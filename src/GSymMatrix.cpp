@@ -114,6 +114,29 @@ GSymMatrix& GSymMatrix::operator= (const GSymMatrix& m)
 
 
 /***************************************************************************
+ *                   GSymMatrix * GSymMatrix multiplication                *
+ ***************************************************************************/
+GSymMatrix GSymMatrix::operator* (const GSymMatrix& m) const
+{
+  // Raise an exception if the matrix dimensions are not compatible
+  if (m_cols != m.m_rows)
+    throw GMatrix::dim_mult_mismatch("GSymMatrix multiplication", m_cols, m.m_rows);
+
+  // Perform matrix multiplication
+  GSymMatrix result(m_rows,m.m_cols);
+  for (unsigned row = 0; row < m_rows; ++row) {
+    for (unsigned col = 0; col < m.m_cols; ++col) {
+	  double sum = 0.0;
+	  for (unsigned i = 0; i < m_cols; ++i)
+	    sum += (*this)(row,i)*m(i,col);
+      result(row,col) = sum;
+    }
+  }
+  return result;
+}
+
+
+/***************************************************************************
  *                     GSymMatrix Cholesky decomposition                   *
  * ----------------------------------------------------------------------- *
  * Inplace Cholesky decomposition inspired by Numerical Recipes algorithm. *

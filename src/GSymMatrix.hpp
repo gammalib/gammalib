@@ -111,14 +111,15 @@ private:
 inline
 GSymMatrix& GSymMatrix::operator= (const double& d) 
 { 
-  this->GMatrix::operator=(d); 
+  this->GMatrix::operator=(d);
+  return *this;
 }
 
 // Matrix element access operator: GSymMatrix(row,col)
 inline
 double& GSymMatrix::operator() (unsigned row, unsigned col)
 {
-  #if G_RANGE_CHECK
+  #if defined(G_RANGE_CHECK)
   if (row >= m_rows || col >= m_cols)
     throw out_of_range("GSymMatrix access", row, col, m_rows, m_cols);
   #endif
@@ -130,7 +131,7 @@ double& GSymMatrix::operator() (unsigned row, unsigned col)
 inline
 const double& GSymMatrix::operator() (unsigned row, unsigned col) const
 {
-  #if G_RANGE_CHECK
+  #if defined(G_RANGE_CHECK)
   if (row >= m_rows || col >= m_cols)
     throw out_of_range("GSymMatrix access", row, col, m_rows, m_cols);
   #endif
@@ -153,26 +154,6 @@ GSymMatrix GSymMatrix::operator- (const GSymMatrix& m) const
 {
   GSymMatrix result = *this;
   result -= m;
-  return result;
-}
-
-// Matrix multiplication: GSymMatrix * GSymMatrix
-inline
-GSymMatrix GSymMatrix::operator* (const GSymMatrix& m) const
-{
-  #if G_RANGE_CHECK
-  if (m_cols != m.m_rows)
-    throw GMatrix::dim_mult_mismatch("GSymMatrix multiplication", m_cols, m.m_rows);
-  #endif
-  GSymMatrix result(m_rows,m.m_cols);
-  for (unsigned row = 0; row < m_rows; ++row) {
-    for (unsigned col = 0; col < m.m_cols; ++col) {
-	  double sum = 0.0;
-	  for (unsigned i = 0; i < m_cols; ++i)
-	    sum += (*this)(row,i)*m(i,col);
-      result(row,col) = sum;
-    }
-  }
   return result;
 }
 

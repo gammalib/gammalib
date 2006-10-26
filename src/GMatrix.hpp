@@ -71,7 +71,7 @@ public:
   GMatrix operator+ (const GMatrix& m) const;
   GMatrix operator- (const GMatrix& m) const;
   GMatrix operator* (const GMatrix& m) const;
-  GVector operator* (const GVector& v) const;
+  virtual GVector operator* (const GVector& v) const;
   GMatrix operator+ (const double& d) const;
   GMatrix operator- (const double& d) const;
   GMatrix operator* (const double& d) const;
@@ -128,34 +128,14 @@ protected:
 
 
 /***************************************************************************
- *                   Generic inline members (to be herited)                *
+ *                  Generic inline members (to be inherited)               *
  ***************************************************************************/
-// Matrix/Vector multiplication: GMatrix * GVector
-inline
-GVector GMatrix::operator* (const GVector& v) const
-{
-  #if G_RANGE_CHECK
-  if (m_cols != v.m_num)
-    throw vec_mat_mismatch("GMatrix*GVector operator", v.m_num, m_rows, m_cols);
-  #endif
-  GVector result(m_rows);
-  for (unsigned row = 0; row < m_rows; ++row) {
-    double sum = 0.0;
-	for (unsigned col = 0; col < m_cols; ++col)
-	  sum += (*this)(row,col) * v(col);
-	result(row) = sum;
-  }
-  return result;
-}
-
 // Matrix unary addition operator: GMatrix += GMatrix
 inline
 GMatrix& GMatrix::operator+= (const GMatrix& m)
 {
-  #if G_RANGE_CHECK
   if (m_rows != m.m_rows || m_cols != m.m_cols)
     throw dim_add_mismatch("GMatrix += operator", m_rows, m.m_rows, m_cols, m.m_cols);
-  #endif
   for (unsigned i = 0; i < m_elements; ++i)
     m_data[i] += m.m_data[i];
   return *this;
@@ -165,10 +145,8 @@ GMatrix& GMatrix::operator+= (const GMatrix& m)
 inline
 GMatrix& GMatrix::operator-= (const GMatrix& m)
 {
-  #if G_RANGE_CHECK
   if (m_rows != m.m_rows || m_cols != m.m_cols)
     throw dim_add_mismatch("GMatrix -= operator", m_rows, m.m_rows, m_cols, m.m_cols);
-  #endif
   for (unsigned i = 0; i < m_elements; ++i)
     m_data[i] -= m.m_data[i];
   return *this;
@@ -313,7 +291,7 @@ GMatrix& GMatrix::operator= (const double& d)
 inline
 double& GMatrix::operator() (unsigned row, unsigned col)
 {
-  #if G_RANGE_CHECK
+  #if defined(G_RANGE_CHECK)
   if (row >= m_rows || col >= m_cols)
     throw out_of_range("GMatrix access", row, col, m_rows, m_cols);
   #endif
@@ -324,7 +302,7 @@ double& GMatrix::operator() (unsigned row, unsigned col)
 inline
 const double& GMatrix::operator() (unsigned row, unsigned col) const
 {
-  #if G_RANGE_CHECK
+  #if defined(G_RANGE_CHECK)
   if (row >= m_rows || col >= m_cols)
     throw out_of_range("GMatrix access", row, col, m_rows, m_cols);
   #endif
@@ -346,26 +324,6 @@ GMatrix GMatrix::operator- (const GMatrix& m) const
 {
   GMatrix result = *this;
   result -= m;
-  return result;
-}
-
-// Matrix multiplication: GMatrix * GMatrix
-inline
-GMatrix GMatrix::operator* (const GMatrix& m) const
-{
-  #if G_RANGE_CHECK
-  if (m_cols != m.m_rows)
-    throw GMatrix::dim_mult_mismatch("GMatrix multiplication", m_cols, m.m_rows);
-  #endif
-  GMatrix result(m_rows,m.m_cols);
-  for (unsigned row = 0; row < m_rows; ++row) {
-    for (unsigned col = 0; col < m.m_cols; ++col) {
-	  double sum = 0.0;
-	  for (unsigned i = 0; i < m_cols; ++i)
-	    sum += (*this)(row,i)*m(i,col);
-      result(row,col) = sum;
-    }
-  }
   return result;
 }
 

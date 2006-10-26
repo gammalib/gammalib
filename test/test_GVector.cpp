@@ -18,6 +18,12 @@ using namespace std;
 
 int main(void)
 {
+  // Dump header
+  cout << endl;
+  cout << "*************************" << endl;
+  cout << "* GVector class testing *" << endl;
+  cout << "*************************" << endl;
+
   // Set parameters
   unsigned num = 5;
 
@@ -64,7 +70,7 @@ int main(void)
 	cout << "  Size = " << test3.size() << endl;
     //
 	cout << "  GVector out of range access: ";
-    #if G_RANGE_CHECK
+    #if defined(G_RANGE_CHECK)
 	cout << test3(3) << endl;
 	#endif
   }

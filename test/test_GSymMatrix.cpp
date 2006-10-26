@@ -356,7 +356,7 @@ int main(void)
     cout << e.what() << endl;
 	throw;
   }
-  #if G_RANGE_CHECK
+  #if defined(G_RANGE_CHECK)
   try {
     GSymMatrix test3(3,3);
     test3(3,3) = 1.0;

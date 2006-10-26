@@ -59,6 +59,7 @@ ostream& operator<< (ostream& os, const GVector& v)
 	if (i != v.m_num-1)
 	  os << ", ";
   }
+  return os;
 }
 
 
@@ -67,10 +68,8 @@ ostream& operator<< (ostream& os, const GVector& v)
  ***************************************************************************/
 GVector cross(const GVector &a, const GVector &b)
 {
-  #if G_RANGE_CHECK
   if (a.m_num != b.m_num)
     throw GVector::dim_mismatch("GVector cross product", a.m_num, b.m_num);
-  #endif
   if (a.m_num != 3)
     throw GVector::bad_cross_dim(a.m_num);
   GVector result(3);

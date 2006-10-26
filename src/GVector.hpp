@@ -146,7 +146,7 @@ GVector::GVector(const GVector& v)
 inline
 double& GVector::operator() (unsigned inx)
 {
-  #if G_RANGE_CHECK
+  #if defined(G_RANGE_CHECK)
   if (inx >= m_num)
     throw out_of_range("GVector access", inx, m_num);
   #endif
@@ -157,7 +157,7 @@ double& GVector::operator() (unsigned inx)
 inline
 const double& GVector::operator() (unsigned inx) const
 {
-  #if G_RANGE_CHECK
+  #if defined(G_RANGE_CHECK)
   if (inx >= m_num)
     throw out_of_range("const GVector access", inx, m_num);
   #endif
@@ -181,10 +181,8 @@ GVector& GVector::operator= (const GVector& v)
 inline
 GVector& GVector::operator+= (const GVector& v)
 {
-  #if G_RANGE_CHECK
   if (m_num != v.m_num)
     throw dim_mismatch("GVector += operator", m_num, v.m_num);
-  #endif
   for (unsigned i = 0; i < m_num; ++i)
     m_data[i] += v.m_data[i];
   return *this;
@@ -194,10 +192,8 @@ GVector& GVector::operator+= (const GVector& v)
 inline
 GVector& GVector::operator-= (const GVector& v)
 {
-  #if G_RANGE_CHECK
   if (m_num != v.m_num)
     throw dim_mismatch("GVector -= operator", m_num, v.m_num);
-  #endif
   for (unsigned i = 0; i < m_num; ++i)
     m_data[i] -= v.m_data[i];
   return *this;
@@ -327,10 +323,8 @@ GVector operator- (const double& a, const GVector& b)
 inline
 double operator* (const GVector& a, const GVector& b)
 {
-  #if G_RANGE_CHECK
   if (a.m_num != b.m_num)
     throw GVector::dim_mismatch("GVector scalar product", a.m_num, b.m_num);
-  #endif
   double result = 0.0;
   for (unsigned i = 0; i < a.m_num; ++i)
     result += (a.m_data[i] * b.m_data[i]);

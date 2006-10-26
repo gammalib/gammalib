@@ -134,6 +134,51 @@ ostream& operator<< (ostream& os, const GMatrix& m)
 	if (row != m.m_rows-1)
 	  os << endl;
   }
+  return os;
+}
+
+
+/***************************************************************************
+ *                       GMatrix * Gvector multiplication                  *
+ ***************************************************************************/
+GVector GMatrix::operator* (const GVector& v) const
+{
+  // Raise an exception if the matrix and vector dimensions are not compatible
+  if (m_cols != v.m_num)
+    throw vec_mat_mismatch("GMatrix*GVector operator", v.m_num, m_rows, m_cols);
+
+  // Perform vector multiplication
+  GVector result(m_rows);
+  for (unsigned row = 0; row < m_rows; ++row) {
+    double sum = 0.0;
+	for (unsigned col = 0; col < m_cols; ++col)
+	  sum += (*this)(row,col) * v(col);
+	result(row) = sum;
+  }
+  return result;
+}
+
+
+/***************************************************************************
+ *                       GMatrix * GMatrix multiplication                  *
+ ***************************************************************************/
+GMatrix GMatrix::operator* (const GMatrix& m) const
+{
+  // Raise an exception if the matrix dimensions are not compatible
+  if (m_cols != m.m_rows)
+    throw GMatrix::dim_mult_mismatch("GMatrix multiplication", m_cols, m.m_rows);
+
+  // Perform matrix multiplication
+  GMatrix result(m_rows,m.m_cols);
+  for (unsigned row = 0; row < m_rows; ++row) {
+    for (unsigned col = 0; col < m.m_cols; ++col) {
+	  double sum = 0.0;
+	  for (unsigned i = 0; i < m_cols; ++i)
+	    sum += (*this)(row,i)*m(i,col);
+      result(row,col) = sum;
+    }
+  }
+  return result;
 }
 
 
