@@ -15,10 +15,16 @@
 #include "GVector.hpp"
 
 
+/*==========================================================================
+ =                                                                         =
+ =                      GVector constructors/destructors                   =
+ =                                                                         =
+ ==========================================================================*/
+
 /***************************************************************************
  *                           GVector constructor                           *
  ***************************************************************************/
-GVector::GVector(unsigned num)
+GVector::GVector(int num)
 {
   // Throw exception if requested vector length is zero
   if (num == 0)
@@ -31,8 +37,11 @@ GVector::GVector(unsigned num)
 	
   // Store vector size and initialize elements to 0.0
   m_num = num;
-  for (unsigned i = 0; i < m_num; ++i)
+  for (int i = 0; i < m_num; ++i)
     m_data[i] = 0.0;
+	
+  // Return
+  return;
 }
 
 
@@ -46,15 +55,42 @@ GVector::~GVector()
     m_num = 0;
     delete[] m_data;
   }
+
+  // Return
+  return;
 }
 
+
+/*==========================================================================
+ =                                                                         =
+ =                            GVector operators                            =
+ =                                                                         =
+ ==========================================================================*/
+
+/*==========================================================================
+ =                                                                         =
+ =                         GVector member functions                        =
+ =                                                                         =
+ ==========================================================================*/
+
+/*==========================================================================
+ =                                                                         =
+ =                         GVector private functions                       =
+ =                                                                         =
+ ==========================================================================*/
+
+/*==========================================================================
+ =                                                                         =
+ =                              GVector friends                            =
+ =                                                                         =
+ ==========================================================================*/
 
 /***************************************************************************
  *                          GVector output operator                        *
  ***************************************************************************/
 ostream& operator<< (ostream& os, const GVector& v)
 {
-  for (unsigned i = 0; i < v.m_num; ++i) {
+  for (int i = 0; i < v.m_num; ++i) {
     os << v(i);
 	if (i != v.m_num-1)
 	  os << ", ";
@@ -80,12 +116,17 @@ GVector cross(const GVector &a, const GVector &b)
 }
 
 
+/*==========================================================================
+ =                                                                         =
+ =                      GSparseMatrix exception classes                    =
+ =                                                                         =
+ ==========================================================================*/
+
 /***************************************************************************
  *                          Class exception handlers                       *
  ***************************************************************************/
 // Vector index out of range
-GVector::out_of_range::out_of_range(string origin, unsigned inx, 
-                                    unsigned elements)
+GVector::out_of_range::out_of_range(string origin, int inx, int elements)
 {
   m_origin = origin;
   if (elements > 0) {
@@ -102,8 +143,7 @@ GVector::out_of_range::out_of_range(string origin, unsigned inx,
 }
 
 // Vector dimensions differ
-GVector::dim_mismatch::dim_mismatch(string origin, unsigned size1, 
-                                    unsigned size2)
+GVector::dim_mismatch::dim_mismatch(string origin, int size1, int size2)
 {
   m_origin = origin;
   ostringstream s_size1;
@@ -115,7 +155,7 @@ GVector::dim_mismatch::dim_mismatch(string origin, unsigned size1,
 }
 
 // Invalid vector dimension for cross product
-GVector::bad_cross_dim::bad_cross_dim(unsigned elements)
+GVector::bad_cross_dim::bad_cross_dim(int elements)
 {
   ostringstream s_elements;
   s_elements << elements;

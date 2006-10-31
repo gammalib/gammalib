@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GSymMatrix.hpp  -  symmetric matrix class               *
+ *                 GSparseMatrix.hpp  -  sparse matrix class               *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -11,8 +11,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef GSYMMATRIX_HPP
-#define GSYMMATRIX_HPP
+#ifndef GSPARSEMATRIX_HPP
+#define GSPARSEMATRIX_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
@@ -27,251 +27,248 @@ using namespace std;
 /* __ Structures _________________________________________________________ */
 
 /* __ Prototypes _________________________________________________________ */
+double cs_cumsum(int* p, int* c, int n);
 
 
 /***************************************************************************
- *                       GSymMatrix class definition                       *
+ *                      GSparseMatrix class definition                     *
  ***************************************************************************/
-class GSymMatrix : public GMatrix {
-  // Operator friends
-  friend GSymMatrix operator* (const double &a, const GSymMatrix &b);
+class GSparseMatrix : public GMatrix {
+  // Friend classes
+  friend class GSparseSymbolic;
+  friend class GSparseNumeric;
+
+  // Binary operator friends
+  friend GSparseMatrix operator* (const double& a,  const GSparseMatrix& b);
+  friend GSparseMatrix operator* (const GSparseMatrix& a, const double& b);
+  friend GSparseMatrix operator/ (const GSparseMatrix& a, const double& b);
 
   // I/O friends
-  // ...
-  
+  friend ostream& operator<< (ostream& os, const GSparseMatrix& m);
+
   // Friend functions
-  friend GSymMatrix transpose(const GSymMatrix &m);
-  friend GSymMatrix cholesky_decompose(const GSymMatrix &m);
-  friend GMatrix    full(const GSymMatrix &m);
-  friend GMatrix    lower_triangle(const GSymMatrix &m);
-  friend GMatrix    upper_triangle(const GSymMatrix &m);
+  friend GSparseMatrix transpose(const GSparseMatrix& m);
+  friend GSparseMatrix fabs(const GSparseMatrix& m);
+  friend GSparseMatrix cholesky_decompose(const GSparseMatrix& m, int compress = 1);
+  friend GSparseMatrix cholesky_invert(const GSparseMatrix& m, int compress = 1);
+
 public:
   // Constructors and destructors (not inherited)
-  GSymMatrix(unsigned rows, unsigned cols);
-  ~GSymMatrix() { }
+  GSparseMatrix(int rows, int cols, int elements = 0);
+  GSparseMatrix(const GSparseMatrix& m);
+  virtual ~GSparseMatrix();
 
   // Matrix element access operators
-  double& operator() (unsigned row, unsigned col);
-  const double& operator() (unsigned row, unsigned col) const;
+  virtual double& operator() (int row, int col);
+  virtual const double& operator() (int row, int col) const;
 
   // Matrix assignment operators (not inherited)
-  GSymMatrix& operator= (const GSymMatrix& m);
-  GSymMatrix& operator= (const double& d);
+  virtual GSparseMatrix& operator= (const GSparseMatrix& m);
 
-  // Specific matrix operators (structure dependent)
-  GSymMatrix operator+ (const GSymMatrix& m) const;
-  GSymMatrix operator- (const GSymMatrix& m) const;
-  GSymMatrix operator* (const GSymMatrix& m) const;
-  GVector    operator* (const GVector& v) const;
-  GSymMatrix operator* (const double& d) const;
-  GSymMatrix operator/ (const double& d) const;
-  GSymMatrix operator- () const;
-  
-  // Specific matrix functions
-  void   transpose();           // Inplace transpose of matrix
-  void   cholesky_decompose();  // Inplace Cholesky decomposition
+  // Binary operators
+  virtual GSparseMatrix operator+ (const GSparseMatrix& m) const;
+  virtual GSparseMatrix operator- (const GSparseMatrix& m) const;
+  virtual GSparseMatrix operator* (const GSparseMatrix& m) const;
+  virtual GVector       operator* (const GVector& v) const;
+  virtual int           operator== (const GSparseMatrix& m) const;
+  virtual int           operator!= (const GSparseMatrix& m) const;
 
-  // Exception: Matrix not symmetric
-  class not_sym : public GException {
-  public:
-    not_sym(string origin, unsigned cols, unsigned rows);
-  };
+  // Unary operators
+  GSparseMatrix operator- () const;
+  virtual GSparseMatrix& operator+= (const GSparseMatrix& m);
+  virtual GSparseMatrix& operator-= (const GSparseMatrix& m);
+  virtual GSparseMatrix& operator*= (const GSparseMatrix& m);
+  virtual GSparseMatrix& operator*= (const double& d);
+  virtual GSparseMatrix& operator/= (const double& d);
 
-  // Exception: Matrix not positive definite
-  class not_pos_definite : public GException {
-  public:
-    not_pos_definite(string origin, unsigned row, double sum);
-  };
+  // Matrix functions
+  // USE_BASE: virtual int rows() const { return m_rows; }
+  // USE_BASE: virtual int cols() const { return m_cols; }
+  virtual double  fill() const { return (double(m_elements)/double(m_rows*m_cols)); }
+  virtual double  min() const;
+  virtual double  max() const;
+  virtual double  sum() const;
+  virtual void    transpose();
+  virtual GVector extract_row(int row) const;
+  virtual GVector extract_col(int col) const;
+  virtual void    insert_col(const GVector& v, int col);
+  virtual void    add_col(const GVector& v, int col);
+  virtual GMatrix convert_to_full() const;
+  //TBD virtual GMatrix extract_lower_triangle() const;
+  //TBD virtual GMatrix extract_upper_triangle() const;
+  virtual void    cholesky_decompose(int compress = 1);
+  virtual GVector cholesky_solver(const GVector& v, int compress = 1);
+  virtual void    cholesky_invert(int compress = 1);
+
 private:
+  // Private functions
+  int           get_index(int row, int col) const;
+  void          fill_pending(void);
+  void          alloc_elements(int start, int num);
+  void          free_elements(int start, int num);
+  void          remove_zero_row_col(void);
+  void          insert_zero_row_col(int rows, int cols);
+  GSparseMatrix cs_transpose(GSparseMatrix *m, int values);
+  
+  // Private data members
+  int*   m_rowinx;    // Row-indices of all elements
+  double m_zero;      // The zero element (needed for data access)
+  double m_fill_val;  // Element to be filled
+  int    m_fill_row;  // Row into which element needs to be filled
+  int    m_fill_col;  // Column into which element needs to be filled
+  void*  m_symbolic;  // Holds GSparseSymbolic object after decomposition
+  void*  m_numeric;   // Holds GSparseNumeric object after decomposition
 };
 
 
 /***************************************************************************
  *              Inline members that override base class members            *
  ***************************************************************************/
-// Matrix assignment operator: GSymMatrix = GSymMatrix
+// Matrix element access operator
 inline
-GSymMatrix& GSymMatrix::operator= (const GSymMatrix& m)
-{ 
-  if (this != &m) 
-    this->GMatrix::operator=(m); 
-}
-
-// Scalar assignment operator: GSymMatrix = double
-inline
-GSymMatrix& GSymMatrix::operator= (const double& d) 
-{ 
-  this->GMatrix::operator=(d); 
-}
-
-// Matrix element access operator: GSymMatrix(row,col)
-inline
-double& GSymMatrix::operator() (unsigned row, unsigned col)
+double& GSparseMatrix::operator() (int row, int col)
 {
-  #if G_RANGE_CHECK
+  #if defined(G_RANGE_CHECK)
   if (row >= m_rows || col >= m_cols)
-    throw out_of_range("GSymMatrix access", row, col, m_rows, m_cols);
+    throw out_of_range("GSparseMatrix access", row, col, m_rows, m_cols);
   #endif
-  unsigned inx = (row >= col) ? m_colstart[col]+(row-col) : m_colstart[row]+(col-row);
-  return m_data[inx];
+  fill_pending();
+  int inx = get_index(row,col);
+  double* value;
+  if (inx < 0) {
+    value      = &m_fill_val;
+	m_fill_row = row;
+	m_fill_col = col;
+  }
+  else
+    value = &(m_data[inx]);
+  return *value;
 }
 
-// Matrix element access operator (const version): GSymMatrix(row,col)
+// Matrix element access operator (const version)
+// We need here the zero element to return also a pointer for 0.0 entry that is
+// not stored. Since we have the const version we don't have to care about
+// modification of this zero value.
 inline
-const double& GSymMatrix::operator() (unsigned row, unsigned col) const
+const double& GSparseMatrix::operator() (int row, int col) const
 {
-  #if G_RANGE_CHECK
+  #if defined(G_RANGE_CHECK)
   if (row >= m_rows || col >= m_cols)
-    throw out_of_range("GSymMatrix access", row, col, m_rows, m_cols);
+    throw out_of_range("GSparseMatrix access", row, col, m_rows, m_cols);
   #endif
-  unsigned inx = (row >= col) ? m_colstart[col]+(row-col) : m_colstart[row]+(col-row);
-  return m_data[inx];
+  int inx = get_index(row,col);
+  double* value;
+  if (inx < 0)
+    value = (double*)&m_zero;
+  else if (inx == m_elements)
+    value = (double*)&m_fill_val;
+  else
+    value = (double*)&(m_data[inx]);
+  return *value;
 }
 
-// Matrix addition: GSymMatrix + GSymMatrix
+// Binary matrix addition
 inline
-GSymMatrix GSymMatrix::operator+ (const GSymMatrix& m) const
+GSparseMatrix GSparseMatrix::operator+ (const GSparseMatrix& m) const
 {
-  GSymMatrix result = *this;
+  GSparseMatrix result = *this;
   result += m;
   return result;
 }
 
-// Matrix subtraction: GSymMatrix - GSymMatrix
+// Binary matrix subtraction
 inline
-GSymMatrix GSymMatrix::operator- (const GSymMatrix& m) const
+GSparseMatrix GSparseMatrix::operator- (const GSparseMatrix& m) const
 {
-  GSymMatrix result = *this;
+  GSparseMatrix result = *this;
   result -= m;
   return result;
 }
 
-// Matrix multiplication: GSymMatrix * GSymMatrix
+// Binary matrix multiplication
 inline
-GSymMatrix GSymMatrix::operator* (const GSymMatrix& m) const
+GSparseMatrix GSparseMatrix::operator* (const GSparseMatrix& m) const
 {
-  #if G_RANGE_CHECK
-  if (m_cols != m.m_rows)
-    throw GMatrix::dim_mult_mismatch("GSymMatrix multiplication", m_cols, m.m_rows);
-  #endif
-  GSymMatrix result(m_rows,m.m_cols);
-  for (unsigned row = 0; row < m_rows; ++row) {
-    for (unsigned col = 0; col < m.m_cols; ++col) {
-	  double sum = 0.0;
-	  for (unsigned i = 0; i < m_cols; ++i)
-	    sum += (*this)(row,i)*m(i,col);
-      result(row,col) = sum;
-    }
-  }
+  GSparseMatrix result = *this;
+  result *= m;
   return result;
 }
 
-// Matrix/Vector multiplication: GSymMatrix * GVector
+// Unary scalar multiplication
 inline
-GVector GSymMatrix::operator* (const GVector& v) const
+GSparseMatrix& GSparseMatrix::operator*= (const double& d)
 {
-  return (this->GMatrix::operator*(v));
+  fill_pending();
+  this->GMatrix::operator*=(d);
 }
 
-// Matrix scaling: GSymMatrix * double
-inline 
-GSymMatrix GSymMatrix::operator* (const double &d) const
-{
-  GSymMatrix result = (*this);
-  result *= d;
-  return result;
-}
-
-// Matrix inverse scaling: GSymMatrix * double
-inline 
-GSymMatrix GSymMatrix::operator/ (const double &d) const
-{
-  GSymMatrix result = (*this);
-  result /= d;
-  return result;
-}
-
-// Unary minus operator
+// Unary scalar division
 inline
-GSymMatrix GSymMatrix::operator- ( ) const
+GSparseMatrix& GSparseMatrix::operator/= (const double& d)
 {
-  GSymMatrix result = *this;
-  for (unsigned i = 0; i < m_elements; ++i)
-    result.m_data[i] = -result.m_data[i];
-  return result;
+  fill_pending();
+  this->GMatrix::operator/=(d);
 }
-
-// Matrix transpose
-inline
-void GSymMatrix::transpose()
-{
-  return;
-}
-
 
 
 /***************************************************************************
  *                               Inline friends                            *
  ***************************************************************************/
-// Matrix scaling: double * GSymMatrix
+// Binary matrix scaling (matrix is left operand)
 inline
-GSymMatrix operator* (const double& a, const GSymMatrix& b)
+GSparseMatrix operator* (const GSparseMatrix& a, const double& b)
 {
-  GSymMatrix result = b;
+  GSparseMatrix result = a;
+  result.fill_pending();
+  result *= b;
+  return result;
+}
+
+// Binary matrix scaling (matrix is right operand)
+inline
+GSparseMatrix operator* (const double& a, const GSparseMatrix& b)
+{
+  GSparseMatrix result = b;
+  result.fill_pending();
   result *= a;
   return result;
 }
 
-// Matrix transpose: transpose(GSymMatrix)
+// Binary matrix division (matrix is left operand)
 inline
-GSymMatrix transpose(const GSymMatrix &m)
+GSparseMatrix operator/ (const GSparseMatrix& a, const double& b)
 {
-  return m;
-}
-
-// Cholesky decomposition: cholesky_decompose(GSymMatrix)
-inline
-GSymMatrix cholesky_decompose(const GSymMatrix &m)
-{
-  GSymMatrix result = m;
-  result.cholesky_decompose();
+  GSparseMatrix result = a;
+  result.fill_pending();
+  result /= b;
   return result;
 }
 
-// Convert symmetric matrix into full matrix: full(GSymMatrix)
+// Matrix transpose function
 inline
-GMatrix full(const GSymMatrix& m)
+GSparseMatrix transpose(const GSparseMatrix& m)
 {
-  GMatrix result(m.m_rows,m.m_cols);
-  for (unsigned row = 0; row < m.m_rows; ++row) {
-    for (unsigned col = 0; col < m.m_cols; ++col)
-	  result(row,col) = m(row,col);
-  }
+  GSparseMatrix result = m;
+  result.transpose();
   return result;
 }
 
-// Convert symmetric matrix into lower triangle full matrix: lower_triangle(GSymMatrix)
+// Cholesky decomposition
 inline
-GMatrix lower_triangle(const GSymMatrix &m)
+GSparseMatrix cholesky_decompose(const GSparseMatrix& m, int compress)
 {
-  GMatrix result(m.m_rows,m.m_cols);
-  for (unsigned row = 0; row < m.m_rows; ++row) {
-    for (unsigned col = 0; col <= row; ++col)
-	  result(row,col) = m.m_data[m.m_colstart[col]+(row-col)];
-  }
+  GSparseMatrix result = m;
+  result.cholesky_decompose(compress);
   return result;
 }
 
-// Convert symmetric matrix into upper triangle full matrix: lower_triangle(GSymMatrix)
+// Matrix inversion using Cholesky decomposition
 inline
-GMatrix upper_triangle(const GSymMatrix &m)
+GSparseMatrix cholesky_invert(const GSparseMatrix& m, int compress)
 {
-  GMatrix result(m.m_rows,m.m_cols);
-  for (unsigned row = 0; row < m.m_rows; ++row) {
-    for (unsigned col = row; col < m.m_cols; ++col)
-	  result(row,col) = m.m_data[m.m_colstart[row]+(col-row)];
-  }
+  GSparseMatrix result = m;
+  result.cholesky_invert(compress);
   return result;
 }
 
-#endif /* GSYMMATRIX_HPP */
+#endif /* GSPARSEMATRIX_HPP */

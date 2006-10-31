@@ -36,7 +36,8 @@ using namespace std;
 class GVector {
   // Friend classes
   friend class GMatrix;
-  friend class GMatrixSym;
+  friend class GSymMatrix;
+  friend class GSparseMatrix;
 
   // Operator friends
   friend GVector  operator+ (const GVector &a, const GVector &b);
@@ -61,6 +62,8 @@ class GVector {
   friend double   min(const GVector &v);
   friend double   max(const GVector &v);
   friend double   sum(const GVector &v);
+  friend GVector  perm(const GVector &v, const int *p);
+  friend GVector  iperm(const GVector &v, const int *p);
   friend GVector  acos(const GVector &v);
   friend GVector  acosh(const GVector &v);
   friend GVector  asin(const GVector &v);
@@ -81,13 +84,13 @@ class GVector {
 
 public:
   // Constructors and destructors
-  explicit GVector(unsigned num);
+  explicit GVector(int num);
   GVector(const GVector& v);
  ~GVector();
 
   // Vector element access operators
-  double& operator() (unsigned inx);
-  const double& operator() (unsigned inx) const;
+  double& operator() (int inx);
+  const double& operator() (int inx) const;
   
   // Vector operators
   GVector& operator= (const GVector& v);
@@ -101,28 +104,28 @@ public:
   GVector  operator- () const;
 
   // Vector functions
-  unsigned size() const; // Return dimension of vector
+  int size() const; // Return dimension of vector
   
   // Exception: Vector index out of range
   class out_of_range : public GException {
   public:
-    out_of_range(string origin, unsigned inx, unsigned elements);
+    out_of_range(string origin, int inx, int elements);
   };
   
   // Exception: Vector dimensions mismatch
   class dim_mismatch : public GException {
   public:
-    dim_mismatch(string origin, unsigned size1, unsigned size2);
+    dim_mismatch(string origin, int size1, int size2);
   };
   
   // Exception: Invalid vector dimension for cross product
   class bad_cross_dim : public GException {
   public:
-    bad_cross_dim(unsigned elements);
+    bad_cross_dim(int elements);
   };
 private:
-  unsigned m_num;
-  double*  m_data;
+  int     m_num;
+  double* m_data;
 };
 
 
@@ -138,13 +141,13 @@ GVector::GVector(const GVector& v)
   if (m_data == NULL)
 	throw mem_alloc("GVector copy constructor", v.m_num);
   m_num = v.m_num;
-  for (unsigned i = 0; i < m_num; ++i)
+  for (int i = 0; i < m_num; ++i)
     m_data[i] = v.m_data[i];
 }
 
 // Vector element access operator
 inline
-double& GVector::operator() (unsigned inx)
+double& GVector::operator() (int inx)
 {
   #if defined(G_RANGE_CHECK)
   if (inx >= m_num)
@@ -155,7 +158,7 @@ double& GVector::operator() (unsigned inx)
 
 // Vector element access operator (const version)
 inline
-const double& GVector::operator() (unsigned inx) const
+const double& GVector::operator() (int inx) const
 {
   #if defined(G_RANGE_CHECK)
   if (inx >= m_num)
@@ -168,12 +171,15 @@ const double& GVector::operator() (unsigned inx) const
 inline
 GVector& GVector::operator= (const GVector& v)
 {
-  m_data = new double[v.m_num];
-  if (m_data == NULL)
-	throw mem_alloc("GVector assignment operator", v.m_num);
-  m_num = v.m_num;
-  for (unsigned i = 0; i < m_num; ++i)
-    m_data[i] = v.m_data[i];
+  if (this != &v) {
+    if (m_data != NULL) delete [] m_data;
+    m_data = new double[v.m_num];
+    if (m_data == NULL)
+	  throw mem_alloc("GVector assignment operator", v.m_num);
+    m_num = v.m_num;
+    for (int i = 0; i < m_num; ++i)
+      m_data[i] = v.m_data[i];
+  }
   return *this;
 }
 
@@ -183,7 +189,7 @@ GVector& GVector::operator+= (const GVector& v)
 {
   if (m_num != v.m_num)
     throw dim_mismatch("GVector += operator", m_num, v.m_num);
-  for (unsigned i = 0; i < m_num; ++i)
+  for (int i = 0; i < m_num; ++i)
     m_data[i] += v.m_data[i];
   return *this;
 }
@@ -194,7 +200,7 @@ GVector& GVector::operator-= (const GVector& v)
 {
   if (m_num != v.m_num)
     throw dim_mismatch("GVector -= operator", m_num, v.m_num);
-  for (unsigned i = 0; i < m_num; ++i)
+  for (int i = 0; i < m_num; ++i)
     m_data[i] -= v.m_data[i];
   return *this;
 }
@@ -203,7 +209,7 @@ GVector& GVector::operator-= (const GVector& v)
 inline
 GVector& GVector::operator= (const double& v)
 {
-  for (unsigned i = 0; i < m_num; ++i)
+  for (int i = 0; i < m_num; ++i)
     m_data[i] = v;
   return *this;
 }
@@ -212,7 +218,7 @@ GVector& GVector::operator= (const double& v)
 inline
 GVector& GVector::operator+= (const double& v)
 {
-  for (unsigned i = 0; i < m_num; ++i)
+  for (int i = 0; i < m_num; ++i)
     m_data[i] += v;
   return *this;
 }
@@ -221,7 +227,7 @@ GVector& GVector::operator+= (const double& v)
 inline
 GVector& GVector::operator-= (const double& v)
 {
-  for (unsigned i = 0; i < m_num; ++i)
+  for (int i = 0; i < m_num; ++i)
     m_data[i] -= v;
   return *this;
 }
@@ -230,7 +236,7 @@ GVector& GVector::operator-= (const double& v)
 inline
 GVector& GVector::operator*= (const double& v)
 {
-  for (unsigned i = 0; i < m_num; ++i)
+  for (int i = 0; i < m_num; ++i)
     m_data[i] *= v;
   return *this;
 }
@@ -239,7 +245,7 @@ GVector& GVector::operator*= (const double& v)
 inline
 GVector& GVector::operator/= (const double& v)
 {
-  for (unsigned i = 0; i < m_num; ++i)
+  for (int i = 0; i < m_num; ++i)
     m_data[i] /= v;
   return *this;
 }
@@ -249,14 +255,14 @@ inline
 GVector GVector::operator- ( ) const
 {
   GVector result = *this;
-  for (unsigned i = 0; i < m_num; ++i)
+  for (int i = 0; i < m_num; ++i)
     result.m_data[i] = -result.m_data[i];
   return result;
 }
 
 // Return size of vector
 inline
-unsigned GVector::size() const
+int GVector::size() const
 {
   return m_num;
 }
@@ -326,7 +332,7 @@ double operator* (const GVector& a, const GVector& b)
   if (a.m_num != b.m_num)
     throw GVector::dim_mismatch("GVector scalar product", a.m_num, b.m_num);
   double result = 0.0;
-  for (unsigned i = 0; i < a.m_num; ++i)
+  for (int i = 0; i < a.m_num; ++i)
     result += (a.m_data[i] * b.m_data[i]);
   return result;
 }
@@ -363,7 +369,7 @@ inline
 double norm(const GVector &v)
 {
   double result = 0.0;
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result += (v.m_data[i] * v.m_data[i]);
   result = (result > 0.0) ? sqrt(result) : 0.0;
   return result;
@@ -374,7 +380,7 @@ inline
 double min(const GVector &v)
 {
   double result = v.m_data[0];
-  for (unsigned i = 1; i < v.m_num; ++i) {
+  for (int i = 1; i < v.m_num; ++i) {
     if (v.m_data[i] < result)
 	  result = v.m_data[i];
   }
@@ -386,7 +392,7 @@ inline
 double max(const GVector &v)
 {
   double result = v.m_data[0];
-  for (unsigned i = 1; i < v.m_num; ++i) {
+  for (int i = 1; i < v.m_num; ++i) {
     if (v.m_data[i] > result)
 	  result = v.m_data[i];
   }
@@ -398,8 +404,36 @@ inline
 double sum(const GVector &v)
 {
   double result = 0.0;
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result += v.m_data[i];
+  return result;
+}
+
+// Vector permutation
+inline
+GVector perm(const GVector &v, const int *p)
+{
+  GVector result(v.m_num);
+  if (p == NULL)
+    result = v;
+  else {
+    for (int i = 0; i < v.m_num; ++i)
+      result.m_data[i] = v.m_data[p[i]];
+  }
+  return result;
+}
+
+// Inverse vector permutation
+inline
+GVector iperm(const GVector &v, const int *p)
+{
+  GVector result(v.m_num);
+  if (p == NULL)
+    result = v;
+  else {
+    for (int i = 0; i < v.m_num; ++i)
+      result.m_data[p[i]] = v.m_data[i];
+  }
   return result;
 }
 
@@ -408,7 +442,7 @@ inline
 GVector acos(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = acos(v.m_data[i]);
   return result;
 }
@@ -418,7 +452,7 @@ inline
 GVector acosh(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = acosh(v.m_data[i]);
   return result;
 }
@@ -428,7 +462,7 @@ inline
 GVector asin(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = asin(v.m_data[i]);
   return result;
 }
@@ -438,7 +472,7 @@ inline
 GVector asinh(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = asinh(v.m_data[i]);
   return result;
 }
@@ -448,7 +482,7 @@ inline
 GVector atan(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = atan(v.m_data[i]);
   return result;
 }
@@ -458,7 +492,7 @@ inline
 GVector atanh(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = atanh(v.m_data[i]);
   return result;
 }
@@ -468,7 +502,7 @@ inline
 GVector cos(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = cos(v.m_data[i]);
   return result;
 }
@@ -478,7 +512,7 @@ inline
 GVector cosh(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = cosh(v.m_data[i]);
   return result;
 }
@@ -488,7 +522,7 @@ inline
 GVector exp(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = exp(v.m_data[i]);
   return result;
 }
@@ -498,7 +532,7 @@ inline
 GVector fabs(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = fabs(v.m_data[i]);
   return result;
 }
@@ -508,7 +542,7 @@ inline
 GVector log(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = log(v.m_data[i]);
   return result;
 }
@@ -518,7 +552,7 @@ inline
 GVector log10(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = log10(v.m_data[i]);
   return result;
 }
@@ -528,7 +562,7 @@ inline
 GVector sin(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = sin(v.m_data[i]);
   return result;
 }
@@ -538,7 +572,7 @@ inline
 GVector sinh(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = sinh(v.m_data[i]);
   return result;
 }
@@ -548,7 +582,7 @@ inline
 GVector sqrt(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = sqrt(v.m_data[i]);
   return result;
 }
@@ -558,7 +592,7 @@ inline
 GVector tan(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = tan(v.m_data[i]);
   return result;
 }
@@ -568,7 +602,7 @@ inline
 GVector tanh(const GVector &v)
 {
   GVector result(v.m_num);
-  for (unsigned i = 0; i < v.m_num; ++i)
+  for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = tanh(v.m_data[i]);
   return result;
 }
@@ -579,7 +613,7 @@ int operator== (const GVector &a, const GVector &b)
 {
   int result = 1;
   if (a.m_num == b.m_num) {
-    for (unsigned i = 0; i < a.m_num; ++i) {
+    for (int i = 0; i < a.m_num; ++i) {
 	  if (a.m_data[i] != b.m_data[i]) {
 	    result = 0;
 		break;
@@ -597,7 +631,7 @@ int operator!= (const GVector &a, const GVector &b)
 {
   int result = 0;
   if (a.m_num == b.m_num) {
-    for (unsigned i = 0; i < a.m_num; ++i) {
+    for (int i = 0; i < a.m_num; ++i) {
 	  if (a.m_data[i] != b.m_data[i]) {
 	    result = 1;
 		break;

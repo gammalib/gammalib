@@ -99,7 +99,7 @@ int check_matrix(const GSymMatrix& m, const double scale, const double add)
     for (unsigned row = 0; row < g_rows; ++row) {
       for (unsigned col = 0; col < g_cols; ++col) {
 	    double value = g_matrix[col+row*g_cols] * scale + add;
-	    if (m(row,col) != value) {
+	    if (fabs(m(row,col)-value) > 1.0e-15) {
 		  result = 0;
 		  break;
 		}
@@ -219,15 +219,15 @@ int check_matrix_vector(const GVector& v)
  ***************************************************************************/
 int check_matrix_matrix(const GSymMatrix& m)
 {
-  if (m.rows() != g_rows || m.cols() != g_cols)
+  if (m.rows() != g_rows || m.cols() != g_rows)
     return 0;
   int result = 1;
   try {
-    for (unsigned row = 0; row < g_rows; ++row) {
-	  for (unsigned col = 0; col < g_cols; ++col) {
+    for (unsigned row = 0; row < m.rows(); ++row) {
+	  for (unsigned col = 0; col < m.cols(); ++col) {
         double value = 0.0;
 		for (unsigned i = 0; i < g_cols; ++i)
-	      value += g_matrix[i+row*g_cols] * g_matrix[row+i*g_cols];
+	      value += g_matrix[i+row*g_cols] * g_matrix[i+col*g_cols];
 	    if (m(row,col) != value) {
 	      result = 0;
 	      break;
@@ -375,7 +375,7 @@ int main(void)
     cout << "GSymMatrix - Test 4: Define matrix using copy constructor: ";
 	//
 	GSymMatrix test4 = m_test;
-    if (!check_matrix(test4, 1.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(test4, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt copy constructor." << endl;
 	  cout << test4 << endl;
 	  throw;
@@ -393,8 +393,8 @@ int main(void)
 	//
 	// GSymMatrix = GSymMatrix
 	result = m_test;
-    if (!check_matrix(result, 1.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt copy constructor." << endl;
+    if (!check_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
+      cout << endl << "TEST ERROR: Corrupt assignment." << endl;
 	  cout << result << endl;
 	  throw;
 	}
@@ -413,7 +413,7 @@ int main(void)
     cout << "GSymMatrix - Test 6: Matrix*Vector multiplication: ";
     //
 	GVector v_test6 = m_test*v_test;
-	if (!check_matrix_vector(v_test6) && !check_matrix(m_test, 1.0, 0.0)) {
+	if (!check_matrix_vector(v_test6) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt Matrix*Vector multiplication." << endl;
 	  cout << v_test6 << endl;
 	  throw;
@@ -426,7 +426,7 @@ int main(void)
   try {
 	GVector v_test6 = bigger*v_test;
   }
-  catch (GMatrix::vec_mat_mismatch &e) {
+  catch (GMatrix::matrix_vector_mismatch &e) {
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -439,7 +439,7 @@ int main(void)
     cout << "GSymMatrix - Test 7: Matrix*Matrix multiplication: ";
     //
 	GSymMatrix m_test7 = m_test*m_test;
-	if (!check_matrix_matrix(m_test7) && !check_matrix(m_test, 1.0, 0.0)) {
+	if (!check_matrix_matrix(m_test7) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt Matrix*Matrix multiplication." << endl;
 	  cout << m_test7 << endl;
 	  throw;
@@ -452,7 +452,7 @@ int main(void)
   try {
 	GSymMatrix m_test7 = m_test*bigger;
   }
-  catch (GMatrix::dim_mult_mismatch &e) {
+  catch (GMatrix::matrix_mismatch &e) {
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -461,7 +461,7 @@ int main(void)
   try {
 	GSymMatrix m_test7 = bigger*m_test;
   }
-  catch (GMatrix::dim_mult_mismatch &e) {
+  catch (GMatrix::matrix_mismatch &e) {
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -475,17 +475,8 @@ int main(void)
 	//
 	// -GSymMatrix
 	result = -m_test;
-    if (!check_matrix(result, -1.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, -1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt -GSymMatrix operator." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	//
-	// GSymMatrix = 3.0
-	result = m_test;
-	result = 3.0;
-    if (!check_matrix(result, 0.0, 3.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSymMatrix = double operator." << endl;
 	  cout << result << endl;
 	  throw;
 	}
@@ -493,17 +484,8 @@ int main(void)
 	// GSymMatrix += GSymMatrix
 	result  = m_test;
 	result += m_test;
-    if (!check_matrix(result, 2.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 2.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GSymMatrix += GSymMatrix operator." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	//
-	// GSymMatrix += 3.0
-	result  = m_test;
-	result += 3.0;
-    if (!check_matrix(result, 1.0, 3.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSymMatrix += double operator." << endl;
 	  cout << result << endl;
 	  throw;
 	}
@@ -511,17 +493,8 @@ int main(void)
 	// GSymMatrix -= GSymMatrix
 	result  = m_test;
 	result -= m_test;
-    if (!check_matrix(result, 0.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 0.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GSymMatrix -= GSymMatrix operator." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	//
-	// GSymMatrix -= 3.0
-	result  = m_test;
-	result -= 3.0;
-    if (!check_matrix(result, 1.0, -3.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSymMatrix -= double operator." << endl;
 	  cout << result << endl;
 	  throw;
 	}
@@ -529,7 +502,7 @@ int main(void)
 	// GSymMatrix *= 3.0
 	result  = m_test;
 	result *= 3.0;
-    if (!check_matrix(result, 3.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 3.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GSymMatrix *= double operator." << endl;
 	  cout << result << endl;
 	  throw;
@@ -538,7 +511,7 @@ int main(void)
 	// GSymMatrix /= 3.0
 	result  = m_test;
 	result /= 3.0;
-    if (!check_matrix(result, 1.0/3.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 1.0/3.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GSymMatrix /= double operator." << endl;
 	  cout << result << endl;
 	  throw;
@@ -546,7 +519,7 @@ int main(void)
 	//
 	// GSymMatrix + GSymMatrix
 	result = m_test + m_test;
-    if (!check_matrix(result, 2.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 2.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GSymMatrix + GSymMatrix operator." << endl;
 	  cout << result << endl;
 	  throw;
@@ -554,7 +527,7 @@ int main(void)
 	//
 	// GSymMatrix - GSymMatrix
 	result = m_test - m_test;
-    if (!check_matrix(result, 0.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 0.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GSymMatrix - GSymMatrix operator." << endl;
 	  cout << result << endl;
 	  throw;
@@ -562,47 +535,15 @@ int main(void)
 	//
 	// GSymMatrix - GSymMatrix
 	result = m_test - m_test;
-    if (!check_matrix(result, 0.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 0.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GSymMatrix - GSymMatrix operator." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	//
-	// GSymMatrix + 3.0
-	result = m_test + 3.0;
-    if (!check_matrix(result, 1.0, 3.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSymMatrix + double operator." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	//
-	// 3.0 + GSymMatrix
-	result = 3.0 + m_test;
-    if (!check_matrix(result, 1.0, 3.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt double + GSymMatrix operator." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	//
-	// GSymMatrix - 3.0
-	result = m_test - 3.0;
-    if (!check_matrix(result, 1.0, -3.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSymMatrix - double operator." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	//
-	// 3.0 - GSymMatrix
-	result = 3.0 - m_test;
-    if (!check_matrix(result, -1.0, 3.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt double - GSymMatrix operator." << endl;
 	  cout << result << endl;
 	  throw;
 	}
 	//
 	// GSymMatrix * 3.0
 	result = m_test * 3.0;
-    if (!check_matrix(result, 3.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 3.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GSymMatrix * double operator." << endl;
 	  cout << result << endl;
 	  throw;
@@ -610,7 +551,7 @@ int main(void)
 	//
 	// 3.0 * GSymMatrix
 	result = 3.0 * m_test;
-    if (!check_matrix(result, 3.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 3.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt double * GSymMatrix operator." << endl;
 	  cout << result << endl;
 	  throw;
@@ -618,7 +559,7 @@ int main(void)
 	//
 	// GSymMatrix / 3.0
 	result = m_test / 3.0;
-    if (!check_matrix(result, 1.0/3.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 1.0/3.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GSymMatrix / double operator." << endl;
 	  cout << result << endl;
 	  throw;
@@ -632,7 +573,7 @@ int main(void)
 	result  = m_test;
 	result += bigger;
   }
-  catch (GMatrix::dim_add_mismatch) {
+  catch (GMatrix::matrix_mismatch) {
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -717,7 +658,7 @@ int main(void)
     //
 	// transpose(GSymMatrix)
 	result = transpose(m_test);
-    if (!check_matrix(result, 1.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt transpose(GSymMatrix) function." << endl;
 	  cout << result << endl;
 	  throw;
@@ -726,32 +667,32 @@ int main(void)
 	// GSymMatrix.transpose()
 	result = m_test;
 	result.transpose();
-    if (!check_matrix(result, 1.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GSymMatrix.transpose() function." << endl;
 	  cout << result << endl;
 	  throw;
 	}
 	//
-	// full(GSymMatrix)
-	GMatrix m_test11 = full(m_test);
-    if (!check_matrix(m_test11, 1.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt full(GSymMatrix) operator." << endl;
+	// convert_to_full()
+	GMatrix m_test11 = m_test.convert_to_full();
+    if (!check_matrix(m_test11, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
+      cout << endl << "TEST ERROR: Corrupt convert_to_full() operator." << endl;
 	  cout << m_test11 << endl;
 	  throw;
 	}
 	//
-	// lower_triangle(GSymMatrix)
-	m_test11 = lower_triangle(m_test);
-    if (!check_matrix_lt(m_test11, 1.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt lower_triangle(GSymMatrix) function." << endl;
+	// extract_lower_triangle()
+	m_test11 = m_test.extract_lower_triangle();
+    if (!check_matrix_lt(m_test11, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
+      cout << endl << "TEST ERROR: Corrupt extract_lower_triangle() function." << endl;
 	  cout << m_test11 << endl;
 	  throw;
 	}
 	//
-	// upper_triangle(GSymMatrix)
-	m_test11 = upper_triangle(m_test);
-    if (!check_matrix_ut(m_test11, 1.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt upper_triangle(GSymMatrix) function." << endl;
+	// extract_upper_triangle()
+	m_test11 = m_test.extract_upper_triangle();
+    if (!check_matrix_ut(m_test11, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
+      cout << endl << "TEST ERROR: Corrupt extract_upper_triangle() function." << endl;
 	  cout << m_test11 << endl;
 	  throw;
 	}
@@ -768,10 +709,10 @@ int main(void)
 	//
     // Test Cholesky decomposition
 	GSymMatrix cd           = cholesky_decompose(m_test);
-	GMatrix    cd_lower     = lower_triangle(cd);
+	GMatrix    cd_lower     = cd.extract_lower_triangle();
 	GMatrix    cd_upper     = transpose(cd_lower);
 	GMatrix    cd_product   = cd_lower * cd_upper;
-	GMatrix    cd_residuals = full(m_test) - cd_product;
+	GMatrix    cd_residuals = m_test.convert_to_full() - cd_product;
 	//
 	double res = (fabs(cd_residuals)).max();
 	if (res < 1.0e-15)
@@ -786,10 +727,10 @@ int main(void)
     // Test compressed Cholesky decomposition
     GSymMatrix m_test_zero       = set_matrix_zero();
 	GSymMatrix cd_zero           = cholesky_decompose(m_test_zero);
-	GMatrix    cd_zero_lower     = lower_triangle(cd_zero);
+	GMatrix    cd_zero_lower     = cd_zero.extract_lower_triangle();
 	GMatrix    cd_zero_upper     = transpose(cd_zero_lower);
 	GMatrix    cd_zero_product   = cd_zero_lower * cd_zero_upper;
-	GMatrix    cd_zero_residuals = full(m_test_zero) - cd_zero_product;
+	GMatrix    cd_zero_residuals = m_test_zero.convert_to_full() - cd_zero_product;
 	//
 	res = (fabs(cd_zero_residuals)).max();
 	if (res < 1.0e-15)
@@ -804,7 +745,7 @@ int main(void)
 	// Test Cholesky inplace decomposition
 	GSymMatrix m_test12 = m_test;
     m_test12.cholesky_decompose();
-	GMatrix cd_lower2 = lower_triangle(m_test12);
+	GMatrix cd_lower2 = m_test12.extract_lower_triangle();
 	if (cd_lower2 != cd_lower) {
       cout << endl << "TEST ERROR: Corrupt GSymMatrix.cholesky_decompose() function." << endl;
 	  cout << cd_lower2 << endl;

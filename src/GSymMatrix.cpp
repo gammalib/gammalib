@@ -18,26 +18,34 @@
 using namespace std;
 
 
+/*==========================================================================
+ =                                                                         =
+ =                   GSymMatrix constructors/destructors                   =
+ =                                                                         =
+ ==========================================================================*/
+
 /***************************************************************************
- *                          GSymMatrix constructor                         *
+ *                         GSymMatrix constructor                          *
  ***************************************************************************/
-GSymMatrix::GSymMatrix(unsigned rows, unsigned cols) : GMatrix()
+GSymMatrix::GSymMatrix(int rows, int cols) : GMatrix()
 {
   // Initialise private members for clean destruction
-  m_rows        = 0;
-  m_cols        = 0;
-  m_elements    = 0;
-  m_num_inx     = 0;
-  m_data        = NULL;
-  m_colstart    = NULL;
-  m_inx         = NULL;
+  m_rows       = 0;
+  m_cols       = 0;
+  m_elements   = 0;
+  m_num_rowsel = 0;
+  m_num_colsel = 0;
+  m_data       = NULL;
+  m_colstart   = NULL;
+  m_rowsel     = NULL;
+  m_colsel     = NULL;
 
   // Throw exception if number of rows and columns is not identical
   if (rows != cols)
-    throw not_sym("GSymMatrix constructor", rows, cols);
+    throw matrix_not_symmetric("GSymMatrix constructor", rows, cols);
 
   // Determine number of physical elements in matrix
-  unsigned elements = rows*(rows+1)/2;
+  int elements = rows*(rows+1)/2;
 
   // Throw exception if requested matrix size is zero
   if (elements == 0)
@@ -46,8 +54,8 @@ GSymMatrix::GSymMatrix(unsigned rows, unsigned cols) : GMatrix()
   // Allocate matrix array and column start index array. Throw an exception 
   // if allocation failed
   m_data     = new double[elements];
-  m_colstart = new unsigned[cols+1];
-  m_inx      = new unsigned[cols];
+  m_colstart = new int[cols+1];
+  m_inx      = new int[cols];
   if (m_data == NULL || m_colstart == NULL || m_inx == NULL)
 	throw mem_alloc("GSymMatrix constructor", elements);
 
@@ -58,13 +66,16 @@ GSymMatrix::GSymMatrix(unsigned rows, unsigned cols) : GMatrix()
 
   // Set-up column start indices
   m_colstart[0]   = 0;
-  unsigned offset = rows;
-  for (unsigned col = 1; col <= m_cols; ++col)
+  int offset = rows;
+  for (int col = 1; col <= m_cols; ++col)
     m_colstart[col] = m_colstart[col-1] + offset--;
 
   // Initialise matrix elements to 0.0
-  for (unsigned i = 0; i < m_elements; ++i)
+  for (int i = 0; i < m_elements; ++i)
     m_data[i] = 0.0;
+
+  // Return
+  return;
 }
 
 
@@ -75,12 +86,16 @@ GSymMatrix::GSymMatrix(unsigned rows, unsigned cols) : GMatrix()
  ***************************************************************************/
 GSymMatrix::GSymMatrix(const GSymMatrix& m) : GMatrix(m)
 { 
+  // Copy members
   m_num_inx = m.m_num_inx;
-  m_inx     = new unsigned[m_cols];
+  m_inx     = new int[m_cols];
   if (m_inx == NULL)
 	throw mem_alloc("GSymMatrix copy constructor", m_cols);
-  for (unsigned i = 0; i < m_cols; ++i)
+  for (int i = 0; i < m_cols; ++i)
 	m_inx[i] = m.m_inx[i];
+
+  // Return
+  return;
 }
 
 
@@ -92,46 +107,259 @@ GSymMatrix::GSymMatrix(const GSymMatrix& m) : GMatrix(m)
 GSymMatrix::~GSymMatrix()
 {
   // De-allocate only if memory has indeed been allocated by derived class
-  if (m_inx != NULL) delete[] m_inx;
+  if (m_inx != NULL) delete [] m_inx;
+
+  // Return
+  return;
 }
 
+
+/*==========================================================================
+ =                                                                         =
+ =                           GSymMatrix operators                          =
+ =                                                                         =
+ ==========================================================================*/
 
 /***************************************************************************
  *                      GSymMatrix assignment operator                     *
  ***************************************************************************/
 GSymMatrix& GSymMatrix::operator= (const GSymMatrix& m)
 { 
+  // Execute only if object is not identical
   if (this != &m) { 
+
+    // Invoque base class assignment operator
     this->GMatrix::operator=(m);
+
+    // De-allocate memory if it has indeed been allocated
+    if (m_inx != NULL) delete [] m_inx;
+
+    // Copy data members
     m_num_inx = m.m_num_inx;
-    m_inx     = new unsigned[m_cols];
+
+    // Allocate memory for indices and copy them
+    m_inx = new int[m_cols];
     if (m_inx == NULL)
 	  throw mem_alloc("GSymMatrix assignment operator", m_cols);
-    for (unsigned i = 0; i < m_cols; ++i)
+    for (int i = 0; i < m_cols; ++i)
 	  m_inx[i] = m.m_inx[i];
   }
+
+  // Return this object
+  return *this;
 }
 
 
 /***************************************************************************
- *                   GSymMatrix * GSymMatrix multiplication                *
+ *                           Vector multiplication                         *
  ***************************************************************************/
-GSymMatrix GSymMatrix::operator* (const GSymMatrix& m) const
+GVector GSymMatrix::operator* (const GVector& v) const
+{
+  // Raise an exception if the matrix and vector dimensions are not compatible
+  if (m_cols != v.m_num)
+    throw matrix_vector_mismatch("GSymMatrix::operator* (const GVector&)", 
+	                             v.m_num, m_rows, m_cols);
+
+  // Perform vector multiplication
+  GVector result(m_rows);
+  for (int row = 0; row < m_rows; ++row) {
+    double sum = 0.0;
+	for (int col = 0; col < m_cols; ++col)
+	  sum += (*this)(row,col) * v(col);
+	result(row) = sum;
+  }
+  
+  // Return result
+  return result;
+}
+
+
+/***************************************************************************
+ *                GSymMatrix negation (unary minus operator)               *
+ ***************************************************************************/
+GSymMatrix GSymMatrix::operator- ( ) const
+{
+  // Copy argument into result
+  GSymMatrix result = *this;
+  
+  // Negate result
+  for (int i = 0; i < m_elements; ++i)
+    result.m_data[i] = -result.m_data[i];
+	
+  // Return result	
+  return result;
+}
+
+
+/***************************************************************************
+ *          Matrix multiplication (unary multiplication operator)          *
+ * ----------------------------------------------------------------------- *
+ * Symmetric matrices must have the same dimensions to be multiplied.      *
+ ***************************************************************************/
+GSymMatrix& GSymMatrix::operator*= (const GSymMatrix& m)
 {
   // Raise an exception if the matrix dimensions are not compatible
-  if (m_cols != m.m_rows)
-    throw GMatrix::dim_mult_mismatch("GSymMatrix multiplication", m_cols, m.m_rows);
+  if (m_cols != m.m_rows || m_rows != m.m_cols)
+    throw matrix_mismatch("GSymMatrix::operator*= (const GSymMatrix&)", 
+						  m_rows, m_cols, m.m_rows, m.m_cols);
 
-  // Perform matrix multiplication
-  GSymMatrix result(m_rows,m.m_cols);
-  for (unsigned row = 0; row < m_rows; ++row) {
-    for (unsigned col = 0; col < m.m_cols; ++col) {
+  // Allocate result matrix
+  GSymMatrix result(m_rows, m.m_cols);
+	
+  // Loop over all elements of result matrix
+  for (int row = 0; row < m_rows; ++row) {
+	for (int col = 0; col < m.m_cols; ++col) {
 	  double sum = 0.0;
-	  for (unsigned i = 0; i < m_cols; ++i)
-	    sum += (*this)(row,i)*m(i,col);
-      result(row,col) = sum;
-    }
+	  for (int i = 0; i < m_cols; ++i)
+		sum += (*this)(row,i) * m(i,col);
+	  result(row,col) = sum;
+	}
   }
+
+  // Assign result
+  *this = result;
+
+  // Return result
+  return *this;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                        GSymMatrix member functions                      =
+ =                                                                         =
+ ==========================================================================*/
+
+/***************************************************************************
+ *                            Sum matrix elements                          *
+ ***************************************************************************/
+double GSymMatrix::sum() const
+{
+  // Initialise matrix sums (diagonal and off-diagonal)
+  double diag     = 0.0;
+  double off_diag = 0.0;
+
+  // Calulate sum over diagonal elements
+  for (int row = 0; row < m_rows; ++row)
+    diag += m_data[m_colstart[row]];
+
+  // Calulate sum over off-diagonal elements
+  for (int row = 0; row < m_rows; ++row) {
+    for (int col = row+1; col < m_cols; ++col)
+      off_diag += m_data[m_colstart[row]+(col-row)];
+  }
+
+  // Calculate total
+  double result = diag + 2.0 * off_diag;
+  
+  // Return result
+  return result;
+}
+
+
+/***************************************************************************
+ *                     Extract row from matrix into vector                 *
+ ***************************************************************************/
+GVector GSymMatrix::extract_row(int row) const
+{
+  // Raise an exception if the row index is invalid
+  #if defined(G_RANGE_CHECK)
+  if (row >= m_rows)
+    throw out_of_range("GSymMatrix::extract_row(int)", 
+	                   row, 0, m_rows, m_cols);
+  #endif
+  
+  // Create result vector
+  GVector result(m_cols);
+  
+  // Extract row into vector
+  for (int col = 0; col < m_cols; ++col)
+    result(col) = (*this)(row,col);
+	
+  // Return vector
+  return result;
+
+}
+
+
+/***************************************************************************
+ *                   Extract column from matrix into vector                *
+ ***************************************************************************/
+GVector GSymMatrix::extract_col(int col) const
+{
+  // Raise an exception if the column index is invalid
+  #if defined(G_RANGE_CHECK)
+  if (col >= m_cols)
+    throw out_of_range("GSymMatrix::extract_col(int)", 
+	                   0, col, m_rows, m_cols);
+  #endif
+  
+  // Create result vector
+  GVector result(m_rows);
+  
+  // Extract column into vector
+  for (int row = 0; row < m_rows; ++row)
+    result(row) = (*this)(row,col);
+	
+  // Return vector
+  return result;
+
+}
+
+
+/***************************************************************************
+ *                 Convert symmetric matrix into full matrix               *
+ ***************************************************************************/
+GMatrix GSymMatrix::convert_to_full() const
+{
+  // Define result matrix
+  GMatrix result(m_rows, m_cols);
+  
+  // Extract all elements
+  for (int row = 0; row < m_rows; ++row) {
+    for (int col = 0; col < m_cols; ++col)
+	  result(row,col) = (*this)(row,col);
+  }
+  
+  // Return result
+  return result;
+}
+
+
+/***************************************************************************
+ *        Extract lower triangle of symmetric matrix into full matrix      *
+ ***************************************************************************/
+GMatrix GSymMatrix::extract_lower_triangle() const
+{
+  // Define result matrix
+  GMatrix result(m_rows, m_cols);
+
+  // Extract all elements
+  for (int row = 0; row < m_rows; ++row) {
+    for (int col = 0; col <= row; ++col)
+	  result(row,col) = m_data[m_colstart[col]+(row-col)];
+  }
+  
+  // Return result
+  return result;
+}
+
+
+/***************************************************************************
+ *        Extract upper triangle of symmetric matrix into full matrix      *
+ ***************************************************************************/
+GMatrix GSymMatrix::extract_upper_triangle() const
+{
+  // Define result matrix
+  GMatrix result(m_rows, m_cols);
+
+  // Extract all elements
+  for (int row = 0; row < m_rows; ++row) {
+    for (int col = row; col < m_cols; ++col)
+	  result(row,col) = m_data[m_colstart[row]+(col-row)];
+  }
+  
+  // Return result
   return result;
 }
 
@@ -159,18 +387,19 @@ void GSymMatrix::cholesky_decompose(int compress)
   if (no_zeros) {
   
     // Loop over upper triangle (col >= row)
-    for (unsigned row = 0; row < m_rows; ++row) {
+    for (int row = 0; row < m_rows; ++row) {
 	  double* ptr = m_data + m_colstart[row];
-      for (unsigned col = row; col < m_cols; ++col, ++ptr) {
+      for (int col = row; col < m_cols; ++col, ++ptr) {
 	    double sum = *ptr;                                // sum = M(row,col)
-	    for (unsigned k = 0; k < row; ++k) {
-	      unsigned offset = m_colstart[k] - k;            // is always positive
+	    for (int k = 0; k < row; ++k) {
+	      int offset = m_colstart[k] - k;            // is always positive
 	      sum -= m_data[offset+row] * m_data[offset+col]; // sum -= M(row,k)*M(col,k)
 	    }
 	    double diag;
 	    if (row == col) {
 	      if (sum <= 0.0)
-		    throw not_pos_definite("GSymMatrix cholesky_decompose", row, sum);
+		    throw matrix_not_pos_definite("GSymMatrix::cholesky_decompose(int)", 
+			                              row, sum);
           *ptr = sqrt(sum);                               // M(row,row) = sqrt(sum)
 		  diag = 1.0/(*ptr);
 	    }
@@ -184,12 +413,12 @@ void GSymMatrix::cholesky_decompose(int compress)
   else if (m_num_inx > 0) {
 
     // Allocate loop variables and pointers
-	unsigned  row;
-	unsigned  col;
-	unsigned  k;
-	unsigned* row_ptr;
-	unsigned* col_ptr;
-	unsigned* k_ptr;
+	int  row;
+	int  col;
+	int  k;
+	int* row_ptr;
+	int* col_ptr;
+	int* k_ptr;
 
     // Loop over upper triangle (col >= row)
     for (row = 0, row_ptr = m_inx; row < m_num_inx; ++row, ++row_ptr) {
@@ -198,13 +427,14 @@ void GSymMatrix::cholesky_decompose(int compress)
 		double* ptr = ptr_0 + *col_ptr;
 	    double  sum = *ptr;                                         // sum = M(row,col)
 	    for (k = 0, k_ptr = m_inx; k < row; ++k, ++k_ptr) {
-	      unsigned offset = m_colstart[*k_ptr] - *k_ptr;            // is always positive
+	      int offset = m_colstart[*k_ptr] - *k_ptr;            // is always positive
 	      sum -= m_data[offset+*row_ptr] * m_data[offset+*col_ptr]; // sum -= M(row,k)*M(col,k)
 	    }
 	    double diag;
 	    if (*row_ptr == *col_ptr) {
 	      if (sum <= 0.0)
-		    throw not_pos_definite("GSymMatrix cholesky_decompose", *row_ptr, sum);
+		    throw matrix_not_pos_definite("GSymMatrix::cholesky_decompose(int)", 
+			                              *row_ptr, sum);
           *ptr = sqrt(sum);                                         // M(row,row) = sqrt(sum)
 		  diag = 1.0/(*ptr);
 	    }
@@ -216,7 +446,7 @@ void GSymMatrix::cholesky_decompose(int compress)
   
   // Case C: all matrix elements are zero
   else
-    throw all_zero("GSymMatrix cholesky_decompose");
+    throw matrix_zero("GSymMatrix::cholesky_decompose(int)");
 	
 }
 
@@ -231,6 +461,12 @@ void GSymMatrix::cholesky_decompose(int compress)
  ***************************************************************************/
 GVector GSymMatrix::cholesky_solver(const GVector& v, int compress)
 {
+  // Raise an exception if the matrix and vector dimensions are not compatible
+  if (m_rows != v.m_num)
+    throw matrix_vector_mismatch(
+	      "GSymMatrix::cholesky_solver(const GVector&, int)", 
+	      v.m_num, m_rows, m_cols);
+
   // Allocate result vector
   GVector x(m_rows);
 
@@ -241,9 +477,9 @@ GVector GSymMatrix::cholesky_solver(const GVector& v, int compress)
   if (no_zeros) {
     
     // Solve L*y=b, storing y in x (row>k)
-    for (unsigned row = 0; row < m_rows; ++row) {
+    for (int row = 0; row < m_rows; ++row) {
       double sum = v(row);
-	  for (unsigned k = 0; k < row; ++k)
+	  for (int k = 0; k < row; ++k)
 	    sum -= m_data[m_colstart[k]+(row-k)] * x(k); // sum -= M(row,k) * x(k)
 	  x(row) = sum/m_data[m_colstart[row]];          // x(row) = sum/M(row,row) 
     }
@@ -252,7 +488,7 @@ GVector GSymMatrix::cholesky_solver(const GVector& v, int compress)
     for (int row = m_rows-1; row >= 0; --row) {
       double  sum = x(row);
 	  double* ptr = m_data + m_colstart[row] + 1;
-	  for (unsigned k = row+1; k < m_rows; ++k)
+	  for (int k = row+1; k < m_rows; ++k)
 	    sum -= *ptr++ * x(k);                        // sum -= M(k,row) * x(k)
 	  x(row) = sum/m_data[m_colstart[row]];          // x(row) = sum/M(row,row) 
     }
@@ -263,9 +499,9 @@ GVector GSymMatrix::cholesky_solver(const GVector& v, int compress)
 
     // Allocate loop variables and pointers
 	int       row;
-	unsigned  k;
-	unsigned* row_ptr;
-	unsigned* k_ptr;
+	int  k;
+	int* row_ptr;
+	int* k_ptr;
 
     // Solve L*y=b, storing y in x (row>k)
     for (row = 0, row_ptr = m_inx; row < m_num_inx; ++row, ++row_ptr) {
@@ -289,7 +525,7 @@ GVector GSymMatrix::cholesky_solver(const GVector& v, int compress)
   
   // Case C: all matrix elements are zero
   else
-    throw all_zero("GSymMatrix cholesky_solver");
+    throw matrix_zero("GSymMatrix::cholesky_solver(const GVector&, int)");
 
   // Return result vector
   return x;
@@ -315,27 +551,27 @@ void GSymMatrix::cholesky_invert(int compress)
   if (no_zeros) {
   
     // Generate inverse of Cholesky decomposition (col>row)
-    for (unsigned row = 0; row < m_rows; ++row) {
+    for (int row = 0; row < m_rows; ++row) {
 	  double* ptr = m_data + m_colstart[row];
 	  *ptr        = 1.0/(*ptr);                       // M(row,row) = 1/M(row,row)
-	  for (unsigned col = row+1; col < m_cols; ++col) {
+	  for (int col = row+1; col < m_cols; ++col) {
 	    double   sum = 0.0;
 	    double* ptr1 = m_data + col - row;
 	    double* ptr2 = ptr;
-	    for (unsigned k = row; k < col; ++k)
+	    for (int k = row; k < col; ++k)
 	      sum -= *(ptr1-- + m_colstart[k]) * *ptr2++; // sum -= M(col,k)*M(k,row)
 	    *(ptr+col-row) = sum/m_data[m_colstart[col]]; // M(col,row) = sum/M(col,col)
 	  }
     }
   
     // Matrix multiplication (col>=row)
-    for (unsigned row = 0; row < m_rows; ++row) {
+    for (int row = 0; row < m_rows; ++row) {
 	  double* ptr = m_data + m_colstart[row];
-	  for (unsigned col = row; col < m_cols; ++col) {
+	  for (int col = row; col < m_cols; ++col) {
 	    double   sum = 0.0;
 	    double* ptr1 = ptr + col - row;
 	    double* ptr2 = m_data + m_colstart[col];
-	    for (unsigned k = col; k < m_cols; ++k)
+	    for (int k = col; k < m_cols; ++k)
 	      sum += *ptr1++ * *ptr2++;                   // sum += M(row,k)*M(k,col)
 	    *(ptr+col-row) = sum;                         // M(row,col) = sum
 	  }
@@ -346,12 +582,12 @@ void GSymMatrix::cholesky_invert(int compress)
   else if (m_num_inx > 0) {
 
     // Allocate loop variables and pointers
-	unsigned  row;
-	unsigned  col;
-	unsigned  k;
-	unsigned* row_ptr;
-	unsigned* col_ptr;
-	unsigned* k_ptr;
+	int  row;
+	int  col;
+	int  k;
+	int* row_ptr;
+	int* col_ptr;
+	int* k_ptr;
 
     // Generate inverse of Cholesky decomposition (col>row)
     for (row = 0, row_ptr = m_inx; row < m_num_inx; ++row, ++row_ptr) {
@@ -384,10 +620,16 @@ void GSymMatrix::cholesky_invert(int compress)
   
   // Case C: all matrix elements are zero
   else
-    throw all_zero("GSymMatrix cholesky_invert");
+    throw matrix_zero("GSymMatrix::cholesky_invert(int)");
 
 }
 
+
+/*==========================================================================
+ =                                                                         =
+ =                      GSymMatrix private functions                       =
+ =                                                                         =
+ ==========================================================================*/
 
 /***************************************************************************
  *                            GSymMatrix set_inx                           *
@@ -399,8 +641,8 @@ void GSymMatrix::cholesky_invert(int compress)
 void GSymMatrix::set_inx(void)
 {
   // Allocate loop variables and pointers
-  unsigned row;
-  unsigned col;
+  int row;
+  int col;
 	
   // Find all nonzero rows/cols
   m_num_inx = 0;
@@ -430,37 +672,31 @@ void GSymMatrix::set_inx(void)
 }
 
 
+/*==========================================================================
+ =                                                                         =
+ =                            GSymMatrix friends                           =
+ =                                                                         =
+ ==========================================================================*/
+
 /***************************************************************************
- *                          Class exception handlers                       *
+ *                          Matrix absolute values                         *
  ***************************************************************************/
-// Matrix not symmetric
-GSymMatrix::not_sym::not_sym(string origin, unsigned cols, unsigned rows)
+GSymMatrix fabs(const GSymMatrix& m)
 {
-  m_origin = origin;
-  ostringstream s_rows;
-  ostringstream s_cols;
-  s_rows << rows;
-  s_cols << cols;
-  m_message = "Matrix is not symmetric [" + s_rows.str() + "," +
-			  s_cols.str() + "]";
+  // Define result matrix
+  GSymMatrix result(m.m_rows,m.m_cols);
+  
+  // Convert all elements to absolute values  
+  for (int i = 0; i < m.m_elements; ++i)
+    result.m_data[i] = fabs(m.m_data[i]);
+  
+  // Return result
+  return result;
 }
 
-// Matrix not positive definite
-GSymMatrix::not_pos_definite::not_pos_definite(string origin, unsigned row,
-                                               double sum)
-{
-  m_origin = origin;
-  ostringstream s_rows;
-  ostringstream s_sum;
-  s_rows << row;
-  s_sum << scientific << sum;
-  m_message = "Matrix is not positive definite (sum " + s_sum.str() + 
-              " occured in row " + s_rows.str() + ")";
-}
 
-// All matrix elements are zero
-GSymMatrix::all_zero::all_zero(string origin)
-{
-  m_origin = origin;
-  m_message = "All matrix elements are zero";
-}
+/*==========================================================================
+ =                                                                         =
+ =                      GSymMatrix exception classes                       =
+ =                                                                         =
+ ==========================================================================*/

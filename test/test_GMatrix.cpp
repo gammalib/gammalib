@@ -18,10 +18,12 @@
 using namespace std;
 
 /* __ Globals ____________________________________________________________ */
-double   g_matrix[] = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
-double   g_vector[] = {1.0, 2.0, 3.0};
+double   g_matrix[] = {1.0, 2.0, 3.0, 4.0, 
+                       5.0, 6.0, 7.0, 8.0, 
+					   9.0, 10., 11., 12.};
+double   g_vector[] = {1.0, 2.0, 3.0, 4.0};
 unsigned g_rows    = 3;
-unsigned g_cols    = 3;
+unsigned g_cols    = 4;
 
 
 /***************************************************************************
@@ -72,7 +74,32 @@ int check_matrix(const GMatrix& m, const double scale, const double add)
     for (unsigned row = 0; row < g_rows; ++row) {
       for (unsigned col = 0; col < g_cols; ++col) {
 	    double value = g_matrix[col+row*g_cols] * scale + add;
-	    if (m(row,col) != value) {
+	    if (fabs(m(row,col)-value) > 1.0e-15) {
+		  result = 0;
+		  break;
+		}
+	  }
+	}
+  }
+  catch (exception &e) {
+    cout << "TEST ERROR: Unable to check test matrix." << endl;
+	throw;
+  }
+  return result;
+}
+
+
+/***************************************************************************
+ *                        Check transposed test matrix                     *
+ ***************************************************************************/
+int check_transpose_matrix(const GMatrix& m, const double scale, const double add)
+{
+  int result = 1;
+  try {
+    for (unsigned row = 0; row < g_rows; ++row) {
+      for (unsigned col = 0; col < g_cols; ++col) {
+	    double value = g_matrix[col+row*g_cols] * scale + add;
+	    if (m(col,row) != value) {
 		  result = 0;
 		  break;
 		}
@@ -167,15 +194,15 @@ int check_matrix_vector(const GVector& v)
  ***************************************************************************/
 int check_matrix_matrix(const GMatrix& m)
 {
-  if (m.rows() != g_rows || m.cols() != g_cols)
+  if (m.rows() != g_rows || m.cols() != g_rows)
     return 0;
   int result = 1;
   try {
-    for (unsigned row = 0; row < g_rows; ++row) {
-	  for (unsigned col = 0; col < g_cols; ++col) {
+    for (unsigned row = 0; row < m.rows(); ++row) {
+	  for (unsigned col = 0; col < m.cols(); ++col) {
         double value = 0.0;
 		for (unsigned i = 0; i < g_cols; ++i)
-	      value += g_matrix[i+row*g_cols] * g_matrix[row+i*g_cols];
+	      value += g_matrix[i+row*g_cols] * g_matrix[i+col*g_cols];
 	    if (m(row,col) != value) {
 	      result = 0;
 	      break;
@@ -323,7 +350,7 @@ int main(void)
     cout << "GMatrix - Test 4: Define matrix using copy constructor: ";
 	//
 	GMatrix test4 = m_test;
-    if (!check_matrix(test4, 1.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(test4, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt copy constructor." << endl;
 	  cout << test4 << endl;
 	  throw;
@@ -341,8 +368,8 @@ int main(void)
 	//
 	// GMatrix = GMatrix
 	result = m_test;
-    if (!check_matrix(result, 1.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt copy constructor." << endl;
+    if (!check_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
+      cout << endl << "TEST ERROR: Corrupt assignment." << endl;
 	  cout << result << endl;
 	  throw;
 	}
@@ -356,84 +383,102 @@ int main(void)
   }
   cout << "ok." << endl;
 
-  // Test 6: Matrix*Vector multiplication
+  // Test 6: Transposition
   try {
-    cout << "GMatrix - Test 6: Matrix*Vector multiplication: ";
+    cout << "GMatrix - Test 6: Transposition: ";
     //
-	GVector v_test6 = m_test*v_test;
-	if (!check_matrix_vector(v_test6) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt Matrix*Vector multiplication." << endl;
-	  cout << v_test6 << endl;
-	  throw;
-	}
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  try {
-	GVector v_test6 = bigger*v_test;
-  }
-  catch (GMatrix::vec_mat_mismatch &e) {
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  cout << "ok." << endl;
-
-  // Test 7: Matrix*Matrix multiplication
-  try {
-    cout << "GMatrix - Test 7: Matrix*Matrix multiplication: ";
-    //
-	GMatrix m_test7 = m_test*m_test;
-	if (!check_matrix_matrix(m_test7) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt Matrix*Matrix multiplication." << endl;
-	  cout << m_test7 << endl;
-	  throw;
-	}
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  try {
-	GMatrix m_test7 = m_test*bigger;
-  }
-  catch (GMatrix::dim_mult_mismatch &e) {
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  try {
-	GMatrix m_test7 = bigger*m_test;
-  }
-  catch (GMatrix::dim_mult_mismatch &e) {
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  cout << "ok." << endl;
-
-  // Test 8: Assignment and arithmetics
-  try {
-    cout << "GMatrix - Test 8: Assignment and arithmetics: ";
-	//
-	// -GMatrix
-	result = -m_test;
-    if (!check_matrix(result, -1.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt -GMatrix operator." << endl;
+	// transpose(GMatrix)
+	result = transpose(m_test);
+    if (!check_transpose_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
+      cout << endl << "TEST ERROR: Corrupt transpose(GMatrix) function." << endl;
 	  cout << result << endl;
 	  throw;
 	}
-	//
-	// GMatrix = 3.0
+    //
+	// GMatrix.transpose()
 	result = m_test;
-	result = 3.0;
-    if (!check_matrix(result, 0.0, 3.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GMatrix = double operator." << endl;
+	result.transpose();
+    if (!check_transpose_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
+      cout << endl << "TEST ERROR: Corrupt GMatrix.transpose() function." << endl;
+	  cout << result << endl;
+	  throw;
+	}
+  }
+  catch (exception &e) {
+    cout << e.what() << endl;
+	throw;
+  }
+  cout << "ok." << endl;
+
+  // Test 7: Matrix*Vector multiplication
+  try {
+    cout << "GMatrix - Test 7: Matrix*Vector multiplication: ";
+    //
+	GVector v_test7 = m_test*v_test;
+	if (!check_matrix_vector(v_test7) || !check_matrix(m_test, 1.0, 0.0)) {
+      cout << endl << "TEST ERROR: Corrupt Matrix*Vector multiplication." << endl;
+	  cout << v_test7 << endl;
+	  throw;
+	}
+  }
+  catch (exception &e) {
+    cout << e.what() << endl;
+	throw;
+  }
+  try {
+	GVector v_test7 = bigger*v_test;
+  }
+  catch (GMatrix::matrix_vector_mismatch &e) {
+  }
+  catch (exception &e) {
+    cout << e.what() << endl;
+	throw;
+  }
+  cout << "ok." << endl;
+
+  // Test 8: Matrix*Matrix multiplication
+  try {
+    cout << "GMatrix - Test 8: Matrix*Matrix multiplication: ";
+    //
+	GMatrix m_test8 = m_test * transpose(m_test);
+	if (!check_matrix_matrix(m_test8) || !check_matrix(m_test, 1.0, 0.0)) {
+      cout << endl << "TEST ERROR: Corrupt Matrix*Matrix multiplication." << endl;
+	  cout << m_test8 << endl;
+	  throw;
+	}
+  }
+  catch (exception &e) {
+    cout << e.what() << endl;
+	throw;
+  }
+  try {
+	GMatrix m_test8 = m_test*bigger;
+  }
+  catch (GMatrix::matrix_mismatch &e) {
+  }
+  catch (exception &e) {
+    cout << e.what() << endl;
+	throw;
+  }
+  try {
+	GMatrix m_test8 = bigger*m_test;
+  }
+  catch (GMatrix::matrix_mismatch &e) {
+  }
+  catch (exception &e) {
+    cout << e.what() << endl;
+	throw;
+  }
+  cout << "ok." << endl;
+
+  // Test 9: Assignment and arithmetics
+  try {
+    cout << "GMatrix - Test 9: Assignment and arithmetics: ";
+	//
+	// -GMatrix
+	result = -m_test;
+    if (!check_matrix(result, -1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
+      cout << endl << "TEST ERROR: Corrupt -GMatrix operator." << endl;
 	  cout << result << endl;
 	  throw;
 	}
@@ -441,17 +486,8 @@ int main(void)
 	// GMatrix += GMatrix
 	result  = m_test;
 	result += m_test;
-    if (!check_matrix(result, 2.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 2.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GMatrix += GMatrix operator." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	//
-	// GMatrix += 3.0
-	result  = m_test;
-	result += 3.0;
-    if (!check_matrix(result, 1.0, 3.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GMatrix += double operator." << endl;
 	  cout << result << endl;
 	  throw;
 	}
@@ -459,17 +495,8 @@ int main(void)
 	// GMatrix -= GMatrix
 	result  = m_test;
 	result -= m_test;
-    if (!check_matrix(result, 0.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 0.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GMatrix -= GMatrix operator." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	//
-	// GMatrix -= 3.0
-	result  = m_test;
-	result -= 3.0;
-    if (!check_matrix(result, 1.0, -3.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GMatrix -= double operator." << endl;
 	  cout << result << endl;
 	  throw;
 	}
@@ -477,7 +504,7 @@ int main(void)
 	// GMatrix *= 3.0
 	result  = m_test;
 	result *= 3.0;
-    if (!check_matrix(result, 3.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 3.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GMatrix *= double operator." << endl;
 	  cout << result << endl;
 	  throw;
@@ -486,7 +513,7 @@ int main(void)
 	// GMatrix /= 3.0
 	result  = m_test;
 	result /= 3.0;
-    if (!check_matrix(result, 1.0/3.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 1.0/3.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GMatrix /= double operator." << endl;
 	  cout << result << endl;
 	  throw;
@@ -494,7 +521,7 @@ int main(void)
 	//
 	// GMatrix + GMatrix
 	result = m_test + m_test;
-    if (!check_matrix(result, 2.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 2.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GMatrix + GMatrix operator." << endl;
 	  cout << result << endl;
 	  throw;
@@ -502,7 +529,7 @@ int main(void)
 	//
 	// GMatrix - GMatrix
 	result = m_test - m_test;
-    if (!check_matrix(result, 0.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 0.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GMatrix - GMatrix operator." << endl;
 	  cout << result << endl;
 	  throw;
@@ -510,47 +537,15 @@ int main(void)
 	//
 	// GMatrix - GMatrix
 	result = m_test - m_test;
-    if (!check_matrix(result, 0.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 0.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GMatrix - GMatrix operator." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	//
-	// GMatrix + 3.0
-	result = m_test + 3.0;
-    if (!check_matrix(result, 1.0, 3.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GMatrix + double operator." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	//
-	// 3.0 + GMatrix
-	result = 3.0 + m_test;
-    if (!check_matrix(result, 1.0, 3.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt double + GMatrix operator." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	//
-	// GMatrix - 3.0
-	result = m_test - 3.0;
-    if (!check_matrix(result, 1.0, -3.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GMatrix - double operator." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	//
-	// 3.0 - GMatrix
-	result = 3.0 - m_test;
-    if (!check_matrix(result, -1.0, 3.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt double - GMatrix operator." << endl;
 	  cout << result << endl;
 	  throw;
 	}
 	//
 	// GMatrix * 3.0
 	result = m_test * 3.0;
-    if (!check_matrix(result, 3.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 3.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GMatrix * double operator." << endl;
 	  cout << result << endl;
 	  throw;
@@ -558,7 +553,7 @@ int main(void)
 	//
 	// 3.0 * GMatrix
 	result = 3.0 * m_test;
-    if (!check_matrix(result, 3.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 3.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt double * GMatrix operator." << endl;
 	  cout << result << endl;
 	  throw;
@@ -566,7 +561,7 @@ int main(void)
 	//
 	// GMatrix / 3.0
 	result = m_test / 3.0;
-    if (!check_matrix(result, 1.0/3.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
+    if (!check_matrix(result, 1.0/3.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt GMatrix / double operator." << endl;
 	  cout << result << endl;
 	  throw;
@@ -580,7 +575,7 @@ int main(void)
 	result  = m_test;
 	result += bigger;
   }
-  catch (GMatrix::dim_add_mismatch) {
+  catch (GMatrix::matrix_mismatch) {
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -588,9 +583,9 @@ int main(void)
   }
   cout << "ok." << endl;
 
-  // Test 9: Matrix functions
+  // Test 10: Matrix functions
   try {
-    cout << "GMatrix - Test 9: Matrix functions: ";
+    cout << "GMatrix - Test 10: Matrix functions: ";
 	//
 	double min = m_test.min();
     if (!check_matrix_min(min)) {
@@ -618,9 +613,9 @@ int main(void)
   }
   cout << "ok." << endl;
 
-  // Test 10: Matrix comparison
+  // Test 11: Matrix comparison
   try {
-    cout << "GMatrix - Test 10: Comparison: ";
+    cout << "GMatrix - Test 11: Comparison: ";
 	//
 	if ((m_test == m_test) != 1) {
       cout << endl << "TEST ERROR: Corrupt GMatrix == GMatrix operator." << endl;
@@ -652,51 +647,6 @@ int main(void)
       cout << endl << "TEST ERROR: Corrupt GMatrix != GMatrix operator." << endl;
 	  throw;
 	}
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  cout << "ok." << endl;
-
-  // Test 11: Transformations
-  try {
-    cout << "GMatrix - Test 11: Transformations: ";
-    //
-	// transpose(GMatrix)
-	result = transpose(m_test);
-    if (!check_matrix(result, 1.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt transpose(GMatrix) function." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-    //
-	// GMatrix.transpose()
-	result = m_test;
-	result.transpose();
-    if (!check_matrix(result, 1.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GMatrix.transpose() function." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-/*
-	//
-	// lower_triangle(GMatrix)
-	m_test11 = lower_triangle(m_test);
-    if (!check_matrix_lt(m_test11, 1.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt lower_triangle(GMatrix) function." << endl;
-	  cout << m_test11 << endl;
-	  throw;
-	}
-	//
-	// upper_triangle(GMatrix)
-	m_test11 = upper_triangle(m_test);
-    if (!check_matrix_ut(m_test11, 1.0, 0.0) && !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt upper_triangle(GMatrix) function." << endl;
-	  cout << m_test11 << endl;
-	  throw;
-	}
-*/
   }
   catch (exception &e) {
     cout << e.what() << endl;

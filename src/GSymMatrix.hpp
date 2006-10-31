@@ -33,113 +33,106 @@ using namespace std;
  *                       GSymMatrix class definition                       *
  ***************************************************************************/
 class GSymMatrix : public GMatrix {
-  // Operator friends
-  friend GSymMatrix operator+ (const double& a, const GSymMatrix& b);
-  friend GSymMatrix operator- (const double& a, const GSymMatrix& b);
-  friend GSymMatrix operator* (const double& a, const GSymMatrix& b);
+  // Binary operator friends
+  friend GSymMatrix operator* (const double& a,  const GSymMatrix& b);
+  friend GSymMatrix operator* (const GSymMatrix& a, const double& b);
+  friend GSymMatrix operator/ (const GSymMatrix& a, const double& b);
 
   // I/O friends
-  // ...
-  
+  // USE_BASE: friend ostream& operator<< (ostream& os, const GSymMatrix& m);
+
   // Friend functions
   friend GSymMatrix transpose(const GSymMatrix& m);
   friend GSymMatrix fabs(const GSymMatrix& m);
   friend GSymMatrix cholesky_decompose(const GSymMatrix& m, int compress = 1);
   friend GSymMatrix cholesky_invert(const GSymMatrix& m, int compress = 1);
-  friend GMatrix    full(const GSymMatrix& m);
-  friend GMatrix    lower_triangle(const GSymMatrix& m);
-  friend GMatrix    upper_triangle(const GSymMatrix& m);
+
 public:
   // Constructors and destructors (not inherited)
-  GSymMatrix(unsigned rows, unsigned cols);
+  GSymMatrix(int rows, int cols);
   GSymMatrix(const GSymMatrix& m);
-  ~GSymMatrix();
+  virtual ~GSymMatrix();
 
   // Matrix element access operators
-  double& operator() (unsigned row, unsigned col);
-  const double& operator() (unsigned row, unsigned col) const;
+  virtual double& operator() (int row, int col);
+  virtual const double& operator() (int row, int col) const;
 
   // Matrix assignment operators (not inherited)
-  GSymMatrix& operator= (const GSymMatrix& m);
-  GSymMatrix& operator= (const double& d);
+  virtual GSymMatrix& operator= (const GSymMatrix& m);
 
-  // Specific matrix operators (structure dependent)
-  GSymMatrix operator+ (const GSymMatrix& m) const;
-  GSymMatrix operator- (const GSymMatrix& m) const;
-  GSymMatrix operator* (const GSymMatrix& m) const;
-  GVector    operator* (const GVector& v) const;
-  GSymMatrix operator+ (const double& d) const;
-  GSymMatrix operator- (const double& d) const;
-  GSymMatrix operator* (const double& d) const;
-  GSymMatrix operator/ (const double& d) const;
+  // Binary operators
+  virtual GSymMatrix operator+ (const GSymMatrix& m) const;
+  virtual GSymMatrix operator- (const GSymMatrix& m) const;
+  virtual GSymMatrix operator* (const GSymMatrix& m) const;
+  virtual GVector    operator* (const GVector& v) const;
+  // USE_BASE: virtual int operator== (const GSymMatrix& m) const;
+  // USE_BASE: virtual int operator!= (const GSymMatrix& m) const;
+
+  // Unary operators
   GSymMatrix operator- () const;
-  
-  // Specific matrix functions
-  void    transpose();                                         // Inplace transpose of matrix
-  void    cholesky_decompose(int compress = 1);                // Inplace Cholesky decomposition
-  GVector cholesky_solver(const GVector& v, int compress = 1); // Cholesky solver
-  void    cholesky_invert(int compress = 1);                   // Inplace Cholesky matrix inverter
-  
-  // Exception: Matrix not symmetric
-  class not_sym : public GException {
-  public:
-    not_sym(string origin, unsigned cols, unsigned rows);
-  };
+  // USE_BASE: virtual GSymMatrix& operator+= (const GSymMatrix& m);
+  // USE_BASE: virtual GSymMatrix& operator-= (const GSymMatrix& m);
+  virtual GSymMatrix& operator*= (const GSymMatrix& m);
+  virtual GSymMatrix& operator*= (const double& d);
+  virtual GSymMatrix& operator/= (const double& d);
 
-  // Exception: Matrix not positive definite
-  class not_pos_definite : public GException {
-  public:
-    not_pos_definite(string origin, unsigned row, double sum);
-  };
-
+  // Matrix functions
+  // USE_BASE: virtual int rows() const { return m_rows; }
+  // USE_BASE: virtual int cols() const { return m_cols; }
+  // USE_BASE: virtual double   min() const;
+  // USE_BASE: virtual double   max() const;
+  virtual double  sum() const;
+  virtual void    transpose() { return; }
+  virtual GVector extract_row(int row) const;
+  virtual GVector extract_col(int col) const;
+  virtual GMatrix convert_to_full() const;
+  virtual GMatrix extract_lower_triangle() const;
+  virtual GMatrix extract_upper_triangle() const;
+  virtual void    cholesky_decompose(int compress = 1);
+  virtual GVector cholesky_solver(const GVector& v, int compress = 1);
+  virtual void    cholesky_invert(int compress = 1);
+    
   // Exception: All matrix elements are zero
   class all_zero : public GException {
   public:
     all_zero(string origin);
   };
+
 private:
-  void      set_inx(void);  // Set indices of non-zero rows/columns
-  unsigned  m_num_inx;      // Number of non-zero rows/columns
-  unsigned* m_inx;          // Indices of non-zero rows/columns
+  void set_inx(void);  // Set indices of non-zero rows/columns
+  int  m_num_inx;      // Number of non-zero rows/columns
+  int* m_inx;          // Indices of non-zero rows/columns
 };
 
 
 /***************************************************************************
- *              Inline members that override base class members            *
+ *                          Inline member functions                        *
  ***************************************************************************/
-// Scalar assignment operator: GSymMatrix = double
+// Matrix element access operator
 inline
-GSymMatrix& GSymMatrix::operator= (const double& d) 
-{ 
-  this->GMatrix::operator=(d);
-  return *this;
-}
-
-// Matrix element access operator: GSymMatrix(row,col)
-inline
-double& GSymMatrix::operator() (unsigned row, unsigned col)
+double& GSymMatrix::operator() (int row, int col)
 {
   #if defined(G_RANGE_CHECK)
   if (row >= m_rows || col >= m_cols)
     throw out_of_range("GSymMatrix access", row, col, m_rows, m_cols);
   #endif
-  unsigned inx = (row >= col) ? m_colstart[col]+(row-col) : m_colstart[row]+(col-row);
+  int inx = (row >= col) ? m_colstart[col]+(row-col) : m_colstart[row]+(col-row);
   return m_data[inx];
 }
 
-// Matrix element access operator (const version): GSymMatrix(row,col)
+// Matrix element access operator (const version)
 inline
-const double& GSymMatrix::operator() (unsigned row, unsigned col) const
+const double& GSymMatrix::operator() (int row, int col) const
 {
   #if defined(G_RANGE_CHECK)
   if (row >= m_rows || col >= m_cols)
     throw out_of_range("GSymMatrix access", row, col, m_rows, m_cols);
   #endif
-  unsigned inx = (row >= col) ? m_colstart[col]+(row-col) : m_colstart[row]+(col-row);
+  int inx = (row >= col) ? m_colstart[col]+(row-col) : m_colstart[row]+(col-row);
   return m_data[inx];
 }
 
-// Matrix addition: GSymMatrix + GSymMatrix
+// Binary matrix addition
 inline
 GSymMatrix GSymMatrix::operator+ (const GSymMatrix& m) const
 {
@@ -148,7 +141,7 @@ GSymMatrix GSymMatrix::operator+ (const GSymMatrix& m) const
   return result;
 }
 
-// Matrix subtraction: GSymMatrix - GSymMatrix
+// Binary matrix subtraction
 inline
 GSymMatrix GSymMatrix::operator- (const GSymMatrix& m) const
 {
@@ -157,90 +150,43 @@ GSymMatrix GSymMatrix::operator- (const GSymMatrix& m) const
   return result;
 }
 
-// Matrix/Vector multiplication: GSymMatrix * GVector
+// Binary matrix multiplication
 inline
-GVector GSymMatrix::operator* (const GVector& v) const
-{
-  return (this->GMatrix::operator*(v));
-}
-
-// Matrix scaling: GSymMatrix + double
-inline 
-GSymMatrix GSymMatrix::operator+ (const double& d) const
-{
-  GSymMatrix result = (*this);
-  result += d;
-  return result;
-}
-
-// Matrix scaling: GSymMatrix - double
-inline 
-GSymMatrix GSymMatrix::operator- (const double& d) const
-{
-  GSymMatrix result = (*this);
-  result -= d;
-  return result;
-}
-
-// Matrix scaling: GSymMatrix * double
-inline 
-GSymMatrix GSymMatrix::operator* (const double& d) const
-{
-  GSymMatrix result = (*this);
-  result *= d;
-  return result;
-}
-
-// Matrix inverse scaling: GSymMatrix * double
-inline 
-GSymMatrix GSymMatrix::operator/ (const double& d) const
-{
-  GSymMatrix result = (*this);
-  result /= d;
-  return result;
-}
-
-// Unary minus operator
-inline
-GSymMatrix GSymMatrix::operator- ( ) const
+GSymMatrix GSymMatrix::operator* (const GSymMatrix& m) const
 {
   GSymMatrix result = *this;
-  for (unsigned i = 0; i < m_elements; ++i)
-    result.m_data[i] = -result.m_data[i];
+  result *= m;
   return result;
 }
 
-// Matrix transpose
+// Unary scalar multiplication
 inline
-void GSymMatrix::transpose()
+GSymMatrix& GSymMatrix::operator*= (const double& d)
 {
-  return;
+  this->GMatrix::operator*=(d);
 }
 
+// Unary scalar division
+inline
+GSymMatrix& GSymMatrix::operator/= (const double& d)
+{
+  this->GMatrix::operator/=(d);
+}
 
 
 /***************************************************************************
  *                               Inline friends                            *
  ***************************************************************************/
-// Matrix addition: double + GSymMatrix
-inline
-GSymMatrix operator+ (const double& a, const GSymMatrix& b)
+// Binary matrix scaling (matrix is left operand)
+inline 
+GSymMatrix operator* (const GSymMatrix& a, const double& b)
 {
-  GSymMatrix result = b;
-  result += a;
+  GSymMatrix result = a;
+  result *= b;
   return result;
 }
 
-// Matrix subtracxtion: double * GSymMatrix
-inline
-GSymMatrix operator- (const double& a, const GSymMatrix& b)
-{
-  GSymMatrix result = b;
-  result -= a;
-  return result;
-}
-
-// Matrix scaling: double * GSymMatrix
+// Binary matrix scaling (matrix is right operand)
 inline
 GSymMatrix operator* (const double& a, const GSymMatrix& b)
 {
@@ -249,24 +195,23 @@ GSymMatrix operator* (const double& a, const GSymMatrix& b)
   return result;
 }
 
-// Matrix transpose: transpose(GSymMatrix)
+// Binary matrix division (matrix is left operand)
+inline 
+GSymMatrix operator/ (const GSymMatrix& a, const double& b)
+{
+  GSymMatrix result = a;
+  result /= b;
+  return result;
+}
+
+// Matrix transpose function
 inline
 GSymMatrix transpose(const GSymMatrix& m)
 {
   return m;
 }
 
-// Matrix absolute: fabs(GSymMatrix)
-inline
-GSymMatrix fabs(const GSymMatrix& m)
-{
-  GSymMatrix result = m;
-  for (unsigned i = 0; i < result.m_elements; ++i)
-    result.m_data[i] = fabs(result.m_data[i]);
-  return result;
-}
-
-// Cholesky decomposition: cholesky_decompose(GSymMatrix)
+// Cholesky decomposition
 inline
 GSymMatrix cholesky_decompose(const GSymMatrix& m, int compress)
 {
@@ -275,48 +220,12 @@ GSymMatrix cholesky_decompose(const GSymMatrix& m, int compress)
   return result;
 }
 
-// Inversion using Cholesky decomposition: cholesky_invert(GSymMatrix)
+// Matrix inversion using Cholesky decomposition
 inline
 GSymMatrix cholesky_invert(const GSymMatrix& m, int compress)
 {
   GSymMatrix result = m;
   result.cholesky_invert(compress);
-  return result;
-}
-
-// Convert symmetric matrix into full matrix: full(GSymMatrix)
-inline
-GMatrix full(const GSymMatrix& m)
-{
-  GMatrix result(m.m_rows,m.m_cols);
-  for (unsigned row = 0; row < m.m_rows; ++row) {
-    for (unsigned col = 0; col < m.m_cols; ++col)
-	  result(row,col) = m(row,col);
-  }
-  return result;
-}
-
-// Convert symmetric matrix into lower triangle full matrix: lower_triangle(GSymMatrix)
-inline
-GMatrix lower_triangle(const GSymMatrix& m)
-{
-  GMatrix result(m.m_rows,m.m_cols);
-  for (unsigned row = 0; row < m.m_rows; ++row) {
-    for (unsigned col = 0; col <= row; ++col)
-	  result(row,col) = m.m_data[m.m_colstart[col]+(row-col)];
-  }
-  return result;
-}
-
-// Convert symmetric matrix into upper triangle full matrix: lower_triangle(GSymMatrix)
-inline
-GMatrix upper_triangle(const GSymMatrix& m)
-{
-  GMatrix result(m.m_rows,m.m_cols);
-  for (unsigned row = 0; row < m.m_rows; ++row) {
-    for (unsigned col = row; col < m.m_cols; ++col)
-	  result(row,col) = m.m_data[m.m_colstart[row]+(col-row)];
-  }
   return result;
 }
 
