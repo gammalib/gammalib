@@ -265,6 +265,23 @@ int check_matrix_sum(const double sum)
 
 
 /***************************************************************************
+ *                                Test: Output                             *
+ ***************************************************************************/
+void test_output(const GMatrix& m_test)
+{
+  cout << "Test GMatrix: Output test matrix: " << endl;
+  try {
+    cout << m_test << endl;
+  }
+  catch (exception &e) {
+	cout << endl << "TEST ERROR: Unable to output matrix." << endl;
+    cout << e.what() << endl;
+	throw;
+  }
+}
+
+
+/***************************************************************************
  *                            Main test function                           *
  ***************************************************************************/
 int main(void)
@@ -284,6 +301,9 @@ int main(void)
   
   // Prepare result matrix
   GMatrix result = m_test;
+
+  // Execute the tests
+  test_output(m_test);
 
   // Test 1: Allocate zero matrix
   try {

@@ -33,6 +33,7 @@ GMatrix::GMatrix(void)
   m_rows       = 0;
   m_cols       = 0;
   m_elements   = 0;
+  m_alloc      = 0;
   m_num_rowsel = 0;
   m_num_colsel = 0;
   m_data       = NULL;
@@ -54,6 +55,7 @@ GMatrix::GMatrix(int rows, int cols)
   m_rows       = 0;
   m_cols       = 0;
   m_elements   = 0;
+  m_alloc      = 0;
   m_num_rowsel = 0;
   m_num_colsel = 0;
   m_data       = NULL;
@@ -61,7 +63,7 @@ GMatrix::GMatrix(int rows, int cols)
   m_rowsel     = NULL;
   m_colsel     = NULL;
 
-  // Determine number of physical elements in matrix
+  // Determine number of elements to store in matrix
   int elements = rows*cols;
 
   // Throw exception if requested matrix size is zero
@@ -75,10 +77,11 @@ GMatrix::GMatrix(int rows, int cols)
   if (m_data == NULL || m_colstart == NULL)
 	throw mem_alloc("GMatrix constructor", elements);
 	
-  // Store matrix size (logical and physical)
+  // Store matrix size (logical, storage, allocated)
   m_rows     = rows;
   m_cols     = cols;
   m_elements = elements;
+  m_alloc    = elements;
   
   // Set-up column start indices
   m_colstart[0] = 0;
@@ -106,6 +109,7 @@ GMatrix::GMatrix(const GMatrix& m)
   m_rows       = 0;
   m_cols       = 0;
   m_elements   = 0;
+  m_alloc      = 0;
   m_num_rowsel = 0;
   m_num_colsel = 0;
   m_data       = NULL;
@@ -121,10 +125,10 @@ GMatrix::GMatrix(const GMatrix& m)
     m_colstart[i] = m.m_colstart[i];
   
   // Allocate memory for elements and copy them (only if there are elements)
-  if (m.m_elements > 0) {
-    m_data = new double[m.m_elements];
+  if (m.m_alloc > 0) {
+    m_data = new double[m.m_alloc];
     if (m_data == NULL)
-	  throw mem_alloc("GMatrix copy constructor", m.m_elements);
+	  throw mem_alloc("GMatrix copy constructor", m.m_alloc);
     for (int i = 0; i < m.m_elements; ++i)
       m_data[i] = m.m_data[i];
   }
@@ -153,6 +157,7 @@ GMatrix::GMatrix(const GMatrix& m)
   m_rows     = m.m_rows;
   m_cols     = m.m_cols;
   m_elements = m.m_elements;
+  m_alloc    = m.m_alloc;
   
   // Return
   return;
@@ -199,6 +204,7 @@ GMatrix& GMatrix::operator= (const GMatrix& m)
     m_rows       = 0;
     m_cols       = 0;
     m_elements   = 0;
+	m_alloc      = 0;
     m_num_rowsel = 0;
     m_num_colsel = 0;
     m_data       = NULL;
@@ -214,10 +220,10 @@ GMatrix& GMatrix::operator= (const GMatrix& m)
       m_colstart[i] = m.m_colstart[i];
   
     // Allocate memory for elements and copy them (only if there are elements)
-    if (m.m_elements > 0) {
-      m_data = new double[m.m_elements];
+    if (m.m_alloc > 0) {
+      m_data = new double[m.m_alloc];
       if (m_data == NULL)
-	    throw mem_alloc("GMatrix::operator= (const GMatrix&)", m.m_elements);
+	    throw mem_alloc("GMatrix::operator= (const GMatrix&)", m.m_alloc);
       for (int i = 0; i < m.m_elements; ++i)
         m_data[i] = m.m_data[i];
     }
@@ -246,6 +252,8 @@ GMatrix& GMatrix::operator= (const GMatrix& m)
     m_rows     = m.m_rows;
     m_cols     = m.m_cols;
     m_elements = m.m_elements;
+	m_alloc    = m.m_alloc;
+	
   } // endif: object was not identical
 
   // Return this object
@@ -709,6 +717,7 @@ void GMatrix::select_non_zero(void)
   return;
 }
 
+
 /*==========================================================================
  =                                                                         =
  =                             GMatrix friends                             =
@@ -720,8 +729,24 @@ void GMatrix::select_non_zero(void)
  ***************************************************************************/
 ostream& operator<< (ostream& os, const GMatrix& m)
 {
+  // Put header in stream
+  os << "=== GMatrix ===" << endl;
+  if (m.m_rowsel != NULL)
+    os << " Number of rows ............: " << m.m_rows << " (compressed " <<
+	      m.m_num_rowsel << ")" << endl;
+  else
+    os << " Number of rows ............: " << m.m_rows << endl;
+  if (m.m_colsel != NULL)
+    os << " Number of columns .........: " << m.m_cols << " (compressed " <<
+	      m.m_num_colsel << ")" << endl;
+  else
+    os << " Number of columns .........: " << m.m_cols << endl;
+  os << " Number of elements ........: " << m.m_elements << endl;
+  os << " Number of allocated cells .: " << m.m_alloc << endl;
+
   // Loop over all matrix elements
   for (int row = 0; row < m.m_rows; ++row) {
+    os << " ";
     for (int col = 0; col < m.m_cols; ++col) {
       os << m(row,col);
 	  if (col != m.m_cols-1)
@@ -729,6 +754,20 @@ ostream& operator<< (ostream& os, const GMatrix& m)
 	}
 	if (row != m.m_rows-1)
 	  os << endl;
+  }
+
+  // If there is a row compression the show scheme
+  if (m.m_rowsel != NULL) {
+    os << endl << " Row selection ..:";
+    for (int row = 0; row < m.m_num_rowsel; ++row)
+      os << " " << m.m_rowsel[row];
+  }
+
+  // If there is a column compression the show scheme
+  if (m.m_colsel != NULL) {
+    os << endl << " Column selection:";
+    for (int col = 0; col < m.m_num_colsel; ++col)
+      os << " " << m.m_colsel[col];
   }
   
   // Return output stream

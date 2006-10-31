@@ -31,7 +31,8 @@ using namespace std;
 //#define G_DEBUG_SPARSE_PENDING                    // Analyse pending values
 //#define G_DEBUG_SPARSE_INSERTION                 // Analyse value insertion
 //#define G_DEBUG_SPARSE_COMPRESSION   // Analyse zero row/column compression
-
+//#define G_DEBUG_SPARSE_MALLOC                  // Analyse memory management
+#define G_USE_MEMCPY
 
 /*==========================================================================
  =                                                                         =
@@ -45,18 +46,20 @@ using namespace std;
 GSparseMatrix::GSparseMatrix(int rows, int cols, int elements) : GMatrix()
 {
   // Initialise private members for clean destruction
-  m_rows     = 0;
-  m_cols     = 0;
-  m_elements = 0;
-  m_data     = NULL;
-  m_colstart = NULL;
-  m_rowinx   = NULL;
-  m_zero     = 0.0;
-  m_fill_val = 0.0;
-  m_fill_row = 0;
-  m_fill_col = 0;
-  m_symbolic = NULL;
-  m_numeric  = NULL;
+  m_rows      = 0;
+  m_cols      = 0;
+  m_elements  = 0;
+  m_alloc     = 0;
+  m_data      = NULL;
+  m_colstart  = NULL;
+  m_rowinx    = NULL;
+  m_mem_block = G_SPARSE_MATRIX_DEFAULT_MEM_BLOCK;
+  m_zero      = 0.0;
+  m_fill_val  = 0.0;
+  m_fill_row  = 0;
+  m_fill_col  = 0;
+  m_symbolic  = NULL;
+  m_numeric   = NULL;
 	
   // Allocate column start array. This is the only array that we can
   // allocate at this time. The other arrays can only be allocated during
@@ -98,16 +101,17 @@ GSparseMatrix::GSparseMatrix(const GSparseMatrix& m) : GMatrix(m)
   m_numeric  = NULL;
 
   // Copy data members
-  m_zero     = m.m_zero;
-  m_fill_val = m.m_fill_val;
-  m_fill_row = m.m_fill_row;
-  m_fill_col = m.m_fill_col;
+  m_mem_block = m.m_mem_block;
+  m_zero      = m.m_zero;
+  m_fill_val  = m.m_fill_val;
+  m_fill_row  = m.m_fill_row;
+  m_fill_col  = m.m_fill_col;
   
   // Allocate memory for row indices and copy them (only if there are elements)
-  if (m_elements > 0) {
-    m_rowinx = new int[m_elements];
+  if (m_alloc > 0) {
+    m_rowinx = new int[m_alloc];
     if (m_rowinx == NULL)
-	  throw mem_alloc("GSparseMatrix copy constructor", m_elements);
+	  throw mem_alloc("GSparseMatrix copy constructor", m_alloc);
     for (int i = 0; i < m_elements; ++i)
       m_rowinx[i] = m.m_rowinx[i];
   }
@@ -181,17 +185,18 @@ GSparseMatrix& GSparseMatrix::operator= (const GSparseMatrix& m)
 	m_numeric  = NULL;
 
     // Copy data members
-    m_zero     = m.m_zero;
-    m_fill_val = m.m_fill_val;
-    m_fill_row = m.m_fill_row;
-    m_fill_col = m.m_fill_col;
+	m_mem_block = m.m_mem_block;
+    m_zero      = m.m_zero;
+    m_fill_val  = m.m_fill_val;
+    m_fill_row  = m.m_fill_row;
+    m_fill_col  = m.m_fill_col;
 
     // Allocate memory for row indices and copy them (only if there are elements)
-    if (m_elements > 0) {
-      m_rowinx = new int[m_elements];
+    if (m_alloc > 0) {
+      m_rowinx = new int[m_alloc];
       if (m_rowinx == NULL)
 	    throw mem_alloc("GSparseMatrix::operator= (const GSparseMatrix&)", 
-		                m_elements);
+		                m_alloc);
       for (int i = 0; i < m_elements; ++i)
         m_rowinx[i] = m.m_rowinx[i];
     }
@@ -444,6 +449,23 @@ GSparseMatrix& GSparseMatrix::operator*= (const GSparseMatrix& m)
  ==========================================================================*/
 
 /***************************************************************************
+ *                       Set all matrix elements to 0                      *
+ ***************************************************************************/
+void GSparseMatrix::clear()
+{
+  // Free memory
+  free_elements(0, m_elements);
+
+  // Initialise column start indices to 0
+  for (int col = 0; col <= m_cols; ++col)
+    m_colstart[col] = 0;
+  
+  // Return
+  return;
+}
+
+
+/***************************************************************************
  *                        Get minimum matrix element                       *
  ***************************************************************************/
 double GSparseMatrix::min() const
@@ -593,7 +615,6 @@ GVector GSparseMatrix::extract_col(int col) const
 	
   // Return vector
   return result;
-
 }
 
 
@@ -645,7 +666,7 @@ void GSparseMatrix::insert_col(const GVector& v, int col)
   // Determine the number of non-zero elements in the vector
   int n_vector = 0;
   for (int row = 0; row < m_rows; ++row) {
-    if (v(row) != 0.0)
+    if (v.m_data[row] != 0.0)
 	  n_vector++;
   }
   
@@ -678,8 +699,8 @@ void GSparseMatrix::insert_col(const GVector& v, int col)
   // Insert the vector elements in the matrix
   if (n_vector > 0) {
     for (int row = 0, i = i_start; row < m_rows; ++row) {
-	  if (v(row) != 0.0) {
-	    m_data[i]   = v(row);
+	  if (v.m_data[row] != 0.0) {
+	    m_data[i]   = v.m_data[row];
 	    m_rowinx[i] = row;
 	    i++;
 	  }
@@ -726,11 +747,26 @@ void GSparseMatrix::add_col(const GVector& v, int col)
     throw matrix_vector_mismatch("GSparseMatrix::add_col(const GVector&, int)", 
 	                             v.m_num, m_rows, m_cols);
 
-  // Extract vector for column, add elements, and re-insert vector
-  GVector column = extract_col(col);
-  column += v;
-  insert_col(column, col);
+  // Extract vector for column, add elements, and re-insert vector (only if
+  // vector to insert has non-zeros)
+  if (v.non_zeros() > 0) {
   
+    // Copy input vector
+    GVector column = v;
+
+    // Add elements to vector
+    for (int i = m_colstart[col]; i < m_colstart[col+1]; ++i)
+      column.m_data[m_rowinx[i]] += m_data[i];
+
+    // If there is a pending element then put it in the vector
+    if (m_fill_val != 0.0 && m_fill_col == col)
+      column.m_data[m_fill_row] += m_fill_val;
+
+	// Insert vector into matrix
+    insert_col(column, col);
+	  
+  }
+
   // Return
   return;
 }
@@ -1225,49 +1261,115 @@ void GSparseMatrix::fill_pending(void)
  ***************************************************************************/
 void GSparseMatrix::alloc_elements(int start, int num)
 {
+  // Dump header
+  #if defined(G_DEBUG_SPARSE_MALLOC)
+  cout << "GSparseMatrix::alloc_elements(start=" << start << ", num=" << 
+          num << ")" << endl;
+  cout << " Before allocation : " << m_elements << " " << m_alloc << endl;
+  #endif
+  
   // Continue only if we need memory
   if (num > 0) {
   
     // If start is after the end the append memory
 	if (start > m_elements)
 	  start = m_elements;
+
+    // Determine the requested new logical size of the matrix
+	int new_size = m_elements + num;
+
+    // Case A: the requested memory is already available, so just move the
+	// data to make space for new elements and initialise the new cells
+	if (new_size <= m_alloc) {
+
+	  // Move up all elements after index to insert
+	  #if defined(G_USE_MEMCPY)
+	  int n_copy = m_elements - start;
+	  memmove(&(m_data[start+num]), &(m_data[start]), sizeof(double)*n_copy);
+	  memmove(&(m_rowinx[start+num]), &(m_rowinx[start]), sizeof(long)*n_copy);
+	  #else
+	  for (int i = m_elements - 1; i >= start; --i) {
+	    m_data[i+num]   = m_data[i];
+	    m_rowinx[i+num] = m_rowinx[i];
+	  }
+	  #endif
+
+	  // Clear new elements (zero content for row 0)
+	  for (int i = start; i < start+num; ++i) {
+	    m_data[i]   = 0.0;
+	    m_rowinx[i] = 0;
+	  }
+
+	  // Update element counter
+	  m_elements += num;
+
+	} // endif: Case A: memory already existed
+	
+	// Case B: more memory is needed, so allocate it, copy the existing
+	// content, and initialise new cells
+	else {
+	
+	  // Make sure that enough memory is allocated
+	  int new_propose = m_alloc + m_mem_block;
+	  m_alloc = (new_size > new_propose) ? new_size : new_propose;
   
-	// Allocate memory for new elements
-	double* new_data   = new double[m_elements+num];
-	int*    new_rowinx = new int[m_elements+num];
-	if (new_data == NULL || new_rowinx == NULL)
-	  throw mem_alloc("GSparseMatrix::alloc_elements(int, int)", 
-	                  m_elements+num);
+	  // Allocate memory for new elements
+	  double* new_data   = new double[m_alloc];
+	  int*    new_rowinx = new int[m_alloc];
+	  if (new_data == NULL || new_rowinx == NULL)
+	    throw mem_alloc("GSparseMatrix::alloc_elements(int, int)", 
+	                    m_alloc);
 
-    // Copy all elements before index to insert
-	for (int i = 0; i < start; ++i) {
-	  new_data[i]   = m_data[i];
-	  new_rowinx[i] = m_rowinx[i];
-	}
+      // Copy all elements before index to insert
+	  #if defined(G_USE_MEMCPY)
+	  int n_copy = start;
+	  memcpy(new_data,   m_data,   sizeof(double)*n_copy);
+	  memcpy(new_rowinx, m_rowinx, sizeof(long)*n_copy);
+	  #else
+	  for (int i = 0; i < start; ++i) {
+	    new_data[i]   = m_data[i];
+	    new_rowinx[i] = m_rowinx[i];
+	  }
+	  #endif
 
-	// Clear new elements (zero content for row 0)
-	for (int i = start; i < start+num; ++i) {
-	  new_data[i]   = 0.0;
-	  new_rowinx[i] = 0;
-	}
+	  // Clear new elements (zero content for row 0)
+	  for (int i = start; i < start+num; ++i) {
+	    new_data[i]   = 0.0;
+	    new_rowinx[i] = 0;
+	  }
 	
-	// Copy all elements after index to insert
-	for (int i = start; i < m_elements; ++i) {
-	  new_data[i+num]   = m_data[i];
-	  new_rowinx[i+num] = m_rowinx[i];
-	}
+	  // Copy all elements after index to insert
+	  #if defined(G_USE_MEMCPY)
+	  n_copy = m_elements - start;
+	  memcpy(&(new_data[start+num]),   &(m_data[start]),   sizeof(double)*n_copy);
+	  memcpy(&(new_rowinx[start+num]), &(m_rowinx[start]), sizeof(long)*n_copy);
+	  #else
+	  for (int i = start; i < m_elements; ++i) {
+	    new_data[i+num]   = m_data[i];
+	    new_rowinx[i+num] = m_rowinx[i];
+	  }
+	  #endif
 	
-    // Delete old memory
-    if (m_data   != NULL) delete [] m_data;
-    if (m_rowinx != NULL) delete [] m_rowinx;
+      // Delete old memory
+      if (m_data   != NULL) delete [] m_data;
+      if (m_rowinx != NULL) delete [] m_rowinx;
 	
-	// Update pointers to new memory and update element counter
-	m_data      = new_data;
-	m_rowinx    = new_rowinx;
-	m_elements += num;
+	  // Update pointers to new memory and update element counter
+	  m_data      = new_data;
+	  m_rowinx    = new_rowinx;
+	  m_elements += num;
+	  
+	} // endelse: Case B: more memory was needed
 	
   } // endif: needed new memory
 
+  // Dump new memory size
+  #if defined(G_DEBUG_SPARSE_MALLOC)
+  cout << " After allocation .: " << m_elements << " " << m_alloc << endl;
+  #endif
+
+  // Return
+  return;
 }
 
 
@@ -1280,55 +1382,105 @@ void GSparseMatrix::alloc_elements(int start, int num)
  ***************************************************************************/
 void GSparseMatrix::free_elements(int start, int num)
 {
+  // Dump header
+  #if defined(G_DEBUG_SPARSE_MALLOC)
+  cout << "GSparseMatrix::free_elements(start=" << start << ", num=" << 
+          num << ")" << endl;
+  #endif
+
   // Continue only if we need to free memory and if start is within the
   // range
   if (num > 0 && start < m_elements) {
 
-    // Determine the new size of the matrix. If there are no elements then
-	// simply delete all matrix elements ...
+    // Determine the requested new logical size of the matrix
 	int new_size = m_elements - num;
+
+    // If there are no elements then simply delete all matrix elements ...
 	if (new_size < 1) {
       if (m_data   != NULL) delete [] m_data;
       if (m_rowinx != NULL) delete [] m_rowinx;
 	  m_data     = NULL;
 	  m_rowinx   = NULL;
 	  m_elements = 0;
+	  m_alloc    = 0;
 	}
 	
 	// ... otherwise shrink the array
 	else {
 	
-	  // Allocate new memory
-	  double* new_data   = new double[new_size];
-	  int*    new_rowinx = new int[new_size];
-	  if (new_data == NULL || new_rowinx == NULL)
-	    throw mem_alloc("GSparseMatrix::free_elements(int, int)", 
-	                    new_size);
+	  // Case A: If at least one entire memory block has been liberated then 
+	  // physically shrink the matrix array
+	  if (m_alloc - new_size > m_mem_block) {
+	  
+	    // Shrink, but leave a memory block for possible future filling
+	    m_alloc = new_size + m_mem_block;
+	  
+	    // Allocate new memory
+	    double* new_data   = new double[m_alloc];
+	    int*    new_rowinx = new int[m_alloc];
+	    if (new_data == NULL || new_rowinx == NULL)
+	      throw mem_alloc("GSparseMatrix::free_elements(int, int)", m_alloc);
 
-	  // Copy all elements before the starting index
-	  for (int i = 0; i < start; ++i) {
-	    new_data[i]   = m_data[i];
-	    new_rowinx[i] = m_rowinx[i];
-	  }
+	    // Copy all elements before the starting index
+	    #if defined(G_USE_MEMCPY)
+	    int n_copy = start;
+	    memcpy(new_data,   m_data,   sizeof(double)*n_copy);
+	    memcpy(new_rowinx, m_rowinx, sizeof(long)*n_copy);
+		#else
+	    for (int i = 0; i < start; ++i) {
+	      new_data[i]   = m_data[i];
+	      new_rowinx[i] = m_rowinx[i];
+	    }
+		#endif
 
-	  // Copy all elements after the starting index
-	  for (int i = start; i < new_size; ++i) {
-	    new_data[i]   = m_data[i+num];
-	    new_rowinx[i] = m_rowinx[i+num];
-	  }
+	    // Copy all elements after the starting index
+	    #if defined(G_USE_MEMCPY)
+	    n_copy = new_size - start;
+	    memcpy(&(new_data[start]),   &(m_data[start+num]),   sizeof(double)*n_copy);
+	    memcpy(&(new_rowinx[start]), &(m_rowinx[start+num]), sizeof(long)*n_copy);
+	    #else
+	    for (int i = start; i < new_size; ++i) {
+	      new_data[i]   = m_data[i+num];
+	      new_rowinx[i] = m_rowinx[i+num];
+	    }
+		#endif
+		
+        // Delete old memory
+        if (m_data   != NULL) delete [] m_data;
+        if (m_rowinx != NULL) delete [] m_rowinx;
 	
-      // Delete old memory
-      if (m_data   != NULL) delete [] m_data;
-      if (m_rowinx != NULL) delete [] m_rowinx;
-	
-	  // Update pointers to new memory and update element counter
-	  m_data     = new_data;
-	  m_rowinx   = new_rowinx;
-	  m_elements = new_size;
+	    // Update pointers to new memory and update element counter
+	    m_data     = new_data;
+	    m_rowinx   = new_rowinx;
+	    m_elements = new_size;
+		
+	  } // endif: Case A: memory shrinkage performed
+	  
+	  // Case B: we keep the memory and just move the elements
+	  else {
+
+	    // Move all elements after the starting index
+	    #if defined(G_USE_MEMCPY)
+	    int n_copy = new_size - start;
+	    memmove(&(m_data[start]),   &(m_data[start+num]),   sizeof(double)*n_copy);
+	    memmove(&(m_rowinx[start]), &(m_rowinx[start+num]), sizeof(long)*n_copy);
+		#else
+	    for (int i = start; i < new_size; ++i) {
+	      m_data[i]   = m_data[i+num];
+	      m_rowinx[i] = m_rowinx[i+num];
+	    }
+		#endif
+
+	    // Update element counter
+	    m_elements = new_size;
+
+	  } // endelse: Case B
 
 	} // endif: array shrinkage needed	
   } // endif: needed new memory
 
+  // Return
+  return;
 }
 
 
@@ -1374,8 +1526,8 @@ void GSparseMatrix::remove_zero_row_col(void)
     row_map[m_rowsel[c_row]] = c_row;
   
   // Initialise pointers to compressed array
-  double* d_data     = m_data;
-  int*    d_rowinx   = m_rowinx;
+  double* d_data   = m_data;
+  int*    d_rowinx = m_rowinx;
 	
   // Initialise column start of first column to zero
   m_colstart[0] = 0;
@@ -1581,32 +1733,41 @@ ostream& operator<< (ostream& os, const GSparseMatrix& m)
   else
     os << " Number of columns .........: " << m.m_cols << endl;
   os << " Number of non-zero elements: " << m.m_elements << endl;
+  os << " Number of allocated cells .: " << m.m_alloc << endl;
+  os << " Memory block size .........: " << m.m_mem_block << endl;
   os << " Sparse matrix fill ........: " << m.fill() << endl;
 
-  // Loop over all matrix elements and put them into the stream
-  for (int row = 0; row < m.m_rows; ++row) {
-    os << " ";
-    for (int col = 0; col < m.m_cols; ++col) {
-      os << m(row,col);
-	  if (col != m.m_cols-1)
-	    os << ", ";
-	}
-	if (row != m.m_rows-1)
-	  os << endl;
+  // Loop over all matrix elements and put them into the stream (only if
+  // their number is not too large)
+  if (m.m_rows < 20 && m.m_cols < 20) {
+    for (int row = 0; row < m.m_rows; ++row) {
+      os << " ";
+      for (int col = 0; col < m.m_cols; ++col) {
+        os << m(row,col);
+	    if (col != m.m_cols-1)
+	      os << ", ";
+	  }
+	  if (row != m.m_rows-1)
+	    os << endl;
+    }
   }
   
   // If there is a row compression the show scheme
   if (m.m_rowsel != NULL) {
     os << endl << " Row selection ..:";
-    for (int row = 0; row < m.m_num_rowsel; ++row)
-      os << " " << m.m_rowsel[row];
+    if (m.m_num_rowsel < 20) {
+      for (int row = 0; row < m.m_num_rowsel; ++row)
+        os << " " << m.m_rowsel[row];
+	}
   }
 
   // If there is a column compression the show scheme
   if (m.m_colsel != NULL) {
     os << endl << " Column selection:";
-    for (int col = 0; col < m.m_num_colsel; ++col)
-      os << " " << m.m_colsel[col];
+    if (m.m_num_colsel < 20) {
+      for (int col = 0; col < m.m_num_colsel; ++col)
+        os << " " << m.m_colsel[col];
+	}
   }
   
   // If there is a symbolic decomposition then put it also in the stream

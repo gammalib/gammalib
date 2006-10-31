@@ -1340,7 +1340,7 @@ void test_cholesky(void)
 /***************************************************************************
  *                            Test: Heavy calculus                         *
  ***************************************************************************/
-void test_heavy()
+void test_heavy(int block = 512)
 {
   // Allocate some variables
   clock_t t_start;
@@ -1353,14 +1353,15 @@ void test_heavy()
     //
 	// Fill 10000 x 10000 matrix with 10000 values
 	number  = 10000;
-    t_start = clock();
 	GSparseMatrix large(number,number);
+	large.set_mem_block(block);
+    t_start = clock();
 	for (int i = 0; i < number; ++i)
 	  large(i,i) = (i+1)*3.14;
 	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
     #if defined(DUMP_TIMING)
 	cout << endl << " - Fill of 10000 values needed " << t_elapse << 
-	                " sec (reference ~ 1.9 sec)";
+	                " sec (reference ~ 0.2 sec)";
 	#endif   
     //
 	// Modify 10000 x 10000 matrix with 10000 (exisiting) values
@@ -1373,12 +1374,33 @@ void test_heavy()
 	                " sec (reference ~ 0 sec)";
 	#endif   
     //
+	// Insert columns into 10000 x 10000 matrix
+	number  = 10000;
+	large.clear();
+	large.set_mem_block(block);
+	GVector column(number);
+    t_start = clock();
+	for (int j = 0; j < 100; ++j) {
+	  column = 0.0;
+	  for (int i = j; i < number; ++i)
+	    column(i) = (i+1)*3.14;
+	  large.add_col(column, j);
+    }
+	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
+    #if defined(DUMP_TIMING)
+	cout << endl << " - 100 columns adding needed " << t_elapse << 
+	                " sec (reference ~ 2.6 sec)";
+	#endif   
+    //
 	// Subsequent addition and subtractions
 	number  = 300;
-    t_start = clock();
 	GSparseMatrix sum(number,number);
 	GSparseMatrix add(number,number);
 	GSparseMatrix sub(number,number);
+	sum.set_mem_block(block);
+	add.set_mem_block(block);
+	sub.set_mem_block(block);
+    t_start = clock();
 	for (int i = 0; i < number; ++i) {
 	  add(i,number-i-1) = (i*i+1)*0.01;
 	  sum += add;
@@ -1392,8 +1414,9 @@ void test_heavy()
 	#endif   
     //
 	// Subsequent multiplications
-    t_start = clock();
 	GSparseMatrix fac(number,number);
+	fac.set_mem_block(block);
+    t_start = clock();
 	for (int i = 0; i < 1; ++i) {
 	  for (int j = 0; j < number; ++j)
 	    fac(j,j) = (i+1)*1.0;

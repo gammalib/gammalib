@@ -104,7 +104,8 @@ public:
   GVector  operator- () const;
 
   // Vector functions
-  int size() const; // Return dimension of vector
+  int size() const;       // Return dimension of vector
+  int non_zeros() const;  // Returns # of non zeros in vector
   
   // Exception: Vector index out of range
   class out_of_range : public GException {

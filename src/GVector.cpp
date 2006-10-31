@@ -73,6 +73,25 @@ GVector::~GVector()
  =                                                                         =
  ==========================================================================*/
 
+/***************************************************************************
+ *                   Returns number of non-zeros in vector                 *
+ ***************************************************************************/
+int GVector::non_zeros() const
+{
+  // Initialise number of non-zeros
+  int non_zeros = 0;
+  
+  // Gather all non-zero elements
+  for (int i = 0; i < m_num; ++i) {
+    if (m_data[i] != 0.0)
+	  non_zeros++;
+  }
+  
+  // Return number of non-zero elements
+  return non_zeros;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                         GVector private functions                       =

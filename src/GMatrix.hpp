@@ -142,7 +142,8 @@ protected:
   // Private data area
   int     m_rows;         // Number of rows
   int     m_cols;         // Number of columns
-  int     m_elements;     // Number of (physical) elements in matrix
+  int     m_elements;     // Number of elements stored in matrix
+  int     m_alloc;        // Size of allocated matrix memory
   int     m_num_rowsel;   // Number of selected rows (for compressed decomposition)
   int     m_num_colsel;   // Number of selected columns (for compressed decomposition)
   int*    m_colstart;     // Column start indices (m_cols+1)

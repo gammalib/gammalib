@@ -33,6 +33,7 @@ GSymMatrix::GSymMatrix(int rows, int cols) : GMatrix()
   m_rows       = 0;
   m_cols       = 0;
   m_elements   = 0;
+  m_alloc      = 0;
   m_num_rowsel = 0;
   m_num_colsel = 0;
   m_data       = NULL;
@@ -63,6 +64,7 @@ GSymMatrix::GSymMatrix(int rows, int cols) : GMatrix()
   m_rows     = rows;
   m_cols     = cols;
   m_elements = elements;
+  m_alloc    = elements;
 
   // Set-up column start indices
   m_colstart[0]   = 0;

@@ -22,6 +22,9 @@
 /* __ Namespaces _________________________________________________________ */
 using namespace std;
 
+/* __ Definitions ________________________________________________________ */
+#define G_SPARSE_MATRIX_DEFAULT_MEM_BLOCK 512    // Default Memory block size
+
 /* __ Enumerators ________________________________________________________ */
 
 /* __ Structures _________________________________________________________ */
@@ -94,6 +97,7 @@ public:
   virtual GVector extract_col(int col) const;
   virtual void    insert_col(const GVector& v, int col);
   virtual void    add_col(const GVector& v, int col);
+  virtual void    set_mem_block(int block);
   virtual GMatrix convert_to_full() const;
   //TBD virtual GMatrix extract_lower_triangle() const;
   //TBD virtual GMatrix extract_upper_triangle() const;
@@ -112,13 +116,14 @@ private:
   GSparseMatrix cs_transpose(GSparseMatrix *m, int values);
   
   // Private data members
-  int*   m_rowinx;    // Row-indices of all elements
-  double m_zero;      // The zero element (needed for data access)
-  double m_fill_val;  // Element to be filled
-  int    m_fill_row;  // Row into which element needs to be filled
-  int    m_fill_col;  // Column into which element needs to be filled
-  void*  m_symbolic;  // Holds GSparseSymbolic object after decomposition
-  void*  m_numeric;   // Holds GSparseNumeric object after decomposition
+  int*   m_rowinx;      // Row-indices of all elements
+  int    m_mem_block;   // Memory block to be allocated at once
+  double m_zero;        // The zero element (needed for data access)
+  double m_fill_val;    // Element to be filled
+  int    m_fill_row;    // Row into which element needs to be filled
+  int    m_fill_col;    // Column into which element needs to be filled
+  void*  m_symbolic;    // Holds GSparseSymbolic object after decomposition
+  void*  m_numeric;     // Holds GSparseNumeric object after decomposition
 };
 
 
@@ -245,14 +250,6 @@ GSparseMatrix operator/ (const GSparseMatrix& a, const double& b)
   return result;
 }
 
-// Matrix clear function
-inline
-void GSparseMatrix::clear()
-{
-  free_elements(0, m_elements);
-  return;
-}
-
 // Matrix fill function
 inline
 double GSparseMatrix::fill() const
@@ -267,6 +264,14 @@ GSparseMatrix transpose(const GSparseMatrix& m)
   GSparseMatrix result = m;
   result.transpose();
   return result;
+}
+
+// Set memory block size
+inline
+void GSparseMatrix::set_mem_block(int block)
+{
+  m_mem_block = (block > 0) ? block : 1;
+  return;
 }
 
 // Cholesky decomposition
