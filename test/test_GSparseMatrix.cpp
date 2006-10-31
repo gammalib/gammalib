@@ -349,6 +349,15 @@ void test_assign_values(const GSparseMatrix& m_test)
 	  throw;
 	}
 	cout << ".";
+	//
+	result.clear();
+    if (!check_matrix(result, 0.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
+      cout << endl << "TEST ERROR: Corrupt GSparseMatrix.clear()." << endl;
+	  cout << "result:" << endl << result << endl;
+	  cout << "m_test:" << endl << m_test << endl;
+	  throw;
+	}
+	cout << ".";
   }
   catch (exception &e) {
     cout << e.what() << endl;

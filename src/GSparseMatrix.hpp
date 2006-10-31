@@ -84,7 +84,8 @@ public:
   // Matrix functions
   // USE_BASE: virtual int rows() const { return m_rows; }
   // USE_BASE: virtual int cols() const { return m_cols; }
-  virtual double  fill() const { return (double(m_elements)/double(m_rows*m_cols)); }
+  virtual void    clear();
+  virtual double  fill() const;
   virtual double  min() const;
   virtual double  max() const;
   virtual double  sum() const;
@@ -242,6 +243,21 @@ GSparseMatrix operator/ (const GSparseMatrix& a, const double& b)
   result.fill_pending();
   result /= b;
   return result;
+}
+
+// Matrix clear function
+inline
+void GSparseMatrix::clear()
+{
+  free_elements(0, m_elements);
+  return;
+}
+
+// Matrix fill function
+inline
+double GSparseMatrix::fill() const
+{
+  return (double(m_elements)/double(m_rows*m_cols));
 }
 
 // Matrix transpose function

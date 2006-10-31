@@ -76,6 +76,7 @@ public:
   // Matrix functions
   virtual int     rows() const { return m_rows; }
   virtual int     cols() const { return m_cols; }
+  virtual void    clear();
   virtual double  min() const;
   virtual double  max() const;
   virtual double  sum() const;

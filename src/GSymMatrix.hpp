@@ -77,8 +77,9 @@ public:
   virtual GSymMatrix& operator/= (const double& d);
 
   // Matrix functions
-  // USE_BASE: virtual int rows() const { return m_rows; }
-  // USE_BASE: virtual int cols() const { return m_cols; }
+  // USE_BASE: virtual int      rows() const { return m_rows; }
+  // USE_BASE: virtual int      cols() const { return m_cols; }
+  // USE_BASE: virtual void     clear();
   // USE_BASE: virtual double   min() const;
   // USE_BASE: virtual double   max() const;
   virtual double  sum() const;
@@ -92,12 +93,6 @@ public:
   virtual GVector cholesky_solver(const GVector& v, int compress = 1);
   virtual void    cholesky_invert(int compress = 1);
     
-  // Exception: All matrix elements are zero
-  class all_zero : public GException {
-  public:
-    all_zero(string origin);
-  };
-
 private:
   void set_inx(void);  // Set indices of non-zero rows/columns
   int  m_num_inx;      // Number of non-zero rows/columns
