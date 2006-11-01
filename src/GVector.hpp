@@ -134,18 +134,6 @@ private:
  *                               Inline members                            *
  ***************************************************************************/
 
-// Copy constructor
-inline
-GVector::GVector(const GVector& v)
-{
-  m_data = new double[v.m_num];
-  if (m_data == NULL)
-	throw mem_alloc("GVector copy constructor", v.m_num);
-  m_num = v.m_num;
-  for (int i = 0; i < m_num; ++i)
-    m_data[i] = v.m_data[i];
-}
-
 // Vector element access operator
 inline
 double& GVector::operator() (int inx)
@@ -166,22 +154,6 @@ const double& GVector::operator() (int inx) const
     throw out_of_range("const GVector access", inx, m_num);
   #endif
   return m_data[inx];
-}
-
-// Vector assignment operator
-inline
-GVector& GVector::operator= (const GVector& v)
-{
-  if (this != &v) {
-    if (m_data != NULL) delete [] m_data;
-    m_data = new double[v.m_num];
-    if (m_data == NULL)
-	  throw mem_alloc("GVector assignment operator", v.m_num);
-    m_num = v.m_num;
-    for (int i = 0; i < m_num; ++i)
-      m_data[i] = v.m_data[i];
-  }
-  return *this;
 }
 
 // Vector unary addition operator

@@ -78,6 +78,12 @@ GSparseNumeric& GSparseNumeric::operator= (const GSparseNumeric& n)
   // Execute only if object is not identical
   if (this != &n) {
 
+    // De-allocate only if memory has indeed been allocated
+    if (m_L    != NULL) delete m_L;
+    if (m_U    != NULL) delete m_U;
+    if (m_pinv != NULL) delete [] m_pinv;
+    if (m_B    != NULL) delete [] m_B;
+
     // Initialise private members for clean destruction
     m_L      = NULL;
     m_U      = NULL;
@@ -87,15 +93,23 @@ GSparseNumeric& GSparseNumeric::operator= (const GSparseNumeric& n)
     m_n_B    = 0;
 
 	// Copy m_L if it exists
-	if (n.m_L != NULL)
-	  m_L  = new GSparseMatrix(*n.m_L);
+	if (n.m_L != NULL) {
+	  m_L = new GSparseMatrix(*n.m_L);
+	  if (m_L == NULL)
+	    throw mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
+					    1);
+	}
 
 	// Copy m_U if it exists
-	if (n.m_U != NULL)
-	  m_U  = new GSparseMatrix(*n.m_U);
+	if (n.m_U != NULL) {
+	  m_U = new GSparseMatrix(*n.m_U);
+	  if (m_U == NULL)
+	    throw mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
+					    1);
+	}
 	
 	// Copy m_pinv array if it exists
-	if (n.m_pinv != NULL) {
+	if (n.m_pinv != NULL && n.m_n_pinv > 0) {
 	  m_pinv = new int[n.m_n_pinv];
 	  if (m_pinv == NULL)
 	    throw mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
@@ -106,7 +120,7 @@ GSparseNumeric& GSparseNumeric::operator= (const GSparseNumeric& n)
 	}
 
 	// Copy m_B array if it exists
-	if (n.m_B != NULL) {
+	if (n.m_B != NULL && n.m_n_B > 0) {
 	  m_B = new double[n.m_n_B];
 	  if (m_B == NULL)
 	    throw mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
@@ -138,9 +152,23 @@ GSparseNumeric& GSparseNumeric::operator= (const GSparseNumeric& n)
  * Input:   A                    Sparse matrix                             *
  *          S                    Symbolic analysis of sparse matrix        *
  ***************************************************************************/
-void GSparseNumeric::cholesky_numeric_analysis(GSparseMatrix& A, 
+void GSparseNumeric::cholesky_numeric_analysis(const GSparseMatrix& A, 
                                                const GSparseSymbolic& S)
 {
+  // De-allocate memory that has indeed been previously allocated
+  if (m_L    != NULL) delete m_L;
+  if (m_U    != NULL) delete m_U;
+  if (m_pinv != NULL) delete [] m_pinv;
+  if (m_B    != NULL) delete [] m_B;
+
+  // Initialise members
+  m_L      = NULL;
+  m_U      = NULL;
+  m_pinv   = NULL;
+  m_B      = NULL;
+  m_n_pinv = 0;
+  m_n_B    = 0;
+
   // Return if arrays in the symbolic analysis have not been allocated
   if (!S.m_cp || !S.m_parent) return;
   
@@ -173,7 +201,7 @@ void GSparseNumeric::cholesky_numeric_analysis(GSparseMatrix& A,
   int* parent = S.m_parent;
 
   // Assign C = A(p,p) where A and C are symmetric and the upper part stored
-  GSparseMatrix C = (pinv) ? S.cs_symperm(&A, pinv, 1) : (A);
+  GSparseMatrix C = (pinv) ? cs_symperm(A, pinv) : (A);
 
   // Assign workspace pointer
   int*    c = wrk_int;
@@ -186,7 +214,7 @@ void GSparseNumeric::cholesky_numeric_analysis(GSparseMatrix& A,
   double* Cx = C.m_data;
   
   // Allocate L matrix
-  m_L = new GSparseMatrix(n,n,cp[n]);
+  m_L = new GSparseMatrix(n, n, cp[n]);
   if (m_L == NULL)
 	throw mem_alloc(
 	      "GSparseNumeric::cholesky_numeric_analysis(GSparseMatrix&, const GSparseSymbolic&)",
@@ -204,7 +232,8 @@ void GSparseNumeric::cholesky_numeric_analysis(GSparseMatrix& A,
   // Compute L(:,k) for L*L' = C
   for (k = 0; k < n; k++) {
   
-	// Nonzero pattern of L(k,:)
+	// Nonzero pattern of L(k,:). 
+	// Returns -1 if parent = NULL, s = NULL or c = NULL
     top  = cs_ereach(&C, k, parent, s, c);      // find pattern of L(k,:)
 	x[k] = 0;                                   // x (0:k) is now zero
 	
@@ -222,14 +251,14 @@ void GSparseNumeric::cholesky_numeric_analysis(GSparseMatrix& A,
 	
 	// Triangular solve: Solve L(0:k-1,0:k-1) * x = C(:,k)
 	for ( ; top < n; top++) {
-      i    = s[top];            // s [top..n-1] is pattern of L(k,:)
-      lki  = x[i]/Lx[Lp[i]];    // L(k,i) = x (i) / L(i,i)
-      x[i] = 0;                 // clear x for k+1st iteration
+      i    = s[top];                            // s [top..n-1] is pattern of L(k,:)
+      lki  = x[i]/Lx[Lp[i]];                    // L(k,i) = x (i) / L(i,i)
+      x[i] = 0;                                 // clear x for k+1st iteration
 	  for (p = Lp[i]+1; p < c[i]; p++)
 		x[Li[p]] -= Lx[p] * lki;
-	  d    -= lki * lki;        // d = d - L(k,i)*L(k,i)
-	  p     = c [i]++ ;
-	  Li[p] = k;                // store L(k,i) in column i
+	  d    -= lki * lki;                        // d = d - L(k,i)*L(k,i)
+	  p     = c[i]++;
+	  Li[p] = k;                                // store L(k,i) in column i
 	  Lx[p] = lki;
 	}
 	
@@ -319,7 +348,7 @@ int GSparseNumeric::cs_ereach(const GSparseMatrix* A, int k,
   CS_MARK(w, k);
   
   // Return index top, where s[top..n-1] contains pattern of L(k,:)
-  return (top);
+  return top;
 }
 
 

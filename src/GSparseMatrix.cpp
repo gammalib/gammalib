@@ -48,8 +48,8 @@ GSparseMatrix::GSparseMatrix(int rows, int cols, int elements) : GMatrix()
   // Initialise private members for clean destruction
   m_rows      = 0;
   m_cols      = 0;
-  m_elements  = 0;
-  m_alloc     = 0;
+  m_elements  = 0;             // Logically used # of elements
+  m_alloc     = 0;             // Allocated # of elements (>= m_elements)
   m_data      = NULL;
   m_colstart  = NULL;
   m_rowinx    = NULL;
@@ -537,7 +537,14 @@ double GSparseMatrix::sum() const
  ***************************************************************************/
 void GSparseMatrix::transpose()
 {
-  *this = cs_transpose(this, 1);
+  // Fill pending value in input matrix
+  fill_pending();
+  
+  // Transpose matrix
+  *this = cs_transpose(*this, 1);
+  
+  // Return
+  return;
 }
 
 
@@ -803,8 +810,12 @@ void GSparseMatrix::cholesky_decompose(int compress)
   int matrix_rows = m_rows;
   int matrix_cols = m_cols;
 
-  // Delete any existing symbolic analysis object
+  // Delete any existing symbolic and numeric analysis object and reset
+  // pointers
   if (m_symbolic != NULL) delete (GSparseSymbolic*)m_symbolic;
+  if (m_numeric  != NULL) delete (GSparseNumeric*)m_numeric;
+  m_symbolic = NULL;
+  m_numeric  = NULL;
 
   // Allocate symbolic analysis object
   GSparseSymbolic* symbolic = new GSparseSymbolic();
@@ -827,44 +838,26 @@ void GSparseMatrix::cholesky_decompose(int compress)
   // Ordering an symbolic analysis of matrix. This sets up an array 'pinv'
   // which contains the fill-in reducing permutations
   symbolic->cholesky_symbolic_analysis(1, *this);
-  
-  // Perform numeric Cholesky decomposition
-  numeric.cholesky_numeric_analysis(*this, *symbolic);
-
-  // Insert zero rows and columns if they have been removed previously.
-  // Since no selection information is present in numeric.m_L we have to
-  // copy it from this in order to allow for insertion.
-  if (compress) {
-
-    // If there is a row selection then copy it
-    if (m_rowsel != NULL && m_num_rowsel > 0) {
-      numeric.m_L->m_rowsel = new int[m_num_rowsel];
-      if (numeric.m_L->m_rowsel == NULL)
-	    throw mem_alloc("GSparseMatrix::cholesky_decompose(int)", m_num_rowsel);
-      for (int i = 0; i < m_num_rowsel; ++i)
-        numeric.m_L->m_rowsel[i] = m_rowsel[i];
-	  numeric.m_L->m_num_rowsel = m_num_rowsel;
-    }
-
-    // If there is a column selection then copy it
-    if (m_colsel != NULL && m_num_colsel > 0) {
-      numeric.m_L->m_colsel = new int[m_num_colsel];
-      if (numeric.m_L->m_colsel == NULL)
-	    throw mem_alloc("GSparseMatrix::cholesky_decompose(int)", m_num_colsel);
-      for (int i = 0; i < m_num_colsel; ++i)
-        numeric.m_L->m_colsel[i] = m_colsel[i];
-	  numeric.m_L->m_num_colsel = m_num_colsel;
-    }
-
-    // Now we can insert zero rows and columns
-    numeric.m_L->insert_zero_row_col(matrix_rows, matrix_cols);
-  }
-
-  // Store Cholesky decomposition in matrix
-  *this = *(numeric.m_L);
 
   // Store symbolic pointer in sparse matrix object
   m_symbolic = (void*)symbolic;
+  
+  // Perform numeric Cholesky decomposition
+  numeric.cholesky_numeric_analysis(*this, *symbolic);
+  
+  // Copy L matrix into this object
+  free_elements(0, m_elements);
+  alloc_elements(0, numeric.m_L->m_elements);
+  for (int i = 0; i < m_elements; ++i) {
+    m_data[i]   = numeric.m_L->m_data[i];
+    m_rowinx[i] = numeric.m_L->m_rowinx[i];
+  }
+  for (int col = 0; col <= m_cols; ++col)
+    m_colstart[col] = numeric.m_L->m_colstart[col];
+
+  // Insert zero rows and columns if they have been removed previously.
+  if (compress)
+	insert_zero_row_col(matrix_rows, matrix_cols);
 
   // Return
   return;
@@ -1534,7 +1527,7 @@ void GSparseMatrix::remove_zero_row_col(void)
 
   // Dump column start array
   #if defined(G_DEBUG_SPARSE_COMPRESSION)
-  cout << " before compression:";
+  cout << " before compression (" << m_colstart[m_cols] << "):";
   for (int col = 0; col <= m_cols; ++col)
     cout << " " << m_colstart[col];
   cout << endl;
@@ -1567,7 +1560,7 @@ void GSparseMatrix::remove_zero_row_col(void)
 
   // Dump column start array
   #if defined(G_DEBUG_SPARSE_COMPRESSION)
-  cout << " after compression :";
+  cout << " after compression (" << m_colstart[m_num_colsel] << ") :";
   for (int c_col = 0; c_col <= m_num_colsel; ++c_col)
     cout << " " << m_colstart[c_col];
   cout << endl;
@@ -1576,10 +1569,9 @@ void GSparseMatrix::remove_zero_row_col(void)
   // Free row mapping array
   delete [] row_map;
 	
-  // Update matrix attributes
-  m_rows     = m_num_rowsel;
-  m_cols     = m_num_colsel;
-  m_elements = m_colstart[m_num_colsel];
+  // Update matrix size
+  m_rows = m_num_rowsel;
+  m_cols = m_num_colsel;
 	 
   // Return
   return;
@@ -1616,7 +1608,7 @@ void GSparseMatrix::insert_zero_row_col(int rows, int cols)
 
   // Dump column start array
   #if defined(G_DEBUG_SPARSE_COMPRESSION)
-  cout << " before restoration:";
+  cout << " before restoration (" << m_colstart[m_num_colsel] << "):";
   for (int c_col = 0; c_col <= m_num_colsel; ++c_col)
     cout << " " << m_colstart[c_col];
   cout << endl;
@@ -1624,7 +1616,11 @@ void GSparseMatrix::insert_zero_row_col(int rows, int cols)
   
   // If column selection exists then restore column counters
   if (m_colsel != NULL) {
+  
+    // Start insertion from the last original column
     int col_stop = cols - 1;
+	
+	// Loop over all compressed columns
     for (int c_col = m_num_colsel-1; c_col > 0; --c_col) {
 	  int col_start = m_colsel[c_col-1] + 1;
 	  int col_value = m_colstart[c_col];
@@ -1632,80 +1628,29 @@ void GSparseMatrix::insert_zero_row_col(int rows, int cols)
 	    m_colstart[col] = col_value;
 	  col_stop = col_start - 1;
 	}
+	
+	// Set first columns if they are not yet set
+	for (int col = 0; col <= col_stop; ++col)
+	  m_colstart[col] = 0;
+	  
+	// Restore the number of elements
 	m_colstart[cols] = m_elements;
   }
 
   // Dump column start array
   #if defined(G_DEBUG_SPARSE_COMPRESSION)
-  cout << " after restoration :";
+  cout << " after restoration (" << m_colstart[cols] << ") :";
   for (int col = 0; col <= cols; ++col)
     cout << " " << m_colstart[col];
   cout << endl;
   #endif  
 
-  // Update matrix attributes
+  // Update matrix size
   m_rows = rows;
   m_cols = cols;
 	
   // Return
   return;
-}
-
-
-/***************************************************************************
- *                              cs_transpose                               *
- * ----------------------------------------------------------------------- *
- * Transpose matrix. The flag 'values' allows to avoid copying the actual  *
- * data values. This allows to perform a logical matrix transposition, as  *
- * needed by the symbolic matrix analysis class.                           *
- ***************************************************************************/
-GSparseMatrix GSparseMatrix::cs_transpose(GSparseMatrix* m, int values)
-{
-  // Fill pending value in input matrix
-  m->fill_pending();
-
-  // Declare and allocate result matrix 
-  GSparseMatrix result(m->m_cols, m->m_rows, m->m_elements);
-
-  // Allocate and initialise workspace
-  int  wrk_size = m->m_rows;
-  int* wrk_int  = new int[wrk_size];
-  if (wrk_int == NULL)
-	throw mem_alloc("GSparseMatrix::cs_transpose(GSparseMatrix*, int)", 
-	                wrk_size);
-  for (int i = 0; i < wrk_size; i++) 
-    wrk_int[i] = 0;
-
-  // Setup the number of non-zero elements in each row
-  for (int p = 0; p < m->m_elements; p++) 
-    wrk_int[m->m_rowinx[p]]++;
-  
-  // Set row pointers. To use a GSparseSymbolic function we have to
-  // allocate and object (but this does not take memory)
-  cs_cumsum(result.m_colstart, wrk_int, m->m_rows);
-
-  // Case A: Normal transponse, including assignment of values
-  if (values) {
-    for (int col = 0; col < m->m_cols; col++) {
-	  for (int p = m->m_colstart[col] ; p < m->m_colstart[col+1] ; p++) {
-	    int i         = wrk_int[m->m_rowinx[p]]++;
-	    result.m_rowinx[i] = col;
-		result.m_data[i]   = m->m_data[p] ;
-	  }
-    }
-  }
-  
-  // Case B: Logical transponse, no assignment of values is performed
-  else {
-    for (int col = 0; col < m->m_cols; col++) {
-	  for (int p = m->m_colstart[col] ; p < m->m_colstart[col+1] ; p++)
-	    result.m_rowinx[wrk_int[m->m_rowinx[p]]++] = col;
-    }
-  }
-  
-  // Return transponse matrix
-  return result;
-	
 }
 
 
@@ -1732,42 +1677,36 @@ ostream& operator<< (ostream& os, const GSparseMatrix& m)
 	      m.m_num_colsel << ")" << endl;
   else
     os << " Number of columns .........: " << m.m_cols << endl;
-  os << " Number of non-zero elements: " << m.m_elements << endl;
+  os << " Number of non-zero elements: " << m.m_colstart[m.m_cols] << " (" <<
+        m.m_elements << ")" << endl;
   os << " Number of allocated cells .: " << m.m_alloc << endl;
   os << " Memory block size .........: " << m.m_mem_block << endl;
   os << " Sparse matrix fill ........: " << m.fill() << endl;
 
-  // Loop over all matrix elements and put them into the stream (only if
-  // their number is not too large)
-  if (m.m_rows < 20 && m.m_cols < 20) {
-    for (int row = 0; row < m.m_rows; ++row) {
-      os << " ";
-      for (int col = 0; col < m.m_cols; ++col) {
-        os << m(row,col);
-	    if (col != m.m_cols-1)
-	      os << ", ";
-	  }
-	  if (row != m.m_rows-1)
-	    os << endl;
-    }
+  // Loop over all matrix elements and put them into the stream
+  for (int row = 0; row < m.m_rows; ++row) {
+	os << " ";
+	for (int col = 0; col < m.m_cols; ++col) {
+	  os << m(row,col);
+	  if (col != m.m_cols-1)
+		os << ", ";
+	}
+	if (row != m.m_rows-1)
+	  os << endl;
   }
   
   // If there is a row compression the show scheme
   if (m.m_rowsel != NULL) {
     os << endl << " Row selection ..:";
-    if (m.m_num_rowsel < 20) {
-      for (int row = 0; row < m.m_num_rowsel; ++row)
-        os << " " << m.m_rowsel[row];
-	}
+	for (int row = 0; row < m.m_num_rowsel; ++row)
+	  os << " " << m.m_rowsel[row];
   }
 
   // If there is a column compression the show scheme
   if (m.m_colsel != NULL) {
     os << endl << " Column selection:";
-    if (m.m_num_colsel < 20) {
-      for (int col = 0; col < m.m_num_colsel; ++col)
-        os << " " << m.m_colsel[col];
-	}
+	for (int col = 0; col < m.m_num_colsel; ++col)
+	  os << " " << m.m_colsel[col];
   }
   
   // If there is a symbolic decomposition then put it also in the stream
@@ -1802,6 +1741,145 @@ GSparseMatrix fabs(const GSparseMatrix& m)
   
   // Return result
   return result;
+}
+
+
+/***************************************************************************
+ *                                cs_symperm                               *
+ * ----------------------------------------------------------------------- *
+ * C = A(p,p) where A and C are symmetric the upper part stored.           *
+ * ----------------------------------------------------------------------- *
+ * Input:   A             Sparse matrix                                    *
+ *          pinv          pinv[0..n-1]                                     *
+ * Output:  C             Sparse matrix                                    *
+ ***************************************************************************/
+GSparseMatrix cs_symperm(const GSparseMatrix& m, const int* pinv)
+{
+  // Declare loop variables
+  int i, j, p, q, i2, j2;
+
+  // Assign matrix attributes
+  int     n  = m.m_cols;
+  int*    Ap = m.m_colstart;
+  int*    Ai = m.m_rowinx; 
+  double* Ax = m.m_data;
+  
+  // Allocate result matrix
+  GSparseMatrix C(n, n, Ap[n]);
+
+  // Allocate and initialise workspace
+  int  wrk_size = n;
+  int* wrk_int  = new int[wrk_size];
+  if (wrk_int == NULL)
+	throw mem_alloc("cs_symperm(GSparseMatrix*, const int*, int", wrk_size);
+  for (i = 0; i < wrk_size; ++i)
+    wrk_int[i] = 0;
+
+  // Assign result matrix attributes   	
+  int*    Cp = C.m_colstart;
+  int*    Ci = C.m_rowinx; 
+  double* Cx = C.m_data;
+
+  // Count entries in each column of C
+  for (j = 0; j < n; j++) {
+  
+    // Column j of A is column j2 of C
+	j2 = pinv ? pinv[j] : j;
+	
+	// Loop over entries in column j
+	for (p = Ap[j]; p < Ap[j+1]; p++) {
+      i = Ai [p];
+      if (i > j) continue;              // skip lower triangular part of A
+      i2 = pinv ? pinv[i] : i;          // row i of A is row i2 of C
+	  wrk_int[G_MAX(i2, j2)]++;         // column count of C
+	}
+  }
+  
+  // Compute column pointers of C
+  cs_cumsum(Cp, wrk_int, n);
+  
+  // Loop over all columns of A
+  for (j = 0 ; j < n ; j++) {
+  
+    // Column j of A is column j2 of C
+	j2 = pinv ? pinv[j] : j;
+	
+	// Loop over entries in column j
+	for (p = Ap[j]; p < Ap[j+1]; p++) {
+      i = Ai [p] ;
+      if (i > j) continue;              // skip lower triangular part of A
+	  i2    = pinv ? pinv[i] : i;       // row i of A is row i2 of C
+      Ci[q  = wrk_int[G_MAX(i2,j2)]++] = G_MIN(i2,j2);
+      if (Cx) Cx[q] = Ax[p];
+	}
+  }
+  
+  // Free workspace
+  delete [] wrk_int;
+  
+  // Rectify the number of elements in matrix C
+  C.free_elements(Cp[n], (C.m_elements-Cp[n]));
+
+  // Return result
+  return C;
+
+}
+
+
+/***************************************************************************
+ *                              cs_transpose                               *
+ * ----------------------------------------------------------------------- *
+ * Transpose matrix. The flag 'values' allows to avoid copying the actual  *
+ * data values. This allows to perform a logical matrix transposition, as  *
+ * needed by the symbolic matrix analysis class.                           *
+ * ----------------------------------------------------------------------- *
+ * NOTE: This routine DOES NOT support pending elements (they have to be   *
+ * filled before.                                                          *
+ ***************************************************************************/
+GSparseMatrix cs_transpose(const GSparseMatrix& m, int values)
+{
+  // Declare and allocate result matrix 
+  GSparseMatrix result(m.m_cols, m.m_rows, m.m_elements);
+
+  // Allocate and initialise workspace
+  int  wrk_size = m.m_rows;
+  int* wrk_int  = new int[wrk_size];
+  if (wrk_int == NULL)
+	throw mem_alloc("GSparseMatrix::cs_transpose(GSparseMatrix*, int)", 
+	                wrk_size);
+  for (int i = 0; i < wrk_size; i++) 
+    wrk_int[i] = 0;
+
+  // Setup the number of non-zero elements in each row
+  for (int p = 0; p < m.m_elements; p++) 
+    wrk_int[m.m_rowinx[p]]++;
+  
+  // Set row pointers. To use a GSparseSymbolic function we have to
+  // allocate and object (but this does not take memory)
+  cs_cumsum(result.m_colstart, wrk_int, m.m_rows);
+
+  // Case A: Normal transponse, including assignment of values
+  if (values) {
+    for (int col = 0; col < m.m_cols; col++) {
+	  for (int p = m.m_colstart[col] ; p < m.m_colstart[col+1] ; p++) {
+	    int i         = wrk_int[m.m_rowinx[p]]++;
+	    result.m_rowinx[i] = col;
+		result.m_data[i]   = m.m_data[p] ;
+	  }
+    }
+  }
+  
+  // Case B: Logical transponse, no assignment of values is performed
+  else {
+    for (int col = 0; col < m.m_cols; col++) {
+	  for (int p = m.m_colstart[col] ; p < m.m_colstart[col+1] ; p++)
+	    result.m_rowinx[wrk_int[m.m_rowinx[p]]++] = col;
+    }
+  }
+  
+  // Return transponse matrix
+  return result;
+	
 }
 
 
@@ -1849,4 +1927,3 @@ double cs_cumsum(int* p, int* c, int n)
   // Return cumulative sum of c[0..n-1]
   return nz2;
 }
-

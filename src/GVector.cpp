@@ -46,15 +46,32 @@ GVector::GVector(int num)
 
 
 /***************************************************************************
+ *                         GVector copy constructor                        *
+ ***************************************************************************/
+GVector::GVector(const GVector& v)
+{
+  // Allocate vector array. Throw exception if allocation failed
+  m_data = new double[v.m_num];
+  if (m_data == NULL)
+	throw mem_alloc("GVector copy constructor", v.m_num);
+
+  // Store vector size and copy elements
+  m_num = v.m_num;
+  for (int i = 0; i < m_num; ++i)
+    m_data[i] = v.m_data[i];
+	
+  // Return
+  return;
+}
+
+
+/***************************************************************************
  *                           GVector destructor                            *
  ***************************************************************************/
 GVector::~GVector()
 {
   // Deallocate only if memory has indeed been allocated
-  if (m_num > 0) {
-    m_num = 0;
-    delete[] m_data;
-  }
+  if (m_data != NULL) delete[] m_data;
 
   // Return
   return;
@@ -66,6 +83,33 @@ GVector::~GVector()
  =                            GVector operators                            =
  =                                                                         =
  ==========================================================================*/
+
+/***************************************************************************
+ *                       GVector assignment operator                       *
+ ***************************************************************************/
+GVector& GVector::operator= (const GVector& v)
+{
+  // Assign only if not identical
+  if (this != &v) {
+  
+    // First delete old data if it exists
+    if (m_data != NULL) delete [] m_data;
+	
+    // Allocate vector array. Throw exception if allocation failed
+    m_data = new double[v.m_num];
+    if (m_data == NULL)
+	  throw mem_alloc("GVector assignment operator", v.m_num);
+
+    // Store vector size and copy elements
+    m_num = v.m_num;
+    for (int i = 0; i < m_num; ++i)
+      m_data[i] = v.m_data[i];
+  }
+  
+  // Return vector
+  return *this;
+}
+
 
 /*==========================================================================
  =                                                                         =

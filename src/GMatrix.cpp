@@ -170,9 +170,9 @@ GMatrix::GMatrix(const GMatrix& m)
 GMatrix::~GMatrix()
 {
   // De-allocate only if memory has indeed been allocated
-  if (m_colstart != NULL) delete [] m_colstart;
   if (m_rowsel   != NULL) delete [] m_rowsel;
   if (m_colsel   != NULL) delete [] m_colsel;
+  if (m_colstart != NULL) delete [] m_colstart;
   if (m_data     != NULL) delete [] m_data;
 
   // Return

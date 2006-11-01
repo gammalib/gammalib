@@ -25,12 +25,9 @@ using namespace std;
 /* __ Definitions ________________________________________________________ */
 #define G_SPARSE_MATRIX_DEFAULT_MEM_BLOCK 512    // Default Memory block size
 
-/* __ Enumerators ________________________________________________________ */
-
-/* __ Structures _________________________________________________________ */
-
-/* __ Prototypes _________________________________________________________ */
-double cs_cumsum(int* p, int* c, int n);
+/* __ Macros (to be moved to GammaLib general header) ____________________ */
+#define G_MIN(a,b) (((a) < (b)) ? (a) : (b))
+#define G_MAX(a,b) (((a) > (b)) ? (a) : (b))
 
 
 /***************************************************************************
@@ -54,6 +51,9 @@ class GSparseMatrix : public GMatrix {
   friend GSparseMatrix fabs(const GSparseMatrix& m);
   friend GSparseMatrix cholesky_decompose(const GSparseMatrix& m, int compress = 1);
   friend GSparseMatrix cholesky_invert(const GSparseMatrix& m, int compress = 1);
+  //
+  friend GSparseMatrix cs_symperm(const GSparseMatrix& m, const int* pinv);
+  friend GSparseMatrix cs_transpose(const GSparseMatrix& m, int values);
 
 public:
   // Constructors and destructors (not inherited)
@@ -113,7 +113,6 @@ private:
   void          free_elements(int start, int num);
   void          remove_zero_row_col(void);
   void          insert_zero_row_col(int rows, int cols);
-  GSparseMatrix cs_transpose(GSparseMatrix *m, int values);
   
   // Private data members
   int*   m_rowinx;      // Row-indices of all elements
@@ -291,5 +290,11 @@ GSparseMatrix cholesky_invert(const GSparseMatrix& m, int compress)
   result.cholesky_invert(compress);
   return result;
 }
+
+
+/***************************************************************************
+ *                      Prototypes for other functions                     *
+ ***************************************************************************/
+double cs_cumsum(int* p, int* c, int n);
 
 #endif /* GSPARSEMATRIX_HPP */

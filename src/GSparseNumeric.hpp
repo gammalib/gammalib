@@ -51,7 +51,7 @@ public:
   GSparseNumeric& operator= (const GSparseNumeric& n);
 
   // Functions
-  void cholesky_numeric_analysis(GSparseMatrix& m, const GSparseSymbolic& s);
+  void cholesky_numeric_analysis(const GSparseMatrix& m, const GSparseSymbolic& s);
 
 private:
   // Functions

@@ -61,7 +61,7 @@ public:
   // Unary operators
 
   // Functions
-  void cholesky_symbolic_analysis(int order, GSparseMatrix& m);
+  void cholesky_symbolic_analysis(int order, const GSparseMatrix& m);
 
   // Exception: Invalid ordering scheme
   class invalid_order : public GException {
@@ -71,18 +71,17 @@ public:
 
 private:
   // Functions
-  int*          cs_amd (int order, GSparseMatrix* A);
-  int*          cs_counts(GSparseMatrix* A, const int* parent, const int* post, int ata);
-  int*          cs_etree(GSparseMatrix* A, int ata);
-  int           cs_fkeep(GSparseMatrix* A, int(*fkeep)(int, int, double, void*), void* other);
-  int           cs_leaf(int i, int j, const int* first, int* maxfirst, int* prevleaf, int* ancestor, int* jleaf);
-  int*          cs_pinv(int const* p, int n);
-  int*          cs_post(const int* parent, int n);
-  GSparseMatrix cs_symperm(GSparseMatrix* A, const int* pinv, int values) const;
-  int           cs_tdfs(int j, int k, int* head, const int* next, int* post, int* stack);
-  static void   init_ata(GSparseMatrix* AT, const int* post, int* wrk_int, int** head, int** next);
-  static int    cs_diag(int i, int j, double aij, void* other);
-  static int    cs_wclear(int mark, int lemax, int* w, int n);
+  int*        cs_amd (int order, const GSparseMatrix* A);
+  int*        cs_counts(const GSparseMatrix* A, const int* parent, const int* post, int ata);
+  int*        cs_etree(const GSparseMatrix* A, int ata);
+  int         cs_fkeep(GSparseMatrix* A, int(*fkeep)(int, int, double, void*), void* other);
+  int         cs_leaf(int i, int j, const int* first, int* maxfirst, int* prevleaf, int* ancestor, int* jleaf);
+  int*        cs_pinv(int const* p, int n);
+  int*        cs_post(const int* parent, int n);
+  int         cs_tdfs(int j, int k, int* head, const int* next, int* post, int* stack);
+  static void init_ata(const GSparseMatrix* AT, const int* post, int* wrk_int, int** head, int** next);
+  static int  cs_diag(int i, int j, double aij, void* other);
+  static int  cs_wclear(int mark, int lemax, int* w, int n);
 
   // Data
   int*   m_pinv;        // Inverse row permutation for QR, fill reduce permutation for Cholesky
