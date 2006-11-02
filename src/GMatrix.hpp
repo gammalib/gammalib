@@ -137,6 +137,9 @@ protected:
   GMatrix();
 
   // Private member functions
+  void init_members(void);
+  void copy_members(const GMatrix& m);
+  void free_members(void);
   void select_non_zero(void);
 
   // Private data area

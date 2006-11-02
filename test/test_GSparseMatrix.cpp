@@ -23,12 +23,12 @@ using namespace std;
 
 /* __ Globals ____________________________________________________________ */
 double   g_matrix[] = {1.0, 7.0, 3.0, 2.0, 4.0, 8.0, 5.0, 6.0, 9.0};
-unsigned g_row[]    = {  0,   0,   1,   2,   2,   2,   3,   3,   3};
-unsigned g_col[]    = {  0,   4,   1,   0,   2,   4,   2,   3,   4};
+int g_row[]    = {  0,   0,   1,   2,   2,   2,   3,   3,   3};
+int g_col[]    = {  0,   4,   1,   0,   2,   4,   2,   3,   4};
 double   g_vector[] = {1.0, 2.0, 3.0, 4.0, 5.0};
-unsigned g_elements = 9;
-unsigned g_rows     = 4;
-unsigned g_cols     = 5;
+int g_elements = 9;
+int g_rows     = 4;
+int g_cols     = 5;
 
 
 /***************************************************************************
@@ -38,7 +38,7 @@ GSparseMatrix set_matrix(void)
 {
   try {
     GSparseMatrix matrix(g_rows,g_cols);
-    for (unsigned i = 0; i < g_elements; ++i)
+    for (int i = 0; i < g_elements; ++i)
 	  matrix(g_row[i],g_col[i]) = g_matrix[i];
     return matrix;
   }
@@ -56,7 +56,7 @@ GVector set_vector(void)
 {
   try {
     GVector vector(g_cols);
-	for (unsigned col = 0; col < g_cols; ++col)
+	for (int col = 0; col < g_cols; ++col)
 	  vector(col) = g_vector[col];
     return vector;
   }
@@ -74,9 +74,9 @@ int check_matrix(const GSparseMatrix& m, const double scale, const double add)
 {
   int result = 1;
   try {
-    for (unsigned row = 0; row < g_rows; ++row) {
-      for (unsigned col = 0; col < g_cols; ++col) {
-	    unsigned i;
+    for (int row = 0; row < g_rows; ++row) {
+      for (int col = 0; col < g_cols; ++col) {
+	    int i;
 		double   ref_value = add;
 		for (i = 0; i < g_elements; ++i) {
 		  if (g_row[i] == row && g_col[i] == col) {
@@ -107,10 +107,10 @@ int check_matrix_vector(const GVector& v)
 {
   int result = 1;
   try {
-    for (unsigned row = 0; row < v.size(); ++row) {
+    for (int row = 0; row < v.size(); ++row) {
       double value = 0.0;
-	  for (unsigned col = 0; col < g_cols; ++col) {
-	    unsigned i;
+	  for (int col = 0; col < g_cols; ++col) {
+	    int i;
 		double   ref_value = 0.0;
 		for (i = 0; i < g_elements; ++i) {
 		  if (g_row[i] == row && g_col[i] == col) {
@@ -143,11 +143,11 @@ int check_matrix_matrix(const GSparseMatrix& m)
     return 0;
   int result = 1;
   try {
-    for (unsigned row = 0; row < m.rows(); ++row) {
-	  for (unsigned col = 0; col < m.cols(); ++col) {
+    for (int row = 0; row < m.rows(); ++row) {
+	  for (int col = 0; col < m.cols(); ++col) {
         double value = 0.0;
-		for (unsigned i = 0; i < g_cols; ++i) {
-	      unsigned k;
+		for (int i = 0; i < g_cols; ++i) {
+	      int k;
 		  double   ref_value_1 = 0.0;
 		  double   ref_value_2 = 0.0;
 		  for (k = 0; k < g_elements; ++k) {
@@ -187,9 +187,9 @@ int check_transpose_matrix(const GSparseMatrix& m, const double scale, const dou
 {
   int result = 1;
   try {
-    for (unsigned row = 0; row < g_rows; ++row) {
-      for (unsigned col = 0; col < g_cols; ++col) {
-	    unsigned i;
+    for (int row = 0; row < g_rows; ++row) {
+      for (int col = 0; col < g_cols; ++col) {
+	    int i;
 		double   ref_value = 0.0;
 		for (i = 0; i < g_elements; ++i) {
 		  if (g_row[i] == row && g_col[i] == col) {
@@ -218,7 +218,7 @@ int check_transpose_matrix(const GSparseMatrix& m, const double scale, const dou
 int check_matrix_min(const double min)
 {
   double value = g_matrix[0];
-  for (unsigned i = 0; i < g_elements; ++i) {
+  for (int i = 0; i < g_elements; ++i) {
 	if (g_matrix[i] < value)
 	  value = g_matrix[i];
   }
@@ -233,7 +233,7 @@ int check_matrix_min(const double min)
 int check_matrix_max(const double max)
 {
   double value = g_matrix[0];
-  for (unsigned i = 0; i < g_elements; ++i) {
+  for (int i = 0; i < g_elements; ++i) {
 	if (g_matrix[i] > value)
 	  value = g_matrix[i];
   }
@@ -247,7 +247,7 @@ int check_matrix_max(const double max)
 int check_matrix_sum(const double sum)
 {
   double value = 0.0;
-  for (unsigned i = 0; i < g_elements; ++i)
+  for (int i = 0; i < g_elements; ++i)
 	  value += g_matrix[i];
   return (sum == value);
 }
@@ -375,7 +375,31 @@ void test_assign_values(const GSparseMatrix& m_test)
 	throw;
   }
   cout << ".";
-  #endif  
+  #endif
+  //
+  // Insert column into 10 x 10 matrix using matrix stack
+  try {
+	GSparseMatrix stack(10,10);
+	stack.clear();
+	for (int i = 3; i < 5; ++i)
+	  stack(i,i) = 5.0;
+	GVector column(10);
+	stack.stack_init(100,50);
+	for (int j = 0; j < 10; ++j) {
+	  int i_min = (j < 2) ?  0 : j-2;
+	  int i_max = (j > 8) ? 10 : j+2;
+	  column = 0.0;
+	  for (int i = i_min; i < i_max; ++i)
+	    column(i) = (i+1)*1;
+	  stack.add_col(column, j);
+    }
+	stack.stack_destroy();
+//	cout << stack << endl;
+  }
+  catch (exception &e) {
+    cout << e.what() << endl;
+	throw;
+  }
   cout << " ok." << endl;
 }
 
@@ -1346,16 +1370,18 @@ void test_heavy(int block = 512)
   clock_t t_start;
   double  t_elapse;
   int     number;
+  int     num_cols;
+  int     i_min, i_max;
   
   // Perform test
   cout << "Test GSparseMatrix: Heavy calculus: ";
   try {
     //
 	// Fill 10000 x 10000 matrix with 10000 values
+    t_start = clock();
 	number  = 10000;
 	GSparseMatrix large(number,number);
 	large.set_mem_block(block);
-    t_start = clock();
 	for (int i = 0; i < number; ++i)
 	  large(i,i) = (i+1)*3.14;
 	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
@@ -1375,32 +1401,67 @@ void test_heavy(int block = 512)
 	#endif   
     //
 	// Insert columns into 10000 x 10000 matrix
-	number  = 10000;
+	number   = 10000;
+	num_cols = 1000;
 	large.clear();
 	large.set_mem_block(block);
+	for (int j = 200; j < 400; ++j)
+	  large(j,j) = 3.14;
 	GVector column(number);
     t_start = clock();
-	for (int j = 0; j < 100; ++j) {
+	for (int j = 0; j < num_cols; ++j) {
+	  i_min = (j < 2) ? 0 : j-2;
+	  i_max = (j > num_cols-2) ? num_cols : j+2;
 	  column = 0.0;
-	  for (int i = j; i < number; ++i)
-	    column(i) = (i+1)*3.14;
+	  for (int i = i_min; i < i_max; ++i)
+	    column(i) = (i+1)*0.01;
 	  large.add_col(column, j);
     }
 	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
     #if defined(DUMP_TIMING)
-	cout << endl << " - 100 columns adding needed " << t_elapse << 
-	                " sec (reference ~ 2.6 sec)";
+	cout << endl << " - " << num_cols << " columns adding needed " << t_elapse << 
+	                " sec (reference ~ 0.4 sec)";
 	#endif   
+    //
+	// Insert columns into 10000 x 10000 matrix using matrix stack
+	GSparseMatrix stack(number,number);
+	stack.clear();
+	stack.set_mem_block(block);
+	for (int j = 200; j < 400; ++j)
+	  stack(j,j) = 3.14;
+    t_start = clock();
+	column = GVector(number);
+	stack.stack_init(20000,100);
+	for (int j = 0; j < num_cols; ++j) {
+	  i_min = (j < 2)          ? 0 : j-2;
+	  i_max = (j > num_cols-2) ? num_cols : j+2;
+	  column = 0.0;
+	  for (int i = i_min; i < i_max; ++i)
+	    column(i) = (i+1)*0.01;
+	  stack.add_col(column, j);
+    }
+	stack.stack_destroy();
+	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
+    #if defined(DUMP_TIMING)
+	cout << endl << " - " << num_cols << " columns stack-adding needed " << t_elapse << 
+	                " sec (reference ~ 0.1 sec)";
+	#endif
+	//
+	// Check that both are identical
+	if (large != stack) {
+      cout << endl << "TEST ERROR: Stack-based insertion corrupted." << endl;
+	  throw;
+	}
     //
 	// Subsequent addition and subtractions
 	number  = 300;
+    t_start = clock();
 	GSparseMatrix sum(number,number);
 	GSparseMatrix add(number,number);
 	GSparseMatrix sub(number,number);
 	sum.set_mem_block(block);
 	add.set_mem_block(block);
 	sub.set_mem_block(block);
-    t_start = clock();
 	for (int i = 0; i < number; ++i) {
 	  add(i,number-i-1) = (i*i+1)*0.01;
 	  sum += add;
@@ -1425,7 +1486,7 @@ void test_heavy(int block = 512)
 	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
     #if defined(DUMP_TIMING)
 	cout << endl << " - Matrix multiplication 1 times " << t_elapse << 
-	                " sec (reference ~ 3.5 sec)";
+	                " sec (reference ~ 3.1 sec)";
 	#endif   
   }
   catch (exception &e) {

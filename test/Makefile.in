@@ -183,7 +183,7 @@ test_GSymMatrix_SOURCES = test_GSymMatrix.cpp
 test_GSymMatrix_LDADD = ../src/libgamma.a
 test_GSparseMatrix_SOURCES = test_GSparseMatrix.cpp
 #test_GSparseMatrix_LDADD = ../src/libgamma.la
-test_GSparseMatrix_LDADD = ../src/libgamma.a
+test_GSparseMatrix_LDADD = ../src/libgamma.a -lc_p
 all: all-am
 
 .SUFFIXES:

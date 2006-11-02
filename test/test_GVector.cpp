@@ -25,18 +25,18 @@ int main(void)
   cout << "*************************" << endl;
 
   // Set parameters
-  unsigned num = 5;
+  int num = 5;
 
   // Define vectors
   GVector test(num);
   GVector result(num);
   GVector smaller(num+1);
   GVector bigger(num+1);
-  for (unsigned i = 0; i < num; ++i)
+  for (int i = 0; i < num; ++i)
     test(i) = (i+1) * 1.1;
-  for (unsigned i = 0; i < num-1; ++i)
+  for (int i = 0; i < num-1; ++i)
     smaller(i) = (i+1) * 1.1;
-  for (unsigned i = 0; i < num+1; ++i)
+  for (int i = 0; i < num+1; ++i)
     bigger(i) = (i+1) * 1.1;
 
   // Test 1: Allocate zero vector
@@ -329,4 +329,7 @@ int main(void)
     cout << e.what() << endl;
   }
 
+
+  // Return
+  return 0;
 }

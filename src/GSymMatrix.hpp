@@ -159,6 +159,7 @@ inline
 GSymMatrix& GSymMatrix::operator*= (const double& d)
 {
   this->GMatrix::operator*=(d);
+  return *this;
 }
 
 // Unary scalar division
@@ -166,6 +167,7 @@ inline
 GSymMatrix& GSymMatrix::operator/= (const double& d)
 {
   this->GMatrix::operator/=(d);
+  return *this;
 }
 
 

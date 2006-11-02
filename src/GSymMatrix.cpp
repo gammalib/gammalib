@@ -389,6 +389,7 @@ void GSymMatrix::cholesky_decompose(int compress)
   if (no_zeros) {
   
     // Loop over upper triangle (col >= row)
+	double diag = 0.0;
     for (int row = 0; row < m_rows; ++row) {
 	  double* ptr = m_data + m_colstart[row];
       for (int col = row; col < m_cols; ++col, ++ptr) {
@@ -397,7 +398,6 @@ void GSymMatrix::cholesky_decompose(int compress)
 	      int offset = m_colstart[k] - k;            // is always positive
 	      sum -= m_data[offset+row] * m_data[offset+col]; // sum -= M(row,k)*M(col,k)
 	    }
-	    double diag;
 	    if (row == col) {
 	      if (sum <= 0.0)
 		    throw matrix_not_pos_definite("GSymMatrix::cholesky_decompose(int)", 
@@ -423,6 +423,7 @@ void GSymMatrix::cholesky_decompose(int compress)
 	int* k_ptr;
 
     // Loop over upper triangle (col >= row)
+	double diag = 0.0;
     for (row = 0, row_ptr = m_inx; row < m_num_inx; ++row, ++row_ptr) {
 	  double* ptr_0 = m_data + m_colstart[*row_ptr] - *row_ptr;
       for (col = row, col_ptr = m_inx + row; col < m_num_inx; ++col, ++col_ptr) {
@@ -432,7 +433,6 @@ void GSymMatrix::cholesky_decompose(int compress)
 	      int offset = m_colstart[*k_ptr] - *k_ptr;            // is always positive
 	      sum -= m_data[offset+*row_ptr] * m_data[offset+*col_ptr]; // sum -= M(row,k)*M(col,k)
 	    }
-	    double diag;
 	    if (*row_ptr == *col_ptr) {
 	      if (sum <= 0.0)
 		    throw matrix_not_pos_definite("GSymMatrix::cholesky_decompose(int)", 

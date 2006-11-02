@@ -17,7 +17,7 @@
  * m_rowinx   : holds the row indices for all elements                (Ai) *
  * Column 'col' covers therefore [m_colstart[j], ..., m_colstart[j+1]-1]   *
  * Note that 'm_colstart' has m_cols+1 elements.                           *
-/***************************************************************************
+ ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
 #include "GSparseMatrix.hpp"
@@ -27,12 +27,116 @@
 /* __ Namespaces _________________________________________________________ */
 using namespace std;
 
-/* __ Definitions ________________________________________________________ */
+/* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_SPARSE_PENDING                    // Analyse pending values
 //#define G_DEBUG_SPARSE_INSERTION                 // Analyse value insertion
 //#define G_DEBUG_SPARSE_COMPRESSION   // Analyse zero row/column compression
 //#define G_DEBUG_SPARSE_MALLOC                  // Analyse memory management
+//#define G_DEBUG_SPARSE_STACK_PUSH           // Analyse stack column pushing
+//#define G_DEBUG_SPARSE_STACK_FLUSH         // Analyse stack column flushing
+
+/* __ Definitions ________________________________________________________ */
 #define G_USE_MEMCPY
+
+
+/*==========================================================================
+ =                                                                         =
+ =                            Private functions                            =
+ =                                                                         =
+ ==========================================================================*/
+void GSparseMatrix::init_members(void)
+{
+  // Initialise sparse matrix members
+  m_rowinx    = NULL;
+  m_mem_block = G_SPARSE_MATRIX_DEFAULT_MEM_BLOCK;
+  m_zero      = 0.0;
+  m_fill_val  = 0.0;
+  m_fill_row  = 0;
+  m_fill_col  = 0;
+  m_symbolic  = NULL;
+  m_numeric   = NULL;
+  
+  // Initialise stack members
+  m_stack_max_entries = 0;
+  m_stack_size        = 0;
+  m_stack_entries     = 0;
+  m_stack_colinx      = NULL;
+  m_stack_start       = NULL;
+  m_stack_data        = NULL;
+  m_stack_rowinx      = NULL;
+  
+  // Return
+  return;
+}
+/***************************************************************************/
+void GSparseMatrix::copy_members(const GSparseMatrix& m)
+{
+  // Copy data members
+  m_mem_block = m.m_mem_block;
+  m_zero      = m.m_zero;
+  m_fill_val  = m.m_fill_val;
+  m_fill_row  = m.m_fill_row;
+  m_fill_col  = m.m_fill_col;
+
+  // Copy row indices
+  if (m.m_rowinx != NULL && m.m_alloc > 0) {
+    m_rowinx = new int[m.m_alloc];
+    if (m_rowinx == NULL)
+	  throw mem_alloc("GSparseMatrix::copy_members(const GSparseMatrix&)", m.m_alloc);
+    for (int i = 0; i < m.m_elements; ++i)
+      m_rowinx[i] = m.m_rowinx[i];
+  }
+
+  // Copy symbolic decomposition
+  if (m.m_symbolic != NULL) {
+    GSparseSymbolic* symbolic = new GSparseSymbolic();
+    if (symbolic == NULL)
+	  throw mem_alloc("GSparseMatrix::copy_members(const GSparseMatrix&)", 1);
+    *symbolic  = *((GSparseSymbolic*)m.m_symbolic);
+    m_symbolic = (void*)symbolic;
+  }
+
+  // Copy numeric decomposition
+  if (m.m_numeric != NULL) {
+    GSparseNumeric* numeric = new GSparseNumeric();
+    if (numeric == NULL)
+	  throw mem_alloc("GSparseMatrix::copy_members(const GSparseMatrix&)", 1);
+    *numeric  = *((GSparseNumeric*)m.m_numeric);
+    m_numeric = (void*)numeric;
+  }
+  
+  // Return
+  return;
+}
+/***************************************************************************/
+void GSparseMatrix::free_members(void)
+{
+  // De-allocate only if memory has indeed been allocated
+  if (m_numeric  != NULL) delete (GSparseNumeric*)m_numeric;
+  if (m_symbolic != NULL) delete (GSparseSymbolic*)m_symbolic;
+  if (m_rowinx   != NULL) delete [] m_rowinx;
+
+  // Properly mark members as free
+  m_rowinx   = NULL;
+  m_symbolic = NULL;
+  m_numeric  = NULL;
+
+  // Free stack members
+  if (m_stack_colinx != NULL) delete [] m_stack_colinx;
+  if (m_stack_start  != NULL) delete [] m_stack_start;
+  if (m_stack_data   != NULL) delete [] m_stack_data;
+  if (m_stack_rowinx != NULL) delete [] m_stack_rowinx;
+
+  // Properly mark members as free
+  m_stack_colinx = NULL;
+  m_stack_start  = NULL;
+  m_stack_data   = NULL;
+  m_stack_rowinx = NULL;
+
+  // Return
+  return;
+}
+
 
 /*==========================================================================
  =                                                                         =
@@ -42,25 +146,15 @@ using namespace std;
 
 /***************************************************************************
  *                        GSparseMatrix constructor                        *
+ * ----------------------------------------------------------------------- *
+ * First invoques GMatrix void constructor which initialises all GMatrix   *
+ * members but which does not allocate memory or assign any value.         *
  ***************************************************************************/
 GSparseMatrix::GSparseMatrix(int rows, int cols, int elements) : GMatrix()
 {
   // Initialise private members for clean destruction
-  m_rows      = 0;
-  m_cols      = 0;
-  m_elements  = 0;             // Logically used # of elements
-  m_alloc     = 0;             // Allocated # of elements (>= m_elements)
-  m_data      = NULL;
-  m_colstart  = NULL;
-  m_rowinx    = NULL;
-  m_mem_block = G_SPARSE_MATRIX_DEFAULT_MEM_BLOCK;
-  m_zero      = 0.0;
-  m_fill_val  = 0.0;
-  m_fill_row  = 0;
-  m_fill_col  = 0;
-  m_symbolic  = NULL;
-  m_numeric   = NULL;
-	
+  init_members();
+
   // Allocate column start array. This is the only array that we can
   // allocate at this time. The other arrays can only be allocated during
   // filling of the matrix
@@ -96,44 +190,11 @@ GSparseMatrix::GSparseMatrix(int rows, int cols, int elements) : GMatrix()
 GSparseMatrix::GSparseMatrix(const GSparseMatrix& m) : GMatrix(m)
 { 
   // Initialise private members for clean destruction
-  m_rowinx   = NULL;
-  m_symbolic = NULL;
-  m_numeric  = NULL;
+  init_members();
 
-  // Copy data members
-  m_mem_block = m.m_mem_block;
-  m_zero      = m.m_zero;
-  m_fill_val  = m.m_fill_val;
-  m_fill_row  = m.m_fill_row;
-  m_fill_col  = m.m_fill_col;
-  
-  // Allocate memory for row indices and copy them (only if there are elements)
-  if (m_alloc > 0) {
-    m_rowinx = new int[m_alloc];
-    if (m_rowinx == NULL)
-	  throw mem_alloc("GSparseMatrix copy constructor", m_alloc);
-    for (int i = 0; i < m_elements; ++i)
-      m_rowinx[i] = m.m_rowinx[i];
-  }
+  // Copy members
+  copy_members(m);
 
-  // If there is a symbolic decomposition then copy it
-  if (m.m_symbolic != NULL) {
-    GSparseSymbolic* symbolic = new GSparseSymbolic();
-    if (symbolic == NULL)
-	  throw mem_alloc("GSparseMatrix copy constructor", 1);
-    *symbolic  = *((GSparseSymbolic*)m.m_symbolic);
-    m_symbolic = (void*)symbolic;
-  }
-
-  // If there is a numeric decomposition then copy it
-  if (m.m_numeric != NULL) {
-    GSparseNumeric* numeric = new GSparseNumeric();
-    if (numeric == NULL)
-	  throw mem_alloc("GSparseMatrix copy constructor", 1);
-    *numeric  = *((GSparseNumeric*)m.m_numeric);
-    m_numeric = (void*)numeric;
-  }
-  
   // Return
   return;
 }
@@ -147,10 +208,8 @@ GSparseMatrix::GSparseMatrix(const GSparseMatrix& m) : GMatrix(m)
  ***************************************************************************/
 GSparseMatrix::~GSparseMatrix()
 {
-  // De-allocate only if memory has indeed been allocated by derived class
-  if (m_rowinx   != NULL) delete [] m_rowinx;
-  if (m_symbolic != NULL) delete (GSparseSymbolic*)m_symbolic;
-  if (m_numeric  != NULL) delete (GSparseNumeric*)m_numeric;
+  // Free members
+  free_members();
 
   // Return
   return;
@@ -174,50 +233,14 @@ GSparseMatrix& GSparseMatrix::operator= (const GSparseMatrix& m)
     // Invoque base class assignment operator
     this->GMatrix::operator=(m);
 
-    // De-allocate memory if it has indeed been allocated
-    if (m_rowinx   != NULL) delete [] m_rowinx;
-    if (m_symbolic != NULL) delete (GSparseSymbolic*)m_symbolic;
-    if (m_numeric  != NULL) delete (GSparseNumeric*)m_numeric;
+    // Free members
+    free_members();
 
     // Initialise private members for clean destruction
-    m_rowinx   = NULL;
-	m_symbolic = NULL;
-	m_numeric  = NULL;
+    init_members();
 
-    // Copy data members
-	m_mem_block = m.m_mem_block;
-    m_zero      = m.m_zero;
-    m_fill_val  = m.m_fill_val;
-    m_fill_row  = m.m_fill_row;
-    m_fill_col  = m.m_fill_col;
-
-    // Allocate memory for row indices and copy them (only if there are elements)
-    if (m_alloc > 0) {
-      m_rowinx = new int[m_alloc];
-      if (m_rowinx == NULL)
-	    throw mem_alloc("GSparseMatrix::operator= (const GSparseMatrix&)", 
-		                m_alloc);
-      for (int i = 0; i < m_elements; ++i)
-        m_rowinx[i] = m.m_rowinx[i];
-    }
-
-    // If there is a symbolic decomposition then copy it
-    if (m.m_symbolic != NULL) {
-      GSparseSymbolic* symbolic = new GSparseSymbolic();
-      if (symbolic == NULL)
-	    throw mem_alloc("GSparseMatrix copy constructor", 1);
-      *symbolic  = *((GSparseSymbolic*)m.m_symbolic);
-      m_symbolic = (void*)symbolic;
-    }
-
-    // If there is a numeric decomposition then copy it
-    if (m.m_numeric != NULL) {
-      GSparseNumeric* numeric = new GSparseNumeric();
-      if (numeric == NULL)
-	    throw mem_alloc("GSparseMatrix copy constructor", 1);
-      *numeric  = *((GSparseNumeric*)m.m_numeric);
-      m_numeric = (void*)numeric;
-    }
+    // Copy members
+    copy_members(m);
 
   } // endif: object was not identical
   
@@ -742,22 +765,40 @@ void GSparseMatrix::insert_col(const GVector& v, int col)
  ***************************************************************************/
 void GSparseMatrix::add_col(const GVector& v, int col)
 {
-  // Raise an exception if the column index is invalid
-  #if defined(G_RANGE_CHECK)
-  if (col >= m_cols)
-    throw out_of_range("GSparseMatrix::add_col(const GVector&, int)", 
-	                   0, col, m_rows, m_cols);
-  #endif
+  // Initialise number of non-zero elements to 0
+  int non_zero = 0;
 
-  // Raise an exception if the matrix and vector dimensions are incompatible
-  if (m_rows != v.m_num)
-    throw matrix_vector_mismatch("GSparseMatrix::add_col(const GVector&, int)", 
-	                             v.m_num, m_rows, m_cols);
+  // If we have a stack then try to push elements on stack first ...
+  if (m_stack_data != NULL) {
+    non_zero = stack_push_column(v, col);
+	if (non_zero == 0)
+	  return;
+  }
+   
+  // ... otherwise check first the arguments and determine the number of
+  // non-zero elements in vector
+  else {
+
+    // Raise an exception if the column index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (col >= m_cols)
+      throw out_of_range("GSparseMatrix::add_col(const GVector&, int)", 
+	                     0, col, m_rows, m_cols);
+    #endif
+
+    // Raise an exception if the matrix and vector dimensions are incompatible
+    if (m_rows != v.m_num)
+      throw matrix_vector_mismatch("GSparseMatrix::add_col(const GVector&, int)", 
+	                               v.m_num, m_rows, m_cols);
+
+    // Determine number of non-zero elements in vector
+	non_zero = v.non_zeros();	
+  }
 
   // Extract vector for column, add elements, and re-insert vector (only if
   // vector to insert has non-zeros)
-  if (v.non_zeros() > 0) {
-  
+  if (non_zero > 0) {
+
     // Copy input vector
     GVector column = v;
 
@@ -771,9 +812,10 @@ void GSparseMatrix::add_col(const GVector& v, int col)
 
 	// Insert vector into matrix
     insert_col(column, col);
+	
 	  
   }
-
+  
   // Return
   return;
 }
@@ -1113,6 +1155,405 @@ void GSparseMatrix::cholesky_invert(int compress)
   }
   
   *this = result;
+  
+  // Return
+  return;
+}
+
+
+/***************************************************************************
+ *                     Initialises matrix filling stack                    *
+ * ----------------------------------------------------------------------- *
+ * The matrix filling stack is used to allow for a fast column-wise        *
+ * filling of a sparse matrix. Columns are successively appended to a      *
+ * stack which is regularily flushed when it is full. This reduces memory  *
+ * copies and movements and increases filling speed.                       *
+ ***************************************************************************/
+void GSparseMatrix::stack_init(int size, int entries)
+{
+  // If there is an existing stack the delete it now
+  if (m_stack_colinx != NULL) delete [] m_stack_colinx;
+  if (m_stack_start  != NULL) delete [] m_stack_start;
+  if (m_stack_data   != NULL) delete [] m_stack_data;
+  if (m_stack_rowinx != NULL) delete [] m_stack_rowinx;
+  
+  // Initialise stack members
+  m_stack_max_entries = (entries > 0) ? entries : G_SPARSE_MATRIX_DEFAULT_STACK_ENTRIES;
+  m_stack_size        = (size > 0) ? size : G_SPARSE_MATRIX_DEFAULT_STACK_SIZE;
+  m_stack_entries     = 0;
+  m_stack_colinx      = NULL;
+  m_stack_start       = NULL;
+  m_stack_data        = NULL;
+  m_stack_rowinx      = NULL;
+  
+  // Allocate stack memory. Raise an exception if allocation fails
+  m_stack_colinx = new int[m_stack_max_entries];
+  m_stack_start  = new int[m_stack_max_entries+1];
+  m_stack_data   = new double[m_stack_size];
+  m_stack_rowinx = new int[m_stack_size];
+  if (m_stack_colinx == NULL)
+	throw mem_alloc("GSparseMatrix::stack_init", m_stack_max_entries);
+  if (m_stack_start == NULL)
+	throw mem_alloc("GSparseMatrix::stack_init", m_stack_max_entries+1);
+  if (m_stack_data == NULL || m_stack_rowinx == NULL)
+	throw mem_alloc("GSparseMatrix::stack_init", m_stack_size);
+	
+  // Initialise next free stack location to the first stack element
+  m_stack_start[0] = 0;
+
+  // Return
+  return;
+}
+
+
+/***************************************************************************
+ *                     Push a column on the matrix stack                   *
+ * ----------------------------------------------------------------------- *
+ * The return value indicates if the vector was successfully pushed onto   *
+ * the stack (=0) or if the elements need to be added directly (in this    *
+ * case the return value equals to the number of non-zero elements in the  *
+ * vector.                                                                 *
+ ***************************************************************************/
+int GSparseMatrix::stack_push_column(const GVector& v, int col)
+{
+  // Raise an exception if the column index is invalid
+  #if defined(G_RANGE_CHECK)
+  if (col >= m_cols)
+    throw out_of_range("GSparseMatrix::stack_push_column(const GVector&, int)", 
+	                   0, col, m_rows, m_cols);
+  #endif
+
+  // Raise an exception if the matrix and vector dimensions are incompatible
+  if (m_rows != v.m_num)
+    throw matrix_vector_mismatch("GSparseMatrix::stack_push_column(const GVector&, int)", 
+	                             v.m_num, m_rows, m_cols);
+
+  // Determines how many elements should be stored in stack
+  int elements = 0;
+  for (int i = 0; i < v.m_num; ++i) {
+    if (v.m_data[i] != 0.0)
+	  elements++;
+  }
+  
+  // If the vector is empty there is nothing to do
+  if (elements == 0)
+    return 0;
+	
+  // If there is no stack or the stack can not hold the requested number of 
+  // elements then report number of vector elements to the caller
+  if (m_stack_data == NULL || elements > m_stack_size)
+    return elements;
+
+  // If the specified column is already in the stack then flush stack (we don't
+  // allow the same column twice)
+  for (int i = 0; i < m_stack_entries; ++i) {
+    if (col == m_stack_colinx[i]) {
+      stack_flush();
+	  break;
+	}
+  }
+	
+  // If the stack is full then flush it before pushing the vector onto it
+  if ((m_stack_entries >= m_stack_max_entries) ||
+      (elements        >= (m_stack_size - m_stack_start[m_stack_entries])))
+	stack_flush();
+
+  // Push the vector on the stack
+  int inx = m_stack_start[m_stack_entries];
+  for (int i = 0; i < v.m_num; ++i) {
+    if (v.m_data[i] != 0.0) {
+	  m_stack_data[inx]   = v.m_data[i];
+	  m_stack_rowinx[inx] = i;
+	  inx++;
+	}
+  }
+  
+  // Store entry information and initialise start of next entry
+  m_stack_colinx[m_stack_entries] = col;     // Store column index for entry
+  m_stack_entries++;                         // Increase the # of entries
+  m_stack_start[m_stack_entries] = inx;      // Set start pointer for next entry
+
+  // Debug: show stack information  
+  #if defined(G_DEBUG_SPARSE_STACK_PUSH)
+  cout << "GSparseMatrix::stack_push_column(v, col=" << col << ")" << endl;
+  cout << " Number of entries: " << m_stack_entries << endl;
+  cout << " Entry columns ...:";
+  for (int i = 0; i < m_stack_entries; ++i)
+    cout << " " << m_stack_colinx[i];
+  cout << endl;
+  cout << " Entry starts ....:";
+  for (int i = 0; i < m_stack_entries; ++i)
+    cout << " " << m_stack_start[i];
+  cout << " (next at " << m_stack_start[m_stack_entries] << ")" << endl;
+  cout << " Stack data ......:";
+  for (int i = 0; i < m_stack_start[m_stack_entries]; ++i)
+    cout << " " << m_stack_data[i];
+  cout << endl;
+  cout << " Stack rows ......:";
+  for (int i = 0; i < m_stack_start[m_stack_entries]; ++i)
+    cout << " " << m_stack_rowinx[i];
+  cout << endl;
+  #endif
+	  
+  // Return success
+  return 0;
+}
+
+
+/***************************************************************************
+ *                              Flush matrix stack                         *
+ * ----------------------------------------------------------------------- *
+ * Adds the stack to the actual matrix. First, the total number of matrix  *
+ * elements is determined. The new memory is allocated to hold all         *
+ * elements. Finally, all elements are filled into a working array that is *
+ * then compressed into the matrix.                                        *
+ * ----------------------------------------------------------------------- *
+ * NOTE: The present algorithm assumes that each column occurs only once   *
+ * in the stack!                                                           *
+ ***************************************************************************/
+void GSparseMatrix::stack_flush(void)
+{
+  // Do nothing if there is no stack
+  if (m_stack_data == NULL)
+    return;
+
+  // Fill pending value
+  fill_pending();
+    
+  // Debug header 
+  #if defined(G_DEBUG_SPARSE_STACK_FLUSH)
+  cout << "GSparseMatrix::stack_flush" << endl;
+  cout << " Stack entries ...: " << m_stack_entries << endl;
+  cout << " Stack elements ..: " << m_stack_start[m_stack_entries] << endl;
+  cout << " Matrix elements .: " << m_elements << endl;
+  #endif
+ 
+  // Allocate workspace for column flags
+  int* wrk_int = new int[m_cols];
+  if (wrk_int == NULL)
+	throw mem_alloc("GSparseMatrix::stack_flush", m_cols);
+
+  // First gather all columns from existing matrix and flag all existing
+  // columns by 1 and all non-existing by 0
+  for (int col = 0; col < m_cols; ++col) {
+    if (m_colstart[col] < m_colstart[col+1])
+	  wrk_int[col] = 1;
+	else
+      wrk_int[col] = 0;
+  }
+  
+  // Loop over all stack entries and set column flags. They have the 
+  // following definition:
+  //  -(entry+2): Column exists and is also found in stack=entry
+  //  +(entry+2): Column exists in stack=entry only
+  //           1: Column exists in matrix only
+  //           0: Column does neither exist in matrix or stack  
+  int new_elements = 0;
+  for (int entry = 0; entry < m_stack_entries; ++entry) {
+  
+    // Get column for actual entry
+    int col = m_stack_colinx[entry];
+
+	// If column exists already in matrix then determine total number
+	// of elements
+	if (wrk_int[col] == 1) {
+	  int i_start = m_colstart[col];
+	  int i_stop  = m_colstart[col+1];
+	  int k_start = m_stack_start[entry];
+	  int k_stop  = m_stack_start[entry+1];
+	  int row_m   = m_rowinx[i_start];
+	  int row_s   = m_stack_rowinx[k_start];
+	  if (k_start < k_stop && i_start < i_stop) {
+	  	wrk_int[col] = -(entry+2);                 // Flag that we have to mix
+	    while (i_start < i_stop || k_start < k_stop) {
+	      if (row_m == row_s) {                    // Case A: element in matrix and stack
+	        i_start++;
+	        k_start++;
+	        row_m = (i_start < i_stop) ? m_rowinx[i_start]       : m_rows+1;
+	        row_s = (k_start < k_stop) ? m_stack_rowinx[k_start] : m_rows+1;
+		  }
+		  else if (row_m < row_s) {                // Case B: element in matrix only
+	        i_start++;
+	        row_m = (i_start < i_stop) ? m_rowinx[i_start] : m_rows+1;
+		  }
+		  else {                                   // Case C: element in stack only
+	        k_start++;
+	        row_s = (k_start < k_stop) ? m_stack_rowinx[k_start] : m_rows+1;
+		    new_elements++;
+		  }
+        } // endwhile: mixing
+	  } // endif: there were elements in stack
+	} // endif: column existed in the matrix
+
+	// Column did not exists in the matrix, so it's newand we add all elements 
+	else {
+	  wrk_int[col]  = (entry+2);
+	  new_elements += (m_stack_start[entry+1] - m_stack_start[entry]);
+	}
+  }
+  int elements = m_elements + new_elements;
+
+  // Dump number of elements in new matrix 
+  #if defined(G_DEBUG_SPARSE_STACK_FLUSH)
+  cout << " New elements ....: " << new_elements << endl;
+  #endif
+  
+  // Allocate memory for new matrix (always keep some elbow room)
+  m_alloc = elements + m_mem_block;
+  double* new_data   = new double[m_alloc];
+  int*    new_rowinx = new int[m_alloc];
+  if (new_data == NULL || new_rowinx == NULL)
+	throw mem_alloc("GSparseMatrix::stack_flush", m_alloc);
+  
+  // Fill new matrix. For this purpose we loop over all matrix columns
+  // and perform the operation that was identified in the previous scan
+  int index = 0;
+  #if defined(G_DEBUG_SPARSE_STACK_FLUSH)
+  int num_orig  = 0;
+  int num_stack = 0;
+  int num_mix   = 0;
+  #endif
+  for (int col = 0; col < m_cols; ++col) {
+
+    // If column does not exist then skip
+	if (wrk_int[col] == 0) {
+	  m_colstart[col] = index;
+	  continue;
+	}
+
+    // If column exists in the matrix but not in the stack we copy the
+	// existing column into the new matrix
+	if (wrk_int[col] == 1) {
+	  for (int i = m_colstart[col]; i < m_colstart[col+1]; ++i) {
+	    new_data[index]   = m_data[i];
+		new_rowinx[index] = m_rowinx[i];
+		index++;
+        #if defined(G_DEBUG_SPARSE_STACK_FLUSH)
+		num_orig++;
+		#endif
+	  }
+	}
+	
+	// If column is new (i.e. it did not exist in the matrix before) we 
+	// copy the stack into the new matrix
+	else if (wrk_int[col] > 1) {
+	  int entry = wrk_int[col] - 2;
+	  for (int i = m_stack_start[entry]; i < m_stack_start[entry+1]; ++i) {
+	    new_data[index]   = m_stack_data[i];
+		new_rowinx[index] = m_stack_rowinx[i];
+		index++;
+        #if defined(G_DEBUG_SPARSE_STACK_FLUSH)
+		num_stack++;
+		#endif
+	  }
+	}
+	
+	// If column exists in the matrix and in the stack then we have the
+	// most tricky case since we have to mix both ...
+	else {
+	  int entry    = -(wrk_int[col] + 2);
+	  int i_start  = m_colstart[col];
+	  int i_stop   = m_colstart[col+1];
+	  int k_start  = m_stack_start[entry];
+	  int k_stop   = m_stack_start[entry+1];
+	  int row_m    = m_rowinx[i_start];
+	  int row_s    = m_stack_rowinx[k_start];
+	  if (k_start < k_stop && i_start < i_stop) {
+	    while (i_start < i_stop || k_start < k_stop) {
+	      if (row_m == row_s) {                    // Case A: element in matrix and stack
+		    new_data[index]    = m_data[i_start] + m_stack_data[k_start];
+		    new_rowinx[index]  = row_m;
+		    i_start++;
+		    k_start++;
+		    row_m = (i_start < i_stop) ? m_rowinx[i_start]       : m_rows+1;
+		    row_s = (k_start < k_stop) ? m_stack_rowinx[k_start] : m_rows+1;
+		  }
+		  else if (row_m < row_s) {                // Case B: element in matrix only
+		    new_data[index]   = m_data[i_start];
+		    new_rowinx[index] = row_m;
+		    i_start++;
+		    row_m = (i_start < i_stop) ? m_rowinx[i_start] : m_rows+1;
+		  }
+		  else {                                   // Case C: element in stack only
+		    new_data[index]   = m_stack_data[k_start];
+		    new_rowinx[index] = row_s;
+		    k_start++;
+		    row_s = (k_start < k_stop) ? m_stack_rowinx[k_start] : m_rows+1;
+		  } 
+		  index++;
+          #if defined(G_DEBUG_SPARSE_STACK_FLUSH)
+		  num_mix++;
+		  #endif
+        } // endwhile: mixing
+	  } // endif: there were elements in stack
+	  
+	} // endelse: we had to mix the entries
+
+	// Store actual index in column start array
+	m_colstart[col] = index;
+	
+  } // endfor: looped over all columns
+
+  // Dump number of elements in new matrix after addition
+  #if defined(G_DEBUG_SPARSE_STACK_FLUSH)
+  cout << " Added elements ..: " << index << " (sould be " << elements << ")" << endl;
+  cout << " - Matrix only ...: " << num_orig << endl;
+  cout << " - Stack only ....: " << num_stack << endl;
+  cout << " - Matrix & Stack : " << num_mix << endl;
+  #endif
+
+  // Correct columns start array
+  for (int col = m_cols; col > 0; --col)
+    m_colstart[col] = m_colstart[col-1];
+  m_colstart[0] = 0;
+  
+  // Delete old matrix memory
+  if (m_data   != NULL) delete [] m_data;
+  if (m_rowinx != NULL) delete [] m_rowinx;
+	
+  // Update pointers to new memory and update element counter
+  m_data     = new_data;
+  m_rowinx   = new_rowinx;
+  m_elements = elements;
+
+  // Stack is empty now, so reset stack counters
+  m_stack_entries  = 0;
+  m_stack_start[0] = 0;
+
+  // Free workspace
+  delete [] wrk_int;
+  
+  // Return
+  return;
+}
+
+
+/***************************************************************************
+ *                             Destroy matrix stack                        *
+ * ----------------------------------------------------------------------- *
+ * Flush and destroy matrix stack                                          *
+ ***************************************************************************/
+void GSparseMatrix::stack_destroy(void)
+{
+  // Flush stack first
+  stack_flush();
+  
+  // Free stack members
+  if (m_stack_colinx != NULL) delete [] m_stack_colinx;
+  if (m_stack_start  != NULL) delete [] m_stack_start;
+  if (m_stack_data   != NULL) delete [] m_stack_data;
+  if (m_stack_rowinx != NULL) delete [] m_stack_rowinx;
+
+  // Properly mark members as free
+  m_stack_colinx = NULL;
+  m_stack_start  = NULL;
+  m_stack_data   = NULL;
+  m_stack_rowinx = NULL;
+
+  // Initialise stack members
+  m_stack_max_entries = 0;
+  m_stack_size        = 0;
+  m_stack_entries     = 0;
   
   // Return
   return;

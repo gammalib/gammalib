@@ -22,8 +22,8 @@ double   g_matrix[] = {1.0, 2.0, 3.0, 4.0,
                        5.0, 6.0, 7.0, 8.0, 
 					   9.0, 10., 11., 12.};
 double   g_vector[] = {1.0, 2.0, 3.0, 4.0};
-unsigned g_rows    = 3;
-unsigned g_cols    = 4;
+int g_rows    = 3;
+int g_cols    = 4;
 
 
 /***************************************************************************
@@ -33,8 +33,8 @@ GMatrix set_matrix(void)
 {
   try {
     GMatrix matrix(g_rows,g_cols);
-    for (unsigned row = 0; row < g_rows; ++row) {
-      for (unsigned col = 0; col < g_cols; ++col)
+    for (int row = 0; row < g_rows; ++row) {
+      for (int col = 0; col < g_cols; ++col)
 	    matrix(row,col) = g_matrix[col+row*g_cols];
 	}
     return matrix;
@@ -53,7 +53,7 @@ GVector set_vector(void)
 {
   try {
     GVector vector(g_cols);
-	for (unsigned col = 0; col < g_cols; ++col)
+	for (int col = 0; col < g_cols; ++col)
 	  vector(col) = g_vector[col];
     return vector;
   }
@@ -71,8 +71,8 @@ int check_matrix(const GMatrix& m, const double scale, const double add)
 {
   int result = 1;
   try {
-    for (unsigned row = 0; row < g_rows; ++row) {
-      for (unsigned col = 0; col < g_cols; ++col) {
+    for (int row = 0; row < g_rows; ++row) {
+      for (int col = 0; col < g_cols; ++col) {
 	    double value = g_matrix[col+row*g_cols] * scale + add;
 	    if (fabs(m(row,col)-value) > 1.0e-15) {
 		  result = 0;
@@ -96,8 +96,8 @@ int check_transpose_matrix(const GMatrix& m, const double scale, const double ad
 {
   int result = 1;
   try {
-    for (unsigned row = 0; row < g_rows; ++row) {
-      for (unsigned col = 0; col < g_cols; ++col) {
+    for (int row = 0; row < g_rows; ++row) {
+      for (int col = 0; col < g_cols; ++col) {
 	    double value = g_matrix[col+row*g_cols] * scale + add;
 	    if (m(col,row) != value) {
 		  result = 0;
@@ -121,8 +121,8 @@ int check_matrix_lt(const GMatrix& m, const double scale, const double add)
 {
   int result = 1;
   try {
-    for (unsigned row = 0; row < g_rows; ++row) {
-      for (unsigned col = 0; col < g_cols; ++col) {
+    for (int row = 0; row < g_rows; ++row) {
+      for (int col = 0; col < g_cols; ++col) {
 	    double value = (col <= row) ? g_matrix[col+row*g_cols] * scale + add : 0.0;
 	    if (m(row,col) != value) {
 		  result = 0;
@@ -146,8 +146,8 @@ int check_matrix_ut(const GMatrix& m, const double scale, const double add)
 {
   int result = 1;
   try {
-    for (unsigned row = 0; row < g_rows; ++row) {
-      for (unsigned col = 0; col < g_cols; ++col) {
+    for (int row = 0; row < g_rows; ++row) {
+      for (int col = 0; col < g_cols; ++col) {
 	    double value = (col >= row) ? g_matrix[col+row*g_cols] * scale + add : 0.0;
 	    if (m(row,col) != value) {
 		  result = 0;
@@ -171,9 +171,9 @@ int check_matrix_vector(const GVector& v)
 {
   int result = 1;
   try {
-    for (unsigned row = 0; row < v.size(); ++row) {
+    for (int row = 0; row < v.size(); ++row) {
       double value = 0.0;
-	  for (unsigned col = 0; col < g_cols; ++col)
+	  for (int col = 0; col < g_cols; ++col)
 	    value += g_matrix[col+row*g_cols] * g_vector[col];
 	  if (v(row) != value) {
 	    result = 0;
@@ -198,10 +198,10 @@ int check_matrix_matrix(const GMatrix& m)
     return 0;
   int result = 1;
   try {
-    for (unsigned row = 0; row < m.rows(); ++row) {
-	  for (unsigned col = 0; col < m.cols(); ++col) {
+    for (int row = 0; row < m.rows(); ++row) {
+	  for (int col = 0; col < m.cols(); ++col) {
         double value = 0.0;
-		for (unsigned i = 0; i < g_cols; ++i)
+		for (int i = 0; i < g_cols; ++i)
 	      value += g_matrix[i+row*g_cols] * g_matrix[i+col*g_cols];
 	    if (m(row,col) != value) {
 	      result = 0;
@@ -224,8 +224,8 @@ int check_matrix_matrix(const GMatrix& m)
 int check_matrix_min(const double min)
 {
   double value = g_matrix[0];
-  for (unsigned row = 0; row < g_rows; ++row) {
-    for (unsigned col = 0; col < g_cols; ++col) {
+  for (int row = 0; row < g_rows; ++row) {
+    for (int col = 0; col < g_cols; ++col) {
 	  if (g_matrix[col+row*g_cols] < value)
 		value = g_matrix[col+row*g_cols];
 	}
@@ -240,8 +240,8 @@ int check_matrix_min(const double min)
 int check_matrix_max(const double max)
 {
   double value = g_matrix[0];
-  for (unsigned row = 0; row < g_rows; ++row) {
-    for (unsigned col = 0; col < g_cols; ++col) {
+  for (int row = 0; row < g_rows; ++row) {
+    for (int col = 0; col < g_cols; ++col) {
 	  if (g_matrix[col+row*g_cols] > value)
 		value = g_matrix[col+row*g_cols];
 	}
@@ -256,8 +256,8 @@ int check_matrix_max(const double max)
 int check_matrix_sum(const double sum)
 {
   double value = 0.0;
-  for (unsigned row = 0; row < g_rows; ++row) {
-    for (unsigned col = 0; col < g_cols; ++col)
+  for (int row = 0; row < g_rows; ++row) {
+    for (int col = 0; col < g_cols; ++col)
       value += g_matrix[col+row*g_cols];
   }
   return (sum == value);
@@ -674,4 +674,6 @@ int main(void)
   }
   cout << "ok." << endl;
 
+  // Return
+  return 0;
 }

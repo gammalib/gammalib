@@ -24,6 +24,8 @@ using namespace std;
 
 /* __ Definitions ________________________________________________________ */
 #define G_SPARSE_MATRIX_DEFAULT_MEM_BLOCK 512    // Default Memory block size
+#define G_SPARSE_MATRIX_DEFAULT_STACK_ENTRIES 100   // Max # of stack entries
+#define G_SPARSE_MATRIX_DEFAULT_STACK_SIZE 512     // Max # of stack elements
 
 /* __ Macros (to be moved to GammaLib general header) ____________________ */
 #define G_MIN(a,b) (((a) < (b)) ? (a) : (b))
@@ -104,25 +106,43 @@ public:
   virtual void    cholesky_decompose(int compress = 1);
   virtual GVector cholesky_solver(const GVector& v, int compress = 1);
   virtual void    cholesky_invert(int compress = 1);
+  
+  // Stack functions
+  virtual void stack_init(int size = 0, int entries = 0);
+  virtual int  stack_push_column(const GVector& v, int col);
+  virtual void stack_flush(void);
+  virtual void stack_destroy(void);
 
 private:
   // Private functions
-  int           get_index(int row, int col) const;
-  void          fill_pending(void);
-  void          alloc_elements(int start, int num);
-  void          free_elements(int start, int num);
-  void          remove_zero_row_col(void);
-  void          insert_zero_row_col(int rows, int cols);
+  void init_members(void);
+  void copy_members(const GSparseMatrix& m);
+  void free_members(void);
+  int  get_index(int row, int col) const;
+  void fill_pending(void);
+  void alloc_elements(int start, int num);
+  void free_elements(int start, int num);
+  void remove_zero_row_col(void);
+  void insert_zero_row_col(int rows, int cols);
   
   // Private data members
-  int*   m_rowinx;      // Row-indices of all elements
-  int    m_mem_block;   // Memory block to be allocated at once
-  double m_zero;        // The zero element (needed for data access)
-  double m_fill_val;    // Element to be filled
-  int    m_fill_row;    // Row into which element needs to be filled
-  int    m_fill_col;    // Column into which element needs to be filled
-  void*  m_symbolic;    // Holds GSparseSymbolic object after decomposition
-  void*  m_numeric;     // Holds GSparseNumeric object after decomposition
+  int*    m_rowinx;             // Row-indices of all elements
+  int     m_mem_block;          // Memory block to be allocated at once
+  double  m_zero;               // The zero element (needed for data access)
+  double  m_fill_val;           // Element to be filled
+  int     m_fill_row;           // Row into which element needs to be filled
+  int     m_fill_col;           // Column into which element needs to be filled
+  void*   m_symbolic;           // Holds GSparseSymbolic object after decomposition
+  void*   m_numeric;            // Holds GSparseNumeric object after decomposition
+
+  // Fill-stack
+  int     m_stack_max_entries;  // Maximum number of entries in the stack
+  int     m_stack_size;         // Maximum number of elements in the stack
+  int     m_stack_entries;      // Number of entries in the stack
+  int*    m_stack_colinx;       // Column index for each entry [m_stack_entries]
+  int*    m_stack_start;        // Start in stack for each entry [m_stack_entries+1]
+  double* m_stack_data;         // Stack data [m_stack_size]
+  int*    m_stack_rowinx;       // Srack row indices [m_stack_size]
 };
 
 
@@ -205,6 +225,7 @@ GSparseMatrix& GSparseMatrix::operator*= (const double& d)
 {
   fill_pending();
   this->GMatrix::operator*=(d);
+  return *this;
 }
 
 // Unary scalar division
@@ -213,6 +234,7 @@ GSparseMatrix& GSparseMatrix::operator/= (const double& d)
 {
   fill_pending();
   this->GMatrix::operator/=(d);
+  return *this;
 }
 
 

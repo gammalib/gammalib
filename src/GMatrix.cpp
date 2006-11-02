@@ -20,6 +20,96 @@ using namespace std;
 
 /*==========================================================================
  =                                                                         =
+ =                            Private functions                            =
+ =                                                                         =
+ ==========================================================================*/
+void GMatrix::init_members(void)
+{
+  // Initialise GMatrix members
+  m_rows       = 0;      // Number of rows
+  m_cols       = 0;      // Number of columns
+  m_elements   = 0;      // Logically used number of elements
+  m_alloc      = 0;      // Allocated # of elements (>= m_elements)
+  m_num_rowsel = 0;      // Number of selected rows (for comp. decomp.)
+  m_num_colsel = 0;      // Number of selected columns (for comp. decomp.)
+  m_data       = NULL;   // Matrix data
+  m_colstart   = NULL;   // Column start indices (m_cols+1)
+  m_rowsel     = NULL;   // Row selection (for compressed decomposition)
+  m_colsel     = NULL;   // Column selection (for compressed decomposition)
+  
+  // Return
+  return;
+}
+/***************************************************************************/
+void GMatrix::copy_members(const GMatrix& m)
+{
+  // Copy matrix attributes
+  m_rows       = m.m_rows;
+  m_cols       = m.m_cols;
+  m_elements   = m.m_elements;
+  m_alloc      = m.m_alloc;
+  m_num_rowsel = m.m_num_rowsel;
+  m_num_colsel = m.m_num_colsel;
+
+  // Allocate memory for column start array and copy content
+  m_colstart = new int[m_cols+1];
+  if (m_colstart == NULL)
+    throw mem_alloc("GMatrix::copy_members(const Matrix&)", m_cols+1);
+  for (int i = 0; i <= m_cols; ++i)
+    m_colstart[i] = m.m_colstart[i];
+  
+  // Allocate memory for elements and copy them (only if there are elements)
+  if (m.m_data != NULL && m_alloc > 0) {
+    m_data = new double[m_alloc];
+    if (m_data == NULL)
+	  throw mem_alloc("GMatrix::copy_members(const Matrix&)", m_alloc);
+    for (int i = 0; i < m_elements; ++i)
+      m_data[i] = m.m_data[i];
+  }
+  
+  // If there is a row selection then copy it
+  if (m.m_rowsel != NULL && m_num_rowsel > 0) {
+    m_rowsel = new int[m_num_rowsel];
+    if (m_rowsel == NULL)
+	  throw mem_alloc("GMatrix::copy_members(const Matrix&)", m_num_rowsel);
+    for (int i = 0; i < m_num_rowsel; ++i)
+      m_rowsel[i] = m.m_rowsel[i];
+  }
+
+  // If there is a column selection then copy it
+  if (m.m_colsel != NULL && m_num_colsel > 0) {
+    m_colsel = new int[m_num_colsel];
+    if (m_colsel == NULL)
+	  throw mem_alloc("GMatrix::copy_members(const Matrix&)", m_num_colsel);
+    for (int i = 0; i < m_num_colsel; ++i)
+      m_colsel[i] = m.m_colsel[i];
+  }
+
+  // Return
+  return;
+}
+/***************************************************************************/
+void GMatrix::free_members(void)
+{
+  // De-allocate only if memory has indeed been allocated
+  if (m_colsel   != NULL) delete [] m_colsel;
+  if (m_rowsel   != NULL) delete [] m_rowsel;
+  if (m_data     != NULL) delete [] m_data;
+  if (m_colstart != NULL) delete [] m_colstart;
+
+  // Properly mark members as free
+  m_colstart = NULL;
+  m_data     = NULL;
+  m_rowsel   = NULL;
+  m_colsel   = NULL;
+  
+  // Return
+  return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
  =                      GMatrix constructors/destructors                   =
  =                                                                         =
  ==========================================================================*/
@@ -30,17 +120,8 @@ using namespace std;
 GMatrix::GMatrix(void)
 {
   // Initialise private members for clean destruction
-  m_rows       = 0;
-  m_cols       = 0;
-  m_elements   = 0;
-  m_alloc      = 0;
-  m_num_rowsel = 0;
-  m_num_colsel = 0;
-  m_data       = NULL;
-  m_colstart   = NULL;
-  m_rowsel     = NULL;
-  m_colsel     = NULL;
-	
+  init_members();
+
   // Return
   return;
 }
@@ -52,16 +133,7 @@ GMatrix::GMatrix(void)
 GMatrix::GMatrix(int rows, int cols)
 {
   // Initialise private members for clean destruction
-  m_rows       = 0;
-  m_cols       = 0;
-  m_elements   = 0;
-  m_alloc      = 0;
-  m_num_rowsel = 0;
-  m_num_colsel = 0;
-  m_data       = NULL;
-  m_colstart   = NULL;
-  m_rowsel     = NULL;
-  m_colsel     = NULL;
+  init_members();
 
   // Determine number of elements to store in matrix
   int elements = rows*cols;
@@ -106,59 +178,11 @@ GMatrix::GMatrix(int rows, int cols)
 GMatrix::GMatrix(const GMatrix& m)
 {
   // Initialise private members for clean destruction
-  m_rows       = 0;
-  m_cols       = 0;
-  m_elements   = 0;
-  m_alloc      = 0;
-  m_num_rowsel = 0;
-  m_num_colsel = 0;
-  m_data       = NULL;
-  m_colstart   = NULL;
-  m_rowsel     = NULL;
-  m_colsel     = NULL;
-  
-  // Allocate memory for column start array and copy content
-  m_colstart = new int[m.m_cols+1];
-  if (m_colstart == NULL)
-    throw mem_alloc("GMatrix copy constructor", m.m_cols+1);
-  for (int i = 0; i <= m.m_cols; ++i)
-    m_colstart[i] = m.m_colstart[i];
-  
-  // Allocate memory for elements and copy them (only if there are elements)
-  if (m.m_alloc > 0) {
-    m_data = new double[m.m_alloc];
-    if (m_data == NULL)
-	  throw mem_alloc("GMatrix copy constructor", m.m_alloc);
-    for (int i = 0; i < m.m_elements; ++i)
-      m_data[i] = m.m_data[i];
-  }
-  
-  // If there is a row selection then copy it
-  if (m.m_rowsel != NULL && m.m_num_rowsel > 0) {
-    m_rowsel = new int[m.m_num_rowsel];
-    if (m_rowsel == NULL)
-	  throw mem_alloc("GMatrix copy constructor", m.m_num_rowsel);
-    for (int i = 0; i < m.m_num_rowsel; ++i)
-      m_rowsel[i] = m.m_rowsel[i];
-	m_num_rowsel = m.m_num_rowsel;
-  }
+  init_members();
 
-  // If there is a column selection then copy it
-  if (m.m_colsel != NULL && m.m_num_colsel > 0) {
-    m_colsel = new int[m.m_num_colsel];
-    if (m_colsel == NULL)
-	  throw mem_alloc("GMatrix copy constructor", m.m_num_colsel);
-    for (int i = 0; i < m.m_num_colsel; ++i)
-      m_colsel[i] = m.m_colsel[i];
-	m_num_colsel = m.m_num_colsel;
-  }
+  // Copy members
+  copy_members(m);
 
-  // Copy matrix attributes
-  m_rows     = m.m_rows;
-  m_cols     = m.m_cols;
-  m_elements = m.m_elements;
-  m_alloc    = m.m_alloc;
-  
   // Return
   return;
 }
@@ -169,11 +193,8 @@ GMatrix::GMatrix(const GMatrix& m)
  ***************************************************************************/
 GMatrix::~GMatrix()
 {
-  // De-allocate only if memory has indeed been allocated
-  if (m_rowsel   != NULL) delete [] m_rowsel;
-  if (m_colsel   != NULL) delete [] m_colsel;
-  if (m_colstart != NULL) delete [] m_colstart;
-  if (m_data     != NULL) delete [] m_data;
+  // Free members
+  free_members();
 
   // Return
   return;
@@ -193,66 +214,15 @@ GMatrix& GMatrix::operator= (const GMatrix& m)
 {
   // Execute only if object is not identical
   if (this != &m) { 
-  
-    // De-allocate memory if it has indeed been allocated
-    if (m_colstart != NULL) delete [] m_colstart;
-    if (m_rowsel   != NULL) delete [] m_rowsel;
-    if (m_colsel   != NULL) delete [] m_colsel;
-    if (m_data     != NULL) delete [] m_data;
 
+    // Free members
+    free_members();
+  
     // Initialise private members for clean destruction
-    m_rows       = 0;
-    m_cols       = 0;
-    m_elements   = 0;
-	m_alloc      = 0;
-    m_num_rowsel = 0;
-    m_num_colsel = 0;
-    m_data       = NULL;
-    m_colstart   = NULL;
-    m_rowsel     = NULL;
-    m_colsel     = NULL;
-  
-    // Allocate memory for column start array and copy content
-    m_colstart = new int[m.m_cols+1];
-    if (m_colstart == NULL)
-      throw mem_alloc("GMatrix::operator= (const GMatrix&)", m.m_cols+1);
-    for (int i = 0; i <= m.m_cols; ++i)
-      m_colstart[i] = m.m_colstart[i];
-  
-    // Allocate memory for elements and copy them (only if there are elements)
-    if (m.m_alloc > 0) {
-      m_data = new double[m.m_alloc];
-      if (m_data == NULL)
-	    throw mem_alloc("GMatrix::operator= (const GMatrix&)", m.m_alloc);
-      for (int i = 0; i < m.m_elements; ++i)
-        m_data[i] = m.m_data[i];
-    }
+    init_members();
 
-    // If there is a row selection then copy it
-    if (m.m_rowsel != NULL && m.m_num_rowsel > 0) {
-      m_rowsel = new int[m.m_num_rowsel];
-      if (m_rowsel == NULL)
-  	    throw mem_alloc("GMatrix::operator= (const GMatrix&)", m.m_num_rowsel);
-      for (int i = 0; i < m.m_num_rowsel; ++i)
-        m_rowsel[i] = m.m_rowsel[i];
-	  m_num_rowsel = m.m_num_rowsel;
-    }
-
-    // If there is a column selection then copy it
-    if (m.m_colsel != NULL && m.m_num_colsel > 0) {
-      m_colsel = new int[m.m_num_colsel];
-      if (m_colsel == NULL)
-	    throw mem_alloc("GMatrix::operator= (const GMatrix&)", m.m_num_colsel);
-      for (int i = 0; i < m.m_num_colsel; ++i)
-        m_colsel[i] = m.m_colsel[i];
-	  m_num_colsel = m.m_num_colsel;
-    }
-
-    // Copy matrix attributes
-    m_rows     = m.m_rows;
-    m_cols     = m.m_cols;
-    m_elements = m.m_elements;
-	m_alloc    = m.m_alloc;
+    // Copy members
+    copy_members(m);
 	
   } // endif: object was not identical
 

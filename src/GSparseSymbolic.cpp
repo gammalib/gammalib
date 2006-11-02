@@ -488,7 +488,7 @@ int* GSparseSymbolic::cs_amd(int order, const GSparseMatrix* A)
   #endif
   
   // Drop diagonal entries from C
-  int cnz_diag = cs_fkeep(&C, &cs_diag, NULL);
+  cs_fkeep(&C, &cs_diag, NULL);
 
   // Debug
   #if defined(G_DEBUG_SPARSE_SYM_AMD_ORDERING)
