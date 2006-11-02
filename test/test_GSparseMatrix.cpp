@@ -22,13 +22,13 @@ using namespace std;
 #define DUMP_TIMING                                          // Dump timing
 
 /* __ Globals ____________________________________________________________ */
-double   g_matrix[] = {1.0, 7.0, 3.0, 2.0, 4.0, 8.0, 5.0, 6.0, 9.0};
-int g_row[]    = {  0,   0,   1,   2,   2,   2,   3,   3,   3};
-int g_col[]    = {  0,   4,   1,   0,   2,   4,   2,   3,   4};
-double   g_vector[] = {1.0, 2.0, 3.0, 4.0, 5.0};
-int g_elements = 9;
-int g_rows     = 4;
-int g_cols     = 5;
+double g_matrix[] = {1.0, 7.0, 3.0, 2.0, 4.0, 8.0, 5.0, 6.0, 9.0};
+int    g_row[]    = {  0,   0,   1,   2,   2,   2,   3,   3,   3};
+int    g_col[]    = {  0,   4,   1,   0,   2,   4,   2,   3,   4};
+double g_vector[] = {1.0, 2.0, 3.0, 4.0, 5.0};
+int    g_elements = 9;
+int    g_rows     = 4;
+int    g_cols     = 5;
 
 
 /***************************************************************************
@@ -761,6 +761,34 @@ void test_arithmetics(const GSparseMatrix& m_test)
 	  throw;
 	}
 	cout << ".";
+	//
+	// GSparseMatrix.add_col() using a compressed array
+	GSparseMatrix compare = m_test;
+ 	GVector v_sparse(g_rows);
+	for (int i = 0; i < g_rows; i += 2)  // Build vector for comparison
+	  v_sparse(i) = 7.0;
+	for (int col = 0; col < g_cols; ++col)
+	  compare.add_col(v_sparse, col);
+	result = m_test;
+	double* values = new double[g_rows];
+	int*    rows   = new int[g_rows];
+	int     number = 0;
+	for (int i = 0; i < g_rows; i += 2, ++number) {
+	  values[number] = 7.0;
+	  rows[number]   = i;
+	}
+	for (int col = 0; col < g_cols; ++col)
+	  result.add_col(values, rows, number, col);
+    delete [] values;
+	delete [] rows;
+    if (result != compare) {
+      cout << endl << "TEST ERROR: Corrupt GSparseMatrix.add_col(compressed array)." << endl;
+	  cout << "m_test " << m_test << endl;
+	  cout << "result " << result << endl;
+	  cout << "compare " << compare << endl;
+	  throw;
+	}
+	cout << ".";
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -1402,11 +1430,12 @@ void test_heavy(int block = 512)
     //
 	// Insert columns into 10000 x 10000 matrix
 	number   = 10000;
-	num_cols = 1000;
-	large.clear();
+	num_cols = 10000;
+	GSparseMatrix diag(number,number);
+	for (int j = 10; j < number-10; ++j)
+	  diag(j,j) = 3.14;
+	large = diag;
 	large.set_mem_block(block);
-	for (int j = 200; j < 400; ++j)
-	  large(j,j) = 3.14;
 	GVector column(number);
     t_start = clock();
 	for (int j = 0; j < num_cols; ++j) {
@@ -1420,18 +1449,18 @@ void test_heavy(int block = 512)
 	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
     #if defined(DUMP_TIMING)
 	cout << endl << " - " << num_cols << " columns adding needed " << t_elapse << 
-	                " sec (reference ~ 0.4 sec)";
+	                " sec (reference ~ 4.8 sec)";
 	#endif   
     //
 	// Insert columns into 10000 x 10000 matrix using matrix stack
 	GSparseMatrix stack(number,number);
-	stack.clear();
+	stack = diag;
 	stack.set_mem_block(block);
 	for (int j = 200; j < 400; ++j)
 	  stack(j,j) = 3.14;
     t_start = clock();
 	column = GVector(number);
-	stack.stack_init(20000,100);
+	stack.stack_init(10000,10000);
 	for (int j = 0; j < num_cols; ++j) {
 	  i_min = (j < 2)          ? 0 : j-2;
 	  i_max = (j > num_cols-2) ? num_cols : j+2;
@@ -1444,7 +1473,7 @@ void test_heavy(int block = 512)
 	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
     #if defined(DUMP_TIMING)
 	cout << endl << " - " << num_cols << " columns stack-adding needed " << t_elapse << 
-	                " sec (reference ~ 0.1 sec)";
+	                " sec (reference ~ 1.3 sec)";
 	#endif
 	//
 	// Check that both are identical

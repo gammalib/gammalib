@@ -30,6 +30,7 @@ using namespace std;
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_SPARSE_PENDING                    // Analyse pending values
 //#define G_DEBUG_SPARSE_INSERTION                 // Analyse value insertion
+//#define G_DEBUG_SPARSE_ADDITION                 // Analyse value addition
 //#define G_DEBUG_SPARSE_COMPRESSION   // Analyse zero row/column compression
 //#define G_DEBUG_SPARSE_MALLOC                  // Analyse memory management
 //#define G_DEBUG_SPARSE_STACK_PUSH           // Analyse stack column pushing
@@ -650,6 +651,10 @@ GVector GSparseMatrix::extract_col(int col) const
 
 /***************************************************************************
  *                      Insert vector column into matrix                   *
+ * ----------------------------------------------------------------------- *
+ * This is the main driver routine to insert data into a matrix. Note that *
+ * there is another instance of this function that takes a compressed      *
+ * array.                                                                  *
  ***************************************************************************/
 void GSparseMatrix::insert_col(const GVector& v, int col)
 {
@@ -712,7 +717,7 @@ void GSparseMatrix::insert_col(const GVector& v, int col)
   // increase the matrix size).
   int n_diff = n_vector - n_exist;
 	
-  // If we need space then allocate it, if we have to much space the free it
+  // If we need space then allocate it, if we have to much space then free it
   if (n_diff > 0) {
 	alloc_elements(i_start, n_diff);
 	#if defined(G_DEBUG_SPARSE_INSERTION)
@@ -761,14 +766,154 @@ void GSparseMatrix::insert_col(const GVector& v, int col)
 
 
 /***************************************************************************
+ *                    Insert compressed array into matrix                  *
+ * ----------------------------------------------------------------------- *
+ * This is the main driver routine to insert data into a matrix. Note that *
+ * there is another instance of this function that takes a vector.         *
+ ***************************************************************************/
+void GSparseMatrix::insert_col(const double* values, const int* rows, 
+                               int number, int col)
+{
+  // Debug header
+  #if defined(G_DEBUG_SPARSE_INSERTION)
+  cout << "GSparseMatrix::insert_col(v, i, n, " << col << "):" << endl;
+  cout << " Matrix Data : ";
+  for (int i = 0; i < m_elements; ++i)
+	cout << m_data[i] << " ";
+  cout << endl << " Matrix Row .: ";
+  for (int i = 0; i < m_elements; ++i)
+	cout << m_rowinx[i] << " ";
+  cout << endl << " Matrix Col .: ";
+  for (int i = 0; i < m_cols+1; ++i)
+	cout << m_colstart[i] << " ";
+  cout << endl;
+  cout << " Array Data .: ";
+  for (int i = 0; i < number; ++i)
+	cout << values[i] << " ";
+  cout << endl << " Array Row ..: ";
+  for (int i = 0; i < number; ++i)
+	cout << rows[i] << " ";
+  cout << endl;
+  #endif
+  
+  // Raise an exception if the column index is invalid
+  #if defined(G_RANGE_CHECK)
+  if (col >= m_cols)
+    throw out_of_range("GSparseMatrix::insert_col(const double*, const int*, int, int)", 
+	                   0, col, m_rows, m_cols);
+  #endif
+
+  // Raise an exception if the index array seems incompatible with matrix 
+  // dimensions
+  if (rows[number-1] >= m_rows)
+    throw matrix_vector_mismatch("GSparseMatrix::insert_col(const GVector&, int)", 
+	                             rows[number-1], m_rows, m_cols);
+
+  // If there is a pending element for this column then delete it since
+  // the vector overwrites this element
+  if (m_fill_val != 0.0 && m_fill_col == col) {
+    #if defined(G_DEBUG_SPARSE_PENDING)
+    cout << "GSparseMatrix::insert_col(const GVector&, int): pending value " <<
+	        m_fill_val << " for location (" << m_fill_row << "," << m_fill_col << 
+		    ") became obsolete" << endl;
+	#endif
+    m_fill_val = 0.0;
+	m_fill_row = 0;
+	m_fill_col = 0;
+  }
+
+  // Get the start and stop indices of the actual column and compute
+  // the number of exisiting elements in the column
+  int i_start = m_colstart[col];
+  int i_stop  = m_colstart[col+1];
+  int n_exist = i_stop - i_start;
+
+  // If the array is empty then make sure that the number of elements is 0 
+  // (we then just delete the existing column)
+  if (!values || !rows)
+	number = 0;
+	
+  // Compute the size difference for the new matrix. It is positive if
+  // the number of non-zero entries in the array is larger than the
+  // number of non-zero entries in the matrix (in this case we have to
+  // increase the matrix size).
+  int n_diff = number - n_exist;
+	
+  // If we need space then allocate it, if we have to much space then free it
+  if (n_diff > 0) {
+	alloc_elements(i_start, n_diff);
+	#if defined(G_DEBUG_SPARSE_INSERTION)
+    cout << " Insert .: " << n_diff << " elements at index " << i_start << endl;
+    #endif
+  }
+  else if (n_diff < 0) {
+	free_elements(i_start, -n_diff);
+	#if defined(G_DEBUG_SPARSE_INSERTION)
+    cout << " Remove .: " << -n_diff << " elements at index " << i_start << endl;
+    #endif
+  }
+	  
+  // Insert the array elements into the matrix
+  if (number > 0) {
+    for (int row = 0, i = i_start; row < number; ++row, ++i) {
+	  m_data[i]   = values[row];
+	  m_rowinx[i] = rows[row];
+    }
+  }
+	
+  // Update column start indices
+  for (int i = col+1; i <= m_cols; ++i)
+	m_colstart[i] += n_diff;
+
+  // Debugging: show sparse matrix after insertion
+  #if defined(G_DEBUG_SPARSE_INSERTION)
+  cout << " Out Data: ";
+  for (int i = 0; i < m_elements; ++i)
+	cout << m_data[i] << " ";
+  cout << endl << " Out Row : ";
+  for (int i = 0; i < m_elements; ++i)
+	cout << m_rowinx[i] << " ";
+  cout << endl << " Out Col : ";
+  for (int i = 0; i < m_cols+1; ++i)
+	cout << m_colstart[i] << " ";
+  cout << endl;
+  #endif
+  
+  // Return
+  return;
+}
+
+
+/***************************************************************************
  *                         Add vector to matrix column                     *
+ * ----------------------------------------------------------------------- *
+ * This is the main driver routine to add data to a matrix. It handles     *
+ * both normal and stack-based filled. Note that there is another instance *
+ * of this function that takes a compressed array.                         *
  ***************************************************************************/
 void GSparseMatrix::add_col(const GVector& v, int col)
 {
+  // Debug header
+  #if defined(G_DEBUG_SPARSE_ADDITION)
+  cout << "GSparseMatrix::add_col([" << v << "], " << col << "):" << endl;
+  cout << " In Data : ";
+  for (int i = 0; i < m_elements; ++i)
+	cout << m_data[i] << " ";
+  cout << endl << " In Row .: ";
+  for (int i = 0; i < m_elements; ++i)
+	cout << m_rowinx[i] << " ";
+  cout << endl << " In Col .: ";
+  for (int i = 0; i < m_cols+1; ++i)
+	cout << m_colstart[i] << " ";
+  cout << endl;
+  #endif
+
   // Initialise number of non-zero elements to 0
   int non_zero = 0;
 
-  // If we have a stack then try to push elements on stack first ...
+  // If we have a stack then try to push vector on stack first. Note that
+  // stack_push_column does its own argument verifications, so to avoid
+  // double checking we don't do anything before this call ...
   if (m_stack_data != NULL) {
     non_zero = stack_push_column(v, col);
 	if (non_zero == 0)
@@ -812,10 +957,169 @@ void GSparseMatrix::add_col(const GVector& v, int col)
 
 	// Insert vector into matrix
     insert_col(column, col);
-	
-	  
+
   }
+
+  // Debugging: show sparse matrix after addition
+  #if defined(G_DEBUG_SPARSE_ADDITION)
+  cout << " Out Data: ";
+  for (int i = 0; i < m_elements; ++i)
+	cout << m_data[i] << " ";
+  cout << endl << " Out Row : ";
+  for (int i = 0; i < m_elements; ++i)
+	cout << m_rowinx[i] << " ";
+  cout << endl << " Out Col : ";
+  for (int i = 0; i < m_cols+1; ++i)
+	cout << m_colstart[i] << " ";
+  cout << endl;
+  #endif
   
+  // Return
+  return;
+}
+
+
+/***************************************************************************
+ *                   Add compressed array to matrix column                 *
+ * ----------------------------------------------------------------------- *
+ * This is the main driver routine to add data to a matrix. It handles     *
+ * both normal and stack-based filled. Note that there is another instance *
+ * of this function that takes a vector.                                   *
+ ***************************************************************************/
+void GSparseMatrix::add_col(const double* values, const int* rows, 
+                            int number, int col)
+{
+  // Debug header
+  #if defined(G_DEBUG_SPARSE_ADDITION)
+  cout << "GSparseMatrix::add_col(v, i, n, " << col << "):" << endl;
+  cout << " Matrix Data : ";
+  for (int i = 0; i < m_elements; ++i)
+	cout << m_data[i] << " ";
+  cout << endl << " Matrix Row .: ";
+  for (int i = 0; i < m_elements; ++i)
+	cout << m_rowinx[i] << " ";
+  cout << endl << " Matrix Col .: ";
+  for (int i = 0; i < m_cols+1; ++i)
+	cout << m_colstart[i] << " ";
+  cout << endl;
+  cout << " Array Data .: ";
+  for (int i = 0; i < number; ++i)
+	cout << values[i] << " ";
+  cout << endl << " Array Row ..: ";
+  for (int i = 0; i < number; ++i)
+	cout << rows[i] << " ";
+  cout << endl;
+  #endif
+
+  // If we have a stack then try to push elements on stack first. Note that
+  // stack_push_column does its own argument verifications, so to avoid
+  // double checking we don't do anything before this call ...
+  if (m_stack_data != NULL) {
+    number = stack_push_column(values, rows, number, col);
+	if (number == 0)
+	  return;
+  }
+   
+  // ... otherwise check the arguments
+  else {
+    // If the array is empty there is nothing to do
+    if (!values || !rows || (number < 1))
+      return;
+
+    // Raise an exception if the column index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (col >= m_cols)
+      throw out_of_range("GSparseMatrix::add_col(const double*, const int*, int, int)", 
+	                     0, col, m_rows, m_cols);
+    #endif
+
+    // Raise an exception if the index array seems incompatible with matrix 
+    // dimensions
+    if (rows[number-1] >= m_rows)
+      throw matrix_vector_mismatch("GSparseMatrix::add_col(const double*, const int*, int, int)", 
+	                               rows[number-1], m_rows, m_cols);
+  } // endelse: there was no stack
+
+  // Get indices of column in matrix
+  int i_start = m_colstart[col];
+  int i_stop  = m_colstart[col+1];
+
+  // Case A: the column exists in the matrix, so mix new elements with existing
+  // data
+  if (i_start < i_stop) {
+  
+    // Allocate workspace to hold combined column
+    int     wrk_size   = number + i_stop - i_start;
+	double* wrk_double = new double[wrk_size];
+    int*    wrk_int    = new int[wrk_size];
+    if (wrk_double == NULL || wrk_int == NULL)
+	  throw mem_alloc("GSparseMatrix::add_col(const double*, const int*, int, int)", 
+	                  wrk_size);
+
+    // Mix values while both are alive
+	int k     = 0;
+	int index = 0;
+	int row_m = m_rowinx[i_start];
+	int row_s = rows[k];
+	while (i_start < i_stop && k < number) {
+	  if (row_m == row_s) {                      // Case A: element in matrix and array
+	    wrk_double[index] = m_data[i_start] + values[k];
+		wrk_int[index]    = row_m;
+		row_m             = m_rowinx[++i_start];
+		row_s             = rows[++k];
+	  }
+	  else if (row_m < row_s) {                  // Case B: element in matrix only
+		wrk_double[index] = m_data[i_start];
+		wrk_int[index]    = row_m;
+		row_m             = m_rowinx[++i_start];
+	  }
+	  else {                                     // Case C: element in array only
+		wrk_double[index] = values[k];
+		wrk_int[index]    = row_s;
+		row_s             = rows[++k];
+	  } 
+	  index++;
+	} // endwhile: mixing
+
+	// Add remaining matrix elements if still alive
+	for (int i = i_start; i < i_stop; ++i) {
+	  wrk_double[index] = m_data[i];
+	  wrk_int[index++]  = m_rowinx[i];
+	}
+
+	// Add remaining array elements if still alive
+	for (int k2 = k; k2 < number; ++k2) {
+	  wrk_double[index] = values[k2];
+	  wrk_int[index++]  = rows[k2];
+	}
+
+    // Insert mixed column
+    insert_col(wrk_double, wrk_int, index, col);
+
+    // Free workspace
+	delete [] wrk_int;
+	delete [] wrk_double;
+  
+  } // endif: Case A
+  
+  // Case B: the column does not yet exist in the matrix, so just insert it
+  else
+    insert_col(values, rows, number, col);
+
+  // Debugging: show sparse matrix after insertion
+  #if defined(G_DEBUG_SPARSE_ADDITION)
+  cout << " Out Data: ";
+  for (int i = 0; i < m_elements; ++i)
+	cout << m_data[i] << " ";
+  cout << endl << " Out Row : ";
+  for (int i = 0; i < m_elements; ++i)
+	cout << m_rowinx[i] << " ";
+  cout << endl << " Out Col : ";
+  for (int i = 0; i < m_cols+1; ++i)
+	cout << m_colstart[i] << " ";
+  cout << endl;
+  #endif
+
   // Return
   return;
 }
@@ -1228,7 +1532,7 @@ int GSparseMatrix::stack_push_column(const GVector& v, int col)
     throw matrix_vector_mismatch("GSparseMatrix::stack_push_column(const GVector&, int)", 
 	                             v.m_num, m_rows, m_cols);
 
-  // Determines how many elements should be stored in stack
+  // Determine how many elements should be stored in stack
   int elements = 0;
   for (int i = 0; i < v.m_num; ++i) {
     if (v.m_data[i] != 0.0)
@@ -1276,6 +1580,91 @@ int GSparseMatrix::stack_push_column(const GVector& v, int col)
   // Debug: show stack information  
   #if defined(G_DEBUG_SPARSE_STACK_PUSH)
   cout << "GSparseMatrix::stack_push_column(v, col=" << col << ")" << endl;
+  cout << " Number of entries: " << m_stack_entries << endl;
+  cout << " Entry columns ...:";
+  for (int i = 0; i < m_stack_entries; ++i)
+    cout << " " << m_stack_colinx[i];
+  cout << endl;
+  cout << " Entry starts ....:";
+  for (int i = 0; i < m_stack_entries; ++i)
+    cout << " " << m_stack_start[i];
+  cout << " (next at " << m_stack_start[m_stack_entries] << ")" << endl;
+  cout << " Stack data ......:";
+  for (int i = 0; i < m_stack_start[m_stack_entries]; ++i)
+    cout << " " << m_stack_data[i];
+  cout << endl;
+  cout << " Stack rows ......:";
+  for (int i = 0; i < m_stack_start[m_stack_entries]; ++i)
+    cout << " " << m_stack_rowinx[i];
+  cout << endl;
+  #endif
+	  
+  // Return success
+  return 0;
+}
+
+
+/***************************************************************************
+ *                Push a compressed array on the matrix stack              *
+ * ----------------------------------------------------------------------- *
+ * The return value indicates if the vector was successfully pushed onto   *
+ * the stack (=0) or if the elements need to be added directly (in this    *
+ * case the return value equals to the number of non-zero elements in the  *
+ * vector.                                                                 *
+ ***************************************************************************/
+int GSparseMatrix::stack_push_column(const double* values, const int* rows,
+                                     int number, int col)
+{
+  // If the array is empty there is nothing to do
+  if (!values || !rows || (number < 1))
+    return 0;
+
+  // If there is no stack or the stack can not hold the requested number of 
+  // elements then report number of array elements to the caller
+  if (m_stack_data == NULL || number > m_stack_size)
+    return number;
+
+  // Raise an exception if the column index is invalid
+  #if defined(G_RANGE_CHECK)
+  if (col >= m_cols)
+    throw out_of_range("GSparseMatrix::stack_push_column(const double*, const int*, int, int)", 0, col, m_rows, m_cols);
+  #endif
+
+  // Raise an exception if the index array seems incompatible with matrix 
+  // dimensions
+  if (rows[number-1] >= m_rows)
+    throw matrix_vector_mismatch("GSparseMatrix::stack_push_column(const double*, const int*, int, int)", rows[number-1], m_rows, m_cols);
+
+  // If the specified column is already in the stack then flush stack (we don't
+  // allow the same column twice)
+  for (int i = 0; i < m_stack_entries; ++i) {
+    if (col == m_stack_colinx[i]) {
+      stack_flush();
+	  break;
+	}
+  }
+	
+  // If the stack is full then flush it before pushing the array onto it
+  if ((m_stack_entries >= m_stack_max_entries) ||
+      (number          >= (m_stack_size - m_stack_start[m_stack_entries])))
+	stack_flush();
+
+  // Push the array on the stack
+  int inx = m_stack_start[m_stack_entries];
+  for (int i = 0; i < number; ++i) {
+	m_stack_data[inx]   = values[i];
+	m_stack_rowinx[inx] = rows[i];
+	inx++;
+  }
+  
+  // Store entry information and initialise start of next entry
+  m_stack_colinx[m_stack_entries] = col;     // Store column index for entry
+  m_stack_entries++;                         // Increase the # of entries
+  m_stack_start[m_stack_entries] = inx;      // Set start pointer for next entry
+
+  // Debug: show stack information  
+  #if defined(G_DEBUG_SPARSE_STACK_PUSH)
+  cout << "GSparseMatrix::stack_push_column(v, i, n, col=" << col << ")" << endl;
   cout << " Number of entries: " << m_stack_entries << endl;
   cout << " Entry columns ...:";
   for (int i = 0; i < m_stack_entries; ++i)
@@ -1363,29 +1752,32 @@ void GSparseMatrix::stack_flush(void)
 	  int k_stop  = m_stack_start[entry+1];
 	  int row_m   = m_rowinx[i_start];
 	  int row_s   = m_stack_rowinx[k_start];
-	  if (k_start < k_stop && i_start < i_stop) {
-	  	wrk_int[col] = -(entry+2);                 // Flag that we have to mix
-	    while (i_start < i_stop || k_start < k_stop) {
-	      if (row_m == row_s) {                    // Case A: element in matrix and stack
-	        i_start++;
-	        k_start++;
-	        row_m = (i_start < i_stop) ? m_rowinx[i_start]       : m_rows+1;
-	        row_s = (k_start < k_stop) ? m_stack_rowinx[k_start] : m_rows+1;
-		  }
-		  else if (row_m < row_s) {                // Case B: element in matrix only
-	        i_start++;
-	        row_m = (i_start < i_stop) ? m_rowinx[i_start] : m_rows+1;
-		  }
-		  else {                                   // Case C: element in stack only
-	        k_start++;
-	        row_s = (k_start < k_stop) ? m_stack_rowinx[k_start] : m_rows+1;
-		    new_elements++;
-		  }
-        } // endwhile: mixing
-	  } // endif: there were elements in stack
+	  
+	  // Flag that this is a mixed column
+	  wrk_int[col] = -(entry+2);
+		
+	  // Mix while both are alive
+	  while (i_start < i_stop && k_start < k_stop) {
+		if (row_m == row_s) {                    // Case A: element in matrix and stack
+		  row_m = m_rowinx[++i_start];             // Get next matrix row number
+		  row_s = m_stack_rowinx[++k_start];       // Get next stack row number
+		}
+		else if (row_m < row_s) {                // Case B: element in matrix only
+		  row_m = m_rowinx[++i_start];             // Get next matrix row number
+		}
+		else {                                   // Case C: element in stack only
+		  row_s = m_stack_rowinx[++k_start];       // Get next stack row number
+		  new_elements++;                          // Count the new element
+		}
+	  } // endwhile: mixing while both are alive
+		
+	  // Add remaining stack elements if still alive
+	  if (k_start < k_stop)
+		new_elements += (k_stop - k_start);
+		
 	} // endif: column existed in the matrix
 
-	// Column did not exists in the matrix, so it's newand we add all elements 
+	// Column did not exists in the matrix, so it's new and we add all elements 
 	else {
 	  wrk_int[col]  = (entry+2);
 	  new_elements += (m_stack_start[entry+1] - m_stack_start[entry]);
@@ -1458,35 +1850,49 @@ void GSparseMatrix::stack_flush(void)
 	  int k_stop   = m_stack_start[entry+1];
 	  int row_m    = m_rowinx[i_start];
 	  int row_s    = m_stack_rowinx[k_start];
-	  if (k_start < k_stop && i_start < i_stop) {
-	    while (i_start < i_stop || k_start < k_stop) {
-	      if (row_m == row_s) {                    // Case A: element in matrix and stack
-		    new_data[index]    = m_data[i_start] + m_stack_data[k_start];
-		    new_rowinx[index]  = row_m;
-		    i_start++;
-		    k_start++;
-		    row_m = (i_start < i_stop) ? m_rowinx[i_start]       : m_rows+1;
-		    row_s = (k_start < k_stop) ? m_stack_rowinx[k_start] : m_rows+1;
-		  }
-		  else if (row_m < row_s) {                // Case B: element in matrix only
-		    new_data[index]   = m_data[i_start];
-		    new_rowinx[index] = row_m;
-		    i_start++;
-		    row_m = (i_start < i_stop) ? m_rowinx[i_start] : m_rows+1;
-		  }
-		  else {                                   // Case C: element in stack only
-		    new_data[index]   = m_stack_data[k_start];
-		    new_rowinx[index] = row_s;
-		    k_start++;
-		    row_s = (k_start < k_stop) ? m_stack_rowinx[k_start] : m_rows+1;
-		  } 
-		  index++;
-          #if defined(G_DEBUG_SPARSE_STACK_FLUSH)
-		  num_mix++;
-		  #endif
-        } // endwhile: mixing
-	  } // endif: there were elements in stack
-	  
+
+	  // Mix while both are alive
+	  while (i_start < i_stop && k_start < k_stop) {
+		if (row_m == row_s) {                    // Case A: element in matrix and stack
+		  new_data[index]   = m_data[i_start] + m_stack_data[k_start];
+		  new_rowinx[index] = row_m;
+		  row_m             = m_rowinx[++i_start];
+		  row_s             = m_stack_rowinx[++k_start];
+		}
+		else if (row_m < row_s) {                // Case B: element in matrix only
+		  new_data[index]   = m_data[i_start];
+		  new_rowinx[index] = row_m;
+		  row_m             = m_rowinx[++i_start];
+		}
+		else {                                   // Case C: element in stack only
+		  new_data[index]   = m_stack_data[k_start];
+		  new_rowinx[index] = row_s;
+		  row_s             = m_stack_rowinx[++k_start];
+		} 
+		index++;
+		#if defined(G_DEBUG_SPARSE_STACK_FLUSH)
+		num_mix++;
+		#endif
+	  } // endwhile: mixing
+
+	  // Add remaining matrix elements if still alive
+	  for (int i = i_start; i < i_stop; ++i) {
+		new_data[index]     = m_data[i];
+		new_rowinx[index++] = m_rowinx[i];
+		#if defined(G_DEBUG_SPARSE_STACK_FLUSH)
+		num_mix++;
+		#endif
+	  }
+
+	  // Add remaining stack elements if still alive
+	  for (int k = k_start; k < k_stop; ++k) {
+		new_data[index]     = m_stack_data[k];
+		new_rowinx[index++] = m_stack_rowinx[k];
+		#if defined(G_DEBUG_SPARSE_STACK_FLUSH)
+		num_mix++;
+		#endif
+	  }
+
 	} // endelse: we had to mix the entries
 
 	// Store actual index in column start array
@@ -1496,7 +1902,7 @@ void GSparseMatrix::stack_flush(void)
 
   // Dump number of elements in new matrix after addition
   #if defined(G_DEBUG_SPARSE_STACK_FLUSH)
-  cout << " Added elements ..: " << index << " (sould be " << elements << ")" << endl;
+  cout << " Added elements ..: " << index << " (should be " << elements << ")" << endl;
   cout << " - Matrix only ...: " << num_orig << endl;
   cout << " - Stack only ....: " << num_stack << endl;
   cout << " - Matrix & Stack : " << num_mix << endl;

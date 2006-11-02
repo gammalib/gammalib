@@ -1,68 +1,61 @@
-Copyright 1994, 1995, 1996, 1999, 2000, 2001, 2002 Free Software
-Foundation, Inc.
+GammaLib - Gamma-Ray Astronomy Library
+======================================
 
-   This file is free documentation; the Free Software Foundation gives
-unlimited permission to copy, distribute and modify it.
+Installation Instructions
+=========================
 
-Basic Installation
-==================
+GammaLib follows the standard GNU installation procedure.  To compile
+GammaLib you will need an ANSI C++-compiler.  After unpacking the
+distribution the Makefiles can be prepared using the configure command,
 
-   These are generic installation instructions.
+  ./configure
 
-   The `configure' shell script attempts to guess correct values for
-various system-dependent variables used during compilation.  It uses
-those values to create a `Makefile' in each directory of the package.
-It may also create one or more `.h' files containing system-dependent
-definitions.  Finally, it creates a shell script `config.status' that
-you can run in the future to recreate the current configuration, and a
-file `config.log' containing compiler output (useful mainly for
-debugging `configure').
+You can then build the library by typing,
 
-   It can also use an optional file (typically called `config.cache'
-and enabled with `--cache-file=config.cache' or simply `-C') that saves
-the results of its tests to speed up reconfiguring.  (Caching is
-disabled by default to prevent problems with accidental use of stale
-cache files.)
+  make
 
-   If you need to do unusual things to compile the package, please try
-to figure out how `configure' could check whether to do them, and mail
-diffs or instructions to the address given in the `README' so they can
-be considered for the next release.  If you are using the cache, and at
-some point `config.cache' contains results you don't want to keep, you
-may remove or edit it.
+Both static and shared versions of the libraries will be compiled by
+default.  Compilation of shared libraries can be turned off by
+specifying the `--disable-shared' option to `configure', e.g.
+  
+  ./configure --disable-shared
 
-   The file `configure.ac' (or `configure.in') is used to create
-`configure' by a program called `autoconf'.  You only need
-`configure.ac' if you want to change it or regenerate `configure' using
-a newer version of `autoconf'.
+If you encounter problems building the library try using the above
+option, because some platforms do not support shared libraries.
 
-The simplest way to compile this package is:
+An extensive test suite is available.  After compiling the library
+with "make", it can be invoked with "make check" at the top level.
+The test output should be directed to a file rather than a terminal,
+with the command,
 
-  1. `cd' to the directory containing the package's source code and type
-     `./configure' to configure the package for your system.  If you're
-     using `csh' on an old version of System V, you might need to type
-     `sh ./configure' instead to prevent `csh' from trying to execute
-     `configure' itself.
 
-     Running `configure' takes awhile.  While running, it prints some
-     messages telling which features it is checking for.
+   make check > log 2>&1
 
-  2. Type `make' to compile the package.
+to allow any errors to be examined in detail.
 
-  3. Optionally, type `make check' to run any self-tests that come with
-     the package.
+The library can be installed using the command,
 
-  4. Type `make install' to install the programs and any data files and
-     documentation.
+  make install
 
-  5. You can remove the program binaries and object files from the
-     source code directory by typing `make clean'.  To also remove the
-     files that `configure' created (so you can compile the package for
-     a different kind of computer), type `make distclean'.  There is
-     also a `make maintainer-clean' target, but that is intended mainly
-     for the package's developers.  If you use it, you may have to get
-     all sorts of other programs in order to regenerate files that came
-     with the distribution.
+The default installation directory prefix is /usr/local.  Consult the
+"Further Information" section below for instructions on installing the
+library in another location or changing other default compilation
+options.
+
+
+OPTIONS TO CONFIGURE SCRIPT:
+============================
+
+Apart form the further down mentioned options, the following
+options can be used:
+
+--enable-range-check       performs index range checking (slower code)
+
+
+For example, if index range checking should be performed, use
+
+./configure --enable-range-check
+
 
 Compilers and Options
 =====================
@@ -78,6 +71,7 @@ is an example:
      ./configure CC=c89 CFLAGS=-O2 LIBS=-lposix
 
    *Note Defining Variables::, for more details.
+
 
 Compiling For Multiple Architectures
 ====================================
@@ -95,6 +89,7 @@ variable, you have to compile the package for one architecture at a
 time in the source code directory.  After you have installed the
 package for one architecture, use `make distclean' before reconfiguring
 for another architecture.
+
 
 Installation Names
 ==================
@@ -119,6 +114,7 @@ you can set and what kinds of files go in them.
 with an extra prefix or suffix on their names by giving `configure' the
 option `--program-prefix=PREFIX' or `--program-suffix=SUFFIX'.
 
+
 Optional Features
 =================
 
@@ -133,6 +129,7 @@ package recognizes.
 find the X include and library files automatically, but if it doesn't,
 you can use the `configure' options `--x-includes=DIR' and
 `--x-libraries=DIR' to specify their locations.
+
 
 Specifying the System Type
 ==========================
@@ -164,6 +161,7 @@ platform different from the build platform, you should specify the
 "host" platform (i.e., that on which the generated programs will
 eventually be run) with `--host=TYPE'.
 
+
 Sharing Defaults
 ================
 
@@ -174,6 +172,7 @@ default values for variables like `CC', `cache_file', and `prefix'.
 `PREFIX/etc/config.site' if it exists.  Or, you can set the
 `CONFIG_SITE' environment variable to the location of the site script.
 A warning: not all `configure' scripts look for a site script.
+
 
 Defining Variables
 ==================
@@ -189,8 +188,9 @@ them in the `configure' command line, using `VAR=value'.  For example:
 will cause the specified gcc to be used as the C compiler (unless it is
 overridden in the site shell script).
 
-`configure' Invocation
-======================
+
+Operation Controls
+==================
 
    `configure' recognizes the following options to control how it
 operates.

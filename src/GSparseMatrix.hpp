@@ -98,7 +98,9 @@ public:
   virtual GVector extract_row(int row) const;
   virtual GVector extract_col(int col) const;
   virtual void    insert_col(const GVector& v, int col);
+  virtual void    insert_col(const double* values, const int* rows, int number, int col);
   virtual void    add_col(const GVector& v, int col);
+  virtual void    add_col(const double* values, const int* rows, int number, int col);
   virtual void    set_mem_block(int block);
   virtual GMatrix convert_to_full() const;
   //TBD virtual GMatrix extract_lower_triangle() const;
@@ -110,6 +112,7 @@ public:
   // Stack functions
   virtual void stack_init(int size = 0, int entries = 0);
   virtual int  stack_push_column(const GVector& v, int col);
+  virtual int  stack_push_column(const double* values, const int* rows, int number, int col);
   virtual void stack_flush(void);
   virtual void stack_destroy(void);
 

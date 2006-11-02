@@ -102,6 +102,7 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
+GAMMALIB_LT_VERSION = @GAMMALIB_LT_VERSION@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -110,12 +111,8 @@ LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
-LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
-MAINT = @MAINT@
-MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
-MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
@@ -173,22 +170,18 @@ TESTS = test_GVector \
 	test_GSparseMatrix
 
 test_GVector_SOURCES = test_GVector.cpp
-#test_GVector_LDADD = ../src/libgamma.la
 test_GVector_LDADD = ../src/libgamma.a
 test_GMatrix_SOURCES = test_GMatrix.cpp
-#test_GMatrix_LDADD = ../src/libgamma.la
 test_GMatrix_LDADD = ../src/libgamma.a
 test_GSymMatrix_SOURCES = test_GSymMatrix.cpp
-#test_GSymMatrix_LDADD = ../src/libgamma.la
 test_GSymMatrix_LDADD = ../src/libgamma.a
 test_GSparseMatrix_SOURCES = test_GSparseMatrix.cpp
-#test_GSparseMatrix_LDADD = ../src/libgamma.la
-test_GSparseMatrix_LDADD = ../src/libgamma.a -lc_p
+test_GSparseMatrix_LDADD = ../src/libgamma.a
 all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .cpp .lo .o .obj
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -213,9 +206,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-$(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
+$(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-$(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
+$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
 clean-checkPROGRAMS:

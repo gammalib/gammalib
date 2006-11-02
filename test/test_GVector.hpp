@@ -15,8 +15,7 @@
 #define TEST_VECTOR_HPP
 
 /* __ Includes ___________________________________________________________ */
-//#include "../src/gammalib.hpp"
-#include "../src/GVector.hpp"
+#include "../src/GammaLib.hpp"
 #include <iostream>                           // cout, cerr
 #include <stdexcept>                          // std::exception
 #include <math.h>
