@@ -335,7 +335,7 @@ int main(void)
     cout << "GSymMatrix - Test 1: Allocate zero matrix: ";
     GSymMatrix test1(0,0);
   }
-  catch (empty &e) {
+  catch (GException::empty &e) {
     cout << "ok." << endl;
   }
   catch (exception &e) {
@@ -446,7 +446,7 @@ int main(void)
   try {
 	GVector v_test6 = bigger*v_test;
   }
-  catch (GMatrix::matrix_vector_mismatch &e) {
+  catch (GException::matrix_vector_mismatch &e) {
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -472,7 +472,7 @@ int main(void)
   try {
 	GSymMatrix m_test7 = m_test*bigger;
   }
-  catch (GMatrix::matrix_mismatch &e) {
+  catch (GException::matrix_mismatch &e) {
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -481,7 +481,7 @@ int main(void)
   try {
 	GSymMatrix m_test7 = bigger*m_test;
   }
-  catch (GMatrix::matrix_mismatch &e) {
+  catch (GException::matrix_mismatch &e) {
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -593,7 +593,7 @@ int main(void)
 	result  = m_test;
 	result += bigger;
   }
-  catch (GMatrix::matrix_mismatch) {
+  catch (GException::matrix_mismatch) {
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -694,7 +694,7 @@ int main(void)
 	}
 	//
 	// convert_to_full()
-	GMatrix m_test11 = m_test.convert_to_full();
+	GMatrix m_test11 = m_test;
     if (!check_matrix(m_test11, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt convert_to_full() operator." << endl;
 	  cout << m_test11 << endl;
@@ -732,7 +732,7 @@ int main(void)
 	GMatrix    cd_lower     = cd.extract_lower_triangle();
 	GMatrix    cd_upper     = transpose(cd_lower);
 	GMatrix    cd_product   = cd_lower * cd_upper;
-	GMatrix    cd_residuals = m_test.convert_to_full() - cd_product;
+	GMatrix    cd_residuals = m_test - cd_product;
 	//
 	double res = (fabs(cd_residuals)).max();
 	if (res < 1.0e-15)
@@ -750,7 +750,7 @@ int main(void)
 	GMatrix    cd_zero_lower     = cd_zero.extract_lower_triangle();
 	GMatrix    cd_zero_upper     = transpose(cd_zero_lower);
 	GMatrix    cd_zero_product   = cd_zero_lower * cd_zero_upper;
-	GMatrix    cd_zero_residuals = m_test_zero.convert_to_full() - cd_zero_product;
+	GMatrix    cd_zero_residuals = m_test_zero - cd_zero_product;
 	//
 	res = (fabs(cd_zero_residuals)).max();
 	if (res < 1.0e-15)

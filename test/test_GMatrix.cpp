@@ -282,6 +282,216 @@ void test_output(const GMatrix& m_test)
 
 
 /***************************************************************************
+ *                     Test: Conversion between matrix types               *
+ ***************************************************************************/
+void test_conversion(void)
+{
+  cout << "Test GMatrix: Matrix conversions: ";
+  try {
+    //
+	// Setup a symmetric matrix
+	int     num = 10;
+	GMatrix symmetric(num,num);
+	for (int i = 0; i < num; ++i) {
+	  for (int j = 0; j < num; ++j)
+	    symmetric(i,j) = (i+j+1)/2.0;
+	}
+    cout << ".";
+	//
+	// Convert symmetric matrix into GSymMatrix object
+	GSymMatrix converted = symmetric;
+    cout << ".";
+	//
+	// Convert GSymMatrix back to full matrix
+    GMatrix back_convert = converted;
+    cout << ".";
+	//
+	// Compare back converted matrix to original one. They should be identical
+	if (symmetric != back_convert) {
+	  cout << endl << "TEST ERROR: Unable to convert matrixes (symmetric)." << endl;
+	  cout << "Original matrix " << symmetric << endl;
+	  cout << "GSymMatrix matrix " << converted << endl;
+	  cout << "Back converted matrix " << back_convert << endl;
+      throw;
+	}
+	//
+	// Determine the fill of the matrix. It should be 1.0
+	double fill = back_convert.fill();
+	if (fabs(fill-1.0) > 1.0e-15) {
+	  cout << endl << "TEST ERROR: Bad fill " << fill << " determined (expected 1.0)." <<
+	       endl;
+	  throw;
+	}
+    cout << ".";
+	//
+	// Extract lower triangle and check values
+	GMatrix lower = symmetric.extract_lower_triangle();
+	int ok = 1;
+	for (int j = 1; j < num; ++j) {
+	  for (int i = 0; i < j; ++i) {
+	    if (lower(i,j) != 0.0)
+		  ok = 0;
+	  }
+	}
+	for (int j = 0; j < num; ++j) {
+	  for (int i = j; i < num; ++i) {
+	    if (lower(i,j) != symmetric(i,j))
+		  ok = 0;
+	  }
+	}
+	if (!ok) {
+	  cout << endl << "TEST ERROR: Corrupt extract_lower_triangle." << endl;
+	  cout << "Original matrix " << symmetric << endl;
+	  cout << "Lower triangle matrix " << lower << endl;
+      throw;
+	}
+    cout << ".";
+	//
+	// Extract upper triangle and check values
+	GMatrix upper = symmetric.extract_upper_triangle();
+	ok = 1;
+	for (int j = 0; j < num; ++j) {
+	  for (int i = j+1; i < num; ++i) {
+	    if (upper(i,j) != 0.0)
+		  ok = 0;
+	  }
+	}
+	for (int j = 0; j < num; ++j) {
+	  for (int i = 0; i <= j; ++i) {
+	    if (upper(i,j) != symmetric(i,j))
+		  ok = 0;
+	  }
+	}
+	if (!ok) {
+	  cout << endl << "TEST ERROR: Corrupt extract_upper_triangle." << endl;
+	  cout << "Original matrix " << symmetric << endl;
+	  cout << "Upper triangle matrix " << upper << endl;
+      throw;
+	}
+    cout << ".";
+	//
+	// Now make the matrix unsymmetric
+	symmetric(0,num-1) = 1000.0;
+	//
+	// Try converting now into GSymMatrix object (this should fail)
+	try {
+	  converted = symmetric;
+	}
+    catch (GException::matrix_not_symmetric &e) {
+      cout << ".";
+	}
+    catch (exception &e) {
+      cout << e.what() << endl;
+	  throw;
+    }
+	//
+	// Now zero some elements to emulate a sparse matrix
+	symmetric(0,num-1) = 0.0;
+	for (int i = 5; i < 8; ++i) {
+	  for (int j = i-2; j < i+2; ++j)
+	    symmetric(i,j) = 0.0;
+	}
+    cout << ".";
+	//
+	// Convert symmetric matrix into GSparseMatrix object
+	GSparseMatrix sparse = symmetric;
+    cout << ".";
+	//
+	// Convert GSparseMatrix back to full matrix
+    back_convert = sparse;
+    cout << ".";
+	//
+	// Compare back converted matrix to original one. They should be identical
+	if (symmetric != back_convert) {
+	  cout << endl << "TEST ERROR: Unable to convert matrixes (sparse)." << endl;
+	  cout << "Original matrix " << symmetric << endl;
+	  cout << "GSparseMatrix matrix " << sparse << endl;
+	  cout << "Back converted matrix " << back_convert << endl;
+      throw;
+	}	
+    cout << ".";
+  }
+  catch (exception &e) {
+    cout << e.what() << endl;
+	throw;
+  }
+  cout << " ok." << endl;
+
+  // Return
+  return;
+}
+
+
+/***************************************************************************
+ *                        Test: extraction and insertion                   *
+ ***************************************************************************/
+void test_extract(void)
+{
+  cout << "Test GMatrix: Vector extraction, insertion and addition: ";
+  try {
+    //
+	// Set-up test matrix
+    int rows = 10;
+    int cols = 20;
+    GMatrix test(rows, cols);
+	//
+	// Add and extract column vectors
+	for (int col = 0; col < cols; ++col) {
+	  GVector column(rows);
+	  for (int row = 0; row < rows; ++row)
+	    column(row) = (col+1)*100.0 + (row+1)*1.0;
+	  test.add_col(column, col);
+	  GVector check = test.extract_col(col);
+	  if (check != column) {
+	    cout << endl << "TEST ERROR: Unable to add and extract columns." << endl;
+	    cout << "Added column ...: " << column << endl;
+	    cout << "Extracted column: " << check << endl;
+        throw;
+	  }
+	}
+	cout << ".";
+	//
+	// Insert and extract column vectors
+	for (int col = 0; col < cols; ++col) {
+	  GVector column(rows);
+	  for (int row = 0; row < rows; ++row)
+	    column(row) = (col+1)*100.0 + (row+1)*1.0;
+	  test.insert_col(column, col);
+	  GVector check = test.extract_col(col);
+	  if (check != column) {
+	    cout << endl << "TEST ERROR: Unable to insert and extract columns." << endl;
+	    cout << "Inserted column : " << column << endl;
+	    cout << "Extracted column: " << check << endl;
+        throw;
+	  }
+	}
+	cout << ".";
+	//
+	// Extract rows
+    for (int row = 0; row < rows; ++row) {
+	  GVector v_row(cols);
+	  for (int col = 0; col < cols; ++col)
+	    v_row(col) = (col+1)*100.0 + (row+1)*1.0;
+	  GVector check = test.extract_row(row);
+	  if (check != v_row) {
+	    cout << endl << "TEST ERROR: Unable to extract rows." << endl;
+	    cout << "Inserted row : " << v_row << endl;
+	    cout << "Extracted row: " << check << endl;
+        throw;
+	  }
+	}
+	cout << ".";
+  }
+  catch (exception &e) {
+	cout << endl << "TEST ERROR: Corrupt vector extraction, insertion, or addition." << endl;
+    cout << e.what() << endl;
+	throw;
+  }
+  cout << ". ok." << endl;
+}
+
+
+/***************************************************************************
  *                            Main test function                           *
  ***************************************************************************/
 int main(void)
@@ -304,13 +514,15 @@ int main(void)
 
   // Execute the tests
   test_output(m_test);
+  test_conversion();
+  test_extract();
 
   // Test 1: Allocate zero matrix
   try {
     cout << "GMatrix - Test 1: Allocate zero matrix: ";
     GMatrix test1(0,0);
   }
-  catch (empty &e) {
+  catch (GException::empty &e) {
     cout << "ok." << endl;
   }
   catch (exception &e) {
@@ -448,7 +660,7 @@ int main(void)
   try {
 	GVector v_test7 = bigger*v_test;
   }
-  catch (GMatrix::matrix_vector_mismatch &e) {
+  catch (GException::matrix_vector_mismatch &e) {
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -474,7 +686,7 @@ int main(void)
   try {
 	GMatrix m_test8 = m_test*bigger;
   }
-  catch (GMatrix::matrix_mismatch &e) {
+  catch (GException::matrix_mismatch &e) {
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -483,7 +695,7 @@ int main(void)
   try {
 	GMatrix m_test8 = bigger*m_test;
   }
-  catch (GMatrix::matrix_mismatch &e) {
+  catch (GException::matrix_mismatch &e) {
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -595,7 +807,7 @@ int main(void)
 	result  = m_test;
 	result += bigger;
   }
-  catch (GMatrix::matrix_mismatch) {
+  catch (GException::matrix_mismatch) {
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -617,7 +829,7 @@ int main(void)
 	double max = m_test.max();
     if (!check_matrix_max(max)) {
       cout << endl << "TEST ERROR: Corrupt GMatrix.max() function." << endl;
-	  cout << min << endl;
+	  cout << max << endl;
 	  throw;
 	}
 	//

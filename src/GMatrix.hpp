@@ -15,23 +15,19 @@
 #define GMATRIX_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GException.hpp"
-#include "GVector.hpp"
+#include "GMatrixBase.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 using namespace std;
 
-/* __ Enumerators ________________________________________________________ */
-
-/* __ Structures _________________________________________________________ */
-
-/* __ Prototypes _________________________________________________________ */
-
 
 /***************************************************************************
  *                         GMatrix class definition                        *
+ * ----------------------------------------------------------------------- *
+ * GMatrix implements a full matrix storage class. It derives from the     *
+ * abstract base class GMatrixBase.                                        *
  ***************************************************************************/
-class GMatrix {
+class GMatrix : public GMatrixBase {
   // Binary operator friends
   friend GMatrix operator* (const double& a,  const GMatrix& b);
   friend GMatrix operator* (const GMatrix& a, const double& b);
@@ -48,116 +44,55 @@ public:
   // Constructors and destructors
   GMatrix(int rows, int cols);
   GMatrix(const GMatrix& m);
+  GMatrix(const GSymMatrix& m);
+  GMatrix(const GSparseMatrix& m);
   virtual ~GMatrix();
 
-  // Matrix element access operators
-  virtual double& operator() (int row, int col);
+  // Operators
+  virtual GMatrix&      operator= (const GMatrix& m);
+  virtual double&       operator() (int row, int col);
   virtual const double& operator() (int row, int col) const;
+  virtual GMatrix       operator+ (const GMatrix& m) const;
+  virtual GMatrix       operator- (const GMatrix& m) const;
+  virtual GMatrix       operator* (const GMatrix& m) const;
+  virtual GVector       operator* (const GVector& v) const;
+  //_USE_BASE virtual int           operator== (const GMatrix& m) const;
+  //_USE_BASE virtual int           operator!= (const GMatrix& m) const;
+  virtual GMatrix       operator- () const;
+  virtual GMatrix&      operator+= (const GMatrix& m);
+  virtual GMatrix&      operator-= (const GMatrix& m);
+  virtual GMatrix&      operator*= (const GMatrix& m);
+  virtual GMatrix&      operator*= (const double& s);
+  virtual GMatrix&      operator/= (const double& s);
 
-  // Matrix assignment operators
-  virtual GMatrix& operator= (const GMatrix& m);
-
-  // Binary operators
-  virtual GMatrix operator+ (const GMatrix& m) const;
-  virtual GMatrix operator- (const GMatrix& m) const;
-  virtual GMatrix operator* (const GMatrix& m) const;
-  virtual GVector operator* (const GVector& v) const;
-  virtual int     operator== (const GMatrix& m) const;
-  virtual int     operator!= (const GMatrix& m) const;
-
-  // Unary operators
-  GMatrix operator- () const;
-  virtual GMatrix& operator+= (const GMatrix& m);
-  virtual GMatrix& operator-= (const GMatrix& m);
-  virtual GMatrix& operator*= (const GMatrix& m);
-  virtual GMatrix& operator*= (const double& d);
-  virtual GMatrix& operator/= (const double& d);
-
-  // Matrix functions
-  virtual int     rows() const { return m_rows; }
-  virtual int     cols() const { return m_cols; }
+  // Methods
+  virtual void    add_col(const GVector& v, int col);
+  //TBD virtual void    cholesky_decompose(int compress = 1);
+  //TBD virtual GVector cholesky_solver(const GVector& v, int compress = 1);
+  //TBD virtual void    cholesky_invert(int compress = 1);
   virtual void    clear();
+  virtual GVector extract_row(int row) const;
+  virtual GVector extract_col(int col) const;
+  virtual GMatrix extract_lower_triangle() const;
+  virtual GMatrix extract_upper_triangle() const;
+  virtual double  fill() const;
+  virtual void    insert_col(const GVector& v, int col);
   virtual double  min() const;
   virtual double  max() const;
   virtual double  sum() const;
   virtual void    transpose();
-  virtual GVector extract_row(int row) const;
-  virtual GVector extract_col(int col) const;
   
-  // Exception: Matrix indices out of range
-  class out_of_range : public GException {
-  public:
-    out_of_range(string origin, int row, int col, int rows, int cols);
-  };
-  
-  // Exception: Vector - Matrix mismatch
-  class matrix_vector_mismatch : public GException {
-  public:
-    matrix_vector_mismatch(string origin, int num, int rows, int cols);
-  };
-
-  // Exception: Matrix dimensions mismatch
-  class matrix_mismatch : public GException {
-  public:
-    matrix_mismatch(string origin, int rows1, int cols1, int cols1, int cols2);
-  };
-
-  // Exception: Matrix not rectangular
-  class matrix_not_rect : public GException {
-  public:
-    matrix_not_rect(string origin, int rows1, int cols1, int cols1, int cols2);
-  };
-
-  // Exception: Matrix not positive definite
-  class matrix_not_pos_definite : public GException {
-  public:
-    matrix_not_pos_definite(string origin, int row, double sum);
-  };
-
-  // Exception: Matrix not symmetric
-  class matrix_not_symmetric : public GException {
-  public:
-    matrix_not_symmetric(string origin, int cols, int rows);
-  };
-
-  // Exception: Matrix not factorised
-  class matrix_not_factorised : public GException {
-  public:
-    matrix_not_factorised(string origin, string type);
-  };
-
-  // Exception: All matrix elements are zero
-  class matrix_zero : public GException {
-  public:
-    matrix_zero(string origin);
-  };
-
-protected:
-  // Void constructor to be used by derived classes which have own constructor
-  GMatrix();
-
-  // Private member functions
-  void init_members(void);
-  void copy_members(const GMatrix& m);
-  void free_members(void);
-  void select_non_zero(void);
-
-  // Private data area
-  int     m_rows;         // Number of rows
-  int     m_cols;         // Number of columns
-  int     m_elements;     // Number of elements stored in matrix
-  int     m_alloc;        // Size of allocated matrix memory
-  int     m_num_rowsel;   // Number of selected rows (for compressed decomposition)
-  int     m_num_colsel;   // Number of selected columns (for compressed decomposition)
-  int*    m_colstart;     // Column start indices (m_cols+1)
-  int*    m_rowsel;       // Row selection (for compressed decomposition)
-  int*    m_colsel;       // Column selection (for compressed decomposition)
-  double* m_data;         // Matrix data
+private:
+  // Private methods
+  void constructor(int rows, int cols);
+  void init_members(void) { ; }
+  void copy_members(const GMatrix& m) { ; }
+  void free_members(void) { ; }
 };
 
 
 /***************************************************************************
- *                          Inline member functions                        *
+ *                            Inline operators                             *
  ***************************************************************************/
 // Matrix element access operator
 inline
@@ -165,7 +100,7 @@ double& GMatrix::operator() (int row, int col)
 {
   #if defined(G_RANGE_CHECK)
   if (row >= m_rows || col >= m_cols)
-    throw out_of_range("GMatrix access", row, col, m_rows, m_cols);
+    throw out_of_range("GMatrix::operator(int,int)", row, col, m_rows, m_cols);
   #endif
   return m_data[m_colstart[col]+row];
 }
@@ -176,7 +111,7 @@ const double& GMatrix::operator() (int row, int col) const
 {
   #if defined(G_RANGE_CHECK)
   if (row >= m_rows || col >= m_cols)
-    throw out_of_range("GMatrix access", row, col, m_rows, m_cols);
+    throw out_of_range("GMatrix::operator(int,int) const", row, col, m_rows, m_cols);
   #endif
   return m_data[m_colstart[col]+row];
 }
@@ -208,9 +143,44 @@ GMatrix GMatrix::operator* (const GMatrix& m) const
   return result;
 }
 
+// Matrix scaling
+inline
+GMatrix& GMatrix::operator*= (const double& s)
+{
+  multiplication(s);
+  return *this;
+}
+
+// Matrix scalar division
+inline
+GMatrix& GMatrix::operator/= (const double& s)
+{
+  double inverse = 1.0/s;
+  multiplication(inverse);
+  return *this;
+}
+
+// Negation
+inline
+GMatrix GMatrix::operator- ( ) const
+{
+  GMatrix result = *this;
+  result.negation();
+  return result;
+}
+
 
 /***************************************************************************
- *                               Inline friends                            *
+ *                              Inline methods                             *
+ ***************************************************************************/
+inline void   GMatrix::clear() { set_all_elements(0.0); }
+inline double GMatrix::min() const { return get_min_element(); }
+inline double GMatrix::max() const { return get_max_element(); }
+inline double GMatrix::sum() const { return get_element_sum(); }
+
+
+/***************************************************************************
+ *                              Inline friends                             *
  ***************************************************************************/
 // Binary matrix scaling (matrix is left operand)
 inline 

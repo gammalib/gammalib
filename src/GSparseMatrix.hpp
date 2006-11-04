@@ -15,27 +15,24 @@
 #define GSPARSEMATRIX_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GException.hpp"
-#include "GVector.hpp"
-#include "GMatrix.hpp"
+#include "GMatrixBase.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 using namespace std;
 
 /* __ Definitions ________________________________________________________ */
-#define G_SPARSE_MATRIX_DEFAULT_MEM_BLOCK 512    // Default Memory block size
-#define G_SPARSE_MATRIX_DEFAULT_STACK_ENTRIES 100   // Max # of stack entries
-#define G_SPARSE_MATRIX_DEFAULT_STACK_SIZE 512     // Max # of stack elements
-
-/* __ Macros (to be moved to GammaLib general header) ____________________ */
-#define G_MIN(a,b) (((a) < (b)) ? (a) : (b))
-#define G_MAX(a,b) (((a) > (b)) ? (a) : (b))
+#define G_SPARSE_MATRIX_DEFAULT_MEM_BLOCK      512  // Default Memory block size
+#define G_SPARSE_MATRIX_DEFAULT_STACK_ENTRIES 1000  // Max # of stack entries
+#define G_SPARSE_MATRIX_DEFAULT_STACK_SIZE     512  // Max # of stack elements
 
 
 /***************************************************************************
  *                      GSparseMatrix class definition                     *
+ * ----------------------------------------------------------------------- *
+ * GMatrix implements a sparse matrix storage class. It derives from the   *
+ * abstract base class GMatrixBase.                                        *
  ***************************************************************************/
-class GSparseMatrix : public GMatrix {
+class GSparseMatrix : public GMatrixBase {
   // Friend classes
   friend class GSparseSymbolic;
   friend class GSparseNumeric;
@@ -58,83 +55,83 @@ class GSparseMatrix : public GMatrix {
   friend GSparseMatrix cs_transpose(const GSparseMatrix& m, int values);
 
 public:
-  // Constructors and destructors (not inherited)
+  // Constructors and destructors
   GSparseMatrix(int rows, int cols, int elements = 0);
+  GSparseMatrix(const GMatrix& m);
+  GSparseMatrix(const GSymMatrix& m);
   GSparseMatrix(const GSparseMatrix& m);
   virtual ~GSparseMatrix();
 
-  // Matrix element access operators
-  virtual double& operator() (int row, int col);
-  virtual const double& operator() (int row, int col) const;
-
-  // Matrix assignment operators (not inherited)
+  // Operators
   virtual GSparseMatrix& operator= (const GSparseMatrix& m);
-
-  // Binary operators
-  virtual GSparseMatrix operator+ (const GSparseMatrix& m) const;
-  virtual GSparseMatrix operator- (const GSparseMatrix& m) const;
-  virtual GSparseMatrix operator* (const GSparseMatrix& m) const;
-  virtual GVector       operator* (const GVector& v) const;
-  virtual int           operator== (const GSparseMatrix& m) const;
-  virtual int           operator!= (const GSparseMatrix& m) const;
-
-  // Unary operators
-  GSparseMatrix operator- () const;
+  virtual double&        operator() (int row, int col);
+  virtual const double&  operator() (int row, int col) const;
+  virtual GSparseMatrix  operator+ (const GSparseMatrix& m) const;
+  virtual GSparseMatrix  operator- (const GSparseMatrix& m) const;
+  virtual GSparseMatrix  operator* (const GSparseMatrix& m) const;
+  virtual GVector        operator* (const GVector& v) const;
+  virtual int            operator== (const GSparseMatrix& m) const;
+  virtual int            operator!= (const GSparseMatrix& m) const;
+  virtual GSparseMatrix  operator- () const;
   virtual GSparseMatrix& operator+= (const GSparseMatrix& m);
   virtual GSparseMatrix& operator-= (const GSparseMatrix& m);
   virtual GSparseMatrix& operator*= (const GSparseMatrix& m);
   virtual GSparseMatrix& operator*= (const double& d);
   virtual GSparseMatrix& operator/= (const double& d);
 
-  // Matrix functions
-  // USE_BASE: virtual int rows() const { return m_rows; }
-  // USE_BASE: virtual int cols() const { return m_cols; }
-  virtual void    clear();
-  virtual double  fill() const;
-  virtual double  min() const;
-  virtual double  max() const;
-  virtual double  sum() const;
-  virtual void    transpose();
-  virtual GVector extract_row(int row) const;
-  virtual GVector extract_col(int col) const;
-  virtual void    insert_col(const GVector& v, int col);
-  virtual void    insert_col(const double* values, const int* rows, int number, int col);
-  virtual void    add_col(const GVector& v, int col);
-  virtual void    add_col(const double* values, const int* rows, int number, int col);
-  virtual void    set_mem_block(int block);
-  virtual GMatrix convert_to_full() const;
-  //TBD virtual GMatrix extract_lower_triangle() const;
-  //TBD virtual GMatrix extract_upper_triangle() const;
-  virtual void    cholesky_decompose(int compress = 1);
-  virtual GVector cholesky_solver(const GVector& v, int compress = 1);
-  virtual void    cholesky_invert(int compress = 1);
+  // Matrix methods
+  virtual void          add_col(const GVector& v, int col);
+  virtual void          add_col(const double* values, const int* rows, int number, int col);
+  virtual void          cholesky_decompose(int compress = 1);
+  virtual GVector       cholesky_solver(const GVector& v, int compress = 1);
+  virtual void          cholesky_invert(int compress = 1);
+  virtual void          clear();
+  virtual GVector       extract_row(int row) const;
+  virtual GVector       extract_col(int col) const;
+  //TBD virtual GSparseMatrix extract_lower_triangle() const;
+  //TBD virtual GSparseMatrix extract_upper_triangle() const;
+  virtual double        fill() const;
+  virtual void          insert_col(const GVector& v, int col);
+  virtual void          insert_col(const double* values, const int* rows, int number, int col);
+  virtual double        min() const;
+  virtual double        max() const;
+  virtual void          set_mem_block(int block);
+  virtual void          stack_init(int size = 0, int entries = 0);
+  virtual int           stack_push_column(const GVector& v, int col);
+  virtual int           stack_push_column(const double* values, const int* rows, int number, int col);
+  virtual void          stack_flush(void);
+  virtual void          stack_destroy(void);
+  virtual double        sum() const;
+  virtual void          transpose();
   
-  // Stack functions
-  virtual void stack_init(int size = 0, int entries = 0);
-  virtual int  stack_push_column(const GVector& v, int col);
-  virtual int  stack_push_column(const double* values, const int* rows, int number, int col);
-  virtual void stack_flush(void);
-  virtual void stack_destroy(void);
-
 private:
-  // Private functions
+  // Private methods
+  void constructor(int rows, int cols, int elements = 0);
   void init_members(void);
+  void init_stack_members(void);
   void copy_members(const GSparseMatrix& m);
   void free_members(void);
+  void free_stack_members(void);
   int  get_index(int row, int col) const;
   void fill_pending(void);
   void alloc_elements(int start, int num);
   void free_elements(int start, int num);
   void remove_zero_row_col(void);
   void insert_zero_row_col(int rows, int cols);
+  void mix_column_prepare(const int* src1_row, int src1_num,
+						  const int* src2_row, int src2_num,
+						  int* num_1, int* num_2, int* num_mix);
+  void mix_column(const double* src1_data, const int* src1_row, int src1_num,
+                  const double* src2_data, const int* src2_row, int src2_num,
+				  double* dst_data, int* dst_row, int* dst_num);
   
   // Private data members
   int*    m_rowinx;             // Row-indices of all elements
-  int     m_mem_block;          // Memory block to be allocated at once
   double  m_zero;               // The zero element (needed for data access)
   double  m_fill_val;           // Element to be filled
   int     m_fill_row;           // Row into which element needs to be filled
   int     m_fill_col;           // Column into which element needs to be filled
+  int     m_mem_block;          // Memory block to be allocated at once
   void*   m_symbolic;           // Holds GSparseSymbolic object after decomposition
   void*   m_numeric;            // Holds GSparseNumeric object after decomposition
 
@@ -145,7 +142,9 @@ private:
   int*    m_stack_colinx;       // Column index for each entry [m_stack_entries]
   int*    m_stack_start;        // Start in stack for each entry [m_stack_entries+1]
   double* m_stack_data;         // Stack data [m_stack_size]
-  int*    m_stack_rowinx;       // Srack row indices [m_stack_size]
+  int*    m_stack_rowinx;       // Stack row indices [m_stack_size]
+  int*    m_stack_work;         // Stack integer working array [m_cols]
+  double* m_stack_buffer;       // Stack double buffer [m_cols]
 };
 
 
@@ -222,22 +221,45 @@ GSparseMatrix GSparseMatrix::operator* (const GSparseMatrix& m) const
   return result;
 }
 
-// Unary scalar multiplication
+// Matrix scaling
 inline
-GSparseMatrix& GSparseMatrix::operator*= (const double& d)
+GSparseMatrix& GSparseMatrix::operator*= (const double& s)
 {
   fill_pending();
-  this->GMatrix::operator*=(d);
+  multiplication(s);
   return *this;
 }
 
-// Unary scalar division
+// Matrix scalar division
 inline
-GSparseMatrix& GSparseMatrix::operator/= (const double& d)
+GSparseMatrix& GSparseMatrix::operator/= (const double& s)
+{
+  double inverse = 1.0/s;
+  fill_pending();
+  multiplication(inverse);
+  return *this;
+}
+
+// Negation
+inline
+GSparseMatrix GSparseMatrix::operator- ( ) const
+{
+  GSparseMatrix result = *this;
+  result.fill_pending();
+  result.negation();
+  return result;
+}
+
+
+/***************************************************************************
+ *                              Inline methods                             *
+ ***************************************************************************/
+// Transpose
+inline
+void GSparseMatrix::transpose()
 {
   fill_pending();
-  this->GMatrix::operator/=(d);
-  return *this;
+  *this = cs_transpose(*this, 1);
 }
 
 
@@ -272,13 +294,6 @@ GSparseMatrix operator/ (const GSparseMatrix& a, const double& b)
   result.fill_pending();
   result /= b;
   return result;
-}
-
-// Matrix fill function
-inline
-double GSparseMatrix::fill() const
-{
-  return (double(m_elements)/double(m_rows*m_cols));
 }
 
 // Matrix transpose function

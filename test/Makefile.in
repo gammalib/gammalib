@@ -50,16 +50,16 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 am_test_GMatrix_OBJECTS = test_GMatrix.$(OBJEXT)
 test_GMatrix_OBJECTS = $(am_test_GMatrix_OBJECTS)
-test_GMatrix_DEPENDENCIES = ../src/libgamma.a
+test_GMatrix_DEPENDENCIES = ../src/libgamma.la
 am_test_GSparseMatrix_OBJECTS = test_GSparseMatrix.$(OBJEXT)
 test_GSparseMatrix_OBJECTS = $(am_test_GSparseMatrix_OBJECTS)
-test_GSparseMatrix_DEPENDENCIES = ../src/libgamma.a
+test_GSparseMatrix_DEPENDENCIES = ../src/libgamma.la
 am_test_GSymMatrix_OBJECTS = test_GSymMatrix.$(OBJEXT)
 test_GSymMatrix_OBJECTS = $(am_test_GSymMatrix_OBJECTS)
-test_GSymMatrix_DEPENDENCIES = ../src/libgamma.a
+test_GSymMatrix_DEPENDENCIES = ../src/libgamma.la
 am_test_GVector_OBJECTS = test_GVector.$(OBJEXT)
 test_GVector_OBJECTS = $(am_test_GVector_OBJECTS)
-test_GVector_DEPENDENCIES = ../src/libgamma.a
+test_GVector_DEPENDENCIES = ../src/libgamma.la
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp =
 am__depfiles_maybe =
@@ -170,13 +170,13 @@ TESTS = test_GVector \
 	test_GSparseMatrix
 
 test_GVector_SOURCES = test_GVector.cpp
-test_GVector_LDADD = ../src/libgamma.a
+test_GVector_LDADD = ../src/libgamma.la
 test_GMatrix_SOURCES = test_GMatrix.cpp
-test_GMatrix_LDADD = ../src/libgamma.a
+test_GMatrix_LDADD = ../src/libgamma.la
 test_GSymMatrix_SOURCES = test_GSymMatrix.cpp
-test_GSymMatrix_LDADD = ../src/libgamma.a
+test_GSymMatrix_LDADD = ../src/libgamma.la
 test_GSparseMatrix_SOURCES = test_GSparseMatrix.cpp
-test_GSparseMatrix_LDADD = ../src/libgamma.a
+test_GSparseMatrix_LDADD = ../src/libgamma.la
 all: all-am
 
 .SUFFIXES:

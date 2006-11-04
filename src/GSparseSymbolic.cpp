@@ -12,7 +12,7 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
-#include "GSparseSymbolic.hpp"
+#include "GammaLib.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 using namespace std;
@@ -120,7 +120,7 @@ GSparseSymbolic& GSparseSymbolic::operator= (const GSparseSymbolic& s)
 	if (s.m_pinv != NULL && s.m_n_pinv > 0) {
 	  m_pinv = new int[s.m_n_pinv];
 	  if (m_pinv == NULL)
-	    throw mem_alloc("GSparseSymbolic::operator= (const GSparseSymbolic&)", 
+	    throw GException::mem_alloc("GSparseSymbolic::operator= (const GSparseSymbolic&)", 
 					    s.m_n_pinv);
       for (int i = 0; i < s.m_n_pinv; ++i)
         m_pinv[i] = s.m_pinv[i];
@@ -131,7 +131,7 @@ GSparseSymbolic& GSparseSymbolic::operator= (const GSparseSymbolic& s)
 	if (s.m_q != NULL && s.m_n_q > 0) {
 	  m_q = new int[s.m_n_q];
 	  if (m_q == NULL)
-	    throw mem_alloc("GSparseSymbolic::operator= (const GSparseSymbolic&)", 
+	    throw GException::mem_alloc("GSparseSymbolic::operator= (const GSparseSymbolic&)", 
 					    s.m_n_q);
       for (int i = 0; i < s.m_n_q; ++i)
         m_q[i] = s.m_q[i];
@@ -142,7 +142,7 @@ GSparseSymbolic& GSparseSymbolic::operator= (const GSparseSymbolic& s)
 	if (s.m_parent != NULL && s.m_n_parent > 0) {
 	  m_parent = new int[s.m_n_parent];
 	  if (m_parent == NULL)
-	    throw mem_alloc("GSparseSymbolic::operator= (const GSparseSymbolic&)", 
+	    throw GException::mem_alloc("GSparseSymbolic::operator= (const GSparseSymbolic&)", 
 					    s.m_n_parent);
       for (int i = 0; i < s.m_n_parent; ++i)
         m_parent[i] = s.m_parent[i];
@@ -153,7 +153,7 @@ GSparseSymbolic& GSparseSymbolic::operator= (const GSparseSymbolic& s)
 	if (s.m_cp != NULL && s.m_n_cp > 0) {
 	  m_cp = new int[s.m_n_cp];
 	  if (m_cp == NULL)
-	    throw mem_alloc("GSparseSymbolic::operator= (const GSparseSymbolic&)", 
+	    throw GException::mem_alloc("GSparseSymbolic::operator= (const GSparseSymbolic&)", 
 					    s.m_n_cp);
       for (int i = 0; i < s.m_n_cp; ++i)
         m_cp[i] = s.m_cp[i];
@@ -164,7 +164,7 @@ GSparseSymbolic& GSparseSymbolic::operator= (const GSparseSymbolic& s)
 	if (s.m_leftmost != NULL && s.m_n_leftmost > 0) {
 	  m_leftmost = new int[s.m_n_leftmost];
 	  if (m_leftmost == NULL)
-	    throw mem_alloc("GSparseSymbolic::operator= (const GSparseSymbolic&)", 
+	    throw GException::mem_alloc("GSparseSymbolic::operator= (const GSparseSymbolic&)", 
 					    s.m_n_leftmost);
       for (int i = 0; i < s.m_n_leftmost; ++i)
         m_leftmost[i] = s.m_leftmost[i];
@@ -230,7 +230,7 @@ void GSparseSymbolic::cholesky_symbolic_analysis(int order,
 
   // Check if order type is valid
   if (order < 0 || order > 1)
-    throw invalid_order(
+    throw GException::invalid_order(
 		  "GSparseSymbolic::cholesky_symbolic_analysis(int, GSparseMatrix*)",
 	      order, 0, 1);
 
@@ -313,7 +313,7 @@ void GSparseSymbolic::cholesky_symbolic_analysis(int order,
   m_n_cp = n+1;
   m_cp   = new int[m_n_cp];
   if (m_cp == NULL)
-	throw mem_alloc("GSparseSymbolic::cs_schol(int, GSparseMatrix*)", m_n_cp);
+	throw GException::mem_alloc("GSparseSymbolic::cs_schol(int, GSparseMatrix*)", m_n_cp);
 
   // Find column pointers for L
   m_unz = m_lnz = cs_cumsum(m_cp, c, n);
@@ -390,7 +390,7 @@ int* GSparseSymbolic::cs_amd(int order, const GSparseMatrix* A)
 {
   // Throw exception if order is not a decomposition
   if (order < 0 || order > 3)
-    throw invalid_order("GSparseSymbolic::cs_amd(int, const GSparseMatrix*)",
+    throw GException::invalid_order("GSparseSymbolic::cs_amd(int, const GSparseMatrix*)",
 	                    order, 0, 3);
   
   // Debug
@@ -502,13 +502,13 @@ int* GSparseSymbolic::cs_amd(int order, const GSparseMatrix* A)
   // Allocate result array
   int* P = new int[n+1];
   if (P == NULL)
-	throw mem_alloc("GSparseSymbolic::cs_amd (int, GSparseMatrix*)", n+1);
+	throw GException::mem_alloc("GSparseSymbolic::cs_amd (int, GSparseMatrix*)", n+1);
 
   // Allocate workspace
   int  wrk_size = 8*(n+1);
   int* wrk_int  = new int[wrk_size];
   if (wrk_int == NULL)
-	throw mem_alloc("GSparseSymbolic::cs_amd (int, GSparseMatrix*)", wrk_size);
+	throw GException::mem_alloc("GSparseSymbolic::cs_amd (int, GSparseMatrix*)", wrk_size);
 
   // Add elbow room to C  
   int elbow_room = cnz/5 + 2*n;           // Request additional # of elements
@@ -975,7 +975,7 @@ int* GSparseSymbolic::cs_counts(const GSparseMatrix* A, const int* parent,
   // Allocate result
   int* colcount = new int[n];
   if (colcount == NULL)
-	throw mem_alloc(
+	throw GException::mem_alloc(
 	      "GSparseSymbolic::cs_counts(GSparseMatrix*, const int*, const int*, int)", 
 	      n);
   int* delta = colcount;
@@ -984,7 +984,7 @@ int* GSparseSymbolic::cs_counts(const GSparseMatrix* A, const int* parent,
   int  wrk_size = 4*n + (ata ? (n+m+1) : 0);
   int* wrk_int  = new int[wrk_size];
   if (wrk_int == NULL)
-	throw mem_alloc("GSparseSymbolic::cs_counts(GSparseMatrix*, const int*, const int*, int)", 
+	throw GException::mem_alloc("GSparseSymbolic::cs_counts(GSparseMatrix*, const int*, const int*, int)", 
 	                wrk_size);
 
   // Get (logical) transpose of A: AT = A'
@@ -1072,13 +1072,13 @@ int* GSparseSymbolic::cs_etree(const GSparseMatrix* A, int ata)
   // Allocate result array
   int* parent = new int[n];
   if (parent == NULL)
-	throw mem_alloc("GSparseSymbolic::cs_etree(GSparseMatrix*, int)", n);
+	throw GException::mem_alloc("GSparseSymbolic::cs_etree(GSparseMatrix*, int)", n);
 
   // Allocate workspace
   int  wrk_size = n + (ata ? m : 0);
   int* wrk_int  = new int[wrk_size];
   if (wrk_int == NULL)
-	throw mem_alloc("GSparseSymbolic::cs_etree(GSparseMatrix*, int)", wrk_size);
+	throw GException::mem_alloc("GSparseSymbolic::cs_etree(GSparseMatrix*, int)", wrk_size);
 
   // Set-up pointers to workspace. If 'ata=1' then we use also a prev array
   int* ancestor = wrk_int;
@@ -1247,7 +1247,7 @@ int* GSparseSymbolic::cs_pinv(int const *p, int n)
   // Allocate result array
   int* pinv = new int[n];
   if (pinv == NULL)
-	throw mem_alloc("GSparseSymbolic::cs_pinv", n);
+	throw GException::mem_alloc("GSparseSymbolic::cs_pinv", n);
   
   // Invert the permutation
   for (int k = 0; k < n; ++k) 
@@ -1274,13 +1274,13 @@ int* GSparseSymbolic::cs_post(const int* parent, int n)
   // Allocate result array
   int* post = new int[n];
   if (post == NULL)
-	throw mem_alloc("GSparseSymbolic::cs_post(const int*, int)", n);
+	throw GException::mem_alloc("GSparseSymbolic::cs_post(const int*, int)", n);
 
   // Allocate workspace
   int  wrk_size = 3 * n;
   int* wrk_int  = new int[wrk_size];
   if (wrk_int == NULL)
-	throw mem_alloc("GSparseSymbolic::cs_post(const int*, int)", wrk_size);
+	throw GException::mem_alloc("GSparseSymbolic::cs_post(const int*, int)", wrk_size);
 
   // Set-up pointers to workspace
   int* head  = wrk_int;
@@ -1526,29 +1526,4 @@ ostream& operator<< (ostream& os, const GSparseSymbolic& s)
   
   // Return output stream
   return os;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                     GSparseSymbolic exception classes                   =
- =                                                                         =
- ==========================================================================*/
-
-/***************************************************************************
- *                     Invalid ordering scheme requested                   *
- ***************************************************************************/
-GSparseSymbolic::invalid_order::invalid_order(string origin, int order, 
-                                               int min_order, int max_order)
-{
-  m_origin = origin;
-  ostringstream s_order;
-  ostringstream s_min_order;
-  ostringstream s_max_order;
-  s_order     << order;
-  s_min_order << min_order;
-  s_max_order << max_order;
-  m_message = "Invalid ordering type " + s_order.str() + 
-              "requested; must be comprised in [" + s_min_order.str() +
-			  "," + s_max_order.str() + "]";
 }

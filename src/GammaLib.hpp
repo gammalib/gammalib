@@ -20,6 +20,7 @@
 #endif
 #include "GException.hpp"
 #include "GVector.hpp"
+#include "GMatrixBase.hpp"
 #include "GMatrix.hpp"
 #include "GSymMatrix.hpp"
 #include "GSparseMatrix.hpp"

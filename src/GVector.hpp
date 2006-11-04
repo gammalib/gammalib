@@ -23,12 +23,6 @@
 /* __ Namespaces _________________________________________________________ */
 using namespace std;
 
-/* __ Enumerators ________________________________________________________ */
-
-/* __ Structures _________________________________________________________ */
-
-/* __ Prototypes _________________________________________________________ */
-
 
 /***************************************************************************
  *                         GVector class definition                        *
@@ -114,15 +108,15 @@ public:
   };
   
   // Exception: Vector dimensions mismatch
-  class dim_mismatch : public GException {
+  class vector_mismatch : public GException {
   public:
-    dim_mismatch(string origin, int size1, int size2);
+    vector_mismatch(string origin, int size1, int size2);
   };
   
   // Exception: Invalid vector dimension for cross product
-  class bad_cross_dim : public GException {
+  class vector_bad_cross_dim : public GException {
   public:
-    bad_cross_dim(int elements);
+    vector_bad_cross_dim(int elements);
   };
 private:
   int     m_num;
@@ -161,7 +155,7 @@ inline
 GVector& GVector::operator+= (const GVector& v)
 {
   if (m_num != v.m_num)
-    throw dim_mismatch("GVector += operator", m_num, v.m_num);
+    throw vector_mismatch("GVector += operator", m_num, v.m_num);
   for (int i = 0; i < m_num; ++i)
     m_data[i] += v.m_data[i];
   return *this;
@@ -172,7 +166,7 @@ inline
 GVector& GVector::operator-= (const GVector& v)
 {
   if (m_num != v.m_num)
-    throw dim_mismatch("GVector -= operator", m_num, v.m_num);
+    throw vector_mismatch("GVector -= operator", m_num, v.m_num);
   for (int i = 0; i < m_num; ++i)
     m_data[i] -= v.m_data[i];
   return *this;
@@ -303,7 +297,7 @@ inline
 double operator* (const GVector& a, const GVector& b)
 {
   if (a.m_num != b.m_num)
-    throw GVector::dim_mismatch("GVector scalar product", a.m_num, b.m_num);
+    throw GVector::vector_mismatch("GVector scalar product", a.m_num, b.m_num);
   double result = 0.0;
   for (int i = 0; i < a.m_num; ++i)
     result += (a.m_data[i] * b.m_data[i]);

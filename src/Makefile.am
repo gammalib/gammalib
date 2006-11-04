@@ -3,6 +3,7 @@
 files = GammaLib.hpp \
         GException.hpp GException.cpp \
         GVector.hpp GVector.cpp \
+	GMatrixBase.hpp GMatrixBase.cpp \
 	GMatrix.hpp GMatrix.cpp \
 	GSymMatrix.hpp GSymMatrix.cpp \
 	GSparseMatrix.hpp GSparseMatrix.cpp \
@@ -19,7 +20,7 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GSparseSymbolic.hpp \
 		     GSparseNumeric.hpp
 
-# Build dynamic library
+# Build libtool library
 lib_LTLIBRARIES = libgamma.la
 libgamma_la_SOURCES = $(files)
 libgamma_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)

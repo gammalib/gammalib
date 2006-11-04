@@ -12,8 +12,7 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
-#include "GSparseSymbolic.hpp"
-#include "GSparseNumeric.hpp"
+#include "GammaLib.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 using namespace std;
@@ -96,7 +95,7 @@ GSparseNumeric& GSparseNumeric::operator= (const GSparseNumeric& n)
 	if (n.m_L != NULL) {
 	  m_L = new GSparseMatrix(*n.m_L);
 	  if (m_L == NULL)
-	    throw mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
+	    throw GException::mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
 					    1);
 	}
 
@@ -104,7 +103,7 @@ GSparseNumeric& GSparseNumeric::operator= (const GSparseNumeric& n)
 	if (n.m_U != NULL) {
 	  m_U = new GSparseMatrix(*n.m_U);
 	  if (m_U == NULL)
-	    throw mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
+	    throw GException::mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
 					    1);
 	}
 	
@@ -112,7 +111,7 @@ GSparseNumeric& GSparseNumeric::operator= (const GSparseNumeric& n)
 	if (n.m_pinv != NULL && n.m_n_pinv > 0) {
 	  m_pinv = new int[n.m_n_pinv];
 	  if (m_pinv == NULL)
-	    throw mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
+	    throw GException::mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
 					    n.m_n_pinv);
       for (int i = 0; i < n.m_n_pinv; ++i)
         m_pinv[i] = n.m_pinv[i];
@@ -123,7 +122,7 @@ GSparseNumeric& GSparseNumeric::operator= (const GSparseNumeric& n)
 	if (n.m_B != NULL && n.m_n_B > 0) {
 	  m_B = new double[n.m_n_B];
 	  if (m_B == NULL)
-	    throw mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
+	    throw GException::mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
 					    n.m_n_B);
       for (int i = 0; i < n.m_n_B; ++i)
         m_B[i] = n.m_B[i];
@@ -183,7 +182,7 @@ void GSparseNumeric::cholesky_numeric_analysis(const GSparseMatrix& A,
   int  wrk_size = 2*n;
   int* wrk_int  = new int[wrk_size];
   if (wrk_int == NULL)
-	throw mem_alloc(
+	throw GException::mem_alloc(
 	      "GSparseNumeric::cholesky_numeric_analysis(GSparseMatrix&, const GSparseSymbolic&)",
           wrk_size);
 
@@ -191,7 +190,7 @@ void GSparseNumeric::cholesky_numeric_analysis(const GSparseMatrix& A,
   wrk_size = n;
   double* wrk_double = new double[wrk_size];
   if (wrk_double == NULL)
-	throw mem_alloc(
+	throw GException::mem_alloc(
 	      "GSparseNumeric::cholesky_numeric_analysis(GSparseMatrix&, const GSparseSymbolic&)",
           wrk_size);
 
@@ -216,7 +215,7 @@ void GSparseNumeric::cholesky_numeric_analysis(const GSparseMatrix& A,
   // Allocate L matrix
   m_L = new GSparseMatrix(n, n, cp[n]);
   if (m_L == NULL)
-	throw mem_alloc(
+	throw GException::mem_alloc(
 	      "GSparseNumeric::cholesky_numeric_analysis(GSparseMatrix&, const GSparseSymbolic&)",
 		  1);
 
@@ -264,7 +263,7 @@ void GSparseNumeric::cholesky_numeric_analysis(const GSparseMatrix& A,
 	
 	// Compute L(k,k)
 	if (d <= 0)
-	  throw GSparseMatrix::matrix_not_pos_definite(
+	  throw GException::matrix_not_pos_definite(
 	        "GSparseNumeric::cholesky_numeric_analysis(GSparseMatrix&, const GSparseSymbolic&)",
 			k, d);
 

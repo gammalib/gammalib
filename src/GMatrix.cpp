@@ -12,100 +12,27 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include "GException.hpp"
+#include "GVector.hpp"
 #include "GMatrix.hpp"
+#include "GSymMatrix.hpp"
+#include "GSparseMatrix.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 using namespace std;
 
-
-/*==========================================================================
- =                                                                         =
- =                            Private functions                            =
- =                                                                         =
- ==========================================================================*/
-void GMatrix::init_members(void)
-{
-  // Initialise GMatrix members
-  m_rows       = 0;      // Number of rows
-  m_cols       = 0;      // Number of columns
-  m_elements   = 0;      // Logically used number of elements
-  m_alloc      = 0;      // Allocated # of elements (>= m_elements)
-  m_num_rowsel = 0;      // Number of selected rows (for comp. decomp.)
-  m_num_colsel = 0;      // Number of selected columns (for comp. decomp.)
-  m_data       = NULL;   // Matrix data
-  m_colstart   = NULL;   // Column start indices (m_cols+1)
-  m_rowsel     = NULL;   // Row selection (for compressed decomposition)
-  m_colsel     = NULL;   // Column selection (for compressed decomposition)
-  
-  // Return
-  return;
-}
-/***************************************************************************/
-void GMatrix::copy_members(const GMatrix& m)
-{
-  // Copy matrix attributes
-  m_rows       = m.m_rows;
-  m_cols       = m.m_cols;
-  m_elements   = m.m_elements;
-  m_alloc      = m.m_alloc;
-  m_num_rowsel = m.m_num_rowsel;
-  m_num_colsel = m.m_num_colsel;
-
-  // Allocate memory for column start array and copy content
-  m_colstart = new int[m_cols+1];
-  if (m_colstart == NULL)
-    throw mem_alloc("GMatrix::copy_members(const Matrix&)", m_cols+1);
-  for (int i = 0; i <= m_cols; ++i)
-    m_colstart[i] = m.m_colstart[i];
-  
-  // Allocate memory for elements and copy them (only if there are elements)
-  if (m.m_data != NULL && m_alloc > 0) {
-    m_data = new double[m_alloc];
-    if (m_data == NULL)
-	  throw mem_alloc("GMatrix::copy_members(const Matrix&)", m_alloc);
-    for (int i = 0; i < m_elements; ++i)
-      m_data[i] = m.m_data[i];
-  }
-  
-  // If there is a row selection then copy it
-  if (m.m_rowsel != NULL && m_num_rowsel > 0) {
-    m_rowsel = new int[m_num_rowsel];
-    if (m_rowsel == NULL)
-	  throw mem_alloc("GMatrix::copy_members(const Matrix&)", m_num_rowsel);
-    for (int i = 0; i < m_num_rowsel; ++i)
-      m_rowsel[i] = m.m_rowsel[i];
-  }
-
-  // If there is a column selection then copy it
-  if (m.m_colsel != NULL && m_num_colsel > 0) {
-    m_colsel = new int[m_num_colsel];
-    if (m_colsel == NULL)
-	  throw mem_alloc("GMatrix::copy_members(const Matrix&)", m_num_colsel);
-    for (int i = 0; i < m_num_colsel; ++i)
-      m_colsel[i] = m.m_colsel[i];
-  }
-
-  // Return
-  return;
-}
-/***************************************************************************/
-void GMatrix::free_members(void)
-{
-  // De-allocate only if memory has indeed been allocated
-  if (m_colsel   != NULL) delete [] m_colsel;
-  if (m_rowsel   != NULL) delete [] m_rowsel;
-  if (m_data     != NULL) delete [] m_data;
-  if (m_colstart != NULL) delete [] m_colstart;
-
-  // Properly mark members as free
-  m_colstart = NULL;
-  m_data     = NULL;
-  m_rowsel   = NULL;
-  m_colsel   = NULL;
-  
-  // Return
-  return;
-}
+/* __ Method name definitions ____________________________________________ */
+#define G_OP_MUL_VEC    "GMatrix::operator* (const GVector&) const"
+#define G_OP_ADD        "GMatrix::operator+= (const GMatrix&)"
+#define G_OP_SUB        "GMatrix::operator-= (const GMatrix&)"
+#define G_OP_MAT_MUL    "GMatrix::operator*= (const GMatrix&)"
+#define G_ADD_COL       "GMatrix::add_col(const GVector&, int)"
+#define G_EXTRACT_ROW   "GMatrix::extract_row(int) const"
+#define G_EXTRACT_COL   "GMatrix::extract_col(int) const"
+#define G_EXTRACT_LOWER "GMatrix::extract_lower_triangle() const"
+#define G_EXTRACT_UPPER "GMatrix::extract_upper_triangle() const"
+#define G_INSERT_COL    "GMatrix::insert_col(const GVector&, int)"
+#define G_CONSTRUCTOR   "GMatrix::constructor(int, int)"
 
 
 /*==========================================================================
@@ -115,69 +42,34 @@ void GMatrix::free_members(void)
  ==========================================================================*/
 
 /***************************************************************************
- *   GMatrix private constructor (used for derived class initialization)   *
- ***************************************************************************/
-GMatrix::GMatrix(void)
-{
-  // Initialise private members for clean destruction
-  init_members();
-
-  // Return
-  return;
-}
-
-
-/***************************************************************************
- *                           GMatrix constructor                           *
- ***************************************************************************/
-GMatrix::GMatrix(int rows, int cols)
-{
-  // Initialise private members for clean destruction
-  init_members();
-
-  // Determine number of elements to store in matrix
-  int elements = rows*cols;
-
-  // Throw exception if requested matrix size is zero
-  if (elements == 0)
-    throw empty("GMatrix constructor");
-	
-  // Allocate matrix array and column start index array. Throw an exception 
-  // if allocation failed
-  m_data     = new double[elements];
-  m_colstart = new int[cols+1];
-  if (m_data == NULL || m_colstart == NULL)
-	throw mem_alloc("GMatrix constructor", elements);
-	
-  // Store matrix size (logical, storage, allocated)
-  m_rows     = rows;
-  m_cols     = cols;
-  m_elements = elements;
-  m_alloc    = elements;
-  
-  // Set-up column start indices
-  m_colstart[0] = 0;
-  for (int col = 1; col <= m_cols; ++col)
-    m_colstart[col] = m_colstart[col-1] + m_rows;
-	
-  // Initialise matrix elements to 0.0
-  for (int i = 0; i < m_elements; ++i)
-    m_data[i] = 0.0;
-	
-  // Return
-  return;
-}
-
-
-/***************************************************************************
- *                           GMatrix copy constructor                      *
+ *                                Constructor                              *
  * ----------------------------------------------------------------------- *
- * The copy constructor is sufficiently general to provide the base        *
- * constructor for all derived classes, including sparse matrices.         *
+ * First calls the void base class constructor that initialises all base   *
+ * class members, then call the GMatrix initialisation method and finally  *
+ * construct the object.                                                   *
  ***************************************************************************/
-GMatrix::GMatrix(const GMatrix& m)
+GMatrix::GMatrix(int rows, int cols) : GMatrixBase()
 {
-  // Initialise private members for clean destruction
+  // Initialise class members for clean destruction
+  init_members();
+
+  // Construct full matrix
+  constructor(rows, cols);
+
+  // Return
+  return;
+}
+
+
+/***************************************************************************
+ *                               Copy constructor                          *
+ * ----------------------------------------------------------------------- *
+ * First calls the void base class copy constructor that copys all base    *
+ * class members, then call the GMatrix member copy method.                *
+ ***************************************************************************/
+GMatrix::GMatrix(const GMatrix& m) : GMatrixBase(m)
+{
+  // Initialise class members for clean destruction
   init_members();
 
   // Copy members
@@ -189,7 +81,63 @@ GMatrix::GMatrix(const GMatrix& m)
 
 
 /***************************************************************************
+ *               GSymMatrix -> GMatrix storage class conversion            *
+ * ----------------------------------------------------------------------- *
+ * First calls the void base class constructor that initialises all base   *
+ * class members, then call the GMatrix initialisation method and finally  *
+ * construct the object and fill it with the GSymMatrix data.              *
+ ***************************************************************************/
+GMatrix::GMatrix(const GSymMatrix& m) : GMatrixBase()
+{ 
+  // Initialise private members for clean destruction
+  init_members();
+
+  // Construct matrix
+  constructor(m.rows(), m.cols());
+
+  // Fill matrix
+  int i_dst = 0;
+  for (int col = 0; col < m_cols; ++col) {
+    for (int row = 0; row < m_rows; ++row)
+	  m_data[i_dst++] = m(row, col);
+  }
+  
+  // Return
+  return;
+}
+
+
+/***************************************************************************
+ *              GSparseMatrix -> GMatrix storage class conversion          *
+ * ----------------------------------------------------------------------- *
+ * First calls the void base class constructor that initialises all base   *
+ * class members, then call the GMatrix initialisation method and finally  *
+ * construct the object and fill it with the GSparseMatrix data.           *
+ ***************************************************************************/
+GMatrix::GMatrix(const GSparseMatrix& m) : GMatrixBase()
+{ 
+  // Initialise private members for clean destruction
+  init_members();
+
+  // Construct matrix
+  constructor(m.rows(), m.cols());
+
+  // Fill matrix
+  int i_dst = 0;
+  for (int col = 0; col < m_cols; ++col) {
+    for (int row = 0; row < m_rows; ++row)
+	  m_data[i_dst++] = m(row, col);
+  }
+  
+  // Return
+  return;
+}
+
+
+/***************************************************************************
  *                           GMatrix destructor                            *
+ * ----------------------------------------------------------------------- *
+ * First destroys class members, then destroy base class members.          *
  ***************************************************************************/
 GMatrix::~GMatrix()
 {
@@ -208,12 +156,16 @@ GMatrix::~GMatrix()
  ==========================================================================*/
 
 /***************************************************************************
- *                        GMatrix assignment operator                      *
+ *                             Assignment operator                         *
+ * ----------------------------------------------------------------------- *
  ***************************************************************************/
 GMatrix& GMatrix::operator= (const GMatrix& m)
 {
   // Execute only if object is not identical
-  if (this != &m) { 
+  if (this != &m) {
+  
+    // Copy base class members
+	this->GMatrixBase::operator=(m);
 
     // Free members
     free_members();
@@ -233,13 +185,14 @@ GMatrix& GMatrix::operator= (const GMatrix& m)
 
 /***************************************************************************
  *                           Vector multiplication                         *
+ * ----------------------------------------------------------------------- *
+ * Multiply matrix by a vector. The result is a vector.                    *
  ***************************************************************************/
 GVector GMatrix::operator* (const GVector& v) const
 {
   // Raise an exception if the matrix and vector dimensions are not compatible
   if (m_cols != v.m_num)
-    throw matrix_vector_mismatch("GMatrix::operator* (const GVector&)", 
-	                             v.m_num, m_rows, m_cols);
+    throw GException::matrix_vector_mismatch(G_OP_MUL_VEC, v.m_num, m_rows, m_cols);
 
   // Perform vector multiplication
   GVector result(m_rows);
@@ -256,87 +209,17 @@ GVector GMatrix::operator* (const GVector& v) const
 
 
 /***************************************************************************
- *                   GMatrix comparison (equality operator)                *
- ***************************************************************************/
-int GMatrix::operator== (const GMatrix &m) const
-{
-  // Initalise the result to 'equal matrices'
-  int result = 1;
-  
-  // Perform comparison (only if matrix dimensions and number of physical
-  // elements are identical; otherwise set result to 'false')
-  if (m_rows == m.m_rows && m_cols == m.m_cols && m_elements == m.m_elements) {
-    for (int i = 0; i < m_elements; ++i) {
-	  if (m_data[i] != m.m_data[i]) {
-	    result = 0;
-		break;
-	  }
-	}
-  }
-  else
-    result = 0;
-
-  // Return result
-  return result;
-}
-
-
-/***************************************************************************
- *                 GMatrix comparison (non-equality operator)              *
- ***************************************************************************/
-int GMatrix::operator!= (const GMatrix &m) const
-{
-  // Initalise the result to 'equal matrices'
-  int result = 0;
-
-  // Perform comparison (only if matrix dimensions and number of physical
-  // elements are identical; otherwise set result to 'true')
-  if (m_rows == m.m_rows && m_cols == m.m_cols && m_elements == m.m_elements) {
-    for (int i = 0; i < m_elements; ++i) {
-	  if (m_data[i] != m.m_data[i]) {
-	    result = 1;
-		break;
-	  }
-	}
-  }
-  else
-    result = 1;
-	
-  // Return result
-  return result;
-}
-
-
-/***************************************************************************
- *                  GMatrix negation (unary minus operator)                *
- ***************************************************************************/
-GMatrix GMatrix::operator- ( ) const
-{
-  // Copy argument into result
-  GMatrix result = *this;
-  
-  // Negate result
-  for (int i = 0; i < m_elements; ++i)
-    result.m_data[i] = -result.m_data[i];
-	
-  // Return result	
-  return result;
-}
-
-
-/***************************************************************************
- *                  GMatrix addition (unary addition operator)             *
+ *                        Unary matrix addition operator                   *
+ * ----------------------------------------------------------------------- *
  ***************************************************************************/
 GMatrix& GMatrix::operator+= (const GMatrix& m)
 {
   // Raise an exception if the matrix dimensions are not compatible
   if (m_rows != m.m_rows || m_cols != m.m_cols)
-    throw matrix_mismatch("GMatrix::operator+= (const GMatrix&)", 
-						  m_rows, m_cols, m.m_rows, m.m_cols);
+    throw GException::matrix_mismatch(G_OP_ADD, m_rows, m_cols, m.m_rows, m.m_cols);
 
   // Add matrices
-  for (int i = 0; i < m_elements; ++i)
-    m_data[i] += m.m_data[i];
+  addition(m);
 
   // Return result
   return *this;
@@ -344,18 +227,17 @@ GMatrix& GMatrix::operator+= (const GMatrix& m)
 
 
 /***************************************************************************
- *             GMatrix subtraction (unary subtraction operator)            *
+ *                      Unary matrix subtraction operator                  *
+ * ----------------------------------------------------------------------- *
  ***************************************************************************/
 GMatrix& GMatrix::operator-= (const GMatrix& m)
 {
   // Raise an exception if the matrix dimensions are not compatible
   if (m_rows != m.m_rows || m_cols != m.m_cols)
-    throw matrix_mismatch("GMatrix::operator-= (const GMatrix&)", 
-						  m_rows, m_cols, m.m_rows, m.m_cols);
+    throw GException::matrix_mismatch(G_OP_SUB, m_rows, m_cols, m.m_rows, m.m_cols);
 
   // Subtract matrices
-  for (int i = 0; i < m_elements; ++i)
-    m_data[i] -= m.m_data[i];
+  subtraction(m);
 
   // Return result
   return *this;
@@ -363,7 +245,7 @@ GMatrix& GMatrix::operator-= (const GMatrix& m)
 
 
 /***************************************************************************
- *          Matrix multiplication (unary multiplication operator)          *
+ *                            Matrix multiplication                        *
  * ----------------------------------------------------------------------- *
  * In case of rectangular matrices the result matrix does not change and   *
  * the operations can be performed 'quasi' inplace (except of a vector).   *
@@ -374,8 +256,7 @@ GMatrix& GMatrix::operator*= (const GMatrix& m)
 {
   // Raise an exception if the matrix dimensions are not compatible
   if (m_cols != m.m_rows)
-    throw matrix_mismatch("GMatrix::operator*= (const GMatrix&)", 
-						  m_rows, m_cols, m.m_rows, m.m_cols);
+    throw GException::matrix_mismatch(G_OP_MAT_MUL, m_rows, m_cols, m.m_rows, m.m_cols);
 
   // Case A: Matrices are rectangular, so perform 'inplace' multiplication
   if (m_rows == m_cols) {
@@ -416,88 +297,116 @@ GMatrix& GMatrix::operator*= (const GMatrix& m)
 }
 
 
-/***************************************************************************
- *  GMatrix scalar multiplication (unary scalar multiplication operator)   *
- ***************************************************************************/
-GMatrix& GMatrix::operator*= (const double& d)
-{
-  // Case A: If multiplicator is 0.0 then set entire matrix to 0.0
-  if (d == 0.0) {
-    for (int i = 0; i < m_elements; ++i)
-      m_data[i] = 0.0;
-  }
-  
-  // Case B: If multiplicator is not +/- 1.0 then perform multiplication
-  else if (fabs(d) != 1.0) {
-    for (int i = 0; i < m_elements; ++i)
-      m_data[i] *= d;
-  }
-  
-  // Case C: If multiplication is -1.0 then negate
-  else if (d == -1.0) {
-    for (int i = 0; i < m_elements; ++i)
-      m_data[i] = -m_data[i];
-  }
-  
-  // Return result
-  return *this;
-}
-
-
-/***************************************************************************
- *         Matrix scalar division (unary scalar division operator)         *
- ***************************************************************************/
-GMatrix& GMatrix::operator/= (const double& d)
-{
-  // Case A: If divider is not +/- 1.0 then perform division
-  if (fabs(d) != 1.0) {
-    for (int i = 0; i < m_elements; ++i)
-      m_data[i] /= d;
-  }
-  
-  // Case B: If divider is -1.0 then negate
-  else if (d == -1.0) {
-    for (int i = 0; i < m_elements; ++i)
-      m_data[i] = -m_data[i];
-  }
-  
-  // Return result
-  return *this;
-}
-
-
 /*==========================================================================
  =                                                                         =
- =                          GMatrix member functions                       =
+ =                            GMatrix methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /***************************************************************************
- *                       Set all matrix elements to zero                   *
+ *                        Add vector column into matrix                    *
+ * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GMatrix::clear()
+void GMatrix::add_col(const GVector& v, int col)
 {
-  // Loop over all matrix elements
-  for (int i = 0; i < m_elements; ++i)
-    m_data[i] = 0.0;
+  // Raise an exception if the column index is invalid
+  #if defined(G_RANGE_CHECK)
+  if (col >= m_cols)
+    throw GException::out_of_range(G_ADD_COL, 0, col, m_rows, m_cols);
+  #endif
+
+  // Raise an exception if the matrix and vector dimensions are not compatible
+  if (m_rows != v.m_num)
+    throw GException::matrix_vector_mismatch(G_ADD_COL, v.m_num, m_rows, m_cols);
+
+  // Get start index of data in matrix
+  int i = m_colstart[col];
   
+  // Add column into vector
+  for (int row = 0; row < m_rows; ++row)
+    m_data[i++] += v.m_data[row];
+	
   // Return
   return;
 }
 
 
 /***************************************************************************
- *                    Get minimum physical matrix element                  *
+ *               Extract row from matrix and put it into vector            *
+ * ----------------------------------------------------------------------- *
  ***************************************************************************/
-double GMatrix::min() const
+GVector GMatrix::extract_row(int row) const
 {
-  // Initialise minimum with first element
-  double result = m_data[0];
+  // Raise an exception if the row index is invalid
+  #if defined(G_RANGE_CHECK)
+  if (row >= m_rows)
+    throw GException::out_of_range(G_EXTRACT_ROW, row, 0, m_rows, m_cols);
+  #endif
   
-  // Search all elements for the smallest one
-  for (int i = 1; i < m_elements; ++i) {
-    if (m_data[i] < result)
-	  result = m_data[i];
+  // Create result vector
+  GVector result(m_cols);
+
+  // Get start of data in matrix
+  int i = row;
+  
+  // Extract row into vector
+  for (int col = 0; col < m_cols; ++col, i+=m_rows)
+    result.m_data[col] = m_data[i];
+	
+  // Return vector
+  return result;
+
+}
+
+
+/***************************************************************************
+ *            Extract column from matrix and put it into vector            *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+GVector GMatrix::extract_col(int col) const
+{
+  // Raise an exception if the column index is invalid
+  #if defined(G_RANGE_CHECK)
+  if (col >= m_cols)
+    throw GException::out_of_range(G_EXTRACT_COL, 0, col, m_rows, m_cols);
+  #endif
+  
+  // Create result vector
+  GVector result(m_rows);
+
+  // Get start of data in matrix
+  int i = m_colstart[col];
+  
+  // Extract column into vector
+  for (int row = 0; row < m_rows; ++row)
+    result.m_data[row] = m_data[i++];
+	
+  // Return vector
+  return result;
+
+}
+
+
+/***************************************************************************
+ *                      Extract lower triangle of matrix                   *
+ * ----------------------------------------------------------------------- *
+ * Triangular extraction only works for rectangular matrixes.              *
+ ***************************************************************************/
+GMatrix GMatrix::extract_lower_triangle() const
+{
+  // First check if matrix is rectangular. Raise an exception if this is not
+  // the case
+  if (m_rows != m_cols)
+    throw GException::matrix_not_rectangular(G_EXTRACT_LOWER, m_rows, m_cols);
+
+  // Define result matrix
+  GMatrix result(m_rows, m_cols);
+
+  // Extract all elements
+  for (int col = 0; col < m_cols; ++col) {
+    int i = m_colstart[col] + col;
+    for (int row = col; row < m_rows; ++row, ++i)
+	  result.m_data[i] = m_data[i];
   }
   
   // Return result
@@ -506,46 +415,86 @@ double GMatrix::min() const
 
 
 /***************************************************************************
- *                    Get maximum physical matrix element                  *
+ *                       Extract upper triangle of matrix                  *
+ * ----------------------------------------------------------------------- *
+ * Triangular extraction only works for rectangular matrixes.              *
  ***************************************************************************/
-double GMatrix::max() const
+GMatrix GMatrix::extract_upper_triangle() const
 {
-  // Initialise minimum with first element
-  double result = m_data[0];
-  
-  // Search all elements for the largest one
-  for (int i = 1; i < m_elements; ++i) {
-    if (m_data[i] > result)
-	  result = m_data[i];
+  // First check if matrix is rectangular. Raise an exception if this is not
+  // the case
+  if (m_rows != m_cols)
+    throw GException::matrix_not_rectangular(G_EXTRACT_UPPER, m_rows, m_cols);
+
+  // Define result matrix
+  GMatrix result(m_rows, m_cols);
+
+  // Extract all elements
+  for (int col = 0; col < m_cols; ++col) {
+    int i = m_colstart[col];
+    for (int row = 0; row <= col; ++row, ++i)
+	  result.m_data[i] = m_data[i];
   }
-
+  
   // Return result
   return result;
 }
 
 
 /***************************************************************************
- *                              Get matrix sum                             *
+ *                          Determine fill of matrix                       *
+ * ----------------------------------------------------------------------- *
+ * The fill of a matrix is defined as the ratio of non-zero elements       *
+ * versus the number of total elements.                                    *
  ***************************************************************************/
-double GMatrix::sum() const
+double GMatrix::fill() const
 {
-  // Initialise matrix sum
-  double result = 0.0;
+  // Determine the number of zero elements
+  int zero = 0;
+  for (int i = 0; i < m_elements; ++i) {
+    if (m_data[i] == 0.0)
+	  zero++;
+  }
   
-  // Add all elements  
-  for (int i = 0; i < m_elements; ++i)
-    result += m_data[i];
-  
-  // Return result
-  return result;
+  // Return the fill
+  return (1.0-double(zero)/double(m_elements));
 }
 
 
 /***************************************************************************
- *                         Inplace transpose of matrix                     *
+ *                     Insert vector column into matrix                    *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+void GMatrix::insert_col(const GVector& v, int col)
+{
+  // Raise an exception if the column index is invalid
+  #if defined(G_RANGE_CHECK)
+  if (col >= m_cols)
+    throw GException::out_of_range(G_INSERT_COL, 0, col, m_rows, m_cols);
+  #endif
+
+  // Raise an exception if the matrix and vector dimensions are not compatible
+  if (m_rows != v.m_num)
+    throw GException::matrix_vector_mismatch(G_INSERT_COL, v.m_num, m_rows, m_cols);
+
+  // Get start index of data in matrix
+  int i = m_colstart[col];
+  
+  // Insert column into vector
+  for (int row = 0; row < m_rows; ++row)
+    m_data[i++] = v.m_data[row];
+	
+  // Return
+  return;
+}
+
+
+/***************************************************************************
+ *                        Inplace transpose of matrix                      *
  * ----------------------------------------------------------------------- *
  * The transpose operation exchanges the number of rows against the number *
- * of columns. The element transformation is done inplace.                 * 
+ * of columns. The element transformation is done inplace.                 *
+ *                     NON RECTANGULAR NOT CODED NATIVELY !!!              *
  ***************************************************************************/
 void GMatrix::transpose()
 {
@@ -578,111 +527,50 @@ void GMatrix::transpose()
 }
 
 
-/***************************************************************************
- *                     Extract row from matrix into vector                 *
- ***************************************************************************/
-GVector GMatrix::extract_row(int row) const
-{
-  // Raise an exception if the row index is invalid
-  #if defined(G_RANGE_CHECK)
-  if (row >= m_rows)
-    throw out_of_range("GMatrix::extract_row(int)", 
-	                   row, 0, m_rows, m_cols);
-  #endif
-  
-  // Create result vector
-  GVector result(m_cols);
-  
-  // Extract row into vector
-  for (int col = 0; col < m_cols; ++col)
-    result(col) = (*this)(row,col);
-	
-  // Return vector
-  return result;
-
-}
-
-
-/***************************************************************************
- *                   Extract column from matrix into vector                *
- ***************************************************************************/
-GVector GMatrix::extract_col(int col) const
-{
-  // Raise an exception if the column index is invalid
-  #if defined(G_RANGE_CHECK)
-  if (col >= m_cols)
-    throw out_of_range("GMatrix::extract_col(int)", 
-	                   0, col, m_rows, m_cols);
-  #endif
-  
-  // Create result vector
-  GVector result(m_rows);
-  
-  // Extract column into vector
-  for (int row = 0; row < m_rows; ++row)
-    result(row) = (*this)(row,col);
-	
-  // Return vector
-  return result;
-
-}
-
-
 /*==========================================================================
  =                                                                         =
- =                     GMatrix private member functions                    =
+ =                          GMatrix private methods                        =
  =                                                                         =
  ==========================================================================*/
 
 /***************************************************************************
- *                              select_non_zero                            *
+ *                            Constructor method                           *
  * ----------------------------------------------------------------------- *
- * Determines the non-zero rows and columns in matrix and set up index     *
- * arrays that points to these rows/columns. These arraya are used for     *
- * compressed matrix factorisations.                                       *
+ * This is the main constructor code, without any initialisation in it.    *
+ * It is used as service function to a number of different constructors of *
+ * the GMatrix class.                                                      *
  ***************************************************************************/
-void GMatrix::select_non_zero(void)
+void GMatrix::constructor(int rows, int cols)
 {
-  // Free existing selection arrays
-  if (m_rowsel != NULL) delete [] m_rowsel;
-  if (m_colsel != NULL) delete [] m_colsel;
-  
-  // Allocate selection arrays
-  m_rowsel = new int[m_rows];
-  if (m_rowsel == NULL)
-    throw mem_alloc("GMatrix::select_non_zero()", m_rows);
-  m_colsel = new int[m_cols];
-  if (m_colsel == NULL)
-    throw mem_alloc("GMatrix::select_non_zero()", m_cols);
+  // Determine number of elements to store in matrix
+  int elements = rows*cols;
 
-  // Initialise non-zero row and column counters
-  m_num_rowsel = 0;
-  m_num_colsel = 0;
+  // Throw exception if requested matrix size is zero
+  if (elements == 0)
+    throw GException::empty(G_CONSTRUCTOR);
+	
+  // Allocate matrix array and column start index array. Throw an exception 
+  // if allocation failed
+  m_data     = new double[elements];
+  m_colstart = new int[cols+1];
+  if (m_data == NULL || m_colstart == NULL)
+	throw GException::mem_alloc(G_CONSTRUCTOR, elements);
+	
+  // Store matrix size (logical, storage, allocated)
+  m_rows     = rows;
+  m_cols     = cols;
+  m_elements = elements;
+  m_alloc    = elements;
   
-  // Declare loop variables
-  int row;
-  int col;
-  
-  // Find all non-zero rows
-  for (row = 0; row < m_rows; ++row) {
-    for (col = 0; col < m_cols; ++col) {
-	  if ((*this)(row,col) != 0.0)
-	    break;
-	}
-	if (col < m_cols)      // found a non-zero element in row
-      m_rowsel[m_num_rowsel++] = row;
-  }
-
-  // Find all non-zero columns
-  for (col = 0; col < m_cols; ++col) {
-    for (row = 0; row < m_rows; ++row) {
-	  if ((*this)(row,col) != 0.0)
-	    break;
-	}
-	if (row < m_rows)      // found a non-zero element in column
-      m_colsel[m_num_colsel++] = col;
-  }
-  
+  // Set-up column start indices
+  m_colstart[0] = 0;
+  for (int col = 1; col <= m_cols; ++col)
+    m_colstart[col] = m_colstart[col-1] + m_rows;
+	
+  // Initialise matrix elements to 0.0
+  for (int i = 0; i < m_elements; ++i)
+    m_data[i] = 0.0;
+	
   // Return
   return;
 }
@@ -696,6 +584,7 @@ void GMatrix::select_non_zero(void)
 
 /***************************************************************************
  *                             Output operator                             *
+ * ----------------------------------------------------------------------- *
  ***************************************************************************/
 ostream& operator<< (ostream& os, const GMatrix& m)
 {
@@ -714,31 +603,10 @@ ostream& operator<< (ostream& os, const GMatrix& m)
   os << " Number of elements ........: " << m.m_elements << endl;
   os << " Number of allocated cells .: " << m.m_alloc << endl;
 
-  // Loop over all matrix elements
-  for (int row = 0; row < m.m_rows; ++row) {
-    os << " ";
-    for (int col = 0; col < m.m_cols; ++col) {
-      os << m(row,col);
-	  if (col != m.m_cols-1)
-	    os << ", ";
-	}
-	if (row != m.m_rows-1)
-	  os << endl;
-  }
-
-  // If there is a row compression the show scheme
-  if (m.m_rowsel != NULL) {
-    os << endl << " Row selection ..:";
-    for (int row = 0; row < m.m_num_rowsel; ++row)
-      os << " " << m.m_rowsel[row];
-  }
-
-  // If there is a column compression the show scheme
-  if (m.m_colsel != NULL) {
-    os << endl << " Column selection:";
-    for (int col = 0; col < m.m_num_colsel; ++col)
-      os << " " << m.m_colsel[col];
-  }
+  // Dump elements and compression schemes
+  m.dump_elements(os);
+  m.dump_row_comp(os);
+  m.dump_col_comp(os);
   
   // Return output stream
   return os;
@@ -747,6 +615,7 @@ ostream& operator<< (ostream& os, const GMatrix& m)
 
 /***************************************************************************
  *                          Matrix absolute values                         *
+ * ----------------------------------------------------------------------- *
  ***************************************************************************/
 GMatrix fabs(const GMatrix& m)
 {
@@ -759,145 +628,4 @@ GMatrix fabs(const GMatrix& m)
   
   // Return result
   return result;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                        GMatrix exception classes                        =
- =                                                                         =
- ==========================================================================*/
-
-/***************************************************************************
- *                      Matrix row or column out of range                  *
- ***************************************************************************/
-GMatrix::out_of_range::out_of_range(string origin, int row, int col, 
-                                    int rows, int cols)
-{
-  m_origin = origin;
-  ostringstream s_row;
-  ostringstream s_col;
-  ostringstream s_rows;
-  ostringstream s_cols;
-  s_row  << row;
-  s_col  << col;
-  s_rows << rows-1;
-  s_cols << cols-1;
-  m_message = "Matrix element (" + s_row.str() + "," + s_col.str() +
-              ") out of range ([0," + s_rows.str() + "], [0," +
-			  s_cols.str() + "])";
-}
-
-
-/***************************************************************************
- *                     Mismatch between matrix and vector                  *
- ***************************************************************************/
-GMatrix::matrix_vector_mismatch::matrix_vector_mismatch(string origin, 
-                                                int num, int rows, int cols)
-{
-  m_origin = origin;
-  ostringstream s_num;
-  ostringstream s_rows;
-  ostringstream s_cols;
-  s_num  << num;
-  s_rows << rows;
-  s_cols << cols;
-  m_message = "Vector dimension [" + s_num.str() + 
-              "] is incompatible with matrix size [" + 
-			  s_rows.str() + "," + s_cols.str() + "]";
-}
-
-
-/***************************************************************************
- *                       Matrix mismatch in operation                      *
- ***************************************************************************/
-GMatrix::matrix_mismatch::matrix_mismatch(string origin, int rows1, 
-                                            int cols1, int rows2, int cols2)
-{
-  m_origin = origin;
-  ostringstream s_rows1;
-  ostringstream s_rows2;
-  ostringstream s_cols1;
-  ostringstream s_cols2;
-  s_rows1 << rows1;
-  s_cols1 << cols1;
-  s_rows2 << rows2;
-  s_cols2 << cols2;
-  m_message = "Matrix mismatch: M1(" + s_rows1.str() + "," + s_cols1.str() +
-              ") incompatible with M2(" + s_rows2.str() + "," + 
-			  s_cols2.str() + ")";
-}
-
-
-/***************************************************************************
- *                           Matrix not rectangular                        *
- ***************************************************************************/
-GMatrix::matrix_not_rect::matrix_not_rect(string origin, int rows1, 
-                                            int cols1, int rows2, int cols2)
-{
-  m_origin = origin;
-  ostringstream s_rows1;
-  ostringstream s_rows2;
-  ostringstream s_cols1;
-  ostringstream s_cols2;
-  s_rows1 << rows1;
-  s_cols1 << cols1;
-  s_rows2 << rows2;
-  s_cols2 << cols2;
-  m_message = "Operation only valid for rectangular matrices: M[" + 
-              s_rows1.str() + "," + s_cols1.str() +
-              "] *= M[" + s_rows2.str() + "," + s_cols2.str() + 
-			  "] not allowed";
-}
-
-
-/***************************************************************************
- *                     Matrix is not positive definite                     *
- ***************************************************************************/
-GMatrix::matrix_not_pos_definite::matrix_not_pos_definite(string origin, 
-                                                        int row, double sum)
-{
-  m_origin = origin;
-  ostringstream s_rows;
-  ostringstream s_sum;
-  s_rows << row;
-  s_sum << scientific << sum;
-  m_message = "Matrix is not positive definite (sum " + s_sum.str() + 
-              " occured in row/column " + s_rows.str() + ")";
-}
-
-
-/***************************************************************************
- *                         Matrix is not symmetric                         *
- ***************************************************************************/
-GMatrix::matrix_not_symmetric::matrix_not_symmetric(string origin, int cols, 
-                                                                   int rows)
-{
-  m_origin = origin;
-  ostringstream s_rows;
-  ostringstream s_cols;
-  s_rows << rows;
-  s_cols << cols;
-  m_message = "Matrix is not symmetric [" + s_rows.str() + "," +
-			  s_cols.str() + "]";
-}
-
-
-/***************************************************************************
- *                       Matrix has not been factorised                    *
- ***************************************************************************/
-GMatrix::matrix_not_factorised::matrix_not_factorised(string origin, string type)
-{
-  m_origin  = origin;
-  m_message = "Matrix has not been factorised using " + type;
-}
-
-
-/***************************************************************************
- *                       All matrix elements are zero                      *
- ***************************************************************************/
-GMatrix::matrix_zero::matrix_zero(string origin)
-{
-  m_origin = origin;
-  m_message = "All matrix elements are zero";
 }

@@ -279,7 +279,7 @@ void test_allocate(void)
   try {
     GSparseMatrix test(0,0);
   }
-  catch (empty &e) {
+  catch (GException::empty &e) {
     cout << ". ok." << endl;
   }
   catch (exception &e) {
@@ -296,6 +296,7 @@ void test_allocate(void)
  ***************************************************************************/
 void test_assign_values(const GSparseMatrix& m_test)
 {
+  //
   cout << "Test GSparseMatrix: Assign matrix values: ";
   try {
     //
@@ -377,24 +378,108 @@ void test_assign_values(const GSparseMatrix& m_test)
   cout << ".";
   #endif
   //
-  // Insert column into 10 x 10 matrix using matrix stack
+  // Insert column into 10 x 10 matrix using matrix stack and the
+  // compressed vector format
   try {
-	GSparseMatrix stack(10,10);
-	stack.clear();
+    //
+	// Set-up sparse matrix for adding  
+	GSparseMatrix sparse(10,10);
 	for (int i = 3; i < 5; ++i)
-	  stack(i,i) = 5.0;
+	  sparse(i,i) = 5.0;
+	GSparseMatrix reference = sparse;
+	//
+	// Initialise vector for column adding
 	GVector column(10);
-	stack.stack_init(100,50);
-	for (int j = 0; j < 10; ++j) {
+	//
+	// Initialise matrix stack  
+	sparse.stack_init(100,50);
+	//
+	// Fill matrix using add_col
+    for (int j = 0; j < 10; ++j) {
+	  // 
+	  // Set column index
+	  int col = int(0.8 * j + 0.5);    // This allows that some columns are twice
+	  if (col > 9) col -= 10;          // This avoids overflow
+	  //
+	  // Set-up vector
 	  int i_min = (j < 2) ?  0 : j-2;
 	  int i_max = (j > 8) ? 10 : j+2;
-	  column = 0.0;
-	  for (int i = i_min; i < i_max; ++i)
-	    column(i) = (i+1)*1;
-	  stack.add_col(column, j);
-    }
-	stack.stack_destroy();
-//	cout << stack << endl;
+	  column    = 0.0;
+	  for (int i = i_min; i < i_max; ++i) {
+		column(i)         = (i+1)*1;
+		reference(i,col) += column(i);
+	  }
+	  //
+	  // Add vector
+	  sparse.add_col(column, col);
+	}
+	//
+	// Destroy stack
+	sparse.stack_destroy();
+    if (sparse != reference) {
+      cout << endl << "TEST ERROR: Corrupt add_col function (vector version)." << endl;
+	  cout << "Sparse " << sparse << endl;
+	  cout << "Reference " << reference << endl;
+	  throw;
+	}
+  }
+  catch (exception &e) {
+    cout << e.what() << endl;
+	throw;
+  }
+  //
+  // Insert column into 10 x 10 matrix using matrix stack and the
+  // compressed vector format
+  try {
+    //
+	// Set-up sparse matrix for adding  
+	GSparseMatrix sparse(10,10);
+	sparse.clear();
+	for (int i = 3; i < 5; ++i)
+	  sparse(i,i) = 5.0;
+	GSparseMatrix reference = sparse;
+	//
+	// Set-up workspace for column adding
+	double* wrk_data = new double[10];
+	int*    wrk_row  = new int[10];
+	//
+	// Initialise matrix stack  
+	sparse.stack_init(100,50);
+	//
+	// Fill matrix using add_col
+    for (int j = 0; j < 10; ++j) {
+	  // 
+	  // Set column index
+	  int col = int(0.8 * j + 0.5);    // This allows that some columns are twice
+	  if (col > 9) col -= 10;          // This avoids overflow
+	  //
+	  // Set-up vector
+	  int inx   = 0;
+	  int i_min = (j < 2) ?  0 : j-2;
+	  int i_max = (j > 8) ? 10 : j+2;
+	  for (int i = i_min; i < i_max; ++i) {
+		wrk_data[inx]     = (i+1)*1;
+		wrk_row[inx]      = i;
+		reference(i,col) += wrk_data[inx];
+		inx++;
+	  }
+	  //
+	  // Add vector
+	  sparse.add_col(wrk_data, wrk_row, inx, col);
+	}
+	//
+	// Destroy stack
+	sparse.stack_destroy();
+    if (sparse != reference) {
+      cout << endl << "TEST ERROR: Corrupt add_col function (compressed array version)." << endl;
+	  cout << "Sparse " << sparse << endl;
+	  cout << "Reference " << reference << endl;
+	  throw;
+	}
+	//
+	// Free workspace
+	delete [] wrk_data;
+	delete [] wrk_row;
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -522,7 +607,7 @@ void test_matrix_vector(const GSparseMatrix& m_test, const GVector& v_test)
 	  bigger(i,i) = (i+1)*1.1;
 	GVector test = bigger*v_test;
   }
-  catch (GMatrix::matrix_vector_mismatch &e) {
+  catch (GException::matrix_vector_mismatch &e) {
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -555,7 +640,7 @@ void test_matrix_matrix(const GSparseMatrix& m_test)
     try {
 	  GSparseMatrix test = m_test * bigger;
     }
-    catch (GMatrix::matrix_mismatch &e) {
+    catch (GException::matrix_mismatch &e) {
       cout << ".";
     }
     catch (exception &e) {
@@ -566,7 +651,7 @@ void test_matrix_matrix(const GSparseMatrix& m_test)
     try {
 	  GSparseMatrix test7 = bigger * m_test;
     }
-    catch (GMatrix::matrix_mismatch &e) {
+    catch (GException::matrix_mismatch &e) {
       cout << ".";
     }
     catch (exception &e) {
@@ -802,7 +887,7 @@ void test_arithmetics(const GSparseMatrix& m_test)
 	result  = m_test;
 	result += bigger;
   }
-  catch (GMatrix::matrix_mismatch) {
+  catch (GException::matrix_mismatch) {
 	cout << ".";
   }
   catch (exception &e) {
@@ -909,12 +994,139 @@ void test_comparison(const GSparseMatrix& m_test)
 
 
 /***************************************************************************
- *                           Test: Matrix conversions                      *
+ *                     Test: Conversion between matrix types               *
  ***************************************************************************/
-void test_conversion(const GSparseMatrix& m_test)
+void test_conversion(void)
 {
-  cout << "Test GSparseMatrix: Conversions: ";
+  cout << "Test GSparseMatrix: Matrix conversions: ";
+  try {
+    //
+	// Setup a symmetric sparse matrix
+	int           num = 10;
+	GSparseMatrix sparse(num,num);
+	for (int i = 0; i < num; ++i)
+	  sparse(i,i) = (i+1);
+	for (int j = 1; j < num; ++j) {
+	  sparse(0,j) = (j+1);
+	  sparse(j,0) = (j+1);
+	}
+    cout << ".";
+	//
+	// Convert GSparseMatrix matrix into GSymMatrix object
+	GSymMatrix converted = sparse;
+    cout << ".";
+	//
+	// Convert GSymMatrix back to GSparseMatrix matrix
+    GSparseMatrix back_convert = converted;
+    cout << ".";
+	//
+	// Compare back converted matrix to original one. They should be identical
+	if (sparse != back_convert) {
+	  cout << endl << "TEST ERROR: Unable to convert matrixes (symmetric)." << endl;
+	  cout << "Original matrix " << sparse << endl;
+	  cout << "GSymMatrix matrix " << converted << endl;
+	  cout << "Back converted matrix " << back_convert << endl;
+      throw;
+	}
+	//
+	// Determine the fill of the matrix. It should be 0.28
+	double fill = back_convert.fill();
+	if (fabs(fill-0.28) > 1.0e-15) {
+	  cout << endl << "TEST ERROR: Bad fill " << fill << " determined (expected 1.0)." <<
+	       endl;
+	  throw;
+	}
+    cout << ".";
+	//
+	// Extract lower triangle and check values
+    #if 0
+	GMatrix lower = sparse.extract_lower_triangle();
+	int ok = 1;
+	for (int j = 1; j < num; ++j) {
+	  for (int i = 0; i < j; ++i) {
+	    if (lower(i,j) != 0.0)
+		  ok = 0;
+	  }
+	}
+	for (int j = 0; j < num; ++j) {
+	  for (int i = j; i < num; ++i) {
+	    if (lower(i,j) != sparse(i,j))
+		  ok = 0;
+	  }
+	}
+	if (!ok) {
+	  cout << endl << "TEST ERROR: Corrupt extract_lower_triangle." << endl;
+	  cout << "Original matrix " << sparse << endl;
+	  cout << "Lower triangle matrix " << lower << endl;
+      throw;
+	}
+    cout << ".";
+	//
+	// Extract upper triangle and check values
+	GMatrix upper = sparse.extract_upper_triangle();
+	ok = 1;
+	for (int j = 0; j < num; ++j) {
+	  for (int i = j+1; i < num; ++i) {
+	    if (upper(i,j) != 0.0)
+		  ok = 0;
+	  }
+	}
+	for (int j = 0; j < num; ++j) {
+	  for (int i = 0; i <= j; ++i) {
+	    if (upper(i,j) != sparse(i,j))
+		  ok = 0;
+	  }
+	}
+	if (!ok) {
+	  cout << endl << "TEST ERROR: Corrupt extract_upper_triangle." << endl;
+	  cout << "Original matrix " << sparse << endl;
+	  cout << "Upper triangle matrix " << upper << endl;
+      throw;
+	}
+    cout << ".";
+	#endif
+	//
+	// Now make the matrix unsymmetric
+	sparse(0,num-1) = 1000.0;
+	//
+	// Try converting now into GSymMatrix object (this should fail)
+	try {
+	  converted = sparse;
+	}
+    catch (GException::matrix_not_symmetric &e) {
+      cout << ".";
+	}
+    catch (exception &e) {
+      cout << e.what() << endl;
+	  throw;
+    }
+	//
+	// Convert matrix into GMatrix object
+	GMatrix full = sparse;
+    cout << ".";
+	//
+	// Convert full matrix back to GSparseMatrix
+    back_convert = full;
+    cout << ".";
+	//
+	// Compare back converted matrix to original one. They should be identical
+	if (sparse != back_convert) {
+	  cout << endl << "TEST ERROR: Unable to convert matrixes (sparse)." << endl;
+	  cout << "Original matrix " << sparse << endl;
+	  cout << "GMatrix matrix " << full << endl;
+	  cout << "Back converted matrix " << back_convert << endl;
+      throw;
+	}	
+    cout << ".";
+  }
+  catch (exception &e) {
+    cout << e.what() << endl;
+	throw;
+  }
   cout << " ok." << endl;
+
+  // Return
+  return;
 }
 
 
@@ -947,7 +1159,7 @@ void test_cholesky(void)
 	  GVector v_test12(5);
 	  v_test12 = m_chol_test.cholesky_solver(v_test12);
     }
-    catch (GMatrix::matrix_not_factorised) {
+    catch (GException::matrix_not_factorised) {
 	  cout << ".";
     }
     catch (exception &e) {
@@ -1449,7 +1661,7 @@ void test_heavy(int block = 512)
 	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
     #if defined(DUMP_TIMING)
 	cout << endl << " - " << num_cols << " columns adding needed " << t_elapse << 
-	                " sec (reference ~ 4.8 sec)";
+	                " sec (reference ~ 4.6 sec)";
 	#endif   
     //
 	// Insert columns into 10000 x 10000 matrix using matrix stack
@@ -1460,7 +1672,7 @@ void test_heavy(int block = 512)
 	  stack(j,j) = 3.14;
     t_start = clock();
 	column = GVector(number);
-	stack.stack_init(10000,10000);
+	stack.stack_init(10000, 1000);
 	for (int j = 0; j < num_cols; ++j) {
 	  i_min = (j < 2)          ? 0 : j-2;
 	  i_max = (j > num_cols-2) ? num_cols : j+2;
@@ -1473,7 +1685,7 @@ void test_heavy(int block = 512)
 	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
     #if defined(DUMP_TIMING)
 	cout << endl << " - " << num_cols << " columns stack-adding needed " << t_elapse << 
-	                " sec (reference ~ 1.3 sec)";
+	                " sec (reference ~ 1 sec)";
 	#endif
 	//
 	// Check that both are identical
@@ -1500,7 +1712,7 @@ void test_heavy(int block = 512)
 	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
     #if defined(DUMP_TIMING)
 	cout << endl << " - Matrix adding and subtraction 300 times " << t_elapse << 
-	                " sec (reference ~ 1.5 sec)";
+	                " sec (reference ~ 1.4 sec)";
 	#endif   
     //
 	// Subsequent multiplications
@@ -1556,7 +1768,7 @@ int main(void)
   test_arithmetics(m_test);
   test_functions(m_test);
   test_comparison(m_test);
-  test_conversion(m_test);
+  test_conversion();
   test_cholesky();
   test_heavy();
 

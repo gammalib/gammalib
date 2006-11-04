@@ -15,31 +15,26 @@
 #define GSYMMATRIX_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GException.hpp"
-#include "GVector.hpp"
-#include "GMatrix.hpp"
+#include "GMatrixBase.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 using namespace std;
 
-/* __ Enumerators ________________________________________________________ */
-
-/* __ Structures _________________________________________________________ */
-
-/* __ Prototypes _________________________________________________________ */
-
 
 /***************************************************************************
  *                       GSymMatrix class definition                       *
+ * ----------------------------------------------------------------------- *
+ * GSymMatrix implements a symmetric matrix storage class. It derives from *
+ * the abstract base class GMatrixBase.                                    *
  ***************************************************************************/
-class GSymMatrix : public GMatrix {
+class GSymMatrix : public GMatrixBase {
   // Binary operator friends
   friend GSymMatrix operator* (const double& a,  const GSymMatrix& b);
   friend GSymMatrix operator* (const GSymMatrix& a, const double& b);
   friend GSymMatrix operator/ (const GSymMatrix& a, const double& b);
 
   // I/O friends
-  // USE_BASE: friend ostream& operator<< (ostream& os, const GSymMatrix& m);
+  friend ostream& operator<< (ostream& os, const GSymMatrix& m);
 
   // Friend functions
   friend GSymMatrix transpose(const GSymMatrix& m);
@@ -50,58 +45,61 @@ class GSymMatrix : public GMatrix {
 public:
   // Constructors and destructors (not inherited)
   GSymMatrix(int rows, int cols);
+  GSymMatrix(const GMatrix& m);
   GSymMatrix(const GSymMatrix& m);
+  GSymMatrix(const GSparseMatrix& m);
   virtual ~GSymMatrix();
 
-  // Matrix element access operators
-  virtual double& operator() (int row, int col);
+  // Operators
+  virtual GSymMatrix&   operator= (const GSymMatrix& m);
+  virtual double&       operator() (int row, int col);
   virtual const double& operator() (int row, int col) const;
+  virtual GSymMatrix    operator+ (const GSymMatrix& m) const;
+  virtual GSymMatrix    operator- (const GSymMatrix& m) const;
+  virtual GSymMatrix    operator* (const GSymMatrix& m) const;
+  virtual GVector       operator* (const GVector& v) const;
+  //_USE_BASE virtual int           operator== (const GSymMatrix& m) const;
+  //_USE_BASE virtual int           operator!= (const GSymMatrix& m) const;
+  virtual GSymMatrix    operator- () const;
+  virtual GSymMatrix&   operator+= (const GSymMatrix& m);
+  virtual GSymMatrix&   operator-= (const GSymMatrix& m);
+  virtual GSymMatrix&   operator*= (const GSymMatrix& m);
+  virtual GSymMatrix&   operator*= (const double& d);
+  virtual GSymMatrix&   operator/= (const double& d);
 
-  // Matrix assignment operators (not inherited)
-  virtual GSymMatrix& operator= (const GSymMatrix& m);
-
-  // Binary operators
-  virtual GSymMatrix operator+ (const GSymMatrix& m) const;
-  virtual GSymMatrix operator- (const GSymMatrix& m) const;
-  virtual GSymMatrix operator* (const GSymMatrix& m) const;
-  virtual GVector    operator* (const GVector& v) const;
-  // USE_BASE: virtual int operator== (const GSymMatrix& m) const;
-  // USE_BASE: virtual int operator!= (const GSymMatrix& m) const;
-
-  // Unary operators
-  GSymMatrix operator- () const;
-  // USE_BASE: virtual GSymMatrix& operator+= (const GSymMatrix& m);
-  // USE_BASE: virtual GSymMatrix& operator-= (const GSymMatrix& m);
-  virtual GSymMatrix& operator*= (const GSymMatrix& m);
-  virtual GSymMatrix& operator*= (const double& d);
-  virtual GSymMatrix& operator/= (const double& d);
-
-  // Matrix functions
-  // USE_BASE: virtual int      rows() const { return m_rows; }
-  // USE_BASE: virtual int      cols() const { return m_cols; }
-  // USE_BASE: virtual void     clear();
-  // USE_BASE: virtual double   min() const;
-  // USE_BASE: virtual double   max() const;
-  virtual double  sum() const;
-  virtual void    transpose() { return; }
-  virtual GVector extract_row(int row) const;
-  virtual GVector extract_col(int col) const;
-  virtual GMatrix convert_to_full() const;
-  virtual GMatrix extract_lower_triangle() const;
-  virtual GMatrix extract_upper_triangle() const;
+  // Methods
+  virtual void    add_col(const GVector& v, int col);
   virtual void    cholesky_decompose(int compress = 1);
   virtual GVector cholesky_solver(const GVector& v, int compress = 1);
   virtual void    cholesky_invert(int compress = 1);
+  virtual void    clear();
+  virtual GVector extract_row(int row) const;
+  virtual GVector extract_col(int col) const;
+  virtual GMatrix extract_lower_triangle() const;
+  virtual GMatrix extract_upper_triangle() const;
+  virtual void    insert_col(const GVector& v, int col);
+  virtual double  fill() const;
+  virtual double  min() const;
+  virtual double  max() const;
+  virtual double  sum() const;
+  virtual void    transpose() { return; }
     
 private:
-  void set_inx(void);  // Set indices of non-zero rows/columns
-  int  m_num_inx;      // Number of non-zero rows/columns
-  int* m_inx;          // Indices of non-zero rows/columns
+  // Private methods
+  void constructor(int rows, int cols);
+  void init_members(void);
+  void copy_members(const GSymMatrix& m);
+  void free_members(void);
+  void set_inx(void);
+
+  // Private data area
+  int  m_num_inx;
+  int* m_inx;
 };
 
 
 /***************************************************************************
- *                          Inline member functions                        *
+ *                            Inline operators                             *
  ***************************************************************************/
 // Matrix element access operator
 inline
@@ -154,21 +152,39 @@ GSymMatrix GSymMatrix::operator* (const GSymMatrix& m) const
   return result;
 }
 
-// Unary scalar multiplication
+// Matrix scaling
 inline
-GSymMatrix& GSymMatrix::operator*= (const double& d)
+GSymMatrix& GSymMatrix::operator*= (const double& s)
 {
-  this->GMatrix::operator*=(d);
+  multiplication(s);
   return *this;
 }
 
-// Unary scalar division
+// Matrix scalar division
 inline
-GSymMatrix& GSymMatrix::operator/= (const double& d)
+GSymMatrix& GSymMatrix::operator/= (const double& s)
 {
-  this->GMatrix::operator/=(d);
+  double inverse = 1.0/s;
+  multiplication(inverse);
   return *this;
 }
+
+// Negation
+inline
+GSymMatrix GSymMatrix::operator- ( ) const
+{
+  GSymMatrix result = *this;
+  result.negation();
+  return result;
+}
+
+
+/***************************************************************************
+ *                              Inline methods                             *
+ ***************************************************************************/
+inline void   GSymMatrix::clear() { set_all_elements(0.0); }
+inline double GSymMatrix::min() const { return get_min_element(); }
+inline double GSymMatrix::max() const { return get_max_element(); }
 
 
 /***************************************************************************

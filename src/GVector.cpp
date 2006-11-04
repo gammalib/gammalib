@@ -14,6 +14,9 @@
 /* __ Includes ___________________________________________________________ */
 #include "GVector.hpp"
 
+/* __ Namespaces _________________________________________________________ */
+using namespace std;
+
 
 /*==========================================================================
  =                                                                         =
@@ -22,18 +25,18 @@
  ==========================================================================*/
 
 /***************************************************************************
- *                           GVector constructor                           *
+ *                              Constructor                                *
  ***************************************************************************/
 GVector::GVector(int num)
 {
   // Throw exception if requested vector length is zero
   if (num == 0)
-    throw empty("GVector constructor");
+    throw GException::empty("GVector constructor");
 	
   // Allocate vector array. Throw exception if allocation failed
   m_data = new double[num];
   if (m_data == NULL)
-	throw mem_alloc("GVector constructor", num);
+	throw GException::mem_alloc("GVector constructor", num);
 	
   // Store vector size and initialize elements to 0.0
   m_num = num;
@@ -46,14 +49,14 @@ GVector::GVector(int num)
 
 
 /***************************************************************************
- *                         GVector copy constructor                        *
+ *                            Copy constructor                             *
  ***************************************************************************/
 GVector::GVector(const GVector& v)
 {
   // Allocate vector array. Throw exception if allocation failed
   m_data = new double[v.m_num];
   if (m_data == NULL)
-	throw mem_alloc("GVector copy constructor", v.m_num);
+	throw GException::mem_alloc("GVector copy constructor", v.m_num);
 
   // Store vector size and copy elements
   m_num = v.m_num;
@@ -66,7 +69,7 @@ GVector::GVector(const GVector& v)
 
 
 /***************************************************************************
- *                           GVector destructor                            *
+ *                               Destructor                                *
  ***************************************************************************/
 GVector::~GVector()
 {
@@ -98,7 +101,7 @@ GVector& GVector::operator= (const GVector& v)
     // Allocate vector array. Throw exception if allocation failed
     m_data = new double[v.m_num];
     if (m_data == NULL)
-	  throw mem_alloc("GVector assignment operator", v.m_num);
+	  throw GException::mem_alloc("GVector assignment operator", v.m_num);
 
     // Store vector size and copy elements
     m_num = v.m_num;
@@ -168,9 +171,9 @@ ostream& operator<< (ostream& os, const GVector& v)
 GVector cross(const GVector &a, const GVector &b)
 {
   if (a.m_num != b.m_num)
-    throw GVector::dim_mismatch("GVector cross product", a.m_num, b.m_num);
+    throw GVector::vector_mismatch("GVector cross product", a.m_num, b.m_num);
   if (a.m_num != 3)
-    throw GVector::bad_cross_dim(a.m_num);
+    throw GVector::vector_bad_cross_dim(a.m_num);
   GVector result(3);
   result(0) = a.m_data[1]*b.m_data[2] - a.m_data[2]*b.m_data[1];
   result(1) = a.m_data[2]*b.m_data[0] - a.m_data[0]*b.m_data[2];
@@ -181,14 +184,13 @@ GVector cross(const GVector &a, const GVector &b)
 
 /*==========================================================================
  =                                                                         =
- =                      GSparseMatrix exception classes                    =
+ =                         GVector exception classes                       =
  =                                                                         =
  ==========================================================================*/
 
 /***************************************************************************
- *                          Class exception handlers                       *
+ *                          Vector index out of range                      *
  ***************************************************************************/
-// Vector index out of range
 GVector::out_of_range::out_of_range(string origin, int inx, int elements)
 {
   m_origin = origin;
@@ -205,8 +207,11 @@ GVector::out_of_range::out_of_range(string origin, int inx, int elements)
   }
 }
 
-// Vector dimensions differ
-GVector::dim_mismatch::dim_mismatch(string origin, int size1, int size2)
+
+/***************************************************************************
+ *                          Vector dimensions differ                       *
+ ***************************************************************************/
+GVector::vector_mismatch::vector_mismatch(string origin, int size1, int size2)
 {
   m_origin = origin;
   ostringstream s_size1;
@@ -217,8 +222,11 @@ GVector::dim_mismatch::dim_mismatch(string origin, int size1, int size2)
               s_size2.str() + ")";
 }
 
-// Invalid vector dimension for cross product
-GVector::bad_cross_dim::bad_cross_dim(int elements)
+
+/***************************************************************************
+ *                   Invalid vector dimension for cross product            *
+ ***************************************************************************/
+GVector::vector_bad_cross_dim::vector_bad_cross_dim(int elements)
 {
   ostringstream s_elements;
   s_elements << elements;

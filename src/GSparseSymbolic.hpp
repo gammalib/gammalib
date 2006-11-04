@@ -63,12 +63,6 @@ public:
   // Functions
   void cholesky_symbolic_analysis(int order, const GSparseMatrix& m);
 
-  // Exception: Invalid ordering scheme
-  class invalid_order : public GException {
-  public:
-    invalid_order(string origin, int order, int min_order, int max_order);
-  };
-
 private:
   // Functions
   int*        cs_amd (int order, const GSparseMatrix* A);
