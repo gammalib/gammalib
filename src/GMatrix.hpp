@@ -99,7 +99,7 @@ inline
 double& GMatrix::operator() (int row, int col)
 {
   #if defined(G_RANGE_CHECK)
-  if (row >= m_rows || col >= m_cols)
+  if (row < 0 || row >= m_rows || col < 0 || col >= m_cols)
     throw out_of_range("GMatrix::operator(int,int)", row, col, m_rows, m_cols);
   #endif
   return m_data[m_colstart[col]+row];
@@ -110,7 +110,7 @@ inline
 const double& GMatrix::operator() (int row, int col) const
 {
   #if defined(G_RANGE_CHECK)
-  if (row >= m_rows || col >= m_cols)
+  if (row < 0 || row >= m_rows || col < 0 || col >= m_cols)
     throw out_of_range("GMatrix::operator(int,int) const", row, col, m_rows, m_cols);
   #endif
   return m_data[m_colstart[col]+row];

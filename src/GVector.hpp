@@ -133,7 +133,7 @@ inline
 double& GVector::operator() (int inx)
 {
   #if defined(G_RANGE_CHECK)
-  if (inx >= m_num)
+  if (inx < 0 || inx >= m_num)
     throw out_of_range("GVector access", inx, m_num);
   #endif
   return m_data[inx];
@@ -144,7 +144,7 @@ inline
 const double& GVector::operator() (int inx) const
 {
   #if defined(G_RANGE_CHECK)
-  if (inx >= m_num)
+  if (inx < 0 || inx >= m_num)
     throw out_of_range("const GVector access", inx, m_num);
   #endif
   return m_data[inx];

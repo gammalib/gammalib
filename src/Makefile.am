@@ -2,6 +2,7 @@
 
 files = GammaLib.hpp \
         GException.hpp GException.cpp \
+        GFitPar.hpp GFitPar.cpp \
         GVector.hpp GVector.cpp \
 	GMatrixBase.hpp GMatrixBase.cpp \
 	GMatrix.hpp GMatrix.cpp \
@@ -13,6 +14,7 @@ files = GammaLib.hpp \
 # Define package included headers (to be installed)
 pkginclude_HEADERS = GammaLib.hpp \
                      GException.hpp \
+		     GFitPar.hpp \
 		     GVector.hpp \
 		     GMatrix.hpp \
 		     GSymMatrix.hpp \
