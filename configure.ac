@@ -56,35 +56,34 @@ if test "x$RANGE_CHECK" = "xyes"; then
         [Define if range checking should be performed])
 fi
 
-dnl ===============
-dnl Checks for SWIG
-dnl ===============
+# ===============
+# Checks for SWIG
+# ===============
 AC_PATH_PROG([SWIG], [swig])
 AM_CONDITIONAL(HAVE_SWIG, test "$SWIG")
 
 
-dnl =================
-dnl Checks for Python
-dnl =================
-AM_PATH_PYTHON([2.2],
-			   [],
+# =================
+# Checks for Python
+# =================
+AM_PATH_PYTHON([2.2], [],
                [AC_MSG_WARN([Python not found. Python is required to build soothsayer python binding. Python can be obtained from http://www.python.org])])
 AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
 
 AC_ARG_ENABLE([python-binding],
-			  AS_HELP_STRING([--enable-python-binding],
-					         [build python binding (default=no]),
-                             [ac_enable_python_binding=yes],
-		                     [ac_enable_python_binding=no])
+              AS_HELP_STRING([--enable-python-binding],
+              [build python binding (default=no]),
+              [ac_enable_python_binding=yes],
+              [ac_enable_python_binding=no])
 if test "x$ac_enable_python_binding" = "xyes"
 then
-	if test ! "$SWIG" -a ! "$PYTHON"
-	then
-		AC_MSG_WARN([Python binding for gammalib cannot be built. Ensure that SWIG and Python packages are available.])
-	fi
+    if test ! "$SWIG" -a ! "$PYTHON"
+    then
+        AC_MSG_WARN([Python binding for gammalib cannot be built. Ensure that SWIG and Python packages are available.])
+    fi
 else
-	AC_MSG_NOTICE([Python binding for gammalib will not be built.])
-	AC_MSG_NOTICE([Enable Python binding module building with --enable-python-binding])
+    AC_MSG_NOTICE([Python binding for gammalib will not be built.])
+    AC_MSG_NOTICE([Enable Python binding module building with --enable-python-binding])
 fi
 AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes")
 
