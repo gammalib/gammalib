@@ -9,5 +9,6 @@ setup(name='@PACKAGE_NAME@',
 	  ext_modules=[Extension('_gammalib', ['gammalib_wrap.cpp'],
 							 include_dirs=['@top_srcdir@/src'],
 							 library_dirs=['../src/.libs'],
-							 libraries=['gamma'])],
+							 libraries=['gamma'],
+                             runtime_library_dirs=['@prefix@/lib'])],
 	  )

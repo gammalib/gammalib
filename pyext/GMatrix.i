@@ -62,13 +62,6 @@ public:
   virtual double  max() const;
   virtual double  sum() const;
   virtual void    transpose();
-  
-private:
-  // Private methods
-  void constructor(int rows, int cols);
-  void init_members(void) { ; }
-  void copy_members(const GMatrix& m) { ; }
-  void free_members(void) { ; }
 };
 
 
@@ -79,7 +72,7 @@ private:
   char *__str__() {
     std::ostringstream buffer;
 	buffer << *self;
-	std::string str = buffer.str();
+	static std::string str = buffer.str();
 	char* ptr = (char*)str.c_str();
 	return ptr;
   }
@@ -100,12 +93,6 @@ private:
   }
   GMatrix __div__(const double &a) {
     return (*self) / a;
-  }
-  GMatrix transpose(const GMatrix& m) {
-    return transpose(m);
-  }
-  GMatrix abs(const GMatrix& m) {
-    return fabs(m);
   }
   GMatrix copy() {
     return (*self);

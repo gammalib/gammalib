@@ -64,7 +64,7 @@ private:
   char *__str__() {
     std::ostringstream buffer;
 	buffer << *self;
-	std::string str = buffer.str();
+	static std::string str = buffer.str();
 	char* ptr = (char*)str.c_str();
 	return ptr;
   }

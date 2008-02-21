@@ -15,7 +15,12 @@
  ***************************************************************************/
 %module gammalib
 
+/* Linear Algebra */
 #include "GVector.i"
 #include "GMatrixBase.i"
 #include "GMatrix.i"
+#include "GSparseMatrix.i"
+#include "GSymMatrix.i"
+
+/* Model fitting */
 #include "GFitPar.i"

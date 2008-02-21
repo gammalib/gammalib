@@ -1485,7 +1485,7 @@ Optional Features:
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --enable-range-check    performs index range checking
-  --enable-python-binding build python binding (default=no
+  --enable-python-binding build python binding (default=yes
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -2433,8 +2433,7 @@ fi
 
 
 
-# things required by automake
-# AC_ARG_PROGRAM
+
 { echo "$as_me:$LINENO: checking whether ${MAKE-make} sets \$(MAKE)" >&5
 echo $ECHO_N "checking whether ${MAKE-make} sets \$(MAKE)... $ECHO_C" >&6; }
 set x ${MAKE-make}; ac_make=`echo "$2" | sed 's/+/p/g; s/[^a-zA-Z0-9_]/_/g'`
@@ -2466,10 +2465,9 @@ echo "${ECHO_T}no" >&6; }
 fi
 
 
-# Check for which system.
-# AC_CANONICAL_HOST
 
-# Checks for programs.
+
+
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -3077,9 +3075,6 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-# AC_LANG(C)
-# AC_PROG_CC
-# AC_PROG_CPP
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or
 # incompatible versions:
@@ -3160,16 +3155,12 @@ test -z "$INSTALL_SCRIPT" && INSTALL_SCRIPT='${INSTALL}'
 
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
-# AC_PROG_LN_S
 
-# Library versioning (current:revision:age)
-# See the libtool manual for an explanation
-#
-# gammalib-0.1     libgamma 0:0:0
+
 GAMMALIB_LT_VERSION="0:0:0"
 
 
-# libtool test.
+
 # Check whether --enable-shared was given.
 if test "${enable_shared+set}" = set; then
   enableval=$enable_shared; p=${PACKAGE-default}
@@ -4654,7 +4645,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4657 "configure"' > conftest.$ac_ext
+  echo '#line 4648 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7239,11 +7230,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7242: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7233: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7246: \$? = $ac_status" >&5
+   echo "$as_me:7237: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7529,11 +7520,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7532: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7523: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7536: \$? = $ac_status" >&5
+   echo "$as_me:7527: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7633,11 +7624,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7636: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7627: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7640: \$? = $ac_status" >&5
+   echo "$as_me:7631: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9997,7 +9988,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10000 "configure"
+#line 9991 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10097,7 +10088,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10100 "configure"
+#line 10091 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12498,11 +12489,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12501: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12492: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12505: \$? = $ac_status" >&5
+   echo "$as_me:12496: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -12602,11 +12593,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12605: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12596: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12609: \$? = $ac_status" >&5
+   echo "$as_me:12600: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14185,11 +14176,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14188: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14179: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14192: \$? = $ac_status" >&5
+   echo "$as_me:14183: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14289,11 +14280,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14292: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14283: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14296: \$? = $ac_status" >&5
+   echo "$as_me:14287: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16496,11 +16487,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16499: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16490: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16503: \$? = $ac_status" >&5
+   echo "$as_me:16494: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16786,11 +16777,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16789: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16780: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16793: \$? = $ac_status" >&5
+   echo "$as_me:16784: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16890,11 +16881,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16893: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16884: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16897: \$? = $ac_status" >&5
+   echo "$as_me:16888: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -19568,19 +19559,15 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 
 
 
-# Check compiler features
-# AC_TYPE_SIZE_T
-# AC_C_CONST
-# AC_C_VOLATILE
-# AC_C_INLINE
 
-# Checks for header files.
 
-# Checks for typedefs, structures, and compiler characteristics.
 
-# Checks for library functions.
 
-# Check for range cheking option.
+
+
+
+
+
 RANGE_CHECK="no"
 # Check whether --enable-range_check was given.
 if test "${enable_range_check+set}" = set; then
@@ -19596,9 +19583,7 @@ _ACEOF
 
 fi
 
-# ===============
-# Checks for SWIG
-# ===============
+
 # Extract the first word of "swig", so it can be a program name with args.
 set dummy swig; ac_word=$2
 { echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -19651,9 +19636,6 @@ fi
 
 
 
-# =================
-# Checks for Python
-# =================
 
 
 
@@ -19852,22 +19834,22 @@ fi
 
 # Check whether --enable-python-binding was given.
 if test "${enable_python_binding+set}" = set; then
-  enableval=$enable_python_binding; ac_enable_python_binding=yes
+  enableval=$enable_python_binding; ac_enable_python_binding=no
 else
-  ac_enable_python_binding=no
+  ac_enable_python_binding=yes
 fi
 
 if test "x$ac_enable_python_binding" = "xyes"
 then
-    if test ! "$SWIG" -a ! "$PYTHON"
-    then
-        { echo "$as_me:$LINENO: WARNING: Python binding for gammalib cannot be built. Ensure that SWIG and Python packages are available." >&5
+	if test ! "$SWIG" -a ! "$PYTHON"
+	then
+		{ echo "$as_me:$LINENO: WARNING: Python binding for gammalib cannot be built. Ensure that SWIG and Python packages are available." >&5
 echo "$as_me: WARNING: Python binding for gammalib cannot be built. Ensure that SWIG and Python packages are available." >&2;}
-    fi
+	fi
 else
-    { echo "$as_me:$LINENO: Python binding for gammalib will not be built." >&5
+	{ echo "$as_me:$LINENO: Python binding for gammalib will not be built." >&5
 echo "$as_me: Python binding for gammalib will not be built." >&6;}
-    { echo "$as_me:$LINENO: Enable Python binding module building with --enable-python-binding" >&5
+	{ echo "$as_me:$LINENO: Enable Python binding module building with --enable-python-binding" >&5
 echo "$as_me: Enable Python binding module building with --enable-python-binding" >&6;}
 fi
 
@@ -19882,8 +19864,101 @@ fi
 
 
 
-#
-#AC_CONFIG_FILES([Makefile src/Makefile test/Makefile pyext/Makefile])
+{ echo "$as_me:$LINENO: checking for library containing ffpss" >&5
+echo $ECHO_N "checking for library containing ffpss... $ECHO_C" >&6; }
+if test "${ac_cv_search_ffpss+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char ffpss ();
+int
+main ()
+{
+return ffpss ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' cfitsio; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ac_cv_search_ffpss=$ac_res
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext
+  if test "${ac_cv_search_ffpss+set}" = set; then
+  break
+fi
+done
+if test "${ac_cv_search_ffpss+set}" = set; then
+  :
+else
+  ac_cv_search_ffpss=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_search_ffpss" >&5
+echo "${ECHO_T}$ac_cv_search_ffpss" >&6; }
+ac_res=$ac_cv_search_ffpss
+if test "$ac_res" != no; then
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+cat >>confdefs.h <<\_ACEOF
+#define G_CFITSIO 1
+_ACEOF
+
+else
+
+cat >>confdefs.h <<\_ACEOF
+#define G_CFITSIO 0
+_ACEOF
+
+fi
+
+
+
 ac_config_files="$ac_config_files Makefile src/Makefile test/Makefile pyext/Makefile pyext/setup.py"
 
 cat >confcache <<\_ACEOF
