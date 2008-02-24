@@ -42,6 +42,7 @@ protected:
     // Protected methods
 
     // Protected data area
+	// this is a test
 
 // Methods that are available to the base class only
 private:
