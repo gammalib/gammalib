@@ -51,6 +51,27 @@ GException::empty::empty(string origin)
 
 
 /***************************************************************************
+ *                          Vector index out of range                      *
+ ***************************************************************************/
+GException::out_of_range::out_of_range(string origin, int inx, int elements)
+{
+  m_origin = origin;
+  if (elements > 0) {
+    ostringstream s_inx;
+    ostringstream s_elements;
+    s_inx      << inx;
+    s_elements << elements-1;
+    m_message = "Vector index (" + s_inx.str() + ") out of range [0," + 
+                s_elements.str() + "]";
+  }
+  else {
+    m_message = "Empty vector";
+  }
+}
+
+
+
+/***************************************************************************
  *                      Matrix row or column out of range                  *
  ***************************************************************************/
 GException::out_of_range::out_of_range(string origin, int row, int col, int rows, int cols)
@@ -67,6 +88,33 @@ GException::out_of_range::out_of_range(string origin, int row, int col, int rows
   m_message = "Matrix element (" + s_row.str() + "," + s_col.str() +
               ") out of range ([0," + s_rows.str() + "], [0," +
 			  s_cols.str() + "])";
+}
+
+
+/***************************************************************************
+ *                          Vector dimensions differ                       *
+ ***************************************************************************/
+GException::vector_mismatch::vector_mismatch(string origin, int size1, int size2)
+{
+  m_origin = origin;
+  ostringstream s_size1;
+  ostringstream s_size2;
+  s_size1 << size1;
+  s_size2 << size2;
+  m_message = "Vector dimensions differ (" + s_size1.str() + " <-> " + 
+              s_size2.str() + ")";
+}
+
+
+/***************************************************************************
+ *                   Invalid vector dimension for cross product            *
+ ***************************************************************************/
+GException::vector_bad_cross_dim::vector_bad_cross_dim(int elements)
+{
+  ostringstream s_elements;
+  s_elements << elements;
+  m_message = "Vector cross product only defined for 3 dimensions but vector size is " + 
+              s_elements.str(); 
 }
 
 

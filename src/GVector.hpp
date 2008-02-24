@@ -100,24 +100,7 @@ public:
   // Vector functions
   int size() const;       // Return dimension of vector
   int non_zeros() const;  // Returns # of non zeros in vector
-  
-  // Exception: Vector index out of range
-  class out_of_range : public GException {
-  public:
-    out_of_range(string origin, int inx, int elements);
-  };
-  
-  // Exception: Vector dimensions mismatch
-  class vector_mismatch : public GException {
-  public:
-    vector_mismatch(string origin, int size1, int size2);
-  };
-  
-  // Exception: Invalid vector dimension for cross product
-  class vector_bad_cross_dim : public GException {
-  public:
-    vector_bad_cross_dim(int elements);
-  };
+
 private:
   int     m_num;
   double* m_data;
@@ -134,7 +117,7 @@ double& GVector::operator() (int inx)
 {
   #if defined(G_RANGE_CHECK)
   if (inx < 0 || inx >= m_num)
-    throw out_of_range("GVector access", inx, m_num);
+    throw GException::out_of_range("GVector::operator(int)", inx, m_num);
   #endif
   return m_data[inx];
 }
@@ -145,7 +128,7 @@ const double& GVector::operator() (int inx) const
 {
   #if defined(G_RANGE_CHECK)
   if (inx < 0 || inx >= m_num)
-    throw out_of_range("const GVector access", inx, m_num);
+    throw GException::out_of_range("GVector::operator(int)", inx, m_num);
   #endif
   return m_data[inx];
 }
@@ -155,7 +138,7 @@ inline
 GVector& GVector::operator+= (const GVector& v)
 {
   if (m_num != v.m_num)
-    throw vector_mismatch("GVector += operator", m_num, v.m_num);
+    throw GException::vector_mismatch("GVector::operator+=(GVector)", m_num, v.m_num);
   for (int i = 0; i < m_num; ++i)
     m_data[i] += v.m_data[i];
   return *this;
@@ -166,7 +149,7 @@ inline
 GVector& GVector::operator-= (const GVector& v)
 {
   if (m_num != v.m_num)
-    throw vector_mismatch("GVector -= operator", m_num, v.m_num);
+    throw GException::vector_mismatch("GVector::operator-=(GVector)", m_num, v.m_num);
   for (int i = 0; i < m_num; ++i)
     m_data[i] -= v.m_data[i];
   return *this;
@@ -297,7 +280,7 @@ inline
 double operator* (const GVector& a, const GVector& b)
 {
   if (a.m_num != b.m_num)
-    throw GVector::vector_mismatch("GVector scalar product", a.m_num, b.m_num);
+    throw GException::vector_mismatch("operator*(GVector, GVector)", a.m_num, b.m_num);
   double result = 0.0;
   for (int i = 0; i < a.m_num; ++i)
     result += (a.m_data[i] * b.m_data[i]);

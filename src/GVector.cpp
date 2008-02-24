@@ -171,65 +171,12 @@ ostream& operator<< (ostream& os, const GVector& v)
 GVector cross(const GVector &a, const GVector &b)
 {
   if (a.m_num != b.m_num)
-    throw GVector::vector_mismatch("GVector cross product", a.m_num, b.m_num);
+    throw GException::vector_mismatch("cross(GVector&, GVector&)", a.m_num, b.m_num);
   if (a.m_num != 3)
-    throw GVector::vector_bad_cross_dim(a.m_num);
+    throw GException::vector_bad_cross_dim(a.m_num);
   GVector result(3);
   result(0) = a.m_data[1]*b.m_data[2] - a.m_data[2]*b.m_data[1];
   result(1) = a.m_data[2]*b.m_data[0] - a.m_data[0]*b.m_data[2];
   result(2) = a.m_data[0]*b.m_data[1] - a.m_data[1]*b.m_data[0];
   return result;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                         GVector exception classes                       =
- =                                                                         =
- ==========================================================================*/
-
-/***************************************************************************
- *                          Vector index out of range                      *
- ***************************************************************************/
-GVector::out_of_range::out_of_range(string origin, int inx, int elements)
-{
-  m_origin = origin;
-  if (elements > 0) {
-    ostringstream s_inx;
-    ostringstream s_elements;
-    s_inx      << inx;
-    s_elements << elements-1;
-    m_message = "Vector index (" + s_inx.str() + ") out of range [0," + 
-                s_elements.str() + "]";
-  }
-  else {
-    m_message = "Empty vector";
-  }
-}
-
-
-/***************************************************************************
- *                          Vector dimensions differ                       *
- ***************************************************************************/
-GVector::vector_mismatch::vector_mismatch(string origin, int size1, int size2)
-{
-  m_origin = origin;
-  ostringstream s_size1;
-  ostringstream s_size2;
-  s_size1 << size1;
-  s_size2 << size2;
-  m_message = "Vector dimensions differ (" + s_size1.str() + " <-> " + 
-              s_size2.str() + ")";
-}
-
-
-/***************************************************************************
- *                   Invalid vector dimension for cross product            *
- ***************************************************************************/
-GVector::vector_bad_cross_dim::vector_bad_cross_dim(int elements)
-{
-  ostringstream s_elements;
-  s_elements << elements;
-  m_message = "Vector cross product only defined for 3 dimensions but vector size is " + 
-              s_elements.str(); 
 }

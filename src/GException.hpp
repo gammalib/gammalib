@@ -55,10 +55,23 @@ public:
     empty(string origin);
   };
 
-  // Index out of range
+  // Out of range
   class out_of_range : public GExceptionHandler {
   public:
+    out_of_range(string origin, int inx, int elements);
     out_of_range(string origin, int row, int col, int rows, int cols);
+  };
+
+  // Vector - Vector mismatch
+  class vector_mismatch : public GExceptionHandler {
+  public:
+    vector_mismatch(string origin, int size1, int size2);
+  };
+
+  // Cross product only defined for 3-element vectors
+  class vector_bad_cross_dim : public GExceptionHandler {
+  public:
+    vector_bad_cross_dim(int elements);
   };
   
   // Vector - Matrix mismatch
