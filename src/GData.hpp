@@ -36,7 +36,7 @@ public:
     // Operators
 
     // Methods
-
+    
 // Methods and data that are available to derived classes
 protected:
     // Protected methods
