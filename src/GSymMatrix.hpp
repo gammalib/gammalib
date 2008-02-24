@@ -107,7 +107,7 @@ double& GSymMatrix::operator() (int row, int col)
 {
   #if defined(G_RANGE_CHECK)
   if (row >= m_rows || col >= m_cols)
-    throw out_of_range("GSymMatrix access", row, col, m_rows, m_cols);
+    throw GException::out_of_range("GSymMatrix::operator(int,int)", row, col, m_rows, m_cols);
   #endif
   int inx = (row >= col) ? m_colstart[col]+(row-col) : m_colstart[row]+(col-row);
   return m_data[inx];
@@ -119,7 +119,7 @@ const double& GSymMatrix::operator() (int row, int col) const
 {
   #if defined(G_RANGE_CHECK)
   if (row >= m_rows || col >= m_cols)
-    throw out_of_range("GSymMatrix access", row, col, m_rows, m_cols);
+    throw GException::out_of_range("GSymMatrix::operator(int,int)", row, col, m_rows, m_cols);
   #endif
   int inx = (row >= col) ? m_colstart[col]+(row-col) : m_colstart[row]+(col-row);
   return m_data[inx];

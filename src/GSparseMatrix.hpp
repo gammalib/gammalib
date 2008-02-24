@@ -157,7 +157,7 @@ double& GSparseMatrix::operator() (int row, int col)
 {
   #if defined(G_RANGE_CHECK)
   if (row >= m_rows || col >= m_cols)
-    throw out_of_range("GSparseMatrix access", row, col, m_rows, m_cols);
+    throw GException::out_of_range("GSparseMatrix::operator(int,int)", row, col, m_rows, m_cols);
   #endif
   fill_pending();
   int inx = get_index(row,col);
@@ -181,7 +181,7 @@ const double& GSparseMatrix::operator() (int row, int col) const
 {
   #if defined(G_RANGE_CHECK)
   if (row >= m_rows || col >= m_cols)
-    throw out_of_range("GSparseMatrix access", row, col, m_rows, m_cols);
+    throw GException::out_of_range("GSparseMatrix::operator(int,int)", row, col, m_rows, m_cols);
   #endif
   int inx = get_index(row,col);
   double* value;
