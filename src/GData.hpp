@@ -36,13 +36,13 @@ public:
     // Operators
 
     // Methods
-  
+
 // Methods and data that are available to derived classes
 protected:
     // Protected methods
 
     // Protected data area
-	// this is a test
+    // this is a test
 
 // Methods that are available to the base class only
 private:
