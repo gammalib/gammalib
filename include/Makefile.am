@@ -11,6 +11,7 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GFits.hpp \
 		     GFitPar.hpp \
 		     GVector.hpp \
+		     GMatrixBase.hpp \
 		     GMatrix.hpp \
 		     GSymMatrix.hpp \
 		     GSparseMatrix.hpp
