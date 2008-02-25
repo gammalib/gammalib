@@ -15,6 +15,9 @@
  ***************************************************************************/
 %module gammalib
 
+/* General */
+#include "GException.i"
+
 /* Linear Algebra */
 #include "GVector.i"
 #include "GMatrixBase.i"

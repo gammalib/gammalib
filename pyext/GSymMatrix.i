@@ -70,23 +70,25 @@ public:
  ***************************************************************************/
 %extend GSymMatrix {
   char *__str__() {
+    static char str_buffer[100001];
     std::ostringstream buffer;
-	buffer << *self;
-	static std::string str = buffer.str();
-	char* ptr = (char*)str.c_str();
-	return ptr;
+    buffer << *self;
+	std::string str = buffer.str();
+    strncpy(str_buffer, (char*)str.c_str(), 100001);
+	str_buffer[100000] = '\0';
+	return str_buffer;
   }
-  void __setslice__(int row, int col, const double val) throw (std::out_of_range) {
-    if (row >=0 && row < (int)self->rows() && col >= 0 || col < (int)self->cols())
-	  (*self)(row,col) = val;
-    else
-      throw std::out_of_range("row,column");
-  }
-  double __getslice__(int row, int col) throw (std::out_of_range) {
+  double __getslice__(int row, int col) {
     if (row >=0 && row < (int)self->rows() && col >= 0 || col < (int)self->cols())
 	  return (*self)(row,col);
     else
-	  throw std::out_of_range("row,column");
+	  throw GException::out_of_range("__getitem__(int,int)", row, col, (int)self->rows(), (int)self->cols());
+  }
+  void __setslice__(int row, int col, const double val) {
+    if (row >=0 && row < (int)self->rows() && col >= 0 || col < (int)self->cols())
+	  (*self)(row,col) = val;
+    else
+	  throw GException::out_of_range("__setitem__(int,int)", row, col, (int)self->rows(), (int)self->cols());
   }
   GSymMatrix __mul__(const double &a) {
     return (*self) * a;

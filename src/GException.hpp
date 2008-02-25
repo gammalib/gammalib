@@ -71,7 +71,7 @@ public:
   // Cross product only defined for 3-element vectors
   class vector_bad_cross_dim : public GExceptionHandler {
   public:
-    vector_bad_cross_dim(int elements);
+    vector_bad_cross_dim(string origin, int elements);
   };
   
   // Vector - Matrix mismatch

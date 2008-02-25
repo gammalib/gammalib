@@ -109,8 +109,9 @@ GException::vector_mismatch::vector_mismatch(string origin, int size1, int size2
 /***************************************************************************
  *                   Invalid vector dimension for cross product            *
  ***************************************************************************/
-GException::vector_bad_cross_dim::vector_bad_cross_dim(int elements)
+GException::vector_bad_cross_dim::vector_bad_cross_dim(string origin, int elements)
 {
+  m_origin = origin;
   ostringstream s_elements;
   s_elements << elements;
   m_message = "Vector cross product only defined for 3 dimensions but vector size is " + 

@@ -11,10 +11,27 @@
  *                                                                         *
  ***************************************************************************/
 %module GException
+
 %{
 /* Put headers and other declarations here */
-#include <string>                             // string
-#include <sstream>                            // ostringstream
-#include <stdexcept>                          // exception
-%}
 #include "GException.hpp"
+%}
+%include exception.i
+
+%exception {
+    try {
+        $action
+    }
+    catch (const GException::mem_alloc& e) {
+        SWIG_exception(SWIG_MemoryError, e.what());
+    }
+    catch (const GException::empty& e) {
+        SWIG_exception(SWIG_ValueError, e.what());
+    }
+    catch (const GException::out_of_range& e) {
+        SWIG_exception(SWIG_IndexError, e.what());
+    }
+    catch (const std::exception& e) {
+        SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+}

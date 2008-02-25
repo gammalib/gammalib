@@ -173,7 +173,7 @@ GVector cross(const GVector &a, const GVector &b)
   if (a.m_num != b.m_num)
     throw GException::vector_mismatch("cross(GVector&, GVector&)", a.m_num, b.m_num);
   if (a.m_num != 3)
-    throw GException::vector_bad_cross_dim(a.m_num);
+    throw GException::vector_bad_cross_dim("cross(GVector&, GVector&)", a.m_num);
   GVector result(3);
   result(0) = a.m_data[1]*b.m_data[2] - a.m_data[2]*b.m_data[1];
   result(1) = a.m_data[2]*b.m_data[0] - a.m_data[0]*b.m_data[2];

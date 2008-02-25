@@ -12,6 +12,7 @@
  ***************************************************************************/
 %{
 /* Put headers and other declarations here that are needed for compilation */
+#include "GException.hpp"
 #include "GVector.hpp"
 %}
 
@@ -47,23 +48,25 @@ public:
  ***************************************************************************/
 %extend GVector {
   char *__str__() {
+    static char str_buffer[100001];
     std::ostringstream buffer;
-	buffer << *self;
-	static std::string str = buffer.str();
-	char* ptr = (char*)str.c_str();
-	return ptr;
+    buffer << *self;
+	std::string str = buffer.str();
+    strncpy(str_buffer, (char*)str.c_str(), 100001);
+	str_buffer[100000] = '\0';
+	return str_buffer;
   }
-  double __getitem__(int index) throw (std::out_of_range) {
+  double __getitem__(int index) {
 	if (index >= 0 && index < (int)self->size())
 	  return (*self)(index);
     else
-	  throw std::out_of_range("index");
+	  throw GException::out_of_range("__getitem__(int)", index, (int)self->size());
   }
-  void __setitem__(int index, const double val) throw (std::out_of_range) {
+  void __setitem__(int index, const double val) {
 	if (index>=0 && index < (int)self->size())
 	  (*self)(index) = val;
     else
-      throw std::out_of_range("index");
+      throw GException::out_of_range("__setitem__(int)", index, (int)self->size());
   }
   GVector __add__(const GVector &a) {
     return (*self) + a;
