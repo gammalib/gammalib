@@ -15,7 +15,7 @@
 #define TEST_GSPARSEMATRIX_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "../src/GammaLib.hpp"
+#include "GammaLib.hpp"
 #include <iostream>                           // cout, cerr
 #include <stdexcept>                          // std::exception
 #include <math.h>
