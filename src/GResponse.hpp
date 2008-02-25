@@ -36,12 +36,17 @@ public:
     // Operators
 
     // Methods
+    virtual void load(std::string rspname) = 0;
+    virtual void save(std::string rspname) = 0;
+    virtual void set_caldb(std::string dbname) = 0;
   
 // Methods and data that are available to derived classes
 protected:
     // Protected methods
 
     // Protected data area
+    std::string m_caldb;      // Calibration database name
+    std::string m_rspname;    // Response name
 
 // Methods that are available to the base class only
 private:

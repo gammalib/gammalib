@@ -1,27 +1,31 @@
 ## Process this file with automake to produce Makefile.in
 
-files = GammaLib.hpp \
-        GException.hpp GException.cpp \
-        GFitPar.hpp GFitPar.cpp \
-        GVector.hpp GVector.cpp \
-        GMatrixBase.hpp GMatrixBase.cpp \
-        GMatrix.hpp GMatrix.cpp \
-        GSymMatrix.hpp GSymMatrix.cpp \
-        GSparseMatrix.hpp GSparseMatrix.cpp \
-        GSparseSymbolic.hpp GSparseSymbolic.cpp \
-        GSparseNumeric.hpp GSparseNumeric.cpp
-        
-# Define package included headers (to be installed)
-pkginclude_HEADERS = GammaLib.hpp \
-                     GException.hpp \
-                     GFitPar.hpp \
-                     GVector.hpp \
-                     GMatrix.hpp \
-                     GSymMatrix.hpp \
-                     GSparseMatrix.hpp \
-                     GSparseSymbolic.hpp \
-                     GSparseNumeric.hpp
-                     
+# we use srcdir/src for "private" includes
+# we use srcdir/include for the static global include files
+# we use builddir/src for the generated include files to get found
+
+INCLUDES = -I$(top_srcdir)/include \
+	   -I$(top_builddir)/src \
+	   -I$(top_srcdir)/src
+
+files = GException.cpp \
+	data/GData.cpp \
+	rsp/GResponse.cpp \
+	obs/GObservation.cpp \
+	fits/GFitsHeaderCard.cpp \
+	fits/GFitsHeader.cpp \
+	fits/GFitsData.cpp \
+	fits/GFitsHDU.cpp \
+	fits/GFits.cpp \
+	fit/GFitPar.cpp \
+	linalg/GVector.cpp \
+	linalg/GMatrixBase.cpp \
+	linalg/GMatrix.cpp \
+	linalg/GSymMatrix.cpp \
+	linalg/GSparseMatrix.cpp \
+	linalg/GSparseSymbolic.cpp \
+	linalg/GSparseNumeric.cpp
+	
 # Build libtool library
 lib_LTLIBRARIES = libgamma.la
 libgamma_la_SOURCES = $(files)
