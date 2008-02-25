@@ -2,7 +2,7 @@ dnl =============================================================
 dnl Process this file with autoconf to produce a configure script
 dnl =============================================================
 AC_INIT([GammaLib], [0.1pre], [knodlseder@cesr.fr])
-AC_CONFIG_SRCDIR(src/GammaLib.hpp)
+AC_CONFIG_SRCDIR(src/Makefile.am)
 
 AM_INIT_AUTOMAKE([gnu no-dependencies])
 AM_CONFIG_HEADER([config.h])
@@ -131,5 +131,4 @@ AC_SEARCH_LIBS(ffpss, cfitsio,
 dnl ===
 dnl
 dnl ===
-dnl AC_CONFIG_FILES([Makefile src/Makefile test/Makefile pyext/Makefile])
-AC_OUTPUT([Makefile src/Makefile test/Makefile pyext/Makefile pyext/setup.py])
+AC_OUTPUT([Makefile src/Makefile include/Makefile test/Makefile pyext/Makefile pyext/setup.py])
