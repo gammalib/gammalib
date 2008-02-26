@@ -82,8 +82,7 @@ AC_ARG_ENABLE(range_check,
              [ RANGE_CHECK="$enableval"
              ]) 
 if test "x$RANGE_CHECK" = "xyes"; then
-        AC_DEFINE([G_RANGE_CHECK], [1], 
-        [Define if range checking should be performed])
+        AC_DEFINE([G_RANGE_CHECK], [1], [Define if range checking should be performed])
 fi
 
 
@@ -98,24 +97,24 @@ dnl =================
 dnl Checks for Python
 dnl =================
 AM_PATH_PYTHON([2.2],
-			   [],
+               [],
                [AC_MSG_WARN([Python not found. Python is required to build soothsayer python binding. Python can be obtained from http://www.python.org])])
 AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
 
 AC_ARG_ENABLE([python-binding],
-			  AS_HELP_STRING([--enable-python-binding],
-					         [build python binding (default=yes]),
+              AS_HELP_STRING([--enable-python-binding],
+                             [build python binding (default=yes]),
                              [ac_enable_python_binding=no],
-		                     [ac_enable_python_binding=yes])
+                             [ac_enable_python_binding=yes])
 if test "x$ac_enable_python_binding" = "xyes"
 then
-	if test ! "$SWIG" -a ! "$PYTHON"
-	then
-		AC_MSG_WARN([Python binding for gammalib cannot be built. Ensure that SWIG and Python packages are available.])
-	fi
+    if test ! "$SWIG" -a ! "$PYTHON"
+    then
+        AC_MSG_WARN([Python binding for gammalib cannot be built. Ensure that SWIG and Python packages are available.])
+    fi
 else
-	AC_MSG_NOTICE([Python binding for gammalib will not be built.])
-	AC_MSG_NOTICE([Enable Python binding module building with --enable-python-binding])
+    AC_MSG_NOTICE([Python binding for gammalib will not be built.])
+    AC_MSG_NOTICE([Enable Python binding module building with --enable-python-binding])
 fi
 AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes")
 
@@ -123,9 +122,9 @@ AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes"
 dnl ==================
 dnl Checks for cfitsio
 dnl ==================
+#AC_SEARCH_LIBS(ffopen, cfitsio,
 AC_SEARCH_LIBS(ffpss, cfitsio,
-    AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available]),
-    AC_DEFINE([G_CFITSIO], [0], [Define if cfitsio is available]) ) 	 
+    AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available]), ,[-lm])
 
 
 dnl ===

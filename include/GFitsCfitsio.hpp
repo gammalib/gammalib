@@ -52,7 +52,7 @@ typedef fitsfile __fitsfile;
 /* __ Macros _____________________________________________________________ */
 #define __ffgerr(A, B) __error(A, B)
 #define __ffopen(A, B, C, D) __dummy()
-#define __ffclos(A, B, C, D) __dummy()
+#define __ffclos(A, B) __dummy()
 #define __ffthdu(A, B, C) __dummy()
 #define __ffmahd(A, B, C, D) __dummy()
 #define __ffghdt(A, B, C) __dummy()
@@ -66,9 +66,11 @@ typedef fitsfile __fitsfile;
 typedef int __fitsfile;
 
 /* __ Dummy function _____________________________________________________ */
+inline
 void __error(int status, char* err_text) {
     strcpy(err_text, "CFITSIO not available");
 }
+inline
 int __dummy(void) {
     return 0;
 }
