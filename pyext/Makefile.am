@@ -5,11 +5,9 @@ if HAVE_PYTHON
 if ENABLE_PYTHON_BINDING
 
 SWIG_INTERFACE = gammalib.i
-
 BUILT_SOURCES = gammalib_wrap.cpp gammalib.py
 CLEANFILES = gammalib_wrap.cpp gammalib.py
-
-EXTRA_DIST =	runme.py
+#EXTRA_DIST =	runme.py
 
 all-local: gammalib_wrap.cpp gammalib.py
 	$(PYTHON) setup.py build

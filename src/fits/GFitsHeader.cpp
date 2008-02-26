@@ -153,20 +153,8 @@ void GFitsHeader::open(__fitsfile* fptr)
  ***************************************************************************/
 GFitsHeaderCard* GFitsHeader::card(const std::string keyname)
 {
-    // Set card pointer to NULL (default)
-    GFitsHeaderCard* ptr = NULL;
-    
-    // Search keyname in list
-    for (int i = 0; i < m_num_cards; ++i) {
-        if (m_card[i].keyname() == keyname) {
-            ptr = &(m_card[i]);
-            break;
-        }
-    }
-    
     // Return card pointer
-    return ptr;
-    
+    return GFitsHeader::card_ptr(keyname);
 }
 
 
@@ -242,6 +230,29 @@ void GFitsHeader::free_members(void)
 
     // Return
     return;
+}
+
+
+/***************************************************************************
+ *                             Get card pointer                            *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+GFitsHeaderCard* GFitsHeader::card_ptr(const std::string keyname)
+{
+
+    // Set card pointer to NULL (default)
+    GFitsHeaderCard* ptr = NULL;
+    
+    // Search keyname in list
+    for (int i = 0; i < m_num_cards; ++i) {
+        if (m_card[i].keyname() == keyname) {
+            ptr = &(m_card[i]);
+            break;
+        }
+    }
+    
+    // Return pointer
+    return ptr;
 }
 
 

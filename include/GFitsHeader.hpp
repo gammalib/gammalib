@@ -39,12 +39,14 @@ public:
     void             open(__fitsfile*  fptr);
     GFitsHeaderCard* card(const std::string keyname);
     GFitsHeaderCard* card(const int cardno);
+    std::string      value(const std::string keyname);
     
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GFitsHeader& header);
-    void free_members(void);
+    void             init_members(void);
+    void             copy_members(const GFitsHeader& header);
+    void             free_members(void);
+    GFitsHeaderCard* GFitsHeader::card_ptr(const std::string keyname);
 
     // Private data area
     int              m_num_cards;

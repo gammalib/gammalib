@@ -6,9 +6,10 @@ setup(name='@PACKAGE_NAME@',
       author_email='@PACKAGE_BUGREPORT@',
       url='http://gammalib.sourceforge.net/',
       py_modules=['gammalib'],
-	  ext_modules=[Extension('_gammalib', ['gammalib_wrap.cpp'],
-							 include_dirs=['@top_srcdir@/include', '@top_srcdir@/src'],
-							 library_dirs=['../src/.libs'],
-							 libraries=['gamma'],
+      ext_modules=[Extension('_gammalib', ['gammalib_wrap.cpp'],
+                             include_dirs=['@top_srcdir@/include', '@top_srcdir@/src'],
+                             library_dirs=['../src/.libs'],
+                             libraries=['gamma','cfitsio'],
                              runtime_library_dirs=['@prefix@/lib'])],
-	  )
+     )
+			   
