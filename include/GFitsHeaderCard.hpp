@@ -15,37 +15,48 @@
 #define GFITSHEADERCARD_HPP
 
 /* __ Includes ___________________________________________________________ */
-//#include "GVector.hpp"
+#include "GFitsCfitsio.hpp"
 
 /* __ Namespaces _________________________________________________________ */
-using namespace std;
 
 
 /***************************************************************************
- *                       GFitsHeaderCard class definition                      *
+ *                     GFitsHeaderCard class definition                    *
  ***************************************************************************/
 class GFitsHeaderCard {
-
-// Public methods
 public:
-    // Constructors and destructors
-    //GFitsHeaderCard();
-    //GFitsHeaderCard(const GFitsHeaderCard& card);
-    //virtual ~GFitsHeaderCard();
-
-    // Operators
-
-    // Methods
+    // Constructors & Destructors
+    GFitsHeaderCard();
+    GFitsHeaderCard(const GFitsHeaderCard& card);
+    ~GFitsHeaderCard();
     
-// Methods and data that are available to derived classes
-protected:
-    // Protected methods
-
-    // Protected data area
-    // this is a test
-
-// Methods that are available to the base class only
+    // Operators
+    GFitsHeaderCard& operator= (const GFitsHeaderCard& card);
+    
+    // Methods
+    std::string  keyname(void);
+    std::string  value(void);
+    std::string  unit(void);
+    std::string  comment(void);
+    void         set_keyname(std::string& keyname);
+    void         set_value(std::string& value);
+    void         set_unit(std::string& unit);
+    void         set_comment(std::string& comment);
+    void         read(__fitsfile* fptr, int keynum);
+    void         read(__fitsfile* fptr, std::string keyname);
+    void         write(__fitsfile* fptr);
+    
 private:
+    // Private methods
+    void init_members(void);
+    void copy_members(const GFitsHeaderCard& card);
+    void free_members(void);
+
+    // Private data area
+    std::string m_keyname;
+    std::string m_value;
+    std::string m_unit;
+    std::string m_comment;
 };
 
 #endif /* GFITSHEADERCARD_HPP */

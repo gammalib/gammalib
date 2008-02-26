@@ -15,10 +15,11 @@
 #define GFITS_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <vector>
+#include "GFitsCfitsio.hpp"
 #include "GFitsHDU.hpp"
 
 /* __ Namespaces _________________________________________________________ */
-using namespace std;
 
 
 /***************************************************************************
@@ -29,15 +30,16 @@ class GFits {
 // Public methods
 public:
     // Constructors and destructors
-    //GFits();
-    //GFits(const GFits& fits);
-    //virtual ~GFits();
+    GFits();
+    GFits(const GFits& fits);
+    ~GFits();
 
     // Operators
+    GFits& operator= (const GFits& fits);
 
     // Methods
-    //void open(std::string filename);
-    //void close(std::string filename);
+    void open(std::string filename);
+    void close(void);
     //GFitsHDU* hdu(std::string extname);
     //GFitsHDU* hdu(int extno);
     
@@ -46,10 +48,16 @@ protected:
     // Protected methods
 
     // Protected data area
-    // this is a test
+    std::string  m_filename;    // FITS file name
+    __fitsfile*  m_fitsfile;    // FITS file pointer
+    int          m_num_hdu;     // Number of HDUs in file
+    GFitsHDU*    m_hdu;         // Pointers to HDUs
 
 // Methods that are available to the base class only
 private:
+  void init_members(void);
+  void copy_members(const GFits& fits);
+  void free_members(void);
 };
 
 #endif /* GFITS_HPP */

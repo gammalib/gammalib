@@ -28,12 +28,12 @@ using namespace std;
  ***************************************************************************/
 class GExceptionHandler : public exception {
 public:
-  GExceptionHandler() { }
- ~GExceptionHandler() throw() { }
-  virtual const char* what() const throw();
+    GExceptionHandler() { }
+    virtual ~GExceptionHandler() throw() { }
+    virtual const char* what() const throw();
 protected:
-  string m_origin;
-  string m_message;
+    string m_origin;
+    string m_message;
 };
 
 
@@ -43,84 +43,102 @@ protected:
 class GException : public GExceptionHandler {
 public:
 
-  // Memory allocation exception class
-  class mem_alloc : public GExceptionHandler {
-  public:
-    mem_alloc(string origin, unsigned num);
-  };
+    // Memory allocation exception class
+    class mem_alloc : public GExceptionHandler {
+    public:
+        mem_alloc(string origin, unsigned num);
+    };
 
-  // Empty object exception class
-  class empty : public GExceptionHandler {
-  public:
-    empty(string origin);
-  };
+    // Empty object exception class
+    class empty : public GExceptionHandler {
+    public:
+        empty(string origin);
+    };
 
-  // Out of range
-  class out_of_range : public GExceptionHandler {
-  public:
-    out_of_range(string origin, int inx, int elements);
-    out_of_range(string origin, int row, int col, int rows, int cols);
-  };
+    // Out of range
+    class out_of_range : public GExceptionHandler {
+    public:
+        out_of_range(string origin, int inx, int elements);
+        out_of_range(string origin, int row, int col, int rows, int cols);
+    };
 
-  // Vector - Vector mismatch
-  class vector_mismatch : public GExceptionHandler {
-  public:
-    vector_mismatch(string origin, int size1, int size2);
-  };
+    // Vector - Vector mismatch
+    class vector_mismatch : public GExceptionHandler {
+    public:
+        vector_mismatch(string origin, int size1, int size2);
+    };
 
-  // Cross product only defined for 3-element vectors
-  class vector_bad_cross_dim : public GExceptionHandler {
-  public:
-    vector_bad_cross_dim(string origin, int elements);
-  };
+    // Cross product only defined for 3-element vectors
+    class vector_bad_cross_dim : public GExceptionHandler {
+    public:
+        vector_bad_cross_dim(string origin, int elements);
+    };
   
-  // Vector - Matrix mismatch
-  class matrix_vector_mismatch : public GExceptionHandler {
-  public:
-    matrix_vector_mismatch(string origin, int num, int rows, int cols);
-  };
+    // Vector - Matrix mismatch
+    class matrix_vector_mismatch : public GExceptionHandler {
+    public:
+        matrix_vector_mismatch(string origin, int num, int rows, int cols);
+    };
 
-  // Matrix dimensions mismatch
-  class matrix_mismatch : public GExceptionHandler {
-  public:
-    matrix_mismatch(string origin, int rows1, int cols1, int rows2, int cols2);
-  };
+    // Matrix dimensions mismatch
+    class matrix_mismatch : public GExceptionHandler {
+    public:
+        matrix_mismatch(string origin, int rows1, int cols1, int rows2, int cols2);
+    };
 
-  // Matrix not rectangular
-  class matrix_not_rectangular : public GExceptionHandler {
-  public:
-	matrix_not_rectangular(string origin, int rows, int cols);
-  };
+    // Matrix not rectangular
+    class matrix_not_rectangular : public GExceptionHandler {
+    public:
+        matrix_not_rectangular(string origin, int rows, int cols);
+    };
 
-  // Matrix not positive definite
-  class matrix_not_pos_definite : public GExceptionHandler {
-  public:
-    matrix_not_pos_definite(string origin, int row, double sum);
-  };
+    // Matrix not positive definite
+    class matrix_not_pos_definite : public GExceptionHandler {
+    public:
+        matrix_not_pos_definite(string origin, int row, double sum);
+    };
 
-  // Matrix not symmetric
-  class matrix_not_symmetric : public GExceptionHandler {
-  public:
-    matrix_not_symmetric(string origin, int cols, int rows);
-  };
+    // Matrix not symmetric
+    class matrix_not_symmetric : public GExceptionHandler {
+    public:
+        matrix_not_symmetric(string origin, int cols, int rows);
+    };
 
-  // Matrix not factorised
-  class matrix_not_factorised : public GExceptionHandler {
-  public:
-    matrix_not_factorised(string origin, string type);
-  };
+    // Matrix not factorised
+    class matrix_not_factorised : public GExceptionHandler {
+    public:
+        matrix_not_factorised(string origin, string type);
+    };
 
-  // All matrix elements are zero
-  class matrix_zero : public GExceptionHandler  {
-  public:
-    matrix_zero(string origin);
-  };
+    // All matrix elements are zero
+    class matrix_zero : public GExceptionHandler  {
+    public:
+        matrix_zero(string origin);
+    };
 
-  // Invalid ordering scheme
-  class invalid_order : public GExceptionHandler {
-  public:
-    invalid_order(string origin, int order, int min_order, int max_order);
-  };
+    // Invalid ordering scheme
+    class invalid_order : public GExceptionHandler {
+    public:
+        invalid_order(string origin, int order, int min_order, int max_order);
+    };
+
+    // General FITS error
+    class fits_error : public GExceptionHandler {
+    public:
+        fits_error(string origin, int status);
+    };
+
+    // FITS file open error
+    class fits_open_error : public GExceptionHandler {
+    public:
+        fits_open_error(string origin, string filename, int status);
+    };
+
+    // FITS keyword not found error
+    class fits_key_not_found : public GExceptionHandler {
+    public:
+        fits_key_not_found(string origin, string keyname, int status);
+    };
 
 };
 

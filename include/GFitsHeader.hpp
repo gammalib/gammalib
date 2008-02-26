@@ -15,11 +15,9 @@
 #define GFITSHEADER_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <vector>                    // for std::vector
 #include "GFitsHeaderCard.hpp"
 
 /* __ Namespaces _________________________________________________________ */
-using namespace std;
 
 
 /***************************************************************************
@@ -30,25 +28,27 @@ class GFitsHeader {
 // Public methods
 public:
     // Constructors and destructors
-    //GFitsHeader();
-    //GFitsHeader(const GFitsHeader& hdr);
-    //virtual ~GFitsHeader();
+    GFitsHeader();
+    GFitsHeader(const GFitsHeader& header);
+    ~GFitsHeader();
 
     // Operators
+    GFitsHeader& operator= (const GFitsHeader& header);
 
     // Methods
-    //GFitsHeaderCard* card(const std::string keyword);
-    //GFitsHeaderCard* card(const int cardno);
+    void             open(__fitsfile*  fptr);
+    GFitsHeaderCard* card(const std::string keyname);
+    GFitsHeaderCard* card(const int cardno);
     
-// Methods and data that are available to derived classes
-protected:
-    // Protected methods
-
-    // Protected data area
-    std::vector<GFitsHeaderCard> m_card;     // List of FITS header cards
-
-// Methods that are available to the base class only
 private:
+    // Private methods
+    void init_members(void);
+    void copy_members(const GFitsHeader& header);
+    void free_members(void);
+
+    // Private data area
+    int              m_num_cards;
+    GFitsHeaderCard* m_card;
 };
 
 #endif /* GFITSHEADER_HPP */

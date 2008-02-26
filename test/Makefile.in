@@ -114,14 +114,18 @@ INCLUDES = -I$(top_srcdir)/include \
 
 
 check_PROGRAMS = test_GVector \
-                 test_GMatrix \
-                 test_GSymMatrix \
-		 test_GSparseMatrix
+		 test_GMatrix \
+		 test_GSymMatrix \
+		 test_GSparseMatrix \
+		 test_GFits
+
 
 TESTS = test_GVector \
-        test_GMatrix \
-        test_GSymMatrix \
-	test_GSparseMatrix
+	test_GMatrix \
+	test_GSymMatrix \
+	test_GSparseMatrix \
+	test_GFits
+
 
 test_GVector_SOURCES = test_GVector.cpp
 test_GVector_LDADD = ../src/libgamma.la
@@ -131,12 +135,19 @@ test_GSymMatrix_SOURCES = test_GSymMatrix.cpp
 test_GSymMatrix_LDADD = ../src/libgamma.la
 test_GSparseMatrix_SOURCES = test_GSparseMatrix.cpp
 test_GSparseMatrix_LDADD = ../src/libgamma.la
+test_GFits_SOURCES = test_GFits.cpp
+test_GFits_LDADD = ../src/libgamma.la
 subdir = test
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 check_PROGRAMS = test_GVector$(EXEEXT) test_GMatrix$(EXEEXT) \
-	test_GSymMatrix$(EXEEXT) test_GSparseMatrix$(EXEEXT)
+	test_GSymMatrix$(EXEEXT) test_GSparseMatrix$(EXEEXT) \
+	test_GFits$(EXEEXT)
+am_test_GFits_OBJECTS = test_GFits.$(OBJEXT)
+test_GFits_OBJECTS = $(am_test_GFits_OBJECTS)
+test_GFits_DEPENDENCIES = ../src/libgamma.la
+test_GFits_LDFLAGS =
 am_test_GMatrix_OBJECTS = test_GMatrix.$(OBJEXT)
 test_GMatrix_OBJECTS = $(am_test_GMatrix_OBJECTS)
 test_GMatrix_DEPENDENCIES = ../src/libgamma.la
@@ -170,10 +181,11 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
-DIST_SOURCES = $(test_GMatrix_SOURCES) $(test_GSparseMatrix_SOURCES) \
-	$(test_GSymMatrix_SOURCES) $(test_GVector_SOURCES)
+DIST_SOURCES = $(test_GFits_SOURCES) $(test_GMatrix_SOURCES) \
+	$(test_GSparseMatrix_SOURCES) $(test_GSymMatrix_SOURCES) \
+	$(test_GVector_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(test_GMatrix_SOURCES) $(test_GSparseMatrix_SOURCES) $(test_GSymMatrix_SOURCES) $(test_GVector_SOURCES)
+SOURCES = $(test_GFits_SOURCES) $(test_GMatrix_SOURCES) $(test_GSparseMatrix_SOURCES) $(test_GSymMatrix_SOURCES) $(test_GVector_SOURCES)
 
 all: all-am
 
@@ -191,6 +203,9 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+test_GFits$(EXEEXT): $(test_GFits_OBJECTS) $(test_GFits_DEPENDENCIES) 
+	@rm -f test_GFits$(EXEEXT)
+	$(CXXLINK) $(test_GFits_LDFLAGS) $(test_GFits_OBJECTS) $(test_GFits_LDADD) $(LIBS)
 test_GMatrix$(EXEEXT): $(test_GMatrix_OBJECTS) $(test_GMatrix_DEPENDENCIES) 
 	@rm -f test_GMatrix$(EXEEXT)
 	$(CXXLINK) $(test_GMatrix_LDFLAGS) $(test_GMatrix_OBJECTS) $(test_GMatrix_LDADD) $(LIBS)

@@ -19,7 +19,6 @@
 #include "GFitsData.hpp"
 
 /* __ Namespaces _________________________________________________________ */
-using namespace std;
 
 
 /***************************************************************************
@@ -30,26 +29,33 @@ class GFitsHDU {
 // Public methods
 public:
     // Constructors and destructors
-    //GFitsHDU();
-    //GFitsHDU(const GFitsHDU& hdu);
-    //virtual ~GFitsHDU();
+    GFitsHDU();
+    GFitsHDU(const GFitsHDU& hdu);
+    ~GFitsHDU();
 
     // Operators
+    GFitsHDU& operator= (const GFitsHDU& hdu);
 
     // Methods
-    GFitsHeader* header(void) { return m_header; }
-    GFitsData*   data(void) { return m_data; }
+    void         open(__fitsfile*  fptr, int hdunum);
+    void         close(void);
+    GFitsHeader* header(void);
+    GFitsData*   data(void);
     
-// Methods and data that are available to derived classes
-protected:
-    // Protected methods
-
-    // Protected data area
-    GFitsHeader* m_header;
-    GFitsData*   m_data;
-
-// Methods that are available to the base class only
 private:
+    // Private methods
+    void init_members(void);
+    void copy_members(const GFitsHDU& hdu);
+    void free_members(void);
+    void move2hdu(void);
+
+    // Private data area
+    __fitsfile*  m_fitsfile;    // FITS file pointer
+    std::string  m_name;        // HDU name
+    int          m_num;         // HDU number (starting from 1)
+    int          m_type;        // HDU type
+    GFitsHeader  m_header;      // HDU header
+    GFitsData    m_data;        // HDU data
 };
 
 #endif /* GFITSHDU_HPP */

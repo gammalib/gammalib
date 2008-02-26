@@ -9,13 +9,17 @@ INCLUDES = -I$(top_srcdir)/include \
 	   -I$(top_srcdir)/src
 
 check_PROGRAMS = test_GVector \
-                 test_GMatrix \
-                 test_GSymMatrix \
-		 test_GSparseMatrix
+		 test_GMatrix \
+		 test_GSymMatrix \
+		 test_GSparseMatrix \
+		 test_GFits
+
 TESTS = test_GVector \
-        test_GMatrix \
-        test_GSymMatrix \
-	test_GSparseMatrix
+	test_GMatrix \
+	test_GSymMatrix \
+	test_GSparseMatrix \
+	test_GFits
+
 test_GVector_SOURCES = test_GVector.cpp
 test_GVector_LDADD = ../src/libgamma.la
 test_GMatrix_SOURCES = test_GMatrix.cpp
@@ -24,3 +28,5 @@ test_GSymMatrix_SOURCES = test_GSymMatrix.cpp
 test_GSymMatrix_LDADD = ../src/libgamma.la
 test_GSparseMatrix_SOURCES = test_GSparseMatrix.cpp
 test_GSparseMatrix_LDADD = ../src/libgamma.la
+test_GFits_SOURCES = test_GFits.cpp
+test_GFits_LDADD = ../src/libgamma.la
