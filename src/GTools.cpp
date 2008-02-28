@@ -23,6 +23,10 @@
  ***************************************************************************/
 std::string strip_whitespace(const std::string arg)
 {
+    // Return empty string if argument is empty
+    if (arg.empty())
+        return arg;
+
     // Get start and stop
     std::string::size_type start = arg.find_first_not_of(' ');
     std::string::size_type stop  = arg.find_last_not_of(' ');
