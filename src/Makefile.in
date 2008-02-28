@@ -120,6 +120,11 @@ files = GException.cpp \
 	fits/GFitsHeaderCard.cpp \
 	fits/GFitsHeader.cpp \
 	fits/GFitsData.cpp \
+	fits/GFitsImage.cpp \
+	fits/GFitsAsciiTable.cpp \
+	fits/GFitsBinTable.cpp \
+	fits/GFitsTableCol.cpp \
+	fits/GFitsTableDblCol.cpp \
 	fits/GFitsHDU.cpp \
 	fits/GFits.cpp \
 	fit/GFitPar.cpp \
@@ -144,10 +149,11 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libgamma_la_LIBADD =
 am__objects_1 = GException.lo GData.lo GResponse.lo GObservation.lo \
-	GFitsHeaderCard.lo GFitsHeader.lo GFitsData.lo GFitsHDU.lo \
-	GFits.lo GFitPar.lo GVector.lo GMatrixBase.lo GMatrix.lo \
-	GSymMatrix.lo GSparseMatrix.lo GSparseSymbolic.lo \
-	GSparseNumeric.lo
+	GFitsHeaderCard.lo GFitsHeader.lo GFitsData.lo GFitsImage.lo \
+	GFitsAsciiTable.lo GFitsBinTable.lo GFitsTableCol.lo \
+	GFitsTableDblCol.lo GFitsHDU.lo GFits.lo GFitPar.lo GVector.lo \
+	GMatrixBase.lo GMatrix.lo GSymMatrix.lo GSparseMatrix.lo \
+	GSparseSymbolic.lo GSparseNumeric.lo
 am_libgamma_la_OBJECTS = $(am__objects_1)
 libgamma_la_OBJECTS = $(am_libgamma_la_OBJECTS)
 
@@ -214,6 +220,11 @@ GObservation.lo: obs/GObservation.cpp
 GFitsHeaderCard.lo: fits/GFitsHeaderCard.cpp
 GFitsHeader.lo: fits/GFitsHeader.cpp
 GFitsData.lo: fits/GFitsData.cpp
+GFitsImage.lo: fits/GFitsImage.cpp
+GFitsAsciiTable.lo: fits/GFitsAsciiTable.cpp
+GFitsBinTable.lo: fits/GFitsBinTable.cpp
+GFitsTableCol.lo: fits/GFitsTableCol.cpp
+GFitsTableDblCol.lo: fits/GFitsTableDblCol.cpp
 GFitsHDU.lo: fits/GFitsHDU.cpp
 GFits.lo: fits/GFits.cpp
 GFitPar.lo: fit/GFitPar.cpp
@@ -295,6 +306,51 @@ GFitsData.obj: fits/GFitsData.cpp
 
 GFitsData.lo: fits/GFitsData.cpp
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsData.lo `test -f 'fits/GFitsData.cpp' || echo '$(srcdir)/'`fits/GFitsData.cpp
+
+GFitsImage.o: fits/GFitsImage.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsImage.o `test -f 'fits/GFitsImage.cpp' || echo '$(srcdir)/'`fits/GFitsImage.cpp
+
+GFitsImage.obj: fits/GFitsImage.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsImage.obj `cygpath -w fits/GFitsImage.cpp`
+
+GFitsImage.lo: fits/GFitsImage.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsImage.lo `test -f 'fits/GFitsImage.cpp' || echo '$(srcdir)/'`fits/GFitsImage.cpp
+
+GFitsAsciiTable.o: fits/GFitsAsciiTable.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsAsciiTable.o `test -f 'fits/GFitsAsciiTable.cpp' || echo '$(srcdir)/'`fits/GFitsAsciiTable.cpp
+
+GFitsAsciiTable.obj: fits/GFitsAsciiTable.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsAsciiTable.obj `cygpath -w fits/GFitsAsciiTable.cpp`
+
+GFitsAsciiTable.lo: fits/GFitsAsciiTable.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsAsciiTable.lo `test -f 'fits/GFitsAsciiTable.cpp' || echo '$(srcdir)/'`fits/GFitsAsciiTable.cpp
+
+GFitsBinTable.o: fits/GFitsBinTable.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsBinTable.o `test -f 'fits/GFitsBinTable.cpp' || echo '$(srcdir)/'`fits/GFitsBinTable.cpp
+
+GFitsBinTable.obj: fits/GFitsBinTable.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsBinTable.obj `cygpath -w fits/GFitsBinTable.cpp`
+
+GFitsBinTable.lo: fits/GFitsBinTable.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsBinTable.lo `test -f 'fits/GFitsBinTable.cpp' || echo '$(srcdir)/'`fits/GFitsBinTable.cpp
+
+GFitsTableCol.o: fits/GFitsTableCol.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsTableCol.o `test -f 'fits/GFitsTableCol.cpp' || echo '$(srcdir)/'`fits/GFitsTableCol.cpp
+
+GFitsTableCol.obj: fits/GFitsTableCol.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsTableCol.obj `cygpath -w fits/GFitsTableCol.cpp`
+
+GFitsTableCol.lo: fits/GFitsTableCol.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsTableCol.lo `test -f 'fits/GFitsTableCol.cpp' || echo '$(srcdir)/'`fits/GFitsTableCol.cpp
+
+GFitsTableDblCol.o: fits/GFitsTableDblCol.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsTableDblCol.o `test -f 'fits/GFitsTableDblCol.cpp' || echo '$(srcdir)/'`fits/GFitsTableDblCol.cpp
+
+GFitsTableDblCol.obj: fits/GFitsTableDblCol.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsTableDblCol.obj `cygpath -w fits/GFitsTableDblCol.cpp`
+
+GFitsTableDblCol.lo: fits/GFitsTableDblCol.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsTableDblCol.lo `test -f 'fits/GFitsTableDblCol.cpp' || echo '$(srcdir)/'`fits/GFitsTableDblCol.cpp
 
 GFitsHDU.o: fits/GFitsHDU.cpp
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsHDU.o `test -f 'fits/GFitsHDU.cpp' || echo '$(srcdir)/'`fits/GFitsHDU.cpp

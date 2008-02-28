@@ -20,6 +20,9 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
+#define G_OPEN     "GFitsHDU::open(int)"
+#define G_COLUMN   "GFitsHDU::column(std::string)"
+#define G_MOVE2HDU "GFitsHDU::move2hdu(void)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -132,26 +135,40 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
     // Get HDU type
     int status = 0;
     status     = __ffghdt(m_fitsfile, &m_type, &status);
-    if (status != 0) {
-        throw GException::fits_error("GFitsHDU::open(int)", status);
-    }
-    
-    // Open HDU header
-    m_header.open(m_fitsfile);
+    if (status != 0)
+        throw GException::fits_error(G_OPEN, status);
+
+    // Allocate and open HDU header
+    if (m_header != NULL) delete m_header;
+    m_header = new GFitsHeader();
+    m_header->open(m_fitsfile);
     
     // Open HDU data area
-    //
+    if (m_data != NULL) delete m_data;
+    switch (m_type) {
+    case 0:        // Image HDU
+        m_data = new GFitsImage();
+        break;
+    case 1:        // ASCII Table HDU
+        m_data = new GFitsAsciiTable();
+        break;
+    case 2:        // Binary Table HDU
+        m_data = new GFitsBinTable();
+        break;
+    default:
+        throw GException::fits_unknown_HDU_type(G_OPEN, m_type);
+        break;
+    }
+    m_data->open(m_fitsfile);
     
     // Get HDU name from header
-    GFitsHeaderCard* extname = m_header.card("EXTNAME");
-    if (extname == NULL) {
+    m_name = m_header->string("EXTNAME");
+    if (m_name.length() == 0) {
         if (hdunum == 1)
             m_name = "Primary";
         else
             m_name = "NoName";
     }
-    else
-        m_name = extname->value();
 
     cout << "HDU #" << hdunum << ": " << m_type << " : " << m_name << endl;
 
@@ -161,35 +178,51 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
 
 
 /***************************************************************************
- *                                Close HDU                                *
+ *                           Save HDU to FITS file                         *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsHDU::close(void)
+void GFitsHDU::save(void)
 {
+    // Move to HDU
+    move2hdu();
+    
+    // Save header
+    //...
+    
+    // Save data
+    //...
+    
     // Return
     return;
 }
 
-
 /***************************************************************************
- *                       Return pointer to HDU header                      *
+ *                     Return pointer to column of table                   *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsHeader* GFitsHDU::header(void)
+GFitsTableCol* GFitsHDU::column(const std::string colname) const
 {
-    // Return header pointer
-    return &m_header;
-}
-
-
-/***************************************************************************
- *                        Return pointer to HDU data                       *
- * ----------------------------------------------------------------------- *
- ***************************************************************************/
-GFitsData* GFitsHDU::data(void)
-{
-    // Return data pointer
-    return &m_data;
+    // Initialise pointer
+    GFitsTableCol* ptr = NULL;
+    
+    // Get pointer to table column
+    switch (m_type) {
+    case 0:        // Image HDU
+        throw GException::fits_HDU_not_a_table(G_COLUMN, m_type);
+        break;
+    case 1:        // ASCII Table HDU
+        ptr = ((GFitsAsciiTable*)this->data())->column(colname);
+        break;
+    case 2:        // Binary Table HDU
+        ptr = ((GFitsBinTable*)this->data())->column(colname);
+        break;
+    default:
+        throw GException::fits_unknown_HDU_type(G_COLUMN, m_type);
+        break;
+    }
+    
+    // Return pointer
+    return ptr;
 }
 
 
@@ -208,8 +241,8 @@ void GFitsHDU::init_members(void)
     // Initialise members
     m_fitsfile = NULL;
     m_type     = 0;
-    //m_header   = NULL;
-    //m_data     = NULL;
+    m_header   = NULL;
+    m_data     = NULL;
   
     // Return
     return;
@@ -219,14 +252,21 @@ void GFitsHDU::init_members(void)
 /***************************************************************************
  *                            Copy class members                           *
  * ----------------------------------------------------------------------- *
+ * The function does not copy the FITS file pointer. This prevents that    *
+ * several copies of the FITS file pointer exist in different instances of *
+ * GFitsHDU, which would lead to confusion since one instance could close  *
+ * the file while for another it still would be opened.                    *
+ * The rule ONE INSTANCE - ONE FILE applies.                               *
  ***************************************************************************/
 void GFitsHDU::copy_members(const GFitsHDU& hdu)
 {
-    // Copy membres
-    m_fitsfile = hdu.m_fitsfile;
-    m_type     = hdu.m_type;
-    m_header   = hdu.m_header;
-    m_data     = hdu.m_data;
+    // Reset FITS file attributes
+    m_fitsfile = NULL;
+
+    // Copy other membres
+    m_type   = hdu.m_type;
+    m_header = hdu.m_header->clone();
+    m_data   = hdu.m_data->clone();
     
     // Return
     return;
@@ -239,6 +279,14 @@ void GFitsHDU::copy_members(const GFitsHDU& hdu)
  ***************************************************************************/
 void GFitsHDU::free_members(void)
 {
+    // Free memory
+    if (m_header != NULL) delete m_header;
+    if (m_data   != NULL) delete m_data;
+    
+    // Signal free pointers
+    m_header = NULL;
+    m_data   = NULL;
+    
     // Return
     return;
 }
@@ -253,9 +301,8 @@ void GFitsHDU::move2hdu(void)
     // Move FITS file pointer to HDU
     int status = 0;
     status     = __ffmahd(m_fitsfile, m_num, NULL, &status);
-    if (status != 0) {
-        throw GException::fits_error("GFitsHDU::move2hdu(void)", status);
-    }
+    if (status != 0)
+        throw GException::fits_error(G_MOVE2HDU, status);
     
     // Return
     return;

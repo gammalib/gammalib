@@ -15,37 +15,37 @@
 #define GFITSDATA_HPP
 
 /* __ Includes ___________________________________________________________ */
-//#include "GVector.hpp"
+#include "GFitsCfitsio.hpp"
 
 /* __ Namespaces _________________________________________________________ */
-using namespace std;
 
 
 /***************************************************************************
- *                       GFitsData class definition                      *
+ *                        GFitsData class definition                       *
  ***************************************************************************/
 class GFitsData {
 
-// Public methods
 public:
     // Constructors and destructors
-    //GFitsData();
-    //GFitsData(const GFitsData& data);
-    //virtual ~GFitsData();
+    GFitsData();
+    GFitsData(const GFitsData& data);
+    virtual ~GFitsData();
 
     // Operators
+    virtual GFitsData& operator= (const GFitsData& data);
 
     // Methods
+    virtual void       open(__fitsfile*  fptr) = 0;
+    virtual void       close(void) = 0;
+    virtual GFitsData* clone(void) const = 0;
     
-// Methods and data that are available to derived classes
 protected:
     // Protected methods
+    void init_members(void);
+    void copy_members(const GFitsData& data);
+    void free_members(void);
 
     // Protected data area
-    // this is a test
-
-// Methods that are available to the base class only
-private:
 };
 
 #endif /* GFITSDATA_HPP */

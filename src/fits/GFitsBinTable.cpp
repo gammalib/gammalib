@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GFitsData.cpp  - FITS data handling abstract base class         *
+ *              GFitsBinTable.cpp  - FITS binary table class               *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -14,11 +14,14 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
-#include "GFitsData.hpp"
+#include "GFitsBinTable.hpp"
+#include "GFitsTableDblCol.hpp"
+#include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
+#define G_OPEN "GFitsBinTable::open(fitsfile*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -27,10 +30,9 @@
 /* __ Debug definitions __________________________________________________ */
 
 
-
 /*==========================================================================
  =                                                                         =
- =                     GFitsData constructors/destructors                  =
+ =                   GFitsBinTable constructors/destructors                =
  =                                                                         =
  ==========================================================================*/
 
@@ -38,7 +40,7 @@
  *                                Constructor                              *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData::GFitsData()
+GFitsBinTable::GFitsBinTable() : GFitsData()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -52,13 +54,13 @@ GFitsData::GFitsData()
  *                              Copy constructor                           *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData::GFitsData(const GFitsData& data)
+GFitsBinTable::GFitsBinTable(const GFitsBinTable& table) : GFitsData(table)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Copy members
-    copy_members(data);
+    copy_members(table);
 
     // Return
     return;
@@ -69,7 +71,7 @@ GFitsData::GFitsData(const GFitsData& data)
  *                               Destructor                                *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData::~GFitsData()
+GFitsBinTable::~GFitsBinTable()
 {
     // Free members
     free_members();
@@ -81,7 +83,7 @@ GFitsData::~GFitsData()
 
 /*==========================================================================
  =                                                                         =
- =                           GFitsData operators                           =
+ =                         GFitsBinTable operators                         =
  =                                                                         =
  ==========================================================================*/
 
@@ -89,11 +91,14 @@ GFitsData::~GFitsData()
  *                            Assignment operator                          *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData& GFitsData::operator= (const GFitsData& data)
+GFitsBinTable& GFitsBinTable::operator= (const GFitsBinTable& table)
 {
     // Execute only if object is not identical
-    if (this != &data) {
+    if (this != &table) {
   
+        // Copy base class members
+        this->GFitsData::operator=(table);
+
         // Free members
         free_members();
   
@@ -101,7 +106,7 @@ GFitsData& GFitsData::operator= (const GFitsData& data)
         init_members();
 
         // Copy members
-        copy_members(data);
+        copy_members(table);
 	
     } // endif: object was not identical
 
@@ -112,26 +117,91 @@ GFitsData& GFitsData::operator= (const GFitsData& data)
 
 /*==========================================================================
  =                                                                         =
- =                         GFitsData public methods                        =
+ =                       GFitsBinTable public methods                      =
  =                                                                         =
  ==========================================================================*/
 
 /***************************************************************************
- *                               Open Data                                 *
+ *                               Open Table                                *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::open(__fitsfile* fptr)
+void GFitsBinTable::open(__fitsfile* fptr)
 {
+    // Determine number of rows in table
+    int  status = 0;
+    long nrows  = 0;
+    status      = __ffgnrw(fptr, &nrows, &status);
+    if (status != 0)
+        throw GException::fits_error(G_OPEN, status);
+    else
+        m_rows = (int)nrows;
+
+    // Determine number of columns in table
+    status = __ffgncl(fptr, &m_cols, &status);
+    if (status != 0)
+        throw GException::fits_error(G_OPEN, status);
+
+    // Allocate memory for column pointers
+    if (m_columns != NULL) delete [] m_columns;
+    m_columns = new GFitsTableCol*[m_cols];
+
+    // Get table column information
+    int  typecode = 0;
+    long repeat   = 0;
+    long width    = 0;
+    for (int i = 0; i < m_cols; ++i) {
+    
+        // Get column name
+        char keyname[10];
+        char value[80];
+        sprintf(keyname, "TTYPE%d", i+1);
+        status = __ffgkey(fptr, keyname, value, NULL, &status);
+        if (status != 0)
+            throw GException::fits_error(G_OPEN, status);
+        value[strlen(value)-1] = '\0';
+        
+        // Get column definition
+        status = __ffgtcl(fptr, i+1, &typecode, &repeat, &width, &status);
+        if (status != 0)
+            throw GException::fits_error(G_OPEN, status);
+
+        // Allocate column
+        switch (typecode) {
+        case __TDOUBLE:
+            m_columns[i] = new GFitsTableDblCol();
+            break;
+        default:
+            m_columns[i] = NULL;
+            m_columns[i] = new GFitsTableDblCol();  // TO BE REMOVED LATER AND REPLACED BY THROW !!!
+            break;
+        }
+        
+        // Store column definition
+        m_columns[i]->set_name(&(value[1]));
+        m_columns[i]->set_colnum(i+1);
+        m_columns[i]->set_type(typecode);
+        m_columns[i]->set_repeat(repeat);
+        m_columns[i]->set_width(width);
+        m_columns[i]->set_length(m_rows);
+        m_columns[i]->set_fitsfile(fptr);
+            
+        cout << m_columns[i]->name() << " : " 
+             << m_columns[i]->colnum() << " : " 
+             << m_columns[i]->repeat() << " : " 
+             << m_columns[i]->width() << " : " 
+             << m_columns[i]->length() << endl;
+    } 
+
     // Return
     return;
 }
 
 
 /***************************************************************************
- *                               Close Data                                *
+ *                               Close Table                               *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::close(void)
+void GFitsBinTable::close(void)
 {
     // Free members
     free_members();
@@ -144,9 +214,52 @@ void GFitsData::close(void)
 }
 
 
+/***************************************************************************
+ *               Return pointer to column with specified name              *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+GFitsTableCol* GFitsBinTable::column(const std::string colname)
+{
+    // Initialise pointer
+    GFitsTableCol* ptr = NULL;
+    
+    // If there are columns then search for the specified name
+    if (m_columns != NULL) {
+        for (int i = 0; i < m_cols; ++i) {
+            if (m_columns[i]->name() == colname) {
+                ptr = m_columns[i];
+                break;
+            }
+        }
+    }
+    
+    // Return column pointer
+    return ptr;
+}
+
+
+/***************************************************************************
+ *                   Return pointer to column with number                  *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+GFitsTableCol* GFitsBinTable::column(const int colnum)
+{
+    // Initialise pointer
+    GFitsTableCol* ptr = NULL;
+    
+    // If there are columns then search for the specified name
+    if (m_columns != NULL) {
+        ptr = m_columns[colnum];
+    }
+    
+    // Return column pointer
+    return ptr;
+}
+
+
 /*==========================================================================
  =                                                                         =
- =                        GFitsData private methods                        =
+ =                       GFitsBinTable private methods                     =
  =                                                                         =
  ==========================================================================*/
 
@@ -154,9 +267,12 @@ void GFitsData::close(void)
  *                         Initialise class members                        *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::init_members(void)
+void GFitsBinTable::init_members(void)
 {
     // Initialise members
+    m_rows    = 0;
+    m_cols    = 0;
+    m_columns = NULL;
 
     // Return
     return;
@@ -167,11 +283,18 @@ void GFitsData::init_members(void)
  *                            Copy class members                           *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::copy_members(const GFitsData& data)
+void GFitsBinTable::copy_members(const GFitsBinTable& table)
 {
     // Copy attributes
+    m_rows = table.m_rows;
+    m_cols = table.m_cols;
     
-    // Copy data
+    // Copy column definition
+    if (table.m_columns != NULL && m_cols > 0) {
+        m_columns = new GFitsTableCol*[m_cols];
+        for (int i = 0; i < m_cols; ++i)
+            m_columns[i] = table.m_columns[i]->clone();
+    }
     
     // Return
     return;
@@ -182,9 +305,16 @@ void GFitsData::copy_members(const GFitsData& data)
  *                           Delete class members                          *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::free_members(void)
+void GFitsBinTable::free_members(void)
 {
     // Free memory
+    for (int i = 0; i < m_cols; ++i) {
+        if (m_columns[i] != NULL) delete m_columns[i];
+    }
+    if (m_columns != NULL) delete [] m_columns;
+    
+    // Mark memory as freed
+    m_columns = NULL;
     
     // Return
     return;
@@ -193,13 +323,13 @@ void GFitsData::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                             GFitsData friends                           =
+ =                           GFitsBinTable friends                         =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                     Other functions used by GFitsData                   =
+ =                   Other functions used by GFitsBinTable                 =
  =                                                                         =
  ==========================================================================*/

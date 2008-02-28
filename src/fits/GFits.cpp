@@ -20,6 +20,9 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
+#define G_OPEN     "GFits::open(std::string)"
+#define G_SAVETO   "GFits::saveto(const std::string, int)"
+#define G_FREE_MEM "GFits::free_members()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -121,23 +124,25 @@ GFits& GFits::operator= (const GFits& fits)
  *                              Open FITS file                             *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFits::open(std::string filename)
+void GFits::open(const std::string filename)
 {
+    // Don't allow opening if another file is already open
+    if (m_fitsfile != NULL)
+        throw GException::fits_already_opened(G_OPEN, m_filename);
+    
     // Open FITS file
     int status = 0;
     status     = __ffopen(&m_fitsfile, filename.c_str(), 1, &status);
-    if (status != 0) {
-        throw GException::fits_open_error("GFits::open(std::string)", filename, status);
-    }
+    if (status != 0)
+        throw GException::fits_open_error(G_OPEN, filename, status);
 
     // Store FITS file attributes
     m_filename = filename;
     
     // Determine number of HDUs
     status = __ffthdu(m_fitsfile, &m_num_hdu, &status);
-    if (status != 0) {
-        throw GException::fits_error("GFits::open(std::string)", status);
-    }
+    if (status != 0)
+        throw GException::fits_error(G_OPEN, status);
     
     // Allocate HDUs
     if (m_hdu != NULL) delete [] m_hdu;
@@ -153,22 +158,96 @@ void GFits::open(std::string filename)
 
 
 /***************************************************************************
- *                              Close FITS file                            *
+ *                               Save FITS file                            *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFits::close(void)
+void GFits::save(void)
 {
-    // Close FITS file
-    int status = 0;
-    status     = __ffclos(m_fitsfile, &status);
-    
-    // Handle error
-    if (status != 0) {
-        throw GException::fits_error("GFits::close(std::string)", status);
-    }
+    // Save all HDUs
+    for (int i = 0; i < m_num_hdu; ++i)
+        m_hdu[i].save();
     
     // Return
     return;
+}
+
+
+/***************************************************************************
+ *                       Save to specified FITS file                       *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+void GFits::saveto(const std::string filename, int clobber)
+{
+    // Create a copy of existing object. Recall that the copy does not
+    // carry over the FITS filename and pointer. Those will be automatically
+    // reset to the initial values in the new object.
+    GFits new_fits = *this;
+    
+    // Check if specified FITS file exists. If yes, saving will only be
+    // allowed if clobber is true ...
+    int status = 0;
+    status     = __ffopen(&(new_fits.m_fitsfile), filename.c_str(), 1, &status);
+    if (status == 0) {
+        if (!clobber) {
+            throw GException::fits_open_error(G_SAVETO, filename, status);
+            //throw file_exists ...
+        }
+        //delete existing file
+        //...
+    }
+    
+    // ... otherwise create a new FITS file now
+    else {
+        // ...
+    }
+    
+    // Save all HDUs
+    for (int i = 0; i < m_num_hdu; ++i)
+        new_fits.m_hdu[i].save();
+    
+    // Return
+    return;
+}
+
+
+/***************************************************************************
+ *                              Close FITS file                            *
+ * ----------------------------------------------------------------------- *
+ * Closing detaches a FITS file from the GFits object and returns a clean  *
+ * empty object.                                                           *
+ ***************************************************************************/
+void GFits::close(void)
+{
+    // Close file and free all members 
+    free_members();
+    
+    // Initialise members
+    init_members();
+    
+    // Return
+    return;
+}
+
+
+/***************************************************************************
+ *                            Get pointer to HDU                           *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+GFitsHDU* GFits::hdu(std::string extname)
+{
+    // Initialise result to NULL pointer
+    GFitsHDU* ptr = NULL;
+    
+    // Search for specified extension
+    for (int i = 0; i < m_num_hdu; ++i) {
+        if (m_hdu[i].extname() == extname) {
+            ptr = &(m_hdu[i]);
+            break;
+        }
+    }
+    
+    // Return pointer
+    return ptr;
 }
 
 
@@ -198,12 +277,17 @@ void GFits::init_members(void)
 /***************************************************************************
  *                            Copy class members                           *
  * ----------------------------------------------------------------------- *
+ * The function does not copy the FITS filename and FITS file pointer.     *
+ * This prevents that several copies of the FITS file pointer exist in     *
+ * different instances of GFits, which would lead to confusion since one   *
+ * instance could close the file while for another it still would be       *
+ * opened. The rule ONE INSTANCE - ONE FILE applies.                       *
  ***************************************************************************/
 void GFits::copy_members(const GFits& fits)
 {
-    // Copy GFits attributes
-    m_filename = fits.m_filename;
-    m_fitsfile = fits.m_fitsfile;
+    // Reset FITS file attributes
+    m_filename.clear();
+    m_fitsfile = NULL;
     
     // Copy HDUs
     if (fits.m_hdu != NULL && fits.m_num_hdu > 0) {
@@ -224,6 +308,14 @@ void GFits::copy_members(const GFits& fits)
  ***************************************************************************/
 void GFits::free_members(void)
 {
+    // If FITS file has been opened then close it now
+    if (m_fitsfile != NULL) {
+        int status = 0;
+        status     = __ffclos(m_fitsfile, &status);
+        if (status != 0)
+            throw GException::fits_error(G_FREE_MEM, status);
+    }
+    
     // Free memory
     if (m_hdu != NULL) delete [] m_hdu;
 

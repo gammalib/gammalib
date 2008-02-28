@@ -32,6 +32,11 @@
 #include "GFitsHeader.hpp"
 #include "GFitsHeaderCard.hpp"
 #include "GFitsData.hpp"
+#include "GFitsImage.hpp"
+#include "GFitsAsciiTable.hpp"
+#include "GFitsBinTable.hpp"
+#include "GFitsTableCol.hpp"
+#include "GFitsTableDblCol.hpp"
 
 #include "GVector.hpp"
 #include "GMatrixBase.hpp"

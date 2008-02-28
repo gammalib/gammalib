@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GFitsData.cpp  - FITS data handling abstract base class         *
+ *        GFitsTableCol.cpp  - FITS table column abstract base class       *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -14,7 +14,8 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
-#include "GFitsData.hpp"
+#include "GFitsTableCol.hpp"
+#include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -27,10 +28,9 @@
 /* __ Debug definitions __________________________________________________ */
 
 
-
 /*==========================================================================
  =                                                                         =
- =                     GFitsData constructors/destructors                  =
+ =                   GFitsTableCol constructors/destructors                =
  =                                                                         =
  ==========================================================================*/
 
@@ -38,7 +38,7 @@
  *                                Constructor                              *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData::GFitsData()
+GFitsTableCol::GFitsTableCol()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -52,13 +52,13 @@ GFitsData::GFitsData()
  *                              Copy constructor                           *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData::GFitsData(const GFitsData& data)
+GFitsTableCol::GFitsTableCol(const GFitsTableCol& column)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Copy members
-    copy_members(data);
+    copy_members(column);
 
     // Return
     return;
@@ -69,7 +69,7 @@ GFitsData::GFitsData(const GFitsData& data)
  *                               Destructor                                *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData::~GFitsData()
+GFitsTableCol::~GFitsTableCol()
 {
     // Free members
     free_members();
@@ -81,7 +81,7 @@ GFitsData::~GFitsData()
 
 /*==========================================================================
  =                                                                         =
- =                           GFitsData operators                           =
+ =                         GFitsTableCol operators                         =
  =                                                                         =
  ==========================================================================*/
 
@@ -89,10 +89,10 @@ GFitsData::~GFitsData()
  *                            Assignment operator                          *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData& GFitsData::operator= (const GFitsData& data)
+GFitsTableCol& GFitsTableCol::operator= (const GFitsTableCol& column)
 {
     // Execute only if object is not identical
-    if (this != &data) {
+    if (this != &column) {
   
         // Free members
         free_members();
@@ -101,7 +101,7 @@ GFitsData& GFitsData::operator= (const GFitsData& data)
         init_members();
 
         // Copy members
-        copy_members(data);
+        copy_members(column);
 	
     } // endif: object was not identical
 
@@ -112,41 +112,14 @@ GFitsData& GFitsData::operator= (const GFitsData& data)
 
 /*==========================================================================
  =                                                                         =
- =                         GFitsData public methods                        =
+ =                        GFitsTableCol public methods                     =
  =                                                                         =
  ==========================================================================*/
-
-/***************************************************************************
- *                               Open Data                                 *
- * ----------------------------------------------------------------------- *
- ***************************************************************************/
-void GFitsData::open(__fitsfile* fptr)
-{
-    // Return
-    return;
-}
-
-
-/***************************************************************************
- *                               Close Data                                *
- * ----------------------------------------------------------------------- *
- ***************************************************************************/
-void GFitsData::close(void)
-{
-    // Free members
-    free_members();
-  
-    // Initialise members
-    init_members();
-    
-    // Return
-    return;
-}
 
 
 /*==========================================================================
  =                                                                         =
- =                        GFitsData private methods                        =
+ =                        GFitsTableCol private methods                    =
  =                                                                         =
  ==========================================================================*/
 
@@ -154,9 +127,16 @@ void GFitsData::close(void)
  *                         Initialise class members                        *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::init_members(void)
+void GFitsTableCol::init_members(void)
 {
     // Initialise members
+    m_name.clear();
+    m_colnum   = 0;
+    m_type     = 0;
+    m_repeat   = 0;
+    m_width    = 0;
+    m_length   = 0;
+    m_fitsfile = NULL;
 
     // Return
     return;
@@ -167,11 +147,16 @@ void GFitsData::init_members(void)
  *                            Copy class members                           *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::copy_members(const GFitsData& data)
+void GFitsTableCol::copy_members(const GFitsTableCol& column)
 {
     // Copy attributes
-    
-    // Copy data
+    m_name     = column.m_name;
+    m_colnum   = column.m_colnum;
+    m_type     = column.m_type;
+    m_repeat   = column.m_repeat;
+    m_width    = column.m_width;
+    m_length   = column.m_length;
+    m_fitsfile = column.m_fitsfile;
     
     // Return
     return;
@@ -182,9 +167,11 @@ void GFitsData::copy_members(const GFitsData& data)
  *                           Delete class members                          *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::free_members(void)
+void GFitsTableCol::free_members(void)
 {
     // Free memory
+    
+    // Mark memory as freed
     
     // Return
     return;
@@ -193,13 +180,13 @@ void GFitsData::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                             GFitsData friends                           =
+ =                           GFitsTableCol friends                         =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                     Other functions used by GFitsData                   =
+ =                    Other functions used by GFitsTableCol                =
  =                                                                         =
  ==========================================================================*/

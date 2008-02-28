@@ -39,7 +39,13 @@
 #define __ffgkey(A, B, C, D, E) ffgkey(A, B, C, D, E)
 #define __ffgkyn(A, B, C, D, E, F) ffgkyn(A, B, C, D, E, F)
 #define __ffuky(A, B, C, D, E, F) ffuky(A, B, C, D, E, F)
-#define __TSTRING TSTRING
+#define __ffgnrw(A, B, C) ffgnrw(A, B, C)
+#define __ffgncl(A, B, C) ffgncl(A, B, C)
+#define __ffgtcl(A, B, C, D, E, F) ffgtcl(A, B, C, D, E, F)
+#define __ffgcv(A, B, C, D, E, F, G, H, I, J) ffgcv(A, B, C, D, E, F, G, H, I, J)
+#define __TLOGICAL TLOGICAL
+#define __TSTRING  TSTRING
+#define __TDOUBLE  TDOUBLE
 
 /* __ Type definition ____________________________________________________ */
 typedef fitsfile __fitsfile;
@@ -60,7 +66,21 @@ typedef fitsfile __fitsfile;
 #define __ffgkey(A, B, C, D, E) __dummy()
 #define __ffgkyn(A, B, C, D, E, F) __dummy()
 #define __ffuky(A, B, C, D, E, F) __dummy()
-#define __TSTRING 0
+#define __ffgnrw(A, B, C) __dummy()
+#define __ffgncl(A, B, C) __dummy()
+#define __ffgtcl(A, B, C, D, E, F) __dummy()
+#define __ffgcv(A, B, C, D, E, F, G, H, I, J) __dummy()
+#define __TBIT          1
+#define __TSHORT       11
+#define __TLOGICAL     14
+#define __TSTRING      16
+#define __TSHORT       21
+#define __TLONG        41
+#define __TLONGLONG    81
+#define __TFLOAT       42
+#define __TDOUBLE      82
+#define __TCOMPLEX     83
+#define __TDBLCOMPLEX 163
 
 /* __ Type definition ____________________________________________________ */
 typedef int __fitsfile;

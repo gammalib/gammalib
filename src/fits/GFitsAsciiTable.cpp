@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GFitsData.cpp  - FITS data handling abstract base class         *
+ *             GFitsAsciiTable.cpp  - FITS ASCII table class               *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -14,7 +14,8 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
-#include "GFitsData.hpp"
+#include "GFitsAsciiTable.hpp"
+#include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -30,7 +31,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                     GFitsData constructors/destructors                  =
+ =                  GFitsAsciiTable constructors/destructors               =
  =                                                                         =
  ==========================================================================*/
 
@@ -38,7 +39,7 @@
  *                                Constructor                              *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData::GFitsData()
+GFitsAsciiTable::GFitsAsciiTable() : GFitsData()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -52,13 +53,13 @@ GFitsData::GFitsData()
  *                              Copy constructor                           *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData::GFitsData(const GFitsData& data)
+GFitsAsciiTable::GFitsAsciiTable(const GFitsAsciiTable& table) : GFitsData(table)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Copy members
-    copy_members(data);
+    copy_members(table);
 
     // Return
     return;
@@ -69,7 +70,7 @@ GFitsData::GFitsData(const GFitsData& data)
  *                               Destructor                                *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData::~GFitsData()
+GFitsAsciiTable::~GFitsAsciiTable()
 {
     // Free members
     free_members();
@@ -81,7 +82,7 @@ GFitsData::~GFitsData()
 
 /*==========================================================================
  =                                                                         =
- =                           GFitsData operators                           =
+ =                        GFitsAsciiTable operators                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -89,11 +90,14 @@ GFitsData::~GFitsData()
  *                            Assignment operator                          *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData& GFitsData::operator= (const GFitsData& data)
+GFitsAsciiTable& GFitsAsciiTable::operator= (const GFitsAsciiTable& table)
 {
     // Execute only if object is not identical
-    if (this != &data) {
+    if (this != &table) {
   
+        // Copy base class members
+        this->GFitsData::operator=(table);
+
         // Free members
         free_members();
   
@@ -101,7 +105,7 @@ GFitsData& GFitsData::operator= (const GFitsData& data)
         init_members();
 
         // Copy members
-        copy_members(data);
+        copy_members(table);
 	
     } // endif: object was not identical
 
@@ -112,26 +116,27 @@ GFitsData& GFitsData::operator= (const GFitsData& data)
 
 /*==========================================================================
  =                                                                         =
- =                         GFitsData public methods                        =
+ =                      GFitsAsciiTable public methods                     =
  =                                                                         =
  ==========================================================================*/
 
 /***************************************************************************
- *                               Open Data                                 *
+ *                               Open Table                                *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::open(__fitsfile* fptr)
+void GFitsAsciiTable::open(__fitsfile* fptr)
 {
+    cout << "open ASCII table" << endl;
     // Return
     return;
 }
 
 
 /***************************************************************************
- *                               Close Data                                *
+ *                               Close Table                               *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::close(void)
+void GFitsAsciiTable::close(void)
 {
     // Free members
     free_members();
@@ -144,9 +149,54 @@ void GFitsData::close(void)
 }
 
 
+/***************************************************************************
+ *               Return pointer to column with specified name              *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+GFitsTableCol* GFitsAsciiTable::column(const std::string colname)
+{
+    // Initialise pointer
+    GFitsTableCol* ptr = NULL;
+    
+    // If there are columns then search for the specified name
+    if (m_columns != NULL) {
+        for (int i = 0; i < m_cols; ++i) {
+            if (m_columns[i]->name() == colname) {
+                ptr = m_columns[i];
+                break;
+            }
+        }
+    }
+    
+    // Return column pointer
+    return ptr;
+}
+
+
+/***************************************************************************
+ *                   Return pointer to column with number                  *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+GFitsTableCol* GFitsAsciiTable::column(const int colnum)
+{
+    // Initialise pointer
+    GFitsTableCol* ptr = NULL;
+    
+    // If there are columns then search for the specified name
+    if (m_columns != NULL) {
+        ptr = m_columns[colnum];
+    }
+    
+    // Return column pointer
+    return ptr;
+}
+
+
+
+
 /*==========================================================================
  =                                                                         =
- =                        GFitsData private methods                        =
+ =                      GFitsAsciiTable private methods                    =
  =                                                                         =
  ==========================================================================*/
 
@@ -154,9 +204,12 @@ void GFitsData::close(void)
  *                         Initialise class members                        *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::init_members(void)
+void GFitsAsciiTable::init_members(void)
 {
     // Initialise members
+    m_rows    = 0;
+    m_cols    = 0;
+    m_columns = NULL;
 
     // Return
     return;
@@ -167,11 +220,18 @@ void GFitsData::init_members(void)
  *                            Copy class members                           *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::copy_members(const GFitsData& data)
+void GFitsAsciiTable::copy_members(const GFitsAsciiTable& table)
 {
     // Copy attributes
+    m_rows = table.m_rows;
+    m_cols = table.m_cols;
     
-    // Copy data
+    // Copy column definition
+    if (table.m_columns != NULL && m_cols > 0) {
+        m_columns = new GFitsTableCol*[m_cols];
+        for (int i = 0; i < m_cols; ++i)
+            m_columns[i] = table.m_columns[i]->clone();
+    }
     
     // Return
     return;
@@ -182,9 +242,16 @@ void GFitsData::copy_members(const GFitsData& data)
  *                           Delete class members                          *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::free_members(void)
+void GFitsAsciiTable::free_members(void)
 {
     // Free memory
+    for (int i = 0; i < m_cols; ++i) {
+        if (m_columns[i] != NULL) delete m_columns[i];
+    }
+    if (m_columns != NULL) delete [] m_columns;
+    
+    // Mark memory as freed
+    m_columns = NULL;
     
     // Return
     return;
@@ -193,13 +260,13 @@ void GFitsData::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                             GFitsData friends                           =
+ =                          GFitsAsciiTable friends                        =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                     Other functions used by GFitsData                   =
+ =                  Other functions used by GFitsAsciiTable                =
  =                                                                         =
  ==========================================================================*/

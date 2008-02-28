@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GFitsHDU.hpp  - FITS HDU handling class                *
+ *             GFitsAsciiTable.hpp  - FITS ASCII table class               *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -11,68 +11,58 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef GFITSHDU_HPP
-#define GFITSHDU_HPP
+#ifndef GFITSASCIITABLE_HPP
+#define GFITSASCIITABLE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsHeader.hpp"
+#include "GFitsCfitsio.hpp"
 #include "GFitsData.hpp"
-#include "GFitsImage.hpp"
-#include "GFitsAsciiTable.hpp"
-#include "GFitsBinTable.hpp"
+#include "GFitsTableCol.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
 
 /***************************************************************************
- *                          GFitsHDU class definition                      *
+ *                     GFitsAsciiTable class definition                    *
  ***************************************************************************/
-class GFitsHDU {
+class GFitsAsciiTable : public GFitsData {
 
-// Public methods
 public:
     // Constructors and destructors
-    GFitsHDU();
-    GFitsHDU(const GFitsHDU& hdu);
-    ~GFitsHDU();
+    GFitsAsciiTable();
+    GFitsAsciiTable(const GFitsAsciiTable& table);
+    virtual ~GFitsAsciiTable();
 
     // Operators
-    GFitsHDU& operator= (const GFitsHDU& hdu);
+    GFitsAsciiTable& operator= (const GFitsAsciiTable& table);
 
     // Methods
-    void           open(__fitsfile*  fptr, int hdunum);
-    void           save(void);
-    std::string    extname(void) const;
-    int            extno(void) const;
-    int            exttype(void) const;
-    GFitsHeader*   header(void) const;
-    GFitsData*     data(void) const;
-    GFitsTableCol* column(const std::string colname) const;
+    void             open(__fitsfile*  fptr);
+    void             close(void);
+    GFitsAsciiTable* clone(void) const;
+    GFitsTableCol*   column(const std::string colname);
+    GFitsTableCol*   column(const int colnum);
     
 private:
     // Private methods
     void init_members(void);
-    void copy_members(const GFitsHDU& hdu);
+    void copy_members(const GFitsAsciiTable& table);
     void free_members(void);
-    void move2hdu(void);
 
     // Private data area
-    __fitsfile*  m_fitsfile;    // FITS file pointer
-    std::string  m_name;        // HDU name
-    int          m_num;         // HDU number (starting from 1)
-    int          m_type;        // HDU type
-    GFitsHeader* m_header;      // HDU header
-    GFitsData*   m_data;        // HDU data
+    int             m_rows;
+    int             m_cols;
+    GFitsTableCol** m_columns;
 };
 
 
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
-inline std::string  GFitsHDU::extname(void) const { return m_name; }
-inline int          GFitsHDU::extno(void) const { return m_num; }
-inline int          GFitsHDU::exttype(void) const { return m_type; }
-inline GFitsHeader* GFitsHDU::header(void) const { return m_header; }
-inline GFitsData*   GFitsHDU::data(void) const { return m_data; }
+inline 
+GFitsAsciiTable* GFitsAsciiTable::clone(void) const 
+{
+    return new GFitsAsciiTable(*this);
+}
 
-#endif /* GFITSHDU_HPP */
+#endif /* GFITSASCIITABLE_HPP */

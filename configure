@@ -18726,7 +18726,6 @@ RANGE_CHECK="no"
 if test "${enable_range_check+set}" = set; then
   enableval="$enable_range_check"
    RANGE_CHECK="$enableval"
-
 fi;
 if test "x$RANGE_CHECK" = "xyes"; then
 

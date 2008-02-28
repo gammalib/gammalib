@@ -28,6 +28,19 @@ void test_open(void)
     try {
         GFits fits;
         fits.open("srcid.fits");
+        
+        // Access data via conversion functions
+        cout << fits.hdu("LAT_POINT_SOURCE_CATALOG")->column("ID_3EG_PROB_1")->string(0) << endl;
+        cout << fits.hdu("LAT_POINT_SOURCE_CATALOG")->column("ID_3EG_PROB_1")->real(0) << endl;
+        cout << fits.hdu("LAT_POINT_SOURCE_CATALOG")->column("ID_3EG_PROB_1")->integer(0) << endl;
+
+        // Access data via pointer
+        double* ptr = fits.hdu("LAT_POINT_SOURCE_CATALOG")->column("ID_3EG_PROB_1")->ptr_double();
+        cout << ptr[0] << endl;
+        
+        GFitsTableDblCol column = *((GFitsTableDblCol*)fits.hdu("LAT_POINT_SOURCE_CATALOG")->column("ID_3EG_PROB_1"));
+        cout << column.real(0) << endl;
+
     }
     catch (exception &e) {
         std::cout << std::endl << "TEST ERROR: Unable to open FITS file." << std::endl;

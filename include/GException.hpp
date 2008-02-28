@@ -58,6 +58,7 @@ public:
     // Out of range
     class out_of_range : public GExceptionHandler {
     public:
+        out_of_range(string origin, int inx, int min, int max);
         out_of_range(string origin, int inx, int elements);
         out_of_range(string origin, int row, int col, int rows, int cols);
     };
@@ -134,10 +135,34 @@ public:
         fits_open_error(string origin, string filename, int status);
     };
 
+    // FITS file has already been opened
+    class fits_already_opened : public GExceptionHandler {
+    public:
+        fits_already_opened(string origin, string filename);
+    };
+
     // FITS keyword not found error
     class fits_key_not_found : public GExceptionHandler {
     public:
         fits_key_not_found(string origin, string keyname, int status);
+    };
+
+    // FITS unknown HDU type
+    class fits_unknown_HDU_type : public GExceptionHandler {
+    public:
+        fits_unknown_HDU_type(string origin, int type);
+    };
+
+    // FITS unknown HDU type
+    class fits_HDU_not_a_table : public GExceptionHandler {
+    public:
+        fits_HDU_not_a_table(string origin, int type);
+    };
+
+    // FITS invalid type
+    class fits_invalid_type : public GExceptionHandler {
+    public:
+        fits_invalid_type(string origin, string message);
     };
 
 };

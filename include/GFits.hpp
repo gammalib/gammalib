@@ -27,7 +27,6 @@
  ***************************************************************************/
 class GFits {
 
-// Public methods
 public:
     // Constructors and destructors
     GFits();
@@ -38,26 +37,39 @@ public:
     GFits& operator= (const GFits& fits);
 
     // Methods
-    void open(std::string filename);
-    void close(void);
-    //GFitsHDU* hdu(std::string extname);
-    //GFitsHDU* hdu(int extno);
+    void      open(const std::string filename);
+    void      save(void);
+    void      saveto(const std::string filename, int clobber);
+    void      close(void);
+    GFitsHDU* hdu(std::string extname);
+    GFitsHDU* hdu(int extno);
     
-// Methods and data that are available to derived classes
-protected:
-    // Protected methods
+private:
+    // Private methods
+    void init_members(void);
+    void copy_members(const GFits& fits);
+    void free_members(void);
 
-    // Protected data area
+    // Private data area
     std::string  m_filename;    // FITS file name
     __fitsfile*  m_fitsfile;    // FITS file pointer
     int          m_num_hdu;     // Number of HDUs in file
     GFitsHDU*    m_hdu;         // Pointers to HDUs
-
-// Methods that are available to the base class only
-private:
-  void init_members(void);
-  void copy_members(const GFits& fits);
-  void free_members(void);
 };
+
+
+/***************************************************************************
+ *                              Inline methods                             *
+ ***************************************************************************/
+inline 
+GFitsHDU* GFits::hdu(int extno) 
+{
+    #if defined(G_RANGE_CHECK)
+    if (extno < 1 || extno > m_num_hdu)
+        throw GException::out_of_range("GFits::hdu(int)", extno, 1, m_num_hdu);
+    #endif
+    return &(m_hdu[extno+1]); 
+}
+
 
 #endif /* GFITS_HPP */

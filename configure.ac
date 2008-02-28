@@ -79,8 +79,7 @@ dnl ==============================
 RANGE_CHECK="no"
 AC_ARG_ENABLE(range_check, 
              [  --enable-range-check    performs index range checking], 
-             [ RANGE_CHECK="$enableval"
-             ]) 
+             [ RANGE_CHECK="$enableval" ]) 
 if test "x$RANGE_CHECK" = "xyes"; then
         AC_DEFINE([G_RANGE_CHECK], [1], [Define if range checking should be performed])
 fi

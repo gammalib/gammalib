@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GFitsHDU.hpp  - FITS HDU handling class                *
+ *          GFitsTableDblCol.hpp  - FITS table double column class         *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -11,68 +11,67 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef GFITSHDU_HPP
-#define GFITSHDU_HPP
+#ifndef GFITSTABLEDBLCOL_HPP
+#define GFITSTABLEDBLCOL_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsHeader.hpp"
-#include "GFitsData.hpp"
-#include "GFitsImage.hpp"
-#include "GFitsAsciiTable.hpp"
-#include "GFitsBinTable.hpp"
+#include "GFitsCfitsio.hpp"
+#include "GFitsTableCol.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
 
-/***************************************************************************
- *                          GFitsHDU class definition                      *
- ***************************************************************************/
-class GFitsHDU {
+/* __ Structures _________________________________________________________ */
 
-// Public methods
+
+/***************************************************************************
+ *                    GFitsTableDblCol class definition                    *
+ ***************************************************************************/
+class GFitsTableDblCol : public GFitsTableCol {
+
 public:
     // Constructors and destructors
-    GFitsHDU();
-    GFitsHDU(const GFitsHDU& hdu);
-    ~GFitsHDU();
+    GFitsTableDblCol();
+    GFitsTableDblCol(const GFitsTableDblCol& column);
+    virtual ~GFitsTableDblCol();
 
     // Operators
-    GFitsHDU& operator= (const GFitsHDU& hdu);
+    GFitsTableDblCol& operator= (const GFitsTableDblCol& column);
 
     // Methods
-    void           open(__fitsfile*  fptr, int hdunum);
-    void           save(void);
-    std::string    extname(void) const;
-    int            extno(void) const;
-    int            exttype(void) const;
-    GFitsHeader*   header(void) const;
-    GFitsData*     data(void) const;
-    GFitsTableCol* column(const std::string colname) const;
+    std::string       string(const int& row, const int& col = 0);
+    double            real(const int& row, const int& col = 0);
+    int               integer(const int& row, const int& col = 0);
+    GFitsTableDblCol* clone(void) const;
+    std::string*      ptr_string(void);
+    double*           ptr_double(void);
+    float*            ptr_float(void);
+    short*            ptr_short(void);
+    long*             ptr_long(void);
+    int*              ptr_int(void);
     
 private:
     // Private methods
     void init_members(void);
-    void copy_members(const GFitsHDU& hdu);
+    void copy_members(const GFitsTableDblCol& column);
     void free_members(void);
-    void move2hdu(void);
+    void load(void);
 
     // Private data area
-    __fitsfile*  m_fitsfile;    // FITS file pointer
-    std::string  m_name;        // HDU name
-    int          m_num;         // HDU number (starting from 1)
-    int          m_type;        // HDU type
-    GFitsHeader* m_header;      // HDU header
-    GFitsData*   m_data;        // HDU data
+    int     m_size;          // Size of data area
+    double* m_data;          // Data area
+    double  m_nulval;        // NULL value
 };
 
 
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
-inline std::string  GFitsHDU::extname(void) const { return m_name; }
-inline int          GFitsHDU::extno(void) const { return m_num; }
-inline int          GFitsHDU::exttype(void) const { return m_type; }
-inline GFitsHeader* GFitsHDU::header(void) const { return m_header; }
-inline GFitsData*   GFitsHDU::data(void) const { return m_data; }
+inline double* GFitsTableDblCol::ptr_double(void) { return m_data; }
+inline 
+GFitsTableDblCol* GFitsTableDblCol::clone(void) const 
+{
+    return new GFitsTableDblCol(*this);
+}
 
-#endif /* GFITSHDU_HPP */
+#endif /* GFITSTABLEDBLCOL_HPP */

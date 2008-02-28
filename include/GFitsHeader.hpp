@@ -15,6 +15,7 @@
 #define GFITSHEADER_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include "GFitsCfitsio.hpp"
 #include "GFitsHeaderCard.hpp"
 
 /* __ Namespaces _________________________________________________________ */
@@ -37,9 +38,16 @@ public:
 
     // Methods
     void             open(__fitsfile*  fptr);
+    void             close(void);
     GFitsHeaderCard* card(const std::string keyname);
     GFitsHeaderCard* card(const int cardno);
-    std::string      value(const std::string keyname);
+    std::string      string(const std::string keyname);
+    std::string      string(const int cardno);
+    double           real(const std::string keyname);
+    double           real(const int cardno);
+    int              integer(const std::string keyname);
+    int              integer(const int cardno);
+    GFitsHeader*     clone(void) const;
     
 private:
     // Private methods
@@ -52,5 +60,25 @@ private:
     int              m_num_cards;
     GFitsHeaderCard* m_card;
 };
+
+
+/***************************************************************************
+ *                              Inline methods                             *
+ ***************************************************************************/
+inline 
+GFitsHeaderCard* GFitsHeader::card(const std::string keyname)
+{
+    return GFitsHeader::card_ptr(keyname);
+}
+inline
+GFitsHeaderCard* GFitsHeader::card(const int cardno)
+{
+    return (cardno >= 0 && cardno < m_num_cards) ? &(m_card[cardno]) : NULL;
+}
+inline 
+GFitsHeader* GFitsHeader::clone(void) const 
+{
+    return new GFitsHeader(*this);
+}
 
 #endif /* GFITSHEADER_HPP */

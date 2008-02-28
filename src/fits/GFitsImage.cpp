@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GFitsData.cpp  - FITS data handling abstract base class         *
+ *                  GFitsImage.cpp  - FITS image class                     *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -14,7 +14,8 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
-#include "GFitsData.hpp"
+#include "GFitsImage.hpp"
+#include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -30,7 +31,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                     GFitsData constructors/destructors                  =
+ =                    GFitsImage constructors/destructors                  =
  =                                                                         =
  ==========================================================================*/
 
@@ -38,7 +39,7 @@
  *                                Constructor                              *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData::GFitsData()
+GFitsImage::GFitsImage() : GFitsData()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -52,13 +53,13 @@ GFitsData::GFitsData()
  *                              Copy constructor                           *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData::GFitsData(const GFitsData& data)
+GFitsImage::GFitsImage(const GFitsImage& image) : GFitsData(image)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Copy members
-    copy_members(data);
+    copy_members(image);
 
     // Return
     return;
@@ -69,7 +70,7 @@ GFitsData::GFitsData(const GFitsData& data)
  *                               Destructor                                *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData::~GFitsData()
+GFitsImage::~GFitsImage()
 {
     // Free members
     free_members();
@@ -81,7 +82,7 @@ GFitsData::~GFitsData()
 
 /*==========================================================================
  =                                                                         =
- =                           GFitsData operators                           =
+ =                           GFitsImage operators                          =
  =                                                                         =
  ==========================================================================*/
 
@@ -89,10 +90,13 @@ GFitsData::~GFitsData()
  *                            Assignment operator                          *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsData& GFitsData::operator= (const GFitsData& data)
+GFitsImage& GFitsImage::operator= (const GFitsImage& image)
 {
     // Execute only if object is not identical
-    if (this != &data) {
+    if (this != &image) {
+
+        // Copy base class members
+        this->GFitsData::operator=(image);
   
         // Free members
         free_members();
@@ -101,7 +105,7 @@ GFitsData& GFitsData::operator= (const GFitsData& data)
         init_members();
 
         // Copy members
-        copy_members(data);
+        copy_members(image);
 	
     } // endif: object was not identical
 
@@ -112,26 +116,27 @@ GFitsData& GFitsData::operator= (const GFitsData& data)
 
 /*==========================================================================
  =                                                                         =
- =                         GFitsData public methods                        =
+ =                        GFitsImage public methods                        =
  =                                                                         =
  ==========================================================================*/
 
 /***************************************************************************
- *                               Open Data                                 *
+ *                               Open Image                                *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::open(__fitsfile* fptr)
+void GFitsImage::open(__fitsfile* fptr)
 {
+    cout << "open image" << endl;
     // Return
     return;
 }
 
 
 /***************************************************************************
- *                               Close Data                                *
+ *                               Close Image                               *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::close(void)
+void GFitsImage::close(void)
 {
     // Free members
     free_members();
@@ -146,7 +151,7 @@ void GFitsData::close(void)
 
 /*==========================================================================
  =                                                                         =
- =                        GFitsData private methods                        =
+ =                        GFitsImage private methods                       =
  =                                                                         =
  ==========================================================================*/
 
@@ -154,7 +159,7 @@ void GFitsData::close(void)
  *                         Initialise class members                        *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::init_members(void)
+void GFitsImage::init_members(void)
 {
     // Initialise members
 
@@ -167,7 +172,7 @@ void GFitsData::init_members(void)
  *                            Copy class members                           *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::copy_members(const GFitsData& data)
+void GFitsImage::copy_members(const GFitsImage& image)
 {
     // Copy attributes
     
@@ -182,7 +187,7 @@ void GFitsData::copy_members(const GFitsData& data)
  *                           Delete class members                          *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsData::free_members(void)
+void GFitsImage::free_members(void)
 {
     // Free memory
     
@@ -193,13 +198,13 @@ void GFitsData::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                             GFitsData friends                           =
+ =                            GFitsImage friends                           =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                     Other functions used by GFitsData                   =
+ =                    Other functions used by GFitsImage                   =
  =                                                                         =
  ==========================================================================*/

@@ -20,6 +20,23 @@ using namespace std;
 
 
 /***************************************************************************
+ *                       Private conversion functions                      *
+ ***************************************************************************/
+std::string str(int value)
+{
+    ostringstream s_value;
+    s_value << value;
+    return  s_value.str();
+}
+std::string str(double value)
+{
+    ostringstream s_value;
+    s_value << scientific << value;
+    return  s_value.str();
+}
+
+
+/***************************************************************************
  *                  Exception handler base class definition                *
  ***************************************************************************/
 const char* GExceptionHandler::what() const throw()
@@ -34,10 +51,8 @@ const char* GExceptionHandler::what() const throw()
  ***************************************************************************/
 GException::mem_alloc::mem_alloc(string origin, unsigned num)
 {
-    ostringstream s_num;
-    s_num << num;
     m_origin  = origin;
-    m_message = "Memory allocation error (" + s_num.str() + " elements)";
+    m_message = "Memory allocation error (" + str((int)num) + " elements)";
 }
 
 
@@ -52,18 +67,25 @@ GException::empty::empty(string origin)
 
 
 /***************************************************************************
+ *                            Index out of range                           *
+ ***************************************************************************/
+GException::out_of_range::out_of_range(string origin, int inx, int min, int max)
+{
+    m_origin  = origin;
+    m_message = "Index (" + str(inx) + ") out of range [" + str(min) + 
+                "," + str(max) + "]";
+}
+
+
+/***************************************************************************
  *                          Vector index out of range                      *
  ***************************************************************************/
 GException::out_of_range::out_of_range(string origin, int inx, int elements)
 {
     m_origin = origin;
     if (elements > 0) {
-        ostringstream s_inx;
-        ostringstream s_elements;
-        s_inx      << inx;
-        s_elements << elements-1;
-        m_message = "Vector index (" + s_inx.str() + ") out of range [0," + 
-                    s_elements.str() + "]";
+        m_message = "Vector index (" + str(inx) + ") out of range [0," + 
+                    str(elements-1) + "]";
     }
     else {
         m_message = "Empty vector";
@@ -71,24 +93,15 @@ GException::out_of_range::out_of_range(string origin, int inx, int elements)
 }
 
 
-
 /***************************************************************************
  *                      Matrix row or column out of range                  *
  ***************************************************************************/
 GException::out_of_range::out_of_range(string origin, int row, int col, int rows, int cols)
 {
-    m_origin = origin;
-    ostringstream s_row;
-    ostringstream s_col;
-    ostringstream s_rows;
-    ostringstream s_cols;
-    s_row  << row;
-    s_col  << col;
-    s_rows << rows-1;
-    s_cols << cols-1;
-    m_message = "Matrix element (" + s_row.str() + "," + s_col.str() +
-                ") out of range ([0," + s_rows.str() + "], [0," +
-                s_cols.str() + "])";
+    m_origin  = origin;
+    m_message = "Matrix element (" + str(row) + "," + str(col) +
+                ") out of range ([0," + str(rows) + "], [0," +
+                str(cols) + "])";
 }
 
 
@@ -97,13 +110,9 @@ GException::out_of_range::out_of_range(string origin, int row, int col, int rows
  ***************************************************************************/
 GException::vector_mismatch::vector_mismatch(string origin, int size1, int size2)
 {
-    m_origin = origin;
-    ostringstream s_size1;
-    ostringstream s_size2;
-    s_size1 << size1;
-    s_size2 << size2;
-    m_message = "Vector dimensions differ (" + s_size1.str() + " <-> " + 
-                s_size2.str() + ")";
+    m_origin  = origin;
+    m_message = "Vector dimensions differ (" + str(size1) + " <-> " + 
+                str(size2) + ")";
 }
 
 
@@ -112,11 +121,9 @@ GException::vector_mismatch::vector_mismatch(string origin, int size1, int size2
  ***************************************************************************/
 GException::vector_bad_cross_dim::vector_bad_cross_dim(string origin, int elements)
 {
-    m_origin = origin;
-    ostringstream s_elements;
-    s_elements << elements;
+    m_origin  = origin;
     m_message = "Vector cross product only defined for 3 dimensions but vector size is " + 
-                s_elements.str(); 
+                str(elements); 
 }
 
 
@@ -125,16 +132,10 @@ GException::vector_bad_cross_dim::vector_bad_cross_dim(string origin, int elemen
  ***************************************************************************/
 GException::matrix_vector_mismatch::matrix_vector_mismatch(string origin, int num, int rows, int cols)
 {
-    m_origin = origin;
-    ostringstream s_num;
-    ostringstream s_rows;
-    ostringstream s_cols;
-    s_num  << num;
-    s_rows << rows;
-    s_cols << cols;
-    m_message = "Vector dimension [" + s_num.str() + 
+    m_origin  = origin;
+    m_message = "Vector dimension [" + str(num) + 
                 "] is incompatible with matrix size [" + 
-                s_rows.str() + "," + s_cols.str() + "]";
+                str(rows) + "," + str(cols) + "]";
 }
 
 
@@ -143,18 +144,9 @@ GException::matrix_vector_mismatch::matrix_vector_mismatch(string origin, int nu
  ***************************************************************************/
 GException::matrix_mismatch::matrix_mismatch(string origin, int rows1, int cols1, int rows2, int cols2)
 {
-    m_origin = origin;
-    ostringstream s_rows1;
-    ostringstream s_rows2;
-    ostringstream s_cols1;
-    ostringstream s_cols2;
-    s_rows1 << rows1;
-    s_cols1 << cols1;
-    s_rows2 << rows2;
-    s_cols2 << cols2;
-    m_message = "Matrix mismatch: M1(" + s_rows1.str() + "," + s_cols1.str() +
-                ") incompatible with M2(" + s_rows2.str() + "," + 
-                s_cols2.str() + ")";
+    m_origin  = origin;
+    m_message = "Matrix mismatch: M1(" + str(rows1) + "," + str(cols1) +
+                ") incompatible with M2(" + str(rows2) + "," + str(cols2) + ")";
 }
 
 
@@ -163,13 +155,8 @@ GException::matrix_mismatch::matrix_mismatch(string origin, int rows1, int cols1
  ***************************************************************************/
 GException::matrix_not_rectangular::matrix_not_rectangular(string origin, int rows, int cols)
 {
-    m_origin = origin;
-    ostringstream s_rows;
-    ostringstream s_cols;
-    s_rows << rows;
-    s_cols << cols;
-    m_message = "Matrix is not rectangular [" + s_rows.str() + "," + s_cols.str() +
-                "]";
+    m_origin  = origin;
+    m_message = "Matrix is not rectangular [" + str(rows) + "," + str(cols) + "]";
 }
 
 
@@ -178,13 +165,9 @@ GException::matrix_not_rectangular::matrix_not_rectangular(string origin, int ro
  ***************************************************************************/
 GException::matrix_not_pos_definite::matrix_not_pos_definite(string origin, int row, double sum)
 {
-    m_origin = origin;
-    ostringstream s_rows;
-    ostringstream s_sum;
-    s_rows << row;
-    s_sum << scientific << sum;
-    m_message = "Matrix is not positive definite (sum " + s_sum.str() + 
-                " occured in row/column " + s_rows.str() + ")";
+    m_origin  = origin;
+    m_message = "Matrix is not positive definite (sum " + str(sum) + 
+                " occured in row/column " + str(row) + ")";
 }
 
 
@@ -193,13 +176,8 @@ GException::matrix_not_pos_definite::matrix_not_pos_definite(string origin, int 
  ***************************************************************************/
 GException::matrix_not_symmetric::matrix_not_symmetric(string origin, int cols, int rows)
 {
-    m_origin = origin;
-    ostringstream s_rows;
-    ostringstream s_cols;
-    s_rows << rows;
-    s_cols << cols;
-    m_message = "Matrix is not symmetric [" + s_rows.str() + "," +
-                s_cols.str() + "]";
+    m_origin  = origin;
+    m_message = "Matrix is not symmetric [" + str(rows) + "," + str(cols) + "]";
 }
 
 
@@ -228,16 +206,10 @@ GException::matrix_zero::matrix_zero(string origin)
  ***************************************************************************/
 GException::invalid_order::invalid_order(string origin, int order, int min_order, int max_order)
 {
-    m_origin = origin;
-    ostringstream s_order;
-    ostringstream s_min_order;
-    ostringstream s_max_order;
-    s_order     << order;
-    s_min_order << min_order;
-    s_max_order << max_order;
-    m_message = "Invalid ordering type " + s_order.str() + 
-                "requested; must be comprised in [" + s_min_order.str() +
-                "," + s_max_order.str() + "]";
+    m_origin  = origin;
+    m_message = "Invalid ordering type " + str(order) + 
+                "requested; must be comprised in [" + str(min_order) +
+                "," + str(max_order) + "]";
 }
 
 
@@ -266,10 +238,50 @@ GException::fits_open_error::fits_open_error(string origin, string filename, int
 
 
 /***************************************************************************
+ *                          FITS file already opened                       *
+ ***************************************************************************/
+GException::fits_already_opened::fits_already_opened(string origin, string filename)
+{
+    m_origin  = origin;
+    m_message = "GFits object has already the FITS file '" + filename + "' opened";
+}
+
+
+/***************************************************************************
  *                        FITS keyword not found error                     *
  ***************************************************************************/
 GException::fits_key_not_found::fits_key_not_found(string origin, string keyname, int status)
 {
     m_origin  = origin;
     m_message = "Keyword '" + keyname + "' not found in header";
+}
+
+
+/***************************************************************************
+ *                          Unknown HDU type found                         *
+ ***************************************************************************/
+GException::fits_unknown_HDU_type::fits_unknown_HDU_type(string origin, int type)
+{
+    m_origin  = origin;
+    m_message = "HDU type " + str(type) + " is not known";
+}
+
+
+/***************************************************************************
+ *                             HDU is not a table                          *
+ ***************************************************************************/
+GException::fits_HDU_not_a_table::fits_HDU_not_a_table(string origin, int type)
+{
+    m_origin  = origin;
+    m_message = "HDU is not a table (type " + str(type) + ")";
+}
+
+
+/***************************************************************************
+ *                             HDU is not a table                          *
+ ***************************************************************************/
+GException::fits_invalid_type::fits_invalid_type(string origin, string message)
+{
+    m_origin  = origin;
+    m_message = message;
 }

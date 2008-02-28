@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GFitsHDU.hpp  - FITS HDU handling class                *
+ *              GFitsBinTable.hpp  - FITS binary table class               *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -11,68 +11,62 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef GFITSHDU_HPP
-#define GFITSHDU_HPP
+#ifndef GFITSBINTABLE_HPP
+#define GFITSBINTABLE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsHeader.hpp"
+#include <vector>
+#include "GFitsCfitsio.hpp"
 #include "GFitsData.hpp"
-#include "GFitsImage.hpp"
-#include "GFitsAsciiTable.hpp"
-#include "GFitsBinTable.hpp"
+#include "GFitsTableCol.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
 
-/***************************************************************************
- *                          GFitsHDU class definition                      *
- ***************************************************************************/
-class GFitsHDU {
+/* __ Structures _________________________________________________________ */
 
-// Public methods
+
+/***************************************************************************
+ *                      GFitsBinTable class definition                     *
+ ***************************************************************************/
+class GFitsBinTable : public GFitsData {
+
 public:
     // Constructors and destructors
-    GFitsHDU();
-    GFitsHDU(const GFitsHDU& hdu);
-    ~GFitsHDU();
+    GFitsBinTable();
+    GFitsBinTable(const GFitsBinTable& table);
+    virtual ~GFitsBinTable();
 
     // Operators
-    GFitsHDU& operator= (const GFitsHDU& hdu);
+    GFitsBinTable& operator= (const GFitsBinTable& table);
 
     // Methods
-    void           open(__fitsfile*  fptr, int hdunum);
-    void           save(void);
-    std::string    extname(void) const;
-    int            extno(void) const;
-    int            exttype(void) const;
-    GFitsHeader*   header(void) const;
-    GFitsData*     data(void) const;
-    GFitsTableCol* column(const std::string colname) const;
+    void           open(__fitsfile*  fptr);
+    void           close(void);
+    GFitsBinTable* clone(void) const;
+    GFitsTableCol* column(const std::string colname);
+    GFitsTableCol* column(const int colnum);
     
 private:
     // Private methods
     void init_members(void);
-    void copy_members(const GFitsHDU& hdu);
+    void copy_members(const GFitsBinTable& table);
     void free_members(void);
-    void move2hdu(void);
 
     // Private data area
-    __fitsfile*  m_fitsfile;    // FITS file pointer
-    std::string  m_name;        // HDU name
-    int          m_num;         // HDU number (starting from 1)
-    int          m_type;        // HDU type
-    GFitsHeader* m_header;      // HDU header
-    GFitsData*   m_data;        // HDU data
+    int             m_rows;
+    int             m_cols;
+    GFitsTableCol** m_columns;
 };
 
 
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
-inline std::string  GFitsHDU::extname(void) const { return m_name; }
-inline int          GFitsHDU::extno(void) const { return m_num; }
-inline int          GFitsHDU::exttype(void) const { return m_type; }
-inline GFitsHeader* GFitsHDU::header(void) const { return m_header; }
-inline GFitsData*   GFitsHDU::data(void) const { return m_data; }
+inline 
+GFitsBinTable* GFitsBinTable::clone(void) const 
+{
+    return new GFitsBinTable(*this);
+}
 
-#endif /* GFITSHDU_HPP */
+#endif /* GFITSBINTABLE_HPP */

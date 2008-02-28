@@ -15,6 +15,11 @@ files = GException.cpp \
 	fits/GFitsHeaderCard.cpp \
 	fits/GFitsHeader.cpp \
 	fits/GFitsData.cpp \
+	fits/GFitsImage.cpp \
+	fits/GFitsAsciiTable.cpp \
+	fits/GFitsBinTable.cpp \
+	fits/GFitsTableCol.cpp \
+	fits/GFitsTableDblCol.cpp \
 	fits/GFitsHDU.cpp \
 	fits/GFits.cpp \
 	fit/GFitPar.cpp \

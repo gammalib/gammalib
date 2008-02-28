@@ -113,6 +113,11 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GFitsHeaderCard.hpp \
 		     GFitsHeader.hpp \
 		     GFitsData.hpp \
+		     GFitsImage.hpp \
+		     GFitsAsciiTable.hpp \
+		     GFitsBinTable.hpp \
+		     GFitsTableCol.hpp \
+		     GFitsTableDblCol.hpp \
 		     GFitsHDU.hpp \
 		     GFits.hpp \
 		     GFitPar.hpp \
