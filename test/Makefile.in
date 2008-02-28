@@ -41,7 +41,7 @@ build_triplet = @build@
 host_triplet = @host@
 check_PROGRAMS = test_GVector$(EXEEXT) test_GMatrix$(EXEEXT) \
 	test_GSymMatrix$(EXEEXT) test_GSparseMatrix$(EXEEXT) \
-	test_GFits$(EXEEXT)
+	test_GFits$(EXEEXT) test_GResponse$(EXEEXT)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -57,6 +57,9 @@ test_GFits_DEPENDENCIES = ../src/libgamma.la
 am_test_GMatrix_OBJECTS = test_GMatrix.$(OBJEXT)
 test_GMatrix_OBJECTS = $(am_test_GMatrix_OBJECTS)
 test_GMatrix_DEPENDENCIES = ../src/libgamma.la
+am_test_GResponse_OBJECTS = test_GResponse.$(OBJEXT)
+test_GResponse_OBJECTS = $(am_test_GResponse_OBJECTS)
+test_GResponse_DEPENDENCIES = ../src/libgamma.la
 am_test_GSparseMatrix_OBJECTS = test_GSparseMatrix.$(OBJEXT)
 test_GSparseMatrix_OBJECTS = $(am_test_GSparseMatrix_OBJECTS)
 test_GSparseMatrix_DEPENDENCIES = ../src/libgamma.la
@@ -78,11 +81,11 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(test_GFits_SOURCES) $(test_GMatrix_SOURCES) \
-	$(test_GSparseMatrix_SOURCES) $(test_GSymMatrix_SOURCES) \
-	$(test_GVector_SOURCES)
+	$(test_GResponse_SOURCES) $(test_GSparseMatrix_SOURCES) \
+	$(test_GSymMatrix_SOURCES) $(test_GVector_SOURCES)
 DIST_SOURCES = $(test_GFits_SOURCES) $(test_GMatrix_SOURCES) \
-	$(test_GSparseMatrix_SOURCES) $(test_GSymMatrix_SOURCES) \
-	$(test_GVector_SOURCES)
+	$(test_GResponse_SOURCES) $(test_GSparseMatrix_SOURCES) \
+	$(test_GSymMatrix_SOURCES) $(test_GVector_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -207,7 +210,8 @@ TESTS = test_GVector \
 	test_GMatrix \
 	test_GSymMatrix \
 	test_GSparseMatrix \
-	test_GFits
+	test_GFits \
+	test_GResponse
 
 test_GVector_SOURCES = test_GVector.cpp
 test_GVector_LDADD = ../src/libgamma.la
@@ -219,6 +223,8 @@ test_GSparseMatrix_SOURCES = test_GSparseMatrix.cpp
 test_GSparseMatrix_LDADD = ../src/libgamma.la
 test_GFits_SOURCES = test_GFits.cpp
 test_GFits_LDADD = ../src/libgamma.la
+test_GResponse_SOURCES = test_GResponse.cpp
+test_GResponse_LDADD = ../src/libgamma.la
 all: all-am
 
 .SUFFIXES:
@@ -265,6 +271,9 @@ test_GFits$(EXEEXT): $(test_GFits_OBJECTS) $(test_GFits_DEPENDENCIES)
 test_GMatrix$(EXEEXT): $(test_GMatrix_OBJECTS) $(test_GMatrix_DEPENDENCIES) 
 	@rm -f test_GMatrix$(EXEEXT)
 	$(CXXLINK) $(test_GMatrix_LDFLAGS) $(test_GMatrix_OBJECTS) $(test_GMatrix_LDADD) $(LIBS)
+test_GResponse$(EXEEXT): $(test_GResponse_OBJECTS) $(test_GResponse_DEPENDENCIES) 
+	@rm -f test_GResponse$(EXEEXT)
+	$(CXXLINK) $(test_GResponse_LDFLAGS) $(test_GResponse_OBJECTS) $(test_GResponse_LDADD) $(LIBS)
 test_GSparseMatrix$(EXEEXT): $(test_GSparseMatrix_OBJECTS) $(test_GSparseMatrix_DEPENDENCIES) 
 	@rm -f test_GSparseMatrix$(EXEEXT)
 	$(CXXLINK) $(test_GSparseMatrix_LDFLAGS) $(test_GSparseMatrix_OBJECTS) $(test_GSparseMatrix_LDADD) $(LIBS)

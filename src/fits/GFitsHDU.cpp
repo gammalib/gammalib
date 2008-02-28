@@ -14,6 +14,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GFitsHDU.hpp"
 #include <iostream>                           // cout, cerr
 
@@ -162,7 +163,7 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
     m_data->open(m_fitsfile);
 
     // Get HDU name from header
-    m_name = m_header->string("EXTNAME");
+    m_name = strip_whitespace(m_header->string("EXTNAME"));
     if (m_name.length() == 0) {
         if (hdunum == 1)
             m_name = "Primary";

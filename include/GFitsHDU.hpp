@@ -48,7 +48,7 @@ public:
     GFitsHeader*   header(void) const;
     GFitsData*     data(void) const;
     GFitsTableCol* column(const std::string colname) const;
-    
+
 private:
     // Private methods
     void init_members(void);

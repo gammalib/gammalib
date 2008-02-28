@@ -283,7 +283,7 @@ int main(void)
     // Dump header
     std::cout << std::endl;
     std::cout << "***********************" << std::endl;
-    std::cout << "* GFIts class testing *" << std::endl;
+    std::cout << "* GFits class testing *" << std::endl;
     std::cout << "***********************" << std::endl;
 
     // Execute the tests

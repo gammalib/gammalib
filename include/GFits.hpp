@@ -41,9 +41,9 @@ public:
     void      save(void);
     void      saveto(const std::string filename, int clobber);
     void      close(void);
-    GFitsHDU* hdu(std::string extname);
+    GFitsHDU* hdu(const std::string extname);
     GFitsHDU* hdu(int extno);
-    
+
 private:
     // Private methods
     void init_members(void);

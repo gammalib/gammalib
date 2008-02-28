@@ -15,6 +15,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
 #include "GFits.hpp"
+#include "GTools.hpp"
 #include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
@@ -233,7 +234,7 @@ void GFits::close(void)
  *                            Get pointer to HDU                           *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsHDU* GFits::hdu(std::string extname)
+GFitsHDU* GFits::hdu(const std::string extname)
 {
     // Initialise result to NULL pointer
     GFitsHDU* ptr = NULL;
