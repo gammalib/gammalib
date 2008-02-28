@@ -11,6 +11,10 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GFitsAsciiTable.hpp \
 		     GFitsBinTable.hpp \
 		     GFitsTableCol.hpp \
+		     GFitsTableStrCol.hpp \
+		     GFitsTableShtCol.hpp \
+		     GFitsTableLngCol.hpp \
+		     GFitsTableFltCol.hpp \
 		     GFitsTableDblCol.hpp \
 		     GFitsHDU.hpp \
 		     GFits.hpp \

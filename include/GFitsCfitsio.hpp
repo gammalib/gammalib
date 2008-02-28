@@ -43,8 +43,12 @@
 #define __ffgncl(A, B, C) ffgncl(A, B, C)
 #define __ffgtcl(A, B, C, D, E, F) ffgtcl(A, B, C, D, E, F)
 #define __ffgcv(A, B, C, D, E, F, G, H, I, J) ffgcv(A, B, C, D, E, F, G, H, I, J)
+#define __ffgcvs(A, B, C, D, E, F, G, H, I) ffgcvs(A, B, C, D, E, F, G, H, I)
 #define __TLOGICAL TLOGICAL
 #define __TSTRING  TSTRING
+#define __TSHORT   TSHORT
+#define __TLONG    TLONG
+#define __TFLOAT   TFLOAT
 #define __TDOUBLE  TDOUBLE
 
 /* __ Type definition ____________________________________________________ */
@@ -70,6 +74,7 @@ typedef fitsfile __fitsfile;
 #define __ffgncl(A, B, C) __dummy()
 #define __ffgtcl(A, B, C, D, E, F) __dummy()
 #define __ffgcv(A, B, C, D, E, F, G, H, I, J) __dummy()
+#define __ffgcvs(A, B, C, D, E, F, G, H, I) __dummy()
 #define __TBIT          1
 #define __TSHORT       11
 #define __TLOGICAL     14

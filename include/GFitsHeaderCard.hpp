@@ -29,10 +29,10 @@ public:
     GFitsHeaderCard();
     GFitsHeaderCard(const GFitsHeaderCard& card);
     ~GFitsHeaderCard();
-    
+
     // Operators
     GFitsHeaderCard& operator= (const GFitsHeaderCard& card);
-    
+
     // Methods
     std::string  keyname(void);
     std::string  value(void);
@@ -49,7 +49,7 @@ public:
     void         read(__fitsfile* fptr, int keynum);
     void         read(__fitsfile* fptr, std::string keyname);
     void         write(__fitsfile* fptr);
-    
+
 private:
     // Private methods
     void init_members(void);

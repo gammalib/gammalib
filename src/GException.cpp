@@ -285,3 +285,13 @@ GException::fits_invalid_type::fits_invalid_type(string origin, string message)
     m_origin  = origin;
     m_message = message;
 }
+
+
+/***************************************************************************
+ *                             Column type is unknown                      *
+ ***************************************************************************/
+GException::fits_unknown_coltype::fits_unknown_coltype(string origin, int type)
+{
+    m_origin  = origin;
+    m_message = "Column type " + str(type) + " is unknown";
+}

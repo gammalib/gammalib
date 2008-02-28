@@ -74,7 +74,7 @@ public:
     public:
         vector_bad_cross_dim(string origin, int elements);
     };
-  
+
     // Vector - Matrix mismatch
     class matrix_vector_mismatch : public GExceptionHandler {
     public:
@@ -163,6 +163,12 @@ public:
     class fits_invalid_type : public GExceptionHandler {
     public:
         fits_invalid_type(string origin, string message);
+    };
+
+    // FITS unable column type
+    class fits_unknown_coltype : public GExceptionHandler {
+    public:
+        fits_unknown_coltype(string origin, int type);
     };
 
 };

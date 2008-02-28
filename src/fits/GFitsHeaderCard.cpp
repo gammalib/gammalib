@@ -56,7 +56,7 @@ GFitsHeaderCard::GFitsHeaderCard()
 {
     // Initialise class members for clean destruction
     init_members();
-    
+
     // Return
     return;
 }
@@ -137,13 +137,12 @@ std::string GFitsHeaderCard::string(void)
 {
     // Initialize return value to empty string
     std::string result;
-    
+
     // Type dependent conversion
     switch (m_value_type) {
     case CT_STRING:
-        int length = m_value.length() - 2;
-        if (length > 0)
-            result = m_value.substr(1, length);
+        if (m_value.length() > 2)
+            result = m_value.substr(1, m_value.length() - 2);
         break;
     case CT_INT:
     case CT_FLOAT:
@@ -153,7 +152,7 @@ std::string GFitsHeaderCard::string(void)
     default:
         break;
     }
-    
+
     // Return string
     return result;
 
@@ -168,13 +167,12 @@ double GFitsHeaderCard::real(void)
 {
     // Initialize return value to 0.0
     double result = 0.0;
-    
+
     // Type dependent conversion
     switch (m_value_type) {
     case CT_STRING:
-        int length = m_value.length() - 2;
-        if (length > 0)
-            result = atof(m_value.substr(1, length).c_str());
+        if (m_value.length() > 2)
+            result = atof(m_value.substr(1, m_value.length() - 2).c_str());
         break;
     case CT_INT:
     case CT_FLOAT:
@@ -186,7 +184,7 @@ double GFitsHeaderCard::real(void)
     default:
         break;
     }
-    
+
     // Return string
     return result;
 
@@ -201,13 +199,12 @@ int GFitsHeaderCard::integer(void)
 {
     // Initialize return value to 0
     int result = 0;
-    
+
     // Type dependent conversion
     switch (m_value_type) {
     case CT_STRING:
-        int length = m_value.length() - 2;
-        if (length > 0)
-            result = atoi(m_value.substr(1, length).c_str());
+        if (m_value.length() > 2)
+            result = atoi(m_value.substr(1, m_value.length() - 2).c_str());
         break;
     case CT_INT:
     case CT_FLOAT:
@@ -219,7 +216,7 @@ int GFitsHeaderCard::integer(void)
     default:
         break;
     }
-    
+
     // Return string
     return result;
 
@@ -240,7 +237,7 @@ void GFitsHeaderCard::read(__fitsfile* fptr, int keynum)
     status      = __ffgkyn(fptr, keynum, keyname, value, comment, &status);
     if (status != 0)
         throw GException::fits_error(G_READ_NUM, status);
-    
+
     // Store result
     m_keyname.assign(keyname);
     m_value.assign(value);
@@ -248,7 +245,7 @@ void GFitsHeaderCard::read(__fitsfile* fptr, int keynum)
 
     // Determine card type
     m_value_type = get_value_type();
-    
+
     // Return
     return;
 }
@@ -265,21 +262,21 @@ void GFitsHeaderCard::read(__fitsfile* fptr, std::string keyname)
     char comment[80];
     int  status = 0;
     status      = __ffgkey(fptr, (char*)keyname.c_str(), value, comment, &status);
-    
+
     // Catch error
     if (status == 202)       // Keyword not found
         throw GException::fits_key_not_found(G_READ_STR, keyname, status);
     else if (status != 0)    // Any other error
         throw GException::fits_error(G_READ_STR, status);
-    
+
     // Store result
     m_keyname = keyname;
     m_value.assign(value);
     m_comment.assign(comment);
-    
+
     // Determine card type
     m_value_type = get_value_type();
-    
+
     // Return
     return;
 }
@@ -297,7 +294,7 @@ void GFitsHeaderCard::write(__fitsfile* fptr)
                          (char*)m_value.c_str(), (char*)m_comment.c_str(), &status);
     if (status != 0)
         throw GException::fits_error(G_WRITE, status);
-    
+
     // Return
     return;
 }
@@ -321,7 +318,7 @@ void GFitsHeaderCard::init_members(void)
     m_value_type = CT_UNKNOWN;
     m_unit.clear();
     m_comment.clear();
-  
+
     // Return
     return;
 }
@@ -339,7 +336,7 @@ void GFitsHeaderCard::copy_members(const GFitsHeaderCard& card)
     m_value_type = card.m_value_type;
     m_unit       = card.m_unit;
     m_comment    = card.m_comment;
-    
+
     // Return
     return;
 }
@@ -364,7 +361,7 @@ int GFitsHeaderCard::get_value_type(void)
 {
     // Get index of last string element
     int last = m_value.length() - 1;
-    
+
     // If value is empty then we either have a COMMENT or HISTORY card or
     // we don't know the type
     if (last < 0) {
@@ -374,11 +371,11 @@ int GFitsHeaderCard::get_value_type(void)
             return CT_HISTORY;
         return CT_UNKNOWN;
     }
-        
+
     // If value is enclosed in parentheses we have a string
     if (m_value[0] == '\x27' && m_value[last] == '\x27')
         return CT_STRING;
-        
+
     // If value has only one digit and is either 'F' or 'T' we have a
     // Boolean
     if (last == 0 && (m_value[0] == 'F' || m_value[0] == 'T'))
@@ -397,7 +394,7 @@ int GFitsHeaderCard::get_value_type(void)
         else
             return CT_INVALID;
     }
-    
+
     // If we are still alive we should have now either a float or an integer
     if (found_int) {
         if (found_float) {

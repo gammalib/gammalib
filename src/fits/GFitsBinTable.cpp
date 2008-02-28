@@ -14,7 +14,12 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GFitsBinTable.hpp"
+#include "GFitsTableStrCol.hpp"
+#include "GFitsTableShtCol.hpp"
+#include "GFitsTableLngCol.hpp"
+#include "GFitsTableFltCol.hpp"
 #include "GFitsTableDblCol.hpp"
 #include <iostream>                           // cout, cerr
 
@@ -95,19 +100,19 @@ GFitsBinTable& GFitsBinTable::operator= (const GFitsBinTable& table)
 {
     // Execute only if object is not identical
     if (this != &table) {
-  
+
         // Copy base class members
         this->GFitsData::operator=(table);
 
         // Free members
         free_members();
-  
+
         // Initialise private members for clean destruction
         init_members();
 
         // Copy members
         copy_members(table);
-	
+
     } // endif: object was not identical
 
     // Return this object
@@ -150,7 +155,7 @@ void GFitsBinTable::open(__fitsfile* fptr)
     long repeat   = 0;
     long width    = 0;
     for (int i = 0; i < m_cols; ++i) {
-    
+
         // Get column name
         char keyname[10];
         char value[80];
@@ -159,7 +164,7 @@ void GFitsBinTable::open(__fitsfile* fptr)
         if (status != 0)
             throw GException::fits_error(G_OPEN, status);
         value[strlen(value)-1] = '\0';
-        
+
         // Get column definition
         status = __ffgtcl(fptr, i+1, &typecode, &repeat, &width, &status);
         if (status != 0)
@@ -167,30 +172,36 @@ void GFitsBinTable::open(__fitsfile* fptr)
 
         // Allocate column
         switch (typecode) {
+        case __TSTRING:
+            m_columns[i] = new GFitsTableStrCol();
+            break;
+        case __TSHORT:
+            m_columns[i] = new GFitsTableShtCol();
+            break;
+        case __TLONG:
+            m_columns[i] = new GFitsTableLngCol();
+            break;
+        case __TFLOAT:
+            m_columns[i] = new GFitsTableFltCol();
+            break;
         case __TDOUBLE:
             m_columns[i] = new GFitsTableDblCol();
             break;
         default:
-            m_columns[i] = NULL;
-            m_columns[i] = new GFitsTableDblCol();  // TO BE REMOVED LATER AND REPLACED BY THROW !!!
+            throw GException::fits_unknown_coltype(G_OPEN, typecode);
             break;
         }
-        
+
         // Store column definition
-        m_columns[i]->set_name(&(value[1]));
+        m_columns[i]->set_name(strip_whitespace(&(value[1])));
         m_columns[i]->set_colnum(i+1);
         m_columns[i]->set_type(typecode);
         m_columns[i]->set_repeat(repeat);
         m_columns[i]->set_width(width);
         m_columns[i]->set_length(m_rows);
         m_columns[i]->set_fitsfile(fptr);
-            
-        cout << m_columns[i]->name() << " : " 
-             << m_columns[i]->colnum() << " : " 
-             << m_columns[i]->repeat() << " : " 
-             << m_columns[i]->width() << " : " 
-             << m_columns[i]->length() << endl;
-    } 
+
+    } // endfor: looped over all columns
 
     // Return
     return;
@@ -205,10 +216,10 @@ void GFitsBinTable::close(void)
 {
     // Free members
     free_members();
-  
+
     // Initialise members
     init_members();
-    
+
     // Return
     return;
 }
@@ -222,7 +233,7 @@ GFitsTableCol* GFitsBinTable::column(const std::string colname)
 {
     // Initialise pointer
     GFitsTableCol* ptr = NULL;
-    
+
     // If there are columns then search for the specified name
     if (m_columns != NULL) {
         for (int i = 0; i < m_cols; ++i) {
@@ -232,7 +243,7 @@ GFitsTableCol* GFitsBinTable::column(const std::string colname)
             }
         }
     }
-    
+
     // Return column pointer
     return ptr;
 }
@@ -246,12 +257,12 @@ GFitsTableCol* GFitsBinTable::column(const int colnum)
 {
     // Initialise pointer
     GFitsTableCol* ptr = NULL;
-    
+
     // If there are columns then search for the specified name
     if (m_columns != NULL) {
         ptr = m_columns[colnum];
     }
-    
+
     // Return column pointer
     return ptr;
 }
@@ -288,14 +299,14 @@ void GFitsBinTable::copy_members(const GFitsBinTable& table)
     // Copy attributes
     m_rows = table.m_rows;
     m_cols = table.m_cols;
-    
+
     // Copy column definition
     if (table.m_columns != NULL && m_cols > 0) {
         m_columns = new GFitsTableCol*[m_cols];
         for (int i = 0; i < m_cols; ++i)
             m_columns[i] = table.m_columns[i]->clone();
     }
-    
+
     // Return
     return;
 }
@@ -312,10 +323,10 @@ void GFitsBinTable::free_members(void)
         if (m_columns[i] != NULL) delete m_columns[i];
     }
     if (m_columns != NULL) delete [] m_columns;
-    
+
     // Mark memory as freed
     m_columns = NULL;
-    
+
     // Return
     return;
 }

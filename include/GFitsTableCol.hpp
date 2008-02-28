@@ -39,7 +39,6 @@ public:
     virtual double         real(const int& row, const int& col = 0) = 0;
     virtual int            integer(const int& row, const int& col = 0) = 0;
     virtual GFitsTableCol* clone(void) const = 0;
-    virtual std::string*   ptr_string(void) = 0;
     virtual double*        ptr_double(void) = 0;
     virtual float*         ptr_float(void) = 0;
     virtual short*         ptr_short(void) = 0;
@@ -60,7 +59,7 @@ public:
     int         repeat(void);
     int         width(void);
     int         length(void);
-    
+
 protected:
     // Protected data area
     std::string m_name;

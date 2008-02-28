@@ -9,6 +9,7 @@ INCLUDES = -I$(top_srcdir)/include \
 	   -I$(top_srcdir)/src
 
 files = GException.cpp \
+	GTools.cpp \
 	data/GData.cpp \
 	rsp/GResponse.cpp \
 	obs/GObservation.cpp \
@@ -19,6 +20,10 @@ files = GException.cpp \
 	fits/GFitsAsciiTable.cpp \
 	fits/GFitsBinTable.cpp \
 	fits/GFitsTableCol.cpp \
+	fits/GFitsTableStrCol.cpp \
+	fits/GFitsTableShtCol.cpp \
+	fits/GFitsTableLngCol.cpp \
+	fits/GFitsTableFltCol.cpp \
 	fits/GFitsTableDblCol.cpp \
 	fits/GFitsHDU.cpp \
 	fits/GFits.cpp \

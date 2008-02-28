@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   GFitsHDU.cpp  - FITS HDU handling class               *
+ *           GFitsTableLngCol.cpp  - FITS table long column class          *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -14,15 +14,21 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
-#include "GFitsHDU.hpp"
+#include "GFitsTableLngCol.hpp"
 #include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPEN     "GFitsHDU::open(int)"
-#define G_COLUMN   "GFitsHDU::column(std::string)"
-#define G_MOVE2HDU "GFitsHDU::move2hdu(void)"
+#define G_STRING     "GFitsTableLngCol::string(const int&, const int&)"
+#define G_REAL       "GFitsTableLngCol::real(const int&, const int&)"
+#define G_INTEGER    "GFitsTableLngCol::integer(const int&, const int&)"
+#define G_PTR_FLOAT  "GFitsTableLngCol::ptr_float()"
+#define G_PTR_DOUBLE "GFitsTableLngCol::ptr_double()"
+#define G_PTR_SHORT  "GFitsTableLngCol::ptr_short()"
+#define G_PTR_LONG   "GFitsTableLngCol::ptr_long()"
+#define G_PTR_INT    "GFitsTableLngCol::ptr_int()"
+#define G_LOAD       "GFitsTableLngCol::load()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -31,10 +37,9 @@
 /* __ Debug definitions __________________________________________________ */
 
 
-
 /*==========================================================================
  =                                                                         =
- =                     GFitsHDU constructors/destructors                   =
+ =                  GFitsTableLngCol constructors/destructors              =
  =                                                                         =
  ==========================================================================*/
 
@@ -42,7 +47,7 @@
  *                                Constructor                              *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsHDU::GFitsHDU()
+GFitsTableLngCol::GFitsTableLngCol() : GFitsTableCol()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -56,13 +61,13 @@ GFitsHDU::GFitsHDU()
  *                              Copy constructor                           *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsHDU::GFitsHDU(const GFitsHDU& hdu)
+GFitsTableLngCol::GFitsTableLngCol(const GFitsTableLngCol& column) : GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Copy members
-    copy_members(hdu);
+    copy_members(column);
 
     // Return
     return;
@@ -73,7 +78,7 @@ GFitsHDU::GFitsHDU(const GFitsHDU& hdu)
  *                               Destructor                                *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsHDU::~GFitsHDU()
+GFitsTableLngCol::~GFitsTableLngCol()
 {
     // Free members
     free_members();
@@ -82,9 +87,10 @@ GFitsHDU::~GFitsHDU()
     return;
 }
 
+
 /*==========================================================================
  =                                                                         =
- =                           GFitsHDU operators                            =
+ =                       GFitsTableLngCol operators                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -92,10 +98,13 @@ GFitsHDU::~GFitsHDU()
  *                            Assignment operator                          *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsHDU& GFitsHDU::operator= (const GFitsHDU& hdu)
+GFitsTableLngCol& GFitsTableLngCol::operator= (const GFitsTableLngCol& column)
 {
     // Execute only if object is not identical
-    if (this != &hdu) {
+    if (this != &column) {
+
+        // Copy base class members
+        this->GFitsTableCol::operator=(column);
 
         // Free members
         free_members();
@@ -104,7 +113,7 @@ GFitsHDU& GFitsHDU::operator= (const GFitsHDU& hdu)
         init_members();
 
         // Copy members
-        copy_members(hdu);
+        copy_members(column);
 
     } // endif: object was not identical
 
@@ -115,120 +124,158 @@ GFitsHDU& GFitsHDU::operator= (const GFitsHDU& hdu)
 
 /*==========================================================================
  =                                                                         =
- =                          GFitsHDU public methods                        =
+ =                      GFitsTableLngCol public methods                    =
  =                                                                         =
  ==========================================================================*/
 
 /***************************************************************************
- *                                 Open HDU                                *
+ *                             Get string value                            *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsHDU::open(__fitsfile* fptr, int hdunum)
+std::string GFitsTableLngCol::string(const int& row, const int& col)
 {
-    // Store information
-    m_fitsfile = fptr;
-    m_num      = hdunum;
+    // Make sure that data are loaded
+    if (m_data == NULL)
+        load();
 
-    // Move to HDU
-    move2hdu();
+    // Check row value
+    if (row < 0 || row >= m_length)
+        throw GException::out_of_range(G_STRING, row, 0, m_length-1);
 
-    // Get HDU type
-    int status = 0;
-    status     = __ffghdt(m_fitsfile, &m_type, &status);
-    if (status != 0)
-        throw GException::fits_error(G_OPEN, status);
+    // Check col value
+    if (col < 0 || col >= m_repeat)
+        throw GException::out_of_range(G_STRING, col, 0, m_repeat-1);
 
-    // Allocate and open HDU header
-    if (m_header != NULL) delete m_header;
-    m_header = new GFitsHeader();
-    m_header->open(m_fitsfile);
+    // Get index
+    int inx = row * m_repeat + col;
 
-    // Open HDU data area
-    if (m_data != NULL) delete m_data;
-    switch (m_type) {
-    case 0:        // Image HDU
-        m_data = new GFitsImage();
-        break;
-    case 1:        // ASCII Table HDU
-        m_data = new GFitsAsciiTable();
-        break;
-    case 2:        // Binary Table HDU
-        m_data = new GFitsBinTable();
-        break;
-    default:
-        throw GException::fits_unknown_HDU_type(G_OPEN, m_type);
-        break;
-    }
-    m_data->open(m_fitsfile);
+    // Convert long into string
+    ostringstream s_value;
+    s_value << m_data[inx];
 
-    // Get HDU name from header
-    m_name = m_header->string("EXTNAME");
-    if (m_name.length() == 0) {
-        if (hdunum == 1)
-            m_name = "Primary";
-        else
-            m_name = "NoName";
-    }
-
-    //cout << "HDU #" << hdunum << ": " << m_type << " : " << m_name << endl;
-
-    // Return
-    return;
+    // Return value
+    return s_value.str();
 }
 
 
 /***************************************************************************
- *                           Save HDU to FITS file                         *
+ *                              Get real value                             *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsHDU::save(void)
+double GFitsTableLngCol::real(const int& row, const int& col)
 {
-    // Move to HDU
-    move2hdu();
+    // Make sure that data are loaded
+    if (m_data == NULL)
+        load();
 
-    // Save header
-    //...
+    // Check row value
+    if (row < 0 || row >= m_length)
+        throw GException::out_of_range(G_REAL, row, 0, m_length-1);
 
-    // Save data
-    //...
+    // Check col value
+    if (col < 0 || col >= m_repeat)
+        throw GException::out_of_range(G_REAL, col, 0, m_repeat-1);
+
+    // Get index
+    int inx = row * m_repeat + col;
+
+    // Convert long into double
+    double value = (double)m_data[inx];
+
+    // Return value
+    return value;
+}
+
+
+/***************************************************************************
+ *                               Get int value                             *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+int GFitsTableLngCol::integer(const int& row, const int& col)
+{
+    // Make sure that data are loaded
+    if (m_data == NULL)
+        load();
+
+    // Check row value
+    if (row < 0 || row >= m_length)
+        throw GException::out_of_range(G_INTEGER, row, 0, m_length-1);
+
+    // Check col value
+    if (col < 0 || col >= m_repeat)
+        throw GException::out_of_range(G_INTEGER, col, 0, m_repeat-1);
+
+    // Get index
+    int inx = row * m_repeat + col;
+
+    // Convert long into int
+    int value = (int)m_data[inx];
+
+    // Return value
+    return value;
+}
+
+
+/***************************************************************************
+ *                      Access to invalid data pointers                    *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+float* GFitsTableLngCol::ptr_float(void)
+{
+    throw GException::fits_invalid_type(G_PTR_FLOAT,
+                               "No <float> pointer allowed to <long> array");
+}
+double* GFitsTableLngCol::ptr_double(void)
+{
+    throw GException::fits_invalid_type(G_PTR_DOUBLE,
+                              "No <double> pointer allowed to <long> array");
+}
+short* GFitsTableLngCol::ptr_short(void)
+{
+    throw GException::fits_invalid_type(G_PTR_SHORT,
+                               "No <short> pointer allowed to <long> array");
+}
+int* GFitsTableLngCol::ptr_int(void)
+{
+    throw GException::fits_invalid_type(G_PTR_INT,
+                                 "No <int> pointer allowed to <long> array");
+}
+
+
+/***************************************************************************
+ *                              Set NULL string                            *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+void GFitsTableLngCol::set_nullval(const long* value)
+{
+    // If NULL value is empty then reset the NULL value
+    if (value == NULL) {
+        if (m_nulval != NULL) delete m_nulval;
+        m_nulval = NULL;
+    }
+
+    // ... otherwise copy value into NULL value
+    else {
+        if (m_nulval != NULL) delete m_nulval;
+        m_nulval  = new long;
+        *m_nulval = *value;
+    }
+
+    // Re-load column 
+    // NOTE: THIS WILL LEAD TO A LOSS OF MODIFICATIONS; ISSUE SAVE BEFORE !!!
+    if (m_data != NULL) {
+        //save();
+        load();
+    }
 
     // Return
     return;
-}
-
-/***************************************************************************
- *                     Return pointer to column of table                   *
- * ----------------------------------------------------------------------- *
- ***************************************************************************/
-GFitsTableCol* GFitsHDU::column(const std::string colname) const
-{
-    // Initialise pointer
-    GFitsTableCol* ptr = NULL;
-
-    // Get pointer to table column
-    switch (m_type) {
-    case 0:        // Image HDU
-        throw GException::fits_HDU_not_a_table(G_COLUMN, m_type);
-        break;
-    case 1:        // ASCII Table HDU
-        ptr = ((GFitsAsciiTable*)this->data())->column(colname);
-        break;
-    case 2:        // Binary Table HDU
-        ptr = ((GFitsBinTable*)this->data())->column(colname);
-        break;
-    default:
-        throw GException::fits_unknown_HDU_type(G_COLUMN, m_type);
-        break;
-    }
-
-    // Return pointer
-    return ptr;
 }
 
 
 /*==========================================================================
  =                                                                         =
- =                         GFitsHDU private methods                        =
+ =                      GFitsTableLngCol private methods                   =
  =                                                                         =
  ==========================================================================*/
 
@@ -236,13 +283,13 @@ GFitsTableCol* GFitsHDU::column(const std::string colname) const
  *                         Initialise class members                        *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsHDU::init_members(void)
+void GFitsTableLngCol::init_members(void)
 {
     // Initialise members
-    m_fitsfile = NULL;
-    m_type     = 0;
-    m_header   = NULL;
-    m_data     = NULL;
+    m_size   = 0;
+    m_anynul = 0;
+    m_data   = NULL;
+    m_nulval = NULL;
 
     // Return
     return;
@@ -252,21 +299,26 @@ void GFitsHDU::init_members(void)
 /***************************************************************************
  *                            Copy class members                           *
  * ----------------------------------------------------------------------- *
- * The function does not copy the FITS file pointer. This prevents that    *
- * several copies of the FITS file pointer exist in different instances of *
- * GFitsHDU, which would lead to confusion since one instance could close  *
- * the file while for another it still would be opened.                    *
- * The rule ONE INSTANCE - ONE FILE applies.                               *
  ***************************************************************************/
-void GFitsHDU::copy_members(const GFitsHDU& hdu)
+void GFitsTableLngCol::copy_members(const GFitsTableLngCol& column)
 {
-    // Reset FITS file attributes
-    m_fitsfile = NULL;
+    // Copy attributes
+    m_size   = column.m_size;
+    m_anynul = column.m_anynul;
 
-    // Copy other membres
-    m_type   = hdu.m_type;
-    m_header = hdu.m_header->clone();
-    m_data   = hdu.m_data->clone();
+    // Copy column data
+    if (column.m_data != NULL && m_size > 0) {
+        if (m_data != NULL) delete [] m_data;
+        m_data = new long[m_size];
+        memcpy(m_data, column.m_data, m_size*sizeof(long));
+    }
+
+    // Copy NULL value
+    if (column.m_nulval != NULL) {
+        if (m_nulval != NULL) delete m_nulval;
+        m_nulval  = new long;
+        *m_nulval = *column.m_nulval;
+    }
 
     // Return
     return;
@@ -277,15 +329,15 @@ void GFitsHDU::copy_members(const GFitsHDU& hdu)
  *                           Delete class members                          *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsHDU::free_members(void)
+void GFitsTableLngCol::free_members(void)
 {
     // Free memory
-    if (m_header != NULL) delete m_header;
-    if (m_data   != NULL) delete m_data;
+    if (m_data   != NULL) delete [] m_data;
+    if (m_nulval != NULL) delete m_nulval;
 
-    // Signal free pointers
-    m_header = NULL;
+    // Mark memory as freed
     m_data   = NULL;
+    m_nulval = NULL;
 
     // Return
     return;
@@ -293,16 +345,24 @@ void GFitsHDU::free_members(void)
 
 
 /***************************************************************************
- *                      Move FITS file pointer to HDU                      *
+ *                             Load column data                            *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GFitsHDU::move2hdu(void)
+void GFitsTableLngCol::load(void)
 {
-    // Move FITS file pointer to HDU
+    // Calculate size of memory
+    m_size = m_repeat * m_length;
+
+    // Allocate memory
+    if (m_data != NULL) delete [] m_data;
+    m_data = new long[m_size];
+
+    // Load column data
     int status = 0;
-    status     = __ffmahd(m_fitsfile, m_num, NULL, &status);
+    status     = __ffgcv(m_fitsfile, __TLONG, m_colnum, 1, 1, m_size,
+                         m_nulval, m_data, &m_anynul, &status);
     if (status != 0)
-        throw GException::fits_error(G_MOVE2HDU, status);
+        throw GException::fits_error(G_LOAD, status);
 
     // Return
     return;
@@ -311,13 +371,13 @@ void GFitsHDU::move2hdu(void)
 
 /*==========================================================================
  =                                                                         =
- =                             GFitsHDU friends                            =
+ =                          GFitsTableShtCol friends                       =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                     Other functions used by GFitsHDU                    =
+ =                  Other functions used by GFitsTableShtCol               =
  =                                                                         =
  ==========================================================================*/

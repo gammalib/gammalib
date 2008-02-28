@@ -93,16 +93,16 @@ GFitsData& GFitsData::operator= (const GFitsData& data)
 {
     // Execute only if object is not identical
     if (this != &data) {
-  
+
         // Free members
         free_members();
-  
+
         // Initialise private members for clean destruction
         init_members();
 
         // Copy members
         copy_members(data);
-	
+
     } // endif: object was not identical
 
     // Return this object
@@ -135,10 +135,10 @@ void GFitsData::close(void)
 {
     // Free members
     free_members();
-  
+
     // Initialise members
     init_members();
-    
+
     // Return
     return;
 }
@@ -170,9 +170,9 @@ void GFitsData::init_members(void)
 void GFitsData::copy_members(const GFitsData& data)
 {
     // Copy attributes
-    
+
     // Copy data
-    
+
     // Return
     return;
 }
@@ -185,7 +185,7 @@ void GFitsData::copy_members(const GFitsData& data)
 void GFitsData::free_members(void)
 {
     // Free memory
-    
+
     // Return
     return;
 }

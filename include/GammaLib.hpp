@@ -36,6 +36,10 @@
 #include "GFitsAsciiTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableCol.hpp"
+#include "GFitsTableStrCol.hpp"
+#include "GFitsTableShtCol.hpp"
+#include "GFitsTableLngCol.hpp"
+#include "GFitsTableFltCol.hpp"
 #include "GFitsTableDblCol.hpp"
 
 #include "GVector.hpp"

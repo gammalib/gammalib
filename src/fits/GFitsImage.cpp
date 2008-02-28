@@ -97,16 +97,16 @@ GFitsImage& GFitsImage::operator= (const GFitsImage& image)
 
         // Copy base class members
         this->GFitsData::operator=(image);
-  
+
         // Free members
         free_members();
-  
+
         // Initialise private members for clean destruction
         init_members();
 
         // Copy members
         copy_members(image);
-	
+
     } // endif: object was not identical
 
     // Return this object
@@ -126,7 +126,6 @@ GFitsImage& GFitsImage::operator= (const GFitsImage& image)
  ***************************************************************************/
 void GFitsImage::open(__fitsfile* fptr)
 {
-    cout << "open image" << endl;
     // Return
     return;
 }
@@ -140,10 +139,10 @@ void GFitsImage::close(void)
 {
     // Free members
     free_members();
-  
+
     // Initialise members
     init_members();
-    
+
     // Return
     return;
 }
@@ -175,9 +174,9 @@ void GFitsImage::init_members(void)
 void GFitsImage::copy_members(const GFitsImage& image)
 {
     // Copy attributes
-    
+
     // Copy data
-    
+
     // Return
     return;
 }
@@ -190,7 +189,7 @@ void GFitsImage::copy_members(const GFitsImage& image)
 void GFitsImage::free_members(void)
 {
     // Free memory
-    
+
     // Return
     return;
 }

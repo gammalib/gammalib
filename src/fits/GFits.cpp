@@ -97,16 +97,16 @@ GFits& GFits::operator= (const GFits& fits)
 {
     // Execute only if object is not identical
     if (this != &fits) {
-  
+
         // Free members
         free_members();
-  
+
         // Initialise private members for clean destruction
         init_members();
 
         // Copy members
         copy_members(fits);
-	
+
     } // endif: object was not identical
 
     // Return this object
@@ -129,7 +129,7 @@ void GFits::open(const std::string filename)
     // Don't allow opening if another file is already open
     if (m_fitsfile != NULL)
         throw GException::fits_already_opened(G_OPEN, m_filename);
-    
+
     // Open FITS file
     int status = 0;
     status     = __ffopen(&m_fitsfile, filename.c_str(), 1, &status);
@@ -138,12 +138,12 @@ void GFits::open(const std::string filename)
 
     // Store FITS file attributes
     m_filename = filename;
-    
+
     // Determine number of HDUs
     status = __ffthdu(m_fitsfile, &m_num_hdu, &status);
     if (status != 0)
         throw GException::fits_error(G_OPEN, status);
-    
+
     // Allocate HDUs
     if (m_hdu != NULL) delete [] m_hdu;
     m_hdu = new GFitsHDU[m_num_hdu];
@@ -151,7 +151,7 @@ void GFits::open(const std::string filename)
     // Open all HDUs
     for (int i = 0; i < m_num_hdu; ++i)
         m_hdu[i].open(m_fitsfile, i+1);
-    
+
     // Return
     return;
 }
@@ -166,7 +166,7 @@ void GFits::save(void)
     // Save all HDUs
     for (int i = 0; i < m_num_hdu; ++i)
         m_hdu[i].save();
-    
+
     // Return
     return;
 }
@@ -182,7 +182,7 @@ void GFits::saveto(const std::string filename, int clobber)
     // carry over the FITS filename and pointer. Those will be automatically
     // reset to the initial values in the new object.
     GFits new_fits = *this;
-    
+
     // Check if specified FITS file exists. If yes, saving will only be
     // allowed if clobber is true ...
     int status = 0;
@@ -195,16 +195,16 @@ void GFits::saveto(const std::string filename, int clobber)
         //delete existing file
         //...
     }
-    
+
     // ... otherwise create a new FITS file now
     else {
         // ...
     }
-    
+
     // Save all HDUs
     for (int i = 0; i < m_num_hdu; ++i)
         new_fits.m_hdu[i].save();
-    
+
     // Return
     return;
 }
@@ -220,10 +220,10 @@ void GFits::close(void)
 {
     // Close file and free all members 
     free_members();
-    
+
     // Initialise members
     init_members();
-    
+
     // Return
     return;
 }
@@ -237,7 +237,7 @@ GFitsHDU* GFits::hdu(std::string extname)
 {
     // Initialise result to NULL pointer
     GFitsHDU* ptr = NULL;
-    
+
     // Search for specified extension
     for (int i = 0; i < m_num_hdu; ++i) {
         if (m_hdu[i].extname() == extname) {
@@ -245,7 +245,7 @@ GFitsHDU* GFits::hdu(std::string extname)
             break;
         }
     }
-    
+
     // Return pointer
     return ptr;
 }
@@ -268,7 +268,7 @@ void GFits::init_members(void)
     m_fitsfile = NULL;
     m_num_hdu  = 0;
     m_hdu      = NULL;
-  
+
     // Return
     return;
 }
@@ -288,7 +288,7 @@ void GFits::copy_members(const GFits& fits)
     // Reset FITS file attributes
     m_filename.clear();
     m_fitsfile = NULL;
-    
+
     // Copy HDUs
     if (fits.m_hdu != NULL && fits.m_num_hdu > 0) {
         m_num_hdu = fits.m_num_hdu;
@@ -296,7 +296,7 @@ void GFits::copy_members(const GFits& fits)
         for (int i = 0; i < fits.m_num_hdu; ++i)
             m_hdu[i] = fits.m_hdu[i];
     }
-    
+
     // Return
     return;
 }
@@ -315,13 +315,13 @@ void GFits::free_members(void)
         if (status != 0)
             throw GException::fits_error(G_FREE_MEM, status);
     }
-    
+
     // Free memory
     if (m_hdu != NULL) delete [] m_hdu;
 
     // Properly mark as free
     m_hdu = NULL;
-    
+
     // Return
     return;
 }

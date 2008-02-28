@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GFitsTableDblCol.hpp  - FITS table double column class         *
+ *          GFitsTableStrCol.hpp  - FITS table string column class         *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -11,8 +11,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef GFITSTABLEDBLCOL_HPP
-#define GFITSTABLEDBLCOL_HPP
+#ifndef GFITSTABLESTRCOL_HPP
+#define GFITSTABLESTRCOL_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GFitsCfitsio.hpp"
@@ -25,54 +25,54 @@
 
 
 /***************************************************************************
- *                    GFitsTableDblCol class definition                    *
+ *                    GFitsTableStrCol class definition                    *
  ***************************************************************************/
-class GFitsTableDblCol : public GFitsTableCol {
+class GFitsTableStrCol : public GFitsTableCol {
 
 public:
     // Constructors and destructors
-    GFitsTableDblCol();
-    GFitsTableDblCol(const GFitsTableDblCol& column);
-    virtual ~GFitsTableDblCol();
+    GFitsTableStrCol();
+    GFitsTableStrCol(const GFitsTableStrCol& column);
+    ~GFitsTableStrCol();
 
     // Operators
-    GFitsTableDblCol& operator= (const GFitsTableDblCol& column);
+    GFitsTableStrCol& operator= (const GFitsTableStrCol& column);
 
     // Methods
     std::string       string(const int& row, const int& col = 0);
     double            real(const int& row, const int& col = 0);
     int               integer(const int& row, const int& col = 0);
-    GFitsTableDblCol* clone(void) const;
-    double*           ptr_double(void);
+    GFitsTableStrCol* clone(void) const;
     float*            ptr_float(void);
+    double*           ptr_double(void);
     short*            ptr_short(void);
     long*             ptr_long(void);
     int*              ptr_int(void);
-    void              set_nullval(const double* value);
+    void              set_nullstr(const std::string string);
 
 private:
     // Private methods
     void init_members(void);
-    void copy_members(const GFitsTableDblCol& column);
+    void copy_members(const GFitsTableStrCol& column);
     void free_members(void);
     void load(void);
 
     // Private data area
-    int     m_size;          // Size of data area
-    double* m_data;          // Data area
-    double* m_nulval;        // NULL value
-    int     m_anynul;        // Number of NULLs encountered
+    int    m_size;       // Total number of strings
+    int    m_num_subs;   // Number of substrings
+    char** m_data;       // Data area
+    char*  m_nulstr;     // NULL string
+    int    m_anynul;     // Number of NULLs encountered
 };
 
 
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
-inline double* GFitsTableDblCol::ptr_double(void) { return m_data; }
-inline 
-GFitsTableDblCol* GFitsTableDblCol::clone(void) const 
+inline
+GFitsTableStrCol* GFitsTableStrCol::clone(void) const
 {
-    return new GFitsTableDblCol(*this);
+    return new GFitsTableStrCol(*this);
 }
 
-#endif /* GFITSTABLEDBLCOL_HPP */
+#endif /* GFITSTABLESTRCOL_HPP */
