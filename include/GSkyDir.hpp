@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GFitsData.hpp  - FITS data handling abstract base class         *
+ *          GSkyDir.hpp  -  Class that implements a sky direction          *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -10,42 +10,68 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GSkyDir.hpp
+ * @brief GSkyDir class definition.
+ * @author J. Knodlseder
+ */
 
-#ifndef GFITSDATA_HPP
-#define GFITSDATA_HPP
+#ifndef GSKYDIR_HPP
+#define GSKYDIR_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsCfitsio.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
 
 /***************************************************************************
- *                        GFitsData class definition                       *
+ *                           GSkyDir class definition                      *
  ***************************************************************************/
-class GFitsData {
+/**
+ * @class GSkyDir
+ *
+ * @brief Interface for the sky direction classes.
+ *
+ * @author J. Knodlseder
+ */
+class GSkyDir {
 
 public:
-    // Constructors and destructors
-    GFitsData();
-    GFitsData(const GFitsData& data);
-    virtual ~GFitsData();
+    /// Constructor
+    GSkyDir();
 
-    // Operators
-    virtual GFitsData& operator= (const GFitsData& data);
+    /// Copy constructor
+    GSkyDir(const GSkyDir& dir);
 
-    // Methods
-    virtual void       open(__fitsfile*  fptr) = 0;
-    virtual void       close(void) = 0;
-    virtual GFitsData* clone(void) const = 0;
+    /// Destructor
+    virtual ~GSkyDir();
+
+    /// Assignment operator
+    GSkyDir& operator= (const GSkyDir& dir);
 
 protected:
-    // Protected methods
+    /// Longitude
+    double m_lon;
+
+    /// Latitude
+    double m_lat;
+
+    /// Protected method that initialises protected members of the class
     void init_members(void);
-    void copy_members(const GFitsData& data);
+
+    /// Protected method that copies protected members of the class
+    void copy_members(const GSkyDir& dir);
+
+    /// Protected method that frees memory allocated by instances of the class
     void free_members(void);
 
-    // Protected data area
+private:
+
 };
 
-#endif /* GFITSDATA_HPP */
+
+/***************************************************************************
+ *                              Inline methods                             *
+ ***************************************************************************/
+
+#endif /* GSKYDIR_HPP */

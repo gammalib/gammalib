@@ -205,6 +205,19 @@ void test_columns(void)
         std::cout << e.what() << std::endl;
         throw;
     }
+    try {
+        GFitsTableFltCol flt = *((GFitsTableFltCol*)fits.hdu("BinTable2")->column("TFLOAT3"));
+        if (!fequal(flt.real(0,0),0.0)) {
+          cout << endl << "TEST ERROR: Bad TFLOAT (3) values read (" 
+               << flt.real(0,0) << " != 0.0)." << endl;
+          throw;
+        }
+    }
+    catch (exception &e) {
+        std::cout << std::endl << "TEST ERROR: Unable to handle single TFLOAT column." << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
     std::cout << ". ok." << std::endl;
 
     //

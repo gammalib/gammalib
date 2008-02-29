@@ -1,8 +1,10 @@
 # Define package included headers (to be installed)
 pkginclude_HEADERS = GammaLib.hpp \
 		     GException.hpp \
+		     GSkyDir.hpp \
 		     GData.hpp \
 		     GResponse.hpp \
+		     GLATResponse.hpp \
 		     GObservation.hpp \
 		     GFitsHeaderCard.hpp \
 		     GFitsHeader.hpp \

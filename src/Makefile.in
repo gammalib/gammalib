@@ -59,14 +59,14 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libgamma_la_LIBADD =
-am__objects_1 = GException.lo GTools.lo GData.lo GResponse.lo \
-	GObservation.lo GFitsHeaderCard.lo GFitsHeader.lo GFitsData.lo \
-	GFitsImage.lo GFitsAsciiTable.lo GFitsBinTable.lo \
-	GFitsTableCol.lo GFitsTableStrCol.lo GFitsTableShtCol.lo \
-	GFitsTableLngCol.lo GFitsTableFltCol.lo GFitsTableDblCol.lo \
-	GFitsHDU.lo GFits.lo GFitPar.lo GVector.lo GMatrixBase.lo \
-	GMatrix.lo GSymMatrix.lo GSparseMatrix.lo GSparseSymbolic.lo \
-	GSparseNumeric.lo
+am__objects_1 = GException.lo GTools.lo GSkyDir.lo GData.lo \
+	GResponse.lo GLATResponse.lo GObservation.lo \
+	GFitsHeaderCard.lo GFitsHeader.lo GFitsData.lo GFitsImage.lo \
+	GFitsAsciiTable.lo GFitsBinTable.lo GFitsTableCol.lo \
+	GFitsTableStrCol.lo GFitsTableShtCol.lo GFitsTableLngCol.lo \
+	GFitsTableFltCol.lo GFitsTableDblCol.lo GFitsHDU.lo GFits.lo \
+	GFitPar.lo GVector.lo GMatrixBase.lo GMatrix.lo GSymMatrix.lo \
+	GSparseMatrix.lo GSparseSymbolic.lo GSparseNumeric.lo
 am_libgamma_la_OBJECTS = $(am__objects_1)
 libgamma_la_OBJECTS = $(am_libgamma_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -204,8 +204,10 @@ INCLUDES = -I$(top_srcdir)/include \
 
 files = GException.cpp \
 	GTools.cpp \
+	GSkyDir.cpp \
 	data/GData.cpp \
 	rsp/GResponse.cpp \
+	rsp/GLATResponse.cpp \
 	obs/GObservation.cpp \
 	fits/GFitsHeaderCard.cpp \
 	fits/GFitsHeader.cpp \
@@ -318,6 +320,9 @@ GData.lo: data/GData.cpp
 
 GResponse.lo: rsp/GResponse.cpp
 	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GResponse.lo `test -f 'rsp/GResponse.cpp' || echo '$(srcdir)/'`rsp/GResponse.cpp
+
+GLATResponse.lo: rsp/GLATResponse.cpp
+	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponse.lo `test -f 'rsp/GLATResponse.cpp' || echo '$(srcdir)/'`rsp/GLATResponse.cpp
 
 GObservation.lo: obs/GObservation.cpp
 	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GObservation.lo `test -f 'obs/GObservation.cpp' || echo '$(srcdir)/'`obs/GObservation.cpp

@@ -13,6 +13,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "test_GResponse.hpp"
+#include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -20,20 +21,25 @@
 
 
 /***************************************************************************
- *                              Test: Open                                 *
+ *                          Test: LAT Response                             *
  ***************************************************************************/
-void test_open(void)
+void test_lat_response(void)
 {
-    std::cout << "Test GResponse: Open PSF FITS file: ";
+    cout << "Test GLATResponse: Open PSF FITS file: ";
     try {
+        // Get HANDOFF Response
+        GLATResponse rsp;
+        rsp.set_caldb("irf/lat");
+        rsp.load("Pass5_v0_front");
+/*
         // Open FITS file
         GFits fits;
-        fits.open("irf/lat/aeff_Pass5_v0_front.fits");
+        fits.open("irf/lat/aeff_.fits");
 
         // Get pointer towards effective area HDU
         GFitsHDU* aeff = fits.hdu("EFFECTIVE AREA");
         if (aeff == NULL) {
-            std::cout << std::endl << "TEST ERROR: Unable to find HDU <EFFECTIVE AREA>." << std::endl;
+            cout << endl << "TEST ERROR: Unable to find HDU <EFFECTIVE AREA>." << endl;
             throw;
         }
 
@@ -43,14 +49,14 @@ void test_open(void)
         GFitsTableFltCol ctheta_lo = *((GFitsTableFltCol*)aeff->column("CTHETA_LO"));
         GFitsTableFltCol ctheta_hi = *((GFitsTableFltCol*)aeff->column("CTHETA_HI"));
         GFitsTableFltCol effarea   = *((GFitsTableFltCol*)aeff->column("EFFAREA"));
-
+*/
     }
     catch (exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to open FITS file." << std::endl;
-        std::cout << e.what() << std::endl;
+        cout << endl << "TEST ERROR: Unable to open FITS file." << endl;
+        cout << e.what() << endl;
         throw;
     }
-    std::cout << ". ok." << std::endl;
+    cout << ". ok." << endl;
 }
 
 
@@ -60,13 +66,13 @@ void test_open(void)
 int main(void)
 {
     // Dump header
-    std::cout << std::endl;
-    std::cout << "***************************" << std::endl;
-    std::cout << "* GResponse class testing *" << std::endl;
-    std::cout << "**************************" << std::endl;
+    cout << std::endl;
+    cout << "***************************" << endl;
+    cout << "* GResponse class testing *" << endl;
+    cout << "**************************" << endl;
 
     // Execute the tests
-    test_open();
+    test_lat_response();
 
     // Return
     return 0;

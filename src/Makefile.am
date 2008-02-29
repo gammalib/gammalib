@@ -10,8 +10,10 @@ INCLUDES = -I$(top_srcdir)/include \
 
 files = GException.cpp \
 	GTools.cpp \
+	GSkyDir.cpp \
 	data/GData.cpp \
 	rsp/GResponse.cpp \
+	rsp/GLATResponse.cpp \
 	obs/GObservation.cpp \
 	fits/GFitsHeaderCard.cpp \
 	fits/GFitsHeader.cpp \

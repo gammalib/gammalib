@@ -42,7 +42,7 @@ public:
     GFitsAsciiTable* clone(void) const;
     GFitsTableCol*   column(const std::string colname);
     GFitsTableCol*   column(const int colnum);
-    
+
 private:
     // Private methods
     void init_members(void);

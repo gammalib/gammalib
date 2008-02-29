@@ -24,6 +24,7 @@
 #include "GObservation.hpp"
 
 #include "GResponse.hpp"
+#include "GLATResponse.hpp"
 
 #include "GData.hpp"
 
