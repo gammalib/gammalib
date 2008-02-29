@@ -264,6 +264,23 @@ void GFitsAsciiTable::free_members(void)
  =                                                                         =
  ==========================================================================*/
 
+/***************************************************************************
+ *                             Output operator                             *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+ostream& operator<< (ostream& os, const GFitsAsciiTable& table)
+{
+    // Put header in stream
+    os << "=== GFitsAsciiTable ===" << endl;
+    os << " Number of rows ............: " << table.m_rows << endl;
+    os << " Number of columns .........: " << table.m_cols << endl;
+    for (int i = 0; i < table.m_cols; ++i)
+        os << i;
+
+    // Return output stream
+    return os;
+}
+
 
 /*==========================================================================
  =                                                                         =

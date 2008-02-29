@@ -25,6 +25,9 @@
  ***************************************************************************/
 class GFitsTableCol {
 
+    // I/O friends
+    friend ostream& operator<< (ostream& os, const GFitsTableCol& column);
+
 public:
     // Constructors and destructors
     GFitsTableCol();

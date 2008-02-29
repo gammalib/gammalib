@@ -31,6 +31,9 @@
  ***************************************************************************/
 class GFitsBinTable : public GFitsData {
 
+    // I/O friends
+    friend ostream& operator<< (ostream& os, const GFitsBinTable& table);
+
 public:
     // Constructors and destructors
     GFitsBinTable();

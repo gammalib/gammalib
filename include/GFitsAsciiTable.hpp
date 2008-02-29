@@ -27,6 +27,9 @@
  ***************************************************************************/
 class GFitsAsciiTable : public GFitsData {
 
+    // I/O friends
+    friend ostream& operator<< (ostream& os, const GFitsAsciiTable& table);
+
 public:
     // Constructors and destructors
     GFitsAsciiTable();

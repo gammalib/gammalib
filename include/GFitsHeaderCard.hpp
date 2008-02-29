@@ -24,6 +24,10 @@
  *                     GFitsHeaderCard class definition                    *
  ***************************************************************************/
 class GFitsHeaderCard {
+
+    // I/O friends
+    friend ostream& operator<< (ostream& os, const GFitsHeaderCard& card);
+
 public:
     // Constructors & Destructors
     GFitsHeaderCard();

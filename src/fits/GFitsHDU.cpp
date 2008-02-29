@@ -317,6 +317,51 @@ void GFitsHDU::move2hdu(void)
  =                                                                         =
  ==========================================================================*/
 
+/***************************************************************************
+ *                             Output operator                             *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+ostream& operator<< (ostream& os, const GFitsHDU& hdu)
+{
+    // Put header in stream
+    os << "=== GFitsHDU ===" << endl;
+    os << " HDU number ................: " << hdu.m_num << endl;
+    os << " HDU name ..................: " << hdu.m_name << endl;
+    os << " HDU type ..................: ";
+    switch (hdu.m_type) {
+    case 0:        // Image HDU
+        os << "Image" << endl;
+        break;
+    case 1:        // ASCII Table HDU
+        os << "ASCII table" << endl;
+        break;
+    case 2:        // Binary Table HDU
+        os << "Binary table" << endl;
+        break;
+    default:
+        os << "Unknown" << endl;
+        break;
+    }
+    os << *hdu.m_header;
+    switch (hdu.m_type) {
+    case 0:        // Image HDU
+        os << "Image";
+        break;
+    case 1:        // ASCII Table HDU
+        os << *(GFitsAsciiTable*)hdu.m_data;
+        break;
+    case 2:        // Binary Table HDU
+        os << *(GFitsBinTable*)hdu.m_data;
+        break;
+    default:
+        os << "Unknown";
+        break;
+    }
+
+    // Return output stream
+    return os;
+}
+
 
 /*==========================================================================
  =                                                                         =

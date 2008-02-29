@@ -26,7 +26,9 @@
  ***************************************************************************/
 class GFitsHeader {
 
-// Public methods
+    // I/O friends
+    friend ostream& operator<< (ostream& os, const GFitsHeader& header);
+
 public:
     // Constructors and destructors
     GFitsHeader();

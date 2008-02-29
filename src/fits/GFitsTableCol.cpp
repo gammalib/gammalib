@@ -184,6 +184,24 @@ void GFitsTableCol::free_members(void)
  =                                                                         =
  ==========================================================================*/
 
+/***************************************************************************
+ *                             Output operator                             *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+ostream& operator<< (ostream& os, const GFitsTableCol& column)
+{
+    // Put header in stream
+    os << "'" << column.m_name << "' [colnum=";
+    os << column.m_colnum << "] ";
+    os << column.m_type << " repeat=";
+    os << column.m_repeat << " width=";
+    os << column.m_width << " length=";
+    os << column.m_length << endl;
+
+    // Return output stream
+    return os;
+}
+
 
 /*==========================================================================
  =                                                                         =

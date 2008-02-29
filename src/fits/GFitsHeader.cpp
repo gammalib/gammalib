@@ -352,6 +352,22 @@ GFitsHeaderCard* GFitsHeader::card_ptr(const std::string keyname)
  =                                                                         =
  ==========================================================================*/
 
+/***************************************************************************
+ *                             Output operator                             *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+ostream& operator<< (ostream& os, const GFitsHeader& header)
+{
+    // Put header in stream
+    os << "=== GFitsHeader ===" << endl;
+    os << " Number of cards ...........: " << header.m_num_cards << endl;
+    for (int i = 0; i < header.m_num_cards; ++i)
+        os << " " << header.m_card[i];
+
+    // Return output stream
+    return os;
+}
+
 
 /*==========================================================================
  =                                                                         =

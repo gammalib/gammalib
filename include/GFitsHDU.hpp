@@ -29,7 +29,9 @@
  ***************************************************************************/
 class GFitsHDU {
 
-// Public methods
+    // I/O friends
+    friend ostream& operator<< (ostream& os, const GFitsHDU& hdu);
+
 public:
     // Constructors and destructors
     GFitsHDU();

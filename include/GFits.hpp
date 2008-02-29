@@ -27,6 +27,9 @@
  ***************************************************************************/
 class GFits {
 
+    // I/O friends
+    friend ostream& operator<< (ostream& os, const GFits& fits);
+
 public:
     // Constructors and destructors
     GFits();

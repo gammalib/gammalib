@@ -407,3 +407,27 @@ int GFitsHeaderCard::get_value_type(void)
     else
         return CT_INVALID;
 }
+
+
+/*==========================================================================
+ =                                                                         =
+ =                         GFitsHeaderCard friends                         =
+ =                                                                         =
+ ==========================================================================*/
+
+/***************************************************************************
+ *                             Output operator                             *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+ostream& operator<< (ostream& os, const GFitsHeaderCard& card)
+{
+    // Put header card in stream
+    os << card.m_keyname << " = ";
+    os << card.m_value << " ";
+    os << card.m_unit << " ";
+    os << card.m_comment << " ";
+    os << card.m_value_type << endl; 
+
+    // Return output stream
+    return os;
+}
