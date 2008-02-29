@@ -13,8 +13,7 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
-//#include <vector>
-#include <iostream>                           // cout, cerr
+#include <iostream>
 #include "GException.hpp"
 #include "GVector.hpp"
 #include "GLATResponse.hpp"
@@ -24,6 +23,10 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
+#define G_INIT_AEFF       "GLATResponse::init_aeff()"
+#define G_INIT_PSF        "GLATResponse::init_psf()"
+#define G_INIT_EDISP      "GLATResponse::init_edisp()"
+#define G_GET_FITS_VECTOR "GLATResponse::get_fits_vector(const GFitsHDU*, const std::string&, int)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -252,26 +255,17 @@ void GLATResponse::init_aeff(void)
     GFits file;
     file.open(m_caldb + "/" + filename);
 
-    // Get pointer towards effective area HDU
+    // Get pointer to effective area HDU
     GFitsHDU* hdu = file.hdu("EFFECTIVE AREA");
-    if (hdu == NULL) {
-        cout << endl << "TEST ERROR: Unable to find HDU <EFFECTIVE AREA>." << endl;
-        throw;
-    }
+    if (hdu == NULL)
+        throw GException::fits_hdu_not_found(G_INIT_AEFF, "EFFECTIVE AREA");
 
-    // Get pointers to data columns
-    GFitsTableFltCol* energ_lo  = (GFitsTableFltCol*)hdu->column("ENERG_LO");
-    GFitsTableFltCol* energ_hi  = (GFitsTableFltCol*)hdu->column("ENERG_HI");
-    GFitsTableFltCol* ctheta_lo = (GFitsTableFltCol*)hdu->column("CTHETA_LO");
-    GFitsTableFltCol* ctheta_hi = (GFitsTableFltCol*)hdu->column("CTHETA_HI");
-    GFitsTableFltCol* effarea   = (GFitsTableFltCol*)hdu->column("EFFAREA");
-    if (energ_lo  == NULL || energ_hi  == NULL ||
-        ctheta_lo == NULL || ctheta_hi == NULL || effarea == NULL) {
-        cout << endl << "TEST ERROR: Unable to get <EFFECTIVE AREA> columns." << endl;
-        throw;
-    }
-
-    // ...
+    // Get the data
+    GVector energ_lo  = get_fits_vector(hdu, "ENERG_LO");
+    GVector energ_hi  = get_fits_vector(hdu, "ENERG_HI");
+    GVector ctheta_lo = get_fits_vector(hdu, "CTHETA_LO");
+    GVector ctheta_hi = get_fits_vector(hdu, "CTHETA_HI");
+    GVector effarea   = get_fits_vector(hdu, "EFFAREA");
 
     // Return
     return;
@@ -291,25 +285,20 @@ void GLATResponse::init_psf(void)
     GFits file;
     file.open(m_caldb + "/" + filename);
 
-    // Get pointer towards PSF HDU
+    // Get pointer to PSF HDU
     GFitsHDU* hdu = file.hdu("RPSF");
-    if (hdu == NULL) {
-        cout << endl << "TEST ERROR: Unable to find HDU <RPSF>." << endl;
-        throw;
-    }
+    if (hdu == NULL)
+        throw GException::fits_hdu_not_found(G_INIT_PSF, "RPSF");
 
-    // Get data
-    GVector energ_lo  = get_fits_column(hdu, "ENERG_LO");
-/*
-    GVector energ_hi  = get_fits_column(hdu, "ENERG_HI");
-    GVector ctheta_lo = get_fits_column(hdu, "CTHETA_LO");
-    GVector ctheta_hi = get_fits_column(hdu, "CTHETA_HI");
-    GVector ncore     = get_fits_column(hdu, "NCORE");
-    GVector sigma     = get_fits_column(hdu, "SIGMA");
-    GVector gcore     = get_fits_column(hdu, "GCORE");
-    GVector gtail     = get_fits_column(hdu, "GTAIL");
-*/
-    // ...
+    // Get the data
+    GVector energ_lo  = get_fits_vector(hdu, "ENERG_LO");
+    GVector energ_hi  = get_fits_vector(hdu, "ENERG_HI");
+    GVector ctheta_lo = get_fits_vector(hdu, "CTHETA_LO");
+    GVector ctheta_hi = get_fits_vector(hdu, "CTHETA_HI");
+    GVector ncore     = get_fits_vector(hdu, "NCORE");
+    GVector sigma     = get_fits_vector(hdu, "SIGMA");
+    GVector gcore     = get_fits_vector(hdu, "GCORE");
+    GVector gtail     = get_fits_vector(hdu, "GTAIL");
 
     // Return
     return;
@@ -331,29 +320,20 @@ void GLATResponse::init_edisp(void)
 
     // Get pointer towards energy dispersion HDU
     GFitsHDU* hdu = file.hdu("ENERGY DISPERSION");
-    if (hdu == NULL) {
-        cout << endl << "TEST ERROR: Unable to find HDU <ENERGY DISPERSION>." << endl;
-        throw;
-    }
+    if (hdu == NULL)
+        throw GException::fits_hdu_not_found(G_INIT_EDISP, "ENERGY DISPERSION");
 
-    // Get pointers to data columns
-    GFitsTableFltCol* energ_lo  = (GFitsTableFltCol*)hdu->column("ENERG_LO");
-    GFitsTableFltCol* energ_hi  = (GFitsTableFltCol*)hdu->column("ENERG_HI");
-    GFitsTableFltCol* ctheta_lo = (GFitsTableFltCol*)hdu->column("CTHETA_LO");
-    GFitsTableFltCol* ctheta_hi = (GFitsTableFltCol*)hdu->column("CTHETA_HI");
-    GFitsTableFltCol* dnorm     = (GFitsTableFltCol*)hdu->column("DNORM");
-    GFitsTableFltCol* ltail     = (GFitsTableFltCol*)hdu->column("LTAIL");
-    GFitsTableFltCol* rwidth    = (GFitsTableFltCol*)hdu->column("RWIDTH");
-    GFitsTableFltCol* nr2       = (GFitsTableFltCol*)hdu->column("NR2");
-    GFitsTableFltCol* lt2       = (GFitsTableFltCol*)hdu->column("LT2");
-    GFitsTableFltCol* rt2       = (GFitsTableFltCol*)hdu->column("RT2");
-    if (energ_lo  == NULL || energ_hi  == NULL ||
-        ctheta_lo == NULL || ctheta_hi == NULL ||
-        dnorm     == NULL || ltail     == NULL || rwidth == NULL ||
-        nr2       == NULL || lt2       == NULL || rt2    == NULL) {
-        cout << endl << "TEST ERROR: Unable to get <ENERGY DISPERSION> columns." << endl;
-        throw;
-    }
+    // Get the data
+    GVector energ_lo  = get_fits_vector(hdu, "ENERG_LO");
+    GVector energ_hi  = get_fits_vector(hdu, "ENERG_HI");
+    GVector ctheta_lo = get_fits_vector(hdu, "CTHETA_LO");
+    GVector ctheta_hi = get_fits_vector(hdu, "CTHETA_HI");
+    GVector dnorm     = get_fits_vector(hdu, "DNORM");
+    GVector ltail     = get_fits_vector(hdu, "LTAIL");
+    GVector rwidth    = get_fits_vector(hdu, "RWIDTH");
+    GVector nr2       = get_fits_vector(hdu, "NR2");
+    GVector lt2       = get_fits_vector(hdu, "LT2");
+    GVector rt2       = get_fits_vector(hdu, "RT2");
 
     // ...
 
@@ -418,22 +398,24 @@ void GLATResponse::free_members(void)
 
 
 /***************************************************************************
- *              Load floating point data from column into vector           *
+ *          Load floating point data from vector column into vector        *
  * ----------------------------------------------------------------------- *
+ * All information is stored in the first table row using vector columns.  *
  ***************************************************************************/
-GVector GLATResponse::get_fits_column(const GFitsHDU* hdu, const std::string& colname)
+GVector GLATResponse::get_fits_vector(const GFitsHDU* hdu, const std::string& colname, int row)
 {
-    // Get pointer on column
-    GFitsTableFltCol* ptr  = (GFitsTableFltCol*)hdu->column(colname);
+    // Get pointer to
+    GFitsTableCol* ptr = hdu->column(colname);
     if (ptr == NULL)
-        throw;
+        throw GException::fits_column_not_found(G_GET_FITS_VECTOR, colname);
+        
+    // Determine number of entries
+    int num = ptr->repeat();
 
     // Load data into vector
-    int num = ptr->repeat();
     GVector data(num);
     for (int i = 0; i < num; ++i)
-        data(i) = ptr->real(0,i);
-    cout << data << endl;
+        data(i) = ptr->real(row,i);
 
     // Return vector
     return data;

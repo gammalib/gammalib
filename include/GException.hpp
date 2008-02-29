@@ -144,7 +144,19 @@ public:
     // FITS keyword not found error
     class fits_key_not_found : public GExceptionHandler {
     public:
-        fits_key_not_found(string origin, string keyname, int status);
+        fits_key_not_found(string origin, string keyname, int status = 0);
+    };
+
+    // FITS column not found error
+    class fits_column_not_found : public GExceptionHandler {
+    public:
+        fits_column_not_found(string origin, string colname, int status = 0);
+    };
+
+    // FITS HDU not found error
+    class fits_hdu_not_found : public GExceptionHandler {
+    public:
+        fits_hdu_not_found(string origin, string extname, int status = 0);
     };
 
     // FITS unknown HDU type
@@ -153,7 +165,7 @@ public:
         fits_unknown_HDU_type(string origin, int type);
     };
 
-    // FITS unknown HDU type
+    // FITS HDU is not a table
     class fits_HDU_not_a_table : public GExceptionHandler {
     public:
         fits_HDU_not_a_table(string origin, int type);
@@ -165,7 +177,7 @@ public:
         fits_invalid_type(string origin, string message);
     };
 
-    // FITS unable column type
+    // FITS unknown column type
     class fits_unknown_coltype : public GExceptionHandler {
     public:
         fits_unknown_coltype(string origin, int type);

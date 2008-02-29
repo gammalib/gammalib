@@ -258,6 +258,26 @@ GException::fits_key_not_found::fits_key_not_found(string origin, string keyname
 
 
 /***************************************************************************
+ *                         FITS column not found error                     *
+ ***************************************************************************/
+GException::fits_column_not_found::fits_column_not_found(string origin, string colname, int status)
+{
+    m_origin  = origin;
+    m_message = "Column '" + colname + "' not found in table";
+}
+
+
+/***************************************************************************
+ *                           FITS HDU not found error                      *
+ ***************************************************************************/
+GException::fits_hdu_not_found::fits_hdu_not_found(string origin, string extname, int status)
+{
+    m_origin  = origin;
+    m_message = "HDU '" + extname + "' not found in FITS file";
+}
+
+
+/***************************************************************************
  *                          Unknown HDU type found                         *
  ***************************************************************************/
 GException::fits_unknown_HDU_type::fits_unknown_HDU_type(string origin, int type)

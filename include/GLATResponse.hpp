@@ -74,13 +74,13 @@ public:
 
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GLATResponse& rsp);
-    void free_members(void);
-    void init_aeff(void);
-    void init_psf(void);
-    void init_edisp(void);
-    GVector get_fits_column(const GFitsHDU* hdu, const std::string& colname);
+    void    init_members(void);
+    void    copy_members(const GLATResponse& rsp);
+    void    free_members(void);
+    void    init_aeff(void);
+    void    init_psf(void);
+    void    init_edisp(void);
+    GVector get_fits_vector(const GFitsHDU* hdu, const std::string& colname, int row = 0);
 
     // Private data area
 
