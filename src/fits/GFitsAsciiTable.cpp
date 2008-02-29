@@ -13,9 +13,14 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include "GException.hpp"
 #include "GFitsAsciiTable.hpp"
-#include <iostream>                           // cout, cerr
+#include "GFitsTableStrCol.hpp"
+#include "GFitsTableShtCol.hpp"
+#include "GFitsTableLngCol.hpp"
+#include "GFitsTableFltCol.hpp"
+#include "GFitsTableDblCol.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -124,6 +129,7 @@ GFitsAsciiTable& GFitsAsciiTable::operator= (const GFitsAsciiTable& table)
  *                               Open Table                                *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
+/// NOT YET IMPLEMENTED
 void GFitsAsciiTable::open(__fitsfile* fptr)
 {
     cout << "open ASCII table" << endl;
@@ -190,8 +196,6 @@ GFitsTableCol* GFitsAsciiTable::column(const int colnum)
     // Return column pointer
     return ptr;
 }
-
-
 
 
 /*==========================================================================
@@ -275,7 +279,7 @@ ostream& operator<< (ostream& os, const GFitsAsciiTable& table)
     os << " Number of rows ............: " << table.m_rows << endl;
     os << " Number of columns .........: " << table.m_cols << endl;
     for (int i = 0; i < table.m_cols; ++i)
-        os << i;
+        os << " " << *(table.m_columns[i]);
 
     // Return output stream
     return os;

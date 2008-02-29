@@ -13,9 +13,9 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include "GException.hpp"
 #include "GFitsTableCol.hpp"
-#include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -131,12 +131,13 @@ void GFitsTableCol::init_members(void)
 {
     // Initialise members
     m_name.clear();
-    m_colnum   = 0;
-    m_type     = 0;
-    m_repeat   = 0;
-    m_width    = 0;
-    m_length   = 0;
-    m_fitsfile = NULL;
+    m_colnum               = 0;
+    m_type                 = 0;
+    m_repeat               = 0;
+    m_width                = 0;
+    m_length               = 0;
+    m_fitsfile.HDUposition = 0;
+    m_fitsfile.Fptr        = NULL;
 
     // Return
     return;
@@ -191,8 +192,8 @@ void GFitsTableCol::free_members(void)
 ostream& operator<< (ostream& os, const GFitsTableCol& column)
 {
     // Put header in stream
-    os << "'" << column.m_name << "' [colnum=";
-    os << column.m_colnum << "] ";
+    os << "'" << column.m_name << "'";
+    os << " [" << column.m_colnum << "] ";
     os << column.m_type << " repeat=";
     os << column.m_repeat << " width=";
     os << column.m_width << " length=";

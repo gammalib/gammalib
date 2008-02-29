@@ -392,8 +392,9 @@ void GFitsTableStrCol::load(void)
 
         // Load column data
         int status = 0;
-        status     = __ffgcvs(m_fitsfile, m_colnum, 1, 1, m_size,
-                              m_nulstr, m_data, &m_anynul, &status);
+        status = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
+        status = __ffgcvs(&m_fitsfile, m_colnum, 1, 1, m_size, m_nulstr, m_data, 
+                          &m_anynul, &status);
         if (status != 0)
             throw GException::fits_error(G_LOAD, status);
 

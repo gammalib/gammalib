@@ -15,7 +15,7 @@
 #define GFITSBINTABLE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <vector>
+//#include <vector>
 #include "GFitsCfitsio.hpp"
 #include "GFitsData.hpp"
 #include "GFitsTableCol.hpp"
@@ -44,7 +44,7 @@ public:
     GFitsBinTable& operator= (const GFitsBinTable& table);
 
     // Methods
-    void           open(__fitsfile*  fptr);
+    void           open(__fitsfile* fptr);
     void           close(void);
     GFitsBinTable* clone(void) const;
     GFitsTableCol* column(const std::string colname);

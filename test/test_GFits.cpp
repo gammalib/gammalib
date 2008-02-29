@@ -41,6 +41,7 @@ void test_open(void)
     try {
         GFits fits;
         fits.open("test_GFits.fits");
+        cout << endl << fits;
     }
     catch (exception &e) {
         std::cout << std::endl << "TEST ERROR: Unable to open FITS file." << std::endl;
@@ -66,7 +67,6 @@ void test_columns(void)
         std::cout << e.what() << std::endl;
         throw;
     }
-
 
     //
     // Test single string column

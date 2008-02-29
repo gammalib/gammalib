@@ -13,6 +13,7 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsBinTable.hpp"
@@ -21,7 +22,6 @@
 #include "GFitsTableLngCol.hpp"
 #include "GFitsTableFltCol.hpp"
 #include "GFitsTableDblCol.hpp"
-#include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -132,8 +132,13 @@ GFitsBinTable& GFitsBinTable::operator= (const GFitsBinTable& table)
  ***************************************************************************/
 void GFitsBinTable::open(__fitsfile* fptr)
 {
+    // Move to HDU
+    int status = 0;
+    status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_OPEN, status);
+
     // Determine number of rows in table
-    int  status = 0;
     long nrows  = 0;
     status      = __ffgnrw(fptr, &nrows, &status);
     if (status != 0)

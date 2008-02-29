@@ -42,26 +42,24 @@ public:
     GFitsHDU& operator= (const GFitsHDU& hdu);
 
     // Methods
-    void           open(__fitsfile*  fptr, int hdunum);
+    void           open(__fitsfile* fptr, int hdunum);
     void           save(void);
     std::string    extname(void) const;
     int            extno(void) const;
     int            exttype(void) const;
     GFitsHeader*   header(void) const;
     GFitsData*     data(void) const;
-    GFitsTableCol* column(const std::string colname) const;
+    GFitsTableCol* column(const std::string& colname) const;
 
 private:
     // Private methods
     void init_members(void);
     void copy_members(const GFitsHDU& hdu);
     void free_members(void);
-    void move2hdu(void);
 
     // Private data area
-    __fitsfile*  m_fitsfile;    // FITS file pointer
+    __fitsfile   m_fitsfile;    // FITS file pointer
     std::string  m_name;        // HDU name
-    int          m_num;         // HDU number (starting from 1)
     int          m_type;        // HDU type
     GFitsHeader* m_header;      // HDU header
     GFitsData*   m_data;        // HDU data
@@ -72,7 +70,7 @@ private:
  *                              Inline methods                             *
  ***************************************************************************/
 inline std::string  GFitsHDU::extname(void) const { return m_name; }
-inline int          GFitsHDU::extno(void) const { return m_num; }
+inline int          GFitsHDU::extno(void) const { return m_fitsfile.HDUposition; }
 inline int          GFitsHDU::exttype(void) const { return m_type; }
 inline GFitsHeader* GFitsHDU::header(void) const { return m_header; }
 inline GFitsData*   GFitsHDU::data(void) const { return m_data; }

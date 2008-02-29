@@ -13,9 +13,9 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include "GException.hpp"
 #include "GFitsImage.hpp"
-#include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -124,6 +124,7 @@ GFitsImage& GFitsImage::operator= (const GFitsImage& image)
  *                               Open Image                                *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
+/// NOT YET IMPLEMENTED
 void GFitsImage::open(__fitsfile* fptr)
 {
     // Return
@@ -200,6 +201,26 @@ void GFitsImage::free_members(void)
  =                            GFitsImage friends                           =
  =                                                                         =
  ==========================================================================*/
+
+/***************************************************************************
+ *                             Output operator                             *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+/// DUMMY VERSION
+ostream& operator<< (ostream& os, const GFitsImage& image)
+{
+    // Put header in stream
+    os << "=== GFitsImage ===" << endl;
+/*
+    os << " Number of rows ............: " << table.m_rows << endl;
+    os << " Number of columns .........: " << table.m_cols << endl;
+    for (int i = 0; i < table.m_cols; ++i)
+        os << " " << *(table.m_columns[i]);
+*/
+
+    // Return output stream
+    return os;
+}
 
 
 /*==========================================================================

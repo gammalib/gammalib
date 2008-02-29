@@ -26,6 +26,9 @@
  ***************************************************************************/
 class GFitsImage : public GFitsData {
 
+    // I/O friends
+    friend ostream& operator<< (ostream& os, const GFitsImage& image);
+
 public:
     // Constructors and destructors
     GFitsImage();
@@ -36,7 +39,7 @@ public:
     GFitsImage& operator= (const GFitsImage& image);
 
     // Methods
-    void        open(__fitsfile*  fptr);
+    void        open(__fitsfile* fptr);
     void        close(void);
     GFitsImage* clone(void) const;
     

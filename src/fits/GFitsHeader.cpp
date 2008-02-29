@@ -13,9 +13,9 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include "GException.hpp"
 #include "GFitsHeader.hpp"
-#include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -124,9 +124,14 @@ GFitsHeader& GFitsHeader::operator= (const GFitsHeader& header)
  ***************************************************************************/
 void GFitsHeader::open(__fitsfile* fptr)
 {
-    // Determine number of cards in header
+    // Move to HDU
     int status = 0;
-    status     = __ffghsp(fptr, &m_num_cards, NULL, &status);
+    status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_OPEN, status);
+
+    // Determine number of cards in header
+    status = __ffghsp(fptr, &m_num_cards, NULL, &status);
     if (status != 0)
         throw GException::fits_error(G_OPEN, status);
 

@@ -13,17 +13,17 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsHDU.hpp"
-#include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OPEN     "GFitsHDU::open(int)"
-#define G_COLUMN   "GFitsHDU::column(std::string)"
-#define G_MOVE2HDU "GFitsHDU::move2hdu(void)"
+#define G_SAVE     "GFitsHDU::save()"
+#define G_COLUMN   "GFitsHDU::column(const std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -127,23 +127,25 @@ GFitsHDU& GFitsHDU::operator= (const GFitsHDU& hdu)
  ***************************************************************************/
 void GFitsHDU::open(__fitsfile* fptr, int hdunum)
 {
-    // Store information
-    m_fitsfile = fptr;
-    m_num      = hdunum;
-
     // Move to HDU
-    move2hdu();
+    int status = 0;
+    status     = __ffmahd(fptr, hdunum, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_OPEN, status);
+
+    // Store information. 
+    // Note that the HDU number - 1 is stored in m_fitsfile->HDUposition !!!
+    m_fitsfile = *fptr;
 
     // Get HDU type
-    int status = 0;
-    status     = __ffghdt(m_fitsfile, &m_type, &status);
+    status = __ffghdt(&m_fitsfile, &m_type, &status);
     if (status != 0)
         throw GException::fits_error(G_OPEN, status);
 
     // Allocate and open HDU header
     if (m_header != NULL) delete m_header;
     m_header = new GFitsHeader();
-    m_header->open(m_fitsfile);
+    m_header->open(&m_fitsfile);
 
     // Open HDU data area
     if (m_data != NULL) delete m_data;
@@ -161,7 +163,7 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
         throw GException::fits_unknown_HDU_type(G_OPEN, m_type);
         break;
     }
-    m_data->open(m_fitsfile);
+    m_data->open(&m_fitsfile);
 
     // Get HDU name from header
     m_name = strip_whitespace(m_header->string("EXTNAME"));
@@ -172,8 +174,6 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
             m_name = "NoName";
     }
 
-    //cout << "HDU #" << hdunum << ": " << m_type << " : " << m_name << endl;
-
     // Return
     return;
 }
@@ -183,10 +183,14 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
  *                           Save HDU to FITS file                         *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
+/// NOT YET IMPLEMENTED !!!
 void GFitsHDU::save(void)
 {
     // Move to HDU
-    move2hdu();
+    int status = 0;
+    status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_SAVE, status);
 
     // Save header
     //...
@@ -198,11 +202,12 @@ void GFitsHDU::save(void)
     return;
 }
 
+
 /***************************************************************************
  *                     Return pointer to column of table                   *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-GFitsTableCol* GFitsHDU::column(const std::string colname) const
+GFitsTableCol* GFitsHDU::column(const std::string& colname) const
 {
     // Initialise pointer
     GFitsTableCol* ptr = NULL;
@@ -241,10 +246,12 @@ GFitsTableCol* GFitsHDU::column(const std::string colname) const
 void GFitsHDU::init_members(void)
 {
     // Initialise members
-    m_fitsfile = NULL;
-    m_type     = 0;
-    m_header   = NULL;
-    m_data     = NULL;
+    m_fitsfile.HDUposition = 0;
+    m_fitsfile.Fptr        = NULL;
+    m_name.clear();
+    m_type                 = 0;
+    m_header               = NULL;
+    m_data                 = NULL;
 
     // Return
     return;
@@ -254,21 +261,15 @@ void GFitsHDU::init_members(void)
 /***************************************************************************
  *                            Copy class members                           *
  * ----------------------------------------------------------------------- *
- * The function does not copy the FITS file pointer. This prevents that    *
- * several copies of the FITS file pointer exist in different instances of *
- * GFitsHDU, which would lead to confusion since one instance could close  *
- * the file while for another it still would be opened.                    *
- * The rule ONE INSTANCE - ONE FILE applies.                               *
  ***************************************************************************/
 void GFitsHDU::copy_members(const GFitsHDU& hdu)
 {
-    // Reset FITS file attributes
-    m_fitsfile = NULL;
-
-    // Copy other membres
-    m_type   = hdu.m_type;
-    m_header = hdu.m_header->clone();
-    m_data   = hdu.m_data->clone();
+    // Copy members
+    m_fitsfile = hdu.m_fitsfile;
+    m_name     = hdu.m_name;
+    m_type     = hdu.m_type;
+    m_header   = hdu.m_header->clone();
+    m_data     = hdu.m_data->clone();
 
     // Return
     return;
@@ -294,23 +295,6 @@ void GFitsHDU::free_members(void)
 }
 
 
-/***************************************************************************
- *                      Move FITS file pointer to HDU                      *
- * ----------------------------------------------------------------------- *
- ***************************************************************************/
-void GFitsHDU::move2hdu(void)
-{
-    // Move FITS file pointer to HDU
-    int status = 0;
-    status     = __ffmahd(m_fitsfile, m_num, NULL, &status);
-    if (status != 0)
-        throw GException::fits_error(G_MOVE2HDU, status);
-
-    // Return
-    return;
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                             GFitsHDU friends                            =
@@ -325,7 +309,7 @@ ostream& operator<< (ostream& os, const GFitsHDU& hdu)
 {
     // Put header in stream
     os << "=== GFitsHDU ===" << endl;
-    os << " HDU number ................: " << hdu.m_num << endl;
+    os << " HDU number ................: " << hdu.m_fitsfile.HDUposition << endl;
     os << " HDU name ..................: " << hdu.m_name << endl;
     os << " HDU type ..................: ";
     switch (hdu.m_type) {
@@ -345,7 +329,7 @@ ostream& operator<< (ostream& os, const GFitsHDU& hdu)
     os << *hdu.m_header;
     switch (hdu.m_type) {
     case 0:        // Image HDU
-        os << "Image";
+        os << *(GFitsImage*)hdu.m_data;
         break;
     case 1:        // ASCII Table HDU
         os << *(GFitsAsciiTable*)hdu.m_data;

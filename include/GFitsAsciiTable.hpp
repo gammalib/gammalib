@@ -40,7 +40,7 @@ public:
     GFitsAsciiTable& operator= (const GFitsAsciiTable& table);
 
     // Methods
-    void             open(__fitsfile*  fptr);
+    void             open(__fitsfile* fptr);
     void             close(void);
     GFitsAsciiTable* clone(void) const;
     GFitsTableCol*   column(const std::string colname);

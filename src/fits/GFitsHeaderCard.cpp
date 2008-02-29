@@ -229,12 +229,17 @@ int GFitsHeaderCard::integer(void)
  ***************************************************************************/
 void GFitsHeaderCard::read(__fitsfile* fptr, int keynum)
 {
+    // Move to HDU
+    int status = 0;
+    status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_READ_NUM, status);
+
     // Read keyword
     char keyname[80];
     char value[80];
     char comment[80];
-    int  status = 0;
-    status      = __ffgkyn(fptr, keynum, keyname, value, comment, &status);
+    status = __ffgkyn(fptr, keynum, keyname, value, comment, &status);
     if (status != 0)
         throw GException::fits_error(G_READ_NUM, status);
 
@@ -257,11 +262,16 @@ void GFitsHeaderCard::read(__fitsfile* fptr, int keynum)
  ***************************************************************************/
 void GFitsHeaderCard::read(__fitsfile* fptr, std::string keyname)
 {
+    // Move to HDU
+    int status = 0;
+    status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_READ_NUM, status);
+
     // Read keyword
     char value[80];
     char comment[80];
-    int  status = 0;
-    status      = __ffgkey(fptr, (char*)keyname.c_str(), value, comment, &status);
+    status = __ffgkey(fptr, (char*)keyname.c_str(), value, comment, &status);
 
     // Catch error
     if (status == 202)       // Keyword not found
@@ -288,10 +298,15 @@ void GFitsHeaderCard::read(__fitsfile* fptr, std::string keyname)
  ***************************************************************************/
 void GFitsHeaderCard::write(__fitsfile* fptr)
 {
-    // Write keyword
+    // Move to HDU
     int status = 0;
-    status     = __ffuky(fptr, __TSTRING, (char*)m_keyname.c_str(), 
-                         (char*)m_value.c_str(), (char*)m_comment.c_str(), &status);
+    status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_READ_NUM, status);
+
+    // Write keyword
+    status = __ffuky(fptr, __TSTRING, (char*)m_keyname.c_str(), 
+                     (char*)m_value.c_str(), (char*)m_comment.c_str(), &status);
     if (status != 0)
         throw GException::fits_error(G_WRITE, status);
 

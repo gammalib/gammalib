@@ -39,7 +39,7 @@ public:
     GFitsHeader& operator= (const GFitsHeader& header);
 
     // Methods
-    void             open(__fitsfile*  fptr);
+    void             open(__fitsfile* fptr);
     void             close(void);
     GFitsHeaderCard* card(const std::string keyname);
     GFitsHeaderCard* card(const int cardno);

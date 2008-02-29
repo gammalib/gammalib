@@ -71,7 +71,7 @@ protected:
     int         m_repeat;
     int         m_width;
     int         m_length;
-    __fitsfile* m_fitsfile;
+    __fitsfile  m_fitsfile;
 
 private:
     // Private methods
@@ -90,7 +90,7 @@ inline void         GFitsTableCol::set_type(const int type) { m_type = type; }
 inline void         GFitsTableCol::set_repeat(const int repeat) { m_repeat = repeat; }
 inline void         GFitsTableCol::set_width(const int width) { m_width = width; }
 inline void         GFitsTableCol::set_length(const int length) { m_length = length; }
-inline void         GFitsTableCol::set_fitsfile(const __fitsfile* fptr) { m_fitsfile = (__fitsfile*)fptr; }
+inline void         GFitsTableCol::set_fitsfile(const __fitsfile* fptr) { m_fitsfile = *fptr; }
 inline std::string  GFitsTableCol::name(void) { return m_name; }
 inline int          GFitsTableCol::colnum(void) { return m_colnum; }
 inline int          GFitsTableCol::type(void) { return m_type; }

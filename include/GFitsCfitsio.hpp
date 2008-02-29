@@ -88,7 +88,10 @@ typedef fitsfile __fitsfile;
 #define __TDBLCOMPLEX 163
 
 /* __ Type definition ____________________________________________________ */
-typedef int __fitsfile;
+typedef struct {
+    int  HDUposition;  // HDU position in file; 0 = first HDU
+    int* Fptr;         // Pointer to FITS file structure
+} __fitsfile;
 
 /* __ Dummy function _____________________________________________________ */
 inline

@@ -356,13 +356,12 @@ void GFitsTableFltCol::load(void)
     // Allocate memory
     if (m_data != NULL) delete [] m_data;
     m_data = new float[m_size];
-cout << endl;
-cout << "m_size: " << m_size << endl;
-cout << "m_colnum: " << m_colnum << endl;
+
     // Load column data
     int status = 0;
-    status     = __ffgcv(m_fitsfile, __TFLOAT, m_colnum, 1, 1, m_size,
-                         m_nulval, m_data, &m_anynul, &status);
+    status = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
+    status = __ffgcv(&m_fitsfile, __TFLOAT, m_colnum, 1, 1, m_size,
+                     m_nulval, m_data, &m_anynul, &status);
     if (status != 0)
         throw GException::fits_error(G_LOAD, status);
 

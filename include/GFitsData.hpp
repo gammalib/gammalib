@@ -35,7 +35,7 @@ public:
     virtual GFitsData& operator= (const GFitsData& data);
 
     // Methods
-    virtual void       open(__fitsfile*  fptr) = 0;
+    virtual void       open(__fitsfile* fptr) = 0;
     virtual void       close(void) = 0;
     virtual GFitsData* clone(void) const = 0;
 

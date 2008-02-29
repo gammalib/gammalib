@@ -359,8 +359,9 @@ void GFitsTableShtCol::load(void)
 
     // Load column data
     int status = 0;
-    status     = __ffgcv(m_fitsfile, __TSHORT, m_colnum, 1, 1, m_size,
-                         m_nulval, m_data, &m_anynul, &status);
+    status = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
+    status = __ffgcv(&m_fitsfile, __TSHORT, m_colnum, 1, 1, m_size,
+                     m_nulval, m_data, &m_anynul, &status);
     if (status != 0)
         throw GException::fits_error(G_LOAD, status);
 
