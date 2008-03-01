@@ -424,6 +424,40 @@ void GLATResponse::psf_init(void)
 
 
 /***************************************************************************
+ *                              Get PSF value                              *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+/// Returns the GLAST LAT PSF value
+/// @param delta angular separation between true and observed photon direction
+/// @param logE logarithm of the true photon energy
+/// @param ctheta cosine of the zenith angle with respect to the pointing axis
+double GLATResponse::psf_get(const double& delta, const double& logE, const double& ctheta)
+{
+    // Interpolate sigma and norm tables
+    double sigma = 1.0;  // Perform bi-linear interpolation in logE and ctheta
+    double norm  = 1.0;  // Perform bi-linear interpolation in logE and ctheta
+    
+    // Evaluate scale
+    double energy = pow(10.0,logE);    // DUMMY: t=(0.01*(10.0^logE))^-0.8
+    double scale  = psf_scale(energy);
+    
+    // Get stretch factor
+    double stretch = sigma * scale;
+    
+    // Get PSF value from table
+    double r   = delta * deg2rad / stretch;  // in radians
+    int    inx = (r - m_psf_angle_min) / m_psf_angle_bin;  // Perform linear interpolation
+    double psf = 1.0;
+    
+    // Normalize PSF
+    psf *= norm;
+    
+    // Return PSF value
+    return psf;
+}
+
+
+/***************************************************************************
  *                            Returns PSF scale                            *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/

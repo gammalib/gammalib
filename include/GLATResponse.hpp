@@ -78,6 +78,7 @@ private:
 
     // Private PSF methods
     void    psf_init(void);
+    double  psf_get(const double& delta, const double& logE, const double& ctheta);
     double  psf_scale(const double& energy);
     double  psf_base_value(const double& u, const double& gamma);
     GVector psf_base_vector(const GVector& u, const double& gamma);
