@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsHDU.hpp
+ * @brief GFitsHDU class definition.
+ * @author J. Knodlseder
+ */
 
 #ifndef GFITSHDU_HPP
 #define GFITSHDU_HPP
@@ -24,8 +29,15 @@
 /* __ Namespaces _________________________________________________________ */
 
 
-/***************************************************************************
- *                          GFitsHDU class definition                      *
+/***********************************************************************//**
+ * @class GFitsHDU
+ *
+ * @brief Implements the FITS Header Data Unit (HDU)
+ *
+ * The HDU is the basic unit of a FITS file. Each HDU consists of a header
+ * and a data area. The header is composed of cards and is implemented by
+ * the GFitsHeader class. The data are is either an image or a table and
+ * is implemented by the abstract GFitsData base class.
  ***************************************************************************/
 class GFitsHDU {
 

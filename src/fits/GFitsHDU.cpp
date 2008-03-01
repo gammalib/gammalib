@@ -39,9 +39,8 @@
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                                Constructor                              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Constructor
  ***************************************************************************/
 GFitsHDU::GFitsHDU()
 {
@@ -53,9 +52,10 @@ GFitsHDU::GFitsHDU()
 }
 
 
-/***************************************************************************
- *                              Copy constructor                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param hdu HDU from which the instance should be constructed
  ***************************************************************************/
 GFitsHDU::GFitsHDU(const GFitsHDU& hdu)
 {
@@ -70,9 +70,8 @@ GFitsHDU::GFitsHDU(const GFitsHDU& hdu)
 }
 
 
-/***************************************************************************
- *                               Destructor                                *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Destructor
  ***************************************************************************/
 GFitsHDU::~GFitsHDU()
 {
@@ -90,9 +89,10 @@ GFitsHDU::~GFitsHDU()
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                            Assignment operator                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param hdu HDU which should be assigned
  ***************************************************************************/
 GFitsHDU& GFitsHDU::operator= (const GFitsHDU& hdu)
 {
@@ -121,9 +121,16 @@ GFitsHDU& GFitsHDU::operator= (const GFitsHDU& hdu)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                                 Open HDU                                *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Open HDU
+ *
+ * @param fptr FITS file pointer
+ * @param hdunum Number of HDU (starting from 1)
+ *
+ * Opens an (existing) HDU in the FITS file. This method does NOT create any
+ * HDU if it does not exist. Opening consists of fetching all header cards
+ * (by opening an associated GFitsHeader instance) and of opening the data
+ * area (which can be of type Image or Table)
  ***************************************************************************/
 void GFitsHDU::open(__fitsfile* fptr, int hdunum)
 {
@@ -179,40 +186,82 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
 }
 
 
-/***************************************************************************
- *                           Save HDU to FITS file                         *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Saves HDU
+ *
+ * Save the HDU to the FITS file. In case that the HDU does not exist in the
+ * file it will be created (by the corresponding opening routines of the
+ * GFitsData instance).
+ * In the special case that no first HDU exists an empty primary image is
+ * created.
  ***************************************************************************/
-/// NOT YET IMPLEMENTED !!!
 void GFitsHDU::save(void)
 {
-cout << "entry" << endl;
     // Move to HDU
     int status = 0;
     status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
-    cout << status << endl;
     
-    // If HDU does not exist then create it now
+    // If HDU does not yet exist in file then create it now. This works even
+    // in the case that the actual HDU has no associated header and/or data
+    // (these will be created automatically)
+    if (status == 107) {
+        status = 0;
+        switch (m_type) {
+        case 0:        // Image HDU
+            if (m_data == NULL) m_data = new GFitsImage();
+            m_data->open(&m_fitsfile);
+            break;
+        case 1:        // ASCII Table HDU
+            if (m_data == NULL) m_data = new GFitsAsciiTable();
+            m_data->open(&m_fitsfile); 
+            break;
+        case 2:        // Binary Table HDU
+            if (m_data == NULL) m_data = new GFitsBinTable();
+            m_data->open(&m_fitsfile); 
+            break;
+        default:
+            throw GException::fits_unknown_HDU_type(G_SAVE, m_type);
+            break;
+        }
+        if (m_header == NULL) m_header = new GFitsHeader();
+        m_header->open(&m_fitsfile);
+    }
     
+    // If they exist then save data and header
+    if (m_data != NULL) { 
+        m_data->save();
+        if (m_header != NULL)
+            m_header->save();
+    }
     
-    //if (status != 0)
-    //    throw GException::fits_error(G_SAVE, status);
+    // ... otherwise make sure that the FITS file has at least a primary
+    // image.
+    else {
+    
+        // Special case: The first HDU does not exist. A FITS file needs at least
+        // one primary HDU. Thus an empty image is created.
+        if (m_fitsfile.HDUposition == 0) {
+            status = __ffcrim(&m_fitsfile, 8, 0, NULL, &status);
+            if (status != 0)
+                throw GException::fits_error(G_SAVE, status);
+            if (m_header != NULL)
+                m_header->save();
+        }
+        
+    } // endelse: no data were available
 
-    // Save header
-    //...
-
-    // Save data
-    //...
-
-cout << "exit" << endl;
     // Return
     return;
 }
 
 
-/***************************************************************************
- *                     Return pointer to column of table                   *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return pointer to column of table
+ *
+ * @param colname Name of FITS table column to be returned
+ *
+ * If this method is called for an image a 'fits_HDU_not_a_table' exception
+ * will be thrown.
  ***************************************************************************/
 GFitsTableCol* GFitsHDU::column(const std::string& colname) const
 {
@@ -240,25 +289,26 @@ GFitsTableCol* GFitsHDU::column(const std::string& colname) const
 }
 
 
-/***************************************************************************
- *                         Setup minimal primary HDU                       *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Setup minimal primary HDU
  ***************************************************************************/
 void GFitsHDU::primary(void)
 {
     // Free any allocated header and data
     free_members();
     
-    // Allocate header
-    m_header = new GFitsHeader();
+    // Create primary image in memory
+    int status = 0;
+    __fitsfile* fptr;
+    status = __ffinit(&fptr, "mem://", &status);
+    status = __ffcrim(fptr, 8, 0, NULL, &status);
     
-    // Add cards
-    m_header->update(GFitsHeaderCard("SIMPLE", "T", "/ file does conform to FITS standard"));
-    m_header->update(GFitsHeaderCard("BITPIX", "8", "/ number of bits per data pixel"));
-    m_header->update(GFitsHeaderCard("NAXIS", "0", "/ number of data axes"));
-    m_header->update(GFitsHeaderCard("EXTEND", "T", "/ FITS dataset may contain extensions"));
-    m_header->update(GFitsHeaderCard("BZERO", "-128", "/ Make values Signed"));
-    m_header->update(GFitsHeaderCard("BSCALE", "1", "/ Make values Signed"));
+    // Open HDU
+    this->open(fptr,1);
+    
+    // Detach FITS file pointer
+    this->m_fitsfile.HDUposition = 0;
+    this->m_fitsfile.Fptr        = NULL;
     
     // Return
     return;
@@ -271,9 +321,8 @@ void GFitsHDU::primary(void)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                         Initialise class members                        *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Initialise class members
  ***************************************************************************/
 void GFitsHDU::init_members(void)
 {
@@ -290,9 +339,10 @@ void GFitsHDU::init_members(void)
 }
 
 
-/***************************************************************************
- *                            Copy class members                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param hdu HDU to be copied
  ***************************************************************************/
 void GFitsHDU::copy_members(const GFitsHDU& hdu)
 {
@@ -308,9 +358,8 @@ void GFitsHDU::copy_members(const GFitsHDU& hdu)
 }
 
 
-/***************************************************************************
- *                           Delete class members                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Delete class members
  ***************************************************************************/
 void GFitsHDU::free_members(void)
 {
@@ -333,9 +382,11 @@ void GFitsHDU::free_members(void)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                             Output operator                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param os Output stream into which the HDU will be dumped
+ * @param hdu HDU to be dumped
  ***************************************************************************/
 ostream& operator<< (ostream& os, const GFitsHDU& hdu)
 {
