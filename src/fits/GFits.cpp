@@ -134,7 +134,15 @@ void GFits::open(const std::string filename)
     // Open FITS file
     int status = 0;
     status     = __ffopen(&m_fitsfile, filename.c_str(), 1, &status);
-    if (status != 0)
+    
+    // If FITS file does not exist then create it now
+    if (status == 104) {
+        status = 0;
+        status = __ffinit(&m_fitsfile, filename.c_str(), &status);
+        if (status != 0)
+            throw GException::fits_open_error(G_OPEN, filename, status);
+    }
+    else if (status != 0)
         throw GException::fits_open_error(G_OPEN, filename, status);
 
     // Store FITS file attributes
@@ -147,7 +155,7 @@ void GFits::open(const std::string filename)
 
     // Allocate HDUs
     if (m_hdu != NULL) delete [] m_hdu;
-    m_hdu = new GFitsHDU[m_num_hdu];
+    if (m_num_hdu > 0) m_hdu = new GFitsHDU[m_num_hdu];
 
     // Open all HDUs
     for (int i = 0; i < m_num_hdu; ++i)
@@ -252,6 +260,62 @@ GFitsHDU* GFits::hdu(const std::string extname)
 }
 
 
+/***************************************************************************
+ *                         Append HDU to FITS file                         *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+void GFits::append(const GFitsHDU* hdu)
+{
+    // Determine number of HDUs to add. If there are no HDUs so far and if
+    // the HDU to append is not an image then we have to add a primary
+    // image first. In this case we add 2 new HDUs.
+    int n_add = (m_num_hdu == 0 && hdu->m_type != 0) ? 2 : 1;
+    
+    // Create memory to hold HDUs
+    GFitsHDU* tmp = new GFitsHDU[m_num_hdu+n_add];
+    if (tmp != NULL) {
+    
+        // Copy over existing HDUs and remove old ones
+        if (m_hdu != NULL) {
+            for (int i = 0; i < m_num_hdu; ++i)
+                tmp[i] = m_hdu[i];
+            delete [] m_hdu;
+        }
+
+        // Connect the new memory to the card pointer
+        m_hdu = tmp;
+        
+        // Add primary image if required
+        if (n_add == 2) {
+
+            // Append empty primary image
+            //m_hdu[m_num_hdu] = TBD
+
+            // Set FITS file pointer for new HDU
+            m_hdu[m_num_hdu].m_fitsfile             = *m_fitsfile;
+            m_hdu[m_num_hdu].m_fitsfile.HDUposition = m_num_hdu;
+
+            // Increment number of HDUs
+            m_num_hdu++;
+        }
+
+        // Append new HDU to list
+        m_hdu[m_num_hdu] = *hdu;
+        
+        // Set FITS file pointer for new HDU
+        m_hdu[m_num_hdu].m_fitsfile             = *m_fitsfile;
+        m_hdu[m_num_hdu].m_fitsfile.HDUposition = m_num_hdu;
+        
+        // Increment number of HDUs
+        m_num_hdu++;
+        
+    }
+
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                          GFits private methods                          =
@@ -311,10 +375,20 @@ void GFits::free_members(void)
 {
     // If FITS file has been opened then close it now
     if (m_fitsfile != NULL) {
-        int status = 0;
-        status     = __ffclos(m_fitsfile, &status);
-        if (status != 0)
-            throw GException::fits_error(G_FREE_MEM, status);
+    
+        // If there are no HDUs then delete the file (don't worry about error)
+        if (m_num_hdu == 0) {
+            int status = 0;
+            __ffdelt(m_fitsfile, &status);
+        }
+        
+        // ... otherwise close the file
+        else {
+            int status = 0;
+            status     = __ffclos(m_fitsfile, &status);
+            if (status != 0)
+                throw GException::fits_error(G_FREE_MEM, status);
+        }
     }
 
     // Free memory

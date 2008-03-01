@@ -60,6 +60,21 @@ GFitsHeaderCard::GFitsHeaderCard()
     // Return
     return;
 }
+GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname, 
+                                 const std::string& value, 
+                                 const std::string& comment)
+{
+    // Initialise class members for clean destruction
+    init_members();
+    
+    // Set members
+    this->set_keyname(keyname);
+    this->set_value(value);
+    this->set_comment(comment);
+
+    // Return
+    return;
+}
 
 
 /***************************************************************************

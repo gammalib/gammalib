@@ -167,11 +167,53 @@ void GFitsHeader::close(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Update card in header                                            *
+ * ----------------------------------------------------------------------- *
+ * This method updates one header card. Updating means replacing any       *
+ * existing card with the specified one or appending a new card to the     *
+ * list of existing cards.                                                 *
+ ***************************************************************************/
+void GFitsHeader::update(const GFitsHeaderCard& card)
+{
+    // If card exists then update existing values
+    GFitsHeaderCard* ptr = this->card(card.keyname());
+    if (ptr != NULL)
+        *ptr = card;
+
+    // ... otherwise append a new card
+    else {
+    
+        // Create memory to hold cards
+        GFitsHeaderCard* tmp = new GFitsHeaderCard[m_num_cards+1];
+        if (tmp != NULL) {
+        
+            // Copy over existing cards and remove old ones
+            if (m_card != NULL) {
+                for (int i = 0; i < m_num_cards; ++i)
+                    tmp[i] = m_card[i];
+                delete [] m_card;
+            }
+
+            // Connect the new memory to the card pointer
+            m_card = tmp;
+
+            // Append new card to list
+            m_card[m_num_cards] = card;
+
+        } // endif: new memory was valid
+    } // endif: card appending was required
+
+    // Return
+    return;
+}
+
+
 /***************************************************************************
  *                 Get specified header card value as string               *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-std::string GFitsHeader::string(const std::string keyname)
+std::string GFitsHeader::string(const std::string& keyname)
 {
     // Get card pointer
     GFitsHeaderCard* ptr = GFitsHeader::card(keyname);
@@ -188,7 +230,7 @@ std::string GFitsHeader::string(const std::string keyname)
  *                 Get specified header card value as string               *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-std::string GFitsHeader::string(const int cardno)
+std::string GFitsHeader::string(const int& cardno)
 {
     // Get card pointer
     GFitsHeaderCard* ptr = GFitsHeader::card(cardno);
@@ -205,7 +247,7 @@ std::string GFitsHeader::string(const int cardno)
  *                 Get specified header card value as double               *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-double GFitsHeader::real(const std::string keyname)
+double GFitsHeader::real(const std::string& keyname)
 {
     // Get card pointer
     GFitsHeaderCard* ptr = GFitsHeader::card(keyname);
@@ -222,7 +264,7 @@ double GFitsHeader::real(const std::string keyname)
  *                 Get specified header card value as double               *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-double GFitsHeader::real(const int cardno)
+double GFitsHeader::real(const int& cardno)
 {
     // Get card pointer
     GFitsHeaderCard* ptr = GFitsHeader::card(cardno);
@@ -239,7 +281,7 @@ double GFitsHeader::real(const int cardno)
  *                  Get specified header card value as int                 *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-int GFitsHeader::integer(const std::string keyname)
+int GFitsHeader::integer(const std::string& keyname)
 {
     // Get card pointer
     GFitsHeaderCard* ptr = GFitsHeader::card(keyname);
@@ -256,7 +298,7 @@ int GFitsHeader::integer(const std::string keyname)
  *                  Get specified header card value as int                 *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-int GFitsHeader::integer(const int cardno)
+int GFitsHeader::integer(const int& cardno)
 {
     // Get card pointer
     GFitsHeaderCard* ptr = GFitsHeader::card(cardno);

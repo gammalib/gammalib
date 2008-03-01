@@ -31,6 +31,8 @@ class GFitsHeaderCard {
 public:
     // Constructors & Destructors
     GFitsHeaderCard();
+    GFitsHeaderCard(const std::string& keyname, const std::string& value, 
+                    const std::string& comment);
     GFitsHeaderCard(const GFitsHeaderCard& card);
     ~GFitsHeaderCard();
 
@@ -38,18 +40,18 @@ public:
     GFitsHeaderCard& operator= (const GFitsHeaderCard& card);
 
     // Methods
-    std::string  keyname(void);
-    std::string  value(void);
-    int          value_type(void);
+    std::string  keyname(void) const;
+    std::string  value(void) const;
+    int          value_type(void) const;
+    std::string  unit(void) const;
+    std::string  comment(void) const;
     std::string  string(void);
     double       real(void);
     int          integer(void);
-    std::string  unit(void);
-    std::string  comment(void);
-    void         set_keyname(std::string& keyname);
-    void         set_value(std::string& value);
-    void         set_unit(std::string& unit);
-    void         set_comment(std::string& comment);
+    void         set_keyname(const std::string& keyname);
+    void         set_value(const std::string& value);
+    void         set_unit(const std::string& unit);
+    void         set_comment(const std::string& comment);
     void         read(__fitsfile* fptr, int keynum);
     void         read(__fitsfile* fptr, std::string keyname);
     void         write(__fitsfile* fptr);
@@ -73,15 +75,15 @@ private:
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
-inline std::string GFitsHeaderCard::keyname(void) { return m_keyname; }
-inline std::string GFitsHeaderCard::value(void) { return m_value; }
-inline int         GFitsHeaderCard::value_type(void) { return m_value_type; }
-inline std::string GFitsHeaderCard::unit(void) { return m_unit; }
-inline std::string GFitsHeaderCard::comment(void) { return m_comment; }
-inline void        GFitsHeaderCard::set_keyname(std::string& keyname) { m_keyname = keyname; }
-inline void        GFitsHeaderCard::set_value(std::string& value) { m_value = value; }
-inline void        GFitsHeaderCard::set_unit(std::string& unit) { m_unit = unit; }
-inline void        GFitsHeaderCard::set_comment(std::string& comment) { m_comment = comment; }
+inline std::string GFitsHeaderCard::keyname(void) const { return m_keyname; }
+inline std::string GFitsHeaderCard::value(void) const { return m_value; }
+inline int         GFitsHeaderCard::value_type(void) const { return m_value_type; }
+inline std::string GFitsHeaderCard::unit(void) const { return m_unit; }
+inline std::string GFitsHeaderCard::comment(void) const { return m_comment; }
+inline void        GFitsHeaderCard::set_keyname(const std::string& keyname) { m_keyname = keyname; }
+inline void        GFitsHeaderCard::set_value(const std::string& value) { m_value = value; }
+inline void        GFitsHeaderCard::set_unit(const std::string& unit) { m_unit = unit; }
+inline void        GFitsHeaderCard::set_comment(const std::string& comment) { m_comment = comment; }
 
 
 #endif /* GFITSHEADERCARD_HPP */

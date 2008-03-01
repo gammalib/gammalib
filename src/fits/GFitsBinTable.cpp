@@ -308,8 +308,10 @@ void GFitsBinTable::copy_members(const GFitsBinTable& table)
     // Copy column definition
     if (table.m_columns != NULL && m_cols > 0) {
         m_columns = new GFitsTableCol*[m_cols];
-        for (int i = 0; i < m_cols; ++i)
-            m_columns[i] = table.m_columns[i]->clone();
+        for (int i = 0; i < m_cols; ++i) {
+            if (table.m_columns[i] != NULL)
+                m_columns[i] = table.m_columns[i]->clone();
+        }
     }
 
     // Return

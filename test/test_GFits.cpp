@@ -289,6 +289,31 @@ void test_columns(void)
 
 
 /***************************************************************************
+ *                            Test: Creation                               *
+ ***************************************************************************/
+void test_create(void)
+{
+    std::cout << "Test GFits: Create FITS file: ";
+    try {
+        GFits fits;
+        fits.open("test.fits");
+        cout << endl << fits;
+        GFitsHDU image;
+        fits.append(&image);
+        fits.save();
+    }
+    catch (exception &e) {
+        std::cout << std::endl << "TEST ERROR: Unable to create FITS file." << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ". ok." << std::endl;
+}
+
+
+
+
+/***************************************************************************
  *                            Main test function                           *
  ***************************************************************************/
 int main(void)
@@ -300,8 +325,9 @@ int main(void)
     std::cout << "***********************" << std::endl;
 
     // Execute the tests
-    test_open();
-    test_columns();
+    test_create();
+    //test_open();
+    //test_columns();
 
     // Return
     return 0;

@@ -31,7 +31,9 @@
 /* __ Macros _____________________________________________________________ */
 #define __ffgerr(A, B) ffgerr(A, B)
 #define __ffopen(A, B, C, D) ffopen(A, B, C, D)
+#define __ffinit(A, B, C) ffinit(A, B, C)
 #define __ffclos(A, B) ffclos(A, B)
+#define __ffdelt(A, B) ffdelt(A, B)
 #define __ffthdu(A, B, C) ffthdu(A, B, C)
 #define __ffmahd(A, B, C, D) ffmahd(A, B, C, D)
 #define __ffghdt(A, B, C) ffghdt(A, B, C)
@@ -62,7 +64,9 @@ typedef fitsfile __fitsfile;
 /* __ Macros _____________________________________________________________ */
 #define __ffgerr(A, B) __error(A, B)
 #define __ffopen(A, B, C, D) __dummy()
+#define __ffinit(A, B, C) __dummy()
 #define __ffclos(A, B) __dummy()
+#define __ffdelt(A, B) __dummy()
 #define __ffthdu(A, B, C) __dummy()
 #define __ffmahd(A, B, C, D) __dummy()
 #define __ffghdt(A, B, C) __dummy()

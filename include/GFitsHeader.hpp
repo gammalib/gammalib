@@ -41,14 +41,15 @@ public:
     // Methods
     void             open(__fitsfile* fptr);
     void             close(void);
-    GFitsHeaderCard* card(const std::string keyname);
-    GFitsHeaderCard* card(const int cardno);
-    std::string      string(const std::string keyname);
-    std::string      string(const int cardno);
-    double           real(const std::string keyname);
-    double           real(const int cardno);
-    int              integer(const std::string keyname);
-    int              integer(const int cardno);
+    void             update(const GFitsHeaderCard& card);
+    GFitsHeaderCard* card(const std::string& keyname);
+    GFitsHeaderCard* card(const int& cardno);
+    std::string      string(const std::string& keyname);
+    std::string      string(const int& cardno);
+    double           real(const std::string& keyname);
+    double           real(const int& cardno);
+    int              integer(const std::string& keyname);
+    int              integer(const int& cardno);
     GFitsHeader*     clone(void) const;
     
 private:
@@ -68,12 +69,12 @@ private:
  *                              Inline methods                             *
  ***************************************************************************/
 inline 
-GFitsHeaderCard* GFitsHeader::card(const std::string keyname)
+GFitsHeaderCard* GFitsHeader::card(const std::string& keyname)
 {
     return GFitsHeader::card_ptr(keyname);
 }
 inline
-GFitsHeaderCard* GFitsHeader::card(const int cardno)
+GFitsHeaderCard* GFitsHeader::card(const int& cardno)
 {
     return (cardno >= 0 && cardno < m_num_cards) ? &(m_card[cardno]) : NULL;
 }

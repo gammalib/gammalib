@@ -46,6 +46,7 @@ public:
     void      close(void);
     GFitsHDU* hdu(const std::string extname);
     GFitsHDU* hdu(int extno);
+    void      append(const GFitsHDU* hdu);
 
 private:
     // Private methods

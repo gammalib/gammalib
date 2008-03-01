@@ -29,6 +29,9 @@
  ***************************************************************************/
 class GFitsHDU {
 
+    // Friend classes
+    friend class GFits;
+
     // I/O friends
     friend ostream& operator<< (ostream& os, const GFitsHDU& hdu);
 
@@ -50,6 +53,7 @@ public:
     GFitsHeader*   header(void) const;
     GFitsData*     data(void) const;
     GFitsTableCol* column(const std::string& colname) const;
+    void           primary(void);
 
 private:
     // Private methods

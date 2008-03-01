@@ -233,7 +233,8 @@ GException::fits_error::fits_error(string origin, int status)
 GException::fits_open_error::fits_open_error(string origin, string filename, int status)
 {
     m_origin  = origin;
-    m_message = "Unable to open FITS file '" + filename + "'";
+    m_message = "Unable to open FITS file '" + filename + "'" 
+                + " (status: " + str(status) + ")";
 }
 
 

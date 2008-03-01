@@ -186,11 +186,17 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
 /// NOT YET IMPLEMENTED !!!
 void GFitsHDU::save(void)
 {
+cout << "entry" << endl;
     // Move to HDU
     int status = 0;
     status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
-    if (status != 0)
-        throw GException::fits_error(G_SAVE, status);
+    cout << status << endl;
+    
+    // If HDU does not exist then create it now
+    
+    
+    //if (status != 0)
+    //    throw GException::fits_error(G_SAVE, status);
 
     // Save header
     //...
@@ -198,6 +204,7 @@ void GFitsHDU::save(void)
     // Save data
     //...
 
+cout << "exit" << endl;
     // Return
     return;
 }
@@ -230,6 +237,31 @@ GFitsTableCol* GFitsHDU::column(const std::string& colname) const
 
     // Return pointer
     return ptr;
+}
+
+
+/***************************************************************************
+ *                         Setup minimal primary HDU                       *
+ * ----------------------------------------------------------------------- *
+ ***************************************************************************/
+void GFitsHDU::primary(void)
+{
+    // Free any allocated header and data
+    free_members();
+    
+    // Allocate header
+    m_header = new GFitsHeader();
+    
+    // Add cards
+    m_header->update(GFitsHeaderCard("SIMPLE", "T", "/ file does conform to FITS standard"));
+    m_header->update(GFitsHeaderCard("BITPIX", "8", "/ number of bits per data pixel"));
+    m_header->update(GFitsHeaderCard("NAXIS", "0", "/ number of data axes"));
+    m_header->update(GFitsHeaderCard("EXTEND", "T", "/ FITS dataset may contain extensions"));
+    m_header->update(GFitsHeaderCard("BZERO", "-128", "/ Make values Signed"));
+    m_header->update(GFitsHeaderCard("BSCALE", "1", "/ Make values Signed"));
+    
+    // Return
+    return;
 }
 
 
@@ -268,8 +300,8 @@ void GFitsHDU::copy_members(const GFitsHDU& hdu)
     m_fitsfile = hdu.m_fitsfile;
     m_name     = hdu.m_name;
     m_type     = hdu.m_type;
-    m_header   = hdu.m_header->clone();
-    m_data     = hdu.m_data->clone();
+    if (hdu.m_header != NULL) m_header = hdu.m_header->clone();
+    if (hdu.m_data   != NULL) m_data   = hdu.m_data->clone();
 
     // Return
     return;
@@ -326,20 +358,26 @@ ostream& operator<< (ostream& os, const GFitsHDU& hdu)
         os << "Unknown" << endl;
         break;
     }
-    os << *hdu.m_header;
-    switch (hdu.m_type) {
-    case 0:        // Image HDU
-        os << *(GFitsImage*)hdu.m_data;
-        break;
-    case 1:        // ASCII Table HDU
-        os << *(GFitsAsciiTable*)hdu.m_data;
-        break;
-    case 2:        // Binary Table HDU
-        os << *(GFitsBinTable*)hdu.m_data;
-        break;
-    default:
-        os << "Unknown";
-        break;
+    
+    // Put FITS header in stream
+    if (hdu.m_header != NULL)
+        os << *hdu.m_header;
+        
+    // Put FITS data in stream
+    if (hdu.m_data != NULL) {
+        switch (hdu.m_type) {
+        case 0:        // Image HDU
+            os << *(GFitsImage*)hdu.m_data;
+            break;
+        case 1:        // ASCII Table HDU
+            os << *(GFitsAsciiTable*)hdu.m_data;
+            break;
+        case 2:        // Binary Table HDU
+            os << *(GFitsBinTable*)hdu.m_data;
+            break;
+        default:
+            break;
+        }
     }
 
     // Return output stream
