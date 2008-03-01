@@ -143,6 +143,7 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
     // Store information. 
     // Note that the HDU number - 1 is stored in m_fitsfile->HDUposition !!!
     m_fitsfile = *fptr;
+    m_hdunum   = hdunum;
 
     // Get HDU type
     status = __ffghdt(&m_fitsfile, &m_type, &status);
@@ -197,14 +198,18 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
  ***************************************************************************/
 void GFitsHDU::save(void)
 {
+cout << "GFitsHDU::save " << m_hdunum-1 << endl;
     // Move to HDU
     int status = 0;
-    status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
+    status     = __ffmahd(&m_fitsfile, m_hdunum, NULL, &status);
     
     // If HDU does not yet exist in file then create it now. This works even
     // in the case that the actual HDU has no associated header and/or data
-    // (these will be created automatically)
+    // (these will be created automatically). However, to make this work we have
+    // to set the fitsfile HDU position to the position we want to go. In that
+    // was the save members will know that they have to create the HDU ...
     if (status == 107) {
+        m_fitsfile.HDUposition = m_hdunum-1;
         status = 0;
         switch (m_type) {
         case 0:        // Image HDU
@@ -329,6 +334,7 @@ void GFitsHDU::init_members(void)
     // Initialise members
     m_fitsfile.HDUposition = 0;
     m_fitsfile.Fptr        = NULL;
+    m_hdunum               = 1;
     m_name.clear();
     m_type                 = 0;
     m_header               = NULL;
@@ -348,6 +354,7 @@ void GFitsHDU::copy_members(const GFitsHDU& hdu)
 {
     // Copy members
     m_fitsfile = hdu.m_fitsfile;
+    m_hdunum   = hdu.m_hdunum;
     m_name     = hdu.m_name;
     m_type     = hdu.m_type;
     if (hdu.m_header != NULL) m_header = hdu.m_header->clone();
@@ -392,7 +399,7 @@ ostream& operator<< (ostream& os, const GFitsHDU& hdu)
 {
     // Put header in stream
     os << "=== GFitsHDU ===" << endl;
-    os << " HDU number ................: " << hdu.m_fitsfile.HDUposition << endl;
+    os << " HDU number ................: " << hdu.m_hdunum << endl;
     os << " HDU name ..................: " << hdu.m_name << endl;
     os << " HDU type ..................: ";
     switch (hdu.m_type) {

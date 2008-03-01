@@ -75,6 +75,7 @@ private:
 
     // Private data area
     __fitsfile   m_fitsfile;    // FITS file pointer
+    int          m_hdunum;      // HDU number (starting from 1)
     std::string  m_name;        // HDU name
     int          m_type;        // HDU type
     GFitsHeader* m_header;      // HDU header
@@ -86,7 +87,7 @@ private:
  *                              Inline methods                             *
  ***************************************************************************/
 inline std::string  GFitsHDU::extname(void) const { return m_name; }
-inline int          GFitsHDU::extno(void) const { return m_fitsfile.HDUposition; }
+inline int          GFitsHDU::extno(void) const { return m_hdunum; }
 inline int          GFitsHDU::exttype(void) const { return m_type; }
 inline GFitsHeader* GFitsHDU::header(void) const { return m_header; }
 inline GFitsData*   GFitsHDU::data(void) const { return m_data; }
