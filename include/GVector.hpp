@@ -75,6 +75,7 @@ class GVector {
   friend GVector  sqrt(const GVector &v);
   friend GVector  tan(const GVector &v);
   friend GVector  tanh(const GVector &v);
+  friend GVector  pow(const GVector &v, const double &q);
 
 public:
   // Constructors and destructors
@@ -555,6 +556,16 @@ GVector tanh(const GVector &v)
   for (int i = 0; i < v.m_num; ++i)
     result.m_data[i] = tanh(v.m_data[i]);
   return result;
+}
+
+// Vector pow
+inline
+GVector pow(const GVector &v, const double &a)
+{
+    GVector result(v.m_num);
+    for (int i = 0; i < v.m_num; ++i)
+        result.m_data[i] = pow(v.m_data[i],a);
+    return result;
 }
 
 // Equality operator
