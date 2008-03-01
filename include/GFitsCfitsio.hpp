@@ -34,6 +34,7 @@
 #define __ffinit(A, B, C) ffinit(A, B, C)
 #define __ffclos(A, B) ffclos(A, B)
 #define __ffdelt(A, B) ffdelt(A, B)
+#define __ffcrim(A, B, C, D, E) ffcrim(A, B, C, D, E)
 #define __ffthdu(A, B, C) ffthdu(A, B, C)
 #define __ffmahd(A, B, C, D) ffmahd(A, B, C, D)
 #define __ffghdt(A, B, C) ffghdt(A, B, C)
@@ -67,6 +68,7 @@ typedef fitsfile __fitsfile;
 #define __ffinit(A, B, C) __dummy()
 #define __ffclos(A, B) __dummy()
 #define __ffdelt(A, B) __dummy()
+#define __ffcrim(A, B, C, D, E) __dummy()
 #define __ffthdu(A, B, C) __dummy()
 #define __ffmahd(A, B, C, D) __dummy()
 #define __ffghdt(A, B, C) __dummy()
@@ -99,11 +101,13 @@ typedef struct {
 
 /* __ Dummy function _____________________________________________________ */
 inline
-void __error(int status, char* err_text) {
+void __error(int status, char* err_text)
+{
     strcpy(err_text, "CFITSIO not available");
 }
 inline
-int __dummy(void) {
+int __dummy(void)
+{
     return 0;
 }
 

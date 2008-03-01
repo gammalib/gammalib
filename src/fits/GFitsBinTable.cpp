@@ -126,9 +126,10 @@ GFitsBinTable& GFitsBinTable::operator= (const GFitsBinTable& table)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                               Open Table                                *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Open Table
+ *
+ * @param fptr FITS file pointer
  ***************************************************************************/
 void GFitsBinTable::open(__fitsfile* fptr)
 {
@@ -213,9 +214,20 @@ void GFitsBinTable::open(__fitsfile* fptr)
 }
 
 
-/***************************************************************************
- *                               Close Table                               *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Save binary table
+ ***************************************************************************/
+void GFitsBinTable::save(void)
+{
+    cout << "GFitsBinTable::save entry" << endl;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Close binary table
  ***************************************************************************/
 void GFitsBinTable::close(void)
 {
@@ -334,6 +346,27 @@ void GFitsBinTable::free_members(void)
     // Mark memory as freed
     m_columns = NULL;
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Connect binary table to FITS file
+ *
+ * @param fptr FITS file pointer to which the binary table should be connected
+ *
+ * The connection of the binary table is done by connecting all columns.
+ ***************************************************************************/
+void GFitsBinTable::connect(__fitsfile* fptr)
+{
+    // First connect binary table
+    
+    // Then connect all columns
+    for (int i = 0; i < m_cols; ++i) {
+        if (m_columns[i] != NULL) m_columns[i]->connect(fptr);
+    }
+    
     // Return
     return;
 }

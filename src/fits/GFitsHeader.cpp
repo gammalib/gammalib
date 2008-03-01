@@ -118,9 +118,13 @@ GFitsHeader& GFitsHeader::operator= (const GFitsHeader& header)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                                Open Header                              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Open Header
+ *
+ * @param fptr FITS file pointer
+ *
+ * Loads all header cards into memory. Any header cards that existed before
+ * will be dropped.
  ***************************************************************************/
 void GFitsHeader::open(__fitsfile* fptr)
 {
@@ -150,9 +154,25 @@ void GFitsHeader::open(__fitsfile* fptr)
 }
 
 
-/***************************************************************************
- *                              Close Header                               *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Save Header to FITS file
+ *
+ * NOT YET IMPLEMENTED
+ ***************************************************************************/
+void GFitsHeader::save(void)
+{
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Close Header
+ *
+ * Drops all header cards. Note that closing does not save the cards to the
+ * FITS file. Use the save method in case that cards should be save to the
+ * FITS file.
  ***************************************************************************/
 void GFitsHeader::close(void)
 {
@@ -168,7 +188,9 @@ void GFitsHeader::close(void)
 
 
 /***********************************************************************//**
- * @brief Update card in header
+ * @brief Update card in header or append card to header
+ *
+ * @param card FITS header card that should be updated
  *                                            
  * This method updates one header card. Updating means replacing any       
  * existing card with the specified one or appending a new card to the     

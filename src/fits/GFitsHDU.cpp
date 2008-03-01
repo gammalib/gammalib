@@ -53,6 +53,32 @@ GFitsHDU::GFitsHDU()
 
 
 /***********************************************************************//**
+ * @brief Image HDU Constructor
+ *
+ * @param image Image from which the HDU should be constructed
+ *
+ * IMPLEMENTATION NOT YET FINISHED (NEEDS KEYWORD SETTING)
+ ***************************************************************************/
+GFitsHDU::GFitsHDU(const GFitsImage& image)
+{
+    // Initialise class members for clean destruction
+    init_members();
+    
+    // Copy image into HDU data
+    m_data = image.clone();
+    
+    // Allocate new header
+    m_header = new GFitsHeader();
+    
+    // Extract keywords from image
+    // TBW
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param hdu HDU from which the instance should be constructed
@@ -198,7 +224,7 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
  ***************************************************************************/
 void GFitsHDU::save(void)
 {
-cout << "GFitsHDU::save " << m_hdunum-1 << endl;
+//cout << "GFitsHDU::save " << m_fitsfile.Fptr << " " << m_hdunum << endl;
     // Move to HDU
     int status = 0;
     status     = __ffmahd(&m_fitsfile, m_hdunum, NULL, &status);
@@ -214,15 +240,18 @@ cout << "GFitsHDU::save " << m_hdunum-1 << endl;
         switch (m_type) {
         case 0:        // Image HDU
             if (m_data == NULL) m_data = new GFitsImage();
-            m_data->open(&m_fitsfile);
+            m_data->connect(&m_fitsfile);
+            m_data->save();
             break;
         case 1:        // ASCII Table HDU
             if (m_data == NULL) m_data = new GFitsAsciiTable();
-            m_data->open(&m_fitsfile); 
+            m_data->connect(&m_fitsfile);
+            m_data->save();
             break;
         case 2:        // Binary Table HDU
             if (m_data == NULL) m_data = new GFitsBinTable();
-            m_data->open(&m_fitsfile); 
+            m_data->connect(&m_fitsfile);
+            m_data->save();
             break;
         default:
             throw GException::fits_unknown_HDU_type(G_SAVE, m_type);
@@ -378,6 +407,25 @@ void GFitsHDU::free_members(void)
     m_header = NULL;
     m_data   = NULL;
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Connect HDU to FITS file
+ *
+ * @param fptr FITS file pointer to which the HDU should be connected
+ ***************************************************************************/
+void GFitsHDU::connect(__fitsfile* fptr)
+{
+    // First connect HDU
+    m_fitsfile = *fptr;
+    m_hdunum   = m_fitsfile.HDUposition + 1;
+    
+    // Then connect data
+    if (m_data != NULL) m_data->connect(fptr);
+    
     // Return
     return;
 }

@@ -45,6 +45,7 @@ public:
 
     // Methods
     void           open(__fitsfile* fptr);
+    void           save(void);
     void           close(void);
     GFitsBinTable* clone(void) const;
     GFitsTableCol* column(const std::string colname);
@@ -55,6 +56,7 @@ private:
     void init_members(void);
     void copy_members(const GFitsBinTable& table);
     void free_members(void);
+    void connect(__fitsfile* fptr);
 
     // Private data area
     int             m_rows;

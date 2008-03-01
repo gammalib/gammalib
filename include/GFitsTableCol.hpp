@@ -25,6 +25,10 @@
  ***************************************************************************/
 class GFitsTableCol {
 
+    // Friend classes
+    friend class GFitsAsciiTable;
+    friend class GFitsBinTable;
+    
     // I/O friends
     friend ostream& operator<< (ostream& os, const GFitsTableCol& column);
 
@@ -78,6 +82,7 @@ private:
     void init_members(void);
     void copy_members(const GFitsTableCol& column);
     void free_members(void);
+    void connect(__fitsfile* fptr);
 };
 
 

@@ -298,8 +298,10 @@ void test_create(void)
         GFits fits;
         fits.open("test.fits");
         cout << endl << fits;
-        GFitsHDU image;
-        fits.append(&image);
+        GFitsImage image;
+        GFitsHDU hdu(image);
+        fits.append(&hdu);
+        cout << endl << fits;
         fits.save();
     }
     catch (exception &e) {

@@ -25,6 +25,9 @@
  ***************************************************************************/
 class GFitsData {
 
+    // Friend classes
+    friend class GFitsHDU;
+
 public:
     // Constructors and destructors
     GFitsData();
@@ -36,6 +39,7 @@ public:
 
     // Methods
     virtual void       open(__fitsfile* fptr) = 0;
+    virtual void       save(void) = 0;
     virtual void       close(void) = 0;
     virtual GFitsData* clone(void) const = 0;
 
@@ -44,6 +48,7 @@ protected:
     void init_members(void);
     void copy_members(const GFitsData& data);
     void free_members(void);
+    virtual void connect(__fitsfile* fptr) = 0;
 
     // Protected data area
 };

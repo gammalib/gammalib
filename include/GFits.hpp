@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFits.hpp
+ * @brief GFits class definition.
+ * @author J. Knodlseder
+ */
 
 #ifndef GFITS_HPP
 #define GFITS_HPP
@@ -22,8 +27,14 @@
 /* __ Namespaces _________________________________________________________ */
 
 
-/***************************************************************************
- *                            GFits class definition                       *
+/***********************************************************************//**
+ * @class GFits
+ *
+ * @brief Implements a FITS file interface
+ *
+ * GFits is the basic FITS file interface. All FITS file handlings operate
+ * via members of GFits. A FITS file is composed of Header Data Units (HDU)
+ * which are implemented by the GFitsHDU class.
  ***************************************************************************/
 class GFits {
 
@@ -40,13 +51,13 @@ public:
     GFits& operator= (const GFits& fits);
 
     // Methods
-    void      open(const std::string filename);
-    void      save(void);
-    void      saveto(const std::string filename, int clobber);
-    void      close(void);
-    GFitsHDU* hdu(const std::string extname);
-    GFitsHDU* hdu(int extno);
+    void      open(const std::string& filename);
     void      append(const GFitsHDU* hdu);
+    void      save(void);
+    void      saveto(const std::string& filename, int clobber);
+    void      close(void);
+    GFitsHDU* hdu(const std::string& extname);
+    GFitsHDU* hdu(int extno);
 
 private:
     // Private methods

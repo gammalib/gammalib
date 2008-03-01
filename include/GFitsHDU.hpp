@@ -50,6 +50,7 @@ class GFitsHDU {
 public:
     // Constructors and destructors
     GFitsHDU();
+    GFitsHDU(const GFitsImage& image);
     GFitsHDU(const GFitsHDU& hdu);
     ~GFitsHDU();
 
@@ -72,6 +73,7 @@ private:
     void init_members(void);
     void copy_members(const GFitsHDU& hdu);
     void free_members(void);
+    void connect(__fitsfile* fptr);
 
     // Private data area
     __fitsfile   m_fitsfile;    // FITS file pointer

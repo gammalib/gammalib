@@ -179,6 +179,21 @@ void GFitsTableCol::free_members(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Connect table column to FITS file
+ *
+ * @param fptr FITS file pointer to which the table column should be connected
+ ***************************************************************************/
+void GFitsTableCol::connect(__fitsfile* fptr)
+{
+    // Connect Image
+    m_fitsfile = *fptr;
+    
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                           GFitsTableCol friends                         =

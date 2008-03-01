@@ -39,9 +39,8 @@
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                                Constructor                              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Constructor
  ***************************************************************************/
 GFits::GFits()
 {
@@ -53,9 +52,10 @@ GFits::GFits()
 }
 
 
-/***************************************************************************
- *                              Copy constructor                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param fits FITS file from which the instance should be built
  ***************************************************************************/
 GFits::GFits(const GFits& fits)
 {
@@ -70,9 +70,8 @@ GFits::GFits(const GFits& fits)
 }
 
 
-/***************************************************************************
- *                               Destructor                                *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Destructor
  ***************************************************************************/
 GFits::~GFits()
 {
@@ -90,9 +89,10 @@ GFits::~GFits()
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                            Assignment operator                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief  Assignment operator
+ *
+ * @param fits FITS file that should be assigned
  ***************************************************************************/
 GFits& GFits::operator= (const GFits& fits)
 {
@@ -121,11 +121,14 @@ GFits& GFits::operator= (const GFits& fits)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                              Open FITS file                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Open FITS file
+ *
+ * @param filename Name of FITS file to be opened
+ *
+ * Opens all HDUs in the specified FITS file.
  ***************************************************************************/
-void GFits::open(const std::string filename)
+void GFits::open(const std::string& filename)
 {
     // Don't allow opening if another file is already open
     if (m_fitsfile != NULL)
@@ -166,9 +169,71 @@ void GFits::open(const std::string filename)
 }
 
 
-/***************************************************************************
- *                               Save FITS file                            *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Append HDU to FITS file
+ *
+ * @param hdu Pointer to FITS HDU that should be appended
+ *
+ * NOT YET FULLY IMPLEMENTED
+ ***************************************************************************/
+void GFits::append(const GFitsHDU* hdu)
+{
+    // Determine number of HDUs to add. If there are no HDUs so far and if
+    // the HDU to append is not an image then we have to add a primary
+    // image first. In this case we add 2 new HDUs.
+    int n_add = (m_num_hdu == 0 && hdu->m_type != 0) ? 2 : 1;
+    
+    // Create memory to hold HDUs
+    GFitsHDU* tmp = new GFitsHDU[m_num_hdu+n_add];
+    if (tmp != NULL) {
+    
+        // Copy over existing HDUs and remove old ones
+        if (m_hdu != NULL) {
+            for (int i = 0; i < m_num_hdu; ++i)
+                tmp[i] = m_hdu[i];
+            delete [] m_hdu;
+        }
+
+        // Connect the new memory to the card pointer
+        m_hdu = tmp;
+        
+        // Add primary image if required
+        if (n_add == 2) {
+
+            // Append empty primary image
+            //m_hdu[m_num_hdu] = TBD
+
+            // Set FITS file pointer for new HDU
+            __fitsfile fptr  = *m_fitsfile;
+            fptr.HDUposition = m_num_hdu;
+            m_hdu[m_num_hdu].connect(&fptr);
+
+            // Increment number of HDUs
+            m_num_hdu++;
+        }
+
+        // Append new HDU to list
+        m_hdu[m_num_hdu] = *hdu;
+        
+        // Set FITS file pointer for new HDU
+        __fitsfile fptr  = *m_fitsfile;
+        fptr.HDUposition = m_num_hdu;
+        m_hdu[m_num_hdu].connect(&fptr);
+        
+        // Increment number of HDUs
+        m_num_hdu++;
+        
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Saves FITS file
+ *
+ * Saves all HDUs to the FITS file.
  ***************************************************************************/
 void GFits::save(void)
 {
@@ -181,11 +246,15 @@ void GFits::save(void)
 }
 
 
-/***************************************************************************
- *                       Save to specified FITS file                       *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Saves to specified FITS file
+ *
+ * @param filename Name of file into which should be saved
+ * @param clobber Specifies whether any existing file should be overwritten
+ *
+ * FUNCTION IS NOT FULLY IMPLEMENTED
  ***************************************************************************/
-void GFits::saveto(const std::string filename, int clobber)
+void GFits::saveto(const std::string& filename, int clobber)
 {
     // Create a copy of existing object. Recall that the copy does not
     // carry over the FITS filename and pointer. Those will be automatically
@@ -219,11 +288,11 @@ void GFits::saveto(const std::string filename, int clobber)
 }
 
 
-/***************************************************************************
- *                              Close FITS file                            *
- * ----------------------------------------------------------------------- *
- * Closing detaches a FITS file from the GFits object and returns a clean  *
- * empty object.                                                           *
+/***********************************************************************//**
+ * @brief Close FITS file
+ *
+ * Closing detaches a FITS file from the GFits object and returns a clean
+ * empty object.
  ***************************************************************************/
 void GFits::close(void)
 {
@@ -238,11 +307,14 @@ void GFits::close(void)
 }
 
 
-/***************************************************************************
- *                            Get pointer to HDU                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Get pointer to HDU
+ *
+ * @param extname Name of HDU extension which should be returned
+ *
+ * Returns NULL if extension has not been found.
  ***************************************************************************/
-GFitsHDU* GFits::hdu(const std::string extname)
+GFitsHDU* GFits::hdu(const std::string& extname)
 {
     // Initialise result to NULL pointer
     GFitsHDU* ptr = NULL;
@@ -260,71 +332,14 @@ GFitsHDU* GFits::hdu(const std::string extname)
 }
 
 
-/***************************************************************************
- *                         Append HDU to FITS file                         *
- * ----------------------------------------------------------------------- *
- ***************************************************************************/
-void GFits::append(const GFitsHDU* hdu)
-{
-    // Determine number of HDUs to add. If there are no HDUs so far and if
-    // the HDU to append is not an image then we have to add a primary
-    // image first. In this case we add 2 new HDUs.
-    int n_add = (m_num_hdu == 0 && hdu->m_type != 0) ? 2 : 1;
-    
-    // Create memory to hold HDUs
-    GFitsHDU* tmp = new GFitsHDU[m_num_hdu+n_add];
-    if (tmp != NULL) {
-    
-        // Copy over existing HDUs and remove old ones
-        if (m_hdu != NULL) {
-            for (int i = 0; i < m_num_hdu; ++i)
-                tmp[i] = m_hdu[i];
-            delete [] m_hdu;
-        }
-
-        // Connect the new memory to the card pointer
-        m_hdu = tmp;
-        
-        // Add primary image if required
-        if (n_add == 2) {
-
-            // Append empty primary image
-            //m_hdu[m_num_hdu] = TBD
-
-            // Set FITS file pointer for new HDU
-            m_hdu[m_num_hdu].m_fitsfile             = *m_fitsfile;
-            m_hdu[m_num_hdu].m_fitsfile.HDUposition = m_num_hdu;
-
-            // Increment number of HDUs
-            m_num_hdu++;
-        }
-
-        // Append new HDU to list
-        m_hdu[m_num_hdu] = *hdu;
-        
-        // Set FITS file pointer for new HDU
-        m_hdu[m_num_hdu].m_fitsfile             = *m_fitsfile;
-        m_hdu[m_num_hdu].m_fitsfile.HDUposition = m_num_hdu;
-        
-        // Increment number of HDUs
-        m_num_hdu++;
-        
-    }
-
-    // Return
-    return;
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                          GFits private methods                          =
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                         Initialise class members                        *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Initialise class members
  ***************************************************************************/
 void GFits::init_members(void)
 {
@@ -339,15 +354,17 @@ void GFits::init_members(void)
 }
 
 
-/***************************************************************************
- *                            Copy class members                           *
- * ----------------------------------------------------------------------- *
- * The function does not copy the FITS filename and FITS file pointer.     *
- * This prevents that several copies of the FITS file pointer exist in     *
- * different instances of GFits, which would lead to confusion since one   *
- * instance could close the file while for another it still would be       *
- * opened. The rule ONE INSTANCE - ONE FILE applies.                       *
- ***************************************************************************/
+/***********************************************************************//**
+ * @brief  Copy class members
+ *
+ * @param fits Object to be copied
+ *
+ * The method does not copy the FITS filename and FITS file pointer.
+ * This prevents that several copies of the FITS file pointer exist in
+ * different instances of GFits, which would lead to confusion since one
+ * instance could close the file while for another it still would be
+ * opened. The rule ONE INSTANCE - ONE FILE applies.
+  ***************************************************************************/
 void GFits::copy_members(const GFits& fits)
 {
     // Reset FITS file attributes
@@ -367,9 +384,12 @@ void GFits::copy_members(const GFits& fits)
 }
 
 
-/***************************************************************************
- *                           Delete class members                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Delete class members
+ *
+ * This method also closes a file. In case that there are no HDUs or in case
+ * that the FITS file is not correct the result file will be deleted. This
+ * prevents leaving corrupted files on disk.
  ***************************************************************************/
 void GFits::free_members(void)
 {
@@ -386,7 +406,12 @@ void GFits::free_members(void)
         else {
             int status = 0;
             status     = __ffclos(m_fitsfile, &status);
-            if (status != 0)
+            if (status == 252) {
+                int new_status = 0;
+                __ffdelt(m_fitsfile, &new_status);
+                throw GException::fits_error(G_FREE_MEM, status);
+            }
+            else if (status != 0)
                 throw GException::fits_error(G_FREE_MEM, status);
         }
     }
@@ -408,9 +433,11 @@ void GFits::free_members(void)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                             Output operator                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param os Output stream into which the FITS file will be dumped
+ * @param fits FITS file to dump
  ***************************************************************************/
 ostream& operator<< (ostream& os, const GFits& fits)
 {

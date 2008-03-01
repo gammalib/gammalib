@@ -41,16 +41,18 @@ public:
 
     // Methods
     void             open(__fitsfile* fptr);
+    void             save(void);
     void             close(void);
     GFitsAsciiTable* clone(void) const;
-    GFitsTableCol*   column(const std::string colname);
-    GFitsTableCol*   column(const int colnum);
+    GFitsTableCol*   column(const std::string& colname);
+    GFitsTableCol*   column(const int& colnum);
 
 private:
     // Private methods
     void init_members(void);
     void copy_members(const GFitsAsciiTable& table);
     void free_members(void);
+    void connect(__fitsfile* fptr);
 
     // Private data area
     int             m_rows;

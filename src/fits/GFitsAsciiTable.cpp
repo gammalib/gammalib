@@ -40,9 +40,8 @@
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                                Constructor                              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Constructor
  ***************************************************************************/
 GFitsAsciiTable::GFitsAsciiTable() : GFitsData()
 {
@@ -54,9 +53,10 @@ GFitsAsciiTable::GFitsAsciiTable() : GFitsData()
 }
 
 
-/***************************************************************************
- *                              Copy constructor                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param table Table to be used to initialise instance
  ***************************************************************************/
 GFitsAsciiTable::GFitsAsciiTable(const GFitsAsciiTable& table) : GFitsData(table)
 {
@@ -71,9 +71,8 @@ GFitsAsciiTable::GFitsAsciiTable(const GFitsAsciiTable& table) : GFitsData(table
 }
 
 
-/***************************************************************************
- *                               Destructor                                *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Destructor
  ***************************************************************************/
 GFitsAsciiTable::~GFitsAsciiTable()
 {
@@ -91,9 +90,10 @@ GFitsAsciiTable::~GFitsAsciiTable()
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                            Assignment operator                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param table Table to be assigned
  ***************************************************************************/
 GFitsAsciiTable& GFitsAsciiTable::operator= (const GFitsAsciiTable& table)
 {
@@ -125,22 +125,33 @@ GFitsAsciiTable& GFitsAsciiTable::operator= (const GFitsAsciiTable& table)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                               Open Table                                *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Open Table
+ *
+ * NOT YET IMPLEMENTED
  ***************************************************************************/
-/// NOT YET IMPLEMENTED
 void GFitsAsciiTable::open(__fitsfile* fptr)
 {
-    cout << "open ASCII table" << endl;
     // Return
     return;
 }
 
 
-/***************************************************************************
- *                               Close Table                               *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Save ASCII table
+ *
+ * NOT YET IMPLEMENTED
+ ***************************************************************************/
+void GFitsAsciiTable::save(void)
+{
+    cout << "GFitsAsciiTable::save entry" << endl;
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Close Table
  ***************************************************************************/
 void GFitsAsciiTable::close(void)
 {
@@ -155,11 +166,12 @@ void GFitsAsciiTable::close(void)
 }
 
 
-/***************************************************************************
- *               Return pointer to column with specified name              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return pointer to column with specified name
+ *
+ * @param colname Name of ASCII table column
  ***************************************************************************/
-GFitsTableCol* GFitsAsciiTable::column(const std::string colname)
+GFitsTableCol* GFitsAsciiTable::column(const std::string& colname)
 {
     // Initialise pointer
     GFitsTableCol* ptr = NULL;
@@ -179,11 +191,12 @@ GFitsTableCol* GFitsAsciiTable::column(const std::string colname)
 }
 
 
-/***************************************************************************
- *                   Return pointer to column with number                  *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return pointer to column with number
+ *
+ * @param colnum Number of ASCII column (starting from 0)
  ***************************************************************************/
-GFitsTableCol* GFitsAsciiTable::column(const int colnum)
+GFitsTableCol* GFitsAsciiTable::column(const int& colnum)
 {
     // Initialise pointer
     GFitsTableCol* ptr = NULL;
@@ -204,9 +217,8 @@ GFitsTableCol* GFitsAsciiTable::column(const int colnum)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                         Initialise class members                        *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Initialise class members
  ***************************************************************************/
 void GFitsAsciiTable::init_members(void)
 {
@@ -220,9 +232,10 @@ void GFitsAsciiTable::init_members(void)
 }
 
 
-/***************************************************************************
- *                            Copy class members                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param table Table to be copied
  ***************************************************************************/
 void GFitsAsciiTable::copy_members(const GFitsAsciiTable& table)
 {
@@ -244,9 +257,8 @@ void GFitsAsciiTable::copy_members(const GFitsAsciiTable& table)
 }
 
 
-/***************************************************************************
- *                           Delete class members                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Delete class members
  ***************************************************************************/
 void GFitsAsciiTable::free_members(void)
 {
@@ -264,15 +276,38 @@ void GFitsAsciiTable::free_members(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Connect ASCII table to FITS file
+ *
+ * @param fptr FITS file pointer to which the binary table should be connected
+ *
+ * The connection of the ASCII table is done by connecting all columns.
+ ***************************************************************************/
+void GFitsAsciiTable::connect(__fitsfile* fptr)
+{
+    // First connect ASCII table
+    
+    // Then connect all columns
+    for (int i = 0; i < m_cols; ++i) {
+        if (m_columns[i] != NULL) m_columns[i]->connect(fptr);
+    }
+    
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                          GFitsAsciiTable friends                        =
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                             Output operator                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param os Stream into which the output is done
+ * @param table Table to be dumped
  ***************************************************************************/
 ostream& operator<< (ostream& os, const GFitsAsciiTable& table)
 {

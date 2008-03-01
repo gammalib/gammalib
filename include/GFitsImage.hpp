@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsImage.hpp
+ * @brief GFitsImage class definition.
+ * @author J. Knodlseder
+ */
 
 #ifndef GFITSIMAGE_HPP
 #define GFITSIMAGE_HPP
@@ -21,8 +26,11 @@
 /* __ Namespaces _________________________________________________________ */
 
 
-/***************************************************************************
- *                        GFitsImage class definition                      *
+/***********************************************************************//**
+ * @class GFitsImage
+ *
+ * @brief Implements a FITS image
+ *
  ***************************************************************************/
 class GFitsImage : public GFitsData {
 
@@ -40,6 +48,7 @@ public:
 
     // Methods
     void        open(__fitsfile* fptr);
+    void        save(void);
     void        close(void);
     GFitsImage* clone(void) const;
     
@@ -48,8 +57,13 @@ private:
     void init_members(void);
     void copy_members(const GFitsImage& image);
     void free_members(void);
+    void connect(__fitsfile* fptr);
 
     // Private data area
+    __fitsfile  m_fitsfile;
+    int         m_bitpix;
+    int         m_naxis;
+    long*       m_naxes;
 };
 
 

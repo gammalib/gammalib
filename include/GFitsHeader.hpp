@@ -40,6 +40,7 @@ public:
 
     // Methods
     void             open(__fitsfile* fptr);
+    void             save(void);
     void             close(void);
     void             update(const GFitsHeaderCard& card);
     GFitsHeaderCard* card(const std::string& keyname);
