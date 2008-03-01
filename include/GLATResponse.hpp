@@ -68,21 +68,43 @@ public:
                  const double& time);
 
     void set_caldb(std::string caldb);
-    void load(std::string rspname);
+    void load(std::string rspname, std::string rsptype);
     void save(std::string rspname) const;
     GLATResponse* clone(void) const;
 
 private:
+    // Private Effective Area methods
+    void aeff_init(void);
+
+    // Private PSF methods
+    void    psf_init(void);
+    double  psf_scale(const double& energy);
+    double  psf_base_value(const double& u, const double& gamma);
+    GVector psf_base_vector(const GVector& u, const double& gamma);
+    
+    // Private PSF data
+    int     m_psf_angle_num;
+    double  m_psf_angle_min;
+    double  m_psf_angle_max;
+    double  m_psf_angle_bin;
+    int     m_psf_energy_num;
+    int     m_psf_ctheta_num;
+    double* m_psf;
+    double* m_norm;
+    double* m_sigma;
+
+    // Provate energy dissipation methods
+    void edisp_init(void);
+
     // Private methods
     void    init_members(void);
     void    copy_members(const GLATResponse& rsp);
     void    free_members(void);
-    void    init_aeff(void);
-    void    init_psf(void);
-    void    init_edisp(void);
     GVector get_fits_vector(const GFitsHDU* hdu, const std::string& colname, int row = 0);
 
     // Private data area
+    std::string m_rsptype;
+    int         m_section;   // 0=front, 1=back
 
 };
 

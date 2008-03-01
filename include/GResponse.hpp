@@ -113,12 +113,12 @@ public:
     /// Pure virtual method to load the instrument response from the calibration
     /// database
     /// @param rspname Name of the instrument response
-    virtual void load(std::string rspname) = 0;
+//    virtual void load(std::string rspname) = 0;
 
     /// Pure virtual method to save the instrument response into the calibration
     /// database
     /// @param rspname Name of the instrument response
-    virtual void save(std::string rspname) const = 0;
+//    virtual void save(std::string rspname) const = 0;
 
     /// Pure virtual method to clone the response instance
     virtual GResponse* clone(void) const = 0;

@@ -30,7 +30,7 @@ void test_lat_response(void)
         // Get HANDOFF Response
         GLATResponse rsp;
         rsp.set_caldb("irf/lat");
-        rsp.load("Pass5_v0_front");
+        rsp.load("Pass5_v0", "front");
 /*
         // Open FITS file
         GFits fits;
