@@ -168,7 +168,8 @@ void GFitsHeader::close(void)
 
 
 /***********************************************************************//**
- * @brief Update card in header                                            
+ * @brief Update card in header
+ *                                            
  * This method updates one header card. Updating means replacing any       
  * existing card with the specified one or appending a new card to the     
  * list of existing cards.                                                 
