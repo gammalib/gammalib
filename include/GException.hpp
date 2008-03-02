@@ -183,6 +183,18 @@ public:
         fits_unknown_coltype(string origin, int type);
     };
 
+    // FITS bad bitpix value
+    class fits_bad_bitpix : public GExceptionHandler {
+    public:
+        fits_bad_bitpix(string origin, int bitpix);
+    };
+
+    // FITS bad image operator
+    class fits_bad_image_operator : public GExceptionHandler {
+    public:
+        fits_bad_image_operator(string origin, int naxis, int nargs);
+    };
+
 };
 
 #endif /* GEXCEPTION_HPP */

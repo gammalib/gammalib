@@ -70,10 +70,11 @@ public:
 
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GFitsHDU& hdu);
-    void free_members(void);
-    void connect(__fitsfile* fptr);
+    void        init_members(void);
+    void        copy_members(const GFitsHDU& hdu);
+    void        free_members(void);
+    void        connect(__fitsfile* fptr);
+    GFitsImage* new_image(void);
 
     // Private data area
     __fitsfile   m_fitsfile;    // FITS file pointer

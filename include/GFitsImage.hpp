@@ -1,5 +1,5 @@
 /***************************************************************************
- *                    GFitsImage.hpp  - FITS image class                   *
+ *              GFitsImage.hpp  - FITS image abstract base class           *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -29,8 +29,9 @@
 /***********************************************************************//**
  * @class GFitsImage
  *
- * @brief Implements a FITS image
+ * @brief Abstract interface for the FITS image classes.
  *
+ * Implements an abstract interface for FITS images.
  ***************************************************************************/
 class GFitsImage : public GFitsData {
 
@@ -40,52 +41,45 @@ class GFitsImage : public GFitsData {
 public:
     // Constructors and destructors
     GFitsImage();
-    GFitsImage(int naxis, const int* naxes, int bitpix = -64);
+    GFitsImage(int naxis, const int* naxes);
     GFitsImage(const GFitsImage& image);
     ~GFitsImage();
 
     // Operators
     GFitsImage& operator= (const GFitsImage& image);
 
-    // Methods
-    void        open(__fitsfile* fptr);
-    void        save(void);
-    void        close(void);
-    void        link(const double* pixels);
-    GFitsImage* clone(void) const;
+    // Pure virtual methods
+    virtual void        open(__fitsfile* fptr) = 0;
+    virtual void        save(void) = 0;
+    virtual void        close(void) = 0;
+    virtual GFitsImage* clone(void) const = 0;
     
-private:
+    // Methods
+    int naxis(void) const;
+    int naxes(int axis) const;
+    
+protected:
     // Private methods
     void init_members(void);
     void copy_members(const GFitsImage& image);
     void free_members(void);
     void connect(__fitsfile* fptr);
+    void open_image(__fitsfile* fptr);
+    void load_image(int datatype, const void* pixels, const void* nulval, int* anynul);
+    void save_image(int datatype, const void* pixels);
 
     // Private data area
     __fitsfile m_fitsfile;    // FITS file
     int        m_bitpix;      // Number of Bits/pixel
     int        m_naxis;       // Image dimension
     long*      m_naxes;       // Number of pixels in each dimension
-    int        m_linked;      // Pixels are linked (don't delete them!)
-    int        m_type;        // Pixel type
-    void*      m_pixels;      // Pixels
+    int        m_num_pixels;  // Number of image pixels
 };
 
 
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
-inline
-void GFitsImage::link(const double* pixels)
-{
-    m_linked = 1;
-    m_type   = __TDOUBLE;
-    m_pixels = (double*)pixels;
-}
-inline 
-GFitsImage* GFitsImage::clone(void) const 
-{
-    return new GFitsImage(*this);
-}
+inline int GFitsImage::naxis(void) const { return m_naxis; }
 
 #endif /* GFITSIMAGE_HPP */

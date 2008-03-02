@@ -15,7 +15,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
 #include "GFitsTableDblCol.hpp"
-#include <iostream>                           // cout, cerr
+#include <iostream>
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -240,7 +240,7 @@ int* GFitsTableDblCol::ptr_int(void)
 
 
 /***************************************************************************
- *                              Set NULL string                            *
+ *                              Set NULL value                             *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
 void GFitsTableDblCol::set_nullval(const double* value)

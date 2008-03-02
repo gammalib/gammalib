@@ -45,12 +45,7 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GFitsData& data);
-    void free_members(void);
     virtual void connect(__fitsfile* fptr) = 0;
-
-    // Protected data area
 };
 
 #endif /* GFITSDATA_HPP */

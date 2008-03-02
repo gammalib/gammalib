@@ -12,6 +12,7 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include <stdlib.h>
 #include "test_GFits.hpp"
 
 /* __ Namespaces _________________________________________________________ */
@@ -293,39 +294,168 @@ void test_columns(void)
  ***************************************************************************/
 void test_create(void)
 {
-    std::cout << "Test GFits: Create FITS file: ";
+    // Dump header
+    cout << "Test GFits: Create FITS file: ";
+    
+    // Remove FITS file
+    system("rm -rf test.fits");
+    
+    // Create FITS file with empty double precision image
     try {
-        // Allocate and open FITS file
         GFits fits;
         fits.open("test.fits");
-        cout << endl << fits;
-        
-        // Define image
-        int naxis       = 2;
-        int naxes[]     = {2,4};
-        double pixels[] = {0,1, 2,3, 4,5, 6,7};
-        GFitsImage image(naxis, naxes);
-        image.link(pixels);
-        
-        // Define and append HDU        
+        GFitsDblImage image;
         GFitsHDU hdu(image);
         fits.append(&hdu);
-        
-        // Dump FITS file
-        cout << endl << fits;
-        
-        // Save FITS file
         fits.save();
     }
     catch (exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to create FITS file." << std::endl;
-        std::cout << e.what() << std::endl;
+        cout << endl << "TEST ERROR: Unable to create FITS file." << endl;
+        cout << e.what() << endl;
         throw;
     }
-    std::cout << ". ok." << std::endl;
+    cout << ".";
+    
+    // Attach double precision image
+    double sum = 0.0;
+    try {
+        GFits fits;
+        fits.open("test.fits");
+        int naxis       = 2;
+        int nx          = 10;
+        int ny          = 20;
+        int naxes[]     = {nx,ny};
+        GFitsDblImage image(naxis, naxes);
+        for (int ix = 0; ix < nx; ++ix) {
+            for (int iy = 0; iy < ny; ++iy) {
+                image(ix,iy) = 0.01*ix + 0.01*iy;
+                sum += image(ix,iy);
+            }
+        }
+        GFitsHDU hdu(image);
+        fits.append(&hdu);
+        fits.save();
+    }
+    catch (exception &e) {
+        cout << endl << "TEST ERROR: Unable to create FITS file." << endl;
+        cout << e.what() << endl;
+        throw;
+    }
+    cout << ".";
+    
+    // Re-open double precision image
+    try {
+        GFits fits;
+        fits.open("test.fits");
+        GFitsHDU*      hdu   = fits.hdu(2);
+        GFitsDblImage* image = (GFitsDblImage*)hdu->data();
+        int nx = image->naxes(0);
+        int ny = image->naxes(1);
+        double total = 0.0;
+        for (int ix = 0; ix < nx; ++ix) {
+            for (int iy = 0; iy < ny; ++iy) {
+                total += (*image)(ix,iy);
+            }
+        }
+        if (!dequal(total, sum)) {
+            cout << endl << "TEST ERROR: Bad values in loaded image." << endl;
+            throw;
+        }
+    }
+    catch (exception &e) {
+        cout << endl << "TEST ERROR: Unable to re-open FITS file." << endl;
+        cout << e.what() << endl;
+        throw;
+    }
+    cout << ".";
+        
+
+    cout << ". ok." << endl;
 }
 
 
+/***************************************************************************
+ *                        Test: GFitsDblImage test                         *
+ ***************************************************************************/
+void test_image_double(void)
+{
+    // Dump header
+    cout << "Test GFitsDblImage: ";
+    
+    // Test 1D Image
+    try {
+        int naxis       = 1;
+        int nx          = 10;
+        int naxes[]     = {nx};
+        GFitsDblImage image(naxis, naxes);
+        cout << ".";
+        
+        // Fill and read image
+        try {
+            for (int ix = 0; ix < nx; ++ix)
+                image(ix) = double(ix);
+            double sum = 0.0;
+            for (int ix = 0; ix < nx; ++ix)
+                sum += image(ix);
+            if (!dequal(sum, 0.5*double(nx-1)*double(nx))) {
+                cout << endl << "TEST ERROR: Bad fill/read of 1D image." << endl;
+                throw;
+            }
+        }
+        catch (exception &e) {
+            cout << endl << "TEST ERROR: Unable to fill/read 1D image." << endl;
+            cout << e.what() << endl;
+            throw;
+        }
+        cout << ".";
+        
+        // Bad 2D operator
+        try {
+            double result = image(0,1);
+        }
+        catch (GException::fits_bad_image_operator &e) {
+            cout << ".";
+        }
+        catch (exception &e) {
+            cout << endl << "TEST ERROR: Wrong operactor access error." << endl;
+            cout << e.what() << endl;
+            throw;
+        }
+
+        // Bad 3D operator
+        try {
+            double result = image(0,1,2);
+        }
+        catch (GException::fits_bad_image_operator &e) {
+            cout << ".";
+        }
+        catch (exception &e) {
+            cout << endl << "TEST ERROR: Wrong operactor access error." << endl;
+            cout << e.what() << endl;
+            throw;
+        }
+
+        // Bad 4D operator
+        try {
+            double result = image(0,1,2,3);
+        }
+        catch (GException::fits_bad_image_operator &e) {
+            cout << ".";
+        }
+        catch (exception &e) {
+            cout << endl << "TEST ERROR: Wrong operactor access error." << endl;
+            cout << e.what() << endl;
+            throw;
+        }
+        
+    }
+    catch (exception &e) {
+        cout << endl << "TEST ERROR: Unable to test GFitsDblImage classes." << endl;
+        cout << e.what() << endl;
+        throw;
+    }
+    cout << ". ok." << endl;
+}
 
 
 /***************************************************************************
@@ -340,6 +470,7 @@ int main(void)
     std::cout << "***********************" << std::endl;
 
     // Execute the tests
+    test_image_double();
     test_create();
     //test_open();
     //test_columns();

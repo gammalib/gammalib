@@ -41,9 +41,6 @@
  ***************************************************************************/
 GFitsData::GFitsData()
 {
-    // Initialise class members for clean destruction
-    init_members();
-
     // Return
     return;
 }
@@ -55,12 +52,6 @@ GFitsData::GFitsData()
  ***************************************************************************/
 GFitsData::GFitsData(const GFitsData& data)
 {
-    // Initialise class members for clean destruction
-    init_members();
-
-    // Copy members
-    copy_members(data);
-
     // Return
     return;
 }
@@ -72,9 +63,6 @@ GFitsData::GFitsData(const GFitsData& data)
  ***************************************************************************/
 GFitsData::~GFitsData()
 {
-    // Free members
-    free_members();
-
     // Return
     return;
 }
@@ -95,15 +83,6 @@ GFitsData& GFitsData::operator= (const GFitsData& data)
     // Execute only if object is not identical
     if (this != &data) {
 
-        // Free members
-        free_members();
-
-        // Initialise private members for clean destruction
-        init_members();
-
-        // Copy members
-        copy_members(data);
-
     } // endif: object was not identical
 
     // Return this object
@@ -123,46 +102,6 @@ GFitsData& GFitsData::operator= (const GFitsData& data)
  =                         GFitsData private methods                       =
  =                                                                         =
  ==========================================================================*/
-
-/***************************************************************************
- *                         Initialise class members                        *
- * ----------------------------------------------------------------------- *
- ***************************************************************************/
-void GFitsData::init_members(void)
-{
-    // Initialise members
-
-    // Return
-    return;
-}
-
-
-/***************************************************************************
- *                            Copy class members                           *
- * ----------------------------------------------------------------------- *
- ***************************************************************************/
-void GFitsData::copy_members(const GFitsData& data)
-{
-    // Copy attributes
-
-    // Copy data
-
-    // Return
-    return;
-}
-
-
-/***************************************************************************
- *                           Delete class members                          *
- * ----------------------------------------------------------------------- *
- ***************************************************************************/
-void GFitsData::free_members(void)
-{
-    // Free memory
-
-    // Return
-    return;
-}
 
 
 /*==========================================================================

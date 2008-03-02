@@ -76,15 +76,5 @@ private:
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
-inline 
-GFitsHDU* GFits::hdu(int extno) 
-{
-    #if defined(G_RANGE_CHECK)
-    if (extno < 1 || extno > m_num_hdu)
-        throw GException::out_of_range("GFits::hdu(int)", extno, 1, m_num_hdu);
-    #endif
-    return &(m_hdu[extno+1]); 
-}
-
 
 #endif /* GFITS_HPP */

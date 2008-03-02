@@ -316,3 +316,31 @@ GException::fits_unknown_coltype::fits_unknown_coltype(string origin, int type)
     m_origin  = origin;
     m_message = "Column type " + str(type) + " is unknown";
 }
+
+
+/***********************************************************************//**
+ * @brief FITS error: invalid number of bits per pixel
+ *
+ * @param origin Method that throws the error
+ * @param bitpix Bitpix value that was not 8,16,32,64,-32, or -64
+ ***************************************************************************/
+GException::fits_bad_bitpix::fits_bad_bitpix(string origin, int bitpix)
+{
+    m_origin  = origin;
+    m_message = "Invalid number of bits per pixel (bitpix=" + str(bitpix) + ")";
+}
+
+
+/***********************************************************************//**
+ * @brief FITS error: bad image operator has been used
+ *
+ * @param origin Method that throws the error
+ * @param naxis Dimension of image
+ * @param nargs Number of arguments of the image operator
+ ***************************************************************************/
+GException::fits_bad_image_operator::fits_bad_image_operator(string origin, int naxis, int nargs)
+{
+    m_origin  = origin;
+    m_message = "Bad image pixel access operator used (image dimension=" + 
+                 str(naxis) + "; operator arguments=" + str(nargs) + ")";
+}

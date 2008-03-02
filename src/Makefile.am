@@ -19,6 +19,7 @@ files = GException.cpp \
 	fits/GFitsHeader.cpp \
 	fits/GFitsData.cpp \
 	fits/GFitsImage.cpp \
+	fits/GFitsDblImage.cpp \
 	fits/GFitsAsciiTable.cpp \
 	fits/GFitsBinTable.cpp \
 	fits/GFitsTableCol.cpp \

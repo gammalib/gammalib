@@ -16,7 +16,7 @@
 #include "GException.hpp"
 #include "GFits.hpp"
 #include "GTools.hpp"
-#include <iostream>                           // cout, cerr
+#include <iostream>
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -311,9 +311,9 @@ void GFits::close(void)
  * @brief Get pointer to HDU
  *
  * @param extname Name of HDU extension which should be returned
- *
- * Returns NULL if extension has not been found.
  ***************************************************************************/
+#define G_HDU1 "GFits::hdu(const std::string&)"
+#define G_HDU2 "GFits::hdu(int extno)"
 GFitsHDU* GFits::hdu(const std::string& extname)
 {
     // Initialise result to NULL pointer
@@ -326,9 +326,40 @@ GFitsHDU* GFits::hdu(const std::string& extname)
             break;
         }
     }
+    
+    // Throw an error if HDU has not been found
+    if (ptr == NULL)
+        throw GException::fits_hdu_not_found(G_HDU1, extname);
 
     // Return pointer
     return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Get pointer to HDU
+ *
+ * @param extno Extension number (starting from 1)
+ ***************************************************************************/
+GFitsHDU* GFits::hdu(int extno) 
+{
+    // Verify that extension number is in valid range
+    if (extno < 1 || extno > m_num_hdu)
+        throw GException::out_of_range("GFits::hdu(int)", extno, 1, m_num_hdu);
+
+    // Get HDU pointer
+    GFitsHDU* ptr = &(m_hdu[extno-1]);
+
+    // Throw an error if HDU has not been found
+    if (ptr == NULL) {
+        ostringstream s_extname;
+        s_extname << extno;
+        std::string extname = "extno=" + s_extname.str();
+        throw GException::fits_hdu_not_found(G_HDU2, extname);
+    }
+
+    // Return pointer
+    return ptr; 
 }
 
 

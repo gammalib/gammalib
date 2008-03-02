@@ -20,15 +20,16 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPEN "GFitsImage::open(fitsfile*)"
-#define G_SAVE "GFitsImage::save()"
+#define G_NAXES      "GFitsImage::naxes(int)"
+#define G_OPEN_IMAGE "GFitsImage::open(fitsfile*)"
+#define G_LOAD_IMAGE "GFitsImage::load_image(int, const void*, const void*, int*)"
+#define G_SAVE_IMAGE "GFitsImage::save_image(int, const void*)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-
 
 
 /*==========================================================================
@@ -55,26 +56,28 @@ GFitsImage::GFitsImage() : GFitsData()
  *
  * @param naxis Image dimensions (0,1,2,3,4)
  * @param naxes Number of pixels in each dimension
- * @param bitpix Number of Bits per pixel (8, 16, 32, 64, -32, -64=default)
  *
  * Construct instance of GFitsImage by specifying the image dimension and
  * the number of pixels in each dimension. Note that this constructor does
  * not allocate any memory for the actual image.
  ***************************************************************************/
-GFitsImage::GFitsImage(int naxis, const int* naxes, int bitpix) : GFitsData()
+GFitsImage::GFitsImage(int naxis, const int* naxes) : GFitsData()
 {
     // Initialise class members for clean destruction
     init_members();
     
     // Store number of axis and bitpix
-    m_naxis  = naxis;
-    m_bitpix = bitpix;
+    m_naxis = naxis;
     
-    // Copy number of pixels in each dimension
+    // Copy number of pixels in each dimension and calculate the total
+    // number of pixels
     if (m_naxis > 0) {
-        m_naxes = new long[m_naxis];
-        for (int i = 0; i < m_naxis; ++i)
-            m_naxes[i] = naxes[i];
+        m_naxes      = new long[m_naxis];
+        m_num_pixels = 1;
+        for (int i = 0; i < m_naxis; ++i) {
+            m_naxes[i]    = naxes[i];
+            m_num_pixels *= naxes[i];
+        }
     }
 
     // Return
@@ -155,101 +158,21 @@ GFitsImage& GFitsImage::operator= (const GFitsImage& image)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Open Image
+ * @brief Return axis dimension
  *
- * @param fptr FITS file pointer
- *
- * Open FITS image in FITS file. If the specified image does not exist a
- * new image will be created in the FITS file.
- * IMPLEMENTATION NOT COMPLETE (IMAGE CUBE LOADING MISSING)
+ * @param axis Axis for which the dimension should be returned (starting from 0)
  ***************************************************************************/
-void GFitsImage::open(__fitsfile* fptr)
+int GFitsImage::naxes(int axis) const
 {
-    // Move to HDU
-    int status = 0;
-    status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
-    if (status != 0)
-        throw GException::fits_error(G_OPEN, status);
+    // Check if axis is within the range
+    if (axis < 0 || axis >= m_naxis)
+        throw GException::out_of_range(G_NAXES, axis, 0, m_naxis-1);
 
-    // Save FITS file pointer
-    m_fitsfile = *fptr;
-    
-    // Load image
-    // TBD
-    
-    // Return
-    return;
-}
+    // Get axis dimension
+    int dim = m_naxes[axis];
 
-
-/***********************************************************************//**
- * @brief Save Image
- *
- * Save image pixels into FITS file. In case that the HDU does not exist it
- * is created.
- ***************************************************************************/
-void GFitsImage::save(void)
-{
-    // Move to HDU
-    int status = 0;
-    status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
-    
-    // If HDU does not yet exist in file then create it now
-    if (status == 107) {
-        status = 0;
-        status = __ffcrim(&m_fitsfile, m_bitpix, m_naxis, m_naxes, &status);
-        if (status != 0)
-            throw GException::fits_error(G_SAVE, status);
-    }
-    else if (status != 0)
-        throw GException::fits_error(G_SAVE, status);
-
-    // If HDU seems to be empty then create it now. This is only needed for the
-    // primary HDU, since __ffmahd gives no error if the primary HDU is empty.
-    // By checking the number of keywords in the HDU we detect an empty HDU ...
-    int num = 0;
-    status  = __ffghsp(&m_fitsfile, &num, NULL, &status);
-    if (status != 0)
-        throw GException::fits_error(G_SAVE, status);
-    if (num == 0) {
-        status = __ffcrim(&m_fitsfile, m_bitpix, m_naxis, m_naxes, &status);
-        if (status != 0)
-            throw GException::fits_error(G_SAVE, status);
-    }
-
-    // Save the image pixels (if there are some ...)
-    if (m_naxis > 0) {
-        long* fpixel = new long[m_naxis];
-        long* lpixel = new long[m_naxis];
-        for (int i = 0; i < m_naxis; ++i) {
-            fpixel[i] = 1;
-            lpixel[i] = m_naxes[i];
-        }
-        status = __ffpss(&m_fitsfile, m_type, fpixel, lpixel, m_pixels, &status);
-        if (status != 0)
-            throw GException::fits_error(G_SAVE, status);
-        delete [] fpixel;
-        delete [] lpixel;
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Close Image
- ***************************************************************************/
-void GFitsImage::close(void)
-{
-    // Free members
-    free_members();
-
-    // Initialise members
-    init_members();
-
-    // Return
-    return;
+    // Return axis dimension
+    return dim;
 }
 
 
@@ -270,9 +193,7 @@ void GFitsImage::init_members(void)
     m_bitpix               = 8;
     m_naxis                = 0;
     m_naxes                = NULL;
-    m_linked               = 0;
-    m_type                 = __TBYTE;
-    m_pixels               = NULL;
+    m_num_pixels           = 0;
 
     // Return
     return;
@@ -287,13 +208,11 @@ void GFitsImage::init_members(void)
 void GFitsImage::copy_members(const GFitsImage& image)
 {
     // Copy attributes
-    m_fitsfile = image.m_fitsfile;
-    m_bitpix   = image.m_bitpix;
-    m_naxis    = image.m_naxis;
-    m_naxes    = NULL;
-    m_linked   = image.m_linked;
-    m_type     = image.m_type;
-    m_pixels   = NULL;
+    m_fitsfile   = image.m_fitsfile;
+    m_bitpix     = image.m_bitpix;
+    m_naxis      = image.m_naxis;
+    m_naxes      = NULL;
+    m_num_pixels = image.m_num_pixels;
 
     // Copy axes
     if (image.m_naxes != NULL && m_naxis > 0) {
@@ -301,12 +220,6 @@ void GFitsImage::copy_members(const GFitsImage& image)
         memcpy(m_naxes, image.m_naxes, m_naxis*sizeof(long));
     }
     
-    // Copy pixels (not if they have been linked!!!)
-    if (m_linked)
-        m_pixels = image.m_pixels;
-    else {
-    }
-
     // Return
     return;
 }
@@ -320,23 +233,8 @@ void GFitsImage::free_members(void)
     // Free memory
     if (m_naxes != NULL) delete [] m_naxes;
     
-    // If we have proper pixels then free them now (type dependent!)
-    if (!m_linked) {
-        if (m_pixels != NULL) {
-            switch (m_type) {
-            case __TDOUBLE:
-                delete [] (double*)m_pixels;
-                break;
-            default:
-                break;
-            }
-        }
-    }
-    
     // Mark memory as free
-    m_naxes  = NULL;
-    m_pixels = NULL;
-    m_linked = 0;
+    m_naxes = NULL;
 
     // Return
     return;
@@ -353,6 +251,157 @@ void GFitsImage::connect(__fitsfile* fptr)
     // Connect Image
     m_fitsfile = *fptr;
     
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Open Image
+ *
+ * @param fptr FITS file pointer
+ *
+ * Open FITS image in FITS file. Opening means connecting the FITS file
+ * pointer to the image and reading the image and axes dimensions.
+ ***************************************************************************/
+void GFitsImage::open_image(__fitsfile* fptr)
+{
+    // Move to HDU
+    int status = 0;
+    status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_OPEN_IMAGE, status);
+
+    // Save FITS file pointer
+    m_fitsfile = *fptr;
+    
+    // Get the image dimensions
+    status = __ffgidm(&m_fitsfile, &m_naxis, &status);
+    if (status != 0)
+        throw GException::fits_error(G_OPEN_IMAGE, status);
+
+    // Reset number of image pixels
+    m_num_pixels = 0;
+
+    // Get the axes dimensions
+    if (m_naxis > 0) {
+    
+        // Allocate memory for axes dimensions
+        if (m_naxes != NULL) delete [] m_naxes;
+        m_naxes      = new long[m_naxis];
+
+        // Get the axes dimensions
+        status = __ffgisz(&m_fitsfile, m_naxis, m_naxes, &status);
+        if (status != 0)
+            throw GException::fits_error(G_OPEN_IMAGE, status);
+        
+        // Calculate number of image pixels
+        m_num_pixels = 1;
+        for (int i = 0; i < m_naxis; ++i)
+            m_num_pixels *= m_naxes[i];
+
+    } // endif: there is an image
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load FITS image
+ *
+ * @param datatype Datatype of pixels to be saved
+ * @param pixels Pixel array to be saved
+ *
+ * Save image pixels into FITS file. In case that the HDU does not exist it
+ * is created.
+ ***************************************************************************/
+void GFitsImage::load_image(int datatype, const void* pixels, const void* nulval,
+                            int* anynul)
+{
+    // Move to HDU
+    int status = 0;
+    status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_LOAD_IMAGE, status);
+
+    // Load the image pixels (if there are some ...)
+    if (m_naxis > 0) {
+        long* fpixel = new long[m_naxis];
+        long* lpixel = new long[m_naxis];
+        long* inc    = new long[m_naxis];
+        for (int i = 0; i < m_naxis; ++i) {
+            fpixel[i] = 1;
+            lpixel[i] = m_naxes[i];
+            inc[i]    = 1;
+        }
+        status = __ffgsv(&m_fitsfile, datatype, fpixel, lpixel, inc, (void*)nulval,
+                         (void*)pixels, anynul, &status);
+        if (status != 0)
+            throw GException::fits_error(G_LOAD_IMAGE, status);
+        delete [] fpixel;
+        delete [] lpixel;
+        delete [] inc;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save FITS image
+ *
+ * @param datatype Datatype of pixels to be saved
+ * @param pixels Pixel array to be saved
+ *
+ * Save image pixels into FITS file. In case that the HDU does not exist it
+ * is created.
+ ***************************************************************************/
+void GFitsImage::save_image(int datatype, const void* pixels)
+{
+    // Move to HDU
+    int status = 0;
+    status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
+    
+    // If HDU does not yet exist in file then create it now
+    if (status == 107) {
+        status = 0;
+        status = __ffcrim(&m_fitsfile, m_bitpix, m_naxis, m_naxes, &status);
+        if (status != 0)
+            throw GException::fits_error(G_SAVE_IMAGE, status);
+    }
+    else if (status != 0)
+        throw GException::fits_error(G_SAVE_IMAGE, status);
+
+    // If HDU seems to be empty then create it now. This is only needed for the
+    // primary HDU, since __ffmahd gives no error if the primary HDU is empty.
+    // By checking the number of keywords in the HDU we detect an empty HDU ...
+    int num = 0;
+    status  = __ffghsp(&m_fitsfile, &num, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_SAVE_IMAGE, status);
+    if (num == 0) {
+        status = __ffcrim(&m_fitsfile, m_bitpix, m_naxis, m_naxes, &status);
+        if (status != 0)
+            throw GException::fits_error(G_SAVE_IMAGE, status);
+    }
+
+    // Save the image pixels (if there are some ...)
+    if (m_naxis > 0) {
+        long* fpixel = new long[m_naxis];
+        long* lpixel = new long[m_naxis];
+        for (int i = 0; i < m_naxis; ++i) {
+            fpixel[i] = 1;
+            lpixel[i] = m_naxes[i];
+        }
+        status = __ffpss(&m_fitsfile, datatype, fpixel, lpixel, (void*)pixels, &status);
+        if (status != 0)
+            throw GException::fits_error(G_SAVE_IMAGE, status);
+        delete [] fpixel;
+        delete [] lpixel;
+    }
+
     // Return
     return;
 }
@@ -375,6 +424,7 @@ ostream& operator<< (ostream& os, const GFitsImage& image)
     // Put header in stream
     os << "=== GFitsImage ===" << endl;
     os << " Number of dimensions ......: " << image.m_naxis << endl;
+    os << " Number of image pixels ....: " << image.m_num_pixels << endl;
     for (int i = 0; i < image.m_naxis; ++i)
         os << " Number of bins in " << i << " .......: " << image.m_naxes[i] << endl;
 

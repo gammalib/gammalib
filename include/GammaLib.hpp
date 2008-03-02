@@ -34,6 +34,7 @@
 #include "GFitsHeaderCard.hpp"
 #include "GFitsData.hpp"
 #include "GFitsImage.hpp"
+#include "GFitsDblImage.hpp"
 #include "GFitsAsciiTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableCol.hpp"

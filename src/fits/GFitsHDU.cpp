@@ -17,13 +17,15 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsHDU.hpp"
+#include "GFitsDblImage.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPEN     "GFitsHDU::open(int)"
-#define G_SAVE     "GFitsHDU::save()"
-#define G_COLUMN   "GFitsHDU::column(const std::string&)"
+#define G_OPEN      "GFitsHDU::open(int)"
+#define G_SAVE      "GFitsHDU::save()"
+#define G_COLUMN    "GFitsHDU::column(const std::string&)"
+#define G_NEW_IMAGE "GFitsHDU::new_image()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -185,7 +187,7 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
     if (m_data != NULL) delete m_data;
     switch (m_type) {
     case 0:        // Image HDU
-        m_data = new GFitsImage();
+        m_data = new_image();
         break;
     case 1:        // ASCII Table HDU
         m_data = new GFitsAsciiTable();
@@ -237,28 +239,25 @@ void GFitsHDU::save(void)
     if (status == 107) {
         m_fitsfile.HDUposition = m_hdunum-1;
         status = 0;
-        switch (m_type) {
-        case 0:        // Image HDU
-            if (m_data == NULL) m_data = new GFitsImage();
-            m_data->connect(&m_fitsfile);
-            m_data->save();
-            break;
-        case 1:        // ASCII Table HDU
-            if (m_data == NULL) m_data = new GFitsAsciiTable();
-            m_data->connect(&m_fitsfile);
-            m_data->save();
-            break;
-        case 2:        // Binary Table HDU
-            if (m_data == NULL) m_data = new GFitsBinTable();
-            m_data->connect(&m_fitsfile);
-            m_data->save();
-            break;
-        default:
-            throw GException::fits_unknown_HDU_type(G_SAVE, m_type);
-            break;
+        if (m_data != NULL) {
+            switch (m_type) {
+            case 0:        // Image HDU
+                m_data->connect(&m_fitsfile);
+                m_data->save();
+                break;
+            case 1:        // ASCII Table HDU
+                m_data->connect(&m_fitsfile);
+                m_data->save();
+                break;
+            case 2:        // Binary Table HDU
+                m_data->connect(&m_fitsfile);
+                m_data->save();
+                break;
+            default:
+                throw GException::fits_unknown_HDU_type(G_SAVE, m_type);
+                break;
+            }
         }
-        if (m_header == NULL) m_header = new GFitsHeader();
-        m_header->open(&m_fitsfile);
     }
     
     // If they exist then save data and header
@@ -357,6 +356,8 @@ void GFitsHDU::primary(void)
 
 /***********************************************************************//**
  * @brief Initialise class members
+ *
+ * Sets all class members to well defined values.
  ***************************************************************************/
 void GFitsHDU::init_members(void)
 {
@@ -378,6 +379,8 @@ void GFitsHDU::init_members(void)
  * @brief Copy class members
  *
  * @param hdu HDU to be copied
+ *
+ * Assumes that all memory has been freed correctly before calling.
  ***************************************************************************/
 void GFitsHDU::copy_members(const GFitsHDU& hdu)
 {
@@ -416,6 +419,10 @@ void GFitsHDU::free_members(void)
  * @brief Connect HDU to FITS file
  *
  * @param fptr FITS file pointer to which the HDU should be connected
+ *
+ * Connects the HDU and the associated data area to the specified FITS file.
+ * Note that the header area does not require a FITS pointer, hence no
+ * connection is required.
  ***************************************************************************/
 void GFitsHDU::connect(__fitsfile* fptr)
 {
@@ -428,6 +435,63 @@ void GFitsHDU::connect(__fitsfile* fptr)
     
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Allocate new FITS image and return memory pointer
+ *
+ * Depending on the number of bits per pixel, a FITS image is allocated
+ * and the pointer is returned. The following FITS image classes are
+ * handled:
+ * GFitsBytImage (bitpix=8)
+ * GFitsShtImage (bitpix=16)
+ * GFitsLngImage (bitpix=32)
+ * GFitsLlgImage (bitpix=64)
+ * GFitsFltImage (bitpix=-32)
+ * GFitsDblImage (bitpix=-64)
+ * The information about the number of bits per pixels is extracted from
+ * the actual HDU.
+ ***************************************************************************/
+GFitsImage* GFitsHDU::new_image(void)
+{
+    // Initialise return value
+    GFitsImage* image = NULL;
+    
+    // Get number of bits per pixel
+    int status =   0;
+    int bitpix = -64;
+    status     = __ffgipr(&m_fitsfile, 0, &bitpix, NULL, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_NEW_IMAGE, status);
+
+    // Allocate bitpix dependent image
+    switch (bitpix) {
+    case 8:
+        image = new GFitsDblImage();  // TO BE REPLACED BY CORRECT CLASS
+        break;
+    case 16:
+        image = new GFitsDblImage();  // TO BE REPLACED BY CORRECT CLASS
+        break;
+    case 32:
+        image = new GFitsDblImage();  // TO BE REPLACED BY CORRECT CLASS
+        break;
+    case 64:
+        image = new GFitsDblImage();  // TO BE REPLACED BY CORRECT CLASS
+        break;
+    case -32:
+        image = new GFitsDblImage();  // TO BE REPLACED BY CORRECT CLASS
+        break;
+    case -64:
+        image = new GFitsDblImage();
+        break;
+    default:
+        throw GException::fits_bad_bitpix(G_OPEN, m_type);
+        break;
+    }
+
+    // Return image pointer
+    return image;
 }
 
 
