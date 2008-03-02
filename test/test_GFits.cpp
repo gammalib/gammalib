@@ -295,13 +295,26 @@ void test_create(void)
 {
     std::cout << "Test GFits: Create FITS file: ";
     try {
+        // Allocate and open FITS file
         GFits fits;
         fits.open("test.fits");
         cout << endl << fits;
-        GFitsImage image;
+        
+        // Define image
+        int naxis       = 2;
+        int naxes[]     = {2,4};
+        double pixels[] = {0,1, 2,3, 4,5, 6,7};
+        GFitsImage image(naxis, naxes);
+        image.link(pixels);
+        
+        // Define and append HDU        
         GFitsHDU hdu(image);
         fits.append(&hdu);
+        
+        // Dump FITS file
         cout << endl << fits;
+        
+        // Save FITS file
         fits.save();
     }
     catch (exception &e) {

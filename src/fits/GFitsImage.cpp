@@ -51,6 +51,38 @@ GFitsImage::GFitsImage() : GFitsData()
 
 
 /***********************************************************************//**
+ * @brief Constructor
+ *
+ * @param naxis Image dimensions (0,1,2,3,4)
+ * @param naxes Number of pixels in each dimension
+ * @param bitpix Number of Bits per pixel (8, 16, 32, 64, -32, -64=default)
+ *
+ * Construct instance of GFitsImage by specifying the image dimension and
+ * the number of pixels in each dimension. Note that this constructor does
+ * not allocate any memory for the actual image.
+ ***************************************************************************/
+GFitsImage::GFitsImage(int naxis, const int* naxes, int bitpix) : GFitsData()
+{
+    // Initialise class members for clean destruction
+    init_members();
+    
+    // Store number of axis and bitpix
+    m_naxis  = naxis;
+    m_bitpix = bitpix;
+    
+    // Copy number of pixels in each dimension
+    if (m_naxis > 0) {
+        m_naxes = new long[m_naxis];
+        for (int i = 0; i < m_naxis; ++i)
+            m_naxes[i] = naxes[i];
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param image FITS image which should be used for construction
@@ -153,11 +185,11 @@ void GFitsImage::open(__fitsfile* fptr)
 /***********************************************************************//**
  * @brief Save Image
  *
- * IMPLEMENTATION NOT COMPLETE (IMAGE CUBE SAVING MISSING)
+ * Save image pixels into FITS file. In case that the HDU does not exist it
+ * is created.
  ***************************************************************************/
 void GFitsImage::save(void)
 {
-//cout << "GFitsImage::save " << m_fitsfile.Fptr << " " << (m_fitsfile.HDUposition)+1 << endl;
     // Move to HDU
     int status = 0;
     status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
@@ -185,11 +217,20 @@ void GFitsImage::save(void)
             throw GException::fits_error(G_SAVE, status);
     }
 
-    // Now save the image
-    // TBD
-    //status = ffpss(&m_fitsfile, 0, NULL, NULL, NULL, &status);
-    //if (status != 0)
-    //    throw GException::fits_error(G_SAVE, status);
+    // Save the image pixels (if there are some ...)
+    if (m_naxis > 0) {
+        long* fpixel = new long[m_naxis];
+        long* lpixel = new long[m_naxis];
+        for (int i = 0; i < m_naxis; ++i) {
+            fpixel[i] = 1;
+            lpixel[i] = m_naxes[i];
+        }
+        status = __ffpss(&m_fitsfile, m_type, fpixel, lpixel, m_pixels, &status);
+        if (status != 0)
+            throw GException::fits_error(G_SAVE, status);
+        delete [] fpixel;
+        delete [] lpixel;
+    }
 
     // Return
     return;
@@ -229,6 +270,9 @@ void GFitsImage::init_members(void)
     m_bitpix               = 8;
     m_naxis                = 0;
     m_naxes                = NULL;
+    m_linked               = 0;
+    m_type                 = __TBYTE;
+    m_pixels               = NULL;
 
     // Return
     return;
@@ -247,11 +291,20 @@ void GFitsImage::copy_members(const GFitsImage& image)
     m_bitpix   = image.m_bitpix;
     m_naxis    = image.m_naxis;
     m_naxes    = NULL;
+    m_linked   = image.m_linked;
+    m_type     = image.m_type;
+    m_pixels   = NULL;
 
-    // Copy data
+    // Copy axes
     if (image.m_naxes != NULL && m_naxis > 0) {
         m_naxes = new long[m_naxis];
         memcpy(m_naxes, image.m_naxes, m_naxis*sizeof(long));
+    }
+    
+    // Copy pixels (not if they have been linked!!!)
+    if (m_linked)
+        m_pixels = image.m_pixels;
+    else {
     }
 
     // Return
@@ -267,8 +320,23 @@ void GFitsImage::free_members(void)
     // Free memory
     if (m_naxes != NULL) delete [] m_naxes;
     
+    // If we have proper pixels then free them now (type dependent!)
+    if (!m_linked) {
+        if (m_pixels != NULL) {
+            switch (m_type) {
+            case __TDOUBLE:
+                delete [] (double*)m_pixels;
+                break;
+            default:
+                break;
+            }
+        }
+    }
+    
     // Mark memory as free
-    m_naxes = NULL;
+    m_naxes  = NULL;
+    m_pixels = NULL;
+    m_linked = 0;
 
     // Return
     return;

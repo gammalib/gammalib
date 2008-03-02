@@ -40,6 +40,7 @@ class GFitsImage : public GFitsData {
 public:
     // Constructors and destructors
     GFitsImage();
+    GFitsImage(int naxis, const int* naxes, int bitpix = -64);
     GFitsImage(const GFitsImage& image);
     ~GFitsImage();
 
@@ -50,6 +51,7 @@ public:
     void        open(__fitsfile* fptr);
     void        save(void);
     void        close(void);
+    void        link(const double* pixels);
     GFitsImage* clone(void) const;
     
 private:
@@ -60,16 +62,26 @@ private:
     void connect(__fitsfile* fptr);
 
     // Private data area
-    __fitsfile  m_fitsfile;
-    int         m_bitpix;
-    int         m_naxis;
-    long*       m_naxes;
+    __fitsfile m_fitsfile;    // FITS file
+    int        m_bitpix;      // Number of Bits/pixel
+    int        m_naxis;       // Image dimension
+    long*      m_naxes;       // Number of pixels in each dimension
+    int        m_linked;      // Pixels are linked (don't delete them!)
+    int        m_type;        // Pixel type
+    void*      m_pixels;      // Pixels
 };
 
 
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
+inline
+void GFitsImage::link(const double* pixels)
+{
+    m_linked = 1;
+    m_type   = __TDOUBLE;
+    m_pixels = (double*)pixels;
+}
 inline 
 GFitsImage* GFitsImage::clone(void) const 
 {
