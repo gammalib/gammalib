@@ -103,6 +103,20 @@ GFitsData& GFitsData::operator= (const GFitsData& data)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Connect data to FITS file
+ *
+ * @param[in] fptr FITS file pointer to which the data should be connected
+ ***************************************************************************/
+void GFitsData::connect(__fitsfile* fptr)
+{
+    // Connect data
+    m_fitsfile = *fptr;
+
+    // Return
+    return;
+}
+
 
 /*==========================================================================
  =                                                                         =

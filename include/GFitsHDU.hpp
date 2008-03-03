@@ -51,6 +51,8 @@ public:
     // Constructors and destructors
     GFitsHDU();
     GFitsHDU(const GFitsImage& image);
+    GFitsHDU(const GFitsAsciiTable& table);
+    GFitsHDU(const GFitsBinTable& table);
     GFitsHDU(const GFitsHDU& hdu);
     ~GFitsHDU();
 

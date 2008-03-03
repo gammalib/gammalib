@@ -31,6 +31,7 @@
 /* __ Macros _____________________________________________________________ */
 #define __ffclos(A, B) ffclos(A, B)
 #define __ffcrim(A, B, C, D, E) ffcrim(A, B, C, D, E)
+#define __ffcrtb(A, B, C, D, E, F, G, H, I) ffcrtb(A, B, C, D, E, F, G, H, I)
 #define __ffdelt(A, B) ffdelt(A, B)
 #define __ffgcv(A, B, C, D, E, F, G, H, I, J) ffgcv(A, B, C, D, E, F, G, H, I, J)
 #define __ffgcvs(A, B, C, D, E, F, G, H, I) ffgcvs(A, B, C, D, E, F, G, H, I)
@@ -49,14 +50,21 @@
 #define __ffinit(A, B, C) ffinit(A, B, C)
 #define __ffopen(A, B, C, D) ffopen(A, B, C, D)
 #define __ffmahd(A, B, C, D) ffmahd(A, B, C, D)
+#define __ffpcom(A, B, C) ffpcom(A, B, C)
+#define __ffphis(A, B, C) ffphis(A, B, C)
 #define __ffpss(A, B, C, D, E, F) ffpss(A, B, C, D, E, F)
 #define __ffthdu(A, B, C) ffthdu(A, B, C)
 #define __ffuky(A, B, C, D, E, F) ffuky(A, B, C, D, E, F)
+#define __ffukyd(A, B, C, D, E, F) ffukyd(A, B, C, D, E, F)
+#define __ffukyj(A, B, C, D, E) ffukyj(A, B, C, D, E)
+#define __ffukyl(A, B, C, D, E) ffukyl(A, B, C, D, E)
+#define __ffukys(A, B, C, D, E) ffukys(A, B, C, D, E)
 #define __TBIT      TBIT
 #define __TBYTE     TBYTE
 #define __TLOGICAL  TLOGICAL
 #define __TSTRING   TSTRING
 #define __TSHORT    TSHORT
+#define __TINT      TINT
 #define __TLONG     TLONG
 #define __TLONGLONG TLONGLONG
 #define __TFLOAT    TFLOAT
@@ -73,6 +81,7 @@ typedef fitsfile __fitsfile;
 /* __ Macros _____________________________________________________________ */
 #define __ffclos(A, B) __dummy()
 #define __ffcrim(A, B, C, D, E) __dummy()
+#define __ffcrtb(A, B, C, D, E, F, G, H, I) __dummy()
 #define __ffdelt(A, B) __dummy()
 #define __ffgcv(A, B, C, D, E, F, G, H, I, J) __dummy()
 #define __ffgcvs(A, B, C, D, E, F, G, H, I) __dummy()
@@ -91,14 +100,21 @@ typedef fitsfile __fitsfile;
 #define __ffinit(A, B, C) __dummy()
 #define __ffmahd(A, B, C, D) __dummy()
 #define __ffopen(A, B, C, D) __dummy()
+#define __ffpcom(A, B, C) __dummy()
+#define __ffphis(A, B, C) __dummy()
 #define __ffpss(A, B, C, D, E, F) __dummy()
 #define __ffthdu(A, B, C) __dummy()
 #define __ffuky(A, B, C, D, E, F) __dummy()
+#define __ffukyd(A, B, C, D, E, F) __dummy()
+#define __ffukyj(A, B, C, D, E) __dummy()
+#define __ffukyl(A, B, C, D, E) __dummy()
+#define __ffukys(A, B, C, D, E) __dummy()
 #define __TBIT          1
 #define __TBYTE        11
 #define __TLOGICAL     14
 #define __TSTRING      16
 #define __TSHORT       21
+#define __TINT         31
 #define __TLONG        41
 #define __TLONGLONG    81
 #define __TFLOAT       42

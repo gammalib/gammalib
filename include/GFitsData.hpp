@@ -45,7 +45,10 @@ public:
 
 protected:
     // Protected methods
-    virtual void connect(__fitsfile* fptr) = 0;
+    virtual void connect(__fitsfile* fptr);
+    
+    // Protected data area
+    __fitsfile m_fitsfile;    //!< FITS file
 };
 
 #endif /* GFITSDATA_HPP */

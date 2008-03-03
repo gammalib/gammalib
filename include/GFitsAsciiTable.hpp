@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsAsciiTable.hpp
+ * @brief GFitsAsciiTable class definition.
+ * @author J. Knodlseder
+ */
 
 #ifndef GFITSASCIITABLE_HPP
 #define GFITSASCIITABLE_HPP
@@ -17,22 +22,22 @@
 /* __ Includes ___________________________________________________________ */
 #include "GFitsCfitsio.hpp"
 #include "GFitsData.hpp"
-#include "GFitsTableCol.hpp"
+#include "GFitsTable.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
 
-/***************************************************************************
- *                     GFitsAsciiTable class definition                    *
+/***********************************************************************//**
+ * @class GFitsAsciiTable
+ *
+ * @brief Interface for FITS binary table
  ***************************************************************************/
-class GFitsAsciiTable : public GFitsData {
-
-    // I/O friends
-    friend ostream& operator<< (ostream& os, const GFitsAsciiTable& table);
+class GFitsAsciiTable : public GFitsTable {
 
 public:
     // Constructors and destructors
     GFitsAsciiTable();
+    GFitsAsciiTable(int nrows, int ncols);
     GFitsAsciiTable(const GFitsAsciiTable& table);
     virtual ~GFitsAsciiTable();
 
@@ -40,34 +45,20 @@ public:
     GFitsAsciiTable& operator= (const GFitsAsciiTable& table);
 
     // Methods
-    void             open(__fitsfile* fptr);
-    void             save(void);
-    void             close(void);
     GFitsAsciiTable* clone(void) const;
-    GFitsTableCol*   column(const std::string& colname);
-    GFitsTableCol*   column(const int& colnum);
 
 private:
     // Private methods
     void init_members(void);
     void copy_members(const GFitsAsciiTable& table);
     void free_members(void);
-    void connect(__fitsfile* fptr);
 
     // Private data area
-    int             m_rows;
-    int             m_cols;
-    GFitsTableCol** m_columns;
 };
 
 
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
-inline 
-GFitsAsciiTable* GFitsAsciiTable::clone(void) const 
-{
-    return new GFitsAsciiTable(*this);
-}
 
 #endif /* GFITSASCIITABLE_HPP */

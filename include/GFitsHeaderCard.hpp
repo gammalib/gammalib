@@ -92,6 +92,7 @@ private:
     int         m_value_decimals;  //!< Decimals of value (for float)
     std::string m_unit;            //!< Unit of the card value
     std::string m_comment;         //!< Card comment
+    int         m_comment_write;   //!< Signals that comment should be written
 };
 
 

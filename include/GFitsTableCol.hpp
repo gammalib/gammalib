@@ -26,8 +26,7 @@
 class GFitsTableCol {
 
     // Friend classes
-    friend class GFitsAsciiTable;
-    friend class GFitsBinTable;
+    friend class GFitsTable;
     
     // I/O friends
     friend ostream& operator<< (ostream& os, const GFitsTableCol& column);
@@ -69,13 +68,15 @@ public:
 
 protected:
     // Protected data area
-    std::string m_name;
-    int         m_colnum;
-    int         m_type;
-    int         m_repeat;
-    int         m_width;
-    int         m_length;
-    __fitsfile  m_fitsfile;
+    std::string m_name;        //!< Column name
+    std::string m_format;      //!< Column format
+    std::string m_unit;        //!< Column unit
+    int         m_colnum;      //!< Column number
+    int         m_type;        //!< Column type
+    int         m_repeat;      //!< Repeat value of column
+    int         m_width;       //!< Width of column
+    int         m_length;      //!< Length of column
+    __fitsfile  m_fitsfile;    //!< FITS file associated with column
 
 private:
     // Private methods

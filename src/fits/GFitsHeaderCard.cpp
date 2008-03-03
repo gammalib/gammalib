@@ -243,7 +243,7 @@ void GFitsHeaderCard::value(const std::string& value)
         if (m_value[m_value.length()-1] != '\x27')
             m_value += "'";
     }
-
+    
     // Return
     return;
 }
@@ -598,10 +598,12 @@ void GFitsHeaderCard::write(__fitsfile* fptr)
                           (char*)m_comment.c_str(), &status);
         break;
     case CT_COMMENT:
-        status = __ffpcom(fptr, (char*)m_comment.c_str(), &status);
+        if (m_comment_write)
+            status = __ffpcom(fptr, (char*)m_comment.c_str(), &status);
         break;
     case CT_HISTORY:
-        status = __ffphis(fptr, (char*)m_comment.c_str(), &status);
+        if (m_comment_write)
+            status = __ffphis(fptr, (char*)m_comment.c_str(), &status);
         break;
     default:
         break;
@@ -632,6 +634,7 @@ void GFitsHeaderCard::init_members(void)
     m_value_decimals = 10;
     m_unit.clear();
     m_comment.clear();
+    m_comment_write = 0;
 
     // Return
     return;
@@ -652,6 +655,7 @@ void GFitsHeaderCard::copy_members(const GFitsHeaderCard& card)
     m_value_decimals = card.m_value_decimals;
     m_unit           = card.m_unit;
     m_comment        = card.m_comment;
+    m_comment_write  = card.m_comment_write;
 
     // Return
     return;

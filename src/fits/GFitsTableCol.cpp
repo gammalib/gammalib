@@ -131,6 +131,8 @@ void GFitsTableCol::init_members(void)
 {
     // Initialise members
     m_name.clear();
+    m_format.clear();
+    m_unit.clear();
     m_colnum               = 0;
     m_type                 = 0;
     m_repeat               = 0;
@@ -152,6 +154,8 @@ void GFitsTableCol::copy_members(const GFitsTableCol& column)
 {
     // Copy attributes
     m_name     = column.m_name;
+    m_format   = column.m_format;
+    m_unit     = column.m_unit;
     m_colnum   = column.m_colnum;
     m_type     = column.m_type;
     m_repeat   = column.m_repeat;

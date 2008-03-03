@@ -22,12 +22,9 @@
 /* __ Includes ___________________________________________________________ */
 #include "GFitsCfitsio.hpp"
 #include "GFitsData.hpp"
-#include "GFitsTableCol.hpp"
+#include "GFitsTable.hpp"
 
 /* __ Namespaces _________________________________________________________ */
-
-
-/* __ Structures _________________________________________________________ */
 
 
 /***********************************************************************//**
@@ -35,10 +32,7 @@
  *
  * @brief Interface for FITS binary table
  ***************************************************************************/
-class GFitsBinTable : public GFitsData {
-
-    // I/O friends
-    friend ostream& operator<< (ostream& os, const GFitsBinTable& table);
+class GFitsBinTable : public GFitsTable {
 
 public:
     // Constructors and destructors
@@ -51,34 +45,20 @@ public:
     GFitsBinTable& operator= (const GFitsBinTable& table);
 
     // Methods
-    void           open(__fitsfile* fptr);
-    void           save(void);
-    void           close(void);
     GFitsBinTable* clone(void) const;
-    GFitsTableCol* column(const std::string& colname);
-    GFitsTableCol* column(const int& colnum);
 
 private:
     // Private methods
     void init_members(void);
     void copy_members(const GFitsBinTable& table);
     void free_members(void);
-    void connect(__fitsfile* fptr);
 
     // Private data area
-    int             m_rows;       //!< Number of rows in table
-    int             m_cols;       //!< Number of columns in table
-    GFitsTableCol** m_columns;    //!< Array of column pointers
 };
 
 
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
-inline 
-GFitsBinTable* GFitsBinTable::clone(void) const 
-{
-    return new GFitsBinTable(*this);
-}
 
 #endif /* GFITSBINTABLE_HPP */

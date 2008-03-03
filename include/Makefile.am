@@ -11,6 +11,7 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GFitsData.hpp \
 		     GFitsImage.hpp \
 		     GFitsDblImage.hpp \
+		     GFitsTable.hpp \
 		     GFitsAsciiTable.hpp \
 		     GFitsBinTable.hpp \
 		     GFitsTableCol.hpp \

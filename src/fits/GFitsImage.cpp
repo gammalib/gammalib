@@ -273,21 +273,6 @@ void GFitsImage::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Connect image to FITS file
- *
- * @param[in] fptr FITS file pointer to which the image should be connected
- ***************************************************************************/
-void GFitsImage::connect(__fitsfile* fptr)
-{
-    // Connect Image
-    m_fitsfile = *fptr;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Open Image
  *
  * @param[in] fptr FITS file pointer

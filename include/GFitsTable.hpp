@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GFitsImage.hpp  - FITS image abstract base class           *
+ *             GFitsTable.hpp  - FITS table abstract base class            *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -11,69 +11,70 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GFitsImage.hpp
- * @brief GFitsImage class definition.
+ * @file GFitsTable.hpp
+ * @brief GFitsTable class definition.
  * @author J. Knodlseder
  */
 
-#ifndef GFITSIMAGE_HPP
-#define GFITSIMAGE_HPP
+#ifndef GFITSTABLE_HPP
+#define GFITSTABLE_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GFitsCfitsio.hpp"
 #include "GFitsData.hpp"
+#include "GFitsTableCol.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
 
+/* __ Structures _________________________________________________________ */
+
+
 /***********************************************************************//**
- * @class GFitsImage
+ * @class GFitsTable
  *
- * @brief Abstract interface for the FITS image classes.
- *
- * Implements an abstract interface for FITS images.
+ * @brief Abstract interface for FITS table
  ***************************************************************************/
-class GFitsImage : public GFitsData {
+class GFitsTable : public GFitsData {
 
     // I/O friends
-    friend ostream& operator<< (ostream& os, const GFitsImage& image);
+    friend ostream& operator<< (ostream& os, const GFitsTable& table);
 
 public:
     // Constructors and destructors
-    GFitsImage();
-    GFitsImage(int naxis, const int* naxes);
-    GFitsImage(const GFitsImage& image);
-    ~GFitsImage();
+    GFitsTable();
+    GFitsTable(int nrows, int ncols);
+    GFitsTable(const GFitsTable& table);
+    virtual ~GFitsTable();
 
     // Operators
-    GFitsImage& operator= (const GFitsImage& image);
-
-    // Pure virtual methods
-    virtual void        open(__fitsfile* fptr) = 0;
-    virtual void        save(void) = 0;
-    virtual void        close(void) = 0;
-    virtual GFitsImage* clone(void) const = 0;
+    GFitsTable& operator= (const GFitsTable& table);
 
     // Methods
-    int bitpix(void) const;
-    int naxis(void) const;
-    int naxes(int axis) const;
-    int num_pixels(void) const;
+    void           open(__fitsfile* fptr);
+    void           save(void);
+    void           close(void);
+    GFitsTable*    clone(void) const = 0;
+    GFitsTableCol* column(const std::string& colname);
+    GFitsTableCol* column(const int& colnum);
+    int            rows(void) const;
+    int            cols(void) const;
 
 protected:
-    // Private methods
-    void init_members(void);
-    void copy_members(const GFitsImage& image);
-    void free_members(void);
-    void open_image(__fitsfile* fptr);
-    void load_image(int datatype, const void* pixels, const void* nulval, int* anynul);
-    void save_image(int datatype, const void* pixels);
+    // Protected methods
+    void  init_members(void);
+    void  copy_members(const GFitsTable& table);
+    void  free_members(void);
+    void  connect(__fitsfile* fptr);
+    char* get_ttype(const int& colnum) const;
+    char* get_tform(const int& colnum) const;
+    char* get_tunit(const int& colnum) const;
 
-    // Private data area
-    int        m_bitpix;      //!< Number of Bits/pixel
-    int        m_naxis;       //!< Image dimension
-    long*      m_naxes;       //!< Number of pixels in each dimension
-    int        m_num_pixels;  //!< Number of image pixels
+    // Protected data area
+    int             m_type;       //!< Table type (1=ASCII, 2=Binary)
+    int             m_rows;       //!< Number of rows in table
+    int             m_cols;       //!< Number of columns in table
+    GFitsTableCol** m_columns;    //!< Array of column pointers
 };
 
 
@@ -81,4 +82,4 @@ protected:
  *                              Inline methods                             *
  ***************************************************************************/
 
-#endif /* GFITSIMAGE_HPP */
+#endif /* GFITSTABLE_HPP */

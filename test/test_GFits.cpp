@@ -335,7 +335,7 @@ void test_create(void)
         }
         GFitsHDU hdu(image);
         fits.append(&hdu);
-        cout << fits;
+        //cout << fits;
         fits.save();
     }
     catch (exception &e) {
@@ -366,6 +366,44 @@ void test_create(void)
     }
     catch (exception &e) {
         cout << endl << "TEST ERROR: Unable to re-open FITS file." << endl;
+        cout << e.what() << endl;
+        throw;
+    }
+    cout << ".";
+
+    // Attach binary table
+    try {
+        GFits fits;
+        fits.open("test.fits");
+        int nrows = 10;
+        int ncols = 5;
+        GFitsBinTable table(nrows,ncols);
+        GFitsHDU hdu(table);
+        fits.append(&hdu);
+        cout << fits;
+        fits.save();
+    }
+    catch (exception &e) {
+        cout << endl << "TEST ERROR: Unable to attach binary table." << endl;
+        cout << e.what() << endl;
+        throw;
+    }
+    cout << ".";
+
+    // Attach ASCII table
+    try {
+        GFits fits;
+        fits.open("test.fits");
+        int nrows = 10;
+        int ncols = 5;
+        GFitsAsciiTable table(nrows,ncols);
+        GFitsHDU hdu(table);
+        fits.append(&hdu);
+        cout << fits;
+        fits.save();
+    }
+    catch (exception &e) {
+        cout << endl << "TEST ERROR: Unable to attach ASCII table." << endl;
         cout << e.what() << endl;
         throw;
     }

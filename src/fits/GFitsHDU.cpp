@@ -27,6 +27,11 @@
 #define G_COLUMN    "GFitsHDU::column(const std::string&)"
 #define G_NEW_IMAGE "GFitsHDU::new_image()"
 
+/* __ Definitions ________________________________________________________ */
+#define HT_IMAGE       0
+#define HT_ASCII_TABLE 1
+#define HT_BIN_TABLE   2
+
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
@@ -67,8 +72,9 @@ GFitsHDU::GFitsHDU(const GFitsImage& image)
     // Initialise class members for clean destruction
     init_members();
 
-    // Copy image into HDU data
+    // Copy image into HDU data and set data type
     m_data = image.clone();
+    m_type = HT_IMAGE;
 
     // Allocate new header
     m_header = new GFitsHeader();
@@ -99,9 +105,91 @@ GFitsHDU::GFitsHDU(const GFitsImage& image)
 
 
 /***********************************************************************//**
+ * @brief ASCII Table HDU Constructor
+ *
+ * @param[in] table Table from which the HDU should be constructed
+ ***************************************************************************/
+GFitsHDU::GFitsHDU(const GFitsAsciiTable& table)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Copy table into HDU data and set data type
+    m_data = table.clone();
+    m_type = HT_ASCII_TABLE;
+
+    // Allocate new header
+    m_header = new GFitsHeader();
+
+    // Set image header keywords
+    /*
+    m_header->update(GFitsHeaderCard("XTENSION", "'BINTABLE'",
+                                     "binary table extension"));
+    m_header->update(GFitsHeaderCard("BITPIX", 8,
+                                     "8-bit bytes"));
+    m_header->update(GFitsHeaderCard("NAXIS", 2,
+                                     "2-dimensional binary table"));
+    m_header->update(GFitsHeaderCard("NAXIS1", 0,
+                                     "width of table in bytes"));
+    m_header->update(GFitsHeaderCard("NAXIS2", table.rows(),
+                                     "number of rows in table"));
+    m_header->update(GFitsHeaderCard("PCOUNT", 0,
+                                     "size of special data area"));
+    m_header->update(GFitsHeaderCard("GCOUNT", 1,
+                                     "one data group (required keyword)"));
+    m_header->update(GFitsHeaderCard("TFIELDS", 1,
+                                     "number of fields in each row"));
+*/
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Binary Table HDU Constructor
+ *
+ * @param[in] table Table from which the HDU should be constructed
+ ***************************************************************************/
+GFitsHDU::GFitsHDU(const GFitsBinTable& table)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Copy table into HDU data and set data type
+    m_data = table.clone();
+    m_type = HT_BIN_TABLE;
+
+    // Allocate new header
+    m_header = new GFitsHeader();
+
+    // Set image header keywords
+    /*
+    m_header->update(GFitsHeaderCard("XTENSION", "'BINTABLE'",
+                                     "binary table extension"));
+    m_header->update(GFitsHeaderCard("BITPIX", 8,
+                                     "8-bit bytes"));
+    m_header->update(GFitsHeaderCard("NAXIS", 2,
+                                     "2-dimensional binary table"));
+    m_header->update(GFitsHeaderCard("NAXIS1", 0,
+                                     "width of table in bytes"));
+    m_header->update(GFitsHeaderCard("NAXIS2", table.rows(),
+                                     "number of rows in table"));
+    m_header->update(GFitsHeaderCard("PCOUNT", 0,
+                                     "size of special data area"));
+    m_header->update(GFitsHeaderCard("GCOUNT", 1,
+                                     "one data group (required keyword)"));
+    m_header->update(GFitsHeaderCard("TFIELDS", 1,
+                                     "number of fields in each row"));
+*/
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
- * @param hdu HDU from which the instance should be constructed
+ * @param[in] hdu HDU from which the instance should be constructed
  ***************************************************************************/
 GFitsHDU::GFitsHDU(const GFitsHDU& hdu)
 {
@@ -138,7 +226,7 @@ GFitsHDU::~GFitsHDU()
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param hdu HDU which should be assigned
+ * @param[in] hdu HDU which should be assigned
  ***************************************************************************/
 GFitsHDU& GFitsHDU::operator= (const GFitsHDU& hdu)
 {
@@ -170,8 +258,8 @@ GFitsHDU& GFitsHDU::operator= (const GFitsHDU& hdu)
 /***********************************************************************//**
  * @brief Open HDU
  *
- * @param fptr FITS file pointer
- * @param hdunum Number of HDU (starting from 1)
+ * @param[in] fptr FITS file pointer
+ * @param[in] hdunum Number of HDU (starting from 1)
  *
  * Opens an (existing) HDU in the FITS file. This method does NOT create any
  * HDU if it does not exist. Opening consists of fetching all header cards
@@ -204,13 +292,13 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
     // Open HDU data area
     if (m_data != NULL) delete m_data;
     switch (m_type) {
-    case 0:        // Image HDU
+    case HT_IMAGE:              // Image HDU
         m_data = new_image();
         break;
-    case 1:        // ASCII Table HDU
+    case HT_ASCII_TABLE:        // ASCII Table HDU
         m_data = new GFitsAsciiTable();
         break;
-    case 2:        // Binary Table HDU
+    case HT_BIN_TABLE:          // Binary Table HDU
         m_data = new GFitsBinTable();
         break;
     default:
@@ -251,30 +339,31 @@ void GFitsHDU::save(void)
 {
 //cout << "GFitsHDU::save " << m_fitsfile.Fptr << " " << m_hdunum << endl;
     // Move to HDU
-    int status = 0;
-    status     = __ffmahd(&m_fitsfile, m_hdunum, NULL, &status);
+//    int status = 0;
+//    status     = __ffmahd(&m_fitsfile, m_hdunum, NULL, &status);
 
     // If HDU does not yet exist in file then create it now. This works even
     // in the case that the actual HDU has no associated header and/or data
     // (these will be created automatically). However, to make this work we have
     // to set the fitsfile HDU position to the position we want to go. In that
     // was the save members will know that they have to create the HDU ...
+/*
     if (status == 107) {
         m_fitsfile.HDUposition = m_hdunum-1;
-        status = 0;
+        status                 = 0;
         if (m_data != NULL) {
             switch (m_type) {
-            case 0:        // Image HDU
+            case HT_IMAGE:              // Image HDU
                 m_data->connect(&m_fitsfile);
-                m_data->save();
+                //m_data->save();
                 break;
-            case 1:        // ASCII Table HDU
+            case HT_ASCII_TABLE:        // ASCII Table HDU
                 m_data->connect(&m_fitsfile);
-                m_data->save();
+                //m_data->save();
                 break;
-            case 2:        // Binary Table HDU
+            case HT_BIN_TABLE:          // Binary Table HDU
                 m_data->connect(&m_fitsfile);
-                m_data->save();
+                //m_data->save();
                 break;
             default:
                 throw GException::fits_unknown_HDU_type(G_SAVE, m_type);
@@ -282,9 +371,11 @@ void GFitsHDU::save(void)
             }
         }
     }
+*/
 
-    // If they exist then save data and header
+    // Save data and header if they exist
     if (m_data != NULL) { 
+        m_data->connect(&m_fitsfile);
         m_data->save();
         if (m_header != NULL)
             m_header->save(&m_fitsfile);
@@ -297,7 +388,8 @@ void GFitsHDU::save(void)
         // Special case: The first HDU does not exist. A FITS file needs at least
         // one primary HDU. Thus an empty image is created.
         if (m_fitsfile.HDUposition == 0) {
-            status = __ffcrim(&m_fitsfile, 8, 0, NULL, &status);
+            int status = 0;
+            status     = __ffcrim(&m_fitsfile, 8, 0, NULL, &status);
             if (status != 0)
                 throw GException::fits_error(G_SAVE, status);
             if (m_header != NULL)
@@ -314,7 +406,7 @@ void GFitsHDU::save(void)
 /***********************************************************************//**
  * @brief Set HDU extension name (EXTNAME keyword)
  *
- * @param extname Name of HDU
+ * @param[in] extname Name of HDU
  *
  * This methos sets the extension name of the HDU. The extension name will
  * be saved in the 'EXTNAME' header keyword. The header attached to the
@@ -340,7 +432,7 @@ void GFitsHDU::extname(const std::string& extname)
 /***********************************************************************//**
  * @brief Return pointer to column of table
  *
- * @param colname Name of FITS table column to be returned
+ * @param[in] colname Name of FITS table column to be returned
  *
  * If this method is called for an image a 'fits_HDU_not_a_table' exception
  * will be thrown.
@@ -352,13 +444,13 @@ GFitsTableCol* GFitsHDU::column(const std::string& colname) const
 
     // Get pointer to table column
     switch (m_type) {
-    case 0:        // Image HDU
+    case HT_IMAGE:              // Image HDU
         throw GException::fits_HDU_not_a_table(G_COLUMN, m_type);
         break;
-    case 1:        // ASCII Table HDU
+    case HT_ASCII_TABLE:        // ASCII Table HDU
         ptr = ((GFitsAsciiTable*)this->data())->column(colname);
         break;
-    case 2:        // Binary Table HDU
+    case HT_BIN_TABLE:          // Binary Table HDU
         ptr = ((GFitsBinTable*)this->data())->column(colname);
         break;
     default:
@@ -427,7 +519,7 @@ void GFitsHDU::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param hdu HDU to be copied
+ * @param[in] hdu HDU to be copied
  *
  * Assumes that all memory has been freed correctly before calling.
  ***************************************************************************/
@@ -467,7 +559,7 @@ void GFitsHDU::free_members(void)
 /***********************************************************************//**
  * @brief Connect HDU to FITS file
  *
- * @param fptr FITS file pointer to which the HDU should be connected
+ * @param[in] fptr FITS file pointer to which the HDU should be connected
  *
  * Connects the HDU and the associated data area to the specified FITS file.
  * Note that the header area does not require a FITS pointer, hence no
@@ -553,8 +645,8 @@ GFitsImage* GFitsHDU::new_image(void)
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param os Output stream into which the HDU will be dumped
- * @param hdu HDU to be dumped
+ * @param[in] os Output stream into which the HDU will be dumped
+ * @param[in] hdu HDU to be dumped
  ***************************************************************************/
 ostream& operator<< (ostream& os, const GFitsHDU& hdu)
 {
@@ -585,13 +677,13 @@ ostream& operator<< (ostream& os, const GFitsHDU& hdu)
     // Put FITS data in stream
     if (hdu.m_data != NULL) {
         switch (hdu.m_type) {
-        case 0:        // Image HDU
+        case HT_IMAGE:              // Image HDU
             os << *(GFitsImage*)hdu.m_data;
             break;
-        case 1:        // ASCII Table HDU
+        case HT_ASCII_TABLE:        // ASCII Table HDU
             os << *(GFitsAsciiTable*)hdu.m_data;
             break;
-        case 2:        // Binary Table HDU
+        case HT_BIN_TABLE:          // Binary Table HDU
             os << *(GFitsBinTable*)hdu.m_data;
             break;
         default:
