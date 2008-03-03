@@ -66,6 +66,7 @@ public:
     std::string  keyname(void) const;
     std::string  value(void) const;
     int          value_type(void) const;
+    int          decimals(void) const;
     std::string  unit(void) const;
     std::string  comment(void) const;
     std::string  string(void);
@@ -85,11 +86,12 @@ private:
     int  get_value_type(const std::string& value);
 
     // Private data area
-    std::string m_keyname;      //!< Name of the card
-    std::string m_value;        //!< Value of the card as read from file
-    int         m_value_type;   //!< Type of the card value
-    std::string m_unit;         //!< Unit of the card value
-    std::string m_comment;      //!< Card comment
+    std::string m_keyname;         //!< Name of the card
+    std::string m_value;           //!< Value of the card as read from file
+    int         m_value_type;      //!< Type of the card value
+    int         m_value_decimals;  //!< Decimals of value (for float)
+    std::string m_unit;            //!< Unit of the card value
+    std::string m_comment;         //!< Card comment
 };
 
 

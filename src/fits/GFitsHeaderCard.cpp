@@ -13,6 +13,7 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include "GException.hpp"
 #include "GFitsHeaderCard.hpp"
 
@@ -353,6 +354,16 @@ int GFitsHeaderCard::value_type(void) const
 
 
 /***********************************************************************//**
+ * @brief Return header card decimals
+  ***************************************************************************/
+int GFitsHeaderCard::decimals(void) const
+{
+    // Return
+    return m_value_decimals;
+}
+
+
+/***********************************************************************//**
  * @brief Return header card value unit
   ***************************************************************************/
 std::string GFitsHeaderCard::unit(void) const
@@ -564,8 +575,37 @@ void GFitsHeaderCard::write(__fitsfile* fptr)
         throw GException::fits_error(G_READ_NUM, status);
 
     // Write keyword
-    status = __ffuky(fptr, __TSTRING, (char*)m_keyname.c_str(), 
-                     (char*)m_value.c_str(), (char*)m_comment.c_str(), &status);
+    switch (m_value_type) {
+    case CT_UNKNOWN:
+        break;
+    case CT_INVALID:
+        break;
+    case CT_STRING:
+        status = __ffukys(fptr, (char*)m_keyname.c_str(),
+                          (char*)string().c_str(), (char*)m_comment.c_str(), 
+                          &status);
+        break;
+    case CT_INT:
+        status = __ffukyj(fptr, (char*)m_keyname.c_str(), integer(),
+                          (char*)m_comment.c_str(), &status);
+        break;
+    case CT_FLOAT:
+        status = __ffukyd(fptr, (char*)m_keyname.c_str(), real(),
+                          decimals(), (char*)m_comment.c_str(), &status);
+        break;
+    case CT_BOOL:
+        status = __ffukyl(fptr, (char*)m_keyname.c_str(), integer(),
+                          (char*)m_comment.c_str(), &status);
+        break;
+    case CT_COMMENT:
+        status = __ffpcom(fptr, (char*)m_comment.c_str(), &status);
+        break;
+    case CT_HISTORY:
+        status = __ffphis(fptr, (char*)m_comment.c_str(), &status);
+        break;
+    default:
+        break;
+    }
     if (status != 0)
         throw GException::fits_error(G_WRITE, status);
 
@@ -588,7 +628,8 @@ void GFitsHeaderCard::init_members(void)
     // Initialise members
     m_keyname.clear();
     m_value.clear();
-    m_value_type = CT_UNKNOWN;
+    m_value_type     = CT_UNKNOWN;
+    m_value_decimals = 10;
     m_unit.clear();
     m_comment.clear();
 
@@ -605,11 +646,12 @@ void GFitsHeaderCard::init_members(void)
 void GFitsHeaderCard::copy_members(const GFitsHeaderCard& card)
 {
     // Copy membres
-    m_keyname    = card.m_keyname;
-    m_value      = card.m_value;
-    m_value_type = card.m_value_type;
-    m_unit       = card.m_unit;
-    m_comment    = card.m_comment;
+    m_keyname        = card.m_keyname;
+    m_value          = card.m_value;
+    m_value_type     = card.m_value_type;
+    m_value_decimals = card.m_value_decimals;
+    m_unit           = card.m_unit;
+    m_comment        = card.m_comment;
 
     // Return
     return;
