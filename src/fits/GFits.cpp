@@ -23,6 +23,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_OPEN     "GFits::open(std::string)"
 #define G_SAVETO   "GFits::saveto(const std::string, int)"
+#define G_HDU1     "GFits::hdu(const std::string&)"
+#define G_HDU2     "GFits::hdu(int extno)"
 #define G_FREE_MEM "GFits::free_members()"
 
 /* __ Macros _____________________________________________________________ */
@@ -55,7 +57,7 @@ GFits::GFits()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param fits FITS file from which the instance should be built
+ * @param[in] fits FITS file from which the instance should be built.
  ***************************************************************************/
 GFits::GFits(const GFits& fits)
 {
@@ -92,7 +94,7 @@ GFits::~GFits()
 /***********************************************************************//**
  * @brief  Assignment operator
  *
- * @param fits FITS file that should be assigned
+ * @param fits[in] FITS file that should be assigned to GFits instance.
  ***************************************************************************/
 GFits& GFits::operator= (const GFits& fits)
 {
@@ -122,11 +124,26 @@ GFits& GFits::operator= (const GFits& fits)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Open FITS file
+ * @brief Opens or creates FITS file
  *
- * @param filename Name of FITS file to be opened
+ * @param[in] filename Name of FITS file to be opened
  *
- * Opens all HDUs in the specified FITS file.
+ * @exception GException::fits_already_opened 
+ *            Class instance contains already an opened FITS file.
+ *            Close file before opening a new one using GFits::close().
+ * @exception GException::fits_open_error 
+ *            Unable to open the specified file.
+ * @exception GException::fits_error 
+ *            Unable to determine number of HDUs in the FITS file.
+ *
+ * This method opens all HDUs that are found in the specified FITS file.
+ * If the file does not exist then a new FITS file is created.
+ * For each HDU, a GFitsHDU object is associated to the GFits object.
+ * The HDUs can then be accessed using the
+ * GFits::hdu(const std::string&)
+ * or
+ * GFits::hdu(int extno)
+ * methods.
  ***************************************************************************/
 void GFits::open(const std::string& filename)
 {
@@ -137,7 +154,7 @@ void GFits::open(const std::string& filename)
     // Open FITS file
     int status = 0;
     status     = __ffopen(&m_fitsfile, filename.c_str(), 1, &status);
-    
+
     // If FITS file does not exist then create it now
     if (status == 104) {
         status = 0;
@@ -172,9 +189,12 @@ void GFits::open(const std::string& filename)
 /***********************************************************************//**
  * @brief Append HDU to FITS file
  *
- * @param hdu Pointer to FITS HDU that should be appended
+ * @param[in] hdu Pointer to FITS HDU that should be appended
  *
- * NOT YET FULLY IMPLEMENTED
+ * Append HDU to the next free position in a FITS file. In case that no HDU
+ * exists so far in the FITS file and if the HDU to append is NOT an image,
+ * an empty primary image will be inserted as first HDU in the FITS file.
+ * This guarantees the compatibility with the FITS standard.
  ***************************************************************************/
 void GFits::append(const GFitsHDU* hdu)
 {
@@ -182,11 +202,11 @@ void GFits::append(const GFitsHDU* hdu)
     // the HDU to append is not an image then we have to add a primary
     // image first. In this case we add 2 new HDUs.
     int n_add = (m_num_hdu == 0 && hdu->m_type != 0) ? 2 : 1;
-    
+
     // Create memory to hold HDUs
     GFitsHDU* tmp = new GFitsHDU[m_num_hdu+n_add];
     if (tmp != NULL) {
-    
+
         // Copy over existing HDUs and remove old ones
         if (m_hdu != NULL) {
             for (int i = 0; i < m_num_hdu; ++i)
@@ -196,12 +216,12 @@ void GFits::append(const GFitsHDU* hdu)
 
         // Connect the new memory to the card pointer
         m_hdu = tmp;
-        
+
         // Add primary image if required
         if (n_add == 2) {
 
             // Append empty primary image
-            //m_hdu[m_num_hdu] = TBD
+            m_hdu[m_num_hdu].primary();
 
             // Set FITS file pointer for new HDU
             __fitsfile fptr  = *m_fitsfile;
@@ -214,15 +234,15 @@ void GFits::append(const GFitsHDU* hdu)
 
         // Append new HDU to list
         m_hdu[m_num_hdu] = *hdu;
-        
+
         // Set FITS file pointer for new HDU
         __fitsfile fptr  = *m_fitsfile;
         fptr.HDUposition = m_num_hdu;
         m_hdu[m_num_hdu].connect(&fptr);
-        
+
         // Increment number of HDUs
         m_num_hdu++;
-        
+
     }
 
     // Return
@@ -233,7 +253,8 @@ void GFits::append(const GFitsHDU* hdu)
 /***********************************************************************//**
  * @brief Saves FITS file
  *
- * Saves all HDUs to the FITS file.
+ * Saves all HDUs to the FITS file by looping over the GFitsHDU::save()
+ * method.
  ***************************************************************************/
 void GFits::save(void)
 {
@@ -249,10 +270,15 @@ void GFits::save(void)
 /***********************************************************************//**
  * @brief Saves to specified FITS file
  *
- * @param filename Name of file into which should be saved
- * @param clobber Specifies whether any existing file should be overwritten
+ * @param[in] filename Name of file into which should be saved.
+ * @param[in] clobber Specifies whether any existing file should be 
+ *            overwritten.
  *
- * FUNCTION IS NOT FULLY IMPLEMENTED
+ * @exception GException::fits_file_exist
+ *            File specified by 'filename' exists already.
+ *            To overwrite an existing file set 'clobber=1'.
+ * @exception GException::fits_error
+ *            Unable to delete exiting FITS file.
  ***************************************************************************/
 void GFits::saveto(const std::string& filename, int clobber)
 {
@@ -262,26 +288,36 @@ void GFits::saveto(const std::string& filename, int clobber)
     GFits new_fits = *this;
 
     // Check if specified FITS file exists. If yes, saving will only be
-    // allowed if clobber is true ...
+    // allowed if clobber is true. If this is the case the specified file
+    // will be deleted.
     int status = 0;
     status     = __ffopen(&(new_fits.m_fitsfile), filename.c_str(), 1, &status);
     if (status == 0) {
-        if (!clobber) {
-            throw GException::fits_open_error(G_SAVETO, filename, status);
-            //throw file_exists ...
-        }
-        //delete existing file
-        //...
-    }
 
-    // ... otherwise create a new FITS file now
-    else {
-        // ...
-    }
+        // If overwriting was not allowed the throw an exception
+        if (!clobber)
+            throw GException::fits_file_exist(G_SAVETO, filename, status);
 
-    // Save all HDUs
+        // Delete existing file
+        __fitsfile* tmp;
+        status = __ffopen(&tmp, filename.c_str(), 1, &status);
+        status = __ffdelt(tmp, &status);
+        if (status == 0)
+            throw GException::fits_error(G_SAVETO, status);
+
+    }
+    else
+        status = 0;
+
+    // Create a new FITS file now
+    new_fits.open(filename);
+
+    // Copy all HDUs
     for (int i = 0; i < m_num_hdu; ++i)
-        new_fits.m_hdu[i].save();
+        new_fits.m_hdu[i] = m_hdu[i];
+
+    // Save new FITS file
+    new_fits.save();
 
     // Return
     return;
@@ -310,10 +346,12 @@ void GFits::close(void)
 /***********************************************************************//**
  * @brief Get pointer to HDU
  *
- * @param extname Name of HDU extension which should be returned
+ * @param[in] extname Name of HDU extension which should be returned
+ *
+ * @exception GException::fits_hdu_not_found
+ *            HDU with specified extension name has not been found in FITS
+ *            file.
  ***************************************************************************/
-#define G_HDU1 "GFits::hdu(const std::string&)"
-#define G_HDU2 "GFits::hdu(int extno)"
 GFitsHDU* GFits::hdu(const std::string& extname)
 {
     // Initialise result to NULL pointer
@@ -326,7 +364,7 @@ GFitsHDU* GFits::hdu(const std::string& extname)
             break;
         }
     }
-    
+
     // Throw an error if HDU has not been found
     if (ptr == NULL)
         throw GException::fits_hdu_not_found(G_HDU1, extname);
@@ -339,7 +377,11 @@ GFitsHDU* GFits::hdu(const std::string& extname)
 /***********************************************************************//**
  * @brief Get pointer to HDU
  *
- * @param extno Extension number (starting from 1)
+ * @param extno[in] Extension number (starting from 1)
+ *
+ * @exception GException::fits_hdu_not_found
+ *            HDU with specified extension number has not been found in FITS
+ *            file.
  ***************************************************************************/
 GFitsHDU* GFits::hdu(int extno) 
 {
@@ -426,13 +468,13 @@ void GFits::free_members(void)
 {
     // If FITS file has been opened then close it now
     if (m_fitsfile != NULL) {
-    
+
         // If there are no HDUs then delete the file (don't worry about error)
         if (m_num_hdu == 0) {
             int status = 0;
             __ffdelt(m_fitsfile, &status);
         }
-        
+
         // ... otherwise close the file
         else {
             int status = 0;

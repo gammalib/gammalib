@@ -213,8 +213,11 @@ GException::invalid_order::invalid_order(string origin, int order, int min_order
 }
 
 
-/***************************************************************************
- *                               FITS error                                *
+/***********************************************************************//**
+ * @brief General FITS error
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] status cfitsio status.
  ***************************************************************************/
 GException::fits_error::fits_error(string origin, int status)
 {
@@ -222,125 +225,211 @@ GException::fits_error::fits_error(string origin, int status)
     ostringstream s_error;
     char err_text[31];
     __ffgerr(status, err_text);
-    s_error << err_text << " (status: " << status << ")";
+    s_error << err_text << " (status=" << status << ")";
     m_message = s_error.str();
 }
 
 
-/***************************************************************************
- *                          FITS file opening error                        *
+/***********************************************************************//**
+ * @brief FITS error: unable to open FITS file
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] filename Name of the file for which opening was attempted.
+ * @param[in] status cfitsio status.
  ***************************************************************************/
-GException::fits_open_error::fits_open_error(string origin, string filename, int status)
+GException::fits_open_error::fits_open_error(string origin,
+                                             string filename,
+                                             int    status)
 {
     m_origin  = origin;
-    m_message = "Unable to open FITS file '" + filename + "'" 
-                + " (status: " + str(status) + ")";
+    m_message = "Unable to open FITS file '" + filename + "'";
+    if (status != 0)
+        m_message += " (status=" + str(status) + ")";
 }
 
 
-/***************************************************************************
- *                          FITS file already opened                       *
+/***********************************************************************//**
+ * @brief FITS error: attempted to overwrite FITS file
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] filename Name of the file for which overwrite attempt was made.
+ * @param[in] status cfitsio status.
  ***************************************************************************/
-GException::fits_already_opened::fits_already_opened(string origin, string filename)
+GException::fits_file_exist::fits_file_exist(string origin,
+                                             string filename,
+                                             int    status)
 {
     m_origin  = origin;
-    m_message = "GFits object has already the FITS file '" + filename + "' opened";
+    m_message = "Attempted to overwrite FITS file '" + filename + "'";
+    if (status != 0)
+        m_message += " (status=" + str(status) + ")";
 }
 
 
-/***************************************************************************
- *                        FITS keyword not found error                     *
+/***********************************************************************//**
+ * @brief FITS error: file already open
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] filename Name of file that is already open.
  ***************************************************************************/
-GException::fits_key_not_found::fits_key_not_found(string origin, string keyname, int status)
+GException::fits_already_opened::fits_already_opened(string origin,
+                                                     string filename)
+{
+    m_origin  = origin;
+    m_message = "FITS file '" + filename + "' is already open";
+}
+
+
+/***********************************************************************//**
+ * @brief FITS error: Keyword not in header
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] keyname Name of keyword that was not found.
+ * @param[in] status cfitsio status.
+ ***************************************************************************/
+GException::fits_key_not_found::fits_key_not_found(string origin,
+                                                   string keyname,
+                                                   int    status)
 {
     m_origin  = origin;
     m_message = "Keyword '" + keyname + "' not found in header";
+    if (status != 0)
+        m_message += " (status=" + str(status) + ")";
 }
 
 
-/***************************************************************************
- *                         FITS column not found error                     *
+/***********************************************************************//**
+ * @brief FITS error: Table column not found
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] colname Name of the table column that was not found.
+ * @param[in] status cfitsio status.
  ***************************************************************************/
-GException::fits_column_not_found::fits_column_not_found(string origin, string colname, int status)
+GException::fits_column_not_found::fits_column_not_found(string origin,
+                                                         string colname,
+                                                         int    status)
 {
     m_origin  = origin;
     m_message = "Column '" + colname + "' not found in table";
+    if (status != 0)
+        m_message += " (status=" + str(status) + ")";
 }
 
 
-/***************************************************************************
- *                           FITS HDU not found error                      *
+/***********************************************************************//**
+ * @brief FITS error: HDU not found in FITS file
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] extname Name of the extension that was not found.
+ * @param[in] status cfitsio status.
  ***************************************************************************/
-GException::fits_hdu_not_found::fits_hdu_not_found(string origin, string extname, int status)
+GException::fits_hdu_not_found::fits_hdu_not_found(string origin,
+                                                   string extname,
+                                                   int    status)
 {
     m_origin  = origin;
     m_message = "HDU '" + extname + "' not found in FITS file";
+    if (status != 0)
+        m_message += " (status=" + str(status) + ")";
 }
 
 
-/***************************************************************************
- *                          Unknown HDU type found                         *
+/***********************************************************************//**
+ * @brief FITS error: HDU of unknown type found
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] type Specified HDU type.
  ***************************************************************************/
-GException::fits_unknown_HDU_type::fits_unknown_HDU_type(string origin, int type)
+GException::fits_unknown_HDU_type::fits_unknown_HDU_type(string origin,
+                                                         int    type)
 {
     m_origin  = origin;
-    m_message = "HDU type " + str(type) + " is not known";
+    m_message = "HDU type '" + str(type) + "' is not known";
 }
 
 
-/***************************************************************************
- *                             HDU is not a table                          *
+/***********************************************************************//**
+ * @brief FITS error: HDU is not a table
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] type Specified HDU type.
  ***************************************************************************/
-GException::fits_HDU_not_a_table::fits_HDU_not_a_table(string origin, int type)
+GException::fits_HDU_not_a_table::fits_HDU_not_a_table(string origin,
+                                                       int    type)
 {
     m_origin  = origin;
-    m_message = "HDU is not a table (type " + str(type) + ")";
+    m_message = "HDU is not of type 'table' (type=" + str(type) + ")";
 }
 
 
-/***************************************************************************
- *                             HDU is not a table                          *
+/***********************************************************************//**
+ * @brief FITS error: Invalid type
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] message Error message.
  ***************************************************************************/
-GException::fits_invalid_type::fits_invalid_type(string origin, string message)
+GException::fits_invalid_type::fits_invalid_type(string origin,
+                                                 string message)
 {
     m_origin  = origin;
     m_message = message;
 }
 
 
-/***************************************************************************
- *                             Column type is unknown                      *
+/***********************************************************************//**
+ * @brief FITS error: Column type is unknown
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] type Specified column type.
  ***************************************************************************/
-GException::fits_unknown_coltype::fits_unknown_coltype(string origin, int type)
+GException::fits_unknown_coltype::fits_unknown_coltype(string origin,
+                                                       int    type)
 {
     m_origin  = origin;
-    m_message = "Column type " + str(type) + " is unknown";
+    m_message = "Column type '" + str(type) + "' is unknown";
 }
 
 
 /***********************************************************************//**
  * @brief FITS error: invalid number of bits per pixel
  *
- * @param origin Method that throws the error
- * @param bitpix Bitpix value that was not 8,16,32,64,-32, or -64
+ * @param[in] origin Method that throws the error.
+ * @param[in] bitpix Bitpix value that was not 8,16,32,64,-32, or -64.
  ***************************************************************************/
-GException::fits_bad_bitpix::fits_bad_bitpix(string origin, int bitpix)
+GException::fits_bad_bitpix::fits_bad_bitpix(string origin,
+                                             int    bitpix)
 {
     m_origin  = origin;
-    m_message = "Invalid number of bits per pixel (bitpix=" + str(bitpix) + ")";
+    m_message = "Invalid number of bits per pixel (bitpix="+str(bitpix)+")";
 }
 
 
 /***********************************************************************//**
- * @brief FITS error: bad image operator has been used
+ * @brief FITS error: wrong image operator has been used
  *
- * @param origin Method that throws the error
- * @param naxis Dimension of image
- * @param nargs Number of arguments of the image operator
+ * @param[in] origin Method that throws the error.
+ * @param[in] naxis Dimension of image.
+ * @param[in] nargs Number of arguments of the image operator.
  ***************************************************************************/
-GException::fits_bad_image_operator::fits_bad_image_operator(string origin, int naxis, int nargs)
+GException::fits_wrong_image_operator::fits_wrong_image_operator(string origin,
+                                                                 int    naxis,
+                                                                 int    nargs)
 {
     m_origin  = origin;
-    m_message = "Bad image pixel access operator used (image dimension=" + 
-                 str(naxis) + "; operator arguments=" + str(nargs) + ")";
+    m_message = "Wrong image pixel access operator has been used (dimension=" +
+                str(naxis) + " <=> arguments=" + str(nargs) + ")";
+}
+
+
+/***********************************************************************//**
+ * @brief Response error: invalid response type specified
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] type Specified response type.
+ ***************************************************************************/
+GException::rsp_invalid_type::rsp_invalid_type(string origin,
+                                               string type)
+{
+    m_origin  = origin;
+    m_message = "Invalid response type '"+type+"' specified";
 }

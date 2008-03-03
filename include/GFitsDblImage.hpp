@@ -39,6 +39,7 @@ public:
     // Constructors and destructors
     GFitsDblImage();
     GFitsDblImage(int naxis, const int* naxes);
+    GFitsDblImage(int naxis, const int* naxes, const double* pixels);
     GFitsDblImage(const GFitsDblImage& image);
     ~GFitsDblImage();
 

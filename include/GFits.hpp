@@ -30,7 +30,7 @@
 /***********************************************************************//**
  * @class GFits
  *
- * @brief Implements a FITS file interface
+ * @brief Implements FITS file interface
  *
  * GFits is the basic FITS file interface. All FITS file handlings operate
  * via members of GFits. A FITS file is composed of Header Data Units (HDU)
@@ -66,10 +66,10 @@ private:
     void free_members(void);
 
     // Private data area
-    std::string  m_filename;    // FITS file name
-    __fitsfile*  m_fitsfile;    // FITS file pointer
-    int          m_num_hdu;     // Number of HDUs in file
-    GFitsHDU*    m_hdu;         // Pointers to HDUs
+    std::string  m_filename;    //!< FITS file name
+    __fitsfile*  m_fitsfile;    //!< FITS file pointer
+    int          m_num_hdu;     //!< Number of HDUs in file
+    GFitsHDU*    m_hdu;         //!< Pointers to HDUs
 };
 
 

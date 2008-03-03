@@ -53,11 +53,13 @@ public:
     virtual void        save(void) = 0;
     virtual void        close(void) = 0;
     virtual GFitsImage* clone(void) const = 0;
-    
+
     // Methods
+    int bitpix(void) const;
     int naxis(void) const;
     int naxes(int axis) const;
-    
+    int num_pixels(void) const;
+
 protected:
     // Private methods
     void init_members(void);
@@ -69,17 +71,16 @@ protected:
     void save_image(int datatype, const void* pixels);
 
     // Private data area
-    __fitsfile m_fitsfile;    // FITS file
-    int        m_bitpix;      // Number of Bits/pixel
-    int        m_naxis;       // Image dimension
-    long*      m_naxes;       // Number of pixels in each dimension
-    int        m_num_pixels;  // Number of image pixels
+    __fitsfile m_fitsfile;    //!< FITS file
+    int        m_bitpix;      //!< Number of Bits/pixel
+    int        m_naxis;       //!< Image dimension
+    long*      m_naxes;       //!< Number of pixels in each dimension
+    int        m_num_pixels;  //!< Number of image pixels
 };
 
 
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
-inline int GFitsImage::naxis(void) const { return m_naxis; }
 
 #endif /* GFITSIMAGE_HPP */

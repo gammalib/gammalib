@@ -18,11 +18,14 @@
 #include "GVector.hpp"
 #include "GLATResponse.hpp"
 #include "GFits.hpp"
+#include "GFitsHDU.hpp"
+#include "GFitsDblImage.hpp"
 #include "GFitsTableFltCol.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
+#define G_LOAD            "load(const std::string&, const std::string&)"
 #define G_INIT_AEFF       "GLATResponse::init_aeff()"
 #define G_INIT_PSF        "GLATResponse::init_psf()"
 #define G_INIT_EDISP      "GLATResponse::init_edisp()"
@@ -56,9 +59,8 @@ const double ln10        = 2.3025850929940459010936138;
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                                Constructor                              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Constructor
  ***************************************************************************/
 GLATResponse::GLATResponse() : GResponse()
 {
@@ -70,9 +72,10 @@ GLATResponse::GLATResponse() : GResponse()
 }
 
 
-/***************************************************************************
- *                              Copy constructor                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param rsp Response to be copied
  ***************************************************************************/
 GLATResponse::GLATResponse(const GLATResponse& rsp) : GResponse(rsp)
 {
@@ -87,9 +90,8 @@ GLATResponse::GLATResponse(const GLATResponse& rsp) : GResponse(rsp)
 }
 
 
-/***************************************************************************
- *                               Destructor                                *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Destructor
  ***************************************************************************/
 GLATResponse::~GLATResponse()
 {
@@ -107,9 +109,10 @@ GLATResponse::~GLATResponse()
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                            Assignment operator                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param rsp Response to be assigned
  ***************************************************************************/
 GLATResponse& GLATResponse::operator= (const GLATResponse& rsp)
 {
@@ -141,9 +144,8 @@ GLATResponse& GLATResponse::operator= (const GLATResponse& rsp)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *               Return value of instrument response function              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return value of instrument response function.
  ***************************************************************************/
 double GLATResponse::irf(const GSkyDir& obsDir, const double& obsEng,
                          const GSkyDir& srcDir, const double& srcEng,
@@ -155,9 +157,8 @@ double GLATResponse::irf(const GSkyDir& obsDir, const double& obsEng,
 }
 
 
-/***************************************************************************
- *                           Return effective area                         *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return effective area
  ***************************************************************************/
 double GLATResponse::aeff(const GSkyDir& obsDir, const double& obsEng,
                           const GSkyDir& srcDir, const double& srcEng,
@@ -169,9 +170,8 @@ double GLATResponse::aeff(const GSkyDir& obsDir, const double& obsEng,
 }
 
 
-/***************************************************************************
- *                   Return value of point spread function                 *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return value of point spread function
  ***************************************************************************/
 double GLATResponse::psf(const GSkyDir& obsDir, const double& obsEng,
                          const GSkyDir& srcDir, const double& srcEng,
@@ -183,9 +183,8 @@ double GLATResponse::psf(const GSkyDir& obsDir, const double& obsEng,
 }
 
 
-/***************************************************************************
- *                     Return value of energy dispersion                   *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return value of energy dispersion
  ***************************************************************************/
 double GLATResponse::edisp(const GSkyDir& obsDir, const double& obsEng,
                            const GSkyDir& srcDir, const double& srcEng,
@@ -197,14 +196,14 @@ double GLATResponse::edisp(const GSkyDir& obsDir, const double& obsEng,
 }
 
 
-/***************************************************************************
- *                         Set calibration database                        *
- * ----------------------------------------------------------------------- *
- ***************************************************************************/
-/**
+/***********************************************************************//**
  * @brief Set the path to the calibration database.
- */
-void GLATResponse::set_caldb(std::string caldb)
+ *
+ * @param caldb Absolute path to calibration database
+ *
+ * NOTE: So far no check is done on whether the path exists!
+ ***************************************************************************/
+void GLATResponse::set_caldb(const std::string& caldb)
 {
     // Simply copy path
     // NOTE: Some check should be done on whether the path exists !!!
@@ -215,25 +214,29 @@ void GLATResponse::set_caldb(std::string caldb)
 }
 
 
-/***************************************************************************
- *                              Load response                              *
- * ----------------------------------------------------------------------- *
- ***************************************************************************/
-/**
+/***********************************************************************//**
  * @brief Load a specified LAT response function.
- */
-void GLATResponse::load(std::string rspname, std::string rsptype)
+ *
+ * @param rspname Name of response
+ * @param rsptype Type of response ('front' or 'back')
+ *
+ * Loads the specified GLAST LAT response from the calibration database and
+ * performs some pre-calculations for faster response determination.
+ ***************************************************************************/
+void GLATResponse::load(const std::string& rspname, const std::string& rsptype)
 {
     // Store response name
     m_rspname = rspname;
-    
-    // Convert response type
+
+    // Convert response type string to section
     if (rsptype == "front")
         m_section = 0;
     else if (rsptype == "back")
         m_section = 1;
     else
-        throw;
+        throw GException::rsp_invalid_type(G_LOAD, rsptype);
+
+    // Store response type
     m_rsptype = rsptype;
 
     // Initialise effective area
@@ -244,18 +247,46 @@ void GLATResponse::load(std::string rspname, std::string rsptype)
 
     // Initialise energy dispersion
     edisp_init();
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                              Save response                              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Save response
+ *
+ * @param rspname Filename into which the response will be saved
  ***************************************************************************/
-/**
- * @brief Save me my friend ...
- */
-void GLATResponse::save(std::string rspname) const
+void GLATResponse::save(const std::string& rspname) const
 {
+    // Open FITS file
+    GFits fits;
+    fits.open(rspname);
+
+    // Build PSF HDUs
+    int           naxes_psf2[] = {m_psf_energy_num, m_psf_ctheta_num};
+    int           naxes_psf3[] = {m_psf_angle_num, m_psf_energy_num, m_psf_ctheta_num};
+    GFitsDblImage image_psf_psf(3, naxes_psf3, m_psf);
+    GFitsDblImage image_psf_norm(2, naxes_psf2, m_norm);
+    GFitsDblImage image_psf_sigma(2, naxes_psf2, m_sigma);
+    GFitsHDU      hdu_psf_psf(image_psf_psf);
+    GFitsHDU      hdu_psf_norm(image_psf_norm);
+    GFitsHDU      hdu_psf_sigma(image_psf_sigma);
+    hdu_psf_psf.extname("PSF");
+    hdu_psf_norm.extname("NORM");
+    hdu_psf_sigma.extname("SIGMA");
+
+    // Append HDUs to FITS file
+    fits.append(&hdu_psf_psf);
+    fits.append(&hdu_psf_norm);
+    fits.append(&hdu_psf_sigma);
+
+    // Save FITS file
+    fits.save();
+
+    // Return
+    return;
 }
 
 
@@ -328,14 +359,14 @@ void GLATResponse::psf_init(void)
     GVector v_sigma     = get_fits_vector(hdu, "SIGMA");
     GVector v_gcore     = get_fits_vector(hdu, "GCORE");
     GVector v_gtail     = get_fits_vector(hdu, "GTAIL");
-    
+
     // Set binning in angle, energy and cos theta
     m_psf_angle_num  = 2000;
     m_psf_angle_min  = 0.01;
     m_psf_angle_bin  = 0.01;
     m_psf_energy_num = v_energy_lo.size();
     m_psf_ctheta_num = v_ctheta_lo.size();
-    
+
     // Free old PSF memory
     if (m_psf   != NULL) delete [] m_psf;
     if (m_norm  != NULL) delete [] m_norm;
@@ -347,7 +378,7 @@ void GLATResponse::psf_init(void)
     m_psf   = new double[psf_size];
     m_norm  = new double[bin_size];
     m_sigma = new double[bin_size];
-    
+
     // Setup PSF vector axis
     GVector xaxis(m_psf_angle_num);
     GVector u(m_psf_angle_num);
@@ -356,46 +387,46 @@ void GLATResponse::psf_init(void)
         xaxis(i) = x;
         u(i)     = 0.5*x*x;
     }
-    
+
     // Get maximum angle
     m_psf_angle_max = xaxis(m_psf_angle_num-1);
-    
+
     // Loop over all energy bins
     for (int ie = 0; ie < m_psf_energy_num; ++ie) {
-    
+
         // Get mean energy of bin
         // NOTE: This should be replaced by a logarithmic mean
         double energy = 0.5 * (v_energy_lo(ie) + v_energy_hi(ie));
-        
+
         // Get scale at specified energy
         double scale = psf_scale(energy);
-    
+
         // Loop over all cos theta bins
         for (int ic = 0; ic < m_psf_ctheta_num; ++ic) {
-        
+
             // Extract PSF parameters
             int    inx   = ic * m_psf_energy_num + ie;
             double ncore = v_ncore(inx);
             double sigma = v_sigma(inx);
             double gcore = v_gcore(inx);
             double gtail = v_gtail(inx);
-            
+
             // Evaluate ntail
             double denom = psf_base_value(10.0, gtail);
             double ntail = (denom != 0.0) ? ncore * psf_base_value(10.0, gcore) / denom : 0.0;
-            
+
             // Calculate PSF dependence
             GVector psf = ncore * psf_base_vector(u, gcore) + ntail * psf_base_vector(u, gtail);
-            
+
             // Normalize PSF vector to identical amplitudes at smallest angular
             // distance. This allows for accurate interpolation afterwards
             double norm = 1.0 / psf(0);
             psf *= norm;
-            
+
             // Evaluate angular separation
             double  stretch = sigma * scale;
             GVector delta   = xaxis * stretch;
-            
+
             // Calculate PSF normalization factor
             double sum = 0.0;
             for (int i = 0; i < m_psf_angle_num; ++i) {
@@ -405,16 +436,16 @@ void GLATResponse::psf_init(void)
             }
             sum *= twopi;
             norm = scale / sum;
-            
+
             // Store PSF information
             m_norm[inx]  = norm;
             m_sigma[inx] = sigma;
-            
+
             // Store PSF vector
             int ipsf = inx * m_psf_angle_num;
             for (int i = 0; i < m_psf_angle_num; ++i, ++ipsf)
                 m_psf[ipsf] = psf(i);
-        
+
         } // endfor: looped over cos theta
     } // endfor: looped over energies
 
@@ -436,22 +467,22 @@ double GLATResponse::psf_get(const double& delta, const double& logE, const doub
     // Interpolate sigma and norm tables
     double sigma = 1.0;  // Perform bi-linear interpolation in logE and ctheta
     double norm  = 1.0;  // Perform bi-linear interpolation in logE and ctheta
-    
+
     // Evaluate scale
     double energy = pow(10.0,logE);    // DUMMY: t=(0.01*(10.0^logE))^-0.8
     double scale  = psf_scale(energy);
-    
+
     // Get stretch factor
     double stretch = sigma * scale;
-    
+
     // Get PSF value from table
     double r   = delta * deg2rad / stretch;  // in radians
-    int    inx = (r - m_psf_angle_min) / m_psf_angle_bin;  // Perform linear interpolation
+    int    inx = (int)((r - m_psf_angle_min) / m_psf_angle_bin);  // Perform linear interpolation
     double psf = 1.0;
-    
+
     // Normalize PSF
     psf *= norm;
-    
+
     // Return PSF value
     return psf;
 }

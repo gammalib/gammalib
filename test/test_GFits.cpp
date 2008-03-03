@@ -38,18 +38,18 @@ int dequal(double val, double ref)
  ***************************************************************************/
 void test_open(void)
 {
-    std::cout << "Test GFits: Open FITS file: ";
+    cout << "Test GFits: Open FITS file: ";
     try {
         GFits fits;
         fits.open("test_GFits.fits");
         cout << endl << fits;
     }
     catch (exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to open FITS file." << std::endl;
-        std::cout << e.what() << std::endl;
+        cout << endl << "TEST ERROR: Unable to open FITS file." << endl;
+        cout << e.what() << endl;
         throw;
     }
-    std::cout << ". ok." << std::endl;
+    cout << ". ok." << endl;
 }
 
 
@@ -64,15 +64,15 @@ void test_columns(void)
         fits.open("test_GFits.fits");
     }
     catch (exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to open test file." << std::endl;
-        std::cout << e.what() << std::endl;
+        cout << endl << "TEST ERROR: Unable to open test file." << endl;
+        cout << e.what() << endl;
         throw;
     }
 
     //
     // Test single string column
     //
-    std::cout << "Test GFits: String column handling: ";
+    cout << "Test GFits: String column handling: ";
     try {
         GFitsTableStrCol str = *((GFitsTableStrCol*)fits.hdu("BinTable")->column("TSTRING"));
         if (str.string(0) != "1" || str.string(1) != "2" || str.string(2) != "") {
@@ -93,16 +93,16 @@ void test_columns(void)
           std::cout << ".";
     }
     catch (exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to handle single TSTRING column." << std::endl;
-        std::cout << e.what() << std::endl;
+        cout << endl << "TEST ERROR: Unable to handle single TSTRING column." << endl;
+        cout << e.what() << endl;
         throw;
     }
-    std::cout << ". ok." << std::endl;
+    cout << ". ok." << endl;
 
     //
     // Test single short column
     //
-    std::cout << "Test GFits: Short column handling: ";
+    cout << "Test GFits: Short column handling: ";
     try {
         GFitsTableShtCol sht = *((GFitsTableShtCol*)fits.hdu("BinTable")->column("TSHORT"));
         if (sht.integer(0) !=  1 || sht.real(0) !=  1.0 || sht.string(0) !=  "1" ||
@@ -115,16 +115,16 @@ void test_columns(void)
           std::cout << ".";
     }
     catch (exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to handle single TSHORT column." << std::endl;
-        std::cout << e.what() << std::endl;
+        cout << endl << "TEST ERROR: Unable to handle single TSHORT column." << endl;
+        cout << e.what() << endl;
         throw;
     }
-    std::cout << ". ok." << std::endl;
+    cout << ". ok." << endl;
 
     //
     // Test single long column
     //
-    std::cout << "Test GFits: Long column handling: ";
+    cout << "Test GFits: Long column handling: ";
     try {
         GFitsTableLngCol lng = *((GFitsTableLngCol*)fits.hdu("BinTable")->column("TLONG"));
         if (lng.integer(0) !=  10 || lng.real(0) !=  10.0 || lng.string(0) !=  "10" ||
@@ -134,14 +134,14 @@ void test_columns(void)
           throw;
         }
         else
-          std::cout << ".";
+          cout << ".";
     }
     catch (exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to handle single TLONG column." << std::endl;
-        std::cout << e.what() << std::endl;
+        cout << endl << "TEST ERROR: Unable to handle single TLONG column." << endl;
+        cout << e.what() << endl;
         throw;
     }
-    std::cout << ". ok." << std::endl;
+    cout << ". ok." << endl;
 
     //
     // Test single floating point column
@@ -215,11 +215,11 @@ void test_columns(void)
         }
     }
     catch (exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to handle single TFLOAT column." << std::endl;
-        std::cout << e.what() << std::endl;
+        cout << endl << "TEST ERROR: Unable to handle single TFLOAT column." << endl;
+        cout << e.what() << endl;
         throw;
     }
-    std::cout << ". ok." << std::endl;
+    cout << ". ok." << endl;
 
     //
     // Test single double column
@@ -280,11 +280,11 @@ void test_columns(void)
           std::cout << ".";
     }
     catch (exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to handle single TDOUBLE column." << std::endl;
-        std::cout << e.what() << std::endl;
+        cout << endl << "TEST ERROR: Unable to handle single TDOUBLE column." << endl;
+        cout << e.what() << endl;
         throw;
     }
-    std::cout << ". ok." << std::endl;
+    cout << ". ok." << endl;
 
 }
 
@@ -296,10 +296,10 @@ void test_create(void)
 {
     // Dump header
     cout << "Test GFits: Create FITS file: ";
-    
+
     // Remove FITS file
     system("rm -rf test.fits");
-    
+
     // Create FITS file with empty double precision image
     try {
         GFits fits;
@@ -307,6 +307,7 @@ void test_create(void)
         GFitsDblImage image;
         GFitsHDU hdu(image);
         fits.append(&hdu);
+        //cout << fits;
         fits.save();
     }
     catch (exception &e) {
@@ -315,7 +316,7 @@ void test_create(void)
         throw;
     }
     cout << ".";
-    
+
     // Attach double precision image
     double sum = 0.0;
     try {
@@ -334,6 +335,7 @@ void test_create(void)
         }
         GFitsHDU hdu(image);
         fits.append(&hdu);
+        cout << fits;
         fits.save();
     }
     catch (exception &e) {
@@ -342,7 +344,7 @@ void test_create(void)
         throw;
     }
     cout << ".";
-    
+
     // Re-open double precision image
     try {
         GFits fits;
@@ -408,12 +410,12 @@ void test_image_double(void)
             throw;
         }
         cout << ".";
-        
+
         // Bad 2D operator
         try {
             double result = image(0,1);
         }
-        catch (GException::fits_bad_image_operator &e) {
+        catch (GException::fits_wrong_image_operator &e) {
             cout << ".";
         }
         catch (exception &e) {
@@ -426,7 +428,7 @@ void test_image_double(void)
         try {
             double result = image(0,1,2);
         }
-        catch (GException::fits_bad_image_operator &e) {
+        catch (GException::fits_wrong_image_operator &e) {
             cout << ".";
         }
         catch (exception &e) {
@@ -439,7 +441,7 @@ void test_image_double(void)
         try {
             double result = image(0,1,2,3);
         }
-        catch (GException::fits_bad_image_operator &e) {
+        catch (GException::fits_wrong_image_operator &e) {
             cout << ".";
         }
         catch (exception &e) {
@@ -447,7 +449,7 @@ void test_image_double(void)
             cout << e.what() << endl;
             throw;
         }
-        
+
     }
     catch (exception &e) {
         cout << endl << "TEST ERROR: Unable to test GFitsDblImage classes." << endl;

@@ -108,7 +108,7 @@ public:
 
     /// Pure virtual method to define the calibration database
     /// @param caldb Calibration database to be used
-    virtual void set_caldb(std::string caldb) = 0;
+    virtual void set_caldb(const std::string& caldb) = 0;
 
     /// Pure virtual method to load the instrument response from the calibration
     /// database

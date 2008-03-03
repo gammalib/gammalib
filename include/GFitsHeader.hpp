@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsHeader.hpp
+ * @brief GFitsHeader class definition.
+ * @author J. Knodlseder
+ */
 
 #ifndef GFITSHEADER_HPP
 #define GFITSHEADER_HPP
@@ -21,8 +26,16 @@
 /* __ Namespaces _________________________________________________________ */
 
 
-/***************************************************************************
- *                       GFitsHeader class definition                      *
+/***********************************************************************//**
+ * @class GFitsHeader
+ *
+ * @brief Interface for FITS header class
+ *
+ * The FITS header class contains all cards that are found in the header of
+ * a HDU. All cards will be hold in memory, so no link to a FITS file is
+ * required. Cards may be read from one file (using the 'open' method) and
+ * saved into another file (using the 'save' method). Cards are added or
+ * changed using the 'update' method.
  ***************************************************************************/
 class GFitsHeader {
 
@@ -40,7 +53,7 @@ public:
 
     // Methods
     void             open(__fitsfile* fptr);
-    void             save(void);
+    void             save(__fitsfile* fptr);
     void             close(void);
     void             update(const GFitsHeaderCard& card);
     GFitsHeaderCard* card(const std::string& keyname);
@@ -52,13 +65,13 @@ public:
     int              integer(const std::string& keyname);
     int              integer(const int& cardno);
     GFitsHeader*     clone(void) const;
-    
+
 private:
     // Private methods
     void             init_members(void);
     void             copy_members(const GFitsHeader& header);
     void             free_members(void);
-    GFitsHeaderCard* GFitsHeader::card_ptr(const std::string keyname);
+    GFitsHeaderCard* GFitsHeader::card_ptr(const std::string& keyname);
 
     // Private data area
     int              m_num_cards;
@@ -69,20 +82,5 @@ private:
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
-inline 
-GFitsHeaderCard* GFitsHeader::card(const std::string& keyname)
-{
-    return GFitsHeader::card_ptr(keyname);
-}
-inline
-GFitsHeaderCard* GFitsHeader::card(const int& cardno)
-{
-    return (cardno >= 0 && cardno < m_num_cards) ? &(m_card[cardno]) : NULL;
-}
-inline 
-GFitsHeader* GFitsHeader::clone(void) const 
-{
-    return new GFitsHeader(*this);
-}
 
 #endif /* GFITSHEADER_HPP */

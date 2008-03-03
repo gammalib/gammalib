@@ -57,7 +57,7 @@ GFitsDblImage::GFitsDblImage() : GFitsImage()
 /***********************************************************************//**
  * @brief Constructor
  *
- * @param naxis Image dimensions (0,1,2,3,4)
+ * @param naxis Image dimension (0,1,2,3,4)
  * @param naxes Number of pixels in each dimension
  *
  * Construct instance of GFitsDblImage by specifying the image dimension and
@@ -68,10 +68,46 @@ GFitsDblImage::GFitsDblImage(int naxis, const int* naxes) : GFitsImage(naxis, na
 {
     // Initialise class members for clean destruction
     init_members();
-    
+
     // Set bitpix
     m_bitpix = -64;
-    
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Constructor
+ *
+ * @param naxis Image dimension (0,1,2,3,4)
+ * @param naxes Number of pixels in each dimension
+ * @param pixels Pointer to image pixel array
+ *
+ * Construct instance of GFitsDblImage by specifying the image dimension, the
+ * number of pixels in each dimension and an image pixel array. If the
+ * 'pixels' pointer is valid (i.e. not NULL) the pixel data is indeed copied
+ * by this constructor. In case of memory shortage a combination of
+ *   GFitsDblImage::GFitsDblImage(int naxis, const int* naxes)
+ * and
+ *   GFitsDblImage::link(double* pixels)
+ * may be prefered to avoid duplication of the pixel data.
+ ***************************************************************************/
+GFitsDblImage::GFitsDblImage(int naxis, const int* naxes, const double* pixels) 
+                                                   : GFitsImage(naxis, naxes)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Copy pixels into object
+    if (m_num_pixels > 0 && pixels != NULL) {
+        m_pixels = new double[m_num_pixels];
+        memcpy(m_pixels, pixels, m_num_pixels*sizeof(double));
+    }
+
+    // Set bitpix
+    m_bitpix = -64;
+
     // Return
     return;
 }
@@ -146,7 +182,10 @@ GFitsDblImage& GFitsDblImage::operator= (const GFitsDblImage& image)
 /***********************************************************************//**
  * @brief 1D image pixel access operator
  *
- * @param ix Pixel index
+ * @param[in] ix Pixel index
+ *
+ * @exception GException::fits_wrong_image_operator
+ *            Image is not a 1D image
  *
  * Provides access to a pixel of a 1D image. No range checking is performed.
  * Use the at(ix) method if range checking is required.
@@ -155,11 +194,11 @@ double& GFitsDblImage::operator() (const int& ix)
 {
     // Operator is only valid for 1D images
     if (m_naxis != 1)
-        throw GException::fits_bad_image_operator(G_OPERATOR2, m_naxis, 1);
+        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 1);
 
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) fetch_pixels();
-    
+
     // Return image pixel
     return m_pixels[ix];
 }
@@ -168,7 +207,10 @@ double& GFitsDblImage::operator() (const int& ix)
 /***********************************************************************//**
  * @brief 1D image pixel access operator (const variant)
  *
- * @param ix Pixel index
+ * @param[in] ix Pixel index
+ *
+ * @exception GException::fits_wrong_image_operator
+ *            Image is not a 1D image
  *
  * Provides access to a pixel of a 1D image. No range checking is performed.
  * Use the at(ix) method if range checking is required.
@@ -177,11 +219,11 @@ const double& GFitsDblImage::operator() (const int& ix) const
 {
     // Operator is only valid for 1D images
     if (m_naxis != 1)
-        throw GException::fits_bad_image_operator(G_OPERATOR2, m_naxis, 1);
+        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 1);
 
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) ((GFitsDblImage*)this)->fetch_pixels();
-    
+
     // Return image pixel
     return m_pixels[ix];
 }
@@ -190,8 +232,11 @@ const double& GFitsDblImage::operator() (const int& ix) const
 /***********************************************************************//**
  * @brief 2D image pixel access operator
  *
- * @param ix Pixel index in first dimension
- * @param iy Pixel index in second dimension
+ * @param[in] ix Pixel index in first dimension
+ * @param[in] iy Pixel index in second dimension
+ *
+ * @exception GException::fits_wrong_image_operator
+ *            Image is not a 2D image
  *
  * Provides access to a pixel of a 2D image. No range checking is performed.
  * Use the at(ix,iy) method if range checking is required.
@@ -200,14 +245,14 @@ double& GFitsDblImage::operator() (const int& ix, const int& iy)
 {
     // Operator is only valid for 2D images
     if (m_naxis != 2)
-        throw GException::fits_bad_image_operator(G_OPERATOR2, m_naxis, 2);
+        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 2);
 
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) fetch_pixels();
-    
+
     // Calculate pixel offset
     int offset = ix + iy * m_naxes[0];
-    
+
     // Return image pixel
     return m_pixels[offset];
 }
@@ -216,8 +261,11 @@ double& GFitsDblImage::operator() (const int& ix, const int& iy)
 /***********************************************************************//**
  * @brief 2D image pixel access operator (const variant)
  *
- * @param ix Pixel index in first dimension
- * @param iy Pixel index in second dimension
+ * @param[in] ix Pixel index in first dimension
+ * @param[in] iy Pixel index in second dimension
+ *
+ * @exception GException::fits_wrong_image_operator
+ *            Image is not a 2D image
  *
  * Provides access to a pixel of a 2D image. No range checking is performed.
  * Use the at(ix,iy) method if range checking is required.
@@ -226,14 +274,14 @@ const double& GFitsDblImage::operator() (const int& ix, const int& iy) const
 {
     // Operator is only valid for 2D images
     if (m_naxis != 2)
-        throw GException::fits_bad_image_operator(G_OPERATOR2, m_naxis, 2);
+        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 2);
 
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) ((GFitsDblImage*)this)->fetch_pixels();
-    
+
     // Calculate pixel offset
     int offset = ix + iy * m_naxes[0];
-    
+
     // Return image pixel
     return m_pixels[offset];
 }
@@ -242,9 +290,12 @@ const double& GFitsDblImage::operator() (const int& ix, const int& iy) const
 /***********************************************************************//**
  * @brief 3D image pixel access operator
  *
- * @param ix Pixel index in first dimension
- * @param iy Pixel index in second dimension
- * @param iz Pixel index in third dimension
+ * @param[in] ix Pixel index in first dimension
+ * @param[in] iy Pixel index in second dimension
+ * @param[in] iz Pixel index in third dimension
+ *
+ * @exception GException::fits_wrong_image_operator
+ *            Image is not a 3D image
  *
  * Provides access to a pixel of a 3D image. No range checking is performed.
  * Use the at(ix,iy,iz) method if range checking is required.
@@ -253,14 +304,14 @@ double& GFitsDblImage::operator() (const int& ix, const int& iy, const int& iz)
 {
     // Operator is only valid for 3D images
     if (m_naxis != 3)
-        throw GException::fits_bad_image_operator(G_OPERATOR2, m_naxis, 3);
+        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 3);
 
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) fetch_pixels();
-    
+
     // Calculate pixel offset
     int offset = ix + m_naxes[0] * (iy + iz * m_naxes[1]);
-    
+
     // Return image pixel
     return m_pixels[offset];
 }
@@ -269,9 +320,12 @@ double& GFitsDblImage::operator() (const int& ix, const int& iy, const int& iz)
 /***********************************************************************//**
  * @brief 3D image pixel access operator (const variant)
  *
- * @param ix Pixel index in first dimension
- * @param iy Pixel index in second dimension
- * @param iz Pixel index in third dimension
+ * @param[in] ix Pixel index in first dimension
+ * @param[in] iy Pixel index in second dimension
+ * @param[in] iz Pixel index in third dimension
+ *
+ * @exception GException::fits_wrong_image_operator
+ *            Image is not a 3D image
  *
  * Provides access to a pixel of a 3D image. No range checking is performed.
  * Use the at(ix,iy,iz) method if range checking is required.
@@ -280,14 +334,14 @@ const double& GFitsDblImage::operator() (const int& ix, const int& iy, const int
 {
     // Operator is only valid for 3D images
     if (m_naxis != 3)
-        throw GException::fits_bad_image_operator(G_OPERATOR2, m_naxis, 3);
+        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 3);
 
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) ((GFitsDblImage*)this)->fetch_pixels();
-    
+
     // Calculate pixel offset
     int offset = ix + m_naxes[0] * (iy + iz * m_naxes[1]);
-    
+
     // Return image pixel
     return m_pixels[offset];
 }
@@ -296,10 +350,13 @@ const double& GFitsDblImage::operator() (const int& ix, const int& iy, const int
 /***********************************************************************//**
  * @brief 4D image pixel access operator
  *
- * @param ix Pixel index in first dimension
- * @param iy Pixel index in second dimension
- * @param iz Pixel index in third dimension
- * @param it Pixel index in forth dimension
+ * @param[in] ix Pixel index in first dimension
+ * @param[in] iy Pixel index in second dimension
+ * @param[in] iz Pixel index in third dimension
+ * @param[in] it Pixel index in forth dimension
+ *
+ * @exception GException::fits_wrong_image_operator
+ *            Image is not a 4D image
  *
  * Provides access to a pixel of a 4D image. No range checking is performed.
  * Use the at(ix,iy,iz,it) method if range checking is required.
@@ -308,14 +365,14 @@ double& GFitsDblImage::operator() (const int& ix, const int& iy, const int& iz, 
 {
     // Operator is only valid for 4D images
     if (m_naxis != 4)
-        throw GException::fits_bad_image_operator(G_OPERATOR2, m_naxis, 4);
+        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 4);
 
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) fetch_pixels();
-    
+
     // Calculate pixel offset
     int offset = ix + m_naxes[0] * (iy + m_naxes[1] * (iz + it *  m_naxes[2]));
-    
+
     // Return image pixel
     return m_pixels[offset];
 }
@@ -324,10 +381,13 @@ double& GFitsDblImage::operator() (const int& ix, const int& iy, const int& iz, 
 /***********************************************************************//**
  * @brief 4D image pixel access operator (const variant)
  *
- * @param ix Pixel index in first dimension
- * @param iy Pixel index in second dimension
- * @param iz Pixel index in third dimension
- * @param it Pixel index in forth dimension
+ * @param[in] ix Pixel index in first dimension
+ * @param[in] iy Pixel index in second dimension
+ * @param[in] iz Pixel index in third dimension
+ * @param[in] it Pixel index in forth dimension
+ *
+ * @exception GException::fits_wrong_image_operator
+ *            Image is not a 4D image
  *
  * Provides access to a pixel of a 4D image. No range checking is performed.
  * Use the at(ix,iy,iz,it) method if range checking is required.
@@ -336,14 +396,14 @@ const double& GFitsDblImage::operator() (const int& ix, const int& iy, const int
 {
     // Operator is only valid for 4D images
     if (m_naxis != 4)
-        throw GException::fits_bad_image_operator(G_OPERATOR2, m_naxis, 4);
+        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 4);
 
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) ((GFitsDblImage*)this)->fetch_pixels();
-    
+
     // Calculate pixel offset
     int offset = ix + m_naxes[0] * (iy + m_naxes[1] * (iz + it *  m_naxes[2]));
-    
+
     // Return image pixel
     return m_pixels[offset];
 }
@@ -367,13 +427,13 @@ void GFitsDblImage::open(__fitsfile* fptr)
 {
     // Initialise base class members
     GFitsImage::init_members();
-    
+
     // Initialise class members
     init_members();
-    
+
     // Open image
     open_image(fptr);
-    
+
     // Return
     return;
 }
@@ -398,10 +458,10 @@ void GFitsDblImage::link(double* pixels)
     if (!m_linked) {
         if (m_pixels != NULL) delete [] m_pixels;
     }
-    
+
     // Link pixel array to image
     m_pixels = pixels;
-    
+
     // Flag that pixels have been linked
     m_linked = 1;
 
@@ -419,7 +479,7 @@ void GFitsDblImage::save(void)
 {
     // Save a double precision image
     save_image(__TDOUBLE, m_pixels);
-    
+
     // Return
     return;
 }
@@ -442,10 +502,10 @@ void GFitsDblImage::close(void)
 
     // Free base class members
     GFitsImage::free_members();
-    
+
     // Initialise base class members
     GFitsImage::init_members();
-    
+
     // Return
     return;
 }
@@ -457,7 +517,7 @@ void GFitsDblImage::close(void)
  * Cloning provides a copy of the FITS file. Cloning is used to allocate
  * derived classes into a base class pointer.
  ***************************************************************************/
-GFitsDblImage* GFitsDblImage::clone(void) const 
+GFitsDblImage* GFitsDblImage::clone(void) const
 {
     // Clone this image
     return new GFitsDblImage(*this);
@@ -534,12 +594,12 @@ void GFitsDblImage::copy_members(const GFitsDblImage& image)
     // Copy attributes
     m_linked = image.m_linked;
     m_anynul = image.m_anynul;
-    
+
     // Copy pixels
     if (m_linked)
         m_pixels = image.m_pixels;
     else {
-        if (m_num_pixels > 0) {
+        if (m_num_pixels > 0 && image.m_pixels != NULL) {
             m_pixels = new double[m_num_pixels];
             memcpy(m_pixels, image.m_pixels, m_num_pixels*sizeof(double));
         }
@@ -566,10 +626,10 @@ void GFitsDblImage::free_members(void)
     if (!m_linked) {
         if (m_pixels != NULL) delete [] m_pixels;
     }
-    
+
     // Free NULL value
     if (m_nulval != NULL) delete m_nulval;
-    
+
     // Mark memory as free
     m_linked = 0;
     m_pixels = NULL;
@@ -602,14 +662,14 @@ void GFitsDblImage::fetch_pixels(void)
         if (!m_linked) {
             if (m_pixels != NULL) delete [] m_pixels;
         }
-    
+
         // Allocate fresh image pixels
         m_pixels = new double[m_num_pixels];
 
         // Case 1: A FITS is attached. Load pixels now.
         if (m_fitsfile.Fptr != NULL)
             load_image(__TDOUBLE, m_pixels, m_nulval, &m_anynul);
-    
+
         // Case 2: No FITS file is attached. Allocate pixels and set them all to 0.0
         else {
             for (int i = 0; i < m_num_pixels; ++i)

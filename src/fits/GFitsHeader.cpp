@@ -20,7 +20,10 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPEN "GFitsHeader::open(int)"
+#define G_OPEN     "GFitsHeader::open(fitsfile*)"
+#define G_SAVE     "GFitsHeader::save(fitsfile*)"
+#define G_CARD      "GFitsHeader::card(const int&)"
+#define G_CARD_PTR "GFitsHeader::card_ptr(const std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -36,9 +39,8 @@
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                                Constructor                              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Constructor
  ***************************************************************************/
 GFitsHeader::GFitsHeader()
 {
@@ -50,9 +52,10 @@ GFitsHeader::GFitsHeader()
 }
 
 
-/***************************************************************************
- *                              Copy constructor                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param header Header from which GFitsHeader instance should be built
  ***************************************************************************/
 GFitsHeader::GFitsHeader(const GFitsHeader& header)
 {
@@ -67,9 +70,8 @@ GFitsHeader::GFitsHeader(const GFitsHeader& header)
 }
 
 
-/***************************************************************************
- *                               Destructor                                *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Destructor
  ***************************************************************************/
 GFitsHeader::~GFitsHeader()
 {
@@ -87,9 +89,10 @@ GFitsHeader::~GFitsHeader()
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                            Assignment operator                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param header Header which should be assigned to GFitsHeader instance
  ***************************************************************************/
 GFitsHeader& GFitsHeader::operator= (const GFitsHeader& header)
 {
@@ -121,7 +124,7 @@ GFitsHeader& GFitsHeader::operator= (const GFitsHeader& header)
 /***********************************************************************//**
  * @brief Open Header
  *
- * @param fptr FITS file pointer
+ * @param fptr Pointer to FITS file from which the header will be loaded
  *
  * Loads all header cards into memory. Any header cards that existed before
  * will be dropped.
@@ -157,10 +160,38 @@ void GFitsHeader::open(__fitsfile* fptr)
 /***********************************************************************//**
  * @brief Save Header to FITS file
  *
- * NOT YET IMPLEMENTED
+ * @param fptr Pointer to FITS file into which the header cards will be saved
+ *
+ * Saves all header cards into HDU. This method does not write the following
+ * mandatory keywords to the HDU (those will be writted by methods handling
+ * the data of the HDU):
+ * 'SIMPLE'
+ * 'BITPIX'
+ * 'NAXIS', 'NAXIS1', 'NAXIS2', etc.
+ * 'EXTEND'
+ * 'PCOUNT'
+ * 'GCOUNT'
  ***************************************************************************/
-void GFitsHeader::save(void)
+void GFitsHeader::save(__fitsfile* fptr)
 {
+    // Move to HDU
+    int status = 0;
+    status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_SAVE, status);
+
+    // Save all cards
+    for (int i = 0; i < m_num_cards; ++i) {
+        if (m_card[i].keyname() != "SIMPLE" &&
+            m_card[i].keyname() != "XTENSION" &&
+            m_card[i].keyname() != "BITPIX" &&
+            m_card[i].keyname() != "EXTEND" &&
+            m_card[i].keyname() != "PCOUNT" &&
+            m_card[i].keyname() != "GCOUNT" &&
+            m_card[i].keyname().find("NAXIS") == std::string::npos) {
+            m_card[i].write(fptr);
+        }
+    }
 
     // Return
     return;
@@ -191,49 +222,95 @@ void GFitsHeader::close(void)
  * @brief Update card in header or append card to header
  *
  * @param card FITS header card that should be updated
- *                                            
- * This method updates one header card. Updating means replacing any       
- * existing card with the specified one or appending a new card to the     
- * list of existing cards.                                                 
+ *
+ * This method updates one header card. Updating means replacing any
+ * existing card with the specified one or appending a new card to the
+ * list of existing cards.
  ***************************************************************************/
 void GFitsHeader::update(const GFitsHeaderCard& card)
 {
-    // If card exists then update existing values
-    GFitsHeaderCard* ptr = this->card(card.keyname());
-    if (ptr != NULL)
-        *ptr = card;
+    // If card keyname is not COMMENT or HISTORY, then check first if
+    // card exists. If yes then update existing card
+    if (card.keyname() != "COMMENT" && card.keyname() != "HISTORY") {
+        try {
+            GFitsHeaderCard* ptr = this->card(card.keyname());
+            *ptr = card;
+            return;
+        }
+        catch (GException::fits_key_not_found) {
+            ;
+        }
+    }
 
-    // ... otherwise append a new card
-    else {
-    
-        // Create memory to hold cards
-        GFitsHeaderCard* tmp = new GFitsHeaderCard[m_num_cards+1];
-        if (tmp != NULL) {
-        
-            // Copy over existing cards and remove old ones
-            if (m_card != NULL) {
-                for (int i = 0; i < m_num_cards; ++i)
-                    tmp[i] = m_card[i];
-                delete [] m_card;
-            }
+    // Create memory to hold cards
+    GFitsHeaderCard* tmp = new GFitsHeaderCard[m_num_cards+1];
+    if (tmp != NULL) {
 
-            // Connect the new memory to the card pointer
-            m_card = tmp;
+        // Copy over existing cards and remove old ones
+        if (m_card != NULL) {
+            for (int i = 0; i < m_num_cards; ++i)
+                tmp[i] = m_card[i];
+            delete [] m_card;
+        }
 
-            // Append new card to list
-            m_card[m_num_cards] = card;
+        // Connect the new memory to the card pointer
+        m_card = tmp;
 
-        } // endif: new memory was valid
-    } // endif: card appending was required
+        // Append new card to list
+        m_card[m_num_cards] = card;
+
+        // Increment number of cards
+        m_num_cards++;
+
+    } // endif: new memory was valid
 
     // Return
     return;
 }
 
 
-/***************************************************************************
- *                 Get specified header card value as string               *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return pointer of header card
+ *
+ * @param[in] keyname Name of header card
+ *
+ * Returns a pointer on the header card.
+ * If card was not found a 'fits_key_not_found' error will be thrown.
+ ***************************************************************************/
+GFitsHeaderCard* GFitsHeader::card(const std::string& keyname)
+{
+    return GFitsHeader::card_ptr(keyname);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer of header card
+ *
+ * @param[in] keyname Name of header card
+ *
+ * Returns a pointer on the header card.
+ * If card was not found a 'out_of_range' error will be thrown.
+ ***************************************************************************/
+GFitsHeaderCard* GFitsHeader::card(const int& cardno)
+{
+    // If card number is out of range then throw an exception
+    if (cardno < 0 || cardno >= m_num_cards)
+        throw GException::out_of_range(G_CARD, cardno, 0, m_num_cards-1);
+
+    // Get card pointer
+    GFitsHeaderCard* ptr = &(m_card[cardno]);
+
+    // Return pointer
+    return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Get specified header card value as string
+ *
+ * @param[in] keyname Name of header card
+ *
+ * If the header card is not found an empty string is returned.
  ***************************************************************************/
 std::string GFitsHeader::string(const std::string& keyname)
 {
@@ -248,9 +325,12 @@ std::string GFitsHeader::string(const std::string& keyname)
 }
 
 
-/***************************************************************************
- *                 Get specified header card value as string               *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Get specified header card value as string
+ *
+ * @param[in] cardno Header card number (starting from 0)
+ *
+ * If the header card number does not exist an empty string is returned.
  ***************************************************************************/
 std::string GFitsHeader::string(const int& cardno)
 {
@@ -265,9 +345,12 @@ std::string GFitsHeader::string(const int& cardno)
 }
 
 
-/***************************************************************************
- *                 Get specified header card value as double               *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Get specified header card value as double precision value
+ *
+ * @param[in] keyname Name of header card
+ *
+ * If the header card is not found 0 is returned.
  ***************************************************************************/
 double GFitsHeader::real(const std::string& keyname)
 {
@@ -282,9 +365,12 @@ double GFitsHeader::real(const std::string& keyname)
 }
 
 
-/***************************************************************************
- *                 Get specified header card value as double               *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Get specified header card value as double precision value
+ *
+ * @param[in] cardno Header card number (starting from 0)
+ *
+ * If the header card number does not exist 0 is returned.
  ***************************************************************************/
 double GFitsHeader::real(const int& cardno)
 {
@@ -299,9 +385,12 @@ double GFitsHeader::real(const int& cardno)
 }
 
 
-/***************************************************************************
- *                  Get specified header card value as int                 *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Get specified header card value as integer value
+ *
+ * @param keyname Name of header card
+ *
+ * If the header card is not found 0 is returned.
  ***************************************************************************/
 int GFitsHeader::integer(const std::string& keyname)
 {
@@ -316,9 +405,12 @@ int GFitsHeader::integer(const std::string& keyname)
 }
 
 
-/***************************************************************************
- *                  Get specified header card value as int                 *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Get specified header card value as integer value
+ *
+ * @param[in] cardno Header card number (starting from 0)
+ *
+ * If the header card number does not exist 0 is returned.
  ***************************************************************************/
 int GFitsHeader::integer(const int& cardno)
 {
@@ -333,15 +425,23 @@ int GFitsHeader::integer(const int& cardno)
 }
 
 
+/***********************************************************************//**
+ * @brief Clone header object
+ ***************************************************************************/
+GFitsHeader* GFitsHeader::clone(void) const
+{
+    return new GFitsHeader(*this);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                         GFitsHeader private methods                     =
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                         Initialise class members                        *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Initialise class members
  ***************************************************************************/
 void GFitsHeader::init_members(void)
 {
@@ -354,18 +454,19 @@ void GFitsHeader::init_members(void)
 }
 
 
-/***************************************************************************
- *                            Copy class members                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] header Header which should be copied
  ***************************************************************************/
 void GFitsHeader::copy_members(const GFitsHeader& header)
 {
     // Copy attributes
+    m_num_cards = header.m_num_cards;
 
     // Copy cards
-    if (header.m_card != NULL && header.m_num_cards > 0) {
-        m_num_cards = header.m_num_cards;
-        m_card      = new GFitsHeaderCard[m_num_cards];
+    if (header.m_card != NULL && m_num_cards > 0) {
+        m_card = new GFitsHeaderCard[m_num_cards];
         for (int i = 0; i < m_num_cards; ++i)
             m_card[i] = header.m_card[i];
     }
@@ -375,9 +476,8 @@ void GFitsHeader::copy_members(const GFitsHeader& header)
 }
 
 
-/***************************************************************************
- *                           Delete class members                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Delete class members
  ***************************************************************************/
 void GFitsHeader::free_members(void)
 {
@@ -392,11 +492,15 @@ void GFitsHeader::free_members(void)
 }
 
 
-/***************************************************************************
- *                             Get card pointer                            *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Get pointer on header card
+ *
+ * @param[in] keyname Name of the header card
+ *
+ * Returns a pointer on the header card.
+ * If card was not found a 'fits_key_not_found' error will be thrown.
  ***************************************************************************/
-GFitsHeaderCard* GFitsHeader::card_ptr(const std::string keyname)
+GFitsHeaderCard* GFitsHeader::card_ptr(const std::string& keyname)
 {
 
     // Set card pointer to NULL (default)
@@ -410,6 +514,10 @@ GFitsHeaderCard* GFitsHeader::card_ptr(const std::string keyname)
         }
     }
 
+    // If no card was found then throw an error
+    if (ptr == NULL)
+        throw GException::fits_key_not_found(G_CARD_PTR, keyname);
+
     // Return pointer
     return ptr;
 }
@@ -421,15 +529,16 @@ GFitsHeaderCard* GFitsHeader::card_ptr(const std::string keyname)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                             Output operator                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream
+ * @param[in] header Header to put in output stream
  ***************************************************************************/
 ostream& operator<< (ostream& os, const GFitsHeader& header)
 {
     // Put header in stream
-    os << "=== GFitsHeader ===" << endl;
-    os << " Number of cards ...........: " << header.m_num_cards << endl;
+    os << "=== GFitsHeader (" << header.m_num_cards << " cards) ===" << endl;
     for (int i = 0; i < header.m_num_cards; ++i)
         os << " " << header.m_card[i];
 

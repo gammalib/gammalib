@@ -48,9 +48,8 @@
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                                Constructor                              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Constructor
  ***************************************************************************/
 GFitsHeaderCard::GFitsHeaderCard()
 {
@@ -60,26 +59,91 @@ GFitsHeaderCard::GFitsHeaderCard()
     // Return
     return;
 }
-GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname, 
-                                 const std::string& value, 
+
+
+/***********************************************************************//**
+ * @brief Constructor for string cards
+ *
+ * @param[in] keyname Name of the header card
+ * @param[in] value String value of the header card
+ * @param[in] comment Comment of the header card
+ *
+ * This constructor builds a header card from the keyname, value and comment.
+ ***************************************************************************/
+GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
+                                 const std::string& value,
                                  const std::string& comment)
 {
     // Initialise class members for clean destruction
     init_members();
-    
+
     // Set members
-    this->set_keyname(keyname);
-    this->set_value(value);
-    this->set_comment(comment);
+    this->keyname(keyname);
+    this->value(value);
+    this->comment(comment);
 
     // Return
     return;
 }
 
 
-/***************************************************************************
- *                              Copy constructor                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Constructor for floating point cards
+ *
+ * @param[in] keyname Name of the header card
+ * @param[in] value Floating point value of the header card
+ * @param[in] comment Comment of the header card
+ *
+ * This constructor builds a header card from the keyname, value and comment.
+ ***************************************************************************/
+GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
+                                 const double& value,
+                                 const std::string& comment)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Set members
+    this->keyname(keyname);
+    this->value(value);
+    this->comment(comment);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Constructor for integer cards
+ *
+ * @param[in] keyname Name of the header card
+ * @param[in] value Integer value of the header card
+ * @param[in] comment Comment of the header card
+ *
+ * This constructor builds a header card from the keyname, value and comment.
+ ***************************************************************************/
+GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
+                                 const int& value,
+                                 const std::string& comment)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Set members
+    this->keyname(keyname);
+    this->value(value);
+    this->comment(comment);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param card[in] Header card that will be used to construct GFitsHeaderCard
+ *                 instance
  ***************************************************************************/
 GFitsHeaderCard::GFitsHeaderCard(const GFitsHeaderCard& card)
 {
@@ -94,9 +158,8 @@ GFitsHeaderCard::GFitsHeaderCard(const GFitsHeaderCard& card)
 }
 
 
-/***************************************************************************
- *                               Destructor                                *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Destructor
  ***************************************************************************/
 GFitsHeaderCard::~GFitsHeaderCard()
 {
@@ -113,24 +176,26 @@ GFitsHeaderCard::~GFitsHeaderCard()
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                            Assignment operator                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param card[in] Header card that will be assigned to GFitsHeaderCard 
+ *                 instance
  ***************************************************************************/
 GFitsHeaderCard& GFitsHeaderCard::operator= (const GFitsHeaderCard& card)
 {
     // Execute only if object is not identical
     if (this != &card) {
-  
+
         // Free members
         free_members();
-  
+
         // Initialise private members for clean destruction
         init_members();
 
         // Copy members
         copy_members(card);
-	
+
     } // endif: object was not identical
 
     // Return this object
@@ -144,9 +209,174 @@ GFitsHeaderCard& GFitsHeaderCard::operator= (const GFitsHeaderCard& card)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                          Return value as string                         *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Set name of header card
+ *
+ * @param[in] keyname Name of header card
+ ***************************************************************************/
+void GFitsHeaderCard::keyname(const std::string& keyname)
+{
+    // Set name of card
+    m_keyname = keyname;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set string value of header card
+ *
+ * @param[in] value String value of header card
+ ***************************************************************************/
+void GFitsHeaderCard::value(const std::string& value)
+{
+    // Set value and value type
+    m_value      = value;
+    m_value_type = get_value_type(value);
+
+    // Attach hyphens if required
+    if (m_value_type == CT_STRING) {
+        if (m_value[0] != '\x27')
+            m_value = "'" + m_value;
+        if (m_value[m_value.length()-1] != '\x27')
+            m_value += "'";
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set floating point value of header card
+ *
+ * @param[in] value Floating point value of header card
+ ***************************************************************************/
+void GFitsHeaderCard::value(const double& value)
+{
+    // Convert value to string
+    ostringstream s_value;
+    s_value << scientific << value;
+
+    // Assign value
+    m_value = s_value.str();
+
+    // Set value type
+    m_value_type = get_value_type(m_value);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set integer value of header card
+ *
+ * @param[in] value Integer value of header card
+ ***************************************************************************/
+void GFitsHeaderCard::value(const int& value)
+{
+    // Convert value to string
+    ostringstream s_value;
+    s_value << value;
+
+    // Assign value
+    m_value = s_value.str();
+
+    // Set value type
+    m_value_type = get_value_type(m_value);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set unit of header card value
+ *
+ * @param[in] value Unit of header card
+ ***************************************************************************/
+void GFitsHeaderCard::unit(const std::string& unit)
+{
+    // Set unit
+    m_unit = unit;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set comment of header card
+ *
+ * @param[in] value Header card comment
+ ***************************************************************************/
+void GFitsHeaderCard::comment(const std::string& comment)
+{
+    // Set comment
+    m_comment = comment;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return header card keyname
+  ***************************************************************************/
+std::string GFitsHeaderCard::keyname(void) const
+{
+    // Return
+    return m_keyname;
+}
+
+
+/***********************************************************************//**
+ * @brief Return header card value
+  ***************************************************************************/
+std::string GFitsHeaderCard::value(void) const
+{
+    // Return
+    return m_value;
+}
+
+
+/***********************************************************************//**
+ * @brief Return header card value type
+  ***************************************************************************/
+int GFitsHeaderCard::value_type(void) const
+{
+    // Return
+    return m_value_type;
+}
+
+
+/***********************************************************************//**
+ * @brief Return header card value unit
+  ***************************************************************************/
+std::string GFitsHeaderCard::unit(void) const
+{
+    // Return
+    return m_unit;
+}
+
+
+/***********************************************************************//**
+ * @brief Return header card comment
+  ***************************************************************************/
+std::string GFitsHeaderCard::comment(void) const
+{
+    // Return
+    return m_comment;
+}
+
+
+/***********************************************************************//**
+ * @brief Return header card value as string
+ *
+ * Convert header card value into a string.
+ * Any hyphens that may occur in the FITS card will be automatically stripped.
  ***************************************************************************/
 std::string GFitsHeaderCard::string(void)
 {
@@ -174,9 +404,12 @@ std::string GFitsHeaderCard::string(void)
 }
 
 
-/***************************************************************************
- *                          Return value as double                         *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return header card value as double precision
+ *
+ * Convert header card value into a double precision value. In case that the
+ * card did not contain a numerical value, 0 will be returned by the
+ * method.
  ***************************************************************************/
 double GFitsHeaderCard::real(void)
 {
@@ -206,9 +439,12 @@ double GFitsHeaderCard::real(void)
 }
 
 
-/***************************************************************************
- *                            Return value as int                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return header card value as integer
+*
+ * Convert header card value into a integer value. In case that the
+ * card did not contain a numerical value, 0 will be returned by the
+ * method.
  ***************************************************************************/
 int GFitsHeaderCard::integer(void)
 {
@@ -238,9 +474,11 @@ int GFitsHeaderCard::integer(void)
 }
 
 
-/***************************************************************************
- *                             Read header card                            *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Read header card from FITS file
+ *
+ * @param[in] fptr Pointer to FITS file from which the card is read
+ * @param[in] keynum Number of the header card
  ***************************************************************************/
 void GFitsHeaderCard::read(__fitsfile* fptr, int keynum)
 {
@@ -264,18 +502,20 @@ void GFitsHeaderCard::read(__fitsfile* fptr, int keynum)
     m_comment.assign(comment);
 
     // Determine card type
-    m_value_type = get_value_type();
+    m_value_type = get_value_type(m_value);
 
     // Return
     return;
 }
 
 
-/***************************************************************************
- *                             Read header card                            *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Read header card from FITS file
+ *
+ * @param[in] fptr Pointer to FITS file from which the card is read
+ * @param[in] keyname Name of the header card
  ***************************************************************************/
-void GFitsHeaderCard::read(__fitsfile* fptr, std::string keyname)
+void GFitsHeaderCard::read(__fitsfile* fptr, const std::string& keyname)
 {
     // Move to HDU
     int status = 0;
@@ -300,16 +540,20 @@ void GFitsHeaderCard::read(__fitsfile* fptr, std::string keyname)
     m_comment.assign(comment);
 
     // Determine card type
-    m_value_type = get_value_type();
+    m_value_type = get_value_type(m_value);
 
     // Return
     return;
 }
 
 
-/***************************************************************************
- *                            Write header card                            *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Write header card
+ *
+ * @param fptr[in] Pointer to FITS file into which the header card should be
+ *                  written
+ *
+ * Writes any kind of header card to a FITS file.
  ***************************************************************************/
 void GFitsHeaderCard::write(__fitsfile* fptr)
 {
@@ -336,9 +580,8 @@ void GFitsHeaderCard::write(__fitsfile* fptr)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                         Initialise class members                        *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Initialise class members
  ***************************************************************************/
 void GFitsHeaderCard::init_members(void)
 {
@@ -354,9 +597,10 @@ void GFitsHeaderCard::init_members(void)
 }
 
 
-/***************************************************************************
- *                            Copy class members                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] card Header card to be copied
  ***************************************************************************/
 void GFitsHeaderCard::copy_members(const GFitsHeaderCard& card)
 {
@@ -372,9 +616,8 @@ void GFitsHeaderCard::copy_members(const GFitsHeaderCard& card)
 }
 
 
-/***************************************************************************
- *                           Delete class members                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Delete class members
  ***************************************************************************/
 void GFitsHeaderCard::free_members(void)
 {
@@ -383,11 +626,25 @@ void GFitsHeaderCard::free_members(void)
 }
 
 
-/***************************************************************************
- *                        Determine card value type                        *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Determine card value type
+ *
+ * @param[in] value Value string for which the type should be determined
+ *
+ * Method that determines the type of the card value. The following types are
+ * defined:
+ * CT_UNKNOWN=0 (inknown type)
+ * CT_INVALID=1 (invalid type)
+ * CT_STRING=2 (string)
+ * CT_INT=3 (integer)
+ * CT_FLOAT=4 (floating point)
+ * CT_BOOL=5 (boolean)
+ * CT_COMMENT=6 (comment)
+ * CT_HISTORY=7 (history)
+ * The type is determined by analyzing the card value. It is stored in the
+ * private variable 'm_value_type'.
  ***************************************************************************/
-int GFitsHeaderCard::get_value_type(void)
+int GFitsHeaderCard::get_value_type(const std::string& value)
 {
     // Get index of last string element
     int last = m_value.length() - 1;
@@ -417,7 +674,8 @@ int GFitsHeaderCard::get_value_type(void)
     int found_int   = 0;
     int found_float = 0;
     for (int i = 0; i <= last; ++i) {
-        if ((m_value[i] >= '0' && m_value[i] <= '9') || m_value[i] == '+' || m_value[i] == '-')
+        if ((m_value[i] >= '0' && m_value[i] <= '9') || m_value[i] == '+' ||
+             m_value[i] == '-')
             found_int = 1;
         else if (m_value[i] == '.' || m_value[i] == 'e' || m_value[i] == 'E')
             found_float = 1;
@@ -445,18 +703,77 @@ int GFitsHeaderCard::get_value_type(void)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                             Output operator                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream
+ * @param[in] card Card that should be put in output stream
  ***************************************************************************/
 ostream& operator<< (ostream& os, const GFitsHeaderCard& card)
 {
-    // Put header card in stream
-    os << card.m_keyname << " = ";
-    os << card.m_value << " ";
-    os << card.m_unit << " ";
-    os << card.m_comment << " ";
-    os << card.m_value_type << endl; 
+    // Set buffer
+    char buffer[100];
+
+    // Setup left justified keyname
+    std::string keyname = card.m_keyname;
+    while (keyname.length() < 8)
+        keyname.append(" ");
+
+    // Setup buffer
+    if (card.m_value_type != CT_COMMENT && card.m_value_type != CT_HISTORY) {
+      if (card.m_unit.length() > 0) {
+        sprintf(buffer, "%8s =%21s / [%s] %s",
+                keyname.c_str(),
+                card.m_value.c_str(),
+                card.m_unit.c_str(),
+                card.m_comment.c_str());
+      }
+      else {
+        sprintf(buffer, "%8s =%21s / %s",
+                keyname.c_str(),
+                card.m_value.c_str(),
+                card.m_comment.c_str());
+      }
+    }
+    else {
+      sprintf(buffer, "%8s %s",
+              keyname.c_str(),
+              card.m_comment.c_str());
+    }
+
+    // Put buffer in stream
+    os << buffer;
+
+    // Attach card type
+    switch (card.m_value_type) {
+    case CT_UNKNOWN:
+        os << " <type unknown>" << endl;
+        break;
+    case CT_INVALID:
+        os << " <invalid type>" << endl;
+        break;
+    case CT_STRING:
+        os << " <string>" << endl;
+        break;
+    case CT_INT:
+        os << " <int>" << endl;
+        break;
+    case CT_FLOAT:
+        os << " <float>" << endl;
+        break;
+    case CT_BOOL:
+        os << " <boolean>" << endl;
+        break;
+    case CT_COMMENT:
+        os << " <comment>" << endl;
+        break;
+    case CT_HISTORY:
+        os << " <history>" << endl;
+        break;
+    default:
+        os << endl;
+        break;
+    }
 
     // Return output stream
     return os;

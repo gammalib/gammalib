@@ -135,6 +135,12 @@ public:
         fits_open_error(string origin, string filename, int status);
     };
 
+    // FITS file exists already
+    class fits_file_exist : public GExceptionHandler {
+    public:
+        fits_file_exist(string origin, string filename, int status);
+    };
+
     // FITS file has already been opened
     class fits_already_opened : public GExceptionHandler {
     public:
@@ -190,9 +196,15 @@ public:
     };
 
     // FITS bad image operator
-    class fits_bad_image_operator : public GExceptionHandler {
+    class fits_wrong_image_operator : public GExceptionHandler {
     public:
-        fits_bad_image_operator(string origin, int naxis, int nargs);
+        fits_wrong_image_operator(string origin, int naxis, int nargs);
+    };
+
+    // Response invalid response type
+    class rsp_invalid_type : public GExceptionHandler {
+    public:
+        rsp_invalid_type(string origin, string type);
     };
 
 };

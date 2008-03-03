@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GFitsHDU
  *
- * @brief Implements the FITS Header Data Unit (HDU)
+ * @brief Implements the FITS Header Data Unit (HDU) interface
  *
  * The HDU is the basic unit of a FITS file. Each HDU consists of a header
  * and a data area. The header is composed of cards and is implemented by
@@ -61,6 +61,7 @@ public:
     void           open(__fitsfile* fptr, int hdunum);
     void           save(void);
     std::string    extname(void) const;
+    void           extname(const std::string& extname);
     int            extno(void) const;
     int            exttype(void) const;
     GFitsHeader*   header(void) const;
@@ -77,12 +78,12 @@ private:
     GFitsImage* new_image(void);
 
     // Private data area
-    __fitsfile   m_fitsfile;    // FITS file pointer
-    int          m_hdunum;      // HDU number (starting from 1)
-    std::string  m_name;        // HDU name
-    int          m_type;        // HDU type
-    GFitsHeader* m_header;      // HDU header
-    GFitsData*   m_data;        // HDU data
+    __fitsfile   m_fitsfile;    //!< FITS file pointer
+    int          m_hdunum;      //!< HDU number (starting from 1)
+    std::string  m_name;        //!< HDU name (extname)
+    int          m_type;        //!< HDU type
+    GFitsHeader* m_header;      //!< HDU header
+    GFitsData*   m_data;        //!< HDU data
 };
 
 

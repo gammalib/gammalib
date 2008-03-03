@@ -57,7 +57,10 @@ GFitsHDU::GFitsHDU()
 /***********************************************************************//**
  * @brief Image HDU Constructor
  *
- * @param image Image from which the HDU should be constructed
+ * @param[in] image Image from which the HDU should be constructed
+ *
+ * Note that the HDU constructor copies the image, hence any change in the
+ * original object after copying will not be reflected in the copied object.
  *
  * IMPLEMENTATION NOT YET FINISHED (NEEDS KEYWORD SETTING)
  ***************************************************************************/
@@ -65,15 +68,32 @@ GFitsHDU::GFitsHDU(const GFitsImage& image)
 {
     // Initialise class members for clean destruction
     init_members();
-    
+
     // Copy image into HDU data
     m_data = image.clone();
-    
+
     // Allocate new header
     m_header = new GFitsHeader();
-    
-    // Extract keywords from image
-    // TBW
+
+    // Set image header keywords
+    m_header->update(GFitsHeaderCard("XTENSION", "'IMAGE   '",
+                                     "IMAGE extension"));
+    m_header->update(GFitsHeaderCard("BITPIX", image.bitpix(),
+                                     "number of bits per data pixel"));
+    m_header->update(GFitsHeaderCard("NAXIS", image.naxis(),
+                                     "number of data axes"));
+    for (int i = 0; i < image.naxis(); ++i) {
+        ostringstream s_key;
+        ostringstream s_comment;
+        s_key     << "NAXIS" << (i+1);
+        s_comment << "length of data axis " << (i+1);
+        m_header->update(GFitsHeaderCard(s_key.str(), image.naxes(i),
+                                         s_comment.str()));
+    }
+    m_header->update(GFitsHeaderCard("PCOUNT", 0,
+                                     "required keyword; must = 0"));
+    m_header->update(GFitsHeaderCard("GCOUNT", 1,
+                                     "required keyword; must = 1"));
 
     // Return
     return;
@@ -202,7 +222,12 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
     m_data->open(&m_fitsfile);
 
     // Get HDU name from header
-    m_name = strip_whitespace(m_header->string("EXTNAME"));
+    try {
+        m_name = strip_whitespace(m_header->string("EXTNAME"));
+    }
+    catch (GException::fits_key_not_found) {
+        m_name.clear();
+    }
     if (m_name.length() == 0) {
         if (hdunum == 1)
             m_name = "Primary";
@@ -230,7 +255,7 @@ void GFitsHDU::save(void)
     // Move to HDU
     int status = 0;
     status     = __ffmahd(&m_fitsfile, m_hdunum, NULL, &status);
-    
+
     // If HDU does not yet exist in file then create it now. This works even
     // in the case that the actual HDU has no associated header and/or data
     // (these will be created automatically). However, to make this work we have
@@ -259,18 +284,18 @@ void GFitsHDU::save(void)
             }
         }
     }
-    
+
     // If they exist then save data and header
     if (m_data != NULL) { 
         m_data->save();
         if (m_header != NULL)
-            m_header->save();
+            m_header->save(&m_fitsfile);
     }
-    
+
     // ... otherwise make sure that the FITS file has at least a primary
     // image.
     else {
-    
+
         // Special case: The first HDU does not exist. A FITS file needs at least
         // one primary HDU. Thus an empty image is created.
         if (m_fitsfile.HDUposition == 0) {
@@ -278,10 +303,36 @@ void GFitsHDU::save(void)
             if (status != 0)
                 throw GException::fits_error(G_SAVE, status);
             if (m_header != NULL)
-                m_header->save();
+                m_header->save(&m_fitsfile);
         }
-        
+
     } // endelse: no data were available
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set HDU extension name (EXTNAME keyword)
+ *
+ * @param extname Name of HDU
+ *
+ * This methos sets the extension name of the HDU. The extension name will
+ * be saved in the 'EXTNAME' header keyword. The header attached to the
+ * HDU will be automatically updated by this method.
+ ***************************************************************************/
+void GFitsHDU::extname(const std::string& extname)
+{
+    // Set extension name
+    m_name = extname;
+
+    // If no header exists then create one now
+    if (m_header == NULL) m_header = new GFitsHeader();
+
+    // Update header
+    m_header->update(GFitsHeaderCard("EXTNAME", extname,
+                                     "name of this extension"));
 
     // Return
     return;
@@ -329,20 +380,20 @@ void GFitsHDU::primary(void)
 {
     // Free any allocated header and data
     free_members();
-    
+
     // Create primary image in memory
     int status = 0;
     __fitsfile* fptr;
     status = __ffinit(&fptr, "mem://", &status);
     status = __ffcrim(fptr, 8, 0, NULL, &status);
-    
+
     // Open HDU
     this->open(fptr,1);
-    
+
     // Detach FITS file pointer
     this->m_fitsfile.HDUposition = 0;
     this->m_fitsfile.Fptr        = NULL;
-    
+
     // Return
     return;
 }
@@ -429,10 +480,10 @@ void GFitsHDU::connect(__fitsfile* fptr)
     // First connect HDU
     m_fitsfile = *fptr;
     m_hdunum   = m_fitsfile.HDUposition + 1;
-    
+
     // Then connect data
     if (m_data != NULL) m_data->connect(fptr);
-    
+
     // Return
     return;
 }
@@ -457,7 +508,7 @@ GFitsImage* GFitsHDU::new_image(void)
 {
     // Initialise return value
     GFitsImage* image = NULL;
-    
+
     // Get number of bits per pixel
     int status =   0;
     int bitpix = -64;
@@ -528,11 +579,11 @@ ostream& operator<< (ostream& os, const GFitsHDU& hdu)
         os << "Unknown" << endl;
         break;
     }
-    
+
     // Put FITS header in stream
     if (hdu.m_header != NULL)
         os << *hdu.m_header;
-        
+
     // Put FITS data in stream
     if (hdu.m_data != NULL) {
         switch (hdu.m_type) {

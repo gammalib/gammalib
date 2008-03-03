@@ -28,16 +28,11 @@
 /* __ Namespaces _________________________________________________________ */
 
 
-/***************************************************************************
- *                        GLATResponse class definition                    *
- ***************************************************************************/
-/**
+/***********************************************************************//**
  * @class GLATResponse
  *
  * @brief Interface for the GLAST LAT instrument response function classes.
- *
- * @author J. Knodlseder
- */
+ ***************************************************************************/
 class GLATResponse : public GResponse {
 
 public:
@@ -67,9 +62,9 @@ public:
                  const GSkyDir& instPntDir, const double& instPosAng,
                  const double& time);
 
-    void set_caldb(std::string caldb);
-    void load(std::string rspname, std::string rsptype);
-    void save(std::string rspname) const;
+    void          set_caldb(const std::string& caldb);
+    void          load(const std::string& rspname, const std::string& rsptype);
+    void          save(const std::string& rspname) const;
     GLATResponse* clone(void) const;
 
 private:
@@ -82,7 +77,7 @@ private:
     double  psf_scale(const double& energy);
     double  psf_base_value(const double& u, const double& gamma);
     GVector psf_base_vector(const GVector& u, const double& gamma);
-    
+
     // Private PSF data
     int     m_psf_angle_num;
     double  m_psf_angle_min;

@@ -12,8 +12,9 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include <stdlib.h>
+#include <iostream>
 #include "test_GResponse.hpp"
-#include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -25,31 +26,18 @@
  ***************************************************************************/
 void test_lat_response(void)
 {
+    // Remove FITS file
+    system("rm -rf test_rsp.fits");
+
     cout << "Test GLATResponse: Open PSF FITS file: ";
     try {
         // Get HANDOFF Response
         GLATResponse rsp;
         rsp.set_caldb("irf/lat");
         rsp.load("Pass5_v0", "front");
-/*
-        // Open FITS file
-        GFits fits;
-        fits.open("irf/lat/aeff_.fits");
 
-        // Get pointer towards effective area HDU
-        GFitsHDU* aeff = fits.hdu("EFFECTIVE AREA");
-        if (aeff == NULL) {
-            cout << endl << "TEST ERROR: Unable to find HDU <EFFECTIVE AREA>." << endl;
-            throw;
-        }
-
-        // Get columns
-        GFitsTableFltCol energ_lo  = *((GFitsTableFltCol*)aeff->column("ENERG_LO"));
-        GFitsTableFltCol energ_hi  = *((GFitsTableFltCol*)aeff->column("ENERG_HI"));
-        GFitsTableFltCol ctheta_lo = *((GFitsTableFltCol*)aeff->column("CTHETA_LO"));
-        GFitsTableFltCol ctheta_hi = *((GFitsTableFltCol*)aeff->column("CTHETA_HI"));
-        GFitsTableFltCol effarea   = *((GFitsTableFltCol*)aeff->column("EFFAREA"));
-*/
+        // Save response
+        rsp.save("test_rsp.fits");
     }
     catch (exception &e) {
         cout << endl << "TEST ERROR: Unable to open FITS file." << endl;
