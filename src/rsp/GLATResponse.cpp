@@ -265,11 +265,13 @@ void GLATResponse::save(const std::string& rspname) const
     fits.open(rspname);
 
     // Build PSF HDUs
+    GFitsBinTable table_psf_bounds(1,4);
     int           naxes_psf2[] = {m_psf_energy_num, m_psf_ctheta_num};
     int           naxes_psf3[] = {m_psf_angle_num, m_psf_energy_num, m_psf_ctheta_num};
     GFitsDblImage image_psf_psf(3, naxes_psf3, m_psf);
     GFitsDblImage image_psf_norm(2, naxes_psf2, m_norm);
     GFitsDblImage image_psf_sigma(2, naxes_psf2, m_sigma);
+ //TBD   GFitsHDU      hdu_psf_bounds(table_psf_bounds);
     GFitsHDU      hdu_psf_psf(image_psf_psf);
     GFitsHDU      hdu_psf_norm(image_psf_norm);
     GFitsHDU      hdu_psf_sigma(image_psf_sigma);
@@ -288,7 +290,12 @@ void GLATResponse::save(const std::string& rspname) const
     // Return
     return;
 }
-
+/*
+    GVector v_energy_lo = get_fits_vector(hdu, "ENERG_LO");
+    GVector v_energy_hi = get_fits_vector(hdu, "ENERG_HI");
+    GVector v_ctheta_lo = get_fits_vector(hdu, "CTHETA_LO");
+    GVector v_ctheta_hi = get_fits_vector(hdu, "CTHETA_HI");
+*/
 
 /*==========================================================================
  =                                                                         =

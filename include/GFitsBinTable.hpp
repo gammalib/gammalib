@@ -10,12 +10,16 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsBinTable.hpp
+ * @brief GFitsBinTable class definition.
+ * @author J. Knodlseder
+ */
 
 #ifndef GFITSBINTABLE_HPP
 #define GFITSBINTABLE_HPP
 
 /* __ Includes ___________________________________________________________ */
-//#include <vector>
 #include "GFitsCfitsio.hpp"
 #include "GFitsData.hpp"
 #include "GFitsTableCol.hpp"
@@ -26,8 +30,10 @@
 /* __ Structures _________________________________________________________ */
 
 
-/***************************************************************************
- *                      GFitsBinTable class definition                     *
+/***********************************************************************//**
+ * @class GFitsBinTable
+ *
+ * @brief Interface for FITS binary table
  ***************************************************************************/
 class GFitsBinTable : public GFitsData {
 
@@ -37,6 +43,7 @@ class GFitsBinTable : public GFitsData {
 public:
     // Constructors and destructors
     GFitsBinTable();
+    GFitsBinTable(int nrows, int ncols);
     GFitsBinTable(const GFitsBinTable& table);
     virtual ~GFitsBinTable();
 
@@ -48,8 +55,8 @@ public:
     void           save(void);
     void           close(void);
     GFitsBinTable* clone(void) const;
-    GFitsTableCol* column(const std::string colname);
-    GFitsTableCol* column(const int colnum);
+    GFitsTableCol* column(const std::string& colname);
+    GFitsTableCol* column(const int& colnum);
 
 private:
     // Private methods
@@ -59,9 +66,9 @@ private:
     void connect(__fitsfile* fptr);
 
     // Private data area
-    int             m_rows;
-    int             m_cols;
-    GFitsTableCol** m_columns;
+    int             m_rows;       //!< Number of rows in table
+    int             m_cols;       //!< Number of columns in table
+    GFitsTableCol** m_columns;    //!< Array of column pointers
 };
 
 

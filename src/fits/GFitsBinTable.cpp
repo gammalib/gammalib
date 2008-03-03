@@ -26,7 +26,9 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPEN "GFitsBinTable::open(fitsfile*)"
+#define G_OPEN    "GFitsBinTable::open(fitsfile*)"
+#define G_COLUMN1 "GFitsBinTable::column(const std::string&)"
+#define G_COLUMN2 "GFitsBinTable::column(const int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -41,9 +43,8 @@
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                                Constructor                              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Constructor
  ***************************************************************************/
 GFitsBinTable::GFitsBinTable() : GFitsData()
 {
@@ -55,9 +56,43 @@ GFitsBinTable::GFitsBinTable() : GFitsData()
 }
 
 
-/***************************************************************************
- *                              Copy constructor                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Constructor
+ *
+ * @param[in] nrows Number of rows in table
+ * @param[in] ncols Number of columns in table
+ ***************************************************************************/
+GFitsBinTable::GFitsBinTable(int nrows, int ncols) : GFitsData()
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Store table dimension
+    m_rows = nrows;
+    m_cols = ncols;
+
+    // If there are columns then allocate memory for column pointers
+    if (m_cols > 0) {
+
+        // Allocate pointer memory
+        m_columns = new GFitsTableCol*[m_cols];
+
+        // Initialise pointers
+        for (int i = 0; i < m_cols; ++i)
+            m_columns[i] = NULL;
+
+    } // endfor: looped over all columns
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] table Table which will be used to construct GFitsBinTable
+ *                  instance
  ***************************************************************************/
 GFitsBinTable::GFitsBinTable(const GFitsBinTable& table) : GFitsData(table)
 {
@@ -72,9 +107,8 @@ GFitsBinTable::GFitsBinTable(const GFitsBinTable& table) : GFitsData(table)
 }
 
 
-/***************************************************************************
- *                               Destructor                                *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Destructor
  ***************************************************************************/
 GFitsBinTable::~GFitsBinTable()
 {
@@ -92,9 +126,10 @@ GFitsBinTable::~GFitsBinTable()
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                            Assignment operator                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param[in] table Table which will be assigned
  ***************************************************************************/
 GFitsBinTable& GFitsBinTable::operator= (const GFitsBinTable& table)
 {
@@ -129,7 +164,11 @@ GFitsBinTable& GFitsBinTable::operator= (const GFitsBinTable& table)
 /***********************************************************************//**
  * @brief Open Table
  *
- * @param fptr FITS file pointer
+ * @param[in] fptr FITS file pointer
+ *
+ * Builds a description of the binary table in memory. Columns are not loaded
+ * but column descriptors are allocated. The column data will only be loaded
+ * once it needs to be accessed.
  ***************************************************************************/
 void GFitsBinTable::open(__fitsfile* fptr)
 {
@@ -216,6 +255,8 @@ void GFitsBinTable::open(__fitsfile* fptr)
 
 /***********************************************************************//**
  * @brief Save binary table
+ *
+ * NOT YET IMPLEMENTED
  ***************************************************************************/
 void GFitsBinTable::save(void)
 {
@@ -242,12 +283,23 @@ void GFitsBinTable::close(void)
 }
 
 
-/***************************************************************************
- *               Return pointer to column with specified name              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return pointer to column with specified name
+ *
+ * @param[in] colname Name of column which should be accessed
+ *
+ * @exception GException::fits_no_data
+ *            There are no column data in the table or there is not data
+ *            for this column
+ * @exception GException::fits_column_not_found
+ *            Requested column has not been found in table.
  ***************************************************************************/
-GFitsTableCol* GFitsBinTable::column(const std::string colname)
+GFitsTableCol* GFitsBinTable::column(const std::string& colname)
 {
+    // If there is no data then throw an exception
+    if (m_columns == NULL)
+        throw GException::fits_no_data(G_COLUMN1, "No column data in table");
+
     // Initialise pointer
     GFitsTableCol* ptr = NULL;
 
@@ -256,29 +308,48 @@ GFitsTableCol* GFitsBinTable::column(const std::string colname)
         for (int i = 0; i < m_cols; ++i) {
             if (m_columns[i]->name() == colname) {
                 ptr = m_columns[i];
+                if (ptr == NULL)
+                    throw GException::fits_no_data(G_COLUMN1, 
+                                                   "No data for this column");
                 break;
             }
         }
     }
+
+    // If column has not been found throw an exception
+    if (ptr == NULL)
+        throw GException::fits_column_not_found(G_COLUMN1, colname);
 
     // Return column pointer
     return ptr;
 }
 
 
-/***************************************************************************
- *                   Return pointer to column with number                  *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return pointer to column with number
+ *
+ * @param[in] colnum Number of requested column (starting from 0)
+ *
+ * @exception GException::fits_no_data
+ *            There are no column data in the table or there is not data
+ *            for this column
+ * @exception GException::out_of_range
+ *            Requested column has not been found in table.
  ***************************************************************************/
-GFitsTableCol* GFitsBinTable::column(const int colnum)
+GFitsTableCol* GFitsBinTable::column(const int& colnum)
 {
-    // Initialise pointer
-    GFitsTableCol* ptr = NULL;
+    // If there is no data then throw an exception
+    if (m_columns == NULL)
+        throw GException::fits_no_data(G_COLUMN2, "No column data in table");
 
-    // If there are columns then search for the specified name
-    if (m_columns != NULL) {
-        ptr = m_columns[colnum];
-    }
+    // If column number is out of range then throw an exception
+    if (colnum < 0 || colnum >= m_cols)
+        throw GException::out_of_range(G_COLUMN2, colnum, 0, m_cols-1);
+
+    // Get column pointer
+    GFitsTableCol* ptr = ptr = m_columns[colnum];
+    if (ptr == NULL)
+        throw GException::fits_no_data(G_COLUMN2, "No data for this column");
 
     // Return column pointer
     return ptr;
@@ -291,9 +362,8 @@ GFitsTableCol* GFitsBinTable::column(const int colnum)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                         Initialise class members                        *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Initialise class members
  ***************************************************************************/
 void GFitsBinTable::init_members(void)
 {
@@ -307,9 +377,10 @@ void GFitsBinTable::init_members(void)
 }
 
 
-/***************************************************************************
- *                            Copy class members                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] table Table to copy
  ***************************************************************************/
 void GFitsBinTable::copy_members(const GFitsBinTable& table)
 {
@@ -331,9 +402,8 @@ void GFitsBinTable::copy_members(const GFitsBinTable& table)
 }
 
 
-/***************************************************************************
- *                           Delete class members                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Delete class members
  ***************************************************************************/
 void GFitsBinTable::free_members(void)
 {
@@ -354,19 +424,20 @@ void GFitsBinTable::free_members(void)
 /***********************************************************************//**
  * @brief Connect binary table to FITS file
  *
- * @param fptr FITS file pointer to which the binary table should be connected
+ * @param[in] fptr FITS file pointer to which the binary table should be 
+ *                 connected
  *
  * The connection of the binary table is done by connecting all columns.
  ***************************************************************************/
 void GFitsBinTable::connect(__fitsfile* fptr)
 {
     // First connect binary table
-    
+
     // Then connect all columns
     for (int i = 0; i < m_cols; ++i) {
         if (m_columns[i] != NULL) m_columns[i]->connect(fptr);
     }
-    
+
     // Return
     return;
 }
@@ -378,9 +449,11 @@ void GFitsBinTable::connect(__fitsfile* fptr)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                             Output operator                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream
+ * @param[in] table Table to put in output stream
  ***************************************************************************/
 ostream& operator<< (ostream& os, const GFitsBinTable& table)
 {

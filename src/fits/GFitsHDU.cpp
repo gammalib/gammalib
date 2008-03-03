@@ -61,8 +61,6 @@ GFitsHDU::GFitsHDU()
  *
  * Note that the HDU constructor copies the image, hence any change in the
  * original object after copying will not be reflected in the copied object.
- *
- * IMPLEMENTATION NOT YET FINISHED (NEEDS KEYWORD SETTING)
  ***************************************************************************/
 GFitsHDU::GFitsHDU(const GFitsImage& image)
 {

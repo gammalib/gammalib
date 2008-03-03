@@ -317,6 +317,24 @@ GException::fits_column_not_found::fits_column_not_found(string origin,
 
 
 /***********************************************************************//**
+ * @brief FITS error: No data
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] message Error message.
+ * @param[in] status cfitsio status.
+ ***************************************************************************/
+GException::fits_no_data::fits_no_data(string origin,
+                                       string message,
+                                       int    status)
+{
+    m_origin  = origin;
+    m_message = message;
+    if (status != 0)
+        m_message += " (status=" + str(status) + ")";
+}
+
+
+/***********************************************************************//**
  * @brief FITS error: HDU not found in FITS file
  *
  * @param[in] origin Method that throws the error.
