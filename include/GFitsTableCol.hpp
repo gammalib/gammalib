@@ -70,7 +70,7 @@ protected:
     std::string m_name;        //!< Column name
     std::string m_format;      //!< Column format
     std::string m_unit;        //!< Column unit
-    int         m_colnum;      //!< Column number (starting from 1)
+    int         m_colnum;      //!< Column number in FITS file (starting from 1)
     int         m_type;        //!< Column type
     int         m_repeat;      //!< Repeat value of column
     int         m_width;       //!< Width of column

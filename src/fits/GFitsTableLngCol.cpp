@@ -349,6 +349,7 @@ void GFitsTableLngCol::set_nullval(const long* value)
 void GFitsTableLngCol::init_members(void)
 {
     // Initialise members
+    m_type   = __TLONG;
     m_size   = 0;
     m_anynul = 0;
     m_data   = NULL;

@@ -284,10 +284,10 @@ void GLATResponse::save(const std::string& rspname) const
     hdu_psf_sigma.extname("SIGMA");
 
     // Append HDUs to FITS file
-    fits.append(&hdu_psf_bounds);
-    fits.append(&hdu_psf_psf);
-    fits.append(&hdu_psf_norm);
-    fits.append(&hdu_psf_sigma);
+    fits.append_hdu(hdu_psf_bounds);
+    fits.append_hdu(hdu_psf_psf);
+    fits.append_hdu(hdu_psf_norm);
+    fits.append_hdu(hdu_psf_sigma);
 
     // Save FITS file
     fits.save();

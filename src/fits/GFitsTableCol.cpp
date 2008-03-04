@@ -152,54 +152,6 @@ void GFitsTableCol::name(const std::string& name)
 
 
 /***********************************************************************//**
- * @brief Set column number
- *
- * @param[in] colnum Number of column.
- ***************************************************************************/
-/*
-void GFitsTableCol::colnum(const int& colnum)
-{
-    // Set column number
-    m_colnum = colnum;
-
-    // Return
-    return;
-}
-*/
-
-/***********************************************************************//**
- * @brief Set column type
- *
- * @param[in] type Type of column.
- ***************************************************************************/
-/*
-void GFitsTableCol::type(const int& type)
-{
-    // Set column type
-    m_type = type;
-
-    // Return
-    return;
-}
-*/
-
-/***********************************************************************//**
- * @brief Set column length
- *
- * @param[in] length Length of column.
- ***************************************************************************/
-/*
-void GFitsTableCol::length(const int& length)
-{
-    // Set column length
-    m_length = length;
-
-    // Return
-    return;
-}
-*/
-
-/***********************************************************************//**
  * @brief Get column name
  ***************************************************************************/
 std::string GFitsTableCol::name(void)
@@ -371,10 +323,58 @@ ostream& operator<< (ostream& os, const GFitsTableCol& column)
     // Put header in stream
     os << "'" << column.m_name << "'";
     os << " [" << column.m_colnum << "] ";
-    os << column.m_type << " repeat=";
-    os << column.m_repeat << " width=";
-    os << column.m_width << " length=";
-    os << column.m_length << endl;
+
+    // Set column type
+    switch (column.m_type) {
+    case 1:
+        os << "TBIT";
+        break;
+    case 11:
+        os << "TBYTE";
+        break;
+    case 14:
+        os << "TLOGICAL";
+        break;
+    case 16:
+        os << "TSTRING";
+        break;
+    case 21:
+        os << "TSHORT";
+        break;
+    case 31:
+        os << "TINT";
+        break;
+    case 41:
+        os << "TLONG";
+        break;
+    case 42:
+        os << "TFLOAT";
+        break;
+    case 81:
+        os << "TLONGLONG";
+        break;
+    case 82:
+        os << "TDOUBLE";
+        break;
+    case 83:
+        os << "TCOMPLEX";
+        break;
+    case 163:
+        os << "TDBLCOMPLEX";
+        break;
+    default:
+        os << "<unknown type>";
+        break;
+    }
+    
+    // Set vector length
+    os << " repeat=" << column.m_repeat;
+
+    // Set width
+    os <<  " width=" << column.m_width;
+    
+    // Set length
+    os << " length=" << column.m_length << endl;
 
     // Return output stream
     return os;

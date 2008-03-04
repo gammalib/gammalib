@@ -295,6 +295,7 @@ void GFitsTableFltCol::set_nullval(const float* value)
 void GFitsTableFltCol::init_members(void)
 {
     // Initialise members
+    m_type   = __TFLOAT;
     m_size   = 0;
     m_anynul = 0;
     m_data   = NULL;

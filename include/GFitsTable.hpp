@@ -58,8 +58,8 @@ public:
     void           save(void);
     void           close(void);
     GFitsTable*    clone(void) const = 0;
-    void           append_column(GFitsTableCol* column);
-    void           insert_column(int colnum, GFitsTableCol* column);
+    void           append_column(GFitsTableCol& column);
+    void           insert_column(int colnum, GFitsTableCol& column);
     void           append_rows(const int& nrows);
     void           insert_rows(const int& rownum, const int& nrows);
     GFitsTableCol* column(const std::string& colname);
@@ -81,7 +81,7 @@ protected:
     int             m_type;       //!< Table type (1=ASCII, 2=Binary)
     int             m_rows;       //!< Number of rows in table
     int             m_cols;       //!< Number of columns in table
-    GFitsTableCol** m_columns;    //!< Array of column pointers
+    GFitsTableCol** m_columns;    //!< Array of table columns
 };
 
 

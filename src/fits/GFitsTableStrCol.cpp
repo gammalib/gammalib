@@ -287,6 +287,7 @@ void GFitsTableStrCol::set_nullstr(const std::string string)
 void GFitsTableStrCol::init_members(void)
 {
     // Initialise members
+    m_type   = __TSTRING;
     m_size     = 0;
     m_num_subs = 0;
     m_data     = NULL;

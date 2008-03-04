@@ -306,7 +306,7 @@ void test_create(void)
         fits.open("test.fits");
         GFitsDblImage image;
         GFitsHDU hdu(image);
-        fits.append(&hdu);
+        fits.append_hdu(hdu);
         //cout << fits;
         fits.save();
     }
@@ -334,7 +334,7 @@ void test_create(void)
             }
         }
         GFitsHDU hdu(image);
-        fits.append(&hdu);
+        fits.append_hdu(hdu);
         //cout << fits;
         fits.save();
     }
@@ -372,23 +372,27 @@ void test_create(void)
     cout << ".";
 
     // Attach binary table
+cout << "start" << endl;
     try {
         // Re-open FITS file
         GFits fits;
         fits.open("test.fits");
+cout << "1" << endl;
 
         // Create binary Table with 10 rows
         int nrows = 10;
         GFitsBinTable    table  = GFitsBinTable(nrows);
         GFitsTableDblCol first  = GFitsTableDblCol(nrows);
         GFitsTableDblCol second = GFitsTableDblCol(nrows);
-        table.append_column(&first);
-        table.append_column(&second);
+cout << "2" << endl;
+        table.append_column(first);
+cout << "3" << endl;
+        table.append_column(second);
         cout << table;
 
         // Create HDU and append to FILE file
         GFitsHDU hdu(table);
-        fits.append(&hdu);
+        fits.append_hdu(hdu);
 //        cout << fits;
 
         // Save FITS file

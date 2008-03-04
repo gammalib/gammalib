@@ -286,6 +286,7 @@ void GFitsTableShtCol::set_nullval(const short* value)
 void GFitsTableShtCol::init_members(void)
 {
     // Initialise members
+    m_type   = __TSHORT;
     m_size   = 0;
     m_anynul = 0;
     m_data   = NULL;

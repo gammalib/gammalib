@@ -367,6 +367,7 @@ void GFitsTableDblCol::set_nullval(const double* value)
 void GFitsTableDblCol::init_members(void)
 {
     // Initialise members
+    m_type   = __TDOUBLE;
     m_size   = 0;
     m_anynul = 0;
     m_data   = NULL;

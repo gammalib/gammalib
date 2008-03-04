@@ -20,7 +20,6 @@
 #define GFITS_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <vector>
 #include "GFitsCfitsio.hpp"
 #include "GFitsHDU.hpp"
 
@@ -52,7 +51,7 @@ public:
 
     // Methods
     void      open(const std::string& filename);
-    void      append(const GFitsHDU* hdu);
+    void      append_hdu(const GFitsHDU& hdu);
     void      save(void);
     void      saveto(const std::string& filename, int clobber);
     void      close(void);

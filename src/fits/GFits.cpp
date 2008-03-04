@@ -189,19 +189,19 @@ void GFits::open(const std::string& filename)
 /***********************************************************************//**
  * @brief Append HDU to FITS file
  *
- * @param[in] hdu Pointer to FITS HDU that should be appended
+ * @param[in] hdu FITS HDU that should be appended
  *
  * Append HDU to the next free position in a FITS file. In case that no HDU
  * exists so far in the FITS file and if the HDU to append is NOT an image,
  * an empty primary image will be inserted as first HDU in the FITS file.
  * This guarantees the compatibility with the FITS standard.
  ***************************************************************************/
-void GFits::append(const GFitsHDU* hdu)
+void GFits::append_hdu(const GFitsHDU& hdu)
 {
     // Determine number of HDUs to add. If there are no HDUs so far and if
     // the HDU to append is not an image then we have to add a primary
     // image first. In this case we add 2 new HDUs.
-    int n_add = (m_num_hdu == 0 && hdu->m_type != 0) ? 2 : 1;
+    int n_add = (m_num_hdu == 0 && hdu.m_type != 0) ? 2 : 1;
 
     // Create memory to hold HDUs
     GFitsHDU* tmp = new GFitsHDU[m_num_hdu+n_add];
@@ -233,7 +233,7 @@ void GFits::append(const GFitsHDU* hdu)
         }
 
         // Append new HDU to list
-        m_hdu[m_num_hdu] = *hdu;
+        m_hdu[m_num_hdu] = hdu;
 
         // Set FITS file pointer for new HDU
         __fitsfile fptr  = *m_fitsfile;
