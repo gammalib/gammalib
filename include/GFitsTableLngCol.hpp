@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsTableLngCol.hpp
+ * @brief GFitsTableLngCol class definition.
+ * @author J. Knodlseder
+ */
 
 #ifndef GFITSTABLELNGCOL_HPP
 #define GFITSTABLELNGCOL_HPP
@@ -24,8 +29,12 @@
 /* __ Structures _________________________________________________________ */
 
 
-/***************************************************************************
- *                    GFitsTableLngCol class definition                    *
+/***********************************************************************//**
+ * @class GFitsTableLngCol
+ *
+ * @brief Interface for FITS table long integer column
+ *
+ * This class implements a FITS table long integer column.
  ***************************************************************************/
 class GFitsTableLngCol : public GFitsTableCol {
 
@@ -37,17 +46,15 @@ public:
 
     // Operators
     GFitsTableLngCol& operator= (const GFitsTableLngCol& column);
+    long&             operator() (const int& row, const int& inx = 0);
+    const long&       operator() (const int& row, const int& inx = 0) const;
 
     // Methods
     std::string       string(const int& row, const int& col = 0);
     double            real(const int& row, const int& col = 0);
     int               integer(const int& row, const int& col = 0);
     GFitsTableLngCol* clone(void) const;
-    double*           ptr_double(void);
-    float*            ptr_float(void);
-    short*            ptr_short(void);
-    long*             ptr_long(void);
-    int*              ptr_int(void);
+    long*             data(void);
     void              set_nullval(const long* value);
 
 private:
@@ -55,24 +62,13 @@ private:
     void init_members(void);
     void copy_members(const GFitsTableLngCol& column);
     void free_members(void);
-    void load(void);
+    void fetch_data(void);
 
     // Private data area
-    int   m_size;          // Size of data area
-    long* m_data;          // Data area
-    long* m_nulval;        // NULL value
-    int   m_anynul;        // Number of NULLs encountered
+    int   m_size;          //!< Size of data area
+    long* m_data;          //!< Data area
+    long* m_nulval;        //!< NULL value
+    int   m_anynul;        //!< Number of NULLs encountered
 };
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
-inline long* GFitsTableLngCol::ptr_long(void) { return m_data; }
-inline
-GFitsTableLngCol* GFitsTableLngCol::clone(void) const
-{
-    return new GFitsTableLngCol(*this);
-}
 
 #endif /* GFITSTABLELNGCOL_HPP */

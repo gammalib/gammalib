@@ -301,7 +301,7 @@ void GFitsTable::save(void)
         }
 
         // Create FITS table
-        status = __ffcrtb(&m_fitsfile, m_type, m_rows, tfields, ttype, tform, 
+        status = __ffcrtb(&m_fitsfile, m_type, m_rows, tfields, ttype, tform,
                           tunit, NULL, &status);
         if (status != 0)
             throw GException::fits_error(G_SAVE, status);
@@ -322,6 +322,7 @@ void GFitsTable::save(void)
     else if (status != 0)
         throw GException::fits_error(G_SAVE, status);
 
+//cout << "GFitsTable::save exit" << endl;
     // Return
     return;
 }
@@ -369,6 +370,7 @@ void GFitsTable::append_column(GFitsTableCol* column)
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Insert column into the table
@@ -455,10 +457,16 @@ void GFitsTable::insert_column(int colnum, GFitsTableCol* column)
         // Connect new memory
         m_columns = tmp;
 
+        // Increment column counter
+        m_cols++;
+
     } // endelse: we made space to insert a column
 
     // Insert column pointer
     m_columns[colnum] = column;
+
+    // Set column attributes
+    m_columns[colnum]->m_colnum = colnum + 1; // IS THIS REALLY NEEDED???
 
     // Return
     return;
@@ -613,10 +621,7 @@ void GFitsTable::copy_members(const GFitsTable& table)
  ***************************************************************************/
 void GFitsTable::free_members(void)
 {
-    // Free memory
-    for (int i = 0; i < m_cols; ++i) {
-        if (m_columns[i] != NULL) delete m_columns[i];
-    }
+    // Free memory (don't free associated column pointers explicitely!!!)
     if (m_columns != NULL) delete [] m_columns;
 
     // Mark memory as freed
@@ -664,15 +669,16 @@ char* GFitsTable::get_ttype(const int& colnum) const
 {
     // Initialise result with NULL pointer
     char* ptr = NULL;
-    
+
     // Get type only if column exists
     if (m_columns != NULL && colnum >=0 && colnum < m_cols && 
         m_columns[colnum] != NULL) {
-        int size = m_columns[colnum]->m_name.length() + 1;
-        ptr      = new char[size];
-        strncpy(ptr, m_columns[colnum]->m_name.c_str(), size-1);
-    }
-    
+        int size = m_columns[colnum]->m_name.length();
+        ptr      = new char[size+1];
+        strncpy(ptr, m_columns[colnum]->m_name.c_str(), size);
+        ptr[size] = '\0';
+   }
+
     // Return result
     return ptr;
 }
@@ -691,15 +697,16 @@ char* GFitsTable::get_tform(const int& colnum) const
 {
     // Initialise result with NULL pointer
     char* ptr = NULL;
-    
+
     // Get type only if column exists
     if (m_columns != NULL && colnum >=0 && colnum < m_cols && 
         m_columns[colnum] != NULL) {
-        int size = m_columns[colnum]->m_format.length() + 1;
-        ptr      = new char[size];
-        strncpy(ptr, m_columns[colnum]->m_format.c_str(), size-1);
+        int size = m_columns[colnum]->m_format.length();
+        ptr      = new char[size+1];
+        strncpy(ptr, m_columns[colnum]->m_format.c_str(), size);
+        ptr[size] = '\0';
     }
-    
+
     // Return result
     return ptr;
 }
@@ -718,15 +725,16 @@ char* GFitsTable::get_tunit(const int& colnum) const
 {
     // Initialise result with NULL pointer
     char* ptr = NULL;
-    
+
     // Get type only if column exists
     if (m_columns != NULL && colnum >=0 && colnum < m_cols && 
         m_columns[colnum] != NULL) {
-        int size = m_columns[colnum]->m_unit.length() + 1;
-        ptr      = new char[size];
-        strncpy(ptr, m_columns[colnum]->m_unit.c_str(), size-1);
+        int size = m_columns[colnum]->m_unit.length();
+        ptr      = new char[size+1];
+        strncpy(ptr, m_columns[colnum]->m_unit.c_str(), size);
+        ptr[size] = '\0';
     }
-    
+
     // Return result
     return ptr;
 }

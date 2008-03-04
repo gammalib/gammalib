@@ -50,9 +50,12 @@ public:
     double&        operator() (const int& ix, const int& iy);
     const double&  operator() (const int& ix, const int& iy) const;
     double&        operator() (const int& ix, const int& iy, const int& iz);
-    const double&  operator() (const int& ix, const int& iy, const int& iz) const;
-    double&        operator() (const int& ix, const int& iy, const int& iz, const int& it);
-    const double&  operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
+    const double&  operator() (const int& ix, const int& iy, const int& iz)
+                               const;
+    double&        operator() (const int& ix, const int& iy, const int& iz,
+                               const int& it);
+    const double&  operator() (const int& ix, const int& iy, const int& iz,
+                               const int& it) const;
 
 
     // Methods

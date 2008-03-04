@@ -425,10 +425,12 @@ void GLATResponse::psf_init(void)
 
             // Evaluate ntail
             double denom = psf_base_value(10.0, gtail);
-            double ntail = (denom != 0.0) ? ncore * psf_base_value(10.0, gcore) / denom : 0.0;
+            double ntail = (denom != 0.0) 
+                           ? ncore * psf_base_value(10.0, gcore) / denom : 0.0;
 
             // Calculate PSF dependence
-            GVector psf = ncore * psf_base_vector(u, gcore) + ntail * psf_base_vector(u, gtail);
+            GVector psf = ncore * psf_base_vector(u, gcore) +
+                          ntail * psf_base_vector(u, gtail);
 
             // Normalize PSF vector to identical amplitudes at smallest angular
             // distance. This allows for accurate interpolation afterwards
@@ -555,7 +557,7 @@ double GLATResponse::psf_base_value(const double& u, const double& gamma)
     double c0       = 1.0 - invgamma;
     double c1       = 1.0 + u * invgamma;
     double result   = c0 * pow(c1,-gamma);
-    
+
     // Return result
     return result;
 }
@@ -567,7 +569,7 @@ GVector GLATResponse::psf_base_vector(const GVector& u, const double& gamma)
     double  c0       = 1.0 - invgamma;
     GVector c1       = 1.0 + u * invgamma;
     GVector result   = c0 * pow(c1,-gamma);
-    
+
     // Return result
     return result;
 }
@@ -631,7 +633,7 @@ void GLATResponse::init_members(void)
     //m_aeff_name.clear();
     //m_psf_name.clear();
     //m_edisp_name.clear();
-    
+
     // Initialise PSF members
     m_psf_angle_num  = 0;
     m_psf_angle_min  = 0.0;
@@ -703,7 +705,7 @@ GVector GLATResponse::get_fits_vector(const GFitsHDU* hdu, const std::string& co
     GFitsTableCol* ptr = hdu->column(colname);
     if (ptr == NULL)
         throw GException::fits_column_not_found(G_GET_FITS_VECTOR, colname);
-        
+
     // Determine number of entries
     int num = ptr->repeat();
 

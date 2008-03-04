@@ -30,7 +30,7 @@
  *
  * @brief Abstract interface for FITS table column
  *
- * This class implements a FITS table column.
+ * This class implements a FITS table column. Vector columns are supported.
  ***************************************************************************/
 class GFitsTableCol {
 
@@ -43,6 +43,7 @@ class GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableCol();
+    GFitsTableCol(const int& length, const int& size = 1);
     GFitsTableCol(const GFitsTableCol& column);
     virtual ~GFitsTableCol();
 
@@ -50,23 +51,13 @@ public:
     GFitsTableCol& operator= (const GFitsTableCol& column);
 
     // Virtual Methods
-    virtual std::string    string(const int& row, const int& col = 0) = 0;
-    virtual double         real(const int& row, const int& col = 0) = 0;
-    virtual int            integer(const int& row, const int& col = 0) = 0;
+    virtual std::string    string(const int& row, const int& inx = 0) = 0;
+    virtual double         real(const int& row, const int& inx = 0) = 0;
+    virtual int            integer(const int& row, const int& inx = 0) = 0;
     virtual GFitsTableCol* clone(void) const = 0;
-    virtual double*        ptr_double(void) = 0;
-    virtual float*         ptr_float(void) = 0;
-    virtual short*         ptr_short(void) = 0;
-    virtual long*          ptr_long(void) = 0;
-    virtual int*           ptr_int(void) = 0;
 
     // Base class Methods
     void        name(const std::string& name);
-    //void        colnum(const int& colnum);    //!< DO WE REALLY NEED THIS???
-    //void        type(const int& type);        //!< DO WE REALLY NEED THIS???
-    //void        repeat(const int repeat);     //!< DO WE REALLY NEED THIS???
-    //void        width(const int width);       //!< DO WE REALLY NEED THIS???
-    //void        length(const int& length);    //!< DO WE REALLY NEED THIS???
     std::string name(void);
     int         colnum(void);
     int         type(void);
@@ -93,10 +84,5 @@ private:
     void free_members(void);
     void connect(__fitsfile* fptr);
 };
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
 
 #endif /* GFITSTABLECOL_HPP */

@@ -48,6 +48,26 @@ GFitsTableCol::GFitsTableCol()
 
 
 /***********************************************************************//**
+ * @brief Constructor
+ *
+ * @param[in] length Length of column.
+ * @param[in] size Vector size of column.
+ ***************************************************************************/
+GFitsTableCol::GFitsTableCol(const int& length, const int& size)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Set column length and vector size
+    m_length = length;
+    m_repeat = size;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] column Column from which the class instance should be built

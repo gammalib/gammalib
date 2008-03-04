@@ -43,9 +43,8 @@
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                                Constructor                              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Constructor
  ***************************************************************************/
 GFitsTableFltCol::GFitsTableFltCol() : GFitsTableCol()
 {
@@ -57,11 +56,13 @@ GFitsTableFltCol::GFitsTableFltCol() : GFitsTableCol()
 }
 
 
-/***************************************************************************
- *                              Copy constructor                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] column Column from which class instance should be built.
  ***************************************************************************/
-GFitsTableFltCol::GFitsTableFltCol(const GFitsTableFltCol& column) : GFitsTableCol(column)
+GFitsTableFltCol::GFitsTableFltCol(const GFitsTableFltCol& column) :
+                                                        GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -74,9 +75,8 @@ GFitsTableFltCol::GFitsTableFltCol(const GFitsTableFltCol& column) : GFitsTableC
 }
 
 
-/***************************************************************************
- *                               Destructor                                *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Destructor
  ***************************************************************************/
 GFitsTableFltCol::~GFitsTableFltCol()
 {
@@ -94,9 +94,10 @@ GFitsTableFltCol::~GFitsTableFltCol()
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                            Assignment operator                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param[in] column Column which should be assigned
  ***************************************************************************/
 GFitsTableFltCol& GFitsTableFltCol::operator= (const GFitsTableFltCol& column)
 {
@@ -128,9 +129,13 @@ GFitsTableFltCol& GFitsTableFltCol::operator= (const GFitsTableFltCol& column)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                             Get string value                            *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Get string value
+ *
+ * @param[in] row Table row.
+ * @param[in] col Table column vector index.
+ *
+ * Returns value of specified row and vector index as string.
  ***************************************************************************/
 std::string GFitsTableFltCol::string(const int& row, const int& col)
 {
@@ -158,9 +163,13 @@ std::string GFitsTableFltCol::string(const int& row, const int& col)
 }
 
 
-/***************************************************************************
- *                              Get real value                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Get double precision value
+ *
+ * @param[in] row Table row.
+ * @param[in] col Table column vector index.
+ *
+ * Returns value of specified row and vector index as double precision.
  ***************************************************************************/
 double GFitsTableFltCol::real(const int& row, const int& col)
 {
@@ -187,9 +196,13 @@ double GFitsTableFltCol::real(const int& row, const int& col)
 }
 
 
-/***************************************************************************
- *                               Get int value                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Get integer value
+ *
+ * @param[in] row Table row.
+ * @param[in] col Table column vector index.
+ *
+ * Returns value of specified row and vector index as integer.
  ***************************************************************************/
 int GFitsTableFltCol::integer(const int& row, const int& col)
 {
@@ -216,35 +229,31 @@ int GFitsTableFltCol::integer(const int& row, const int& col)
 }
 
 
-/***************************************************************************
- *                      Access to invalid data pointers                    *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Clone column
  ***************************************************************************/
-double* GFitsTableFltCol::ptr_double(void)
+GFitsTableFltCol* GFitsTableFltCol::clone(void) const
 {
-    throw GException::fits_invalid_type(G_PTR_DOUBLE,
-                             "No <double> pointer allowed to <float> array");
-}
-short* GFitsTableFltCol::ptr_short(void)
-{
-    throw GException::fits_invalid_type(G_PTR_SHORT,
-                              "No <short> pointer allowed to <float> array");
-}
-long* GFitsTableFltCol::ptr_long(void)
-{
-    throw GException::fits_invalid_type(G_PTR_LONG, 
-                               "No <long> pointer allowed to <float> array");
-}
-int* GFitsTableFltCol::ptr_int(void)
-{
-    throw GException::fits_invalid_type(G_PTR_INT,
-                                "No <int> pointer allowed to <float> array");
+    return new GFitsTableFltCol(*this);
 }
 
 
-/***************************************************************************
- *                              Set NULL string                            *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return pointer to floating point column
+ ***************************************************************************/
+float* GFitsTableFltCol::data(void)
+{
+    return m_data;
+}
+
+
+/***********************************************************************//**
+ * @brief Set NULL value
+ *
+ * @param[in] value Pointer on NULL value
+ *
+ * Allows the specification of the FITS table NULL value. If value=NULL the
+ * data will not be screened for NULL values.
  ***************************************************************************/
 void GFitsTableFltCol::set_nullval(const float* value)
 {
@@ -261,12 +270,13 @@ void GFitsTableFltCol::set_nullval(const float* value)
         *m_nulval = *value;
     }
 
-    // Re-load column 
-    // NOTE: THIS WILL LEAD TO A LOSS OF MODIFICATIONS; ISSUE SAVE BEFORE !!!
+    // Re-load column
+/*
     if (m_data != NULL) {
-        //save();
+        save();
         load();
     }
+*/
 
     // Return
     return;
@@ -279,9 +289,8 @@ void GFitsTableFltCol::set_nullval(const float* value)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                         Initialise class members                        *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Initialise class members
  ***************************************************************************/
 void GFitsTableFltCol::init_members(void)
 {
@@ -296,9 +305,10 @@ void GFitsTableFltCol::init_members(void)
 }
 
 
-/***************************************************************************
- *                            Copy class members                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] column Column for which members should be copied.
  ***************************************************************************/
 void GFitsTableFltCol::copy_members(const GFitsTableFltCol& column)
 {
@@ -325,9 +335,8 @@ void GFitsTableFltCol::copy_members(const GFitsTableFltCol& column)
 }
 
 
-/***************************************************************************
- *                           Delete class members                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Delete class members
  ***************************************************************************/
 void GFitsTableFltCol::free_members(void)
 {
@@ -344,9 +353,8 @@ void GFitsTableFltCol::free_members(void)
 }
 
 
-/***************************************************************************
- *                             Load column data                            *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Load column data
  ***************************************************************************/
 void GFitsTableFltCol::load(void)
 {

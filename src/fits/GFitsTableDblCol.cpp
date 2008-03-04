@@ -23,12 +23,7 @@
 #define G_STRING     "GFitsTableDblCol::string(const int&, const int&)"
 #define G_REAL       "GFitsTableDblCol::real(const int&, const int&)"
 #define G_INTEGER    "GFitsTableDblCol::integer(const int&, const int&)"
-#define G_PTR_FLOAT  "GFitsTableDblCol::ptr_float()"
-#define G_PTR_DOUBLE "GFitsTableDblCol::ptr_double()"
-#define G_PTR_SHORT  "GFitsTableDblCol::ptr_short()"
-#define G_PTR_LONG   "GFitsTableDblCol::ptr_long()"
-#define G_PTR_INT    "GFitsTableDblCol::ptr_int()"
-#define G_LOAD       "GFitsTableDblCol::load()"
+#define G_FETCH_DATA "GFitsTableDblCol::fetch_data()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -43,9 +38,8 @@
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                                Constructor                              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Constructor
  ***************************************************************************/
 GFitsTableDblCol::GFitsTableDblCol() : GFitsTableCol()
 {
@@ -57,11 +51,35 @@ GFitsTableDblCol::GFitsTableDblCol() : GFitsTableCol()
 }
 
 
-/***************************************************************************
- *                              Copy constructor                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Constructor
+ *
+ * @param[in] length Length of column.
+ * @param[in] size Vector size of column.
  ***************************************************************************/
-GFitsTableDblCol::GFitsTableDblCol(const GFitsTableDblCol& column) : GFitsTableCol(column)
+GFitsTableDblCol::GFitsTableDblCol(const int& length, const int& size)
+                                                : GFitsTableCol(length, size)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Setup format
+    //m_name   = "Test";
+    m_format = "1D";
+    //m_unit   = "deg";
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] column Column from which class instance should be built.
+ ***************************************************************************/
+GFitsTableDblCol::GFitsTableDblCol(const GFitsTableDblCol& column) :
+                                                        GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -74,9 +92,8 @@ GFitsTableDblCol::GFitsTableDblCol(const GFitsTableDblCol& column) : GFitsTableC
 }
 
 
-/***************************************************************************
- *                               Destructor                                *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Destructor
  ***************************************************************************/
 GFitsTableDblCol::~GFitsTableDblCol()
 {
@@ -94,9 +111,10 @@ GFitsTableDblCol::~GFitsTableDblCol()
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                            Assignment operator                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param[in] column Column which should be assigned
  ***************************************************************************/
 GFitsTableDblCol& GFitsTableDblCol::operator= (const GFitsTableDblCol& column)
 {
@@ -122,126 +140,193 @@ GFitsTableDblCol& GFitsTableDblCol::operator= (const GFitsTableDblCol& column)
 }
 
 
+/***********************************************************************//**
+ * @brief Column data access operator
+ *
+ * @param[in] row Row of column to access.
+ * @param[in] inx Vector index in column row to access
+ *
+ * Provides access to data in a column. No range checking is performed.
+ * Use one of
+ *   GFitsTableDblCol::string(ix,iy),
+ *   GFitsTableDblCol::real(ix;iy) or
+ *   GFitsTableDblCol::integer(ix;iy)
+ * if range checking is required.
+ ***************************************************************************/
+double& GFitsTableDblCol::operator() (const int& row, const int& inx)
+{
+    // If data are not available then load them now
+    if (m_data == NULL) fetch_data();
+
+    // Calculate pixel offset
+    int offset = row * m_repeat + inx;
+
+    // Return image pixel
+    return m_data[offset];
+}
+
+
+/***********************************************************************//**
+ * @brief Column data access operator (const variant)
+ *
+ * @param[in] row Row of column to access.
+ * @param[in] inx Vector index in column row to access
+ *
+ * Provides access to data in a column. No range checking is performed.
+ * Use one of
+ *   GFitsTableDblCol::string(ix,iy),
+ *   GFitsTableDblCol::real(ix;iy) or
+ *   GFitsTableDblCol::integer(ix;iy)
+ * if range checking is required.
+ ***************************************************************************/
+const double& GFitsTableDblCol::operator() (const int& row, const int& inx)
+                                                                        const
+{
+    // If data are not available then load them now
+    if (m_data == NULL) ((GFitsTableDblCol*)this)->fetch_data();
+
+    // Calculate pixel offset
+    int offset = row * m_repeat + inx;
+
+    // Return image pixel
+    return m_data[offset];
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                      GFitsTableDblCol public methods                    =
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                             Get string value                            *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Get string value
+ *
+ * @param[in] row Table row.
+ * @param[in] inx Table column vector index.
+ *
+ * @exception GException::out_of_range
+ *            Table row or vector index are out of valid range.
+ *
+ * Returns value of specified row and vector index as string.
  ***************************************************************************/
-std::string GFitsTableDblCol::string(const int& row, const int& col)
+std::string GFitsTableDblCol::string(const int& row, const int& inx)
 {
-    // Make sure that data are loaded
-    if (m_data == NULL)
-        load();
+    // If data are not available then load them now
+    if (m_data == NULL) fetch_data();
 
     // Check row value
     if (row < 0 || row >= m_length)
         throw GException::out_of_range(G_STRING, row, 0, m_length-1);
 
-    // Check col value
-    if (col < 0 || col >= m_repeat)
-        throw GException::out_of_range(G_STRING, col, 0, m_repeat-1);
+    // Check inx value
+    if (inx < 0 || inx >= m_repeat)
+        throw GException::out_of_range(G_STRING, inx, 0, m_repeat-1);
 
     // Get index
-    int inx = row * m_repeat + col;
+    int offset = row * m_repeat + inx;
 
     // Convert double into string
     ostringstream s_value;
-    s_value << scientific << m_data[inx];
+    s_value << scientific << m_data[offset];
 
     // Return value
     return s_value.str();
 }
 
 
-/***************************************************************************
- *                              Get real value                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Get double precision value
+ *
+ * @param[in] row Table row.
+ * @param[in] inx Table column vector index.
+ *
+ * @exception GException::out_of_range
+ *            Table row or vector index are out of valid range.
+ *
+ * Returns value of specified row and vector index as double precision.
  ***************************************************************************/
-double GFitsTableDblCol::real(const int& row, const int& col)
+double GFitsTableDblCol::real(const int& row, const int& inx)
 {
-    // Make sure that data are loaded
-    if (m_data == NULL)
-        load();
+    // If data are not available then load them now
+    if (m_data == NULL) fetch_data();
 
     // Check row value
     if (row < 0 || row >= m_length)
         throw GException::out_of_range(G_REAL, row, 0, m_length-1);
 
-    // Check col value
-    if (col < 0 || col >= m_repeat)
-        throw GException::out_of_range(G_REAL, col, 0, m_repeat-1);
+    // Check inx value
+    if (inx < 0 || inx >= m_repeat)
+        throw GException::out_of_range(G_REAL, inx, 0, m_repeat-1);
 
     // Get index
-    int inx = row * m_repeat + col;
+    int offset = row * m_repeat + inx;
 
     // Return value
-    return m_data[inx];
+    return m_data[offset];
 }
 
 
-/***************************************************************************
- *                               Get int value                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Get integer value
+ *
+ * @param[in] row Table row.
+ * @param[in] inx Table column vector index.
+ *
+ * @exception GException::out_of_range
+ *            Table row or vector index are out of valid range.
+ *
+ * Returns value of specified row and vector index as integer.
  ***************************************************************************/
-int GFitsTableDblCol::integer(const int& row, const int& col)
+int GFitsTableDblCol::integer(const int& row, const int& inx)
 {
-    // Make sure that data are loaded
-    if (m_data == NULL)
-        load();
+    // If data are not available then load them now
+    if (m_data == NULL) fetch_data();
 
     // Check row value
     if (row < 0 || row >= m_length)
         throw GException::out_of_range(G_INTEGER, row, 0, m_length-1);
 
     // Check col value
-    if (col < 0 || col >= m_repeat)
-        throw GException::out_of_range(G_INTEGER, col, 0, m_repeat-1);
+    if (inx < 0 || inx >= m_repeat)
+        throw GException::out_of_range(G_INTEGER, inx, 0, m_repeat-1);
 
     // Get index
-    int inx = row * m_repeat + col;
+    int offset = row * m_repeat + inx;
 
     // Convert double into int
-    int value = (int)m_data[inx];
+    int value = (int)m_data[offset];
 
     // Return value
     return value;
 }
 
 
-/***************************************************************************
- *                      Access to invalid data pointers                    *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Clone column
  ***************************************************************************/
-float* GFitsTableDblCol::ptr_float(void)
+GFitsTableDblCol* GFitsTableDblCol::clone(void) const
 {
-    throw GException::fits_invalid_type(G_PTR_FLOAT,
-                             "No <float> pointer allowed to <double> array");
-}
-short* GFitsTableDblCol::ptr_short(void) 
-{
-    throw GException::fits_invalid_type(G_PTR_SHORT,
-                             "No <short> pointer allowed to <double> array");
-}
-long* GFitsTableDblCol::ptr_long(void) 
-{
-    throw GException::fits_invalid_type(G_PTR_LONG,
-                              "No <long> pointer allowed to <double> array");
-}
-int* GFitsTableDblCol::ptr_int(void) 
-{
-    throw GException::fits_invalid_type(G_PTR_INT,
-                               "No <int> pointer allowed to <double> array");
+    return new GFitsTableDblCol(*this);
 }
 
 
-/***************************************************************************
- *                              Set NULL value                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return pointer to double precision column
+ ***************************************************************************/
+double* GFitsTableDblCol::data(void)
+{
+    return m_data;
+}
+
+
+/***********************************************************************//**
+ * @brief Set NULL value
+ *
+ * @param[in] value Pointer on NULL value
+ *
+ * Allows the specification of the FITS table NULL value. If value=NULL the
+ * data will not be screened for NULL values.
  ***************************************************************************/
 void GFitsTableDblCol::set_nullval(const double* value)
 {
@@ -258,13 +343,13 @@ void GFitsTableDblCol::set_nullval(const double* value)
         *m_nulval = *value;
     }
 
-    // Re-load column 
-    // NOTE: THIS WILL LEAD TO A LOSS OF MODIFICATIONS; ISSUE SAVE BEFORE !!!
+    // Re-load column
+/*
     if (m_data != NULL) {
-        //save();
+        save();
         load();
     }
-
+*/
     // Return
     return;
 }
@@ -276,9 +361,8 @@ void GFitsTableDblCol::set_nullval(const double* value)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                         Initialise class members                        *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Initialise class members
  ***************************************************************************/
 void GFitsTableDblCol::init_members(void)
 {
@@ -293,9 +377,10 @@ void GFitsTableDblCol::init_members(void)
 }
 
 
-/***************************************************************************
- *                            Copy class members                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] column Column for which members should be copied.
  ***************************************************************************/
 void GFitsTableDblCol::copy_members(const GFitsTableDblCol& column)
 {
@@ -322,9 +407,8 @@ void GFitsTableDblCol::copy_members(const GFitsTableDblCol& column)
 }
 
 
-/***************************************************************************
- *                           Delete class members                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Delete class members
  ***************************************************************************/
 void GFitsTableDblCol::free_members(void)
 {
@@ -341,26 +425,47 @@ void GFitsTableDblCol::free_members(void)
 }
 
 
-/***************************************************************************
- *                             Load column data                            *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Fetch column data
+ *
+ * @exception GException::fits_error
+ *            An error occured while loading column data from FITS file.
+ *
+ * If a FITS file is attached to the column the data are loaded into memory
+ * from the FITS file. If no FITS file is attached, memory is allocated
+ * to hold the column data and all cells are set to 0.
  ***************************************************************************/
-void GFitsTableDblCol::load(void)
+void GFitsTableDblCol::fetch_data(void)
 {
     // Calculate size of memory
     m_size = m_repeat * m_length;
 
-    // Allocate memory
-    if (m_data != NULL) delete [] m_data;
-    m_data = new double[m_size];
+    // Load only if the column has a positive size
+    if (m_size > 0) {
 
-    // Load column data
-    int status = 0;
-    status = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
-    status = __ffgcv(&m_fitsfile, __TDOUBLE, m_colnum, 1, 1, m_size,
-                     m_nulval, m_data, &m_anynul, &status);
-    if (status != 0)
-        throw GException::fits_error(G_LOAD, status);
+        // Allocate fresh memory
+        if (m_data != NULL) delete [] m_data;
+        m_data = new double[m_size];
+
+        // If a FITS file is attached then load column data from the FITS
+        // file
+        if (m_fitsfile.Fptr != NULL) {
+            int status = 0;
+            status = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL,
+                              &status);
+            status = __ffgcv(&m_fitsfile, __TDOUBLE, m_colnum, 1, 1, m_size,
+                             m_nulval, m_data, &m_anynul, &status);
+            if (status != 0)
+                throw GException::fits_error(G_FETCH_DATA, status);
+        }
+
+        // ... otherwise initialise all column values to 0
+        else {
+            for (int i = 0; i < m_size; ++i)
+                m_data[i] = 0.0;
+        }
+
+    } // endif: column has a positive size
 
     // Return
     return;

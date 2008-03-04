@@ -174,6 +174,7 @@ void GFitsHeader::open(__fitsfile* fptr)
  ***************************************************************************/
 void GFitsHeader::save(__fitsfile* fptr)
 {
+//cout << "GFitsHeader::save entry" << endl;
     // Move to HDU
     int status = 0;
     status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
@@ -193,6 +194,7 @@ void GFitsHeader::save(__fitsfile* fptr)
         }
     }
 
+//cout << "GFitsHeader::save exit" << endl;
     // Return
     return;
 }

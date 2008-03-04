@@ -337,41 +337,7 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
  ***************************************************************************/
 void GFitsHDU::save(void)
 {
-//cout << "GFitsHDU::save " << m_fitsfile.Fptr << " " << m_hdunum << endl;
-    // Move to HDU
-//    int status = 0;
-//    status     = __ffmahd(&m_fitsfile, m_hdunum, NULL, &status);
-
-    // If HDU does not yet exist in file then create it now. This works even
-    // in the case that the actual HDU has no associated header and/or data
-    // (these will be created automatically). However, to make this work we have
-    // to set the fitsfile HDU position to the position we want to go. In that
-    // was the save members will know that they have to create the HDU ...
-/*
-    if (status == 107) {
-        m_fitsfile.HDUposition = m_hdunum-1;
-        status                 = 0;
-        if (m_data != NULL) {
-            switch (m_type) {
-            case HT_IMAGE:              // Image HDU
-                m_data->connect(&m_fitsfile);
-                //m_data->save();
-                break;
-            case HT_ASCII_TABLE:        // ASCII Table HDU
-                m_data->connect(&m_fitsfile);
-                //m_data->save();
-                break;
-            case HT_BIN_TABLE:          // Binary Table HDU
-                m_data->connect(&m_fitsfile);
-                //m_data->save();
-                break;
-            default:
-                throw GException::fits_unknown_HDU_type(G_SAVE, m_type);
-                break;
-            }
-        }
-    }
-*/
+//cout << "GFitsHDU::save entry" << endl;
 
     // Save data and header if they exist
     if (m_data != NULL) { 
@@ -398,6 +364,7 @@ void GFitsHDU::save(void)
 
     } // endelse: no data were available
 
+//cout << "GFitsHDU::save exit" << endl;
     // Return
     return;
 }

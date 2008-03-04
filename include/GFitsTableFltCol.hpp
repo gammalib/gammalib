@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsTableFltCol.hpp
+ * @brief GFitsTableFltCol class definition.
+ * @author J. Knodlseder
+ */
 
 #ifndef GFITSTABLEFLTCOL_HPP
 #define GFITSTABLEFLTCOL_HPP
@@ -24,8 +29,12 @@
 /* __ Structures _________________________________________________________ */
 
 
-/***************************************************************************
- *                    GFitsTableFltCol class definition                    *
+/***********************************************************************//**
+ * @class GFitsTableFltCol
+ *
+ * @brief Interface for FITS table floating point column
+ *
+ * This class implements a FITS table floating point column.
  ***************************************************************************/
 class GFitsTableFltCol : public GFitsTableCol {
 
@@ -43,11 +52,7 @@ public:
     double            real(const int& row, const int& col = 0);
     int               integer(const int& row, const int& col = 0);
     GFitsTableFltCol* clone(void) const;
-    double*           ptr_double(void);
-    float*            ptr_float(void);
-    short*            ptr_short(void);
-    long*             ptr_long(void);
-    int*              ptr_int(void);
+    float*            data(void);
     void              set_nullval(const float* value);
 
 private:
@@ -58,21 +63,15 @@ private:
     void load(void);
 
     // Private data area
-    int    m_size;          // Size of data area
-    float* m_data;          // Data area
-    float* m_nulval;        // NULL value
-    int    m_anynul;        // Number of NULLs encountered
+    int    m_size;          //!< Size of data area
+    float* m_data;          //!< Data area
+    float* m_nulval;        //!< NULL value
+    int    m_anynul;        //!< Number of NULLs encountered
 };
 
 
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
-inline float* GFitsTableFltCol::ptr_float(void) { return m_data; }
-inline
-GFitsTableFltCol* GFitsTableFltCol::clone(void) const
-{
-    return new GFitsTableFltCol(*this);
-}
 
 #endif /* GFITSTABLEFLTCOL_HPP */
