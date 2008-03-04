@@ -80,7 +80,7 @@ GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
 
     // Set members
     this->keyname(keyname);
-    this->value(value);
+    this->value("'"+value+"'");
     this->comment(comment);
 
     // Return
@@ -243,7 +243,7 @@ void GFitsHeaderCard::value(const std::string& value)
         if (m_value[m_value.length()-1] != '\x27')
             m_value += "'";
     }
-    
+
     // Return
     return;
 }
