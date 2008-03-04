@@ -34,9 +34,8 @@
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                                Constructor                              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Constructor
  ***************************************************************************/
 GFitsTableCol::GFitsTableCol()
 {
@@ -48,9 +47,10 @@ GFitsTableCol::GFitsTableCol()
 }
 
 
-/***************************************************************************
- *                              Copy constructor                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] column Column from which the class instance should be built
  ***************************************************************************/
 GFitsTableCol::GFitsTableCol(const GFitsTableCol& column)
 {
@@ -65,9 +65,8 @@ GFitsTableCol::GFitsTableCol(const GFitsTableCol& column)
 }
 
 
-/***************************************************************************
- *                               Destructor                                *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Destructor
  ***************************************************************************/
 GFitsTableCol::~GFitsTableCol()
 {
@@ -85,24 +84,25 @@ GFitsTableCol::~GFitsTableCol()
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                            Assignment operator                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param[in] column Column which will be assigned
  ***************************************************************************/
 GFitsTableCol& GFitsTableCol::operator= (const GFitsTableCol& column)
 {
     // Execute only if object is not identical
     if (this != &column) {
-  
+
         // Free members
         free_members();
-  
+
         // Initialise private members for clean destruction
         init_members();
 
         // Copy members
         copy_members(column);
-	
+
     } // endif: object was not identical
 
     // Return this object
@@ -116,6 +116,142 @@ GFitsTableCol& GFitsTableCol::operator= (const GFitsTableCol& column)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Set column name
+ *
+ * @param[in] name Name of the column.
+ ***************************************************************************/
+void GFitsTableCol::name(const std::string& name)
+{
+    // Set name
+    m_name = name;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set column number
+ *
+ * @param[in] colnum Number of column.
+ ***************************************************************************/
+/*
+void GFitsTableCol::colnum(const int& colnum)
+{
+    // Set column number
+    m_colnum = colnum;
+
+    // Return
+    return;
+}
+*/
+
+/***********************************************************************//**
+ * @brief Set column type
+ *
+ * @param[in] type Type of column.
+ ***************************************************************************/
+/*
+void GFitsTableCol::type(const int& type)
+{
+    // Set column type
+    m_type = type;
+
+    // Return
+    return;
+}
+*/
+
+/***********************************************************************//**
+ * @brief Set column length
+ *
+ * @param[in] length Length of column.
+ ***************************************************************************/
+/*
+void GFitsTableCol::length(const int& length)
+{
+    // Set column length
+    m_length = length;
+
+    // Return
+    return;
+}
+*/
+
+/***********************************************************************//**
+ * @brief Get column name
+ ***************************************************************************/
+std::string GFitsTableCol::name(void)
+{
+    // Return Name
+    return m_name;
+}
+
+
+/***********************************************************************//**
+ * @brief Get number of column in FITS file (starting from 1)
+ ***************************************************************************/
+int GFitsTableCol::colnum(void)
+{
+    // Return column number
+    return m_colnum;
+}
+
+
+/***********************************************************************//**
+ * @brief Get CFITSIO column type
+ *
+ * Returns one of the following:
+ *   1 (TBIT)
+ *  11 (TBYTE)
+ *  14 (TLOGICAL)
+ *  16 (TSTRING)
+ *  21 (TSHORT)
+ *  31 (TINT)
+ *  41 (TLONG)
+ *  42 (TFLOAT)
+ *  81 (TLONGLONG)
+ *  82 (TDOUBLE)
+ *  83 (TCOMPLEX)
+ * 163 (TDBLCOMPLEX)
+ ***************************************************************************/
+int GFitsTableCol::type(void)
+{
+    // Return column type
+    return m_type;
+}
+
+
+/***********************************************************************//**
+ * @brief Get column repeat value
+ ***************************************************************************/
+int GFitsTableCol::repeat(void)
+{
+    // Return column repeat value
+    return m_repeat;
+}
+
+
+/***********************************************************************//**
+ * @brief Get column width
+ ***************************************************************************/
+int GFitsTableCol::width(void)
+{
+    // Return column width
+    return m_width;
+}
+
+
+/***********************************************************************//**
+ * @brief Get column length
+ ***************************************************************************/
+int GFitsTableCol::length(void)
+{
+    // Return column length
+    return m_length;
+}
+
 
 /*==========================================================================
  =                                                                         =
@@ -123,9 +259,8 @@ GFitsTableCol& GFitsTableCol::operator= (const GFitsTableCol& column)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                         Initialise class members                        *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Initialise class members
  ***************************************************************************/
 void GFitsTableCol::init_members(void)
 {
@@ -146,9 +281,10 @@ void GFitsTableCol::init_members(void)
 }
 
 
-/***************************************************************************
- *                            Copy class members                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] column Column to be copied
  ***************************************************************************/
 void GFitsTableCol::copy_members(const GFitsTableCol& column)
 {
@@ -162,22 +298,21 @@ void GFitsTableCol::copy_members(const GFitsTableCol& column)
     m_width    = column.m_width;
     m_length   = column.m_length;
     m_fitsfile = column.m_fitsfile;
-    
+
     // Return
     return;
 }
 
 
-/***************************************************************************
- *                           Delete class members                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Delete class members
  ***************************************************************************/
 void GFitsTableCol::free_members(void)
 {
     // Free memory
-    
+
     // Mark memory as freed
-    
+
     // Return
     return;
 }
@@ -186,13 +321,14 @@ void GFitsTableCol::free_members(void)
 /***********************************************************************//**
  * @brief Connect table column to FITS file
  *
- * @param fptr FITS file pointer to which the table column should be connected
+ * @param[in] fptr FITS file pointer to which the table column should be
+ *                 connected
  ***************************************************************************/
 void GFitsTableCol::connect(__fitsfile* fptr)
 {
     // Connect Image
     m_fitsfile = *fptr;
-    
+
     // Return
     return;
 }
@@ -204,9 +340,11 @@ void GFitsTableCol::connect(__fitsfile* fptr)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                             Output operator                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream
+ * @param[in] column Column to put in output stream
  ***************************************************************************/
 ostream& operator<< (ostream& os, const GFitsTableCol& column)
 {

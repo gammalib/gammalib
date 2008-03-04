@@ -59,7 +59,7 @@ GFitsBinTable::GFitsBinTable() : GFitsTable()
  * @param[in] nrows Number of rows in table
  * @param[in] ncols Number of columns in table
  ***************************************************************************/
-GFitsBinTable::GFitsBinTable(int nrows, int ncols) : GFitsTable(nrows, ncols)
+GFitsBinTable::GFitsBinTable(int nrows) : GFitsTable(nrows)
 {
     // Initialise class members for clean destruction
     init_members();

@@ -37,7 +37,7 @@ class GFitsBinTable : public GFitsTable {
 public:
     // Constructors and destructors
     GFitsBinTable();
-    GFitsBinTable(int nrows, int ncols);
+    GFitsBinTable(int nrows);
     GFitsBinTable(const GFitsBinTable& table);
     virtual ~GFitsBinTable();
 

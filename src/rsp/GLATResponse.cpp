@@ -264,22 +264,27 @@ void GLATResponse::save(const std::string& rspname) const
     GFits fits;
     fits.open(rspname);
 
-    // Build PSF HDUs
-    GFitsBinTable table_psf_bounds(1,4);
+    // Build PSF tables and images
+    GFitsBinTable table_psf_bounds(1);
     int           naxes_psf2[] = {m_psf_energy_num, m_psf_ctheta_num};
-    int           naxes_psf3[] = {m_psf_angle_num, m_psf_energy_num, m_psf_ctheta_num};
+    int           naxes_psf3[] = {m_psf_angle_num, m_psf_energy_num,
+                                  m_psf_ctheta_num};
     GFitsDblImage image_psf_psf(3, naxes_psf3, m_psf);
     GFitsDblImage image_psf_norm(2, naxes_psf2, m_norm);
     GFitsDblImage image_psf_sigma(2, naxes_psf2, m_sigma);
- //TBD   GFitsHDU      hdu_psf_bounds(table_psf_bounds);
-    GFitsHDU      hdu_psf_psf(image_psf_psf);
-    GFitsHDU      hdu_psf_norm(image_psf_norm);
-    GFitsHDU      hdu_psf_sigma(image_psf_sigma);
+
+    // Construct PSF HDUs
+    GFitsHDU hdu_psf_bounds(table_psf_bounds);
+    GFitsHDU hdu_psf_psf(image_psf_psf);
+    GFitsHDU hdu_psf_norm(image_psf_norm);
+    GFitsHDU hdu_psf_sigma(image_psf_sigma);
+    hdu_psf_bounds.extname("PBOUNDS");
     hdu_psf_psf.extname("PSF");
     hdu_psf_norm.extname("NORM");
     hdu_psf_sigma.extname("SIGMA");
 
     // Append HDUs to FITS file
+    fits.append(&hdu_psf_bounds);
     fits.append(&hdu_psf_psf);
     fits.append(&hdu_psf_norm);
     fits.append(&hdu_psf_sigma);

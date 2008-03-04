@@ -195,6 +195,12 @@ public:
         fits_unknown_coltype(string origin, int type);
     };
 
+    // FITS bad column length
+    class fits_bad_col_length : public GExceptionHandler {
+    public:
+        fits_bad_col_length(string origin, int length, int rows);
+    };
+
     // FITS bad bitpix value
     class fits_bad_bitpix : public GExceptionHandler {
     public:

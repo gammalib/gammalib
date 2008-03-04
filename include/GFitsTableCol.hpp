@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsTableCol.hpp
+ * @brief GFitsTableCol class definition.
+ * @author J. Knodlseder
+ */
 
 #ifndef GFITSTABLECOL_HPP
 #define GFITSTABLECOL_HPP
@@ -20,14 +25,18 @@
 /* __ Namespaces _________________________________________________________ */
 
 
-/***************************************************************************
- *                      GFitsTableCol class definition                     *
+/***********************************************************************//**
+ * @class GFitsTableCol
+ *
+ * @brief Abstract interface for FITS table column
+ *
+ * This class implements a FITS table column.
  ***************************************************************************/
 class GFitsTableCol {
 
     // Friend classes
     friend class GFitsTable;
-    
+
     // I/O friends
     friend ostream& operator<< (ostream& os, const GFitsTableCol& column);
 
@@ -52,13 +61,12 @@ public:
     virtual int*           ptr_int(void) = 0;
 
     // Base class Methods
-    void        set_name(const std::string name);
-    void        set_colnum(const int colnum);
-    void        set_type(const int type);
-    void        set_repeat(const int repeat);
-    void        set_width(const int width);
-    void        set_length(const int length);
-    void        set_fitsfile(const __fitsfile* fptr);
+    void        name(const std::string& name);
+    //void        colnum(const int& colnum);    //!< DO WE REALLY NEED THIS???
+    //void        type(const int& type);        //!< DO WE REALLY NEED THIS???
+    //void        repeat(const int repeat);     //!< DO WE REALLY NEED THIS???
+    //void        width(const int width);       //!< DO WE REALLY NEED THIS???
+    //void        length(const int& length);    //!< DO WE REALLY NEED THIS???
     std::string name(void);
     int         colnum(void);
     int         type(void);
@@ -71,7 +79,7 @@ protected:
     std::string m_name;        //!< Column name
     std::string m_format;      //!< Column format
     std::string m_unit;        //!< Column unit
-    int         m_colnum;      //!< Column number
+    int         m_colnum;      //!< Column number (starting from 1)
     int         m_type;        //!< Column type
     int         m_repeat;      //!< Repeat value of column
     int         m_width;       //!< Width of column
@@ -90,18 +98,5 @@ private:
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
-inline void         GFitsTableCol::set_name(const std::string name) { m_name = name; }
-inline void         GFitsTableCol::set_colnum(const int colnum) { m_colnum = colnum; }
-inline void         GFitsTableCol::set_type(const int type) { m_type = type; }
-inline void         GFitsTableCol::set_repeat(const int repeat) { m_repeat = repeat; }
-inline void         GFitsTableCol::set_width(const int width) { m_width = width; }
-inline void         GFitsTableCol::set_length(const int length) { m_length = length; }
-inline void         GFitsTableCol::set_fitsfile(const __fitsfile* fptr) { m_fitsfile = *fptr; }
-inline std::string  GFitsTableCol::name(void) { return m_name; }
-inline int          GFitsTableCol::colnum(void) { return m_colnum; }
-inline int          GFitsTableCol::type(void) { return m_type; }
-inline int          GFitsTableCol::repeat(void) { return m_repeat; }
-inline int          GFitsTableCol::width(void) { return m_width; }
-inline int          GFitsTableCol::length(void) { return m_length; }
 
 #endif /* GFITSTABLECOL_HPP */

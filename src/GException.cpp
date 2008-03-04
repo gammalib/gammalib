@@ -409,6 +409,24 @@ GException::fits_unknown_coltype::fits_unknown_coltype(string origin,
 
 
 /***********************************************************************//**
+ * @brief FITS error: Bad column length
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] length Length of the column.
+ * @param[in] rows Number of rows in table.
+ ***************************************************************************/
+GException::fits_bad_col_length::fits_bad_col_length(string origin,
+                                                     int    length,
+                                                     int    rows)
+{
+    m_origin  = origin;
+    m_message = "Column length '" + str(length) + "' is not compatible"
+                " with the number of rows '" + str(rows) + "' in the"
+                " table";
+}
+
+
+/***********************************************************************//**
  * @brief FITS error: invalid number of bits per pixel
  *
  * @param[in] origin Method that throws the error.

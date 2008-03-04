@@ -377,7 +377,7 @@ void test_create(void)
         fits.open("test.fits");
         int nrows = 10;
         int ncols = 5;
-        GFitsBinTable table(nrows,ncols);
+        GFitsBinTable table(nrows);
         GFitsHDU hdu(table);
         fits.append(&hdu);
         cout << fits;
@@ -390,25 +390,6 @@ void test_create(void)
     }
     cout << ".";
 
-    // Attach ASCII table
-    try {
-        GFits fits;
-        fits.open("test.fits");
-        int nrows = 10;
-        int ncols = 5;
-        GFitsAsciiTable table(nrows,ncols);
-        GFitsHDU hdu(table);
-        fits.append(&hdu);
-        cout << fits;
-        fits.save();
-    }
-    catch (exception &e) {
-        cout << endl << "TEST ERROR: Unable to attach ASCII table." << endl;
-        cout << e.what() << endl;
-        throw;
-    }
-    cout << ".";
-        
 
     cout << ". ok." << endl;
 }
@@ -421,7 +402,7 @@ void test_image_double(void)
 {
     // Dump header
     cout << "Test GFitsDblImage: ";
-    
+
     // Test 1D Image
     try {
         int naxis       = 1;
@@ -429,7 +410,7 @@ void test_image_double(void)
         int naxes[]     = {nx};
         GFitsDblImage image(naxis, naxes);
         cout << ".";
-        
+
         // Fill and read image
         try {
             for (int ix = 0; ix < nx; ++ix)

@@ -66,8 +66,8 @@
 #define __TSHORT    TSHORT
 #define __TINT      TINT
 #define __TLONG     TLONG
-#define __TLONGLONG TLONGLONG
 #define __TFLOAT    TFLOAT
+#define __TLONGLONG TLONGLONG
 #define __TDOUBLE   TDOUBLE
 
 /* __ Type definition ____________________________________________________ */
@@ -116,8 +116,8 @@ typedef fitsfile __fitsfile;
 #define __TSHORT       21
 #define __TINT         31
 #define __TLONG        41
-#define __TLONGLONG    81
 #define __TFLOAT       42
+#define __TLONGLONG    81
 #define __TDOUBLE      82
 #define __TCOMPLEX     83
 #define __TDBLCOMPLEX 163

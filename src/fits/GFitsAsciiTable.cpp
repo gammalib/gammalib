@@ -59,7 +59,7 @@ GFitsAsciiTable::GFitsAsciiTable() : GFitsTable()
  * @param[in] nrows Number of rows in table
  * @param[in] ncols Number of columns in table
  ***************************************************************************/
-GFitsAsciiTable::GFitsAsciiTable(int nrows, int ncols) : GFitsTable(nrows, ncols)
+GFitsAsciiTable::GFitsAsciiTable(int nrows) : GFitsTable(nrows)
 {
     // Initialise class members for clean destruction
     init_members();

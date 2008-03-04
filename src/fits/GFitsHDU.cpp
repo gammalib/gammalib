@@ -385,8 +385,8 @@ void GFitsHDU::save(void)
     // image.
     else {
 
-        // Special case: The first HDU does not exist. A FITS file needs at least
-        // one primary HDU. Thus an empty image is created.
+        // Special case: The first HDU does not exist. A FITS file needs at
+        // least one primary HDU. Thus an empty image is created.
         if (m_fitsfile.HDUposition == 0) {
             int status = 0;
             status     = __ffcrim(&m_fitsfile, 8, 0, NULL, &status);

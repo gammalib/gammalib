@@ -34,6 +34,9 @@
  * @class GFitsTable
  *
  * @brief Abstract interface for FITS table
+ *
+ * This class implements a FITS table. A FITS table is a collection of
+ * columns with an identical number of rows.
  ***************************************************************************/
 class GFitsTable : public GFitsData {
 
@@ -43,7 +46,7 @@ class GFitsTable : public GFitsData {
 public:
     // Constructors and destructors
     GFitsTable();
-    GFitsTable(int nrows, int ncols);
+    GFitsTable(int nrows);
     GFitsTable(const GFitsTable& table);
     virtual ~GFitsTable();
 
@@ -55,10 +58,14 @@ public:
     void           save(void);
     void           close(void);
     GFitsTable*    clone(void) const = 0;
+    void           append_column(GFitsTableCol* column);
+    void           insert_column(int colnum, GFitsTableCol* column);
+    void           append_rows(const int& nrows);
+    void           insert_rows(const int& rownum, const int& nrows);
     GFitsTableCol* column(const std::string& colname);
     GFitsTableCol* column(const int& colnum);
-    int            rows(void) const;
-    int            cols(void) const;
+    int            nrows(void) const;
+    int            ncols(void) const;
 
 protected:
     // Protected methods

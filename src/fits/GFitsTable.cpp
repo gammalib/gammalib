@@ -26,10 +26,12 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPEN    "GFitsTable::open(fitsfile*)"
-#define G_SAVE    "GFitsTable::save()"
-#define G_COLUMN1 "GFitsTable::column(const std::string&)"
-#define G_COLUMN2 "GFitsTable::column(const int&)"
+#define G_OPEN          "GFitsTable::open(fitsfile*)"
+#define G_SAVE          "GFitsTable::save()"
+#define G_APPEND_COLUMN "GFitsTable::append_column(GFitsTableCol*)"
+#define G_INSERT_COLUMN "GFitsTable::insert_column(int, GFitsTableCol*)"
+#define G_COLUMN1       "GFitsTable::column(const std::string&)"
+#define G_COLUMN2       "GFitsTable::column(const int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -46,6 +48,13 @@
 
 /***********************************************************************//**
  * @brief Constructor
+ *
+ * Construct an instance of GFitsTable with zero rows. 
+ * Use the methods
+ *   GFitsTable::append_column and GFitsTable::insert_column
+ * to add columns and
+ *   GFitsTable::append_rows and GFitsTable::insert_rows
+ * to add rows to this table.
  ***************************************************************************/
 GFitsTable::GFitsTable() : GFitsData()
 {
@@ -61,28 +70,19 @@ GFitsTable::GFitsTable() : GFitsData()
  * @brief Constructor
  *
  * @param[in] nrows Number of rows in table
- * @param[in] ncols Number of columns in table
+ *
+ * Construct an instance of GFitsTable with a given number of rows.
+ * Use the methods
+ *   GFitsTable::append_column and GFitsTable::insert_column
+ * to add columns to this table.
  ***************************************************************************/
-GFitsTable::GFitsTable(int nrows, int ncols) : GFitsData()
+GFitsTable::GFitsTable(int nrows) : GFitsData()
 {
     // Initialise class members for clean destruction
     init_members();
 
-    // Store table dimension
+    // Store numnber of rows
     m_rows = nrows;
-    m_cols = ncols;
-
-    // If there are columns then allocate memory for column pointers
-    if (m_cols > 0) {
-
-        // Allocate pointer memory
-        m_columns = new GFitsTableCol*[m_cols];
-
-        // Initialise pointers
-        for (int i = 0; i < m_cols; ++i)
-            m_columns[i] = NULL;
-
-    } // endfor: looped over all columns
 
     // Return
     return;
@@ -166,9 +166,9 @@ GFitsTable& GFitsTable::operator= (const GFitsTable& table)
  *
  * @param[in] fptr FITS file pointer
  *
- * Builds a description of the binary table in memory. Columns are not loaded
- * but column descriptors are allocated. The column data will only be loaded
- * once it needs to be accessed.
+ * Builds a description of the table in memory.
+ * Columns are not loaded but column descriptors are allocated.
+ * The column data will only be loaded once it needs to be accessed.
  ***************************************************************************/
 void GFitsTable::open(__fitsfile* fptr)
 {
@@ -214,7 +214,8 @@ void GFitsTable::open(__fitsfile* fptr)
         value[strlen(value)-1] = '\0';
 
         // Get column definition
-        status = __ffgtcl(&m_fitsfile, i+1, &typecode, &repeat, &width, &status);
+        status = __ffgtcl(&m_fitsfile, i+1, &typecode, &repeat, &width,
+                          &status);
         if (status != 0)
             throw GException::fits_error(G_OPEN, status);
 
@@ -241,13 +242,13 @@ void GFitsTable::open(__fitsfile* fptr)
         }
 
         // Store column definition
-        m_columns[i]->set_name(strip_whitespace(&(value[1])));
-        m_columns[i]->set_colnum(i+1);
-        m_columns[i]->set_type(typecode);
-        m_columns[i]->set_repeat(repeat);
-        m_columns[i]->set_width(width);
-        m_columns[i]->set_length(m_rows);
-        m_columns[i]->set_fitsfile(fptr);
+        m_columns[i]->name(strip_whitespace(&(value[1])));
+        m_columns[i]->m_colnum = i+1;
+        m_columns[i]->m_type   = typecode;
+        m_columns[i]->m_repeat = repeat;
+        m_columns[i]->m_width  = width;
+        m_columns[i]->m_length = m_rows;
+        m_columns[i]->connect(fptr);
 
     } // endfor: looped over all columns
 
@@ -264,14 +265,15 @@ void GFitsTable::save(void)
 //cout << "GFitsTable::save entry" << endl;
     // Move to HDU
     int status = 0;
-    status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
+    status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL,
+                          &status);
 
     // If HDU does not yet exist in file then create it now
     if (status == 107) {
-    
+
         // Reset status
         status = 0;
-        
+
         // Initialise number of fields
         int tfields = 0;
 
@@ -297,13 +299,13 @@ void GFitsTable::save(void)
                     tfields++;
             }
         }
-        
+
         // Create FITS table
         status = __ffcrtb(&m_fitsfile, m_type, m_rows, tfields, ttype, tform, 
                           tunit, NULL, &status);
         if (status != 0)
             throw GException::fits_error(G_SAVE, status);
-            
+
         // De-allocate column definition arrays
         if (m_cols > 0) {
             for (int i = 0; i < m_cols; ++i) {
@@ -335,6 +337,128 @@ void GFitsTable::close(void)
 
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append column to the table
+ *
+ * @param[in] column Pointer to column which should be appended
+ *
+ * @exception GException::fits_no_data
+ *            A NULL column pointer was passed to the method.
+ *            This method requires a valid column pointer.
+ *
+ * A column will be appended at the end of the table. See
+ *   GFitsTable::insert_column
+ * for more details on the method.
+ ***************************************************************************/
+void GFitsTable::append_column(GFitsTableCol* column)
+{
+    // Throw exception if column pointer is empty
+    if (column == NULL)
+        throw GException::fits_no_data(G_APPEND_COLUMN,
+                                       "Column pointer was NULL");
+
+    // Inserting at the end correspond to appending
+    insert_column(m_cols, column);
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Insert column into the table
+ *
+ * @param[in] colnum Column number to be inserted
+ * @param[in] column Pointer to column which should be inserted
+ *
+ * @exception GException::fits_no_data
+ *            A NULL column pointer was passed to the method.
+ *            This method requires a valid column pointer.
+ * @exception GException::fits_bad_col_length
+ *            The length of the column is incompatible with the number of
+ *            rows in the table.
+ *
+ * A column will be inserted at position 'colnum' of the table. If the
+ * position is beyond the end of the table the column will be appended.
+ * Any 'colnum' value smaller than 0 will be set automatically to 0.
+ *
+ * If the table is empty and has 0 rows, the number of rows will be set to
+ * the length of the column.
+ *
+ * The length of the column to be inserted has to be identical to the number
+ * of rows in the table.
+ ***************************************************************************/
+void GFitsTable::insert_column(int colnum, GFitsTableCol* column)
+{
+    // Throw exception if column pointer is empty
+    if (column == NULL)
+        throw GException::fits_no_data(G_INSERT_COLUMN,
+                                       "Column pointer was NULL");
+
+    // Make sure that 'colnum' is valid. Since we add one column the total
+    // number of columns at return will be m_cols+1, hence the column
+    // index is comprised between [0,m_cols]
+    if (colnum <      0) colnum = 0;
+    if (colnum > m_cols) colnum = m_cols;
+
+    // If the table is empty and has 0 rows then set the number of rows in
+    // the table to the length of the column
+    if (m_columns == NULL && m_rows == 0)
+        m_rows = column->length();
+
+    // Throw exception if the column length is incompatible with number of
+    // rows in the table
+    if (m_rows != column->length())
+        throw GException::fits_bad_col_length(G_INSERT_COLUMN,
+                                              column->length(), m_rows);
+
+    // If there are no rows in the table then set the number of rows to
+    // the length of the column
+    if (m_rows == 0 && column->length() > 0)
+        m_rows = column->length();
+
+    // If no column data exist then allocate them now
+    if (m_columns == NULL) {
+        m_columns    = new GFitsTableCol*[1];
+        m_cols       = 1;
+        m_columns[0] = NULL;
+        colnum       = 0;     // We insert at the first place
+    }
+
+    // ... otherwise make space to insert column
+    else {
+
+        // Allocate fresh memory
+        GFitsTableCol** tmp = new GFitsTableCol*[m_cols+1];
+
+        // Copy over old column pointers. Leave some space at the position
+        // where we want to insert the column
+        int src;
+        int dst;
+        for (src = 0, dst = 0; dst < m_cols+1; ++dst) {
+            if (dst == colnum)
+                tmp[dst] = NULL;
+            else {
+                tmp[dst] = m_columns[src];
+                src++;
+            }
+        }
+
+        // Free old column pointer array
+        delete [] m_columns;
+
+        // Connect new memory
+        m_columns = tmp;
+
+    } // endelse: we made space to insert a column
+
+    // Insert column pointer
+    m_columns[colnum] = column;
 
     // Return
     return;
@@ -417,7 +541,7 @@ GFitsTableCol* GFitsTable::column(const int& colnum)
 /***********************************************************************//**
  * @brief Return number of rows in table
  ***************************************************************************/
-int GFitsTable::rows(void) const
+int GFitsTable::nrows(void) const
 {
     // Return number of rows
     return m_rows;
@@ -427,7 +551,7 @@ int GFitsTable::rows(void) const
 /***********************************************************************//**
  * @brief Return number of columns in table
  ***************************************************************************/
-int GFitsTable::cols(void) const
+int GFitsTable::ncols(void) const
 {
     // Return number of columns
     return m_cols;
