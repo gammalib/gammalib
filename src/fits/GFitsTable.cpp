@@ -266,12 +266,23 @@ void GFitsTable::open(__fitsfile* fptr)
 
 
 /***********************************************************************//**
- * @brief Save FITS table
+ * @brief Save table into FITS file
  *
  * @exception GException::fits_error
  *            A CFITSIO error occured in this method.
  * @exception GException::fits_bad_col_length
  *            Table columns have inconsistent lengths.
+ *
+ * This method saves a table into a FITS file.
+ *
+ * In case that no table HDU exists it will be created by appending a new
+ * HDU to the existing file. The definition of this HDU will be based on the
+ * table definition in the class instance.
+ *
+ * The method also verifies the consistency of all table columns. Table
+ * columns need to have identical lengths to be saved into a FITS table.
+ * All columns with a length of zero will be excluded from saving, and if
+ * they exist in the FITS file, they will be removed from the file.
  ***************************************************************************/
 void GFitsTable::save(void)
 {
@@ -331,6 +342,16 @@ void GFitsTable::save(void)
             if (ttype != NULL) delete [] tunit;
         }
 
+        // Connect all existing columns to FITS table
+        if (m_columns != NULL) {
+            for (int i = 0; i < m_cols; ++i) {
+                if (m_columns[i] != NULL) {
+                    m_columns[i]->m_fitsfile = m_fitsfile;
+                    m_columns[i]->m_colnum   = i+1;
+                }
+            }
+        }
+
     }
     else if (status != 0)
         throw GException::fits_error(G_SAVE, status);
@@ -341,14 +362,15 @@ void GFitsTable::save(void)
     if (status != 0)
         throw GException::fits_error(G_SAVE, status);
 
-    // If we have no columns in the table then delete all columns from FITS table
+    // If we have no columns in the table then delete all columns from
+    // FITS table
     if (m_columns == NULL) {
         // TBD: Delete all columns from FITS table
     }
-    
-    // ... else update the FITS table
+
+    // ... otherwise update the FITS table
     else {
-    
+
         // Make sure that all columns have the same length. Columns with zero
         // length will not be considered
         int length = 0;
@@ -357,7 +379,7 @@ void GFitsTable::save(void)
                 if (length == 0)
                     length = m_columns[i]->length();
                 else if (m_columns[i]->length() != length) {
-                    throw GException::fits_bad_col_length(G_SAVE, 
+                    throw GException::fits_bad_col_length(G_SAVE,
                                                           m_columns[i]->length(),
                                                           length);
                 }
@@ -369,53 +391,66 @@ void GFitsTable::save(void)
         // TBD
 
         // Update all columns. The 'm_colnum' field specifies where in the
-        // FITS file the column resides. If 'm_colnum=0' then we append
-        // another column
+        // FITS file the column resides. If 'm_colnum=0' then we have a new
+        // column that does not yet exist. In this case we append a new column
+        // to the FITS file.
         for (int i = 0; i < m_cols; ++i) {
+
+            // Only consider valid columns
             if (m_columns[i] != NULL) {
+
+                // If column has no correspondance than add new column in
+                // FITS table and link column to table.
                 if (m_columns[i]->m_colnum == 0) {
-                
+
 cout << "needs appending of column to FITS file " << num_cols << endl;
+                    // Increment number of columns in FITS file
+                    num_cols++;
+
                     // Append column to FITS file
-                    status = __fficol(&m_fitsfile, num_cols, get_ttype(i), 
+                    status = __fficol(&m_fitsfile, num_cols, get_ttype(i),
                                       get_tform(i), &status);
                     if (status != 0)
                         throw GException::fits_error(G_SAVE, status);
-                    
-                    // Update the 'm_colnum' field in table
-                    m_columns[i]->m_colnum = num_cols;
-                    
-                    // Increment number of columns in FITS file
-                    num_cols++;
-                }
-                else {
-                    cout << "write column into " << m_columns[i]->m_colnum << endl;
+
+                    // Link column to FITS table
+                    m_columns[i]->m_fitsfile = m_fitsfile;
+                    m_columns[i]->m_colnum   = num_cols;
+
+                } // endif: column appended to FITS file
+
+                // Now write column into FITS file (only if length is positive)
+                if (m_columns[i]->length() > 0) {
+cout << "write column into " << m_columns[i]->m_colnum << endl;
                     //m_columns[i]->save();
                 }
-            }
-        }
-        
+
+            } // endif: column was valid
+        } // endfor: looped over all table columns
+
         // Delete all unused columns of FITS file (from last to first!!!)
         for (int colnum = num_cols; colnum > 0; --colnum) {
 
             // Initialise column usage flag
             int used = 0;
 
-            // Search column number in table
+            // Set column usage flag by searching column number in table
             for (int i = 0; i < m_cols; ++i) {
-                if (m_columns[i] != NULL && m_columns[i]->m_colnum == colnum) {
+                if (m_columns[i]           != NULL &&
+                    m_columns[i]->m_colnum == colnum &&
+                    m_columns[i]->length() > 0) {
                     used = 1;
                     break;
                 }
             }
-            
-            // Delete unused column
+
+            // If column is not used then delete it now from FITS table
             if (!used) {
                 // delete FITS column 'colnum'
             }
-            
+
         } // endfor: Looped over all FITS columns
-        
+
     } // endelse: FITS table has been updated
 
 //cout << "GFitsTable::save exit" << endl;
