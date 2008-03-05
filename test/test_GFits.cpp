@@ -382,7 +382,9 @@ void test_create(void)
         GFitsBinTable    table  = GFitsBinTable(nrows);
         GFitsTableDblCol first  = GFitsTableDblCol("First", nrows);
         GFitsTableDblCol second = GFitsTableDblCol("Second", nrows);
-        first(9)  =  99.0;
+        first(0)  =  1.0;
+        first(1)  =  2.0;
+        first(2)  =  3.0;
         second(0) = -99.0;
         cout << endl << first << endl;
         cout << second << endl;
@@ -495,6 +497,189 @@ void test_image_double(void)
 
 
 /***************************************************************************
+ *                       Test: FITS binary table test                      *
+ ***************************************************************************/
+void test_bin_table(void)
+{
+    // Dump header
+    cout << "Test GFitsBinTable: ";
+
+    // Remove FITS file
+    system("rm -rf test_bintables.fits");
+
+    // Allocate reference sums
+    double      sum_dbl     = 0.0;
+    int         sum_dbl_int = 0;
+    std::string sum_dbl_str;
+    float       sum_flt     = 0.0;
+    int         sum_flt_int = 0;
+    std::string sum_flt_str;
+    
+    // Build tables
+    try {
+        // Open FITS file
+        GFits fits;
+        fits.open("test_bintables.fits");
+
+        // Set number of rows
+        int nrows = 10;
+
+        // Initial control sums
+        float       tot_flt = 0.0;
+        double      tot_dbl = 0.0;
+        int         tot_int = 0;
+        std::string tot_str;
+
+        //
+        // ===== D O U B L E =====
+        //
+        
+        // Set double precision table
+        GFitsTableDblCol col_dbl = GFitsTableDblCol("DOUBLE", nrows);
+        for (int i = 0; i < nrows; ++i) {
+            double val_dbl = cos(double(i));
+            col_dbl(i)   = val_dbl;
+            sum_dbl     += val_dbl;
+            sum_dbl_int += int(val_dbl);
+            ostringstream s_value;
+            s_value << scientific << val_dbl;
+            sum_dbl_str += ":"+s_value.str();
+        }
+        cout << ".";
+        
+        // Check double precision table (operator access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_dbl += col_dbl(i);
+        if (!dequal(tot_dbl, sum_dbl)) {
+            cout << endl << "TEST ERROR: GFitsTableDblCol::operator()" 
+                 << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check double precision table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_dbl += col_dbl.real(i);
+        if (!dequal(tot_dbl, sum_dbl)) {
+            cout << endl << "TEST ERROR: GFitsTableDblCol::real()" 
+                 << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check double precision table (int access)
+        tot_int = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_int += col_dbl.integer(i);
+        if (tot_int != sum_dbl_int) {
+            cout << endl << "TEST ERROR: GFitsTableDblCol::integer()" 
+                 << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check double precision table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i)
+            tot_str += ":"+col_dbl.string(i);
+        if (tot_str != sum_dbl_str) {
+            cout << endl << "TEST ERROR: GFitsTableDblCol::string()" 
+                 << endl;
+            throw;
+        }
+        cout << ".";
+
+        //
+        // ===== F L O A T =====
+        //
+
+        // Set single precision table
+        GFitsTableFltCol col_flt = GFitsTableFltCol("FLOAT", nrows);
+        for (int i = 0; i < nrows; ++i) {
+            float val_flt = cos(0.1*float(i));
+            col_flt(i)   = val_flt;
+            sum_flt     += val_flt;
+            sum_flt_int += int(val_flt);
+            ostringstream s_value;
+            s_value << scientific << val_flt;
+            sum_flt_str += ":"+s_value.str();
+        }
+        cout << ".";
+
+        // Check single precision table (operator access)
+        tot_flt = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_flt += col_flt(i);
+        if (!fequal(tot_flt, sum_flt)) {
+            cout << endl << "TEST ERROR: GFitsTableFltCol::operator()" 
+                 << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check single precision table (real access)
+        tot_flt = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_flt += col_flt.real(i);
+        if (!fequal(tot_flt, sum_flt)) {
+            cout << endl << "TEST ERROR: GFitsTableFltCol::real()" 
+                 << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check single precision table (int access)
+        tot_int = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_int += col_flt.integer(i);
+        if (tot_int != sum_flt_int) {
+            cout << endl << "TEST ERROR: GFitsTableFltCol::integer()" 
+                 << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check single precision table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i)
+            tot_str += ":"+col_flt.string(i);
+        if (tot_str != sum_flt_str) {
+            cout << endl << "TEST ERROR: GFitsTableFltCol::string()" 
+                 << endl;
+            throw;
+        }
+        cout << ".";
+
+        //
+        // ===== W R I T E   T A B L E =====
+        //
+        
+        // Build binary table
+        GFitsBinTable table = GFitsBinTable(nrows);
+        table.append_column(col_dbl);
+        table.append_column(col_flt);
+        
+        // Create HDU and append to FILE file
+        GFitsHDU hdu(table);
+        fits.append_hdu(hdu);
+
+        // Save FITS file
+        fits.save();
+        cout << ".";
+    }
+    catch (exception &e) {
+        cout << endl << "TEST ERROR: Unable to build tables." << endl;
+        cout << e.what() << endl;
+        throw;
+    }
+    cout << ". ok." << endl;
+        
+        
+}
+
+/***************************************************************************
  *                            Main test function                           *
  ***************************************************************************/
 int main(void)
@@ -506,8 +691,9 @@ int main(void)
     std::cout << "***********************" << std::endl;
 
     // Execute the tests
-    test_image_double();
     test_create();
+    test_image_double();
+    test_bin_table();
     //test_open();
     //test_columns();
 

@@ -38,6 +38,9 @@
  ***************************************************************************/
 class GFitsTableFltCol : public GFitsTableCol {
 
+    // I/O friends
+    friend ostream& operator<< (ostream& os, const GFitsTableFltCol& column);
+
 public:
     // Constructors and destructors
     GFitsTableFltCol();
@@ -48,6 +51,8 @@ public:
 
     // Operators
     GFitsTableFltCol& operator= (const GFitsTableFltCol& column);
+    float&            operator() (const int& row, const int& inx = 0);
+    const float&      operator() (const int& row, const int& inx = 0) const;
 
     // Methods
     void              save(void);
@@ -63,20 +68,15 @@ private:
     void        init_members(void);
     void        copy_members(const GFitsTableFltCol& column);
     void        free_members(void);
-    void        load(void);
+    void        fetch_data(void);
     std::string ascii_format(void) const;
     std::string binary_format(void) const;
 
     // Private data area
-    int    m_size;          //!< Size of data area
-    float* m_data;          //!< Data area
-    float* m_nulval;        //!< NULL value
-    int    m_anynul;        //!< Number of NULLs encountered
+    int    m_size;       //!< Size of allocated data area (0 if not loaded)
+    float* m_data;       //!< Data area
+    float* m_nulval;     //!< NULL value
+    int    m_anynul;     //!< Number of NULLs encountered
 };
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
 
 #endif /* GFITSTABLEFLTCOL_HPP */

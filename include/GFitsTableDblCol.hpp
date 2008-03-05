@@ -73,10 +73,10 @@ private:
     std::string binary_format(void) const;
 
     // Private data area
-    int     m_size;          //!< Size of allocated data area (0 if offline)
-    double* m_data;          //!< Data area
-    double* m_nulval;        //!< NULL value
-    int     m_anynul;        //!< Number of NULLs encountered
+    int     m_size;      //!< Size of allocated data area (0 if not loaded)
+    double* m_data;      //!< Data area
+    double* m_nulval;    //!< NULL value
+    int     m_anynul;    //!< Number of NULLs encountered
 };
 
 #endif /* GFITSTABLEDBLCOL_HPP */

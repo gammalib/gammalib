@@ -25,12 +25,7 @@
 #define G_STRING     "GFitsTableFltCol::string(const int&, const int&)"
 #define G_REAL       "GFitsTableFltCol::real(const int&, const int&)"
 #define G_INTEGER    "GFitsTableFltCol::integer(const int&, const int&)"
-#define G_PTR_FLOAT  "GFitsTableFltCol::ptr_float()"
-#define G_PTR_DOUBLE "GFitsTableFltCol::ptr_double()"
-#define G_PTR_SHORT  "GFitsTableFltCol::ptr_short()"
-#define G_PTR_LONG   "GFitsTableFltCol::ptr_long()"
-#define G_PTR_INT    "GFitsTableFltCol::ptr_int()"
-#define G_LOAD       "GFitsTableFltCol::load()"
+#define G_FETCH_DATA "GFitsTableFltCol::fetch_data()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -83,8 +78,8 @@ GFitsTableFltCol::GFitsTableFltCol(const std::string& name,
  *
  * @param[in] column Column from which class instance should be built.
  ***************************************************************************/
-GFitsTableFltCol::GFitsTableFltCol(const GFitsTableFltCol& column) :
-                                                        GFitsTableCol(column)
+GFitsTableFltCol::GFitsTableFltCol(const GFitsTableFltCol& column)
+                                   : GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -145,6 +140,59 @@ GFitsTableFltCol& GFitsTableFltCol::operator= (const GFitsTableFltCol& column)
 }
 
 
+/***********************************************************************//**
+ * @brief Column data access operator
+ *
+ * @param[in] row Row of column to access.
+ * @param[in] inx Vector index in column row to access
+ *
+ * Provides access to data in a column. No range checking is performed.
+ * Use one of
+ *   GFitsTableFltCol::string(ix,iy),
+ *   GFitsTableFltCol::real(ix;iy) or
+ *   GFitsTableFltCol::integer(ix;iy)
+ * if range checking is required.
+ ***************************************************************************/
+float& GFitsTableFltCol::operator() (const int& row, const int& inx)
+{
+    // If data are not available then load them now
+    if (m_data == NULL) fetch_data();
+
+    // Calculate pixel offset
+    int offset = row * m_number + inx;
+
+    // Return image pixel
+    return m_data[offset];
+}
+
+
+/***********************************************************************//**
+ * @brief Column data access operator (const variant)
+ *
+ * @param[in] row Row of column to access.
+ * @param[in] inx Vector index in column row to access
+ *
+ * Provides access to data in a column. No range checking is performed.
+ * Use one of
+ *   GFitsTableFltCol::string(ix,iy),
+ *   GFitsTableFltCol::real(ix;iy) or
+ *   GFitsTableFltCol::integer(ix;iy)
+ * if range checking is required.
+ ***************************************************************************/
+const float& GFitsTableFltCol::operator() (const int& row, const int& inx)
+                                           const
+{
+    // If data are not available then load them now
+    if (m_data == NULL) ((GFitsTableFltCol*)this)->fetch_data();
+
+    // Calculate pixel offset
+    int offset = row * m_number + inx;
+
+    // Return image pixel
+    return m_data[offset];
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                      GFitsTableFltCol public methods                    =
@@ -156,11 +204,17 @@ GFitsTableFltCol& GFitsTableFltCol::operator= (const GFitsTableFltCol& column)
  *
  * @exception GException::fits_hdu_not_found
  *            Specified HDU not found in FITS file.
+ * @exception GException::fits_error
+ *            Error occured during writing of the column data.
+ *
+ * The table column is only saved if it is linked to a FITS file and if the
+ * data are indeed present in the class instance. This avoids saving of data
+ * that have not been modified.
  ***************************************************************************/
 void GFitsTableFltCol::save(void)
 {
-    // Continue only if a FITS file is connected
-    if (m_fitsfile.Fptr != NULL) {
+    // Continue only if a FITS file is connected and data have been loaded
+    if (m_fitsfile.Fptr != NULL && m_colnum > 0 && m_data != NULL) {
 
         // Move to the HDU
         int status = 0;
@@ -170,9 +224,11 @@ void GFitsTableFltCol::save(void)
             throw GException::fits_hdu_not_found(G_SAVE, 
                                                  (m_fitsfile.HDUposition)+1,
                                                  status);
-
         // Save the column data
-        // TBD
+        status = __ffpcn(&m_fitsfile, __TFLOAT, m_colnum, 1, 1, 
+                         (long)m_size, m_data, m_nulval, &status);
+        if (status != 0)
+            throw GException::fits_error(G_SAVE, status);
 
     } // endif: FITS file was connected
 
@@ -185,30 +241,32 @@ void GFitsTableFltCol::save(void)
  * @brief Get string value
  *
  * @param[in] row Table row.
- * @param[in] col Table column vector index.
+ * @param[in] inx Table column vector index.
+ *
+ * @exception GException::out_of_range
+ *            Table row or vector index are out of valid range.
  *
  * Returns value of specified row and vector index as string.
  ***************************************************************************/
-std::string GFitsTableFltCol::string(const int& row, const int& col)
+std::string GFitsTableFltCol::string(const int& row, const int& inx)
 {
-    // Make sure that data are loaded
-    if (m_data == NULL)
-        load();
+    // If data are not available then load them now
+    if (m_data == NULL) fetch_data();
 
     // Check row value
     if (row < 0 || row >= m_length)
         throw GException::out_of_range(G_STRING, row, 0, m_length-1);
 
-    // Check col value
-    if (col < 0 || col >= m_number)
-        throw GException::out_of_range(G_STRING, col, 0, m_number-1);
+    // Check inx value
+    if (inx < 0 || inx >= m_number)
+        throw GException::out_of_range(G_STRING, inx, 0, m_number-1);
 
     // Get index
-    int inx = row * m_repeat + col;
+    int offset = row * m_number + inx;
 
     // Convert double into string
     ostringstream s_value;
-    s_value << scientific << m_data[inx];
+    s_value << scientific << m_data[offset];
 
     // Return value
     return s_value.str();
@@ -219,29 +277,31 @@ std::string GFitsTableFltCol::string(const int& row, const int& col)
  * @brief Get double precision value
  *
  * @param[in] row Table row.
- * @param[in] col Table column vector index.
+ * @param[in] inx Table column vector index.
+ *
+ * @exception GException::out_of_range
+ *            Table row or vector index are out of valid range.
  *
  * Returns value of specified row and vector index as double precision.
  ***************************************************************************/
-double GFitsTableFltCol::real(const int& row, const int& col)
+double GFitsTableFltCol::real(const int& row, const int& inx)
 {
-    // Make sure that data are loaded
-    if (m_data == NULL)
-        load();
+    // If data are not available then load them now
+    if (m_data == NULL) fetch_data();
 
     // Check row value
     if (row < 0 || row >= m_length)
         throw GException::out_of_range(G_REAL, row, 0, m_length-1);
 
-    // Check col value
-    if (col < 0 || col >= m_number)
-        throw GException::out_of_range(G_REAL, col, 0, m_number-1);
+    // Check inx value
+    if (inx < 0 || inx >= m_number)
+        throw GException::out_of_range(G_REAL, inx, 0, m_number-1);
 
     // Get index
-    int inx = row * m_repeat + col;
+    int offset = row * m_number + inx;
 
     // Convert float into double
-    double value = (double)m_data[inx];
+    double value = (double)m_data[offset];
 
     // Return value
     return value;
@@ -252,29 +312,31 @@ double GFitsTableFltCol::real(const int& row, const int& col)
  * @brief Get integer value
  *
  * @param[in] row Table row.
- * @param[in] col Table column vector index.
+ * @param[in] inx Table column vector index.
+ *
+ * @exception GException::out_of_range
+ *            Table row or vector index are out of valid range.
  *
  * Returns value of specified row and vector index as integer.
  ***************************************************************************/
-int GFitsTableFltCol::integer(const int& row, const int& col)
+int GFitsTableFltCol::integer(const int& row, const int& inx)
 {
-    // Make sure that data are loaded
-    if (m_data == NULL)
-        load();
+    // If data are not available then load them now
+    if (m_data == NULL) fetch_data();
 
     // Check row value
     if (row < 0 || row >= m_length)
         throw GException::out_of_range(G_INTEGER, row, 0, m_length-1);
 
-    // Check col value
-    if (col < 0 || col >= m_number)
-        throw GException::out_of_range(G_INTEGER, col, 0, m_number-1);
+    // Check inx value
+    if (inx < 0 || inx >= m_number)
+        throw GException::out_of_range(G_INTEGER, inx, 0, m_number-1);
 
     // Get index
-    int inx = row * m_repeat + col;
+    int offset = row * m_number + inx;
 
     // Convert float into int
-    int value = (int)m_data[inx];
+    int value = (int)m_data[offset];
 
     // Return value
     return value;
@@ -407,28 +469,52 @@ void GFitsTableFltCol::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Load column data
+ * @brief Fetch column data
+ *
+ * @exception GException::fits_error
+ *            An error occured while loading column data from FITS file.
+ *
+ * If a FITS file is attached to the column the data are loaded into memory
+ * from the FITS file. If no FITS file is attached, memory is allocated
+ * to hold the column data and all cells are set to 0.
  ***************************************************************************/
-void GFitsTableFltCol::load(void)
+void GFitsTableFltCol::fetch_data(void)
 {
     // Calculate size of memory
     m_size = m_number * m_length;
 
-    // Allocate memory
-    if (m_data != NULL) delete [] m_data;
-    m_data = new float[m_size];
+    // Load only if the column has a positive size
+    if (m_size > 0) {
 
-    // Load column data
-    int status = 0;
-    status = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
-    status = __ffgcv(&m_fitsfile, __TFLOAT, m_colnum, 1, 1, m_size,
-                     m_nulval, m_data, &m_anynul, &status);
-    if (status != 0)
-        throw GException::fits_error(G_LOAD, status);
+        // Allocate fresh memory
+        if (m_data != NULL) delete [] m_data;
+        m_data = new float[m_size];
+
+        // If a FITS file is attached then load column data from the FITS
+        // file
+        if (m_fitsfile.Fptr != NULL) {
+            int status = 0;
+            status = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL,
+                              &status);
+            status = __ffgcv(&m_fitsfile, __TFLOAT, m_colnum, 1, 1, m_size,
+                             m_nulval, m_data, &m_anynul, &status);
+            if (status != 0)
+                throw GException::fits_error(G_FETCH_DATA, status);
+        }
+
+        // ... otherwise initialise all column values to 0
+        else {
+            for (int i = 0; i < m_size; ++i)
+                m_data[i] = 0.0;
+        }
+
+    } // endif: column has a positive size
 
     // Return
     return;
 }
+
+
 
 
 /***********************************************************************//**
@@ -474,6 +560,52 @@ std::string GFitsTableFltCol::binary_format(void) const
  =                          GFitsTableFltCol friends                       =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream
+ * @param[in] column Column to put in output stream
+ ***************************************************************************/
+ostream& operator<< (ostream& os, const GFitsTableFltCol& column)
+{
+    // Put column name in stream
+    os << "'" << column.m_name << "'";
+
+    // Put FITS column number in stream
+    if (column.m_colnum > 0)
+        os << " [fits_colnum=" << column.m_colnum << "]";
+    else
+        os << " [not linked to FITS file]";
+
+    // Put column type in stream
+    os << " " << column.ascii_format();
+    os << " " << column.binary_format();
+
+    // Put data loading in stream
+    if (column.m_data == NULL)
+        os << " (not loaded)";
+    else
+        os << " (loaded in memory)";
+
+    // Set data area size
+    os << " size=" << column.m_size;
+
+    // Set vector length
+    os << " repeat=" << column.m_repeat;
+
+    // Set width
+    os <<  " width=" << column.m_width;
+
+    // Set number
+    os <<  " number=" << column.m_number;
+
+    // Set length
+    os << " length=" << column.m_length;
+
+    // Return output stream
+    return os;
+}
 
 
 /*==========================================================================

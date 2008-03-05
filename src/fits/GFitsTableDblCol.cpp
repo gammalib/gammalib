@@ -78,8 +78,8 @@ GFitsTableDblCol::GFitsTableDblCol(const std::string& name,
  *
  * @param[in] column Column from which class instance should be built.
  ***************************************************************************/
-GFitsTableDblCol::GFitsTableDblCol(const GFitsTableDblCol& column) :
-                                                        GFitsTableCol(column)
+GFitsTableDblCol::GFitsTableDblCol(const GFitsTableDblCol& column) 
+                                   : GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -159,7 +159,7 @@ double& GFitsTableDblCol::operator() (const int& row, const int& inx)
     if (m_data == NULL) fetch_data();
 
     // Calculate pixel offset
-    int offset = row * m_repeat + inx;
+    int offset = row * m_number + inx;
 
     // Return image pixel
     return m_data[offset];
@@ -180,13 +180,13 @@ double& GFitsTableDblCol::operator() (const int& row, const int& inx)
  * if range checking is required.
  ***************************************************************************/
 const double& GFitsTableDblCol::operator() (const int& row, const int& inx)
-                                                                        const
+                                           const
 {
     // If data are not available then load them now
     if (m_data == NULL) ((GFitsTableDblCol*)this)->fetch_data();
 
     // Calculate pixel offset
-    int offset = row * m_repeat + inx;
+    int offset = row * m_number + inx;
 
     // Return image pixel
     return m_data[offset];
@@ -262,7 +262,7 @@ std::string GFitsTableDblCol::string(const int& row, const int& inx)
         throw GException::out_of_range(G_STRING, inx, 0, m_number-1);
 
     // Get index
-    int offset = row * m_repeat + inx;
+    int offset = row * m_number + inx;
 
     // Convert double into string
     ostringstream s_value;
@@ -298,7 +298,7 @@ double GFitsTableDblCol::real(const int& row, const int& inx)
         throw GException::out_of_range(G_REAL, inx, 0, m_number-1);
 
     // Get index
-    int offset = row * m_repeat + inx;
+    int offset = row * m_number + inx;
 
     // Return value
     return m_data[offset];
@@ -330,7 +330,7 @@ int GFitsTableDblCol::integer(const int& row, const int& inx)
         throw GException::out_of_range(G_INTEGER, inx, 0, m_number-1);
 
     // Get index
-    int offset = row * m_repeat + inx;
+    int offset = row * m_number + inx;
 
     // Convert double into int
     int value = (int)m_data[offset];
