@@ -356,7 +356,7 @@ GException::fits_hdu_not_found::fits_hdu_not_found(string origin,
  * @brief FITS error: HDU not found in FITS file
  *
  * @param[in] origin Method that throws the error.
- * @param[in] extno Extension number (starting from 1).
+ * @param[in] extno Number of the extension that was not found.
  * @param[in] status cfitsio status.
  ***************************************************************************/
 GException::fits_hdu_not_found::fits_hdu_not_found(string origin,

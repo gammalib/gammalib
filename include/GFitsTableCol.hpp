@@ -71,7 +71,11 @@ protected:
     std::string m_name;        //!< Column name
     std::string m_format;      //!< Column format
     std::string m_unit;        //!< Column unit
-    int         m_colnum;      //!< Column number in FITS file (starting from 1)
+    int         m_colnum;      //!< Column number (starting from 1).
+                               //!< This parameter is used to signal if a
+                               //!< table column corresponds to a FITS file
+                               //!< column. If it is set to 0 there is no
+                               //!< correspondance.
     int         m_type;        //!< Column type
     int         m_repeat;      //!< Repeat value of column
     int         m_width;       //!< Width of column
