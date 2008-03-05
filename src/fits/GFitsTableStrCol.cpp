@@ -13,13 +13,15 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GFitsTableStrCol.hpp"
-#include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
+#define G_SAVE       "GFitsTableStrCol::save()"
 #define G_STRING     "GFitsTableStrCol::string(const int&, const int&)"
 #define G_REAL       "GFitsTableStrCol::real(const int&, const int&)"
 #define G_INTEGER    "GFitsTableStrCol::integer(const int&, const int&)"
@@ -129,6 +131,35 @@ GFitsTableStrCol& GFitsTableStrCol::operator= (const GFitsTableStrCol& column)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Save table column into FITS file
+ *
+ * @exception GException::fits_hdu_not_found
+ *            Specified HDU not found in FITS file.
+ ***************************************************************************/
+void GFitsTableStrCol::save(void)
+{
+    // Continue only if a FITS file is connected
+    if (m_fitsfile.Fptr != NULL) {
+
+        // Move to the HDU
+        int status = 0;
+        status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL,
+                              &status);
+        if (status != 0)
+            throw GException::fits_hdu_not_found(G_SAVE, 
+                                                 (m_fitsfile.HDUposition)+1,
+                                                 status);
+
+        // Save the column data
+        // TBD
+
+    } // endif: FITS file was connected
+
+    // Return
+    return;
+}
+
 /***************************************************************************
  *                             Get string value                            *
  * ----------------------------------------------------------------------- *
@@ -144,11 +175,11 @@ std::string GFitsTableStrCol::string(const int& row, const int& col)
         throw GException::out_of_range(G_STRING, row, 0, m_length-1);
 
     // Check col value
-    if (col < 0 || col >= m_num_subs)
-        throw GException::out_of_range(G_STRING, col, 0, m_num_subs-1);
+    if (col < 0 || col >= m_number)
+        throw GException::out_of_range(G_STRING, col, 0, m_number-1);
 
     // Get string index
-    int inx = row * m_num_subs + col;
+    int inx = row * m_repeat + col;
 
     // Assign C string to C++ std::string
     std::string value;
@@ -174,11 +205,11 @@ double GFitsTableStrCol::real(const int& row, const int& col)
         throw GException::out_of_range(G_STRING, row, 0, m_length-1);
 
     // Check col value
-    if (col < 0 || col >= m_num_subs)
-        throw GException::out_of_range(G_STRING, col, 0, m_num_subs-1);
+    if (col < 0 || col >= m_number)
+        throw GException::out_of_range(G_STRING, col, 0, m_number-1);
 
     // Get string index
-    int inx = row * m_num_subs + col;
+    int inx = row * m_repeat + col;
 
     // Assign C string to double
     double value = atof(m_data[inx]);
@@ -203,11 +234,11 @@ int GFitsTableStrCol::integer(const int& row, const int& col)
         throw GException::out_of_range(G_STRING, row, 0, m_length-1);
 
     // Check col value
-    if (col < 0 || col >= m_num_subs)
-        throw GException::out_of_range(G_STRING, col, 0, m_num_subs-1);
+    if (col < 0 || col >= m_number)
+        throw GException::out_of_range(G_STRING, col, 0, m_number-1);
 
     // Get string index
-    int inx = row * m_num_subs + col;
+    int inx = row * m_repeat + col;
 
     // Assign C string to int
     int value = atoi(m_data[inx]);
@@ -289,7 +320,6 @@ void GFitsTableStrCol::init_members(void)
     // Initialise members
     m_type   = __TSTRING;
     m_size     = 0;
-    m_num_subs = 0;
     m_data     = NULL;
     m_nulstr   = NULL;
     m_anynul   = 0;
@@ -309,7 +339,6 @@ void GFitsTableStrCol::copy_members(const GFitsTableStrCol& column)
 {
     // Copy string size
     m_size     = column.m_size;
-    m_num_subs = column.m_num_subs;
     m_anynul   = column.m_anynul;
 
     // Copy column data
@@ -368,14 +397,8 @@ void GFitsTableStrCol::free_members(void)
  ***************************************************************************/
 void GFitsTableStrCol::load(void)
 {
-    // Calculate number of substrings
-    if (m_repeat == 1)             // ASCII tables
-        m_num_subs = 1;
-    else                           // Binary tables
-        m_num_subs = m_repeat / m_width;
-
     // Calculate total number of strings
-    m_size = m_num_subs * m_length;
+    m_size = m_number * m_length;
 
     // Free memory
     free_members();
@@ -393,8 +416,9 @@ void GFitsTableStrCol::load(void)
 
         // Load column data
         int status = 0;
-        status = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
-        status = __ffgcvs(&m_fitsfile, m_colnum, 1, 1, m_size, m_nulstr, m_data, 
+        status = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL,
+                          &status);
+        status = __ffgcvs(&m_fitsfile, m_colnum, 1, 1, m_size, m_nulstr, m_data,
                           &m_anynul, &status);
         if (status != 0)
             throw GException::fits_error(G_LOAD, status);
@@ -403,6 +427,48 @@ void GFitsTableStrCol::load(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns format string of ASCII table
+ ***************************************************************************/
+std::string GFitsTableStrCol::ascii_format(void) const
+{
+    // Initialize format string
+    std::string format;
+
+    // Set type code
+    format.append("A");
+
+    // Set width
+    format.append(str(m_width));
+
+    // Return format
+    return format;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns format string of binary table
+ ***************************************************************************/
+std::string GFitsTableStrCol::binary_format(void) const
+{
+    // Initialize format string
+    std::string format;
+
+    // Set number of elements
+    format.append(str(m_repeat));
+
+    // Set type code
+    format.append("A");
+
+    // If there are substrings then add width of substring
+    if (m_repeat > m_width)
+        format.append(str(m_width));
+
+    // Return format
+    return format;
 }
 
 

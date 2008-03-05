@@ -413,6 +413,20 @@ GException::fits_invalid_type::fits_invalid_type(string origin,
 
 
 /***********************************************************************//**
+ * @brief FITS error: Table type is unknow
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] type Specified table type.
+ ***************************************************************************/
+GException::fits_unknown_tabtype::fits_unknown_tabtype(string origin,
+                                                       int    type)
+{
+    m_origin  = origin;
+    m_message = "Table type '" + str(type) + "' is unknown";
+}
+
+
+/***********************************************************************//**
  * @brief FITS error: Column type is unknown
  *
  * @param[in] origin Method that throws the error.

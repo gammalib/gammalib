@@ -41,6 +41,8 @@ class GFitsTableLngCol : public GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableLngCol();
+    GFitsTableLngCol(const std::string& name, const int& length,
+                     const int& size = 1);
     GFitsTableLngCol(const GFitsTableLngCol& column);
     virtual ~GFitsTableLngCol();
 
@@ -60,10 +62,12 @@ public:
 
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GFitsTableLngCol& column);
-    void free_members(void);
-    void fetch_data(void);
+    void        init_members(void);
+    void        copy_members(const GFitsTableLngCol& column);
+    void        free_members(void);
+    void        fetch_data(void);
+    std::string ascii_format(void) const;
+    std::string binary_format(void) const;
 
     // Private data area
     int   m_size;          //!< Size of data area

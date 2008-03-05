@@ -32,6 +32,7 @@
 #define G_INSERT_COLUMN "GFitsTable::insert_column(int, GFitsTableCol*)"
 #define G_COLUMN1       "GFitsTable::column(const std::string&)"
 #define G_COLUMN2       "GFitsTable::column(const int&)"
+#define G_GET_TFORM     "GFitsTable::get_tform(const int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -258,6 +259,13 @@ void GFitsTable::open(__fitsfile* fptr)
         m_columns[i]->m_length = m_rows;
         m_columns[i]->connect(fptr);
 
+        // Extract column vector size
+        if (m_columns[i]->m_repeat == 1)   // ASCII tables
+            m_columns[i]->m_number = 1;
+        else                               // Binary tables
+            m_columns[i]->m_number = m_columns[i]->m_repeat /
+                                     m_columns[i]->m_width;
+
     } // endfor: looped over all columns
 
     // Return
@@ -283,6 +291,8 @@ void GFitsTable::open(__fitsfile* fptr)
  * columns need to have identical lengths to be saved into a FITS table.
  * All columns with a length of zero will be excluded from saving, and if
  * they exist in the FITS file, they will be removed from the file.
+ *
+ * IMPLEMENTION NOT YET COMPLETED (ROW ADDING/DELETION MISSING)
  ***************************************************************************/
 void GFitsTable::save(void)
 {
@@ -387,7 +397,7 @@ void GFitsTable::save(void)
         }
 
         // If the table length differs from number of rows in the FITS file
-        // then ????
+        // then re-adjust FITS table length
         // TBD
 
         // Update all columns. The 'm_colnum' field specifies where in the
@@ -403,7 +413,6 @@ void GFitsTable::save(void)
                 // FITS table and link column to table.
                 if (m_columns[i]->m_colnum == 0) {
 
-cout << "needs appending of column to FITS file " << num_cols << endl;
                     // Increment number of columns in FITS file
                     num_cols++;
 
@@ -420,10 +429,8 @@ cout << "needs appending of column to FITS file " << num_cols << endl;
                 } // endif: column appended to FITS file
 
                 // Now write column into FITS file (only if length is positive)
-                if (m_columns[i]->length() > 0) {
-cout << "write column into " << m_columns[i]->m_colnum << endl;
-                    //m_columns[i]->save();
-                }
+                if (m_columns[i]->length() > 0)
+                    m_columns[i]->save();
 
             } // endif: column was valid
         } // endfor: looped over all table columns
@@ -503,8 +510,6 @@ void GFitsTable::append_column(GFitsTableCol& column)
  * @exception GException::fits_bad_col_length
  *            The length of the column is incompatible with the number of
  *            rows in the table.
- * @exception GException::fits_unknown_coltype
- *            FITS column is of unknown type.
  *
  * A column will be inserted at position 'colnum' of the table. If the
  * position is beyond the end of the table the column will be appended.
@@ -573,37 +578,9 @@ void GFitsTable::insert_column(int colnum, GFitsTableCol& column)
 
     } // endelse: we made space to insert a column
 
-    // Type dependent copy of column
-    switch (column.m_type) {
-    case __TSTRING:
-        m_columns[colnum]  = new GFitsTableStrCol;
-        *m_columns[colnum] = column;
-        break;
-    case __TSHORT:
-        m_columns[colnum]  = new GFitsTableShtCol;
-        *m_columns[colnum] = column;
-        break;
-    case __TLONG:
-        m_columns[colnum]  = new GFitsTableLngCol;
-        *m_columns[colnum] = column;
-        break;
-    case __TFLOAT:
-        m_columns[colnum]  = new GFitsTableFltCol;
-        *m_columns[colnum] = column;
-        break;
-    case __TDOUBLE:
-        m_columns[colnum]  = new GFitsTableDblCol;
-        *m_columns[colnum] = column;
-        break;
-    default:
-        throw GException::fits_unknown_coltype(G_INSERT_COLUMN, column.m_type);
-        break;
-    }
+    // Copy column by cloning it
+    m_columns[colnum] = column.clone();
 
-    // Set column number (this is important to known from which column in the
-    // FITS file the data should be read
-    //// NO NO NO !!! Only for columns that exist in the FITS file !!! 
-    //// m_columns[colnum]->m_colnum = colnum + 1;
     // Reset column number since column does not already exist in FITS
     // file
     m_columns[colnum]->m_colnum = 0;
@@ -836,6 +813,9 @@ char* GFitsTable::get_ttype(const int& colnum) const
  *
  * @param[in] colnum Column number for which format is to be returned
  *
+ * @exception GException::fits_unknown_tabtype
+ *            Table is neither ASCII nor Binary.
+ *
  * This methods allocates memory for the character string that holds the
  * column format. The client has to de-allocate this memory after usage.
  * In case that the column does not exist a NULL pointer is returned.
@@ -846,11 +826,26 @@ char* GFitsTable::get_tform(const int& colnum) const
     char* ptr = NULL;
 
     // Get type only if column exists
-    if (m_columns != NULL && colnum >=0 && colnum < m_cols && 
+    if (m_columns != NULL && colnum >=0 && colnum < m_cols &&
         m_columns[colnum] != NULL) {
-        int size = m_columns[colnum]->m_format.length();
-        ptr      = new char[size+1];
-        strncpy(ptr, m_columns[colnum]->m_format.c_str(), size);
+
+        // Get table type specific format
+        int size;
+        switch (m_type) {
+        case 1:
+            size = m_columns[colnum]->ascii_format().length();
+            ptr  = new char[size+1];
+            strncpy(ptr, m_columns[colnum]->ascii_format().c_str(), size);
+            break;
+        case 2:
+            size = m_columns[colnum]->binary_format().length();
+            ptr  = new char[size+1];
+            strncpy(ptr, m_columns[colnum]->binary_format().c_str(), size);
+            break;
+        default:
+            throw GException::fits_unknown_tabtype(G_GET_TFORM, m_type);
+            break;
+        }
         ptr[size] = '\0';
     }
 
@@ -919,8 +914,28 @@ ostream& operator<< (ostream& os, const GFitsTable& table)
     os << " Number of columns .........: " << table.m_cols << endl;
     if (table.m_columns != NULL) {
         for (int i = 0; i < table.m_cols; ++i) {
-            if (table.m_columns[i] != NULL)
-                os << " " << *(table.m_columns[i]);
+            if (table.m_columns[i] != NULL) {
+                switch (table.m_columns[i]->type()) {
+                case __TSTRING:
+                    os << " column " << i << " no << operator" << endl;
+                    break;
+                case __TSHORT:
+                    os << " column " << i << " no << operator" << endl;
+                    break;
+                case __TLONG:
+                    os << " column " << i << " no << operator" << endl;
+                    break;
+                case __TFLOAT:
+                    os << " column " << i << " no << operator" << endl;
+                    break;
+                case __TDOUBLE:
+                    os << " " << *((GFitsTableDblCol*)table.m_columns[i]) 
+                       << endl;
+                    break;
+                default:
+                    break;
+                }
+            }
             else
                 os << " column " << i << " undefined" << endl;
         }

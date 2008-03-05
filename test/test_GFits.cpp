@@ -372,28 +372,28 @@ void test_create(void)
     cout << ".";
 
     // Attach binary table
-cout << "start" << endl;
     try {
         // Re-open FITS file
         GFits fits;
         fits.open("test.fits");
-cout << "1" << endl;
 
         // Create binary Table with 10 rows
         int nrows = 10;
         GFitsBinTable    table  = GFitsBinTable(nrows);
-        GFitsTableDblCol first  = GFitsTableDblCol(nrows);
-        GFitsTableDblCol second = GFitsTableDblCol(nrows);
-cout << "2" << endl;
+        GFitsTableDblCol first  = GFitsTableDblCol("First", nrows);
+        GFitsTableDblCol second = GFitsTableDblCol("Second", nrows);
+        first(9)  =  99.0;
+        second(0) = -99.0;
+        cout << endl << first << endl;
+        cout << second << endl;
         table.append_column(first);
-cout << "3" << endl;
         table.append_column(second);
         cout << table;
 
         // Create HDU and append to FILE file
         GFitsHDU hdu(table);
         fits.append_hdu(hdu);
-//        cout << fits;
+  //      cout << fits;
 
         // Save FITS file
         fits.save();

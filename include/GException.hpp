@@ -84,7 +84,8 @@ public:
     // Matrix dimensions mismatch
     class matrix_mismatch : public GExceptionHandler {
     public:
-        matrix_mismatch(string origin, int rows1, int cols1, int rows2, int cols2);
+        matrix_mismatch(string origin, int rows1, int cols1, int rows2, 
+                        int cols2);
     };
 
     // Matrix not rectangular
@@ -188,6 +189,12 @@ public:
     class fits_invalid_type : public GExceptionHandler {
     public:
         fits_invalid_type(string origin, string message);
+    };
+
+    // FITS unknown table type
+    class fits_unknown_tabtype : public GExceptionHandler {
+    public:
+        fits_unknown_tabtype(string origin, int type);
     };
 
     // FITS unknown column type

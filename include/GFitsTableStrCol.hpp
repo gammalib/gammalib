@@ -32,6 +32,8 @@ class GFitsTableStrCol : public GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableStrCol();
+    GFitsTableStrCol(const std::string& name, const int& length,
+                     const int& size = 1);
     GFitsTableStrCol(const GFitsTableStrCol& column);
     ~GFitsTableStrCol();
 
@@ -53,14 +55,15 @@ public:
 
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GFitsTableStrCol& column);
-    void free_members(void);
-    void load(void);
+    void        init_members(void);
+    void        copy_members(const GFitsTableStrCol& column);
+    void        free_members(void);
+    void        load(void);
+    std::string ascii_format(void) const;
+    std::string binary_format(void) const;
 
     // Private data area
     int    m_size;       // Total number of strings
-    int    m_num_subs;   // Number of substrings
     char** m_data;       // Data area
     char*  m_nulstr;     // NULL string
     int    m_anynul;     // Number of NULLs encountered

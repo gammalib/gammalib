@@ -41,6 +41,8 @@ class GFitsTableFltCol : public GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableFltCol();
+    GFitsTableFltCol(const std::string& name, const int& length,
+                     const int& size = 1);
     GFitsTableFltCol(const GFitsTableFltCol& column);
     virtual ~GFitsTableFltCol();
 
@@ -58,10 +60,12 @@ public:
 
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GFitsTableFltCol& column);
-    void free_members(void);
-    void load(void);
+    void        init_members(void);
+    void        copy_members(const GFitsTableFltCol& column);
+    void        free_members(void);
+    void        load(void);
+    std::string ascii_format(void) const;
+    std::string binary_format(void) const;
 
     // Private data area
     int    m_size;          //!< Size of data area

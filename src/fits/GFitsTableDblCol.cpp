@@ -13,9 +13,10 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
-#include "GException.hpp"
-#include "GFitsTableDblCol.hpp"
 #include <iostream>
+#include "GException.hpp"
+#include "GTools.hpp"
+#include "GFitsTableDblCol.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -55,19 +56,17 @@ GFitsTableDblCol::GFitsTableDblCol() : GFitsTableCol()
 /***********************************************************************//**
  * @brief Constructor
  *
+ * @param[in] name Name of column.
  * @param[in] length Length of column.
  * @param[in] size Vector size of column.
  ***************************************************************************/
-GFitsTableDblCol::GFitsTableDblCol(const int& length, const int& size)
-                                                : GFitsTableCol(length, size)
+GFitsTableDblCol::GFitsTableDblCol(const std::string& name,
+                                   const int&         length,
+                                   const int&         size)
+                                   : GFitsTableCol(name, length, size, 8)
 {
     // Initialise class members for clean destruction
     init_members();
-
-    // Setup format
-    //m_name   = "Test";
-    m_format = "1D";
-    //m_unit   = "deg";
 
     // Return
     return;
@@ -205,11 +204,17 @@ const double& GFitsTableDblCol::operator() (const int& row, const int& inx)
  *
  * @exception GException::fits_hdu_not_found
  *            Specified HDU not found in FITS file.
+ * @exception GException::fits_error
+ *            Error occured during writing of the column data.
+ *
+ * The table column is only saved if it is linked to a FITS file and if the
+ * data are indeed present in the class instance. This avoids saving of data
+ * that have not been modified.
  ***************************************************************************/
 void GFitsTableDblCol::save(void)
 {
-    // Continue only if a FITS file is connected
-    if (m_fitsfile.Fptr != NULL) {
+    // Continue only if a FITS file is connected and data have been loaded
+    if (m_fitsfile.Fptr != NULL && m_colnum > 0 && m_data != NULL) {
 
         // Move to the HDU
         int status = 0;
@@ -219,12 +224,14 @@ void GFitsTableDblCol::save(void)
             throw GException::fits_hdu_not_found(G_SAVE, 
                                                  (m_fitsfile.HDUposition)+1,
                                                  status);
-    
         // Save the column data
-        // TBD
-    
+        status = __ffpcn(&m_fitsfile, __TDOUBLE, m_colnum, 1, 1, 
+                         (long)m_size, m_data, m_nulval, &status);
+        if (status != 0)
+            throw GException::fits_error(G_SAVE, status);
+
     } // endif: FITS file was connected
-    
+
     // Return
     return;
 }
@@ -251,8 +258,8 @@ std::string GFitsTableDblCol::string(const int& row, const int& inx)
         throw GException::out_of_range(G_STRING, row, 0, m_length-1);
 
     // Check inx value
-    if (inx < 0 || inx >= m_repeat)
-        throw GException::out_of_range(G_STRING, inx, 0, m_repeat-1);
+    if (inx < 0 || inx >= m_number)
+        throw GException::out_of_range(G_STRING, inx, 0, m_number-1);
 
     // Get index
     int offset = row * m_repeat + inx;
@@ -287,8 +294,8 @@ double GFitsTableDblCol::real(const int& row, const int& inx)
         throw GException::out_of_range(G_REAL, row, 0, m_length-1);
 
     // Check inx value
-    if (inx < 0 || inx >= m_repeat)
-        throw GException::out_of_range(G_REAL, inx, 0, m_repeat-1);
+    if (inx < 0 || inx >= m_number)
+        throw GException::out_of_range(G_REAL, inx, 0, m_number-1);
 
     // Get index
     int offset = row * m_repeat + inx;
@@ -319,8 +326,8 @@ int GFitsTableDblCol::integer(const int& row, const int& inx)
         throw GException::out_of_range(G_INTEGER, row, 0, m_length-1);
 
     // Check col value
-    if (inx < 0 || inx >= m_repeat)
-        throw GException::out_of_range(G_INTEGER, inx, 0, m_repeat-1);
+    if (inx < 0 || inx >= m_number)
+        throw GException::out_of_range(G_INTEGER, inx, 0, m_number-1);
 
     // Get index
     int offset = row * m_repeat + inx;
@@ -470,7 +477,7 @@ void GFitsTableDblCol::free_members(void)
 void GFitsTableDblCol::fetch_data(void)
 {
     // Calculate size of memory
-    m_size = m_repeat * m_length;
+    m_size = m_number * m_length;
 
     // Load only if the column has a positive size
     if (m_size > 0) {
@@ -504,11 +511,95 @@ void GFitsTableDblCol::fetch_data(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Returns format string of ASCII table
+ ***************************************************************************/
+std::string GFitsTableDblCol::ascii_format(void) const
+{
+    // Initialize format string
+    std::string format;
+
+    // Set type code
+    format.append("F");
+
+    // Set width
+    format.append(str(m_width));
+
+    // Return format
+    return format;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns format string of binary table
+ ***************************************************************************/
+std::string GFitsTableDblCol::binary_format(void) const
+{
+    // Initialize format string
+    std::string format;
+
+    // Set number of elements
+    format.append(str(m_number));
+
+    // Set type code
+    format.append("D");
+
+    // Return format
+    return format;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                          GFitsTableDblCol friends                       =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream
+ * @param[in] column Column to put in output stream
+ ***************************************************************************/
+ostream& operator<< (ostream& os, const GFitsTableDblCol& column)
+{
+    // Put column name in stream
+    os << "'" << column.m_name << "'";
+
+    // Put FITS column number in stream
+    if (column.m_colnum > 0)
+        os << " [fits_colnum=" << column.m_colnum << "]";
+    else
+        os << " [not linked to FITS file]";
+
+    // Put column type in stream
+    os << " " << column.ascii_format();
+    os << " " << column.binary_format();
+
+    // Put data loading in stream
+    if (column.m_data == NULL)
+        os << " (not loaded)";
+    else
+        os << " (loaded in memory)";
+
+    // Set data area size
+    os << " size=" << column.m_size;
+
+    // Set vector length
+    os << " repeat=" << column.m_repeat;
+
+    // Set width
+    os <<  " width=" << column.m_width;
+
+    // Set number
+    os <<  " number=" << column.m_number;
+
+    // Set length
+    os << " length=" << column.m_length;
+
+    // Return output stream
+    return os;
+}
 
 
 /*==========================================================================

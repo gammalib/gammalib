@@ -707,7 +707,7 @@ GVector GLATResponse::get_fits_vector(const GFitsHDU* hdu, const std::string& co
         throw GException::fits_column_not_found(G_GET_FITS_VECTOR, colname);
 
     // Determine number of entries
-    int num = ptr->repeat();
+    int num = ptr->number();
 
     // Load data into vector
     GVector data(num);

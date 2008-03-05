@@ -13,13 +13,15 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GFitsTableShtCol.hpp"
-#include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
+#define G_SAVE       "GFitsTableShtCol::save()"
 #define G_STRING     "GFitsTableShtCol::string(const int&, const int&)"
 #define G_REAL       "GFitsTableShtCol::real(const int&, const int&)"
 #define G_INTEGER    "GFitsTableShtCol::integer(const int&, const int&)"
@@ -48,6 +50,26 @@
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
 GFitsTableShtCol::GFitsTableShtCol() : GFitsTableCol()
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Constructor
+ *
+ * @param[in] name Name of column.
+ * @param[in] length Length of column.
+ * @param[in] size Vector size of column.
+ ***************************************************************************/
+GFitsTableShtCol::GFitsTableShtCol(const std::string& name,
+                                   const int&         length,
+                                   const int&         size)
+                                   : GFitsTableCol(name, length, size, 2)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -128,6 +150,35 @@ GFitsTableShtCol& GFitsTableShtCol::operator= (const GFitsTableShtCol& column)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Save table column into FITS file
+ *
+ * @exception GException::fits_hdu_not_found
+ *            Specified HDU not found in FITS file.
+ ***************************************************************************/
+void GFitsTableShtCol::save(void)
+{
+    // Continue only if a FITS file is connected
+    if (m_fitsfile.Fptr != NULL) {
+
+        // Move to the HDU
+        int status = 0;
+        status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL,
+                              &status);
+        if (status != 0)
+            throw GException::fits_hdu_not_found(G_SAVE, 
+                                                 (m_fitsfile.HDUposition)+1,
+                                                 status);
+
+        // Save the column data
+        // TBD
+
+    } // endif: FITS file was connected
+
+    // Return
+    return;
+}
+
 /***************************************************************************
  *                             Get string value                            *
  * ----------------------------------------------------------------------- *
@@ -143,8 +194,8 @@ std::string GFitsTableShtCol::string(const int& row, const int& col)
         throw GException::out_of_range(G_STRING, row, 0, m_length-1);
 
     // Check col value
-    if (col < 0 || col >= m_repeat)
-        throw GException::out_of_range(G_STRING, col, 0, m_repeat-1);
+    if (col < 0 || col >= m_number)
+        throw GException::out_of_range(G_STRING, col, 0, m_number-1);
 
     // Get index
     int inx = row * m_repeat + col;
@@ -173,8 +224,8 @@ double GFitsTableShtCol::real(const int& row, const int& col)
         throw GException::out_of_range(G_REAL, row, 0, m_length-1);
 
     // Check col value
-    if (col < 0 || col >= m_repeat)
-        throw GException::out_of_range(G_REAL, col, 0, m_repeat-1);
+    if (col < 0 || col >= m_number)
+        throw GException::out_of_range(G_REAL, col, 0, m_number-1);
 
     // Get index
     int inx = row * m_repeat + col;
@@ -202,8 +253,8 @@ int GFitsTableShtCol::integer(const int& row, const int& col)
         throw GException::out_of_range(G_INTEGER, row, 0, m_length-1);
 
     // Check col value
-    if (col < 0 || col >= m_repeat)
-        throw GException::out_of_range(G_INTEGER, col, 0, m_repeat-1);
+    if (col < 0 || col >= m_number)
+        throw GException::out_of_range(G_INTEGER, col, 0, m_number-1);
 
     // Get index
     int inx = row * m_repeat + col;
@@ -352,7 +403,7 @@ void GFitsTableShtCol::free_members(void)
 void GFitsTableShtCol::load(void)
 {
     // Calculate size of memory
-    m_size = m_repeat * m_length;
+    m_size = m_number * m_length;
 
     // Allocate memory
     if (m_data != NULL) delete [] m_data;
@@ -368,6 +419,44 @@ void GFitsTableShtCol::load(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns format string of ASCII table
+ ***************************************************************************/
+std::string GFitsTableShtCol::ascii_format(void) const
+{
+    // Initialize format string
+    std::string format;
+
+    // Set type code
+    format.append("I");
+
+    // Set width
+    format.append(str(m_width));
+
+    // Return format
+    return format;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns format string of binary table
+ ***************************************************************************/
+std::string GFitsTableShtCol::binary_format(void) const
+{
+    // Initialize format string
+    std::string format;
+
+    // Set number of elements
+    format.append(str(m_number));
+
+    // Set type code
+    format.append("I");
+
+    // Return format
+    return format;
 }
 
 

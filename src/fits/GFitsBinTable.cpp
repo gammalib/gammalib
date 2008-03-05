@@ -15,13 +15,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include "GException.hpp"
-//#include "GTools.hpp"
 #include "GFitsBinTable.hpp"
-//#include "GFitsTableStrCol.hpp"
-//#include "GFitsTableShtCol.hpp"
-//#include "GFitsTableLngCol.hpp"
-//#include "GFitsTableFltCol.hpp"
-//#include "GFitsTableDblCol.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -32,6 +26,8 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+
+/* __ Prototypes of local functions ______________________________________ */
 
 
 /*==========================================================================
@@ -57,7 +53,6 @@ GFitsBinTable::GFitsBinTable() : GFitsTable()
  * @brief Constructor
  *
  * @param[in] nrows Number of rows in table
- * @param[in] ncols Number of columns in table
  ***************************************************************************/
 GFitsBinTable::GFitsBinTable(int nrows) : GFitsTable(nrows)
 {
@@ -145,7 +140,7 @@ GFitsBinTable& GFitsBinTable::operator= (const GFitsBinTable& table)
 /***********************************************************************//**
  * @brief Clone binary table
  ***************************************************************************/
-GFitsBinTable* GFitsBinTable::clone(void) const 
+GFitsBinTable* GFitsBinTable::clone(void) const
 {
     return new GFitsBinTable(*this);
 }

@@ -22,6 +22,7 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Prototypes ________________________________________________________ */
-std::string strip_whitespace(const std::string arg);
+std::string strip_whitespace(const std::string& arg);
+std::string str(const int& value);
 
 #endif /* GTOOLS_HPP */

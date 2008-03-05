@@ -50,17 +50,30 @@ GFitsTableCol::GFitsTableCol()
 /***********************************************************************//**
  * @brief Constructor
  *
+ * @param[in] name Name of column.
  * @param[in] length Length of column.
- * @param[in] size Vector size of column.
+ * @param[in] number Vector size of column.
+ * @param[in] width Width of single column element.
+ *
+ * Construct column instance from name, length, vector size and column width.
+ * The repeat value, required for binary tables, is calculated internally.
  ***************************************************************************/
-GFitsTableCol::GFitsTableCol(const int& length, const int& size)
+GFitsTableCol::GFitsTableCol(const std::string& name,
+                             const int&         length,
+                             const int&         number,
+                             const int&         width)
 {
     // Initialise class members for clean destruction
     init_members();
 
-    // Set column length and vector size
+    // Store attributes
+    m_name   = name;
     m_length = length;
-    m_repeat = size;
+    m_number = number;
+    m_width  = width;
+
+    // Calculate repeat value (only used for binary table!)
+    m_repeat = m_number * m_width;
 
     // Return
     return;
@@ -196,7 +209,7 @@ int GFitsTableCol::type(void)
 
 
 /***********************************************************************//**
- * @brief Get column repeat value
+ * @brief Get column repeat value (only used for binary tables)
  ***************************************************************************/
 int GFitsTableCol::repeat(void)
 {
@@ -206,12 +219,22 @@ int GFitsTableCol::repeat(void)
 
 
 /***********************************************************************//**
- * @brief Get column width
+ * @brief Get width of one element in column
  ***************************************************************************/
 int GFitsTableCol::width(void)
 {
-    // Return column width
+    // Return width of one element in column
     return m_width;
+}
+
+
+/***********************************************************************//**
+ * @brief Get number of elements in a column
+ ***************************************************************************/
+int GFitsTableCol::number(void)
+{
+    // Return number of elements in a column
+    return m_number;
 }
 
 
@@ -238,12 +261,12 @@ void GFitsTableCol::init_members(void)
 {
     // Initialise members
     m_name.clear();
-    m_format.clear();
     m_unit.clear();
     m_colnum               = 0;
     m_type                 = 0;
     m_repeat               = 0;
     m_width                = 0;
+    m_number               = 0;
     m_length               = 0;
     m_fitsfile.HDUposition = 0;
     m_fitsfile.Fptr        = NULL;
@@ -262,12 +285,12 @@ void GFitsTableCol::copy_members(const GFitsTableCol& column)
 {
     // Copy attributes
     m_name     = column.m_name;
-    m_format   = column.m_format;
     m_unit     = column.m_unit;
     m_colnum   = column.m_colnum;
     m_type     = column.m_type;
     m_repeat   = column.m_repeat;
     m_width    = column.m_width;
+    m_number   = column.m_number;
     m_length   = column.m_length;
     m_fitsfile = column.m_fitsfile;
 
@@ -311,74 +334,6 @@ void GFitsTableCol::connect(__fitsfile* fptr)
  =                           GFitsTableCol friends                         =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream
- * @param[in] column Column to put in output stream
- ***************************************************************************/
-ostream& operator<< (ostream& os, const GFitsTableCol& column)
-{
-    // Put header in stream
-    os << "'" << column.m_name << "'";
-    os << " [" << column.m_colnum << "] ";
-
-    // Set column type
-    switch (column.m_type) {
-    case 1:
-        os << "TBIT";
-        break;
-    case 11:
-        os << "TBYTE";
-        break;
-    case 14:
-        os << "TLOGICAL";
-        break;
-    case 16:
-        os << "TSTRING";
-        break;
-    case 21:
-        os << "TSHORT";
-        break;
-    case 31:
-        os << "TINT";
-        break;
-    case 41:
-        os << "TLONG";
-        break;
-    case 42:
-        os << "TFLOAT";
-        break;
-    case 81:
-        os << "TLONGLONG";
-        break;
-    case 82:
-        os << "TDOUBLE";
-        break;
-    case 83:
-        os << "TCOMPLEX";
-        break;
-    case 163:
-        os << "TDBLCOMPLEX";
-        break;
-    default:
-        os << "<unknown type>";
-        break;
-    }
-    
-    // Set vector length
-    os << " repeat=" << column.m_repeat;
-
-    // Set width
-    os <<  " width=" << column.m_width;
-    
-    // Set length
-    os << " length=" << column.m_length << endl;
-
-    // Return output stream
-    return os;
-}
 
 
 /*==========================================================================

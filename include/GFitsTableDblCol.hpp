@@ -38,10 +38,14 @@
  ***************************************************************************/
 class GFitsTableDblCol : public GFitsTableCol {
 
+    // I/O friends
+    friend ostream& operator<< (ostream& os, const GFitsTableDblCol& column);
+
 public:
     // Constructors and destructors
     GFitsTableDblCol();
-    GFitsTableDblCol(const int& length, const int& size = 1);
+    GFitsTableDblCol(const std::string& name, const int& length,
+                     const int& size = 1);
     GFitsTableDblCol(const GFitsTableDblCol& column);
     virtual ~GFitsTableDblCol();
 
@@ -61,13 +65,15 @@ public:
 
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GFitsTableDblCol& column);
-    void free_members(void);
-    void fetch_data(void);
+    void        init_members(void);
+    void        copy_members(const GFitsTableDblCol& column);
+    void        free_members(void);
+    void        fetch_data(void);
+    std::string ascii_format(void) const;
+    std::string binary_format(void) const;
 
     // Private data area
-    int     m_size;          //!< Size of data area
+    int     m_size;          //!< Size of allocated data area (0 if offline)
     double* m_data;          //!< Data area
     double* m_nulval;        //!< NULL value
     int     m_anynul;        //!< Number of NULLs encountered

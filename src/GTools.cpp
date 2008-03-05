@@ -12,16 +12,18 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include <sstream>
 #include "GTools.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
 
-/***************************************************************************
- *             Strip leading and trailing whitespace from string           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Strip leading and trailing whitespace from string
+ *
+ * @param[in] arg String which should be stripped of whitespace.
  ***************************************************************************/
-std::string strip_whitespace(const std::string arg)
+std::string strip_whitespace(const std::string& arg)
 {
     // Return empty string if argument is empty
     if (arg.empty())
@@ -40,3 +42,17 @@ std::string strip_whitespace(const std::string arg)
     // Return result
     return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Convert integer value into string
+ *
+ * @param[in] value Value to be converted into a string.
+ ***************************************************************************/
+std::string str(const int& value)
+{
+    std::ostringstream s_value;
+    s_value << value;
+    return  s_value.str();
+}
+

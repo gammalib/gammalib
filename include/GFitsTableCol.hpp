@@ -38,12 +38,13 @@ class GFitsTableCol {
     friend class GFitsTable;
 
     // I/O friends
-    friend ostream& operator<< (ostream& os, const GFitsTableCol& column);
+//    friend ostream& operator<< (ostream& os, const GFitsTableCol& column);
 
 public:
     // Constructors and destructors
     GFitsTableCol();
-    GFitsTableCol(const int& length, const int& size = 1);
+    GFitsTableCol(const std::string& name, const int& length,
+                  const int& number,       const int& width);
     GFitsTableCol(const GFitsTableCol& column);
     virtual ~GFitsTableCol();
 
@@ -64,23 +65,29 @@ public:
     int         type(void);
     int         repeat(void);
     int         width(void);
+    int         number(void);
     int         length(void);
 
 protected:
     // Protected data area
     std::string m_name;        //!< Column name
-    std::string m_format;      //!< Column format
     std::string m_unit;        //!< Column unit
-    int         m_colnum;      //!< Column number (starting from 1).
+    int         m_colnum;      //!< @brief Column number (starting from 1).
                                //!< This parameter is used to signal if a
                                //!< table column corresponds to a FITS file
                                //!< column. If it is set to 0 there is no
                                //!< correspondance.
     int         m_type;        //!< Column type
     int         m_repeat;      //!< Repeat value of column
-    int         m_width;       //!< Width of column
+    int         m_width;       //!< Width of single column element
+    int         m_number;      //!< Number of elements in column
+                               //!< m_number = m_repeat / m_width
     int         m_length;      //!< Length of column
     __fitsfile  m_fitsfile;    //!< FITS file associated with column
+
+    // Protected methods
+    virtual std::string ascii_format(void) const = 0;
+    virtual std::string binary_format(void) const = 0;
 
 private:
     // Private methods
