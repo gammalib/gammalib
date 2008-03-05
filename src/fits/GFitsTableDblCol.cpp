@@ -20,6 +20,7 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
+#define G_SAVE       "GFitsTableDblCol::save(void)"
 #define G_STRING     "GFitsTableDblCol::string(const int&, const int&)"
 #define G_REAL       "GFitsTableDblCol::real(const int&, const int&)"
 #define G_INTEGER    "GFitsTableDblCol::integer(const int&, const int&)"
@@ -198,6 +199,36 @@ const double& GFitsTableDblCol::operator() (const int& row, const int& inx)
  =                      GFitsTableDblCol public methods                    =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Save table column into FITS file
+ *
+ * @exception GException::fits_hdu_not_found
+ *            Specified HDU not found in FITS file.
+ ***************************************************************************/
+void GFitsTableDblCol::save(void)
+{
+    // Continue only if a FITS file is connected
+    if (m_fitsfile.Fptr != NULL) {
+
+        // Move to the HDU
+        int status = 0;
+        status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL,
+                              &status);
+        if (status != 0)
+            throw GException::fits_hdu_not_found(G_SAVE, 
+                                                 (m_fitsfile.HDUposition)+1,
+                                                 status);
+    
+        // Save the column data
+        // TBD
+    
+    } // endif: FITS file was connected
+    
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Get string value

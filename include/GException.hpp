@@ -169,6 +169,7 @@ public:
     class fits_hdu_not_found : public GExceptionHandler {
     public:
         fits_hdu_not_found(string origin, string extname, int status = 0);
+        fits_hdu_not_found(string origin, int extno, int status = 0);
     };
 
     // FITS unknown HDU type

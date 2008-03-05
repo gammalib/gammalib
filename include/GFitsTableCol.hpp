@@ -51,6 +51,7 @@ public:
     GFitsTableCol& operator= (const GFitsTableCol& column);
 
     // Virtual Methods
+    virtual void           save(void) = 0;
     virtual std::string    string(const int& row, const int& inx = 0) = 0;
     virtual double         real(const int& row, const int& inx = 0) = 0;
     virtual int            integer(const int& row, const int& inx = 0) = 0;

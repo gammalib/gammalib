@@ -48,6 +48,7 @@ public:
     GFitsTableFltCol& operator= (const GFitsTableFltCol& column);
 
     // Methods
+    void              save(void);
     std::string       string(const int& row, const int& col = 0);
     double            real(const int& row, const int& col = 0);
     int               integer(const int& row, const int& col = 0);

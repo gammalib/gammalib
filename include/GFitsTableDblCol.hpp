@@ -51,6 +51,7 @@ public:
     const double&     operator() (const int& row, const int& inx = 0) const;
 
     // Methods
+    void              save(void);
     std::string       string(const int& row, const int& inx = 0);
     double            real(const int& row, const int& inx = 0);
     int               integer(const int& row, const int& inx = 0);
