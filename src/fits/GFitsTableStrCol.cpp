@@ -318,7 +318,7 @@ int GFitsTableStrCol::integer(const int& row, const int& inx)
     if (row < 0 || row >= m_length)
         throw GException::out_of_range(G_INTEGER, row, 0, m_length-1);
 
-    // Check col value
+    // Check inx value
     if (inx < 0 || inx >= m_number)
         throw GException::out_of_range(G_INTEGER, inx, 0, m_number-1);
 
@@ -326,7 +326,7 @@ int GFitsTableStrCol::integer(const int& row, const int& inx)
     int offset = row * m_number + inx;
 
     // Assign C string to int
-    int value = atoi(m_data[offset].c_str());
+    int value = int(atof(m_data[offset].c_str()));
 
     // Return value
     return value;
