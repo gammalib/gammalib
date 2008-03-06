@@ -262,9 +262,13 @@ void GFitsTable::open(__fitsfile* fptr)
         // Extract column vector size
         if (m_columns[i]->m_repeat == 1)   // ASCII tables
             m_columns[i]->m_number = 1;
-        else                               // Binary tables
-            m_columns[i]->m_number = m_columns[i]->m_repeat /
-                                     m_columns[i]->m_width;
+        else {                             // Binary tables
+            if (typecode == __TSTRING)
+                m_columns[i]->m_number = m_columns[i]->m_repeat /
+                                         m_columns[i]->m_width;
+            else
+                m_columns[i]->m_number = m_columns[i]->m_repeat;
+        }
 
     } // endfor: looped over all columns
 
