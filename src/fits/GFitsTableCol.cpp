@@ -20,6 +20,8 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
+#define G_LOAD_COLUMN "GFitsTableCol::load_column(void*, void*)"
+#define G_SAVE_COLUMN "GFitsTableCol::save_column(void*, void*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -268,6 +270,8 @@ void GFitsTableCol::init_members(void)
     m_width                = 0;
     m_number               = 0;
     m_length               = 0;
+    m_size                 = 0;
+    m_anynul               = 0;
     m_fitsfile.HDUposition = 0;
     m_fitsfile.Fptr        = NULL;
 
@@ -292,6 +296,8 @@ void GFitsTableCol::copy_members(const GFitsTableCol& column)
     m_width    = column.m_width;
     m_number   = column.m_number;
     m_length   = column.m_length;
+    m_size     = column.m_size;
+    m_anynul   = column.m_anynul;
     m_fitsfile = column.m_fitsfile;
 
     // Return
@@ -323,6 +329,159 @@ void GFitsTableCol::connect(__fitsfile* fptr)
 {
     // Connect Image
     m_fitsfile = *fptr;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load table column from FITS file
+ *
+ * @exception GException::fits_hdu_not_found
+ *            Specified HDU not found in FITS file.
+ * @exception GException::fits_error
+ *            An error occured while loading column data from FITS file.
+ *
+ * If a FITS file is attached to the column the data are loaded into memory
+ * from the FITS file. If no FITS file is attached, memory is allocated
+ * to hold the column data and all cells are set to 0.
+ *
+ * The method make use of the virtual methods 
+ *   GFitsTableCol::alloc_data,
+ *   GFitsTableCol::init_data,
+ *   GFitsTableCol::ptr_data, and
+ *   GFitsTableCol::ptr_nulval.
+ * These methods are implemented by the derived column classes which 
+ * implement a specific storage class (i.e. float, double, short, ...).
+ ***************************************************************************/
+void GFitsTableCol::load_column(void)
+{
+    // Calculate size of memory
+    m_size = m_number * m_length;
+
+    // Load only if the column has a positive size
+    if (m_size > 0) {
+
+        // Allocate fresh memory
+        alloc_data();
+
+        // If a FITS file is attached then load column data from the FITS
+        // file
+        if (m_fitsfile.Fptr != NULL) {
+
+            // Move to the HDU
+            int status = 0;
+            status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1,
+                                  NULL, &status);
+            if (status != 0)
+                throw GException::fits_hdu_not_found(G_LOAD_COLUMN,
+                                                 (m_fitsfile.HDUposition)+1,
+                                                 status);
+
+            // Load data
+            status = __ffgcv(&m_fitsfile, m_type, m_colnum, 1, 1, m_size,
+                             ptr_nulval(), ptr_data(), &m_anynul, &status);
+            if (status != 0)
+                throw GException::fits_error(G_LOAD_COLUMN, status);
+        }
+
+        // ... otherwise initialise all column values
+        else
+            init_data();
+
+    } // endif: column has a positive size
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save table column into FITS file
+ *
+ * @exception GException::fits_hdu_not_found
+ *            Specified HDU not found in FITS file.
+ * @exception GException::fits_error
+ *            Error occured during writing of the column data.
+ *
+ * The table column is only saved if it is linked to a FITS file and if the
+ * data are indeed present in the class instance. This avoids saving of data
+ * that have not been modified.
+ *
+ * The method make use of the virtual methods 
+ *   GFitsTableCol::ptr_data and
+ *   GFitsTableCol::ptr_nulval.
+ * These methods are implemented by the derived column classes which 
+ * implement a specific storage class (i.e. float, double, short, ...).
+ ***************************************************************************/
+void GFitsTableCol::save_column(void)
+{
+    // Continue only if a FITS file is connected and data have been loaded
+    if (m_fitsfile.Fptr != NULL && m_colnum > 0 && ptr_data() != NULL) {
+
+        // Move to the HDU
+        int status = 0;
+        status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL,
+                              &status);
+        if (status != 0)
+            throw GException::fits_hdu_not_found(G_SAVE_COLUMN,
+                                                 (m_fitsfile.HDUposition)+1,
+                                                 status);
+        // Save the column data
+        status = __ffpcn(&m_fitsfile, m_type, m_colnum, 1, 1,
+                         (long)m_size, ptr_data(), ptr_nulval(), &status);
+        if (status != 0)
+            throw GException::fits_error(G_SAVE_COLUMN, status);
+
+    } // endif: FITS file was connected
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Put column information in output stream
+ *
+ * @param[in] os Output stream
+ * @param[in] column Column to put in output stream
+ ***************************************************************************/
+void GFitsTableCol::dump_column(ostream& os, void* data) const
+{
+    // Put column name in stream
+    os << "'" << m_name << "'";
+
+    // Put FITS column number in stream
+    if (m_colnum > 0)
+        os << " [fits_colnum=" << m_colnum << "]";
+    else
+        os << " [not linked to FITS file]";
+
+    // Put column type in stream
+    os << " " << ascii_format();
+    os << " " << binary_format();
+
+    // Put data loading in stream
+    if (data == NULL)
+        os << " (not loaded)";
+    else
+        os << " (loaded in memory)";
+
+    // Set data area size
+    os << " size=" << m_size;
+
+    // Set vector length
+    os << " repeat=" << m_repeat;
+
+    // Set width
+    os <<  " width=" << m_width;
+
+    // Set number
+    os <<  " number=" << m_number;
+
+    // Set length
+    os << " length=" << m_length;
 
     // Return
     return;

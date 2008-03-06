@@ -37,9 +37,6 @@ class GFitsTableCol {
     // Friend classes
     friend class GFitsTable;
 
-    // I/O friends
-//    friend ostream& operator<< (ostream& os, const GFitsTableCol& column);
-
 public:
     // Constructors and destructors
     GFitsTableCol();
@@ -70,24 +67,36 @@ public:
 
 protected:
     // Protected data area
-    std::string m_name;        //!< Column name
-    std::string m_unit;        //!< Column unit
-    int         m_colnum;      //!< @brief Column number (starting from 1).
-                               //!< This parameter is used to signal if a
-                               //!< table column corresponds to a FITS file
-                               //!< column. If it is set to 0 there is no
-                               //!< correspondance.
-    int         m_type;        //!< Column type
-    int         m_repeat;      //!< Repeat value of column
-    int         m_width;       //!< Width of single column element
-    int         m_number;      //!< Number of elements in column
-                               //!< m_number = m_repeat / m_width
-    int         m_length;      //!< Length of column
-    __fitsfile  m_fitsfile;    //!< FITS file associated with column
+    std::string m_name;      //!< Column name
+    std::string m_unit;      //!< Column unit
+    int         m_colnum;    //!< @brief Column number (starting from 1).
+                             //!< This parameter is used to signal if a
+                             //!< table column corresponds to a FITS file
+                             //!< column. If it is set to 0 there is no
+                             //!< correspondance.
+    int         m_type;      //!< Column type
+    int         m_repeat;    //!< Repeat value of column
+    int         m_width;     //!< Width of single column element
+    int         m_number;    //!< @brief Number of elements in column.
+                             //!< m_number = m_repeat / m_width
+    int         m_length;    //!< Length of column
+    int         m_size;      //!< Size of allocated data area (0 if not loaded)
+    int         m_anynul;    //!< Number of NULLs encountered
+    __fitsfile  m_fitsfile;  //!< FITS file associated with column
 
-    // Protected methods
+    // Protected virtual methods
     virtual std::string ascii_format(void) const = 0;
     virtual std::string binary_format(void) const = 0;
+    virtual void        alloc_data(void) = 0;
+    virtual void        init_data(void) = 0;
+    virtual void        fetch_data(void) = 0;
+    virtual void*       ptr_data(void) = 0;
+    virtual void*       ptr_nulval(void) = 0;
+
+    // Protected methods
+    void load_column(void);
+    void save_column(void);
+    void dump_column(ostream& os, void* data) const;
 
 private:
     // Private methods

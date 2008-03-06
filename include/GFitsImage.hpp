@@ -66,7 +66,8 @@ protected:
     void copy_members(const GFitsImage& image);
     void free_members(void);
     void open_image(__fitsfile* fptr);
-    void load_image(int datatype, const void* pixels, const void* nulval, int* anynul);
+    void load_image(int datatype, const void* pixels, const void* nulval,
+                    int* anynul);
     void save_image(int datatype, const void* pixels);
 
     // Private data area

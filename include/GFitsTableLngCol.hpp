@@ -38,6 +38,9 @@
  ***************************************************************************/
 class GFitsTableLngCol : public GFitsTableCol {
 
+    // I/O friends
+    friend ostream& operator<< (ostream& os, const GFitsTableLngCol& column);
+
 public:
     // Constructors and destructors
     GFitsTableLngCol();
@@ -65,15 +68,17 @@ private:
     void        init_members(void);
     void        copy_members(const GFitsTableLngCol& column);
     void        free_members(void);
-    void        fetch_data(void);
     std::string ascii_format(void) const;
     std::string binary_format(void) const;
+    void        alloc_data(void);
+    void        init_data(void);
+    void        fetch_data(void);
+    void*       ptr_data(void) { return m_data; }
+    void*       ptr_nulval(void) { return m_nulval; }
 
     // Private data area
-    int   m_size;          //!< Size of data area
     long* m_data;          //!< Data area
     long* m_nulval;        //!< NULL value
-    int   m_anynul;        //!< Number of NULLs encountered
 };
 
 #endif /* GFITSTABLELNGCOL_HPP */

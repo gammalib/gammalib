@@ -46,7 +46,7 @@ public:
 protected:
     // Protected methods
     virtual void connect(__fitsfile* fptr);
-    
+
     // Protected data area
     __fitsfile m_fitsfile;    //!< FITS file
 };

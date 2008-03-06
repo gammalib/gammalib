@@ -917,16 +917,20 @@ ostream& operator<< (ostream& os, const GFitsTable& table)
             if (table.m_columns[i] != NULL) {
                 switch (table.m_columns[i]->type()) {
                 case __TSTRING:
-                    os << " column " << i << " no << operator" << endl;
+                    os << " " << *((GFitsTableStrCol*)table.m_columns[i]) 
+                       << endl;
                     break;
                 case __TSHORT:
-                    os << " column " << i << " no << operator" << endl;
+                    os << " " << *((GFitsTableShtCol*)table.m_columns[i]) 
+                       << endl;
                     break;
                 case __TLONG:
-                    os << " column " << i << " no << operator" << endl;
+                    os << " " << *((GFitsTableLngCol*)table.m_columns[i]) 
+                       << endl;
                     break;
                 case __TFLOAT:
-                    os << " column " << i << " no << operator" << endl;
+                    os << " " << *((GFitsTableFltCol*)table.m_columns[i]) 
+                       << endl;
                     break;
                 case __TDOUBLE:
                     os << " " << *((GFitsTableDblCol*)table.m_columns[i]) 

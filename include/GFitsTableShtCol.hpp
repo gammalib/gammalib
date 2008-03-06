@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsTableShtCol.hpp
+ * @brief GFitsTableShtCol class definition.
+ * @author J. Knodlseder
+ */
 
 #ifndef GFITSTABLESHTCOL_HPP
 #define GFITSTABLESHTCOL_HPP
@@ -24,21 +29,30 @@
 /* __ Structures _________________________________________________________ */
 
 
-/***************************************************************************
- *                    GFitsTableShtCol class definition                    *
+/***********************************************************************//**
+ * @class GFitsTableShtCol
+ *
+ * @brief Interface for FITS table short integer column
+ *
+ * This class implements a FITS table short integer column.
  ***************************************************************************/
 class GFitsTableShtCol : public GFitsTableCol {
+
+    // I/O friends
+    friend ostream& operator<< (ostream& os, const GFitsTableShtCol& column);
 
 public:
     // Constructors and destructors
     GFitsTableShtCol();
     GFitsTableShtCol(const std::string& name, const int& length,
-                     const int&         size = 1);
+                     const int& size = 1);
     GFitsTableShtCol(const GFitsTableShtCol& column);
     virtual ~GFitsTableShtCol();
 
     // Operators
     GFitsTableShtCol& operator= (const GFitsTableShtCol& column);
+    short&            operator() (const int& row, const int& inx = 0);
+    const short&      operator() (const int& row, const int& inx = 0) const;
 
     // Methods
     void              save(void);
@@ -46,11 +60,7 @@ public:
     double            real(const int& row, const int& col = 0);
     int               integer(const int& row, const int& col = 0);
     GFitsTableShtCol* clone(void) const;
-    double*           ptr_double(void);
-    float*            ptr_float(void);
-    short*            ptr_short(void);
-    long*             ptr_long(void);
-    int*              ptr_int(void);
+    short*            data(void);
     void              set_nullval(const short* value);
 
 private:
@@ -58,26 +68,17 @@ private:
     void        init_members(void);
     void        copy_members(const GFitsTableShtCol& column);
     void        free_members(void);
-    void        load(void);
     std::string ascii_format(void) const;
     std::string binary_format(void) const;
+    void        alloc_data(void);
+    void        init_data(void);
+    void        fetch_data(void);
+    void*       ptr_data(void) { return m_data; }
+    void*       ptr_nulval(void) { return m_nulval; }
 
     // Private data area
-    int    m_size;          // Size of data area
-    short* m_data;          // Data area
-    short* m_nulval;        // NULL value
-    int    m_anynul;        // Number of NULLs encountered
+    short* m_data;       //!< Data area
+    short* m_nulval;     //!< NULL value
 };
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
-inline short* GFitsTableShtCol::ptr_short(void) { return m_data; }
-inline
-GFitsTableShtCol* GFitsTableShtCol::clone(void) const
-{
-    return new GFitsTableShtCol(*this);
-}
 
 #endif /* GFITSTABLESHTCOL_HPP */

@@ -68,15 +68,17 @@ private:
     void        init_members(void);
     void        copy_members(const GFitsTableFltCol& column);
     void        free_members(void);
-    void        fetch_data(void);
     std::string ascii_format(void) const;
     std::string binary_format(void) const;
+    void        alloc_data(void);
+    void        init_data(void);
+    void        fetch_data(void);
+    void*       ptr_data(void) { return m_data; }
+    void*       ptr_nulval(void) { return m_nulval; }
 
     // Private data area
-    int    m_size;       //!< Size of allocated data area (0 if not loaded)
     float* m_data;       //!< Data area
     float* m_nulval;     //!< NULL value
-    int    m_anynul;     //!< Number of NULLs encountered
 };
 
 #endif /* GFITSTABLEFLTCOL_HPP */

@@ -21,11 +21,9 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
-#define G_SAVE       "GFitsTableDblCol::save(void)"
-#define G_STRING     "GFitsTableDblCol::string(const int&, const int&)"
-#define G_REAL       "GFitsTableDblCol::real(const int&, const int&)"
-#define G_INTEGER    "GFitsTableDblCol::integer(const int&, const int&)"
-#define G_FETCH_DATA "GFitsTableDblCol::fetch_data()"
+#define G_STRING  "GFitsTableDblCol::string(const int&, const int&)"
+#define G_REAL    "GFitsTableDblCol::real(const int&, const int&)"
+#define G_INTEGER "GFitsTableDblCol::integer(const int&, const int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -161,7 +159,7 @@ double& GFitsTableDblCol::operator() (const int& row, const int& inx)
     // Calculate pixel offset
     int offset = row * m_number + inx;
 
-    // Return image pixel
+    // Return data bin
     return m_data[offset];
 }
 
@@ -180,7 +178,7 @@ double& GFitsTableDblCol::operator() (const int& row, const int& inx)
  * if range checking is required.
  ***************************************************************************/
 const double& GFitsTableDblCol::operator() (const int& row, const int& inx)
-                                           const
+                                            const
 {
     // If data are not available then load them now
     if (m_data == NULL) ((GFitsTableDblCol*)this)->fetch_data();
@@ -188,7 +186,7 @@ const double& GFitsTableDblCol::operator() (const int& row, const int& inx)
     // Calculate pixel offset
     int offset = row * m_number + inx;
 
-    // Return image pixel
+    // Return data bin
     return m_data[offset];
 }
 
@@ -202,35 +200,16 @@ const double& GFitsTableDblCol::operator() (const int& row, const int& inx)
 /***********************************************************************//**
  * @brief Save table column into FITS file
  *
- * @exception GException::fits_hdu_not_found
- *            Specified HDU not found in FITS file.
- * @exception GException::fits_error
- *            Error occured during writing of the column data.
- *
  * The table column is only saved if it is linked to a FITS file and if the
  * data are indeed present in the class instance. This avoids saving of data
  * that have not been modified.
+ *
+ * Refer to GFitsTableCol::save_column() for more information.
  ***************************************************************************/
 void GFitsTableDblCol::save(void)
 {
-    // Continue only if a FITS file is connected and data have been loaded
-    if (m_fitsfile.Fptr != NULL && m_colnum > 0 && m_data != NULL) {
-
-        // Move to the HDU
-        int status = 0;
-        status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL,
-                              &status);
-        if (status != 0)
-            throw GException::fits_hdu_not_found(G_SAVE, 
-                                                 (m_fitsfile.HDUposition)+1,
-                                                 status);
-        // Save the column data
-        status = __ffpcn(&m_fitsfile, __TDOUBLE, m_colnum, 1, 1, 
-                         (long)m_size, m_data, m_nulval, &status);
-        if (status != 0)
-            throw GException::fits_error(G_SAVE, status);
-
-    } // endif: FITS file was connected
+    // Save column
+    save_column();
 
     // Return
     return;
@@ -406,8 +385,6 @@ void GFitsTableDblCol::init_members(void)
 {
     // Initialise members
     m_type   = __TDOUBLE;
-    m_size   = 0;
-    m_anynul = 0;
     m_data   = NULL;
     m_nulval = NULL;
 
@@ -424,8 +401,6 @@ void GFitsTableDblCol::init_members(void)
 void GFitsTableDblCol::copy_members(const GFitsTableDblCol& column)
 {
     // Copy attributes
-    m_size   = column.m_size;
-    m_anynul = column.m_anynul;
 
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
@@ -458,53 +433,6 @@ void GFitsTableDblCol::free_members(void)
     // Mark memory as freed
     m_data   = NULL;
     m_nulval = NULL;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Fetch column data
- *
- * @exception GException::fits_error
- *            An error occured while loading column data from FITS file.
- *
- * If a FITS file is attached to the column the data are loaded into memory
- * from the FITS file. If no FITS file is attached, memory is allocated
- * to hold the column data and all cells are set to 0.
- ***************************************************************************/
-void GFitsTableDblCol::fetch_data(void)
-{
-    // Calculate size of memory
-    m_size = m_number * m_length;
-
-    // Load only if the column has a positive size
-    if (m_size > 0) {
-
-        // Allocate fresh memory
-        if (m_data != NULL) delete [] m_data;
-        m_data = new double[m_size];
-
-        // If a FITS file is attached then load column data from the FITS
-        // file
-        if (m_fitsfile.Fptr != NULL) {
-            int status = 0;
-            status = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL,
-                              &status);
-            status = __ffgcv(&m_fitsfile, __TDOUBLE, m_colnum, 1, 1, m_size,
-                             m_nulval, m_data, &m_anynul, &status);
-            if (status != 0)
-                throw GException::fits_error(G_FETCH_DATA, status);
-        }
-
-        // ... otherwise initialise all column values to 0
-        else {
-            for (int i = 0; i < m_size; ++i)
-                m_data[i] = 0.0;
-        }
-
-    } // endif: column has a positive size
 
     // Return
     return;
@@ -549,6 +477,61 @@ std::string GFitsTableDblCol::binary_format(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Allocates column data
+ ***************************************************************************/
+void GFitsTableDblCol::alloc_data(void)
+{
+    // Free any existing memory
+    if (m_data != NULL) delete [] m_data;
+
+    // Mark pointer as free
+    m_data = NULL;
+
+    // Allocate new data
+    if (m_size > 0)
+        m_data = new double[m_size];
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Initialise column data
+ ***************************************************************************/
+void GFitsTableDblCol::init_data(void)
+{
+    // Initialise data if they exist
+    if (m_data != NULL) {
+        for (int i = 0; i < m_size; ++i)
+            m_data[i] = 0.0;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fetch column data
+ *
+ * If a FITS file is attached to the column the data are loaded into memory
+ * from the FITS file. If no FITS file is attached, memory is allocated
+ * to hold the column data and all cells are set to 0.
+ *
+ * Refer to GFitsTableCol::load_column for more information.
+ ***************************************************************************/
+void GFitsTableDblCol::fetch_data(void)
+{
+    // Save column
+    load_column();
+
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                          GFitsTableDblCol friends                       =
@@ -563,39 +546,8 @@ std::string GFitsTableDblCol::binary_format(void) const
  ***************************************************************************/
 ostream& operator<< (ostream& os, const GFitsTableDblCol& column)
 {
-    // Put column name in stream
-    os << "'" << column.m_name << "'";
-
-    // Put FITS column number in stream
-    if (column.m_colnum > 0)
-        os << " [fits_colnum=" << column.m_colnum << "]";
-    else
-        os << " [not linked to FITS file]";
-
-    // Put column type in stream
-    os << " " << column.ascii_format();
-    os << " " << column.binary_format();
-
-    // Put data loading in stream
-    if (column.m_data == NULL)
-        os << " (not loaded)";
-    else
-        os << " (loaded in memory)";
-
-    // Set data area size
-    os << " size=" << column.m_size;
-
-    // Set vector length
-    os << " repeat=" << column.m_repeat;
-
-    // Set width
-    os <<  " width=" << column.m_width;
-
-    // Set number
-    os <<  " number=" << column.m_number;
-
-    // Set length
-    os << " length=" << column.m_length;
+    // Dump column in output stream
+    column.dump_column(os, column.m_data);
 
     // Return output stream
     return os;

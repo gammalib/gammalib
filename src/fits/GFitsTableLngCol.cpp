@@ -21,11 +21,9 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
-#define G_SAVE       "GFitsTableLngCol::save()"
-#define G_STRING     "GFitsTableLngCol::string(const int&, const int&)"
-#define G_REAL       "GFitsTableLngCol::real(const int&, const int&)"
-#define G_INTEGER    "GFitsTableLngCol::integer(const int&, const int&)"
-#define G_FETCH_DATA "GFitsTableLngCol::fetch_data()"
+#define G_STRING  "GFitsTableLngCol::string(const int&, const int&)"
+#define G_REAL    "GFitsTableLngCol::real(const int&, const int&)"
+#define G_INTEGER "GFitsTableLngCol::integer(const int&, const int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -78,8 +76,8 @@ GFitsTableLngCol::GFitsTableLngCol(const std::string& name,
  *
  * @param[in] column Column from which class instance should be built.
  ***************************************************************************/
-GFitsTableLngCol::GFitsTableLngCol(const GFitsTableLngCol& column) :
-                                                        GFitsTableCol(column)
+GFitsTableLngCol::GFitsTableLngCol(const GFitsTableLngCol& column) 
+                                   : GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -159,7 +157,7 @@ long& GFitsTableLngCol::operator() (const int& row, const int& inx)
     if (m_data == NULL) fetch_data();
 
     // Calculate pixel offset
-    int offset = row * m_repeat + inx;
+    int offset = row * m_number + inx;
 
     // Return image pixel
     return m_data[offset];
@@ -180,13 +178,13 @@ long& GFitsTableLngCol::operator() (const int& row, const int& inx)
  * if range checking is required.
  ***************************************************************************/
 const long& GFitsTableLngCol::operator() (const int& row, const int& inx)
-                                                                        const
+                                          const
 {
     // If data are not available then load them now
     if (m_data == NULL) ((GFitsTableLngCol*)this)->fetch_data();
 
     // Calculate pixel offset
-    int offset = row * m_repeat + inx;
+    int offset = row * m_number + inx;
 
     // Return image pixel
     return m_data[offset];
@@ -202,27 +200,16 @@ const long& GFitsTableLngCol::operator() (const int& row, const int& inx)
 /***********************************************************************//**
  * @brief Save table column into FITS file
  *
- * @exception GException::fits_hdu_not_found
- *            Specified HDU not found in FITS file.
+ * The table column is only saved if it is linked to a FITS file and if the
+ * data are indeed present in the class instance. This avoids saving of data
+ * that have not been modified.
+ *
+ * Refer to GFitsTableCol::save_column() for more information.
  ***************************************************************************/
 void GFitsTableLngCol::save(void)
 {
-    // Continue only if a FITS file is connected
-    if (m_fitsfile.Fptr != NULL) {
-
-        // Move to the HDU
-        int status = 0;
-        status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL,
-                              &status);
-        if (status != 0)
-            throw GException::fits_hdu_not_found(G_SAVE, 
-                                                 (m_fitsfile.HDUposition)+1,
-                                                 status);
-
-        // Save the column data
-        // TBD
-
-    } // endif: FITS file was connected
+    // Save column
+    save_column();
 
     // Return
     return;
@@ -254,7 +241,7 @@ std::string GFitsTableLngCol::string(const int& row, const int& inx)
         throw GException::out_of_range(G_STRING, inx, 0, m_number-1);
 
     // Get index
-    int offset = row * m_repeat + inx;
+    int offset = row * m_number + inx;
 
     // Convert long into string
     ostringstream s_value;
@@ -290,7 +277,7 @@ double GFitsTableLngCol::real(const int& row, const int& inx)
         throw GException::out_of_range(G_REAL, inx, 0, m_number-1);
 
     // Get index
-    int offset = row * m_repeat + inx;
+    int offset = row * m_number + inx;
 
     // Convert long into double
     double value = (double)m_data[offset];
@@ -325,7 +312,7 @@ int GFitsTableLngCol::integer(const int& row, const int& inx)
         throw GException::out_of_range(G_INTEGER, inx, 0, m_number-1);
 
     // Get index
-    int offset = row * m_repeat + inx;
+    int offset = row * m_number + inx;
 
     // Convert long into int
     int value = (int)m_data[offset];
@@ -402,8 +389,6 @@ void GFitsTableLngCol::init_members(void)
 {
     // Initialise members
     m_type   = __TLONG;
-    m_size   = 0;
-    m_anynul = 0;
     m_data   = NULL;
     m_nulval = NULL;
 
@@ -420,8 +405,6 @@ void GFitsTableLngCol::init_members(void)
 void GFitsTableLngCol::copy_members(const GFitsTableLngCol& column)
 {
     // Copy attributes
-    m_size   = column.m_size;
-    m_anynul = column.m_anynul;
 
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
@@ -454,53 +437,6 @@ void GFitsTableLngCol::free_members(void)
     // Mark memory as freed
     m_data   = NULL;
     m_nulval = NULL;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Fetch column data
- *
- * @exception GException::fits_error
- *            An error occured while loading column data from FITS file.
- *
- * If a FITS file is attached to the column the data are loaded into memory
- * from the FITS file. If no FITS file is attached, memory is allocated
- * to hold the column data and all cells are set to 0.
- ***************************************************************************/
-void GFitsTableLngCol::fetch_data(void)
-{
-    // Calculate size of memory
-    m_size = m_number * m_length;
-
-    // Load only if the column has a positive size
-    if (m_size > 0) {
-
-        // Allocate fresh memory
-        if (m_data != NULL) delete [] m_data;
-        m_data = new long[m_size];
-
-        // If a FITS file is attached then load column data from the FITS
-        // file
-        if (m_fitsfile.Fptr != NULL) {
-            int status = 0;
-            status = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL,
-                              &status);
-            status = __ffgcv(&m_fitsfile, __TLONG, m_colnum, 1, 1, m_size,
-                             m_nulval, m_data, &m_anynul, &status);
-            if (status != 0)
-                throw GException::fits_error(G_FETCH_DATA, status);
-        }
-
-        // ... otherwise initialise all column values to 0
-        else {
-            for (int i = 0; i < m_size; ++i)
-                m_data[i] = 0;
-        }
-
-    } // endif: column has a positive size
 
     // Return
     return;
@@ -545,11 +481,81 @@ std::string GFitsTableLngCol::binary_format(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Allocates column data
+ ***************************************************************************/
+void GFitsTableLngCol::alloc_data(void)
+{
+    // Free any existing memory
+    if (m_data != NULL) delete [] m_data;
+
+    // Mark pointer as free
+    m_data = NULL;
+
+    // Allocate new data
+    if (m_size > 0)
+        m_data = new long[m_size];
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Initialise column data
+ ***************************************************************************/
+void GFitsTableLngCol::init_data(void)
+{
+    // Initialise data if they exist
+    if (m_data != NULL) {
+        for (int i = 0; i < m_size; ++i)
+            m_data[i] = 0;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fetch column data
+ *
+ * If a FITS file is attached to the column the data are loaded into memory
+ * from the FITS file. If no FITS file is attached, memory is allocated
+ * to hold the column data and all cells are set to 0.
+ *
+ * Refer to GFitsTableCol::load_column for more information.
+ ***************************************************************************/
+void GFitsTableLngCol::fetch_data(void)
+{
+    // Save column
+    load_column();
+
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                          GFitsTableLngCol friends                       =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream
+ * @param[in] column Column to put in output stream
+ ***************************************************************************/
+ostream& operator<< (ostream& os, const GFitsTableLngCol& column)
+{
+    // Dump column in output stream
+    column.dump_column(os, column.m_data);
+
+    // Return output stream
+    return os;
+}
 
 
 /*==========================================================================

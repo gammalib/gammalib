@@ -21,16 +21,9 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
-#define G_SAVE       "GFitsTableShtCol::save()"
-#define G_STRING     "GFitsTableShtCol::string(const int&, const int&)"
-#define G_REAL       "GFitsTableShtCol::real(const int&, const int&)"
-#define G_INTEGER    "GFitsTableShtCol::integer(const int&, const int&)"
-#define G_PTR_FLOAT  "GFitsTableShtCol::ptr_float()"
-#define G_PTR_DOUBLE "GFitsTableShtCol::ptr_double()"
-#define G_PTR_SHORT  "GFitsTableShtCol::ptr_short()"
-#define G_PTR_LONG   "GFitsTableShtCol::ptr_long()"
-#define G_PTR_INT    "GFitsTableShtCol::ptr_int()"
-#define G_LOAD       "GFitsTableShtCol::load()"
+#define G_STRING  "GFitsTableShtCol::string(const int&, const int&)"
+#define G_REAL    "GFitsTableShtCol::real(const int&, const int&)"
+#define G_INTEGER "GFitsTableShtCol::integer(const int&, const int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -45,9 +38,8 @@
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                                Constructor                              *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Constructor
  ***************************************************************************/
 GFitsTableShtCol::GFitsTableShtCol() : GFitsTableCol()
 {
@@ -79,9 +71,10 @@ GFitsTableShtCol::GFitsTableShtCol(const std::string& name,
 }
 
 
-/***************************************************************************
- *                              Copy constructor                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] column Column from which class instance should be built.
  ***************************************************************************/
 GFitsTableShtCol::GFitsTableShtCol(const GFitsTableShtCol& column) : GFitsTableCol(column)
 {
@@ -96,9 +89,8 @@ GFitsTableShtCol::GFitsTableShtCol(const GFitsTableShtCol& column) : GFitsTableC
 }
 
 
-/***************************************************************************
- *                               Destructor                                *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Destructor
  ***************************************************************************/
 GFitsTableShtCol::~GFitsTableShtCol()
 {
@@ -116,9 +108,10 @@ GFitsTableShtCol::~GFitsTableShtCol()
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                            Assignment operator                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param[in] column Column which should be assigned
  ***************************************************************************/
 GFitsTableShtCol& GFitsTableShtCol::operator= (const GFitsTableShtCol& column)
 {
@@ -144,6 +137,59 @@ GFitsTableShtCol& GFitsTableShtCol::operator= (const GFitsTableShtCol& column)
 }
 
 
+/***********************************************************************//**
+ * @brief Column data access operator
+ *
+ * @param[in] row Row of column to access.
+ * @param[in] inx Vector index in column row to access
+ *
+ * Provides access to data in a column. No range checking is performed.
+ * Use one of
+ *   GFitsTableShtCol::string(ix,iy),
+ *   GFitsTableShtCol::real(ix;iy) or
+ *   GFitsTableShtCol::integer(ix;iy)
+ * if range checking is required.
+ ***************************************************************************/
+short& GFitsTableShtCol::operator() (const int& row, const int& inx)
+{
+    // If data are not available then load them now
+    if (m_data == NULL) fetch_data();
+
+    // Calculate pixel offset
+    int offset = row * m_number + inx;
+
+    // Return data bin
+    return m_data[offset];
+}
+
+
+/***********************************************************************//**
+ * @brief Column data access operator (const variant)
+ *
+ * @param[in] row Row of column to access.
+ * @param[in] inx Vector index in column row to access
+ *
+ * Provides access to data in a column. No range checking is performed.
+ * Use one of
+ *   GFitsTableDblCol::string(ix,iy),
+ *   GFitsTableShtCol::real(ix;iy) or
+ *   GFitsTableShtCol::integer(ix;iy)
+ * if range checking is required.
+ ***************************************************************************/
+const short& GFitsTableShtCol::operator() (const int& row, const int& inx)
+                                           const
+{
+    // If data are not available then load them now
+    if (m_data == NULL) ((GFitsTableShtCol*)this)->fetch_data();
+
+    // Calculate pixel offset
+    int offset = row * m_number + inx;
+
+    // Return data bin
+    return m_data[offset];
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                      GFitsTableShtCol public methods                    =
@@ -153,149 +199,153 @@ GFitsTableShtCol& GFitsTableShtCol::operator= (const GFitsTableShtCol& column)
 /***********************************************************************//**
  * @brief Save table column into FITS file
  *
- * @exception GException::fits_hdu_not_found
- *            Specified HDU not found in FITS file.
+ * The table column is only saved if it is linked to a FITS file and if the
+ * data are indeed present in the class instance. This avoids saving of data
+ * that have not been modified.
+ *
+ * Refer to GFitsTableCol::save_column() for more information.
  ***************************************************************************/
 void GFitsTableShtCol::save(void)
 {
-    // Continue only if a FITS file is connected
-    if (m_fitsfile.Fptr != NULL) {
-
-        // Move to the HDU
-        int status = 0;
-        status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL,
-                              &status);
-        if (status != 0)
-            throw GException::fits_hdu_not_found(G_SAVE, 
-                                                 (m_fitsfile.HDUposition)+1,
-                                                 status);
-
-        // Save the column data
-        // TBD
-
-    } // endif: FITS file was connected
+    // Save column
+    save_column();
 
     // Return
     return;
 }
 
-/***************************************************************************
- *                             Get string value                            *
- * ----------------------------------------------------------------------- *
+
+/***********************************************************************//**
+ * @brief Get string value
+ *
+ * @param[in] row Table row.
+ * @param[in] inx Table column vector index.
+ *
+ * @exception GException::out_of_range
+ *            Table row or vector index are out of valid range.
+ *
+ * Returns value of specified row and vector index as string.
  ***************************************************************************/
-std::string GFitsTableShtCol::string(const int& row, const int& col)
+std::string GFitsTableShtCol::string(const int& row, const int& inx)
 {
-    // Make sure that data are loaded
-    if (m_data == NULL)
-        load();
+    // If data are not available then load them now
+    if (m_data == NULL) fetch_data();
 
     // Check row value
     if (row < 0 || row >= m_length)
         throw GException::out_of_range(G_STRING, row, 0, m_length-1);
 
-    // Check col value
-    if (col < 0 || col >= m_number)
-        throw GException::out_of_range(G_STRING, col, 0, m_number-1);
+    // Check inx value
+    if (inx < 0 || inx >= m_number)
+        throw GException::out_of_range(G_STRING, inx, 0, m_number-1);
 
     // Get index
-    int inx = row * m_repeat + col;
+    int offset = row * m_number + inx;
 
-    // Convert short into string
+    // Convert double into string
     ostringstream s_value;
-    s_value << m_data[inx];
+    s_value << m_data[offset];
 
     // Return value
     return s_value.str();
 }
 
 
-/***************************************************************************
- *                              Get real value                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Get double precision value
+ *
+ * @param[in] row Table row.
+ * @param[in] inx Table column vector index.
+ *
+ * @exception GException::out_of_range
+ *            Table row or vector index are out of valid range.
+ *
+ * Returns value of specified row and vector index as double precision.
  ***************************************************************************/
-double GFitsTableShtCol::real(const int& row, const int& col)
+double GFitsTableShtCol::real(const int& row, const int& inx)
 {
-    // Make sure that data are loaded
-    if (m_data == NULL)
-        load();
+    // If data are not available then load them now
+    if (m_data == NULL) fetch_data();
 
     // Check row value
     if (row < 0 || row >= m_length)
         throw GException::out_of_range(G_REAL, row, 0, m_length-1);
 
-    // Check col value
-    if (col < 0 || col >= m_number)
-        throw GException::out_of_range(G_REAL, col, 0, m_number-1);
+    // Check inx value
+    if (inx < 0 || inx >= m_number)
+        throw GException::out_of_range(G_REAL, inx, 0, m_number-1);
 
     // Get index
-    int inx = row * m_repeat + col;
+    int offset = row * m_number + inx;
 
     // Convert short into double
-    double value = (double)m_data[inx];
+    double value = (double)m_data[offset];
 
     // Return value
     return value;
 }
 
 
-/***************************************************************************
- *                               Get int value                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Get integer value
+ *
+ * @param[in] row Table row.
+ * @param[in] inx Table column vector index.
+ *
+ * @exception GException::out_of_range
+ *            Table row or vector index are out of valid range.
+ *
+ * Returns value of specified row and vector index as integer.
  ***************************************************************************/
-int GFitsTableShtCol::integer(const int& row, const int& col)
+int GFitsTableShtCol::integer(const int& row, const int& inx)
 {
-    // Make sure that data are loaded
-    if (m_data == NULL)
-        load();
+    // If data are not available then load them now
+    if (m_data == NULL) fetch_data();
 
     // Check row value
     if (row < 0 || row >= m_length)
         throw GException::out_of_range(G_INTEGER, row, 0, m_length-1);
 
     // Check col value
-    if (col < 0 || col >= m_number)
-        throw GException::out_of_range(G_INTEGER, col, 0, m_number-1);
+    if (inx < 0 || inx >= m_number)
+        throw GException::out_of_range(G_INTEGER, inx, 0, m_number-1);
 
     // Get index
-    int inx = row * m_repeat + col;
+    int offset = row * m_number + inx;
 
     // Convert short into int
-    int value = (int)m_data[inx];
+    int value = (int)m_data[offset];
 
     // Return value
     return value;
 }
 
 
-/***************************************************************************
- *                      Access to invalid data pointers                    *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Clone column
  ***************************************************************************/
-float* GFitsTableShtCol::ptr_float(void)
+GFitsTableShtCol* GFitsTableShtCol::clone(void) const
 {
-    throw GException::fits_invalid_type(G_PTR_FLOAT,
-                              "No <float> pointer allowed to <short> array");
-}
-double* GFitsTableShtCol::ptr_double(void)
-{
-    throw GException::fits_invalid_type(G_PTR_DOUBLE,
-                             "No <double> pointer allowed to <short> array");
-}
-long* GFitsTableShtCol::ptr_long(void)
-{
-    throw GException::fits_invalid_type(G_PTR_LONG, 
-                               "No <long> pointer allowed to <short> array");
-}
-int* GFitsTableShtCol::ptr_int(void)
-{
-    throw GException::fits_invalid_type(G_PTR_INT,
-                                "No <int> pointer allowed to <short> array");
+    return new GFitsTableShtCol(*this);
 }
 
 
-/***************************************************************************
- *                              Set NULL string                            *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return pointer to short integer column
+ ***************************************************************************/
+short* GFitsTableShtCol::data(void)
+{
+    return m_data;
+}
+
+
+/***********************************************************************//**
+ * @brief Set NULL value
+ *
+ * @param[in] value Pointer on NULL value
+ *
+ * Allows the specification of the FITS table NULL value. If value=NULL the
+ * data will not be screened for NULL values.
  ***************************************************************************/
 void GFitsTableShtCol::set_nullval(const short* value)
 {
@@ -312,13 +362,13 @@ void GFitsTableShtCol::set_nullval(const short* value)
         *m_nulval = *value;
     }
 
-    // Re-load column 
-    // NOTE: THIS WILL LEAD TO A LOSS OF MODIFICATIONS; ISSUE SAVE BEFORE !!!
+    // Re-load column
+/*
     if (m_data != NULL) {
-        //save();
+        save();
         load();
     }
-
+*/
     // Return
     return;
 }
@@ -330,16 +380,13 @@ void GFitsTableShtCol::set_nullval(const short* value)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                         Initialise class members                        *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Initialise class members
  ***************************************************************************/
 void GFitsTableShtCol::init_members(void)
 {
     // Initialise members
     m_type   = __TSHORT;
-    m_size   = 0;
-    m_anynul = 0;
     m_data   = NULL;
     m_nulval = NULL;
 
@@ -348,15 +395,14 @@ void GFitsTableShtCol::init_members(void)
 }
 
 
-/***************************************************************************
- *                            Copy class members                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] column Column for which members should be copied.
  ***************************************************************************/
 void GFitsTableShtCol::copy_members(const GFitsTableShtCol& column)
 {
     // Copy attributes
-    m_size   = column.m_size;
-    m_anynul = column.m_anynul;
 
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
@@ -377,9 +423,8 @@ void GFitsTableShtCol::copy_members(const GFitsTableShtCol& column)
 }
 
 
-/***************************************************************************
- *                           Delete class members                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Delete class members
  ***************************************************************************/
 void GFitsTableShtCol::free_members(void)
 {
@@ -390,32 +435,6 @@ void GFitsTableShtCol::free_members(void)
     // Mark memory as freed
     m_data   = NULL;
     m_nulval = NULL;
-
-    // Return
-    return;
-}
-
-
-/***************************************************************************
- *                             Load column data                            *
- * ----------------------------------------------------------------------- *
- ***************************************************************************/
-void GFitsTableShtCol::load(void)
-{
-    // Calculate size of memory
-    m_size = m_number * m_length;
-
-    // Allocate memory
-    if (m_data != NULL) delete [] m_data;
-    m_data = new short[m_size];
-
-    // Load column data
-    int status = 0;
-    status = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
-    status = __ffgcv(&m_fitsfile, __TSHORT, m_colnum, 1, 1, m_size,
-                     m_nulval, m_data, &m_anynul, &status);
-    if (status != 0)
-        throw GException::fits_error(G_LOAD, status);
 
     // Return
     return;
@@ -460,11 +479,81 @@ std::string GFitsTableShtCol::binary_format(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Allocates column data
+ ***************************************************************************/
+void GFitsTableShtCol::alloc_data(void)
+{
+    // Free any existing memory
+    if (m_data != NULL) delete [] m_data;
+
+    // Mark pointer as free
+    m_data = NULL;
+
+    // Allocate new data
+    if (m_size > 0)
+        m_data = new short[m_size];
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Initialise column data
+ ***************************************************************************/
+void GFitsTableShtCol::init_data(void)
+{
+    // Initialise data if they exist
+    if (m_data != NULL) {
+        for (int i = 0; i < m_size; ++i)
+            m_data[i] = 0;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fetch column data
+ *
+ * If a FITS file is attached to the column the data are loaded into memory
+ * from the FITS file. If no FITS file is attached, memory is allocated
+ * to hold the column data and all cells are set to 0.
+ *
+ * Refer to GFitsTableCol::load_column for more information.
+ ***************************************************************************/
+void GFitsTableShtCol::fetch_data(void)
+{
+    // Save column
+    load_column();
+
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                          GFitsTableShtCol friends                       =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream
+ * @param[in] column Column to put in output stream
+ ***************************************************************************/
+ostream& operator<< (ostream& os, const GFitsTableShtCol& column)
+{
+    // Dump column in output stream
+    column.dump_column(os, column.m_data);
+
+    // Return output stream
+    return os;
+}
 
 
 /*==========================================================================

@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsTableStrCol.hpp
+ * @brief GFitsTableStrCol class definition.
+ * @author J. Knodlseder
+ */
 
 #ifndef GFITSTABLESTRCOL_HPP
 #define GFITSTABLESTRCOL_HPP
@@ -24,21 +29,30 @@
 /* __ Structures _________________________________________________________ */
 
 
-/***************************************************************************
- *                    GFitsTableStrCol class definition                    *
+/***********************************************************************//**
+ * @class GFitsTableStrCol
+ *
+ * @brief Interface for FITS table string column
+ *
+ * This class implements a FITS table string column.
  ***************************************************************************/
 class GFitsTableStrCol : public GFitsTableCol {
+
+    // I/O friends
+    friend ostream& operator<< (ostream& os, const GFitsTableStrCol& column);
 
 public:
     // Constructors and destructors
     GFitsTableStrCol();
     GFitsTableStrCol(const std::string& name, const int& length,
-                     const int& size = 1);
+                     const int& width, const int& size = 1);
     GFitsTableStrCol(const GFitsTableStrCol& column);
     ~GFitsTableStrCol();
 
     // Operators
-    GFitsTableStrCol& operator= (const GFitsTableStrCol& column);
+    GFitsTableStrCol&  operator= (const GFitsTableStrCol& column);
+    std::string&       operator() (const int& row, const int& inx = 0);
+    const std::string& operator() (const int& row, const int& inx = 0) const;
 
     // Methods
     void              save(void);
@@ -46,37 +60,28 @@ public:
     double            real(const int& row, const int& col = 0);
     int               integer(const int& row, const int& col = 0);
     GFitsTableStrCol* clone(void) const;
-    float*            ptr_float(void);
-    double*           ptr_double(void);
-    short*            ptr_short(void);
-    long*             ptr_long(void);
-    int*              ptr_int(void);
-    void              set_nullstr(const std::string string);
+    std::string*      data(void);
+    void              set_nullval(const std::string string);
 
 private:
     // Private methods
     void        init_members(void);
     void        copy_members(const GFitsTableStrCol& column);
     void        free_members(void);
-    void        load(void);
     std::string ascii_format(void) const;
     std::string binary_format(void) const;
+    void        alloc_data(void);
+    void        init_data(void);
+    void        fetch_data(void);
+    void*       ptr_data(void) { return m_buffer; }
+    void*       ptr_nulval(void) { return m_nulval; }
+    void        alloc_buffer(void);
+    void        free_buffer(void);
 
     // Private data area
-    int    m_size;       // Total number of strings
-    char** m_data;       // Data area
-    char*  m_nulstr;     // NULL string
-    int    m_anynul;     // Number of NULLs encountered
+    std::string* m_data;    //!< Data area
+    char**       m_buffer;  //!< Data area for CFITSIO transfer
+    char*        m_nulval;  //!< NULL string
 };
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
-inline
-GFitsTableStrCol* GFitsTableStrCol::clone(void) const
-{
-    return new GFitsTableStrCol(*this);
-}
 
 #endif /* GFITSTABLESTRCOL_HPP */

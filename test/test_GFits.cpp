@@ -82,8 +82,8 @@ void test_columns(void)
         }
         else
           std::cout << ".";
-        std::string nullstr = "empty";
-        str.set_nullstr(nullstr);
+        std::string nullval = "empty";
+        str.set_nullval(nullval);
         if (str.string(2) != "empty") {
           cout << endl << "TEST ERROR: Bad single TSTRING NULL value read (" 
                << str.string(2) << ")." << endl;
@@ -508,13 +508,31 @@ void test_bin_table(void)
     system("rm -rf test_bintables.fits");
 
     // Allocate reference sums
-    double      sum_dbl     = 0.0;
-    int         sum_dbl_int = 0;
+    double      sum_dbl       = 0.0;
+    double      sum_dbl10     = 0.0;
+    int         sum_dbl_int   = 0;
+    int         sum_dbl10_int = 0;
     std::string sum_dbl_str;
-    float       sum_flt     = 0.0;
-    int         sum_flt_int = 0;
+    std::string sum_dbl10_str;
+    float       sum_flt       = 0.0;
+    float       sum_flt10     = 0.0;
+    int         sum_flt_int   = 0;
+    int         sum_flt10_int = 0;
     std::string sum_flt_str;
-    
+    std::string sum_flt10_str;
+    short       sum_sht       = 0;
+    short       sum_sht10     = 0;
+    short       sum_sht_int   = 0;
+    short       sum_sht10_int = 0;
+    std::string sum_sht_str;
+    std::string sum_sht10_str;
+    long        sum_lng       = 0;
+    long        sum_lng10     = 0;
+    long        sum_lng_int   = 0;
+    long        sum_lng10_int = 0;
+    std::string sum_lng_str;
+    std::string sum_lng10_str;
+
     // Build tables
     try {
         // Open FITS file
@@ -523,17 +541,20 @@ void test_bin_table(void)
 
         // Set number of rows
         int nrows = 10;
+        int nvec  = 10;
 
         // Initial control sums
         float       tot_flt = 0.0;
         double      tot_dbl = 0.0;
         int         tot_int = 0;
+        long        tot_lng = 0;
+        short       tot_sht = 0;
         std::string tot_str;
 
         //
         // ===== D O U B L E =====
         //
-        
+
         // Set double precision table
         GFitsTableDblCol col_dbl = GFitsTableDblCol("DOUBLE", nrows);
         for (int i = 0; i < nrows; ++i) {
@@ -546,14 +567,15 @@ void test_bin_table(void)
             sum_dbl_str += ":"+s_value.str();
         }
         cout << ".";
-        
+
         // Check double precision table (operator access)
         tot_dbl = 0.0;
         for (int i = 0; i < nrows; ++i)
             tot_dbl += col_dbl(i);
         if (!dequal(tot_dbl, sum_dbl)) {
-            cout << endl << "TEST ERROR: GFitsTableDblCol::operator()" 
-                 << endl;
+            cout << endl << "TEST ERROR: GFitsTableDblCol::operator()";
+            cout << endl << "  Reference sum: " << sum_dbl;
+            cout << endl << "  Derived sum:   " << tot_dbl << endl;
             throw;
         }
         cout << ".";
@@ -563,19 +585,21 @@ void test_bin_table(void)
         for (int i = 0; i < nrows; ++i)
             tot_dbl += col_dbl.real(i);
         if (!dequal(tot_dbl, sum_dbl)) {
-            cout << endl << "TEST ERROR: GFitsTableDblCol::real()" 
-                 << endl;
+            cout << endl << "TEST ERROR: GFitsTableDblCol::real()";
+            cout << endl << "  Reference sum: " << sum_dbl;
+            cout << endl << "  Derived sum:   " << tot_dbl << endl;
             throw;
         }
         cout << ".";
 
         // Check double precision table (int access)
-        tot_int = 0.0;
+        tot_int = 0;
         for (int i = 0; i < nrows; ++i)
             tot_int += col_dbl.integer(i);
         if (tot_int != sum_dbl_int) {
-            cout << endl << "TEST ERROR: GFitsTableDblCol::integer()" 
-                 << endl;
+            cout << endl << "TEST ERROR: GFitsTableDblCol::integer()";
+            cout << endl << "  Reference sum: " << sum_dbl_int;
+            cout << endl << "  Derived sum:   " << tot_int << endl;
             throw;
         }
         cout << ".";
@@ -585,8 +609,84 @@ void test_bin_table(void)
         for (int i = 0; i < nrows; ++i)
             tot_str += ":"+col_dbl.string(i);
         if (tot_str != sum_dbl_str) {
-            cout << endl << "TEST ERROR: GFitsTableDblCol::string()" 
-                 << endl;
+            cout << endl << "TEST ERROR: GFitsTableDblCol::string()";
+            cout << endl << "  Reference sum: " << sum_dbl_str;
+            cout << endl << "  Derived sum:   " << tot_str << endl;
+            throw;
+        }
+        cout << ".";
+
+        //
+        // ===== D O U B L E 1 0 =====
+        //
+
+        // Set double precision table
+        GFitsTableDblCol col_dbl10 = GFitsTableDblCol("DOUBLE10", nrows, nvec);
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j) {
+                double val_dbl = cos(double(i))*cos(0.33*double(j));
+                col_dbl10(i,j) = val_dbl;
+                sum_dbl10     += val_dbl;
+                sum_dbl10_int += int(val_dbl);
+                ostringstream s_value;
+                s_value << scientific << val_dbl;
+                sum_dbl10_str += ":"+s_value.str();
+            }
+        }
+        cout << ".";
+
+        // Check double precision table (operator access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_dbl += col_dbl10(i,j);
+        }
+        if (!dequal(tot_dbl, sum_dbl10)) {
+            cout << endl << "TEST ERROR: GFitsTableDblCol::operator() - 10";
+            cout << endl << "  Reference sum: " << sum_dbl10;
+            cout << endl << "  Derived sum:   " << tot_dbl << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check double precision table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_dbl += col_dbl10.real(i,j);
+        }
+        if (!dequal(tot_dbl, sum_dbl10)) {
+            cout << endl << "TEST ERROR: GFitsTableDblCol::real() - 10";
+            cout << endl << "  Reference sum: " << sum_dbl10;
+            cout << endl << "  Derived sum:   " << tot_dbl << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check double precision table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_int += col_dbl10.integer(i,j);
+        }
+        if (tot_int != sum_dbl10_int) {
+            cout << endl << "TEST ERROR: GFitsTableDblCol::integer() - 10";
+            cout << endl << "  Reference sum: " << sum_dbl10_int;
+            cout << endl << "  Derived sum:   " << tot_int << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check double precision table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_str += ":"+col_dbl10.string(i,j);
+        }
+        if (tot_str != sum_dbl10_str) {
+            cout << endl << "TEST ERROR: GFitsTableDblCol::string() - 10";
+            cout << endl << "  Reference sum: " << sum_dbl10_str;
+            cout << endl << "  Derived sum:   " << tot_str << endl;
             throw;
         }
         cout << ".";
@@ -613,8 +713,9 @@ void test_bin_table(void)
         for (int i = 0; i < nrows; ++i)
             tot_flt += col_flt(i);
         if (!fequal(tot_flt, sum_flt)) {
-            cout << endl << "TEST ERROR: GFitsTableFltCol::operator()" 
-                 << endl;
+            cout << endl << "TEST ERROR: GFitsTableFltCol::operator()";
+            cout << endl << "  Reference sum: " << sum_flt;
+            cout << endl << "  Derived sum:   " << tot_flt << endl;
             throw;
         }
         cout << ".";
@@ -624,19 +725,21 @@ void test_bin_table(void)
         for (int i = 0; i < nrows; ++i)
             tot_flt += col_flt.real(i);
         if (!fequal(tot_flt, sum_flt)) {
-            cout << endl << "TEST ERROR: GFitsTableFltCol::real()" 
-                 << endl;
+            cout << endl << "TEST ERROR: GFitsTableFltCol::real()";
+            cout << endl << "  Reference sum: " << sum_flt;
+            cout << endl << "  Derived sum:   " << tot_flt << endl;
             throw;
         }
         cout << ".";
 
         // Check single precision table (int access)
-        tot_int = 0.0;
+        tot_int = 0;
         for (int i = 0; i < nrows; ++i)
             tot_int += col_flt.integer(i);
         if (tot_int != sum_flt_int) {
-            cout << endl << "TEST ERROR: GFitsTableFltCol::integer()" 
-                 << endl;
+            cout << endl << "TEST ERROR: GFitsTableFltCol::integer()";
+            cout << endl << "  Reference sum: " << sum_flt_int;
+            cout << endl << "  Derived sum:   " << tot_int << endl;
             throw;
         }
         cout << ".";
@@ -646,27 +749,493 @@ void test_bin_table(void)
         for (int i = 0; i < nrows; ++i)
             tot_str += ":"+col_flt.string(i);
         if (tot_str != sum_flt_str) {
-            cout << endl << "TEST ERROR: GFitsTableFltCol::string()" 
-                 << endl;
+            cout << endl << "TEST ERROR: GFitsTableFltCol::string()";
+            cout << endl << "  Reference sum: " << sum_flt_str;
+            cout << endl << "  Derived sum:   " << tot_str << endl;
             throw;
+        }
+        cout << ".";
+
+        //
+        // ===== F L O A T  1 0 =====
+        //
+
+        // Set single precision table
+        GFitsTableFltCol col_flt10 = GFitsTableFltCol("FLOAT10", nrows, nvec);
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j) {
+                float val_flt  = cos(0.1*float(i))*cos(0.33*float(j));
+                col_flt10(i,j) = val_flt;
+                sum_flt10     += val_flt;
+                sum_flt10_int += int(val_flt);
+                ostringstream s_value;
+                s_value << scientific << val_flt;
+                sum_flt10_str += ":"+s_value.str();
+            }
+        }
+        cout << ".";
+
+        // Check single precision table (operator access)
+        tot_flt = 0.0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_flt += col_flt10(i,j);
+        }
+        if (!fequal(tot_flt, sum_flt10)) {
+            cout << endl << "TEST ERROR: GFitsTableFltCol::operator() - 10";
+            cout << endl << "  Reference sum: " << sum_flt10;
+            cout << endl << "  Derived sum:   " << tot_flt << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check single precision table (real access)
+        tot_flt = 0.0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_flt += col_flt10.real(i,j);
+        }
+        if (!fequal(tot_flt, sum_flt10)) {
+            cout << endl << "TEST ERROR: GFitsTableFltCol::real() - 10";
+            cout << endl << "  Reference sum: " << sum_flt10;
+            cout << endl << "  Derived sum:   " << tot_flt << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check double precision table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_int += col_flt10.integer(i,j);
+        }
+        if (tot_int != sum_flt10_int) {
+            cout << endl << "TEST ERROR: GFitsTableFltCol::integer() - 10";
+            cout << endl << "  Reference sum: " << sum_flt10_int;
+            cout << endl << "  Derived sum:   " << tot_int << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check single precision table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_str += ":"+col_flt10.string(i,j);
+        }
+        if (tot_str != sum_flt10_str) {
+            cout << endl << "TEST ERROR: GFitsTableFltCol::string() - 10";
+            cout << endl << "  Reference sum: " << sum_flt10_str;
+            cout << endl << "  Derived sum:   " << tot_str << endl;
+            throw;
+        }
+        cout << ".";
+
+        //
+        // ===== S H O R T =====
+        //
+
+        // Set short table
+        GFitsTableShtCol col_sht = GFitsTableShtCol("SHORT", nrows);
+        for (int i = 0; i < nrows; ++i) {
+            short val_sht = short(1000.0 * cos(0.1*float(i)));
+            col_sht(i)    = val_sht;
+            sum_sht      += val_sht;
+            sum_sht_int  += int(val_sht);
+            ostringstream s_value;
+            s_value << val_sht;
+            sum_sht_str += ":"+s_value.str();
+        }
+        cout << ".";
+
+        // Check short table (operator access)
+        tot_sht = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_sht += col_sht(i);
+        if (tot_sht != sum_sht) {
+            cout << endl << "TEST ERROR: GFitsTableShtCol::operator()";
+            cout << endl << "  Reference sum: " << sum_sht;
+            cout << endl << "  Derived sum:   " << tot_sht << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check short table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_dbl += col_sht.real(i);
+        if (!dequal(tot_dbl, double(sum_sht))) {
+            cout << endl << "TEST ERROR: GFitsTableShtCol::real()";
+            cout << endl << "  Reference sum: " << sum_sht;
+            cout << endl << "  Derived sum:   " << tot_dbl << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check short table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_int += col_sht.integer(i);
+        if (tot_int != sum_sht_int) {
+            cout << endl << "TEST ERROR: GFitsTableShtCol::integer()";
+            cout << endl << "  Reference sum: " << sum_sht_int;
+            cout << endl << "  Derived sum:   " << tot_int << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check single precision table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i)
+            tot_str += ":"+col_sht.string(i);
+        if (tot_str != sum_sht_str) {
+            cout << endl << "TEST ERROR: GFitsTableShtCol::string()";
+            cout << endl << "  Reference sum: " << sum_sht_str;
+            cout << endl << "  Derived sum:   " << tot_str << endl;
+            throw;
+        }
+        cout << ".";
+
+        //
+        // ===== S H O R T  1 0 =====
+        //
+
+        // Set short table
+        GFitsTableShtCol col_sht10 = GFitsTableShtCol("SHORT10", nrows, nvec);
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j) {
+                short val_sht  = short(100.0*cos(0.1*float(i))*
+                                             cos(0.33*float(j)));
+                col_sht10(i,j) = val_sht;
+                sum_sht10     += val_sht;
+                sum_sht10_int += int(val_sht);
+                ostringstream s_value;
+                s_value << val_sht;
+                sum_sht10_str += ":"+s_value.str();
+            }
+        }
+        cout << ".";
+
+        // Check short table (operator access)
+        tot_sht = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_sht += col_sht10(i,j);
+        }
+        if (tot_sht != sum_sht10) {
+            cout << endl << "TEST ERROR: GFitsTableShtCol::operator() - 10";
+            cout << endl << "  Reference sum: " << sum_sht10;
+            cout << endl << "  Derived sum:   " << tot_sht << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check short table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_dbl += col_sht10.real(i,j);
+        }
+        if (!dequal(tot_dbl, sum_sht10)) {
+            cout << endl << "TEST ERROR: GFitsTableShtCol::real() - 10";
+            cout << endl << "  Reference sum: " << sum_sht10;
+            cout << endl << "  Derived sum:   " << tot_dbl << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check short table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_int += col_sht10.integer(i,j);
+        }
+        if (tot_int != sum_sht10_int) {
+            cout << endl << "TEST ERROR: GFitsTableShtCol::integer() - 10";
+            cout << endl << "  Reference sum: " << sum_sht10_int;
+            cout << endl << "  Derived sum:   " << tot_int << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check single precision table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_str += ":"+col_sht10.string(i,j);
+        }
+        if (tot_str != sum_sht10_str) {
+            cout << endl << "TEST ERROR: GFitsTableShtCol::string() - 10";
+            cout << endl << "  Reference sum: " << sum_sht10_str;
+            cout << endl << "  Derived sum:   " << tot_str << endl;
+            throw;
+        }
+        cout << ".";
+
+        //
+        // ===== L O N G =====
+        //
+
+        // Set long table
+        GFitsTableLngCol col_lng = GFitsTableLngCol("LONG", nrows);
+        for (int i = 0; i < nrows; ++i) {
+            long val_lng  = long(100000.0 * cos(0.1*float(i)));
+            col_lng(i)    = val_lng;
+            sum_lng      += val_lng;
+            sum_lng_int  += int(val_lng);
+            ostringstream s_value;
+            s_value << val_lng;
+            sum_lng_str += ":"+s_value.str();
+        }
+        cout << ".";
+
+        // Check long table (operator access)
+        tot_lng = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_lng += col_lng(i);
+        if (tot_lng != sum_lng) {
+            cout << endl << "TEST ERROR: GFitsTableLngCol::operator()";
+            cout << endl << "  Reference sum: " << sum_lng;
+            cout << endl << "  Derived sum:   " << tot_lng << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check long table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_dbl += col_lng.real(i);
+        if (!dequal(tot_dbl, double(sum_lng))) {
+            cout << endl << "TEST ERROR: GFitsTableLngCol::real()";
+            cout << endl << "  Reference sum: " << sum_lng;
+            cout << endl << "  Derived sum:   " << tot_dbl << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check long table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_int += col_lng.integer(i);
+        if (tot_int != sum_lng_int) {
+            cout << endl << "TEST ERROR: GFitsTableLngCol::integer()";
+            cout << endl << "  Reference sum: " << sum_lng_int;
+            cout << endl << "  Derived sum:   " << tot_int << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check long table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i)
+            tot_str += ":"+col_lng.string(i);
+        if (tot_str != sum_lng_str) {
+            cout << endl << "TEST ERROR: GFitsTableLngCol::string()";
+            cout << endl << "  Reference sum: " << sum_lng_str;
+            cout << endl << "  Derived sum:   " << tot_str << endl;
+            throw;
+        }
+        cout << ".";
+
+        //
+        // ===== L O N G  1 0 =====
+        //
+
+        // Set long table
+        GFitsTableLngCol col_lng10 = GFitsTableLngCol("LONG10", nrows, nvec);
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j) {
+                long val_lng   = long(1000.0*cos(0.1*float(i))*
+                                             cos(0.33*float(j)));
+                col_lng10(i,j) = val_lng;
+                sum_lng10     += val_lng;
+                sum_lng10_int += int(val_lng);
+                ostringstream s_value;
+                s_value << val_lng;
+                sum_lng10_str += ":"+s_value.str();
+            }
+        }
+        cout << ".";
+
+        // Check long table (operator access)
+        tot_lng = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_lng += col_lng10(i,j);
+        }
+        if (tot_lng != sum_lng10) {
+            cout << endl << "TEST ERROR: GFitsTableLngCol::operator() - 10";
+            cout << endl << "  Reference sum: " << sum_lng10;
+            cout << endl << "  Derived sum:   " << tot_lng << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check long table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_dbl += col_lng10.real(i,j);
+        }
+        if (!dequal(tot_dbl, sum_lng10)) {
+            cout << endl << "TEST ERROR: GFitsTableLngCol::real() - 10";
+            cout << endl << "  Reference sum: " << sum_lng10;
+            cout << endl << "  Derived sum:   " << tot_dbl << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check long table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_int += col_lng10.integer(i,j);
+        }
+        if (tot_int != sum_lng10_int) {
+            cout << endl << "TEST ERROR: GFitsTableLngCol::integer() - 10";
+            cout << endl << "  Reference sum: " << sum_lng10_int;
+            cout << endl << "  Derived sum:   " << tot_int << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check single precision table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_str += ":"+col_lng10.string(i,j);
+        }
+        if (tot_str != sum_lng10_str) {
+            cout << endl << "TEST ERROR: GFitsTableLngCol::string() - 10";
+            cout << endl << "  Reference sum: " << sum_lng10_str;
+            cout << endl << "  Derived sum:   " << tot_str << endl;
+            throw;
+        }
+        cout << ".";
+
+        //
+        // ===== S T R I N G =====
+        //
+
+        // Set string table
+        GFitsTableStrCol col_str = GFitsTableStrCol("STRING", nrows, 20);
+        for (int i = 0; i < nrows; ++i) {
+            double val_dbl = cos(0.1*double(i));
+            ostringstream s_value;
+            s_value << scientific << val_dbl;
+            col_str(i) = s_value.str();
         }
         cout << ".";
 
         //
         // ===== W R I T E   T A B L E =====
         //
-        
+
         // Build binary table
         GFitsBinTable table = GFitsBinTable(nrows);
         table.append_column(col_dbl);
         table.append_column(col_flt);
-        
+        table.append_column(col_sht);
+        table.append_column(col_lng);
+        table.append_column(col_str);
+        table.insert_column(1, col_dbl10);
+        table.insert_column(1, col_flt10);
+        table.insert_column(0, col_sht10);
+        table.insert_column(99, col_lng10);
+
         // Create HDU and append to FILE file
         GFitsHDU hdu(table);
         fits.append_hdu(hdu);
 
         // Save FITS file
         fits.save();
+        //cout << fits;
+        cout << ".";
+    }
+    catch (exception &e) {
+        cout << endl << "TEST ERROR: Unable to build tables." << endl;
+        cout << e.what() << endl;
+        throw;
+    }
+    cout << ".";
+
+
+    //================================================================
+    //================================================================
+    //================================================================
+    // Read tables
+    //================================================================
+    //================================================================
+    //================================================================
+    try {
+        // Open FITS file
+        GFits fits;
+        fits.open("test_bintables.fits");
+
+        // Set number of rows
+        int nrows = 10;
+        int nvec  = 10;
+
+        // Initial control sums
+        float       tot_flt = 0.0;
+        double      tot_dbl = 0.0;
+        int         tot_int = 0;
+        std::string tot_str;
+
+        //
+        // ===== D O U B L E =====
+        //
+
+        // Get column
+        GFitsTableDblCol* col_dbl =
+                    (GFitsTableDblCol*)fits.hdu(2)->column("DOUBLE");
+
+        // Check double precision table (operator access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_dbl += (*col_dbl)(i);
+        if (!dequal(tot_dbl, sum_dbl)) {
+            cout << endl << "TEST ERROR: GFitsTableDblCol::operator()";
+            cout << endl << "  Reference sum: " << sum_dbl;
+            cout << endl << "  Derived sum:   " << tot_dbl << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check double precision table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_dbl += (*col_dbl).real(i);
+        if (!dequal(tot_dbl, sum_dbl)) {
+            cout << endl << "TEST ERROR: GFitsTableDblCol::real()";
+            cout << endl << "  Reference sum: " << sum_dbl;
+            cout << endl << "  Derived sum:   " << tot_dbl << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check double precision table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_int += (*col_dbl).integer(i);
+        if (tot_int != sum_dbl_int) {
+            cout << endl << "TEST ERROR: GFitsTableDblCol::integer()";
+            cout << endl << "  Reference sum: " << sum_dbl_int;
+            cout << endl << "  Derived sum:   " << tot_int << endl;
+            throw;
+        }
+        cout << ".";
+
+        // Check double precision table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i)
+            tot_str += ":"+ (*col_dbl).string(i);
+        if (tot_str != sum_dbl_str) {
+            cout << endl << "TEST ERROR: GFitsTableDblCol::string()";
+            cout << endl << "  Reference sum: " << sum_dbl_str;
+            cout << endl << "  Derived sum:   " << tot_str << endl;
+            throw;
+        }
         cout << ".";
     }
     catch (exception &e) {
@@ -675,8 +1244,7 @@ void test_bin_table(void)
         throw;
     }
     cout << ". ok." << endl;
-        
-        
+
 }
 
 /***************************************************************************
