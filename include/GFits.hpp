@@ -53,10 +53,11 @@ public:
     void      open(const std::string& filename);
     void      append_hdu(const GFitsHDU& hdu);
     void      save(void);
-    void      saveto(const std::string& filename, int clobber);
+    void      saveto(const std::string& filename, int clobber = 0);
     void      close(void);
     GFitsHDU* hdu(const std::string& extname);
     GFitsHDU* hdu(int extno);
+    int       num_hdu(void) const;
 
 private:
     // Private methods
