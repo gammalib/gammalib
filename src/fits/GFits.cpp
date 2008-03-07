@@ -279,19 +279,17 @@ void GFits::save(void)
  *            To overwrite an existing file set 'clobber=1'.
  * @exception GException::fits_error
  *            Unable to delete exiting FITS file.
+ * @exception GException::fits_open_error
+ *            Unable to create new FITS file.
  ***************************************************************************/
 void GFits::saveto(const std::string& filename, int clobber)
 {
-    // Create a copy of existing object. Recall that the copy does not
-    // carry over the FITS filename and pointer. Those will be automatically
-    // reset to the initial values in the new object.
-    GFits new_fits = *this;
-
     // Check if specified FITS file exists. If yes, saving will only be
     // allowed if clobber is true. If this is the case the specified file
     // will be deleted.
-    int status = 0;
-    status     = __ffopen(&(new_fits.m_fitsfile), filename.c_str(), 1, &status);
+    __fitsfile* tmp = NULL;
+    int status      = 0;
+    status          = __ffopen(&tmp, filename.c_str(), 1, &status);
     if (status == 0) {
 
         // If overwriting was not allowed the throw an exception
@@ -299,25 +297,33 @@ void GFits::saveto(const std::string& filename, int clobber)
             throw GException::fits_file_exist(G_SAVETO, filename, status);
 
         // Delete existing file
-        __fitsfile* tmp;
-        status = __ffopen(&tmp, filename.c_str(), 1, &status);
         status = __ffdelt(tmp, &status);
-        if (status == 0)
+        if (status != 0)
             throw GException::fits_error(G_SAVETO, status);
 
     }
+
+    // If error differs from 'file does not exist' then throw exception
+    else if (status != 104)
+        throw GException::fits_error(G_SAVETO, status);
+
+    // If file does not exist this is okay
     else
         status = 0;
 
     // Create a new FITS file now
+    GFits new_fits;
     new_fits.open(filename);
 
-    // Copy all HDUs
+    // Save new FITS file
     for (int i = 0; i < m_num_hdu; ++i)
-        new_fits.m_hdu[i] = m_hdu[i];
+        new_fits.append_hdu(m_hdu[i]);
 
     // Save new FITS file
     new_fits.save();
+
+    // Close new FITS file
+    new_fits.close();
 
     // Return
     return;
