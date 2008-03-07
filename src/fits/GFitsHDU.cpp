@@ -256,121 +256,6 @@ GFitsHDU& GFitsHDU::operator= (const GFitsHDU& hdu)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Open HDU
- *
- * @param[in] fptr FITS file pointer
- * @param[in] hdunum Number of HDU (starting from 1)
- *
- * Opens an (existing) HDU in the FITS file. This method does NOT create any
- * HDU if it does not exist. Opening consists of fetching all header cards
- * (by opening an associated GFitsHeader instance) and of opening the data
- * area (which can be of type Image or Table)
- ***************************************************************************/
-void GFitsHDU::open(__fitsfile* fptr, int hdunum)
-{
-    // Move to HDU
-    int status = 0;
-    status     = __ffmahd(fptr, hdunum, NULL, &status);
-    if (status != 0)
-        throw GException::fits_error(G_OPEN, status);
-
-    // Store information. 
-    // Note that the HDU number - 1 is stored in m_fitsfile->HDUposition !!!
-    m_fitsfile = *fptr;
-    m_hdunum   = hdunum;
-
-    // Get HDU type
-    status = __ffghdt(&m_fitsfile, &m_type, &status);
-    if (status != 0)
-        throw GException::fits_error(G_OPEN, status);
-
-    // Allocate and open HDU header
-    if (m_header != NULL) delete m_header;
-    m_header = new GFitsHeader();
-    m_header->open(&m_fitsfile);
-
-    // Open HDU data area
-    if (m_data != NULL) delete m_data;
-    switch (m_type) {
-    case HT_IMAGE:              // Image HDU
-        m_data = new_image();
-        break;
-    case HT_ASCII_TABLE:        // ASCII Table HDU
-        m_data = new GFitsAsciiTable();
-        break;
-    case HT_BIN_TABLE:          // Binary Table HDU
-        m_data = new GFitsBinTable();
-        break;
-    default:
-        throw GException::fits_unknown_HDU_type(G_OPEN, m_type);
-        break;
-    }
-    m_data->open(&m_fitsfile);
-
-    // Get HDU name from header
-    try {
-        m_name = strip_whitespace(m_header->string("EXTNAME"));
-    }
-    catch (GException::fits_key_not_found) {
-        m_name.clear();
-    }
-    if (m_name.length() == 0) {
-        if (hdunum == 1)
-            m_name = "Primary";
-        else
-            m_name = "NoName";
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Saves HDU
- *
- * Save the HDU to the FITS file. In case that the HDU does not exist in the
- * file it will be created (by the corresponding opening routines of the
- * GFitsData instance).
- * In the special case that no first HDU exists an empty primary image is
- * created.
- ***************************************************************************/
-void GFitsHDU::save(void)
-{
-//cout << "GFitsHDU::save entry" << endl;
-
-    // Save data and header if they exist
-    if (m_data != NULL) { 
-        m_data->connect(&m_fitsfile);
-        m_data->save();
-        if (m_header != NULL)
-            m_header->save(&m_fitsfile);
-    }
-
-    // ... otherwise make sure that the FITS file has at least a primary
-    // image.
-    else {
-
-        // Special case: The first HDU does not exist. A FITS file needs at
-        // least one primary HDU. Thus an empty image is created.
-        if (m_fitsfile.HDUposition == 0) {
-            int status = 0;
-            status     = __ffcrim(&m_fitsfile, 8, 0, NULL, &status);
-            if (status != 0)
-                throw GException::fits_error(G_SAVE, status);
-            if (m_header != NULL)
-                m_header->save(&m_fitsfile);
-        }
-
-    } // endelse: no data were available
-
-//cout << "GFitsHDU::save exit" << endl;
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Set HDU extension name (EXTNAME keyword)
  *
  * @param[in] extname Name of HDU
@@ -600,6 +485,121 @@ GFitsImage* GFitsHDU::new_image(void)
 
     // Return image pointer
     return image;
+}
+
+
+/***********************************************************************//**
+ * @brief Open HDU
+ *
+ * @param[in] fptr FITS file pointer
+ * @param[in] hdunum Number of HDU (starting from 1)
+ *
+ * Opens an (existing) HDU in the FITS file. This method does NOT create any
+ * HDU if it does not exist. Opening consists of fetching all header cards
+ * (by opening an associated GFitsHeader instance) and of opening the data
+ * area (which can be of type Image or Table)
+ ***************************************************************************/
+void GFitsHDU::open(__fitsfile* fptr, int hdunum)
+{
+    // Move to HDU
+    int status = 0;
+    status     = __ffmahd(fptr, hdunum, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_OPEN, status);
+
+    // Store information. 
+    // Note that the HDU number - 1 is stored in m_fitsfile->HDUposition !!!
+    m_fitsfile = *fptr;
+    m_hdunum   = hdunum;
+
+    // Get HDU type
+    status = __ffghdt(&m_fitsfile, &m_type, &status);
+    if (status != 0)
+        throw GException::fits_error(G_OPEN, status);
+
+    // Allocate and open HDU header
+    if (m_header != NULL) delete m_header;
+    m_header = new GFitsHeader();
+    m_header->open(&m_fitsfile);
+
+    // Open HDU data area
+    if (m_data != NULL) delete m_data;
+    switch (m_type) {
+    case HT_IMAGE:              // Image HDU
+        m_data = new_image();
+        break;
+    case HT_ASCII_TABLE:        // ASCII Table HDU
+        m_data = new GFitsAsciiTable();
+        break;
+    case HT_BIN_TABLE:          // Binary Table HDU
+        m_data = new GFitsBinTable();
+        break;
+    default:
+        throw GException::fits_unknown_HDU_type(G_OPEN, m_type);
+        break;
+    }
+    m_data->open(&m_fitsfile);
+
+    // Get HDU name from header
+    try {
+        m_name = strip_whitespace(m_header->string("EXTNAME"));
+    }
+    catch (GException::fits_key_not_found) {
+        m_name.clear();
+    }
+    if (m_name.length() == 0) {
+        if (hdunum == 1)
+            m_name = "Primary";
+        else
+            m_name = "NoName";
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Saves HDU
+ *
+ * Save the HDU to the FITS file. In case that the HDU does not exist in the
+ * file it will be created (by the corresponding opening routines of the
+ * GFitsData instance).
+ * In the special case that no first HDU exists an empty primary image is
+ * created.
+ ***************************************************************************/
+void GFitsHDU::save(void)
+{
+//cout << "GFitsHDU::save entry" << endl;
+
+    // Save data and header if they exist
+    if (m_data != NULL) { 
+        m_data->connect(&m_fitsfile);
+        m_data->save();
+        if (m_header != NULL)
+            m_header->save(&m_fitsfile);
+    }
+
+    // ... otherwise make sure that the FITS file has at least a primary
+    // image.
+    else {
+
+        // Special case: The first HDU does not exist. A FITS file needs at
+        // least one primary HDU. Thus an empty image is created.
+        if (m_fitsfile.HDUposition == 0) {
+            int status = 0;
+            status     = __ffcrim(&m_fitsfile, 8, 0, NULL, &status);
+            if (status != 0)
+                throw GException::fits_error(G_SAVE, status);
+            if (m_header != NULL)
+                m_header->save(&m_fitsfile);
+        }
+
+    } // endelse: no data were available
+
+//cout << "GFitsHDU::save exit" << endl;
+    // Return
+    return;
 }
 
 

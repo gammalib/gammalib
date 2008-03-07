@@ -20,6 +20,7 @@
 #define GFITSHDU_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include "GFitsCfitsio.hpp"
 #include "GFitsHeader.hpp"
 #include "GFitsData.hpp"
 #include "GFitsImage.hpp"
@@ -60,8 +61,6 @@ public:
     GFitsHDU& operator= (const GFitsHDU& hdu);
 
     // Methods
-    void           open(__fitsfile* fptr, int hdunum);
-    void           save(void);
     std::string    extname(void) const;
     void           extname(const std::string& extname);
     int            extno(void) const;
@@ -78,6 +77,8 @@ private:
     void        free_members(void);
     void        connect(__fitsfile* fptr);
     GFitsImage* new_image(void);
+    void        open(__fitsfile* fptr, int hdunum);
+    void        save(void);
 
     // Private data area
     __fitsfile   m_fitsfile;    //!< FITS file pointer
