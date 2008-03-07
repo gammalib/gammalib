@@ -436,6 +436,16 @@ GFitsHeader* GFitsHeader::clone(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Returns number of header cards
+ ***************************************************************************/
+int GFitsHeader::num_cards(void) const
+{
+    // Return number of header cards
+    return m_num_cards;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                         GFitsHeader private methods                     =
