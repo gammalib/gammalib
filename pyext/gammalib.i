@@ -21,6 +21,8 @@
 /* FITS file class */
 #include "GFits.i"
 #include "GFitsHDU.i"
+#include "GFitsHeader.i"
+#include "GFitsHeaderCard.i"
 
 /* Model fitting */
 #include "GFitPar.i"

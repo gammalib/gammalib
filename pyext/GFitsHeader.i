@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GFitsHDU.i  - FITS HDU handling class SWIG file             *
+ *           GFitsHeader.i  - FITS header handling class SWIG file         *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -11,55 +11,55 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GFitsHDU.i
- * @brief GFitsHDU class SWIG file
+ * @file GFitsHeader.i
+ * @brief GFitsHeader class SWIG file.
  * @author J. Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GFitsHDU.hpp"
+#include "GFitsHeader.hpp"
 %}
 
 %include stl.i
 
 
 /***********************************************************************//**
- * @class GFitsHDU
+ * @class GFitsHeader
  *
- * @brief Implements the FITS Header Data Unit (HDU) SWIG interface
+ * @brief Implements FITS header class SWIG interface
  *
- * The HDU is the basic unit of a FITS file. Each HDU consists of a header
- * and a data area. The header is composed of cards and is implemented by
- * the GFitsHeader class. The data are is either an image or a table and
- * is implemented by the abstract GFitsData base class.
+ * The FITS header class contains all cards that are found in the header of
+ * a HDU. All cards will be hold in memory, so no link to a FITS file is
+ * required. Cards may be read from one file (using the 'open' method) and
+ * saved into another file (using the 'save' method). Cards are added or
+ * changed using the 'update' method.
  ***************************************************************************/
-class GFitsHDU {
+class GFitsHeader {
 public:
     // Constructors and destructors
-    GFitsHDU();
-    GFitsHDU(const GFitsImage& image);
-    GFitsHDU(const GFitsAsciiTable& table);
-    GFitsHDU(const GFitsBinTable& table);
-    GFitsHDU(const GFitsHDU& hdu);
-    ~GFitsHDU();
+    GFitsHeader();
+    GFitsHeader(const GFitsHeader& header);
+    ~GFitsHeader();
 
     // Methods
-    std::string    extname(void) const;
-    void           extname(const std::string& extname);
-    int            extno(void) const;
-    int            exttype(void) const;
-    GFitsHeader*   header(void) const;
-    GFitsData*     data(void) const;
-    GFitsTableCol* column(const std::string& colname) const;
-    void           primary(void);
-
+    void             update(const GFitsHeaderCard& card);
+    GFitsHeaderCard* card(const std::string& keyname);
+    GFitsHeaderCard* card(const int& cardno);
+    std::string      string(const std::string& keyname);
+    std::string      string(const int& cardno);
+    double           real(const std::string& keyname);
+    double           real(const int& cardno);
+    int              integer(const std::string& keyname);
+    int              integer(const int& cardno);
+    GFitsHeader*     clone(void) const;
+    int              num_cards(void) const;
 };
 
 
 /***********************************************************************//**
- * @brief GFitsHDU class SWIG extension
+ * @brief GFitsHeader class SWIG extension
  ***************************************************************************/
-%extend GFitsHDU {
+%extend GFitsHeader {
     char *__str__() {
         static char str_buffer[100001];
         std::ostringstream buffer;
@@ -69,7 +69,7 @@ public:
         str_buffer[100000] = '\0';
         return str_buffer;
     }
-    GFitsHDU copy() {
+    GFitsHeader copy() {
         return (*self);
     }
 }
