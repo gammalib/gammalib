@@ -485,6 +485,133 @@ int GFitsHeaderCard::integer(void)
 }
 
 
+/*==========================================================================
+ =                                                                         =
+ =                      GFitsHeaderCard private methods                    =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ ***************************************************************************/
+void GFitsHeaderCard::init_members(void)
+{
+    // Initialise members
+    m_keyname.clear();
+    m_value.clear();
+    m_value_type     = CT_UNKNOWN;
+    m_value_decimals = 10;
+    m_unit.clear();
+    m_comment.clear();
+    m_comment_write = 0;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] card Header card to be copied
+ ***************************************************************************/
+void GFitsHeaderCard::copy_members(const GFitsHeaderCard& card)
+{
+    // Copy membres
+    m_keyname        = card.m_keyname;
+    m_value          = card.m_value;
+    m_value_type     = card.m_value_type;
+    m_value_decimals = card.m_value_decimals;
+    m_unit           = card.m_unit;
+    m_comment        = card.m_comment;
+    m_comment_write  = card.m_comment_write;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ ***************************************************************************/
+void GFitsHeaderCard::free_members(void)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Determine card value type
+ *
+ * @param[in] value Value string for which the type should be determined
+ *
+ * Method that determines the type of the card value. The following types are
+ * defined:
+ * CT_UNKNOWN=0 (inknown type)
+ * CT_INVALID=1 (invalid type)
+ * CT_STRING=2 (string)
+ * CT_INT=3 (integer)
+ * CT_FLOAT=4 (floating point)
+ * CT_BOOL=5 (boolean)
+ * CT_COMMENT=6 (comment)
+ * CT_HISTORY=7 (history)
+ * The type is determined by analyzing the card value. It is stored in the
+ * private variable 'm_value_type'.
+ ***************************************************************************/
+int GFitsHeaderCard::get_value_type(const std::string& value)
+{
+    // Get index of last string element
+    int last = m_value.length() - 1;
+
+    // If value is empty then we either have a COMMENT or HISTORY card or
+    // we don't know the type
+    if (last < 0) {
+        if (m_keyname == "COMMENT")
+            return CT_COMMENT;
+        if (m_keyname == "HISTORY")
+            return CT_HISTORY;
+        return CT_UNKNOWN;
+    }
+
+    // If value is enclosed in parentheses we have a string
+    if (m_value[0] == '\x27' && m_value[last] == '\x27')
+        return CT_STRING;
+
+    // If value has only one digit and is either 'F' or 'T' we have a
+    // Boolean
+    if (last == 0 && (m_value[0] == 'F' || m_value[0] == 'T'))
+        return CT_BOOL;
+
+    // If value is composed only of numeric or '+' or '-' characters we
+    // have an integer. If in addition we have '.' or 'e' or 'E' we (may)
+    // have a float.
+    int found_int   = 0;
+    int found_float = 0;
+    for (int i = 0; i <= last; ++i) {
+        if ((m_value[i] >= '0' && m_value[i] <= '9') || m_value[i] == '+' ||
+             m_value[i] == '-')
+            found_int = 1;
+        else if (m_value[i] == '.' || m_value[i] == 'e' || m_value[i] == 'E')
+            found_float = 1;
+        else
+            return CT_INVALID;
+    }
+
+    // If we are still alive we should have now either a float or an integer
+    if (found_int) {
+        if (found_float) {
+            return CT_FLOAT;
+        }
+        else {
+            return CT_INT;
+        }
+    }
+    else
+        return CT_INVALID;
+}
+
+
 /***********************************************************************//**
  * @brief Read header card from FITS file
  *
@@ -613,133 +740,6 @@ void GFitsHeaderCard::write(__fitsfile* fptr)
 
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                      GFitsHeaderCard private methods                    =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Initialise class members
- ***************************************************************************/
-void GFitsHeaderCard::init_members(void)
-{
-    // Initialise members
-    m_keyname.clear();
-    m_value.clear();
-    m_value_type     = CT_UNKNOWN;
-    m_value_decimals = 10;
-    m_unit.clear();
-    m_comment.clear();
-    m_comment_write = 0;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Copy class members
- *
- * @param[in] card Header card to be copied
- ***************************************************************************/
-void GFitsHeaderCard::copy_members(const GFitsHeaderCard& card)
-{
-    // Copy membres
-    m_keyname        = card.m_keyname;
-    m_value          = card.m_value;
-    m_value_type     = card.m_value_type;
-    m_value_decimals = card.m_value_decimals;
-    m_unit           = card.m_unit;
-    m_comment        = card.m_comment;
-    m_comment_write  = card.m_comment_write;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Delete class members
- ***************************************************************************/
-void GFitsHeaderCard::free_members(void)
-{
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Determine card value type
- *
- * @param[in] value Value string for which the type should be determined
- *
- * Method that determines the type of the card value. The following types are
- * defined:
- * CT_UNKNOWN=0 (inknown type)
- * CT_INVALID=1 (invalid type)
- * CT_STRING=2 (string)
- * CT_INT=3 (integer)
- * CT_FLOAT=4 (floating point)
- * CT_BOOL=5 (boolean)
- * CT_COMMENT=6 (comment)
- * CT_HISTORY=7 (history)
- * The type is determined by analyzing the card value. It is stored in the
- * private variable 'm_value_type'.
- ***************************************************************************/
-int GFitsHeaderCard::get_value_type(const std::string& value)
-{
-    // Get index of last string element
-    int last = m_value.length() - 1;
-
-    // If value is empty then we either have a COMMENT or HISTORY card or
-    // we don't know the type
-    if (last < 0) {
-        if (m_keyname == "COMMENT")
-            return CT_COMMENT;
-        if (m_keyname == "HISTORY")
-            return CT_HISTORY;
-        return CT_UNKNOWN;
-    }
-
-    // If value is enclosed in parentheses we have a string
-    if (m_value[0] == '\x27' && m_value[last] == '\x27')
-        return CT_STRING;
-
-    // If value has only one digit and is either 'F' or 'T' we have a
-    // Boolean
-    if (last == 0 && (m_value[0] == 'F' || m_value[0] == 'T'))
-        return CT_BOOL;
-
-    // If value is composed only of numeric or '+' or '-' characters we
-    // have an integer. If in addition we have '.' or 'e' or 'E' we (may)
-    // have a float.
-    int found_int   = 0;
-    int found_float = 0;
-    for (int i = 0; i <= last; ++i) {
-        if ((m_value[i] >= '0' && m_value[i] <= '9') || m_value[i] == '+' ||
-             m_value[i] == '-')
-            found_int = 1;
-        else if (m_value[i] == '.' || m_value[i] == 'e' || m_value[i] == 'E')
-            found_float = 1;
-        else
-            return CT_INVALID;
-    }
-
-    // If we are still alive we should have now either a float or an integer
-    if (found_int) {
-        if (found_float) {
-            return CT_FLOAT;
-        }
-        else {
-            return CT_INT;
-        }
-    }
-    else
-        return CT_INVALID;
 }
 
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *       GFitsHeaderCard.hpp  - FITS header card abstract base class       *
+ *               GFitsHeaderCard.hpp  - FITS header card class             *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -35,6 +35,9 @@
  * and a comment (string). COMMENT or HISTORY cards do not have any value.
  ***************************************************************************/
 class GFitsHeaderCard {
+
+    // Friend classes
+    friend class GFitsHeader;
 
     // I/O friends
     friend ostream& operator<< (ostream& os, const GFitsHeaderCard& card);
@@ -73,17 +76,15 @@ public:
     double       real(void);
     int          integer(void);
 
-    // Other methods
-    void         read(__fitsfile* fptr, int keynum);
-    void         read(__fitsfile* fptr, const std::string& keyname);
-    void         write(__fitsfile* fptr);
-
 private:
     // Private methods
     void init_members(void);
     void copy_members(const GFitsHeaderCard& card);
     void free_members(void);
     int  get_value_type(const std::string& value);
+    void read(__fitsfile* fptr, int keynum);
+    void read(__fitsfile* fptr, const std::string& keyname);
+    void write(__fitsfile* fptr);
 
     // Private data area
     std::string m_keyname;         //!< Name of the card
