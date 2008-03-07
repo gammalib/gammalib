@@ -18,6 +18,13 @@
 /* General */
 #include "GException.i"
 
+/* FITS file class */
+#include "GFits.i"
+#include "GFitsHDU.i"
+
+/* Model fitting */
+#include "GFitPar.i"
+
 /* Linear Algebra */
 #include "GVector.i"
 #include "GMatrixBase.i"
@@ -25,5 +32,3 @@
 #include "GSparseMatrix.i"
 #include "GSymMatrix.i"
 
-/* Model fitting */
-#include "GFitPar.i"
