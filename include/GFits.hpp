@@ -57,7 +57,7 @@ public:
     void      close(void);
     GFitsHDU* hdu(const std::string& extname);
     GFitsHDU* hdu(int extno);
-    int       num_hdu(void) const;
+    int       num_hdus(void) const;
 
 private:
     // Private methods

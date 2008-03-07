@@ -408,7 +408,7 @@ GFitsHDU* GFits::hdu(int extno)
 /***********************************************************************//**
  * @brief Returns number of HDUs
  ***************************************************************************/
-int GFits::num_hdu(void) const
+int GFits::num_hdus(void) const
 {
     // Return number of HDUs
     return m_num_hdu;
