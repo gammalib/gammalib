@@ -39,6 +39,9 @@
  ***************************************************************************/
 class GFitsHeader {
 
+    // Friend classes
+    friend class GFitsHDU;
+
     // I/O friends
     friend ostream& operator<< (ostream& os, const GFitsHeader& header);
 
@@ -52,9 +55,9 @@ public:
     GFitsHeader& operator= (const GFitsHeader& header);
 
     // Methods
-    void             open(__fitsfile* fptr);
-    void             save(__fitsfile* fptr);
-    void             close(void);
+//    void             open(__fitsfile* fptr);
+//    void             save(__fitsfile* fptr);
+//    void             close(void);
     void             update(const GFitsHeaderCard& card);
     GFitsHeaderCard* card(const std::string& keyname);
     GFitsHeaderCard* card(const int& cardno);
@@ -73,6 +76,9 @@ private:
     void             copy_members(const GFitsHeader& header);
     void             free_members(void);
     GFitsHeaderCard* GFitsHeader::card_ptr(const std::string& keyname);
+    void             open(__fitsfile* fptr);
+    void             save(__fitsfile* fptr);
+    void             close(void);
 
     // Private data area
     int              m_num_cards;
