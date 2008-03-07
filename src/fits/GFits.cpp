@@ -383,7 +383,7 @@ GFitsHDU* GFits::hdu(const std::string& extname)
  *            HDU with specified extension number has not been found in FITS
  *            file.
  ***************************************************************************/
-GFitsHDU* GFits::hdu(int extno) 
+GFitsHDU* GFits::hdu(int extno)
 {
     // Verify that extension number is in valid range
     if (extno < 1 || extno > m_num_hdu)
@@ -401,7 +401,17 @@ GFitsHDU* GFits::hdu(int extno)
     }
 
     // Return pointer
-    return ptr; 
+    return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns number of HDUs
+ ***************************************************************************/
+int GFits::num_hdu(void) const
+{
+    // Return number of HDUs
+    return m_num_hdu;
 }
 
 
