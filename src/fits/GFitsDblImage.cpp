@@ -416,30 +416,6 @@ const double& GFitsDblImage::operator() (const int& ix, const int& iy, const int
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Open FITS image
- *
- * @param fptr FITS file pointer
- *
- * Open FITS image in FITS file. Opening means connecting the FITS file
- * pointer to the image and reading the image and axes dimensions.
- ***************************************************************************/
-void GFitsDblImage::open(__fitsfile* fptr)
-{
-    // Initialise base class members
-    GFitsImage::init_members();
-
-    // Initialise class members
-    init_members();
-
-    // Open image
-    open_image(fptr);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Link external pixel array to image
  *
  * @param pixels Pointer to external pixel array that should be linked
@@ -464,47 +440,6 @@ void GFitsDblImage::link(double* pixels)
 
     // Flag that pixels have been linked
     m_linked = 1;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Save FITS image
- *
- * Saves the image into the FITS file.
- ***************************************************************************/
-void GFitsDblImage::save(void)
-{
-    // Save a double precision image
-    save_image(__TDOUBLE, m_pixels);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Close FITS image
- *
- * Closing a FITS image resets the object into its initial state. Closing
- * does NOT save the image into the FITS file. Use the save method for this
- * purpose.
- ***************************************************************************/
-void GFitsDblImage::close(void)
-{
-    // Free members
-    free_members();
-
-    // Initialise members
-    init_members();
-
-    // Free base class members
-    GFitsImage::free_members();
-
-    // Initialise base class members
-    GFitsImage::init_members();
 
     // Return
     return;
@@ -679,6 +614,71 @@ void GFitsDblImage::fetch_pixels(void)
         // Mark pixel as proper to the class instance
         m_linked = 0;
     }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Open FITS image
+ *
+ * @param fptr FITS file pointer
+ *
+ * Open FITS image in FITS file. Opening means connecting the FITS file
+ * pointer to the image and reading the image and axes dimensions.
+ ***************************************************************************/
+void GFitsDblImage::open(__fitsfile* fptr)
+{
+    // Initialise base class members
+    GFitsImage::init_members();
+
+    // Initialise class members
+    init_members();
+
+    // Open image
+    open_image(fptr);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save FITS image
+ *
+ * Saves the image into the FITS file.
+ ***************************************************************************/
+void GFitsDblImage::save(void)
+{
+    // Save a double precision image
+    save_image(__TDOUBLE, m_pixels);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Close FITS image
+ *
+ * Closing a FITS image resets the object into its initial state. Closing
+ * does NOT save the image into the FITS file. Use the save method for this
+ * purpose.
+ ***************************************************************************/
+void GFitsDblImage::close(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Free base class members
+    GFitsImage::free_members();
+
+    // Initialise base class members
+    GFitsImage::init_members();
 
     // Return
     return;

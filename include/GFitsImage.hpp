@@ -49,9 +49,6 @@ public:
     GFitsImage& operator= (const GFitsImage& image);
 
     // Pure virtual methods
-    virtual void        open(__fitsfile* fptr) = 0;
-    virtual void        save(void) = 0;
-    virtual void        close(void) = 0;
     virtual GFitsImage* clone(void) const = 0;
 
     // Methods
@@ -70,11 +67,16 @@ protected:
                     int* anynul);
     void save_image(int datatype, const void* pixels);
 
+    // Pure virtual methods
+    virtual void open(__fitsfile* fptr) = 0;
+    virtual void save(void) = 0;
+    virtual void close(void) = 0;
+
     // Private data area
-    int        m_bitpix;      //!< Number of Bits/pixel
-    int        m_naxis;       //!< Image dimension
-    long*      m_naxes;       //!< Number of pixels in each dimension
-    int        m_num_pixels;  //!< Number of image pixels
+    int   m_bitpix;      //!< Number of Bits/pixel
+    int   m_naxis;       //!< Image dimension
+    long* m_naxes;       //!< Number of pixels in each dimension
+    int   m_num_pixels;  //!< Number of image pixels
 };
 
 

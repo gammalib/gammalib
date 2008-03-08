@@ -59,10 +59,7 @@ public:
 
 
     // Methods
-    void           open(__fitsfile* fptr);
     void           link(double* pixels);
-    void           save(void);
-    void           close(void);
     GFitsDblImage* clone(void) const;
     void           set_nullval(const double* value);
 
@@ -72,6 +69,9 @@ private:
     void copy_members(const GFitsDblImage& image);
     void free_members(void);
     void fetch_pixels(void);
+    void open(__fitsfile* fptr);
+    void save(void);
+    void close(void);
 
     // Private data area
     int     m_linked;        // Pixels are linked (don't delete them!)
