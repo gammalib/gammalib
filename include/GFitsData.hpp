@@ -38,14 +38,14 @@ public:
     virtual GFitsData& operator= (const GFitsData& data);
 
     // Methods
+
+protected:
+    // Protected methods
     virtual void       open(__fitsfile* fptr) = 0;
     virtual void       save(void) = 0;
     virtual void       close(void) = 0;
     virtual GFitsData* clone(void) const = 0;
-
-protected:
-    // Protected methods
-    virtual void connect(__fitsfile* fptr);
+    virtual void       connect(__fitsfile* fptr);
 
     // Protected data area
     __fitsfile m_fitsfile;    //!< FITS file
