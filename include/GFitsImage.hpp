@@ -35,6 +35,9 @@
  ***************************************************************************/
 class GFitsImage : public GFitsData {
 
+    // Friend classes
+    friend class GFitsHDU;
+
     // I/O friends
     friend ostream& operator<< (ostream& os, const GFitsImage& image);
 
@@ -47,9 +50,6 @@ public:
 
     // Operators
     GFitsImage& operator= (const GFitsImage& image);
-
-    // Pure virtual methods
-    virtual GFitsImage* clone(void) const = 0;
 
     // Methods
     int bitpix(void) const;
@@ -68,9 +68,10 @@ protected:
     void save_image(int datatype, const void* pixels);
 
     // Pure virtual methods
-    virtual void open(__fitsfile* fptr) = 0;
-    virtual void save(void) = 0;
-    virtual void close(void) = 0;
+    virtual void        open(__fitsfile* fptr) = 0;
+    virtual void        save(void) = 0;
+    virtual void        close(void) = 0;
+    virtual GFitsImage* clone(void) const = 0;
 
     // Private data area
     int   m_bitpix;      //!< Number of Bits/pixel

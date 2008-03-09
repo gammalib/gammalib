@@ -57,21 +57,20 @@ public:
     const double&  operator() (const int& ix, const int& iy, const int& iz,
                                const int& it) const;
 
-
     // Methods
     void           link(double* pixels);
-    GFitsDblImage* clone(void) const;
     void           set_nullval(const double* value);
 
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GFitsDblImage& image);
-    void free_members(void);
-    void fetch_pixels(void);
-    void open(__fitsfile* fptr);
-    void save(void);
-    void close(void);
+    void           init_members(void);
+    void           copy_members(const GFitsDblImage& image);
+    void           free_members(void);
+    void           fetch_pixels(void);
+    void           open(__fitsfile* fptr);
+    void           save(void);
+    void           close(void);
+    GFitsDblImage* clone(void) const;
 
     // Private data area
     int     m_linked;        // Pixels are linked (don't delete them!)
