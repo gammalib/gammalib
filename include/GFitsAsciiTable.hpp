@@ -34,6 +34,9 @@
  ***************************************************************************/
 class GFitsAsciiTable : public GFitsTable {
 
+    // Friend classes
+    friend class GFitsHDU;
+
 public:
     // Constructors and destructors
     GFitsAsciiTable();
