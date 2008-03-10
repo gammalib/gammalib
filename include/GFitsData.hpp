@@ -37,8 +37,6 @@ public:
     // Operators
     virtual GFitsData& operator= (const GFitsData& data);
 
-    // Methods
-
 protected:
     // Protected methods
     virtual void       open(__fitsfile* fptr) = 0;

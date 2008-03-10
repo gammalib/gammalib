@@ -29,10 +29,30 @@ def test_fits():
     hdr.update(GFitsHeaderCard("test", "test-value", "this is for testing"))
     hdr.update(GFitsHeaderCard("real", 3.1415, "a real value"))
     hdr.update(GFitsHeaderCard("int", 41, "an integer value"))
+    
 
     # Append HDU to FITS file
     fits.append_hdu(hdu)
-    print fits
+
+    # Set double image
+    img1 = GFitsDblImage(100)
+    img2 = GFitsDblImage(10, 20)
+    img3 = GFitsDblImage(10, 10, 10)
+    img4 = GFitsDblImage(5, 9, 20, 20)
+    print img1
+    print img2
+    print img3
+    print img4
+    print img1.bitpix()
+    print img3.naxis()
+    print img2.naxes(0),  img2.naxes(1)
+    print img4.num_pixels()
+    fits.append_hdu(GFitsHDU(img1))
+    fits.append_hdu(GFitsHDU(img2))
+    fits.append_hdu(GFitsHDU(img3))
+    fits.append_hdu(GFitsHDU(img4))
+
+    #print fits
     
     # Save FITS file
     fits.save()

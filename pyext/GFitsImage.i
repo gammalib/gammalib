@@ -31,4 +31,6 @@ public:
     int naxis(void) const;
     int naxes(int axis) const;
     int num_pixels(void) const;
+protected:
+    virtual GFitsImage* clone(void) const = 0;
 };

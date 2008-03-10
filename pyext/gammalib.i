@@ -23,6 +23,9 @@
 #include "GFitsHDU.i"
 #include "GFitsHeader.i"
 #include "GFitsHeaderCard.i"
+#include "GFitsData.i"
+#include "GFitsImage.i"
+#include "GFitsDblImage.i"
 
 /* Model fitting */
 #include "GFitPar.i"

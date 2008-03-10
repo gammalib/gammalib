@@ -28,4 +28,6 @@
  ***************************************************************************/
 class GFitsData {
 public:
+protected:
+    virtual GFitsData* clone(void) const = 0;
 };

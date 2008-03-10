@@ -19,8 +19,7 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFitsDblImage.hpp"
 %}
-%import "GFitsData.i"
-%import "GFitsImage.i"
+%feature("notabstract") GFitsDblImage;
 
 /***********************************************************************//**
  * @class GFitsDblImage
