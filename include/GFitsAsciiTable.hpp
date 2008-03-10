@@ -45,13 +45,13 @@ public:
     GFitsAsciiTable& operator= (const GFitsAsciiTable& table);
 
     // Methods
-    GFitsAsciiTable* clone(void) const;
 
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GFitsAsciiTable& table);
-    void free_members(void);
+    void             init_members(void);
+    void             copy_members(const GFitsAsciiTable& table);
+    void             free_members(void);
+    GFitsAsciiTable* clone(void) const;
 
     // Private data area
 };

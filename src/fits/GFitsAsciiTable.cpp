@@ -16,11 +16,6 @@
 #include <iostream>
 #include "GException.hpp"
 #include "GFitsAsciiTable.hpp"
-//#include "GFitsTableStrCol.hpp"
-//#include "GFitsTableShtCol.hpp"
-//#include "GFitsTableLngCol.hpp"
-//#include "GFitsTableFltCol.hpp"
-//#include "GFitsTableDblCol.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -141,15 +136,6 @@ GFitsAsciiTable& GFitsAsciiTable::operator= (const GFitsAsciiTable& table)
  =                                                                         =
  ==========================================================================*/
 
-/***********************************************************************//**
- * @brief Clone ASCII table
- ***************************************************************************/
-GFitsAsciiTable* GFitsAsciiTable::clone(void) const 
-{
-    return new GFitsAsciiTable(*this);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                      GFitsAsciiTable private methods                    =
@@ -194,6 +180,15 @@ void GFitsAsciiTable::free_members(void)
     
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone ASCII table
+ ***************************************************************************/
+GFitsAsciiTable* GFitsAsciiTable::clone(void) const 
+{
+    return new GFitsAsciiTable(*this);
 }
 
 
