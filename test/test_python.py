@@ -51,6 +51,10 @@ def test_fits():
     fits.append_hdu(GFitsHDU(img2))
     fits.append_hdu(GFitsHDU(img3))
     fits.append_hdu(GFitsHDU(img4))
+    
+    # Set binary table
+    tbl1 = GFitsBinTable(10);
+    fits.append_hdu(GFitsHDU(tbl1))
 
     #print fits
     

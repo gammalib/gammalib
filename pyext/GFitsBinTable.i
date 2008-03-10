@@ -1,5 +1,5 @@
 /***************************************************************************
- *     GFitsTable.i  - FITS table abstract base class SWIG interface       *
+ *       GFitsBinTable.i  - FITS binary table class SWIG definition        *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -11,39 +11,27 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GFitsTable.i
- * @brief GFitsTable class SWIG file.
+ * @file GFitsBinTable.i
+ * @brief GFitsBinTable class SWIG file.
  * @author J. Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GFitsTable.hpp"
+#include "GFitsBinTable.hpp"
 %}
+%feature("notabstract") GFitsBinTable;
 
 
 /***********************************************************************//**
- * @class GFitsTable
+ * @class GFitsBinTable
  *
- * @brief Abstract SWIG interface for the FITS table classes.
+ * @brief SWIG interface for FITS binary table
  ***************************************************************************/
-class GFitsTable : public GFitsData {
+class GFitsBinTable : public GFitsTable {
 public:
     // Constructors and destructors
-    GFitsTable();
-    GFitsTable(int nrows);
-    GFitsTable(const GFitsTable& table);
-    virtual ~GFitsTable();
-
-    // Methods
-    void           append_column(GFitsTableCol& column);
-    void           insert_column(int colnum, GFitsTableCol& column);
-    //void           append_rows(const int& nrows);
-    //void           insert_rows(const int& rownum, const int& nrows);
-    GFitsTableCol* column(const std::string& colname);
-    GFitsTableCol* column(const int& colnum);
-    int            nrows(void) const;
-    int            ncols(void) const;
-
-protected:
-    GFitsTable* clone(void) const = 0;
+    GFitsBinTable();
+    GFitsBinTable(int nrows);
+    GFitsBinTable(const GFitsBinTable& table);
+    virtual ~GFitsBinTable();
 };

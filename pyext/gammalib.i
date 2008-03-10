@@ -26,6 +26,8 @@
 #include "GFitsData.i"
 #include "GFitsImage.i"
 #include "GFitsDblImage.i"
+#include "GFitsTable.i"
+#include "GFitsBinTable.i"
 
 /* Model fitting */
 #include "GFitPar.i"

@@ -1,5 +1,5 @@
 /***************************************************************************
- *     GFitsImage.hpp  - FITS image abstract base class SWIG interface     *
+ *      GFitsImage.i  - FITS image abstract base class SWIG interface      *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *

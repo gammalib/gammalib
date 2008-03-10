@@ -137,15 +137,6 @@ GFitsBinTable& GFitsBinTable::operator= (const GFitsBinTable& table)
  =                                                                         =
  ==========================================================================*/
 
-/***********************************************************************//**
- * @brief Clone binary table
- ***************************************************************************/
-GFitsBinTable* GFitsBinTable::clone(void) const
-{
-    return new GFitsBinTable(*this);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                       GFitsBinTable private methods                     =
@@ -190,6 +181,15 @@ void GFitsBinTable::free_members(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone binary table
+ ***************************************************************************/
+GFitsBinTable* GFitsBinTable::clone(void) const
+{
+    return new GFitsBinTable(*this);
 }
 
 

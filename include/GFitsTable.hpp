@@ -59,8 +59,8 @@ public:
     // Methods
     void           append_column(GFitsTableCol& column);
     void           insert_column(int colnum, GFitsTableCol& column);
-    void           append_rows(const int& nrows);
-    void           insert_rows(const int& rownum, const int& nrows);
+    //void           append_rows(const int& nrows);
+    //void           insert_rows(const int& rownum, const int& nrows);
     GFitsTableCol* column(const std::string& colname);
     GFitsTableCol* column(const int& colnum);
     int            nrows(void) const;
