@@ -54,10 +54,6 @@ public:
     GFitsTable& operator= (const GFitsTable& table);
 
     // Methods
-    void           open(__fitsfile* fptr);
-    void           save(void);
-    void           close(void);
-    GFitsTable*    clone(void) const = 0;
     void           append_column(GFitsTableCol& column);
     void           insert_column(int colnum, GFitsTableCol& column);
     void           append_rows(const int& nrows);
@@ -69,13 +65,17 @@ public:
 
 protected:
     // Protected methods
-    void  init_members(void);
-    void  copy_members(const GFitsTable& table);
-    void  free_members(void);
-    void  connect(__fitsfile* fptr);
-    char* get_ttype(const int& colnum) const;
-    char* get_tform(const int& colnum) const;
-    char* get_tunit(const int& colnum) const;
+    void        init_members(void);
+    void        copy_members(const GFitsTable& table);
+    void        free_members(void);
+    void        open(__fitsfile* fptr);
+    void        save(void);
+    void        close(void);
+    void        connect(__fitsfile* fptr);
+    GFitsTable* clone(void) const = 0;
+    char*       get_ttype(const int& colnum) const;
+    char*       get_tform(const int& colnum) const;
+    char*       get_tunit(const int& colnum) const;
 
     // Protected data area
     int             m_type;       //!< Table type (1=ASCII, 2=Binary)
