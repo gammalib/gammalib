@@ -40,6 +40,9 @@
  ***************************************************************************/
 class GFitsTable : public GFitsData {
 
+    // Friend classes
+    friend class GFitsHDU;
+
     // I/O friends
     friend ostream& operator<< (ostream& os, const GFitsTable& table);
 

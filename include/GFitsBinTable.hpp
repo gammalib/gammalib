@@ -34,6 +34,9 @@
  ***************************************************************************/
 class GFitsBinTable : public GFitsTable {
 
+    // Friend classes
+    friend class GFitsHDU;
+
 public:
     // Constructors and destructors
     GFitsBinTable();
@@ -45,13 +48,13 @@ public:
     GFitsBinTable& operator= (const GFitsBinTable& table);
 
     // Methods
-    GFitsBinTable* clone(void) const;
 
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GFitsBinTable& table);
-    void free_members(void);
+    void           init_members(void);
+    void           copy_members(const GFitsBinTable& table);
+    void           free_members(void);
+    GFitsBinTable* clone(void) const;
 
     // Private data area
 };
