@@ -198,25 +198,6 @@ const float& GFitsTableFltCol::operator() (const int& row, const int& inx)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Save table column into FITS file
- *
- * The table column is only saved if it is linked to a FITS file and if the
- * data are indeed present in the class instance. This avoids saving of data
- * that have not been modified.
- *
- * Refer to GFitsTableCol::save_column() for more information.
- ***************************************************************************/
-void GFitsTableFltCol::save(void)
-{
-    // Save column
-    save_column();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Get string value
  *
  * @param[in] row Table row.
@@ -319,15 +300,6 @@ int GFitsTableFltCol::integer(const int& row, const int& inx)
 
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Clone column
- ***************************************************************************/
-GFitsTableFltCol* GFitsTableFltCol::clone(void) const
-{
-    return new GFitsTableFltCol(*this);
 }
 
 
@@ -440,6 +412,34 @@ void GFitsTableFltCol::free_members(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save table column into FITS file
+ *
+ * The table column is only saved if it is linked to a FITS file and if the
+ * data are indeed present in the class instance. This avoids saving of data
+ * that have not been modified.
+ *
+ * Refer to GFitsTableCol::save_column() for more information.
+ ***************************************************************************/
+void GFitsTableFltCol::save(void)
+{
+    // Save column
+    save_column();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone column
+ ***************************************************************************/
+GFitsTableFltCol* GFitsTableFltCol::clone(void) const
+{
+    return new GFitsTableFltCol(*this);
 }
 
 
