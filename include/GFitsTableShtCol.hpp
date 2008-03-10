@@ -55,26 +55,26 @@ public:
     const short&      operator() (const int& row, const int& inx = 0) const;
 
     // Methods
-    void              save(void);
-    std::string       string(const int& row, const int& col = 0);
-    double            real(const int& row, const int& col = 0);
-    int               integer(const int& row, const int& col = 0);
-    GFitsTableShtCol* clone(void) const;
-    short*            data(void);
-    void              set_nullval(const short* value);
+    std::string string(const int& row, const int& col = 0);
+    double      real(const int& row, const int& col = 0);
+    int         integer(const int& row, const int& col = 0);
+    short*      data(void);
+    void        set_nullval(const short* value);
 
 private:
     // Private methods
-    void        init_members(void);
-    void        copy_members(const GFitsTableShtCol& column);
-    void        free_members(void);
-    std::string ascii_format(void) const;
-    std::string binary_format(void) const;
-    void        alloc_data(void);
-    void        init_data(void);
-    void        fetch_data(void);
-    void*       ptr_data(void) { return m_data; }
-    void*       ptr_nulval(void) { return m_nulval; }
+    void              init_members(void);
+    void              copy_members(const GFitsTableShtCol& column);
+    void              free_members(void);
+    void              save(void);
+    GFitsTableShtCol* clone(void) const;
+    std::string       ascii_format(void) const;
+    std::string       binary_format(void) const;
+    void              alloc_data(void);
+    void              init_data(void);
+    void              fetch_data(void);
+    void*             ptr_data(void) { return m_data; }
+    void*             ptr_nulval(void) { return m_nulval; }
 
     // Private data area
     short* m_data;       //!< Data area
