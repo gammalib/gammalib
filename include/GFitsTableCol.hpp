@@ -49,11 +49,9 @@ public:
     GFitsTableCol& operator= (const GFitsTableCol& column);
 
     // Virtual Methods
-    virtual void           save(void) = 0;
-    virtual std::string    string(const int& row, const int& inx = 0) = 0;
-    virtual double         real(const int& row, const int& inx = 0) = 0;
-    virtual int            integer(const int& row, const int& inx = 0) = 0;
-    virtual GFitsTableCol* clone(void) const = 0;
+    virtual std::string string(const int& row, const int& inx = 0) = 0;
+    virtual double      real(const int& row, const int& inx = 0) = 0;
+    virtual int         integer(const int& row, const int& inx = 0) = 0;
 
     // Base class Methods
     void        name(const std::string& name);
@@ -85,13 +83,15 @@ protected:
     __fitsfile  m_fitsfile;  //!< FITS file associated with column
 
     // Protected virtual methods
-    virtual std::string ascii_format(void) const = 0;
-    virtual std::string binary_format(void) const = 0;
-    virtual void        alloc_data(void) = 0;
-    virtual void        init_data(void) = 0;
-    virtual void        fetch_data(void) = 0;
-    virtual void*       ptr_data(void) = 0;
-    virtual void*       ptr_nulval(void) = 0;
+    virtual void           save(void) = 0;
+    virtual GFitsTableCol* clone(void) const = 0;
+    virtual std::string    ascii_format(void) const = 0;
+    virtual std::string    binary_format(void) const = 0;
+    virtual void           alloc_data(void) = 0;
+    virtual void           init_data(void) = 0;
+    virtual void           fetch_data(void) = 0;
+    virtual void*          ptr_data(void) = 0;
+    virtual void*          ptr_nulval(void) = 0;
 
     // Protected methods
     void load_column(void);

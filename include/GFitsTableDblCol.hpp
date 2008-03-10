@@ -55,26 +55,26 @@ public:
     const double&     operator() (const int& row, const int& inx = 0) const;
 
     // Methods
-    void              save(void);
     std::string       string(const int& row, const int& inx = 0);
     double            real(const int& row, const int& inx = 0);
     int               integer(const int& row, const int& inx = 0);
-    GFitsTableDblCol* clone(void) const;
     double*           data(void);
     void              set_nullval(const double* value);
 
 private:
     // Private methods
-    void        init_members(void);
-    void        copy_members(const GFitsTableDblCol& column);
-    void        free_members(void);
-    std::string ascii_format(void) const;
-    std::string binary_format(void) const;
-    void        alloc_data(void);
-    void        init_data(void);
-    void        fetch_data(void);
-    void*       ptr_data(void) { return m_data; }
-    void*       ptr_nulval(void) { return m_nulval; }
+    void              init_members(void);
+    void              copy_members(const GFitsTableDblCol& column);
+    void              free_members(void);
+    void              save(void);
+    GFitsTableDblCol* clone(void) const;
+    std::string       ascii_format(void) const;
+    std::string       binary_format(void) const;
+    void              alloc_data(void);
+    void              init_data(void);
+    void              fetch_data(void);
+    void*             ptr_data(void) { return m_data; }
+    void*             ptr_nulval(void) { return m_nulval; }
 
     // Private data area
     double* m_data;      //!< Data area
