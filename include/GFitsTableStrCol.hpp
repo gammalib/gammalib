@@ -55,28 +55,28 @@ public:
     const std::string& operator() (const int& row, const int& inx = 0) const;
 
     // Methods
-    void              save(void);
-    std::string       string(const int& row, const int& col = 0);
-    double            real(const int& row, const int& col = 0);
-    int               integer(const int& row, const int& col = 0);
-    GFitsTableStrCol* clone(void) const;
-    std::string*      data(void);
-    void              set_nullval(const std::string string);
+    std::string  string(const int& row, const int& col = 0);
+    double       real(const int& row, const int& col = 0);
+    int          integer(const int& row, const int& col = 0);
+    std::string* data(void);
+    void         set_nullval(const std::string string);
 
 private:
     // Private methods
-    void        init_members(void);
-    void        copy_members(const GFitsTableStrCol& column);
-    void        free_members(void);
-    std::string ascii_format(void) const;
-    std::string binary_format(void) const;
-    void        alloc_data(void);
-    void        init_data(void);
-    void        fetch_data(void);
-    void*       ptr_data(void) { return m_buffer; }
-    void*       ptr_nulval(void) { return m_nulval; }
-    void        alloc_buffer(void);
-    void        free_buffer(void);
+    void              init_members(void);
+    void              copy_members(const GFitsTableStrCol& column);
+    void              free_members(void);
+    void              save(void);
+    GFitsTableStrCol* clone(void) const;
+    std::string       ascii_format(void) const;
+    std::string       binary_format(void) const;
+    void              alloc_data(void);
+    void              init_data(void);
+    void              fetch_data(void);
+    void*             ptr_data(void) { return m_buffer; }
+    void*             ptr_nulval(void) { return m_nulval; }
+    void              alloc_buffer(void);
+    void              free_buffer(void);
 
     // Private data area
     std::string* m_data;    //!< Data area
