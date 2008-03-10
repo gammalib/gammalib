@@ -28,6 +28,12 @@
 #include "GFitsDblImage.i"
 #include "GFitsTable.i"
 #include "GFitsBinTable.i"
+#include "GFitsTableCol.i"
+#include "GFitsTableDblCol.i"
+#include "GFitsTableFltCol.i"
+#include "GFitsTableLngCol.i"
+#include "GFitsTableShtCol.i"
+#include "GFitsTableStrCol.i"
 
 /* Model fitting */
 #include "GFitPar.i"
