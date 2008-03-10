@@ -49,12 +49,12 @@ public:
  ***************************************************************************/
 %extend GFitsTableDblCol {
     char *__str__() {
-        static char str_buffer[100001];
+        static char str_buffer[1001];
         std::ostringstream buffer;
         buffer << *self;
 	    std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 100001);
-	    str_buffer[100000] = '\0';
+        strncpy(str_buffer, (char*)str.c_str(), 1001);
+	    str_buffer[1000] = '\0';
 	    return str_buffer;
     }
     double get(const int& row) {

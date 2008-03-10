@@ -27,10 +27,6 @@
  * @brief SWIG interface for FITS table long integer column
  ***************************************************************************/
 class GFitsTableLngCol : public GFitsTableCol {
-
-    // I/O friends
-    friend ostream& operator<< (ostream& os, const GFitsTableLngCol& column);
-
 public:
     // Constructors and destructors
     GFitsTableLngCol();
@@ -53,24 +49,24 @@ public:
  ***************************************************************************/
 %extend GFitsTableLngCol {
     char *__str__() {
-        static char str_buffer[100001];
+        static char str_buffer[1001];
         std::ostringstream buffer;
         buffer << *self;
 	    std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 100001);
-	    str_buffer[100000] = '\0';
+        strncpy(str_buffer, (char*)str.c_str(), 1001);
+	    str_buffer[1000] = '\0';
 	    return str_buffer;
     }
-    double get(const int& row) {
+    long get(const int& row) {
         return (*self)(row);
     }
-    double get(const int& row, const int& col) {
+    long get(const int& row, const int& col) {
         return (*self)(row, col);
     }
-    void set(const int& row, const double& value) {
+    void set(const int& row, const long& value) {
         (*self)(row) = value;
     }
-    void set(const int& row, const int& col, const double& value) {
+    void set(const int& row, const int& col, const long& value) {
         (*self)(row, col) = value;
     }
     GFitsTableLngCol copy() {
