@@ -27,6 +27,7 @@
 #include "GFitsImage.i"
 #include "GFitsDblImage.i"
 #include "GFitsTable.i"
+#include "GFitsAsciiTable.i"
 #include "GFitsBinTable.i"
 #include "GFitsTableCol.i"
 #include "GFitsTableDblCol.i"
