@@ -70,6 +70,7 @@ private:
     void init_members(void);
     void copy_members(const GNodeArray& array);
     void free_members(void);
+    void setup(void);
     
     // Data
     int     m_nodes;          //!< Number of nodes

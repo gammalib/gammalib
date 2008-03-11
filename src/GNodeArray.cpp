@@ -146,25 +146,9 @@ void GNodeArray::nodes(const int& num, const double* array)
     for (int i = 0; i < m_nodes; ++i)
         m_node[i] = array[i];
 
-    // Setup distance array
-    for (int i = 0; i < m_nodes-1; ++i)
-        m_step[i] = m_node[i+1] - m_node[i];
+    // Setup
+    setup();
 
-    // Evaluate linear slope and offset
-    m_linear_slope  = double(m_nodes) / (m_node[m_nodes-1] - m_node[0]);
-    m_linear_offset = -m_linear_slope * m_node[0];
-    
-    // Check if nodes form a linear array
-    m_is_linear = 1;
-    for (int i = 0; i < m_nodes-1; ++i) {
-        double eps = m_linear_slope * m_node[i] + m_linear_offset - double(i);
-        if (fabs(eps) > 1.0e-6) {
-            cout << "WARNING: Node " << i 
-                 << "indexing is invalid (eps=" << eps << ")" << endl;
-            m_is_linear = 0;
-        }
-    }
-    
     // Return
     return;
 }
@@ -196,25 +180,9 @@ void GNodeArray::nodes(const GVector& vector)
     for (int i = 0; i < m_nodes; ++i)
         m_node[i] = vector(i);
 
-    // Setup distance array
-    for (int i = 0; i < m_nodes-1; ++i)
-        m_step[i] = m_node[i+1] - m_node[i];
+    // Setup
+    setup();
 
-    // Evaluate linear slope and offset
-    m_linear_slope  = double(m_nodes) / (m_node[m_nodes-1] - m_node[0]);
-    m_linear_offset = -m_linear_slope * m_node[0];
-    
-    // Check if nodes form a linear array
-    m_is_linear = 1;
-    for (int i = 0; i < m_nodes-1; ++i) {
-        double eps = m_linear_slope * m_node[i] + m_linear_offset - double(i);
-        if (fabs(eps) > 1.0e-6) {
-            cout << "WARNING: Node " << i 
-                 << "indexing is invalid (eps=" << eps << ")" << endl;
-            m_is_linear = 0;
-        }
-    }
-    
     // Return
     return;
 }
@@ -318,6 +286,35 @@ void GNodeArray::free_members(void)
     // Signal that memory is free
     m_node = NULL;
     m_step = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute distance array and linear slope/offset
+ ***************************************************************************/
+void GNodeArray::setup(void)
+{
+    // Setup distance array
+    for (int i = 0; i < m_nodes-1; ++i)
+        m_step[i] = m_node[i+1] - m_node[i];
+
+    // Evaluate linear slope and offset
+    m_linear_slope  = double(m_nodes-1) / (m_node[m_nodes-1] - m_node[0]);
+    m_linear_offset = -m_linear_slope * m_node[0];
+    
+    // Check if nodes form a linear array
+    m_is_linear = 1;
+    for (int i = 0; i < m_nodes-1; ++i) {
+        double eps = m_linear_slope * m_node[i] + m_linear_offset - double(i);
+        if (fabs(eps) > 1.0e-6) {
+            cout << "WARNING: Node " << i 
+                 << "indexing is invalid (eps=" << eps << ")" << endl;
+            m_is_linear = 0;
+        }
+    }
 
     // Return
     return;
