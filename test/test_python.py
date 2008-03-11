@@ -52,9 +52,45 @@ def test_fits():
     fits.append_hdu(GFitsHDU(img3))
     fits.append_hdu(GFitsHDU(img4))
     
-    # Set binary table
-    tbl1 = GFitsBinTable(10);
+    # Set ASCII table
+    tbl1 = GFitsAsciiTable(10)
+    col1 = GFitsTableDblCol("DOUBLE", 10)
+    col2 = GFitsTableFltCol("FLOAT", 10)
+    col3 = GFitsTableLngCol("LONG", 10)
+    col4 = GFitsTableShtCol("SHORT", 10)
+    col5 = GFitsTableStrCol("STRING", 10, 20)
+    for i in range(10):
+        col1.set(i, i*0.01)
+        col2.set(i, i*0.01)
+        col3.set(i, i*100)
+        col4.set(i, i*100)
+        col5.set(i, str(i*100))
+    tbl1.append_column(col1)
+    #tbl1.append_column(col2) # FLOAT: datatype conversion overflow (status=412)
+    #tbl1.append_column(col3) # LONG: unknown TFORM datatype code (status=262)
+    #tbl1.append_column(col4) # SHORT: datatype conversion overflow (status=412)
+    tbl1.append_column(col5)
     fits.append_hdu(GFitsHDU(tbl1))
+
+    # Set binary table
+    tbl2 = GFitsBinTable(10)
+    col1 = GFitsTableDblCol("DOUBLE", 10)
+    col2 = GFitsTableFltCol("FLOAT", 10)
+    col3 = GFitsTableLngCol("LONG", 10)
+    col4 = GFitsTableShtCol("SHORT", 10)
+    col5 = GFitsTableStrCol("STRING", 10, 20)
+    for i in range(10):
+        col1.set(i, i*0.01)
+        col2.set(i, i*0.01)
+        col3.set(i, i*100)
+        col4.set(i, i*100)
+        col5.set(i, str(i*100))
+    tbl2.append_column(col1)
+    tbl2.append_column(col2)
+    tbl2.append_column(col3)
+    tbl2.append_column(col4)
+    tbl2.append_column(col5)
+    fits.append_hdu(GFitsHDU(tbl2))
 
     #print fits
     
