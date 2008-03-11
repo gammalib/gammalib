@@ -19,6 +19,7 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GLATResponse.hpp"
 %}
+%include stl.i
 
 
 /***********************************************************************//**
