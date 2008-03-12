@@ -17,6 +17,11 @@
 
 /* General */
 #include "GException.i"
+#include "GNodeArray.i"
+
+/* Response classes */
+#include "GResponse.i"
+#include "GLATResponse.i"
 
 /* FITS file class */
 #include "GFits.i"

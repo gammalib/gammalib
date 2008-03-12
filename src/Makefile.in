@@ -116,9 +116,12 @@ INCLUDES = -I$(top_srcdir)/include \
 files = GException.cpp \
 	GTools.cpp \
 	GSkyDir.cpp \
+	GNodeArray.cpp \
 	data/GData.cpp \
 	rsp/GResponse.cpp \
 	rsp/GLATResponse.cpp \
+	rsp/GLATResponseTable.cpp \
+	rsp/GLATPsf.cpp \
 	obs/GObservation.cpp \
 	fits/GFitsHeaderCard.cpp \
 	fits/GFitsHeader.cpp \
@@ -157,15 +160,15 @@ CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libgamma_la_LIBADD =
-am__objects_1 = GException.lo GTools.lo GSkyDir.lo GData.lo GResponse.lo \
-	GLATResponse.lo GObservation.lo GFitsHeaderCard.lo \
-	GFitsHeader.lo GFitsData.lo GFitsImage.lo GFitsDblImage.lo \
-	GFitsTable.lo GFitsAsciiTable.lo GFitsBinTable.lo \
-	GFitsTableCol.lo GFitsTableStrCol.lo GFitsTableShtCol.lo \
-	GFitsTableLngCol.lo GFitsTableFltCol.lo GFitsTableDblCol.lo \
-	GFitsHDU.lo GFits.lo GFitPar.lo GVector.lo GMatrixBase.lo \
-	GMatrix.lo GSymMatrix.lo GSparseMatrix.lo GSparseSymbolic.lo \
-	GSparseNumeric.lo
+am__objects_1 = GException.lo GTools.lo GSkyDir.lo GNodeArray.lo \
+	GData.lo GResponse.lo GLATResponse.lo GLATResponseTable.lo \
+	GLATPsf.lo GObservation.lo GFitsHeaderCard.lo GFitsHeader.lo \
+	GFitsData.lo GFitsImage.lo GFitsDblImage.lo GFitsTable.lo \
+	GFitsAsciiTable.lo GFitsBinTable.lo GFitsTableCol.lo \
+	GFitsTableStrCol.lo GFitsTableShtCol.lo GFitsTableLngCol.lo \
+	GFitsTableFltCol.lo GFitsTableDblCol.lo GFitsHDU.lo GFits.lo \
+	GFitPar.lo GVector.lo GMatrixBase.lo GMatrix.lo GSymMatrix.lo \
+	GSparseMatrix.lo GSparseSymbolic.lo GSparseNumeric.lo
 am_libgamma_la_OBJECTS = $(am__objects_1)
 libgamma_la_OBJECTS = $(am_libgamma_la_OBJECTS)
 
@@ -229,6 +232,8 @@ clean-libLTLIBRARIES:
 GData.lo: data/GData.cpp
 GResponse.lo: rsp/GResponse.cpp
 GLATResponse.lo: rsp/GLATResponse.cpp
+GLATResponseTable.lo: rsp/GLATResponseTable.cpp
+GLATPsf.lo: rsp/GLATPsf.cpp
 GObservation.lo: obs/GObservation.cpp
 GFitsHeaderCard.lo: fits/GFitsHeaderCard.cpp
 GFitsHeader.lo: fits/GFitsHeader.cpp
@@ -298,6 +303,24 @@ GLATResponse.obj: rsp/GLATResponse.cpp
 
 GLATResponse.lo: rsp/GLATResponse.cpp
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponse.lo `test -f 'rsp/GLATResponse.cpp' || echo '$(srcdir)/'`rsp/GLATResponse.cpp
+
+GLATResponseTable.o: rsp/GLATResponseTable.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponseTable.o `test -f 'rsp/GLATResponseTable.cpp' || echo '$(srcdir)/'`rsp/GLATResponseTable.cpp
+
+GLATResponseTable.obj: rsp/GLATResponseTable.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponseTable.obj `cygpath -w rsp/GLATResponseTable.cpp`
+
+GLATResponseTable.lo: rsp/GLATResponseTable.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponseTable.lo `test -f 'rsp/GLATResponseTable.cpp' || echo '$(srcdir)/'`rsp/GLATResponseTable.cpp
+
+GLATPsf.o: rsp/GLATPsf.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATPsf.o `test -f 'rsp/GLATPsf.cpp' || echo '$(srcdir)/'`rsp/GLATPsf.cpp
+
+GLATPsf.obj: rsp/GLATPsf.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATPsf.obj `cygpath -w rsp/GLATPsf.cpp`
+
+GLATPsf.lo: rsp/GLATPsf.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATPsf.lo `test -f 'rsp/GLATPsf.cpp' || echo '$(srcdir)/'`rsp/GLATPsf.cpp
 
 GObservation.o: obs/GObservation.cpp
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GObservation.o `test -f 'obs/GObservation.cpp' || echo '$(srcdir)/'`obs/GObservation.cpp

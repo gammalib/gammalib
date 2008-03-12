@@ -5,6 +5,7 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GData.hpp \
 		     GResponse.hpp \
 		     GLATResponse.hpp \
+		     GLATResponseTable.hpp \
 		     GObservation.hpp \
 		     GFitsHeaderCard.hpp \
 		     GFitsHeader.hpp \
@@ -27,4 +28,5 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GMatrixBase.hpp \
 		     GMatrix.hpp \
 		     GSymMatrix.hpp \
-		     GSparseMatrix.hpp
+		     GSparseMatrix.hpp \
+		     GNodeArray.hpp
