@@ -41,9 +41,10 @@ const double scale_front_c0   = 3.77e-4;
 const double scale_front_c1   = 5.8e-2;
 const double scale_back_c0    = 1.3e-3;
 const double scale_back_c1    = 9.6e-2;
-const int    angle_num        = 10000;   // Number of angles for PSF
+const int    angle_num        = 5000;    // Number of angles for PSF
 const double angle_min        = 0.0001;  // Minimum angular separation (rad)
 const double angle_bin        = 0.01;    // Angular separation binning (rad)
+const double max_sep          = pihalf;  // Maximum angular separation (rad)
 
 
 /*==========================================================================
@@ -100,8 +101,8 @@ double GLATResponse::psf(const double& delta, const double& logE,
     
     // Compute maximum allowed angular separation
     double delta_max = m_psf_angle_max * stretch;
-    if (delta_max >= pihalf)
-        delta_max = pihalf;
+    if (delta_max >= max_sep)
+        delta_max = max_sep;
     
     // If maximum angular separation is exceeded then return 0.0
     double psf;
@@ -166,8 +167,8 @@ GVector GLATResponse::psf(const GVector& delta, const double& logE,
     
     // Compute maximum allowed angular separation
     double delta_max = m_psf_angle_max * stretch;
-    if (delta_max >= pihalf)
-        delta_max = pihalf;
+    if (delta_max >= max_sep)
+        delta_max = max_sep;
 
     // Allocate result vector
     GVector psf(delta.size());
@@ -314,7 +315,7 @@ void GLATResponse::psf_init(void)
             // 'norm' by 'stretch^2'.
             double sum = 0.0;
             for (int i = 1; i < angle_num; ++i) {
-                if (delta(i) >= pihalf)
+                if (delta(i) >= max_sep)
                     psf(i) = 0.0;
                 else
                     sum += (psf(i)*sin(delta(i)) + psf(i-1)*sin(delta(i-1)));
