@@ -145,13 +145,12 @@ def test_node_array():
     """
     Test GammaLib GNodeArray interface.
     """
-    # Set-up vector and data array
+    # Set-up linear vector and data array
     vector = GVector(20)
     data   = GVector(20)
     for i in range(20):
         vector[i] = 10.0 + i*5.0
         data[i]   = sin(0.15*(vector[i]-10.0))
-    #print vector
     
     # Set-up node array
     array = GNodeArray()
@@ -168,10 +167,47 @@ def test_node_array():
         wgt_left  = array.wgt_left()
         wgt_right = array.wgt_right()
         y         = wgt_left*data[inx_left] + wgt_right*data[inx_right]
+        if (wgt_left+wgt_right != 1.0):
+            print "WARNING (linear): Weights do not sum to 1.0 ("+str(wgt_left+wgt_right)+")"
         x_val.append(x)
         y_val.append(y)
     
+    # Plot Figure 1
+    figure(1)
     plot(x_val, y_val)
+    
+    # Set-up non-linear vector and data array
+    vector = GVector(20)
+    data   = GVector(20)
+    for i in range(20):
+        vector[i] = 10.0 + i*i*1.0
+        data[i]   = sin(0.7*(i))
+    
+    # Set-up node array
+    array = GNodeArray()
+    array.nodes(vector)
+    
+    # Get values
+    x_val = []
+    y_val = []
+    for i in range(100):
+        x = i-10
+        array.set_value(x)
+        inx_left  = array.inx_left()
+        inx_right = array.inx_right()
+        wgt_left  = array.wgt_left()
+        wgt_right = array.wgt_right()
+        y         = wgt_left*data[inx_left] + wgt_right*data[inx_right]
+        if (wgt_left+wgt_right != 1.0):
+            print "WARNING (bisection): Weights do not sum to 1.0 ("+str(wgt_left+wgt_right)+")"
+        x_val.append(x)
+        y_val.append(y)
+    
+    # Plot Figure 2
+    figure(2)
+    plot(x_val, y_val)
+    
+    # Show figures
     show()
     
 
@@ -182,5 +218,5 @@ if __name__ == '__main__':
     """
     Perform testing.
     """
-    test_psf()
-    #test_node_array()
+    #test_psf()
+    test_node_array()
