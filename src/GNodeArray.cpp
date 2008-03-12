@@ -11,6 +11,11 @@
  *                                                                         *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
+/**
+ * @file GNodeArray.cpp
+ * @brief GNodeArray class implementation.
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
@@ -192,10 +197,16 @@ void GNodeArray::nodes(const GVector& vector)
  * @brief Set indices and weighting factors for interpolation
  *
  * @param[in] value Value for which the interpolation should be done.
+ *
+ * Set the indices that bound the specified value and the corresponding
+ * weighting factors for linear interpolation. If the array has a linear
+ * form (i.e. the nodes are equidistant), an analytic formula is used to
+ * determine the boundary indices. If the nodes are not equidistant the
+ * boundary indices are searched by bisection.
  ***************************************************************************/
 void GNodeArray::set_value(const double& value)
 {
-    // If array is linear
+    // If array is linear then get left index from analytic formula
     if (m_is_linear) {
     
         // Set left index
@@ -205,19 +216,40 @@ void GNodeArray::set_value(const double& value)
         if (m_inx_left < 0)               m_inx_left = 0;
         else if (m_inx_left >= m_nodes-1) m_inx_left = m_nodes - 2;
         
-        // Set right index
-        m_inx_right = m_inx_left + 1;
-
-        // Set weighting factors
-        m_wgt_right = (value - m_node[m_inx_left]) / m_step[m_inx_left];
-        m_wgt_left  = 1.0 - m_wgt_right;
-
     } // endif: array is linear
     
-    // ... otherwise search the relevant bin
-    {
-        // TBD
+    // ... otherwise search the relevant indices by bisection
+    else {
+        // Set left index if value is before first node
+        if (value < m_node[0])
+            m_inx_left = 0;
+
+        // Set left index if value is after last node
+        else if (value >  m_node[m_nodes-1])
+            m_inx_left = m_nodes - 2;
+
+        // Set left index by bisection
+        else {
+            int low  = 0;
+            int high = m_nodes - 1;
+            int mid  = 0;
+            while ((high - low) > 1) {
+                int mid = (low+high) / 2;
+                if (m_node[mid] > value)
+                    high = mid;
+                else if (m_node[mid] <= value)
+                    low = mid;
+            }
+            m_inx_left = low;
+        } // endelse: did bisection
     }
+
+    // Set right index
+    m_inx_right = m_inx_left + 1;
+
+    // Set weighting factors
+    m_wgt_right = (value - m_node[m_inx_left]) / m_step[m_inx_left];
+    m_wgt_left  = 1.0 - m_wgt_right;
 
     // Return
     return;
@@ -297,7 +329,7 @@ void GNodeArray::free_members(void)
  ***************************************************************************/
 void GNodeArray::setup(void)
 {
-    // Setup distance array
+    // Setup distance array between subsequent nodes
     for (int i = 0; i < m_nodes-1; ++i)
         m_step[i] = m_node[i+1] - m_node[i];
 
@@ -310,9 +342,8 @@ void GNodeArray::setup(void)
     for (int i = 0; i < m_nodes-1; ++i) {
         double eps = m_linear_slope * m_node[i] + m_linear_offset - double(i);
         if (fabs(eps) > 1.0e-6) {
-            cout << "WARNING: Node " << i 
-                 << "indexing is invalid (eps=" << eps << ")" << endl;
             m_is_linear = 0;
+            break;
         }
     }
 

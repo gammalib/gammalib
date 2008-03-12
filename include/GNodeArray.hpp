@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GNodeArray.hpp
- * @brief GNodeArray class definition.
+ * @brief GNodeArray class interface definition.
  * @author J. Knodlseder
  */
 
