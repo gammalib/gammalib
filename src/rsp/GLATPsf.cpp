@@ -249,9 +249,12 @@ void GLATResponse::psf_init(void)
     // Allocate memory for PSF
     int bin_size = m_psf_bins.num_energy() * m_psf_bins.num_ctheta();
     int psf_size = bin_size * angle_num;
-    m_psf        = new double[psf_size];
-    m_norm       = new double[bin_size];
-    m_sigma      = new double[bin_size];
+    if (psf_size > 0)
+        m_psf = new double[psf_size];
+    if (bin_size > 0) {
+        m_norm  = new double[bin_size];
+        m_sigma = new double[bin_size];
+    }
 
     // Setup PSF vector axis
     GVector xaxis(angle_num);
@@ -543,18 +546,24 @@ void GLATResponse::psf_copy_members(const GLATResponse& rsp)
     // Copy arrays
     if (rsp.m_psf != NULL) {
         int size = m_psf_bins.num_energy() * m_psf_bins.num_ctheta() * angle_num;
-        m_psf    = new double[size];
-        memcpy(m_psf, rsp.m_psf, size*sizeof(double));
+        if (size > 0) {
+            m_psf = new double[size];
+            memcpy(m_psf, rsp.m_psf, size*sizeof(double));
+        }
     }
     if (rsp.m_norm != NULL) {
         int size = m_psf_bins.num_energy() * m_psf_bins.num_ctheta();
-        m_norm   = new double[size];
-        memcpy(m_norm, rsp.m_norm, size*sizeof(double));
+        if (size > 0) {
+            m_norm = new double[size];
+            memcpy(m_norm, rsp.m_norm, size*sizeof(double));
+        }
     }
     if (rsp.m_sigma != NULL) {
         int size = m_psf_bins.num_energy() * m_psf_bins.num_ctheta();
-        m_sigma  = new double[size];
-        memcpy(m_sigma, rsp.m_sigma, size*sizeof(double));
+        if (size > 0) {
+            m_sigma = new double[size];
+            memcpy(m_sigma, rsp.m_sigma, size*sizeof(double));
+        }
     }
 
     // Return
