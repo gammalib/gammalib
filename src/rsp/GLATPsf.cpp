@@ -41,8 +41,8 @@ const double scale_front_c0   = 3.77e-4;
 const double scale_front_c1   = 5.8e-2;
 const double scale_back_c0    = 1.3e-3;
 const double scale_back_c1    = 9.6e-2;
-const int    angle_num        = 2000;    // Number of angles for PSF
-const double angle_min        = 0.01;    // Minimum angular separation (rad)
+const int    angle_num        = 10000;   // Number of angles for PSF
+const double angle_min        = 0.0001;  // Minimum angular separation (rad)
 const double angle_bin        = 0.01;    // Angular separation binning (rad)
 
 
