@@ -136,6 +136,103 @@ def test_psf():
 
     # Show plots
     show()
+
+
+#===============#
+# Test LAT Aeff #
+#===============#
+def test_aeff():
+    """
+    Test GammaLib LAT Aeff interface.
+    """
+    # Allocate LAT response
+    front = GLATResponse()
+    back  = GLATResponse()
+    
+    # Set calibration database
+    front.set_caldb("irf/lat")
+    back.set_caldb("irf/lat")
+    
+    # Load response
+    front.load("Pass5_v0", "front")
+    back.load("Pass5_v0",  "back")
+    
+    # Save response
+    front.save("test_rsp_pass5_front.fits")
+    back.save("test_rsp_pass5_back.fits")
+    
+    # Restrict to 70 deg zenith angle
+    front.aeff_ctheta_min(cos(70.0*pi/180))
+    back.aeff_ctheta_min(cos(70.0*pi/180))
+
+    # Figure 1: front
+    figure(1)
+    make_aeff_panel(front)
+
+    # Figure 2: back
+    figure(2)
+    make_aeff_panel(back)
+
+    # Show figures
+    show()
+
+def make_aeff_panel(rsp):
+    """
+    Make 6 figures.
+    """
+    # logE=1.25527 (18 MeV)
+    subplot(231)
+    make_aeff_image(1.25527, rsp)
+    title("Front, 18 MeV")
+
+    # logE=1.47712
+    subplot(232)
+    make_aeff_image(1.47712, rsp)
+    title("Front, 30 MeV")
+
+    # logE=2.0
+    subplot(233)
+    make_aeff_image(2.0, rsp)
+    title("Front, 100 MeV")
+
+    # logE=3.0
+    subplot(234)
+    make_aeff_image(3.0, rsp)
+    title("Front, 1 GeV")
+
+    # logE=4.0
+    subplot(235)
+    make_aeff_image(4.0, rsp)
+    title("Front, 10 GeV")
+
+    # logE=5.0
+    subplot(236)
+    make_aeff_image(5.0, rsp)
+    title("Front, 100 GeV")
+
+
+def make_aeff_image(logE, rsp):
+    """
+    Make Aeff image.
+    """
+    # Setup results
+    aeff_list = []
+    x  = arange(-90.0, 90.0, 1.0)
+    y  = arange(-90.0, 90.0, 1.0)
+    nx = len(x)
+    ny = len(y)
+    for xval in x:
+        for yval in y:
+            angle  = sqrt(xval*xval+yval*yval)
+            ctheta = cos(angle*pi/180.0)
+            value  = rsp.aeff(logE, ctheta)
+            aeff_list.append(value)
+    
+    # Build image array
+    aeff = array(aeff_list)
+    aeff.shape = nx, ny
+    im = imshow(aeff)
+    #colorbar()
     
 
 #=================#
@@ -219,4 +316,5 @@ if __name__ == '__main__':
     Perform testing.
     """
     #test_psf()
-    test_node_array()
+    test_aeff()
+    #test_node_array()
