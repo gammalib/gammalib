@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.hpp
- * @brief GLATResponse class definition.
+ * @brief GLATResponse class interface definition.
  * @author J. Knodlseder
  */
 
@@ -25,6 +25,7 @@
 #include "GSkyDir.hpp"
 #include "GResponse.hpp"
 #include "GLATResponseTable.hpp"
+#include "GFits.hpp"
 #include "GFitsHDU.hpp"
 
 /* __ Namespaces _________________________________________________________ */
@@ -52,6 +53,12 @@ public:
                const GSkyDir& instPntDir, const double& instPosAng,
                const double& time);
 
+    // Aeff Methods
+    double aeff(const GSkyDir& obsDir, const double& obsEng,
+                const GSkyDir& srcDir, const double& srcEng,
+                const GSkyDir& instPntDir, const double& instPosAng,
+                const double& time);
+
     // PSF Methods
     double  psf(const GSkyDir& obsDir, const double& obsEng,
                 const GSkyDir& srcDir, const double& srcEng,
@@ -59,12 +66,6 @@ public:
                 const double& time);
     double  psf(const double& delta, const double& logE, const double& ctheta);
     GVector psf(const GVector& delta, const double& logE, const double& ctheta);
-
-    // Aeff Methods
-    double aeff(const GSkyDir& obsDir, const double& obsEng,
-                const GSkyDir& srcDir, const double& srcEng,
-                const GSkyDir& instPntDir, const double& instPosAng,
-                const double& time);
 
     // Edisp Methods
     double edisp(const GSkyDir& obsDir, const double& obsEng,
@@ -80,7 +81,11 @@ public:
 
 private:
     // Private Effective Area methods
-    void aeff_init(void);
+    void    aeff_init(void);
+    void    aeff_append(GFits& file) const;
+    void    aeff_init_members(void);
+    void    aeff_copy_members(const GLATResponse& rsp);
+    void    aeff_free_members(void);
 
     // Private PSF methods
     void    psf_init(void);
@@ -93,26 +98,36 @@ private:
     void    psf_copy_members(const GLATResponse& rsp);
     void    psf_free_members(void);
 
-    // Private PSF data
-    GLATResponseTable m_psf_bins;        //!< Energy and cos theta binning
-    GNodeArray        m_psf_angle;       //!< PSF vector binning
-    double            m_psf_angle_max;   //!< Maximum angular distance covered
-    double*           m_psf;             //!< PSF vector array
-    double*           m_norm;            //!< PSF normalization array
-    double*           m_sigma;           //!< PSF sigma array
-
     // Private energy dissipation methods
-    void edisp_init(void);
+    void    edisp_init(void);
+    void    edisp_append(GFits& file) const;
+    void    edisp_init_members(void);
+    void    edisp_copy_members(const GLATResponse& rsp);
+    void    edisp_free_members(void);
 
-    // Private methods
+    // Other private methods
     void    init_members(void);
     void    copy_members(const GLATResponse& rsp);
     void    free_members(void);
     GVector get_fits_vector(const GFitsHDU* hdu, const std::string& colname, int row = 0);
 
-    // Private data area
-    std::string m_rsptype;
-    int         m_section;   // 0=front, 1=back
+    // Private Aeff data
+    GLATResponseTable m_aeff_bins;       //!< Aeff energy and cos theta binning
+
+    // Private PSF data
+    GLATResponseTable m_psf_bins;        //!< PSF energy and cos theta binning
+    GNodeArray        m_psf_angle;       //!< PSF vector binning
+    double            m_psf_angle_max;   //!< PSF maximum angular distance covered
+    double*           m_psf;             //!< PSF vector array
+    double*           m_norm;            //!< PSF normalization array
+    double*           m_sigma;           //!< PSF sigma array
+
+    // Private Edisp data
+    GLATResponseTable m_edisp_bins;      //!< Edisp energy and cos theta binning
+
+    // Other private data
+    std::string m_rsptype;   //!< Response type ('front','back')
+    int         m_section;   //!< PSF section (0=front, 1=back)
 
 };
 

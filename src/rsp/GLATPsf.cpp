@@ -11,15 +11,17 @@
  *                                                                         *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
+/**
+ * @file GLATPsf.cpp
+ * @brief GLATResponse class PSF implementation.
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include "GTools.hpp"
 #include "GException.hpp"
-#include "GVector.hpp"
 #include "GLATResponse.hpp"
-#include "GFits.hpp"
-#include "GFitsHDU.hpp"
 #include "GFitsDblImage.hpp"
 #include "GFitsTableFltCol.hpp"
 
@@ -70,7 +72,7 @@ double GLATResponse::psf(const GSkyDir& obsDir, const double& obsEng,
                          const double& time)
 {
     // Return PSF value
-    return 0.0;
+    return 0.0; //!< @todo Not yet implemented
 }
 
 
@@ -354,31 +356,30 @@ void GLATResponse::psf_init(void)
 void GLATResponse::psf_append(GFits& file) const
 {
     // Get PSF boundary table
-    GFitsHDU hdu_psf_bounds;
-    m_psf_bins.save(&hdu_psf_bounds);
-    hdu_psf_bounds.extname("PBOUNDS");
+    GFitsHDU hdu_bounds;
+    m_psf_bins.save(&hdu_bounds);
+    hdu_bounds.extname("PBOUNDS");
     
     // Build PSF tables and images
-    int naxes_psf2[] = {m_psf_bins.num_energy(), m_psf_bins.num_ctheta()};
-    int naxes_psf3[] = {angle_num, m_psf_bins.num_energy(), 
-                        m_psf_bins.num_ctheta()};
-    GFitsDblImage image_psf_norm(2, naxes_psf2, m_norm);
-    GFitsDblImage image_psf_sigma(2, naxes_psf2, m_sigma);
-    GFitsDblImage image_psf_psf(3, naxes_psf3, m_psf);
+    int naxes2[] = {m_psf_bins.num_energy(), m_psf_bins.num_ctheta()};
+    int naxes3[] = {angle_num, m_psf_bins.num_energy(), m_psf_bins.num_ctheta()};
+    GFitsDblImage image_norm(2, naxes2, m_norm);
+    GFitsDblImage image_sigma(2, naxes2, m_sigma);
+    GFitsDblImage image_psf(3, naxes3, m_psf);
 
     // Construct PSF HDUs
-    GFitsHDU hdu_psf_norm(image_psf_norm);
-    GFitsHDU hdu_psf_sigma(image_psf_sigma);
-    GFitsHDU hdu_psf_psf(image_psf_psf);
-    hdu_psf_norm.extname("PNORM");
-    hdu_psf_sigma.extname("PSIGMA");
-    hdu_psf_psf.extname("PSF");
+    GFitsHDU hdu_norm(image_norm);
+    GFitsHDU hdu_sigma(image_sigma);
+    GFitsHDU hdu_psf(image_psf);
+    hdu_norm.extname("PNORM");
+    hdu_sigma.extname("PSIGMA");
+    hdu_psf.extname("PSF");
 
     // Append HDUs to FITS file
-    file.append_hdu(hdu_psf_bounds);
-    file.append_hdu(hdu_psf_norm);
-    file.append_hdu(hdu_psf_sigma);
-    file.append_hdu(hdu_psf_psf);
+    file.append_hdu(hdu_bounds);
+    file.append_hdu(hdu_norm);
+    file.append_hdu(hdu_sigma);
+    file.append_hdu(hdu_psf);
 
     // Return
     return;
@@ -514,7 +515,7 @@ GVector GLATResponse::psf_base_vector(const GVector& u, const double& gamma) con
 
 
 /***********************************************************************//**
- * @brief Initialise PSF class members
+ * @brief Initialise class members
  ***************************************************************************/
 void GLATResponse::psf_init_members(void)
 {
@@ -530,7 +531,7 @@ void GLATResponse::psf_init_members(void)
 
 
 /***********************************************************************//**
- * @brief Copy PSF class members
+ * @brief Copy class members
  ***************************************************************************/
 void GLATResponse::psf_copy_members(const GLATResponse& rsp)
 {
@@ -567,9 +568,9 @@ void GLATResponse::psf_copy_members(const GLATResponse& rsp)
 void GLATResponse::psf_free_members(void)
 {
     // Free PSF memory
-    if (m_psf       != NULL) delete [] m_psf;
-    if (m_norm      != NULL) delete [] m_norm;
-    if (m_sigma     != NULL) delete [] m_sigma;
+    if (m_psf   != NULL) delete [] m_psf;
+    if (m_norm  != NULL) delete [] m_norm;
+    if (m_sigma != NULL) delete [] m_sigma;
 
     // Signal that PSF memory is free
     m_psf   = NULL;

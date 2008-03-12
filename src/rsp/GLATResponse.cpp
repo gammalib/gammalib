@@ -11,6 +11,11 @@
  *                                                                         *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
+/**
+ * @file GLATResponse.cpp
+ * @brief GLATResponse class implementation.
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
@@ -26,8 +31,6 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD            "load(const std::string&, const std::string&)"
-#define G_INIT_AEFF       "GLATResponse::init_aeff()"
-#define G_INIT_EDISP      "GLATResponse::init_edisp()"
 #define G_GET_FITS_VECTOR "GLATResponse::get_fits_vector(const GFitsHDU*, const std::string&, int)"
 
 /* __ Macros _____________________________________________________________ */
@@ -139,33 +142,7 @@ double GLATResponse::irf(const GSkyDir& obsDir, const double& obsEng,
                          const double& time)
 {
     // Return IRF value
-    return 0.0;
-}
-
-
-/***********************************************************************//**
- * @brief Return effective area
- ***************************************************************************/
-double GLATResponse::aeff(const GSkyDir& obsDir, const double& obsEng,
-                          const GSkyDir& srcDir, const double& srcEng,
-                          const GSkyDir& instPntDir, const double& instPosAng,
-                          const double& time)
-{
-    // Return Aeff value
-    return 0.0;
-}
-
-
-/***********************************************************************//**
- * @brief Return value of energy dispersion
- ***************************************************************************/
-double GLATResponse::edisp(const GSkyDir& obsDir, const double& obsEng,
-                           const GSkyDir& srcDir, const double& srcEng,
-                           const GSkyDir& instPntDir, const double& instPosAng,
-                           const double& time)
-{
-    // Return Edisp value
-    return 0.0;
+    return 0.0; //!< @todo Not yet implemented
 }
 
 
@@ -179,7 +156,7 @@ double GLATResponse::edisp(const GSkyDir& obsDir, const double& obsEng,
 void GLATResponse::set_caldb(const std::string& caldb)
 {
     // Simply copy path
-    // NOTE: Some check should be done on whether the path exists !!!
+    /// @todo Some check should be done on whether the path exists
     m_caldb = caldb;
 
     // Return
@@ -240,91 +217,16 @@ void GLATResponse::save(const std::string& rspname) const
     file.open(rspname);
     
     // Save effective area
+    aeff_append(file);
     
     // Append PSF HDUs
     psf_append(file);
     
     // Save energy dispersions
+    edisp_append(file);
 
     // Save FITS file
     file.save();
-
-    // Return
-    return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =               GLATResponse private effective area methods               =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Initialise effective area
- ***************************************************************************/
-void GLATResponse::aeff_init(void)
-{
-    // Build filename
-    std::string filename = "aeff_"  + m_rspname + "_" + m_rsptype + ".fits";
-
-    // Open FITS file
-    GFits file;
-    file.open(m_caldb + "/" + filename);
-
-    // Get pointer to effective area HDU
-    GFitsHDU* hdu = file.hdu("EFFECTIVE AREA");
-    if (hdu == NULL)
-        throw GException::fits_hdu_not_found(G_INIT_AEFF, "EFFECTIVE AREA");
-
-    // Get the data
-    GVector energ_lo  = get_fits_vector(hdu, "ENERG_LO");
-    GVector energ_hi  = get_fits_vector(hdu, "ENERG_HI");
-    GVector ctheta_lo = get_fits_vector(hdu, "CTHETA_LO");
-    GVector ctheta_hi = get_fits_vector(hdu, "CTHETA_HI");
-    GVector effarea   = get_fits_vector(hdu, "EFFAREA");
-
-    // Return
-    return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =             GLATResponse private energy dispersion methods              =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Initialise energy dispersion
- ***************************************************************************/
-void GLATResponse::edisp_init(void)
-{
-    // Build filename
-    std::string filename = "edisp_"  + m_rspname + "_" + m_rsptype + ".fits";
-
-    // Open FITS file
-    GFits file;
-    file.open(m_caldb + "/" + filename);
-
-    // Get pointer towards energy dispersion HDU
-    GFitsHDU* hdu = file.hdu("ENERGY DISPERSION");
-    if (hdu == NULL)
-        throw GException::fits_hdu_not_found(G_INIT_EDISP, "ENERGY DISPERSION");
-
-    // Get the data
-    GVector energ_lo  = get_fits_vector(hdu, "ENERG_LO");
-    GVector energ_hi  = get_fits_vector(hdu, "ENERG_HI");
-    GVector ctheta_lo = get_fits_vector(hdu, "CTHETA_LO");
-    GVector ctheta_hi = get_fits_vector(hdu, "CTHETA_HI");
-    GVector dnorm     = get_fits_vector(hdu, "DNORM");
-    GVector ltail     = get_fits_vector(hdu, "LTAIL");
-    GVector rwidth    = get_fits_vector(hdu, "RWIDTH");
-    GVector nr2       = get_fits_vector(hdu, "NR2");
-    GVector lt2       = get_fits_vector(hdu, "LT2");
-    GVector rt2       = get_fits_vector(hdu, "RT2");
-
-    // ...
 
     // Return
     return;
@@ -343,11 +245,13 @@ void GLATResponse::edisp_init(void)
 void GLATResponse::init_members(void)
 {
     // Initialise effective area members
+    aeff_init_members();
 
     // Initialise PSF members
     psf_init_members();
     
     // Initialize energy dispersion members
+    edisp_init_members();
 
     // By default use HANDOFF response database.
     char* handoff = getenv("HANDOFF_IRF_DIR");
@@ -367,11 +271,13 @@ void GLATResponse::init_members(void)
 void GLATResponse::copy_members(const GLATResponse& rsp)
 {
     // Copy effective area members
+    aeff_copy_members(rsp);
     
     // Copy PSF members
     psf_copy_members(rsp);
 
     // Copy energy dispersion members
+    edisp_copy_members(rsp);
     
     // Copy remaining members
     m_caldb = rsp.m_caldb;
@@ -386,15 +292,16 @@ void GLATResponse::copy_members(const GLATResponse& rsp)
  ***************************************************************************/
 void GLATResponse::free_members(void)
 {
-    // Free PSF memory
-    if (m_psf   != NULL) delete [] m_psf;
-    if (m_norm  != NULL) delete [] m_norm;
-    if (m_sigma != NULL) delete [] m_sigma;
+    // Free effective area members
+    aeff_free_members();
 
-    // Signal that PSF memory is free
-    m_psf   = NULL;
-    m_norm  = NULL;
-    m_sigma = NULL;
+    // Free PSF  members
+    psf_free_members();
+    
+    // Free energy dispersion members
+    edisp_free_members();
+    
+    // Free remaining members
 
     // Return
     return;

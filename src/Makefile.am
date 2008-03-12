@@ -16,7 +16,9 @@ files = GException.cpp \
 	rsp/GResponse.cpp \
 	rsp/GLATResponse.cpp \
 	rsp/GLATResponseTable.cpp \
+	rsp/GLATAeff.cpp \
 	rsp/GLATPsf.cpp \
+	rsp/GLATEdisp.cpp \
 	obs/GObservation.cpp \
 	fits/GFitsHeaderCard.cpp \
 	fits/GFitsHeader.cpp \
