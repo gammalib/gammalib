@@ -20,9 +20,12 @@
 #define GLATRESPONSETABLE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include "GNodeArray.hpp"
 #include "GFitsHDU.hpp"
 
 /* __ Namespaces _________________________________________________________ */
+
+/* __ Structures _________________________________________________________ */
 
 
 /***********************************************************************//**
@@ -45,6 +48,11 @@ public:
     void   load(const GFitsHDU* hdu);
     void   save(GFitsHDU* hdu) const;
     int    index(const int& ie, const int& ic) const;
+    double interpolate(const double& logE, const double& ctheta, 
+                       const double* array);
+    double interpolate(const double& logE, const double& ctheta, 
+                       const double* array, const int& offset, 
+                       const int& size);
     double energy(const int& ie) const;
     int    num_energy(void) const { return m_energy_num; }
     int    num_ctheta(void) const { return m_ctheta_num; }
@@ -55,13 +63,27 @@ private:
     void copy_members(const GLATResponseTable& table);
     void free_members(void);
     
-    // Data
-    int     m_energy_num;   //!< Number of energy bins in table
-    int     m_ctheta_num;   //!< Number of cos theta bins in table
-    double* m_energy_lo;    //!< Energy bins lower boundary (MeV)
-    double* m_energy_hi;    //!< Energy bins upper boundary (MeV)
-    double* m_ctheta_lo;    //!< cos(theta) bins lower boundary
-    double* m_ctheta_hi;    //!< cos(theta) bins upper boundary
+    // Table nodes
+    int        m_energy_num;   //!< Number of energy bins in table
+    int        m_ctheta_num;   //!< Number of cos theta bins in table
+    double*    m_energy_lo;    //!< Energy bins lower boundary (MeV)
+    double*    m_energy_hi;    //!< Energy bins upper boundary (MeV)
+    double*    m_ctheta_lo;    //!< cos(theta) bins lower boundary
+    double*    m_ctheta_hi;    //!< cos(theta) bins upper boundary
+    GNodeArray m_energy;       //!< Energy nodes
+    GNodeArray m_ctheta;       //!< cos(theta) nodes
+
+    // Bi-linear interpolation data
+    double     m_last_energy;  //!< Last requested energy for interpolation
+    double     m_last_ctheta;  //!< Last requested cos(theta) for interpolation
+    int        m_inx1;         //!< Index 1
+    int        m_inx2;         //!< Index 2
+    int        m_inx3;         //!< Index 3
+    int        m_inx4;         //!< Index 4
+    double     m_wgt1;         //!< Weighting factor 1
+    double     m_wgt2;         //!< Weighting factor 2
+    double     m_wgt3;         //!< Weighting factor 3
+    double     m_wgt4;         //!< Weighting factor 4
 };
 
 #endif /* GLATRESPONSETABLE_HPP */

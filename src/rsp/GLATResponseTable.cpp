@@ -14,6 +14,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
+#include <math.h>
 #include "GException.hpp"
 #include "GLATResponseTable.hpp"
 #include "GFitsHDU.hpp"
@@ -123,7 +124,7 @@ GLATResponseTable& GLATResponseTable::operator= (const GLATResponseTable& table)
 /***********************************************************************//**
  * @brief Load response table from FITS HDU
  *
- * @param hdu HDU from which the response table should be loaded
+ * @param[in] hdu Pointer to HDU from which the response table should be loaded
  *
  * The response table definition is assumed to be stored in 4 vector columns
  * with the names
@@ -171,7 +172,25 @@ void GLATResponseTable::load(const GFitsHDU* hdu)
         m_ctheta_lo[i] = ctheta_lo->real(0,i);
         m_ctheta_hi[i] = ctheta_hi->real(0,i);
     }
+    
+    // Set energy nodes
+    if (m_energy_num > 0) {
+        double *logE = new double[m_energy_num];
+        for (int i = 0; i < m_energy_num; ++i)
+            logE[i] = 0.5 * (log10(m_energy_lo[i]) + log10(m_energy_hi[i]));
+        m_energy.nodes(m_energy_num, logE);
+        delete [] logE;
+    }
 
+    // Set cos theta nodes
+    if (m_ctheta_num > 0) {
+        double *ctheta = new double[m_ctheta_num];
+        for (int i = 0; i < m_ctheta_num; ++i)
+            ctheta[i] = 0.5 * (m_ctheta_lo[i] + m_ctheta_hi[i]);
+        m_ctheta.nodes(m_ctheta_num, ctheta);
+        delete [] ctheta;
+    }
+    
     // Return
     return;
 }
@@ -180,7 +199,7 @@ void GLATResponseTable::load(const GFitsHDU* hdu)
 /***********************************************************************//**
  * @brief Save response table into FITS HDU
  *
- * @param hdu HDU into which the response table should be saved.
+ * @param[in] hdu HDU into which the response table should be saved.
  ***************************************************************************/
 void GLATResponseTable::save(GFitsHDU* hdu) const
 {
@@ -220,8 +239,8 @@ void GLATResponseTable::save(GFitsHDU* hdu) const
 /***********************************************************************//**
  * @brief Return table index
  *
- * @param ie Energy bin (starting from 0)
- * @param ic cos theta bin (starting from 0)
+ * @param[in] ie Energy bin (starting from 0)
+ * @param[in] ic cos theta bin (starting from 0)
  ***************************************************************************/
 int GLATResponseTable::index(const int& ie, const int& ic) const
 {
@@ -232,18 +251,142 @@ int GLATResponseTable::index(const int& ie, const int& ic) const
 /***********************************************************************//**
  * @brief Return mean energy of bin
  *
- * @param ie Energy bin (starting from 0)
+ * @param[in] ie Index of energy bin (starting from 0)
  *
- * The mean energy is actually computed from the average of lower and upper
- * boundaries.
+ * The mean energy is actually computed from the logarithmic average of 
+ * lower and upper boundaries:
+ * /f$E=10^{0.5 \times (\log{E_{\rm min}} + \log{E_{\rm max}})}/f$
  ***************************************************************************/
 double GLATResponseTable::energy(const int& ie) const
 {
     // Determine mean energy of bin
-    double energy = 0.5 * (m_energy_lo[ie] + m_energy_hi[ie]);
+    double mean   = 0.5 * (log10(m_energy_lo[ie]) + log10(m_energy_hi[ie]));
+    double energy = pow(10.0, mean);
 
     // Return mean energy
     return energy;
+}
+
+
+/***********************************************************************//**
+ * @brief Perform bi-linear interpolation of 2D array
+ *
+ * @param[in] logE Base 10 logarithm of the energy (MeV)
+ * @param[in] ctheta cos(theta)
+ * @param[in] array Array to be interpolated
+ ***************************************************************************/
+double GLATResponseTable::interpolate(const double& logE, 
+                                      const double& ctheta, 
+                                      const double* array)
+{
+    // Flag no change of values
+    int change = 0;
+    
+    // Set energy interpolation
+    if (logE != m_last_energy) {
+        m_energy.set_value(logE);
+        m_last_energy = logE;
+        change        = 1;
+    }
+
+    // Set cos(theta) interpolation
+    if (ctheta != m_last_ctheta) {
+        m_ctheta.set_value(ctheta);
+        m_last_ctheta = ctheta;
+        change        = 1;
+    }
+    
+    // If change occured then update interpolation indices and weighting
+    // factors
+    if (change) {
+    
+        // Set array indices for bi-linear interpolation
+        int inx_ctheta_left  = m_ctheta.inx_left()  * m_energy_num;
+        int inx_ctheta_right = m_ctheta.inx_right() * m_energy_num;
+        m_inx1 = m_energy.inx_left()  + inx_ctheta_left;
+        m_inx2 = m_energy.inx_left()  + inx_ctheta_right;
+        m_inx3 = m_energy.inx_right() + inx_ctheta_left;
+        m_inx4 = m_energy.inx_right() + inx_ctheta_right;
+
+        // Set weighting factors for bi-linear interpolation
+        m_wgt1 = m_energy.wgt_left()  * m_ctheta.wgt_left();
+        m_wgt2 = m_energy.wgt_left()  * m_ctheta.wgt_right();
+        m_wgt3 = m_energy.wgt_right() * m_ctheta.wgt_left();
+        m_wgt4 = m_energy.wgt_right() * m_ctheta.wgt_right();
+        
+    } // endif: logE or ctheta changed
+    
+    // Perform bi-linear interpolation
+    double value = m_wgt1 * array[m_inx1] +
+                   m_wgt2 * array[m_inx2] +
+                   m_wgt3 * array[m_inx3] +
+                   m_wgt4 * array[m_inx4];
+    
+    // Return bi-linear interpolated value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Perform bi-linear interpolation of 3D array
+ *
+ * @param[in] logE Base 10 logarithm of the energy (MeV)
+ * @param[in] ctheta cos(theta)
+ * @param[in] array Array to be interpolated
+ * @param[in] offset Offset if 3D array in 1st dimension
+ * @param[in] size Size of 3D array in 1st dimension
+ ***************************************************************************/
+double GLATResponseTable::interpolate(const double& logE, 
+                                      const double& ctheta, 
+                                      const double* array,
+                                      const int&    offset,
+                                      const int&    size)
+{
+    // Flag no change of values
+    int change = 0;
+    
+    // Set energy interpolation
+    if (logE != m_last_energy) {
+        m_energy.set_value(logE);
+        m_last_energy = logE;
+        change        = 1;
+    }
+
+    // Set cos(theta) interpolation
+    if (ctheta != m_last_ctheta) {
+        m_ctheta.set_value(ctheta);
+        m_last_ctheta = ctheta;
+        change        = 1;
+    }
+    
+    // If change occured then update interpolation indices and weighting
+    // factors
+    if (change) {
+    
+        // Set array indices for bi-linear interpolation
+        int inx_ctheta_left  = m_ctheta.inx_left()  * m_energy_num;
+        int inx_ctheta_right = m_ctheta.inx_right() * m_energy_num;
+        m_inx1 = m_energy.inx_left()  + inx_ctheta_left;
+        m_inx2 = m_energy.inx_left()  + inx_ctheta_right;
+        m_inx3 = m_energy.inx_right() + inx_ctheta_left;
+        m_inx4 = m_energy.inx_right() + inx_ctheta_right;
+
+        // Set weighting factors for bi-linear interpolation
+        m_wgt1 = m_energy.wgt_left()  * m_ctheta.wgt_left();
+        m_wgt2 = m_energy.wgt_left()  * m_ctheta.wgt_right();
+        m_wgt3 = m_energy.wgt_right() * m_ctheta.wgt_left();
+        m_wgt4 = m_energy.wgt_right() * m_ctheta.wgt_right();
+        
+    } // endif: logE or ctheta changed
+    
+    // Perform bi-linear interpolation
+    double value = m_wgt1 * array[m_inx1*size+offset] +
+                   m_wgt2 * array[m_inx2*size+offset] +
+                   m_wgt3 * array[m_inx3*size+offset] +
+                   m_wgt4 * array[m_inx4*size+offset];
+    
+    // Return bi-linear interpolated value
+    return value;
 }
 
 
@@ -258,13 +401,15 @@ double GLATResponseTable::energy(const int& ie) const
  ***************************************************************************/
 void GLATResponseTable::init_members(void)
 {
-    // Initialise effective area members
-    m_energy_num = 0;
-    m_ctheta_num = 0;
-    m_energy_lo  = NULL;
-    m_energy_hi  = NULL;
-    m_ctheta_lo  = NULL;
-    m_ctheta_hi  = NULL;
+    // Initialise members
+    m_energy_num  = 0;
+    m_ctheta_num  = 0;
+    m_energy_lo   = NULL;
+    m_energy_hi   = NULL;
+    m_ctheta_lo   = NULL;
+    m_ctheta_hi   = NULL;
+    m_last_energy = -1.0;
+    m_last_ctheta = -1.0;
 
     // Return
     return;
@@ -279,13 +424,17 @@ void GLATResponseTable::init_members(void)
 void GLATResponseTable::copy_members(const GLATResponseTable& table)
 {
     // Copy number of bins
-    m_energy_num = table.m_energy_num;
-    m_ctheta_num = table.m_ctheta_num;
+    m_energy_num  = table.m_energy_num;
+    m_ctheta_num  = table.m_ctheta_num;
+    m_energy      = table.m_energy;
+    m_ctheta      = table.m_ctheta;
+    m_last_energy = table.m_last_energy;
+    m_last_ctheta = table.m_last_ctheta;
     
     // Copy energy bins
     if (m_energy_num > 0) {
-        m_energy_lo = new double[m_energy_num];
-        m_energy_hi = new double[m_energy_num];
+        m_energy_lo   = new double[m_energy_num];
+        m_energy_hi   = new double[m_energy_num];
         memcpy(m_energy_lo, table.m_energy_lo, m_energy_num*sizeof(double));
         memcpy(m_energy_hi, table.m_energy_hi, m_energy_num*sizeof(double));
     }

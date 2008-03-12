@@ -20,9 +20,11 @@
 #define GLATRESPONSE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include "GNodeArray.hpp"
 #include "GVector.hpp"
 #include "GSkyDir.hpp"
 #include "GResponse.hpp"
+#include "GLATResponseTable.hpp"
 #include "GFitsHDU.hpp"
 
 /* __ Namespaces _________________________________________________________ */
@@ -44,24 +46,33 @@ public:
     // Operators
     GLATResponse& operator= (const GLATResponse & rsp);
 
-    // Methods
+    // IRF Methods
     double irf(const GSkyDir& obsDir, const double& obsEng,
                const GSkyDir& srcDir, const double& srcEng,
                const GSkyDir& instPntDir, const double& instPosAng,
                const double& time);
-    double psf(const GSkyDir& obsDir, const double& obsEng,
-               const GSkyDir& srcDir, const double& srcEng,
-               const GSkyDir& instPntDir, const double& instPosAng,
-               const double& time);
+
+    // PSF Methods
+    double  psf(const GSkyDir& obsDir, const double& obsEng,
+                const GSkyDir& srcDir, const double& srcEng,
+                const GSkyDir& instPntDir, const double& instPosAng,
+                const double& time);
+    double  psf(const double& delta, const double& logE, const double& ctheta);
+    GVector psf(const GVector& delta, const double& logE, const double& ctheta);
+
+    // Aeff Methods
     double aeff(const GSkyDir& obsDir, const double& obsEng,
                 const GSkyDir& srcDir, const double& srcEng,
                 const GSkyDir& instPntDir, const double& instPosAng,
                 const double& time);
+
+    // Edisp Methods
     double edisp(const GSkyDir& obsDir, const double& obsEng,
                  const GSkyDir& srcDir, const double& srcEng,
                  const GSkyDir& instPntDir, const double& instPosAng,
                  const double& time);
 
+    // Other Methods
     void          set_caldb(const std::string& caldb);
     void          load(const std::string& rspname, const std::string& rsptype);
     void          save(const std::string& rspname) const;
@@ -73,23 +84,24 @@ private:
 
     // Private PSF methods
     void    psf_init(void);
-    double  psf_get(const double& delta, const double& logE, const double& ctheta);
-    double  psf_scale(const double& energy);
-    double  psf_base_value(const double& u, const double& gamma);
-    GVector psf_base_vector(const GVector& u, const double& gamma);
+    void    psf_append(GFits& file) const;
+    double  psf_scale(const double& energy) const;
+    double  psf_scale_log(const double& logE) const;
+    double  psf_base_value(const double& u, const double& gamma) const;
+    GVector psf_base_vector(const GVector& u, const double& gamma) const;
+    void    psf_init_members(void);
+    void    psf_copy_members(const GLATResponse& rsp);
+    void    psf_free_members(void);
 
     // Private PSF data
-    int     m_psf_angle_num;
-    double  m_psf_angle_min;
-    double  m_psf_angle_max;
-    double  m_psf_angle_bin;
-    int     m_psf_energy_num;
-    int     m_psf_ctheta_num;
-    double* m_psf;
-    double* m_norm;
-    double* m_sigma;
+    GLATResponseTable m_psf_bins;        //!< Energy and cos theta binning
+    GNodeArray        m_psf_angle;       //!< PSF vector binning
+    double            m_psf_angle_max;   //!< Maximum angular distance covered
+    double*           m_psf;             //!< PSF vector array
+    double*           m_norm;            //!< PSF normalization array
+    double*           m_sigma;           //!< PSF sigma array
 
-    // Provate energy dissipation methods
+    // Private energy dissipation methods
     void edisp_init(void);
 
     // Private methods
@@ -103,15 +115,5 @@ private:
     int         m_section;   // 0=front, 1=back
 
 };
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
-inline 
-GLATResponse* GLATResponse::clone(void) const
-{
-    return new GLATResponse(*this);
-}
 
 #endif /* GLATRESPONSE_HPP */
