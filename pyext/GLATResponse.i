@@ -39,10 +39,12 @@ public:
                const GSkyDir& srcDir, const double& srcEng,
                const GSkyDir& instPntDir, const double& instPosAng,
                const double& time);
-    double psf(const GSkyDir& obsDir, const double& obsEng,
-               const GSkyDir& srcDir, const double& srcEng,
-               const GSkyDir& instPntDir, const double& instPosAng,
-               const double& time);
+    double  psf(const GSkyDir& obsDir, const double& obsEng,
+                const GSkyDir& srcDir, const double& srcEng,
+                const GSkyDir& instPntDir, const double& instPosAng,
+                const double& time);
+    double  psf(const double& delta, const double& logE, const double& ctheta);
+    GVector psf(const GVector& delta, const double& logE, const double& ctheta);
     double aeff(const GSkyDir& obsDir, const double& obsEng,
                 const GSkyDir& srcDir, const double& srcEng,
                 const GSkyDir& instPntDir, const double& instPosAng,
