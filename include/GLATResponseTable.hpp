@@ -56,6 +56,10 @@ public:
     double energy(const int& ie) const;
     int    num_energy(void) const { return m_energy_num; }
     int    num_ctheta(void) const { return m_ctheta_num; }
+    double energy_lo(const int& inx) const { return m_energy_lo[inx]; }
+    double energy_hi(const int& inx) const { return m_energy_hi[inx]; }
+    double ctheta_lo(const int& inx) const { return m_ctheta_lo[inx]; }
+    double ctheta_hi(const int& inx) const { return m_ctheta_hi[inx]; }
 
 private:
     // Methods

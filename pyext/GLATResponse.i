@@ -34,26 +34,36 @@ public:
     GLATResponse(const GLATResponse& rsp);
     ~GLATResponse();
 
-    // Methods
+    // IRF Methods
     double irf(const GSkyDir& obsDir, const double& obsEng,
                const GSkyDir& srcDir, const double& srcEng,
                const GSkyDir& instPntDir, const double& instPosAng,
                const double& time);
+    // Aeff Methods
+    double aeff(const GSkyDir& obsDir, const double& obsEng,
+                const GSkyDir& srcDir, const double& srcEng,
+                const GSkyDir& instPntDir, const double& instPosAng,
+                const double& time);
+    double aeff(const double& logE, const double& ctheta);
+    void   aeff_ctheta_min(const double& ctheta);
+    double aeff_ctheta_min(void) const;
+
+    // PSF Methods
     double  psf(const GSkyDir& obsDir, const double& obsEng,
                 const GSkyDir& srcDir, const double& srcEng,
                 const GSkyDir& instPntDir, const double& instPosAng,
                 const double& time);
     double  psf(const double& delta, const double& logE, const double& ctheta);
     GVector psf(const GVector& delta, const double& logE, const double& ctheta);
-    double aeff(const GSkyDir& obsDir, const double& obsEng,
-                const GSkyDir& srcDir, const double& srcEng,
-                const GSkyDir& instPntDir, const double& instPosAng,
-                const double& time);
+
+    // Edisp Methods
     double edisp(const GSkyDir& obsDir, const double& obsEng,
                  const GSkyDir& srcDir, const double& srcEng,
                  const GSkyDir& instPntDir, const double& instPosAng,
                  const double& time);
-    void   set_caldb(const std::string& caldb);
-    void   load(const std::string& rspname, const std::string& rsptype);
-    void   save(const std::string& rspname) const;
+
+    // Other Methods
+    void set_caldb(const std::string& caldb);
+    void load(const std::string& rspname, const std::string& rsptype);
+    void save(const std::string& rspname) const;
 };

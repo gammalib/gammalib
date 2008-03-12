@@ -58,6 +58,9 @@ public:
                 const GSkyDir& srcDir, const double& srcEng,
                 const GSkyDir& instPntDir, const double& instPosAng,
                 const double& time);
+    double aeff(const double& logE, const double& ctheta);
+    void   aeff_ctheta_min(const double& ctheta);
+    double aeff_ctheta_min(void) const;
 
     // PSF Methods
     double  psf(const GSkyDir& obsDir, const double& obsEng,
@@ -112,7 +115,9 @@ private:
     GVector get_fits_vector(const GFitsHDU* hdu, const std::string& colname, int row = 0);
 
     // Private Aeff data
-    GLATResponseTable m_aeff_bins;       //!< Aeff energy and cos theta binning
+    GLATResponseTable m_aeff_bins;        //!< Aeff energy and cos theta binning
+    double*           m_aeff;             //!< Aeff array
+    double            m_aeff_ctheta_min;  //!< Minimum valid cos(theta)
 
     // Private PSF data
     GLATResponseTable m_psf_bins;        //!< PSF energy and cos theta binning
