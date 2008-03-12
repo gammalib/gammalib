@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 from gammalib import *
-
+from math import *
 
 #================#
 # Test FITS file #
@@ -101,6 +101,59 @@ def test_fits():
     fits.saveto("test_python_2.fits")
 
 
+#===================#
+# Test LAT response #
+#===================#
+def test_lat_response():
+    """
+    Test GammaLib GLATResponse interface.
+    """
+    # Allocate LAT response
+    rsp = GLATResponse()
+    
+    # Set calibration database
+    rsp.set_caldb("irf/lat")
+    
+    # Load response
+    rsp.load("Pass5_v0", "front")
+    
+    # Save response
+    rsp.save("test_rsp.fits")
+
+
+#=================#
+# Test Node array #
+#=================#
+def test_node_array():
+    """
+    Test GammaLib GNodeArray interface.
+    """
+    # Set-up vector and data array
+    vector = GVector(20)
+    data   = GVector(20)
+    for i in range(20):
+        vector[i] = 10.0 + i*5.0
+        data[i]   = sin(0.15*(vector[i]-10.0))
+    
+    # Set-up node array
+    array = GNodeArray()
+    array.nodes(vector)
+    
+    # Get values
+    x_val = []
+    y_val = []
+    for i in range(100):
+        x = i-10
+        array.set_value(x)
+        inx_left  = array.inx_left()
+        inx_right = array.inx_right()
+        wgt_left  = array.wgt_left()
+        wgt_right = array.wgt_right()
+        y         = wgt_left*data[inx_left] + wgt_right*data[inx_right]
+        x_val.append(x)
+        y_val.append(y)
+    
+
 #==========================#
 # Main routine entry point #
 #==========================#
@@ -109,3 +162,5 @@ if __name__ == '__main__':
     Perform testing.
     """
     test_fits()
+    test_node_array()
+    test_lat_response()
