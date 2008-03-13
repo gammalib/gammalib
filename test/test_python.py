@@ -2,6 +2,7 @@
 
 from gammalib import *
 from math import *
+import os
 
 #================#
 # Test FITS file #
@@ -10,6 +11,13 @@ def test_fits():
     """
     Test GammaLib GFits interface.
     """
+    # Remove test files
+    try:
+        os.remove("test_python.fits")
+        os.remove("test_python_2.fits")
+    except:
+        pass
+
     # Create FITS file
     fits = GFits()
     fits.open("test_python.fits")
@@ -59,17 +67,20 @@ def test_fits():
     col3 = GFitsTableLngCol("LONG", 10)
     col4 = GFitsTableShtCol("SHORT", 10)
     col5 = GFitsTableStrCol("STRING", 10, 20)
+    col6 = GFitsTableLogCol("LOGICAL", 10)
     for i in range(10):
         col1.set(i, i*0.01)
         col2.set(i, i*0.01)
         col3.set(i, i*100)
         col4.set(i, i*100)
         col5.set(i, str(i*100))
+        col6.set(i, i % 2)
     tbl1.append_column(col1)
     #tbl1.append_column(col2) # FLOAT: datatype conversion overflow (status=412)
     #tbl1.append_column(col3) # LONG: unknown TFORM datatype code (status=262)
     #tbl1.append_column(col4) # SHORT: datatype conversion overflow (status=412)
     tbl1.append_column(col5)
+    #tbl1.append_column(col6) # LOGICAL: unknown TFORM datatype code (status=262)
     fits.append_hdu(GFitsHDU(tbl1))
 
     # Set binary table
@@ -79,17 +90,20 @@ def test_fits():
     col3 = GFitsTableLngCol("LONG", 10)
     col4 = GFitsTableShtCol("SHORT", 10)
     col5 = GFitsTableStrCol("STRING", 10, 20)
+    col6 = GFitsTableLogCol("LOGICAL", 10)
     for i in range(10):
         col1.set(i, i*0.01)
         col2.set(i, i*0.01)
         col3.set(i, i*100)
         col4.set(i, i*100)
         col5.set(i, str(i*100))
+        col6.set(i, i % 2)
     tbl2.append_column(col1)
     tbl2.append_column(col2)
     tbl2.append_column(col3)
     tbl2.append_column(col4)
     tbl2.append_column(col5)
+    tbl2.append_column(col6)
     fits.append_hdu(GFitsHDU(tbl2))
 
     #print fits
@@ -99,26 +113,6 @@ def test_fits():
 
     # Save into another FITS file
     fits.saveto("test_python_2.fits")
-
-
-#===================#
-# Test LAT response #
-#===================#
-def test_lat_response():
-    """
-    Test GammaLib GLATResponse interface.
-    """
-    # Allocate LAT response
-    rsp = GLATResponse()
-    
-    # Set calibration database
-    rsp.set_caldb("irf/lat")
-    
-    # Load response
-    rsp.load("Pass5_v0", "front")
-    
-    # Save response
-    rsp.save("test_rsp.fits")
 
 
 #=================#
@@ -152,7 +146,47 @@ def test_node_array():
         y         = wgt_left*data[inx_left] + wgt_right*data[inx_right]
         x_val.append(x)
         y_val.append(y)
+
+
+#===================#
+# Test LAT response #
+#===================#
+def test_lat_response():
+    """
+    Test GammaLib GLATResponse interface.
+    """
+    # Remove test file
+    try:
+        os.remove("test_rsp.fits")
+    except:
+        pass
     
+    # Allocate LAT response
+    rsp = GLATResponse()
+    
+    # Set calibration database
+    rsp.set_caldb("irf/lat")
+    
+    # Load response
+    rsp.load("Pass5_v0", "front")
+    
+    # Save response
+    rsp.save("test_rsp.fits")
+
+
+#======================#
+# Test LAT observation #
+#======================#
+def test_lat_observation():
+    """
+    Test GammaLib GLATObservation interface.
+    """
+    # Allocate LAT Observation
+    obs = GLATObservation("data/FT1_253582800.fits.gz", "data/FT2_253582800.fits.gz")
+
+    #
+    print obs.ft1()
+    print obs.ft2()
 
 #==========================#
 # Main routine entry point #
@@ -164,3 +198,5 @@ if __name__ == '__main__':
     test_fits()
     test_node_array()
     test_lat_response()
+    test_lat_observation()
+    
