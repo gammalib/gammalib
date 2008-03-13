@@ -135,6 +135,7 @@ files = GException.cpp \
 	fits/GFitsAsciiTable.cpp \
 	fits/GFitsBinTable.cpp \
 	fits/GFitsTableCol.cpp \
+	fits/GFitsTableLogCol.cpp \
 	fits/GFitsTableStrCol.cpp \
 	fits/GFitsTableShtCol.cpp \
 	fits/GFitsTableLngCol.cpp \
@@ -169,10 +170,11 @@ am__objects_1 = GException.lo GTools.lo GSkyDir.lo GNodeArray.lo \
 	GLATObservation.lo GFitsHeaderCard.lo GFitsHeader.lo \
 	GFitsData.lo GFitsImage.lo GFitsDblImage.lo GFitsTable.lo \
 	GFitsAsciiTable.lo GFitsBinTable.lo GFitsTableCol.lo \
-	GFitsTableStrCol.lo GFitsTableShtCol.lo GFitsTableLngCol.lo \
-	GFitsTableFltCol.lo GFitsTableDblCol.lo GFitsHDU.lo GFits.lo \
-	GFitPar.lo GVector.lo GMatrixBase.lo GMatrix.lo GSymMatrix.lo \
-	GSparseMatrix.lo GSparseSymbolic.lo GSparseNumeric.lo
+	GFitsTableLogCol.lo GFitsTableStrCol.lo GFitsTableShtCol.lo \
+	GFitsTableLngCol.lo GFitsTableFltCol.lo GFitsTableDblCol.lo \
+	GFitsHDU.lo GFits.lo GFitPar.lo GVector.lo GMatrixBase.lo \
+	GMatrix.lo GSymMatrix.lo GSparseMatrix.lo GSparseSymbolic.lo \
+	GSparseNumeric.lo
 am_libgamma_la_OBJECTS = $(am__objects_1)
 libgamma_la_OBJECTS = $(am_libgamma_la_OBJECTS)
 
@@ -251,6 +253,7 @@ GFitsTable.lo: fits/GFitsTable.cpp
 GFitsAsciiTable.lo: fits/GFitsAsciiTable.cpp
 GFitsBinTable.lo: fits/GFitsBinTable.cpp
 GFitsTableCol.lo: fits/GFitsTableCol.cpp
+GFitsTableLogCol.lo: fits/GFitsTableLogCol.cpp
 GFitsTableStrCol.lo: fits/GFitsTableStrCol.cpp
 GFitsTableShtCol.lo: fits/GFitsTableShtCol.cpp
 GFitsTableLngCol.lo: fits/GFitsTableLngCol.cpp
@@ -445,6 +448,15 @@ GFitsTableCol.obj: fits/GFitsTableCol.cpp
 
 GFitsTableCol.lo: fits/GFitsTableCol.cpp
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsTableCol.lo `test -f 'fits/GFitsTableCol.cpp' || echo '$(srcdir)/'`fits/GFitsTableCol.cpp
+
+GFitsTableLogCol.o: fits/GFitsTableLogCol.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsTableLogCol.o `test -f 'fits/GFitsTableLogCol.cpp' || echo '$(srcdir)/'`fits/GFitsTableLogCol.cpp
+
+GFitsTableLogCol.obj: fits/GFitsTableLogCol.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsTableLogCol.obj `cygpath -w fits/GFitsTableLogCol.cpp`
+
+GFitsTableLogCol.lo: fits/GFitsTableLogCol.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsTableLogCol.lo `test -f 'fits/GFitsTableLogCol.cpp' || echo '$(srcdir)/'`fits/GFitsTableLogCol.cpp
 
 GFitsTableStrCol.o: fits/GFitsTableStrCol.cpp
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsTableStrCol.o `test -f 'fits/GFitsTableStrCol.cpp' || echo '$(srcdir)/'`fits/GFitsTableStrCol.cpp

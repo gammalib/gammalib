@@ -30,6 +30,7 @@ files = GException.cpp \
 	fits/GFitsAsciiTable.cpp \
 	fits/GFitsBinTable.cpp \
 	fits/GFitsTableCol.cpp \
+	fits/GFitsTableLogCol.cpp \
 	fits/GFitsTableStrCol.cpp \
 	fits/GFitsTableShtCol.cpp \
 	fits/GFitsTableLngCol.cpp \

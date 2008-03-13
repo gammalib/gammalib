@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GLATObservation.hpp  -  LAT Observation class             *
+ *        GLATObservation.i  -  LAT Observation class SWIG interface       *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -11,20 +11,17 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GLATObservation.hpp
- * @brief GLATObservation class interface definition.
+ * @file GLATObservation.i
+ * @brief GLATObservation class SWIG file.
  * @author J. Knodlseder
  */
-
-#ifndef GLATOBSERVATION_HPP
-#define GLATOBSERVATION_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include "GObservation.hpp"
-#include "GFits.hpp"
-
-/* __ Namespaces _________________________________________________________ */
-
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GLATObservation.hpp"
+%}
+%include stl.i
+%feature("notabstract") GLATObservation;
+%import GObservation.i
 
 /***********************************************************************//**
  * @class GLATObservation
@@ -32,7 +29,6 @@
  * @brief Interface for the LAT observation classes.
  ***************************************************************************/
 class GLATObservation : public GObservation {
-
 public:
     // Constructors and destructors
     GLATObservation();
@@ -40,26 +36,8 @@ public:
     GLATObservation(const GLATObservation& obs);
     virtual ~GLATObservation();
 
-    // Operators
-    GLATObservation& operator= (const GLATObservation& obs);
-
     // Methods
     GFits* ft1(void) const;
     GFits* ft2(void) const;
-  
-protected:
-    // Protected methods
-    void             init_members(void);
-    void             copy_members(const GLATObservation& obs);
-    void             free_members(void);
-    GLATObservation* clone(void) const;
-
-    // Protected data area
-
-private:
-    GFits* m_ft1;     //!< FT1 FITS file
-    GFits* m_ft2;     //!< FT2 FITS file
-    GFits* m_ltcube;  //!< Lifetime cube FITS file
 };
 
-#endif /* GLATOBSERVATION_HPP */
