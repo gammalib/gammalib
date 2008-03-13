@@ -23,6 +23,10 @@
 #include "GResponse.i"
 #include "GLATResponse.i"
 
+/* Observation classes */
+//#include "GObservation.i"
+#include "GLATObservation.i"
+
 /* FITS file class */
 #include "GFits.i"
 #include "GFitsHDU.i"
@@ -35,6 +39,7 @@
 #include "GFitsAsciiTable.i"
 #include "GFitsBinTable.i"
 #include "GFitsTableCol.i"
+#include "GFitsTableLogCol.i"
 #include "GFitsTableDblCol.i"
 #include "GFitsTableFltCol.i"
 #include "GFitsTableLngCol.i"
