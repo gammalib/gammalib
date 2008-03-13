@@ -20,6 +20,7 @@ files = GException.cpp \
 	rsp/GLATPsf.cpp \
 	rsp/GLATEdisp.cpp \
 	obs/GObservation.cpp \
+	obs/GLATObservation.cpp \
 	fits/GFitsHeaderCard.cpp \
 	fits/GFitsHeader.cpp \
 	fits/GFitsData.cpp \

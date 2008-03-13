@@ -7,6 +7,7 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GLATResponse.hpp \
 		     GLATResponseTable.hpp \
 		     GObservation.hpp \
+		     GLATObservation.hpp \
 		     GFitsHeaderCard.hpp \
 		     GFitsHeader.hpp \
 		     GFitsData.hpp \

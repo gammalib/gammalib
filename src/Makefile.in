@@ -125,6 +125,7 @@ files = GException.cpp \
 	rsp/GLATPsf.cpp \
 	rsp/GLATEdisp.cpp \
 	obs/GObservation.cpp \
+	obs/GLATObservation.cpp \
 	fits/GFitsHeaderCard.cpp \
 	fits/GFitsHeader.cpp \
 	fits/GFitsData.cpp \
@@ -165,13 +166,13 @@ libgamma_la_LIBADD =
 am__objects_1 = GException.lo GTools.lo GSkyDir.lo GNodeArray.lo \
 	GData.lo GResponse.lo GLATResponse.lo GLATResponseTable.lo \
 	GLATAeff.lo GLATPsf.lo GLATEdisp.lo GObservation.lo \
-	GFitsHeaderCard.lo GFitsHeader.lo GFitsData.lo GFitsImage.lo \
-	GFitsDblImage.lo GFitsTable.lo GFitsAsciiTable.lo \
-	GFitsBinTable.lo GFitsTableCol.lo GFitsTableStrCol.lo \
-	GFitsTableShtCol.lo GFitsTableLngCol.lo GFitsTableFltCol.lo \
-	GFitsTableDblCol.lo GFitsHDU.lo GFits.lo GFitPar.lo GVector.lo \
-	GMatrixBase.lo GMatrix.lo GSymMatrix.lo GSparseMatrix.lo \
-	GSparseSymbolic.lo GSparseNumeric.lo
+	GLATObservation.lo GFitsHeaderCard.lo GFitsHeader.lo \
+	GFitsData.lo GFitsImage.lo GFitsDblImage.lo GFitsTable.lo \
+	GFitsAsciiTable.lo GFitsBinTable.lo GFitsTableCol.lo \
+	GFitsTableStrCol.lo GFitsTableShtCol.lo GFitsTableLngCol.lo \
+	GFitsTableFltCol.lo GFitsTableDblCol.lo GFitsHDU.lo GFits.lo \
+	GFitPar.lo GVector.lo GMatrixBase.lo GMatrix.lo GSymMatrix.lo \
+	GSparseMatrix.lo GSparseSymbolic.lo GSparseNumeric.lo
 am_libgamma_la_OBJECTS = $(am__objects_1)
 libgamma_la_OBJECTS = $(am_libgamma_la_OBJECTS)
 
@@ -240,6 +241,7 @@ GLATAeff.lo: rsp/GLATAeff.cpp
 GLATPsf.lo: rsp/GLATPsf.cpp
 GLATEdisp.lo: rsp/GLATEdisp.cpp
 GObservation.lo: obs/GObservation.cpp
+GLATObservation.lo: obs/GLATObservation.cpp
 GFitsHeaderCard.lo: fits/GFitsHeaderCard.cpp
 GFitsHeader.lo: fits/GFitsHeader.cpp
 GFitsData.lo: fits/GFitsData.cpp
@@ -353,6 +355,15 @@ GObservation.obj: obs/GObservation.cpp
 
 GObservation.lo: obs/GObservation.cpp
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GObservation.lo `test -f 'obs/GObservation.cpp' || echo '$(srcdir)/'`obs/GObservation.cpp
+
+GLATObservation.o: obs/GLATObservation.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATObservation.o `test -f 'obs/GLATObservation.cpp' || echo '$(srcdir)/'`obs/GLATObservation.cpp
+
+GLATObservation.obj: obs/GLATObservation.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATObservation.obj `cygpath -w obs/GLATObservation.cpp`
+
+GLATObservation.lo: obs/GLATObservation.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATObservation.lo `test -f 'obs/GLATObservation.cpp' || echo '$(srcdir)/'`obs/GLATObservation.cpp
 
 GFitsHeaderCard.o: fits/GFitsHeaderCard.cpp
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsHeaderCard.o `test -f 'fits/GFitsHeaderCard.cpp' || echo '$(srcdir)/'`fits/GFitsHeaderCard.cpp

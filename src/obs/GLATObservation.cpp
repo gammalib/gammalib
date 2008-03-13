@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GObservation.cpp  -  Observation abstract base class          *
+ *               GLATObservation.cpp  -  LAT Observation class             *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -12,15 +12,15 @@
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
- * @file GObservation.cpp
- * @brief GObservation abstract base class implementation.
+ * @file GLATObservation.cpp
+ * @brief GLATObservationclass implementation.
  * @author J. Knodlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include "GException.hpp"
-#include "GObservation.hpp"
+#include "GLATObservation.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -36,14 +36,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                    GObservation constructors/destructors                =
+ =                  GLATObservation constructors/destructors               =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GObservation::GObservation()
+GLATObservation::GLATObservation() : GObservation()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -58,7 +58,7 @@ GObservation::GObservation()
  *
  * @param[in] obs Observation from which the instance should be built.
  ***************************************************************************/
-GObservation::GObservation(const GObservation& obs)
+GLATObservation::GLATObservation(const GLATObservation& obs) : GObservation(obs)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -74,7 +74,7 @@ GObservation::GObservation(const GObservation& obs)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GObservation::~GObservation()
+GLATObservation::~GLATObservation()
 {
     // Free members
     free_members();
@@ -86,7 +86,7 @@ GObservation::~GObservation()
 
 /*==========================================================================
  =                                                                         =
- =                          GObservation operators                         =
+ =                        GLATObservation operators                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -95,10 +95,13 @@ GObservation::~GObservation()
  *
  * @param[in] obs Observation which should be assigned.
  ***************************************************************************/
-GObservation& GObservation::operator= (const GObservation& obs)
+GLATObservation& GLATObservation::operator= (const GLATObservation& obs)
 {
     // Execute only if object is not identical
     if (this != &obs) {
+
+        // Copy base class members
+        this->GObservation::operator=(obs);
 
         // Free members
         free_members();
@@ -118,27 +121,23 @@ GObservation& GObservation::operator= (const GObservation& obs)
 
 /*==========================================================================
  =                                                                         =
- =                       GObservation public methods                       =
+ =                     GLATObservation public methods                      =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                       GObservation private methods                      =
+ =                     GLATObservation private methods                     =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GObservation::init_members(void)
+void GLATObservation::init_members(void)
 {
     // Initialise members
-    m_obsname.clear();
-    m_num_response = 0;
-    m_response     = NULL;
-    m_data         = NULL;
 
     // Return
     return;
@@ -148,20 +147,11 @@ void GObservation::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] obs GObservation members which should be copied.
+ * @param[in] obs Observation to be copied
  ***************************************************************************/
-void GObservation::copy_members(const GObservation& obs)
+void GLATObservation::copy_members(const GLATObservation& obs)
 {
-    // Copy attributes
-    m_obsname      = obs.m_obsname;
-    m_num_response = obs.m_num_response;
-
-    // Copy other members
-    if (m_num_response > 0) {
-        m_response = new GResponse*[m_num_response];
-        for (int i = 0; i < m_num_response; ++i)
-            m_response[i] = obs.m_response[i]->clone();
-    }
+    // Copy members
 
     // Return
     return;
@@ -171,33 +161,33 @@ void GObservation::copy_members(const GObservation& obs)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GObservation::free_members(void)
+void GLATObservation::free_members(void)
 {
-    // Free memory
-    if (m_response != NULL) {
-        for (int i = 0; i < m_num_response; ++i) {
-            if (m_response[i] != NULL) delete [] m_response[i];
-        }
-        delete [] m_response;
-    }
-
-    // Signal free pointers
-    m_response = NULL;
+    // Free members
 
     // Return
     return;
 }
 
 
+/***********************************************************************//**
+ * @brief Clone class
+***************************************************************************/
+GLATObservation* GLATObservation::clone(void) const
+{
+    return new GLATObservation(*this);
+}
+
+
 /*==========================================================================
  =                                                                         =
- =                           GObservation friends                          =
+ =                         GLATObservation friends                         =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                   Other functions used by GObservation                  =
+ =                 Other functions used by GLATObservation                 =
  =                                                                         =
  ==========================================================================*/

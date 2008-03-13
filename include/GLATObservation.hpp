@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GObservation.hpp  -  Observation abstract base class          *
+ *               GLATObservation.hpp  -  LAT Observation class             *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -11,53 +11,48 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GObservation.hpp
- * @brief GObservation abstract base class interface definition.
+ * @file GLATObservation.hpp
+ * @brief GLATObservation class interface definition.
  * @author J. Knodlseder
  */
 
-#ifndef GOBSERVATION_HPP
-#define GOBSERVATION_HPP
+#ifndef GLATOBSERVATION_HPP
+#define GLATOBSERVATION_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GResponse.hpp"
-#include "GData.hpp"
+#include "GObservation.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
 
 /***********************************************************************//**
- * @class GObservation
+ * @class GLATObservation
  *
- * @brief Abstract interface for the observation classes.
+ * @brief Interface for the LAT observation classes.
  ***************************************************************************/
-class GObservation {
+class GLATObservation : public GObservation {
 
 public:
     // Constructors and destructors
-    GObservation();
-    GObservation(const GObservation& obs);
-    virtual ~GObservation();
+    GLATObservation();
+    GLATObservation(const GLATObservation& obs);
+    virtual ~GLATObservation();
 
     // Operators
-    virtual GObservation& operator= (const GObservation& obs);
+    virtual GLATObservation& operator= (const GLATObservation& obs);
 
     // Methods
   
 protected:
     // Protected methods
     void    init_members(void);
-    void    copy_members(const GObservation& obs);
+    void    copy_members(const GLATObservation& obs);
     void    free_members(void);
-    virtual GObservation* clone(void) const = 0;
+    virtual GLATObservation* clone(void) const;
 
     // Protected data area
-    std::string m_obsname;      //!< Name of observation
-    int         m_num_response; //!< Number of associated response functions
-	GResponse** m_response;     //!< Pointer to instrument response functions
-	GData*      m_data;         //!< Pointer to associated data
 
 private:
 };
 
-#endif /* GOBSERVATION_HPP */
+#endif /* GLATOBSERVATION_HPP */
