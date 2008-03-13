@@ -68,6 +68,7 @@ private:
     // Private data area
     std::string  m_filename;    //!< FITS file name
     __fitsfile*  m_fitsfile;    //!< FITS file pointer
+    int          m_readwrite;   //!< FITS file is read/write (1=true, 0=false)
     int          m_num_hdu;     //!< Number of HDUs in file
     GFitsHDU*    m_hdu;         //!< Pointers to HDUs
 };

@@ -151,6 +151,9 @@ void GFits::open(const std::string& filename)
     if (m_fitsfile != NULL)
         throw GException::fits_already_opened(G_OPEN, m_filename);
 
+    // Initialise FITS file as readwrite
+    m_readwrite = 1;
+
     // Open FITS file
     int status = 0;
     status     = __ffopen(&m_fitsfile, filename.c_str(), 1, &status);
@@ -159,10 +162,17 @@ void GFits::open(const std::string& filename)
     if (status == 104) {
         status = 0;
         status = __ffinit(&m_fitsfile, filename.c_str(), &status);
-        if (status != 0)
-            throw GException::fits_open_error(G_OPEN, filename, status);
     }
-    else if (status != 0)
+    
+    // If FITS file is readonly then open as readonly
+    else if (status == 112) {
+        status      = 0;
+        status      = __ffopen(&m_fitsfile, filename.c_str(), 0, &status);
+        m_readwrite = 0;
+    }
+    
+    // Throw any other error
+    if (status != 0)
         throw GException::fits_open_error(G_OPEN, filename, status);
 
     // Store FITS file attributes
@@ -434,9 +444,10 @@ void GFits::init_members(void)
 {
     // Initialise GFits members
     m_filename.clear();
-    m_fitsfile = NULL;
-    m_num_hdu  = 0;
-    m_hdu      = NULL;
+    m_fitsfile  = NULL;
+    m_readwrite = 0;
+    m_num_hdu   = 0;
+    m_hdu       = NULL;
 
     // Return
     return;
@@ -458,7 +469,8 @@ void GFits::copy_members(const GFits& fits)
 {
     // Reset FITS file attributes
     m_filename.clear();
-    m_fitsfile = NULL;
+    m_fitsfile  = NULL;
+    m_readwrite = 0;
 
     // Copy HDUs
     if (fits.m_hdu != NULL && fits.m_num_hdu > 0) {
@@ -533,6 +545,11 @@ ostream& operator<< (ostream& os, const GFits& fits)
     // Put header in stream
     os << "=== GFits ===" << endl;
     os << " Filename ..................: " << fits.m_filename << endl;
+    os << " Mode ......................: ";
+    if (fits.m_readwrite)
+        os << "read/write" << endl;
+    else
+        os << "read only" << endl;
     os << " Number of HDUs ............: " << fits.m_num_hdu << endl;
     for (int i = 0; i < fits.m_num_hdu; ++i)
         os << fits.m_hdu[i];
