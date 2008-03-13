@@ -38,6 +38,7 @@
 #include "GFitsAsciiTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableCol.hpp"
+#include "GFitsTableLogCol.hpp"
 #include "GFitsTableStrCol.hpp"
 #include "GFitsTableShtCol.hpp"
 #include "GFitsTableLngCol.hpp"

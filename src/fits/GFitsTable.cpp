@@ -17,6 +17,7 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsTable.hpp"
+#include "GFitsTableLogCol.hpp"
 #include "GFitsTableStrCol.hpp"
 #include "GFitsTableShtCol.hpp"
 #include "GFitsTableLngCol.hpp"
@@ -504,6 +505,9 @@ void GFitsTable::open(__fitsfile* fptr)
 
         // Allocate column
         switch (typecode) {
+        case __TLOGICAL:
+            m_columns[i] = new GFitsTableLogCol();
+            break;
         case __TSTRING:
             m_columns[i] = new GFitsTableStrCol();
             break;
@@ -920,6 +924,10 @@ ostream& operator<< (ostream& os, const GFitsTable& table)
         for (int i = 0; i < table.m_cols; ++i) {
             if (table.m_columns[i] != NULL) {
                 switch (table.m_columns[i]->type()) {
+                case __TLOGICAL:
+                    os << " " << *((GFitsTableLogCol*)table.m_columns[i]) 
+                       << endl;
+                    break;
                 case __TSTRING:
                     os << " " << *((GFitsTableStrCol*)table.m_columns[i]) 
                        << endl;
