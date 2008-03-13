@@ -11,13 +11,17 @@
  *                                                                         *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
+/**
+ * @file GData.cpp
+ * @brief GData abstract base class implementation.
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
 #include "GData.hpp"
 
 /* __ Namespaces _________________________________________________________ */
-using namespace std;
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -35,6 +39,49 @@ using namespace std;
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Constructor
+ ***************************************************************************/
+GData::GData()
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param data GData instance which should be used for construction
+ ***************************************************************************/
+GData::GData(const GData& data)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Copy members
+    copy_members(data);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Destructor
+ ***************************************************************************/
+GData::~GData()
+{
+    // Free members
+    free_members();
+
+    // Return
+    return;
+}
+
 
 /*==========================================================================
  =                                                                         =
@@ -42,19 +89,83 @@ using namespace std;
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param[in] data GData instance to be assigned
+ ***************************************************************************/
+GData& GData::operator= (const GData& data)
+{
+    // Execute only if object is not identical
+    if (this != &data) {
+
+        // Free members
+        free_members();
+
+        // Initialise private members for clean destruction
+        init_members();
+
+        // Copy members
+        copy_members(data);
+
+    } // endif: object was not identical
+
+    // Return this object
+    return *this;
+}
+
 
 /*==========================================================================
  =                                                                         =
- =                              GData methods                              =
+ =                           GData public methods                          =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                         GData private functions                         =
+ =                           GData private methods                         =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ ***************************************************************************/
+void GData::init_members(void)
+{
+    // Initialise members
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] data GData instance from which members should be copied
+ ***************************************************************************/
+void GData::copy_members(const GData& data)
+{
+    // Copy attributes
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ ***************************************************************************/
+void GData::free_members(void)
+{
+    // Free memory
+
+    // Mark memory as free
+
+    // Return
+    return;
+}
 
 
 /*==========================================================================

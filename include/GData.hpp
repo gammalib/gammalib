@@ -10,41 +10,46 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GData.hpp
+ * @brief GData abstract base class definition.
+ * @author J. Knodlseder
+ */
 
 #ifndef GDATA_HPP
 #define GDATA_HPP
 
 /* __ Includes ___________________________________________________________ */
-//#include "GVector.hpp"
 
 /* __ Namespaces _________________________________________________________ */
-using namespace std;
 
 
-/***************************************************************************
- *                            GData class definition                       *
+/***********************************************************************//**
+ * @class GData
+ *
+ * @brief Abstract GData class interface defintion
  ***************************************************************************/
 class GData {
 
-// Public methods
 public:
     // Constructors and destructors
-    //GData();
-    //GData(const GData& d);
-    //virtual ~GData();
+    GData();
+    GData(const GData& d);
+    virtual ~GData();
 
     // Operators
+    GData& operator= (const GData& data);
 
     // Methods
     
-// Methods and data that are available to derived classes
 protected:
     // Protected methods
+    void           init_members(void);
+    void           copy_members(const GData& data);
+    void           free_members(void);
+    virtual GData* clone(void) const = 0;
 
     // Protected data area
-    // this is a test
-
-// Methods that are available to the base class only
 private:
 };
 
