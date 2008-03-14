@@ -342,7 +342,7 @@ GFitsData* GFitsHDU::data(void) const
 {
     // If no header pointer is available then throw exception
     if (m_data == NULL)
-        throw GException::fits_no_data(G_HEADER, "No data found");
+        throw GException::fits_no_data(G_DATA, "No data found");
 
     // Return data pointer
     return m_data;
@@ -413,7 +413,7 @@ GFitsTableCol* GFitsHDU::column(const std::string& colname) const
 /***********************************************************************//**
  * @brief Return pointer to column of table
  *
- * @param[in] colnum Number FITS table column to be returned (starting from 1)
+ * @param[in] colnum Number FITS table column to be returned (starting from 0)
  *
  * If this method is called for an image a 'fits_HDU_not_a_table' exception
  * will be thrown.
@@ -486,7 +486,7 @@ void GFitsHDU::init_members(void)
     // Initialise members
     m_fitsfile.HDUposition = 0;
     m_fitsfile.Fptr        = NULL;
-    m_hdunum               = 1;
+    m_hdunum               = 0;
     m_name.clear();
     m_type                 = 0;
     m_header               = NULL;
@@ -550,7 +550,7 @@ void GFitsHDU::connect(__fitsfile* fptr)
 {
     // First connect HDU
     m_fitsfile = *fptr;
-    m_hdunum   = m_fitsfile.HDUposition + 1;
+    m_hdunum   = m_fitsfile.HDUposition;
 
     // Then connect data
     if (m_data != NULL) m_data->connect(fptr);
@@ -621,7 +621,7 @@ GFitsImage* GFitsHDU::new_image(void)
  * @brief Open HDU
  *
  * @param[in] fptr FITS file pointer
- * @param[in] hdunum Number of HDU (starting from 1)
+ * @param[in] hdunum Number of HDU (starting from 0)
  *
  * Opens an (existing) HDU in the FITS file. This method does NOT create any
  * HDU if it does not exist. Opening consists of fetching all header cards
@@ -637,7 +637,7 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
         throw GException::fits_error(G_OPEN, status);
 
     // Store information. 
-    // Note that the HDU number - 1 is stored in m_fitsfile->HDUposition !!!
+    // Note that the HDU number is stored in m_fitsfile->HDUposition !!!
     m_fitsfile = *fptr;
     m_hdunum   = hdunum;
 
