@@ -189,7 +189,7 @@ GFitsHeaderCard* GFitsHeader::card(const std::string& keyname)
 /***********************************************************************//**
  * @brief Return pointer of header card
  *
- * @param[in] keyname Name of header card
+ * @param[in] cardno Number of card in header
  *
  * Returns a pointer on the header card.
  * If card was not found a 'out_of_range' error will be thrown.

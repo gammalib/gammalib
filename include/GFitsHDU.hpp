@@ -61,15 +61,17 @@ public:
     GFitsHDU& operator= (const GFitsHDU& hdu);
 
     // Methods
-    std::string    extname(void) const;
-    void           extname(const std::string& extname);
-    int            extno(void) const;
-    int            exttype(void) const;
-    GFitsHeader*   header(void) const;
-    GFitsData*     data(void) const;
-    GFitsTableCol* column(const std::string& colname) const;
-    GFitsTableCol* column(const int& colnum) const;
-    void           primary(void);
+    std::string      extname(void) const;
+    void             extname(const std::string& extname);
+    int              extno(void) const;
+    int              exttype(void) const;
+    GFitsHeader*     header(void) const;
+    GFitsData*       data(void) const;
+    GFitsHeaderCard* card(const std::string& keyname) const;
+    GFitsHeaderCard* card(const int& cardno) const;
+    GFitsTableCol*   column(const std::string& colname) const;
+    GFitsTableCol*   column(const int& colnum) const;
+    void             primary(void);
 
 private:
     // Private methods
@@ -89,15 +91,5 @@ private:
     GFitsHeader* m_header;      //!< HDU header
     GFitsData*   m_data;        //!< HDU data
 };
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
-inline std::string  GFitsHDU::extname(void) const { return m_name; }
-inline int          GFitsHDU::extno(void) const { return m_hdunum; }
-inline int          GFitsHDU::exttype(void) const { return m_type; }
-inline GFitsHeader* GFitsHDU::header(void) const { return m_header; }
-inline GFitsData*   GFitsHDU::data(void) const { return m_data; }
 
 #endif /* GFITSHDU_HPP */

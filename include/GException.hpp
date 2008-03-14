@@ -160,6 +160,12 @@ public:
         fits_column_not_found(string origin, string colname, int status = 0);
     };
 
+    // FITS has no header
+    class fits_no_header : public GExceptionHandler {
+    public:
+        fits_no_header(string origin, string message, int status = 0);
+    };
+
     // FITS has no data
     class fits_no_data : public GExceptionHandler {
     public:

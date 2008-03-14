@@ -11,6 +11,11 @@
  *                                                                         *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
+/**
+ * @file GFitsHDU.cpp
+ * @brief GFitsHDU class implementation.
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
@@ -24,6 +29,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_OPEN      "GFitsHDU::open(int)"
 #define G_SAVE      "GFitsHDU::save()"
+#define G_HEADER    "GFitsHDU::header()"
+#define G_DATA      "GFitsHDU::data()"
 #define G_COLUMN    "GFitsHDU::column(const std::string&)"
 #define G_NEW_IMAGE "GFitsHDU::new_image()"
 
@@ -256,11 +263,20 @@ GFitsHDU& GFitsHDU::operator= (const GFitsHDU& hdu)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Get HDU extension name (EXTNAME keyword)
+ ***************************************************************************/
+std::string GFitsHDU::extname(void) const
+{
+    return m_name;
+}
+
+
+/***********************************************************************//**
  * @brief Set HDU extension name (EXTNAME keyword)
  *
  * @param[in] extname Name of HDU
  *
- * This methos sets the extension name of the HDU. The extension name will
+ * This method sets the extension name of the HDU. The extension name will
  * be saved in the 'EXTNAME' header keyword. The header attached to the
  * HDU will be automatically updated by this method.
  ***************************************************************************/
@@ -282,9 +298,88 @@ void GFitsHDU::extname(const std::string& extname)
 
 
 /***********************************************************************//**
+ * @brief Get HDU extension number
+***************************************************************************/
+int GFitsHDU::extno(void) const
+{ 
+    return m_hdunum; 
+}
+
+
+/***********************************************************************//**
+ * @brief Get HDU extension type
+***************************************************************************/
+int GFitsHDU::exttype(void) const
+{
+    return m_type;
+}
+
+
+/***********************************************************************//**
+ * @brief Get pointer to header
+ *
+ * @exception GException::fits_no_header
+ *            No header was found in HDU
+ ***************************************************************************/
+GFitsHeader* GFitsHDU::header(void) const
+{
+    // If no header pointer is available then throw exception
+    if (m_header == NULL)
+        throw GException::fits_no_header(G_HEADER, "No header found");
+
+    // Return header pointer
+    return m_header;
+}
+
+
+/***********************************************************************//**
+ * @brief Get pointer to data
+ *
+ * @exception GException::fits_no_data
+ *            No data was found in HDU
+ ***************************************************************************/
+GFitsData* GFitsHDU::data(void) const
+{
+    // If no header pointer is available then throw exception
+    if (m_data == NULL)
+        throw GException::fits_no_data(G_HEADER, "No data found");
+
+    // Return data pointer
+    return m_data;
+}
+
+
+/***********************************************************************//**
+ * @brief Get pointer to header card
+ *
+ * @param[in] keyname Name of header card
+ ***************************************************************************/
+GFitsHeaderCard* GFitsHDU::card(const std::string& keyname) const
+{
+    return m_header->card(keyname);
+}
+
+
+/***********************************************************************//**
+ * @brief Get pointer to header card
+ *
+ * @param[in] cardno Number of card in header
+ ***************************************************************************/
+GFitsHeaderCard* GFitsHDU::card(const int& cardno) const
+{
+    return m_header->card(cardno);
+}
+
+
+/***********************************************************************//**
  * @brief Return pointer to column of table
  *
  * @param[in] colname Name of FITS table column to be returned
+ *
+ * @exception GException::fits_HDU_not_a_table
+ *            HDU is not a table
+ * @exception GException::fits_unknown_HDU_type
+ *            HDU type is not known
  *
  * If this method is called for an image a 'fits_HDU_not_a_table' exception
  * will be thrown.
