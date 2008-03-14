@@ -168,6 +168,15 @@ void GHealpix::free_members(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Clone Healpix representation
+ ***************************************************************************/
+GHealpix* GHealpix::clone(void) const
+{
+    return new GHealpix(*this);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             GHealpix friends                            =
