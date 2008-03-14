@@ -43,6 +43,7 @@ class GFits {
 public:
     // Constructors and destructors
     GFits();
+    GFits(const std::string& filename);
     GFits(const GFits& fits);
     ~GFits();
 

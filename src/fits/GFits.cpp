@@ -46,8 +46,26 @@
  ***************************************************************************/
 GFits::GFits()
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Constructor from FITS file
+ *
+ * @param[in] filename FITS file name
+ ***************************************************************************/
+GFits::GFits(const std::string& filename)
+{
+    // Initialise class members
+    init_members();
+
+    // Open specified FITS file
+    open(filename);
 
     // Return
     return;
@@ -61,7 +79,7 @@ GFits::GFits()
  ***************************************************************************/
 GFits::GFits(const GFits& fits)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Copy members
