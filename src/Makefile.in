@@ -117,6 +117,7 @@ files = GException.cpp \
 	GTools.cpp \
 	GSkyDir.cpp \
 	GNodeArray.cpp \
+	GImage.cpp \
 	data/GData.cpp \
 	rsp/GResponse.cpp \
 	rsp/GLATResponse.cpp \
@@ -165,16 +166,16 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libgamma_la_LIBADD =
 am__objects_1 = GException.lo GTools.lo GSkyDir.lo GNodeArray.lo \
-	GData.lo GResponse.lo GLATResponse.lo GLATResponseTable.lo \
-	GLATAeff.lo GLATPsf.lo GLATEdisp.lo GObservation.lo \
-	GLATObservation.lo GFitsHeaderCard.lo GFitsHeader.lo \
-	GFitsData.lo GFitsImage.lo GFitsDblImage.lo GFitsTable.lo \
-	GFitsAsciiTable.lo GFitsBinTable.lo GFitsTableCol.lo \
-	GFitsTableLogCol.lo GFitsTableStrCol.lo GFitsTableShtCol.lo \
-	GFitsTableLngCol.lo GFitsTableFltCol.lo GFitsTableDblCol.lo \
-	GFitsHDU.lo GFits.lo GFitPar.lo GVector.lo GMatrixBase.lo \
-	GMatrix.lo GSymMatrix.lo GSparseMatrix.lo GSparseSymbolic.lo \
-	GSparseNumeric.lo
+	GImage.lo GData.lo GResponse.lo GLATResponse.lo \
+	GLATResponseTable.lo GLATAeff.lo GLATPsf.lo GLATEdisp.lo \
+	GObservation.lo GLATObservation.lo GFitsHeaderCard.lo \
+	GFitsHeader.lo GFitsData.lo GFitsImage.lo GFitsDblImage.lo \
+	GFitsTable.lo GFitsAsciiTable.lo GFitsBinTable.lo \
+	GFitsTableCol.lo GFitsTableLogCol.lo GFitsTableStrCol.lo \
+	GFitsTableShtCol.lo GFitsTableLngCol.lo GFitsTableFltCol.lo \
+	GFitsTableDblCol.lo GFitsHDU.lo GFits.lo GFitPar.lo GVector.lo \
+	GMatrixBase.lo GMatrix.lo GSymMatrix.lo GSparseMatrix.lo \
+	GSparseSymbolic.lo GSparseNumeric.lo
 am_libgamma_la_OBJECTS = $(am__objects_1)
 libgamma_la_OBJECTS = $(am_libgamma_la_OBJECTS)
 

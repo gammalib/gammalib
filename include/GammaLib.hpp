@@ -28,6 +28,8 @@
 
 #include "GData.hpp"
 
+#include "GImage.hpp"
+
 #include "GFits.hpp"
 #include "GFitsHDU.hpp"
 #include "GFitsHeader.hpp"

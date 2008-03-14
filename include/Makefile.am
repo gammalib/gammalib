@@ -2,6 +2,7 @@
 pkginclude_HEADERS = GammaLib.hpp \
 		     GException.hpp \
 		     GSkyDir.hpp \
+		     GImage.hpp \
 		     GData.hpp \
 		     GResponse.hpp \
 		     GLATResponse.hpp \

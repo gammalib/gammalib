@@ -12,6 +12,7 @@ files = GException.cpp \
 	GTools.cpp \
 	GSkyDir.cpp \
 	GNodeArray.cpp \
+	GImage.cpp \
 	data/GData.cpp \
 	rsp/GResponse.cpp \
 	rsp/GLATResponse.cpp \
