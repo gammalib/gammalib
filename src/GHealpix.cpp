@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GImage.cpp  -  Image abstract base class                *
+ *             GHealpix.cpp  -  Healpix sky representation class           *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -12,14 +12,14 @@
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
- * @file GImage.cpp
- * @brief GImage abstract base class implementation.
+ * @file GHealpix.cpp
+ * @brief GHealpix class implementation.
  * @author J. Knodlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
-#include "GImage.hpp"
+#include "GHealpix.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -35,14 +35,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                      GImage constructors/destructors                    =
+ =                     GHealpix constructors/destructors                   =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GImage::GImage()
+GHealpix::GHealpix()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -55,15 +55,15 @@ GImage::GImage()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param image GImage instance which should be used for construction
+ * @param pixels GHealpix instance which should be used for construction
  ***************************************************************************/
-GImage::GImage(const GImage& image)
+GHealpix::GHealpix(const GHealpix& pixels)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Copy members
-    copy_members(image);
+    copy_members(pixels);
 
     // Return
     return;
@@ -73,7 +73,7 @@ GImage::GImage(const GImage& image)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GImage::~GImage()
+GHealpix::~GHealpix()
 {
     // Free members
     free_members();
@@ -85,19 +85,19 @@ GImage::~GImage()
 
 /*==========================================================================
  =                                                                         =
- =                            GImage operators                             =
+ =                          GHealpix operators                             =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] image GImage instance to be assigned
+ * @param[in] pixels GHealpix instance to be assigned
  ***************************************************************************/
-GImage& GImage::operator= (const GImage& image)
+GHealpix& GHealpix::operator= (const GHealpix& pixels)
 {
     // Execute only if object is not identical
-    if (this != &image) {
+    if (this != &pixels) {
 
         // Free members
         free_members();
@@ -106,7 +106,7 @@ GImage& GImage::operator= (const GImage& image)
         init_members();
 
         // Copy members
-        copy_members(image);
+        copy_members(pixels);
 
     } // endif: object was not identical
 
@@ -117,21 +117,21 @@ GImage& GImage::operator= (const GImage& image)
 
 /*==========================================================================
  =                                                                         =
- =                          GImage public methods                          =
+ =                         GHealpix public methods                         =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                          GImage private methods                         =
+ =                         GHealpix private methods                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GImage::init_members(void)
+void GHealpix::init_members(void)
 {
     // Initialise members
 
@@ -143,9 +143,9 @@ void GImage::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] image GImage instance from which members should be copied
+ * @param[in] pixels GHealpix instance from which members should be copied
  ***************************************************************************/
-void GImage::copy_members(const GImage& image)
+void GHealpix::copy_members(const GHealpix& pixels)
 {
     // Copy attributes
     
@@ -157,7 +157,7 @@ void GImage::copy_members(const GImage& image)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GImage::free_members(void)
+void GHealpix::free_members(void)
 {
     // Free memory
 
@@ -170,13 +170,13 @@ void GImage::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                              GImage friends                             =
+ =                             GHealpix friends                            =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                      Other functions used by GImage                     =
+ =                     Other functions used by GHealpix                    =
  =                                                                         =
  ==========================================================================*/
