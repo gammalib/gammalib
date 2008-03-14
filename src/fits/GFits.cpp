@@ -368,7 +368,7 @@ void GFits::close(void)
  *            HDU with specified extension name has not been found in FITS
  *            file.
  ***************************************************************************/
-GFitsHDU* GFits::hdu(const std::string& extname)
+GFitsHDU* GFits::hdu(const std::string& extname) const
 {
     // Initialise result to NULL pointer
     GFitsHDU* ptr = NULL;
@@ -393,20 +393,20 @@ GFitsHDU* GFits::hdu(const std::string& extname)
 /***********************************************************************//**
  * @brief Get pointer to HDU
  *
- * @param extno[in] Extension number (starting from 1)
+ * @param extno[in] Extension number (starting from 0)
  *
  * @exception GException::fits_hdu_not_found
  *            HDU with specified extension number has not been found in FITS
  *            file.
  ***************************************************************************/
-GFitsHDU* GFits::hdu(int extno)
+GFitsHDU* GFits::hdu(int extno) const
 {
     // Verify that extension number is in valid range
-    if (extno < 1 || extno > m_num_hdu)
-        throw GException::out_of_range("GFits::hdu(int)", extno, 1, m_num_hdu);
+    if (extno < 0 || extno >= m_num_hdu)
+        throw GException::out_of_range("GFits::hdu(int)", extno, 0, m_num_hdu-1);
 
     // Get HDU pointer
-    GFitsHDU* ptr = &(m_hdu[extno-1]);
+    GFitsHDU* ptr = &(m_hdu[extno]);
 
     // Throw an error if HDU has not been found
     if (ptr == NULL) {

@@ -55,8 +55,8 @@ public:
     void      save(void);
     void      saveto(const std::string& filename, int clobber = 0);
     void      close(void);
-    GFitsHDU* hdu(const std::string& extname);
-    GFitsHDU* hdu(int extno);
+    GFitsHDU* hdu(const std::string& extname) const;
+    GFitsHDU* hdu(int extno) const;
     int       num_hdus(void) const;
 
 private:
