@@ -95,7 +95,7 @@ void test_create(void)
     try {
         GFits fits;
         fits.open("test.fits");
-        GFitsHDU*      hdu   = fits.hdu(2);
+        GFitsHDU*      hdu   = fits.hdu(1);
         GFitsDblImage* image = (GFitsDblImage*)hdu->data();
         int nx = image->naxes(0);
         int ny = image->naxes(1);
@@ -475,7 +475,7 @@ void test_bintable_double(void)
 
         // Get column
         GFitsTableDblCol* col_dbl =
-                    (GFitsTableDblCol*)fits.hdu(2)->column("DOUBLE");
+                    (GFitsTableDblCol*)fits.hdu(1)->column("DOUBLE");
 
         // Check double precision table (operator access)
         tot_dbl = 0.0;
@@ -531,7 +531,7 @@ void test_bintable_double(void)
 
         // Get column
         GFitsTableDblCol* col_dbl10 =
-                    (GFitsTableDblCol*)fits.hdu(2)->column("DOUBLE10");
+                    (GFitsTableDblCol*)fits.hdu(1)->column("DOUBLE10");
 
         // Check double precision table (operator access)
         tot_dbl = 0.0;
@@ -834,7 +834,7 @@ void test_bintable_float(void)
 
         // Get column
         GFitsTableFltCol* col_flt =
-                    (GFitsTableFltCol*)fits.hdu(2)->column("FLOAT");
+                    (GFitsTableFltCol*)fits.hdu(1)->column("FLOAT");
 
         // Check single precision table (operator access)
         tot_flt = 0.0;
@@ -890,7 +890,7 @@ void test_bintable_float(void)
 
         // Get column
         GFitsTableFltCol* col_flt10 =
-                    (GFitsTableFltCol*)fits.hdu(2)->column("FLOAT10");
+                    (GFitsTableFltCol*)fits.hdu(1)->column("FLOAT10");
 
         // Check single precision table (operator access)
         tot_flt = 0.0;
@@ -1196,7 +1196,7 @@ void test_bintable_short(void)
 
         // Get column
         GFitsTableShtCol* col_sht =
-                    (GFitsTableShtCol*)fits.hdu(2)->column("SHORT");
+                    (GFitsTableShtCol*)fits.hdu(1)->column("SHORT");
 
         // Check short table (operator access)
         tot_sht = 0;
@@ -1252,7 +1252,7 @@ void test_bintable_short(void)
 
         // Get column
         GFitsTableShtCol* col_sht10 =
-                    (GFitsTableShtCol*)fits.hdu(2)->column("SHORT10");
+                    (GFitsTableShtCol*)fits.hdu(1)->column("SHORT10");
 
         // Check short table (operator access)
         tot_sht = 0;
@@ -1556,7 +1556,7 @@ void test_bintable_long(void)
 
         // Get column
         GFitsTableLngCol* col_lng =
-                    (GFitsTableLngCol*)fits.hdu(2)->column("LONG");
+                    (GFitsTableLngCol*)fits.hdu(1)->column("LONG");
 
         // Check long table (operator access)
         tot_lng = 0;
@@ -1612,7 +1612,7 @@ void test_bintable_long(void)
 
         // Get column
         GFitsTableLngCol* col_lng10 =
-                    (GFitsTableLngCol*)fits.hdu(2)->column("LONG10");
+                    (GFitsTableLngCol*)fits.hdu(1)->column("LONG10");
 
         // Check long table (operator access)
         tot_lng = 0;
@@ -1914,7 +1914,7 @@ void test_bintable_string(void)
 
         // Get column
         GFitsTableStrCol* col_str =
-                         (GFitsTableStrCol*)fits.hdu(2)->column("STRING");
+                         (GFitsTableStrCol*)fits.hdu(1)->column("STRING");
 
         // Check string table (operator access)
         tot_str.clear();
@@ -1970,7 +1970,7 @@ void test_bintable_string(void)
 
         // Get column
         GFitsTableStrCol* col_str10 =
-                         (GFitsTableStrCol*)fits.hdu(2)->column("STRING10");
+                         (GFitsTableStrCol*)fits.hdu(1)->column("STRING10");
 
         // Check string table (operator access)
         tot_str.clear();
@@ -2276,7 +2276,7 @@ void test_bintable_logical(void)
 
         // Get column
         GFitsTableLogCol* col =
-                    (GFitsTableLogCol*)fits.hdu(2)->column("LOGICAL");
+                    (GFitsTableLogCol*)fits.hdu(1)->column("LOGICAL");
 
         // Check table (operator access)
         tot_int = 0;
@@ -2332,7 +2332,7 @@ void test_bintable_logical(void)
 
         // Get column
         GFitsTableLogCol* col10 =
-                    (GFitsTableLogCol*)fits.hdu(2)->column("LOGICAL10");
+                    (GFitsTableLogCol*)fits.hdu(1)->column("LOGICAL10");
 
         // Check table (operator access)
         tot_int = 0;
