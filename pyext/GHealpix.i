@@ -30,11 +30,12 @@ class GHealpix {
 public:
     // Constructors and destructors
     GHealpix();
+    GHealpix(const GFitsHDU* hdu);
     GHealpix(const GHealpix& pixels);
     virtual ~GHealpix();
 
     // Methods
-    void    load(const GFitsHDU* hdu);
+    void    read(const GFitsHDU* hdu);
     int     nside(void) const;
     int     num_pixels(void) const;
     double  omega(void) const;

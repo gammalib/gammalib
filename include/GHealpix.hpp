@@ -39,6 +39,7 @@ class GHealpix {
 public:
     // Constructors and destructors
     GHealpix();
+    GHealpix(const GFitsHDU* hdu);
     GHealpix(const GHealpix& pixels);
     virtual ~GHealpix();
 
@@ -46,7 +47,7 @@ public:
     GHealpix& operator= (const GHealpix& pixels);
 
     // Methods
-    void    load(const GFitsHDU* hdu);
+    void    read(const GFitsHDU* hdu);
     int     nside(void) const;
     int     num_pixels(void) const;
     double  omega(void) const;
@@ -58,16 +59,20 @@ private:
     void      copy_members(const GHealpix& pixels);
     void      free_members(void);
     GHealpix* clone(void) const;
-    void      mk_pix2xy(void);
+    void      pix2xy(const int& ipix, int* x, int* y);
     void      pix2ang_ring(int ipix, double* theta, double* phi);
     void      pix2ang_nest(int ipix, double* theta, double* phi);
     
     // Private data area
     int      m_nside;        //!< Number of divisions of each base pixel (1-8192)
+    int      m_npface;       //!<
+    int      m_ncap;         //!<
     int      m_order;        //!< Ordering (0=ring, 1=nested, -1=?)
     int      m_coordsys;     //!< Coordinate system (0=equatorial, 1=galactic, -1=?)
     int      m_num_pixels;   //!< Number of pixels
     int      m_size_pixels;  //!< Vector size of each pixel
+    double   m_fact1;        //!<
+    double   m_fact2;        //!<
     double   m_omega;        //!< Solid angle of pixel
     double*  m_pixels;       //!< Pixel array
     GSkyDir* m_dir;          //!< Sky direction for each pixel

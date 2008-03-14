@@ -19,8 +19,7 @@ def test_fits():
         pass
 
     # Create FITS file
-    fits = GFits()
-    fits.open("test_python.fits")
+    fits = GFits("test_python.fits")
 
     # Print number of HDUs
     print "Number of HDUs ..: " + str(fits.num_hdus())
@@ -197,12 +196,10 @@ def test_healpix():
     Test GHealpix interface.
     """
     # Open exposure cube
-    fits = GFits()
-    fits.open("data/expCube_253582800.fits.gz")
+    fits = GFits("data/expCube_253582800.fits.gz")
     
     # Lood Healpix table
-    pixels = GHealpix()
-    pixels.load(fits.hdu("EXPOSURE"))
+    pixels = GHealpix(fits.hdu("EXPOSURE"))
     
     # Dump information
     print pixels

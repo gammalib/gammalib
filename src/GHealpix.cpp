@@ -42,8 +42,8 @@ const int jrll[12] = {2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4};
 const int jpll[12] = {1, 3, 5, 7, 0, 2, 4, 6, 1, 3, 5, 7};
 
 /* __ Static conversion arrays ___________________________________________ */
-static int pix2x[1024];
-static int pix2y[1024];
+static short ctab[0x100];
+static short utab[0x100];
 
 
 /*==========================================================================
@@ -57,8 +57,26 @@ static int pix2y[1024];
  ***************************************************************************/
 GHealpix::GHealpix()
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Constructor from FITS HDU table
+ *
+ * @param[in] hdu Pointer to FITS HDU
+ ***************************************************************************/
+GHealpix::GHealpix(const GFitsHDU* hdu)
+{
+    // Initialise class members
+    init_members();
+
+    // Read pixels from FITS HDU
+    read(hdu);
 
     // Return
     return;
@@ -135,14 +153,14 @@ GHealpix& GHealpix::operator= (const GHealpix& pixels)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Load Healpix data from table.
+ * @brief Read Healpix data from table.
  *
  * @param[in] hdu FITS HDU containing the Healpix data
  *
  * @exception GException::healpix
  *            Unable to load Healpix data from table.
  ***************************************************************************/
-void GHealpix::load(const GFitsHDU* hdu)
+void GHealpix::read(const GFitsHDU* hdu)
 {
     // Free memory and initialise members
     free_members();
@@ -154,7 +172,11 @@ void GHealpix::load(const GFitsHDU* hdu)
     
     // Get Healpix resolution and determine number of pixels and solid angle
     m_nside      = hdu->card("NSIDE")->integer();
-    m_num_pixels = 12 * m_nside * m_nside;
+    m_npface     = m_nside * m_nside;
+    m_ncap       = 2 * (m_npface - m_nside);
+    m_num_pixels = 12 * m_npface;
+    m_fact2      = 4.0 / m_num_pixels;
+    m_fact1      = 2 * m_nside * m_fact2;
     m_omega      = fourpi / m_num_pixels;
 
     // Get ordering scheme from ORDERING keyword
@@ -319,16 +341,27 @@ void GHealpix::init_members(void)
 {
     // Initialise members
     m_nside       = 0;
+    m_npface      = 0;
+    m_ncap        = 0;
     m_order       = 0;
     m_coordsys    = 0;
     m_num_pixels  = 0;
     m_size_pixels = 0;
+    m_fact1       = 0.0;
+    m_fact2       = 0.0;
     m_omega       = 0.0;
     m_pixels      = NULL;
     m_dir         = NULL;
     
-    // Initiates the array for the pixel number -> (x,y) mapping
-    mk_pix2xy();
+    // Construct conversion arrays
+    for (int m = 0; m < 0x100; ++m) {
+    ctab[m] =
+         (m&0x1 )       | ((m&0x2 ) << 7) | ((m&0x4 ) >> 1) | ((m&0x8 ) << 6)
+      | ((m&0x10) >> 2) | ((m&0x20) << 5) | ((m&0x40) >> 3) | ((m&0x80) << 4);
+    utab[m] =
+         (m&0x1 )       | ((m&0x2 ) << 1) | ((m&0x4 ) << 2) | ((m&0x8 ) << 3)
+      | ((m&0x10) << 4) | ((m&0x20) << 5) | ((m&0x40) << 6) | ((m&0x80) << 7);
+    }
 
     // Return
     return;
@@ -344,10 +377,14 @@ void GHealpix::copy_members(const GHealpix& pixels)
 {
     // Copy attributes
     m_nside       = pixels.m_nside;
+    m_npface      = pixels.m_npface;
+    m_ncap        = pixels.m_ncap;
     m_order       = pixels.m_order;
     m_coordsys    = pixels.m_coordsys;
     m_num_pixels  = pixels.m_num_pixels;
     m_size_pixels = pixels.m_size_pixels;
+    m_fact1       = pixels.m_fact1;
+    m_fact2       = pixels.m_fact2;
     m_omega       = pixels.m_omega;
     
     // Copy arrays
@@ -397,41 +434,22 @@ GHealpix* GHealpix::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Constructs pixel to (x,y) conversion array
+ * @brief Convert pixel index to (x,y) coordinate
  *
- * Constructs the array giving x and y in the face from pixel number for the
- * nested (quad-cube like) ordering of pixels. The bits corresponding to x 
- * and y are interleaved in the pixel number one breaks up the pixel number
- * by even and odd bits.
+ * @param[in] ipix Pixel index for which (x,y) are to be computed.
+ * @param[out] x Pointer to x coordinate.
+ * @param[out] y Pointer to y coordinate.
  ***************************************************************************/
-void GHealpix::mk_pix2xy(void)
+void GHealpix::pix2xy(const int& ipix, int* x, int* y)
 {
-    // Loop over all pixels of array
-    for (int kpix = 0; kpix < 1024; ++kpix) {
-    
-        // Setup
-        int jpix = kpix;
-        int IX   = 0;
-        int IY   = 0;
-        int IP   = 1;                    // Bit position (in x and y)
-        
-        // Go through all the bits
-        while (jpix != 0) {
-            int ID = (int)fmod(jpix,2);  //  Bit value (in kpix), goes in ix
-            jpix   = jpix/2;
-            IX     = ID*IP+IX;
-            ID     = (int)fmod(jpix,2);  //  Bit value (in kpix), goes in iy
-            jpix   = jpix/2;
-            IY     = ID*IP+IY;
-            IP     = 2*IP;               //  Next bit (in x and y)
-        }
+    // Set x coordinate
+    int raw = (ipix & 0x5555) | ((ipix & 0x55550000) >> 15);
+    *x      = ctab[raw & 0xff] | (ctab[raw >> 8] << 4);
 
-        // Set array elements
-        pix2x[kpix] = IX;                //  in {0,31}
-        pix2y[kpix] = IY;                //  in {0,31}
-        
-    }
-  
+    // Set y coordinate
+    raw = ((ipix & 0xaaaa) >> 1) | ((ipix & 0xaaaa0000) >> 16);
+    *y  = ctab[raw & 0xff] | (ctab[raw >> 8] << 4);
+
     // Return
     return;
 }
@@ -514,60 +532,53 @@ void GHealpix::pix2ang_nest(int ipix, double* theta, double* phi)
     if (ipix < 0 || ipix >= m_num_pixels)
         throw GException::out_of_range(G_PIX2ANG_NEST, ipix, 0, m_num_pixels-1);
 
-    // ...
-    double fn    = 1. * m_nside;
-    double fact1 = 1. / (3.*fn*fn);
-    double fact2 = 2. / (3.*fn);
-    int    nl4   = 4 * m_nside;
+    // Get face number and index in face
+    int nl4      = 4 * m_nside;
+    int face_num = ipix/m_npface;            // Face number in {0,11}
+    int ipf      = ipix & (m_npface - 1);
 
-    // Finds the face, and the number in the face
-    int npface   = m_nside*m_nside;
-    int face_num = ipix/npface;            // Face number in {0,11}
-    int ipf      = (int)fmod(ipix,npface); // Pixel number in the face {0,npface-1}
-
-    // Finds the x,y on the face from the pixel number
-    // (starting from the lowest corner)
-    int ip_low   = (int)fmod(ipf,1024);      // Content of the last 10 bits
-    int ip_trunc = ipf/1024;                 // Truncation of the last 10 bits
-    int ip_med   = (int)fmod(ip_trunc,1024); // Content of the next 10 bits
-    int ip_hi    = ip_trunc/1024;            // Content of the high weight 10 bits
-    int  ix      = 1024*pix2x[ip_hi] + 32*pix2x[ip_med] + pix2x[ip_low];
-    int  iy      = 1024*pix2y[ip_hi] + 32*pix2y[ip_med] + pix2y[ip_low];
-
-    // Transforms this in (horizontal, vertical) coordinates
-    int jrt = ix + iy;   // 'vertical' in {0,2*(m_nside-1)}
-    int jpt = ix - iy;   // 'horizontal' in {-m_nside+1,m_nside-1}
+    // Get pixel coordinates
+    int ix;
+    int iy;
+    pix2xy(ipf, &ix, &iy);
 
     // Computes the z coordinate on the sphere
-    int    jr     = jrll[face_num]*m_nside - jrt - 1;
-    int    nr     = m_nside;             // Equatorial region (the most frequent)
-    double z      = (2*m_nside-jr)*fact2;
-    int    kshift = (int)fmod(jr - m_nside, 2);
+    int jr = jrll[face_num]*m_nside - ix - iy - 1;
+
+    // Declare result variables
+    int    nr;
+    double z;
+    int    kshift;
     
     // North pole region
     if (jr < m_nside) {
         nr     = jr;
-        z      = 1. - nr*nr*fact1;
+        z      = 1. - nr*nr*m_fact2;
         kshift = 0;
     }
     
     // South pole region
     else if (jr > 3*m_nside) {
         nr     = nl4 - jr;
-        z      = - 1. + nr*nr*fact1;
+        z      = nr*nr*m_fact2 - 1;
         kshift = 0;
     }
     
-    // Computes theta
-    *theta = acos(z);
-      
-    // Computes the phi coordinate on the sphere, in [0,2Pi]
-    int jp = (jpll[face_num]*nr + jpt + 1 + kshift)/2;
-    if (jp > nl4) jp = jp - nl4;
-    if (jp <   1) jp = jp + nl4;
+    // Equatorial region
+    else {
+        nr     = m_nside;
+        z      = (2*m_nside-jr) * m_fact1;
+        kshift = (jr-m_nside) & 1;
+    }
     
-    // Computes Phi
-    *phi = (jp - (kshift+1)*0.5) * (pihalf / nr);
+    // Computes the phi coordinate on the sphere, in [0,2Pi]
+    int jp = (jpll[face_num]*nr + ix - iy + 1 + kshift) / 2;
+    if (jp > nl4) jp -= nl4;
+    if (jp <   1) jp += nl4;
+    
+    // Computes Theta and Phi
+    *theta = acos(z);
+    *phi   = (jp - (kshift+1)*0.5) * (pihalf / nr);
     
     // Return
     return;
