@@ -68,6 +68,7 @@ public:
     GFitsHeader*   header(void) const;
     GFitsData*     data(void) const;
     GFitsTableCol* column(const std::string& colname) const;
+    GFitsTableCol* column(const int& colnum) const;
     void           primary(void);
 
 private:

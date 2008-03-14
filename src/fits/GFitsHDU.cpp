@@ -316,6 +316,40 @@ GFitsTableCol* GFitsHDU::column(const std::string& colname) const
 
 
 /***********************************************************************//**
+ * @brief Return pointer to column of table
+ *
+ * @param[in] colnum Number FITS table column to be returned (starting from 1)
+ *
+ * If this method is called for an image a 'fits_HDU_not_a_table' exception
+ * will be thrown.
+ ***************************************************************************/
+GFitsTableCol* GFitsHDU::column(const int& colnum) const
+{
+    // Initialise pointer
+    GFitsTableCol* ptr = NULL;
+
+    // Get pointer to table column
+    switch (m_type) {
+    case HT_IMAGE:              // Image HDU
+        throw GException::fits_HDU_not_a_table(G_COLUMN, m_type);
+        break;
+    case HT_ASCII_TABLE:        // ASCII Table HDU
+        ptr = ((GFitsAsciiTable*)this->data())->column(colnum);
+        break;
+    case HT_BIN_TABLE:          // Binary Table HDU
+        ptr = ((GFitsBinTable*)this->data())->column(colnum);
+        break;
+    default:
+        throw GException::fits_unknown_HDU_type(G_COLUMN, m_type);
+        break;
+    }
+
+    // Return pointer
+    return ptr;
+}
+
+
+/***********************************************************************//**
  * @brief Setup minimal primary HDU
  ***************************************************************************/
 void GFitsHDU::primary(void)
