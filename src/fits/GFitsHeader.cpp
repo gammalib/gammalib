@@ -410,6 +410,9 @@ void GFitsHeader::free_members(void)
  *
  * @param[in] keyname Name of the header card
  *
+ * @exception GException::fits_key_not_found
+ *            Requested header card was not found in header.
+ *
  * Returns a pointer on the header card.
  * If card was not found a 'fits_key_not_found' error will be thrown.
  ***************************************************************************/
@@ -439,7 +442,9 @@ GFitsHeaderCard* GFitsHeader::card_ptr(const std::string& keyname)
 /***********************************************************************//**
  * @brief Open Header
  *
- * @param fptr Pointer to FITS file from which the header will be loaded
+ * @param[in] fptr Pointer to FITS file from which the header will be loaded
+ *
+ * @exception GException::fits_error FITS error occured.
  *
  * Loads all header cards into memory. Any header cards that existed before
  * will be dropped.
@@ -475,7 +480,9 @@ void GFitsHeader::open(__fitsfile* fptr)
 /***********************************************************************//**
  * @brief Save Header to FITS file
  *
- * @param fptr Pointer to FITS file into which the header cards will be saved
+ * @param[in] fptr Pointer to FITS file into which the header cards will be saved
+ *
+ * @exception GException::fits_error FITS error occured.
  *
  * Saves all header cards into HDU. This method does not write the following
  * mandatory keywords to the HDU (those will be writted by methods handling
@@ -489,7 +496,6 @@ void GFitsHeader::open(__fitsfile* fptr)
  ***************************************************************************/
 void GFitsHeader::save(__fitsfile* fptr)
 {
-//cout << "GFitsHeader::save entry" << endl;
     // Move to HDU
     int status = 0;
     status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
@@ -509,7 +515,6 @@ void GFitsHeader::save(__fitsfile* fptr)
         }
     }
 
-//cout << "GFitsHeader::save exit" << endl;
     // Return
     return;
 }
