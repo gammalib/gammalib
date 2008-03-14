@@ -20,6 +20,7 @@
 #define GHEALPIX_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include "GFitsHDU.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -41,16 +42,27 @@ public:
     GHealpix& operator= (const GHealpix& pixels);
 
     // Methods
+    void   load(const GFitsHDU* hdu);
+    int    nside(void) const;
+    int    num_pixels(void) const;
+    double omega(void) const;
     
-protected:
-    // Protected methods
+private:
+    // Private methods
     void      init_members(void);
     void      copy_members(const GHealpix& pixels);
     void      free_members(void);
     GHealpix* clone(void) const;
 
-    // Protected data area
-private:
+    // Private data area
+    int     m_nside;        //!< Number of divisions of each base pixel (1,2,..)
+    int     m_order;        //!< Ordering (0=ring, 1=nested)
+    int     m_coordsys;     //!< Coordinate system (0=equatorial, 1=galactic)
+    int     m_num_pixels;   //!< Number of pixels
+    int     m_size_pixels;  //!< Vector size of each pixel
+    double* m_pixels;       //!< Pixel array
+    double* m_lon;          //!< RA or GLON values for each pixel
+    double* m_lat;          //!< DEC or GLAT values for each pixel
 };
 
 #endif /* GHEALPIX_HPP */
