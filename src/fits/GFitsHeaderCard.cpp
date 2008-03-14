@@ -15,6 +15,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GFitsHeaderCard.hpp"
 
 /* __ Namespaces _________________________________________________________ */
@@ -398,7 +399,7 @@ std::string GFitsHeaderCard::string(void)
     switch (m_value_type) {
     case CT_STRING:
         if (m_value.length() > 2)
-            result = m_value.substr(1, m_value.length() - 2);
+            result = strip_whitespace(m_value.substr(1, m_value.length() - 2));
         break;
     case CT_INT:
     case CT_FLOAT:
