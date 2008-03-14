@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GSkyDir.hpp  -  Class that implements a sky direction          *
+ *               GSkyDir.i  -  Sky direction class SWIG file               *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -11,17 +11,14 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GSkyDir.hpp
- * @brief GSkyDir class definition.
+ * @file GSkyDir.i
+ * @brief GSkyDir class SWIG file.
  * @author J. Knodlseder
  */
-
-#ifndef GSKYDIR_HPP
-#define GSKYDIR_HPP
-
-/* __ Includes ___________________________________________________________ */
-
-/* __ Namespaces _________________________________________________________ */
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GSkyDir.hpp"
+%}
 
 
 /***********************************************************************//**
@@ -30,18 +27,11 @@
  * @brief GSkyDir class interface defintion
  ***************************************************************************/
 class GSkyDir {
-
-    // I/O friends
-    friend ostream& operator<< (ostream& os, const GSkyDir& dir);
-
 public:
     // Constructors and destructors
     GSkyDir();
     GSkyDir(const GSkyDir& dir);
     virtual ~GSkyDir();
-
-    // Operators
-    GSkyDir& operator= (const GSkyDir& dir);
 
     // Methods
     void   radec(const double& ra, const double& dec);
@@ -50,22 +40,23 @@ public:
     double b(void);
     double ra(void);
     double dec(void);
-
-private:
-    // Private methods
-    void init_members(void);
-    void copy_members(const GSkyDir& dir);
-    void free_members(void);
-    void equ2gal(void);
-    void gal2equ(void);
-
-    // Private data area
-    int    m_has_lb;     //!< Has galactic coordinates
-    int    m_has_radec;  //!< Has equatorial coordinates
-    double m_l;          //!< Galactic longitude in radians
-    double m_b;          //!< Galactic latitude in radians
-    double m_ra;         //!< Right Ascension in radians
-    double m_dec;        //!< Declination in radians
 };
 
-#endif /* GSKYDIR_HPP */
+
+/***********************************************************************//**
+ * @brief GSkyDir class extension
+ ***************************************************************************/
+%extend GSkyDir {
+    char *__str__() {
+        static char str_buffer[1001];
+        std::ostringstream buffer;
+        buffer << *self;
+	    std::string str = buffer.str();
+        strncpy(str_buffer, (char*)str.c_str(), 1001);
+	    str_buffer[1000] = '\0';
+	    return str_buffer;
+    }
+    GSkyDir copy() {
+        return (*self);
+    }
+};

@@ -18,6 +18,8 @@
 /* General */
 #include "GException.i"
 #include "GNodeArray.i"
+#include "GHealpix.i"
+#include "GSkyDir.i"
 
 /* Response classes */
 #include "GResponse.i"

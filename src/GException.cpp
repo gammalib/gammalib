@@ -519,3 +519,16 @@ GException::rsp_invalid_type::rsp_invalid_type(string origin,
     m_origin  = origin;
     m_message = "Invalid response type '"+type+"' specified";
 }
+
+
+/***********************************************************************//**
+ * @brief General Healpix error
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] message Error message.
+ ***************************************************************************/
+GException::healpix::healpix(string origin, string message)
+{
+    m_origin  = origin;
+    m_message = message;
+}

@@ -9,7 +9,7 @@ import os
 #================#
 def test_fits():
     """
-    Test GammaLib GFits interface.
+    Test GFits interface.
     """
     # Remove test files
     try:
@@ -120,7 +120,7 @@ def test_fits():
 #=================#
 def test_node_array():
     """
-    Test GammaLib GNodeArray interface.
+    Test GNodeArray interface.
     """
     # Set-up vector and data array
     vector = GVector(20)
@@ -153,7 +153,7 @@ def test_node_array():
 #===================#
 def test_lat_response():
     """
-    Test GammaLib GLATResponse interface.
+    Test GLATResponse interface.
     """
     # Remove test file
     try:
@@ -179,14 +179,40 @@ def test_lat_response():
 #======================#
 def test_lat_observation():
     """
-    Test GammaLib GLATObservation interface.
+    Test GLATObservation interface.
     """
     # Allocate LAT Observation
     obs = GLATObservation("data/FT1_253582800.fits.gz", "data/FT2_253582800.fits.gz")
 
     #
-    print obs.ft1()
-    print obs.ft2()
+    #print obs.ft1()
+    #print obs.ft2()
+
+
+#==============#
+# Test Healpix #
+#==============#
+def test_healpix():
+    """
+    Test GHealpix interface.
+    """
+    # Open exposure cube
+    fits = GFits()
+    fits.open("data/expCube_253582800.fits.gz")
+    
+    # Lood Healpix table
+    pixels = GHealpix()
+    pixels.load(fits.hdu("EXPOSURE"))
+    
+    # Dump information
+    print pixels
+    
+    print pixels.pix2ang(0)
+    print " ",pixels.pix2ang(0).ra()*180/pi, pixels.pix2ang(0).dec()*180/pi
+    print pixels.pix2ang(1)
+    print pixels.pix2ang(2)
+    print pixels.pix2ang(3)
+    
 
 #==========================#
 # Main routine entry point #
@@ -199,4 +225,5 @@ if __name__ == '__main__':
     test_node_array()
     test_lat_response()
     test_lat_observation()
+    test_healpix()
     

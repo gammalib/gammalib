@@ -233,6 +233,12 @@ public:
         rsp_invalid_type(string origin, string type);
     };
 
+    // General Healpix error
+    class healpix : public GExceptionHandler {
+    public:
+        healpix(string origin, string message);
+    };
+
 };
 
 #endif /* GEXCEPTION_HPP */

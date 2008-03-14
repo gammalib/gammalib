@@ -85,7 +85,7 @@ private:
 
     // Private data area
     __fitsfile   m_fitsfile;    //!< FITS file pointer
-    int          m_hdunum;      //!< HDU number (starting from 1)
+    int          m_hdunum;      //!< HDU number (starting from 0)
     std::string  m_name;        //!< HDU name (extname)
     int          m_type;        //!< HDU type
     GFitsHeader* m_header;      //!< HDU header

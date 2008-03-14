@@ -1,5 +1,5 @@
 /***************************************************************************
- *      GLATResponse.hpp  -  GLAST LAT Response class SWIG definition      *
+ *       GLATResponse.i  -  GLAST LAT Response class SWIG definition       *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *

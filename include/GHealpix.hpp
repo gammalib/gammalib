@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GFitsHDU.hpp"
+#include "GSkyDir.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -32,6 +33,9 @@
  ***************************************************************************/
 class GHealpix {
 
+    // I/O friends
+    friend ostream& operator<< (ostream& os, const GHealpix& pixels);
+
 public:
     // Constructors and destructors
     GHealpix();
@@ -42,10 +46,11 @@ public:
     GHealpix& operator= (const GHealpix& pixels);
 
     // Methods
-    void   load(const GFitsHDU* hdu);
-    int    nside(void) const;
-    int    num_pixels(void) const;
-    double omega(void) const;
+    void    load(const GFitsHDU* hdu);
+    int     nside(void) const;
+    int     num_pixels(void) const;
+    double  omega(void) const;
+    GSkyDir pix2ang(const int& ipix);
     
 private:
     // Private methods
@@ -53,16 +58,19 @@ private:
     void      copy_members(const GHealpix& pixels);
     void      free_members(void);
     GHealpix* clone(void) const;
-
+    void      mk_pix2xy(void);
+    void      pix2ang_ring(int ipix, double* theta, double* phi);
+    void      pix2ang_nest(int ipix, double* theta, double* phi);
+    
     // Private data area
-    int     m_nside;        //!< Number of divisions of each base pixel (1,2,..)
-    int     m_order;        //!< Ordering (0=ring, 1=nested)
-    int     m_coordsys;     //!< Coordinate system (0=equatorial, 1=galactic)
-    int     m_num_pixels;   //!< Number of pixels
-    int     m_size_pixels;  //!< Vector size of each pixel
-    double* m_pixels;       //!< Pixel array
-    double* m_lon;          //!< RA or GLON values for each pixel
-    double* m_lat;          //!< DEC or GLAT values for each pixel
+    int      m_nside;        //!< Number of divisions of each base pixel (1-8192)
+    int      m_order;        //!< Ordering (0=ring, 1=nested, -1=?)
+    int      m_coordsys;     //!< Coordinate system (0=equatorial, 1=galactic, -1=?)
+    int      m_num_pixels;   //!< Number of pixels
+    int      m_size_pixels;  //!< Vector size of each pixel
+    double   m_omega;        //!< Solid angle of pixel
+    double*  m_pixels;       //!< Pixel array
+    GSkyDir* m_dir;          //!< Sky direction for each pixel
 };
 
 #endif /* GHEALPIX_HPP */
