@@ -35,11 +35,17 @@ public:
 
     // Methods
     void   radec(const double& ra, const double& dec);
+    void   radec_deg(const double& ra, const double& dec);
     void   lb(const double& l, const double& b);
+    void   lb_deg(const double& l, const double& b);
     double l(void);
+    double l_deg(void);
     double b(void);
+    double b_deg(void);
     double ra(void);
+    double ra_deg(void);
     double dec(void);
+    double dec_deg(void);
 };
 
 

@@ -13,6 +13,7 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GSkyDir.hpp"
@@ -27,7 +28,9 @@
 
 /* __ Debug definitions __________________________________________________ */
 
-
+/* __ Prototype __________________________________________________________ */
+void   euler(const int& type, const double& xin, const double &yin, 
+             double* xout, double *yout);
 
 /*==========================================================================
  =                                                                         =
@@ -116,7 +119,7 @@ GSkyDir& GSkyDir::operator= (const GSkyDir& dir)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Set equatorial sky direction
+ * @brief Set equatorial sky direction (radians)
  *
  * @param[in] ra Right Ascension in radians.
  * @param[in] dec Declination in radians.
@@ -137,7 +140,28 @@ void GSkyDir::radec(const double& ra, const double& dec)
 
 
 /***********************************************************************//**
- * @brief Set galactic sky direction
+ * @brief Set equatorial sky direction (degrees)
+ *
+ * @param[in] ra Right Ascension in degrees.
+ * @param[in] dec Declination in degrees.
+ ***************************************************************************/
+void GSkyDir::radec_deg(const double& ra, const double& dec)
+{
+    // Set attributes
+    m_has_lb    = 0;
+    m_has_radec = 1;
+
+    // Set direction
+    m_ra  = ra  * deg2rad;
+    m_dec = dec * deg2rad;
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set galactic sky direction (radians)
  *
  * @param[in] l Galactic longitude in radians.
  * @param[in] b Galactic latitude in radians.
@@ -151,6 +175,27 @@ void GSkyDir::lb(const double& l, const double& b)
     // Set direction
     m_l = l;
     m_b = b;
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set galactic sky direction (degrees)
+ *
+ * @param[in] l Galactic longitude in degrees.
+ * @param[in] b Galactic latitude in degrees.
+ ***************************************************************************/
+void GSkyDir::lb_deg(const double& l, const double& b)
+{
+    // Set attributes
+    m_has_lb    = 1;
+    m_has_radec = 0;
+
+    // Set direction
+    m_l = l * deg2rad;
+    m_b = b * deg2rad;
     
     // Return
     return;
@@ -172,6 +217,20 @@ double GSkyDir::l(void)
 
 
 /***********************************************************************//**
+ * @brief Returns galactic longitude in degrees
+ ***************************************************************************/
+double GSkyDir::l_deg(void)
+{
+    // If we have no galactic coordinates then get them now
+    if (!m_has_lb && m_has_radec)
+        equ2gal();
+    
+    // Return galactic longitude
+    return m_l * rad2deg;
+}
+
+
+/***********************************************************************//**
  * @brief Returns galactic latitude in radians
  ***************************************************************************/
 double GSkyDir::b(void)
@@ -182,6 +241,20 @@ double GSkyDir::b(void)
     
     // Return galactic latitude
     return m_b;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns galactic latitude in degrees
+ ***************************************************************************/
+double GSkyDir::b_deg(void)
+{
+    // If we have no galactic coordinates then get them now
+    if (!m_has_lb && m_has_radec)
+        equ2gal();
+    
+    // Return galactic latitude
+    return m_b * rad2deg;
 }
 
 
@@ -200,6 +273,20 @@ double GSkyDir::ra(void)
 
 
 /***********************************************************************//**
+ * @brief Returns Right Ascension in degrees
+ ***************************************************************************/
+double GSkyDir::ra_deg(void)
+{
+    // If we have no equatorial coordinates then get them now
+    if (!m_has_radec && m_has_lb)
+        gal2equ();
+    
+    // Return Right Ascension
+    return m_ra * rad2deg;
+}
+
+
+/***********************************************************************//**
  * @brief Returns Declination in radians
  ***************************************************************************/
 double GSkyDir::dec(void)
@@ -210,6 +297,20 @@ double GSkyDir::dec(void)
     
     // Return Declination
     return m_dec;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns Declination in degrees
+ ***************************************************************************/
+double GSkyDir::dec_deg(void)
+{
+    // If we have no equatorial coordinates then get them now
+    if (!m_has_radec && m_has_lb)
+        gal2equ();
+    
+    // Return Declination
+    return m_dec * rad2deg;
 }
 
 
@@ -273,11 +374,12 @@ void GSkyDir::free_members(void)
 
 /***********************************************************************//**
  * @brief Convert equatorial to galactic coordinates
- *
- * @todo Needs to be implemented
  ***************************************************************************/
 void GSkyDir::equ2gal(void)
 {
+    // Convert from equatorial to galactic
+    euler(0, m_ra, m_dec, &m_l, &m_b);
+
     // Return
     return;
 }
@@ -285,11 +387,12 @@ void GSkyDir::equ2gal(void)
 
 /***********************************************************************//**
  * @brief Convert galactic to equatorial coordinates
- *
- * @todo Needs to be implemented
  ***************************************************************************/
 void GSkyDir::gal2equ(void)
 {
+    // Convert from galactic to equatorial
+    euler(1, m_l, m_b, &m_ra, &m_dec);
+
     // Return
     return;
 }
@@ -325,3 +428,42 @@ ostream& operator<< (ostream& os, const GSkyDir& dir)
  =                      Other functions used by GSkyDir                    =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief General coordinate transformation routine for J2000
+ *
+ * @param[in] type Conversion type (0=equ2gal, 1=gal2equ)
+ * @param[in] xin Input longitude (RA or GLON) in radians.
+ * @param[in] yin Input latitude (Dec or GLAT) in radians.
+ * @param[out] xout Output longitude in radians.
+ * @param[out] yout Output latitude in radians.
+ ***************************************************************************/
+void euler(const int& type, const double& xin, const double &yin, 
+           double* xout, double *yout)
+{
+    // Set transformation constants
+    const double psi[]    = {0.57477043300,  4.9368292465};
+    const double stheta[] = {0.88998808748, -0.88998808748};
+    const double ctheta[] = {0.45598377618,  0.45598377618};
+    const double phi[]    = {4.9368292465,   0.57477043300};
+    
+    // Perform transformation
+    double a    = xin - phi[type];
+    double b    = yin;
+    double sb   = sin(b);
+    double cb   = cos(b);
+    double cbsa = cb * sin(a);
+    
+    //
+    a = atan2(ctheta[type] * cbsa + stheta[type] * sb, cb * cos(a));
+    b = -stheta[type] * cbsa + ctheta[type] * sb;
+    if (b > 1.0)
+        b = 1.0;
+
+    //
+    *yout = asin(b);
+    *xout = modulo((a+psi[type] + fourpi), twopi);
+
+    // Return
+    return;
+}
