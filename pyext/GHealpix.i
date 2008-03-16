@@ -40,6 +40,7 @@ public:
     int     num_pixels(void) const;
     double  omega(void) const;
     GSkyDir pix2ang(const int& ipix);
+    int     ang2pix(GSkyDir dir) const;
 };
 
 
