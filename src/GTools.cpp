@@ -56,3 +56,19 @@ std::string str(const int& value)
     return  s_value.str();
 }
 
+
+/***********************************************************************//**
+ * @brief Returns the remainder of the division \a v1/v2.
+ *
+ * @param[in] v1 Argument 1.
+ * @param[in] v2 Argument 2.
+ *
+ * Returns the remainder of the division \a v1/v2.
+ * The result is non-negative.
+ * \a v1 can be positive or negative; \a v2 must be positive.
+ ***************************************************************************/
+double modulo(double v1, double v2)
+{
+    // Return
+    return (v1 >= 0) ? ((v1 < v2) ? v1 : fmod(v1,v2)) : (fmod(v1,v2)+v2);
+}
