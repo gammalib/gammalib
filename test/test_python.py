@@ -204,12 +204,27 @@ def test_healpix():
     # Dump information
     print pixels
     
-    print pixels.pix2ang(0)
-    print " ",pixels.pix2ang(0).ra()*180/pi, pixels.pix2ang(0).dec()*180/pi
-    print pixels.pix2ang(1)
-    print pixels.pix2ang(2)
-    print pixels.pix2ang(3)
+    # Control pix2ang / ang2pix
+    for i in range(pixels.num_pixels()):
+        dir  = pixels.pix2ang(i)
+        ipix = pixels.ang2pix(dir)
+        if (i != ipix):
+            print "GHealpix Trouble with pixel "+str(i)+" ("+str(ipix)+ \
+                  "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
     
+    # Control SkyDir coordinate transformation for all pixels
+    for i in range(pixels.num_pixels()):
+        dir     = pixels.pix2ang(i)
+        dir_new = GSkyDir()
+        dir_new.lb(dir.l(),dir.b())
+        dra  = abs(dir.ra()  - dir_new.ra())
+        if (dra >= 5.0):
+            dra -= 2.0*pi
+        ddec = abs(dir.dec() - dir_new.dec())
+        if (dra > 1.0e-9 or ddec > 1.0e-9):
+            print "GSkyDir Trouble with pixel "+str(i)+" ("+str(dra)+ \
+                  ","+str(ddec)+")"
+
 
 #==========================#
 # Main routine entry point #
