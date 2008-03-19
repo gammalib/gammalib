@@ -462,7 +462,7 @@ void GHealpix::copy_members(const GHealpix& pixels)
                 m_dir[i] = pixels.m_dir[i];
         }
     }
-    
+
     // Return
     return;
 }
@@ -504,7 +504,7 @@ int GHealpix::nside2order(int nside)
 {
     // Initialise order
     int order = -1;
-    
+
     // Determine order
     for (int m = 0; m <= order_max; ++m) {
         int nstest = 1 << m;
@@ -515,7 +515,7 @@ int GHealpix::nside2order(int nside)
         if (nside < nstest)
             break;
     }
-    
+
     // Return order
     return order;
 }
@@ -578,7 +578,7 @@ void GHealpix::pix2ang_ring(int ipix, double* theta, double* phi)
         *theta    = acos(1.0 - iring*iring / m_fact2);
         *phi      = (iphi - 0.5) * pi/(2.0*iring);
     }
-    
+
     // Handle Equatorial region
     else if (ipix < (m_num_pixels - m_ncap)) {
         int    ip    = ipix - m_ncap;
@@ -589,7 +589,7 @@ void GHealpix::pix2ang_ring(int ipix, double* theta, double* phi)
         *theta       = acos((nl2 - iring) / m_fact1);
         *phi         = (iphi - fodd) * pi/nl2;
     }
-    
+
     // Handle South Polar cap    
     else {
         int ip    = m_num_pixels - ipix;
@@ -636,37 +636,37 @@ void GHealpix::pix2ang_nest(int ipix, double* theta, double* phi)
     int    nr;
     double z;
     int    kshift;
-    
+
     // North pole region
     if (jr < m_nside) {
         nr     = jr;
         z      = 1. - nr*nr*m_fact2;
         kshift = 0;
     }
-    
+
     // South pole region
     else if (jr > 3*m_nside) {
         nr     = nl4 - jr;
         z      = nr*nr*m_fact2 - 1;
         kshift = 0;
     }
-    
+
     // Equatorial region
     else {
         nr     = m_nside;
         z      = (2*m_nside-jr) * m_fact1;
         kshift = (jr-m_nside) & 1;
     }
-    
+
     // Computes the phi coordinate on the sphere, in [0,2Pi]
     int jp = (jpll[face_num]*nr + ix - iy + 1 + kshift) / 2;
     if (jp > nl4) jp -= nl4;
     if (jp <   1) jp += nl4;
-    
+
     // Computes Theta and Phi
     *theta = acos(z);
     *phi   = (jp - (kshift+1)*0.5) * (pihalf / nr);
-    
+
     // Return
     return;
 }
@@ -682,7 +682,7 @@ int GHealpix::ang2pix_z_phi_ring(double z, double phi) const
 {
     // Initialise pixel
     int ipix = 0;
-    
+
     // Setup
     double za = abs(z);
     double tt = modulo(phi,twopi) * inv_pihalf; // in [0,4)
@@ -696,10 +696,10 @@ int GHealpix::ang2pix_z_phi_ring(double z, double phi) const
         int    ir     = m_nside + 1 + jp - jm;      // in {1,2n+1}
         int    kshift = 1 - (ir & 1);               // kshift=1 if ir even, 0 otherwise
         int    ip     = (jp+jm-m_nside+kshift+1)/2; // in {0,4n-1}
-        ip            = modulo(ip,4*m_nside);
+        ip            = int(modulo(ip,4*m_nside));
         ipix          = m_ncap + (ir-1)*4*m_nside + ip;
     }
-    
+
     // North & South polar caps
     else {
         double tp  = tt - int(tt);
@@ -708,18 +708,18 @@ int GHealpix::ang2pix_z_phi_ring(double z, double phi) const
         int    jm  = int((1.0-tp)*tmp); // decreasing edge line index
         int    ir  = jp + jm + 1;       // ring number counted from the closest pole
         int    ip  = int(tt*ir);        // in {0,4*ir-1}
-        ip = modulo(ip,4*ir);
+        ip = int(modulo(ip,4*ir));
         if (z>0)
             ipix = 2*ir*(ir-1) + ip;
         else
             ipix = m_num_pixels - 2*ir*(ir+1) + ip;
     }
-    
+
     // Return pixel
     return ipix;
 }
-    
-    
+
+
 /***********************************************************************//**
  * @brief Returns pixels which contains angular coordinates (z,phi)
  *
@@ -732,7 +732,7 @@ int GHealpix::ang2pix_z_phi_nest(double z, double phi) const
     int face_num;
     int ix;
     int iy;
-    
+
     // Setup
     double za = abs(z);
     double tt = modulo(phi,twopi) * inv_pihalf; // in [0,4)
@@ -754,7 +754,7 @@ int GHealpix::ang2pix_z_phi_nest(double z, double phi) const
         ix = jm & (ns_max-1);
         iy = ns_max - (jp & (ns_max-1)) - 1;
     }
-    
+
     // Polar region, za > 2/3
     else {
         int    ntt = int(tt);
@@ -775,7 +775,7 @@ int GHealpix::ang2pix_z_phi_nest(double z, double phi) const
             iy       =  jm;
         }
     }
-    
+
     // Get pixel
     int ipf = xy2pix(ix, iy);
     ipf >>= (2*(order_max - m_order));     // in {0, nside**2 - 1}
@@ -808,7 +808,7 @@ ostream& operator<< (ostream& os, const GHealpix& pixels)
     os << " Pixel vector size .........: " << pixels.m_size_pixels << endl;
     os << " Solid angle ...............: " << scientific << pixels.m_omega 
        << fixed << " sr" << endl;
-    
+
     // Put ordering in stream
     os << " Ordering ..................: ";
     switch (pixels.m_scheme) {

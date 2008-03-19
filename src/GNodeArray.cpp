@@ -208,16 +208,16 @@ void GNodeArray::set_value(const double& value)
 {
     // If array is linear then get left index from analytic formula
     if (m_is_linear) {
-    
+
         // Set left index
-        m_inx_left = m_linear_slope * value + m_linear_offset;
-        
+        m_inx_left = int(m_linear_slope * value + m_linear_offset);
+
         // Keep index in valid range
         if (m_inx_left < 0)               m_inx_left = 0;
         else if (m_inx_left >= m_nodes-1) m_inx_left = m_nodes - 2;
-        
+
     } // endif: array is linear
-    
+
     // ... otherwise search the relevant indices by bisection
     else {
         // Set left index if value is before first node
