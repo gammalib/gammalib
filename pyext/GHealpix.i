@@ -29,15 +29,16 @@
 class GHealpix {
 public:
     // Constructors and destructors
-    GHealpix();
+    GHealpix(int nside, int scheme = 1, int coordsys = 1, int dimension = 1);
     GHealpix(const GFitsHDU* hdu);
     GHealpix(const GHealpix& pixels);
     virtual ~GHealpix();
 
     // Methods
     void    read(const GFitsHDU* hdu);
+    void    write(GFits* fits);
     int     nside(void) const;
-    int     num_pixels(void) const;
+    int     npix(void) const;
     double  omega(void) const;
     GSkyDir pix2ang(const int& ipix);
     int     ang2pix(GSkyDir dir) const;
@@ -56,6 +57,18 @@ public:
         strncpy(str_buffer, (char*)str.c_str(), 1001);
 	    str_buffer[1000] = '\0';
 	    return str_buffer;
+    }
+    double __getitem__(int pixel) {
+	    if (pixel >= 0 && pixel < (int)self->npix())
+            return (*self)(pixel);
+        else
+	        throw GException::out_of_range("__getitem__(int)", pixel, (int)self->npix());
+    }
+    void __setitem__(int pixel, const double val) {
+	    if (pixel >= 0 && pixel < (int)self->npix())
+	        (*self)(pixel) = val;
+        else
+            throw GException::out_of_range("__setitem__(int)", pixel, (int)self->npix());
     }
     GHealpix copy() {
         return (*self);

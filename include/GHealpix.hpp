@@ -20,7 +20,10 @@
 #define GHEALPIX_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include "GFits.hpp"
 #include "GFitsHDU.hpp"
+#include "GFitsBinTable.hpp"
+#include "GFitsTableDblCol.hpp"
 #include "GSkyDir.hpp"
 
 /* __ Namespaces _________________________________________________________ */
@@ -38,19 +41,24 @@ class GHealpix {
 
 public:
     // Constructors and destructors
-    GHealpix();
+    GHealpix(int nside, int scheme = 1, int coordsys = 1, int dimension = 1);
     GHealpix(const GFitsHDU* hdu);
     GHealpix(const GHealpix& pixels);
     virtual ~GHealpix();
+
+    // Pixel access operators
+    double& operator() (int pixel, int element = 0);
+    const double& operator() (int pixel, int element = 0) const;
 
     // Operators
     GHealpix& operator= (const GHealpix& pixels);
 
     // Methods
     void    read(const GFitsHDU* hdu);
+    void    write(GFits* fits);
     int     nside(void) const;
     int     order(void) const;
-    int     num_pixels(void) const;
+    int     npix(void) const;
     double  omega(void) const;
     GSkyDir pix2ang(const int& ipix);
     int     ang2pix(GSkyDir dir) const;
@@ -58,6 +66,7 @@ public:
 private:
     // Private methods
     void      init_members(void);
+    void      alloc_members(void);
     void      copy_members(const GHealpix& pixels);
     void      free_members(void);
     GHealpix* clone(void) const;

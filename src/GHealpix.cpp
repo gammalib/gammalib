@@ -19,7 +19,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
-//#include <math.h>
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
@@ -28,6 +27,7 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
+#define G_OP_ACCESS    "GHealpix::operator(int,int)"
 #define G_LOAD         "GHealpix::load(const GFitsHDU*)"
 #define G_PIX2ANG_RING "GHealpix::pix2ang_ring(int,double*,double*)"
 #define G_PIX2ANG_NEST "GHealpix::pix2ang_nest(int,double*,double*)"
@@ -59,11 +59,40 @@ static short utab[0x100];
 
 /***********************************************************************//**
  * @brief Constructor
+ *
+ * @param[in] nside Number of sides
+ * @param[in] scheme Ordering scheme (0=ring, 1=nested)
+ * @param[in] coordsys Coordinate system (0=equatorial, 1=galactic)
+ * @param[in] nside Number of sides
  ***************************************************************************/
-GHealpix::GHealpix()
+GHealpix::GHealpix(int nside, int scheme, int coordsys, int dimension)
 {
     // Initialise class members
     init_members();
+    
+    // Put parameters in valid range
+    if (nside < 1) nside = 1;
+    if (scheme   != 0 && scheme   != 1) scheme   = 1;  // Default to nested
+    if (coordsys != 0 && coordsys != 1) coordsys = 1;  // Default to galactic
+    if (dimension < 1) dimension = 1;
+    
+    // Set Healpix parameters
+    m_nside       = nside;
+    m_scheme      = scheme;
+    m_coordsys    = coordsys;
+    m_size_pixels = dimension;
+
+    // Derive Healpix parameters
+    m_npface     = m_nside * m_nside;
+    m_ncap       = 2 * (m_npface - m_nside);
+    m_num_pixels = 12 * m_npface;
+    m_fact2      = 4.0 / m_num_pixels;
+    m_fact1      = 2 * m_nside * m_fact2;
+    m_omega      = fourpi / m_num_pixels;
+    m_order      = nside2order(m_nside);
+
+    // Allocate pixels
+    alloc_members();
 
     // Return
     return;
@@ -126,6 +155,38 @@ GHealpix::~GHealpix()
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Pixel access operator
+ *
+ * @param[in] pixel pixel number (starting from 0)
+ * @param[in] element vector element number (starting from 0)
+ ***************************************************************************/
+double& GHealpix::operator() (int pixel, int element)
+{
+  #if defined(G_RANGE_CHECK)
+  if (pixel < 0 || pixel >= m_num_pixels || element < 0 || element >= m_size_pixels)
+    throw GException::out_of_range(G_OP_ACCESS, pixel, element, m_num_pixels, m_size_pixels);
+  #endif
+  return m_pixels[pixel*m_size_pixels+element];
+}
+
+
+/***********************************************************************//**
+ * @brief Pixel access operator
+ *
+ * @param[in] pixel pixel number (starting from 0)
+ * @param[in] element vector element number (starting from 0)
+ ***************************************************************************/
+const double& GHealpix::operator() (int pixel, int element) const
+{
+  #if defined(G_RANGE_CHECK)
+  if (pixel < 0 || pixel >= m_num_pixels || element < 0 || element >= m_size_pixels)
+    throw GException::out_of_range(G_OP_ACCESS, pixel, element, m_num_pixels, m_size_pixels);
+  #endif
+  return m_pixels[pixel*m_size_pixels+element];
+}
+
+
+/***********************************************************************//**
  * @brief Assignment operator
  *
  * @param[in] pixels GHealpix instance to be assigned
@@ -158,7 +219,7 @@ GHealpix& GHealpix::operator= (const GHealpix& pixels)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Read Healpix data from table.
+ * @brief Read Healpix data from FITS table.
  *
  * @param[in] hdu FITS HDU containing the Healpix data
  *
@@ -184,7 +245,6 @@ void GHealpix::read(const GFitsHDU* hdu)
     m_fact1      = 2 * m_nside * m_fact2;
     m_omega      = fourpi / m_num_pixels;
     m_order      = nside2order(m_nside);
-
 
     // Get ordering scheme from ORDERING keyword
     std::string ordering;
@@ -240,11 +300,13 @@ void GHealpix::read(const GFitsHDU* hdu)
 
         // Extract vector size of each pixel
         m_size_pixels = col->number();
+        
+        // Allocate pixels
+        alloc_members();
 
         // If there are pixels then load them
         int size = m_num_pixels * m_size_pixels;
         if (size > 0) {
-            m_pixels = new double[size];
             double* ptr = m_pixels;
             for (int row = 0; row < m_num_pixels; ++row) {
                 for (int inx = 0; inx < m_size_pixels; ++inx, ++ptr)
@@ -252,13 +314,90 @@ void GHealpix::read(const GFitsHDU* hdu)
             }
         } // endif: there were pixels to load
 
-        // Compute sky direction for each pixel
-        m_dir = new GSkyDir[m_num_pixels];
-        for (int i = 0; i < m_num_pixels; ++i)
-            m_dir[i] = pix2ang(i);
-    
     } // endif: we had pixels
         
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write Healpix data into FITS table.
+ *
+ * @param[in] fits FITS object to which the Healpix data will be written
+ ***************************************************************************/
+void GHealpix::write(GFits* fits)
+{
+    // Continue only if there are data
+    int size = m_num_pixels * m_size_pixels;
+    if (size > 0) {
+    
+        // Create binary table with one column
+        GFitsBinTable    table  = GFitsBinTable(m_num_pixels);
+        GFitsTableDblCol column = GFitsTableDblCol("DATA", m_num_pixels, 
+                                                   m_size_pixels);  
+
+        // Fill data into column
+        double* ptr = m_pixels;
+        for (int row = 0; row < m_num_pixels; ++row) {
+            for (int inx = 0; inx < m_size_pixels; ++inx, ++ptr)
+                column(row,inx) = *ptr;
+        }
+        
+        // Append column to table
+        table.append_column(column);
+        
+        // Create HDU with table
+        GFitsHDU hdu(table);
+        
+        // Set extension name
+        hdu.extname("HEALPIX");
+        
+        // Set ordering scheme keyword value
+        std::string s_scheme;
+        switch (m_scheme) {
+        case 0:
+            s_scheme = "RING";
+            break;
+        case 1:
+            s_scheme = "NESTED";
+            break;
+        default:
+            s_scheme = "UNKNOWN";
+            break;
+        }
+
+        // Set coordinate system keyword value
+        std::string s_coordsys;
+        switch (m_coordsys) {
+        case 0:
+            s_coordsys = "EQU";
+            break;
+        case 1:
+            s_coordsys = "GAL";
+            break;
+        default:
+            s_coordsys = "UNKNOWN";
+            break;
+        }
+        
+        // Set keywords
+        GFitsHeaderCard pixtype  = GFitsHeaderCard("PIXTYPE", "HEALPIX", "Pixel type");
+        GFitsHeaderCard nside    = GFitsHeaderCard("NSIDE", m_nside, "HEALPix resolution");
+        GFitsHeaderCard ordering = GFitsHeaderCard("ORDERING", s_scheme, "Ordering scheme");
+        GFitsHeaderCard coordsys = GFitsHeaderCard("COORDSYS", s_coordsys, "Coordinate system");
+        
+        // Add cards to header
+        hdu.header()->update(pixtype);
+        hdu.header()->update(nside);
+        hdu.header()->update(ordering);
+        hdu.header()->update(coordsys);
+        
+        // Append HDU to FITS file
+        fits->append_hdu(hdu);
+        
+    }
+    
     // Return
     return;
 }
@@ -287,7 +426,7 @@ int GHealpix::order(void) const
 /***********************************************************************//**
  * @brief Returns number of pixels.
  ***************************************************************************/
-int GHealpix::num_pixels(void) const
+int GHealpix::npix(void) const
 {
     // Return nside
     return m_num_pixels;
@@ -424,6 +563,34 @@ void GHealpix::init_members(void)
       | ((m&0x10) << 4) | ((m&0x20) << 5) | ((m&0x40) << 6) | ((m&0x80) << 7);
     }
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Allocate class members
+ ***************************************************************************/
+void GHealpix::alloc_members(void)
+{
+    // Compute data size
+    int size = m_num_pixels * m_size_pixels;
+
+    // Continue only if there are pixels    
+    if (size > 0) {
+    
+        // Allocate pixels and initialize them to 0
+        m_pixels = new double[size];
+        for (int i = 0; i < size; ++i)
+            m_pixels[i] = 0.0;
+
+        // Compute sky direction for each pixel
+        m_dir = new GSkyDir[m_num_pixels];
+        for (int i = 0; i < m_num_pixels; ++i)
+            m_dir[i] = pix2ang(i);
+            
+    } // endif: there were pixels
+    
     // Return
     return;
 }
@@ -575,7 +742,7 @@ void GHealpix::pix2ang_ring(int ipix, double* theta, double* phi)
     if (ipix < m_ncap) {
         int iring = int(0.5*(1+isqrt(1+2*ipix))); // counted from North pole
         int iphi  = (ipix+1) - 2*iring*(iring-1);
-        *theta    = acos(1.0 - iring*iring / m_fact2);
+        *theta    = acos(1.0 - (iring*iring) * m_fact2);
         *phi      = (iphi - 0.5) * pi/(2.0*iring);
     }
 
@@ -586,7 +753,7 @@ void GHealpix::pix2ang_ring(int ipix, double* theta, double* phi)
         int    iphi  = ip%(4*m_nside) + 1;
         double fodd  = ((iring+m_nside)&1) ? 1 : 0.5;
         int    nl2   = 2*m_nside;
-        *theta       = acos((nl2 - iring) / m_fact1);
+        *theta       = acos((nl2 - iring) * m_fact1);
         *phi         = (iphi - fodd) * pi/nl2;
     }
 
@@ -595,7 +762,7 @@ void GHealpix::pix2ang_ring(int ipix, double* theta, double* phi)
         int ip    = m_num_pixels - ipix;
         int iring = int(0.5*(1+isqrt(2*ip-1)));    // Counted from South pole
         int iphi  = 4*iring + 1 - (ip - 2*iring*(iring-1));
-        *theta    = acos(iring*iring / m_fact2 - 1.0);
+        *theta    = acos(-1.0 + (iring*iring) * m_fact2);
         *phi      = (iphi - 0.5) * pi/(2.*iring);
     }
 
