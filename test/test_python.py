@@ -205,7 +205,7 @@ def test_healpix():
     print pixels
     
     # Control pix2ang / ang2pix
-    for i in range(pixels.num_pixels()):
+    for i in range(pixels.npix()):
         dir  = pixels.pix2ang(i)
         ipix = pixels.ang2pix(dir)
         if (i != ipix):
@@ -213,7 +213,7 @@ def test_healpix():
                   "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
     
     # Control SkyDir coordinate transformation for all pixels
-    for i in range(pixels.num_pixels()):
+    for i in range(pixels.npix()):
         dir     = pixels.pix2ang(i)
         dir_new = GSkyDir()
         dir_new.lb(dir.l(),dir.b())
