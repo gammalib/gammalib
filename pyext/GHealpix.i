@@ -19,6 +19,7 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GHealpix.hpp"
 %}
+%include stl.i
 
 
 /***********************************************************************//**
@@ -29,7 +30,8 @@
 class GHealpix {
 public:
     // Constructors and destructors
-    GHealpix(int nside, int scheme = 1, int coordsys = 1, int dimension = 1);
+    GHealpix(int nside, std::string scheme = "NESTED",
+             std::string coordsys = "GAL", int dimension = 1);
     GHealpix(const GFitsHDU* hdu);
     GHealpix(const GHealpix& pixels);
     virtual ~GHealpix();

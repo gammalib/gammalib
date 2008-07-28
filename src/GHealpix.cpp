@@ -27,6 +27,7 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONSTRUCT    "GHealpix::GHealpix(int,int,int,int)"
 #define G_OP_ACCESS    "GHealpix::operator(int,int)"
 #define G_LOAD         "GHealpix::load(const GFitsHDU*)"
 #define G_PIX2ANG_RING "GHealpix::pix2ang_ring(int,double*,double*)"
@@ -61,25 +62,50 @@ static short utab[0x100];
  * @brief Constructor
  *
  * @param[in] nside Number of sides
- * @param[in] scheme Ordering scheme (0=ring, 1=nested)
- * @param[in] coordsys Coordinate system (0=equatorial, 1=galactic)
- * @param[in] nside Number of sides
+ * @param[in] scheme Ordering scheme ('RING' or 'NESTED')
+ * @param[in] coordsys Coordinate system ('EQU' or 'GAL')
+ * @param[in] dimension Vector dimension of pixels
+ *
+ * @exception GException::healpix_bad_nside Invalid nside parameter.
+ * @exception GException::healpix_bad_scheme Invalid scheme parameter.
+ * @exception GException::healpix_bad_coords Invalid coordsys parameter.
  ***************************************************************************/
-GHealpix::GHealpix(int nside, int scheme, int coordsys, int dimension)
+GHealpix::GHealpix(int nside, std::string scheme, std::string coordsys,
+                   int dimension)
 {
     // Initialise class members
     init_members();
-    
-    // Put parameters in valid range
-    if (nside < 1) nside = 1;
-    if (scheme   != 0 && scheme   != 1) scheme   = 1;  // Default to nested
-    if (coordsys != 0 && coordsys != 1) coordsys = 1;  // Default to galactic
+
+    // Check nside parameter (power of 2 between 1 and 8192)
+    int order = nside2order(nside);
+    if (order == -1)
+      throw GException::healpix_bad_nside(G_CONSTRUCT, nside);
+
+    // Check scheme
+    int i_scheme = -1;
+    if (scheme == "RING")
+        i_scheme = 0;
+    else if (scheme == "NESTED")
+        i_scheme = 1;
+    else
+      throw GException::healpix_bad_scheme(G_CONSTRUCT, scheme);
+
+    // Check coordinate system
+    int i_coordsys;
+    if (coordsys == "EQU")
+        i_coordsys = 0;
+    else if (coordsys == "GAL")
+        i_coordsys = 1;
+    else
+      throw GException::healpix_bad_coords(G_CONSTRUCT, coordsys);
+
+    // Check dimension
     if (dimension < 1) dimension = 1;
-    
+
     // Set Healpix parameters
     m_nside       = nside;
-    m_scheme      = scheme;
-    m_coordsys    = coordsys;
+    m_scheme      = i_scheme;
+    m_coordsys    = i_coordsys;
     m_size_pixels = dimension;
 
     // Derive Healpix parameters
@@ -231,11 +257,11 @@ void GHealpix::read(const GFitsHDU* hdu)
     // Free memory and initialise members
     free_members();
     init_members();
-    
+
     // Check if we have a healpix representation
     if (hdu->card("PIXTYPE")->string() != "HEALPIX")
         throw GException::healpix(G_LOAD, "HDU does not contain Healpix data");
-    
+
     // Get Healpix resolution and determine number of pixels and solid angle
     m_nside      = hdu->card("NSIDE")->integer();
     m_npface     = m_nside * m_nside;
@@ -254,7 +280,7 @@ void GHealpix::read(const GFitsHDU* hdu)
     catch (GException::fits_key_not_found &e) {
         m_scheme = -1; // Flag unknown ordering
     }
-    
+
     // Decode ordering scheme string
     if (ordering == "RING")
         m_scheme = 0;
@@ -278,7 +304,7 @@ void GHealpix::read(const GFitsHDU* hdu)
             m_coordsys = -1; // Flag coordinate system as unknown
         }
     }
-    
+
     // Decode coordinate system string
     if (coordsys.find("EQU") == 0)
         m_coordsys = 0;
@@ -286,10 +312,10 @@ void GHealpix::read(const GFitsHDU* hdu)
         m_coordsys = 1;
     else
         throw GException::healpix(G_LOAD, "Invalid coordinate system");
-    
+
     // Continue only of we have pixels
     if (m_num_pixels > 0) {
-    
+
         // Get first column
         GFitsTableCol* col = hdu->column(0);
 
@@ -300,7 +326,7 @@ void GHealpix::read(const GFitsHDU* hdu)
 
         // Extract vector size of each pixel
         m_size_pixels = col->number();
-        
+
         // Allocate pixels
         alloc_members();
 
@@ -315,7 +341,7 @@ void GHealpix::read(const GFitsHDU* hdu)
         } // endif: there were pixels to load
 
     } // endif: we had pixels
-        
+
     // Return
     return;
 }
@@ -331,7 +357,7 @@ void GHealpix::write(GFits* fits)
     // Continue only if there are data
     int size = m_num_pixels * m_size_pixels;
     if (size > 0) {
-    
+
         // Create binary table with one column
         GFitsBinTable    table  = GFitsBinTable(m_num_pixels);
         GFitsTableDblCol column = GFitsTableDblCol("DATA", m_num_pixels, 
@@ -343,16 +369,16 @@ void GHealpix::write(GFits* fits)
             for (int inx = 0; inx < m_size_pixels; ++inx, ++ptr)
                 column(row,inx) = *ptr;
         }
-        
+
         // Append column to table
         table.append_column(column);
-        
+
         // Create HDU with table
         GFitsHDU hdu(table);
-        
+
         // Set extension name
         hdu.extname("HEALPIX");
-        
+
         // Set ordering scheme keyword value
         std::string s_scheme;
         switch (m_scheme) {
@@ -380,24 +406,30 @@ void GHealpix::write(GFits* fits)
             s_coordsys = "UNKNOWN";
             break;
         }
-        
+
         // Set keywords
-        GFitsHeaderCard pixtype  = GFitsHeaderCard("PIXTYPE", "HEALPIX", "Pixel type");
-        GFitsHeaderCard nside    = GFitsHeaderCard("NSIDE", m_nside, "HEALPix resolution");
-        GFitsHeaderCard ordering = GFitsHeaderCard("ORDERING", s_scheme, "Ordering scheme");
-        GFitsHeaderCard coordsys = GFitsHeaderCard("COORDSYS", s_coordsys, "Coordinate system");
-        
+        GFitsHeaderCard pixtype  = GFitsHeaderCard("PIXTYPE", "HEALPIX",
+                                        "HEALPix pixelisation");
+        GFitsHeaderCard nside    = GFitsHeaderCard("NSIDE", m_nside,
+                                        "HEALPix resolution parameter");
+        GFitsHeaderCard npix     = GFitsHeaderCard("NPIX", m_num_pixels,
+                                        "Total number of pixels");
+        GFitsHeaderCard ordering = GFitsHeaderCard("ORDERING", s_scheme,
+                                        "Pixel ordering scheme, either RING of NESTED");
+        GFitsHeaderCard coordsys = GFitsHeaderCard("COORDSYS", s_coordsys,
+                                        "Coordinate system, either EQU or GAL");
+
         // Add cards to header
         hdu.header()->update(pixtype);
         hdu.header()->update(nside);
         hdu.header()->update(ordering);
         hdu.header()->update(coordsys);
-        
+
         // Append HDU to FITS file
         fits->append_hdu(hdu);
-        
+
     }
-    
+
     // Return
     return;
 }

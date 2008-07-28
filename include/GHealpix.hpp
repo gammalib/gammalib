@@ -41,7 +41,8 @@ class GHealpix {
 
 public:
     // Constructors and destructors
-    GHealpix(int nside, int scheme = 1, int coordsys = 1, int dimension = 1);
+    GHealpix(int nside, std::string scheme = "NESTED",
+             std::string coordsys = "GAL", int dimension = 1);
     GHealpix(const GFitsHDU* hdu);
     GHealpix(const GHealpix& pixels);
     virtual ~GHealpix();
@@ -62,7 +63,7 @@ public:
     double  omega(void) const;
     GSkyDir pix2ang(const int& ipix);
     int     ang2pix(GSkyDir dir) const;
-    
+
 private:
     // Private methods
     void      init_members(void);
@@ -77,7 +78,7 @@ private:
     void      pix2ang_nest(int ipix, double* theta, double* phi);
     int       ang2pix_z_phi_ring(double z, double phi) const;
     int       ang2pix_z_phi_nest(double z, double phi) const;
-    
+
     // Private data area
     int      m_nside;        //!< Number of divisions of each base pixel (1-8192)
     int      m_npface;       //!<

@@ -239,6 +239,24 @@ public:
         healpix(string origin, string message);
     };
 
+    // Healpix resolution invalid
+    class healpix_bad_nside : public GExceptionHandler {
+    public:
+        healpix_bad_nside(string origin, int nside);
+    };
+
+    // Healpix scheme invalid
+    class healpix_bad_scheme : public GExceptionHandler {
+    public:
+        healpix_bad_scheme(string origin, string scheme);
+    };
+
+    // Healpix coordinate system invalid
+    class healpix_bad_coords : public GExceptionHandler {
+    public:
+        healpix_bad_coords(string origin, string coordsys);
+    };
+
 };
 
 #endif /* GEXCEPTION_HPP */

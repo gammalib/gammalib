@@ -72,7 +72,7 @@ GException::empty::empty(string origin)
 GException::out_of_range::out_of_range(string origin, int inx, int min, int max)
 {
     m_origin  = origin;
-    m_message = "Index (" + str(inx) + ") out of range [" + str(min) + 
+    m_message = "Index (" + str(inx) + ") out of range [" + str(min) +
                 "," + str(max) + "]";
 }
 
@@ -84,7 +84,7 @@ GException::out_of_range::out_of_range(string origin, int inx, int elements)
 {
     m_origin = origin;
     if (elements > 0) {
-        m_message = "Vector index (" + str(inx) + ") out of range [0," + 
+        m_message = "Vector index (" + str(inx) + ") out of range [0," +
                     str(elements-1) + "]";
     }
     else {
@@ -111,7 +111,7 @@ GException::out_of_range::out_of_range(string origin, int row, int col, int rows
 GException::vector_mismatch::vector_mismatch(string origin, int size1, int size2)
 {
     m_origin  = origin;
-    m_message = "Vector dimensions differ (" + str(size1) + " <-> " + 
+    m_message = "Vector dimensions differ (" + str(size1) + " <-> " +
                 str(size2) + ")";
 }
 
@@ -531,4 +531,45 @@ GException::healpix::healpix(string origin, string message)
 {
     m_origin  = origin;
     m_message = message;
+}
+
+
+/***********************************************************************//**
+ * @brief Healpix resolution invalid
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] nside Specified nside parameter.
+ ***************************************************************************/
+GException::healpix_bad_nside::healpix_bad_nside(string origin, int nside)
+{
+    m_origin  = origin;
+    m_message = "Invalid nside "+str(nside)+" parameter (should be one of "
+                "1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192).";
+}
+
+
+/***********************************************************************//**
+ * @brief Healpix scheme invalid
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] scheme Specified scheme.
+ ***************************************************************************/
+GException::healpix_bad_scheme::healpix_bad_scheme(string origin, string scheme)
+{
+    m_origin  = origin;
+    m_message = "Invalid scheme '"+scheme+"' (should be either 'RING' or 'NESTED').";
+}
+
+
+/***********************************************************************//**
+ * @brief Healpix coordinate system invalid
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] coordsys Specified coordinate system.
+ ***************************************************************************/
+GException::healpix_bad_coords::healpix_bad_coords(string origin, string coordsys)
+{
+    m_origin  = origin;
+    m_message = "Invalid coordinate system '"+coordsys +
+                "' (should be either 'EQU' or 'GAL').";
 }
