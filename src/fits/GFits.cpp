@@ -181,14 +181,14 @@ void GFits::open(const std::string& filename)
         status = 0;
         status = __ffinit(&m_fitsfile, filename.c_str(), &status);
     }
-    
+
     // If FITS file is readonly then open as readonly
-    else if (status == 112) {
+    else if (status == 112 or status == 105) {
         status      = 0;
         status      = __ffopen(&m_fitsfile, filename.c_str(), 0, &status);
         m_readwrite = 0;
     }
-    
+
     // Throw any other error
     if (status != 0)
         throw GException::fits_open_error(G_OPEN, filename, status);
