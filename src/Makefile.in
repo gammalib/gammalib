@@ -119,15 +119,15 @@ files = GException.cpp \
 	GNodeArray.cpp \
 	GImage.cpp \
 	GHealpix.cpp \
+        lat/GLATResponse.cpp \
+        lat/GLATResponseTable.cpp \
+        lat/GLATAeff.cpp \
+        lat/GLATPsf.cpp \
+        lat/GLATEdisp.cpp \
+        lat/GLATObservation.cpp \
 	data/GData.cpp \
 	rsp/GResponse.cpp \
-	rsp/GLATResponse.cpp \
-	rsp/GLATResponseTable.cpp \
-	rsp/GLATAeff.cpp \
-	rsp/GLATPsf.cpp \
-	rsp/GLATEdisp.cpp \
 	obs/GObservation.cpp \
-	obs/GLATObservation.cpp \
 	fits/GFitsHeaderCard.cpp \
 	fits/GFitsHeader.cpp \
 	fits/GFitsData.cpp \
@@ -167,16 +167,16 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libgamma_la_LIBADD =
 am__objects_1 = GException.lo GTools.lo GSkyDir.lo GNodeArray.lo \
-	GImage.lo GHealpix.lo GData.lo GResponse.lo GLATResponse.lo \
-	GLATResponseTable.lo GLATAeff.lo GLATPsf.lo GLATEdisp.lo \
-	GObservation.lo GLATObservation.lo GFitsHeaderCard.lo \
-	GFitsHeader.lo GFitsData.lo GFitsImage.lo GFitsDblImage.lo \
-	GFitsTable.lo GFitsAsciiTable.lo GFitsBinTable.lo \
-	GFitsTableCol.lo GFitsTableLogCol.lo GFitsTableStrCol.lo \
-	GFitsTableShtCol.lo GFitsTableLngCol.lo GFitsTableFltCol.lo \
-	GFitsTableDblCol.lo GFitsHDU.lo GFits.lo GFitPar.lo GVector.lo \
-	GMatrixBase.lo GMatrix.lo GSymMatrix.lo GSparseMatrix.lo \
-	GSparseSymbolic.lo GSparseNumeric.lo
+	GImage.lo GHealpix.lo GLATResponse.lo GLATResponseTable.lo \
+	GLATAeff.lo GLATPsf.lo GLATEdisp.lo GLATObservation.lo GData.lo \
+	GResponse.lo GObservation.lo GFitsHeaderCard.lo GFitsHeader.lo \
+	GFitsData.lo GFitsImage.lo GFitsDblImage.lo GFitsTable.lo \
+	GFitsAsciiTable.lo GFitsBinTable.lo GFitsTableCol.lo \
+	GFitsTableLogCol.lo GFitsTableStrCol.lo GFitsTableShtCol.lo \
+	GFitsTableLngCol.lo GFitsTableFltCol.lo GFitsTableDblCol.lo \
+	GFitsHDU.lo GFits.lo GFitPar.lo GVector.lo GMatrixBase.lo \
+	GMatrix.lo GSymMatrix.lo GSparseMatrix.lo GSparseSymbolic.lo \
+	GSparseNumeric.lo
 am_libgamma_la_OBJECTS = $(am__objects_1)
 libgamma_la_OBJECTS = $(am_libgamma_la_OBJECTS)
 
@@ -237,15 +237,15 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
+GLATResponse.lo: lat/GLATResponse.cpp
+GLATResponseTable.lo: lat/GLATResponseTable.cpp
+GLATAeff.lo: lat/GLATAeff.cpp
+GLATPsf.lo: lat/GLATPsf.cpp
+GLATEdisp.lo: lat/GLATEdisp.cpp
+GLATObservation.lo: lat/GLATObservation.cpp
 GData.lo: data/GData.cpp
 GResponse.lo: rsp/GResponse.cpp
-GLATResponse.lo: rsp/GLATResponse.cpp
-GLATResponseTable.lo: rsp/GLATResponseTable.cpp
-GLATAeff.lo: rsp/GLATAeff.cpp
-GLATPsf.lo: rsp/GLATPsf.cpp
-GLATEdisp.lo: rsp/GLATEdisp.cpp
 GObservation.lo: obs/GObservation.cpp
-GLATObservation.lo: obs/GLATObservation.cpp
 GFitsHeaderCard.lo: fits/GFitsHeaderCard.cpp
 GFitsHeader.lo: fits/GFitsHeader.cpp
 GFitsData.lo: fits/GFitsData.cpp
@@ -289,6 +289,60 @@ distclean-compile:
 .cpp.lo:
 	$(LTCXXCOMPILE) -c -o $@ `test -f '$<' || echo '$(srcdir)/'`$<
 
+GLATResponse.o: lat/GLATResponse.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponse.o `test -f 'lat/GLATResponse.cpp' || echo '$(srcdir)/'`lat/GLATResponse.cpp
+
+GLATResponse.obj: lat/GLATResponse.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponse.obj `cygpath -w lat/GLATResponse.cpp`
+
+GLATResponse.lo: lat/GLATResponse.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponse.lo `test -f 'lat/GLATResponse.cpp' || echo '$(srcdir)/'`lat/GLATResponse.cpp
+
+GLATResponseTable.o: lat/GLATResponseTable.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponseTable.o `test -f 'lat/GLATResponseTable.cpp' || echo '$(srcdir)/'`lat/GLATResponseTable.cpp
+
+GLATResponseTable.obj: lat/GLATResponseTable.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponseTable.obj `cygpath -w lat/GLATResponseTable.cpp`
+
+GLATResponseTable.lo: lat/GLATResponseTable.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponseTable.lo `test -f 'lat/GLATResponseTable.cpp' || echo '$(srcdir)/'`lat/GLATResponseTable.cpp
+
+GLATAeff.o: lat/GLATAeff.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATAeff.o `test -f 'lat/GLATAeff.cpp' || echo '$(srcdir)/'`lat/GLATAeff.cpp
+
+GLATAeff.obj: lat/GLATAeff.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATAeff.obj `cygpath -w lat/GLATAeff.cpp`
+
+GLATAeff.lo: lat/GLATAeff.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATAeff.lo `test -f 'lat/GLATAeff.cpp' || echo '$(srcdir)/'`lat/GLATAeff.cpp
+
+GLATPsf.o: lat/GLATPsf.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATPsf.o `test -f 'lat/GLATPsf.cpp' || echo '$(srcdir)/'`lat/GLATPsf.cpp
+
+GLATPsf.obj: lat/GLATPsf.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATPsf.obj `cygpath -w lat/GLATPsf.cpp`
+
+GLATPsf.lo: lat/GLATPsf.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATPsf.lo `test -f 'lat/GLATPsf.cpp' || echo '$(srcdir)/'`lat/GLATPsf.cpp
+
+GLATEdisp.o: lat/GLATEdisp.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATEdisp.o `test -f 'lat/GLATEdisp.cpp' || echo '$(srcdir)/'`lat/GLATEdisp.cpp
+
+GLATEdisp.obj: lat/GLATEdisp.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATEdisp.obj `cygpath -w lat/GLATEdisp.cpp`
+
+GLATEdisp.lo: lat/GLATEdisp.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATEdisp.lo `test -f 'lat/GLATEdisp.cpp' || echo '$(srcdir)/'`lat/GLATEdisp.cpp
+
+GLATObservation.o: lat/GLATObservation.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATObservation.o `test -f 'lat/GLATObservation.cpp' || echo '$(srcdir)/'`lat/GLATObservation.cpp
+
+GLATObservation.obj: lat/GLATObservation.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATObservation.obj `cygpath -w lat/GLATObservation.cpp`
+
+GLATObservation.lo: lat/GLATObservation.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATObservation.lo `test -f 'lat/GLATObservation.cpp' || echo '$(srcdir)/'`lat/GLATObservation.cpp
+
 GData.o: data/GData.cpp
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GData.o `test -f 'data/GData.cpp' || echo '$(srcdir)/'`data/GData.cpp
 
@@ -307,51 +361,6 @@ GResponse.obj: rsp/GResponse.cpp
 GResponse.lo: rsp/GResponse.cpp
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GResponse.lo `test -f 'rsp/GResponse.cpp' || echo '$(srcdir)/'`rsp/GResponse.cpp
 
-GLATResponse.o: rsp/GLATResponse.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponse.o `test -f 'rsp/GLATResponse.cpp' || echo '$(srcdir)/'`rsp/GLATResponse.cpp
-
-GLATResponse.obj: rsp/GLATResponse.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponse.obj `cygpath -w rsp/GLATResponse.cpp`
-
-GLATResponse.lo: rsp/GLATResponse.cpp
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponse.lo `test -f 'rsp/GLATResponse.cpp' || echo '$(srcdir)/'`rsp/GLATResponse.cpp
-
-GLATResponseTable.o: rsp/GLATResponseTable.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponseTable.o `test -f 'rsp/GLATResponseTable.cpp' || echo '$(srcdir)/'`rsp/GLATResponseTable.cpp
-
-GLATResponseTable.obj: rsp/GLATResponseTable.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponseTable.obj `cygpath -w rsp/GLATResponseTable.cpp`
-
-GLATResponseTable.lo: rsp/GLATResponseTable.cpp
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponseTable.lo `test -f 'rsp/GLATResponseTable.cpp' || echo '$(srcdir)/'`rsp/GLATResponseTable.cpp
-
-GLATAeff.o: rsp/GLATAeff.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATAeff.o `test -f 'rsp/GLATAeff.cpp' || echo '$(srcdir)/'`rsp/GLATAeff.cpp
-
-GLATAeff.obj: rsp/GLATAeff.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATAeff.obj `cygpath -w rsp/GLATAeff.cpp`
-
-GLATAeff.lo: rsp/GLATAeff.cpp
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATAeff.lo `test -f 'rsp/GLATAeff.cpp' || echo '$(srcdir)/'`rsp/GLATAeff.cpp
-
-GLATPsf.o: rsp/GLATPsf.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATPsf.o `test -f 'rsp/GLATPsf.cpp' || echo '$(srcdir)/'`rsp/GLATPsf.cpp
-
-GLATPsf.obj: rsp/GLATPsf.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATPsf.obj `cygpath -w rsp/GLATPsf.cpp`
-
-GLATPsf.lo: rsp/GLATPsf.cpp
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATPsf.lo `test -f 'rsp/GLATPsf.cpp' || echo '$(srcdir)/'`rsp/GLATPsf.cpp
-
-GLATEdisp.o: rsp/GLATEdisp.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATEdisp.o `test -f 'rsp/GLATEdisp.cpp' || echo '$(srcdir)/'`rsp/GLATEdisp.cpp
-
-GLATEdisp.obj: rsp/GLATEdisp.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATEdisp.obj `cygpath -w rsp/GLATEdisp.cpp`
-
-GLATEdisp.lo: rsp/GLATEdisp.cpp
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATEdisp.lo `test -f 'rsp/GLATEdisp.cpp' || echo '$(srcdir)/'`rsp/GLATEdisp.cpp
-
 GObservation.o: obs/GObservation.cpp
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GObservation.o `test -f 'obs/GObservation.cpp' || echo '$(srcdir)/'`obs/GObservation.cpp
 
@@ -360,15 +369,6 @@ GObservation.obj: obs/GObservation.cpp
 
 GObservation.lo: obs/GObservation.cpp
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GObservation.lo `test -f 'obs/GObservation.cpp' || echo '$(srcdir)/'`obs/GObservation.cpp
-
-GLATObservation.o: obs/GLATObservation.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATObservation.o `test -f 'obs/GLATObservation.cpp' || echo '$(srcdir)/'`obs/GLATObservation.cpp
-
-GLATObservation.obj: obs/GLATObservation.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATObservation.obj `cygpath -w obs/GLATObservation.cpp`
-
-GLATObservation.lo: obs/GLATObservation.cpp
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATObservation.lo `test -f 'obs/GLATObservation.cpp' || echo '$(srcdir)/'`obs/GLATObservation.cpp
 
 GFitsHeaderCard.o: fits/GFitsHeaderCard.cpp
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsHeaderCard.o `test -f 'fits/GFitsHeaderCard.cpp' || echo '$(srcdir)/'`fits/GFitsHeaderCard.cpp

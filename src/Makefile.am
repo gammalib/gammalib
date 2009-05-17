@@ -14,15 +14,15 @@ files = GException.cpp \
 	GNodeArray.cpp \
 	GImage.cpp \
 	GHealpix.cpp \
+        lat/GLATResponse.cpp \
+        lat/GLATResponseTable.cpp \
+        lat/GLATAeff.cpp \
+        lat/GLATPsf.cpp \
+        lat/GLATEdisp.cpp \
+        lat/GLATObservation.cpp \
 	data/GData.cpp \
 	rsp/GResponse.cpp \
-	rsp/GLATResponse.cpp \
-	rsp/GLATResponseTable.cpp \
-	rsp/GLATAeff.cpp \
-	rsp/GLATPsf.cpp \
-	rsp/GLATEdisp.cpp \
 	obs/GObservation.cpp \
-	obs/GLATObservation.cpp \
 	fits/GFitsHeaderCard.cpp \
 	fits/GFitsHeader.cpp \
 	fits/GFitsData.cpp \
