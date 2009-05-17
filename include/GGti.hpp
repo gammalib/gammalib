@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GData.hpp  -  Data abstract base class                 *
+ *                 GGti.hpp  -  Good time interval class                   *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -11,13 +11,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GData.hpp
- * @brief GData abstract base class definition.
+ * @file GGti.hpp
+ * @brief Good time interval class interface definition.
  * @author J. Knodlseder
  */
 
-#ifndef GDATA_HPP
-#define GDATA_HPP
+#ifndef GGTI_HPP
+#define GGTI_HPP
 
 /* __ Includes ___________________________________________________________ */
 
@@ -25,35 +25,43 @@
 
 
 /***********************************************************************//**
- * @class GData
+ * @class GGti
  *
- * @brief Abstract GData class interface defintion
+ * @brief Interface for the GTI class.
  ***************************************************************************/
-class GData {
+class GGti {
 
   // Friend classes
   friend class GObservation;
 
 public:
     // Constructors and destructors
-    GData();
-    GData(const GData& d);
-    virtual ~GData();
+    GGti();
+    GGti(const GGti& gti);
+    virtual ~GGti();
 
     // Operators
-    GData& operator= (const GData& data);
+    virtual GGti& operator= (const GGti& gti);
 
     // Methods
-    
+  
 protected:
     // Protected methods
-    void           init_members(void);
-    void           copy_members(const GData& data);
-    void           free_members(void);
-    virtual GData* clone(void) const = 0;
+    void  init_members(void);
+    void  copy_members(const GGti& gti);
+    void  free_members(void);
+    GGti* clone(void);
 
     // Protected data area
+	int         m_num;          //!< Number of intervals
+	double      m_tstart;       //!< Start of observation
+	double      m_tstop;        //!< Stop of observation
+	double      m_ontime;       //!< Sum of GTI durations
+	double      m_elapse;       //!< Time between start of first GTI and stop of last GTI
+	double     *m_start;        //!< Array of start times
+	double     *m_stop;         //!< Array of stop times
+
 private:
 };
 
-#endif /* GDATA_HPP */
+#endif /* GGTI_HPP */

@@ -125,9 +125,10 @@ files = GException.cpp \
         lat/GLATPsf.cpp \
         lat/GLATEdisp.cpp \
         lat/GLATObservation.cpp \
-	data/GData.cpp \
-	rsp/GResponse.cpp \
 	obs/GObservation.cpp \
+        obs/GResponse.cpp \
+        obs/GData.cpp \
+        obs/GGti.cpp \
 	fits/GFitsHeaderCard.cpp \
 	fits/GFitsHeader.cpp \
 	fits/GFitsData.cpp \
@@ -168,15 +169,15 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libgamma_la_LIBADD =
 am__objects_1 = GException.lo GTools.lo GSkyDir.lo GNodeArray.lo \
 	GImage.lo GHealpix.lo GLATResponse.lo GLATResponseTable.lo \
-	GLATAeff.lo GLATPsf.lo GLATEdisp.lo GLATObservation.lo GData.lo \
-	GResponse.lo GObservation.lo GFitsHeaderCard.lo GFitsHeader.lo \
-	GFitsData.lo GFitsImage.lo GFitsDblImage.lo GFitsTable.lo \
-	GFitsAsciiTable.lo GFitsBinTable.lo GFitsTableCol.lo \
-	GFitsTableLogCol.lo GFitsTableStrCol.lo GFitsTableShtCol.lo \
-	GFitsTableLngCol.lo GFitsTableFltCol.lo GFitsTableDblCol.lo \
-	GFitsHDU.lo GFits.lo GFitPar.lo GVector.lo GMatrixBase.lo \
-	GMatrix.lo GSymMatrix.lo GSparseMatrix.lo GSparseSymbolic.lo \
-	GSparseNumeric.lo
+	GLATAeff.lo GLATPsf.lo GLATEdisp.lo GLATObservation.lo \
+	GObservation.lo GResponse.lo GData.lo GGti.lo \
+	GFitsHeaderCard.lo GFitsHeader.lo GFitsData.lo GFitsImage.lo \
+	GFitsDblImage.lo GFitsTable.lo GFitsAsciiTable.lo \
+	GFitsBinTable.lo GFitsTableCol.lo GFitsTableLogCol.lo \
+	GFitsTableStrCol.lo GFitsTableShtCol.lo GFitsTableLngCol.lo \
+	GFitsTableFltCol.lo GFitsTableDblCol.lo GFitsHDU.lo GFits.lo \
+	GFitPar.lo GVector.lo GMatrixBase.lo GMatrix.lo GSymMatrix.lo \
+	GSparseMatrix.lo GSparseSymbolic.lo GSparseNumeric.lo
 am_libgamma_la_OBJECTS = $(am__objects_1)
 libgamma_la_OBJECTS = $(am_libgamma_la_OBJECTS)
 
@@ -243,9 +244,10 @@ GLATAeff.lo: lat/GLATAeff.cpp
 GLATPsf.lo: lat/GLATPsf.cpp
 GLATEdisp.lo: lat/GLATEdisp.cpp
 GLATObservation.lo: lat/GLATObservation.cpp
-GData.lo: data/GData.cpp
-GResponse.lo: rsp/GResponse.cpp
 GObservation.lo: obs/GObservation.cpp
+GResponse.lo: obs/GResponse.cpp
+GData.lo: obs/GData.cpp
+GGti.lo: obs/GGti.cpp
 GFitsHeaderCard.lo: fits/GFitsHeaderCard.cpp
 GFitsHeader.lo: fits/GFitsHeader.cpp
 GFitsData.lo: fits/GFitsData.cpp
@@ -343,24 +345,6 @@ GLATObservation.obj: lat/GLATObservation.cpp
 GLATObservation.lo: lat/GLATObservation.cpp
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATObservation.lo `test -f 'lat/GLATObservation.cpp' || echo '$(srcdir)/'`lat/GLATObservation.cpp
 
-GData.o: data/GData.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GData.o `test -f 'data/GData.cpp' || echo '$(srcdir)/'`data/GData.cpp
-
-GData.obj: data/GData.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GData.obj `cygpath -w data/GData.cpp`
-
-GData.lo: data/GData.cpp
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GData.lo `test -f 'data/GData.cpp' || echo '$(srcdir)/'`data/GData.cpp
-
-GResponse.o: rsp/GResponse.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GResponse.o `test -f 'rsp/GResponse.cpp' || echo '$(srcdir)/'`rsp/GResponse.cpp
-
-GResponse.obj: rsp/GResponse.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GResponse.obj `cygpath -w rsp/GResponse.cpp`
-
-GResponse.lo: rsp/GResponse.cpp
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GResponse.lo `test -f 'rsp/GResponse.cpp' || echo '$(srcdir)/'`rsp/GResponse.cpp
-
 GObservation.o: obs/GObservation.cpp
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GObservation.o `test -f 'obs/GObservation.cpp' || echo '$(srcdir)/'`obs/GObservation.cpp
 
@@ -369,6 +353,33 @@ GObservation.obj: obs/GObservation.cpp
 
 GObservation.lo: obs/GObservation.cpp
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GObservation.lo `test -f 'obs/GObservation.cpp' || echo '$(srcdir)/'`obs/GObservation.cpp
+
+GResponse.o: obs/GResponse.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GResponse.o `test -f 'obs/GResponse.cpp' || echo '$(srcdir)/'`obs/GResponse.cpp
+
+GResponse.obj: obs/GResponse.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GResponse.obj `cygpath -w obs/GResponse.cpp`
+
+GResponse.lo: obs/GResponse.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GResponse.lo `test -f 'obs/GResponse.cpp' || echo '$(srcdir)/'`obs/GResponse.cpp
+
+GData.o: obs/GData.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GData.o `test -f 'obs/GData.cpp' || echo '$(srcdir)/'`obs/GData.cpp
+
+GData.obj: obs/GData.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GData.obj `cygpath -w obs/GData.cpp`
+
+GData.lo: obs/GData.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GData.lo `test -f 'obs/GData.cpp' || echo '$(srcdir)/'`obs/GData.cpp
+
+GGti.o: obs/GGti.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GGti.o `test -f 'obs/GGti.cpp' || echo '$(srcdir)/'`obs/GGti.cpp
+
+GGti.obj: obs/GGti.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GGti.obj `cygpath -w obs/GGti.cpp`
+
+GGti.lo: obs/GGti.cpp
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GGti.lo `test -f 'obs/GGti.cpp' || echo '$(srcdir)/'`obs/GGti.cpp
 
 GFitsHeaderCard.o: fits/GFitsHeaderCard.cpp
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsHeaderCard.o `test -f 'fits/GFitsHeaderCard.cpp' || echo '$(srcdir)/'`fits/GFitsHeaderCard.cpp

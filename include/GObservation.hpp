@@ -22,6 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GResponse.hpp"
 #include "GData.hpp"
+#include "GGti.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -53,9 +54,11 @@ protected:
 
     // Protected data area
     std::string m_obsname;      //!< Name of observation
-    int         m_num_response; //!< Number of associated response functions
-	GResponse** m_response;     //!< Pointer to instrument response functions
+	double      m_tstart;       //!< Start time of observation
+	double      m_tstop;        //!< Stop time of observations
+	GResponse*  m_response;     //!< Pointer to instrument response functions
 	GData*      m_data;         //!< Pointer to associated data
+	GGti*       m_gti;          //!< Pointer to associated data
 
 private:
 };

@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GObservation.cpp  -  Observation abstract base class          *
+ *                  GData.cpp  -  Data abstract base class                 *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -12,15 +12,14 @@
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
- * @file GObservation.cpp
- * @brief GObservation abstract base class implementation.
+ * @file GData.cpp
+ * @brief GData abstract base class implementation.
  * @author J. Knodlseder
  */
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include "GException.hpp"
-#include "GObservation.hpp"
+#include "GData.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -36,14 +35,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                    GObservation constructors/destructors                =
+ =                       GData constructors/destructors                    =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GObservation::GObservation()
+GData::GData()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -56,15 +55,15 @@ GObservation::GObservation()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] obs Observation from which the instance should be built.
+ * @param data GData instance which should be used for construction
  ***************************************************************************/
-GObservation::GObservation(const GObservation& obs)
+GData::GData(const GData& data)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Copy members
-    copy_members(obs);
+    copy_members(data);
 
     // Return
     return;
@@ -74,7 +73,7 @@ GObservation::GObservation(const GObservation& obs)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GObservation::~GObservation()
+GData::~GData()
 {
     // Free members
     free_members();
@@ -86,19 +85,19 @@ GObservation::~GObservation()
 
 /*==========================================================================
  =                                                                         =
- =                          GObservation operators                         =
+ =                             GData operators                             =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] obs Observation which should be assigned.
+ * @param[in] data GData instance to be assigned
  ***************************************************************************/
-GObservation& GObservation::operator= (const GObservation& obs)
+GData& GData::operator= (const GData& data)
 {
     // Execute only if object is not identical
-    if (this != &obs) {
+    if (this != &data) {
 
         // Free members
         free_members();
@@ -107,7 +106,7 @@ GObservation& GObservation::operator= (const GObservation& obs)
         init_members();
 
         // Copy members
-        copy_members(obs);
+        copy_members(data);
 
     } // endif: object was not identical
 
@@ -118,29 +117,23 @@ GObservation& GObservation::operator= (const GObservation& obs)
 
 /*==========================================================================
  =                                                                         =
- =                       GObservation public methods                       =
+ =                           GData public methods                          =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                       GObservation private methods                      =
+ =                           GData private methods                         =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GObservation::init_members(void)
+void GData::init_members(void)
 {
     // Initialise members
-    m_obsname.clear();
-    m_tstart   = 0.0;
-    m_tstop    = 0.0;
-    m_response = NULL;
-    m_data     = NULL;
-    m_gti      = NULL;
 
     // Return
     return;
@@ -150,20 +143,12 @@ void GObservation::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] obs GObservation members which should be copied.
+ * @param[in] data GData instance from which members should be copied
  ***************************************************************************/
-void GObservation::copy_members(const GObservation& obs)
+void GData::copy_members(const GData& data)
 {
     // Copy attributes
-    m_obsname = obs.m_obsname;
-    m_tstart  = obs.m_tstart;
-    m_tstop   = obs.m_tstop;
-
-    // Clone members
-	m_response = obs.m_response->clone();
-	m_data     = obs.m_data->clone();
-	m_gti      = obs.m_gti->clone();
-
+    
     // Return
     return;
 }
@@ -172,17 +157,11 @@ void GObservation::copy_members(const GObservation& obs)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GObservation::free_members(void)
+void GData::free_members(void)
 {
     // Free memory
-	if (m_response != NULL) delete m_response;
-	if (m_data     != NULL) delete m_data;
-	if (m_gti      != NULL) delete m_gti;
 
-    // Signal free pointers
-    m_response = NULL;
-    m_data     = NULL;
-    m_gti      = NULL;
+    // Mark memory as free
 
     // Return
     return;
@@ -191,13 +170,13 @@ void GObservation::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                           GObservation friends                          =
+ =                               GData friends                             =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                   Other functions used by GObservation                  =
+ =                       Other functions used by GData                     =
  =                                                                         =
  ==========================================================================*/

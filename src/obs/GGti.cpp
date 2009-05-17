@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GObservation.cpp  -  Observation abstract base class          *
+ *                 GGti.cpp  -  Good time interval class                   *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -12,19 +12,20 @@
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
- * @file GObservation.cpp
- * @brief GObservation abstract base class implementation.
+ * @file GGti.cpp
+ * @brief Good time interval class implementation.
  * @author J. Knodlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include "GException.hpp"
-#include "GObservation.hpp"
+#include "GGti.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
+#define G_COPY_MEMBERS      "GGti::copy_members(const GGti&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -36,14 +37,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                    GObservation constructors/destructors                =
+ =                        GGti constructors/destructors                    =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GObservation::GObservation()
+GGti::GGti()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -56,15 +57,15 @@ GObservation::GObservation()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] obs Observation from which the instance should be built.
+ * @param[in] gti Good time interval from which the instance should be built.
  ***************************************************************************/
-GObservation::GObservation(const GObservation& obs)
+GGti::GGti(const GGti& gti)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Copy members
-    copy_members(obs);
+    copy_members(gti);
 
     // Return
     return;
@@ -74,7 +75,7 @@ GObservation::GObservation(const GObservation& obs)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GObservation::~GObservation()
+GGti::~GGti()
 {
     // Free members
     free_members();
@@ -86,19 +87,19 @@ GObservation::~GObservation()
 
 /*==========================================================================
  =                                                                         =
- =                          GObservation operators                         =
+ =                              GGti operators                             =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] obs Observation which should be assigned.
+ * @param[in] gti Good time interval which should be assigned.
  ***************************************************************************/
-GObservation& GObservation::operator= (const GObservation& obs)
+GGti& GGti::operator= (const GGti& gti)
 {
     // Execute only if object is not identical
-    if (this != &obs) {
+    if (this != &gti) {
 
         // Free members
         free_members();
@@ -107,7 +108,7 @@ GObservation& GObservation::operator= (const GObservation& obs)
         init_members();
 
         // Copy members
-        copy_members(obs);
+        copy_members(gti);
 
     } // endif: object was not identical
 
@@ -118,29 +119,30 @@ GObservation& GObservation::operator= (const GObservation& obs)
 
 /*==========================================================================
  =                                                                         =
- =                       GObservation public methods                       =
+ =                           GGti public methods                           =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                       GObservation private methods                      =
+ =                           GGti private methods                          =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GObservation::init_members(void)
+void GGti::init_members(void)
 {
     // Initialise members
-    m_obsname.clear();
-    m_tstart   = 0.0;
-    m_tstop    = 0.0;
-    m_response = NULL;
-    m_data     = NULL;
-    m_gti      = NULL;
+    m_num    = 0;
+	m_tstart = 0.0;
+	m_tstop  = 0.0;
+	m_ontime = 0.0;
+	m_elapse = 0.0;
+	m_start  = NULL;
+	m_stop   = NULL;
 
     // Return
     return;
@@ -150,19 +152,28 @@ void GObservation::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] obs GObservation members which should be copied.
+ * @param[in] gti GGti members which should be copied.
  ***************************************************************************/
-void GObservation::copy_members(const GObservation& obs)
+void GGti::copy_members(const GGti& gti)
 {
     // Copy attributes
-    m_obsname = obs.m_obsname;
-    m_tstart  = obs.m_tstart;
-    m_tstop   = obs.m_tstop;
+    m_num    = gti.m_num;
+    m_tstart = gti.m_tstart;
+    m_tstop  = gti.m_tstop;
+    m_ontime = gti.m_ontime;
+    m_elapse = gti.m_elapse;
 
-    // Clone members
-	m_response = obs.m_response->clone();
-	m_data     = obs.m_data->clone();
-	m_gti      = obs.m_gti->clone();
+    // Copy start/stop times
+    if (m_num > 0) {
+        m_start = new double[m_num];
+        m_stop  = new double[m_num];
+        if (m_start == NULL || m_stop == NULL)
+            throw GException::mem_alloc(G_COPY_MEMBERS, m_num);
+        for (int i = 0; i < m_num; ++i) {
+            m_start[i] = gti.m_start[i];
+            m_stop[i]  = gti.m_stop[i];
+        }
+    }
 
     // Return
     return;
@@ -172,17 +183,15 @@ void GObservation::copy_members(const GObservation& obs)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GObservation::free_members(void)
+void GGti::free_members(void)
 {
     // Free memory
-	if (m_response != NULL) delete m_response;
-	if (m_data     != NULL) delete m_data;
-	if (m_gti      != NULL) delete m_gti;
+    if (m_start != NULL) delete [] m_start;
+    if (m_stop  != NULL) delete [] m_stop;
 
     // Signal free pointers
-    m_response = NULL;
-    m_data     = NULL;
-    m_gti      = NULL;
+    m_start = NULL;
+    m_stop  = NULL;
 
     // Return
     return;
@@ -191,13 +200,13 @@ void GObservation::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                           GObservation friends                          =
+ =                               GGti friends                              =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                   Other functions used by GObservation                  =
+ =                       Other functions used by GGti                      =
  =                                                                         =
  ==========================================================================*/

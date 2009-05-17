@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GObservation.cpp  -  Observation abstract base class          *
+ *               GResponse.cpp  -  Response abstract base class            *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -11,16 +11,11 @@
  *                                                                         *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-/**
- * @file GObservation.cpp
- * @brief GObservation abstract base class implementation.
- * @author J. Knodlseder
- */
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include "GException.hpp"
-#include "GObservation.hpp"
+#include "GResponse.hpp"
+#include <iostream>                           // cout, cerr
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -36,14 +31,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                    GObservation constructors/destructors                =
+ =                     GResponse constructors/destructors                  =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GObservation::GObservation()
+GResponse::GResponse()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -56,15 +51,15 @@ GObservation::GObservation()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] obs Observation from which the instance should be built.
+ * @param[in] rsp Response from which the instance should be built.
  ***************************************************************************/
-GObservation::GObservation(const GObservation& obs)
+GResponse::GResponse(const GResponse& rsp)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Copy members
-    copy_members(obs);
+    copy_members(rsp);
 
     // Return
     return;
@@ -74,7 +69,7 @@ GObservation::GObservation(const GObservation& obs)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GObservation::~GObservation()
+GResponse::~GResponse()
 {
     // Free members
     free_members();
@@ -86,19 +81,19 @@ GObservation::~GObservation()
 
 /*==========================================================================
  =                                                                         =
- =                          GObservation operators                         =
+ =                           GResponse operators                           =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] obs Observation which should be assigned.
+ * @param[in] rsp Response which should be assigned.
  ***************************************************************************/
-GObservation& GObservation::operator= (const GObservation& obs)
+GResponse& GResponse::operator= (const GResponse& rsp)
 {
     // Execute only if object is not identical
-    if (this != &obs) {
+    if (this != &rsp) {
 
         // Free members
         free_members();
@@ -107,7 +102,7 @@ GObservation& GObservation::operator= (const GObservation& obs)
         init_members();
 
         // Copy members
-        copy_members(obs);
+        copy_members(rsp);
 
     } // endif: object was not identical
 
@@ -118,29 +113,25 @@ GObservation& GObservation::operator= (const GObservation& obs)
 
 /*==========================================================================
  =                                                                         =
- =                       GObservation public methods                       =
+ =                         GResponse public methods                        =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                       GObservation private methods                      =
+ =                         GResponse private methods                       =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GObservation::init_members(void)
+void GResponse::init_members(void)
 {
     // Initialise members
-    m_obsname.clear();
-    m_tstart   = 0.0;
-    m_tstop    = 0.0;
-    m_response = NULL;
-    m_data     = NULL;
-    m_gti      = NULL;
+    m_caldb.clear();
+    m_rspname.clear();
 
     // Return
     return;
@@ -150,19 +141,15 @@ void GObservation::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] obs GObservation members which should be copied.
+ * @param[in] rsp Response members which should be copied.
  ***************************************************************************/
-void GObservation::copy_members(const GObservation& obs)
+void GResponse::copy_members(const GResponse& rsp)
 {
     // Copy attributes
-    m_obsname = obs.m_obsname;
-    m_tstart  = obs.m_tstart;
-    m_tstop   = obs.m_tstop;
+    m_caldb   = rsp.m_caldb;
+    m_rspname = rsp.m_rspname;
 
-    // Clone members
-	m_response = obs.m_response->clone();
-	m_data     = obs.m_data->clone();
-	m_gti      = obs.m_gti->clone();
+    // Copy other membres
 
     // Return
     return;
@@ -172,17 +159,11 @@ void GObservation::copy_members(const GObservation& obs)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GObservation::free_members(void)
+void GResponse::free_members(void)
 {
     // Free memory
-	if (m_response != NULL) delete m_response;
-	if (m_data     != NULL) delete m_data;
-	if (m_gti      != NULL) delete m_gti;
 
     // Signal free pointers
-    m_response = NULL;
-    m_data     = NULL;
-    m_gti      = NULL;
 
     // Return
     return;
@@ -191,13 +172,13 @@ void GObservation::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                           GObservation friends                          =
+ =                             GResponse friends                           =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                   Other functions used by GObservation                  =
+ =                     Other functions used by GResponse                   =
  =                                                                         =
  ==========================================================================*/
