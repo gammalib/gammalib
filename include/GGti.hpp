@@ -38,10 +38,10 @@ public:
     // Constructors and destructors
     GGti();
     GGti(const GGti& gti);
-    virtual ~GGti();
+    ~GGti();
 
     // Operators
-    virtual GGti& operator= (const GGti& gti);
+    GGti& operator= (const GGti& gti);
 
     // Methods
   
