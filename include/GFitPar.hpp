@@ -18,9 +18,6 @@
 #include "GException.hpp"
 #include <iostream>                           // std::ostream
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 
 /***************************************************************************
  *                         GFitPar class definition                        *
@@ -31,7 +28,7 @@ class GFitPar {
   // Operator friends
 
   // I/O friends
-  friend ostream& operator<< (ostream& os, const GFitPar& p);
+  friend std::ostream& operator<< (std::ostream& os, const GFitPar& p);
 
   // Friend functions
 

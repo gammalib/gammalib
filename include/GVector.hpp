@@ -20,9 +20,6 @@
 #include <stddef.h>                           // NULL
 #include <iostream>                           // std::ostream
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 
 /***************************************************************************
  *                         GVector class definition                        *
@@ -48,7 +45,7 @@ class GVector {
   friend int      operator!= (const GVector &a, const GVector &b);
 
   // I/O friends
-  friend ostream& operator<< (ostream& os, const GVector& v);
+  friend std::ostream& operator<< (std::ostream& os, const GVector& v);
 
   // Friend functions
   friend GVector  cross(const GVector &a, const GVector &b);

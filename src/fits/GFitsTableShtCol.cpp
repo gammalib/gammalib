@@ -18,8 +18,6 @@
 #include "GTools.hpp"
 #include "GFitsTableShtCol.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 /* __ Method name definitions ____________________________________________ */
 #define G_STRING  "GFitsTableShtCol::string(const int&, const int&)"
 #define G_REAL    "GFitsTableShtCol::real(const int&, const int&)"
@@ -224,7 +222,7 @@ std::string GFitsTableShtCol::string(const int& row, const int& inx)
     int offset = row * m_number + inx;
 
     // Convert double into string
-    ostringstream s_value;
+    std::ostringstream s_value;
     s_value << m_data[offset];
 
     // Return value
@@ -546,7 +544,7 @@ void GFitsTableShtCol::fetch_data(void)
  * @param[in] os Output stream
  * @param[in] column Column to put in output stream
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GFitsTableShtCol& column)
+std::ostream& operator<< (std::ostream& os, const GFitsTableShtCol& column)
 {
     // Dump column in output stream
     column.dump_column(os, column.m_data);

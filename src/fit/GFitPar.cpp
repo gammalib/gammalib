@@ -16,9 +16,6 @@
 #include "GException.hpp"
 #include "GFitPar.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 /* __ Method name definitions ____________________________________________ */
 //#define G_OP_MUL_VEC   "GSparseMatrix::operator* (const GVector&) const"
 
@@ -285,21 +282,21 @@ void GFitPar::free_members(void)
  *                             Output operator                             *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GFitPar& p)
+std::ostream& operator<< (std::ostream& os, const GFitPar& p)
 {
   // Put header in stream
-  os << "=== GFitPar ===" << endl;
+  os << "=== GFitPar ===" << std::endl;
   os << " Value .....................: " << p.m_value;
   if (p.m_free == 0)
-    os << " (fixed)" << endl;
+    os << " (fixed)" << std::endl;
   else
-    os << " (free)" << endl;
+    os << " (free)" << std::endl;
   if (p.m_has_error)
-    os << " Error .....................: " << p.m_error << endl;
+    os << " Error .....................: " << p.m_error << std::endl;
   if (p.m_has_min)
-    os << " Minimum boundary ..........: " << p.m_value_min << endl;
+    os << " Minimum boundary ..........: " << p.m_value_min << std::endl;
   if (p.m_has_max)
-    os << " Maximum boundary ..........: " << p.m_value_max << endl;
+    os << " Maximum boundary ..........: " << p.m_value_max << std::endl;
 
   // Return output stream
   return os;

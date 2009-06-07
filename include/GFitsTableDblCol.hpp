@@ -23,11 +23,6 @@
 #include "GFitsCfitsio.hpp"
 #include "GFitsTableCol.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
-
-/* __ Structures _________________________________________________________ */
-
 
 /***********************************************************************//**
  * @class GFitsTableDblCol
@@ -39,7 +34,7 @@
 class GFitsTableDblCol : public GFitsTableCol {
 
     // I/O friends
-    friend ostream& operator<< (ostream& os, const GFitsTableDblCol& column);
+    friend std::ostream& operator<< (std::ostream& os, const GFitsTableDblCol& column);
 
 public:
     // Constructors and destructors

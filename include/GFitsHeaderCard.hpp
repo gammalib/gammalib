@@ -22,8 +22,6 @@
 /* __ Includes ___________________________________________________________ */
 #include "GFitsCfitsio.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 
 /***********************************************************************//**
  * @class GFitsHeaderCard
@@ -40,7 +38,7 @@ class GFitsHeaderCard {
     friend class GFitsHeader;
 
     // I/O friends
-    friend ostream& operator<< (ostream& os, const GFitsHeaderCard& card);
+    friend std::ostream& operator<< (std::ostream& os, const GFitsHeaderCard& card);
 
 public:
     // Constructors & Destructors

@@ -18,8 +18,6 @@
 #include "GTools.hpp"
 #include "GSkyDir.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 /* __ Method name definitions ____________________________________________ */
 
 /* __ Macros _____________________________________________________________ */
@@ -410,7 +408,7 @@ void GSkyDir::gal2equ(void)
  * @param[in] os Output stream
  * @param[in] column Sky direction to put in output stream
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GSkyDir& dir)
+std::ostream& operator<< (std::ostream& os, const GSkyDir& dir)
 {
     // Create coordinate system dependent output
     if (dir.m_has_lb)

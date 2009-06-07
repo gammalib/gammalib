@@ -24,8 +24,6 @@
 #include "GFitsData.hpp"
 #include "GFitsTableCol.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 
 /* __ Structures _________________________________________________________ */
 
@@ -44,7 +42,7 @@ class GFitsTable : public GFitsData {
     friend class GFitsHDU;
 
     // I/O friends
-    friend ostream& operator<< (ostream& os, const GFitsTable& table);
+    friend std::ostream& operator<< (std::ostream& os, const GFitsTable& table);
 
 public:
     // Constructors and destructors

@@ -21,8 +21,6 @@
 
 /* __ Includes ___________________________________________________________ */
 
-/* __ Namespaces _________________________________________________________ */
-
 
 /***********************************************************************//**
  * @class GSkyDir
@@ -32,7 +30,7 @@
 class GSkyDir {
 
     // I/O friends
-    friend ostream& operator<< (ostream& os, const GSkyDir& dir);
+    friend std::ostream& operator<< (std::ostream& os, const GSkyDir& dir);
 
 public:
     // Constructors and destructors

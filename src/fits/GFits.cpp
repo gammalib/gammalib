@@ -18,8 +18,6 @@
 #include "GTools.hpp"
 #include <iostream>
 
-/* __ Namespaces _________________________________________________________ */
-
 /* __ Method name definitions ____________________________________________ */
 #define G_OPEN     "GFits::open(std::string)"
 #define G_SAVETO   "GFits::saveto(const std::string, int)"
@@ -428,7 +426,7 @@ GFitsHDU* GFits::hdu(int extno) const
 
     // Throw an error if HDU has not been found
     if (ptr == NULL) {
-        ostringstream s_extname;
+        std::ostringstream s_extname;
         s_extname << extno;
         std::string extname = "extno=" + s_extname.str();
         throw GException::fits_hdu_not_found(G_HDU2, extname);
@@ -558,17 +556,17 @@ void GFits::free_members(void)
  * @param os Output stream into which the FITS file will be dumped
  * @param fits FITS file to dump
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GFits& fits)
+std::ostream& operator<< (std::ostream& os, const GFits& fits)
 {
     // Put header in stream
-    os << "=== GFits ===" << endl;
-    os << " Filename ..................: " << fits.m_filename << endl;
+    os << "=== GFits ===" << std::endl;
+    os << " Filename ..................: " << fits.m_filename << std::endl;
     os << " Mode ......................: ";
     if (fits.m_readwrite)
-        os << "read/write" << endl;
+        os << "read/write" << std::endl;
     else
-        os << "read only" << endl;
-    os << " Number of HDUs ............: " << fits.m_num_hdu << endl;
+        os << "read only" << std::endl;
+    os << " Number of HDUs ............: " << fits.m_num_hdu << std::endl;
     for (int i = 0; i < fits.m_num_hdu; ++i)
         os << fits.m_hdu[i];
 

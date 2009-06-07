@@ -17,8 +17,6 @@
 #include "GException.hpp"
 #include "GFitsHeader.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 /* __ Method name definitions ____________________________________________ */
 #define G_CARD     "GFitsHeader::card(const int&)"
 #define G_CARD_PTR "GFitsHeader::card_ptr(const std::string&)"
@@ -552,10 +550,10 @@ void GFitsHeader::close(void)
  * @param[in] os Output stream
  * @param[in] header Header to put in output stream
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GFitsHeader& header)
+std::ostream& operator<< (std::ostream& os, const GFitsHeader& header)
 {
     // Put header in stream
-    os << "=== GFitsHeader (" << header.m_num_cards << " cards) ===" << endl;
+    os << "=== GFitsHeader (" << header.m_num_cards << " cards) ===" << std::endl;
     for (int i = 0; i < header.m_num_cards; ++i)
         os << " " << header.m_card[i];
 

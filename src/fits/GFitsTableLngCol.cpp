@@ -18,8 +18,6 @@
 #include "GTools.hpp"
 #include "GFitsTableLngCol.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 /* __ Method name definitions ____________________________________________ */
 #define G_STRING  "GFitsTableLngCol::string(const int&, const int&)"
 #define G_REAL    "GFitsTableLngCol::real(const int&, const int&)"
@@ -225,7 +223,7 @@ std::string GFitsTableLngCol::string(const int& row, const int& inx)
     int offset = row * m_number + inx;
 
     // Convert long into string
-    ostringstream s_value;
+    std::ostringstream s_value;
     s_value << m_data[offset];
 
     // Return value
@@ -548,7 +546,7 @@ void GFitsTableLngCol::fetch_data(void)
  * @param[in] os Output stream
  * @param[in] column Column to put in output stream
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GFitsTableLngCol& column)
+std::ostream& operator<< (std::ostream& os, const GFitsTableLngCol& column)
 {
     // Dump column in output stream
     column.dump_column(os, column.m_data);

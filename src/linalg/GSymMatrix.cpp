@@ -18,9 +18,6 @@
 #include "GSymMatrix.hpp"
 #include "GSparseMatrix.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 /* __ Method name definitions ____________________________________________ */
 #define G_CAST_MATRIX       "GSymMatrix::GSymMatrix(const GMatrix&)"
 #define G_CAST_SPARSEMATRIX "GSymMatrix::GSymMatrix(const GSparseMatrix&)"
@@ -917,22 +914,22 @@ void GSymMatrix::set_inx(void)
  *                             Output operator                             *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GSymMatrix& m)
+std::ostream& operator<< (std::ostream& os, const GSymMatrix& m)
 {
   // Put header in stream
-  os << "=== GSymMatrix ===" << endl;
+  os << "=== GSymMatrix ===" << std::endl;
   if (m.m_rowsel != NULL)
     os << " Number of rows ............: " << m.m_rows << " (compressed " <<
-	      m.m_num_rowsel << ")" << endl;
+	      m.m_num_rowsel << ")" << std::endl;
   else
-    os << " Number of rows ............: " << m.m_rows << endl;
+    os << " Number of rows ............: " << m.m_rows << std::endl;
   if (m.m_colsel != NULL)
     os << " Number of columns .........: " << m.m_cols << " (compressed " <<
-	      m.m_num_colsel << ")" << endl;
+	      m.m_num_colsel << ")" << std::endl;
   else
-    os << " Number of columns .........: " << m.m_cols << endl;
-  os << " Number of elements ........: " << m.m_elements << endl;
-  os << " Number of allocated cells .: " << m.m_alloc << endl;
+    os << " Number of columns .........: " << m.m_cols << std::endl;
+  os << " Number of elements ........: " << m.m_elements << std::endl;
+  os << " Number of allocated cells .: " << m.m_alloc << std::endl;
 
   // Dump elements and compression schemes
   m.dump_elements(os);

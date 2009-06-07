@@ -16,9 +16,6 @@
 #include "GException.hpp"
 #include "GVector.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 /* __ Method name definitions ____________________________________________ */
 #define G_COPY_MEMBERS    "GMatrixBase::copy_members(const GMatrixBase&)"
 #define G_SELECT_NON_ZERO "GMatrixBase::select_non_zero()"
@@ -330,7 +327,7 @@ double GMatrixBase::get_element_sum() const
  *                     Dump all matrix elements in ostream                 *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GMatrixBase::dump_elements(ostream& os) const
+void GMatrixBase::dump_elements(std::ostream& os) const
 {
   // Dump matrix elements row by row using the access function
   for (int row = 0; row < m_rows; ++row) {
@@ -341,7 +338,7 @@ void GMatrixBase::dump_elements(ostream& os) const
 	    os << ", ";
 	}
 	if (row != m_rows-1)
-	  os << endl;
+	  os << std::endl;
   }
   
   // Return
@@ -353,11 +350,11 @@ void GMatrixBase::dump_elements(ostream& os) const
  *           Dump row compression scheme in ostream if it exists           *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GMatrixBase::dump_row_comp(ostream& os) const
+void GMatrixBase::dump_row_comp(std::ostream& os) const
 {
   // If there is a row compression the show scheme
   if (m_rowsel != NULL) {
-    os << endl << " Row selection ..:";
+    os << std::endl << " Row selection ..:";
     for (int row = 0; row < m_num_rowsel; ++row)
       os << " " << m_rowsel[row];
   }
@@ -371,11 +368,11 @@ void GMatrixBase::dump_row_comp(ostream& os) const
  *           Dump column compression scheme in ostream if it exists        *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-void GMatrixBase::dump_col_comp(ostream& os) const
+void GMatrixBase::dump_col_comp(std::ostream& os) const
 {
   // If there is a column compression the show scheme
   if (m_colsel != NULL) {
-    os << endl << " Column selection:";
+    os << std::endl << " Column selection:";
     for (int col = 0; col < m_num_colsel; ++col)
       os << " " << m_colsel[col];
   }

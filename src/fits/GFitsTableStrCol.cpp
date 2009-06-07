@@ -18,8 +18,6 @@
 #include "GTools.hpp"
 #include "GFitsTableStrCol.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 /* __ Method name definitions ____________________________________________ */
 #define G_STRING  "GFitsTableStrCol::string(const int&, const int&)"
 #define G_REAL    "GFitsTableStrCol::real(const int&, const int&)"
@@ -627,7 +625,7 @@ void GFitsTableStrCol::free_buffer(void)
  * @param[in] os Output stream
  * @param[in] column Column to put in output stream
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GFitsTableStrCol& column)
+std::ostream& operator<< (std::ostream& os, const GFitsTableStrCol& column)
 {
     // Dump column in output stream
     column.dump_column(os, column.m_data);

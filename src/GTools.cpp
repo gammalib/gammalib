@@ -15,8 +15,6 @@
 #include <sstream>
 #include "GTools.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 
 /***********************************************************************//**
  * @brief Strip leading and trailing whitespace from string

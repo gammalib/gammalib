@@ -23,8 +23,6 @@
 #include "GFitsCfitsio.hpp"
 #include "GFitsHeaderCard.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 
 /***********************************************************************//**
  * @class GFitsHeader
@@ -43,7 +41,7 @@ class GFitsHeader {
     friend class GFitsHDU;
 
     // I/O friends
-    friend ostream& operator<< (ostream& os, const GFitsHeader& header);
+    friend std::ostream& operator<< (std::ostream& os, const GFitsHeader& header);
 
 public:
     // Constructors and destructors

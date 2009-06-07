@@ -17,9 +17,6 @@
 /* __ Includes ___________________________________________________________ */
 #include "GMatrixBase.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 
 /***************************************************************************
  *                       GSymMatrix class definition                       *
@@ -34,7 +31,7 @@ class GSymMatrix : public GMatrixBase {
   friend GSymMatrix operator/ (const GSymMatrix& a, const double& b);
 
   // I/O friends
-  friend ostream& operator<< (ostream& os, const GSymMatrix& m);
+  friend std::ostream& operator<< (std::ostream& os, const GSymMatrix& m);
 
   // Friend functions
   friend GSymMatrix transpose(const GSymMatrix& m);

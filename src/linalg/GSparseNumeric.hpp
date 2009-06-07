@@ -21,9 +21,6 @@
 #include "GSparseMatrix.hpp"
 #include "GSparseSymbolic.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 /* __ Definitions ________________________________________________________ */
 
 /* __ Enumerators ________________________________________________________ */
@@ -41,7 +38,7 @@ class GSparseNumeric {
   friend class GSparseMatrix;
 
   // I/O friends
-  friend ostream& operator<< (ostream& os, const GSparseNumeric& n);
+  friend std::ostream& operator<< (std::ostream& os, const GSparseNumeric& n);
 
 public:
   // Constructors and destructors

@@ -14,9 +14,6 @@
 /* __ Includes ___________________________________________________________ */
 #include "GSparseSymbolic.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 /* __ Macros _____________________________________________________________ */
 #define CS_MIN(a,b) (((a) < (b)) ? (a) : (b))
 #define CS_MAX(a,b) (((a) > (b)) ? (a) : (b))
@@ -1479,47 +1476,47 @@ int GSparseSymbolic::cs_wclear(int mark, int lemax, int* w, int n)
 /***************************************************************************
  *                             Output operator                             *
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GSparseSymbolic& s)
+std::ostream& operator<< (std::ostream& os, const GSparseSymbolic& s)
 {
   // Put header is stream
   os << "=== GSparseSymbolic ===";
   
   // Show inverse permutation if it exists
   if (s.m_pinv != NULL) {
-    os << endl << " Inverse permutation (of " << s.m_n_pinv << " elements)" << 
-	   endl;
+    os << std::endl << " Inverse permutation (of " << s.m_n_pinv << " elements)" << 
+	   std::endl;
 	for (int i = 0; i < s.m_n_pinv; ++i)
 	  os << " " << s.m_pinv[i];
   } 
 
   // Show fill reducing column permutation if it exists
   if (s.m_q != NULL) {
-    os << endl << " Fill reducing column permutation (" << s.m_n_cp << 
-	   " elements)" << endl;
+    os << std::endl << " Fill reducing column permutation (" << s.m_n_cp << 
+	   " elements)" << std::endl;
 	for (int i = 0; i < s.m_n_cp; ++i)
 	  os << " " << s.m_q[i];
   } 
 
   // Show elimination tree for Cholesky and QR if it exists
   if (s.m_parent != NULL) {
-    os << endl << " Elimination tree (" << s.m_n_parent << " elements)" << 
-	   endl;
+    os << std::endl << " Elimination tree (" << s.m_n_parent << " elements)" << 
+	   std::endl;
 	for (int i = 0; i < s.m_n_parent; ++i)
 	  os << " " << s.m_parent[i];
   } 
 
   // Show column pointers for Cholesky row counts for QR if it exists
   if (s.m_cp != NULL) {
-    os << endl << " Cholesky column pointers/QR row counts (" << s.m_n_cp << 
-	   " elements)" << endl;
+    os << std::endl << " Cholesky column pointers/QR row counts (" << s.m_n_cp << 
+	   " elements)" << std::endl;
 	for (int i = 0; i < s.m_n_cp; ++i)
 	  os << " " << s.m_cp[i];
   } 
 
   // Show leftmost[i] = min(find(A(i,:))) if it exists
   if (s.m_leftmost != NULL) {
-    os << endl << " leftmost[i] = min(find(A(i,:))) (" << s.m_n_leftmost << 
-	   " elements)" << endl;
+    os << std::endl << " leftmost[i] = min(find(A(i,:))) (" << s.m_n_leftmost << 
+	   " elements)" << std::endl;
 	for (int i = 0; i < s.m_n_leftmost; ++i)
 	  os << " " << s.m_leftmost[i];
   } 

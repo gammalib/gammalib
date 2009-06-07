@@ -14,9 +14,6 @@
 /* __ Includes ___________________________________________________________ */
 #include "GVector.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 
 /*==========================================================================
  =                                                                         =
@@ -154,7 +151,7 @@ int GVector::non_zeros() const
 /***************************************************************************
  *                          GVector output operator                        *
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GVector& v)
+std::ostream& operator<< (std::ostream& os, const GVector& v)
 {
   for (int i = 0; i < v.m_num; ++i) {
     os << v(i);

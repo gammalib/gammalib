@@ -17,9 +17,6 @@
 /* __ Includes ___________________________________________________________ */
 #include "GMatrixBase.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 /* __ Definitions ________________________________________________________ */
 #define G_SPARSE_MATRIX_DEFAULT_MEM_BLOCK      512  // Default Memory block size
 #define G_SPARSE_MATRIX_DEFAULT_STACK_ENTRIES 1000  // Max # of stack entries
@@ -43,7 +40,7 @@ class GSparseMatrix : public GMatrixBase {
   friend GSparseMatrix operator/ (const GSparseMatrix& a, const double& b);
 
   // I/O friends
-  friend ostream& operator<< (ostream& os, const GSparseMatrix& m);
+  friend std::ostream& operator<< (std::ostream& os, const GSparseMatrix& m);
 
   // Friend functions
   friend GSparseMatrix transpose(const GSparseMatrix& m);

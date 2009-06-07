@@ -24,8 +24,6 @@
 #include "GTools.hpp"
 #include "GHealpix.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT    "GHealpix::GHealpix(int,int,int,int)"
 #define G_OP_ACCESS    "GHealpix::operator(int,int)"
@@ -995,33 +993,33 @@ int GHealpix::ang2pix_z_phi_nest(double z, double phi) const
  * @param[in] os Output stream
  * @param[in] column Healpix array to put in output stream
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GHealpix& pixels)
+std::ostream& operator<< (std::ostream& os, const GHealpix& pixels)
 {
     // Put header in stream
-    os << "=== GHealpix ===" << endl;
-    os << " Nside (number of divisions): " << pixels.m_nside << endl;
-    os << " Npface (pixels per face) ..: " << pixels.m_npface << endl;
-    os << " Ncap (number of cap pixels): " << pixels.m_ncap << endl;
-    os << " Npix (number of pixels) ...: " << pixels.m_num_pixels << endl;
-    os << " Order .....................: " << pixels.m_order << endl;
-    os << " Pixel vector size .........: " << pixels.m_size_pixels << endl;
-    os << " Solid angle ...............: " << scientific << pixels.m_omega 
-       << fixed << " sr" << endl;
+    os << "=== GHealpix ===" << std::endl;
+    os << " Nside (number of divisions): " << pixels.m_nside << std::endl;
+    os << " Npface (pixels per face) ..: " << pixels.m_npface << std::endl;
+    os << " Ncap (number of cap pixels): " << pixels.m_ncap << std::endl;
+    os << " Npix (number of pixels) ...: " << pixels.m_num_pixels << std::endl;
+    os << " Order .....................: " << pixels.m_order << std::endl;
+    os << " Pixel vector size .........: " << pixels.m_size_pixels << std::endl;
+    os << " Solid angle ...............: " << std::scientific << pixels.m_omega 
+       << std::fixed << " sr" << std::endl;
 
     // Put ordering in stream
     os << " Ordering ..................: ";
     switch (pixels.m_scheme) {
     case 0:
-        os << "Ring" << endl;
+        os << "Ring" << std::endl;
         break;
     case 1:
-        os << "Nested" << endl;
+        os << "Nested" << std::endl;
         break;
     case -1:
-        os << "*** Unknown ***" << endl;
+        os << "*** Unknown ***" << std::endl;
         break;
     default:
-        os << "*** Invalid ***" << endl;
+        os << "*** Invalid ***" << std::endl;
         break;
     }
 

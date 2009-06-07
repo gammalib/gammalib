@@ -17,9 +17,6 @@
 /* __ Includes ___________________________________________________________ */
 #include "GMatrixBase.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 
 /***************************************************************************
  *                         GMatrix class definition                        *
@@ -34,7 +31,7 @@ class GMatrix : public GMatrixBase {
   friend GMatrix operator/ (const GMatrix& a, const double& b);
 
   // I/O friends
-  friend ostream& operator<< (ostream& os, const GMatrix& m);
+  friend std::ostream& operator<< (std::ostream& os, const GMatrix& m);
 
   // Friend functions
   friend GMatrix transpose(const GMatrix& m);

@@ -18,8 +18,6 @@
 #include "GTools.hpp"
 #include "GFitsHeaderCard.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 /* __ Method name definitions ____________________________________________ */
 #define G_READ_NUM   "GFitsHeaderCard::read(fitsfile*, int)"
 #define G_READ_STR   "GFitsHeaderCard::read(fitsfile*, std::string)"
@@ -258,8 +256,8 @@ void GFitsHeaderCard::value(const std::string& value)
 void GFitsHeaderCard::value(const double& value)
 {
     // Convert value to string
-    ostringstream s_value;
-    s_value << scientific << value;
+    std::ostringstream s_value;
+    s_value << std::scientific << value;
 
     // Assign value
     m_value = s_value.str();
@@ -280,7 +278,7 @@ void GFitsHeaderCard::value(const double& value)
 void GFitsHeaderCard::value(const int& value)
 {
     // Convert value to string
-    ostringstream s_value;
+    std::ostringstream s_value;
     s_value << value;
 
     // Assign value
@@ -756,7 +754,7 @@ void GFitsHeaderCard::write(__fitsfile* fptr)
  * @param[in] os Output stream
  * @param[in] card Card that should be put in output stream
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GFitsHeaderCard& card)
+std::ostream& operator<< (std::ostream& os, const GFitsHeaderCard& card)
 {
     // Set buffer
     char buffer[100];
@@ -794,31 +792,31 @@ ostream& operator<< (ostream& os, const GFitsHeaderCard& card)
     // Attach card type
     switch (card.m_value_type) {
     case CT_UNKNOWN:
-        os << " <type unknown>" << endl;
+        os << " <type unknown>" << std::endl;
         break;
     case CT_INVALID:
-        os << " <invalid type>" << endl;
+        os << " <invalid type>" << std::endl;
         break;
     case CT_STRING:
-        os << " <string>" << endl;
+        os << " <string>" << std::endl;
         break;
     case CT_INT:
-        os << " <int>" << endl;
+        os << " <int>" << std::endl;
         break;
     case CT_FLOAT:
-        os << " <float>" << endl;
+        os << " <float>" << std::endl;
         break;
     case CT_BOOL:
-        os << " <boolean>" << endl;
+        os << " <boolean>" << std::endl;
         break;
     case CT_COMMENT:
-        os << " <comment>" << endl;
+        os << " <comment>" << std::endl;
         break;
     case CT_HISTORY:
-        os << " <history>" << endl;
+        os << " <history>" << std::endl;
         break;
     default:
-        os << endl;
+        os << std::endl;
         break;
     }
 

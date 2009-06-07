@@ -17,8 +17,6 @@
 #include "GException.hpp"
 #include "GFitsImage.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 /* __ Method name definitions ____________________________________________ */
 #define G_NAXES      "GFitsImage::naxes(int)"
 #define G_OPEN_IMAGE "GFitsImage::open(fitsfile*)"
@@ -436,14 +434,14 @@ void GFitsImage::save_image(int datatype, const void* pixels)
  * @param os Output stream into which the result will be writted
  * @param image FITS image which should be put in the output stream
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GFitsImage& image)
+std::ostream& operator<< (std::ostream& os, const GFitsImage& image)
 {
     // Put header in stream
-    os << "=== GFitsImage ===" << endl;
-    os << " Number of dimensions ......: " << image.m_naxis << endl;
-    os << " Number of image pixels ....: " << image.m_num_pixels << endl;
+    os << "=== GFitsImage ===" << std::endl;
+    os << " Number of dimensions ......: " << image.m_naxis << std::endl;
+    os << " Number of image pixels ....: " << image.m_num_pixels << std::endl;
     for (int i = 0; i < image.m_naxis; ++i)
-        os << " Number of bins in " << i << " .......: " << image.m_naxes[i] << endl;
+        os << " Number of bins in " << i << " .......: " << image.m_naxes[i] << std::endl;
 
     // Return output stream
     return os;

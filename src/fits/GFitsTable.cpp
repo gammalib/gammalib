@@ -24,8 +24,6 @@
 #include "GFitsTableFltCol.hpp"
 #include "GFitsTableDblCol.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 /* __ Method name definitions ____________________________________________ */
 #define G_OPEN          "GFitsTable::open(fitsfile*)"
 #define G_SAVE          "GFitsTable::save()"
@@ -902,62 +900,62 @@ char* GFitsTable::get_tunit(const int& colnum) const
  * @param[in] os Output stream
  * @param[in] table Table to put in output stream
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GFitsTable& table)
+std::ostream& operator<< (std::ostream& os, const GFitsTable& table)
 {
     // Put header in stream
-    os << "=== GFitsTable ===" << endl;
+    os << "=== GFitsTable ===" << std::endl;
     os << " Table type ................: ";
     switch (table.m_type) {
     case 1:
-        os << "ASCII table" << endl;
+        os << "ASCII table" << std::endl;
         break;
     case 2:
-        os << "Binary table" << endl;
+        os << "Binary table" << std::endl;
         break;
     default:
-        os << "Unknown" << endl;
+        os << "Unknown" << std::endl;
         break;
     }
-    os << " Number of rows ............: " << table.m_rows << endl;
-    os << " Number of columns .........: " << table.m_cols << endl;
+    os << " Number of rows ............: " << table.m_rows << std::endl;
+    os << " Number of columns .........: " << table.m_cols << std::endl;
     if (table.m_columns != NULL) {
         for (int i = 0; i < table.m_cols; ++i) {
             if (table.m_columns[i] != NULL) {
                 switch (table.m_columns[i]->type()) {
                 case __TLOGICAL:
                     os << " " << *((GFitsTableLogCol*)table.m_columns[i]) 
-                       << endl;
+                       << std::endl;
                     break;
                 case __TSTRING:
                     os << " " << *((GFitsTableStrCol*)table.m_columns[i]) 
-                       << endl;
+                       << std::endl;
                     break;
                 case __TSHORT:
                     os << " " << *((GFitsTableShtCol*)table.m_columns[i]) 
-                       << endl;
+                       << std::endl;
                     break;
                 case __TLONG:
                     os << " " << *((GFitsTableLngCol*)table.m_columns[i]) 
-                       << endl;
+                       << std::endl;
                     break;
                 case __TFLOAT:
                     os << " " << *((GFitsTableFltCol*)table.m_columns[i]) 
-                       << endl;
+                       << std::endl;
                     break;
                 case __TDOUBLE:
                     os << " " << *((GFitsTableDblCol*)table.m_columns[i]) 
-                       << endl;
+                       << std::endl;
                     break;
                 default:
                     break;
                 }
             }
             else
-                os << " column " << i << " undefined" << endl;
+                os << " column " << i << " undefined" << std::endl;
         }
     }
     else
-        os << " table columns undefined" << endl;
+        os << " table columns undefined" << std::endl;
 
     // Return output stream
     return os;

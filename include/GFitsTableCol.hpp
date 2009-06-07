@@ -22,8 +22,6 @@
 /* __ Includes ___________________________________________________________ */
 #include "GFitsCfitsio.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 
 /***********************************************************************//**
  * @class GFitsTableCol
@@ -96,7 +94,7 @@ protected:
     // Protected methods
     void load_column(void);
     void save_column(void);
-    void dump_column(ostream& os, void* data) const;
+    void dump_column(std::ostream& os, void* data) const;
 
 private:
     // Private methods

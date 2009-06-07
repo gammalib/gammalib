@@ -20,9 +20,6 @@
 #include "GMatrix.hpp"
 #include "GSparseMatrix.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 /* __ Definitions ________________________________________________________ */
 
 /* __ Enumerators ________________________________________________________ */
@@ -43,7 +40,7 @@ class GSparseSymbolic {
   // Binary operator friends
 
   // I/O friends
-  friend ostream& operator<< (ostream& os, const GSparseSymbolic& s);
+  friend std::ostream& operator<< (std::ostream& os, const GSparseSymbolic& s);
 
   // Friend functions
 

@@ -15,23 +15,20 @@
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 
 /***************************************************************************
  *                       Private conversion functions                      *
  ***************************************************************************/
 std::string str(int value)
 {
-    ostringstream s_value;
+    std::ostringstream s_value;
     s_value << value;
     return  s_value.str();
 }
 std::string str(double value)
 {
-    ostringstream s_value;
-    s_value << scientific << value;
+    std::ostringstream s_value;
+    s_value << std::scientific << value;
     return  s_value.str();
 }
 
@@ -41,7 +38,7 @@ std::string str(double value)
  ***************************************************************************/
 const char* GExceptionHandler::what() const throw()
 {
-    string message = "*** ERROR in " + m_origin + ": " + m_message;
+    std::string message = "*** ERROR in " + m_origin + ": " + m_message;
     return message.c_str();
 }
 
@@ -49,7 +46,7 @@ const char* GExceptionHandler::what() const throw()
 /***************************************************************************
  *                        Memory allocation exception                      *
  ***************************************************************************/
-GException::mem_alloc::mem_alloc(string origin, unsigned num)
+GException::mem_alloc::mem_alloc(std::string origin, unsigned num)
 {
     m_origin  = origin;
     m_message = "Memory allocation error (" + str((int)num) + " elements)";
@@ -59,7 +56,7 @@ GException::mem_alloc::mem_alloc(string origin, unsigned num)
 /***************************************************************************
  *                           Empty object exception                        *
  ***************************************************************************/
-GException::empty::empty(string origin)
+GException::empty::empty(std::string origin)
 {
     m_origin  = origin;
     m_message = "Zero-size allocation";
@@ -69,7 +66,7 @@ GException::empty::empty(string origin)
 /***************************************************************************
  *                            Index out of range                           *
  ***************************************************************************/
-GException::out_of_range::out_of_range(string origin, int inx, int min, int max)
+GException::out_of_range::out_of_range(std::string origin, int inx, int min, int max)
 {
     m_origin  = origin;
     m_message = "Index (" + str(inx) + ") out of range [" + str(min) +
@@ -80,7 +77,7 @@ GException::out_of_range::out_of_range(string origin, int inx, int min, int max)
 /***************************************************************************
  *                          Vector index out of range                      *
  ***************************************************************************/
-GException::out_of_range::out_of_range(string origin, int inx, int elements)
+GException::out_of_range::out_of_range(std::string origin, int inx, int elements)
 {
     m_origin = origin;
     if (elements > 0) {
@@ -96,7 +93,7 @@ GException::out_of_range::out_of_range(string origin, int inx, int elements)
 /***************************************************************************
  *                      Matrix row or column out of range                  *
  ***************************************************************************/
-GException::out_of_range::out_of_range(string origin, int row, int col, int rows, int cols)
+GException::out_of_range::out_of_range(std::string origin, int row, int col, int rows, int cols)
 {
     m_origin  = origin;
     m_message = "Matrix element (" + str(row) + "," + str(col) +
@@ -108,7 +105,7 @@ GException::out_of_range::out_of_range(string origin, int row, int col, int rows
 /***************************************************************************
  *                          Vector dimensions differ                       *
  ***************************************************************************/
-GException::vector_mismatch::vector_mismatch(string origin, int size1, int size2)
+GException::vector_mismatch::vector_mismatch(std::string origin, int size1, int size2)
 {
     m_origin  = origin;
     m_message = "Vector dimensions differ (" + str(size1) + " <-> " +
@@ -119,7 +116,7 @@ GException::vector_mismatch::vector_mismatch(string origin, int size1, int size2
 /***************************************************************************
  *                   Invalid vector dimension for cross product            *
  ***************************************************************************/
-GException::vector_bad_cross_dim::vector_bad_cross_dim(string origin, int elements)
+GException::vector_bad_cross_dim::vector_bad_cross_dim(std::string origin, int elements)
 {
     m_origin  = origin;
     m_message = "Vector cross product only defined for 3 dimensions but vector size is " + 
@@ -130,7 +127,10 @@ GException::vector_bad_cross_dim::vector_bad_cross_dim(string origin, int elemen
 /***************************************************************************
  *                     Mismatch between matrix and vector                  *
  ***************************************************************************/
-GException::matrix_vector_mismatch::matrix_vector_mismatch(string origin, int num, int rows, int cols)
+GException::matrix_vector_mismatch::matrix_vector_mismatch(std::string origin, 
+                                                           int         num, 
+														   int         rows,
+														   int         cols)
 {
     m_origin  = origin;
     m_message = "Vector dimension [" + str(num) + 
@@ -142,7 +142,7 @@ GException::matrix_vector_mismatch::matrix_vector_mismatch(string origin, int nu
 /***************************************************************************
  *                       Matrix mismatch in operation                      *
  ***************************************************************************/
-GException::matrix_mismatch::matrix_mismatch(string origin, int rows1, int cols1, int rows2, int cols2)
+GException::matrix_mismatch::matrix_mismatch(std::string origin, int rows1, int cols1, int rows2, int cols2)
 {
     m_origin  = origin;
     m_message = "Matrix mismatch: M1(" + str(rows1) + "," + str(cols1) +
@@ -153,7 +153,7 @@ GException::matrix_mismatch::matrix_mismatch(string origin, int rows1, int cols1
 /***************************************************************************
  *                           Matrix not rectangular                        *
  ***************************************************************************/
-GException::matrix_not_rectangular::matrix_not_rectangular(string origin, int rows, int cols)
+GException::matrix_not_rectangular::matrix_not_rectangular(std::string origin, int rows, int cols)
 {
     m_origin  = origin;
     m_message = "Matrix is not rectangular [" + str(rows) + "," + str(cols) + "]";
@@ -163,7 +163,7 @@ GException::matrix_not_rectangular::matrix_not_rectangular(string origin, int ro
 /***************************************************************************
  *                     Matrix is not positive definite                     *
  ***************************************************************************/
-GException::matrix_not_pos_definite::matrix_not_pos_definite(string origin, int row, double sum)
+GException::matrix_not_pos_definite::matrix_not_pos_definite(std::string origin, int row, double sum)
 {
     m_origin  = origin;
     m_message = "Matrix is not positive definite (sum " + str(sum) + 
@@ -174,7 +174,9 @@ GException::matrix_not_pos_definite::matrix_not_pos_definite(string origin, int 
 /***************************************************************************
  *                         Matrix is not symmetric                         *
  ***************************************************************************/
-GException::matrix_not_symmetric::matrix_not_symmetric(string origin, int cols, int rows)
+GException::matrix_not_symmetric::matrix_not_symmetric(std::string origin, 
+                                                       int         cols, 
+													   int         rows)
 {
     m_origin  = origin;
     m_message = "Matrix is not symmetric [" + str(rows) + "," + str(cols) + "]";
@@ -184,7 +186,8 @@ GException::matrix_not_symmetric::matrix_not_symmetric(string origin, int cols, 
 /***************************************************************************
  *                       Matrix has not been factorised                    *
  ***************************************************************************/
-GException::matrix_not_factorised::matrix_not_factorised(string origin, string type)
+GException::matrix_not_factorised::matrix_not_factorised(std::string origin, 
+                                                         std::string type)
 {
     m_origin  = origin;
     m_message = "Matrix has not been factorised using " + type;
@@ -194,7 +197,7 @@ GException::matrix_not_factorised::matrix_not_factorised(string origin, string t
 /***************************************************************************
  *                       All matrix elements are zero                      *
  ***************************************************************************/
-GException::matrix_zero::matrix_zero(string origin)
+GException::matrix_zero::matrix_zero(std::string origin)
 {
     m_origin = origin;
     m_message = "All matrix elements are zero";
@@ -204,7 +207,7 @@ GException::matrix_zero::matrix_zero(string origin)
 /***************************************************************************
  *                     Invalid ordering scheme requested                   *
  ***************************************************************************/
-GException::invalid_order::invalid_order(string origin, int order, int min_order, int max_order)
+GException::invalid_order::invalid_order(std::string origin, int order, int min_order, int max_order)
 {
     m_origin  = origin;
     m_message = "Invalid ordering type " + str(order) + 
@@ -219,10 +222,10 @@ GException::invalid_order::invalid_order(string origin, int order, int min_order
  * @param[in] origin Method that throws the error.
  * @param[in] status cfitsio status.
  ***************************************************************************/
-GException::fits_error::fits_error(string origin, int status)
+GException::fits_error::fits_error(std::string origin, int status)
 {
     m_origin  = origin;
-    ostringstream s_error;
+    std::ostringstream s_error;
     char err_text[31];
     __ffgerr(status, err_text);
     s_error << err_text << " (status=" << status << ")";
@@ -237,9 +240,9 @@ GException::fits_error::fits_error(string origin, int status)
  * @param[in] filename Name of the file for which opening was attempted.
  * @param[in] status cfitsio status.
  ***************************************************************************/
-GException::fits_open_error::fits_open_error(string origin,
-                                             string filename,
-                                             int    status)
+GException::fits_open_error::fits_open_error(std::string origin,
+                                             std::string filename,
+                                             int         status)
 {
     m_origin  = origin;
     m_message = "Unable to open FITS file '" + filename + "'";
@@ -255,9 +258,9 @@ GException::fits_open_error::fits_open_error(string origin,
  * @param[in] filename Name of the file for which overwrite attempt was made.
  * @param[in] status cfitsio status.
  ***************************************************************************/
-GException::fits_file_exist::fits_file_exist(string origin,
-                                             string filename,
-                                             int    status)
+GException::fits_file_exist::fits_file_exist(std::string origin,
+                                             std::string filename,
+                                             int         status)
 {
     m_origin  = origin;
     m_message = "Attempted to overwrite FITS file '" + filename + "'";
@@ -272,8 +275,8 @@ GException::fits_file_exist::fits_file_exist(string origin,
  * @param[in] origin Method that throws the error.
  * @param[in] filename Name of file that is already open.
  ***************************************************************************/
-GException::fits_already_opened::fits_already_opened(string origin,
-                                                     string filename)
+GException::fits_already_opened::fits_already_opened(std::string origin,
+                                                     std::string filename)
 {
     m_origin  = origin;
     m_message = "FITS file '" + filename + "' is already open";
@@ -287,9 +290,9 @@ GException::fits_already_opened::fits_already_opened(string origin,
  * @param[in] keyname Name of keyword that was not found.
  * @param[in] status cfitsio status.
  ***************************************************************************/
-GException::fits_key_not_found::fits_key_not_found(string origin,
-                                                   string keyname,
-                                                   int    status)
+GException::fits_key_not_found::fits_key_not_found(std::string origin,
+                                                   std::string keyname,
+                                                   int         status)
 {
     m_origin  = origin;
     m_message = "Keyword '" + keyname + "' not found in header";
@@ -305,9 +308,9 @@ GException::fits_key_not_found::fits_key_not_found(string origin,
  * @param[in] colname Name of the table column that was not found.
  * @param[in] status cfitsio status.
  ***************************************************************************/
-GException::fits_column_not_found::fits_column_not_found(string origin,
-                                                         string colname,
-                                                         int    status)
+GException::fits_column_not_found::fits_column_not_found(std::string origin,
+                                                         std::string colname,
+                                                         int         status)
 {
     m_origin  = origin;
     m_message = "Column '" + colname + "' not found in table";
@@ -323,9 +326,9 @@ GException::fits_column_not_found::fits_column_not_found(string origin,
  * @param[in] message Error message.
  * @param[in] status cfitsio status.
  ***************************************************************************/
-GException::fits_no_header::fits_no_header(string origin,
-                                           string message,
-                                           int    status)
+GException::fits_no_header::fits_no_header(std::string origin,
+                                           std::string message,
+                                           int         status)
 {
     m_origin  = origin;
     m_message = message;
@@ -341,9 +344,9 @@ GException::fits_no_header::fits_no_header(string origin,
  * @param[in] message Error message.
  * @param[in] status cfitsio status.
  ***************************************************************************/
-GException::fits_no_data::fits_no_data(string origin,
-                                       string message,
-                                       int    status)
+GException::fits_no_data::fits_no_data(std::string origin,
+                                       std::string message,
+                                       int         status)
 {
     m_origin  = origin;
     m_message = message;
@@ -359,9 +362,9 @@ GException::fits_no_data::fits_no_data(string origin,
  * @param[in] extname Name of the extension that was not found.
  * @param[in] status cfitsio status.
  ***************************************************************************/
-GException::fits_hdu_not_found::fits_hdu_not_found(string origin,
-                                                   string extname,
-                                                   int    status)
+GException::fits_hdu_not_found::fits_hdu_not_found(std::string origin,
+                                                   std::string extname,
+                                                   int         status)
 {
     m_origin  = origin;
     m_message = "HDU '" + extname + "' not found in FITS file";
@@ -377,9 +380,9 @@ GException::fits_hdu_not_found::fits_hdu_not_found(string origin,
  * @param[in] extno Number of the extension that was not found.
  * @param[in] status cfitsio status.
  ***************************************************************************/
-GException::fits_hdu_not_found::fits_hdu_not_found(string origin,
-                                                   int    extno,
-                                                   int    status)
+GException::fits_hdu_not_found::fits_hdu_not_found(std::string origin,
+                                                   int         extno,
+                                                   int         status)
 {
     m_origin  = origin;
     m_message = "HDU number '" + str(extno) + "' not found in FITS file";
@@ -394,8 +397,8 @@ GException::fits_hdu_not_found::fits_hdu_not_found(string origin,
  * @param[in] origin Method that throws the error.
  * @param[in] type Specified HDU type.
  ***************************************************************************/
-GException::fits_unknown_HDU_type::fits_unknown_HDU_type(string origin,
-                                                         int    type)
+GException::fits_unknown_HDU_type::fits_unknown_HDU_type(std::string origin,
+                                                         int         type)
 {
     m_origin  = origin;
     m_message = "HDU type '" + str(type) + "' is not known";
@@ -408,8 +411,8 @@ GException::fits_unknown_HDU_type::fits_unknown_HDU_type(string origin,
  * @param[in] origin Method that throws the error.
  * @param[in] type Specified HDU type.
  ***************************************************************************/
-GException::fits_HDU_not_a_table::fits_HDU_not_a_table(string origin,
-                                                       int    type)
+GException::fits_HDU_not_a_table::fits_HDU_not_a_table(std::string origin,
+                                                       int         type)
 {
     m_origin  = origin;
     m_message = "HDU is not of type 'table' (type=" + str(type) + ")";
@@ -422,8 +425,8 @@ GException::fits_HDU_not_a_table::fits_HDU_not_a_table(string origin,
  * @param[in] origin Method that throws the error.
  * @param[in] message Error message.
  ***************************************************************************/
-GException::fits_invalid_type::fits_invalid_type(string origin,
-                                                 string message)
+GException::fits_invalid_type::fits_invalid_type(std::string origin,
+                                                 std::string message)
 {
     m_origin  = origin;
     m_message = message;
@@ -436,8 +439,8 @@ GException::fits_invalid_type::fits_invalid_type(string origin,
  * @param[in] origin Method that throws the error.
  * @param[in] type Specified table type.
  ***************************************************************************/
-GException::fits_unknown_tabtype::fits_unknown_tabtype(string origin,
-                                                       int    type)
+GException::fits_unknown_tabtype::fits_unknown_tabtype(std::string origin,
+                                                       int         type)
 {
     m_origin  = origin;
     m_message = "Table type '" + str(type) + "' is unknown";
@@ -450,8 +453,8 @@ GException::fits_unknown_tabtype::fits_unknown_tabtype(string origin,
  * @param[in] origin Method that throws the error.
  * @param[in] type Specified column type.
  ***************************************************************************/
-GException::fits_unknown_coltype::fits_unknown_coltype(string origin,
-                                                       int    type)
+GException::fits_unknown_coltype::fits_unknown_coltype(std::string origin,
+                                                       int         type)
 {
     m_origin  = origin;
     m_message = "Column type '" + str(type) + "' is unknown";
@@ -465,9 +468,9 @@ GException::fits_unknown_coltype::fits_unknown_coltype(string origin,
  * @param[in] length Length of the column.
  * @param[in] rows Number of rows in table.
  ***************************************************************************/
-GException::fits_bad_col_length::fits_bad_col_length(string origin,
-                                                     int    length,
-                                                     int    rows)
+GException::fits_bad_col_length::fits_bad_col_length(std::string origin,
+                                                     int         length,
+                                                     int         rows)
 {
     m_origin  = origin;
     m_message = "Column length '" + str(length) + "' is not compatible"
@@ -482,8 +485,8 @@ GException::fits_bad_col_length::fits_bad_col_length(string origin,
  * @param[in] origin Method that throws the error.
  * @param[in] bitpix Bitpix value that was not 8,16,32,64,-32, or -64.
  ***************************************************************************/
-GException::fits_bad_bitpix::fits_bad_bitpix(string origin,
-                                             int    bitpix)
+GException::fits_bad_bitpix::fits_bad_bitpix(std::string origin,
+                                             int         bitpix)
 {
     m_origin  = origin;
     m_message = "Invalid number of bits per pixel (bitpix="+str(bitpix)+")";
@@ -497,9 +500,9 @@ GException::fits_bad_bitpix::fits_bad_bitpix(string origin,
  * @param[in] naxis Dimension of image.
  * @param[in] nargs Number of arguments of the image operator.
  ***************************************************************************/
-GException::fits_wrong_image_operator::fits_wrong_image_operator(string origin,
-                                                                 int    naxis,
-                                                                 int    nargs)
+GException::fits_wrong_image_operator::fits_wrong_image_operator(std::string origin,
+                                                                 int         naxis,
+                                                                 int         nargs)
 {
     m_origin  = origin;
     m_message = "Wrong image pixel access operator has been used (dimension=" +
@@ -513,8 +516,8 @@ GException::fits_wrong_image_operator::fits_wrong_image_operator(string origin,
  * @param[in] origin Method that throws the error.
  * @param[in] type Specified response type.
  ***************************************************************************/
-GException::rsp_invalid_type::rsp_invalid_type(string origin,
-                                               string type)
+GException::rsp_invalid_type::rsp_invalid_type(std::string origin,
+                                               std::string type)
 {
     m_origin  = origin;
     m_message = "Invalid response type '"+type+"' specified";
@@ -527,7 +530,8 @@ GException::rsp_invalid_type::rsp_invalid_type(string origin,
  * @param[in] origin Method that throws the error.
  * @param[in] message Error message.
  ***************************************************************************/
-GException::healpix::healpix(string origin, string message)
+GException::healpix::healpix(std::string origin, 
+                             std::string message)
 {
     m_origin  = origin;
     m_message = message;
@@ -540,7 +544,8 @@ GException::healpix::healpix(string origin, string message)
  * @param[in] origin Method that throws the error.
  * @param[in] nside Specified nside parameter.
  ***************************************************************************/
-GException::healpix_bad_nside::healpix_bad_nside(string origin, int nside)
+GException::healpix_bad_nside::healpix_bad_nside(std::string origin, 
+                                                 int         nside)
 {
     m_origin  = origin;
     m_message = "Invalid nside "+str(nside)+" parameter (should be one of "
@@ -554,7 +559,8 @@ GException::healpix_bad_nside::healpix_bad_nside(string origin, int nside)
  * @param[in] origin Method that throws the error.
  * @param[in] scheme Specified scheme.
  ***************************************************************************/
-GException::healpix_bad_scheme::healpix_bad_scheme(string origin, string scheme)
+GException::healpix_bad_scheme::healpix_bad_scheme(std::string origin, 
+                                                   std::string scheme)
 {
     m_origin  = origin;
     m_message = "Invalid scheme '"+scheme+"' (should be either 'RING' or 'NESTED').";
@@ -567,7 +573,8 @@ GException::healpix_bad_scheme::healpix_bad_scheme(string origin, string scheme)
  * @param[in] origin Method that throws the error.
  * @param[in] coordsys Specified coordinate system.
  ***************************************************************************/
-GException::healpix_bad_coords::healpix_bad_coords(string origin, string coordsys)
+GException::healpix_bad_coords::healpix_bad_coords(std::string origin, 
+                                                   std::string coordsys)
 {
     m_origin  = origin;
     m_message = "Invalid coordinate system '"+coordsys +

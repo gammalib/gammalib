@@ -27,8 +27,6 @@
 #include "GFitsAsciiTable.hpp"
 #include "GFitsBinTable.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 
 /***********************************************************************//**
  * @class GFitsHDU
@@ -46,7 +44,7 @@ class GFitsHDU {
     friend class GFits;
 
     // I/O friends
-    friend ostream& operator<< (ostream& os, const GFitsHDU& hdu);
+    friend std::ostream& operator<< (std::ostream& os, const GFitsHDU& hdu);
 
 public:
     // Constructors and destructors

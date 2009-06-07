@@ -26,8 +26,6 @@
 #include "GFitsTableDblCol.hpp"
 #include "GSkyDir.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 
 /***********************************************************************//**
  * @class GHealpix
@@ -37,7 +35,7 @@
 class GHealpix {
 
     // I/O friends
-    friend ostream& operator<< (ostream& os, const GHealpix& pixels);
+    friend std::ostream& operator<< (std::ostream& os, const GHealpix& pixels);
 
 public:
     // Constructors and destructors

@@ -18,8 +18,6 @@
 #include "GTools.hpp"
 #include "GFitsTableFltCol.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 /* __ Method name definitions ____________________________________________ */
 #define G_STRING  "GFitsTableFltCol::string(const int&, const int&)"
 #define G_REAL    "GFitsTableFltCol::real(const int&, const int&)"
@@ -225,8 +223,8 @@ std::string GFitsTableFltCol::string(const int& row, const int& inx)
     int offset = row * m_number + inx;
 
     // Convert double into string
-    ostringstream s_value;
-    s_value << scientific << m_data[offset];
+    std::ostringstream s_value;
+    s_value << std::scientific << m_data[offset];
 
     // Return value
     return s_value.str();
@@ -548,7 +546,7 @@ void GFitsTableFltCol::fetch_data(void)
  * @param[in] os Output stream
  * @param[in] column Column to put in output stream
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GFitsTableFltCol& column)
+std::ostream& operator<< (std::ostream& os, const GFitsTableFltCol& column)
 {
     // Dump column in output stream
     column.dump_column(os, column.m_data);

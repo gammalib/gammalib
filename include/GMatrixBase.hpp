@@ -17,9 +17,6 @@
 /* __ Includes ___________________________________________________________ */
 #include "GVector.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 
 /***************************************************************************
  *                        GMatrixBase class definition                     *
@@ -87,9 +84,9 @@ protected:
   double get_min_element() const;
   double get_max_element() const;
   double get_element_sum() const;
-  void   dump_elements(ostream& os) const;
-  void   dump_row_comp(ostream& os) const;
-  void   dump_col_comp(ostream& os) const;
+  void   dump_elements(std::ostream& os) const;
+  void   dump_row_comp(std::ostream& os) const;
+  void   dump_col_comp(std::ostream& os) const;
 
   // Protected data area
   int     m_rows;         // Number of rows

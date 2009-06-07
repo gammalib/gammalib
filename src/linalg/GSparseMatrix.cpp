@@ -28,9 +28,6 @@
 #include "GSparseSymbolic.hpp"
 #include "GSparseNumeric.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 /* __ Method name definitions ____________________________________________ */
 #define G_OP_MUL_VEC   "GSparseMatrix::operator* (const GVector&) const"
 #define G_OP_ADD       "GSparseMatrix::operator+= (const GSparseMatrix&)"
@@ -2705,32 +2702,32 @@ void GSparseMatrix::mix_column(const double* src1_data, const int* src1_row,
  *                             Output operator                             *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GSparseMatrix& m)
+std::ostream& operator<< (std::ostream& os, const GSparseMatrix& m)
 {
   // Put header in stream
-  os << "=== GSparseMatrix ===" << endl;
+  os << "=== GSparseMatrix ===" << std::endl;
   if (m.m_rowsel != NULL)
     os << " Number of rows ............: " << m.m_rows << " (compressed " <<
-	      m.m_num_rowsel << ")" << endl;
+	      m.m_num_rowsel << ")" << std::endl;
   else
-    os << " Number of rows ............: " << m.m_rows << endl;
+    os << " Number of rows ............: " << m.m_rows << std::endl;
   if (m.m_colsel != NULL)
     os << " Number of columns .........: " << m.m_cols << " (compressed " <<
-	      m.m_num_colsel << ")" << endl;
+	      m.m_num_colsel << ")" << std::endl;
   else
-    os << " Number of columns .........: " << m.m_cols << endl;
+    os << " Number of columns .........: " << m.m_cols << std::endl;
   if (m.m_fill_val == 0.0)
     os << " Number of non-zero elements: " << m.m_colstart[m.m_cols] << " (" <<
-          m.m_elements << ")" << endl;
+          m.m_elements << ")" << std::endl;
   else {
     os << " Number of non-zero elements: " << m.m_colstart[m.m_cols]+1 << " (" <<
-          m.m_elements+1 << ")" << endl;
+          m.m_elements+1 << ")" << std::endl;
     os << " Pending element ...........: (" << m.m_fill_row << "," << m.m_fill_col <<
-	      ")=" << m.m_fill_val << endl;
+	      ")=" << m.m_fill_val << std::endl;
   }
-  os << " Number of allocated cells .: " << m.m_alloc << endl;
-  os << " Memory block size .........: " << m.m_mem_block << endl;
-  os << " Sparse matrix fill ........: " << m.fill() << endl;
+  os << " Number of allocated cells .: " << m.m_alloc << std::endl;
+  os << " Memory block size .........: " << m.m_mem_block << std::endl;
+  os << " Sparse matrix fill ........: " << m.fill() << std::endl;
 
   // Dump elements and compression schemes
   m.dump_elements(os);
@@ -2739,12 +2736,12 @@ ostream& operator<< (ostream& os, const GSparseMatrix& m)
   
   // If there is a symbolic decomposition then put it also in the stream
   if (m.m_symbolic != NULL) {
-    os << endl << *((GSparseSymbolic*)m.m_symbolic);
+    os << std::endl << *((GSparseSymbolic*)m.m_symbolic);
   }
 
   // If there is a numeric decomposition then put it also in the stream
   if (m.m_numeric != NULL) {
-    os << endl << *((GSparseNumeric*)m.m_numeric);
+    os << std::endl << *((GSparseNumeric*)m.m_numeric);
   }
 
   // Return output stream

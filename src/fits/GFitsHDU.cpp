@@ -24,8 +24,6 @@
 #include "GFitsHDU.hpp"
 #include "GFitsDblImage.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 /* __ Method name definitions ____________________________________________ */
 #define G_OPEN      "GFitsHDU::open(int)"
 #define G_SAVE      "GFitsHDU::save()"
@@ -94,8 +92,8 @@ GFitsHDU::GFitsHDU(const GFitsImage& image)
     m_header->update(GFitsHeaderCard("NAXIS", image.naxis(),
                                      "number of data axes"));
     for (int i = 0; i < image.naxis(); ++i) {
-        ostringstream s_key;
-        ostringstream s_comment;
+        std::ostringstream s_key;
+        std::ostringstream s_comment;
         s_key     << "NAXIS" << (i+1);
         s_comment << "length of data axis " << (i+1);
         m_header->update(GFitsHeaderCard(s_key.str(), image.naxes(i),
@@ -744,25 +742,25 @@ void GFitsHDU::save(void)
  * @param[in] os Output stream into which the HDU will be dumped
  * @param[in] hdu HDU to be dumped
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GFitsHDU& hdu)
+std::ostream& operator<< (std::ostream& os, const GFitsHDU& hdu)
 {
     // Put header in stream
-    os << "=== GFitsHDU ===" << endl;
-    os << " HDU number ................: " << hdu.m_hdunum << endl;
-    os << " HDU name ..................: " << hdu.m_name << endl;
+    os << "=== GFitsHDU ===" << std::endl;
+    os << " HDU number ................: " << hdu.m_hdunum << std::endl;
+    os << " HDU name ..................: " << hdu.m_name << std::endl;
     os << " HDU type ..................: ";
     switch (hdu.m_type) {
     case 0:        // Image HDU
-        os << "Image" << endl;
+        os << "Image" << std::endl;
         break;
     case 1:        // ASCII Table HDU
-        os << "ASCII table" << endl;
+        os << "ASCII table" << std::endl;
         break;
     case 2:        // Binary Table HDU
-        os << "Binary table" << endl;
+        os << "Binary table" << std::endl;
         break;
     default:
-        os << "Unknown" << endl;
+        os << "Unknown" << std::endl;
         break;
     }
 

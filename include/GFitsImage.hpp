@@ -23,8 +23,6 @@
 #include "GFitsCfitsio.hpp"
 #include "GFitsData.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 
 /***********************************************************************//**
  * @class GFitsImage
@@ -39,7 +37,7 @@ class GFitsImage : public GFitsData {
     friend class GFitsHDU;
 
     // I/O friends
-    friend ostream& operator<< (ostream& os, const GFitsImage& image);
+    friend std::ostream& operator<< (std::ostream& os, const GFitsImage& image);
 
 public:
     // Constructors and destructors

@@ -14,9 +14,6 @@
 /* __ Includes ___________________________________________________________ */
 #include "GSparseNumeric.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 /* __ Macros _____________________________________________________________ */
 #define CS_FLIP(i) (-(i)-2)
 #define CS_MARK(w,j) { w [j] = CS_FLIP (w [j]) ; }
@@ -366,35 +363,35 @@ int GSparseNumeric::cs_ereach(const GSparseMatrix* A, int k,
 /***************************************************************************
  *                             Output operator                             *
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GSparseNumeric& n)
+std::ostream& operator<< (std::ostream& os, const GSparseNumeric& n)
 {
   // Put header is stream
   os << "=== GSparseNumeric ===";
 
   // Show L or V matrix
   if (n.m_L != NULL) {
-    os << endl <<
+    os << std::endl <<
 	   " === L or V ";
-	os << *n.m_L << endl;
+	os << *n.m_L << std::endl;
   }
 
   // Show U or R matrix
   if (n.m_U != NULL) {
-    os << endl <<
+    os << std::endl <<
        " === U or R matrix ";
-	os << *n.m_U << endl;
+	os << *n.m_U << std::endl;
   }
 
   // Show inverse permutation if it exists
   if (n.m_pinv != NULL) {
-    os << endl << " Inverse permutation (of " << n.m_n_pinv << " elements)" << endl;
+    os << std::endl << " Inverse permutation (of " << n.m_n_pinv << " elements)" << std::endl;
 	for (int i = 0; i < n.m_n_pinv; ++i)
 	  os << " " << n.m_pinv[i];
   } 
 
   // Show beta array if it exists
   if (n.m_B != NULL) {
-    os << endl << " Beta[0.." << n.m_n_B << "]" << endl;
+    os << std::endl << " Beta[0.." << n.m_n_B << "]" << std::endl;
 	for (int i = 0; i < n.m_n_B; ++i)
 	  os << " " << n.m_B[i];
   } 

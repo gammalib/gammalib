@@ -22,8 +22,6 @@
 #include "GException.hpp"
 #include "GGti.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 /* __ Method name definitions ____________________________________________ */
 #define G_COPY_MEMBERS      "GGti::copy_members(const GGti&)"
 

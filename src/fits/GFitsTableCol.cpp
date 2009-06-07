@@ -17,8 +17,6 @@
 #include "GException.hpp"
 #include "GFitsTableCol.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD_COLUMN "GFitsTableCol::load_column(void*, void*)"
 #define G_SAVE_COLUMN "GFitsTableCol::save_column(void*, void*)"
@@ -447,7 +445,7 @@ void GFitsTableCol::save_column(void)
  * @param[in] os Output stream
  * @param[in] column Column to put in output stream
  ***************************************************************************/
-void GFitsTableCol::dump_column(ostream& os, void* data) const
+void GFitsTableCol::dump_column(std::ostream& os, void* data) const
 {
     // Put column name in stream
     os << "'" << m_name << "'";
