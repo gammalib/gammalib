@@ -1,0 +1,194 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% GammaLib Software Requirement Specification
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definitions for manual package
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\task}{\mbox{GammaLib}}
+\newcommand{\this}{\mbox{\tt \task}}
+\newcommand{\shorttype}{\mbox{SRS}}
+\newcommand{\doctype}{\mbox{Software Requirement Specification}}
+\newcommand{\version}{\mbox{draft}}
+\newcommand{\calendar}{\mbox{7 October 2009}}
+\newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
+\newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document definition
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}[12pt,a4]
+\usepackage{epsfig}
+\usepackage{manual}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Begin of document body
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\frontpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Product Overview}
+
+The \this\ is a vesatile toolbox for the high-level analysis of astronomical gamma-ray data.
+It is implemented as a C++ library that is fully scriptable in the Python scripting language.
+The library provides core functionalities such as 
+data input and output,
+interfaces for parameter specifications, and
+a reporting and logging interface.
+It implements instruments specific functionalities such as
+instrument response functions and
+data formats.
+Instrument specific functionalities share a common interface to allow for extension of the \this\
+to include new gamma-ray instruments.
+The \this\ provides an abstract data analysis framework that enables simultaneous multi-mission
+analysis.
+
+The \this\ is designed as an open source library that is made availably at\break
+{\tt http://gammalib.sourceforge.net/}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Purpose}
+
+The \this\ provides all functionalities required to perform a high-level analysis of astronomical 
+gamma-ray data.
+High-level analysis means that the data are expected to be calibrated (energy, arrival direction or
+detector position) and time tagged.
+The \this\ is not designed for preprocessing of data or data calibration purposes.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Scope}
+
+The \this\ is designed for the high-level analysis of astronomical gamma-ray data.
+For the purpose of the \this, gamma rays are defined as photons with energies above
+few $\sim100$~keV.
+The \this\ both applies to data collected by space-based and ground-based instruments.
+So far it allows for the analysis of data collected by the following instruments:
+CTA.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Reference}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Definition and Abbreviations}
+
+The following abbreviations have been employed in this document:
+\begin{itemize}
+\item[]{\bf COMPTEL} Compton Telescope (flown aboard CGRO 1991-2000)
+\item[]{\bf CTA} Cherenkov Telescope Array
+\item[]{\bf Fermi} Fermi Gamma-Ray Space Telescope (launched in 2007)
+\item[]{\bf INTEGRAL} International Gamma Ray Laboratory (launched in 2002) 
+\item[]{\bf IRAF} 
+\item[]{\bf SPI} Spectrometer on INTEGRAL
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Specific Requirements
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Specific Requirements}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{External Interface Requirements}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{User Interfaces}
+
+The \this\ is to designed as C++ API library of which all modules are designed as classes.
+A Python interface allows for scripting of library components.
+
+The \this\ supports 2 user interface formats for parameter input:
+the IRAF parameter interface (which is also employed for the {\tt ftools} and the 
+INTEGRAL and Fermi data analysis frameworks)
+and a XML interface (which is also used within the Fermi data analysis framework).
+
+The \this\ provides also a reporting and logging interface that provides the user with 
+human-readable information about code execution
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Hardware Interfaces}
+
+No hardware interfaces are foreseen.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Software Interfaces}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Communication Protocols}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Memory Constraints}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Operation}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Product function}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Assumption and Dependency}
+
+The \this\ should be designed as a standalone package except for a link to the HEASARC
+{\tt cfitsio} library.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Software Product Features}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Software System Attributes}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Reliability}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Availability}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Security}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Maintainability}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Portability}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Performance}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Database requirements}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Additional Material
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Additional Material}
+
+\end{document} 
