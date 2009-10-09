@@ -19,17 +19,24 @@
 #include <config.h>
 #endif
 
+/* __ Core services ______________________________________________________ */
 #include "GException.hpp"
 
+/* __ Observation handling _______________________________________________ */
+#include "GData.hpp"
 #include "GObservation.hpp"
-
+#include "GEvents.hpp"
+#include "GGti.hpp"
 #include "GResponse.hpp"
+
+/* __ Fermi/LAT specific code ____________________________________________ */
+#include "GLATObservation.hpp"
 #include "GLATResponse.hpp"
 
-#include "GData.hpp"
-
+/* __ Image module _______________________________________________________ */
 #include "GImage.hpp"
 
+/* __ FITS module ________________________________________________________ */
 #include "GFits.hpp"
 #include "GFitsHDU.hpp"
 #include "GFitsHeader.hpp"
@@ -47,14 +54,11 @@
 #include "GFitsTableFltCol.hpp"
 #include "GFitsTableDblCol.hpp"
 
+/* __ LINALG module ______________________________________________________ */
 #include "GVector.hpp"
 #include "GMatrixBase.hpp"
 #include "GMatrix.hpp"
 #include "GSymMatrix.hpp"
 #include "GSparseMatrix.hpp"
-
-/* __ Globals ____________________________________________________________ */
-
-/* __ Prototypes _________________________________________________________ */
 
 #endif /* GAMMALIB_HPP */
