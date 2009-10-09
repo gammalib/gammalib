@@ -14,16 +14,17 @@ files = GException.cpp \
 	GNodeArray.cpp \
 	GImage.cpp \
 	GHealpix.cpp \
-        lat/GLATResponse.cpp \
-        lat/GLATResponseTable.cpp \
-        lat/GLATAeff.cpp \
-        lat/GLATPsf.cpp \
-        lat/GLATEdisp.cpp \
-        lat/GLATObservation.cpp \
+	lat/GLATResponse.cpp \
+	lat/GLATResponseTable.cpp \
+	lat/GLATAeff.cpp \
+	lat/GLATPsf.cpp \
+	lat/GLATEdisp.cpp \
+	lat/GLATObservation.cpp \
+	obs/GData.cpp \
 	obs/GObservation.cpp \
-        obs/GResponse.cpp \
-        obs/GData.cpp \
-        obs/GGti.cpp \
+	obs/GEvents.cpp \
+	obs/GGti.cpp \
+	obs/GResponse.cpp \
 	fits/GFitsHeaderCard.cpp \
 	fits/GFitsHeader.cpp \
 	fits/GFitsData.cpp \
