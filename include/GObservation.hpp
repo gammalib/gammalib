@@ -25,6 +25,10 @@
 #include "GGti.hpp"
 
 
+/* __ Typedefs ___________________________________________________________ */
+typedef void (GObservation::*fct_free)(void);
+
+
 /***********************************************************************//**
  * @class GObservation
  *
@@ -34,6 +38,9 @@ class GObservation {
 
   // Friend classes
   friend class GData;
+
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GObservation& obs);
 
 public:
     // Constructors and destructors
@@ -45,8 +52,12 @@ public:
     virtual GObservation& operator= (const GObservation& obs);
 
     // Methods
-	void link(void);
-	void release(void);
+	void         link(void);
+	void         release(void);
+	double       tstart(void);
+	double       tstop(void);
+	std::string  obsname(void);
+	std::string  instrument(void);
   
 protected:
     // Protected methods
@@ -65,6 +76,7 @@ protected:
 	GResponse*  m_response;     //!< Pointer to instrument response functions
 	int         m_num_links;    //!< Number of links into GData objects
 	int         m_free_pending; //!< Signals pending destruction (1=pending, 0=no pending)
+	fct_free    m_free_members; //!< Pointer to derive class free member function
 
 private:
 };

@@ -18,6 +18,7 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include "GException.hpp"
 #include "GData.hpp"
 
@@ -29,7 +30,6 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-
 
 
 /*==========================================================================
@@ -120,6 +120,39 @@ GData& GData::operator= (const GData& data)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Add observation to data
+ ***************************************************************************/
+void GData::add(GObservation *obs)
+{
+	// Allocate observation pointers
+    GObservation** new_obs = new GObservation*[m_num+1];
+	if (new_obs == NULL)
+		throw GException::mem_alloc(G_COPY_MEMBERS, m_num+1);
+
+	// Copy over old observation pointers
+    if (m_num > 0) {
+        for (int i = 0; i < m_num; ++i)
+			new_obs[i] = m_obs[i];
+	}
+	
+	// Link in new observation
+	new_obs[m_num] = obs;
+	obs->link();
+	
+	// Release old pointer array
+	if (m_obs != NULL) delete [] m_obs;
+	
+	// Attach new pointer array
+	m_obs = new_obs;
+	
+	// Increment number of observations
+	m_num++;
+	
+    // Return
+    return;
+}
+
 
 /*==========================================================================
  =                                                                         =
@@ -204,6 +237,26 @@ void GData::free_members(void)
  =                               GData friends                             =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream into which the data will be dumped
+ * @param[in] data Data to be dumped
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GData& data)
+{
+    // Put header in stream
+    os << "=== GData ===" << std::endl;
+    os << " Number of observations ....: " << data.m_num << std::endl;
+
+	// Put observations in stream
+	for (int i = 0; i < data.m_num; ++i)
+		os << *(data.m_obs[i]);
+
+    // Return output stream
+    return os;
+}
 
 
 /*==========================================================================

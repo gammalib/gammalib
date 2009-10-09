@@ -284,6 +284,7 @@ void test_output(const GMatrix& m_test)
 /***************************************************************************
  *                     Test: Conversion between matrix types               *
  ***************************************************************************/
+/*
 void test_conversion(void)
 {
   cout << "Test GMatrix: Matrix conversions: ";
@@ -420,7 +421,7 @@ void test_conversion(void)
   // Return
   return;
 }
-
+*/
 
 /***************************************************************************
  *                        Test: extraction and insertion                   *
@@ -514,7 +515,7 @@ int main(void)
 
   // Execute the tests
   test_output(m_test);
-  test_conversion();
+  //test_conversion();
   test_extract();
 
   // Test 1: Allocate zero matrix

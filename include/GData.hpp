@@ -30,6 +30,9 @@
  ***************************************************************************/
 class GData {
 
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GData& data);
+
 public:
     // Constructors and destructors
     GData();
@@ -40,6 +43,7 @@ public:
     GData& operator= (const GData& data);
 
     // Methods
+	void add(GObservation *obs);
     
 protected:
     // Protected methods

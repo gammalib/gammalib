@@ -23,14 +23,16 @@
 #include "GObservation.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_RELEASE      "GObservation::release(void)"
+#define G_FREE_MEMBERS   "GObservation::free_members(void)"
+#define G_DESTRUCT       "GObservation::~GObservation()"
+#define G_RELEASE        "GObservation::release(void)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-
+//#define G_DEBUG_ALLOC_OBS                    // Track observation allocation
 
 
 /*==========================================================================
@@ -72,9 +74,17 @@ GObservation::GObservation(const GObservation& obs)
 
 /***********************************************************************//**
  * @brief Destructor
+ *
+ * The object is only destructed immediately if it is not linked in
+ * somewhere.
  ***************************************************************************/
 GObservation::~GObservation()
 {
+	// Optionally dump enter message
+	#if defined(G_DEBUG_ALLOC_OBS)
+	std::cout << G_DESTRUCT << ": entered with " << m_num_links << " links." << std::endl;
+	#endif
+
 	// Do not destruct if object is linked in somewhere
 	if (m_num_links > 0)
 		m_free_pending = 1;
@@ -152,11 +162,58 @@ void GObservation::release(void)
 	
 	// If there are no more links and destruction is pending then free
 	// object now
-	if (m_num_links == 0 && m_free_pending == 1)
+	if (m_num_links == 0 && m_free_pending == 1) {
+	
+		// If we have a derived class free_members function then call it
+		if (m_free_members != NULL)
+			(*this.*m_free_members)();
+			
+		// Free base class members
 		free_members();
+	}
 	
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return start time
+ ***************************************************************************/
+double GObservation::tstart(void)
+{
+    // Return
+    return m_tstart;
+}
+
+
+/***********************************************************************//**
+ * @brief Return stop time
+ ***************************************************************************/
+double GObservation::tstop(void)
+{
+    // Return
+    return m_tstop;
+}
+
+
+/***********************************************************************//**
+ * @brief Return observation name
+ ***************************************************************************/
+std::string GObservation::obsname(void)
+{
+    // Return
+    return m_obsname;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument name
+ ***************************************************************************/
+std::string GObservation::instrument(void)
+{
+    // Return
+    return m_instrument;
 }
 
 
@@ -181,6 +238,7 @@ void GObservation::init_members(void)
     m_response     = NULL;
 	m_num_links    = 0;
 	m_free_pending = 0;
+	m_free_members = NULL;
 
     // Return
     return;
@@ -201,11 +259,12 @@ void GObservation::copy_members(const GObservation& obs)
     m_tstop        = obs.m_tstop;
 	m_num_links    = 0;           // Do not copy over any link
 	m_free_pending = 0;           // Do not copy over destruction scheduling
+	m_free_members = obs.m_free_members;
 
-    // Clone members
-	m_events   = obs.m_events->clone();
-	m_gti      = obs.m_gti->clone();
-	m_response = obs.m_response->clone();
+    // Clone members (only if they exist)
+	m_events   = (obs.m_events   != NULL) ? obs.m_events->clone()   : NULL;
+	m_gti      = (obs.m_gti      != NULL) ? obs.m_gti->clone()      : NULL;
+	m_response = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;
 
     // Return
     return;
@@ -217,6 +276,11 @@ void GObservation::copy_members(const GObservation& obs)
  ***************************************************************************/
 void GObservation::free_members(void)
 {
+	// Optionally dump enter message
+	#if defined(G_DEBUG_ALLOC_OBS)
+	std::cout << G_FREE_MEMBERS << ": entered." << std::endl;
+	#endif
+
     // Free memory
 	if (m_events   != NULL) delete m_events;
 	if (m_gti      != NULL) delete m_gti;
@@ -241,6 +305,32 @@ void GObservation::free_members(void)
  =                           GObservation friends                          =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream into which the data will be dumped
+ * @param[in] obs Observation to be dumped
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GObservation& obs)
+{
+    // Put header in stream
+    os << "=== GObservation ===" << std::endl;
+    os << " Name ......................: " << obs.m_obsname << std::endl;
+    os << " Instrument ................: " << obs.m_instrument << std::endl;
+    os << " Start time ................: " << obs.m_tstart << std::endl;
+    os << " Stop time .................: " << obs.m_tstop << std::endl;
+    os << " Number of links ...........: " << obs.m_num_links << std::endl;
+	if (obs.m_free_pending)
+		os << " Destruction pending .......: yes" << std::endl;
+	else
+		os << " Destruction pending .......: no" << std::endl;
+	if (obs.m_gti != NULL)
+		os << *(obs.m_gti);
+	
+    // Return output stream
+    return os;
+}
 
 
 /*==========================================================================

@@ -85,7 +85,6 @@ int check_matrix(const GSparseMatrix& m, const double scale, const double add)
 		  }
 		}
 	    if (fabs(m(row,col)-ref_value) > 1.0e-15) {
-//cout << row << "," << col << ": " << fabs(m(row,col)-ref_value) << endl;
 		  result = 0;
 		  break;
 		}
@@ -996,6 +995,7 @@ void test_comparison(const GSparseMatrix& m_test)
 /***************************************************************************
  *                     Test: Conversion between matrix types               *
  ***************************************************************************/
+/*
 void test_conversion(void)
 {
   cout << "Test GSparseMatrix: Matrix conversions: ";
@@ -1128,7 +1128,7 @@ void test_conversion(void)
   // Return
   return;
 }
-
+*/
 
 /***************************************************************************
  *                        Test: Cholesky factorisation                     *
@@ -1768,7 +1768,7 @@ int main(void)
   test_arithmetics(m_test);
   test_functions(m_test);
   test_comparison(m_test);
-  test_conversion();
+  //test_conversion();
   test_cholesky();
   test_heavy();
 

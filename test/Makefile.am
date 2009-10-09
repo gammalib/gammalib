@@ -13,6 +13,7 @@ check_PROGRAMS = test_GVector \
 		 test_GSymMatrix \
 		 test_GSparseMatrix \
 		 test_GFits \
+		 test_GData \
 		 test_GResponse
 
 TESTS = test_GVector \
@@ -20,6 +21,7 @@ TESTS = test_GVector \
 	test_GSymMatrix \
 	test_GSparseMatrix \
 	test_GFits \
+	test_GData \
 	test_GResponse
 
 test_GVector_SOURCES = test_GVector.cpp
@@ -32,5 +34,7 @@ test_GSparseMatrix_SOURCES = test_GSparseMatrix.cpp
 test_GSparseMatrix_LDADD = ../src/libgamma.la
 test_GFits_SOURCES = test_GFits.cpp
 test_GFits_LDADD = ../src/libgamma.la
+test_GData_SOURCES = test_GData.cpp
+test_GData_LDADD = ../src/libgamma.la
 test_GResponse_SOURCES = test_GResponse.cpp
 test_GResponse_LDADD = ../src/libgamma.la

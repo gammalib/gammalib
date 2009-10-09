@@ -29,7 +29,7 @@ void test_lat_response(void)
     // Remove FITS file
     system("rm -rf test_rsp.fits");
 
-    cout << "Test GLATResponse: Open PSF FITS file: ";
+    std::cout << "Test GLATResponse: Open PSF FITS file: ";
     try {
         // Get HANDOFF Response
         GLATResponse rsp;
@@ -39,12 +39,12 @@ void test_lat_response(void)
         // Save response
         rsp.save("test_rsp.fits");
     }
-    catch (exception &e) {
-        cout << endl << "TEST ERROR: Unable to open FITS file." << endl;
-        cout << e.what() << endl;
+    catch (std::exception &e) {
+        std::cout << std::endl << "TEST ERROR: Unable to open FITS file." << std::endl;
+        std::cout << e.what() << std::endl;
         throw;
     }
-    cout << ". ok." << endl;
+    std::cout << ". ok." << std::endl;
 }
 
 
@@ -54,10 +54,10 @@ void test_lat_response(void)
 int main(void)
 {
     // Dump header
-    cout << std::endl;
-    cout << "***************************" << endl;
-    cout << "* GResponse class testing *" << endl;
-    cout << "**************************" << endl;
+    std::cout << std::endl;
+    std::cout << "***************************" << std::endl;
+    std::cout << "* GResponse class testing *" << std::endl;
+    std::cout << "***************************" << std::endl;
 
     // Execute the tests
     test_lat_response();
