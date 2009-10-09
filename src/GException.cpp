@@ -580,3 +580,17 @@ GException::healpix_bad_coords::healpix_bad_coords(std::string origin,
     m_message = "Invalid coordinate system '"+coordsys +
                 "' (should be either 'EQU' or 'GAL').";
 }
+
+
+/***********************************************************************//**
+ * @brief Invalid object release
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] msg Message.
+ ***************************************************************************/
+GException::invalid_release::invalid_release(std::string origin, 
+											 int         nlinks)
+{
+    m_origin  = origin;
+    m_message = "Invalid object release (links="+str(nlinks)+")";
+}

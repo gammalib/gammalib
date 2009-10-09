@@ -254,6 +254,12 @@ public:
         healpix_bad_coords(std::string origin, std::string coordsys);
     };
 
+    // Invalid object release
+    class invalid_release : public GExceptionHandler {
+    public:
+        invalid_release(std::string origin, int nlinks);
+    };
+
 };
 
 #endif /* GEXCEPTION_HPP */
