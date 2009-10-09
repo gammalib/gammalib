@@ -21,13 +21,13 @@
 #include "GHealpix.i"
 #include "GSkyDir.i"
 
-/* Response classes */
-#include "GResponse.i"
-#include "GLATResponse.i"
-
 /* Observation classes */
-//#include "GObservation.i"
+#include "GData.i"
+#include "GResponse.i"
+
+/* Fermi LAT classes */
 #include "GLATObservation.i"
+#include "GLATResponse.i"
 
 /* FITS file class */
 #include "GFits.i"
