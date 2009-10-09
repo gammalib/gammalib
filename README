@@ -1,0 +1,49 @@
+This is GammaLib version 0.2.0
+==============================
+
+
+License information
+-------------------
+
+To be writted ...
+
+
+What's new in this release?
+---------------------------
+
+See the file "NEWS".
+
+
+What is the GammaLib anyway?
+----------------------------
+
+The GammaLib is a vesatile toolbox for the high-level analysis of
+astronomical gamma-ray data. It is implemented as a C++ library 
+that is fully scriptable in the Python scripting language. The library
+provides core functionalities such as data input and output, interfaces
+for parameter specifications, and a reporting and logging interface.
+It implements instruments specific functionalities such as instrument
+response functions and data formats. Instrument specific functionalities
+share a common interface to allow for extension of the GammaLib to 
+include new gamma-ray instruments. The GammaLib provides an abstract 
+data analysis framework that enables simultaneous multi-mission analysis.
+
+
+Web sites
+---------
+
+http://gammalib.sourceforge.net
+
+
+Bug reports
+-----------
+
+To report or search for bugs, please use the GammaLib Bug Tracker at
+https://sourceforge.net/tracker/?group_id=282143&atid=1196795.
+
+
+Contact
+-------
+
+To get in touch with the GammaLib developers and to contribute to the
+project please contact Juergen Knoedlseder <knodlseder@cesr.fr>.
