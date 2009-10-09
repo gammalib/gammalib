@@ -29,8 +29,11 @@
  ***************************************************************************/
 class GGti {
 
-  // Friend classes
-  friend class GObservation;
+	// Friend classes
+	friend class GObservation;
+
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GGti& gti);
 
 public:
     // Constructors and destructors
@@ -42,6 +45,11 @@ public:
     GGti& operator= (const GGti& gti);
 
     // Methods
+	void   load(const std::string& filename);
+	double tstart(void);
+	double tstop(void);
+	double ontime(void);
+	double elapse(void);
   
 protected:
     // Protected methods

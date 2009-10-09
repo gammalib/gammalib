@@ -21,6 +21,7 @@
 #include <iostream>
 #include "GException.hpp"
 #include "GGti.hpp"
+#include "GFits.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_COPY_MEMBERS      "GGti::copy_members(const GGti&)"
@@ -134,6 +135,90 @@ GGti& GGti::operator= (const GGti& gti)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Load GTI intervals from file.
+ ***************************************************************************/
+void GGti::load(const std::string& filename)
+{
+	// Free members
+	free_members();
+
+	// Initialise attributes
+	init_members();
+	
+	// Allocate FITS file
+	GFits file;
+	
+	// Open FITS file
+	file.open(filename);
+	
+	// Get GTI HDU
+	GFitsHDU* hdu = file.hdu("GTI");
+	
+	// Extract GTI information from FITS file
+	m_num = hdu->card("NAXIS2")->integer();
+	if (m_num > 0) {
+	
+		// Get GTI intervals
+		m_start = new double[m_num];
+		m_stop  = new double[m_num];
+		for (int i = 0; i < m_num; ++i) {
+			m_start[i] = hdu->column("START")->real(i);
+			m_stop[i]  = hdu->column("STOP")->real(i);
+			m_ontime  += (m_stop[i] - m_start[i]);
+		}
+		
+		// Set attributes
+		m_tstart = m_start[0];
+		m_tstop  = m_stop[m_num-1];
+		m_elapse = m_tstop - m_tstart;
+
+	}
+	
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return start time
+ ***************************************************************************/
+double GGti::tstart(void)
+{
+    // Return
+    return m_tstart;
+}
+
+
+/***********************************************************************//**
+ * @brief Return stop time
+ ***************************************************************************/
+double GGti::tstop(void)
+{
+    // Return
+    return m_tstop;
+}
+
+
+/***********************************************************************//**
+ * @brief Return ontime
+ ***************************************************************************/
+double GGti::ontime(void)
+{
+    // Return
+    return m_ontime;
+}
+
+
+/***********************************************************************//**
+ * @brief Return elapsed time
+ ***************************************************************************/
+double GGti::elapse(void)
+{
+    // Return
+    return m_elapse;
+}
+
 
 /*==========================================================================
  =                                                                         =
@@ -214,6 +299,26 @@ void GGti::free_members(void)
  =                               GGti friends                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream into which the GTI will be dumped
+ * @param[in] gti GTI to be dumped
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GGti& gti)
+{
+    // Put header in stream
+    os << "=== GGti ===" << std::endl;
+    os << " Number of intervals .......: " << gti.m_num << std::endl;
+    os << " Start time ................: " << gti.m_tstart << std::endl;
+    os << " Stop time .................: " << gti.m_tstop << std::endl;
+    os << " Ontime ....................: " << gti.m_ontime << " sec" << std::endl;
+    os << " Elapsed time ..............: " << gti.m_elapse << " sec" << std::endl;
+	
+    // Return output stream
+    return os;
+}
 
 
 /*==========================================================================
