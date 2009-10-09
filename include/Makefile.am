@@ -5,10 +5,12 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GImage.hpp \
 		     GHealpix.hpp \
 		     GData.hpp \
+		     GObservation.hpp \
+		     GEvents.hpp \
+		     GGti.hpp \
 		     GResponse.hpp \
 		     GLATResponse.hpp \
 		     GLATResponseTable.hpp \
-		     GObservation.hpp \
 		     GLATObservation.hpp \
 		     GFitsHeaderCard.hpp \
 		     GFitsHeader.hpp \
