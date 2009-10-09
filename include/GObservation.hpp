@@ -21,7 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GResponse.hpp"
-#include "GData.hpp"
+#include "GEvents.hpp"
 #include "GGti.hpp"
 
 
@@ -31,6 +31,9 @@
  * @brief Abstract interface for the observation classes.
  ***************************************************************************/
 class GObservation {
+
+  // Friend classes
+  friend class GData;
 
 public:
     // Constructors and destructors
@@ -42,6 +45,8 @@ public:
     virtual GObservation& operator= (const GObservation& obs);
 
     // Methods
+	void link(void);
+	void release(void);
   
 protected:
     // Protected methods
@@ -52,11 +57,14 @@ protected:
 
     // Protected data area
     std::string m_obsname;      //!< Name of observation
+	std::string m_instrument;   //!< Instrument name
 	double      m_tstart;       //!< Start time of observation
 	double      m_tstop;        //!< Stop time of observations
+	GEvents*    m_events;       //!< Pointer to events
+	GGti*       m_gti;          //!< Pointer to good time intervals
 	GResponse*  m_response;     //!< Pointer to instrument response functions
-	GData*      m_data;         //!< Pointer to associated data
-	GGti*       m_gti;          //!< Pointer to associated data
+	int         m_num_links;    //!< Number of links into GData objects
+	int         m_free_pending; //!< Signals pending destruction (1=pending, 0=no pending)
 
 private:
 };
