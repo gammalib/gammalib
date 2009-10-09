@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GData.hpp  -  Data abstract base class                 *
+ *                        GData.hpp  -  Data class                         *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GData.hpp
- * @brief GData abstract base class definition.
+ * @brief GData class definition.
  * @author J. Knodlseder
  */
 
@@ -20,22 +20,20 @@
 #define GDATA_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include "GObservation.hpp"
 
 
 /***********************************************************************//**
  * @class GData
  *
- * @brief Abstract GData class interface defintion
+ * @brief GData class interface defintion
  ***************************************************************************/
 class GData {
-
-  // Friend classes
-  friend class GObservation;
 
 public:
     // Constructors and destructors
     GData();
-    GData(const GData& d);
+    GData(const GData& data);
     virtual ~GData();
 
     // Operators
@@ -48,9 +46,11 @@ protected:
     void           init_members(void);
     void           copy_members(const GData& data);
     void           free_members(void);
-    virtual GData* clone(void) const = 0;
 
     // Protected data area
+	int            m_num;       //!< Number of observations
+	GObservation **m_obs;       //!< Pointers to observations
+	
 private:
 };
 

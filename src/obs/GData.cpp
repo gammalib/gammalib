@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GData.cpp  -  Data abstract base class                 *
+ *                        GData.cpp  -  Data class                         *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -13,7 +13,7 @@
  ***************************************************************************/
 /**
  * @file GData.cpp
- * @brief GData abstract base class implementation.
+ * @brief GData class implementation.
  * @author J. Knodlseder
  */
 
@@ -22,6 +22,7 @@
 #include "GData.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_COPY_MEMBERS      "GData::copy_members(const GData&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -132,6 +133,8 @@ GData& GData::operator= (const GData& data)
 void GData::init_members(void)
 {
     // Initialise members
+    m_num = 0;
+	m_obs = NULL;
 
     // Return
     return;
@@ -142,10 +145,27 @@ void GData::init_members(void)
  * @brief Copy class members
  *
  * @param[in] data GData instance from which members should be copied
+ *
+ * Copy observations from a GData object into the present object by invoking
+ * the observation clone method of each observation.
  ***************************************************************************/
 void GData::copy_members(const GData& data)
 {
     // Copy attributes
+    m_num = data.m_num;
+	
+	// Copy observations
+    if (m_num > 0) {
+        m_obs = new GObservation*[m_num];
+        if (m_obs == NULL)
+            throw GException::mem_alloc(G_COPY_MEMBERS, m_num);
+        for (int i = 0; i < m_num; ++i) {
+			if (data.m_obs[i] != NULL)
+				m_obs[i] = (data.m_obs[i])->clone();
+			else
+				m_obs[i] = NULL;
+		}
+	}
     
     // Return
     return;
@@ -158,8 +178,21 @@ void GData::copy_members(const GData& data)
 void GData::free_members(void)
 {
     // Free memory
-
+    if (m_obs != NULL) {
+	
+		// Release all observations
+        for (int i = 0; i < m_num; ++i) {
+			if (m_obs[i] != NULL)
+				m_obs[i]->release();
+		}
+		
+		// Delete observation pointers
+		delete [] m_obs;
+	}
+	
     // Mark memory as free
+	m_num = 0;
+	m_obs = NULL;
 
     // Return
     return;
