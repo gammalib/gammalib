@@ -48,7 +48,7 @@ protected:
     void  init_members(void);
     void  copy_members(const GGti& gti);
     void  free_members(void);
-    GGti* clone(void);
+    GGti* clone(void) const;
 
     // Protected data area
 	int         m_num;          //!< Number of intervals

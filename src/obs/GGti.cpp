@@ -83,6 +83,19 @@ GGti::~GGti()
 }
 
 
+/***********************************************************************//**
+ * @brief Clone GTI
+ *
+ * Cloning provides a copy of the GTIs. Cloning is used to allocate
+ * derived classes into a base class pointer.
+ ***************************************************************************/
+GGti* GGti::clone(void) const
+{
+    // Clone this image
+    return new GGti(*this);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                              GGti operators                             =
