@@ -35,9 +35,5 @@ public:
     GLATObservation(const std::string& ft1name, const std::string& ft2name);
     GLATObservation(const GLATObservation& obs);
     virtual ~GLATObservation();
-
-    // Methods
-    GFits* ft1(void) const;
-    GFits* ft2(void) const;
 };
 
