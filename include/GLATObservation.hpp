@@ -21,7 +21,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GObservation.hpp"
-#include "GFits.hpp"
 
 
 /***********************************************************************//**
@@ -42,8 +41,6 @@ public:
     GLATObservation& operator= (const GLATObservation& obs);
 
     // Methods
-    GFits* ft1(void) const;
-    GFits* ft2(void) const;
   
 protected:
     // Protected methods
@@ -53,11 +50,9 @@ protected:
     GLATObservation* clone(void) const;
 
     // Protected data area
-
-private:
-    GFits* m_ft1;     //!< FT1 FITS file
-    GFits* m_ft2;     //!< FT2 FITS file
-    GFits* m_ltcube;  //!< Lifetime cube FITS file
+    std::string m_ft1name;   //!< FT1 FITS filename
+    std::string m_ft2name;   //!< FT2 FITS filename
+    std::string m_ltcube;    //!< Lifetime cube FITS filename
 };
 
 #endif /* GLATOBSERVATION_HPP */
