@@ -36,8 +36,8 @@ typedef void (GObservation::*fct_free)(void);
  ***************************************************************************/
 class GObservation {
 
-  // Friend classes
-  friend class GData;
+    // Friend classes
+    friend class GData;
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GObservation& obs);
@@ -52,31 +52,33 @@ public:
     virtual GObservation& operator= (const GObservation& obs);
 
     // Methods
-	void         link(void);
-	void         release(void);
-	double       tstart(void);
-	double       tstop(void);
-	std::string  obsname(void);
-	std::string  instrument(void);
-  
+    double       tstart(void) const;
+    double       tstop(void) const;
+    double       emin(void) const;
+    double       emax(void) const;
+    std::string  obsname(void) const;
+    std::string  instrument(void) const;
+    GEvents*     events(void) const;
+    GGti*        gti(void) const;
+    GResponse*   response(void) const;
+
 protected:
     // Protected methods
-    void    init_members(void);
-    void    copy_members(const GObservation& obs);
-    void    free_members(void);
+    void                  init_members(void);
+    void                  copy_members(const GObservation& obs);
+    void                  free_members(void);
     virtual GObservation* clone(void) const = 0;
 
     // Protected data area
     std::string m_obsname;      //!< Name of observation
-	std::string m_instrument;   //!< Instrument name
-	double      m_tstart;       //!< Start time of observation
-	double      m_tstop;        //!< Stop time of observations
-	GEvents*    m_events;       //!< Pointer to events
-	GGti*       m_gti;          //!< Pointer to good time intervals
-	GResponse*  m_response;     //!< Pointer to instrument response functions
-	int         m_num_links;    //!< Number of links into GData objects
-	int         m_free_pending; //!< Signals pending destruction (1=pending, 0=no pending)
-	fct_free    m_free_members; //!< Pointer to derive class free member function
+    std::string m_instrument;   //!< Instrument name
+    double      m_tstart;       //!< Start time of observation
+    double      m_tstop;        //!< Stop time of observations
+    double      m_emin;         //!< Minimum energy covered by observation
+    double      m_emax;         //!< Maximum energy covered by observation
+    GEvents*    m_events;       //!< Pointer to events
+    GGti*       m_gti;          //!< Pointer to good time intervals
+    GResponse*  m_response;     //!< Pointer to instrument response functions
 
 private:
 };

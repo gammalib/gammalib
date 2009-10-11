@@ -19,6 +19,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
+#include <iomanip.h>
 #include "GException.hpp"
 #include "GGti.hpp"
 #include "GFits.hpp"
@@ -308,11 +309,11 @@ void GGti::free_members(void)
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GGti& gti)
 {
-    // Put header in stream
+    // Put Gti in stream
     os << "=== GGti ===" << std::endl;
     os << " Number of intervals .......: " << gti.m_num << std::endl;
-    os << " Start time ................: " << gti.m_tstart << std::endl;
-    os << " Stop time .................: " << gti.m_tstop << std::endl;
+    os << " Time range ................: " << fixed << setprecision(3) << 
+            gti.m_tstart << " - " << gti.m_tstop << std::endl;
     os << " Ontime ....................: " << gti.m_ontime << " sec" << std::endl;
     os << " Elapsed time ..............: " << gti.m_elapse << " sec" << std::endl;
 	
