@@ -41,12 +41,70 @@ void test_lat_data(void)
         std::cout << e.what() << std::endl;
         throw;
     }
-    std::cout << ". ok." << std::endl;
-	std::cout << obs << std::endl;
+    std::cout << ".";
 	
-	// Add observation to data
-	data.add(&obs);
-	std::cout << data << std::endl;
+	// Add observation (twice) to data
+    try {
+        data.add(obs);
+        data.add(obs);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl << "TEST ERROR: Unable to add LAT observation to data." 
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+    
+    // Loop over all events in GData using iterators
+    try {
+        int num = 0;
+        for (GData::iterator event = data.begin(); event != data.end(); ++event) {
+//          std::cout << *event << std::endl;
+            num++;
+        }
+        if (num != 552724) {
+            std::cout << std::endl << 
+                      "TEST ERROR: Wrong number of iterations in GData::iterator."
+                      << std::endl;
+            throw;
+        }
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl << "TEST ERROR: Unable to iterate GData." << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Loop over all events in GEvents using iterator
+    try {
+        int num = 0;
+        GLATEvents *ptr = (GLATEvents*)obs.events();
+        for (GLATEvents::iterator event = ptr->begin(); event != ptr->end(); ++event) {
+//          std::cout << *event << std::endl;
+            num++;
+        }
+        if (num != 276362) {
+            std::cout << std::endl << 
+                      "TEST ERROR: Wrong number of iterations in GLATEvents::iterator."
+                      << std::endl;
+            throw;
+        }
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl << "TEST ERROR: Unable to iterate GLATEvents." << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Plot final test success
+    std::cout << ". ok." << std::endl;
+
+    // Exit test
+    return;
+ 
 }
 
 
