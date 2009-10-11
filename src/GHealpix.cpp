@@ -881,7 +881,7 @@ int GHealpix::ang2pix_z_phi_ring(double z, double phi) const
     int ipix = 0;
 
     // Setup
-    double za = abs(z);
+    double za = fabs(z);
     double tt = modulo(phi,twopi) * inv_pihalf; // in [0,4)
 
     // Equatorial region
@@ -931,7 +931,7 @@ int GHealpix::ang2pix_z_phi_nest(double z, double phi) const
     int iy;
 
     // Setup
-    double za = abs(z);
+    double za = fabs(z);
     double tt = modulo(phi,twopi) * inv_pihalf; // in [0,4)
 
     // Equatorial region
