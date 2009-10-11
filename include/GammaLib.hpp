@@ -26,11 +26,14 @@
 #include "GData.hpp"
 #include "GObservation.hpp"
 #include "GEvents.hpp"
+#include "GEvent.hpp"
 #include "GGti.hpp"
 #include "GResponse.hpp"
 
 /* __ Fermi/LAT specific code ____________________________________________ */
 #include "GLATObservation.hpp"
+#include "GLATEvents.hpp"
+#include "GLATEvent.hpp"
 #include "GLATResponse.hpp"
 
 /* __ Image module _______________________________________________________ */

@@ -76,9 +76,10 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libgamma_la_LIBADD =
 am__objects_1 = GException.lo GTools.lo GSkyDir.lo GNodeArray.lo \
-	GImage.lo GHealpix.lo GLATResponse.lo GLATResponseTable.lo \
-	GLATAeff.lo GLATPsf.lo GLATEdisp.lo GLATObservation.lo \
-	GData.lo GObservation.lo GEvents.lo GGti.lo GResponse.lo \
+	GImage.lo GHealpix.lo GData.lo GObservation.lo GEvents.lo \
+	GEvent.lo GGti.lo GResponse.lo GLATObservation.lo \
+	GLATEvents.lo GLATEvent.lo GLATResponse.lo \
+	GLATResponseTable.lo GLATAeff.lo GLATPsf.lo GLATEdisp.lo \
 	GFitsHeaderCard.lo GFitsHeader.lo GFitsData.lo GFitsImage.lo \
 	GFitsDblImage.lo GFitsTable.lo GFitsAsciiTable.lo \
 	GFitsBinTable.lo GFitsTableCol.lo GFitsTableLogCol.lo \
@@ -241,17 +242,20 @@ files = GException.cpp \
 	GNodeArray.cpp \
 	GImage.cpp \
 	GHealpix.cpp \
+	obs/GData.cpp \
+	obs/GObservation.cpp \
+	obs/GEvents.cpp \
+	obs/GEvent.cpp \
+	obs/GGti.cpp \
+	obs/GResponse.cpp \
+	lat/GLATObservation.cpp \
+	lat/GLATEvents.cpp \
+	lat/GLATEvent.cpp \
 	lat/GLATResponse.cpp \
 	lat/GLATResponseTable.cpp \
 	lat/GLATAeff.cpp \
 	lat/GLATPsf.cpp \
 	lat/GLATEdisp.cpp \
-	lat/GLATObservation.cpp \
-	obs/GData.cpp \
-	obs/GObservation.cpp \
-	obs/GEvents.cpp \
-	obs/GGti.cpp \
-	obs/GResponse.cpp \
 	fits/GFitsHeaderCard.cpp \
 	fits/GFitsHeader.cpp \
 	fits/GFitsData.cpp \
@@ -366,6 +370,33 @@ distclean-compile:
 .cpp.lo:
 	$(LTCXXCOMPILE) -c -o $@ $<
 
+GData.lo: obs/GData.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GData.lo `test -f 'obs/GData.cpp' || echo '$(srcdir)/'`obs/GData.cpp
+
+GObservation.lo: obs/GObservation.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GObservation.lo `test -f 'obs/GObservation.cpp' || echo '$(srcdir)/'`obs/GObservation.cpp
+
+GEvents.lo: obs/GEvents.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GEvents.lo `test -f 'obs/GEvents.cpp' || echo '$(srcdir)/'`obs/GEvents.cpp
+
+GEvent.lo: obs/GEvent.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GEvent.lo `test -f 'obs/GEvent.cpp' || echo '$(srcdir)/'`obs/GEvent.cpp
+
+GGti.lo: obs/GGti.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GGti.lo `test -f 'obs/GGti.cpp' || echo '$(srcdir)/'`obs/GGti.cpp
+
+GResponse.lo: obs/GResponse.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GResponse.lo `test -f 'obs/GResponse.cpp' || echo '$(srcdir)/'`obs/GResponse.cpp
+
+GLATObservation.lo: lat/GLATObservation.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATObservation.lo `test -f 'lat/GLATObservation.cpp' || echo '$(srcdir)/'`lat/GLATObservation.cpp
+
+GLATEvents.lo: lat/GLATEvents.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATEvents.lo `test -f 'lat/GLATEvents.cpp' || echo '$(srcdir)/'`lat/GLATEvents.cpp
+
+GLATEvent.lo: lat/GLATEvent.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATEvent.lo `test -f 'lat/GLATEvent.cpp' || echo '$(srcdir)/'`lat/GLATEvent.cpp
+
 GLATResponse.lo: lat/GLATResponse.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponse.lo `test -f 'lat/GLATResponse.cpp' || echo '$(srcdir)/'`lat/GLATResponse.cpp
 
@@ -380,24 +411,6 @@ GLATPsf.lo: lat/GLATPsf.cpp
 
 GLATEdisp.lo: lat/GLATEdisp.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATEdisp.lo `test -f 'lat/GLATEdisp.cpp' || echo '$(srcdir)/'`lat/GLATEdisp.cpp
-
-GLATObservation.lo: lat/GLATObservation.cpp
-	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATObservation.lo `test -f 'lat/GLATObservation.cpp' || echo '$(srcdir)/'`lat/GLATObservation.cpp
-
-GData.lo: obs/GData.cpp
-	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GData.lo `test -f 'obs/GData.cpp' || echo '$(srcdir)/'`obs/GData.cpp
-
-GObservation.lo: obs/GObservation.cpp
-	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GObservation.lo `test -f 'obs/GObservation.cpp' || echo '$(srcdir)/'`obs/GObservation.cpp
-
-GEvents.lo: obs/GEvents.cpp
-	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GEvents.lo `test -f 'obs/GEvents.cpp' || echo '$(srcdir)/'`obs/GEvents.cpp
-
-GGti.lo: obs/GGti.cpp
-	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GGti.lo `test -f 'obs/GGti.cpp' || echo '$(srcdir)/'`obs/GGti.cpp
-
-GResponse.lo: obs/GResponse.cpp
-	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GResponse.lo `test -f 'obs/GResponse.cpp' || echo '$(srcdir)/'`obs/GResponse.cpp
 
 GFitsHeaderCard.lo: fits/GFitsHeaderCard.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsHeaderCard.lo `test -f 'fits/GFitsHeaderCard.cpp' || echo '$(srcdir)/'`fits/GFitsHeaderCard.cpp
