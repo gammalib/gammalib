@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GEvents.hpp  -  Events abstract base class              *
+ *                 GEvents.hpp  -  Events container class                  *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GEvents.hpp
- * @brief GEvents abstract base class interface definition.
+ * @brief GEvents container class interface definition.
  * @author J. Knodlseder
  */
 
@@ -20,17 +20,23 @@
 #define GEVENTS_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include "GEvent.hpp"
+#include "GFits.hpp"
 
 
 /***********************************************************************//**
  * @class GEvents
  *
- * @brief Abstract interface for the events classes.
+ * @brief GEvents container class interface defintion.
  ***************************************************************************/
 class GEvents {
 
 	// Friend classes
+    friend class GData;
     friend class GObservation;
+
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GEvents& events);
 
 public:
     // Constructors and destructors
@@ -42,15 +48,41 @@ public:
     virtual GEvents& operator= (const GEvents& events);
 
     // Methods
-  
+	int             num(void) const;
+	virtual void    load(const std::string& filename) = 0;
+    virtual void    load(GFitsHDU* hdu) = 0;
+    virtual GEvent* pointer(int index) const = 0;
+
+    // Event iterator
+    class iterator {
+    friend class GEvents;
+    public:
+        iterator(GEvents *events);
+        ~iterator();
+        iterator& operator++(void);                // Prefix
+        iterator  operator++(int junk);            // Postfix
+        bool      operator==(const iterator& it) const;
+        bool      operator!=(const iterator& it) const;
+        GEvent&   operator*(void);
+        GEvent*   operator->(void);
+    protected:
+        int      m_index;        //!< Actuel event index
+        int      m_num;          //!< Number of events in GEvents object
+        GEvents *m_base;         //!< Pointer to GEvents object
+    };
+    iterator begin(void);
+    iterator end(void);
+
 protected:
     // Protected methods
-    void    init_members(void);
-    void    copy_members(const GEvents& events);
-    void    free_members(void);
+    void             init_members(void);
+    void             copy_members(const GEvents& events);
+    void             free_members(void);
     virtual GEvents* clone(void) const = 0;
 
     // Protected data area
+    int     m_num;              //!< Number of events
+    GEvent *m_events;           //!< Pointer to events
 
 private:
 };

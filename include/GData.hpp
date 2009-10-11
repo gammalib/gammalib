@@ -1,7 +1,7 @@
 /***************************************************************************
- *                        GData.hpp  -  Data class                         *
+ *                   GData.hpp  -  Data container class                    *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GData.hpp
- * @brief GData class definition.
+ * @brief GData container class interface definition.
  * @author J. Knodlseder
  */
 
@@ -21,12 +21,13 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GObservation.hpp"
+#include "GEvent.hpp"
 
 
 /***********************************************************************//**
  * @class GData
  *
- * @brief GData class interface defintion
+ * @brief GData container class interface defintion.
  ***************************************************************************/
 class GData {
 
@@ -43,8 +44,30 @@ public:
     GData& operator= (const GData& data);
 
     // Methods
-	void add(GObservation *obs);
-    
+	void add(GObservation &obs);
+
+    // Event iterator
+    class iterator {
+    friend class GData;
+    public:
+        iterator(GData *data);
+        ~iterator();
+        iterator& operator++(void);                // Prefix
+        iterator  operator++(int junk);            // Postfix
+        bool      operator==(const iterator& it) const;
+        bool      operator!=(const iterator& it) const;
+        GEvent&   operator*(void);
+        GEvent*   operator->(void);
+    protected:
+        int           m_obs_index;    //!< Actual observation index [0,m_num-1]
+        int           m_event_index;  //!< Actual event index
+        int           m_num_events;   //!< Total number of events in actual observation
+        GObservation *m_obs;          //!< Pointer to actual observation
+        GData        *m_data;         //!< Pointer to GData object
+    };
+    iterator begin(void);
+    iterator end(void);
+
 protected:
     // Protected methods
     void           init_members(void);

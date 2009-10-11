@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GEvents.cpp  -  Events abstract base class                *
+ *                GEvents.cpp  -  Events container class                   *
  * ----------------------------------------------------------------------- *
  *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
@@ -13,7 +13,7 @@
  ***************************************************************************/
 /**
  * @file GEvents.cpp
- * @brief GEvents abstract base class implementation.
+ * @brief GEvents container class implementation.
  * @author J. Knodlseder
  */
 
@@ -29,7 +29,6 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-
 
 
 /*==========================================================================
@@ -116,9 +115,150 @@ GEvents& GEvents::operator= (const GEvents& events)
 
 /*==========================================================================
  =                                                                         =
+ =                          GEvents event iterator                         =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Iterator Constructor
+ ***************************************************************************/
+GEvents::iterator::iterator(GEvents *events)
+{
+    // Initialise iterator
+    m_num   = (events != NULL) ? events->m_num : 0;
+    m_index = 0;
+    m_base  = events;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Iterator Destructor
+ ***************************************************************************/
+GEvents::iterator::~iterator()
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Iterator prefix operator
+ ***************************************************************************/
+GEvents::iterator& GEvents::iterator::operator++(void)
+{
+    // Get next event
+    m_index++;
+    
+    // Return
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Iterator postfix operator
+ ***************************************************************************/
+GEvents::iterator GEvents::iterator::operator++(int junk)
+{
+    // Save actual iterator
+    GEvents::iterator actual = *this;
+    
+    // Increment using prefix iterator
+    ++(*this);
+    
+    // Return actual iterator
+    return actual;
+}
+
+
+/***********************************************************************//**
+ * @brief Iterator == operator
+ ***************************************************************************/
+bool GEvents::iterator::operator==(const iterator& it) const
+{
+    // Return result
+    return (m_index == it.m_index);
+}
+
+
+/***********************************************************************//**
+ * @brief Iterator != operator
+ ***************************************************************************/
+bool GEvents::iterator::operator!=(const iterator& it) const
+{
+    // Return result
+    return (m_index != it.m_index);
+}
+
+
+/***********************************************************************//**
+ * @brief Iterator dereference operator
+ ***************************************************************************/
+GEvent& GEvents::iterator::operator*(void)
+{
+    // Return event
+    return *(m_base->pointer(m_index));
+}
+
+
+/***********************************************************************//**
+ * @brief Iterator pointer operator
+ ***************************************************************************/
+GEvent* GEvents::iterator::operator->(void)
+{
+    // Return pointer to event
+    return m_base->pointer(m_index);
+}
+
+
+/***********************************************************************//**
+ * @brief Get iterator for first event
+ ***************************************************************************/
+GEvents::iterator GEvents::begin(void)
+{
+    // Allocate iterator object
+    GEvents::iterator iter(this);
+
+    // Set iterator for first event
+    iter.m_index = 0;
+	
+    // Return
+    return iter;
+}
+
+
+/***********************************************************************//**
+ * @brief Get iterator after last event
+ ***************************************************************************/
+GEvents::iterator GEvents::end(void)
+{
+    // Allocate iterator object
+    GEvents::iterator iter(this);
+    
+    // Set iterator beyond last event
+    iter.m_index = iter.m_num;
+	
+    // Return
+    return iter;
+}
+
+
+/*==========================================================================
+ =                                                                         =
  =                         GEvents public methods                          =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Return number of events
+ ***************************************************************************/
+int GEvents::num(void) const
+{
+    // Return
+    return m_num;
+}
 
 
 /*==========================================================================
@@ -132,8 +272,6 @@ GEvents& GEvents::operator= (const GEvents& events)
  ***************************************************************************/
 void GEvents::init_members(void)
 {
-    // Initialise members
-
     // Return
     return;
 }
@@ -146,10 +284,6 @@ void GEvents::init_members(void)
  ***************************************************************************/
 void GEvents::copy_members(const GEvents& events)
 {
-    // Copy attributes
-
-    // Clone members
-
     // Return
     return;
 }
@@ -160,10 +294,6 @@ void GEvents::copy_members(const GEvents& events)
  ***************************************************************************/
 void GEvents::free_members(void)
 {
-    // Free memory
-
-    // Signal free pointers
-
     // Return
     return;
 }
@@ -174,6 +304,22 @@ void GEvents::free_members(void)
  =                             GEvents friends                             =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream into which the events will be dumped
+ * @param[in] events Events to be dumped
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GEvents& events)
+{
+    // Put header in stream
+    os << "=== GEvents ===" << std::endl;
+    os << " Number of events ..........: " << events.m_num << std::endl;
+        
+    // Return output stream
+    return os;
+}
 
 
 /*==========================================================================
