@@ -21,7 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GEventList.hpp"
-#include "GLATEvent.hpp"
+#include "GLATEventAtom.hpp"
 #include "GFits.hpp"
 
 
@@ -45,9 +45,9 @@ public:
     GLATEventList& operator= (const GLATEventList& list);
 
     // Methods
-	void       load(const std::string& filename);
-    void       load(GFitsHDU* hdu);
-    GLATEvent* pointer(int index) const;
+	void           load(const std::string& filename);
+    void           load(GFitsHDU* hdu);
+    GLATEventAtom* pointer(int index) const;
     
 protected:
     // Protected methods
