@@ -132,11 +132,6 @@ GEvent& GEvent::operator= (const GEvent& event)
  ***************************************************************************/
 void GEvent::init_members(void)
 {
-    // Initialise attributes
-    m_time   = 0.0;
-    m_energy = 0.0;
-    m_dir.radec(0.0, 0.0);
-
     // Return
     return;
 }
@@ -149,11 +144,6 @@ void GEvent::init_members(void)
  ***************************************************************************/
 void GEvent::copy_members(const GEvent& event)
 {
-    // Copy attributes
-    m_time   = event.m_time;
-    m_energy = event.m_energy;
-    m_dir    = event.m_dir;
-
     // Return
     return;
 }
@@ -176,17 +166,15 @@ void GEvent::free_members(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Output operator
+ * @brief Put event into an output stream
  *
  * @param[in] os Output stream into which the event will be dumped
  * @param[in] event Event to be dumped
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GEvent& event)
 {
-    // Put event in stream
-    os << "Time=" << fixed << setprecision(3) << event.m_time;
-    os << " Energy=" << fixed << setprecision(3) << event.m_energy;
-    os << " " << event.m_dir;
+    // Put event in output stream
+    os << (&event)->pipe(os);
         
     // Return output stream
     return os;
