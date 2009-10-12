@@ -123,26 +123,6 @@ GEventAtom& GEventAtom::operator= (const GEventAtom& atom)
  =                                                                         =
  ==========================================================================*/
 
-/***********************************************************************//**
- * @brief Converts event into string
- ***************************************************************************/
-std::string GEventAtom::string(void) const
-{
-    // Allocate buffer for event
-    char buffer[80];
-    
-    // Get Right Ascension and Declination
-    GSkyDir dir = m_dir;
-    
-    // Put event in buffer
-    sprintf(buffer, "Time=%14.3f Energy=%12.3f MeV (RA,Dec)=(%7.3f,%7.3f)",
-            m_time, m_energy, dir.ra_deg(), dir.dec_deg());
-    
-    // Return as string
-    return std::string(buffer);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                        GEventAtom private methods                       =
@@ -196,6 +176,26 @@ void GEventAtom::free_members(void)
  =                            GEventAtom friends                           =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Put atom into output stream
+ *
+ * @param[in] os Output stream into which the atom will be dumped
+ * @param[in] atom Atom to be dumped
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GEventAtom& atom)
+{
+    // Put bin in output stream
+    os.precision(3);
+    os << fixed;
+    os << "Time=" << atom.m_time;
+    os << " Energy=" << atom.m_energy;
+    os << atom.m_dir; 
+        
+    // Return output stream
+    return os;
+}
+
 
 /*==========================================================================
  =                                                                         =
