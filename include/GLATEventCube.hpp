@@ -33,6 +33,9 @@
  ***************************************************************************/
 class GLATEventCube : public GEventCube {
 
+    // Friend classes
+    friend class GLATObservation;
+
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GLATEventCube& cube);
 
