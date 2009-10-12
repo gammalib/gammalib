@@ -47,16 +47,20 @@ public:
     // Operators
     virtual GEvents& operator= (const GEvents& events);
 
-    // Methods
-	int             num(void) const;
+    // Virtual methods
 	virtual void    load(const std::string& filename) = 0;
     virtual void    load(GFitsHDU* hdu) = 0;
     virtual GEvent* pointer(int index) const = 0;
+    virtual int     number(void) const = 0;
+    
+    // Implemented methods
+	int elements(void) const;
 
     // Event iterator
     class iterator {
     friend class GEvents;
     public:
+        iterator();
         iterator(GEvents *events);
         ~iterator();
         iterator& operator++(void);                // Prefix
@@ -64,7 +68,6 @@ public:
         bool      operator==(const iterator& it) const;
         bool      operator!=(const iterator& it) const;
         GEvent&   operator*(void);
-        GEvent*   operator->(void);
     protected:
         int      m_index;        //!< Actuel event index
         int      m_num;          //!< Number of events in GEvents object
@@ -81,8 +84,8 @@ protected:
     virtual GEvents* clone(void) const = 0;
 
     // Protected data area
-    int     m_num;              //!< Number of events
-    GEvent *m_events;           //!< Pointer to events
+    int     m_num;               //!< Number of events in list or bins in cube
+    GEvent *m_events;            //!< Pointer to event list or cube pixels
 
 private:
 };

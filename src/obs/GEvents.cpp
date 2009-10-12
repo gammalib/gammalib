@@ -122,6 +122,21 @@ GEvents& GEvents::operator= (const GEvents& events)
 /***********************************************************************//**
  * @brief Iterator Constructor
  ***************************************************************************/
+GEvents::iterator::iterator()
+{
+    // Initialise iterator
+    m_num   = 0;
+    m_index = 0;
+    m_base  = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Iterator Constructor
+ ***************************************************************************/
 GEvents::iterator::iterator(GEvents *events)
 {
     // Initialise iterator
@@ -204,16 +219,6 @@ GEvent& GEvents::iterator::operator*(void)
 
 
 /***********************************************************************//**
- * @brief Iterator pointer operator
- ***************************************************************************/
-GEvent* GEvents::iterator::operator->(void)
-{
-    // Return pointer to event
-    return m_base->pointer(m_index);
-}
-
-
-/***********************************************************************//**
  * @brief Get iterator for first event
  ***************************************************************************/
 GEvents::iterator GEvents::begin(void)
@@ -252,9 +257,9 @@ GEvents::iterator GEvents::end(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return number of events
+ * @brief Return number of elements (either events in list or pixels in cube)
  ***************************************************************************/
-int GEvents::num(void) const
+int GEvents::elements(void) const
 {
     // Return
     return m_num;
@@ -315,7 +320,7 @@ std::ostream& operator<< (std::ostream& os, const GEvents& events)
 {
     // Put header in stream
     os << "=== GEvents ===" << std::endl;
-    os << " Number of events ..........: " << events.m_num << std::endl;
+    os << " Number of elements ........: " << events.elements() << std::endl;
         
     // Return output stream
     return os;
