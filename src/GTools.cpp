@@ -14,6 +14,10 @@
 /* __ Includes ___________________________________________________________ */
 #include <sstream>
 #include "GTools.hpp"
+#include <cmath>
+#include <string>
+#include <algorithm>
+#include <cctype>
 
 
 /***********************************************************************//**
@@ -52,6 +56,32 @@ std::string str(const int& value)
     std::ostringstream s_value;
     s_value << value;
     return  s_value.str();
+}
+
+
+/***********************************************************************//**
+ * @brief Convert string to upper case
+ *
+ * @param[in] arg String to be converted to upper case.
+ ***************************************************************************/
+std::string toupper(const std::string& arg)
+{
+    std::string s = arg;
+    std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper);
+    return s;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert string to lower case
+ *
+ * @param[in] arg String to be converted to upper case.
+ ***************************************************************************/
+std::string tolower(const std::string& arg)
+{
+    std::string s = arg;
+    std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) tolower);
+    return s;
 }
 
 

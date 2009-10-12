@@ -15,8 +15,6 @@
 #define GTOOLS_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <cmath>
-#include <string>
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -39,6 +37,8 @@ const double fourthird   =  4.0/3.0;
 /* __ Prototypes ________________________________________________________ */
 std::string strip_whitespace(const std::string& arg);
 std::string str(const int& value);
+std::string toupper(const std::string& s);
+std::string tolower(const std::string& s);
 double      modulo(double v1, double v2);
 
 #endif /* GTOOLS_HPP */
