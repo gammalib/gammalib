@@ -43,9 +43,9 @@ public:
     virtual GEventBin& operator= (const GEventBin& bin);
 
     // Virtual methods
+    virtual std::string string(void) const = 0;
     
     // Implemented methods
-    std::string string(void) const;
     
 protected:
     // Protected methods
