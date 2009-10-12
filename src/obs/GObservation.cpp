@@ -19,7 +19,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
-#include <iomanip.h>
 #include "GException.hpp"
 #include "GObservation.hpp"
 
@@ -300,13 +299,14 @@ void GObservation::free_members(void)
 std::ostream& operator<< (std::ostream& os, const GObservation& obs)
 {
     // Put observation in stream
+    os.precision(3);
     os << "=== GObservation ===" << std::endl;
     os << " Name ......................: " << obs.m_obsname << std::endl;
     os << " Instrument ................: " << obs.m_instrument << std::endl;
-    os << " Time range ................: " << fixed << setprecision(3) << 
+    os << " Time range ................: " << std::fixed << 
             obs.m_tstart << " - " << obs.m_tstop << std::endl;
-    os << " Energy range ..............: " << fixed << setprecision(3) << 
-            obs.m_emin << " - " << obs.m_emax << std::endl;
+    os << " Energy range ..............: " << std::fixed << 
+            obs.m_emin << " - " << obs.m_emax << " MeV" << std::endl;
 
     // Add event list to stream
     if (obs.m_events != NULL)

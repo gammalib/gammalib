@@ -320,7 +320,8 @@ std::ostream& operator<< (std::ostream& os, const GEvents& events)
 {
     // Put header in stream
     os << "=== GEvents ===" << std::endl;
-    os << " Number of elements ........: " << events.elements();
+    os << " Number of elements ........: " << events.elements() << std::endl;
+    os << " Number of events ..........: " << events.number();
         
     // Return output stream
     return os;
