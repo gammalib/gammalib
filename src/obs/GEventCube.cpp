@@ -124,16 +124,6 @@ GEventCube& GEventCube::operator= (const GEventCube& cube)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return number of events in cube
- ***************************************************************************/
-int GEventCube::number(void) const
-{
-    // Return
-    return 0;  // DUMMY DUMMY
-}
-
-
-/***********************************************************************//**
  * @brief Return number of elements in cube
  ***************************************************************************/
 int GEventCube::elements(void) const
