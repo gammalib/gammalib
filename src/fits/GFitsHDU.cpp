@@ -22,7 +22,8 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsHDU.hpp"
-#include "GFitsDblImage.hpp"
+#include "GFitsImageFlt.hpp"
+#include "GFitsImageDbl.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OPEN      "GFitsHDU::open(int)"
@@ -588,22 +589,22 @@ GFitsImage* GFitsHDU::new_image(void)
     // Allocate bitpix dependent image
     switch (bitpix) {
     case 8:
-        image = new GFitsDblImage();  // TO BE REPLACED BY CORRECT CLASS
+        image = new GFitsImageDbl();  // TO BE REPLACED BY CORRECT CLASS
         break;
     case 16:
-        image = new GFitsDblImage();  // TO BE REPLACED BY CORRECT CLASS
+        image = new GFitsImageDbl();  // TO BE REPLACED BY CORRECT CLASS
         break;
     case 32:
-        image = new GFitsDblImage();  // TO BE REPLACED BY CORRECT CLASS
+        image = new GFitsImageDbl();  // TO BE REPLACED BY CORRECT CLASS
         break;
     case 64:
-        image = new GFitsDblImage();  // TO BE REPLACED BY CORRECT CLASS
+        image = new GFitsImageDbl();  // TO BE REPLACED BY CORRECT CLASS
         break;
     case -32:
-        image = new GFitsDblImage();  // TO BE REPLACED BY CORRECT CLASS
+        image = new GFitsImageFlt();
         break;
     case -64:
-        image = new GFitsDblImage();
+        image = new GFitsImageDbl();
         break;
     default:
         throw GException::fits_bad_bitpix(G_OPEN, m_type);
