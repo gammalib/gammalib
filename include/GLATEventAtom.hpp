@@ -64,7 +64,10 @@ protected:
     short   m_event_class;          //!< Event class: 0, 1, 2, ...
     short   m_conversion_type;      //!< Type of conversion: 0=Front, 1=Back
     double  m_livetime;             //!< Accumulated livetime since mission start
-    double  m_difrsp[5];            //!< Diffuse response components
+    double* m_difrsp;               //!< Diffuse response components
+    
+    // Other attributes
+    int     m_num_difrsp;           //!< Number of diffuse model components
 };
 
 #endif /* GLATEVENTATOM_HPP */

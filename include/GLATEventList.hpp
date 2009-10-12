@@ -55,8 +55,19 @@ protected:
     void           copy_members(const GLATEventList& list);
     void           free_members(void);
     GLATEventList* clone(void) const;
+    void           load_events(GFitsHDU* hdu);
+    void           load_ds_keys(GFitsHDU* hdu);
 
-    // Protected data area
+    // Diffuse response information
+    int          m_num_difrsp;       //!< Number of diffuse response models
+    std::string* m_difrsp_label;     //!< Diffuse response model labels
+    
+    // Data selection information
+    int          m_ds_num;           //!< Number of data selection keys
+    std::string* m_ds_type;          //!< Data selection types
+    std::string* m_ds_unit;          //!< Data selection units
+    std::string* m_ds_value;         //!< Data selection values
+    std::string* m_ds_reference;     //!< Data selection references
 
 private:
 };
