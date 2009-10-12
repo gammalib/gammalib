@@ -50,6 +50,7 @@ public:
     class iterator {
     friend class GData;
     public:
+        iterator();
         iterator(GData *data);
         ~iterator();
         iterator& operator++(void);                // Prefix
@@ -57,13 +58,12 @@ public:
         bool      operator==(const iterator& it) const;
         bool      operator!=(const iterator& it) const;
         GEvent&   operator*(void);
-        GEvent*   operator->(void);
     protected:
-        int           m_obs_index;    //!< Actual observation index [0,m_num-1]
-        int           m_event_index;  //!< Actual event index
-        int           m_num_events;   //!< Total number of events in actual observation
-        GObservation *m_obs;          //!< Pointer to actual observation
-        GData        *m_data;         //!< Pointer to GData object
+        int               m_index;   //!< Actual observation index [0,m_num-1]
+        GEvents::iterator m_event;   //!< Iterator on actual event
+        GEvents::iterator m_end;     //!< Iterator on observation end
+        GObservation*     m_obs;     //!< Pointer to actual observation
+        GData*            m_data;    //!< Pointer to GData object
     };
     iterator begin(void);
     iterator end(void);
@@ -75,8 +75,8 @@ protected:
     void           free_members(void);
 
     // Protected data area
-	int            m_num;       //!< Number of observations
-	GObservation **m_obs;       //!< Pointers to observations
+	int            m_num;            //!< Number of observations
+	GObservation **m_obs;            //!< Pointers to observations
 	
 private:
 };
