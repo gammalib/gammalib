@@ -58,7 +58,7 @@ public:
     // Methods
     void   link(float* pixels);
     void   set_nullval(const float* value);
-    float* pixels(void) const;
+    float* pixels(void);
 
 private:
     // Private methods

@@ -483,8 +483,11 @@ void GFitsImageFlt::set_nullval(const float* value)
 /***********************************************************************//**
  * @brief Return pointer to image pixel
  ***************************************************************************/
-float* GFitsImageFlt::pixels(void) const
+float* GFitsImageFlt::pixels(void)
 {
+    // If image pixels are not available then allocate them now
+    if (m_pixels == NULL) fetch_pixels();
+
     // Return
     return m_pixels;
 }

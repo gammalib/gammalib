@@ -483,8 +483,11 @@ void GFitsImageDbl::set_nullval(const double* value)
 /***********************************************************************//**
  * @brief Return pointer to image pixel
  ***************************************************************************/
-double* GFitsImageDbl::pixels(void) const
+double* GFitsImageDbl::pixels(void)
 {
+    // If image pixels are not available then allocate them now
+    if (m_pixels == NULL) fetch_pixels();
+
     // Return
     return m_pixels;
 }

@@ -37,7 +37,7 @@ public:
     // Methods
     void    link(double* pixels);
     void    set_nullval(const double* value);
-    double* pixels(void) const;
+    double* pixels(void);
 };
 
 
