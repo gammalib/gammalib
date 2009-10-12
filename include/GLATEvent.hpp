@@ -31,7 +31,8 @@
 class GLATEvent : public GEvent {
 
     // Friend classes
-    friend class GLATEvents;
+    friend class GLATEventList;
+    friend class GLATEventCube;
 
 public:
     // Constructors and destructors

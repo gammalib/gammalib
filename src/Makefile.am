@@ -17,11 +17,14 @@ files = GException.cpp \
 	obs/GData.cpp \
 	obs/GObservation.cpp \
 	obs/GEvents.cpp \
+	obs/GEventList.cpp \
+	obs/GEventCube.cpp \
 	obs/GEvent.cpp \
 	obs/GGti.cpp \
 	obs/GResponse.cpp \
 	lat/GLATObservation.cpp \
-	lat/GLATEvents.cpp \
+	lat/GLATEventList.cpp \
+	lat/GLATEventCube.cpp \
 	lat/GLATEvent.cpp \
 	lat/GLATResponse.cpp \
 	lat/GLATResponseTable.cpp \

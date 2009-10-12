@@ -53,7 +53,7 @@ public:
     virtual GEvent* pointer(int index) const = 0;
 
     // Implemented methods
-    int     number(void) const;
+    int number(void) const;
 	int dim(void) const;
     int naxis(int axis) const;
 

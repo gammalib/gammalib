@@ -32,6 +32,8 @@ class GEvent {
 
     // Friend classes
     friend class GEvents;
+//    friend class GEventList;
+//    friend class GEventCube;
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GEvent& event);

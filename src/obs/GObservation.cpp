@@ -307,8 +307,12 @@ std::ostream& operator<< (std::ostream& os, const GObservation& obs)
             obs.m_tstart << " - " << obs.m_tstop << std::endl;
     os << " Energy range ..............: " << fixed << setprecision(3) << 
             obs.m_emin << " - " << obs.m_emax << std::endl;
+
+    // Add event list to stream
     if (obs.m_events != NULL)
-        os << *(obs.m_events);
+        os << *(obs.m_events) << std::endl;
+
+    // Add GTIs to stream
     if (obs.m_gti != NULL)
         os << *(obs.m_gti);
         

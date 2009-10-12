@@ -30,6 +30,9 @@
  ***************************************************************************/
 class GLATObservation : public GObservation {
 
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GLATObservation& obs);
+
 public:
     // Constructors and destructors
     GLATObservation();
