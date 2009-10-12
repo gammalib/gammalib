@@ -20,12 +20,15 @@ files = GException.cpp \
 	obs/GEventList.cpp \
 	obs/GEventCube.cpp \
 	obs/GEvent.cpp \
+	obs/GEventAtom.cpp \
+	obs/GEventBin.cpp \
 	obs/GGti.cpp \
 	obs/GResponse.cpp \
 	lat/GLATObservation.cpp \
 	lat/GLATEventList.cpp \
 	lat/GLATEventCube.cpp \
-	lat/GLATEvent.cpp \
+	lat/GLATEventAtom.cpp \
+	lat/GLATEventBin.cpp \
 	lat/GLATResponse.cpp \
 	lat/GLATResponseTable.cpp \
 	lat/GLATAeff.cpp \

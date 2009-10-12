@@ -36,7 +36,8 @@
 #include "GLATObservation.hpp"
 #include "GLATEventList.hpp"
 #include "GLATEventCube.hpp"
-#include "GLATEvent.hpp"
+#include "GLATEventAtom.hpp"
+#include "GLATEventBin.hpp"
 #include "GLATResponse.hpp"
 
 /* __ Image module _______________________________________________________ */

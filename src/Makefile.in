@@ -77,17 +77,18 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libgamma_la_LIBADD =
 am__objects_1 = GException.lo GTools.lo GSkyDir.lo GNodeArray.lo \
 	GImage.lo GHealpix.lo GData.lo GObservation.lo GEvents.lo \
-	GEventList.lo GEventCube.lo GEvent.lo GGti.lo GResponse.lo \
-	GLATObservation.lo GLATEventList.lo GLATEventCube.lo \
-	GLATEvent.lo GLATResponse.lo GLATResponseTable.lo GLATAeff.lo \
-	GLATPsf.lo GLATEdisp.lo GFitsHeaderCard.lo GFitsHeader.lo \
-	GFitsData.lo GFitsImage.lo GFitsDblImage.lo GFitsTable.lo \
-	GFitsAsciiTable.lo GFitsBinTable.lo GFitsTableCol.lo \
-	GFitsTableLogCol.lo GFitsTableStrCol.lo GFitsTableShtCol.lo \
-	GFitsTableLngCol.lo GFitsTableFltCol.lo GFitsTableDblCol.lo \
-	GFitsHDU.lo GFits.lo GFitPar.lo GVector.lo GMatrixBase.lo \
-	GMatrix.lo GSymMatrix.lo GSparseMatrix.lo GSparseSymbolic.lo \
-	GSparseNumeric.lo
+	GEventList.lo GEventCube.lo GEvent.lo GEventAtom.lo \
+	GEventBin.lo GGti.lo GResponse.lo GLATObservation.lo \
+	GLATEventList.lo GLATEventCube.lo GLATEventAtom.lo \
+	GLATEventBin.lo GLATResponse.lo GLATResponseTable.lo \
+	GLATAeff.lo GLATPsf.lo GLATEdisp.lo GFitsHeaderCard.lo \
+	GFitsHeader.lo GFitsData.lo GFitsImage.lo GFitsDblImage.lo \
+	GFitsTable.lo GFitsAsciiTable.lo GFitsBinTable.lo \
+	GFitsTableCol.lo GFitsTableLogCol.lo GFitsTableStrCol.lo \
+	GFitsTableShtCol.lo GFitsTableLngCol.lo GFitsTableFltCol.lo \
+	GFitsTableDblCol.lo GFitsHDU.lo GFits.lo GFitPar.lo GVector.lo \
+	GMatrixBase.lo GMatrix.lo GSymMatrix.lo GSparseMatrix.lo \
+	GSparseSymbolic.lo GSparseNumeric.lo
 am_libgamma_la_OBJECTS = $(am__objects_1)
 libgamma_la_OBJECTS = $(am_libgamma_la_OBJECTS)
 libgamma_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
@@ -249,12 +250,15 @@ files = GException.cpp \
 	obs/GEventList.cpp \
 	obs/GEventCube.cpp \
 	obs/GEvent.cpp \
+	obs/GEventAtom.cpp \
+	obs/GEventBin.cpp \
 	obs/GGti.cpp \
 	obs/GResponse.cpp \
 	lat/GLATObservation.cpp \
 	lat/GLATEventList.cpp \
 	lat/GLATEventCube.cpp \
-	lat/GLATEvent.cpp \
+	lat/GLATEventAtom.cpp \
+	lat/GLATEventBin.cpp \
 	lat/GLATResponse.cpp \
 	lat/GLATResponseTable.cpp \
 	lat/GLATAeff.cpp \
@@ -392,6 +396,12 @@ GEventCube.lo: obs/GEventCube.cpp
 GEvent.lo: obs/GEvent.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GEvent.lo `test -f 'obs/GEvent.cpp' || echo '$(srcdir)/'`obs/GEvent.cpp
 
+GEventAtom.lo: obs/GEventAtom.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GEventAtom.lo `test -f 'obs/GEventAtom.cpp' || echo '$(srcdir)/'`obs/GEventAtom.cpp
+
+GEventBin.lo: obs/GEventBin.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GEventBin.lo `test -f 'obs/GEventBin.cpp' || echo '$(srcdir)/'`obs/GEventBin.cpp
+
 GGti.lo: obs/GGti.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GGti.lo `test -f 'obs/GGti.cpp' || echo '$(srcdir)/'`obs/GGti.cpp
 
@@ -407,8 +417,11 @@ GLATEventList.lo: lat/GLATEventList.cpp
 GLATEventCube.lo: lat/GLATEventCube.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATEventCube.lo `test -f 'lat/GLATEventCube.cpp' || echo '$(srcdir)/'`lat/GLATEventCube.cpp
 
-GLATEvent.lo: lat/GLATEvent.cpp
-	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATEvent.lo `test -f 'lat/GLATEvent.cpp' || echo '$(srcdir)/'`lat/GLATEvent.cpp
+GLATEventAtom.lo: lat/GLATEventAtom.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATEventAtom.lo `test -f 'lat/GLATEventAtom.cpp' || echo '$(srcdir)/'`lat/GLATEventAtom.cpp
+
+GLATEventBin.lo: lat/GLATEventBin.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATEventBin.lo `test -f 'lat/GLATEventBin.cpp' || echo '$(srcdir)/'`lat/GLATEventBin.cpp
 
 GLATResponse.lo: lat/GLATResponse.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATResponse.lo `test -f 'lat/GLATResponse.cpp' || echo '$(srcdir)/'`lat/GLATResponse.cpp

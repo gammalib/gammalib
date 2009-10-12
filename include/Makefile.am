@@ -10,12 +10,15 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GEventList.hpp \
 		     GEventCube.hpp \
 		     GEvent.hpp \
+		     GEventAtom.hpp \
+		     GEventBin.hpp \
 		     GGti.hpp \
 		     GResponse.hpp \
 		     GLATObservation.hpp \
 		     GLATEventList.hpp \
 		     GLATEventCube.hpp \
-		     GLATEvent.hpp \
+		     GLATEventAtom.hpp \
+		     GLATEventBin.hpp \
 		     GLATResponse.hpp \
 		     GLATResponseTable.hpp \
 		     GFitsHeaderCard.hpp \
