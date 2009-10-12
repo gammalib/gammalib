@@ -23,6 +23,7 @@ files = GException.cpp \
 	obs/GEventAtom.cpp \
 	obs/GEventBin.cpp \
 	obs/GGti.cpp \
+	obs/GEbounds.cpp \
 	obs/GResponse.cpp \
 	lat/GLATObservation.cpp \
 	lat/GLATEventList.cpp \
@@ -38,7 +39,8 @@ files = GException.cpp \
 	fits/GFitsHeader.cpp \
 	fits/GFitsData.cpp \
 	fits/GFitsImage.cpp \
-	fits/GFitsDblImage.cpp \
+	fits/GFitsImageFlt.cpp \
+	fits/GFitsImageDbl.cpp \
 	fits/GFitsTable.cpp \
 	fits/GFitsAsciiTable.cpp \
 	fits/GFitsBinTable.cpp \

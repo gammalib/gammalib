@@ -13,6 +13,7 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GEventAtom.hpp \
 		     GEventBin.hpp \
 		     GGti.hpp \
+		     GEbounds.hpp \
 		     GResponse.hpp \
 		     GLATObservation.hpp \
 		     GLATEventList.hpp \
@@ -25,7 +26,8 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GFitsHeader.hpp \
 		     GFitsData.hpp \
 		     GFitsImage.hpp \
-		     GFitsDblImage.hpp \
+		     GFitsImageFlt.hpp \
+		     GFitsImageDbl.hpp \
 		     GFitsTable.hpp \
 		     GFitsAsciiTable.hpp \
 		     GFitsBinTable.hpp \

@@ -78,17 +78,18 @@ libgamma_la_LIBADD =
 am__objects_1 = GException.lo GTools.lo GSkyDir.lo GNodeArray.lo \
 	GImage.lo GHealpix.lo GData.lo GObservation.lo GEvents.lo \
 	GEventList.lo GEventCube.lo GEvent.lo GEventAtom.lo \
-	GEventBin.lo GGti.lo GResponse.lo GLATObservation.lo \
-	GLATEventList.lo GLATEventCube.lo GLATEventAtom.lo \
-	GLATEventBin.lo GLATResponse.lo GLATResponseTable.lo \
-	GLATAeff.lo GLATPsf.lo GLATEdisp.lo GFitsHeaderCard.lo \
-	GFitsHeader.lo GFitsData.lo GFitsImage.lo GFitsDblImage.lo \
-	GFitsTable.lo GFitsAsciiTable.lo GFitsBinTable.lo \
-	GFitsTableCol.lo GFitsTableLogCol.lo GFitsTableStrCol.lo \
-	GFitsTableShtCol.lo GFitsTableLngCol.lo GFitsTableFltCol.lo \
-	GFitsTableDblCol.lo GFitsHDU.lo GFits.lo GFitPar.lo GVector.lo \
-	GMatrixBase.lo GMatrix.lo GSymMatrix.lo GSparseMatrix.lo \
-	GSparseSymbolic.lo GSparseNumeric.lo
+	GEventBin.lo GGti.lo GEbounds.lo GResponse.lo \
+	GLATObservation.lo GLATEventList.lo GLATEventCube.lo \
+	GLATEventAtom.lo GLATEventBin.lo GLATResponse.lo \
+	GLATResponseTable.lo GLATAeff.lo GLATPsf.lo GLATEdisp.lo \
+	GFitsHeaderCard.lo GFitsHeader.lo GFitsData.lo GFitsImage.lo \
+	GFitsImageFlt.lo GFitsImageDbl.lo GFitsTable.lo \
+	GFitsAsciiTable.lo GFitsBinTable.lo GFitsTableCol.lo \
+	GFitsTableLogCol.lo GFitsTableStrCol.lo GFitsTableShtCol.lo \
+	GFitsTableLngCol.lo GFitsTableFltCol.lo GFitsTableDblCol.lo \
+	GFitsHDU.lo GFits.lo GFitPar.lo GVector.lo GMatrixBase.lo \
+	GMatrix.lo GSymMatrix.lo GSparseMatrix.lo GSparseSymbolic.lo \
+	GSparseNumeric.lo
 am_libgamma_la_OBJECTS = $(am__objects_1)
 libgamma_la_OBJECTS = $(am_libgamma_la_OBJECTS)
 libgamma_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
@@ -253,6 +254,7 @@ files = GException.cpp \
 	obs/GEventAtom.cpp \
 	obs/GEventBin.cpp \
 	obs/GGti.cpp \
+	obs/GEbounds.cpp \
 	obs/GResponse.cpp \
 	lat/GLATObservation.cpp \
 	lat/GLATEventList.cpp \
@@ -268,7 +270,8 @@ files = GException.cpp \
 	fits/GFitsHeader.cpp \
 	fits/GFitsData.cpp \
 	fits/GFitsImage.cpp \
-	fits/GFitsDblImage.cpp \
+	fits/GFitsImageFlt.cpp \
+	fits/GFitsImageDbl.cpp \
 	fits/GFitsTable.cpp \
 	fits/GFitsAsciiTable.cpp \
 	fits/GFitsBinTable.cpp \
@@ -405,6 +408,9 @@ GEventBin.lo: obs/GEventBin.cpp
 GGti.lo: obs/GGti.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GGti.lo `test -f 'obs/GGti.cpp' || echo '$(srcdir)/'`obs/GGti.cpp
 
+GEbounds.lo: obs/GEbounds.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GEbounds.lo `test -f 'obs/GEbounds.cpp' || echo '$(srcdir)/'`obs/GEbounds.cpp
+
 GResponse.lo: obs/GResponse.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GResponse.lo `test -f 'obs/GResponse.cpp' || echo '$(srcdir)/'`obs/GResponse.cpp
 
@@ -450,8 +456,11 @@ GFitsData.lo: fits/GFitsData.cpp
 GFitsImage.lo: fits/GFitsImage.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsImage.lo `test -f 'fits/GFitsImage.cpp' || echo '$(srcdir)/'`fits/GFitsImage.cpp
 
-GFitsDblImage.lo: fits/GFitsDblImage.cpp
-	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsDblImage.lo `test -f 'fits/GFitsDblImage.cpp' || echo '$(srcdir)/'`fits/GFitsDblImage.cpp
+GFitsImageFlt.lo: fits/GFitsImageFlt.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsImageFlt.lo `test -f 'fits/GFitsImageFlt.cpp' || echo '$(srcdir)/'`fits/GFitsImageFlt.cpp
+
+GFitsImageDbl.lo: fits/GFitsImageDbl.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsImageDbl.lo `test -f 'fits/GFitsImageDbl.cpp' || echo '$(srcdir)/'`fits/GFitsImageDbl.cpp
 
 GFitsTable.lo: fits/GFitsTable.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitsTable.lo `test -f 'fits/GFitsTable.cpp' || echo '$(srcdir)/'`fits/GFitsTable.cpp
