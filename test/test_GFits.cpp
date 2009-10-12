@@ -53,7 +53,7 @@ void test_create(void)
     try {
         GFits fits;
         fits.open("test.fits");
-        GFitsDblImage image;
+        GFitsImageDbl image;
         GFitsHDU hdu(image);
         fits.append_hdu(hdu);
         fits.save();
@@ -74,7 +74,7 @@ void test_create(void)
         int nx          = 10;
         int ny          = 20;
         int naxes[]     = {nx,ny};
-        GFitsDblImage image(naxis, naxes);
+        GFitsImageDbl image(naxis, naxes);
         for (int ix = 0; ix < nx; ++ix) {
             for (int iy = 0; iy < ny; ++iy) {
                 image(ix,iy) = 0.01*ix + 0.01*iy;
@@ -97,7 +97,7 @@ void test_create(void)
         GFits fits;
         fits.open("test.fits");
         GFitsHDU*      hdu   = fits.hdu(1);
-        GFitsDblImage* image = (GFitsDblImage*)hdu->data();
+        GFitsImageDbl* image = (GFitsImageDbl*)hdu->data();
         int nx = image->naxes(0);
         int ny = image->naxes(1);
         double total = 0.0;
@@ -171,7 +171,7 @@ void test_image_double(void)
         int naxis       = 1;
         int nx          = 10;
         int naxes[]     = {nx};
-        GFitsDblImage image(naxis, naxes);
+        GFitsImageDbl image(naxis, naxes);
         cout << ".";
 
         // Fill and read image

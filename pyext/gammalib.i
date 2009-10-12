@@ -36,7 +36,7 @@
 #include "GFitsHeaderCard.i"
 #include "GFitsData.i"
 #include "GFitsImage.i"
-#include "GFitsDblImage.i"
+#include "GFitsImageDbl.i"
 #include "GFitsTable.i"
 #include "GFitsAsciiTable.i"
 #include "GFitsBinTable.i"
