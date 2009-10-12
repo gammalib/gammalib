@@ -22,6 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GEventCube.hpp"
 #include "GLATEventBin.hpp"
+#include "GEbounds.hpp"
 #include "GFits.hpp"
 
 
@@ -31,6 +32,9 @@
  * @brief GLATEventCube class interface defintion.
  ***************************************************************************/
 class GLATEventCube : public GEventCube {
+
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GLATEventCube& cube);
 
 public:
     // Constructors and destructors
@@ -43,8 +47,8 @@ public:
 
     // Methods
 	void          load(const std::string& filename);
-    void          load(GFitsHDU* hdu);
     GLATEventBin* pointer(int index) const;
+    int           number(void) const;
     
 protected:
     // Protected methods
@@ -52,9 +56,11 @@ protected:
     void           copy_members(const GLATEventCube& cube);
     void           free_members(void);
     GLATEventCube* clone(void) const;
+    void           load_cntmap(GFitsHDU* hdu);
 
     // Protected data area
     GLATEventBin* m_bins;             //!< Pointer to bins
+    GEbounds      m_ebds;             //!< Energy boundaries
 
 private:
 };
