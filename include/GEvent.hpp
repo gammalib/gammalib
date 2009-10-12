@@ -20,7 +20,6 @@
 #define GEVENT_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GSkyDir.hpp"
 
 
 /***********************************************************************//**
@@ -32,8 +31,6 @@ class GEvent {
 
     // Friend classes
     friend class GEvents;
-//    friend class GEventList;
-//    friend class GEventCube;
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GEvent& event);
@@ -47,7 +44,11 @@ public:
     // Operators
     virtual GEvent& operator= (const GEvent& event);
 
-    // Methods
+    // Virtual methods
+    virtual std::ostream& pipe(std::ostream& os) const = 0;
+    
+    // Implemented methods
+    int test(void) const { return 47; }
     
 protected:
     // Protected methods
@@ -57,9 +58,7 @@ protected:
     virtual GEvent* clone(void) const = 0;
 
     // Protected data area
-    double  m_time;                //!< Event time (TO BE REPLACED BY GTime)
-	double  m_energy;              //!< Event energy (MeV)
-    GSkyDir m_dir;                 //!< Arrivial direction
+
 private:
 };
 
