@@ -1,0 +1,10 @@
+LAT example data processed by ScienceTools v9r15p5
+
+ROI: Crab region
+Centre: (RA,Dec)=(83.6331, +22.0145)
+Radius: 7.5 deg
+Binned: 10 x 10 deg
+Diffuse events class
+1 week of data
+Energy range: 200 MeV - 20 GeV
+20 logarithmic energy bins in binned data
