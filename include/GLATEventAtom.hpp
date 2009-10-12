@@ -52,14 +52,19 @@ protected:
     void           free_members(void);
     GLATEventAtom* clone(void) const;
 
-    // Protected data area (defines all LAT specific event attributes)
-    float  m_theta;                //!< Zenith angle in instrument system
-    float  m_phi;                  //!< Azimuth angle in instrument system
-    float  m_zenith_angle;         //!< Zenith angle in Earth system
-    float  m_earth_azimuth_angle;  //!< Azimuth angle in Earth system
-    short  m_event_class;          //!< Event class
-
-private:
+    // LAT data format attributes
+    float   m_theta;                //!< Zenith angle in instrument system
+    float   m_phi;                  //!< Azimuth angle in instrument system
+    float   m_zenith_angle;         //!< Zenith angle in Earth system
+    float   m_earth_azimuth_angle;  //!< Azimuth angle in Earth system
+    long    m_event_id;             //!< ID number of original event
+    long    m_run_id;               //!< Run number of original event
+    short   m_recon_version;        //!< Version of event reconstruction software
+    short   m_calib_version[3];     //!< Version of calibration tables for ACD, CAL
+    short   m_event_class;          //!< Event class: 0, 1, 2, ...
+    short   m_conversion_type;      //!< Type of conversion: 0=Front, 1=Back
+    double  m_livetime;             //!< Accumulated livetime since mission start
+    double  m_difrsp[5];            //!< Diffuse response components
 };
 
 #endif /* GLATEVENTATOM_HPP */
