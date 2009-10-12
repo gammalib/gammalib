@@ -327,8 +327,7 @@ void GFitsImage::open_image(__fitsfile* fptr)
  * @param[in] datatype Datatype of pixels to be saved
  * @param[in] pixels Pixel array to be saved
  *
- * Save image pixels into FITS file. In case that the HDU does not exist it
- * is created.
+ * Load image pixels from FITS file.
  ***************************************************************************/
 void GFitsImage::load_image(int datatype, const void* pixels, const void* nulval,
                             int* anynul)
