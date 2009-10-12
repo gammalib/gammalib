@@ -30,6 +30,7 @@
 #include "GEventCube.hpp"
 #include "GEvent.hpp"
 #include "GGti.hpp"
+#include "GEbounds.hpp"
 #include "GResponse.hpp"
 
 /* __ Fermi/LAT specific code ____________________________________________ */
