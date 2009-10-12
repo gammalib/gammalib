@@ -50,12 +50,13 @@ public:
 
     // Virtual methods
 	virtual void        load(const std::string& filename) = 0;
-//    virtual void        load(GFitsHDU* hdu) = 0;
     virtual GEventAtom* pointer(int index) const = 0;
 
     // Implemented methods
-    int number(void) const;
-    int elements(void) const;
+    int  number(void) const;
+    int  elements(void) const;
+    bool islist(void) const { return true; }
+    bool iscube(void) const { return false; }
 
 protected:
     // Protected methods

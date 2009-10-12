@@ -50,12 +50,14 @@ public:
     // Virtual methods
 	virtual void    load(const std::string& filename) = 0;
     virtual GEvent* pointer(int index) const = 0;
-    virtual int number(void) const = 0;
+    virtual int     number(void) const = 0;
 
     // Implemented methods
-    int elements(void) const;
-	int dim(void) const;
-    int naxis(int axis) const;
+    int  elements(void) const;
+	int  dim(void) const;
+    int  naxis(int axis) const;
+    bool islist(void) const { return false; }
+    bool iscube(void) const { return true; }
 
 protected:
     // Protected methods
