@@ -388,12 +388,18 @@ GFitsHDU* GFits::hdu(const std::string& extname) const
 {
     // Initialise result to NULL pointer
     GFitsHDU* ptr = NULL;
+    
+    // Return primary HDU if requested ...
+    if (toupper(extname) == "PRIMARY")
+        ptr = m_hdu;
 
-    // Search for specified extension
-    for (int i = 0; i < m_num_hdu; ++i) {
-        if (m_hdu[i].extname() == extname) {
-            ptr = &(m_hdu[i]);
-            break;
+    // ... otherwise search for specified extension
+    else {
+        for (int i = 0; i < m_num_hdu; ++i) {
+            if (m_hdu[i].extname() == extname) {
+                ptr = &(m_hdu[i]);
+                break;
+            }
         }
     }
 
