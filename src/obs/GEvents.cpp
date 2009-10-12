@@ -219,6 +219,16 @@ GEvent& GEvents::iterator::operator*(void)
 
 
 /***********************************************************************//**
+ * @brief Iterator dereference operator
+ ***************************************************************************/
+GEvent* GEvents::iterator::operator->(void)
+{
+    // Return event
+    return m_base->pointer(m_index);
+}
+
+
+/***********************************************************************//**
  * @brief Get iterator for first event
  ***************************************************************************/
 GEvents::iterator GEvents::begin(void)

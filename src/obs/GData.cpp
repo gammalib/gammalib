@@ -275,6 +275,16 @@ GEvent& GData::iterator::operator*(void)
 
 
 /***********************************************************************//**
+ * @brief Iterator dereference operator
+ ***************************************************************************/
+GEvent* GData::iterator::operator->(void)
+{
+    // Return event
+    return &(*m_event);
+}
+
+
+/***********************************************************************//**
  * @brief Get iterator for first observation and event
  *
  * Any empty observations (NULL pointer) or observations with 0 events are

@@ -58,6 +58,7 @@ public:
         bool      operator==(const iterator& it) const;
         bool      operator!=(const iterator& it) const;
         GEvent&   operator*(void);
+        GEvent*   operator->(void);
     protected:
         int               m_index;   //!< Actual observation index [0,m_num-1]
         GEvents::iterator m_event;   //!< Iterator on actual event

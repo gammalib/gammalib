@@ -68,6 +68,7 @@ public:
         bool      operator==(const iterator& it) const;
         bool      operator!=(const iterator& it) const;
         GEvent&   operator*(void);
+        GEvent*   operator->(void);
     protected:
         int      m_index;        //!< Actuel event index
         int      m_num;          //!< Number of events in GEvents object
