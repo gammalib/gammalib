@@ -54,6 +54,7 @@ protected:
     GLATEventCube* clone(void) const;
 
     // Protected data area
+    GLATEventBin* m_bins;             //!< Pointer to bins
 
 private:
 };

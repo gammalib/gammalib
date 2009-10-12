@@ -66,9 +66,9 @@ protected:
     virtual GEventCube* clone(void) const = 0;
 
     // Protected data area
-    int     m_elements;         //!< Number of cube elements
-    int     m_dim;              //!< Cube dimension
-    int*    m_naxis;            //!< Number of bins in each axis
+    int        m_elements;         //!< Number of cube elements
+    int        m_dim;              //!< Cube dimension
+    int*       m_naxis;            //!< Number of bins in each axis
 
 private:
 };
