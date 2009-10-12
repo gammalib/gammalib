@@ -36,7 +36,7 @@ class GLATObservation : public GObservation {
 public:
     // Constructors and destructors
     GLATObservation();
-    GLATObservation(const std::string& ft1name, const std::string& ft2name);
+//    GLATObservation(const std::string& ft1name, const std::string& ft2name);
     GLATObservation(const GLATObservation& obs);
     virtual ~GLATObservation();
 
@@ -44,6 +44,12 @@ public:
     GLATObservation& operator= (const GLATObservation& obs);
 
     // Methods
+    void load_unbinned(const std::string& ft1name, 
+                       const std::string& ft2name,
+                       const std::string& ltcube_name);
+    void load_binned(const std::string& cntmap_name, 
+                     const std::string& expmap_name, 
+                     const std::string& ltcube_name);
   
 protected:
     // Protected methods
@@ -53,9 +59,6 @@ protected:
     GLATObservation* clone(void) const;
 
     // Protected data area
-    std::string m_ft1name;   //!< FT1 FITS filename
-    std::string m_ft2name;   //!< FT2 FITS filename
-    std::string m_ltcube;    //!< Lifetime cube FITS filename
 };
 
 #endif /* GLATOBSERVATION_HPP */
