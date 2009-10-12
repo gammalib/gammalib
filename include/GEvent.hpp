@@ -45,7 +45,7 @@ public:
     virtual GEvent& operator= (const GEvent& event);
 
     // Virtual methods
-    virtual std::ostream& pipe(std::ostream& os) const = 0;
+    virtual std::string string(void) const = 0;
     
     // Implemented methods
     int test(void) const { return 47; }

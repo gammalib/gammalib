@@ -140,7 +140,7 @@ GEvents::iterator::iterator()
 GEvents::iterator::iterator(GEvents *events)
 {
     // Initialise iterator
-    m_num   = (events != NULL) ? events->m_num : 0;
+    m_num   = (events != NULL) ? events->elements() : 0;
     m_index = 0;
     m_base  = events;
 
@@ -265,16 +265,6 @@ GEvents::iterator GEvents::end(void)
  =                         GEvents public methods                          =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Return number of elements (either events in list or pixels in cube)
- ***************************************************************************/
-int GEvents::elements(void) const
-{
-    // Return
-    return m_num;
-}
-
 
 /*==========================================================================
  =                                                                         =

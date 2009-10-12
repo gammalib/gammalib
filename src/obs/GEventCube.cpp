@@ -134,6 +134,16 @@ int GEventCube::number(void) const
 
 
 /***********************************************************************//**
+ * @brief Return number of elements in cube
+ ***************************************************************************/
+int GEventCube::elements(void) const
+{
+    // Return
+    return m_elements;
+}
+
+
+/***********************************************************************//**
  * @brief Return event cube dimension
  ***************************************************************************/
 int GEventCube::dim(void) const
@@ -173,8 +183,9 @@ int GEventCube::naxis(int axis) const
 void GEventCube::init_members(void)
 {
     // Initialise members
-    m_dim   = 0;
-    m_naxis = NULL;
+    m_elements = 0;
+    m_dim      = 0;
+    m_naxis    = NULL;
     
     // Return
     return;
@@ -189,7 +200,8 @@ void GEventCube::init_members(void)
 void GEventCube::copy_members(const GEventCube& cube)
 {
     // Copy attributes
-    m_dim = cube.m_dim;
+    m_elements = cube.m_elements;
+    m_dim      = cube.m_dim;
 
     // If the cube is not empty then copy it
     if (m_dim > 0 && cube.m_naxis != NULL) {
@@ -246,6 +258,7 @@ std::ostream& operator<< (std::ostream& os, const GEventCube& cube)
         os << " Cube is undefined" << std::endl;
     }
     else {
+        os << " Number of cube elements ...: " << cube.elements() << std::endl;
         os << " Cube dimension ............: " << cube.dim() << std::endl;
         for (int axis = 0; axis < cube.m_dim; ++axis) {
             os << " Axis " << axis+1 << " dimension ..........: " 

@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GEvents.hpp"
+#include "GEventAtom.hpp"
 #include "GFits.hpp"
 
 
@@ -48,13 +49,13 @@ public:
     virtual GEventList& operator= (const GEventList& list);
 
     // Virtual methods
-	virtual void    load(const std::string& filename) = 0;
-    virtual void    load(GFitsHDU* hdu) = 0;
-    virtual GEvent* pointer(int index) const = 0;
+	virtual void        load(const std::string& filename) = 0;
+    virtual void        load(GFitsHDU* hdu) = 0;
+    virtual GEventAtom* pointer(int index) const = 0;
 
     // Implemented methods
     int number(void) const;
-//	int num(void) const;
+    int elements(void) const;
 
 protected:
     // Protected methods
@@ -64,8 +65,8 @@ protected:
     virtual GEventList* clone(void) const = 0;
 
     // Protected data area
-//    int     m_num;              //!< Number of events
-//    GEvent* m_events;           //!< Pointer to events
+    int         m_num;           //!< Number of events
+    GEventAtom* m_events;        //!< Pointer to events
 
 private:
 };

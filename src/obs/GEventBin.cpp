@@ -124,17 +124,23 @@ GEventBin& GEventBin::operator= (const GEventBin& bin)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Puts an event bin into an output stream
- *
- * @param[in] os Output stream into which the event bin will be put
+ * @brief Converts event into string
  ***************************************************************************/
-std::ostream& GEventBin::pipe(std::ostream& os) const
+std::string GEventBin::string(void) const
 {
-    // Put event bin in stream
-    os << ".";
-        
-    // Return output stream
-    return os;
+    // Allocate buffer for event
+    char buffer[80];
+    
+    // Get Right Ascension and Declination
+//    GSkyDir dir = m_dir;
+    
+    // Put event in buffer
+//    sprintf(buffer, "Time=%14.3f Energy=%12.3f MeV (RA,Dec)=(%7.3f,%7.3f)",
+//            m_time, m_energy, dir.ra_deg(), dir.dec_deg());
+    sprintf(buffer, ".");
+    
+    // Return as string
+    return std::string(buffer);
 }
 
 

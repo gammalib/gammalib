@@ -52,9 +52,9 @@ public:
     virtual void    load(GFitsHDU* hdu) = 0;
     virtual GEvent* pointer(int index) const = 0;
     virtual int     number(void) const = 0;
+    virtual int     elements(void) const = 0;
     
     // Implemented methods
-	int elements(void) const;
 
     // Event iterator
     class iterator {
@@ -83,12 +83,6 @@ protected:
     void             copy_members(const GEvents& events);
     void             free_members(void);
     virtual GEvents* clone(void) const = 0;
-
-    // Protected data area
-    int     m_num;               //!< Number of events in list or bins in cube
-    GEvent *m_events;            //!< Pointer to event list or cube pixels
-
-private:
 };
 
 #endif /* GEVENTS_HPP */

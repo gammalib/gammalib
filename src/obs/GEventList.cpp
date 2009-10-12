@@ -124,8 +124,22 @@ GEventList& GEventList::operator= (const GEventList& list)
 
 /***********************************************************************//**
  * @brief Return number of events in list
+ *
+ * The number of events is identical to the number of elements
  ***************************************************************************/
 int GEventList::number(void) const
+{
+    // Return
+    return m_num;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of elements in list
+ *
+ * The number of elements is identical to the number of events.
+ ***************************************************************************/
+int GEventList::elements(void) const
 {
     // Return
     return m_num;

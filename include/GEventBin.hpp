@@ -45,7 +45,7 @@ public:
     // Virtual methods
     
     // Implemented methods
-    std::ostream& pipe(std::ostream& os) const;
+    std::string string(void) const;
     
 protected:
     // Protected methods

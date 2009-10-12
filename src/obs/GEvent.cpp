@@ -174,7 +174,8 @@ void GEvent::free_members(void)
 std::ostream& operator<< (std::ostream& os, const GEvent& event)
 {
     // Put event in output stream
-    os << (&event)->pipe(os);
+    std::string str = (&event)->string();
+    os << str;
         
     // Return output stream
     return os;

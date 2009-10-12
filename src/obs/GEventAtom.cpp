@@ -124,19 +124,22 @@ GEventAtom& GEventAtom::operator= (const GEventAtom& atom)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Puts an event atom into an output stream
- *
- * @param[in] os Output stream into which the event atom will be put
+ * @brief Converts event into string
  ***************************************************************************/
-std::ostream& GEventAtom::pipe(std::ostream& os) const
+std::string GEventAtom::string(void) const
 {
-    // Put event atom in output stream
-    os << "Time=" << fixed << setprecision(3) << m_time;
-    os << " Energy=" << fixed << setprecision(3) << m_energy;
-    os << " " << m_dir;
-        
-    // Return output stream
-    return os;
+    // Allocate buffer for event
+    char buffer[80];
+    
+    // Get Right Ascension and Declination
+    GSkyDir dir = m_dir;
+    
+    // Put event in buffer
+    sprintf(buffer, "Time=%14.3f Energy=%12.3f MeV (RA,Dec)=(%7.3f,%7.3f)",
+            m_time, m_energy, dir.ra_deg(), dir.dec_deg());
+    
+    // Return as string
+    return std::string(buffer);
 }
 
 

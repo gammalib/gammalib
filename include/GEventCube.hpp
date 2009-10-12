@@ -54,6 +54,7 @@ public:
 
     // Implemented methods
     int number(void) const;
+    int elements(void) const;
 	int dim(void) const;
     int naxis(int axis) const;
 
@@ -65,6 +66,7 @@ protected:
     virtual GEventCube* clone(void) const = 0;
 
     // Protected data area
+    int     m_elements;         //!< Number of cube elements
     int     m_dim;              //!< Cube dimension
     int*    m_naxis;            //!< Number of bins in each axis
 
