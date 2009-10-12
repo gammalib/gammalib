@@ -21,7 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GEventCube.hpp"
-#include "GLATEvent.hpp"
+#include "GLATEventBin.hpp"
 #include "GFits.hpp"
 
 
@@ -42,9 +42,9 @@ public:
     GLATEventCube& operator= (const GLATEventCube& cube);
 
     // Methods
-	void       load(const std::string& filename);
-    void       load(GFitsHDU* hdu);
-    GLATEvent* pointer(int index) const;
+	void          load(const std::string& filename);
+    void          load(GFitsHDU* hdu);
+    GLATEventBin* pointer(int index) const;
     
 protected:
     // Protected methods
