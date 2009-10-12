@@ -46,7 +46,6 @@ public:
 
     // Methods
 	void           load(const std::string& filename);
-    void           load(GFitsHDU* hdu);
     GLATEventAtom* pointer(int index) const;
     
 protected:
@@ -55,6 +54,7 @@ protected:
     void           copy_members(const GLATEventList& list);
     void           free_members(void);
     GLATEventList* clone(void) const;
+    void           load_ft1(GFitsHDU* hdu);
     void           load_events(GFitsHDU* hdu);
     void           load_ds_keys(GFitsHDU* hdu);
 
