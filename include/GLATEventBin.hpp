@@ -33,6 +33,9 @@ class GLATEventBin : public GEventBin {
     // Friend classes
     friend class GLATEventCube;
 
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GLATEventBin& bin);
+
 public:
     // Constructors and destructors
     GLATEventBin();
@@ -43,6 +46,8 @@ public:
     GLATEventBin& operator= (const GLATEventBin& bin);
 
     // Methods
+    double      counts(void) const;
+    std::string string(void) const;
     
 protected:
     // Protected methods
@@ -52,8 +57,8 @@ protected:
     GLATEventBin* clone(void) const;
 
     // Protected data area (defines all LAT specific event attributes)
+    double m_counts;      //!< Counts
 
-private:
 };
 
 #endif /* GLATEVENTBIN_HPP */
