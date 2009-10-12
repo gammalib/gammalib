@@ -49,7 +49,7 @@ public:
 
     // Virtual methods
 	virtual void    load(const std::string& filename) = 0;
-    virtual void    load(GFitsHDU* hdu) = 0;
+//    virtual void    load(GFitsHDU* hdu) = 0;
     virtual GEvent* pointer(int index) const = 0;
 
     // Implemented methods
