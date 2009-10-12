@@ -59,13 +59,13 @@ protected:
     GGti* clone(void) const;
 
     // Protected data area
-	int         m_num;          //!< Number of intervals
-	double      m_tstart;       //!< Start of observation
-	double      m_tstop;        //!< Stop of observation
-	double      m_ontime;       //!< Sum of GTI durations
-	double      m_elapse;       //!< Time between start of first GTI and stop of last GTI
-	double     *m_start;        //!< Array of start times
-	double     *m_stop;         //!< Array of stop times
+	int     m_num;          //!< Number of intervals
+	double  m_tstart;       //!< Start of observation
+	double  m_tstop;        //!< Stop of observation
+	double  m_ontime;       //!< Sum of GTI durations
+	double  m_elapse;       //!< Time between start of first GTI and stop of last GTI
+	double *m_start;        //!< Array of start times
+	double *m_stop;         //!< Array of stop times
 
 private:
 };

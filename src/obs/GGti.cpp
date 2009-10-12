@@ -309,13 +309,13 @@ void GGti::free_members(void)
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GGti& gti)
 {
-    // Put Gti in stream
+    // Put GTIs in stream
     os << "=== GGti ===" << std::endl;
     os << " Number of intervals .......: " << gti.m_num << std::endl;
-    os << " Time range ................: " << fixed << setprecision(3) << 
-            gti.m_tstart << " - " << gti.m_tstop << std::endl;
     os << " Ontime ....................: " << gti.m_ontime << " sec" << std::endl;
     os << " Elapsed time ..............: " << gti.m_elapse << " sec" << std::endl;
+    os << " Time range ................: " << fixed << setprecision(3) << 
+            gti.m_tstart << " - " << gti.m_tstop;
 	
     // Return output stream
     return os;
