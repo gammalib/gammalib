@@ -165,23 +165,6 @@ void GEvent::free_members(void)
  =                                                                         =
  ==========================================================================*/
 
-/***********************************************************************//**
- * @brief Put event into an output stream
- *
- * @param[in] os Output stream into which the event will be dumped
- * @param[in] event Event to be dumped
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GEvent& event)
-{
-    // Put event in output stream
-    std::string str = (&event)->string();
-    os << str;
-        
-    // Return output stream
-    return os;
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                     Other functions used by GEvent                      =

@@ -43,9 +43,11 @@ public:
     virtual GEventBin& operator= (const GEventBin& bin);
 
     // Virtual methods
-    virtual std::string string(void) const = 0;
+    virtual double      counts(void) const = 0;
     
     // Implemented methods
+    bool isatom(void) const { return false; }
+    bool isbin(void) const { return true; }
     
 protected:
     // Protected methods
