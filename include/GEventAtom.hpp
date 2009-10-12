@@ -34,6 +34,9 @@ class GEventAtom : public GEvent {
     // Friend classes
     friend class GEvents;
 
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GEventAtom& atom);
+
 public:
     // Constructors and destructors
     GEventAtom();
@@ -46,7 +49,9 @@ public:
     // Virtual methods
     
     // Implemented methods
-    std::string string(void) const;
+    double counts(void) const { return 1.0; }
+    bool   isatom(void) const { return true; }
+    bool   isbin(void) const { return false; }
     
 protected:
     // Protected methods

@@ -33,7 +33,7 @@ class GEvent {
     friend class GEvents;
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GEvent& event);
+//    friend std::ostream& operator<< (std::ostream& os, const GEvent& event);
 
 public:
     // Constructors and destructors
@@ -45,10 +45,11 @@ public:
     virtual GEvent& operator= (const GEvent& event);
 
     // Virtual methods
-    virtual std::string string(void) const = 0;
+    virtual double counts(void) const = 0;
+    virtual bool   isatom(void) const = 0;
+    virtual bool   isbin(void) const = 0;
     
     // Implemented methods
-    int test(void) const { return 47; }
     
 protected:
     // Protected methods
