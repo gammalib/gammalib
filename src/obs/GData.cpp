@@ -121,16 +121,33 @@ GData& GData::operator= (const GData& data)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Iterator Constructor
+ * @brief Void iterator constructor
+ ***************************************************************************/
+GData::iterator::iterator() 
+{
+    // Initialise iterator
+    m_data  = NULL;
+    m_index = 0;
+    m_obs   = NULL;
+    m_event = GEvents::iterator();
+    m_end   = GEvents::iterator();
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Iterator constructor based on specific GData object
  ***************************************************************************/
 GData::iterator::iterator(GData *data)
 {
     // Initialise iterator
-    m_data        = data;       // Keep pointer of GData object
-    m_obs_index   = 0;
-    m_event_index = 0;
-    m_num_events  = 0;
-    m_obs         = NULL;
+    m_data  = data;
+    m_index = 0;
+    m_obs   = NULL;
+    m_event = GEvents::iterator();
+    m_end   = GEvents::iterator();
     
     // Return
     return;
@@ -155,51 +172,56 @@ GData::iterator::~iterator()
  ***************************************************************************/
 GData::iterator& GData::iterator::operator++(void)
 {
-    // Increment event index
-    m_event_index++;
+    // Only iterate if we have a valid data pointer
+    if (m_data != NULL) {
+        
+        // Increment event iterator
+        m_event++;
+    
+        // If end of observation is reached then set iterator to first event of
+        // next valid observation
+        if (m_event == m_end) {
 
-    // If end of observation is reached then set iterator to first event of
-    // next valid observation
-    if (m_event_index >= m_num_events) {
+            // Find next valid observation
+            while (m_index < m_data->m_num) {
         
-        // Find next valid observation
-        while (m_obs_index < m_data->m_num) {
-        
-            // Go to next observation
-            m_obs_index++;
+                // Go to next observation
+                m_index++;
             
-            // If we still have an observation then set now the iterator
-            // to the first event from this observation ...
-            if (m_obs_index < m_data->m_num) {
+                // If we still have an observation then set now the iterator
+                // to the first event from this observation ...
+                if (m_index < m_data->m_num) {
             
-                // Get next observation. Skip if empty
-                m_obs = m_data->m_obs[m_obs_index];
-                if (m_obs == NULL)
-                    continue;
+                    // Get next observation. Skip if empty
+                    m_obs = m_data->m_obs[m_index];
+                    if (m_obs == NULL)
+                        continue;
                 
-                // Skip observation if it contains no events 
-                if (m_obs->events() == NULL)
-                    continue;
+                    // Skip observation if it contains no events 
+                    if (m_obs->events() == NULL)
+                        continue;
                     
-                // Set iterator to first event of current observation. Exit
-                // only if we have events in that observation
-                m_event_index = 0;
-                m_num_events  = m_obs->events()->num();
-                if (m_event_index < m_num_events)
-                    break;
+                    // Set iterator to first event of current observation. Exit
+                    // only if we have events in that observation
+                    m_event = m_obs->events()->begin();
+                    m_end   = m_obs->events()->end();
+                    if (m_event != m_end)
+                        break;
                 
-            } // endif: we still had an observation
+                } // endif: we still had an observation
             
-        } // endwhile: searched for next valid observation
+            } // endwhile: searched for next valid observation
         
-        // If observations are exhausted then reset iterator to signal the end
-        if (m_obs_index >= m_data->m_num) {
-            m_obs_index   = m_data->m_num;
-            m_event_index = 0;
-            m_num_events  = 0;
-        }
+            // If observations are exhausted then set iterator to signal the end
+            if (m_index >= m_data->m_num) {
+                m_index = m_data->m_num;
+                m_obs   = NULL;
+                m_event = GEvents::iterator();
+                m_end   = GEvents::iterator();
+            }
         
-    } // endif: end of observation has been reached
+        } // endif: end of observation has been reached
+    } // endif: we had a valid data pointer
     
     // Return
     return *this;
@@ -228,8 +250,7 @@ GData::iterator GData::iterator::operator++(int junk)
 bool GData::iterator::operator==(const iterator& it) const
 {
     // Return result
-    return ((m_obs_index == it.m_obs_index) && 
-            (m_event_index == it.m_event_index));
+    return ((m_index == it.m_index) && (m_event == it.m_event));
 }
 
 
@@ -239,8 +260,7 @@ bool GData::iterator::operator==(const iterator& it) const
 bool GData::iterator::operator!=(const iterator& it) const
 {
     // Return result
-    return ((m_obs_index != it.m_obs_index) || 
-            (m_event_index != it.m_event_index));
+    return ((m_index != it.m_index) || (m_event != it.m_event));
 }
 
 
@@ -250,22 +270,12 @@ bool GData::iterator::operator!=(const iterator& it) const
 GEvent& GData::iterator::operator*(void)
 {
     // Return event
-    return *(m_obs->events()->pointer(m_event_index));
+    return *m_event;
 }
 
 
 /***********************************************************************//**
- * @brief Iterator pointer operator
- ***************************************************************************/
-GEvent* GData::iterator::operator->(void)
-{
-    // Return pointer to event
-    return m_obs->events()->pointer(m_event_index);
-}
-
-
-/***********************************************************************//**
- * @brief Get iterator for first event
+ * @brief Get iterator for first observation and event
  *
  * Any empty observations (NULL pointer) or observations with 0 events are
  * skipped.
@@ -274,17 +284,21 @@ GData::iterator GData::begin(void)
 {
     // Allocate iterator object
     GData::iterator iter(this);
-
-    // Set iterator to first event in first valid observation
+    
+    // Get first valid observation
     if (iter.m_data != NULL) {
-        while (iter.m_obs_index < iter.m_data->m_num) {
-            if (iter.m_data->m_obs[iter.m_obs_index] != NULL) {
-                iter.m_obs         = iter.m_data->m_obs[iter.m_obs_index];
-                iter.m_num_events  = iter.m_obs->events()->num();
+        while (iter.m_index < iter.m_data->m_num) {
+            if (iter.m_data->m_obs[iter.m_index] != NULL) {
+                iter.m_obs         = iter.m_data->m_obs[iter.m_index];
                 break;
             }
-            iter.m_obs_index++;
         }
+    }
+    
+    // Initialise event iterator
+    if (iter.m_obs != NULL) {
+        iter.m_event = iter.m_obs->events()->begin();
+        iter.m_end   = iter.m_obs->events()->end();
     }
 	
     // Return
@@ -293,7 +307,7 @@ GData::iterator GData::begin(void)
 
 
 /***********************************************************************//**
- * @brief Get iterator after last event
+ * @brief Get iterator after last observation and event
  ***************************************************************************/
 GData::iterator GData::end(void)
 {
@@ -301,10 +315,8 @@ GData::iterator GData::end(void)
     GData::iterator iter(this);
     
     // Set obeservation number beyond last observation
-    iter.m_obs_index   = (iter.m_data != NULL) ? iter.m_data->m_num : 1;
-    iter.m_event_index = 0;
-    iter.m_num_events  = 0;
-    iter.m_obs         = NULL;
+    iter.m_index = iter.m_data->m_num;
+    iter.m_obs   = NULL;
 	
     // Return
     return iter;
