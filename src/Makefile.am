@@ -25,6 +25,14 @@ files = GException.cpp \
 	obs/GGti.cpp \
 	obs/GEbounds.cpp \
 	obs/GResponse.cpp \
+	model/GModel.cpp \
+	model/GModelPar.cpp \
+	model/GModelSpatial.cpp \
+	model/GModelSpatialPtsrc.cpp \
+	model/GModelSpectral.cpp \
+	model/GModelSpectralPlaw.cpp \
+	model/GModelTemporal.cpp \
+	model/GModelTemporalConst.cpp \
 	lat/GLATObservation.cpp \
 	lat/GLATEventList.cpp \
 	lat/GLATEventCube.cpp \
@@ -53,7 +61,6 @@ files = GException.cpp \
 	fits/GFitsTableDblCol.cpp \
 	fits/GFitsHDU.cpp \
 	fits/GFits.cpp \
-	fit/GFitPar.cpp \
 	linalg/GVector.cpp \
 	linalg/GMatrixBase.cpp \
 	linalg/GMatrix.cpp \

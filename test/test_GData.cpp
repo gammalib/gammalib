@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GData.cpp  -  test GData class                   *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -14,6 +14,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <stdlib.h>
 #include "test_GData.hpp"
+#include "GModelPar.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -102,7 +103,7 @@ void test_lat_unbinned(void)
     std::cout << ".";
     
     // Plot final test success
-    std::cout << ". ok." << std::endl;
+    std::cout << " ok." << std::endl;
 
 //GLATEventList *ptr = (GLATEventList*)obs.events();
 //std::cout << obs << std::endl;
@@ -210,7 +211,7 @@ void test_lat_binned(void)
     std::cout << ".";
 
     // Plot final test success
-    std::cout << ". ok." << std::endl;
+    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
@@ -232,7 +233,7 @@ int main(void)
     // Execute the tests
     test_lat_unbinned();
     test_lat_binned();
-
+    
     // Return
     return 0;
 }

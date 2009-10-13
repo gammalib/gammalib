@@ -32,7 +32,6 @@ class GLATObservation : public GObservation {
 public:
     // Constructors and destructors
     GLATObservation();
-    GLATObservation(const std::string& ft1name, const std::string& ft2name);
     GLATObservation(const GLATObservation& obs);
     virtual ~GLATObservation();
 };

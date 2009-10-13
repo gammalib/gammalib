@@ -15,6 +15,14 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GGti.hpp \
 		     GEbounds.hpp \
 		     GResponse.hpp \
+		     GModel.hpp \
+		     GModelPar.hpp \
+		     GModelSpatial.hpp \
+		     GModelSpatialPtsrc.hpp \
+		     GModelSpectral.hpp \
+		     GModelSpectralPlaw.hpp \
+		     GModelTemporal.hpp \
+		     GModelTemporalConst.hpp \
 		     GLATObservation.hpp \
 		     GLATEventList.hpp \
 		     GLATEventCube.hpp \
@@ -40,7 +48,6 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GFitsTableDblCol.hpp \
 		     GFitsHDU.hpp \
 		     GFits.hpp \
-		     GFitPar.hpp \
 		     GVector.hpp \
 		     GMatrixBase.hpp \
 		     GMatrix.hpp \

@@ -78,17 +78,19 @@ libgamma_la_LIBADD =
 am__objects_1 = GException.lo GTools.lo GSkyDir.lo GNodeArray.lo \
 	GImage.lo GHealpix.lo GData.lo GObservation.lo GEvents.lo \
 	GEventList.lo GEventCube.lo GEvent.lo GEventAtom.lo \
-	GEventBin.lo GGti.lo GEbounds.lo GResponse.lo \
-	GLATObservation.lo GLATEventList.lo GLATEventCube.lo \
-	GLATEventAtom.lo GLATEventBin.lo GLATResponse.lo \
-	GLATResponseTable.lo GLATAeff.lo GLATPsf.lo GLATEdisp.lo \
-	GFitsHeaderCard.lo GFitsHeader.lo GFitsData.lo GFitsImage.lo \
-	GFitsImageFlt.lo GFitsImageDbl.lo GFitsTable.lo \
+	GEventBin.lo GGti.lo GEbounds.lo GResponse.lo GModel.lo \
+	GModelPar.lo GModelSpatial.lo GModelSpatialPtsrc.lo \
+	GModelSpectral.lo GModelSpectralPlaw.lo GModelTemporal.lo \
+	GModelTemporalConst.lo GLATObservation.lo GLATEventList.lo \
+	GLATEventCube.lo GLATEventAtom.lo GLATEventBin.lo \
+	GLATResponse.lo GLATResponseTable.lo GLATAeff.lo GLATPsf.lo \
+	GLATEdisp.lo GFitsHeaderCard.lo GFitsHeader.lo GFitsData.lo \
+	GFitsImage.lo GFitsImageFlt.lo GFitsImageDbl.lo GFitsTable.lo \
 	GFitsAsciiTable.lo GFitsBinTable.lo GFitsTableCol.lo \
 	GFitsTableLogCol.lo GFitsTableStrCol.lo GFitsTableShtCol.lo \
 	GFitsTableLngCol.lo GFitsTableFltCol.lo GFitsTableDblCol.lo \
-	GFitsHDU.lo GFits.lo GFitPar.lo GVector.lo GMatrixBase.lo \
-	GMatrix.lo GSymMatrix.lo GSparseMatrix.lo GSparseSymbolic.lo \
+	GFitsHDU.lo GFits.lo GVector.lo GMatrixBase.lo GMatrix.lo \
+	GSymMatrix.lo GSparseMatrix.lo GSparseSymbolic.lo \
 	GSparseNumeric.lo
 am_libgamma_la_OBJECTS = $(am__objects_1)
 libgamma_la_OBJECTS = $(am_libgamma_la_OBJECTS)
@@ -256,6 +258,14 @@ files = GException.cpp \
 	obs/GGti.cpp \
 	obs/GEbounds.cpp \
 	obs/GResponse.cpp \
+	model/GModel.cpp \
+	model/GModelPar.cpp \
+	model/GModelSpatial.cpp \
+	model/GModelSpatialPtsrc.cpp \
+	model/GModelSpectral.cpp \
+	model/GModelSpectralPlaw.cpp \
+	model/GModelTemporal.cpp \
+	model/GModelTemporalConst.cpp \
 	lat/GLATObservation.cpp \
 	lat/GLATEventList.cpp \
 	lat/GLATEventCube.cpp \
@@ -284,7 +294,6 @@ files = GException.cpp \
 	fits/GFitsTableDblCol.cpp \
 	fits/GFitsHDU.cpp \
 	fits/GFits.cpp \
-	fit/GFitPar.cpp \
 	linalg/GVector.cpp \
 	linalg/GMatrixBase.cpp \
 	linalg/GMatrix.cpp \
@@ -414,6 +423,30 @@ GEbounds.lo: obs/GEbounds.cpp
 GResponse.lo: obs/GResponse.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GResponse.lo `test -f 'obs/GResponse.cpp' || echo '$(srcdir)/'`obs/GResponse.cpp
 
+GModel.lo: model/GModel.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GModel.lo `test -f 'model/GModel.cpp' || echo '$(srcdir)/'`model/GModel.cpp
+
+GModelPar.lo: model/GModelPar.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GModelPar.lo `test -f 'model/GModelPar.cpp' || echo '$(srcdir)/'`model/GModelPar.cpp
+
+GModelSpatial.lo: model/GModelSpatial.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GModelSpatial.lo `test -f 'model/GModelSpatial.cpp' || echo '$(srcdir)/'`model/GModelSpatial.cpp
+
+GModelSpatialPtsrc.lo: model/GModelSpatialPtsrc.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GModelSpatialPtsrc.lo `test -f 'model/GModelSpatialPtsrc.cpp' || echo '$(srcdir)/'`model/GModelSpatialPtsrc.cpp
+
+GModelSpectral.lo: model/GModelSpectral.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GModelSpectral.lo `test -f 'model/GModelSpectral.cpp' || echo '$(srcdir)/'`model/GModelSpectral.cpp
+
+GModelSpectralPlaw.lo: model/GModelSpectralPlaw.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GModelSpectralPlaw.lo `test -f 'model/GModelSpectralPlaw.cpp' || echo '$(srcdir)/'`model/GModelSpectralPlaw.cpp
+
+GModelTemporal.lo: model/GModelTemporal.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GModelTemporal.lo `test -f 'model/GModelTemporal.cpp' || echo '$(srcdir)/'`model/GModelTemporal.cpp
+
+GModelTemporalConst.lo: model/GModelTemporalConst.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GModelTemporalConst.lo `test -f 'model/GModelTemporalConst.cpp' || echo '$(srcdir)/'`model/GModelTemporalConst.cpp
+
 GLATObservation.lo: lat/GLATObservation.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GLATObservation.lo `test -f 'lat/GLATObservation.cpp' || echo '$(srcdir)/'`lat/GLATObservation.cpp
 
@@ -497,9 +530,6 @@ GFitsHDU.lo: fits/GFitsHDU.cpp
 
 GFits.lo: fits/GFits.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFits.lo `test -f 'fits/GFits.cpp' || echo '$(srcdir)/'`fits/GFits.cpp
-
-GFitPar.lo: fit/GFitPar.cpp
-	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GFitPar.lo `test -f 'fit/GFitPar.cpp' || echo '$(srcdir)/'`fit/GFitPar.cpp
 
 GVector.lo: linalg/GVector.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GVector.lo `test -f 'linalg/GVector.cpp' || echo '$(srcdir)/'`linalg/GVector.cpp

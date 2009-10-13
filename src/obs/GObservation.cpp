@@ -70,9 +70,6 @@ GObservation::GObservation(const GObservation& obs)
 
 /***********************************************************************//**
  * @brief Destructor
- *
- * The object is only destructed immediately if it is not linked in
- * somewhere.
  ***************************************************************************/
 GObservation::~GObservation()
 {
