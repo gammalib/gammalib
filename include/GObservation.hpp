@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GObservation.hpp  -  Observation abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2009 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,10 +20,10 @@
 #define GOBSERVATION_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GResponse.hpp"
 #include "GEvents.hpp"
+#include "GResponse.hpp"
 #include "GGti.hpp"
-
+#include "GModels.hpp"
 
 /* __ Typedefs ___________________________________________________________ */
 
@@ -51,15 +51,17 @@ public:
     virtual GObservation& operator= (const GObservation& obs);
 
     // Methods
-    double       tstart(void) const;
-    double       tstop(void) const;
-    double       emin(void) const;
-    double       emax(void) const;
-    std::string  obsname(void) const;
-    std::string  instrument(void) const;
-    GEvents*     events(void) const;
-    GGti*        gti(void) const;
-    GResponse*   response(void) const;
+    void         obsname(const std::string& obsname) { m_obsname=obsname; return; }
+    double       tstart(void) const { return m_tstart; }
+    double       tstop(void) const { return m_tstop; }
+    double       emin(void) const { return m_emin; }
+    double       emax(void) const { return m_emax; }
+    std::string  obsname(void) const { return m_obsname; }
+    std::string  instrument(void) const { return m_instrument; }
+    GEvents*     events(void) const { return m_events; }
+    GResponse*   response(void) const { return m_response; }
+    GGti*        gti(void) { return &m_gti; }
+    GModels*     models(void) { return &m_models; }
 
 protected:
     // Protected methods
@@ -76,8 +78,9 @@ protected:
     double      m_emin;         //!< Minimum energy covered by observation
     double      m_emax;         //!< Maximum energy covered by observation
     GEvents*    m_events;       //!< Pointer to events
-    GGti*       m_gti;          //!< Pointer to good time intervals
     GResponse*  m_response;     //!< Pointer to instrument response functions
+    GGti        m_gti;          //!< Good time intervals
+    GModels     m_models;       //!< Models
 
 private:
 };

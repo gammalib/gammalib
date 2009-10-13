@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GObservation.cpp  -  Observation abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2009 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -119,96 +119,6 @@ GObservation& GObservation::operator= (const GObservation& obs)
  =                                                                         =
  ==========================================================================*/
 
-/***********************************************************************//**
- * @brief Return start time
- ***************************************************************************/
-double GObservation::tstart(void) const
-{
-    // Return
-    return m_tstart;
-}
-
-
-/***********************************************************************//**
- * @brief Return stop time
- ***************************************************************************/
-double GObservation::tstop(void) const
-{
-    // Return
-    return m_tstop;
-}
-
-
-/***********************************************************************//**
- * @brief Return minimum energy
- ***************************************************************************/
-double GObservation::emin(void) const
-{
-    // Return
-    return m_emin;
-}
-
-
-/***********************************************************************//**
- * @brief Return maximum energy
- ***************************************************************************/
-double GObservation::emax(void) const
-{
-    // Return
-    return m_emax;
-}
-
-
-/***********************************************************************//**
- * @brief Return observation name
- ***************************************************************************/
-std::string GObservation::obsname(void) const
-{
-    // Return
-    return m_obsname;
-}
-
-
-/***********************************************************************//**
- * @brief Return instrument name
- ***************************************************************************/
-std::string GObservation::instrument(void) const
-{
-    // Return
-    return m_instrument;
-}
-
-
-/***********************************************************************//**
- * @brief Return pointer to events
- ***************************************************************************/
-GEvents* GObservation::events(void) const
-{
-    // Return
-    return m_events;
-}
-
-
-/***********************************************************************//**
- * @brief Return pointer to Good Time Intervals
- ***************************************************************************/
-GGti* GObservation::gti(void) const
-{
-    // Return
-    return m_gti;
-}
-
-
-/***********************************************************************//**
- * @brief Return pointer to instrument response
- ***************************************************************************/
-GResponse* GObservation::response(void) const
-{
-    // Return
-    return m_response;
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                       GObservation private methods                      =
@@ -228,8 +138,9 @@ void GObservation::init_members(void)
     m_emin     = 0.0;
     m_emax     = 0.0;
     m_events   = NULL;
-    m_gti      = NULL;
     m_response = NULL;
+    m_gti      = GGti();
+    m_models   = GModels();
 
     // Return
     return;
@@ -250,10 +161,11 @@ void GObservation::copy_members(const GObservation& obs)
     m_tstop      = obs.m_tstop;
     m_emin       = obs.m_emin;
     m_emax       = obs.m_emax;
+    m_gti        = obs.m_gti;
+    m_models     = obs.m_models;
 
     // Clone members that exist
     m_events   = (obs.m_events   != NULL) ? obs.m_events->clone()   : NULL;
-    m_gti      = (obs.m_gti      != NULL) ? obs.m_gti->clone()      : NULL;
     m_response = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;
 
     // Return
@@ -268,12 +180,10 @@ void GObservation::free_members(void)
 {
     // Free memory
     if (m_events   != NULL) delete m_events;
-    if (m_gti      != NULL) delete m_gti;
     if (m_response != NULL) delete m_response;
 
     // Signal free pointers
     m_events   = NULL;
-    m_gti      = NULL;
     m_response = NULL;
 
     // Return
@@ -310,8 +220,10 @@ std::ostream& operator<< (std::ostream& os, const GObservation& obs)
         os << *(obs.m_events) << std::endl;
 
     // Add GTIs to stream
-    if (obs.m_gti != NULL)
-        os << *(obs.m_gti);
+    os << obs.m_gti;
+    
+    // Add models to stream
+    os << obs.m_models;
         
     // Return output stream
     return os;
