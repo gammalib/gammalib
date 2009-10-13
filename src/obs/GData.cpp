@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GData.cpp  -  Data class                         *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,6 +23,7 @@
 #include "GData.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ADD                                     "GData::add(GObservation&)"
 #define G_COPY_MEMBERS                    "GData::copy_members(const GData&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -342,12 +343,12 @@ GData::iterator GData::end(void)
 /***********************************************************************//**
  * @brief Add observation to data
  ***************************************************************************/
-void GData::add(GObservation &obs)
+void GData::add(GObservation& obs)
 {
 	// Allocate new observation pointers
     GObservation** new_obs = new GObservation*[m_num+1];
 	if (new_obs == NULL)
-		throw GException::mem_alloc(G_COPY_MEMBERS, m_num+1);
+		throw GException::mem_alloc(G_ADD, m_num+1);
 
 	// If we have already observation pointers then copy them over to the
     // new pointer array
