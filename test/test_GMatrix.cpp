@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GMatrix.cpp  -  test GMatrix class                 *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2009 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,9 +18,9 @@
 using namespace std;
 
 /* __ Globals ____________________________________________________________ */
-double   g_matrix[] = {1.0, 2.0, 3.0, 4.0, 
-                       5.0, 6.0, 7.0, 8.0, 
-					   9.0, 10., 11., 12.};
+double   g_matrix[] = {1.0, 2.0, 3.0, 4.0,
+                       5.0, 6.0, 7.0, 8.0,
+                       9.0, 10., 11., 12.};
 double   g_vector[] = {1.0, 2.0, 3.0, 4.0};
 int g_rows    = 3;
 int g_cols    = 4;
@@ -35,13 +35,13 @@ GMatrix set_matrix(void)
     GMatrix matrix(g_rows,g_cols);
     for (int row = 0; row < g_rows; ++row) {
       for (int col = 0; col < g_cols; ++col)
-	    matrix(row,col) = g_matrix[col+row*g_cols];
-	}
+        matrix(row,col) = g_matrix[col+row*g_cols];
+    }
     return matrix;
   }
   catch (exception &e) {
     cout << "TEST ERROR: Unable to set test matrix." << endl;
-	throw;
+    throw;
   }
 }
 
