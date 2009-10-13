@@ -33,7 +33,8 @@
 #include "GEbounds.hpp"
 #include "GResponse.hpp"
 
-/* __ Modelling handling _________________________________________________ */
+/* __ Model handling _____________________________________________________ */
+#include "GModels.hpp"
 #include "GModel.hpp"
 #include "GModelPar.hpp"
 #include "GModelSpatial.hpp"
