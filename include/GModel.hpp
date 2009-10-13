@@ -49,8 +49,10 @@ public:
     GModel& operator= (const GModel& model);
 
     // Methods
-    int        npars(void) const { return m_npars; }
-    GModelPar* par(int index) const;
+    std::string name(void) const { return m_name; }
+    void        name(const std::string& name) { m_name=name; return; }
+    int         npars(void) const { return m_npars; }
+    GModelPar*  par(int index) const;
   
 protected:
     // Protected methods
@@ -60,6 +62,7 @@ protected:
     void set_pointers(void);
 
     // Proteced data members
+    std::string     m_name;          //!< Model name
     int             m_npars;         //!< Total number of model parameters
     GModelPar**     m_par;           //!< Pointers to all model parameters
     GModelSpatial*  m_spatial;       //!< Spatial model

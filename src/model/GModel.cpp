@@ -298,6 +298,7 @@ std::ostream& operator<< (std::ostream& os, const GModel& model)
 
     // Put model in stream
     os << "=== GModel ===" << std::endl;
+    os << " Name ......................: " << model.m_name << std::endl;
     os << " Number of parameters ......: " << model.m_npars << std::endl;
     os << " Number of spatial par's ...: " << n_spatial;
     int i;
