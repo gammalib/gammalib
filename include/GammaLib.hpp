@@ -75,6 +75,7 @@
 #include "GFitsTableDblCol.hpp"
 
 /* __ LINALG module ______________________________________________________ */
+#include "GMatrixTools.hpp"
 #include "GVector.hpp"
 #include "GMatrixBase.hpp"
 #include "GMatrix.hpp"
