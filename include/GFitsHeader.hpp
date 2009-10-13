@@ -70,7 +70,7 @@ private:
     void             init_members(void);
     void             copy_members(const GFitsHeader& header);
     void             free_members(void);
-    GFitsHeaderCard* GFitsHeader::card_ptr(const std::string& keyname);
+    GFitsHeaderCard* card_ptr(const std::string& keyname);
     void             open(__fitsfile* fptr);
     void             save(__fitsfile* fptr);
     void             close(void);
