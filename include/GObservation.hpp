@@ -52,6 +52,13 @@ public:
 
     // Methods
     void         obsname(const std::string& obsname) { m_obsname=obsname; return; }
+    void         instrument(const std::string& instrument) { m_instrument=instrument; return; }
+    void         tstart(const double& tstart) { m_tstart=tstart; return; }
+    void         tstop(const double& tstop) { m_tstop=tstop; return; }
+    void         emin(const double& emin) { m_emin=emin; return; }
+    void         emax(const double& emax) { m_emax=emax; return; }
+    void         gti(const GGti& gti) { m_gti=gti; return; }
+    void         models(const GModels& models) { m_models=models; return; }
     double       tstart(void) const { return m_tstart; }
     double       tstop(void) const { return m_tstop; }
     double       emin(void) const { return m_emin; }
