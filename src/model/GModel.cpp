@@ -176,6 +176,7 @@ GModelPar* GModel::par(int index) const
 void GModel::init_members(void)
 {
     // Initialise members
+    m_name.clear();
     m_npars    = 0;
     m_par      = NULL;
     m_spatial  = NULL;
@@ -195,6 +196,7 @@ void GModel::init_members(void)
 void GModel::copy_members(const GModel& model)
 {
     // Copy attributes
+    m_name  = model.m_name;
     m_npars = model.m_npars;
     
     // Clone spatial and spectral models
