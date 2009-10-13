@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GSymMatrix.cpp  -  test GSymMatrix class              *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2009 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -692,17 +692,19 @@ int main(void)
 	  cout << result << endl;
 	  throw;
 	}
-	//
-	// convert_to_full()
-	GMatrix m_test11 = m_test;
+    //
+    // convert_to_full()
+/*
+    GMatrix m_test11 = m_test;
     if (!check_matrix(m_test11, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt convert_to_full() operator." << endl;
-	  cout << m_test11 << endl;
-	  throw;
-	}
-	//
-	// extract_lower_triangle()
-	m_test11 = m_test.extract_lower_triangle();
+      cout << m_test11 << endl;
+      throw;
+    }
+*/
+    //
+    // extract_lower_triangle()
+    m_test11 = m_test.extract_lower_triangle();
     if (!check_matrix_lt(m_test11, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt extract_lower_triangle() function." << endl;
 	  cout << m_test11 << endl;
