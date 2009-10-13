@@ -63,6 +63,7 @@ files = GException.cpp \
 	fits/GFitsHDU.cpp \
 	fits/GFits.cpp \
 	linalg/GVector.cpp \
+	linalg/GMatrixTools.cpp \
 	linalg/GMatrixBase.cpp \
 	linalg/GMatrix.cpp \
 	linalg/GSymMatrix.cpp \

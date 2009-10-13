@@ -13,6 +13,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "test_GSymMatrix.hpp"
+#include "GMatrixTools.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 using namespace std;
@@ -33,13 +34,13 @@ GSymMatrix set_matrix(void)
     GSymMatrix matrix(g_rows,g_cols);
     for (int row = 0; row < g_rows; ++row) {
       for (int col = 0; col < g_cols; ++col)
-	    matrix(row,col) = g_matrix[col+row*g_cols];
-	}
+        matrix(row,col) = g_matrix[col+row*g_cols];
+    }
     return matrix;
   }
   catch (exception &e) {
     cout << "TEST ERROR: Unable to set test matrix." << endl;
-	throw;
+    throw;
   }
 }
 
@@ -694,30 +695,29 @@ int main(void)
 	}
     //
     // convert_to_full()
-/*
-    GMatrix m_test11 = m_test;
+    GMatrix m_test11 = convert(m_test);
     if (!check_matrix(m_test11, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt convert_to_full() operator." << endl;
       cout << m_test11 << endl;
       throw;
     }
-*/
     //
     // extract_lower_triangle()
     m_test11 = m_test.extract_lower_triangle();
     if (!check_matrix_lt(m_test11, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt extract_lower_triangle() function." << endl;
-	  cout << m_test11 << endl;
-	  throw;
-	}
-	//
-	// extract_upper_triangle()
-	m_test11 = m_test.extract_upper_triangle();
+      cout << m_test11 << endl;
+      throw;
+    }
+    //
+    // extract_upper_triangle()
+    m_test11 = m_test.extract_upper_triangle();
     if (!check_matrix_ut(m_test11, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt extract_upper_triangle() function." << endl;
-	  cout << m_test11 << endl;
-	  throw;
-	}
+      cout << m_test11 << endl;
+      throw;
+    }
+
   }
   catch (exception &e) {
     cout << e.what() << endl;
@@ -734,7 +734,7 @@ int main(void)
 	GMatrix    cd_lower     = cd.extract_lower_triangle();
 	GMatrix    cd_upper     = transpose(cd_lower);
 	GMatrix    cd_product   = cd_lower * cd_upper;
-	GMatrix    cd_residuals = m_test - cd_product;
+	GMatrix    cd_residuals = convert(m_test) - cd_product;
 	//
 	double res = (fabs(cd_residuals)).max();
 	if (res < 1.0e-15)
@@ -752,7 +752,7 @@ int main(void)
 	GMatrix    cd_zero_lower     = cd_zero.extract_lower_triangle();
 	GMatrix    cd_zero_upper     = transpose(cd_zero_lower);
 	GMatrix    cd_zero_product   = cd_zero_lower * cd_zero_upper;
-	GMatrix    cd_zero_residuals = m_test_zero - cd_zero_product;
+	GMatrix    cd_zero_residuals = convert(m_test_zero) - cd_zero_product;
 	//
 	res = (fabs(cd_zero_residuals)).max();
 	if (res < 1.0e-15)
