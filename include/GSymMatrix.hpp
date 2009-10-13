@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GSymMatrix.hpp  -  symmetric matrix class               *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2009 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -42,9 +42,9 @@ class GSymMatrix : public GMatrixBase {
 public:
   // Constructors and destructors (not inherited)
   GSymMatrix(int rows, int cols);
-  GSymMatrix(const GMatrix& m);
+//  GSymMatrix(const GMatrix& m);
   GSymMatrix(const GSymMatrix& m);
-  GSymMatrix(const GSparseMatrix& m);
+//  GSymMatrix(const GSparseMatrix& m);
   virtual ~GSymMatrix();
 
   // Operators

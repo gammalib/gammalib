@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSymMatrix.cpp  -  symmetric matrix class              *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2009 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -92,6 +92,7 @@ GSymMatrix::GSymMatrix(const GSymMatrix& m) : GMatrixBase(m)
  * class members, then call the GSymMatrix initialisation method and       *
  * finally construct the object and fill it with the GMatrix data.         *
  ***************************************************************************/
+/*
 GSymMatrix::GSymMatrix(const GMatrix& m) : GMatrixBase()
 { 
   // First check if matrix is rectangular. Raise an exception if this is not
@@ -119,7 +120,7 @@ GSymMatrix::GSymMatrix(const GMatrix& m) : GMatrixBase()
   // Return
   return;
 }
-
+*/
 
 /***************************************************************************
  *           GSparseMatrix -> GSymMatrix storage class conversion          *
@@ -132,6 +133,7 @@ GSymMatrix::GSymMatrix(const GMatrix& m) : GMatrixBase()
  * class members, then call the GSymMatrix initialisation method and       *
  * finally construct the object and fill it with the GSparseMatrix data.   *
  ***************************************************************************/
+/*
 GSymMatrix::GSymMatrix(const GSparseMatrix& m) : GMatrixBase()
 { 
   // First check if matrix is rectangular. Raise an exception if this is not
@@ -159,7 +161,7 @@ GSymMatrix::GSymMatrix(const GSparseMatrix& m) : GMatrixBase()
   // Return
   return;
 }
-
+*/
 
 /***************************************************************************
  *                                Destructor                               *

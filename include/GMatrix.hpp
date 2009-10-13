@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GMatrix.hpp  -  matrix class                    *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2009 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -41,8 +41,8 @@ public:
   // Constructors and destructors
   GMatrix(int rows, int cols);
   GMatrix(const GMatrix& m);
-  GMatrix(const GSymMatrix& m);
-  GMatrix(const GSparseMatrix& m);
+//  GMatrix(const GSymMatrix& m);
+//  GMatrix(const GSparseMatrix& m);
   virtual ~GMatrix();
 
   // Operators

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GSparseMatrix.hpp  -  sparse matrix class               *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2009 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -54,8 +54,8 @@ class GSparseMatrix : public GMatrixBase {
 public:
   // Constructors and destructors
   GSparseMatrix(int rows, int cols, int elements = 0);
-  GSparseMatrix(const GMatrix& m);
-  GSparseMatrix(const GSymMatrix& m);
+//  GSparseMatrix(const GMatrix& m);
+//  GSparseMatrix(const GSymMatrix& m);
   GSparseMatrix(const GSparseMatrix& m);
   virtual ~GSparseMatrix();
 

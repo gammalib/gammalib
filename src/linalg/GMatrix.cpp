@@ -84,6 +84,7 @@ GMatrix::GMatrix(const GMatrix& m) : GMatrixBase(m)
  * class members, then call the GMatrix initialisation method and finally  *
  * construct the object and fill it with the GSymMatrix data.              *
  ***************************************************************************/
+/*
 GMatrix::GMatrix(const GSymMatrix& m) : GMatrixBase()
 { 
   // Initialise private members for clean destruction
@@ -102,7 +103,7 @@ GMatrix::GMatrix(const GSymMatrix& m) : GMatrixBase()
   // Return
   return;
 }
-
+*/
 
 /***************************************************************************
  *              GSparseMatrix -> GMatrix storage class conversion          *
@@ -111,6 +112,7 @@ GMatrix::GMatrix(const GSymMatrix& m) : GMatrixBase()
  * class members, then call the GMatrix initialisation method and finally  *
  * construct the object and fill it with the GSparseMatrix data.           *
  ***************************************************************************/
+/*
 GMatrix::GMatrix(const GSparseMatrix& m) : GMatrixBase()
 { 
   // Initialise private members for clean destruction
@@ -129,7 +131,7 @@ GMatrix::GMatrix(const GSparseMatrix& m) : GMatrixBase()
   // Return
   return;
 }
-
+*/
 
 /***************************************************************************
  *                           GMatrix destructor                            *
