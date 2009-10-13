@@ -23,8 +23,13 @@
 
 /* __ Constants __________________________________________________________ */
 
-/* __ Prototypes ________________________________________________________ */
-GMatrix convert(const GSymMatrix& m);
-GMatrix convert(const GSparseMatrix& m);
+/* __ Prototypes _________________________________________________________ */
+GMatrix       matrix(const GSymMatrix& m);
+GMatrix       matrix(const GSparseMatrix& m);
+GSymMatrix    sym_matrix(const GMatrix& m);
+GSymMatrix    sym_matrix(const GSparseMatrix& m);
+GSparseMatrix sparse_matrix(const GMatrix& m);
+GSparseMatrix sparse_matrix(const GSymMatrix& m);
+
 
 #endif /* GMATRIXTOOLS_HPP */
