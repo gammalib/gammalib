@@ -145,6 +145,23 @@ void test_model(void)
     std::cout << ".";
 //std::cout << models << std::endl;
 
+    // Put container in observation
+    GLATObservation obs;
+    try {
+        GModels models;
+        models.add(crab);
+        obs.load_unbinned("data/lat/ft1.fits.gz", "data/lat/ft2.fits.gz", "");
+        obs.models(models);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl << "TEST ERROR: Unable setup GLATObservation." 
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+//std::cout << obs << std::endl;
+
     // Plot final test success
     std::cout << " ok." << std::endl;
 
