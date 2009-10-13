@@ -56,6 +56,7 @@ public:
     class out_of_range : public GExceptionHandler {
     public:
         out_of_range(std::string origin, int inx, int min, int max);
+        out_of_range(std::string origin, double value, double min, double max);
         out_of_range(std::string origin, int inx, int elements);
         out_of_range(std::string origin, int row, int col, int rows, int cols);
     };

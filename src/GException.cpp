@@ -75,6 +75,18 @@ GException::out_of_range::out_of_range(std::string origin, int inx, int min, int
 
 
 /***************************************************************************
+ *                            Value out of range                           *
+ ***************************************************************************/
+GException::out_of_range::out_of_range(std::string origin, double value,
+                                       double min, double max)
+{
+    m_origin  = origin;
+    m_message = "Value (" + str(value) + ") out of range [" + str(min) +
+                "," + str(max) + "]";
+}
+
+
+/***************************************************************************
  *                          Vector index out of range                      *
  ***************************************************************************/
 GException::out_of_range::out_of_range(std::string origin, int inx, int elements)
