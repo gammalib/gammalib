@@ -324,7 +324,7 @@ std::ostream& operator<< (std::ostream& os, const GModels& models)
     
     // Put model in stream
     os << "=== GModels ===" << std::endl;
-    os << " Number of model ...........: " << models.m_elements << std::endl;
+    os << " Number of models ..........: " << models.m_elements << std::endl;
     os << " Number of parameters ......: " << models.m_npars;
     int i = 0;
     for (int k = 0; k < models.m_elements; ++k) {
