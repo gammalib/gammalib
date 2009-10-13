@@ -26,26 +26,27 @@
  ***************************************************************************/
 void test_lat_unbinned(void)
 {
-	// Write header
+    // Write header
     std::cout << "Test LAT unbinned data handling: ";
 
-	// Declare observations
-	GData           data;
-	GLATObservation obs;
+    // Declare observations
+    GData           data;
+    GLATObservation obs;
 
-	// Load unbinned LAT observation
+    // Load unbinned LAT observation
     try {
         obs.load_unbinned("data/lat/ft1.fits.gz", "data/lat/ft2.fits.gz", "");
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to load LAT observation." << std::endl;
+        std::cout << std::endl << "TEST ERROR: Unable to load LAT observation."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
     std::cout << ".";
 //std::cout << obs << std::endl;
-	
-	// Add observation (twice) to data
+
+    // Add observation (twice) to data
     try {
         data.add(obs);
         data.add(obs);
@@ -57,7 +58,7 @@ void test_lat_unbinned(void)
         throw;
     }
     std::cout << ".";
-    
+
     // Loop over all events in GData using iterators
     try {
         int num = 0;
@@ -101,7 +102,7 @@ void test_lat_unbinned(void)
         throw;
     }
     std::cout << ".";
-    
+
     // Plot final test success
     std::cout << " ok." << std::endl;
 
@@ -120,12 +121,12 @@ void test_lat_unbinned(void)
  ***************************************************************************/
 void test_lat_binned(void)
 {
-	// Write header
+    // Write header
     std::cout << "Test LAT binned data handling: ";
 
-	// Declare observations
-	GData           data;
-	GLATObservation obs;
+    // Declare observations
+    GData           data;
+    GLATObservation obs;
 
     // Load LAT binned observation
     try {
@@ -151,7 +152,7 @@ void test_lat_binned(void)
     }
     std::cout << ".";
 
-	// Add observation (twice) to data
+    // Add observation (twice) to data
     try {
         data.add(obs);
         data.add(obs);
@@ -170,7 +171,7 @@ void test_lat_binned(void)
         int sum = 0;
         for (GData::iterator event = data.begin(); event != data.end(); ++event) {
             num++;
-            sum += event->counts();
+            sum += (int)event->counts();
         }
         if (sum != 2718 || num != 400000) {
             std::cout << std::endl << 
@@ -194,7 +195,7 @@ void test_lat_binned(void)
         for (GLATEventCube::iterator event = ptr->begin(); event != ptr->end(); ++event) {
 //            std::cout << *((GLATEventBin*)&(*event));
             num++;
-            sum += event->counts();
+            sum += (int)event->counts();
         }
         if (sum != 1359 || num != 200000) {
             std::cout << std::endl << 
@@ -215,7 +216,7 @@ void test_lat_binned(void)
 
     // Exit test
     return;
- 
+
 }
 
 
@@ -233,7 +234,7 @@ int main(void)
     // Execute the tests
     test_lat_unbinned();
     test_lat_binned();
-    
+
     // Return
     return 0;
 }

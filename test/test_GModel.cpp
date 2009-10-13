@@ -25,10 +25,10 @@
  ***************************************************************************/
 void test_model_par(void)
 {
-	// Write header
+    // Write header
     std::cout << "Test GModelPar: ";
 
-	// Load unbinned LAT observation
+    // Load unbinned LAT observation
     try {
         GModelPar par;
         par.value(47.01);
@@ -54,13 +54,13 @@ void test_model_par(void)
         throw;
     }
     std::cout << ".";
-    
+
     // Plot final test success
     std::cout << " ok." << std::endl;
 
     // Exit test
     return;
- 
+
 }
 
 
@@ -69,13 +69,9 @@ void test_model_par(void)
  ***************************************************************************/
 void test_model(void)
 {
-	// Write header
+    // Write header
     std::cout << "Test GModel: ";
 
-	// Declare observations
-//	GData           data;
-//	GLATObservation obs;
-    
     // Setup spatial model
     GModelSpatialPtsrc point_source;
     try {
@@ -154,7 +150,7 @@ void test_model(void)
 
     // Exit test
     return;
- 
+
 }
 
 
@@ -172,7 +168,7 @@ int main(void)
     // Execute the tests
     test_model_par();
     test_model();
-        
+
     // Return
     return 0;
 }
