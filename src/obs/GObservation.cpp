@@ -220,7 +220,7 @@ std::ostream& operator<< (std::ostream& os, const GObservation& obs)
         os << *(obs.m_events) << std::endl;
 
     // Add GTIs to stream
-    os << obs.m_gti;
+    os << obs.m_gti << std::endl;
     
     // Add models to stream
     os << obs.m_models;
