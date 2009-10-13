@@ -309,6 +309,7 @@ void GModelPar::free_members(void)
 std::ostream& operator<< (std::ostream& os, const GModelPar& par)
 {
     // Put parameter in stream
+    os << std::scientific;
     os << par.m_name << ": ";
     os << par.real_value();
     os << " +/- ";
