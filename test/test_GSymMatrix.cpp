@@ -13,7 +13,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "test_GSymMatrix.hpp"
-#include "GMatrixTools.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 using namespace std;
@@ -695,7 +694,7 @@ int main(void)
 	}
     //
     // convert_to_full()
-    GMatrix m_test11 = convert(m_test);
+    GMatrix m_test11 = matrix(m_test);
     if (!check_matrix(m_test11, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
       cout << endl << "TEST ERROR: Corrupt convert_to_full() operator." << endl;
       cout << m_test11 << endl;
@@ -734,7 +733,7 @@ int main(void)
 	GMatrix    cd_lower     = cd.extract_lower_triangle();
 	GMatrix    cd_upper     = transpose(cd_lower);
 	GMatrix    cd_product   = cd_lower * cd_upper;
-	GMatrix    cd_residuals = convert(m_test) - cd_product;
+	GMatrix    cd_residuals = matrix(m_test) - cd_product;
 	//
 	double res = (fabs(cd_residuals)).max();
 	if (res < 1.0e-15)
@@ -752,7 +751,7 @@ int main(void)
 	GMatrix    cd_zero_lower     = cd_zero.extract_lower_triangle();
 	GMatrix    cd_zero_upper     = transpose(cd_zero_lower);
 	GMatrix    cd_zero_product   = cd_zero_lower * cd_zero_upper;
-	GMatrix    cd_zero_residuals = convert(m_test_zero) - cd_zero_product;
+	GMatrix    cd_zero_residuals = matrix(m_test_zero) - cd_zero_product;
 	//
 	res = (fabs(cd_zero_residuals)).max();
 	if (res < 1.0e-15)
