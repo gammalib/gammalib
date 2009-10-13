@@ -284,144 +284,145 @@ void test_output(const GMatrix& m_test)
 /***************************************************************************
  *                     Test: Conversion between matrix types               *
  ***************************************************************************/
-/*
 void test_conversion(void)
 {
   cout << "Test GMatrix: Matrix conversions: ";
   try {
     //
-	// Setup a symmetric matrix
-	int     num = 10;
-	GMatrix symmetric(num,num);
-	for (int i = 0; i < num; ++i) {
-	  for (int j = 0; j < num; ++j)
-	    symmetric(i,j) = (i+j+1)/2.0;
-	}
+    // Setup a symmetric matrix
+    int     num = 10;
+    GMatrix symmetric(num,num);
+    for (int i = 0; i < num; ++i) {
+      for (int j = 0; j < num; ++j)
+        symmetric(i,j) = (i+j+1)/2.0;
+    }
     cout << ".";
-	//
-	// Convert symmetric matrix into GSymMatrix object
-	GSymMatrix converted = symmetric;
+    //
+    // Convert symmetric matrix into GSymMatrix object
+    GSymMatrix converted = sym_matrix(symmetric);
     cout << ".";
-	//
-	// Convert GSymMatrix back to full matrix
-    GMatrix back_convert = converted;
+    //
+    // Convert GSymMatrix back to full matrix
+    GMatrix back_convert = matrix(converted);
     cout << ".";
-	//
-	// Compare back converted matrix to original one. They should be identical
-	if (symmetric != back_convert) {
-	  cout << endl << "TEST ERROR: Unable to convert matrixes (symmetric)." << endl;
-	  cout << "Original matrix " << symmetric << endl;
-	  cout << "GSymMatrix matrix " << converted << endl;
-	  cout << "Back converted matrix " << back_convert << endl;
+    //
+    // Compare back converted matrix to original one. They should be identical
+    if (symmetric != back_convert) {
+      cout << endl << "TEST ERROR: Unable to convert matrixes (symmetric)." << endl;
+      cout << "Original matrix " << symmetric << endl;
+      cout << "GSymMatrix matrix " << converted << endl;
+      cout << "Back converted matrix " << back_convert << endl;
       throw;
-	}
-	//
-	// Determine the fill of the matrix. It should be 1.0
-	double fill = back_convert.fill();
-	if (fabs(fill-1.0) > 1.0e-15) {
-	  cout << endl << "TEST ERROR: Bad fill " << fill << " determined (expected 1.0)." <<
-	       endl;
-	  throw;
-	}
-    cout << ".";
-	//
-	// Extract lower triangle and check values
-	GMatrix lower = symmetric.extract_lower_triangle();
-	int ok = 1;
-	for (int j = 1; j < num; ++j) {
-	  for (int i = 0; i < j; ++i) {
-	    if (lower(i,j) != 0.0)
-		  ok = 0;
-	  }
-	}
-	for (int j = 0; j < num; ++j) {
-	  for (int i = j; i < num; ++i) {
-	    if (lower(i,j) != symmetric(i,j))
-		  ok = 0;
-	  }
-	}
-	if (!ok) {
-	  cout << endl << "TEST ERROR: Corrupt extract_lower_triangle." << endl;
-	  cout << "Original matrix " << symmetric << endl;
-	  cout << "Lower triangle matrix " << lower << endl;
+    }
+    //
+    // Determine the fill of the matrix. It should be 1.0
+    double fill = back_convert.fill();
+    if (fabs(fill-1.0) > 1.0e-15) {
+      cout << endl << "TEST ERROR: Bad fill " << fill << " determined (expected 1.0)." <<
+           endl;
       throw;
-	}
+    }
     cout << ".";
-	//
-	// Extract upper triangle and check values
-	GMatrix upper = symmetric.extract_upper_triangle();
-	ok = 1;
-	for (int j = 0; j < num; ++j) {
-	  for (int i = j+1; i < num; ++i) {
-	    if (upper(i,j) != 0.0)
-		  ok = 0;
-	  }
-	}
-	for (int j = 0; j < num; ++j) {
-	  for (int i = 0; i <= j; ++i) {
-	    if (upper(i,j) != symmetric(i,j))
-		  ok = 0;
-	  }
-	}
-	if (!ok) {
-	  cout << endl << "TEST ERROR: Corrupt extract_upper_triangle." << endl;
-	  cout << "Original matrix " << symmetric << endl;
-	  cout << "Upper triangle matrix " << upper << endl;
+    //
+    // Extract lower triangle and check values
+    GMatrix lower = symmetric.extract_lower_triangle();
+    int ok = 1;
+    for (int j = 1; j < num; ++j) {
+      for (int i = 0; i < j; ++i) {
+        if (lower(i,j) != 0.0)
+          ok = 0;
+      }
+    }
+    for (int j = 0; j < num; ++j) {
+      for (int i = j; i < num; ++i) {
+        if (lower(i,j) != symmetric(i,j))
+          ok = 0;
+      }
+    }
+    if (!ok) {
+      cout << endl << "TEST ERROR: Corrupt extract_lower_triangle." << endl;
+      cout << "Original matrix " << symmetric << endl;
+      cout << "Lower triangle matrix " << lower << endl;
       throw;
-	}
+    }
     cout << ".";
-	//
-	// Now make the matrix unsymmetric
-	symmetric(0,num-1) = 1000.0;
-	//
-	// Try converting now into GSymMatrix object (this should fail)
-	try {
-	  converted = symmetric;
-	}
+    //
+    // Extract upper triangle and check values
+    GMatrix upper = symmetric.extract_upper_triangle();
+    ok = 1;
+    for (int j = 0; j < num; ++j) {
+      for (int i = j+1; i < num; ++i) {
+        if (upper(i,j) != 0.0)
+          ok = 0;
+      }
+    }
+    for (int j = 0; j < num; ++j) {
+      for (int i = 0; i <= j; ++i) {
+        if (upper(i,j) != symmetric(i,j))
+          ok = 0;
+      }
+    }
+    if (!ok) {
+      cout << endl << "TEST ERROR: Corrupt extract_upper_triangle." << endl;
+      cout << "Original matrix " << symmetric << endl;
+      cout << "Upper triangle matrix " << upper << endl;
+      throw;
+    }
+    cout << ".";
+    //
+    // Now make the matrix unsymmetric
+    symmetric(0,num-1) = 1000.0;
+    //
+    // Try converting now into GSymMatrix object (this should fail)
+    try {
+      converted = sym_matrix(symmetric);
+      cout << endl << "TEST ERROR: Conversion to symmetric should have failed." << endl;
+      throw;
+    }
     catch (GException::matrix_not_symmetric &e) {
       cout << ".";
-	}
+    }
     catch (exception &e) {
       cout << e.what() << endl;
-	  throw;
-    }
-	//
-	// Now zero some elements to emulate a sparse matrix
-	symmetric(0,num-1) = 0.0;
-	for (int i = 5; i < 8; ++i) {
-	  for (int j = i-2; j < i+2; ++j)
-	    symmetric(i,j) = 0.0;
-	}
-    cout << ".";
-	//
-	// Convert symmetric matrix into GSparseMatrix object
-	GSparseMatrix sparse = symmetric;
-    cout << ".";
-	//
-	// Convert GSparseMatrix back to full matrix
-    back_convert = sparse;
-    cout << ".";
-	//
-	// Compare back converted matrix to original one. They should be identical
-	if (symmetric != back_convert) {
-	  cout << endl << "TEST ERROR: Unable to convert matrixes (sparse)." << endl;
-	  cout << "Original matrix " << symmetric << endl;
-	  cout << "GSparseMatrix matrix " << sparse << endl;
-	  cout << "Back converted matrix " << back_convert << endl;
       throw;
-	}	
+    }
+    //
+    // Now zero some elements to emulate a sparse matrix
+    symmetric(0,num-1) = 0.0;
+    for (int i = 5; i < 8; ++i) {
+      for (int j = i-2; j < i+2; ++j)
+        symmetric(i,j) = 0.0;
+    }
+    cout << ".";
+    //
+    // Convert symmetric matrix into GSparseMatrix object
+    GSparseMatrix sparse = sparse_matrix(symmetric);
+    cout << ".";
+    //
+    // Convert GSparseMatrix back to full matrix
+    back_convert = matrix(sparse);
+    cout << ".";
+    //
+    // Compare back converted matrix to original one. They should be identical
+    if (symmetric != back_convert) {
+      cout << endl << "TEST ERROR: Unable to convert matrixes (sparse)." << endl;
+      cout << "Original matrix " << symmetric << endl;
+      cout << "GSparseMatrix matrix " << sparse << endl;
+      cout << "Back converted matrix " << back_convert << endl;
+      throw;
+    }
     cout << ".";
   }
   catch (exception &e) {
     cout << e.what() << endl;
-	throw;
+    throw;
   }
   cout << " ok." << endl;
 
   // Return
   return;
 }
-*/
+
 
 /***************************************************************************
  *                        Test: extraction and insertion                   *
@@ -506,16 +507,16 @@ int main(void)
   // Set test matrix and vector
   GMatrix m_test = set_matrix();
   GVector v_test = set_vector();
-  
+
   // Set bigger matrix (only used for collision, don't care about content)
   GMatrix bigger(g_rows+1,g_cols+1);
-  
+
   // Prepare result matrix
   GMatrix result = m_test;
 
   // Execute the tests
   test_output(m_test);
-  //test_conversion();
+  test_conversion();
   test_extract();
 
   // Test 1: Allocate zero matrix
