@@ -41,8 +41,6 @@ public:
   // Constructors and destructors
   GMatrix(int rows, int cols);
   GMatrix(const GMatrix& m);
-//  GMatrix(const GSymMatrix& m);
-//  GMatrix(const GSparseMatrix& m);
   virtual ~GMatrix();
 
   // Operators

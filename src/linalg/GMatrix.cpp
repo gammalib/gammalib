@@ -78,62 +78,6 @@ GMatrix::GMatrix(const GMatrix& m) : GMatrixBase(m)
 
 
 /***************************************************************************
- *               GSymMatrix -> GMatrix storage class conversion            *
- * ----------------------------------------------------------------------- *
- * First calls the void base class constructor that initialises all base   *
- * class members, then call the GMatrix initialisation method and finally  *
- * construct the object and fill it with the GSymMatrix data.              *
- ***************************************************************************/
-/*
-GMatrix::GMatrix(const GSymMatrix& m) : GMatrixBase()
-{ 
-  // Initialise private members for clean destruction
-  init_members();
-
-  // Construct matrix
-  constructor(m.rows(), m.cols());
-
-  // Fill matrix
-  int i_dst = 0;
-  for (int col = 0; col < m_cols; ++col) {
-    for (int row = 0; row < m_rows; ++row)
-	  m_data[i_dst++] = m(row, col);
-  }
-  
-  // Return
-  return;
-}
-*/
-
-/***************************************************************************
- *              GSparseMatrix -> GMatrix storage class conversion          *
- * ----------------------------------------------------------------------- *
- * First calls the void base class constructor that initialises all base   *
- * class members, then call the GMatrix initialisation method and finally  *
- * construct the object and fill it with the GSparseMatrix data.           *
- ***************************************************************************/
-/*
-GMatrix::GMatrix(const GSparseMatrix& m) : GMatrixBase()
-{ 
-  // Initialise private members for clean destruction
-  init_members();
-
-  // Construct matrix
-  constructor(m.rows(), m.cols());
-
-  // Fill matrix
-  int i_dst = 0;
-  for (int col = 0; col < m_cols; ++col) {
-    for (int row = 0; row < m_rows; ++row)
-	  m_data[i_dst++] = m(row, col);
-  }
-  
-  // Return
-  return;
-}
-*/
-
-/***************************************************************************
  *                           GMatrix destructor                            *
  * ----------------------------------------------------------------------- *
  * First destroys class members, then destroy base class members.          *
@@ -591,12 +535,12 @@ std::ostream& operator<< (std::ostream& os, const GMatrix& m)
   os << "=== GMatrix ===" << std::endl;
   if (m.m_rowsel != NULL)
     os << " Number of rows ............: " << m.m_rows << " (compressed " <<
-	      m.m_num_rowsel << ")" << std::endl;
+        m.m_num_rowsel << ")" << std::endl;
   else
     os << " Number of rows ............: " << m.m_rows << std::endl;
   if (m.m_colsel != NULL)
     os << " Number of columns .........: " << m.m_cols << " (compressed " <<
-	      m.m_num_colsel << ")" << std::endl;
+       m.m_num_colsel << ")" << std::endl;
   else
     os << " Number of columns .........: " << m.m_cols << std::endl;
   os << " Number of elements ........: " << m.m_elements << std::endl;
@@ -606,7 +550,7 @@ std::ostream& operator<< (std::ostream& os, const GMatrix& m)
   m.dump_elements(os);
   m.dump_row_comp(os);
   m.dump_col_comp(os);
-  
+
   // Return output stream
   return os;
 }
@@ -620,11 +564,13 @@ GMatrix fabs(const GMatrix& m)
 {
   // Define result matrix
   GMatrix result = m;
-  
+
   // Convert all elements to absolute values  
   for (int i = 0; i < result.m_elements; ++i)
     result.m_data[i] = fabs(result.m_data[i]);
-  
+
   // Return result
   return result;
 }
+
+
