@@ -122,6 +122,7 @@ void test_model(void)
     GModel crab;
     try {
         crab = GModel(point_source, power_law);
+        crab.name("Crab");
     }
     catch (std::exception &e) {
         std::cout << std::endl << "TEST ERROR: Unable setup GModel." 
@@ -130,7 +131,23 @@ void test_model(void)
         throw;
     }
     std::cout << ".";
-std::cout << crab << std::endl;
+//std::cout << crab << std::endl;
+
+    // Put model in container
+    GModels models;
+    try {
+        models.add(crab);
+        models.add(crab);
+        models.add(crab);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl << "TEST ERROR: Unable setup GModels." 
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+//std::cout << models << std::endl;
 
     // Plot final test success
     std::cout << " ok." << std::endl;

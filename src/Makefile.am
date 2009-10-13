@@ -25,6 +25,7 @@ files = GException.cpp \
 	obs/GGti.cpp \
 	obs/GEbounds.cpp \
 	obs/GResponse.cpp \
+	model/GModels.cpp \
 	model/GModel.cpp \
 	model/GModelPar.cpp \
 	model/GModelSpatial.cpp \

@@ -78,8 +78,8 @@ libgamma_la_LIBADD =
 am__objects_1 = GException.lo GTools.lo GSkyDir.lo GNodeArray.lo \
 	GImage.lo GHealpix.lo GData.lo GObservation.lo GEvents.lo \
 	GEventList.lo GEventCube.lo GEvent.lo GEventAtom.lo \
-	GEventBin.lo GGti.lo GEbounds.lo GResponse.lo GModel.lo \
-	GModelPar.lo GModelSpatial.lo GModelSpatialPtsrc.lo \
+	GEventBin.lo GGti.lo GEbounds.lo GResponse.lo GModels.lo \
+	GModel.lo GModelPar.lo GModelSpatial.lo GModelSpatialPtsrc.lo \
 	GModelSpectral.lo GModelSpectralPlaw.lo GModelTemporal.lo \
 	GModelTemporalConst.lo GLATObservation.lo GLATEventList.lo \
 	GLATEventCube.lo GLATEventAtom.lo GLATEventBin.lo \
@@ -258,6 +258,7 @@ files = GException.cpp \
 	obs/GGti.cpp \
 	obs/GEbounds.cpp \
 	obs/GResponse.cpp \
+	model/GModels.cpp \
 	model/GModel.cpp \
 	model/GModelPar.cpp \
 	model/GModelSpatial.cpp \
@@ -422,6 +423,9 @@ GEbounds.lo: obs/GEbounds.cpp
 
 GResponse.lo: obs/GResponse.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GResponse.lo `test -f 'obs/GResponse.cpp' || echo '$(srcdir)/'`obs/GResponse.cpp
+
+GModels.lo: model/GModels.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GModels.lo `test -f 'model/GModels.cpp' || echo '$(srcdir)/'`model/GModels.cpp
 
 GModel.lo: model/GModel.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GModel.lo `test -f 'model/GModel.cpp' || echo '$(srcdir)/'`model/GModel.cpp

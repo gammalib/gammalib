@@ -35,6 +35,9 @@
  ***************************************************************************/
 class GModel {
 
+    // Friend classes
+    friend class GModels;
+    
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GModel& model);
 
