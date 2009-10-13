@@ -376,7 +376,8 @@ void GFitsTableDblCol::copy_members(const GFitsTableDblCol& column)
     if (column.m_data != NULL && m_size > 0) {
         if (m_data != NULL) delete [] m_data;
         m_data = new double[m_size];
-        memcpy(m_data, column.m_data, m_size*sizeof(double));
+        for (int i = 0; i < m_size; ++i)
+            m_data[i] = column.m_data[i];
     }
 
     // Copy NULL value
