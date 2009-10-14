@@ -179,7 +179,7 @@ GData::iterator& GData::iterator::operator++(void)
         
         // Increment event iterator
         m_event++;
-    
+
         // If end of observation is reached then set iterator to first event of
         // next valid observation
         if (m_event == m_end) {
