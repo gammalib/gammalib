@@ -150,29 +150,6 @@ GEvents::iterator::iterator(GEvents *events)
 
 
 /***********************************************************************//**
- * @brief Iterator Destructor
- ***************************************************************************/
-GEvents::iterator::~iterator()
-{
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Iterator prefix operator
- ***************************************************************************/
-GEvents::iterator& GEvents::iterator::operator++(void)
-{
-    // Get next event
-    m_index++;
-    
-    // Return
-    return *this;
-}
-
-
-/***********************************************************************//**
  * @brief Iterator postfix operator
  ***************************************************************************/
 GEvents::iterator GEvents::iterator::operator++(int junk)
@@ -185,46 +162,6 @@ GEvents::iterator GEvents::iterator::operator++(int junk)
     
     // Return actual iterator
     return actual;
-}
-
-
-/***********************************************************************//**
- * @brief Iterator == operator
- ***************************************************************************/
-bool GEvents::iterator::operator==(const iterator& it) const
-{
-    // Return result
-    return (m_index == it.m_index);
-}
-
-
-/***********************************************************************//**
- * @brief Iterator != operator
- ***************************************************************************/
-bool GEvents::iterator::operator!=(const iterator& it) const
-{
-    // Return result
-    return (m_index != it.m_index);
-}
-
-
-/***********************************************************************//**
- * @brief Iterator dereference operator
- ***************************************************************************/
-GEvent& GEvents::iterator::operator*(void)
-{
-    // Return event
-    return *(m_base->pointer(m_index));
-}
-
-
-/***********************************************************************//**
- * @brief Iterator dereference operator
- ***************************************************************************/
-GEvent* GEvents::iterator::operator->(void)
-{
-    // Return event
-    return m_base->pointer(m_index);
 }
 
 

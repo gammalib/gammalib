@@ -63,13 +63,13 @@ public:
     public:
         iterator();
         iterator(GEvents *events);
-        ~iterator();
-        iterator& operator++(void);                // Prefix
-        iterator  operator++(int junk);            // Postfix
-        bool      operator==(const iterator& it) const;
-        bool      operator!=(const iterator& it) const;
-        GEvent&   operator*(void);
-        GEvent*   operator->(void);
+        ~iterator() { return; }
+        iterator& operator++(void) { m_index++; return *this; }
+        iterator  operator++(int junk);
+        bool      operator==(const iterator& it) const { return (m_index == it.m_index); }
+        bool      operator!=(const iterator& it) const { return (m_index != it.m_index); }
+        GEvent&   operator*(void) { return *(m_base->pointer(m_index)); }
+        GEvent*   operator->(void) { return m_base->pointer(m_index); }
     protected:
         int      m_index;        //!< Actuel event index
         int      m_num;          //!< Number of events in GEvents object
