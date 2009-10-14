@@ -162,7 +162,7 @@ void test_model(void)
         throw;
     }
     std::cout << ".";
-std::cout << data << std::endl;
+//std::cout << data << std::endl;
 
     // Plot final test success
     std::cout << " ok." << std::endl;
