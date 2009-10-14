@@ -58,7 +58,6 @@ public:
     void         emin(const double& emin) { m_emin=emin; return; }
     void         emax(const double& emax) { m_emax=emax; return; }
     void         gti(const GGti& gti) { m_gti=gti; return; }
-    void         models(const GModels& models) { m_models=models; return; }
     double       tstart(void) const { return m_tstart; }
     double       tstop(void) const { return m_tstop; }
     double       emin(void) const { return m_emin; }
@@ -68,7 +67,6 @@ public:
     GEvents*     events(void) const { return m_events; }
     GResponse*   response(void) const { return m_response; }
     GGti*        gti(void) { return &m_gti; }
-    GModels*     models(void) { return &m_models; }
 
 protected:
     // Protected methods
@@ -87,7 +85,6 @@ protected:
     GEvents*    m_events;       //!< Pointer to events
     GResponse*  m_response;     //!< Pointer to instrument response functions
     GGti        m_gti;          //!< Good time intervals
-    GModels     m_models;       //!< Models
 
 private:
 };

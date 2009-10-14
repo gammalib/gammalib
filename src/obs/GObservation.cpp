@@ -140,7 +140,6 @@ void GObservation::init_members(void)
     m_events   = NULL;
     m_response = NULL;
     m_gti      = GGti();
-    m_models   = GModels();
 
     // Return
     return;
@@ -162,7 +161,6 @@ void GObservation::copy_members(const GObservation& obs)
     m_emin       = obs.m_emin;
     m_emax       = obs.m_emax;
     m_gti        = obs.m_gti;
-    m_models     = obs.m_models;
 
     // Clone members that exist
     m_events   = (obs.m_events   != NULL) ? obs.m_events->clone()   : NULL;
@@ -222,9 +220,6 @@ std::ostream& operator<< (std::ostream& os, const GObservation& obs)
     // Add GTIs to stream
     os << obs.m_gti << std::endl;
     
-    // Add models to stream
-    os << obs.m_models;
-        
     // Return output stream
     return os;
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GData.hpp  -  Data container class                    *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -44,7 +44,11 @@ public:
     GData& operator= (const GData& data);
 
     // Methods
-	void add(GObservation &obs);
+	void          add(GObservation &obs);
+    void          models(const GModels& models) { m_models=models; return; }
+    int           elements(void) const { return m_num; }
+    GObservation* observation(int index) const;
+    GModels*      models(void) { return &m_models; }
 
     // Event iterator
     class iterator {
@@ -77,9 +81,9 @@ protected:
 
     // Protected data area
 	int            m_num;            //!< Number of observations
-	GObservation **m_obs;            //!< Pointers to observations
+	GObservation** m_obs;            //!< Pointers to observations
+    GModels        m_models;         //!< Models
 	
-private:
 };
 
 #endif /* GDATA_HPP */

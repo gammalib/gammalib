@@ -25,6 +25,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_ADD                                     "GData::add(GObservation&)"
 #define G_COPY_MEMBERS                    "GData::copy_members(const GData&)"
+#define G_OBSERVATION                         "GData::observation(int) const"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -375,6 +376,21 @@ void GData::add(GObservation& obs)
 }
 
 
+/***********************************************************************//**
+ * @brief Returns pointer on observation
+ *
+ * @param[in] index Index of observation (0,1,2,...)  
+ ***************************************************************************/
+GObservation* GData::observation(int index) const
+{
+    // If index is outside boundary then throw an error
+    if (index < 0 || index >= m_num)
+        throw GException::out_of_range(G_OBSERVATION, index, 0, m_num-1);
+
+    // Return observation pointer
+    return m_obs[index];
+}
+
 /*==========================================================================
  =                                                                         =
  =                           GData private methods                         =
@@ -387,8 +403,9 @@ void GData::add(GObservation& obs)
 void GData::init_members(void)
 {
     // Initialise members
-    m_num = 0;
-	m_obs = NULL;
+    m_num    = 0;
+	m_obs    = NULL;
+    m_models = GModels();
 
     // Return
     return;
@@ -406,7 +423,8 @@ void GData::init_members(void)
 void GData::copy_members(const GData& data)
 {
     // Copy attributes
-    m_num = data.m_num;
+    m_num    = data.m_num;
+    m_models = data.m_models;
 	
 	// Copy observations
     if (m_num > 0) {
@@ -440,7 +458,6 @@ void GData::free_members(void)
 	}
 	
     // Mark memory as free
-	m_num = 0;
 	m_obs = NULL;
 
     // Return
@@ -469,6 +486,9 @@ std::ostream& operator<< (std::ostream& os, const GData& data)
 	// Put observations in stream
 	for (int i = 0; i < data.m_num; ++i)
 		os << *(data.m_obs[i]);
+
+    // Add models to stream
+    os << data.m_models;
 
     // Return output stream
     return os;
