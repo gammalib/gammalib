@@ -22,6 +22,11 @@
 /* __ Core services ______________________________________________________ */
 #include "GException.hpp"
 
+/* __ Tools ______________________________________________________________ */
+#include "GHealpix.hpp"
+#include "GNodeArray.hpp"
+#include "GSkyDir.hpp"
+
 /* __ Observation handling _______________________________________________ */
 #include "GData.hpp"
 #include "GObservation.hpp"
@@ -43,14 +48,6 @@
 #include "GModelSpectralPlaw.hpp"
 #include "GModelTemporal.hpp"
 #include "GModelTemporalConst.hpp"
-
-/* __ Fermi/LAT specific code ____________________________________________ */
-#include "GLATObservation.hpp"
-#include "GLATEventList.hpp"
-#include "GLATEventCube.hpp"
-#include "GLATEventAtom.hpp"
-#include "GLATEventBin.hpp"
-#include "GLATResponse.hpp"
 
 /* __ Image module _______________________________________________________ */
 #include "GImage.hpp"
@@ -74,6 +71,9 @@
 #include "GFitsTableFltCol.hpp"
 #include "GFitsTableDblCol.hpp"
 
+/* __ Optimizer module ___________________________________________________ */
+#include "GOptimizerFunction.hpp"
+
 /* __ LINALG module ______________________________________________________ */
 #include "GMatrixTools.hpp"
 #include "GVector.hpp"
@@ -81,5 +81,13 @@
 #include "GMatrix.hpp"
 #include "GSymMatrix.hpp"
 #include "GSparseMatrix.hpp"
+
+/* __ Fermi/LAT specific code ____________________________________________ */
+#include "GLATObservation.hpp"
+#include "GLATEventList.hpp"
+#include "GLATEventCube.hpp"
+#include "GLATEventAtom.hpp"
+#include "GLATEventBin.hpp"
+#include "GLATResponse.hpp"
 
 #endif /* GAMMALIB_HPP */

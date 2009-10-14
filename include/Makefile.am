@@ -54,4 +54,5 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GMatrix.hpp \
 		     GSymMatrix.hpp \
 		     GSparseMatrix.hpp \
+             GOptimizerFunction.hpp \
 		     GNodeArray.hpp

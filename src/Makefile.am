@@ -62,6 +62,7 @@ files = GException.cpp \
 	fits/GFitsTableDblCol.cpp \
 	fits/GFitsHDU.cpp \
 	fits/GFits.cpp \
+	opt/GOptimizerFunction.cpp \
 	linalg/GVector.cpp \
 	linalg/GMatrixTools.cpp \
 	linalg/GMatrixBase.cpp \
