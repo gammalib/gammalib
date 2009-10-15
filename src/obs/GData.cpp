@@ -157,16 +157,6 @@ GData::iterator::iterator(GData *data)
 
 
 /***********************************************************************//**
- * @brief Iterator Destructor
- ***************************************************************************/
-GData::iterator::~iterator()
-{
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Iterator prefix operator
  *
  * The iterator skips any empty observations (i.e. NULL observation pointer)
@@ -243,46 +233,6 @@ GData::iterator GData::iterator::operator++(int junk)
     
     // Return actual iterator
     return actual;
-}
-
-
-/***********************************************************************//**
- * @brief Iterator == operator
- ***************************************************************************/
-bool GData::iterator::operator==(const iterator& it) const
-{
-    // Return result
-    return ((m_index == it.m_index) && (m_event == it.m_event));
-}
-
-
-/***********************************************************************//**
- * @brief Iterator != operator
- ***************************************************************************/
-bool GData::iterator::operator!=(const iterator& it) const
-{
-    // Return result
-    return ((m_index != it.m_index) || (m_event != it.m_event));
-}
-
-
-/***********************************************************************//**
- * @brief Iterator dereference operator
- ***************************************************************************/
-GEvent& GData::iterator::operator*(void)
-{
-    // Return event
-    return *m_event;
-}
-
-
-/***********************************************************************//**
- * @brief Iterator dereference operator
- ***************************************************************************/
-GEvent* GData::iterator::operator->(void)
-{
-    // Return event
-    return &(*m_event);
 }
 
 

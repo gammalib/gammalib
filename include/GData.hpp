@@ -56,13 +56,15 @@ public:
     public:
         iterator();
         iterator(GData *data);
-        ~iterator();
+        ~iterator() { return; }
         iterator& operator++(void);                // Prefix
         iterator  operator++(int junk);            // Postfix
-        bool      operator==(const iterator& it) const;
-        bool      operator!=(const iterator& it) const;
-        GEvent&   operator*(void);
-        GEvent*   operator->(void);
+        bool      operator==(const iterator& it) const 
+                  { return ((m_index == it.m_index) && (m_event == it.m_event)); }
+        bool      operator!=(const iterator& it) const
+                  { return ((m_index != it.m_index) || (m_event != it.m_event)); }
+        GEvent&   operator*(void) { return *m_event; }
+        GEvent*   operator->(void) { return &(*m_event); }
     protected:
         int               m_index;   //!< Actual observation index [0,m_num-1]
         GEvents::iterator m_event;   //!< Iterator on actual event
