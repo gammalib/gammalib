@@ -72,8 +72,10 @@
 #include "GFitsTableDblCol.hpp"
 
 /* __ Optimizer module ___________________________________________________ */
-#include "GOptimizerFunction.hpp"
+#include "GOptimizer.hpp"
+#include "GOptimizerLM.hpp"
 #include "GOptimizerPars.hpp"
+#include "GOptimizerFunction.hpp"
 
 /* __ LINALG module ______________________________________________________ */
 #include "GMatrixTools.hpp"

@@ -70,13 +70,13 @@ GOptimizerPars::GOptimizerPars(const GModels& models)
         m_npars = models.npars();
     
         // Allocate model parameter pointers
-        m_par = new GModelPar[m_npars];
+        m_par = new GModelPar*[m_npars];
         if (m_par == NULL)
             throw GException::mem_alloc(G_CONSTRUCTOR, m_npars);
         
         // Copy model parameter pointers
         for (int i = 0; i < m_npars; ++i)
-            m_par[i] = *(models.par(i));
+            m_par[i] = models.par(i);
     
     } // endif: there were parameters in the model
   
@@ -166,7 +166,7 @@ GModelPar* GOptimizerPars::par(int index) const
         throw GException::out_of_range(G_PAR, index, 0, m_npars-1);
     
     // Return parameter pointer
-    return &(m_par[index]);
+    return m_par[index];
 }
 
 
@@ -204,7 +204,7 @@ void GOptimizerPars::copy_members(const GOptimizerPars& pars)
     if (m_npars > 0 && pars.m_par != NULL) {
     
         // Allocate parameters
-        m_par = new GModelPar[m_npars];
+        m_par = new GModelPar*[m_npars];
         if (m_par == NULL)
             throw GException::mem_alloc(G_COPY_MEMBERS, m_npars);
         

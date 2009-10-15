@@ -57,8 +57,8 @@ protected:
     void free_members(void);
 
     // Proteced data members
-    int        m_npars;         //!< Total number of model parameters
-    GModelPar* m_par;           //!< Array of model parameters
+    int         m_npars;         //!< Total number of model parameters
+    GModelPar** m_par;           //!< Pointers to model parameters
 };
 
 #endif /* GOPTIMIZERPARS_HPP */
