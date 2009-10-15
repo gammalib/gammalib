@@ -48,6 +48,7 @@ public:
 
     // Methods
     int        npars(void) const { return m_npars; }
+    int        nfree(void) const;
     GModelPar* par(int index) const;
   
 protected:

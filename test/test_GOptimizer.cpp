@@ -124,8 +124,8 @@ void test_optimizer(void)
         throw;
     }
     std::cout << ".";
-std::cout << opt << std::endl;
-std::cout << data << std::endl;
+//std::cout << opt << std::endl;
+//std::cout << data << std::endl;
 
     // Plot final test success
     std::cout << " ok." << std::endl;

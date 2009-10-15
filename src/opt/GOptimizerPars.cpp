@@ -155,6 +155,25 @@ GOptimizerPars& GOptimizerPars::operator= (const GOptimizerPars& pars)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Compute number of free parameters
+ ***************************************************************************/
+int GOptimizerPars::nfree(void) const
+{
+    // Initialise number of free parameters
+    int nfree = 0;
+    
+    // Collect all free parameters
+    for (int i = 0; i < m_npars; ++i) {
+        if (m_par[i]->isfree())
+            nfree++;
+    }
+    
+    // Return
+    return nfree;
+}
+
+
+/***********************************************************************//**
  * @brief Get pointer to model parameter
  *
  * @param[in] index Parameter index.

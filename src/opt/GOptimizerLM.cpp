@@ -162,6 +162,12 @@ GOptimizerPars& GOptimizerLM::operator() (GOptimizerFunction& fct, GOptimizerPar
     // Initalise output parameters with input parameters
     GOptimizerPars* pars = new GOptimizerPars(p);
     
+    // Initial eveluation
+    fct.eval(*pars);
+std::cout << *(fct.value()) << std::endl;
+std::cout << *(fct.gradient()) << std::endl;
+std::cout << *(fct.covar()) << std::endl;
+    
     // DUMMY
     pars->par(0)->value(10.0);
     pars->par(0)->error(1.0);
