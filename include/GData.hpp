@@ -88,15 +88,15 @@ public:
         ~optimizer();
         optimizer& operator= (const optimizer& fct);
         void           eval(const GOptimizerPars& pars);
-        double*        value(void);
-        GVector*       gradient(void);
-        GSparseMatrix* covar(void);
+        double*        value(void) { return &m_value; }
+        GVector*       gradient(void) { return m_gradient; }
+        GSparseMatrix* covar(void) { return m_covar; }
     protected:
         void           init_members(void);
         void           copy_members(const optimizer& fct);
         void           free_members(void);
         double         m_value;       //!< Function value
-        GVector*       m_vector;      //!< Pointer to gradient vector
+        GVector*       m_gradient;    //!< Pointer to gradient vector
         GSparseMatrix* m_covar;       //!< Pointer to covariance matrix
         GData*         m_data;        //!< Pointer to GData object
     };
