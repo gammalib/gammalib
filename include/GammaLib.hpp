@@ -73,6 +73,7 @@
 
 /* __ Optimizer module ___________________________________________________ */
 #include "GOptimizerFunction.hpp"
+#include "GOptimizerPars.hpp"
 
 /* __ LINALG module ______________________________________________________ */
 #include "GMatrixTools.hpp"
