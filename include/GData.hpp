@@ -20,8 +20,11 @@
 #define GDATA_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include "GObservation.hpp"
 #include "GEvent.hpp"
+#include "GOptimizer.hpp"
+#include "GOptimizerFunction.hpp"
 
 
 /***********************************************************************//**
@@ -49,6 +52,7 @@ public:
     int           elements(void) const { return m_num; }
     GObservation* observation(int index) const;
     GModels*      models(void) { return &m_models; }
+    void          optimize(const GOptimizer& opt);
 
     // Event iterator
     class iterator {
@@ -66,14 +70,34 @@ public:
         GEvent&   operator*(void) { return *m_event; }
         GEvent*   operator->(void) { return &(*m_event); }
     protected:
-        int               m_index;   //!< Actual observation index [0,m_num-1]
-        GEvents::iterator m_event;   //!< Iterator on actual event
-        GEvents::iterator m_end;     //!< Iterator on observation end
-        GObservation*     m_obs;     //!< Pointer to actual observation
-        GData*            m_data;    //!< Pointer to GData object
+        int               m_index;    //!< Actual observation index [0,m_num-1]
+        GEvents::iterator m_event;    //!< Iterator on actual event
+        GEvents::iterator m_end;      //!< Iterator on observation end
+        GObservation*     m_obs;      //!< Pointer to actual observation
+        GData*            m_data;     //!< Pointer to GData object
     };
     iterator begin(void);
     iterator end(void);
+    
+    // Optimizer
+    class optimizer : public GOptimizerFunction {
+    public:
+        optimizer(const GOptimizerPars& pars);
+        optimizer(const optimizer& fct);
+        ~optimizer();
+        optimizer& operator= (const optimizer& fct);
+        double        value(void) const;
+        GVector       gradient(void) const;
+        GSparseMatrix covar(void) const;
+    protected:
+        void           init_members(void);
+        void           copy_members(const optimizer& fct);
+        void           free_members(void);
+        double         m_value;       //!< Function value
+        GVector*       m_vector;      //!< Pointer to gradient vector
+        GSparseMatrix* m_covar;       //!< Pointer to covariance matrix
+        GData*         m_data;        //!< Pointer to GData object
+    };
 
 protected:
     // Protected methods
