@@ -55,7 +55,7 @@ public:
     double      min(void) const { return m_min; }
     double      max(void) const { return m_max; }
     double      scale(void) const { return m_scale; }
-    bool        free(void) const { return m_free; }
+    bool        isfree(void) const { return m_free; }
     bool        hasmin(void) const { return m_hasmin; }
     bool        hasmax(void) const { return m_hasmax; }
     void        name(const std::string& name) { m_name=name; return; }
