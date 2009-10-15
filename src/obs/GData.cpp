@@ -178,8 +178,14 @@ GObservation* GData::observation(int index) const
  *
  * @param[in] opt Optimiser to be used for 
  ***************************************************************************/
-void GData::optimize(const GOptimizer& opt)
+void GData::optimize(GOptimizer& opt)
 {
+    // Set optimizer function
+    GData::optimizer fct(this);
+
+    // Optimise model parameters
+    m_models = opt(fct, m_models);
+
     // Return
     return;
 }
