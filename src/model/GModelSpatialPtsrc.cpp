@@ -40,7 +40,7 @@
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GModelSpatialPtsrc::GModelSpatialPtsrc(void)
+GModelSpatialPtsrc::GModelSpatialPtsrc(void) : GModelSpatial()
 {
     // Initialise private members for clean destruction
     init_members();
@@ -55,7 +55,7 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(void)
  *
  * @param[in] dir Position of the point source.
  ***************************************************************************/
-GModelSpatialPtsrc::GModelSpatialPtsrc(GSkyDir dir)
+GModelSpatialPtsrc::GModelSpatialPtsrc(GSkyDir dir) : GModelSpatial()
 {
     // Initialise private members for clean destruction
     init_members();
@@ -74,7 +74,8 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(GSkyDir dir)
  *
  * @param[in] model Model from which the instance should be built.
  ***************************************************************************/
-GModelSpatialPtsrc::GModelSpatialPtsrc(const GModelSpatialPtsrc& model)
+GModelSpatialPtsrc::GModelSpatialPtsrc(const GModelSpatialPtsrc& model) : 
+   GModelSpatial(model)
 { 
     // Initialise private members for clean destruction
     init_members();
@@ -115,6 +116,9 @@ GModelSpatialPtsrc& GModelSpatialPtsrc::operator= (const GModelSpatialPtsrc& mod
 { 
     // Execute only if object is not identical
     if (this != &model) {
+
+        // Copy base class members
+        this->GModelSpatial::operator=(model);
 
         // Free members
         free_members();

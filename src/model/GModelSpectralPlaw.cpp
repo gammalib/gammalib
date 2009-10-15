@@ -40,7 +40,7 @@
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GModelSpectralPlaw::GModelSpectralPlaw(void)
+GModelSpectralPlaw::GModelSpectralPlaw(void) : GModelSpectral()
 {
     // Initialise private members for clean destruction
     init_members();
@@ -56,7 +56,8 @@ GModelSpectralPlaw::GModelSpectralPlaw(void)
  * @param[in] norm Power law normalization.
  * @param[in] index Power law index.
  ***************************************************************************/
-GModelSpectralPlaw::GModelSpectralPlaw(const double& norm, const double& index)
+GModelSpectralPlaw::GModelSpectralPlaw(const double& norm, const double& index) : 
+    GModelSpectral()
 {
     // Initialise private members for clean destruction
     init_members();
@@ -75,7 +76,8 @@ GModelSpectralPlaw::GModelSpectralPlaw(const double& norm, const double& index)
  *
  * @param[in] model Model from which the instance should be built.
  ***************************************************************************/
-GModelSpectralPlaw::GModelSpectralPlaw(const GModelSpectralPlaw& model)
+GModelSpectralPlaw::GModelSpectralPlaw(const GModelSpectralPlaw& model) : 
+    GModelSpectral(model)
 { 
     // Initialise private members for clean destruction
     init_members();
@@ -116,6 +118,9 @@ GModelSpectralPlaw& GModelSpectralPlaw::operator= (const GModelSpectralPlaw& mod
 { 
     // Execute only if object is not identical
     if (this != &model) {
+
+        // Copy base class members
+        this->GModelSpectral::operator=(model);
 
         // Free members
         free_members();

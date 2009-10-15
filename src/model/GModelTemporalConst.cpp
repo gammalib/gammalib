@@ -40,7 +40,7 @@
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GModelTemporalConst::GModelTemporalConst(void)
+GModelTemporalConst::GModelTemporalConst(void) : GModelTemporal()
 {
     // Initialise private members for clean destruction
     init_members();
@@ -55,7 +55,8 @@ GModelTemporalConst::GModelTemporalConst(void)
  *
  * @param[in] model Model from which the instance should be built.
  ***************************************************************************/
-GModelTemporalConst::GModelTemporalConst(const GModelTemporalConst& model)
+GModelTemporalConst::GModelTemporalConst(const GModelTemporalConst& model) : 
+    GModelTemporal(model)
 { 
     // Initialise private members for clean destruction
     init_members();
@@ -96,6 +97,9 @@ GModelTemporalConst& GModelTemporalConst::operator= (const GModelTemporalConst& 
 { 
     // Execute only if object is not identical
     if (this != &model) {
+
+        // Copy base class members
+        this->GModelTemporal::operator=(model);
 
         // Free members
         free_members();
