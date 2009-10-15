@@ -58,6 +58,7 @@ GOptimizer::GOptimizer(void)
  * @param[in] fct Optimizer function.
  * @param[in] pars Optimizer parameters.
  ***************************************************************************/
+/*
 GOptimizer::GOptimizer(const GOptimizerFunction& fct, const GOptimizerPars &pars)
 {
     // Initialise private members for clean destruction
@@ -70,7 +71,7 @@ GOptimizer::GOptimizer(const GOptimizerFunction& fct, const GOptimizerPars &pars
     // Return
     return;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Construct object from function and models
@@ -78,6 +79,7 @@ GOptimizer::GOptimizer(const GOptimizerFunction& fct, const GOptimizerPars &pars
  * @param[in] fct Optimizer function.
  * @param[in] models Optimizer parameters.
  ***************************************************************************/
+/*
 GOptimizer::GOptimizer(const GOptimizerFunction& fct, const GModels &models)
 {
     // Initialise private members for clean destruction
@@ -90,7 +92,7 @@ GOptimizer::GOptimizer(const GOptimizerFunction& fct, const GModels &models)
     // Return
     return;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Copy constructor
@@ -161,6 +163,30 @@ GOptimizer& GOptimizer::operator= (const GOptimizer& opt)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Optimization operator
+ *
+ * @param[in] fct Optimization function.
+ * @param[in] models Model parameters to be optimised.
+ ***************************************************************************/
+GModels& GOptimizer::operator() (GOptimizerFunction& fct, GModels& m)
+{
+    // Initalise output parameters with input parameters
+    GModels* models = new GModels(m);
+    
+    // Create parameter structure from model
+    GOptimizerPars p = GOptimizerPars(*models);
+    
+    // Call parameter optimization operator. Note that this automatically
+    // updates the parameter in 'model' since 'p' contains the pointers
+    // to the model parameters, not their values.
+    p = (*this)(fct, p);
+
+    // Return
+    return *models;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                         GOptimizer private methods                      =
@@ -173,8 +199,8 @@ GOptimizer& GOptimizer::operator= (const GOptimizer& opt)
 void GOptimizer::init_members(void)
 {
     // Initialise members
-    m_fct  = NULL;
-    m_pars = GOptimizerPars();
+//    m_fct  = NULL;
+//    m_pars = GOptimizerPars();
   
     // Return
     return;
@@ -189,8 +215,8 @@ void GOptimizer::init_members(void)
 void GOptimizer::copy_members(const GOptimizer& opt)
 {
     // Copy attributes
-    m_fct  = opt.m_fct;
-    m_pars = opt.m_pars;
+//    m_fct  = opt.m_fct;
+//    m_pars = opt.m_pars;
     
     // Return
     return;

@@ -37,16 +37,12 @@ public:
 
     // Constructors and destructors
     GOptimizerLM();
-    GOptimizerLM(const GOptimizerFunction& fct, const GOptimizerPars &pars);
-    GOptimizerLM(const GOptimizerFunction& fct, const GModels &models);
     GOptimizerLM(const GOptimizerLM& opt);
     virtual ~GOptimizerLM();
 
     // Operators
-    GOptimizerLM& operator= (const GOptimizerLM& opt);
-
-    // Methods
-    void optimize(void) const;
+    GOptimizerLM&   operator= (const GOptimizerLM& opt);
+    GOptimizerPars& operator() (GOptimizerFunction& fct, GOptimizerPars& p);
 
 protected:
     // Protected methods

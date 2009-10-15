@@ -22,7 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GOptimizerPars.hpp"
 #include "GOptimizerFunction.hpp"
-//#include "GVector.hpp"
+#include "GModels.hpp"
 
 
 /***********************************************************************//**
@@ -39,16 +39,17 @@ public:
 
     // Constructors and destructors
     GOptimizer();
-    GOptimizer(const GOptimizerFunction& fct, const GOptimizerPars &pars);
-    GOptimizer(const GOptimizerFunction& fct, const GModels &models);
     GOptimizer(const GOptimizer& opt);
     virtual ~GOptimizer();
 
-    // Operators
-    virtual GOptimizer& operator= (const GOptimizer& opt);
+    // Virtual Operators
+    virtual GOptimizer&     operator= (const GOptimizer& opt);
+    virtual GOptimizerPars& operator() (GOptimizerFunction& fct, GOptimizerPars& p) = 0;
+
+    // Implemented operators
+    GModels& operator() (GOptimizerFunction& fct, GModels& m);
 
     // Virtual methods
-    virtual void optimize(void) const = 0;
  
     // Implement methods
 
@@ -59,8 +60,6 @@ protected:
     void free_members(void);
     
     // Protected data area
-    const GOptimizerFunction* m_fct;     //!< Optimizer function
-    GOptimizerPars            m_pars;    //!< Optimizer parameters
 
 };
 

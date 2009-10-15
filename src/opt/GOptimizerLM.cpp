@@ -55,6 +55,7 @@ GOptimizerLM::GOptimizerLM(void) : GOptimizer()
  * @param[in] fct Optimizer function.
  * @param[in] pars Optimizer parameters.
  ***************************************************************************/
+/*
 GOptimizerLM::GOptimizerLM(const GOptimizerFunction& fct, const GOptimizerPars &pars) :
   GOptimizer(fct, pars)
 {
@@ -64,7 +65,7 @@ GOptimizerLM::GOptimizerLM(const GOptimizerFunction& fct, const GOptimizerPars &
     // Return
     return;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Construct object from function and models
@@ -72,6 +73,7 @@ GOptimizerLM::GOptimizerLM(const GOptimizerFunction& fct, const GOptimizerPars &
  * @param[in] fct Optimizer function.
  * @param[in] models Optimizer parameters.
  ***************************************************************************/
+/*
 GOptimizerLM::GOptimizerLM(const GOptimizerFunction& fct, const GModels &models) :
   GOptimizer(fct, models)
 {
@@ -81,7 +83,7 @@ GOptimizerLM::GOptimizerLM(const GOptimizerFunction& fct, const GModels &models)
     // Return
     return;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Copy constructor
@@ -149,23 +151,31 @@ GOptimizerLM& GOptimizerLM::operator= (const GOptimizerLM& opt)
 }
 
 
+/***********************************************************************//**
+ * @brief Optimization operator
+ *
+ * @param[in] fct Optimization function.
+ * @param[in] pars Parameters to be optimised.
+ ***************************************************************************/
+GOptimizerPars& GOptimizerLM::operator() (GOptimizerFunction& fct, GOptimizerPars& p)
+{
+    // Initalise output parameters with input parameters
+    GOptimizerPars* pars = new GOptimizerPars(p);
+    
+    // DUMMY
+    pars->par(0)->value(10.0);
+    pars->par(0)->error(1.0);
+
+    // Return
+    return *pars;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                        GOptimizerLM public methods                      =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Optimize model parameters
- ***************************************************************************/
-void GOptimizerLM::optimize(void) const
-{
-    // DUMMY
-    
-    // Return
-    return;
-}
-
 
 /*==========================================================================
  =                                                                         =
