@@ -46,8 +46,7 @@ public:
     GLATEventBin& operator= (const GLATEventBin& bin);
 
     // Methods
-    double      counts(void) const;
-    std::string string(void) const;
+    double counts(void) const { return m_counts; }
     
 protected:
     // Protected methods
