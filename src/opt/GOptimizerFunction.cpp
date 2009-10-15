@@ -38,9 +38,11 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Constructor optimizer function for a given parameter set.
+ *
+ * @param[in] pars Parameters from which the instance should be built.
  ***************************************************************************/
-GOptimizerFunction::GOptimizerFunction()
+GOptimizerFunction::GOptimizerFunction(const GOptimizerPars& pars)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -110,109 +112,6 @@ GOptimizerFunction& GOptimizerFunction::operator= (const GOptimizerFunction& fct
 
     // Return this object
     return *this;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                     GOptimizerFunction item iterator                    =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Iterator Constructor
- ***************************************************************************/
-GOptimizerFunction::iterator::iterator()
-{
-    // Initialise iterator
-    m_base  = NULL;
-    m_index = 0;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Iterator Constructor
- ***************************************************************************/
-GOptimizerFunction::iterator::iterator(GOptimizerFunction *fct)
-{
-    // Initialise iterator
-    m_base  = fct;
-    m_index = 0;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Iterator prefix operator
- ***************************************************************************/
-GOptimizerFunction::iterator& GOptimizerFunction::iterator::operator++(void)
-{
-    // Increment index
-    m_index++;
-    
-    // Move to next item. If end is reached then set index to -1
-    if (m_base->next_item())
-        m_index = -1;
-    
-    // Return
-    return *this;
-}
-
-
-/***********************************************************************//**
- * @brief Iterator postfix operator
- ***************************************************************************/
-GOptimizerFunction::iterator GOptimizerFunction::iterator::operator++(int junk)
-{
-    // Save actual iterator
-    GOptimizerFunction::iterator actual = *this;
-    
-    // Increment using prefix iterator
-    ++(*this);
-    
-    // Return actual iterator
-    return actual;
-}
-
-
-/***********************************************************************//**
- * @brief Set iterator on first elements
- ***************************************************************************/
-GOptimizerFunction::iterator GOptimizerFunction::begin(void)
-{
-    // Allocate iterator object
-    GOptimizerFunction::iterator iter(this);
-    
-    // Initialise index
-    iter.m_index = 0;
-    
-    // Set iterator to first data/model item
-    if (iter.m_base != NULL)
-        iter.m_base->first_item();
-
-    // Return
-    return iter;
-}
-
-
-/***********************************************************************//**
- * @brief Set iterator to end
- ***************************************************************************/
-GOptimizerFunction::iterator GOptimizerFunction::end(void)
-{
-    // Allocate iterator object
-    GOptimizerFunction::iterator iter(this);
-
-    // End is flagged by an index of -1
-    iter.m_index = -1;
-
-    // Return
-    return iter;
 }
 
 
