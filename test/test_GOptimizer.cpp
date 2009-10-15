@@ -21,56 +21,6 @@
 
 
 /***************************************************************************
- *  Test: Model parameter handling                                         *
- ***************************************************************************/
-void MyOptFct::init_members(void)
-{
-    m_event = GData::iterator();
-    m_end   = GData::iterator();
-    return;
-}
-void MyOptFct::copy_members(const MyOptFct& fct)
-{
-    m_data  = fct.m_data;
-    m_event = fct.m_event;
-    m_end   = fct.m_end;
-    return;
-}
-MyOptFct& MyOptFct::operator= (const MyOptFct& fct)
-{
-    if (this != &fct) {
-        free_members();
-        init_members();
-        copy_members(fct);
-    }
-    return *this;
-}
-void MyOptFct::first_item(void)
-{
-    m_event = m_data.begin();
-    m_end   = m_data.end();
-    return;
-}
-bool MyOptFct::next_item(void)
-{
-    m_event++;
-    return (m_event == m_end);
-}
-GVector MyOptFct::get_gradient(void) 
-{
-    GVector gradient = GVector(10);
-    return (gradient);
-}
-void MyOptFct::set_data(const GData& data)
-{
-    m_data  = data;
-    m_event = m_data.begin();
-    m_end   = m_data.end();
-    return;
-}
-
-
-/***************************************************************************
  *  Test: Optimizer                                                        *
  ***************************************************************************/
 void test_optimizer(void)
@@ -90,7 +40,8 @@ void test_optimizer(void)
             data.add(obs);
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable setup GData for optimizing." 
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable setup GData for optimizing." 
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -98,19 +49,45 @@ void test_optimizer(void)
     std::cout << ".";
 //std::cout << data << std::endl;
 
-
-    // Setup optimizer
-    MyOptFct opt;
+    // Setup GModels for optimizing
+    GModelSpatialPtsrc point_source;
+    GModelSpectralPlaw power_law;
+    GModel             crab;
+    GModels            models;
     try {
-        opt.set_data(data);
+        GSkyDir dir;
+        dir.radec_deg(83.6331, +22.0145);
+        point_source = GModelSpatialPtsrc(dir);
+        power_law    = GModelSpectralPlaw(1.0e-7, -2.1);
+        crab         = GModel(point_source, power_law);
+        crab.name("Crab");
+        models.add(crab);
+        data.models(models);
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable setup optimizer." 
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable setup GModels for optimizing." 
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
     std::cout << ".";
+//std::cout << models << std::endl;
+
+    // Setup parameters for optimizing
+    GOptimizerPars pars;
+    try {
+        pars = GOptimizerPars(models);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable setup GOptimizerPars for optimizing." 
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+//std::cout << pars << std::endl;
 
     // Time simple GData iterator
     double  t_elapse;
@@ -125,42 +102,30 @@ void test_optimizer(void)
         t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to iterate GData." << std::endl;
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to iterate GData." 
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
     std::cout << "." << std::endl;
     std::cout << " - Reference time for GData::iterator: " << t_elapse << std::endl;
 
-    // Iterate over optimizer
+    // Setup LM optimizer
+    GOptimizerLM opt;
     try {
-        clock_t t_start = clock();
-        int     num   = 0;
-        int     sum   = 0;
-        int     sum_m = 0;
-        for (GOptimizerFunction::iterator item = opt.begin(); item != opt.end(); ++item) {
-            num++;
-            sum += (int)item.data();
-//            double  model    = item.model();
-//            GVector gradient = item.gradient();
-        }
-        t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
-        if (sum != 1359*nobs || num != 200000*nobs) {
-            std::cout << std::endl << 
-                      "TEST ERROR: Wrong number of iterations in MyOptFct::iterator."
-                      << std::endl;
-            throw;
-        }
+        data.optimize(opt);
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to iterate." 
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable setup optimizer." 
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
-    std::cout << " - Time for MyOptFct::iterator doing same operations: " << t_elapse 
-              << std::endl;
     std::cout << ".";
+std::cout << opt << std::endl;
+std::cout << data << std::endl;
 
     // Plot final test success
     std::cout << " ok." << std::endl;
