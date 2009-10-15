@@ -138,7 +138,7 @@ void test_optimizer(void)
         int     num   = 0;
         int     sum   = 0;
         int     sum_m = 0;
-        for (MyOptFct::iterator item = opt.begin(); item != opt.end(); ++item) {
+        for (GOptimizerFunction::iterator item = opt.begin(); item != opt.end(); ++item) {
             num++;
             sum += (int)item.data();
 //            double  model    = item.model();
