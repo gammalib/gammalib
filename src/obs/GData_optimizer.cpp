@@ -38,9 +38,9 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Construct optimizer from parameters
- ***************************************************************************/
-GData::optimizer::optimizer(const GOptimizerPars& pars) : GOptimizerFunction(pars)
+ * @brief Constructor
+***************************************************************************/
+GData::optimizer::optimizer(void) : GOptimizerFunction()
 {
     // Initialise iterator
     init_members();
@@ -48,6 +48,23 @@ GData::optimizer::optimizer(const GOptimizerPars& pars) : GOptimizerFunction(par
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Constructor based on specific GData object
+ ***************************************************************************/
+GData::optimizer::optimizer(GData *data) : GOptimizerFunction()
+{
+    // Initialise iterator
+    init_members();
+
+    // Set data object
+    m_data = data;
+    
+    // Return
+    return;
+}
+
 
 
 /***********************************************************************//**
@@ -123,38 +140,50 @@ GData::optimizer& GData::optimizer::operator= (const optimizer& fct)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return function value
+ * @brief Evaluate function
  ***************************************************************************/
-double GData::optimizer::value(void) const 
+void GData::optimizer::eval(const GOptimizerPars& pars) 
 {
     // DUMMY
     
     // Return
-    return 0.0;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return function value
+ ***************************************************************************/
+double* GData::optimizer::value(void) 
+{
+    // DUMMY
+    
+    // Return
+    return &m_value;
 }
 
 
 /***********************************************************************//**
  * @brief Return function gradient
  ***************************************************************************/
-GVector GData::optimizer::gradient(void) const 
+GVector* GData::optimizer::gradient(void) 
 {
     // DUMMY
     
     // Return
-    return GVector(10);
+    return m_vector;
 }
 
 
 /***********************************************************************//**
  * @brief Return function covariance matrix
  ***************************************************************************/
-GSparseMatrix GData::optimizer::covar(void) const 
+GSparseMatrix* GData::optimizer::covar(void) 
 {
     // DUMMY
     
     // Return
-    return GSparseMatrix(10,10);
+    return m_covar;
 }
 
 

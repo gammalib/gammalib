@@ -52,7 +52,7 @@ public:
     int           elements(void) const { return m_num; }
     GObservation* observation(int index) const;
     GModels*      models(void) { return &m_models; }
-    void          optimize(const GOptimizer& opt);
+    void          optimize(GOptimizer& opt);
 
     // Event iterator
     class iterator {
@@ -82,13 +82,15 @@ public:
     // Optimizer
     class optimizer : public GOptimizerFunction {
     public:
-        optimizer(const GOptimizerPars& pars);
+        optimizer();
+        optimizer(GData *data);
         optimizer(const optimizer& fct);
         ~optimizer();
         optimizer& operator= (const optimizer& fct);
-        double        value(void) const;
-        GVector       gradient(void) const;
-        GSparseMatrix covar(void) const;
+        void           eval(const GOptimizerPars& pars);
+        double*        value(void);
+        GVector*       gradient(void);
+        GSparseMatrix* covar(void);
     protected:
         void           init_members(void);
         void           copy_members(const optimizer& fct);

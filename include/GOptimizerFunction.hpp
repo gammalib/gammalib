@@ -34,7 +34,7 @@ class GOptimizerFunction {
 
 public:
     // Constructors and destructors
-    GOptimizerFunction(const GOptimizerPars& pars);
+    GOptimizerFunction();
     GOptimizerFunction(const GOptimizerFunction& fct);
     virtual ~GOptimizerFunction();
 
@@ -42,9 +42,10 @@ public:
     virtual GOptimizerFunction& operator= (const GOptimizerFunction& fct);
 
     // Virtual methods
-    virtual double        value(void) const = 0;
-    virtual GVector       gradient(void) const = 0;
-    virtual GSparseMatrix covar(void) const = 0;
+    virtual void           eval(const GOptimizerPars& pars) = 0;
+    virtual double*        value(void) = 0;
+    virtual GVector*       gradient(void) = 0;
+    virtual GSparseMatrix* covar(void) = 0;
  
 protected:
     // Protected methods

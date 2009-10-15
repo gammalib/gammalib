@@ -38,11 +38,9 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor optimizer function for a given parameter set.
- *
- * @param[in] pars Parameters from which the instance should be built.
+ * @brief Constructor
  ***************************************************************************/
-GOptimizerFunction::GOptimizerFunction(const GOptimizerPars& pars)
+GOptimizerFunction::GOptimizerFunction(void)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -51,6 +49,22 @@ GOptimizerFunction::GOptimizerFunction(const GOptimizerPars& pars)
     return;
 }
 
+
+/***********************************************************************//**
+ * @brief Constructor optimizer function for a given parameter set.
+ *
+ * @param[in] pars Parameters from which the instance should be built.
+ ***************************************************************************/
+/*
+GOptimizerFunction::GOptimizerFunction(const GOptimizerPars& pars)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Return
+    return;
+}
+*/
 
 /***********************************************************************//**
  * @brief Copy constructor
