@@ -1,5 +1,5 @@
 /***************************************************************************
- *                        GData.cpp  -  Data class                         *
+ *          GData_optimizer.cpp  -  Optimizer class of data class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
@@ -12,20 +12,15 @@
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
- * @file GData.cpp
- * @brief GData class implementation.
+ * @file GData_optimizer.cpp
+ * @brief GData::optimizer class implementation.
  * @author J. Knodlseder
  */
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GException.hpp"
 #include "GData.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ADD                                     "GData::add(GObservation&)"
-#define G_COPY_MEMBERS                    "GData::copy_members(const GData&)"
-#define G_OBSERVATION                         "GData::observation(int) const"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -33,21 +28,23 @@
 
 /* __ Debug definitions __________________________________________________ */
 
+/* __ Prototypes _________________________________________________________ */
+
 
 /*==========================================================================
  =                                                                         =
- =                       GData constructors/destructors                    =
+ =                GData::optimizer constructors/destructors                =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Construct optimizer from parameters
  ***************************************************************************/
-GData::GData()
+GData::optimizer::optimizer(const GOptimizerPars& pars) : GOptimizerFunction(pars)
 {
-    // Initialise class members for clean destruction
+    // Initialise iterator
     init_members();
-
+    
     // Return
     return;
 }
@@ -58,13 +55,13 @@ GData::GData()
  *
  * @param data GData instance which should be used for construction
  ***************************************************************************/
-GData::GData(const GData& data)
+GData::optimizer::optimizer(const optimizer& fct) : GOptimizerFunction(fct)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Copy members
-    copy_members(data);
+    copy_members(fct);
 
     // Return
     return;
@@ -74,7 +71,7 @@ GData::GData(const GData& data)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GData::~GData()
+GData::optimizer::~optimizer()
 {
     // Free members
     free_members();
@@ -86,7 +83,7 @@ GData::~GData()
 
 /*==========================================================================
  =                                                                         =
- =                             GData operators                             =
+ =                       GData::optimizer operators                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -95,10 +92,13 @@ GData::~GData()
  *
  * @param[in] data GData instance to be assigned
  ***************************************************************************/
-GData& GData::operator= (const GData& data)
+GData::optimizer& GData::optimizer::operator= (const optimizer& fct)
 {
     // Execute only if object is not identical
-    if (this != &data) {
+    if (this != &fct) {
+
+        // Copy base class members
+        this->GOptimizerFunction::operator=(fct);
 
         // Free members
         free_members();
@@ -107,7 +107,7 @@ GData& GData::operator= (const GData& data)
         init_members();
 
         // Copy members
-        copy_members(data);
+        copy_members(fct);
 
     } // endif: object was not identical
 
@@ -118,137 +118,62 @@ GData& GData::operator= (const GData& data)
 
 /*==========================================================================
  =                                                                         =
- =                           GData public methods                          =
+ =                      GData::optimizer public methods                    =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Add observation to data
+ * @brief Return function value
  ***************************************************************************/
-void GData::add(GObservation& obs)
+double GData::optimizer::value(void) const 
 {
-	// Allocate new observation pointers
-    GObservation** new_obs = new GObservation*[m_num+1];
-	if (new_obs == NULL)
-		throw GException::mem_alloc(G_ADD, m_num+1);
-
-	// If we have already observation pointers then copy them over to the
-    // new pointer array
-    if (m_num > 0) {
-        for (int i = 0; i < m_num; ++i)
-			new_obs[i] = m_obs[i];
-	}
-	
-	// Create a copy of the observation that should be added and store the
-    // pointer to this copy as last element of the pointer array
-	new_obs[m_num] = obs.clone();
-	
-	// Release old pointer array
-	if (m_obs != NULL) delete [] m_obs;
-	
-	// Attach new pointer array to this object
-	m_obs = new_obs;
-	
-	// Increment number of observations
-	m_num++;
-	
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer on observation
- *
- * @param[in] index Index of observation (0,1,2,...)  
- ***************************************************************************/
-GObservation* GData::observation(int index) const
-{
-    // If index is outside boundary then throw an error
-    if (index < 0 || index >= m_num)
-        throw GException::out_of_range(G_OBSERVATION, index, 0, m_num-1);
-
-    // Return observation pointer
-    return m_obs[index];
-}
-
-
-/***********************************************************************//**
- * @brief Optimize model parameters using optimizer
- *
- * @param[in] opt Optimiser to be used for 
- ***************************************************************************/
-void GData::optimize(const GOptimizer& opt)
-{
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Get iterator for first observation and event
- *
- * Any empty observations (NULL pointer) or observations with 0 events are
- * skipped.
- ***************************************************************************/
-GData::iterator GData::begin(void)
-{
-    // Allocate iterator object
-    GData::iterator iter(this);
+    // DUMMY
     
-    // Get first valid observation
-    if (iter.m_data != NULL) {
-        while (iter.m_index < iter.m_data->m_num) {
-            if (iter.m_data->m_obs[iter.m_index] != NULL) {
-                iter.m_obs         = iter.m_data->m_obs[iter.m_index];
-                break;
-            }
-        }
-    }
-    
-    // Initialise event iterator
-    if (iter.m_obs != NULL) {
-        iter.m_event = iter.m_obs->events()->begin();
-        iter.m_end   = iter.m_obs->events()->end();
-    }
-	
     // Return
-    return iter;
+    return 0.0;
 }
 
 
 /***********************************************************************//**
- * @brief Get iterator after last observation and event
+ * @brief Return function gradient
  ***************************************************************************/
-GData::iterator GData::end(void)
+GVector GData::optimizer::gradient(void) const 
 {
-    // Allocate iterator object
-    GData::iterator iter(this);
+    // DUMMY
     
-    // Set obeservation number beyond last observation
-    iter.m_index = iter.m_data->m_num;
-    iter.m_obs   = NULL;
-	
     // Return
-    return iter;
+    return GVector(10);
+}
+
+
+/***********************************************************************//**
+ * @brief Return function covariance matrix
+ ***************************************************************************/
+GSparseMatrix GData::optimizer::covar(void) const 
+{
+    // DUMMY
+    
+    // Return
+    return GSparseMatrix(10,10);
 }
 
 
 /*==========================================================================
  =                                                                         =
- =                           GData private methods                         =
+ =                     GData::optimizer private methods                    =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GData::init_members(void)
+void GData::optimizer::init_members(void)
 {
     // Initialise members
-    m_num    = 0;
-	m_obs    = NULL;
-    m_models = GModels();
+    m_value  = 0.0;
+    m_vector = NULL;
+    m_covar  = NULL;
+    m_data   = NULL;
 
     // Return
     return;
@@ -258,29 +183,20 @@ void GData::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] data GData instance from which members should be copied
- *
- * Copy observations from a GData object into the present object by invoking
- * the observation clone method of each observation.
+ * @param[in] fct GData::optimizer members to be copied.
  ***************************************************************************/
-void GData::copy_members(const GData& data)
+void GData::optimizer::copy_members(const optimizer& fct)
 {
     // Copy attributes
-    m_num    = data.m_num;
-    m_models = data.m_models;
-	
-	// Copy observations
-    if (m_num > 0) {
-        m_obs = new GObservation*[m_num];
-        if (m_obs == NULL)
-            throw GException::mem_alloc(G_COPY_MEMBERS, m_num);
-        for (int i = 0; i < m_num; ++i) {
-			if (data.m_obs[i] != NULL)
-				m_obs[i] = (data.m_obs[i])->clone();
-			else
-				m_obs[i] = NULL;
-		}
-	}
+    m_value = fct.m_value;
+    
+    // Copy gradient if it exists
+    if (fct.m_vector != NULL)
+        m_vector = new GVector(*fct.m_vector);
+
+    // Copy covariance matrix if it exists
+    if (fct.m_covar != NULL)
+        m_covar = new GSparseMatrix(*fct.m_covar);
     
     // Return
     return;
@@ -290,18 +206,15 @@ void GData::copy_members(const GData& data)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GData::free_members(void)
+void GData::optimizer::free_members(void)
 {
-    // Free memory
-    if (m_obs != NULL) {
-        for (int i = 0; i < m_num; ++i) {
-			if (m_obs[i] != NULL) delete m_obs[i];
-        }
-		delete [] m_obs;
-	}
-	
-    // Mark memory as free
-	m_obs = NULL;
+    // Free members
+	if (m_vector != NULL) delete m_vector;
+	if (m_covar  != NULL) delete m_covar;
+    
+    // Signal free pointers
+    m_vector = NULL;
+    m_covar  = NULL;
 
     // Return
     return;
@@ -310,36 +223,12 @@ void GData::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                               GData friends                             =
+ =                         GData::optimizer friends                        =
  =                                                                         =
  ==========================================================================*/
 
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream into which the data will be dumped
- * @param[in] data Data to be dumped
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GData& data)
-{
-    // Put header in stream
-    os << "=== GData ===" << std::endl;
-    os << " Number of observations ....: " << data.m_num << std::endl;
-
-	// Put observations in stream
-	for (int i = 0; i < data.m_num; ++i)
-		os << *(data.m_obs[i]);
-
-    // Add models to stream
-    os << data.m_models;
-
-    // Return output stream
-    return os;
-}
-
-
 /*==========================================================================
  =                                                                         =
- =                       Other functions used by GData                     =
+ =                  Other functions used by GData::optimizer               =
  =                                                                         =
  ==========================================================================*/
