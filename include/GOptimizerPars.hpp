@@ -20,10 +20,8 @@
 #define GOPTIMIZERPARS_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GException.hpp"
-#include "GModels.hpp"
-#include "GModelPar.hpp"
 #include <iostream>
+#include "GModelPar.hpp"
 
 
 /***********************************************************************//**
@@ -39,7 +37,6 @@ class GOptimizerPars {
 public:
     // Constructors and destructors
     GOptimizerPars(void);
-    GOptimizerPars(const GModels& models);
     GOptimizerPars(const GOptimizerPars& pars);
     ~GOptimizerPars();
  

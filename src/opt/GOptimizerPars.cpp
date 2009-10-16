@@ -53,39 +53,6 @@ GOptimizerPars::GOptimizerPars(void)
 
 
 /***********************************************************************//**
- * @brief Construct object from parameters in GModels
- *
- * @param[in] models Model from which the instance should be built.
- ***************************************************************************/
-GOptimizerPars::GOptimizerPars(const GModels& models)
-{
-    // Initialise private members for clean destruction
-    init_members();
-    
-    // If there are parameters in model then copy their pointers into this
-    // object
-    if (models.npars() > 0) {
-    
-        // Set number of parameters
-        m_npars = models.npars();
-    
-        // Allocate model parameter pointers
-        m_par = new GModelPar*[m_npars];
-        if (m_par == NULL)
-            throw GException::mem_alloc(G_CONSTRUCTOR, m_npars);
-        
-        // Copy model parameter pointers
-        for (int i = 0; i < m_npars; ++i)
-            m_par[i] = models.par(i);
-    
-    } // endif: there were parameters in the model
-  
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] pars Parameters from which the instance should be built.
