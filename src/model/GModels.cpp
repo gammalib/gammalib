@@ -165,11 +165,11 @@ void GModels::add(const GModel& model)
 /***********************************************************************//**
  * @brief Evaluate function gradients
  ***************************************************************************/
-void GModels::eval_gradients(void)
+void GModels::eval_gradients(GSkyDir& dir, const double& energy, const double& time)
 {
     // Evaluate gradients for all models
     for (int i = 0; i < m_elements; ++i)
-        m_model[i].eval_gradients();
+        m_model[i].eval_gradients(dir, energy, time);
     
     // Return
     return;
