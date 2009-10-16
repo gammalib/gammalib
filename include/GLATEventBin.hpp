@@ -52,7 +52,7 @@ public:
     double   model(GModels& models, GVector* gradient);
     GSkyDir* dir(void) { return m_dir; }
     double*  energy(void) { return m_energy; }
-    double*  time(void) const { return &m_time; }
+    double*  time(void) { return &m_time; }
     
 protected:
     // Protected methods
