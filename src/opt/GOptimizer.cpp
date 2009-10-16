@@ -18,13 +18,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
-#include "GException.hpp"
 #include "GOptimizer.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CONSTRUCTOR        "GOptimizer::GOptimizer(const GModels&)"
-#define G_PAR                                "GOptimizer::par(int) const"
-#define G_COPY_MEMBERS          "GOptimizer::copy_members(const GOptimizer&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -51,48 +47,6 @@ GOptimizer::GOptimizer(void)
     return;
 }
 
-
-/***********************************************************************//**
- * @brief Construct object from function and parameters
- *
- * @param[in] fct Optimizer function.
- * @param[in] pars Optimizer parameters.
- ***************************************************************************/
-/*
-GOptimizer::GOptimizer(const GOptimizerFunction& fct, const GOptimizerPars &pars)
-{
-    // Initialise private members for clean destruction
-    init_members();
-    
-    // Store optimizer function and parameters
-    m_fct  = &fct;
-    m_pars = pars;
-  
-    // Return
-    return;
-}
-*/
-
-/***********************************************************************//**
- * @brief Construct object from function and models
- *
- * @param[in] fct Optimizer function.
- * @param[in] models Optimizer parameters.
- ***************************************************************************/
-/*
-GOptimizer::GOptimizer(const GOptimizerFunction& fct, const GModels &models)
-{
-    // Initialise private members for clean destruction
-    init_members();
-
-    // Store optimizer function and parameters
-    m_fct  = &fct;
-    m_pars = GOptimizerPars(models);
-  
-    // Return
-    return;
-}
-*/
 
 /***********************************************************************//**
  * @brief Copy constructor
@@ -163,30 +117,6 @@ GOptimizer& GOptimizer::operator= (const GOptimizer& opt)
  =                                                                         =
  ==========================================================================*/
 
-/***********************************************************************//**
- * @brief Optimization operator
- *
- * @param[in] fct Optimization function.
- * @param[in] models Model parameters to be optimised.
- ***************************************************************************/
-GModels& GOptimizer::operator() (GOptimizerFunction& fct, GModels& m)
-{
-    // Initalise output parameters with input parameters
-    GModels* models = new GModels(m);
-    
-    // Create parameter structure from model
-    GOptimizerPars p = GOptimizerPars(*models);
-    
-    // Call parameter optimization operator. Note that this automatically
-    // updates the parameter in 'model' since 'p' contains the pointers
-    // to the model parameters, not their values.
-    p = (*this)(fct, p);
-
-    // Return
-    return *models;
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                         GOptimizer private methods                      =
@@ -198,10 +128,6 @@ GModels& GOptimizer::operator() (GOptimizerFunction& fct, GModels& m)
  ***************************************************************************/
 void GOptimizer::init_members(void)
 {
-    // Initialise members
-//    m_fct  = NULL;
-//    m_pars = GOptimizerPars();
-  
     // Return
     return;
 }
@@ -214,10 +140,6 @@ void GOptimizer::init_members(void)
  ***************************************************************************/
 void GOptimizer::copy_members(const GOptimizer& opt)
 {
-    // Copy attributes
-//    m_fct  = opt.m_fct;
-//    m_pars = opt.m_pars;
-    
     // Return
     return;
 }
@@ -228,10 +150,6 @@ void GOptimizer::copy_members(const GOptimizer& opt)
  ***************************************************************************/
 void GOptimizer::free_members(void)
 {
-    // Free memory
-
-    // Signal free pointers
-  
     // Return
     return;
 }
@@ -242,22 +160,6 @@ void GOptimizer::free_members(void)
  =                             GOptimizer friends                          =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Put optimizer in output stream
- *
- * @param[in] os Output stream into which the optimizer will be dumped
- * @param[in] pars Parameters to be dumped
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GOptimizer& opt)
-{
-    // Put optimizer in stream
-    os << "=== GOptimizer ===" << std::endl;
-
-    // Return output stream
-    return os;
-}
-
 
 /*==========================================================================
  =                                                                         =

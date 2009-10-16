@@ -42,12 +42,10 @@ public:
     GOptimizer(const GOptimizer& opt);
     virtual ~GOptimizer();
 
-    // Virtual Operators
+    // Operators
     virtual GOptimizer&     operator= (const GOptimizer& opt);
     virtual GOptimizerPars& operator() (GOptimizerFunction& fct, GOptimizerPars& p) = 0;
-
-    // Implemented operators
-    GModels& operator() (GOptimizerFunction& fct, GModels& m);
+    virtual GModels&        operator() (GOptimizerFunction& fct, GModels& m) = 0;
 
     // Virtual methods
  
