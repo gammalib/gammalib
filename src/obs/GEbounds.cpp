@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GEbounds.cpp  -  Energy boundary class                  *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,13 +18,21 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
+#include <math.h>
 #include "GException.hpp"
 #include "GEbounds.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_COPY_MEMBERS              "GEbounds::copy_members(const GEbounds&)"
 #define G_LOAD       "GEbounds::load(const std::string&, const std::string&)"
+#define G_EMIN                                    "GEbounds::emin(int) const"
+#define G_EMAX                                    "GEbounds::emax(int) const"
+#define G_EMEAN                                  "GEbounds::emean(int) const"
+#define G_ELOGMEAN                            "GEbounds::elogmean(int) const"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -217,28 +225,78 @@ void GEbounds::load(GFitsHDU* hdu)
 
 
 /***********************************************************************//**
- * @brief Get minimum energy.
+ * @brief Returns minimum energy for a given bin
+ *
+ * @param[in] index Energy bin.
  ***************************************************************************/
-double GEbounds::emin(void) const
+double GEbounds::emin(int index) const
 {
-    // Determine minimum energy
-    double emin = (m_emin != NULL) ? m_emin[0] : 0.0;
-    
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= m_num)
+        throw GException::out_of_range(G_MIN, index, 0, m_num-1);
+    #endif
+
     // Return
-    return emin;
+    return m_emin[index];
 }
 
 
 /***********************************************************************//**
- * @brief Get maximum energy.
+ * @brief Returns maximum energy for a given bin
+ *
+ * @param[in] index Energy bin.
  ***************************************************************************/
-double GEbounds::emax(void) const
+double GEbounds::emax(int index) const
 {
-    // Determine minimum energy
-    double emax = (m_emax != NULL) ? m_emax[m_num-1] : 0.0;
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= m_num)
+        throw GException::out_of_range(G_MAX, index, 0, m_num-1);
+    #endif
+
+    // Return
+    return m_emax[index];
+}
+
+
+/***********************************************************************//**
+ * @brief Returns mean energy for a given bin
+ *
+ * @param[in] index Energy bin.
+ ***************************************************************************/
+double GEbounds::emean(int index) const
+{
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= m_num)
+        throw GException::out_of_range(G_MEAN, index, 0, m_num-1);
+    #endif
+
+    // Compute mean energy
+    double emean = 0.5 * (m_emin[index] + m_emax[index]);
     
     // Return
-    return emax;
+    return emean;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns logarithmic mean energy for a given bin
+ *
+ * @param[in] index Energy bin.
+ ***************************************************************************/
+double GEbounds::elogmean(int index) const
+{
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= m_num)
+        throw GException::out_of_range(G_LOGMEAN, index, 0, m_num-1);
+    #endif
+
+    // Compute logarithmic mean energy
+    double elogmin  = log10(m_emin[index]);
+    double elogmax  = log10(m_emax[index]);
+    double elogmean = pow(10.0, 0.5 * (elogmin + elogmax));
+    
+    // Return
+    return elogmean;
 }
 
 
@@ -343,8 +401,9 @@ std::ostream& operator<< (std::ostream& os, const GEbounds& ebds)
     os.precision(3);
     os << "=== GEbounds ===" << std::endl;
     os << " Number of boundaries ......: " << ebds.m_num << std::endl;
-    os << " Energy range ..............: " << std::fixed << 
-            ebds.emin() << " - " << ebds.emax() << " keV" << std::endl;
+    os << " Energy range ..............: " << std::fixed
+            << ebds.emin(0) << " - " << ebds.emax(ebds.elements()-1) 
+            << " keV" << std::endl;
     os << " Channel type ..............: " << ebds.m_chantype << std::endl;
     os << " Telescope .................: " << ebds.m_telescope << std::endl;
     os << " Instrument ................: " << ebds.m_instrument;

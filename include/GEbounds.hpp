@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GEbounds.hpp  -  Energy boundary class                   *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -43,10 +43,19 @@ public:
     GEbounds& operator= (const GEbounds& ebds);
 
     // Methods
-	void   load(const std::string& filename, const std::string& extname = "EBOUNDS");
-    void   load(GFitsHDU* hdu);
-    double emin(void) const;
-    double emax(void) const;
+	void        load(const std::string& filename,
+                     const std::string& extname = "EBOUNDS");
+    void        load(GFitsHDU* hdu);
+    int         elements(void) const { return m_num; }
+    double      emin(int index) const;
+    double      emax(int index) const;
+    double      emean(int index) const;
+    double      elogmean(int index) const;
+    std::string telescope(void) const { return m_telescope; }
+    std::string instrument(void) const { return m_instrument; }
+    std::string filter(void) const { return m_filter; }
+    std::string chantype(void) const { return m_chantype; }
+    std::string detchannels(void) const { return m_detchannels; }
   
 protected:
     // Protected methods
