@@ -52,7 +52,7 @@ public:
     double   model(GModels& models, GVector* gradient);
     GSkyDir* dir(void) { return m_dir; }
     double*  energy(void) { return m_energy; }
-    double*  time(void) { return &m_time; }
+    double*  time(void) { return m_time; }
     
 protected:
     // Protected methods
@@ -62,8 +62,8 @@ protected:
     GLATEventBin* clone(void) const;
 
     // Protected data area (defines all LAT specific event attributes)
-    double*  m_counts;      //!< Counts
-    double   m_time;        //!< Bin time (constant for LAT cube)
+    double*  m_counts;      //!< Pointer to number of counts
+    double*  m_time;        //!< Pointer to bin time
     GSkyDir* m_dir;         //!< Pointer to bin direction
     double*  m_energy;      //!< Pointer to bin energy
 
