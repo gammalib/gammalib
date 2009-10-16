@@ -62,8 +62,8 @@ public:
     void        name(const std::string& name) { m_name=name; return; }
     void        unit(const std::string& unit) { m_unit=unit; return; }
     void        value(const double& value);
-    void        error(const double& error);
-    void        gradient(const double& gradient);
+    void        error(const double& error)  { m_error=error; return; }
+    void        gradient(const double& gradient) { m_gradient=gradient; return; }
     void        min(const double& min);
     void        max(const double& max);
     void        scale(const double& scale) { m_scale=scale; return; }

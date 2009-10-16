@@ -148,21 +148,6 @@ void GModelPar::value(const double& value)
 
 
 /***********************************************************************//**
- * @brief Set parameter error
- *
- * @param[in] error Parameter error.
- ***************************************************************************/
-void GModelPar::error(const double& error)
-{
-    // Assign error
-    m_error = error;
-	
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Set parameter minimum
  *
  * @param[in] min Parameter minimum.
