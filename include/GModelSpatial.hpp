@@ -45,7 +45,8 @@ public:
     // Virtual methods
     virtual int        npars(void) const = 0;
     virtual GModelPar* par(int index) const = 0;
-    virtual void       eval_gradients(GSkyDir* dir) = 0;
+    virtual double     eval(GSkyDir* dir) = 0;
+    virtual double     eval_gradients(GSkyDir* dir) = 0;
   
 protected:
     // Protected methods

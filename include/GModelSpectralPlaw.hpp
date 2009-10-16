@@ -48,7 +48,8 @@ public:
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
-    void       eval_gradients(double* energy);
+    double     eval(double* energy);
+    double     eval_gradients(double* energy);
     void       autoscale(void);
     double     norm(void) const { return m_norm.real_value(); }
     double     index(void) const { return m_index.real_value(); }
