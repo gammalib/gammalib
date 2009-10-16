@@ -50,42 +50,6 @@ GOptimizerLM::GOptimizerLM(void) : GOptimizer()
 
 
 /***********************************************************************//**
- * @brief Construct object from function and parameters
- *
- * @param[in] fct Optimizer function.
- * @param[in] pars Optimizer parameters.
- ***************************************************************************/
-/*
-GOptimizerLM::GOptimizerLM(const GOptimizerFunction& fct, const GOptimizerPars &pars) :
-  GOptimizer(fct, pars)
-{
-    // Initialise private members for clean destruction
-    init_members();
-
-    // Return
-    return;
-}
-*/
-
-/***********************************************************************//**
- * @brief Construct object from function and models
- *
- * @param[in] fct Optimizer function.
- * @param[in] models Optimizer parameters.
- ***************************************************************************/
-/*
-GOptimizerLM::GOptimizerLM(const GOptimizerFunction& fct, const GModels &models) :
-  GOptimizer(fct, models)
-{
-    // Initialise private members for clean destruction
-    init_members();
-  
-    // Return
-    return;
-}
-*/
-
-/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] opt Optimizer from which the instance should be built.
@@ -155,7 +119,7 @@ GOptimizerLM& GOptimizerLM::operator= (const GOptimizerLM& opt)
  * @brief Optimization operator
  *
  * @param[in] fct Optimization function.
- * @param[in] pars Parameters to be optimised.
+ * @param[in] p Parameters to be optimised.
  ***************************************************************************/
 GOptimizerPars& GOptimizerLM::operator() (GOptimizerFunction& fct, GOptimizerPars& p)
 {
@@ -168,12 +132,30 @@ std::cout << *(fct.value()) << std::endl;
 std::cout << *(fct.gradient()) << std::endl;
 std::cout << *(fct.covar()) << std::endl;
     
-    // DUMMY
-    pars->par(0)->value(10.0);
-    pars->par(0)->error(1.0);
-
     // Return
     return *pars;
+}
+
+
+/***********************************************************************//**
+ * @brief Optimization operator
+ *
+ * @param[in] fct Optimization function.
+ * @param[in] m Model parameters to be optimised.
+ ***************************************************************************/
+GModels& GOptimizerLM::operator() (GOptimizerFunction& fct, GModels& m)
+{
+    // Initalise output parameters with input parameters
+    GModels* models = new GModels(m);
+    
+    // Initial eveluation
+    fct.eval(*models);
+std::cout << *(fct.value()) << std::endl;
+std::cout << *(fct.gradient()) << std::endl;
+std::cout << *(fct.covar()) << std::endl;
+    
+    // Return
+    return *models;
 }
 
 

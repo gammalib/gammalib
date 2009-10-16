@@ -21,6 +21,8 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GOptimizer.hpp"
+#include "GOptimizerFunction.hpp"
+#include "GModels.hpp"
 
 
 /***********************************************************************//**
@@ -43,6 +45,7 @@ public:
     // Operators
     GOptimizerLM&   operator= (const GOptimizerLM& opt);
     GOptimizerPars& operator() (GOptimizerFunction& fct, GOptimizerPars& p);
+    GModels&        operator() (GOptimizerFunction& fct, GModels& m);
 
 protected:
     // Protected methods
