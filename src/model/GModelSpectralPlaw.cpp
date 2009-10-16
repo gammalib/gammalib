@@ -161,6 +161,16 @@ GModelPar* GModelSpectralPlaw::par(int index) const
 
 
 /***********************************************************************//**
+ * @brief Evaluate function gradients
+ ***************************************************************************/
+void GModelSpectralPlaw::eval_gradients(void)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Autoscale normalization
  ***************************************************************************/
 void GModelSpectralPlaw::autoscale(void)

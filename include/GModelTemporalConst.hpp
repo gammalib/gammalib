@@ -51,6 +51,7 @@ public:
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
+    void       eval_gradients(void);
   
 protected:
     // Protected methods

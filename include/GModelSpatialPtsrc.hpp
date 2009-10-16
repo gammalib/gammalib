@@ -50,6 +50,7 @@ public:
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
+    void       eval_gradients(void);
     double     ra(void) const { return m_ra.real_value(); }
     double     dec(void) const { return m_dec.real_value(); }
   

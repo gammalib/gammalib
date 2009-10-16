@@ -164,6 +164,21 @@ GModelPar* GModel::par(int index) const
 }
 
 
+/***********************************************************************//**
+ * @brief Evaluate function gradients
+ ***************************************************************************/
+void GModel::eval_gradients(void)
+{
+    // Evaluate gradients in all components
+    if (m_spatial  != NULL) m_spatial->eval_gradients();
+    if (m_spectral != NULL) m_spectral->eval_gradients();
+    if (m_temporal != NULL) m_temporal->eval_gradients();
+    
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                          GModel private methods                         =

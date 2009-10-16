@@ -47,6 +47,7 @@ public:
     // Virtual methods
     virtual int        npars(void) const = 0;
     virtual GModelPar* par(int index) const = 0;
+    virtual void       eval_gradients(void) = 0;
   
 protected:
     // Protected methods

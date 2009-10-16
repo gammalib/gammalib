@@ -47,6 +47,7 @@ public:
 
     // Methods
     void add(const GModel& model);
+    void eval_gradients(void);
   
 protected:
     // Protected methods

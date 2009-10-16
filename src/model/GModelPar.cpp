@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModelPar.cpp  -  Model parameter class               *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -245,14 +245,15 @@ void GModelPar::init_members(void)
     // Initialise members
     m_name.clear();
     m_unit.clear();
-    m_value  = 0.0;
-    m_error  = 0.0;
-    m_min    = 0.0;
-    m_max    = 0.0;
-    m_scale  = 1.0;
-    m_hasmin = false;
-    m_hasmax = false;
-    m_free   = true;
+    m_value    = 0.0;
+    m_error    = 0.0;
+    m_gradient = 0.0;
+    m_min      = 0.0;
+    m_max      = 0.0;
+    m_scale    = 1.0;
+    m_hasmin   = false;
+    m_hasmax   = false;
+    m_free     = true;
   
     // Return
     return;
@@ -267,16 +268,17 @@ void GModelPar::init_members(void)
 void GModelPar::copy_members(const GModelPar& par)
 {
     // Copy members
-    m_name   = par.m_name;
-    m_unit   = par.m_unit;
-    m_value  = par.m_value;
-    m_error  = par.m_error;
-    m_min    = par.m_min;
-    m_max    = par.m_max;
-    m_scale  = par.m_scale;
-    m_hasmin = par.m_hasmin;
-    m_hasmax = par.m_hasmax;
-    m_free   = par.m_free;
+    m_name    = par.m_name;
+    m_unit    = par.m_unit;
+    m_value   = par.m_value;
+    m_error   = par.m_error;
+    m_gradient = par.m_gradient;
+    m_min     = par.m_min;
+    m_max     = par.m_max;
+    m_scale   = par.m_scale;
+    m_hasmin  = par.m_hasmin;
+    m_hasmax  = par.m_hasmax;
+    m_free    = par.m_free;
 
     // Return
     return;

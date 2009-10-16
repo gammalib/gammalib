@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialPtsrc.cpp  -  Spatial point source model class      *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -155,6 +155,16 @@ GModelPar* GModelSpatialPtsrc::par(int index) const
     
     // Return parameter pointer
     return m_par[index];
+}
+
+
+/***********************************************************************//**
+ * @brief Evaluate function gradients
+ ***************************************************************************/
+void GModelSpatialPtsrc::eval_gradients(void)
+{
+    // Return
+    return;
 }
 
 

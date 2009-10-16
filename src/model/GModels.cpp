@@ -162,6 +162,21 @@ void GModels::add(const GModel& model)
 }
 
 
+/***********************************************************************//**
+ * @brief Evaluate function gradients
+ ***************************************************************************/
+void GModels::eval_gradients(void)
+{
+    // Evaluate gradients for all models
+    for (int i = 0; i < m_elements; ++i)
+        m_model[i].eval_gradients();
+    
+    // Return
+    return;
+}
+
+
+
 /*==========================================================================
  =                                                                         =
  =                         GModels private methods                         =

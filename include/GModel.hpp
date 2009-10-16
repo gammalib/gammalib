@@ -20,12 +20,11 @@
 #define GMODEL_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GException.hpp"
+#include <iostream>
 #include "GModelPar.hpp"
 #include "GModelSpatial.hpp"
 #include "GModelSpectral.hpp"
 #include "GModelTemporal.hpp"
-#include <iostream>
 
 
 /***********************************************************************//**
@@ -56,6 +55,7 @@ public:
     void        name(const std::string& name) { m_name=name; return; }
     int         npars(void) const { return m_npars; }
     GModelPar*  par(int index) const;
+    void        eval_gradients(void);
   
 protected:
     // Protected methods

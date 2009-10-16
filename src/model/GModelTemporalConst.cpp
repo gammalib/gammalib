@@ -139,6 +139,16 @@ GModelPar* GModelTemporalConst::par(int index) const
 }
 
 
+/***********************************************************************//**
+ * @brief Evaluate function gradients
+ ***************************************************************************/
+void GModelTemporalConst::eval_gradients(void)
+{
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                   GModelTemporalConst private methods                   =

@@ -52,6 +52,7 @@ public:
     double      real_max(void) const { return m_max*m_scale; }
     double      value(void) const { return m_value; }
     double      error(void) const { return m_error; }
+    double      gradient(void) const { return m_gradient; }
     double      min(void) const { return m_min; }
     double      max(void) const { return m_max; }
     double      scale(void) const { return m_scale; }
@@ -62,6 +63,7 @@ public:
     void        unit(const std::string& unit) { m_unit=unit; return; }
     void        value(const double& value);
     void        error(const double& error);
+    void        gradient(const double& gradient);
     void        min(const double& min);
     void        max(const double& max);
     void        scale(const double& scale) { m_scale=scale; return; }
@@ -83,6 +85,7 @@ protected:
     std::string  m_unit;         //!< Parameter unit
     double       m_value;        //!< Parameter value
     double       m_error;        //!< Uncertainty in parameter value
+    double       m_gradient;     //!< Model gradient
     double       m_min;          //!< Parameter minimum
     double       m_max;          //!< Parameter maximum
     double       m_scale;        //!< Parameter scale (real = m_value * m_scale)
