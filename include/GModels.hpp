@@ -48,7 +48,7 @@ public:
 
     // Methods
     void add(const GModel& model);
-    void eval_gradients(GSkyDir& dir, const double& energy, const double& time);
+    void eval_gradients(GSkyDir* dir, double* energy, double* time);
   
 protected:
     // Protected methods

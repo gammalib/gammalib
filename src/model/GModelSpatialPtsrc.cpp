@@ -161,7 +161,7 @@ GModelPar* GModelSpatialPtsrc::par(int index) const
 /***********************************************************************//**
  * @brief Evaluate function gradients
  ***************************************************************************/
-void GModelSpatialPtsrc::eval_gradients(GSkyDir& dir)
+void GModelSpatialPtsrc::eval_gradients(GSkyDir* dir)
 {
     // Return
     return;

@@ -142,7 +142,7 @@ GModelPar* GModelTemporalConst::par(int index) const
 /***********************************************************************//**
  * @brief Evaluate function gradients
  ***************************************************************************/
-void GModelTemporalConst::eval_gradients(const double& time)
+void GModelTemporalConst::eval_gradients(double* time)
 {
     // Return
     return;

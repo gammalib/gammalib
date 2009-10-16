@@ -166,7 +166,7 @@ GModelPar* GModelSpectralPlaw::par(int index) const
  *
  * @param[in] energy Energy at which the gradients are to be computed.
  ***************************************************************************/
-void GModelSpectralPlaw::eval_gradients(const double& energy)
+void GModelSpectralPlaw::eval_gradients(double* energy)
 {
     // Set gradient to 0 is all parameters are fixed ...
     if ( !m_norm.isfree() && !m_index.isfree() && !m_pivot.isfree() ) {
@@ -179,7 +179,7 @@ void GModelSpectralPlaw::eval_gradients(const double& energy)
     else {
     
         // Precompute some values
-        double e = energy/m_pivot.value();
+        double e = *energy/m_pivot.value();
         double p = pow(e, m_index.value());
     
         // Compute normalization gradient
@@ -190,7 +190,7 @@ void GModelSpectralPlaw::eval_gradients(const double& energy)
 
         // Compute index gradient
         if (m_index.isfree()) {
-            double g = m_norm.value() * p * log(energy);
+            double g = m_norm.value() * p * log(*energy);
             m_index.gradient(g);
         }
         else

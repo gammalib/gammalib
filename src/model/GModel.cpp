@@ -167,7 +167,7 @@ GModelPar* GModel::par(int index) const
 /***********************************************************************//**
  * @brief Evaluate function gradients
  ***************************************************************************/
-void GModel::eval_gradients(GSkyDir& dir, const double& energy, const double& time)
+void GModel::eval_gradients(GSkyDir* dir, double* energy, double* time)
 {
     // Evaluate gradients in all components
     if (m_spatial  != NULL) m_spatial->eval_gradients(dir);

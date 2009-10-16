@@ -56,7 +56,7 @@ public:
     void        name(const std::string& name) { m_name=name; return; }
     int         npars(void) const { return m_npars; }
     GModelPar*  par(int index) const;
-    void        eval_gradients(GSkyDir& dir, const double& energy, const double& time);
+    void        eval_gradients(GSkyDir* dir, double* energy, double* time);
   
 protected:
     // Protected methods
