@@ -45,7 +45,7 @@ public:
     GLATEventAtom& operator= (const GLATEventAtom& atom);
 
     // Methods
-    double model(GModels& models, GVector* gradient) const;
+    double model(GModels& models, GVector* gradient);
     
 protected:
     // Protected methods

@@ -47,7 +47,7 @@ public:
 
     // Virtual methods
     virtual double   counts(void) const = 0;
-    virtual double   model(GModels& models, GVector* gradient) const = 0;
+    virtual double   model(GModels& models, GVector* gradient) = 0;
     virtual GSkyDir* dir(void) = 0;
     virtual double*  energy(void) = 0;
     virtual double*  time(void) = 0;
