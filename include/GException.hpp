@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GException.hpp  -  exception handler                  *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2009 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -256,9 +256,9 @@ public:
     };
 
     // Invalid object release
-    class invalid_release : public GExceptionHandler {
+    class gradient_par_mismatch : public GExceptionHandler {
     public:
-        invalid_release(std::string origin, int nlinks);
+        gradient_par_mismatch(std::string origin, int nsize, int npars);
     };
 
 };

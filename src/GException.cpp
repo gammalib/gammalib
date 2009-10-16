@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GException.cpp  -  exception handler                  *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2009 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -595,14 +595,17 @@ GException::healpix_bad_coords::healpix_bad_coords(std::string origin,
 
 
 /***********************************************************************//**
- * @brief Invalid object release
+ * @brief Mismatch between gradient vector and number of model parameters
  *
  * @param[in] origin Method that throws the error.
- * @param[in] msg Message.
+ * @param[in] nsize Gradient vector size.
+ * @param[in] npars Number of parameters in model.
  ***************************************************************************/
-GException::invalid_release::invalid_release(std::string origin, 
-											 int         nlinks)
+GException::gradient_par_mismatch::gradient_par_mismatch(std::string origin, 
+											             int nsize,
+                                                         int npars)
 {
     m_origin  = origin;
-    m_message = "Invalid object release (links="+str(nlinks)+")";
+    m_message = "Gradient vector size "+str(nsize)+
+                " mismatches number "+str(npars)+" of model parameters.";
 }
