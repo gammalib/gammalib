@@ -201,8 +201,8 @@ void GEbounds::load(GFitsHDU* hdu)
             // Copy information
             for (int i = 0; i < m_num; ++i) {
                 m_channel[i] = hdu->column("CHANNEL")->integer(i);
-                m_emin[i]    = hdu->column("E_MIN")->real(i);
-                m_emax[i]    = hdu->column("E_MAX")->real(i);
+                m_emin[i]    = hdu->column("E_MIN")->real(i) / 1000.0;
+                m_emax[i]    = hdu->column("E_MAX")->real(i) / 1000.0;
             }
         
         } // endif: there were channels to read
