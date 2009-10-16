@@ -23,7 +23,6 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ADD                             "GModels::add(const GModel& model)"
-#define G_PAR                                       "GModels::par(int) const"
 #define G_COPY_MEMBERS                "GModels::copy_members(const GModels&)"
 #define G_SET_POINTERS                              "GModels::set_pointers()"
 
