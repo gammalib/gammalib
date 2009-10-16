@@ -24,6 +24,7 @@
 #include "GOptimizerPars.hpp"
 #include "GModel.hpp"
 #include "GModelPar.hpp"
+#include "GSkyDir.hpp"
 
 
 /***********************************************************************//**
@@ -47,7 +48,7 @@ public:
 
     // Methods
     void add(const GModel& model);
-    void eval_gradients(void);
+    void eval_gradients(GSkyDir& dir, const double& energy, const double& time);
   
 protected:
     // Protected methods

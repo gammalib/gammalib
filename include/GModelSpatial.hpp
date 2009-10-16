@@ -20,10 +20,8 @@
 #define GMODELSPATIAL_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GException.hpp"
 #include "GModelPar.hpp"
-#include <iostream>
-
+#include "GSkyDir.hpp"
 
 /***********************************************************************//**
  * @class GModelSpatial
@@ -47,7 +45,7 @@ public:
     // Virtual methods
     virtual int        npars(void) const = 0;
     virtual GModelPar* par(int index) const = 0;
-    virtual void       eval_gradients(void) = 0;
+    virtual void       eval_gradients(GSkyDir& dir) = 0;
   
 protected:
     // Protected methods

@@ -20,10 +20,8 @@
 #define GMODELTEMPORALCONST_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GException.hpp"
 #include "GModelPar.hpp"
 #include "GModelTemporal.hpp"
-#include <iostream>
 
 
 /***********************************************************************//**
@@ -51,7 +49,7 @@ public:
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
-    void       eval_gradients(void);
+    void       eval_gradients(const double& time);
   
 protected:
     // Protected methods

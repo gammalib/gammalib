@@ -20,10 +20,9 @@
 #define GMODELSPECTRALPLAW_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GException.hpp"
+#include <iostream>
 #include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
-#include <iostream>
 
 
 /***********************************************************************//**
@@ -49,7 +48,7 @@ public:
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
-    void       eval_gradients(void);
+    void       eval_gradients(const double& energy);
     void       autoscale(void);
     double     norm(void) const { return m_norm.real_value(); }
     double     index(void) const { return m_index.real_value(); }
