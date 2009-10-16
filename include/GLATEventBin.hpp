@@ -49,6 +49,7 @@ public:
 
     // Methods
     double   counts(void) const { return *m_counts; }
+    double   model(GModels& models);
     double   model(GModels& models, GVector* gradient);
     GSkyDir* dir(void) { return m_dir; }
     double*  energy(void) { return m_energy; }

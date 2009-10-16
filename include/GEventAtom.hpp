@@ -49,6 +49,7 @@ public:
     virtual GEventAtom& operator= (const GEventAtom& atom);
 
     // Virtual methods
+    virtual double model(GModels& models) = 0;
     virtual double model(GModels& models, GVector* gradient) = 0;
 
     // Implemented methods
