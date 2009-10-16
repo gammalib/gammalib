@@ -46,7 +46,7 @@ public:
 
     // Methods
 	void           load(const std::string& filename);
-    GLATEventAtom* pointer(int index) const;
+    GLATEventAtom* pointer(int index);
     
 protected:
     // Protected methods

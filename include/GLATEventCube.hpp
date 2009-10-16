@@ -50,7 +50,7 @@ public:
 
     // Methods
 	void          load(const std::string& filename);
-    GLATEventBin* pointer(int index) const;
+    GLATEventBin* pointer(int index);
     int           number(void) const;
     
 protected:
@@ -62,8 +62,9 @@ protected:
     void           load_cntmap(GFitsHDU* hdu);
 
     // Protected data area
-    GLATEventBin* m_bins;             //!< Pointer to bins
-    GEbounds      m_ebds;             //!< Energy boundaries
+    GLATEventBin m_bin;              //!< Actual energy bin
+    GEbounds     m_ebds;             //!< Energy boundaries
+    double*      m_counts;           //!< Pointer to counts array
 
 private:
 };

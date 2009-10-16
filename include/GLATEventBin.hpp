@@ -48,8 +48,11 @@ public:
     GLATEventBin& operator= (const GLATEventBin& bin);
 
     // Methods
-    double counts(void) const { return m_counts; }
-    double model(GModels& models, GVector* gradient) const;
+    double  counts(void) const { return *m_counts; }
+    double  model(GModels& models, GVector* gradient) const;
+    GSkyDir dir(void) const;
+    double  energy(void) const;
+    double  time(void) const;
     
 protected:
     // Protected methods
@@ -59,7 +62,7 @@ protected:
     GLATEventBin* clone(void) const;
 
     // Protected data area (defines all LAT specific event attributes)
-    double m_counts;      //!< Counts
+    double* m_counts;      //!< Counts
 
 };
 
