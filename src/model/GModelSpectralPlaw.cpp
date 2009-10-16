@@ -18,6 +18,7 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#include <math.h>
 #include "GException.hpp"
 #include "GModelSpectralPlaw.hpp"
 
@@ -162,9 +163,49 @@ GModelPar* GModelSpectralPlaw::par(int index) const
 
 /***********************************************************************//**
  * @brief Evaluate function gradients
+ *
+ * @param[in] energy Energy at which the gradients are to be computed.
  ***************************************************************************/
-void GModelSpectralPlaw::eval_gradients(void)
+void GModelSpectralPlaw::eval_gradients(const double& energy)
 {
+    // Set gradient to 0 is all parameters are fixed ...
+    if ( !m_norm.isfree() && !m_index.isfree() && !m_pivot.isfree() ) {
+        m_norm.gradient(0.0);
+        m_index.gradient(0.0);
+        m_pivot.gradient(0.0);
+    }
+    
+    // ... otherwise compute gradient
+    else {
+    
+        // Precompute some values
+        double e = energy/m_pivot.value();
+        double p = pow(e, m_index.value());
+    
+        // Compute normalization gradient
+        if (m_norm.isfree())
+            m_norm.gradient(p);
+        else
+            m_norm.gradient(0.0);
+
+        // Compute index gradient
+        if (m_index.isfree()) {
+            double g = m_norm.value() * p * log(energy);
+            m_index.gradient(g);
+        }
+        else
+            m_index.gradient(0.0);
+
+        // Compute pivot energy gradient
+        if (m_pivot.isfree()) {
+            double g = -m_norm.value() * m_index.value() * p / m_pivot.value();
+            m_pivot.gradient(g);
+        }
+        else
+            m_pivot.gradient(0.0);
+
+    } // endelse: gradient computation required
+    
     // Return
     return;
 }
