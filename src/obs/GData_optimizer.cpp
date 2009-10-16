@@ -174,6 +174,7 @@ void GData::optimizer::eval(const GOptimizerPars& pars)
         m_covar    = new GSparseMatrix(npars,npars);
         
         // Allocate some working arrays
+        GVector grad(npars);
         m_covar->stack_init(npars,10000);
         inx    = new int[npars];
         values = new double[npars];
@@ -185,11 +186,8 @@ void GData::optimizer::eval(const GOptimizerPars& pars)
             // Get number of counts in bin
             double data = bin->counts();
             
-            // DUMMY: Get model and derivative
-            double  model = 1.0;
-            GVector grad(npars);
-            grad(0) = 0.1;
-            grad(1) = 0.2;
+            // Get model and derivative
+            double model = bin->model((GModels&)pars, &grad);
             
             // Skip bin if model is empty
             if (model <= 0.0)
