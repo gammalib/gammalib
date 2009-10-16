@@ -43,7 +43,7 @@
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GModels::GModels(void)
+GModels::GModels(void) : GOptimizerPars()
 {
     // Initialise private members for clean destruction
     init_members();
@@ -58,7 +58,7 @@ GModels::GModels(void)
  *
  * @param[in] models Models from which the instance should be built.
  ***************************************************************************/
-GModels::GModels(const GModels& models)
+GModels::GModels(const GModels& models) : GOptimizerPars(models)
 { 
     // Initialise private members for clean destruction
     init_members();
@@ -99,6 +99,9 @@ GModels& GModels::operator= (const GModels& models)
 { 
     // Execute only if object is not identical
     if (this != &models) {
+
+        // Copy base class members
+        this->GOptimizerPars::operator=(models);
 
         // Free members
         free_members();
@@ -159,21 +162,6 @@ void GModels::add(const GModel& model)
     return;
 }
 
-/***********************************************************************//**
- * @brief Get pointer to model parameter
- *
- * @param[in] index Parameter index.
- ***************************************************************************/
-GModelPar* GModels::par(int index) const
-{
-    // If index is outside boundary then throw an error
-    if (index < 0 || index >= m_npars)
-        throw GException::out_of_range(G_PAR, index, 0, m_npars-1);
-    
-    // Return parameter pointer
-    return m_par[index];
-}
-
 
 /*==========================================================================
  =                                                                         =
@@ -188,9 +176,7 @@ void GModels::init_members(void)
 {
     // Initialise members
     m_elements = 0;
-    m_npars    = 0;
     m_model    = NULL;
-    m_par      = NULL;
   
     // Return
     return;
@@ -206,7 +192,6 @@ void GModels::copy_members(const GModels& models)
 {
     // Copy attributes
     m_elements = models.m_elements;
-    m_npars    = models.m_npars;
     
     // If there are models then copy them
     if (m_elements > 0 && models.m_model != NULL) {
@@ -237,11 +222,9 @@ void GModels::free_members(void)
 {
     // Free memory
     if (m_model != NULL) delete [] m_model;
-    if (m_par   != NULL) delete [] m_par;
 
     // Signal free pointers
     m_model = NULL;
-    m_par   = NULL;
   
     // Return
     return;
