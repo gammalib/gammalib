@@ -45,13 +45,13 @@ public:
     virtual GEvent& operator= (const GEvent& event);
 
     // Virtual methods
-    virtual double  counts(void) const = 0;
-    virtual double  model(GModels& models, GVector* gradient) const = 0;
-    virtual GSkyDir dir(void) const = 0;
-    virtual double  energy(void) const = 0;
-    virtual double  time(void) const = 0;
-    virtual bool    isatom(void) const = 0;
-    virtual bool    isbin(void) const = 0;
+    virtual double   counts(void) const = 0;
+    virtual double   model(GModels& models, GVector* gradient) const = 0;
+    virtual GSkyDir* dir(void) = 0;
+    virtual double*  energy(void) = 0;
+    virtual double*  time(void) = 0;
+    virtual bool     isatom(void) const = 0;
+    virtual bool     isbin(void) const = 0;
     
     // Implemented methods
     
