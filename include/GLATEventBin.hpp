@@ -49,7 +49,7 @@ public:
 
     // Methods
     double counts(void) const { return m_counts; }
-    double model(const GModels& models, GVector* gradient) const;
+    double model(GModels& models, GVector* gradient) const;
     
 protected:
     // Protected methods

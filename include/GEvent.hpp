@@ -45,7 +45,7 @@ public:
 
     // Virtual methods
     virtual double counts(void) const = 0;
-    virtual double model(const GModels& models, GVector* gradient) const = 0;
+    virtual double model(GModels& models, GVector* gradient) const = 0;
     virtual bool   isatom(void) const = 0;
     virtual bool   isbin(void) const = 0;
     

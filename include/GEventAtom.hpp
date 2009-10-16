@@ -49,7 +49,7 @@ public:
     virtual GEventAtom& operator= (const GEventAtom& atom);
 
     // Virtual methods
-    virtual double model(const GModels& models, GVector* gradient) const = 0;
+    virtual double model(GModels& models, GVector* gradient) const = 0;
 
     // Implemented methods
     double counts(void) const { return 1.0; }
