@@ -25,6 +25,7 @@
 #include "GEvent.hpp"
 #include "GOptimizer.hpp"
 #include "GOptimizerFunction.hpp"
+#include "GModels.hpp"
 
 
 /***********************************************************************//**
