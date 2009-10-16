@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GLATEventBin.hpp  -  LAT event bin class                *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,6 +21,8 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GEventBin.hpp"
+#include "GModels.hpp"
+#include "GVector.hpp"
 
 
 /***********************************************************************//**
@@ -47,6 +49,7 @@ public:
 
     // Methods
     double counts(void) const { return m_counts; }
+    double model(const GModels& models, GVector* gradient) const;
     
 protected:
     // Protected methods

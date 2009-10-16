@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATEventAtom.hpp  -  LAT event atom class               *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,6 +21,8 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GEventAtom.hpp"
+#include "GModels.hpp"
+#include "GVector.hpp"
 
 
 /***********************************************************************//**
@@ -32,7 +34,6 @@ class GLATEventAtom : public GEventAtom {
 
     // Friend classes
     friend class GLATEventList;
-//    friend class GLATEventCube;
 
 public:
     // Constructors and destructors
@@ -44,6 +45,7 @@ public:
     GLATEventAtom& operator= (const GLATEventAtom& atom);
 
     // Methods
+    double model(const GModels& models, GVector* gradient) const;
     
 protected:
     // Protected methods

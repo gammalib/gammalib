@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GEvent.hpp  -  Event abstract base class               *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,6 +20,8 @@
 #define GEVENT_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include "GModels.hpp"
+#include "GVector.hpp"
 
 
 /***********************************************************************//**
@@ -32,9 +34,6 @@ class GEvent {
     // Friend classes
     friend class GEvents;
 
-    // I/O friends
-//    friend std::ostream& operator<< (std::ostream& os, const GEvent& event);
-
 public:
     // Constructors and destructors
     GEvent();
@@ -46,6 +45,7 @@ public:
 
     // Virtual methods
     virtual double counts(void) const = 0;
+    virtual double model(const GModels& models, GVector* gradient) const = 0;
     virtual bool   isatom(void) const = 0;
     virtual bool   isbin(void) const = 0;
     

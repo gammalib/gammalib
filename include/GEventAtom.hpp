@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GEventAtom.hpp  -  Event atom abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -22,6 +22,8 @@
 /* __ Includes ___________________________________________________________ */
 #include "GEvent.hpp"
 #include "GSkyDir.hpp"
+#include "GModels.hpp"
+#include "GVector.hpp"
 
 
 /***********************************************************************//**
@@ -47,7 +49,8 @@ public:
     virtual GEventAtom& operator= (const GEventAtom& atom);
 
     // Virtual methods
-    
+    virtual double model(const GModels& models, GVector* gradient) const = 0;
+
     // Implemented methods
     double counts(void) const { return 1.0; }
     bool   isatom(void) const { return true; }

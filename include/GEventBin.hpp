@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GEventBin.hpp  -  Event bin abstract base class           *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,6 +21,8 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GEvent.hpp"
+#include "GModels.hpp"
+#include "GVector.hpp"
 
 
 /***********************************************************************//**
@@ -43,7 +45,8 @@ public:
     virtual GEventBin& operator= (const GEventBin& bin);
 
     // Virtual methods
-    virtual double      counts(void) const = 0;
+    virtual double counts(void) const = 0;
+    virtual double model(const GModels& models, GVector* gradient) const = 0;
     
     // Implemented methods
     bool isatom(void) const { return false; }
