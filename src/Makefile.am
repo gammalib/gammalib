@@ -15,6 +15,8 @@ files = GException.cpp \
 	GImage.cpp \
 	GHealpix.cpp \
 	obs/GData.cpp \
+	obs/GData_iterator.cpp \
+	obs/GData_optimizer.cpp \
 	obs/GObservation.cpp \
 	obs/GEvents.cpp \
 	obs/GEventList.cpp \
@@ -62,6 +64,9 @@ files = GException.cpp \
 	fits/GFitsTableDblCol.cpp \
 	fits/GFitsHDU.cpp \
 	fits/GFits.cpp \
+	opt/GOptimizer.cpp \
+	opt/GOptimizerLM.cpp \
+	opt/GOptimizerPars.cpp \
 	opt/GOptimizerFunction.cpp \
 	linalg/GVector.cpp \
 	linalg/GMatrixTools.cpp \
