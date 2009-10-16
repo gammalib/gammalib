@@ -22,7 +22,6 @@
 #include "GOptimizerPars.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CONSTRUCTOR        "GOptimizerPars::GOptimizerPars(const GModels&)"
 #define G_PAR                                "GOptimizerPars::par(int) const"
 #define G_COPY_MEMBERS  "GOptimizerPars::copy_members(const GOptimizerPars&)"
 
