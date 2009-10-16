@@ -52,9 +52,12 @@ public:
     virtual double model(GModels& models, GVector* gradient) const = 0;
 
     // Implemented methods
-    double counts(void) const { return 1.0; }
-    bool   isatom(void) const { return true; }
-    bool   isbin(void) const { return false; }
+    double  counts(void) const { return 1.0; }
+    GSkyDir dir(void) const { return m_dir; }
+    double  energy(void) const { return m_energy; }
+    double  time(void) const { return m_time; }
+    bool    isatom(void) const { return true; }
+    bool    isbin(void) const { return false; }
     
 protected:
     // Protected methods
