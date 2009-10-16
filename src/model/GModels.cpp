@@ -163,18 +163,45 @@ void GModels::add(const GModel& model)
 
 
 /***********************************************************************//**
- * @brief Evaluate function gradients
+ * @brief Evaluate function
+ *
+ * @param[in] dir Pointer to sky direction used for evaluation.
+ * @param[in] energy Pointer to energy used for evaluation.
+ * @param[in] time Pointer to time used for evaluation.
  ***************************************************************************/
-void GModels::eval_gradients(GSkyDir* dir, double* energy, double* time)
+double GModels::eval(GSkyDir* dir, double* energy, double* time)
 {
-    // Evaluate gradients for all models
+    // Initialise function value
+    double value = 0.0;
+    
+    // Evaluate function for all models
     for (int i = 0; i < m_elements; ++i)
-        m_model[i].eval_gradients(dir, energy, time);
+        value += m_model[i].eval(dir, energy, time);
     
     // Return
-    return;
+    return value;
 }
 
+
+/***********************************************************************//**
+ * @brief Evaluate function and gradients
+ *
+ * @param[in] dir Pointer to sky direction used for evaluation.
+ * @param[in] energy Pointer to energy used for evaluation.
+ * @param[in] time Pointer to time used for evaluation.
+ ***************************************************************************/
+double GModels::eval_gradients(GSkyDir* dir, double* energy, double* time)
+{
+    // Initialise function value
+    double value = 0.0;
+    
+    // Evaluate function and gradients for all models
+    for (int i = 0; i < m_elements; ++i)
+        value += m_model[i].eval_gradients(dir, energy, time);
+    
+    // Return
+    return value;
+}
 
 
 /*==========================================================================

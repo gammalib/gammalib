@@ -165,17 +165,46 @@ GModelPar* GModel::par(int index) const
 
 
 /***********************************************************************//**
- * @brief Evaluate function gradients
+ * @brief Evaluate function
+ *
+ * @param[in] dir Pointer to sky direction used for evaluation.
+ * @param[in] energy Pointer to energy used for evaluation.
+ * @param[in] time Pointer to time used for evaluation.
  ***************************************************************************/
-void GModel::eval_gradients(GSkyDir* dir, double* energy, double* time)
+double GModel::eval(GSkyDir* dir, double* energy, double* time)
 {
+    // Initialise value
+    double value = 1.0;
+    
     // Evaluate gradients in all components
-    if (m_spatial  != NULL) m_spatial->eval_gradients(dir);
-    if (m_spectral != NULL) m_spectral->eval_gradients(energy);
-    if (m_temporal != NULL) m_temporal->eval_gradients(time);
+    if (m_spatial  != NULL) value *= m_spatial->eval(dir);
+    if (m_spectral != NULL) value *= m_spectral->eval(energy);
+    if (m_temporal != NULL) value *= m_temporal->eval(time);
     
     // Return
-    return;
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Evaluate function and gradients
+ *
+ * @param[in] dir Pointer to sky direction used for evaluation.
+ * @param[in] energy Pointer to energy used for evaluation.
+ * @param[in] time Pointer to time used for evaluation.
+ ***************************************************************************/
+double GModel::eval_gradients(GSkyDir* dir, double* energy, double* time)
+{
+    // Initialise value
+    double value = 1.0;
+    
+    // Evaluate gradients in all components
+    if (m_spatial  != NULL) value *= m_spatial->eval_gradients(dir);
+    if (m_spectral != NULL) value *= m_spectral->eval_gradients(energy);
+    if (m_temporal != NULL) value *= m_temporal->eval_gradients(time);
+    
+    // Return
+    return value;
 }
 
 

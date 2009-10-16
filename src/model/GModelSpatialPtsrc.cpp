@@ -159,12 +159,26 @@ GModelPar* GModelSpatialPtsrc::par(int index) const
 
 
 /***********************************************************************//**
- * @brief Evaluate function gradients
+ * @brief Evaluate function
+ *
+ * @param[in] dir Sky direction.
  ***************************************************************************/
-void GModelSpatialPtsrc::eval_gradients(GSkyDir* dir)
+double GModelSpatialPtsrc::eval(GSkyDir* dir)
 {
     // Return
-    return;
+    return 1.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Evaluate function and gradients
+ *
+ * @param[in] dir Sky direction.
+ ***************************************************************************/
+double GModelSpatialPtsrc::eval_gradients(GSkyDir* dir)
+{
+    // Return
+    return 1.0;
 }
 
 

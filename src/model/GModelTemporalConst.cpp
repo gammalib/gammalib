@@ -140,12 +140,26 @@ GModelPar* GModelTemporalConst::par(int index) const
 
 
 /***********************************************************************//**
- * @brief Evaluate function gradients
+ * @brief Evaluate function
+ *
+ * @param[in] time Time at which the function is to be computed.
  ***************************************************************************/
-void GModelTemporalConst::eval_gradients(double* time)
+double GModelTemporalConst::eval(double* time)
 {
     // Return
-    return;
+    return 1.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Evaluate function and gradients
+ *
+ * @param[in] time Time at which the function and gradients are to be computed.
+ ***************************************************************************/
+double GModelTemporalConst::eval_gradients(double* time)
+{
+    // Return
+    return 1.0;
 }
 
 
