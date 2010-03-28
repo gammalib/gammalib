@@ -27,6 +27,10 @@
 #include "GNodeArray.hpp"
 #include "GSkyDir.hpp"
 
+/* __ Skymaps ____________________________________________________________ */
+#include "GWcs.hpp"
+#include "GWcsHPX.hpp"
+
 /* __ Observation handling _______________________________________________ */
 #include "GData.hpp"
 #include "GObservation.hpp"

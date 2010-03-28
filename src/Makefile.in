@@ -76,17 +76,17 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libgamma_la_LIBADD =
 am__objects_1 = GException.lo GTools.lo GSkyDir.lo GNodeArray.lo \
-	GImage.lo GHealpix.lo GData.lo GData_iterator.lo \
-	GData_optimizer.lo GObservation.lo GEvents.lo GEventList.lo \
-	GEventCube.lo GEvent.lo GEventAtom.lo GEventBin.lo GGti.lo \
-	GEbounds.lo GResponse.lo GModels.lo GModel.lo GModelPar.lo \
-	GModelSpatial.lo GModelSpatialPtsrc.lo GModelSpectral.lo \
-	GModelSpectralPlaw.lo GModelTemporal.lo GModelTemporalConst.lo \
-	GLATObservation.lo GLATEventList.lo GLATEventCube.lo \
-	GLATEventAtom.lo GLATEventBin.lo GLATResponse.lo \
-	GLATResponseTable.lo GLATAeff.lo GLATPsf.lo GLATEdisp.lo \
-	GFitsHeaderCard.lo GFitsHeader.lo GFitsData.lo GFitsImage.lo \
-	GFitsImageFlt.lo GFitsImageDbl.lo GFitsTable.lo \
+	GImage.lo GHealpix.lo GWcs.lo GWcsHPX.lo GData.lo \
+	GData_iterator.lo GData_optimizer.lo GObservation.lo \
+	GEvents.lo GEventList.lo GEventCube.lo GEvent.lo GEventAtom.lo \
+	GEventBin.lo GGti.lo GEbounds.lo GResponse.lo GModels.lo \
+	GModel.lo GModelPar.lo GModelSpatial.lo GModelSpatialPtsrc.lo \
+	GModelSpectral.lo GModelSpectralPlaw.lo GModelTemporal.lo \
+	GModelTemporalConst.lo GLATObservation.lo GLATEventList.lo \
+	GLATEventCube.lo GLATEventAtom.lo GLATEventBin.lo \
+	GLATResponse.lo GLATResponseTable.lo GLATAeff.lo GLATPsf.lo \
+	GLATEdisp.lo GFitsHeaderCard.lo GFitsHeader.lo GFitsData.lo \
+	GFitsImage.lo GFitsImageFlt.lo GFitsImageDbl.lo GFitsTable.lo \
 	GFitsAsciiTable.lo GFitsBinTable.lo GFitsTableCol.lo \
 	GFitsTableLogCol.lo GFitsTableStrCol.lo GFitsTableShtCol.lo \
 	GFitsTableLngCol.lo GFitsTableFltCol.lo GFitsTableDblCol.lo \
@@ -249,6 +249,8 @@ files = GException.cpp \
 	GNodeArray.cpp \
 	GImage.cpp \
 	GHealpix.cpp \
+	wcs/GWcs.cpp \
+	wcs/GWcsHPX.cpp \
 	obs/GData.cpp \
 	obs/GData_iterator.cpp \
 	obs/GData_optimizer.cpp \
@@ -399,6 +401,12 @@ distclean-compile:
 
 .cpp.lo:
 	$(LTCXXCOMPILE) -c -o $@ $<
+
+GWcs.lo: wcs/GWcs.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GWcs.lo `test -f 'wcs/GWcs.cpp' || echo '$(srcdir)/'`wcs/GWcs.cpp
+
+GWcsHPX.lo: wcs/GWcsHPX.cpp
+	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GWcsHPX.lo `test -f 'wcs/GWcsHPX.cpp' || echo '$(srcdir)/'`wcs/GWcsHPX.cpp
 
 GData.lo: obs/GData.cpp
 	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GData.lo `test -f 'obs/GData.cpp' || echo '$(srcdir)/'`obs/GData.cpp
