@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{SDD}}
 \newcommand{\doctype}{\mbox{Software Design Description}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{9 October 2009}}
+\newcommand{\calendar}{\mbox{28 Mars 2010}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 \newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
@@ -69,7 +69,49 @@ A Python interface allows scripting of library components.
 \section{Detailed Description of Components}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Skymaps}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GSkymap}}
+
+The {\tt GSkymap} template class contains:
+\begin{verbatim}
+template<class T> class GSkymap {
+private:
+  GWcs* m_wcs;     //!< Pointer to World Coordinate System projection
+  T*    m_pixels;  //!< Pointer to sky map pixels
+};
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GWcs}}
+
+Virtual base class that implements projections from sky coordinates into a vector of
+image pixels.
+The class follows the World Coordinate System (WCS) convention.
+
+The following pure virtual methods are defined for {\tt GWcs}:
+\begin{verbatim}
+  void    read(const GFitsHDU* hdu);     //!< Read projection information from FITS header
+  void    write(GFitsHDU* hdu);          //!< Write projection information to FITS header
+  GSkyDir pix2dir(const int& pix);       //!< Convert pixel index to sky direction
+  int     dir2pix(GSkyDir dir) const;    //!< Convert sky direction to pixel index
+  double  omega(const int& pix);         //!< Return solid angle of pixel
+  int     npix(void) const;              //!< Return number of pixels in image
+  int     naxes(void) const;             //!< Return number of image axes
+  int     naxis(const int& axis) const;  //!< Return number of pixels in specified axis
+\end{verbatim}
+
+The HEALPix projection (as a general class of spherical projections) is represented by the 
+keyword HPX in the FITS standard for writing astronomical data files.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Observation handling}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GObservation}}
 
 Observation handling provides an abstract interface to gamma-ray observations of all kinds
 without any reference to instrument specific properties.
@@ -85,6 +127,10 @@ It contains:
   GGti*       m_gti;          //!< Pointer to good time intervals
   GResponse*  m_response;     //!< Pointer to instrument response function
 \end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GData}}
 
 Observations taken with different instruments or with different instrument configurations are
 gathered together in a {\tt GData} container class which provides an abstract interface to all 
@@ -127,15 +173,22 @@ The class dependencies are shown in Fig.~\ref{fig:GEvent}.
 
 The following generic methods are implemented for {\tt GEvent}:
 \begin{verbatim}
-  std::string string(void);                    //!< Convert event information into string
+  double counts(void) const;       //!< Returns number of counts in event
+  bool   isatom(void) const;       //!< Event is an atom
+  bool   isbin(void) const;        //!< Event is a bin
 \end{verbatim}
 
-The {\tt GEventAtom} class contains the following generic event attributes:
+In addition, the following generic methods are implemented for {\tt GEventAtom}:
 \begin{verbatim}
-  GTime    m_time;         //!< Time tag of event
-  double   m_energy;       //!< Energy of event in MeV
-  GSkyDir  m_dir;          //!< Arrival direction of event in sky coordinates
+  GTime   time(void) const;        //!< Time tag of event
+  double  energy(void) const;      //!< Returns energy of event in MeV
+  GSkyDir dir(void);               //!< Returns arrival direction of event in sky coordinates
 \end{verbatim}
+and the following generic methods are implemented for {\tt GEventBin}:
+\begin{verbatim}
+  ...
+\end{verbatim}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{{\tt GEvents}}
@@ -161,7 +214,6 @@ The class dependencies are shown in Fig.~\ref{fig:GEvents}.
 The following generic methods are implemented:
 \begin{verbatim}
   void    load(const std::string& filename);   //!< Load events from FITS file
-  void    load(GFitsHDU* hdu);                 //!< Load events from FITS HDU
   GEvent* pointer(int index) const;            //!< Returns pointer to event (atom or bin)
   int     number(void) const;                  //!< Returns total number of events
   int     elements(void) const;                //!< Returns total number of elements
@@ -180,6 +232,210 @@ the {\tt GLATEvents} derived class):
   }
 \end{verbatim}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Model handling}
+
+{\tt GModel} desribes how the gamma-ray (or background event) intensity $I$ depends on 
+the direction $\vec{d}$ on the sky, on the photon energy $E_{\gamma}$, and on the time 
+$t$ as function of a number of parameters $\vec{p}$.
+It is assumed that the spatial, spectral and temporal description can be factorized following
+\begin{equation}
+I(\vec{d},E_{\gamma},t | \vec{p}) = I(\vec{d} | \vec{p}) \times I(E_{\gamma} | \vec{p}) 
+\times I(t | \vec{p}) 
+\end{equation}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GModelPar}}
+
+The elements of the parameter vector $\vec{p}$ are realized by the {\tt GModelPar} class
+\begin{verbatim}
+  class GModelPar {
+  ...
+  protected:
+    std::string m_name;      //!< Parameter name
+    std::string m_unit;      //!< Parameter unit
+    double      m_value;     //!< Parameter value
+    double      m_error;     //!< Uncertainty in parameter value
+    double      m_min;       //!< Parameter value minimum
+    double      m_max;       //!< Parameter value maximum
+    double      m_scale;     //!< Parameter scaling (real = m_value * m_scale)
+    bool        m_free;      //!< Parameter is free/fixed (for fitting)
+    bool        m_hasmin;    //!< Parameter has minimum boundary
+    bool        m_hasmax;    //!< Parameter has maximum boundary
+  }
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GModel}}
+
+The model is realized by the {\tt GModel} class
+\begin{verbatim}
+  class GModel {
+  ...
+    std::string name(void) const;               //!< Return model name
+    void        name(const std::string& name);  //!< Set model name
+    int         npars(void) const;              //!< Returns number of parameters
+    GModelPar*  par(int) const;                 //!< Returns pointer to parameter
+  protected:
+    int             m_npars;        //!< Total number of parameters in model
+    GModelPar**     m_par;          //!< Pointers to all model parameters
+    GModelSpatial  *m_spatial;      //!< I(d|p)
+    GModelSpectral *m_spectral;     //!< I(E|p)
+    GModelTemporal *m_temporal;     //!< I(t|p)
+  }
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GModelSpatial}}
+
+The abstract base class {\tt GModelSpatial} implements different functional forms for 
+$I(\vec{d} | \vec{p})$.
+The derived classes contain the model parameters, and {\tt m\_par} provides pointers
+to all these parameters for quick access.
+As an example, the {\tt GModelSpatialPtsrc} derived class is show:
+\begin{verbatim}
+  class GModelSpatialPtsrc {
+  ...
+    int        npars(void) const;   //!< Returns number of parameters
+    GModelPar* par(int) const;      //!< Returns pointer to parameter
+  protected:
+    GModelPar  m_ra;                //!< Right Ascension of source
+    GModelPar  m_dec;               //!< Declination of source
+  }
+\end{verbatim}
+The following classes are implemented:
+\begin{verbatim}
+  GModelSpatialPtsrc      //!< Point source
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GModelSpectral}}
+
+The abstract base class {\tt GModelSpectral} implements different functional forms for 
+$I(E_{\gamma} | \vec{p})$.
+The following classes are implemented:
+\begin{verbatim}
+  GModelSpatialPlaw       //!< Power law
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GModelTemporal}}
+
+The abstract base class {\tt GModelTemporal} implements different functional forms for 
+$I(t | \vec{p})$.
+The following classes are implemented:
+\begin{verbatim}
+  GModelTemporalConst     //!< Constant source
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GModels}}
+
+The models are collected into the {\tt GModels} container class
+\begin{verbatim}
+  class GModels : public GOptimizerPars {
+    void        add(GModel);        //!< Add model to container
+    int         npars(void) const;  //!< Returns number of parameters
+    GModelPar*  par(int) const;     //!< Returns pointer to parameter
+  ...
+    int         m_elements;         //!< Total number of models
+    GModel*     m_model;            //!< Pointers to all models
+    int         m_npars;            //!< Total number of model parameters
+    GModelPar** m_par;              //!< Pointers to all model parameters
+  }
+\end{verbatim}
+which is derived from the general parameter container class {\tt GOptimizerPars}.
+It is this container class that is handed to {\tt GData} in order to compute the model
+prediction for a some given data.
+The interpretation of the models is done on the level of the instrument specific classes
+{\tt GXXXEventList} and {\tt GXXXEventCube} (where {\tt XXX} is the instrument code).
+
+{\tt GModels} is also handed to the {\tt GOptimizer} class for parameter optimization.
+
+The following code illustrates how a point source is set up for the Crab pulsar with a
+power law spectral shape:
+\begin{verbatim}
+  // Define Crab position
+  GSkyDir dir;
+  dir.radec_deg(83.6331, +22.0145);
+  
+  // Spatial model is a point source at the position of the Crab
+  GModelSpatialPtsrc point_source = GModelSpatialPtsrc(dir);
+  
+  // Spectral model is a power law
+  GModelSpectralPlaw power_law = GModelSpectralPlaw(1.0e-7, -2.1);
+  
+  // Set up Crab model
+  GModel crab = GModel(point_source, power_law);
+  
+  // Create model container
+  GModels models;
+  models.add(crab);
+  
+  // Set model for observation
+  GData data;
+  ...
+  data.set_model(models);
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Optimizer}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GOptimizerFunction}}
+
+The abstract base class {\tt GOptimizerFunction} provides the interface between any
+user-defined function and the {\tt GOptimizer} class.
+The {\tt GOptimizerFunction} class has the following structure:
+\begin{verbatim}
+  class GOptimizerFunction {
+    ...
+    virtual void           eval(const GOptimizerPars& pars); //!< Evaluate function
+    virtual double*        value(void);        //!< Return pointer to function value
+    virtual GVector*       gradient(void);     //!< Return pointer to gradient
+    virtual GSparseMatrix* covar(void);        //!< Return pointer to covariance matrix
+  }
+\end{verbatim}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GOptimizer}}
+
+The {\tt GOptimizer} class ...
+\begin{verbatim}
+  class GOptimizer {
+    ...
+    virtual GOptimizerPars& operator() (GOptimizerFunction& fct, GOptimizerPars& p);
+    GModels& operator() (GOptimizerFunction& fct, GModels& m);
+    }
+  }
+\end{verbatim}
+
+Optimization is then done using
+
+\begin{verbatim}
+  void GData::optimize(GOptimizer& opt)
+  {
+    // Set optimizer function
+    GData::optimizer fct(this);
+
+    // Optimise model parameters
+    m_models = opt(fct, m_models);
+
+    // Return
+    return;
+  }
+\end{verbatim}
 
 
 
