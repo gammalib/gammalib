@@ -29,7 +29,7 @@ void test_optimizer(void)
     std::cout << "Test GOptimizer: ";
     
     // Number of observations in data
-    int nobs = 50;
+    int nobs = 1;
 
     // Setup GData for optimizing
     GData           data;
@@ -125,7 +125,7 @@ void test_optimizer(void)
     }
     std::cout << ".";
 //std::cout << opt << std::endl;
-//std::cout << data << std::endl;
+std::cout << data << std::endl;
 
     // Plot final test success
     std::cout << " ok." << std::endl;
