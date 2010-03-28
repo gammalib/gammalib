@@ -1058,8 +1058,8 @@ std::ostream& operator<< (std::ostream& os, const GHealpix& pixels)
  *
  * Returns the integer \a n, which fulfills \a n*n <= arg < (n+1)*(n+1).
  ***************************************************************************/
-unsigned int isqrt(unsigned int arg)
-{
-    // Return
-    return unsigned(sqrt(arg+0.5));
-}
+//unsigned int isqrt(unsigned int arg)
+//{
+//    // Return
+//    return unsigned(sqrt(arg+0.5));
+//}
