@@ -74,14 +74,74 @@ A Python interface allows scripting of library components.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{{\tt GSkymap}}
 
-The {\tt GSkymap} template class contains:
+The {\tt GSkymap} class holds a single skymap (or a set of skymaps with identical coordinates)
+in a specific world coordinate projection (see {\tt GWcs}).
+Three different constructors exist:
 \begin{verbatim}
-template<class T> class GSkymap {
-private:
-  GWcs* m_wcs;     //!< Pointer to World Coordinate System projection
-  T*    m_pixels;  //!< Pointer to sky map pixels
-};
+  GSkymap(void);
+  GSkymap(std::string wcs, std::string coordsys, int nside, std::string ordering,
+          int nmaps = 1);
+  GSkymap(std::string wcs, std::string coordsys, GSkyDir dir, int nlon, int nlat, 
+          double dlon, double dlat, int nmaps = 1);
 \end{verbatim}
+The first one creates an instance of an empty skymap.
+
+The second is for creating an instance of a Healpix skymap.
+Here
+{\tt wcs} needs to be {\tt HPX} (we add this for consistency),
+{\tt coordsys} is the coordinate system (see below),
+{\tt nside} is the $N_{side}$ parameter,
+{\tt ordering} is the pixel ordering (either {\tt RING} or {\tt NESTED}, case independent),
+and
+{\tt nmaps} gives the number of maps in a set (defaults to 1 if not given).
+
+The third is for creating an instance of any other type of skymap.
+Here
+{\tt wcs} is the projection of the skymap (see {\tt GWcs}),
+{\tt coordsys} is the coordinate system (see below),
+{\tt dir} is the position of the map centre,
+{\tt nlon} is the number of pixels in longitude,
+{\tt nlat} is the number of pixels in latitude,
+{\tt dlon} is the pixel size in longitude (in units of degrees),
+{\tt dlat} is the pixel size in latitude (in units of degrees),
+and
+{\tt nmaps} gives the number of maps in a set (defaults to 1 if not given).
+
+Two coordinate systems are implemented ({\tt coordsys}):
+{\tt GAL} indicates the galactic system (galactic longitude and latitude), and
+{\tt CEL} indicates equatorial or celestial system (Right Ascension and declination).
+
+The following methods are defined for {\tt GSkymap}:
+\begin{verbatim}
+  void        read(std::string filename);     //!< Read skymap from FITS file
+  void        read(const GFitsHDU* hdu);      //!< Read skymap from FITS HDU
+  void        write(std::string filename);    //!< Write skymap into FITS file
+  void        write(GFitsHDU* hdu);           //!< Write skymap into FITS HDU
+  std::string ordering(void) const;           //!< Returns Healpix ordering ("" if not Healpix)
+  std::string coordsys(void) const;           //!< Returns coordinate system
+  GSkyDir     pix2dir(const int& pix);        //!< Convert pixel index to sky direction
+  int         dir2pix(GSkyDir dir) const;     //!< Convert sky direction to pixel index
+  double      omega(const int& pix);          //!< Return solid angle of pixel (in steradian)
+  int         npix(void) const;               //!< Return number of pixels in image
+  int         nside(void) const;              //!< Return number of sides (0 if not Healpix)
+  int         nlon(void) const;               //!< Return number of longitude pixels (0 if Healpix)
+  int         nlat(void) const;               //!< Return number of latitude pixels (0 if Healpix)
+  void        ordering(std::string ordering); //!< Change Healpix ordering (RING or NESTED)
+  void        coordsys(std::string coordsys); //!< Change coordinate system (CEL or GAL)
+  void        nside(int nside);               //!< Change Healpix N_side parameter
+  void        rebin(int nlon, int nlat);      //!< Change number of longitude/latitude pixels
+  void        smooth_gaussian(double sigma);  //!< Smooth skymap using Gaussian kernel
+\end{verbatim}
+
+The {\tt GSkymap} class contains:
+\begin{verbatim}
+  GWcs*   m_wcs;     //!< Pointer to World Coordinate System projection
+  double* m_pixels;  //!< Pointer to sky map pixels
+\end{verbatim}
+
+Note that the skymap is internally stored in a double precision array.
+The class may eventually by extended to also handle other storage types.
+Alternatively, the class could also be implemented as a template class.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -97,7 +157,7 @@ The following pure virtual methods are defined for {\tt GWcs}:
   void    write(GFitsHDU* hdu);          //!< Write projection information to FITS header
   GSkyDir pix2dir(const int& pix);       //!< Convert pixel index to sky direction
   int     dir2pix(GSkyDir dir) const;    //!< Convert sky direction to pixel index
-  double  omega(const int& pix);         //!< Return solid angle of pixel
+  double  omega(const int& pix);         //!< Return solid angle of pixel (in steradian)
   int     npix(void) const;              //!< Return number of pixels in image
   int     naxes(void) const;             //!< Return number of image axes
   int     naxis(const int& axis) const;  //!< Return number of pixels in specified axis
