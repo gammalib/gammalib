@@ -14,6 +14,7 @@ files = GException.cpp \
 	GNodeArray.cpp \
 	GImage.cpp \
 	GHealpix.cpp \
+	GSkymap.cpp \
 	wcs/GWcs.cpp \
 	wcs/GWcsHPX.cpp \
 	obs/GData.cpp \
