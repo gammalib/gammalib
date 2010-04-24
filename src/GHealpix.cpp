@@ -996,7 +996,7 @@ int GHealpix::ang2pix_z_phi_nest(double z, double phi) const
 std::ostream& operator<< (std::ostream& os, const GHealpix& pixels)
 {
     // Put header in stream
-    os << "=== GHealpix ===" << std::endl;
+    os << "=== GHealpix ===========================" << std::endl;
     os << " Nside (number of divisions): " << pixels.m_nside << std::endl;
     os << " Npface (pixels per face) ..: " << pixels.m_npface << std::endl;
     os << " Ncap (number of cap pixels): " << pixels.m_ncap << std::endl;
