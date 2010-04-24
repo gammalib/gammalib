@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GammaLib.hpp  -  Gamma-Ray Astronomy Library Header file        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2009 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,7 +27,8 @@
 #include "GNodeArray.hpp"
 #include "GSkyDir.hpp"
 
-/* __ Skymaps ____________________________________________________________ */
+/* __ Skymap handling ____________________________________________________ */
+#include "GSkymap.hpp"
 #include "GWcs.hpp"
 #include "GWcsHPX.hpp"
 
