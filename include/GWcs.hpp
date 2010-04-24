@@ -30,6 +30,10 @@
  * @brief GWcs virtual base class interface defintion
  ***************************************************************************/
 class GWcs {
+
+  // Friend classes
+  friend class GSkymap;
+
 public:
     // Constructors and destructors
     GWcs();
