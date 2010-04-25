@@ -2,8 +2,9 @@
 pkginclude_HEADERS = GammaLib.hpp \
 		     GException.hpp \
 		     GSkyDir.hpp \
-		     GImage.hpp \
-		     GHealpix.hpp \
+		     GSkymap.hpp \
+		     GWcs.hpp \
+		     GWcsHPX.hpp \
 		     GData.hpp \
 		     GObservation.hpp \
 		     GEvents.hpp \
@@ -54,8 +55,8 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GMatrix.hpp \
 		     GSymMatrix.hpp \
 		     GSparseMatrix.hpp \
-             GOptimizer.hpp \
-             GOptimizerLM.hpp \
-             GOptimizerPars.hpp \
-             GOptimizerFunction.hpp \
+		     GOptimizer.hpp \
+		     GOptimizerLM.hpp \
+		     GOptimizerPars.hpp \
+		     GOptimizerFunction.hpp \
 		     GNodeArray.hpp
