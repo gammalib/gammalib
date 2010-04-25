@@ -19,15 +19,12 @@
 #include <config.h>
 #endif
 
-/* __ Core services ______________________________________________________ */
+/* __ Core services and tools ____________________________________________ */
 #include "GException.hpp"
-
-/* __ Tools ______________________________________________________________ */
-#include "GHealpix.hpp"
 #include "GNodeArray.hpp"
-#include "GSkyDir.hpp"
 
 /* __ Skymap handling ____________________________________________________ */
+#include "GSkyDir.hpp"
 #include "GSkymap.hpp"
 #include "GWcs.hpp"
 #include "GWcsHPX.hpp"
@@ -53,9 +50,6 @@
 #include "GModelSpectralPlaw.hpp"
 #include "GModelTemporal.hpp"
 #include "GModelTemporalConst.hpp"
-
-/* __ Image module _______________________________________________________ */
-#include "GImage.hpp"
 
 /* __ FITS module ________________________________________________________ */
 #include "GFits.hpp"
