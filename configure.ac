@@ -27,12 +27,9 @@ dnl ===================
 dnl Checks for programs
 dnl ===================
 AC_PROG_CXX
-dnl AC_LANG(C)
-dnl AC_PROG_CC
-dnl AC_PROG_CPP
 AC_PROG_INSTALL
-dnl AC_PROG_LN_S
 AC_PROG_RANLIB
+AC_PROG_LIBTOOL
 
 
 dnl ========================================= 
@@ -45,12 +42,6 @@ dnl gammalib-0.3     libgamma 0:0:0
 dnl =========================================
 GAMMALIB_LT_VERSION="0:0:0"
 AC_SUBST(GAMMALIB_LT_VERSION)
-
-
-dnl ============
-dnl libtool test
-dnl ============
-AC_PROG_LIBTOOL
 
 
 dnl =======================
@@ -130,7 +121,10 @@ AC_SEARCH_LIBS(ffpss, cfitsio,
     AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available]), ,[-lm])
 
 
-dnl ===
-dnl
-dnl ===
-AC_OUTPUT([Makefile src/Makefile include/Makefile test/Makefile pyext/Makefile pyext/setup.py])
+dnl ======================================
+dnl Set list of output files to be creates
+dnl ======================================
+AC_OUTPUT([Makefile src/Makefile src/linalg/Makefile src/fits/Makefile 
+           src/sky/Makefile src/opt/Makefile src/obs/Makefile src/model/Makefile
+           src/lat/Makefile
+           include/Makefile test/Makefile pyext/Makefile pyext/setup.py])
