@@ -3,6 +3,7 @@ dnl Process this file with autoconf to produce a configure script
 dnl =============================================================
 AC_INIT([GammaLib], [0.3], [knodlseder@cesr.fr])
 AC_CONFIG_SRCDIR(src/Makefile.am)
+AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([gnu no-dependencies])
 AM_CONFIG_HEADER([config.h])
@@ -31,6 +32,7 @@ dnl AC_PROG_CC
 dnl AC_PROG_CPP
 AC_PROG_INSTALL
 dnl AC_PROG_LN_S
+AC_PROG_RANLIB
 
 
 dnl ========================================= 
