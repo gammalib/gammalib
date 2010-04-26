@@ -22,6 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GSkyDir.hpp"
 #include "GWcs.hpp"
+#include "GWcsHPX.hpp"
 
 
 /***********************************************************************//**
@@ -50,16 +51,21 @@ public:
     GSkymap& operator= (const GSkymap& map);
 
     // Methods
+    void read(const GFitsHDU* hdu);
+    void write(const GFits* file);
 
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GSkymap& map);
-    void free_members(void);
+    void      init_members(void);
+    void      alloc_pixels(void);
+    void      copy_members(const GSkymap& map);
+    void      free_members(void);
+    void      read_healpix(const GFitsHDU* hdu);
+    GFitsHDU* create_hdu_healpix(void);
 
     // Private data area
-    int     m_coordsys;   //!< 0=celestial, 1=galactic
-    int     m_num_pixels; //!< Total number of allocated pixels
+    int     m_num_pixels; //!< Number of pixels per map
+    int     m_num_maps;   //!< Number of maps
     GWcs*   m_wcs;        //!< Pointer to WCS projection
     double* m_pixels;     //!< Pointer to skymap pixels
 };
