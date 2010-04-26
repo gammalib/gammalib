@@ -2,18 +2,19 @@
 
 # Set include directories
 INCLUDES = -I$(top_srcdir)/include \
-	   -I$(top_builddir)/src \
-	   -I$(top_srcdir)/src
+           -I$(top_builddir)/src \
+           -I$(top_srcdir)/src/support
 
 # Define sources for this directory
 sources = GVector.cpp \
-	  GMatrixTools.cpp \
-	  GMatrixBase.cpp \
-	  GMatrix.cpp \
-	  GSymMatrix.cpp \
-	  GSparseMatrix.cpp \
-	  GSparseSymbolic.cpp \
-	  GSparseNumeric.cpp
+          GMatrixTools.cpp \
+          GMatrixBase.cpp \
+          GMatrix.cpp \
+          GSymMatrix.cpp \
+          GSparseMatrix.cpp \
+          GSparseSymbolic.cpp \
+          GSparseNumeric.cpp \
+          GException_linalg.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = liblinalg.la
