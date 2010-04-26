@@ -31,6 +31,7 @@ class GSkymap {
 public:
     // Constructors and destructors
     GSkymap(void);
+    GSkymap(const std::string& filename);
     GSkymap(const std::string& wcs, const std::string& coords,
             const int& nside, const std::string& order,
             const int nmaps = 1);
@@ -38,7 +39,7 @@ public:
             GSkyDir& dir, const int& nlon, const int& nlat,
             const double& dlon, const double& dlat, const int nmaps = 1);
     GSkymap(const GSkymap& map);
-    ~GSkymap(void);
+    virtual ~GSkymap(void);
 
     // Methods
     void    load(const std::string& filename);
@@ -49,6 +50,7 @@ public:
     int     dir2pix(GSkyDir dir) const;
     double  omega(const int& pix) const;
     int     npix(void) const;
+    int     nmaps(void) const;
 };
 
 
@@ -69,13 +71,31 @@ public:
         if (pixel >= 0 && pixel < (int)self->npix())
             return (*self)(pixel);
         else
-            throw GException::out_of_range("__getitem__(int)", pixel, (int)self->npix());
+            throw GException::out_of_range("__getitem__(int)", pixel, 
+                                           (int)self->npix());
     }
     void __setitem__(int pixel, const double val) {
         if (pixel >= 0 && pixel < (int)self->npix())
             (*self)(pixel) = val;
         else
-            throw GException::out_of_range("__setitem__(int)", pixel, (int)self->npix());
+            throw GException::out_of_range("__setitem__(int)", pixel, 
+                                           (int)self->npix());
+    }
+    double __getslice__(int pixel, int element) {
+        if (pixel   >= 0 && pixel   < (int)self->npix() && 
+            element >= 0 && element < (int)self->nmaps())
+            return (*self)(pixel,element);
+        else
+            throw GException::out_of_range("__getitem__(int,int)", pixel, element,
+                                           (int)self->npix(), (int)self->nmaps());
+    }
+    void __setslice__(int pixel, int element, const double val) {
+        if (pixel   >= 0 && pixel   < (int)self->npix() && 
+            element >= 0 && element < (int)self->nmaps())
+            (*self)(pixel,element) = val;
+        else
+            throw GException::out_of_range("__setitem__(int,int)", pixel, element,
+                                           (int)self->npix(), (int)self->nmaps());
     }
     GSkymap copy() {
         return (*self);
