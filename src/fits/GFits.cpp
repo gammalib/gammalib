@@ -249,9 +249,11 @@ void GFits::append_hdu(const GFitsHDU& hdu)
             m_hdu[m_num_hdu].primary();
 
             // Set FITS file pointer for new HDU
-            __fitsfile fptr  = *m_fitsfile;
-            fptr.HDUposition = m_num_hdu;
-            m_hdu[m_num_hdu].connect(&fptr);
+            if (m_fitsfile != NULL) {
+              __fitsfile fptr  = *m_fitsfile;
+              fptr.HDUposition = m_num_hdu;
+              m_hdu[m_num_hdu].connect(&fptr);
+            }
 
             // Increment number of HDUs
             m_num_hdu++;
@@ -388,7 +390,7 @@ GFitsHDU* GFits::hdu(const std::string& extname) const
 {
     // Initialise result to NULL pointer
     GFitsHDU* ptr = NULL;
-    
+
     // Return primary HDU if requested ...
     if (toupper(extname) == "PRIMARY")
         ptr = m_hdu;
