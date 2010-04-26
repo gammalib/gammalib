@@ -2,28 +2,29 @@
 
 # Set include directories
 INCLUDES = -I$(top_srcdir)/include \
-	   -I$(top_builddir)/src \
-	   -I$(top_srcdir)/src
+           -I$(top_builddir)/src \
+           -I$(top_srcdir)/src/support
 
 # Define sources for this directory
 sources = GFitsHeaderCard.cpp \
-	  GFitsHeader.cpp \
-	  GFitsData.cpp \
-	  GFitsImage.cpp \
-	  GFitsImageFlt.cpp \
-	  GFitsImageDbl.cpp \
-	  GFitsTable.cpp \
-	  GFitsAsciiTable.cpp \
-	  GFitsBinTable.cpp \
-	  GFitsTableCol.cpp \
-	  GFitsTableLogCol.cpp \
-	  GFitsTableStrCol.cpp \
-	  GFitsTableShtCol.cpp \
-	  GFitsTableLngCol.cpp \
-	  GFitsTableFltCol.cpp \
-	  GFitsTableDblCol.cpp \
-	  GFitsHDU.cpp \
-	  GFits.cpp
+          GFitsHeader.cpp \
+          GFitsData.cpp \
+          GFitsImage.cpp \
+          GFitsImageFlt.cpp \
+          GFitsImageDbl.cpp \
+          GFitsTable.cpp \
+          GFitsAsciiTable.cpp \
+          GFitsBinTable.cpp \
+          GFitsTableCol.cpp \
+          GFitsTableLogCol.cpp \
+          GFitsTableStrCol.cpp \
+          GFitsTableShtCol.cpp \
+          GFitsTableLngCol.cpp \
+          GFitsTableFltCol.cpp \
+          GFitsTableDblCol.cpp \
+          GFitsHDU.cpp \
+          GFits.cpp \
+          GException_fits.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libfits.la
