@@ -37,7 +37,7 @@ class GSkymap {
 
 public:
     // Constructors and destructors
-    GSkymap(void);
+    GSkymap();
     GSkymap(const std::string& wcs, const std::string& coords,
             const int& nside, const std::string& order,
             const int nmaps = 1);
@@ -45,7 +45,7 @@ public:
             GSkyDir& dir, const int& nlon, const int& nlat,
             const double& dlon, const double& dlat, const int nmaps = 1);
     GSkymap(const GSkymap& map);
-    virtual ~GSkymap(void);
+    ~GSkymap();
 
     // Pixel access operators
     double&       operator() (int pixel, int element = 0);

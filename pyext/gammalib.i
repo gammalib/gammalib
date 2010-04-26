@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         gammalib - SWIG file                            *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright            : (C) 2008-2010 by Jurgen Knodlseder              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -15,11 +15,14 @@
  ***************************************************************************/
 %module gammalib
 
-/* General */
+/* Support */
 #include "GException.i"
 #include "GNodeArray.i"
-#include "GHealpix.i"
+/*#include "GHealpix.i"*/
+
+/* Sky classes */
 #include "GSkyDir.i"
+#include "GSkymap.i"
 
 /* Observation classes */
 #include "GData.i"
@@ -49,7 +52,7 @@
 #include "GFitsTableStrCol.i"
 
 /* Model fitting */
-#include "GFitPar.i"
+/*#include "GFitPar.i"*/
 
 /* Linear Algebra */
 #include "GVector.i"
