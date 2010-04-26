@@ -2,14 +2,15 @@
 
 # Set include directories
 INCLUDES = -I$(top_srcdir)/include \
-	   -I$(top_builddir)/src \
-	   -I$(top_srcdir)/src
+           -I$(top_builddir)/src \
+           -I$(top_srcdir)/src/support
 
 # Define sources for this directory
 sources = GSkyDir.cpp \
-	  GSkymap.cpp \
-	  GWcs.cpp \
-	  GWcsHPX.cpp
+          GSkymap.cpp \
+          GWcs.cpp \
+          GWcsHPX.cpp \
+          GException_sky.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libsky.la
