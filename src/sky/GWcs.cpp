@@ -18,8 +18,6 @@
  */
 
 /* __ Includes ___________________________________________________________ */
-//#include <iostream>
-//#include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GWcs.hpp"
@@ -154,20 +152,23 @@ std::string GWcs::coordsys(void) const
 /***********************************************************************//**
  * @brief Set coordinate system.
  *
- * @param[in] coordsys Coordinate system (EQU/CEL or GAL)
+ * @param[in] coordsys Coordinate system (EQU/CEL/E/C or GAL/G)
+ *
+ * @exception GException::wcs_bad_coords Invalid coordsys parameter.
  ***************************************************************************/
 void GWcs::coordsys(const std::string& coordsys)
 {
     // Convert argument to upper case
     std::string ucoordsys = toupper(coordsys);
-    
+
     // Set coordinate system
-    if (ucoordsys == "EQU" || ucoordsys == "CEL")
+    if (ucoordsys == "EQU" || ucoordsys == "CEL" || ucoordsys == "E" ||
+        ucoordsys == "C")
         m_coordsys = 0;
-    else if (ucoordsys == "GAL")
+    else if (ucoordsys == "GAL" || ucoordsys == "G")
         m_coordsys = 1;
     else
-        throw GException::healpix_bad_coords(G_COORDSYS_SET, coordsys);
+        throw GException::wcs_bad_coords(G_COORDSYS_SET, coordsys);
 
     // Return
     return;
@@ -187,7 +188,7 @@ void GWcs::init_members(void)
 {
     // Initialise members
     m_coordsys = 0;
-    
+
     // Return
     return;
 }

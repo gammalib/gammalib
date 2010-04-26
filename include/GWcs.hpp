@@ -44,14 +44,15 @@ public:
     virtual GWcs& operator= (const GWcs& wcs);
 
     // Virtual Methods
-    virtual void    read(const GFitsHDU* hdu) = 0;
-    virtual void    write(GFitsHDU* hdu) = 0;
-    virtual GSkyDir pix2dir(const int& pix) = 0;
-    virtual int     dir2pix(GSkyDir dir) const = 0;
-    virtual double  omega(const int& pix) const = 0;
-    virtual int     npix(void) const = 0;
-    virtual int     naxes(void) const = 0;
-    virtual int     naxis(const int& axis) const = 0;
+    virtual std::string type(void) const = 0;
+    virtual void        read(const GFitsHDU* hdu) = 0;
+    virtual void        write(GFitsHDU* hdu) = 0;
+    virtual GSkyDir     pix2dir(const int& pix) = 0;
+    virtual int         dir2pix(GSkyDir dir) const = 0;
+    virtual double      omega(const int& pix) const = 0;
+    virtual int         npix(void) const = 0;
+    virtual int         naxes(void) const = 0;
+    virtual int         naxis(const int& axis) const = 0;
 
     // Implemented methods
     std::string coordsys(void) const;
