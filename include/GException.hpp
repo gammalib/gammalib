@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GException.hpp  -  exception handler                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2009 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -119,7 +119,8 @@ public:
     // Invalid ordering scheme
     class invalid_order : public GExceptionHandler {
     public:
-        invalid_order(std::string origin, int order, int min_order, int max_order);
+        invalid_order(std::string origin, int order, int min_order, 
+                      int max_order);
     };
 
     // General FITS error
@@ -149,13 +150,15 @@ public:
     // FITS keyword not found error
     class fits_key_not_found : public GExceptionHandler {
     public:
-        fits_key_not_found(std::string origin, std::string keyname, int status = 0);
+        fits_key_not_found(std::string origin, std::string keyname, 
+                           int status = 0);
     };
 
     // FITS column not found error
     class fits_column_not_found : public GExceptionHandler {
     public:
-        fits_column_not_found(std::string origin, std::string colname, int status = 0);
+        fits_column_not_found(std::string origin, std::string colname, 
+                              int status = 0);
     };
 
     // FITS has no header
@@ -173,7 +176,8 @@ public:
     // FITS HDU not found error
     class fits_hdu_not_found : public GExceptionHandler {
     public:
-        fits_hdu_not_found(std::string origin, std::string extname, int status = 0);
+        fits_hdu_not_found(std::string origin, std::string extname, 
+                           int status = 0);
         fits_hdu_not_found(std::string origin, int extno, int status = 0);
     };
 
@@ -231,28 +235,28 @@ public:
         rsp_invalid_type(std::string origin, std::string type);
     };
 
-    // General Healpix error
-    class healpix : public GExceptionHandler {
+    // General WCS error
+    class wcs : public GExceptionHandler {
     public:
-        healpix(std::string origin, std::string message);
+        wcs(std::string origin, std::string message);
     };
 
-    // Healpix resolution invalid
-    class healpix_bad_nside : public GExceptionHandler {
+    // Coordinate system invalid
+    class wcs_bad_coords : public GExceptionHandler {
     public:
-        healpix_bad_nside(std::string origin, int nside);
+        wcs_bad_coords(std::string origin, std::string coordsys);
     };
 
-    // Healpix scheme invalid
-    class healpix_bad_scheme : public GExceptionHandler {
+    // WCS Healpix resolution invalid
+    class wcs_hpx_bad_nside : public GExceptionHandler {
     public:
-        healpix_bad_scheme(std::string origin, std::string scheme);
+        wcs_hpx_bad_nside(std::string origin, int nside);
     };
 
-    // Healpix coordinate system invalid
-    class healpix_bad_coords : public GExceptionHandler {
+    // Healpix pixel ordering invalid
+    class wcs_hpx_bad_ordering : public GExceptionHandler {
     public:
-        healpix_bad_coords(std::string origin, std::string coordsys);
+        wcs_hpx_bad_ordering(std::string origin, std::string ordering);
     };
 
     // Invalid object release
