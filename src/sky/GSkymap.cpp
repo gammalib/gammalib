@@ -13,7 +13,7 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
-//#include <iostream>
+#include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GSkymap.hpp"
@@ -52,6 +52,24 @@ GSkymap::GSkymap(void)
 {
     // Initialise class members for clean destruction
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief FITS file constructor
+ *
+ * @param[in] filename FITS file from which sky map should be instantiated.
+ ***************************************************************************/
+GSkymap::GSkymap(const std::string& filename)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Load skymap
+    load(filename);
 
     // Return
     return;
@@ -466,6 +484,16 @@ int GSkymap::npix(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Returns number of maps
+ ***************************************************************************/
+int GSkymap::nmaps(void) const
+{
+    // Return number of maps
+    return m_num_maps;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                          GSkymap private methods                        =
@@ -568,9 +596,12 @@ void GSkymap::free_members(void)
  * @exception GException::skymap
  *            HEALPix HDU is not a binary table.
  *
- * HEALPix data may be stored in a single vector column or in multi vector
- * columns. If multi vector columns exist it is assumed that each column
- * corresponds to a specific map.
+ * HEALPix data may be stored in various formats depending on the 
+ * application that has writted the data. HEALPix IDL, for example, may
+ * store the data in vectors of length 1024 if the number of pixels is
+ * a multiple of 1024. On the other hand, vectors may also be used to store
+ * several HEALPix maps into a single column. Alternatively, multiple maps
+ * may be stored in multiple columns.
  ***************************************************************************/
 void GSkymap::read_healpix(const GFitsHDU* hdu)
 {
@@ -578,9 +609,14 @@ void GSkymap::read_healpix(const GFitsHDU* hdu)
     if (hdu != NULL) {
 
         // Verify that HDU contains binary table
-        if (hdu->exttype() != 2) //TODO: Implement unambigous method i GFitsHDU
+        if (hdu->exttype() != 2) //TODO: Implement unambigous method in GFitsHDU
             throw GException::skymap(G_READ_HEALPIX,
                                      "HEALPix HDU is not a binary table.");
+
+        // Determine number of rows and columns in table
+        int nrows = ((GFitsTable*)hdu->data())->nrows();
+        int ncols = ((GFitsTable*)hdu->data())->ncols();
+//std::cout << "nrows=" << nrows << " ncols=" << ncols << std::endl;
 
         // Allocate Healpix WCS
         m_wcs = new GWcsHPX;
@@ -590,81 +626,85 @@ void GSkymap::read_healpix(const GFitsHDU* hdu)
 
         // Set number of pixels based on NSIDE parameter
         m_num_pixels = m_wcs->npix();
+//std::cout << "m_num_pixels=" << m_num_pixels << std::endl;
+        
+        // Number of map pixels has to be a multiple of the number of
+        // rows in column
+        if (m_num_pixels % nrows != 0)
+            throw GException::skymap_bad_size(G_READ_HEALPIX, nrows,
+                                              m_num_pixels);
+        
+        // Determine vector length for HEALPix data storage
+        int nentry = m_num_pixels / nrows;
+//std::cout << "nentry=" << nentry << std::endl;
 
-        // Determine number of columns in table
-        int ncols = ((GFitsTable*)hdu->data())->ncols();
-
-        // Check if we have NBRBINS keyword.
-        int nbrbins = -1;
+        // Determine number of maps from NBRBINS keyword. If keyword was
+        // not found then determine the number of maps that fit into
+        // all columns. Only count columns that can full hold the map.
         try {
-            nbrbins = hdu->card("NBRBINS")->integer();
+            m_num_maps = hdu->card("NBRBINS")->integer();
         }
         catch (GException::fits_key_not_found &e) {
-        }
-
-        // Case A: There is a single vector column
-        if (ncols == 1) {
-
-            // Get first and unique column
-            GFitsTableCol* col = hdu->column(0);
-
-            // Determine total number of pixels in column
-            int size = col->length() * col->number();
-
-            // Determine number of maps
-            m_num_maps = size / m_num_pixels;
-
-            // Cross check that FITS column size is consistent
-            if (m_num_maps*m_num_pixels != size)
-                throw GException::skymap_bad_size(G_READ_HEALPIX, size,
-                                                  m_num_maps*m_num_pixels);
-
-            // Allocate pixels
-            alloc_pixels();
-
-            // Read pixels
-            double* ptr = m_pixels;
-            for (int row = 0; row < col->length(); ++row) {
-                for (int inx = 0; inx < col->number(); ++inx, ++ptr)
-                    *ptr = col->real(row,inx);
-            }
-
-        } // endif: Case A: There was a single vector column
-
-        // Case B: Data are in multiple vector columns, one per map
-        else if (ncols > 1) {
-
-            // Each column is a map
-            m_num_maps = ncols;
-
-            // Allocate pixels
-            alloc_pixels();
-
-            // Loop over all columns
+            m_num_maps = 0;
             for (int icol = 0; icol < ncols; ++icol) {
-
-                // Get column
                 GFitsTableCol* col = hdu->column(icol);
+                if (col->number() % nentry == 0)
+                    m_num_maps += col->number() / nentry;
+            }
+        }
+//std::cout << "m_num_maps=" << m_num_maps << std::endl;
 
-                // Determine total number of pixels in column
-                int size = col->length() * col->number();
+        // Allocate pixels to hold the map
+        alloc_pixels();
+        
+        // Initialise map counter
+        int imap = 0;
+        
+        // Loop over all columns
+        for (int icol = 0; icol < ncols; ++icol) {
+        
+            // Get next column
+            GFitsTableCol* col = hdu->column(icol);
+            
+            // Only consider columns that can fully hold maps
+            if (col->number() % nentry == 0) {
+            
+                // Determine number of maps in column
+                int num = col->number() / nentry;
+                
+                // Loop over all maps in column
+                int inx_start = 0;
+                int inx_end   = nentry;
+                for (int i = 0; i < num; ++i) {
+                
+//std::cout << "Load map=" << imap << " index=" << inx_start << "-" << inx_end << std::endl;
+                    // Load map 
+                    double *ptr = m_pixels + imap;
+                    for (int row = 0; row < col->length(); ++row) {
+                        for (int inx = inx_start; inx < inx_end; ++inx, ptr+=m_num_maps)
+                                *ptr = col->real(row,inx);
+                    }
+                    
+                    // Increment index range
+                    inx_start  = inx_end;
+                    inx_end   += nentry;
+                    
+                    // Increment map counter
+                    imap++;
+                    
+                    // Break if we have loaded all maps
+                    if (imap >= m_num_maps)
+                        break;
+                    
+                } // endfor: looped over all maps in column
+            } // endif: column could fully hold maps
 
-                // Cross check that FITS column size is consistent
-                if (m_num_pixels != size)
-                    throw GException::skymap_bad_size(G_READ_HEALPIX, size,
-                                                      m_num_pixels);
-
-                // Read pixels
-                double* ptr = m_pixels + icol;
-                for (int row = 0; row < col->length(); ++row) {
-                    for (int inx = 0; inx < col->number(); ++inx, ptr += m_num_maps)
-                        *ptr = col->real(row,inx);
-                }
-
-            } // endfor: looped over all columns
-
-        } // endif: Case B: Data were in multiple columns
-
+            // Break if we have loaded all maps
+            if (imap >= m_num_maps)
+                break;
+            
+        } // endfor: looped over all columns
+        
     } // endif: HDU was valid
 
     // Return
@@ -749,7 +789,7 @@ std::ostream& operator<< (std::ostream& os, const GSkymap& map)
     if (map.m_wcs != NULL) {
         if (map.m_wcs->type() == "HPX")
             os << *((GWcsHPX*)map.m_wcs);
-        os << std::endl;
+        //os << std::endl;
     }
 
     // Return output stream
