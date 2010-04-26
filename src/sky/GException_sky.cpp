@@ -70,7 +70,7 @@ GException::skymap_bad_size::skymap_bad_size(std::string origin,
     // Set origin and message
     m_origin  = origin;
     m_message = "Data size ("+str(size)+") is incompatible with "
-                "expetation ("+str(expected)+"). " + message;
+                "expected size ("+str(expected)+"). " + message;
 
     // Return
     return;
