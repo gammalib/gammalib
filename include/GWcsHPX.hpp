@@ -35,7 +35,8 @@ class GWcsHPX : public GWcs {
 
 public:
     // Constructors and destructors
-    GWcsHPX(int nside, std::string scheme = "NESTED", std::string coordsys = "GAL");
+    GWcsHPX(void);
+    GWcsHPX(int nside, std::string ordering = "NESTED", std::string coordsys = "GAL");
     GWcsHPX(const GFitsHDU* hdu);
     GWcsHPX(const GWcsHPX& wcs);
     virtual ~GWcsHPX();
@@ -54,8 +55,9 @@ public:
     int     naxis(const int& axis) const;
 
     // Class specific methods
-    int     nside(void) const;
-    int     order(void) const;
+    int         nside(void) const;
+    std::string ordering(void) const;
+    void        ordering(const std::string& ordering);
 
 private:
     // Private methods
@@ -76,8 +78,7 @@ private:
     int      m_npface;       //!<
     int      m_ncap;         //!<
     int      m_order;        //!< Order
-    int      m_scheme;       //!< Ordering scheme (0=ring, 1=nested, -1=?)
-    int      m_coordsys;     //!< Coordinate system (0=equatorial, 1=galactic, -1=?)
+    int      m_ordering;     //!< Pixel ordering (0=ring, 1=nested, -1=?)
     int      m_num_pixels;   //!< Number of pixels
     double   m_fact1;        //!<
     double   m_fact2;        //!<

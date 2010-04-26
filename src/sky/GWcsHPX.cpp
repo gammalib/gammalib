@@ -25,11 +25,12 @@
 #include "GWcsHPX.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CONSTRUCT    "GWcsHPX::GWcsHPX(int,std::string,std::string)"
-#define G_READ         "GWcsHPX::read(const GFitsHDU*)"
-#define G_NAXIS        "GWcsHPX::naxis(int)"
-#define G_PIX2ANG_RING "GWcsHPX::pix2ang_ring(int,double*,double*)"
-#define G_PIX2ANG_NEST "GWcsHPX::pix2ang_nest(int,double*,double*)"
+#define G_CONSTRUCT           "GWcsHPX::GWcsHPX(int,std::string,std::string)"
+#define G_READ                               "GWcsHPX::read(const GFitsHDU*)"
+#define G_NAXIS                                         "GWcsHPX::naxis(int)"
+#define G_PIX2ANG_RING           "GWcsHPX::pix2ang_ring(int,double*,double*)"
+#define G_PIX2ANG_NEST           "GWcsHPX::pix2ang_nest(int,double*,double*)"
+#define G_ORDERING_SET                       "GWcsHPX::coordsys(std::string)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -58,18 +59,31 @@ static short utab[0x100];
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Void constructor
+ ***************************************************************************/
+GWcsHPX::GWcsHPX(void) : GWcs()
+{
+    // Initialise class members
+    init_members();
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
  * @brief Constructor
  *
  * @param[in] nside Number of sides
- * @param[in] scheme Ordering scheme ('RING' or 'NESTED')
+ * @param[in] ordering Pixel ordering ('RING' or 'NESTED')
  * @param[in] coordsys Coordinate system ('EQU' or 'GAL')
  * @param[in] dimension Vector dimension of pixels
  *
  * @exception GException::healpix_bad_nside Invalid nside parameter.
- * @exception GException::healpix_bad_scheme Invalid scheme parameter.
+ * @exception GException::healpix_bad_scheme Invalid ordering parameter.
  * @exception GException::healpix_bad_coords Invalid coordsys parameter.
  ***************************************************************************/
-GWcsHPX::GWcsHPX(int nside, std::string scheme, std::string coordsys) : GWcs()
+GWcsHPX::GWcsHPX(int nside, std::string ordering, std::string coordsys) : 
+         GWcs()
 {
     // Initialise class members
     init_members();
@@ -79,30 +93,14 @@ GWcsHPX::GWcsHPX(int nside, std::string scheme, std::string coordsys) : GWcs()
     if (order == -1)
       throw GException::healpix_bad_nside(G_CONSTRUCT, nside);
 
-    // Check scheme
-    int i_scheme = -1;
-    if (scheme == "RING")
-        i_scheme = 0;
-    else if (scheme == "NESTED")
-        i_scheme = 1;
-    else
-      throw GException::healpix_bad_scheme(G_CONSTRUCT, scheme);
-
-    // Check coordinate system
-    int i_coordsys;
-    if (coordsys == "EQU")
-        i_coordsys = 0;
-    else if (coordsys == "GAL")
-        i_coordsys = 1;
-    else
-      throw GException::healpix_bad_coords(G_CONSTRUCT, coordsys);
+    // Set coordinate system
+    this->coordsys(coordsys);
+    
+    // Set pixel ordering
+    this->ordering(ordering);
 
     // Set Healpix parameters
-    m_nside    = nside;
-    m_scheme   = i_scheme;
-    m_coordsys = i_coordsys;
-
-    // Derive Healpix parameters
+    m_nside      = nside;
     m_npface     = m_nside * m_nside;
     m_ncap       = 2 * (m_npface - m_nside);
     m_num_pixels = 12 * m_npface;
@@ -181,6 +179,9 @@ GWcsHPX& GWcsHPX::operator= (const GWcsHPX& wcs)
     // Execute only if object is not identical
     if (this != &wcs) {
 
+        // Copy base class members
+        this->GWcs::operator=(wcs);
+
         // Free members
         free_members();
 
@@ -237,14 +238,14 @@ void GWcsHPX::read(const GFitsHDU* hdu)
         ordering = hdu->card("ORDERING")->string();
     }
     catch (GException::fits_key_not_found &e) {
-        m_scheme = -1; // Flag unknown ordering
+        m_ordering = -1; // Flag unknown ordering
     }
 
     // Decode ordering scheme string
     if (ordering == "RING")
-        m_scheme = 0;
+        m_ordering = 0;
     else if (ordering == "NESTED")
-        m_scheme = 1;
+        m_ordering = 1;
     else
         throw GException::healpix(G_READ, "Invalid ordering");
 
@@ -272,6 +273,7 @@ void GWcsHPX::read(const GFitsHDU* hdu)
     else
         throw GException::healpix(G_READ, "Invalid coordinate system");
 
+
     // Return
     return;
 }
@@ -284,23 +286,6 @@ void GWcsHPX::read(const GFitsHDU* hdu)
  ***************************************************************************/
 void GWcsHPX::write(GFitsHDU* hdu)
 {
-    // Set extension name
-    hdu->extname("HEALPIX");
-
-    // Set ordering scheme keyword value
-    std::string s_scheme;
-    switch (m_scheme) {
-    case 0:
-        s_scheme = "RING";
-        break;
-    case 1:
-        s_scheme = "NESTED";
-        break;
-    default:
-        s_scheme = "UNKNOWN";
-        break;
-    }
-
     // Set coordinate system keyword value
     std::string s_coordsys;
     switch (m_coordsys) {
@@ -315,6 +300,9 @@ void GWcsHPX::write(GFitsHDU* hdu)
         break;
     }
 
+    // Set extension name
+    hdu->extname("HEALPIX");
+
     // Set keywords
     hdu->header()->update(GFitsHeaderCard("PIXTYPE",  "HEALPIX",
                                           "HEALPix pixelisation"));
@@ -322,8 +310,8 @@ void GWcsHPX::write(GFitsHDU* hdu)
                                           "HEALPix resolution parameter"));
     hdu->header()->update(GFitsHeaderCard("NPIX",     m_num_pixels,
                                           "Total number of pixels"));
-    hdu->header()->update(GFitsHeaderCard("ORDERING", s_scheme,
-                                          "Pixel ordering scheme, either RING of NESTED"));
+    hdu->header()->update(GFitsHeaderCard("ORDERING", ordering(),
+                                          "Pixel ordering scheme, either RING or NESTED"));
     hdu->header()->update(GFitsHeaderCard("COORDSYS", s_coordsys,
                                           "Coordinate system, either EQU or GAL"));
 
@@ -345,7 +333,7 @@ GSkyDir GWcsHPX::pix2dir(const int& pix)
     double  phi   = 0.0;
     
     // Perform ordering dependent conversion
-    switch (m_scheme) {
+    switch (m_ordering) {
     case 0:
         pix2ang_ring(pix, &theta, &phi);
         break;
@@ -400,7 +388,7 @@ int GWcsHPX::dir2pix(GSkyDir dir) const
     }
     
     // Perform ordering dependent conversion
-    switch (m_scheme) {
+    switch (m_ordering) {
     case 0:
         pix = ang2pix_z_phi_ring(z, phi);
         break;
@@ -475,10 +463,47 @@ int GWcsHPX::nside(void) const
 /***********************************************************************//**
  * @brief Returns ordering parameter.
  ***************************************************************************/
-int GWcsHPX::order(void) const
+std::string GWcsHPX::ordering(void) const
 {
-    // Return order
-    return m_order;
+    // Set pixel ordering type
+    std::string s_ordering;
+    switch (m_ordering) {
+    case 0:
+        s_ordering = "RING";
+        break;
+    case 1:
+        s_ordering = "NESTED";
+        break;
+    default:
+        s_ordering = "UNKNOWN";
+        break;
+    }
+
+    // Return ordering
+    return s_ordering;
+}
+
+
+/***********************************************************************//**
+ * @brief Set pixel ordering.
+ *
+ * @param[in] ordering Pixel ordering (RING or NEST/NESTED)
+ ***************************************************************************/
+void GWcsHPX::ordering(const std::string& ordering)
+{
+    // Convert argument to upper case
+    std::string uordering = toupper(ordering);
+    
+    // Set pixel ordering
+    if (uordering == "RING")
+        m_ordering = 0;
+    else if (uordering == "NESTED" || uordering == "NEST")
+        m_ordering = 1;
+    else
+        throw GException::healpix_bad_scheme(G_ORDERING_SET, ordering);
+
+    // Return
+    return;
 }
 
 
@@ -498,8 +523,7 @@ void GWcsHPX::init_members(void)
     m_npface      = 0;
     m_ncap        = 0;
     m_order       = 0;
-    m_scheme      = 0;
-    m_coordsys    = 0;
+    m_ordering    = 0;
     m_num_pixels  = 0;
     m_fact1       = 0.0;
     m_fact2       = 0.0;
@@ -532,8 +556,7 @@ void GWcsHPX::copy_members(const GWcsHPX& wcs)
     m_npface      = wcs.m_npface;
     m_ncap        = wcs.m_ncap;
     m_order       = wcs.m_order;
-    m_scheme      = wcs.m_scheme;
-    m_coordsys    = wcs.m_coordsys;
+    m_ordering    = wcs.m_ordering;
     m_num_pixels  = wcs.m_num_pixels;
     m_fact1       = wcs.m_fact1;
     m_fact2       = wcs.m_fact2;
@@ -875,40 +898,8 @@ std::ostream& operator<< (std::ostream& os, const GWcsHPX& wcs)
     os << " Order .....................: " << wcs.m_order << std::endl;
     os << " Solid angle ...............: " << std::scientific << wcs.m_omega 
        << std::fixed << " sr" << std::endl;
-
-    // Put ordering in stream
-    os << " Ordering ..................: ";
-    switch (wcs.m_scheme) {
-    case 0:
-        os << "Ring" << std::endl;
-        break;
-    case 1:
-        os << "Nested" << std::endl;
-        break;
-    case -1:
-        os << "*** Unknown ***" << std::endl;
-        break;
-    default:
-        os << "*** Invalid ***" << std::endl;
-        break;
-    }
-
-    // Put coordinate system in stream
-    os << " Coordinate system .........: ";
-    switch (wcs.m_coordsys) {
-    case 0:
-        os << "Equatorial (RA,Dec)";
-        break;
-    case 1:
-        os << "Galactic (l,b)";
-        break;
-    case -1:
-        os << "*** Unknown ***";
-        break;
-    default:
-        os << "*** Invalid ***";
-        break;
-    }
+    os << " Ordering ..................: " << wcs.ordering() << std::endl;
+    os << " Coordinate system .........: " << wcs.coordsys();
 
     // Return output stream
     return os;
