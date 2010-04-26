@@ -20,6 +20,7 @@
 #define GWCSHPX_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include "GSkyDir.hpp"
 #include "GWcs.hpp"
 
 
@@ -36,7 +37,8 @@ class GWcsHPX : public GWcs {
 public:
     // Constructors and destructors
     GWcsHPX(void);
-    GWcsHPX(int nside, std::string ordering = "NESTED", std::string coordsys = "GAL");
+    GWcsHPX(const int& nside, const std::string& ordering = "NESTED",
+            const std::string& coordsys = "GAL");
     GWcsHPX(const GFitsHDU* hdu);
     GWcsHPX(const GWcsHPX& wcs);
     virtual ~GWcsHPX();
@@ -45,14 +47,15 @@ public:
     GWcsHPX& operator= (const GWcsHPX& wcs);
 
     // Implemented virtual methods
-    void    read(const GFitsHDU* hdu);
-    void    write(GFitsHDU* hdu);
-    GSkyDir pix2dir(const int& ipix);
-    int     dir2pix(GSkyDir dir) const;
-    double  omega(const int& pix) const;
-    int     npix(void) const;
-    int     naxes(void) const;
-    int     naxis(const int& axis) const;
+    std::string type(void) const;
+    void        read(const GFitsHDU* hdu);
+    void        write(GFitsHDU* hdu);
+    GSkyDir     pix2dir(const int& ipix);
+    int         dir2pix(GSkyDir dir) const;
+    double      omega(const int& pix) const;
+    int         npix(void) const;
+    int         naxes(void) const;
+    int         naxis(const int& axis) const;
 
     // Class specific methods
     int         nside(void) const;
@@ -61,17 +64,18 @@ public:
 
 private:
     // Private methods
-    void     init_members(void);
-    void     copy_members(const GWcsHPX& wcs);
-    void     free_members(void);
-    GWcsHPX* clone(void) const;
-    int      nside2order(int nside);
-    void     pix2xy(const int& ipix, int* x, int* y);
-    int      xy2pix(int x, int y) const;
-    void     pix2ang_ring(int ipix, double* theta, double* phi);
-    void     pix2ang_nest(int ipix, double* theta, double* phi);
-    int      ang2pix_z_phi_ring(double z, double phi) const;
-    int      ang2pix_z_phi_nest(double z, double phi) const;
+    void         init_members(void);
+    void         copy_members(const GWcsHPX& wcs);
+    void         free_members(void);
+    GWcsHPX*     clone(void) const;
+    int          nside2order(int nside);
+    void         pix2xy(const int& ipix, int* x, int* y);
+    int          xy2pix(int x, int y) const;
+    void         pix2ang_ring(int ipix, double* theta, double* phi);
+    void         pix2ang_nest(int ipix, double* theta, double* phi);
+    int          ang2pix_z_phi_ring(double z, double phi) const;
+    int          ang2pix_z_phi_nest(double z, double phi) const;
+    unsigned int isqrt(unsigned int arg);
 
     // Private data area
     int      m_nside;        //!< Number of divisions of each base pixel (1-8192)

@@ -13,14 +13,22 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
-//#include <cmath>
+//#include <iostream>
 #include "GException.hpp"
-//#include "GTools.hpp"
+#include "GTools.hpp"
 #include "GSkymap.hpp"
+#include "GWcsHPX.hpp"
+#include "GFits.hpp"
 #include "GFitsTableDblCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONSTRUCT_HPX "GSkymap::GSkymap(std::string,std::string,int,std::string,int)"
+#define G_OP_ACCESS                              "GSkymap::operator(int,int)"
 #define G_READ                               "GSkymap::read(const GFitsHDU*)"
+#define G_PIX2DIR                                     "GSkymap::pix2dir(int)"
+#define G_DIR2PIX                                 "GSkymap::dir2pix(GSkyDir)"
+#define G_OMEGA                                         "GSkymap::omega(int)"
+#define G_READ_HEALPIX                     "GSkymap::read_healpix(GFitsHDU*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -54,19 +62,48 @@ GSkymap::GSkymap(void)
  * @brief Healpix constructor
  *
  * @param[in] wcs World Coordinate System (HPX).
- * @param[in] coordsys Coordinate System (CEL or GAL).
+ * @param[in] coords Coordinate System (CEL or GAL).
  * @param[in] nside Nside parameter.
- * @param[in] ordering Pixel ordering (RING or NEST).
+ * @param[in] order Pixel ordering (RING or NEST).
  * @param[in] nmaps Number of maps in set (default=1).
+ *
+ * @exception GException::wcs_invalid 
+ *            Invalid wcs parameter.
+ * @exception GException::skymap_bad_nmaps 
+ *            Invalid nmaps parameter.
+ * @exception GException::wcs_hpx_bad_nside 
+ *            Invalid nside parameter.
+ * @exception GException::wcs_bad_coords 
+ *            Invalid coordsys parameter.
+ * @exception GException::wcs_hpx_bad_ordering 
+ *            Invalid ordering parameter.
  ***************************************************************************/
-GSkymap::GSkymap(const std::string& wcs, const std::string& coordsys, 
-                 const int& nside, const std::string& ordering,
+GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
+                 const int& nside, const std::string& order,
                  const int nmaps)
 {
     // Initialise class members for clean destruction
     init_members();
 
-    // TODO
+    // Check if wcs is HPX
+    if (toupper(wcs) != "HPX")
+        throw GException::wcs_invalid(G_CONSTRUCT_HPX, wcs,
+                                      "WCS parameter must be 'HPX'.");
+
+    // Check if nmaps parameter is >0
+    if (nmaps < 1)
+        throw GException::skymap_bad_nmaps(G_CONSTRUCT_HPX, nmaps,
+                                           "nmaps parameter must be >0.");
+
+    // Allocate WCS
+    m_wcs = new GWcsHPX(nside, order, coords);
+
+    // Set number of maps
+    m_num_pixels = m_wcs->npix();
+    m_num_maps   = nmaps;
+
+    // Allocate pixels
+    alloc_pixels();
 
     // Return
     return;
@@ -74,10 +111,10 @@ GSkymap::GSkymap(const std::string& wcs, const std::string& coordsys,
 
 
 /***********************************************************************//**
- * @brief Healpix constructor
+ * @brief Image constructor
  *
  * @param[in] wcs World Coordinate System (HPX).
- * @param[in] coordsys Coordinate System (CEL or GAL).
+ * @param[in] coords Coordinate System (CEL or GAL).
  * @param[in] dir Centre of skymap.
  * @param[in] nlon Number of pixels in longitude.
  * @param[in] nlat Number of pixels in latitude.
@@ -85,14 +122,14 @@ GSkymap::GSkymap(const std::string& wcs, const std::string& coordsys,
  * @param[in] dlat Size of pixels in latitude.
  * @param[in] nmaps Number of maps in set (default=1).
  ***************************************************************************/
-GSkymap::GSkymap(const std::string& wcs, const std::string& coordsys, 
+GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
                  GSkyDir& dir, const int& nlon, const int& nlat,
                  const double& dlon, const double& dlat, const int nmaps)
 {
     // Initialise class members for clean destruction
     init_members();
-    
-    // TODO
+
+    //TODO: Implement non HEALPix constructor
 
     // Return
     return;
@@ -137,7 +174,51 @@ GSkymap::~GSkymap(void)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Pixel access operator
+ *
+ * @param[in] pixel pixel number (starting from 0).
+ * @param[in] element vector element number (starting from 0).
+ ***************************************************************************/
+double& GSkymap::operator() (int pixel, int element)
+{
+    // Throw error if pixel is not in range
+    #if defined(G_RANGE_CHECK)
+    if (pixel   < 0 || pixel   >= m_num_pixels ||
+        element < 0 || element >= m_num_maps)
+        throw GException::out_of_range(G_OP_ACCESS, pixel, element,
+                                       m_num_pixels, m_num_maps);
+    #endif
+
+    // Return reference to pixel value
+    return m_pixels[pixel*m_num_maps+element];
+}
+
+
+/***********************************************************************//**
+ * @brief Pixel access operator
+ *
+ * @param[in] pixel pixel number (starting from 0).
+ * @param[in] element vector element number (starting from 0).
+ ***************************************************************************/
+const double& GSkymap::operator() (int pixel, int element) const
+{
+    // Throw error if pixel is not in range
+    #if defined(G_RANGE_CHECK)
+    if (pixel   < 0 || pixel   >= m_num_pixels ||
+        element < 0 || element >= m_num_maps)
+        throw GException::out_of_range(G_OP_ACCESS, pixel, element, 
+                                       m_num_pixels, m_num_maps);
+    #endif
+
+    // Return reference to pixel value
+    return m_pixels[pixel*m_num_maps+element];
+}
+
+
+/***********************************************************************//**
  * @brief Assignment operator
+ *
+ * @param[in] map GSkymap instance to be assigned
  ***************************************************************************/
 GSkymap& GSkymap::operator= (const GSkymap& map)
 {
@@ -167,38 +248,221 @@ GSkymap& GSkymap::operator= (const GSkymap& map)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Read skymap from FITS table.
+ * @brief Load skymap from FITS file.
  *
- * @param[in] hdu FITS HDU containing the Healpix data
+ * @param[in] filename FITS file into which the skymap will be saved.
+ *
+ * Loads HEALPix and non HEALPix skymaps. First searches for HEALPix map in
+ * FITS file by scanning all HDUs for PIXTYPE=HEALPIX. If no HEALPix map has
+ * been found then search load first non-empty image.
  ***************************************************************************/
-void GSkymap::read(const GFitsHDU* hdu)
+void GSkymap::load(const std::string& filename)
 {
     // Free memory and initialise members
     free_members();
     init_members();
-    
-    // TODO: Detect here the skymap type (table = Healpix)
-    
+
+    // Open FITS file
+    GFits fits(filename);
+
+    // Get number of HDUs
+    int num = fits.num_hdus();
+
+    // Initialize pointer to HDU and load flag
+    GFitsHDU* hdu    = NULL;
+    int       loaded = 0;
+
+    // First search for HEALPix extension. We can skip the first extension
+    // since this is always an image and a HEALPix map is stored in a
+    // binary table
+    for (int extno = 1; extno < num; ++extno) {
+
+        // Get pointer to HDU
+        hdu = fits.hdu(extno);
+
+        // Check if PIXTYPE keyword equals "HEALPIX"
+        try {
+            if (hdu->card("PIXTYPE")->string() == "HEALPIX") {
+                read_healpix(hdu);
+                loaded = 1;
+                break;
+            }
+        }
+        catch (GException::fits_key_not_found &e) {
+        }
+
+    } // endfor: looped over HDUs
+
+    // If we have not found a HEALPIX map then search now for image.
+    // Skip empty images
+    if (loaded == 0) {
+        for (int extno = 0; extno < num; ++extno) {
+            //TODO: Implement non HEALPix loading
+        }
+    }
+
+    // Close FITS file
+    fits.close();
+
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Read skymap from FITS table.
+ * @brief Save skymap into FITS file.
  *
- * @param[in] fits FITS file into which the skymap will be written
+ * @param[in] filename FITS file into which the skymap will be saved.
+ * @param[in] clobber Overwrite existing file (0=false, 1=true).
  ***************************************************************************/
-void GSkymap::write(const GFits* file)
+void GSkymap::save(const std::string& filename, int clobber)
 {
-    // TODO: Skymap type writing
+    // Continue only if we have data to save
+    if (m_wcs != NULL) {
 
+        // Initialise HDU pointer
+        GFitsHDU* hdu = NULL;
 
-    // Append HDU to FITS file
-//    fits->append_hdu(hdu);
+        // Case A: Skymap is Healpix
+        if (m_wcs->type() == "HPX")
+            hdu = create_healpix_hdu();
+
+        // Case B: Skymap is not Healpix
+        else {
+            //TODO: Implement non HEALPix saving
+        }
+
+        // Create FITS file and save it to disk
+        if (hdu != NULL) {
+            GFits fits;
+            fits.append_hdu(*hdu);
+            fits.saveto(filename, clobber);
+        }
+
+    } // endif: we had data to save
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read skymap from FITS HDU
+ *
+ * @param[in] hdu FITS HDU from which skymap should be read.
+ ***************************************************************************/
+void GSkymap::read(const GFitsHDU* hdu)
+{
+    // Free memory and initialise members
+    free_members();
+    init_members();
+
+    // Continue only if HDU pointer is valid
+    if (hdu != NULL) {
+
+        // Initialize load flag
+        int loaded = 0;
+
+        // Try load as HEALPix map
+        try {
+            if (hdu->card("PIXTYPE")->string() == "HEALPIX") {
+                read_healpix(hdu);
+                loaded = 1;
+            }
+        }
+        catch (GException::fits_key_not_found &e) {
+        }
+
+        // ... otherwise try loading as non HEALPix map
+        if (loaded == 0) {
+            //TODO: Implement non HEALPix loading
+        }
+
+    } // endif: HDU pointer was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write skymap into FITS HDU
+ *
+ * @param[in] hdu FITS HDU into which skymap should be written.
+ ***************************************************************************/
+void GSkymap::write(GFitsHDU* hdu)
+{
+    // TODO: Skymap writing
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns sky direction of pixel
+ *
+ * @param[in] pix Pixel number (0,1,...,num_pixels).
+ *
+ * @exception GException::wcs
+ *            No valid WCS found.
+ ***************************************************************************/
+GSkyDir GSkymap::pix2dir(const int& pix)
+{
+    // Throw error if WCS is not valid
+    if (m_wcs == NULL)
+        throw GException::wcs(G_PIX2DIR, "No valid WCS found.");
+
+    // Return sky direction
+    return (m_wcs->pix2dir(pix));
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pixel index for a given sky direction
+ *
+ * @param[in] dir Sky direction.
+ *
+ * @exception GException::wcs
+ *            No valid WCS found.
+ ***************************************************************************/
+int GSkymap::dir2pix(GSkyDir dir) const
+{
+    // Throw error if WCS is not valid
+    if (m_wcs == NULL)
+        throw GException::wcs(G_DIR2PIX, "No valid WCS found.");
+
+    // Return pixel index
+    return (m_wcs->dir2pix(dir));
+}
+
+
+/***********************************************************************//**
+ * @brief Returns solid angle of pixel
+ *
+ * @param[in] pix Pixel number (0,1,...,num_pixels).
+ *
+ * @exception GException::wcs
+ *            No valid WCS found.
+ ***************************************************************************/
+double GSkymap::omega(const int& pix) const
+{
+    // Throw error if WCS is not valid
+    if (m_wcs == NULL)
+        throw GException::wcs(G_OMEGA, "No valid WCS found.");
+
+    // Return solid angle
+    return (m_wcs->omega(pix));
+}
+
+
+/***********************************************************************//**
+ * @brief Returns number of pixels
+ ***************************************************************************/
+int GSkymap::npix(void) const
+{
+    // Return number of pixels
+    return m_num_pixels;
 }
 
 
@@ -225,23 +489,23 @@ void GSkymap::init_members(void)
 
 
 /***********************************************************************//**
- * @brief Allocate class members
+ * @brief Allocate skymap pixels
  ***************************************************************************/
 void GSkymap::alloc_pixels(void)
 {
     // Compute data size
     int size = m_num_pixels * m_num_maps;
 
-    // Continue only if there are pixels    
+    // Continue only if there are pixels
     if (size > 0) {
-    
+
         // Allocate pixels and initialize them to 0
         m_pixels = new double[size];
         for (int i = 0; i < size; ++i)
             m_pixels[i] = 0.0;
 
     } // endif: there were pixels
-    
+
     // Return
     return;
 }
@@ -250,22 +514,22 @@ void GSkymap::alloc_pixels(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] dir Sky map from which members should be copied
+ * @param[in] dir Sky map from which members should be copied.
  ***************************************************************************/
 void GSkymap::copy_members(const GSkymap& map)
 {
     // Copy attributes
     m_num_pixels = map.m_num_pixels;
     m_num_maps   = map.m_num_maps;
-    
-    // Copy WCS
-    m_wcs = map.m_wcs->clone();
+
+    // Clone WCS if it is valid
+    if (map.m_wcs != NULL) m_wcs = map.m_wcs->clone();
 
     // Compute data size
     int size = m_num_pixels * m_num_maps;
-    
+
     // Copy pixels
-    if (size > 0) {
+    if (size > 0 && map.m_pixels != NULL) {
         alloc_pixels();
         for (int i = 0; i <  size; ++i)
             m_pixels[i] = map.m_pixels[i];
@@ -299,38 +563,101 @@ void GSkymap::free_members(void)
 /***********************************************************************//**
  * @brief Read Healpix data from FITS table.
  *
- * @param[in] hdu FITS HDU containing the Healpix data
+ * @param[in] hdu FITS HDU containing the Healpix data.
+ *
+ * @exception GException::skymap
+ *            HEALPix HDU is not a binary table.
+ *
+ * HEALPix data may be stored in a single vector column or in multi vector
+ * columns. If multi vector columns exist it is assumed that each column
+ * corresponds to a specific map.
  ***************************************************************************/
 void GSkymap::read_healpix(const GFitsHDU* hdu)
 {
-    // Allocate Healpix WCS
-    m_wcs = new GWcsHPX;
-    
-    // Read WCS information from FITS header
-    m_wcs->read(hdu);
+    // Continue only if HDU is valid
+    if (hdu != NULL) {
 
-    // Get first column
-    GFitsTableCol* col = hdu->column(0);
+        // Verify that HDU contains binary table
+        if (hdu->exttype() != 2) //TODO: Implement unambigous method i GFitsHDU
+            throw GException::skymap(G_READ_HEALPIX,
+                                     "HEALPix HDU is not a binary table.");
 
-    // Extract pixel information
-    m_num_pixels = col->length();
-    m_num_maps   = col->number();
-    
-    // If we have pixels then read them now
-    int size = m_num_pixels * m_num_maps;
-    if (size > 0) {
+        // Allocate Healpix WCS
+        m_wcs = new GWcsHPX;
 
-        // Allocate pixels
-        alloc_pixels();
+        // Read WCS information from FITS header
+        m_wcs->read(hdu);
 
-        // Read pixels
-        double* ptr = m_pixels;
-        for (int row = 0; row < m_num_pixels; ++row) {
-            for (int inx = 0; inx < m_num_maps; ++inx, ++ptr)
-                *ptr = col->real(row,inx);
-        }
-    
-    } // endif: we had pixels
+        // Set number of pixels based on NSIDE parameter
+        m_num_pixels = m_wcs->npix();
+
+        // Determine number of columns in table
+        int ncols = ((GFitsTable*)hdu->data())->ncols();
+
+        // Case A: There is a single vector column
+        if (ncols == 1) {
+
+            // Get first and unique column
+            GFitsTableCol* col = hdu->column(0);
+
+            // Determine total number of pixels in column
+            int size = col->length() * col->number();
+
+            // Determine number of maps
+            m_num_maps = size / m_num_pixels;
+
+            // Cross check that FITS column size is consistent
+            if (m_num_maps*m_num_pixels != size)
+                throw GException::skymap_bad_size(G_READ_HEALPIX, size,
+                                                  m_num_maps*m_num_pixels);
+
+            // Allocate pixels
+            alloc_pixels();
+
+            // Read pixels
+            double* ptr = m_pixels;
+            for (int row = 0; row < col->length(); ++row) {
+                for (int inx = 0; inx < col->number(); ++inx, ++ptr)
+                    *ptr = col->real(row,inx);
+            }
+
+        } // endif: Case A: There was a single vector column
+
+        // Case B: Data are in multiple vector columns, one per map
+        else if (ncols > 1) {
+
+            // Each column is a map
+            m_num_maps = ncols;
+
+            // Allocate pixels
+            alloc_pixels();
+
+            // Loop over all columns
+            for (int icol = 0; icol < ncols; ++icol) {
+
+                // Get column
+                GFitsTableCol* col = hdu->column(icol);
+
+                // Determine total number of pixels in column
+                int size = col->length() * col->number();
+
+                // Cross check that FITS column size is consistent
+                if (m_num_pixels != size)
+                    throw GException::skymap_bad_size(G_READ_HEALPIX, size,
+                                                      m_num_pixels);
+
+                // Read pixels
+                double* ptr = m_pixels + icol;
+                for (int row = 0; row < col->length(); ++row) {
+                    for (int inx = 0; inx < col->number(); ++inx, ptr += m_num_maps)
+                        *ptr = col->real(row,inx);
+                }
+
+            } // endfor: looped over all columns
+
+        } // endif: Case B: Data were in multiple columns
+
+    } // endif: HDU was valid
 
     // Return
     return;
@@ -339,43 +666,54 @@ void GSkymap::read_healpix(const GFitsHDU* hdu)
 
 /***********************************************************************//**
  * @brief Create FITS HDU containing Healpix data
+ *
+ * Returns pointer to HDU that contains the Healpix data. Deallocation of the
+ * GFitsHDU object has to be done by the client.
  ***************************************************************************/
-GFitsHDU* GSkymap::create_hdu_healpix(void)
+GFitsHDU* GSkymap::create_healpix_hdu(void)
 {
     // Initialise result to NULL pointer
     GFitsHDU* hdu = NULL;
-    
+
     // Compute size of Healpix data
     int size = m_num_pixels * m_num_maps;
 
-    // Continue only if we have a WCS and some data
-    if (m_wcs != NULL && size > 0) {
-    
-        // Create binary table with one column
-        GFitsBinTable    table  = GFitsBinTable(m_num_pixels);
-        GFitsTableDblCol column = GFitsTableDblCol("DATA", m_num_pixels, 
-                                                    m_num_maps);  
+    // Continue only if we have pixels
+    if (size > 0) {
+
+        // Set number of rows and columns
+        int rows   = m_num_pixels;
+        int number = m_num_maps;
+
+        // Create column to hold Healpix data
+        GFitsTableDblCol column = GFitsTableDblCol("DATA", rows, number);
 
         // Fill data into column
         double* ptr = m_pixels;
-        for (int row = 0; row < m_num_pixels; ++row) {
-            for (int inx = 0; inx < m_num_maps; ++inx, ++ptr)
+        for (int row = 0; row < rows; ++row) {
+            for (int inx = 0; inx < number; ++inx, ++ptr)
                 column(row,inx) = *ptr;
         }
 
-        // Append column to table
+        // Create HDU that contains Healpix map in a binary table
+        GFitsBinTable table = GFitsBinTable(rows);
         table.append_column(column);
-
-        // Create HDU with table
         hdu = new GFitsHDU(table);
 
-        // Set extension name
-        hdu->extname("HEALPIX");
+    } // endif: there were pixels
 
-        // Write WCS information into FITS header
-        m_wcs->write(hdu);
-    
-    }
+    // ... otherwise create an empty header
+    else
+        hdu = new GFitsHDU;
+
+    // Set extension name
+    hdu->extname("HEALPIX");
+
+    // If we have WCS information then write into FITS header
+    if (m_wcs != NULL) m_wcs->write(hdu);
+
+    // Set additional keywords
+    hdu->card("NBRBINS", m_num_maps, "Number of HEALPix maps");
 
     // Return HDU
     return hdu;
@@ -391,13 +729,20 @@ GFitsHDU* GSkymap::create_hdu_healpix(void)
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param[in] os Output stream
- * @param[in] map Sky map to put in output stream
+ * @param[in] os Output stream.
+ * @param[in] map Sky map to put in output stream.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GSkymap& map)
 {
     // Put header in stream
     os << "=== GSkymap ===" << std::endl;
+
+    // Put WCS information in stream
+    if (map.m_wcs != NULL) {
+        if (map.m_wcs->type() == "HPX")
+            os << *((GWcsHPX*)map.m_wcs);
+        os << std::endl;
+    }
 
     // Return output stream
     return os;
