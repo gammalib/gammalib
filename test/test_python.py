@@ -195,33 +195,55 @@ def test_skymap():
     """
     Test GSkymap interface.
     """
+    # Create HEALPix skymap
+    pixels = GSkymap("HPX", "GAL", 4, "RING", 2)
+    for i, pixel in enumerate(pixels):
+        pixels[i]   = i+1.0
+        pixels[i:1] = i+1.0 + 1000.0
+    pixels.save("test_python_skymap_hpx_v1.fits", True)
+    
     # Load HEALPix skymap
     pixels = GSkymap()
     pixels.load("data/lat/ltcube.fits.gz ")
 
-    # Dump information
-    print pixels
+    # Dump skymap
+    #print pixels
 
-    # Control pix2ang / ang2pix
-#    for i in range(pixels.npix()):
-#        dir  = pixels.pix2ang(i)
-#        ipix = pixels.ang2pix(dir)
-#        if (i != ipix):
-#            print "GHealpix Trouble with pixel "+str(i)+" ("+str(ipix)+ \
-#                  "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
+    # Control pix2dir / dir2pix
+    for i in range(pixels.npix()):
+        dir  = pixels.pix2dir(i)
+        ipix = pixels.dir2pix(dir)
+        if (i != ipix):
+            print "GSkymap Trouble with pixel "+str(i)+" ("+str(ipix)+ \
+                  "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
 
     # Control SkyDir coordinate transformation for all pixels
-#    for i in range(pixels.npix()):
-#        dir     = pixels.pix2ang(i)
-#        dir_new = GSkyDir()
-#        dir_new.lb(dir.l(),dir.b())
-#        dra  = abs(dir.ra()  - dir_new.ra())
-#        if (dra >= 5.0):
-#            dra -= 2.0*pi
-#        ddec = abs(dir.dec() - dir_new.dec())
-#        if (dra > 1.0e-9 or ddec > 1.0e-9):
-#            print "GSkyDir Trouble with pixel "+str(i)+" ("+str(dra)+ \
-#                  ","+str(ddec)+")"
+    for i in range(pixels.npix()):
+        dir     = pixels.pix2dir(i)
+        dir_new = GSkyDir()
+        dir_new.lb(dir.l(),dir.b())
+        dra  = abs(dir.ra()  - dir_new.ra())
+        if (dra >= 5.0):
+            dra -= 2.0*pi
+        ddec = abs(dir.dec() - dir_new.dec())
+        if (dra > 1.0e-9 or ddec > 1.0e-9):
+            print "GSkyDir Trouble with pixel "+str(i)+" ("+str(dra)+ \
+                  ","+str(ddec)+")"
+    
+    # Save HEALPix skymap
+    try:
+        pixels.save("test_python_skymap_hpx_v2.fits", True)
+        pixels.save("test_python_skymap_hpx_v2.fits")
+        print "ERROR: FITS file overwritten!"
+    except RuntimeError:
+        pass
+    pixels.save("test_python_skymap_hpx_v2.fits", True)
+
+    # Load again HEALPix skymap
+    pixels = GSkymap("data/lat/ltcube.fits.gz ")
+
+    # Dump skymap
+    #print pixels
 
 
 #==========================#
