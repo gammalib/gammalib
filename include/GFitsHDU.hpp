@@ -67,6 +67,12 @@ public:
     GFitsData*       data(void) const;
     GFitsHeaderCard* card(const std::string& keyname) const;
     GFitsHeaderCard* card(const int& cardno) const;
+    void             card(const std::string& keyname, const std::string& value,
+                          const std::string& comment);
+    void             card(const std::string& keyname, const double& value,
+                          const std::string& comment);
+    void             card(const std::string& keyname, const int& value,
+                          const std::string& comment);
     GFitsTableCol*   column(const std::string& colname) const;
     GFitsTableCol*   column(const int& colnum) const;
     void             primary(void);
