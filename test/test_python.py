@@ -36,7 +36,7 @@ def test_fits():
     hdr.update(GFitsHeaderCard("test", "test-value", "this is for testing"))
     hdr.update(GFitsHeaderCard("real", 3.1415, "a real value"))
     hdr.update(GFitsHeaderCard("int", 41, "an integer value"))
-    
+
 
     # Append HDU to FITS file
     fits.append_hdu(hdu)
@@ -58,7 +58,7 @@ def test_fits():
     fits.append_hdu(GFitsHDU(img2))
     fits.append_hdu(GFitsHDU(img3))
     fits.append_hdu(GFitsHDU(img4))
-    
+
     # Set ASCII table
     tbl1 = GFitsAsciiTable(10)
     col1 = GFitsTableDblCol("DOUBLE", 10)
@@ -106,7 +106,7 @@ def test_fits():
     fits.append_hdu(GFitsHDU(tbl2))
 
     #print fits
-    
+
     # Save FITS file
     fits.save()
 
@@ -127,11 +127,11 @@ def test_node_array():
     for i in range(20):
         vector[i] = 10.0 + i*5.0
         data[i]   = sin(0.15*(vector[i]-10.0))
-    
+
     # Set-up node array
     array = GNodeArray()
     array.nodes(vector)
-    
+
     # Get values
     x_val = []
     y_val = []
@@ -159,16 +159,16 @@ def test_lat_response():
         os.remove("test_rsp.fits")
     except:
         pass
-    
+
     # Allocate LAT response
     rsp = GLATResponse()
-    
+
     # Set calibration database
     rsp.set_caldb("irf/lat")
-    
+
     # Load response
     rsp.load("Pass5_v0", "front")
-    
+
     # Save response
     rsp.save("test_rsp.fits")
 
@@ -189,41 +189,39 @@ def test_lat_observation():
 
 
 #==============#
-# Test Healpix #
+# Test GSkymap #
 #==============#
-def test_healpix():
+def test_skymap():
     """
-    Test GHealpix interface.
+    Test GSkymap interface.
     """
-    # Open exposure cube
-    fits = GFits("data/expCube_253582800.fits.gz")
-    
-    # Lood Healpix table
-    pixels = GHealpix(fits.hdu("EXPOSURE"))
-    
+    # Load HEALPix skymap
+    pixels = GSkymap()
+    pixels.load("data/lat/ltcube.fits.gz ")
+
     # Dump information
     print pixels
-    
+
     # Control pix2ang / ang2pix
-    for i in range(pixels.npix()):
-        dir  = pixels.pix2ang(i)
-        ipix = pixels.ang2pix(dir)
-        if (i != ipix):
-            print "GHealpix Trouble with pixel "+str(i)+" ("+str(ipix)+ \
-                  "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
-    
+#    for i in range(pixels.npix()):
+#        dir  = pixels.pix2ang(i)
+#        ipix = pixels.ang2pix(dir)
+#        if (i != ipix):
+#            print "GHealpix Trouble with pixel "+str(i)+" ("+str(ipix)+ \
+#                  "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
+
     # Control SkyDir coordinate transformation for all pixels
-    for i in range(pixels.npix()):
-        dir     = pixels.pix2ang(i)
-        dir_new = GSkyDir()
-        dir_new.lb(dir.l(),dir.b())
-        dra  = abs(dir.ra()  - dir_new.ra())
-        if (dra >= 5.0):
-            dra -= 2.0*pi
-        ddec = abs(dir.dec() - dir_new.dec())
-        if (dra > 1.0e-9 or ddec > 1.0e-9):
-            print "GSkyDir Trouble with pixel "+str(i)+" ("+str(dra)+ \
-                  ","+str(ddec)+")"
+#    for i in range(pixels.npix()):
+#        dir     = pixels.pix2ang(i)
+#        dir_new = GSkyDir()
+#        dir_new.lb(dir.l(),dir.b())
+#        dra  = abs(dir.ra()  - dir_new.ra())
+#        if (dra >= 5.0):
+#            dra -= 2.0*pi
+#        ddec = abs(dir.dec() - dir_new.dec())
+#        if (dra > 1.0e-9 or ddec > 1.0e-9):
+#            print "GSkyDir Trouble with pixel "+str(i)+" ("+str(dra)+ \
+#                  ","+str(ddec)+")"
 
 
 #==========================#
@@ -233,9 +231,8 @@ if __name__ == '__main__':
     """
     Perform testing.
     """
-    test_fits()
-    test_node_array()
-    test_lat_response()
-    test_lat_observation()
-    test_healpix()
-    
+#    test_fits()
+#    test_node_array()
+#    test_lat_response()
+#    test_lat_observation()
+    test_skymap()

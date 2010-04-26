@@ -594,6 +594,14 @@ void GSkymap::read_healpix(const GFitsHDU* hdu)
         // Determine number of columns in table
         int ncols = ((GFitsTable*)hdu->data())->ncols();
 
+        // Check if we have NBRBINS keyword.
+        int nbrbins = -1;
+        try {
+            nbrbins = hdu->card("NBRBINS")->integer();
+        }
+        catch (GException::fits_key_not_found &e) {
+        }
+
         // Case A: There is a single vector column
         if (ncols == 1) {
 

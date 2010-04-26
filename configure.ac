@@ -124,7 +124,17 @@ AC_SEARCH_LIBS(ffpss, cfitsio,
 dnl ======================================
 dnl Set list of output files to be creates
 dnl ======================================
-AC_OUTPUT([Makefile src/Makefile src/linalg/Makefile src/fits/Makefile 
-           src/sky/Makefile src/opt/Makefile src/obs/Makefile src/model/Makefile
+AC_OUTPUT([Makefile
+           src/Makefile
+           src/support/Makefile
+           src/linalg/Makefile
+           src/fits/Makefile
+           src/sky/Makefile
+           src/opt/Makefile
+           src/obs/Makefile
+           src/model/Makefile
            src/lat/Makefile
-           include/Makefile test/Makefile pyext/Makefile pyext/setup.py])
+           include/Makefile
+           test/Makefile
+           pyext/Makefile
+           pyext/setup.py])
