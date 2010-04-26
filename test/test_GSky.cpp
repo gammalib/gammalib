@@ -193,17 +193,20 @@ void test_GSkymap_healpix_construct(void)
 void test_GSkymap_healpix_io(void)
 {
     // Set filenames
-    const std::string filename = "test_skymap_hpx.fits";
+    const std::string file1 = "test_skymap_hpx_1.fits";
+    const std::string file2 = "test_skymap_hpx_2.fits";
 
     // Dump header
     std::cout << "Test Healpix GSkymap I/O: ";
 
+    // Define Healpix map for comparison
+    GSkymap refmap("HPX", "GAL", 4, "RING", 1);
+    
     // Test Healpix map saving
     try {
-        GSkymap map("HPX", "GAL", 4, "RING", 1);
-        for (int pix = 0; pix < map.npix(); ++pix)
-            map(pix) = pix+1;
-        map.save(filename, 1);
+        for (int pix = 0; pix < refmap.npix(); ++pix)
+            refmap(pix) = pix+1;
+        refmap.save(file1, 1);
     }
     catch (std::exception &e) {
         std::cout << std::endl 
@@ -217,7 +220,18 @@ void test_GSkymap_healpix_io(void)
     // Test Healpix map loading
     try {
         GSkymap map;
-        map.load(filename);
+        map.load(file1);
+        int diff = 0;
+        for (int pix = 0; pix < refmap.npix(); ++pix) {
+            if (map(pix) != refmap(pix))
+                diff++;
+        }
+        if (diff > 0) {
+            std::cout << std::endl
+                      << "TEST ERROR: Loaded file differs from saved file ."
+                      << std::endl;
+            throw;
+        }
     }
     catch (std::exception &e) {
         std::cout << std::endl 
@@ -228,6 +242,30 @@ void test_GSkymap_healpix_io(void)
     }
     std::cout << ".";
 
+    // Test Healpix map instantiation
+    try {
+        GSkymap map(file1);
+        int diff = 0;
+        for (int pix = 0; pix < refmap.npix(); ++pix) {
+            if (map(pix) != refmap(pix))
+                diff++;
+        }
+        if (diff > 0) {
+            std::cout << std::endl
+                      << "TEST ERROR: Loaded file differs from saved file ."
+                      << std::endl;
+            throw;
+        }
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to instatiate Healpix map from FITS file."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+    
     // Signal final test success
     std::cout << " ok." << std::endl;
 
