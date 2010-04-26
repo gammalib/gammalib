@@ -343,7 +343,7 @@ void GFits::saveto(const std::string& filename, int clobber)
     GFits new_fits;
     new_fits.open(filename);
 
-    // Save new FITS file
+    // Copy headers in new FITS file
     for (int i = 0; i < m_num_hdu; ++i)
         new_fits.append_hdu(m_hdu[i]);
 
