@@ -1,6 +1,7 @@
 #!/bin/sh
 
 #autoreconf --force --install -I config -I m4
-aclocal \
+libtoolize --force \
+&& aclocal \
 && automake --add-missing \
 && autoconf
