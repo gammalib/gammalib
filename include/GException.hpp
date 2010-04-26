@@ -235,10 +235,35 @@ public:
         rsp_invalid_type(std::string origin, std::string type);
     };
 
-    // General WCS error
+    // General GSkymap error
+    class skymap : public GExceptionHandler {
+    public:
+        skymap(std::string origin, std::string message);
+    };
+
+    // Invalid number of maps in set
+    class skymap_bad_nmaps : public GExceptionHandler {
+    public:
+        skymap_bad_nmaps(std::string origin, int nmaps, std::string message = "");
+    };
+
+    // Incompatible data size
+    class skymap_bad_size : public GExceptionHandler {
+    public:
+        skymap_bad_size(std::string origin, int size, int expected,
+                        std::string message = "");
+    };
+
+    // General GWcs error
     class wcs : public GExceptionHandler {
     public:
         wcs(std::string origin, std::string message);
+    };
+
+    // Invalid WCS
+    class wcs_invalid : public GExceptionHandler {
+    public:
+        wcs_invalid(std::string origin, std::string wcs, std::string message);
     };
 
     // Coordinate system invalid
