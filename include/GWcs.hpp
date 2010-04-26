@@ -54,6 +54,8 @@ public:
     virtual int     naxis(const int& axis) const = 0;
 
     // Implemented methods
+    std::string coordsys(void) const;
+    void        coordsys(const std::string& coordsys);
 
 private:
     // Private methods
@@ -62,7 +64,9 @@ private:
     void          free_members(void);
     virtual GWcs* clone(void) const = 0;
 
-    // Private data area
+protected:
+    // Protected data area
+    int      m_coordsys;     //!< 0=celestial, 1=galactic
 };
 
 #endif /* GWCS_HPP */

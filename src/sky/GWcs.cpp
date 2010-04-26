@@ -18,13 +18,14 @@
  */
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include <cmath>
+//#include <iostream>
+//#include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GWcs.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_COORDSYS_SET                          "GWcs::coordsys(std::string)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -126,6 +127,52 @@ GWcs& GWcs::operator= (const GWcs& wcs)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Returns coordinate system.
+ ***************************************************************************/
+std::string GWcs::coordsys(void) const
+{
+    // Set coordinate system
+    std::string s_coordsys;
+    switch (m_coordsys) {
+    case 0:
+        s_coordsys = "EQU";
+        break;
+    case 1:
+        s_coordsys = "GAL";
+        break;
+    default:
+        s_coordsys = "UNKNOWN";
+        break;
+    }
+
+    // Return coordinate system
+    return s_coordsys;
+}
+
+
+/***********************************************************************//**
+ * @brief Set coordinate system.
+ *
+ * @param[in] coordsys Coordinate system (EQU/CEL or GAL)
+ ***************************************************************************/
+void GWcs::coordsys(const std::string& coordsys)
+{
+    // Convert argument to upper case
+    std::string ucoordsys = toupper(coordsys);
+    
+    // Set coordinate system
+    if (ucoordsys == "EQU" || ucoordsys == "CEL")
+        m_coordsys = 0;
+    else if (ucoordsys == "GAL")
+        m_coordsys = 1;
+    else
+        throw GException::healpix_bad_coords(G_COORDSYS_SET, coordsys);
+
+    // Return
+    return;
+}
+
 
 /*==========================================================================
  =                                                                         =
@@ -139,6 +186,7 @@ GWcs& GWcs::operator= (const GWcs& wcs)
 void GWcs::init_members(void)
 {
     // Initialise members
+    m_coordsys = 0;
     
     // Return
     return;
@@ -153,6 +201,7 @@ void GWcs::init_members(void)
 void GWcs::copy_members(const GWcs& wcs)
 {
     // Copy attributes
+    m_coordsys = wcs.m_coordsys;
 
     // Return
     return;
