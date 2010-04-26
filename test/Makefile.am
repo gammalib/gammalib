@@ -5,30 +5,30 @@
 # we use builddir/src for the generated include files to get found
 
 INCLUDES = -I$(top_srcdir)/include \
-	   -I$(top_builddir)/src \
-	   -I$(top_srcdir)/src
+           -I$(top_builddir)/src \
+           -I$(top_srcdir)/src/support
 
 check_PROGRAMS = test_GVector \
-		 test_GMatrix \
-		 test_GSymMatrix \
-		 test_GSparseMatrix \
-		 test_GFits \
-		 test_GResponse \
-		 test_GModel \
-		 test_GData \
-		 test_GOptimizer \
-		 test_GSky
+                 test_GMatrix \
+                 test_GSymMatrix \
+                 test_GSparseMatrix \
+                 test_GFits \
+                 test_GResponse \
+                 test_GModel \
+                 test_GData \
+                 test_GOptimizer \
+                 test_GSky
 
 TESTS = test_GVector \
-	test_GMatrix \
-	test_GSymMatrix \
-	test_GSparseMatrix \
-	test_GFits \
-	test_GResponse \
-	test_GModel \
-	test_GData \
-	test_GOptimizer \
-	test_GSky
+        test_GMatrix \
+        test_GSymMatrix \
+        test_GSparseMatrix \
+        test_GFits \
+        test_GResponse \
+        test_GModel \
+        test_GData \
+        test_GOptimizer \
+        test_GSky
 
 test_GVector_SOURCES = test_GVector.cpp
 test_GVector_LDADD = ../src/libgamma.la
