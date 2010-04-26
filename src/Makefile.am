@@ -5,11 +5,12 @@
 # we use builddir/src for the generated include files to get found
 
 INCLUDES = -I$(top_srcdir)/include \
-	   -I$(top_builddir)/src \
-	   -I$(top_srcdir)/src
+           -I$(top_builddir)/src \
+           -I$(top_srcdir)/src/support
 
 # Set sub directories
-SUBDIRS = linalg \
+SUBDIRS = support \
+          linalg \
           fits \
           sky \
           opt \
@@ -17,15 +18,14 @@ SUBDIRS = linalg \
           model \
           lat
 
-files = GException.cpp \
-	GTools.cpp \
-	GNodeArray.cpp \
-	GHealpix.cpp
+# Define sources for this directory
+sources =
 
 # Build libtool library
 lib_LTLIBRARIES = libgamma.la
-libgamma_la_SOURCES = $(files)
-libgamma_la_LIBADD = linalg/liblinalg.la \
+libgamma_la_SOURCES = $(sources)
+libgamma_la_LIBADD = support/libsupport.la \
+                     linalg/liblinalg.la \
                      fits/libfits.la \
                      sky/libsky.la \
                      opt/libopt.la \
