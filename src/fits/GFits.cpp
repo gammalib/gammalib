@@ -144,12 +144,11 @@ GFits& GFits::operator= (const GFits& fits)
  *
  * @param[in] filename Name of FITS file to be opened
  *
- * @exception GException::fits_already_opened 
+ * @exception GException::fits_already_opened
  *            Class instance contains already an opened FITS file.
  *            Close file before opening a new one using GFits::close().
- * @exception GException::fits_open_error 
- *            Unable to open the specified file.
- * @exception GException::fits_error 
+ * @exception GException::fits_open_error Unable to open the specified file.
+ * @exception GException::fits_error
  *            Unable to determine number of HDUs in the FITS file.
  *
  * This method opens all HDUs that are found in the specified FITS file.
@@ -262,9 +261,11 @@ void GFits::append_hdu(const GFitsHDU& hdu)
         m_hdu[m_num_hdu] = hdu;
 
         // Set FITS file pointer for new HDU
-        __fitsfile fptr  = *m_fitsfile;
-        fptr.HDUposition = m_num_hdu;
-        m_hdu[m_num_hdu].connect(&fptr);
+        if (m_fitsfile != NULL) {
+          __fitsfile fptr  = *m_fitsfile;
+          fptr.HDUposition = m_num_hdu;
+          m_hdu[m_num_hdu].connect(&fptr);
+        }
 
         // Increment number of HDUs
         m_num_hdu++;
@@ -297,8 +298,7 @@ void GFits::save(void)
  * @brief Saves to specified FITS file
  *
  * @param[in] filename Name of file into which should be saved.
- * @param[in] clobber Specifies whether any existing file should be 
- *            overwritten.
+ * @param[in] clobber Overwrite existing FITS file (0=false, 1=true).
  *
  * @exception GException::fits_file_exist
  *            File specified by 'filename' exists already.
