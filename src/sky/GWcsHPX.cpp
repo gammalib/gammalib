@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GWcsHPX.cpp  -  Healpix projection class                *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2010 by Jurgen Knodlseder                   *
+ *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -69,6 +69,7 @@ GWcsHPX::GWcsHPX(void) : GWcs()
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Constructor
  *
@@ -78,11 +79,11 @@ GWcsHPX::GWcsHPX(void) : GWcs()
  * @param[in] dimension Vector dimension of pixels.
  *
  * @exception GException::wcs_hpx_bad_nside 
-              Invalid nside parameter.
+ *            Invalid nside parameter.
  * @exception GException::wcs_bad_coords 
-              Invalid coordsys parameter.
+ *            Invalid coordsys parameter.
  * @exception GException::wcs_hpx_bad_ordering 
-              Invalid ordering parameter.
+ *            Invalid ordering parameter.
  ***************************************************************************/
 GWcsHPX::GWcsHPX(const int& nside, const std::string& order,
                  const std::string& coords) : GWcs()
@@ -221,11 +222,11 @@ std::string GWcsHPX::type(void) const
  * @param[in] hdu FITS HDU containing the Healpix definition.
  *
  * @exception GException::wcs 
-              Unable to load Healpix definition from HDU.
+ *            Unable to load Healpix definition from HDU.
  * @exception GException::wcs_bad_coords 
-              Invalid coordsys parameter.
+ *            Invalid coordsys parameter.
  * @exception GException::wcs_hpx_bad_ordering 
-              Invalid ordering parameter.
+ *            Invalid ordering parameter.
  ***************************************************************************/
 void GWcsHPX::read(const GFitsHDU* hdu)
 {
@@ -412,38 +413,13 @@ double GWcsHPX::omega(const int& pix) const
 /***********************************************************************//**
  * @brief Returns number of pixels
  ***************************************************************************/
+/*
 int GWcsHPX::npix(void) const
 {
     // Return number of pixels
     return m_num_pixels;
 }
-
-
-/***********************************************************************//**
- * @brief Returns number of axes.
- ***************************************************************************/
-int GWcsHPX::naxes(void) const
-{
-    // Return number of axes
-    return 1;
-}
-
-
-/***********************************************************************//**
- * @brief Returns number of pixels in axis.
- *
- * @param[in] axis Axis for which number of pixels should be returned.
- ***************************************************************************/
-int GWcsHPX::naxis(const int& axis) const
-{
-    // Check of axis is in range
-    if (axis != 0)
-        throw  GException::out_of_range(G_NAXIS, axis, 0, 0);
-
-    // Return number of pixels in axis
-    return m_num_pixels;
-}
-
+*/
 
 /***********************************************************************//**
  * @brief Returns number of divisions of the side of each base pixel.

@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GWcs.cpp  -  World Coordinate System virtual base class       *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2010 by Jurgen Knodlseder                   *
+ *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -46,10 +46,56 @@
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GWcs::GWcs()
+GWcs::GWcs(void)
 {
     // Initialise class members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Constructor
+ *
+ * @param[in] crval Coordinates of reference pixel.
+ * @param[in] crpix1 X coordinate of reference pixel.
+ * @param[in] crpix2 Y coordinate of reference pixel.
+ * @param[in] cdelt1 X increment at reference point in degrees/pixel.
+ * @param[in] cdelt2 Y increment at reference point in degrees/pixel.
+ * @param[in] coords Coordinate system ('EQU' or 'GAL').
+ ***************************************************************************/
+GWcs::GWcs(GSkyDir& crval, const double& crpix1, const double& crpix2,
+           const double& cdelt1, const double& cdelt2,
+           const std::string& coords)
+{
+    // Initialise class members
+    init_members();
+
+    // Set coordinate system
+    coordsys(coords);
+
+    // Set reference value
+    switch (m_coordsys) {
+    case 0:
+        m_crval[0] = crval.ra_deg();
+        m_crval[1] = crval.dec_deg();
+        break;
+    case 1:
+        m_crval[0] = crval.l_deg();
+        m_crval[1] = crval.b_deg();
+        break;
+    default:
+        //TODO: Throw error
+        break;
+    }
+
+    // Set members
+    m_crpix[0] = crpix1;
+    m_crpix[1] = crpix2;
+    m_cdelt[0] = cdelt1;
+    m_cdelt[1] = cdelt2;
 
     // Return
     return;
@@ -77,7 +123,7 @@ GWcs::GWcs(const GWcs& wcs)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GWcs::~GWcs()
+GWcs::~GWcs(void)
 {
     // Free members
     free_members();
@@ -187,7 +233,19 @@ void GWcs::coordsys(const std::string& coordsys)
 void GWcs::init_members(void)
 {
     // Initialise members
-    m_coordsys = 0;
+    m_ctype[0].clear();
+    m_ctype[1].clear();
+    m_cdelt[0] =   0.0;
+    m_cdelt[1] =   0.0;
+    m_crpix[0] =   0.0;
+    m_crpix[1] =   0.0;
+    m_crval[0] =   0.0;
+    m_crval[1] =   0.0;
+    m_longpole = 180.0;
+    m_latpole  =   0.0;
+    m_pv2[0]   =   0.0;
+    m_pv2[1]   =   0.0;
+    m_coordsys =     0;
 
     // Return
     return;
@@ -202,6 +260,18 @@ void GWcs::init_members(void)
 void GWcs::copy_members(const GWcs& wcs)
 {
     // Copy attributes
+    m_ctype[0] = wcs.m_ctype[0];
+    m_ctype[1] = wcs.m_ctype[1];
+    m_cdelt[0] = wcs.m_cdelt[0];
+    m_cdelt[1] = wcs.m_cdelt[1];
+    m_crpix[0] = wcs.m_crpix[0];
+    m_crpix[1] = wcs.m_crpix[1];
+    m_crval[0] = wcs.m_crval[0];
+    m_crval[1] = wcs.m_crval[1];
+    m_longpole = wcs.m_longpole;
+    m_latpole  = wcs.m_latpole;
+    m_pv2[0]   = wcs.m_pv2[0];
+    m_pv2[1]   = wcs.m_pv2[1];
     m_coordsys = wcs.m_coordsys;
 
     // Return

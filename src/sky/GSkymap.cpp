@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GSkymap.cpp  -  Class that implements a sky map             *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2010 by Jurgen Knodlseder                   *
+ *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -35,6 +35,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+#define G_READ_HEALPIX_DEBUG 0  // Debug read_healpix
 
 /* __ Prototype __________________________________________________________ */
 
@@ -117,7 +118,7 @@ GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
     m_wcs = new GWcsHPX(nside, order, coords);
 
     // Set number of maps
-    m_num_pixels = m_wcs->npix();
+    m_num_pixels = ((GWcsHPX*)m_wcs)->npix();
     m_num_maps   = nmaps;
 
     // Allocate pixels
@@ -616,7 +617,9 @@ void GSkymap::read_healpix(const GFitsHDU* hdu)
         // Determine number of rows and columns in table
         int nrows = ((GFitsTable*)hdu->data())->nrows();
         int ncols = ((GFitsTable*)hdu->data())->ncols();
-//std::cout << "nrows=" << nrows << " ncols=" << ncols << std::endl;
+        #if G_READ_HEALPIX_DEBUG
+        std::cout << "nrows=" << nrows << " ncols=" << ncols << std::endl;
+        #endif
 
         // Allocate Healpix WCS
         m_wcs = new GWcsHPX;
@@ -625,18 +628,22 @@ void GSkymap::read_healpix(const GFitsHDU* hdu)
         m_wcs->read(hdu);
 
         // Set number of pixels based on NSIDE parameter
-        m_num_pixels = m_wcs->npix();
-//std::cout << "m_num_pixels=" << m_num_pixels << std::endl;
-        
+        m_num_pixels = ((GWcsHPX*)m_wcs)->npix();
+        #if G_READ_HEALPIX_DEBUG
+        std::cout << "m_num_pixels=" << m_num_pixels << std::endl;
+        #endif
+
         // Number of map pixels has to be a multiple of the number of
         // rows in column
         if (m_num_pixels % nrows != 0)
             throw GException::skymap_bad_size(G_READ_HEALPIX, nrows,
                                               m_num_pixels);
-        
+
         // Determine vector length for HEALPix data storage
         int nentry = m_num_pixels / nrows;
-//std::cout << "nentry=" << nentry << std::endl;
+        #if G_READ_HEALPIX_DEBUG
+        std::cout << "nentry=" << nentry << std::endl;
+        #endif
 
         // Determine number of maps from NBRBINS keyword. If keyword was
         // not found then determine the number of maps that fit into
@@ -652,59 +659,64 @@ void GSkymap::read_healpix(const GFitsHDU* hdu)
                     m_num_maps += col->number() / nentry;
             }
         }
-//std::cout << "m_num_maps=" << m_num_maps << std::endl;
+        #if G_READ_HEALPIX_DEBUG
+        std::cout << "m_num_maps=" << m_num_maps << std::endl;
+        #endif
 
         // Allocate pixels to hold the map
         alloc_pixels();
-        
+
         // Initialise map counter
         int imap = 0;
-        
+
         // Loop over all columns
         for (int icol = 0; icol < ncols; ++icol) {
-        
+
             // Get next column
             GFitsTableCol* col = hdu->column(icol);
-            
+
             // Only consider columns that can fully hold maps
             if (col->number() % nentry == 0) {
-            
+
                 // Determine number of maps in column
                 int num = col->number() / nentry;
-                
+
                 // Loop over all maps in column
                 int inx_start = 0;
                 int inx_end   = nentry;
                 for (int i = 0; i < num; ++i) {
-                
-//std::cout << "Load map=" << imap << " index=" << inx_start << "-" << inx_end << std::endl;
-                    // Load map 
+
+                    // Load map
                     double *ptr = m_pixels + imap;
                     for (int row = 0; row < col->length(); ++row) {
                         for (int inx = inx_start; inx < inx_end; ++inx, ptr+=m_num_maps)
                                 *ptr = col->real(row,inx);
                     }
-                    
+                    #if G_READ_HEALPIX_DEBUG
+                    std::cout << "Load map=" << imap << " index="
+                              << inx_start << "-" << inx_end << std::endl;
+                    #endif
+
                     // Increment index range
                     inx_start  = inx_end;
                     inx_end   += nentry;
-                    
+
                     // Increment map counter
                     imap++;
-                    
+
                     // Break if we have loaded all maps
                     if (imap >= m_num_maps)
                         break;
-                    
+
                 } // endfor: looped over all maps in column
             } // endif: column could fully hold maps
 
             // Break if we have loaded all maps
             if (imap >= m_num_maps)
                 break;
-            
+
         } // endfor: looped over all columns
-        
+
     } // endif: HDU was valid
 
     // Return

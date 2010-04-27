@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GWcs.hpp  -  World Coordinate System virtual base class        *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2010 by Jurgen Knodlseder                   *
+ *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -36,9 +36,12 @@ class GWcs {
 
 public:
     // Constructors and destructors
-    GWcs();
+    GWcs(void);
     GWcs(const GWcs& wcs);
-    virtual ~GWcs();
+    GWcs(GSkyDir& crval, const double& crpix1, const double& crpix2,
+         const double& cdelt1, const double& cdelt2,
+         const std::string& coords);
+    virtual ~GWcs(void);
 
     // Operators
     virtual GWcs& operator= (const GWcs& wcs);
@@ -50,9 +53,6 @@ public:
     virtual GSkyDir     pix2dir(const int& pix) = 0;
     virtual int         dir2pix(GSkyDir dir) const = 0;
     virtual double      omega(const int& pix) const = 0;
-    virtual int         npix(void) const = 0;
-    virtual int         naxes(void) const = 0;
-    virtual int         naxis(const int& axis) const = 0;
 
     // Implemented methods
     std::string coordsys(void) const;
@@ -67,7 +67,17 @@ private:
 
 protected:
     // Protected data area
-    int      m_coordsys;     //!< 0=celestial, 1=galactic
+    int          m_coordsys;     //!< 0=celestial, 1=galactic
+
+    // WCS projection parameters
+    std::string  m_ctype[2];     //!< Coordinate strings
+    double       m_cd[4];        //!< Astrometry parameters
+    double       m_cdelt[2];     //!< Increment at reference point (deg/pixel)
+    double       m_crpix[2];     //!< x and y coordinates of the reference point
+    double       m_crval[2];     //!< Coordinates of reference point
+    double       m_longpole;     //!< Native longitude of North Pole
+    double       m_latpole;      //!< Native latitude of North Pole
+    double       m_pv2[2];       //!< Additional parameters
 };
 
 #endif /* GWCS_HPP */

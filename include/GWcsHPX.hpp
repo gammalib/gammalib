@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GWcsHPX.hpp  -  Healpix projection class                *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2010 by Jurgen Knodlseder                   *
+ *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -41,7 +41,7 @@ public:
             const std::string& coordsys = "GAL");
     GWcsHPX(const GFitsHDU* hdu);
     GWcsHPX(const GWcsHPX& wcs);
-    virtual ~GWcsHPX();
+    virtual ~GWcsHPX(void);
 
     // Operators
     GWcsHPX& operator= (const GWcsHPX& wcs);
@@ -53,11 +53,9 @@ public:
     GSkyDir     pix2dir(const int& ipix);
     int         dir2pix(GSkyDir dir) const;
     double      omega(const int& pix) const;
-    int         npix(void) const;
-    int         naxes(void) const;
-    int         naxis(const int& axis) const;
 
     // Class specific methods
+    int         npix(void) const;
     int         nside(void) const;
     std::string ordering(void) const;
     void        ordering(const std::string& ordering);
