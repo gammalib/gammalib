@@ -120,13 +120,6 @@ AC_SEARCH_LIBS(ffpss, cfitsio,
     AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available]), ,[-lm])
 
 
-dnl =================
-dnl Checks for wcslib
-dnl =================
-AC_SEARCH_LIBS(wcsp2s, wcs,
-    AC_DEFINE([G_WCS], [1], [Define if wcslib is available]), ,[-lm])
-
-
 dnl ======================================
 dnl Set list of output files to be creates
 dnl ======================================
