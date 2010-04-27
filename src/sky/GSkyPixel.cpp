@@ -136,7 +136,7 @@ GSkyPixel& GSkyPixel::operator= (const GSkyPixel& pixel)
  *
  * @param[in] x X value to set.
  ***************************************************************************/
-inline void GSkyPixel::x(const double& x)
+void GSkyPixel::x(const double& x)
 {
     // Set x value
     m_x = x;
@@ -148,7 +148,7 @@ inline void GSkyPixel::x(const double& x)
  *
  * @param[in] y Y value to set.
  ***************************************************************************/
-inline void GSkyPixel::y(const double& y)
+void GSkyPixel::y(const double& y)
 {
     // Set y value
     m_y = y;
@@ -158,7 +158,7 @@ inline void GSkyPixel::y(const double& y)
 /***********************************************************************//**
  * @brief Return x value of sky pixel
  ***************************************************************************/
-inline double GSkyPixel::x(void) const
+double GSkyPixel::x(void) const
 {
     // Return x value
     return m_x;
@@ -168,7 +168,7 @@ inline double GSkyPixel::x(void) const
 /***********************************************************************//**
  * @brief Return x value of sky pixel
  ***************************************************************************/
-inline double GSkyPixel::y(void) const
+double GSkyPixel::y(void) const
 {
     // Return y value
     return m_y;

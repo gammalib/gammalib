@@ -518,7 +518,7 @@ void GSkymap::write(GFitsHDU* hdu)
  * implement 1D conversion methods while 2D schemes need only to implement
  * 2D conversion methods.
  ***************************************************************************/
-inline GSkyDir GSkymap::pix2dir(const int& pix)
+GSkyDir GSkymap::pix2dir(const int& pix)
 {
     // Throw error if WCS is not valid
     if (m_wcs == NULL)
@@ -548,7 +548,7 @@ inline GSkyDir GSkymap::pix2dir(const int& pix)
  * implement 1D conversion methods while 2D schemes need only to implement
  * 2D conversion methods.
  ***************************************************************************/
-inline int GSkymap::dir2pix(GSkyDir dir) const
+int GSkymap::dir2pix(GSkyDir dir) const
 {
     // Throw error if WCS is not valid
     if (m_wcs == NULL)
@@ -577,7 +577,7 @@ inline int GSkymap::dir2pix(GSkyDir dir) const
  * implement 1D conversion methods while 2D schemes need only to implement
  * 2D conversion methods.
  ***************************************************************************/
-inline GSkyDir GSkymap::xy2dir(const GSkyPixel& pix)
+GSkyDir GSkymap::xy2dir(const GSkyPixel& pix)
 {
     // Throw error if WCS is not valid
     if (m_wcs == NULL)
@@ -607,7 +607,7 @@ inline GSkyDir GSkymap::xy2dir(const GSkyPixel& pix)
  * implement 1D conversion methods while 2D schemes need only to implement
  * 2D conversion methods.
  ***************************************************************************/
-inline GSkyPixel GSkymap::dir2xy(GSkyDir dir) const
+GSkyPixel GSkymap::dir2xy(GSkyDir dir) const
 {
     // Throw error if WCS is not valid
     if (m_wcs == NULL)
@@ -644,7 +644,7 @@ double GSkymap::omega(const int& pix) const
 /***********************************************************************//**
  * @brief Returns number of pixels
  ***************************************************************************/
-inline int GSkymap::npix(void) const
+int GSkymap::npix(void) const
 {
     // Return number of pixels
     return m_num_pixels;
@@ -654,7 +654,7 @@ inline int GSkymap::npix(void) const
 /***********************************************************************//**
  * @brief Returns number of pixels in x coordinate
  ***************************************************************************/
-inline int GSkymap::nx(void) const
+int GSkymap::nx(void) const
 {
     // Return number of pixels
     return m_num_x;
@@ -664,7 +664,7 @@ inline int GSkymap::nx(void) const
 /***********************************************************************//**
  * @brief Returns number of pixels in y coordinate
  ***************************************************************************/
-inline int GSkymap::ny(void) const
+int GSkymap::ny(void) const
 {
     // Return number of pixels
     return m_num_y;
@@ -674,7 +674,7 @@ inline int GSkymap::ny(void) const
 /***********************************************************************//**
  * @brief Returns number of maps
  ***************************************************************************/
-inline int GSkymap::nmaps(void) const
+int GSkymap::nmaps(void) const
 {
     // Return number of maps
     return m_num_maps;
@@ -791,7 +791,7 @@ void GSkymap::free_members(void)
  * The (x,y) value is rounded to nearest integers before conversion. The x 
  * axis is assumed as the most rapidely varying index.
  ***************************************************************************/
-inline int GSkymap::xy2pix(const GSkyPixel& pix) const
+int GSkymap::xy2pix(const GSkyPixel& pix) const
 {
     // Get x and y indices by rounding the (x,y) values
     int ix = int(pix.x()+0.5);
@@ -810,7 +810,7 @@ inline int GSkymap::xy2pix(const GSkyPixel& pix) const
  * If skymap is not 2D the pixel index is returned in the x element of the
  * GSkyPixel object.
  ***************************************************************************/
-inline GSkyPixel GSkymap::pix2xy(const int& pix) const
+GSkyPixel GSkymap::pix2xy(const int& pix) const
 {
     // Get x and y indices
     double x;
