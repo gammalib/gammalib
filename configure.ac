@@ -92,7 +92,7 @@ dnl Checks for Python
 dnl =================
 AM_PATH_PYTHON([2.2],
                [],
-               [AC_MSG_WARN([Python not found. Python is required to build soothsayer python binding. Python can be obtained from http://www.python.org])])
+               [AC_MSG_WARN([Python not found. Python is required to build python binding. Python can be obtained from http://www.python.org])])
 AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
 
 AC_ARG_ENABLE([python-binding],
@@ -116,9 +116,15 @@ AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes"
 dnl ==================
 dnl Checks for cfitsio
 dnl ==================
-#AC_SEARCH_LIBS(ffopen, cfitsio,
 AC_SEARCH_LIBS(ffpss, cfitsio,
     AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available]), ,[-lm])
+
+
+dnl =================
+dnl Checks for wcslib
+dnl =================
+AC_SEARCH_LIBS(wcsp2s, wcs,
+    AC_DEFINE([G_WCS], [1], [Define if wcslib is available]), ,[-lm])
 
 
 dnl ======================================
