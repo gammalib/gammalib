@@ -46,6 +46,23 @@ GSkyPixel::GSkyPixel()
 
 
 /***********************************************************************//**
+ * @brief Index constructor
+ *
+ * @param[in] x X index.
+ * @param[in] y Y index.
+ ***************************************************************************/
+GSkyPixel::GSkyPixel(const double& x, const double& y)
+{
+    // Set members
+    m_x = x;
+    m_y = y;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] pixel Sky pixel from which class should be instantiated.
