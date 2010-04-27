@@ -167,7 +167,7 @@ void test_GSkymap_healpix_construct(void)
     try {
         GSkymap map("HPX", "GAL", 2, "NEST", 0);
     }
-    catch (GException::skymap_bad_nmaps &e) {
+    catch (GException::skymap_bad_par &e) {
     }
     catch (std::exception &e) {
         std::cout << std::endl 
