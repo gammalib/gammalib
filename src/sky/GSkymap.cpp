@@ -511,6 +511,12 @@ void GSkymap::write(GFitsHDU* hdu)
  *
  * @exception GException::wcs
  *            No valid WCS found.
+ *
+ * Returns sky direction for a given sky map pixel. This methods works for
+ * sky maps that have a 1D (e.g. HEALPix) or 2D pixel indexation scheme.
+ * Automatic index conversion is provided so that 1D schemes need only to
+ * implement 1D conversion methods while 2D schemes need only to implement
+ * 2D conversion methods.
  ***************************************************************************/
 inline GSkyDir GSkymap::pix2dir(const int& pix)
 {
@@ -518,8 +524,13 @@ inline GSkyDir GSkymap::pix2dir(const int& pix)
     if (m_wcs == NULL)
         throw GException::wcs(G_PIX2DIR, "No valid WCS found.");
 
+    // Determine sky direction from pixel. Use 2D version if sky map is
+    // 2D, otherwise use 1D version.
+    GSkyDir dir = (m_num_x == 0) ? m_wcs->pix2dir(pix)
+                                 : m_wcs->xy2dir(pix2xy(pix));
+
     // Return sky direction
-    return (m_wcs->pix2dir(pix));
+    return dir;
 }
 
 
@@ -530,6 +541,12 @@ inline GSkyDir GSkymap::pix2dir(const int& pix)
  *
  * @exception GException::wcs
  *            No valid WCS found.
+ *
+ * Returns sky map pixel for a given sky direction. This methods works for
+ * sky maps that have a 1D (e.g. HEALPix) or 2D pixel indexation scheme.
+ * Automatic index conversion is provided so that 1D schemes need only to
+ * implement 1D conversion methods while 2D schemes need only to implement
+ * 2D conversion methods.
  ***************************************************************************/
 inline int GSkymap::dir2pix(GSkyDir dir) const
 {
@@ -537,8 +554,12 @@ inline int GSkymap::dir2pix(GSkyDir dir) const
     if (m_wcs == NULL)
         throw GException::wcs(G_DIR2PIX, "No valid WCS found.");
 
+    // Determine 1D pixel index for a given sky direction
+    int pix = (m_num_x == 0) ? m_wcs->dir2pix(dir)
+                             : xy2pix(m_wcs->dir2xy(dir));
+
     // Return pixel index
-    return (m_wcs->dir2pix(dir));
+    return pix;
 }
 
 
@@ -549,6 +570,12 @@ inline int GSkymap::dir2pix(GSkyDir dir) const
  *
  * @exception GException::wcs
  *            No valid WCS found.
+ *
+ * Returns sky direction for a given sky map pixel. This methods works for
+ * sky maps that have a 1D (e.g. HEALPix) or 2D pixel indexation scheme.
+ * Automatic index conversion is provided so that 1D schemes need only to
+ * implement 1D conversion methods while 2D schemes need only to implement
+ * 2D conversion methods.
  ***************************************************************************/
 inline GSkyDir GSkymap::xy2dir(const GSkyPixel& pix)
 {
@@ -556,8 +583,13 @@ inline GSkyDir GSkymap::xy2dir(const GSkyPixel& pix)
     if (m_wcs == NULL)
         throw GException::wcs(G_XY2DIR, "No valid WCS found.");
 
+    // Determine sky direction from pixel. Use 2D version if sky map is
+    // 2D, otherwise use 1D version.
+    GSkyDir dir = (m_num_x == 0) ? m_wcs->pix2dir(xy2pix(pix))
+                                 : m_wcs->xy2dir(pix);
+
     // Return sky direction
-    return (m_wcs->xy2dir(pix));
+    return dir;
 }
 
 
@@ -568,12 +600,22 @@ inline GSkyDir GSkymap::xy2dir(const GSkyPixel& pix)
  *
  * @exception GException::wcs
  *            No valid WCS found.
+ *
+ * Returns sky map pixel for a given sky direction. This methods works for
+ * sky maps that have a 1D (e.g. HEALPix) or 2D pixel indexation scheme.
+ * Automatic index conversion is provided so that 1D schemes need only to
+ * implement 1D conversion methods while 2D schemes need only to implement
+ * 2D conversion methods.
  ***************************************************************************/
 inline GSkyPixel GSkymap::dir2xy(GSkyDir dir) const
 {
     // Throw error if WCS is not valid
     if (m_wcs == NULL)
         throw GException::wcs(G_DIR2XY, "No valid WCS found.");
+
+    // Determine 1D pixel index for a given sky direction
+    GSkyPixel pix = (m_num_x == 0) ? pix2xy(m_wcs->dir2pix(dir))
+                                   : m_wcs->dir2xy(dir);
 
     // Return pixel index
     return (m_wcs->dir2xy(dir));
@@ -744,7 +786,7 @@ void GSkymap::free_members(void)
 /***********************************************************************//**
  * @brief Converts 2D index (x,y) into 1D pixel index
  *
- * @param[in] pixel 2D pixel index.
+ * @param[in] pix 2D pixel index.
  *
  * The (x,y) value is rounded to nearest integers before conversion. The x 
  * axis is assumed as the most rapidely varying index.
@@ -757,6 +799,36 @@ inline int GSkymap::xy2pix(const GSkyPixel& pix) const
     
     // Return index
     return (ix+iy*m_num_x);
+}
+
+
+/***********************************************************************//**
+ * @brief Converts 1D pixel index into 2D index (x,y)
+ *
+ * @param[in] pix 1D pixel index.
+ *
+ * If skymap is not 2D the pixel index is returned in the x element of the
+ * GSkyPixel object.
+ ***************************************************************************/
+inline GSkyPixel GSkymap::pix2xy(const int& pix) const
+{
+    // Get x and y indices
+    double x;
+    double y;
+    if (m_num_x != 0) {
+        x = double(pix % m_num_x);
+        y = double(pix / m_num_x);
+    }
+    else {
+        x = double(pix);
+        y = 0.0;
+    }
+    
+    // Set pixel
+    GSkyPixel pixel(x, y);
+    
+    // Return pixel
+    return pixel;
 }
 
 

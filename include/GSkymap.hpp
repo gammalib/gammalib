@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GSkymap.hpp  -  Class that implements a sky map              *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2010 by Jurgen Knodlseder                   *
+ *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -82,6 +82,7 @@ private:
     void      copy_members(const GSkymap& map);
     void      free_members(void);
     int       xy2pix(const GSkyPixel& pix) const;
+    GSkyPixel pix2xy(const int& pix) const;
     void      read_healpix(const GFitsHDU* hdu);
     GFitsHDU* create_healpix_hdu(void);
 
