@@ -22,6 +22,8 @@
 #include "GWcsCAR.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_XY2DIR                                 "GWcsCAR::xy2dir(GSkyPixel)"
+#define G_DIR2XY                                   "GWcsCAR::dir2xy(GSkyDir)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -67,8 +69,7 @@ GWcsCAR::GWcsCAR(void) : GWcs()
  ***************************************************************************/
 GWcsCAR::GWcsCAR(GSkyDir& crval, const double& crpix1, const double& crpix2,
                  const double& cdelt1, const double& cdelt2,
-                 const std::string& coords) :
-                 GWcs(crval, crpix1, crpix2, cdelt1, cdelt2, coords)
+                 const std::string& coords) : GWcs()
 {
     // Initialise class members
     init_members();
@@ -178,6 +179,92 @@ std::string GWcsCAR::type(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Returns sky direction of pixel (method should never be called)
+ *
+ * @param[in] pix Pixel number (0,1,...,m_num_pixels).
+ ***************************************************************************/
+GSkyDir GWcsCAR::pix2dir(const int& pix)
+{
+    // Throw error
+    throw GException::wcs(G_XY2DIR, "WCS method not defined for CAR projection.");
+}
+
+
+/***********************************************************************//**
+ * @brief Returns sky direction of pixel
+ *
+ * @param[in] pix Sky pixel.
+ ***************************************************************************/
+GSkyDir GWcsCAR::xy2dir(const GSkyPixel& pix)
+{
+    // Allocate sky direction
+    GSkyDir dir;
+    
+    //TODO: Implement
+    
+    // Return
+    return dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pixel for sky direction (method should never be called)
+ *
+ * @param[in] dir Sky direction.
+ ***************************************************************************/
+int GWcsCAR::dir2pix(GSkyDir dir) const
+{
+    // Throw error
+    throw GException::wcs(G_DIR2XY, "WCS method not defined for CAR projection.");
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pixel of sky direction
+ *
+ * @param[in] dir Sky direction.
+ ***************************************************************************/
+GSkyPixel GWcsCAR::dir2xy(GSkyDir dir) const
+{
+    // Allocate sky pixel
+    GSkyPixel pixel;
+    
+    //TODO: Implement
+    
+    // Return
+    return pixel;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns solid angle of pixel
+ *
+ * @param[in] pix Pixel number (0,1,...,m_num_pixels).
+ ***************************************************************************/
+double GWcsCAR::omega(const int& pix) const
+{
+    // TODO: Implement
+    
+    // Return solid angle
+    return 0.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns solid angle of pixel
+ *
+ * @param[in] pix Pixel index (x,y)
+ ***************************************************************************/
+double GWcsCAR::omega(const GSkyPixel& pix) const
+{
+    // TODO: Implement
+    
+    // Return solid angle
+    return 0.0;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                          GWcsCAR private methods                        =
@@ -226,6 +313,17 @@ void GWcsCAR::free_members(void)
 GWcsCAR* GWcsCAR::clone(void) const
 {
     return new GWcsCAR(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+ ***************************************************************************/
+void GWcsCAR::wcsxy2sph(const double& x, const double& y, double* lon, double* lat) const
+{
+}
+void GWcsCAR::wcssph2xy(const double& lon, const double& lat, double* x, double* y) const
+{
 }
 
 

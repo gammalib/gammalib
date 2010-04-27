@@ -57,52 +57,6 @@ GWcs::GWcs(void)
 
 
 /***********************************************************************//**
- * @brief Constructor
- *
- * @param[in] crval Coordinates of reference pixel.
- * @param[in] crpix1 X coordinate of reference pixel.
- * @param[in] crpix2 Y coordinate of reference pixel.
- * @param[in] cdelt1 X increment at reference point in degrees/pixel.
- * @param[in] cdelt2 Y increment at reference point in degrees/pixel.
- * @param[in] coords Coordinate system ('EQU' or 'GAL').
- ***************************************************************************/
-GWcs::GWcs(GSkyDir& crval, const double& crpix1, const double& crpix2,
-           const double& cdelt1, const double& cdelt2,
-           const std::string& coords)
-{
-    // Initialise class members
-    init_members();
-
-    // Set coordinate system
-    coordsys(coords);
-
-    // Set reference value
-    switch (m_coordsys) {
-    case 0:
-        m_crval[0] = crval.ra_deg();
-        m_crval[1] = crval.dec_deg();
-        break;
-    case 1:
-        m_crval[0] = crval.l_deg();
-        m_crval[1] = crval.b_deg();
-        break;
-    default:
-        //TODO: Throw error
-        break;
-    }
-
-    // Set members
-    m_crpix[0] = crpix1;
-    m_crpix[1] = crpix2;
-    m_cdelt[0] = cdelt1;
-    m_cdelt[1] = cdelt2;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param wcs GWcs instance which should be used for construction
@@ -172,6 +126,41 @@ GWcs& GWcs::operator= (const GWcs& wcs)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Read WCS definiton from FITS header.
+ *
+ * @param[in] hdu FITS HDU containing the WCS definition.
+ ***************************************************************************/
+void GWcs::read(const GFitsHDU* hdu)
+{
+    // Free memory and initialise members
+    free_members();
+    init_members();
+    
+    //TODO: Implement WCS definition reading
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write WCS definiton into FITS HDU.
+ *
+ * @param[in] hdu FITS HDU into which WCS definition will be written.
+ ***************************************************************************/
+void GWcs::write(GFitsHDU* hdu)
+{
+    // Continue only if HDU is valid
+    if (hdu != NULL) {
+
+    } // endif: HDU was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Returns coordinate system.
  ***************************************************************************/
 std::string GWcs::coordsys(void) const
@@ -233,8 +222,8 @@ void GWcs::coordsys(const std::string& coordsys)
 void GWcs::init_members(void)
 {
     // Initialise members
-    m_ctype[0].clear();
-    m_ctype[1].clear();
+//    m_ctype[0].clear();
+//    m_ctype[1].clear();
     m_cdelt[0] =   0.0;
     m_cdelt[1] =   0.0;
     m_crpix[0] =   0.0;
@@ -260,8 +249,8 @@ void GWcs::init_members(void)
 void GWcs::copy_members(const GWcs& wcs)
 {
     // Copy attributes
-    m_ctype[0] = wcs.m_ctype[0];
-    m_ctype[1] = wcs.m_ctype[1];
+//    m_ctype[0] = wcs.m_ctype[0];
+//    m_ctype[1] = wcs.m_ctype[1];
     m_cdelt[0] = wcs.m_cdelt[0];
     m_cdelt[1] = wcs.m_cdelt[1];
     m_crpix[0] = wcs.m_crpix[0];
@@ -284,6 +273,46 @@ void GWcs::copy_members(const GWcs& wcs)
  ***************************************************************************/
 void GWcs::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Constructor
+ *
+ * @param[in] crval Coordinates of reference pixel.
+ * @param[in] crpix1 X coordinate of reference pixel.
+ * @param[in] crpix2 Y coordinate of reference pixel.
+ * @param[in] cdelt1 X increment at reference point in degrees/pixel.
+ * @param[in] cdelt2 Y increment at reference point in degrees/pixel.
+ * @param[in] coords Coordinate system ('EQU' or 'GAL').
+ ***************************************************************************/
+void GWcs::set_wcs(const double& crval1, const double& crval2, 
+                   const double& crpix1, const double& crpix2,
+                   const double& cdelt1, const double& cdelt2,
+                   const std::string& coords, 
+                   const double* cd, const double* pv)
+{
+    // Initialise class members
+    init_members();
+
+    // Set members
+    m_crval[0] = crval1;
+    m_crval[1] = crval2;
+    m_crpix[0] = crpix1;
+    m_crpix[1] = crpix2;
+    m_cdelt[0] = cdelt1;
+    m_cdelt[1] = cdelt2;
+
+    // Set coordinate system
+    coordsys(coords);
+    
+    // TODO: Set CD
+    
+    // TODO: Compute inverted CD
+    //cdinv=invert(ds)
+
     // Return
     return;
 }

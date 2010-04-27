@@ -20,8 +20,9 @@
 #define GWCSCAR_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GSkyDir.hpp"
 #include "GWcs.hpp"
+#include "GSkyDir.hpp"
+#include "GSkyPixel.hpp"
 
 
 /***********************************************************************//**
@@ -49,13 +50,12 @@ public:
 
     // Implemented virtual methods
     std::string type(void) const;
-    void        read(const GFitsHDU* hdu);
-    void        write(GFitsHDU* hdu);
-    GSkyDir     pix2dir(const int& ipix);
+    GSkyDir     pix2dir(const int& pix);
+    GSkyDir     xy2dir(const GSkyPixel& pix);
     int         dir2pix(GSkyDir dir) const;
+    GSkyPixel   dir2xy(GSkyDir dir) const;
     double      omega(const int& pix) const;
-
-    // Class specific methods
+    double      omega(const GSkyPixel& pix) const;
 
 private:
     // Private methods
@@ -63,6 +63,10 @@ private:
     void     copy_members(const GWcsCAR& wcs);
     void     free_members(void);
     GWcsCAR* clone(void) const;
+
+    // Implemented pure virtual private methods
+    void wcsxy2sph(const double& x, const double& y, double* lon, double* lat) const;
+    void wcssph2xy(const double& lon, const double& lat, double* x, double* y) const;
 
     // Private data area
 };

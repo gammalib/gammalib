@@ -26,8 +26,9 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT           "GWcsHPX::GWcsHPX(int,std::string,std::string)"
-#define G_READ                               "GWcsHPX::read(const GFitsHDU*)"
-#define G_NAXIS                                         "GWcsHPX::naxis(int)"
+#define G_READ                                     "GWcsHPX::read(GFitsHDU*)"
+#define G_XY2DIR                                 "GWcsHPX::xy2dir(GSkyPixel)"
+#define G_DIR2XY                                   "GWcsHPX::dir2xy(GSkyDir)"
 #define G_PIX2ANG_RING           "GWcsHPX::pix2ang_ring(int,double*,double*)"
 #define G_PIX2ANG_NEST           "GWcsHPX::pix2ang_nest(int,double*,double*)"
 #define G_ORDERING_SET                       "GWcsHPX::coordsys(std::string)"
@@ -217,6 +218,144 @@ std::string GWcsHPX::type(void) const
 
 
 /***********************************************************************//**
+ * @brief Returns sky direction of pixel
+ *
+ * @param[in] pix Pixel number (0,1,...,m_num_pixels).
+ ***************************************************************************/
+GSkyDir GWcsHPX::pix2dir(const int& pix)
+{
+    // Declare result
+    GSkyDir result;
+    double  theta = 0.0;
+    double  phi   = 0.0;
+
+    // Perform ordering dependent conversion
+    switch (m_ordering) {
+    case 0:
+        pix2ang_ring(pix, &theta, &phi);
+        break;
+    case 1:
+        pix2ang_nest(pix, &theta, &phi);
+        break;
+    default:
+        break;
+    }
+
+    // Store coordinate system dependent result
+    switch (m_coordsys) {
+    case 0:
+        result.radec(phi, pihalf-theta);
+        break;
+    case 1:
+        result.lb(phi, pihalf-theta);
+        break;
+    default:
+        break;
+    }
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns sky direction of pixel (method should never be called)
+ *
+ * @param[in] pix Sky pixel.
+ ***************************************************************************/
+GSkyDir GWcsHPX::xy2dir(const GSkyPixel& pix)
+{
+    // Throw error
+    throw GException::wcs(G_XY2DIR, "WCS method not defined for HPX type.");
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pixel for a given sky direction
+ *
+ * @param[in] dir Sky direction.
+ ***************************************************************************/
+int GWcsHPX::dir2pix(GSkyDir dir) const
+{
+    // Declare result
+    int    pix;
+    double z;
+    double phi;
+
+    // Compute coordinate system dependent (z,phi)
+    switch (m_coordsys) {
+    case 0:
+        z   = cos(pihalf-dir.dec());
+        phi = dir.ra();
+        break;
+    case 1:
+        z   = cos(pihalf-dir.b());
+        phi = dir.l();
+        break;
+    default:
+        break;
+    }
+
+    // Perform ordering dependent conversion
+    switch (m_ordering) {
+    case 0:
+        pix = ang2pix_z_phi_ring(z, phi);
+        break;
+    case 1:
+        pix = ang2pix_z_phi_nest(z, phi);
+        break;
+    default:
+        break;
+    }
+    
+    // Return pixel index
+    return pix;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pixel of sky direction (method should never be called)
+ *
+ * @param[in] dir Sky direction.
+ ***************************************************************************/
+GSkyPixel GWcsHPX::dir2xy(GSkyDir dir) const
+{
+    // Throw error
+    throw GException::wcs(G_DIR2XY, "WCS method not defined for HPX type.");
+}
+
+
+/***********************************************************************//**
+ * @brief Returns solid angle of pixel
+ *
+ * @param[in] pix Pixel number (0,1,...,num_pixels).
+ *
+ * HEALPix pixels have all the same solid angle, hence the pix argument is
+ * not used.
+ ***************************************************************************/
+double GWcsHPX::omega(const int& pix) const
+{
+    // Return solid angle
+    return m_omega;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns solid angle of pixel
+ *
+ * @param[in] pix Pixel index (x,y).
+ *
+ * HEALPix pixels have all the same solid angle, hence the pix argument is
+ * not used.
+ ***************************************************************************/
+double GWcsHPX::omega(const GSkyPixel& pix) const
+{
+    // Return solid angle
+    return m_omega;
+}
+
+
+/***********************************************************************//**
  * @brief Read Healpix definiton from FITS header.
  *
  * @param[in] hdu FITS HDU containing the Healpix definition.
@@ -312,114 +451,14 @@ void GWcsHPX::write(GFitsHDU* hdu)
 
 
 /***********************************************************************//**
- * @brief Returns sky direction of pixel
- *
- * @param[in] pix Pixel number (0,1,...,num_pixels).
- ***************************************************************************/
-GSkyDir GWcsHPX::pix2dir(const int& pix)
-{
-    // Declare result
-    GSkyDir result;
-    double  theta = 0.0;
-    double  phi   = 0.0;
-
-    // Perform ordering dependent conversion
-    switch (m_ordering) {
-    case 0:
-        pix2ang_ring(pix, &theta, &phi);
-        break;
-    case 1:
-        pix2ang_nest(pix, &theta, &phi);
-        break;
-    default:
-        break;
-    }
-
-    // Store coordinate system dependent result
-    switch (m_coordsys) {
-    case 0:
-        result.radec(phi, pihalf-theta);
-        break;
-    case 1:
-        result.lb(phi, pihalf-theta);
-        break;
-    default:
-        break;
-    }
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pixel for a given sky direction
- *
- * @param[in] dir Sky direction.
- ***************************************************************************/
-int GWcsHPX::dir2pix(GSkyDir dir) const
-{
-    // Declare result
-    int    pix;
-    double z;
-    double phi;
-
-    // Compute coordinate system dependent (z,phi)
-    switch (m_coordsys) {
-    case 0:
-        z   = cos(pihalf-dir.dec());
-        phi = dir.ra();
-        break;
-    case 1:
-        z   = cos(pihalf-dir.b());
-        phi = dir.l();
-        break;
-    default:
-        break;
-    }
-
-    // Perform ordering dependent conversion
-    switch (m_ordering) {
-    case 0:
-        pix = ang2pix_z_phi_ring(z, phi);
-        break;
-    case 1:
-        pix = ang2pix_z_phi_nest(z, phi);
-        break;
-    default:
-        break;
-    }
-
-    // Return pixel index
-    return pix;
-}
-
-
-/***********************************************************************//**
- * @brief Returns solid angle of pixel
- *
- * @param[in] pix Pixel number (0,1,...,num_pixels).
- *
- * HEALPix pixels have all the same solid angle, hence the pix argument is
- * not used.
- ***************************************************************************/
-double GWcsHPX::omega(const int& pix) const
-{
-    // Return solid angle
-    return m_omega;
-}
-
-
-/***********************************************************************//**
  * @brief Returns number of pixels
  ***************************************************************************/
-/*
 int GWcsHPX::npix(void) const
 {
     // Return number of pixels
     return m_num_pixels;
 }
-*/
+
 
 /***********************************************************************//**
  * @brief Returns number of divisions of the side of each base pixel.

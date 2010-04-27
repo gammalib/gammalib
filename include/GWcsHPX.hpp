@@ -20,8 +20,9 @@
 #define GWCSHPX_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GSkyDir.hpp"
 #include "GWcs.hpp"
+#include "GSkyDir.hpp"
+#include "GSkyPixel.hpp"
 
 
 /***********************************************************************//**
@@ -46,15 +47,18 @@ public:
     // Operators
     GWcsHPX& operator= (const GWcsHPX& wcs);
 
-    // Implemented virtual methods
+    // Implemented pure virtual methods
     std::string type(void) const;
-    void        read(const GFitsHDU* hdu);
-    void        write(GFitsHDU* hdu);
-    GSkyDir     pix2dir(const int& ipix);
+    GSkyDir     pix2dir(const int& pix);
+    GSkyDir     xy2dir(const GSkyPixel& pix);
     int         dir2pix(GSkyDir dir) const;
+    GSkyPixel   dir2xy(GSkyDir dir) const;
     double      omega(const int& pix) const;
+    double      omega(const GSkyPixel& pix) const;
 
     // Class specific methods
+    void        read(const GFitsHDU* hdu); // overwrites base class method
+    void        write(GFitsHDU* hdu);      // overwrites base class method
     int         npix(void) const;
     int         nside(void) const;
     std::string ordering(void) const;

@@ -22,6 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
+#include "GSkyPixel.hpp"
 
 
 /***********************************************************************//**
@@ -38,25 +39,25 @@ public:
     // Constructors and destructors
     GWcs(void);
     GWcs(const GWcs& wcs);
-    GWcs(GSkyDir& crval, const double& crpix1, const double& crpix2,
-         const double& cdelt1, const double& cdelt2,
-         const std::string& coords);
     virtual ~GWcs(void);
 
     // Operators
     virtual GWcs& operator= (const GWcs& wcs);
 
-    // Virtual Methods
+    // Pure virtual methods (not implemented)
     virtual std::string type(void) const = 0;
-    virtual void        read(const GFitsHDU* hdu) = 0;
-    virtual void        write(GFitsHDU* hdu) = 0;
     virtual GSkyDir     pix2dir(const int& pix) = 0;
+    virtual GSkyDir     xy2dir(const GSkyPixel& pix) = 0;
     virtual int         dir2pix(GSkyDir dir) const = 0;
+    virtual GSkyPixel   dir2xy(GSkyDir dir) const = 0;
     virtual double      omega(const int& pix) const = 0;
+    virtual double      omega(const GSkyPixel& pix) const = 0;
 
-    // Implemented methods
-    std::string coordsys(void) const;
-    void        coordsys(const std::string& coordsys);
+    // Virtual methods (implemented)
+    virtual void        read(const GFitsHDU* hdu);
+    virtual void        write(GFitsHDU* hdu);
+    virtual std::string coordsys(void) const;
+    virtual void        coordsys(const std::string& coordsys);
 
 private:
     // Private methods
@@ -64,19 +65,23 @@ private:
     void          copy_members(const GWcs& wcs);
     void          free_members(void);
     virtual GWcs* clone(void) const = 0;
+    void          set_wcs(const double& crval1, const double& crval2, 
+                          const double& crpix1, const double& crpix2,
+                          const double& cdelt1, const double& cdelt2,
+                          const std::string& coords, 
+                          const double* cd = NULL, const double* pv = NULL);
 
 protected:
     // Protected data area
     int          m_coordsys;     //!< 0=celestial, 1=galactic
 
     // WCS projection parameters
-    std::string  m_ctype[2];     //!< Coordinate strings
-    double       m_cd[4];        //!< Astrometry parameters
-    double       m_cdelt[2];     //!< Increment at reference point (deg/pixel)
-    double       m_crpix[2];     //!< x and y coordinates of the reference point
     double       m_crval[2];     //!< Coordinates of reference point
+    double       m_crpix[2];     //!< x and y coordinates of the reference point
+    double       m_cdelt[2];     //!< Increment at reference point (deg/pixel)
     double       m_longpole;     //!< Native longitude of North Pole
     double       m_latpole;      //!< Native latitude of North Pole
+    double       m_cd[4];        //!< Astrometry parameters
     double       m_pv2[2];       //!< Additional parameters
 };
 
