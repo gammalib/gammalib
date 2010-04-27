@@ -23,10 +23,13 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT_HPX "GSkymap::GSkymap(std::string,std::string,int,std::string,int)"
+#define G_CONSTRUCT_MAP "GSkymap::GSkymap(std::string,std::string,GSkyDir,int,int,double,double,int)"
 #define G_OP_ACCESS                              "GSkymap::operator(int,int)"
 #define G_READ                               "GSkymap::read(const GFitsHDU*)"
 #define G_PIX2DIR                                     "GSkymap::pix2dir(int)"
 #define G_DIR2PIX                                 "GSkymap::dir2pix(GSkyDir)"
+#define G_XY2DIR                                 "GSkymap::xy2dir(GSkyPixel)"
+#define G_DIR2XY                                   "GSkymap::dir2xy(GSkyDir)"
 #define G_OMEGA                                         "GSkymap::omega(int)"
 #define G_READ_HEALPIX                     "GSkymap::read_healpix(GFitsHDU*)"
 
@@ -88,8 +91,8 @@ GSkymap::GSkymap(const std::string& filename)
  *
  * @exception GException::wcs_invalid 
  *            Invalid wcs parameter.
- * @exception GException::skymap_bad_nmaps 
- *            Invalid nmaps parameter.
+ * @exception GException::skymap_bad_par
+ *            Invalid sky map parameter.
  * @exception GException::wcs_hpx_bad_nside 
  *            Invalid nside parameter.
  * @exception GException::wcs_bad_coords 
@@ -111,13 +114,13 @@ GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
 
     // Check if nmaps parameter is >0
     if (nmaps < 1)
-        throw GException::skymap_bad_nmaps(G_CONSTRUCT_HPX, nmaps,
-                                           "nmaps parameter must be >0.");
+        throw GException::skymap_bad_par(G_CONSTRUCT_HPX, nmaps,
+                                         "nmaps parameter must be >0.");
 
     // Allocate WCS
     m_wcs = new GWcsHPX(nside, order, coords);
 
-    // Set number of maps
+    // Set number of pixels and number of maps
     m_num_pixels = ((GWcsHPX*)m_wcs)->npix();
     m_num_maps   = nmaps;
 
@@ -130,9 +133,9 @@ GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
 
 
 /***********************************************************************//**
- * @brief Image constructor
+ * @brief 2D sky map constructor
  *
- * @param[in] wcs World Coordinate System (HPX).
+ * @param[in] wcs World Coordinate System.
  * @param[in] coords Coordinate System (CEL or GAL).
  * @param[in] dir Centre of skymap.
  * @param[in] nlon Number of pixels in longitude.
@@ -140,6 +143,9 @@ GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
  * @param[in] dlon Size of pixels in longitude.
  * @param[in] dlat Size of pixels in latitude.
  * @param[in] nmaps Number of maps in set (default=1).
+ *
+ * @exception GException::skymap_bad_par
+ *            Invalid sky map parameter.
  ***************************************************************************/
 GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
                  GSkyDir& dir, const int& nlon, const int& nlat,
@@ -148,8 +154,28 @@ GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
     // Initialise class members for clean destruction
     init_members();
 
+    // Check parameters
+    if (nlon < 1)
+        throw GException::skymap_bad_par(G_CONSTRUCT_MAP, nlon,
+                                         "nlon parameter must be >0.");
+    if (nlat < 1)
+        throw GException::skymap_bad_par(G_CONSTRUCT_MAP, nlat,
+                                         "nlat parameter must be >0.");
+    if (nmaps < 1)
+        throw GException::skymap_bad_par(G_CONSTRUCT_MAP, nmaps,
+                                         "nmaps parameter must be >0.");
+
     //TODO: Implement non HEALPix constructor
 
+    // Set number of pixels and number of maps
+    m_num_x      = nlon;
+    m_num_y      = nlat;
+    m_num_pixels = m_num_x * m_num_y;
+    m_num_maps   = nmaps;
+    
+    // Allocate pixels
+    alloc_pixels();
+    
     // Return
     return;
 }
@@ -193,44 +219,104 @@ GSkymap::~GSkymap(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Pixel access operator
+ * @brief 1D pixel access operator
  *
- * @param[in] pixel pixel number (starting from 0).
- * @param[in] element vector element number (starting from 0).
+ * @param[in] pixel Pixel index (0,1,...,m_num_pixels).
+ * @param[in] map Map index (0,1,...,m_num_maps).
+ *
+ * Access sky map pixel by its index, where the most quickly varying axis is
+ * the x axis of the map.
  ***************************************************************************/
-double& GSkymap::operator() (int pixel, int element)
+double& GSkymap::operator() (const int& pixel, const int map)
 {
-    // Throw error if pixel is not in range
+    // Throw error if pixel is not in valid range
     #if defined(G_RANGE_CHECK)
-    if (pixel   < 0 || pixel   >= m_num_pixels ||
-        element < 0 || element >= m_num_maps)
-        throw GException::out_of_range(G_OP_ACCESS, pixel, element,
+    if (pixel < 0 || pixel >= m_num_pixels ||
+        map   < 0 || map   >= m_num_maps)
+        throw GException::out_of_range(G_OP_ACCESS, pixel, map,
                                        m_num_pixels, m_num_maps);
     #endif
 
     // Return reference to pixel value
-    return m_pixels[pixel*m_num_maps+element];
+    return m_pixels[pixel*m_num_maps+map];
 }
 
 
 /***********************************************************************//**
- * @brief Pixel access operator
+ * @brief 1D pixel access operator
  *
- * @param[in] pixel pixel number (starting from 0).
- * @param[in] element vector element number (starting from 0).
+ * @param[in] pixel Pixel index (0,1,...,m_num_pixels).
+ * @param[in] map Map index (0,1,...,m_num_maps).
+ *
+ * Access sky map pixel by its index, where the most quickly varying axis is
+ * the x axis of the map.
  ***************************************************************************/
-const double& GSkymap::operator() (int pixel, int element) const
+const double& GSkymap::operator() (const int& pixel, const int map) const
 {
-    // Throw error if pixel is not in range
+    // Throw error if pixel is not in valid range
     #if defined(G_RANGE_CHECK)
-    if (pixel   < 0 || pixel   >= m_num_pixels ||
-        element < 0 || element >= m_num_maps)
-        throw GException::out_of_range(G_OP_ACCESS, pixel, element, 
+    if (pixel < 0 || pixel >= m_num_pixels ||
+        map   < 0 || map   >= m_num_maps)
+        throw GException::out_of_range(G_OP_ACCESS, pixel, map, 
                                        m_num_pixels, m_num_maps);
     #endif
 
     // Return reference to pixel value
-    return m_pixels[pixel*m_num_maps+element];
+    return m_pixels[pixel*m_num_maps+map];
+}
+
+
+/***********************************************************************//**
+ * @brief 2D pixel access operator
+ *
+ * @param[in] pixel 2D pixel index.
+ * @param[in] map Map index (0,1,...,m_num_maps).
+ *
+ * Access sky map pixel by its 2D index (x,y) that is implemented by the
+ * GSkyPixel class.
+ ***************************************************************************/
+double& GSkymap::operator() (const GSkyPixel& pixel, const int map)
+{
+    // Get pixel index
+    int index = xy2pix(pixel);
+    
+    // Throw error if pixel is not in range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= m_num_pixels ||
+        map   < 0 || map   >= m_num_maps)
+        throw GException::out_of_range(G_OP_ACCESS, index, map,
+                                       m_num_pixels, m_num_maps);
+    #endif
+
+    // Return reference to pixel value
+    return m_pixels[index*m_num_maps+map];
+}
+
+
+/***********************************************************************//**
+ * @brief 2D pixel access operator
+ *
+ * @param[in] pixel 2D pixel index.
+ * @param[in] map Map index (0,1,...,m_num_maps).
+ *
+ * Access sky map pixel by its 2D index (x,y) that is implemented by the
+ * GSkyPixel class.
+ ***************************************************************************/
+const double& GSkymap::operator() (const GSkyPixel& pixel, const int map) const
+{
+    // Get pixel index
+    int index = xy2pix(pixel);
+    
+    // Throw error if pixel is not in range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= m_num_pixels ||
+        map   < 0 || map   >= m_num_maps)
+        throw GException::out_of_range(G_OP_ACCESS, index, map,
+                                       m_num_pixels, m_num_maps);
+    #endif
+
+    // Return reference to pixel value
+    return m_pixels[index*m_num_maps+map];
 }
 
 
@@ -421,12 +507,12 @@ void GSkymap::write(GFitsHDU* hdu)
 /***********************************************************************//**
  * @brief Returns sky direction of pixel
  *
- * @param[in] pix Pixel number (0,1,...,num_pixels).
+ * @param[in] pix Pixel number (0,1,...,m_num_pixels).
  *
  * @exception GException::wcs
  *            No valid WCS found.
  ***************************************************************************/
-GSkyDir GSkymap::pix2dir(const int& pix)
+inline GSkyDir GSkymap::pix2dir(const int& pix)
 {
     // Throw error if WCS is not valid
     if (m_wcs == NULL)
@@ -445,7 +531,7 @@ GSkyDir GSkymap::pix2dir(const int& pix)
  * @exception GException::wcs
  *            No valid WCS found.
  ***************************************************************************/
-int GSkymap::dir2pix(GSkyDir dir) const
+inline int GSkymap::dir2pix(GSkyDir dir) const
 {
     // Throw error if WCS is not valid
     if (m_wcs == NULL)
@@ -457,9 +543,47 @@ int GSkymap::dir2pix(GSkyDir dir) const
 
 
 /***********************************************************************//**
+ * @brief Returns sky direction of pixel
+ *
+ * @param[in] pix Sky map pixel.
+ *
+ * @exception GException::wcs
+ *            No valid WCS found.
+ ***************************************************************************/
+inline GSkyDir GSkymap::xy2dir(const GSkyPixel& pix)
+{
+    // Throw error if WCS is not valid
+    if (m_wcs == NULL)
+        throw GException::wcs(G_XY2DIR, "No valid WCS found.");
+
+    // Return sky direction
+    return (m_wcs->xy2dir(pix));
+}
+
+
+/***********************************************************************//**
+ * @brief Returns sky map pixel for a given sky direction
+ *
+ * @param[in] dir Sky direction.
+ *
+ * @exception GException::wcs
+ *            No valid WCS found.
+ ***************************************************************************/
+inline GSkyPixel GSkymap::dir2xy(GSkyDir dir) const
+{
+    // Throw error if WCS is not valid
+    if (m_wcs == NULL)
+        throw GException::wcs(G_DIR2XY, "No valid WCS found.");
+
+    // Return pixel index
+    return (m_wcs->dir2xy(dir));
+}
+
+
+/***********************************************************************//**
  * @brief Returns solid angle of pixel
  *
- * @param[in] pix Pixel number (0,1,...,num_pixels).
+ * @param[in] pix Pixel number (0,1,...,m_num_pixels).
  *
  * @exception GException::wcs
  *            No valid WCS found.
@@ -478,7 +602,7 @@ double GSkymap::omega(const int& pix) const
 /***********************************************************************//**
  * @brief Returns number of pixels
  ***************************************************************************/
-int GSkymap::npix(void) const
+inline int GSkymap::npix(void) const
 {
     // Return number of pixels
     return m_num_pixels;
@@ -486,9 +610,29 @@ int GSkymap::npix(void) const
 
 
 /***********************************************************************//**
+ * @brief Returns number of pixels in x coordinate
+ ***************************************************************************/
+inline int GSkymap::nx(void) const
+{
+    // Return number of pixels
+    return m_num_x;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns number of pixels in y coordinate
+ ***************************************************************************/
+inline int GSkymap::ny(void) const
+{
+    // Return number of pixels
+    return m_num_y;
+}
+
+
+/***********************************************************************//**
  * @brief Returns number of maps
  ***************************************************************************/
-int GSkymap::nmaps(void) const
+inline int GSkymap::nmaps(void) const
 {
     // Return number of maps
     return m_num_maps;
@@ -509,6 +653,8 @@ void GSkymap::init_members(void)
     // Initialise members
     m_num_pixels = 0;
     m_num_maps   = 0;
+    m_num_x      = 0;
+    m_num_y      = 0;
     m_wcs        = NULL;
     m_pixels     = NULL;
 
@@ -550,6 +696,8 @@ void GSkymap::copy_members(const GSkymap& map)
     // Copy attributes
     m_num_pixels = map.m_num_pixels;
     m_num_maps   = map.m_num_maps;
+    m_num_x      = map.m_num_x;
+    m_num_y      = map.m_num_y;
 
     // Clone WCS if it is valid
     if (map.m_wcs != NULL) m_wcs = map.m_wcs->clone();
@@ -581,11 +729,34 @@ void GSkymap::free_members(void)
     // Signal free pointers
     m_wcs        = NULL;
     m_pixels     = NULL;
+    
+    // Reset number of pixels
     m_num_pixels = 0;
     m_num_maps   = 0;
+    m_num_x      = 0;
+    m_num_y      = 0;
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Converts 2D index (x,y) into 1D pixel index
+ *
+ * @param[in] pixel 2D pixel index.
+ *
+ * The (x,y) value is rounded to nearest integers before conversion. The x 
+ * axis is assumed as the most rapidely varying index.
+ ***************************************************************************/
+inline int GSkymap::xy2pix(const GSkyPixel& pix) const
+{
+    // Get x and y indices by rounding the (x,y) values
+    int ix = int(pix.x()+0.5);
+    int iy = int(pix.y()+0.5);
+    
+    // Return index
+    return (ix+iy*m_num_x);
 }
 
 

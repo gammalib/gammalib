@@ -20,8 +20,9 @@
 #define GSKYMAP_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GSkyDir.hpp"
 #include "GWcs.hpp"
+#include "GSkyDir.hpp"
+#include "GSkyPixel.hpp"
 #include "GFitsHDU.hpp"
 
 
@@ -48,36 +49,47 @@ public:
     GSkymap(const GSkymap& map);
     virtual ~GSkymap(void);
 
-    // Pixel access operators
-    double&       operator() (int pixel, int element = 0);
-    const double& operator() (int pixel, int element = 0) const;
-
     // Operators
     GSkymap& operator= (const GSkymap& map);
 
-    // Methods
-    void    load(const std::string& filename);
-    void    save(const std::string& filename, int clobber = 0);
-    void    read(const GFitsHDU* hdu);
-    void    write(GFitsHDU* hdu);
-    GSkyDir pix2dir(const int& ipix);
-    int     dir2pix(GSkyDir dir) const;
-    double  omega(const int& pix) const;
-    int     npix(void) const;
-    int     nmaps(void) const;
+    // 1D pixel methods
+    double&       operator() (const int& pixel, const int map = 0);
+    const double& operator() (const int& pixel, const int map = 0) const;
+    GSkyDir       pix2dir(const int& pix);
+    int           dir2pix(GSkyDir dir) const;
+    double        omega(const int& pix) const;
+    
+    // 2D pixel methods
+    double&       operator() (const GSkyPixel& pixel, const int map = 0);
+    const double& operator() (const GSkyPixel& pixel, const int map = 0) const;
+    GSkyDir       xy2dir(const GSkyPixel& pix);
+    GSkyPixel     dir2xy(GSkyDir dir) const;
 
+    // Methods
+    void      load(const std::string& filename);
+    void      save(const std::string& filename, int clobber = 0);
+    void      read(const GFitsHDU* hdu);
+    void      write(GFitsHDU* hdu);
+    int       npix(void) const;
+    int       nx(void) const;
+    int       ny(void) const;
+    int       nmaps(void) const;
+    
 private:
     // Private methods
     void      init_members(void);
     void      alloc_pixels(void);
     void      copy_members(const GSkymap& map);
     void      free_members(void);
+    int       xy2pix(const GSkyPixel& pix) const;
     void      read_healpix(const GFitsHDU* hdu);
     GFitsHDU* create_healpix_hdu(void);
 
     // Private data area
     int     m_num_pixels;   //!< Number of pixels
     int     m_num_maps;     //!< Number of maps
+    int     m_num_x;        //!< Number of pixels in x direction (only 2D)
+    int     m_num_y;        //!< Number of pixels in y direction (only 2D)
     GWcs*   m_wcs;          //!< Pointer to WCS projection
     double* m_pixels;       //!< Pointer to skymap pixels
 };
