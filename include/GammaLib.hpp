@@ -77,6 +77,7 @@
 
 /* __ Skymap handling ____________________________________________________ */
 #include "GSkyDir.hpp"
+#include "GSkyPixel.hpp"
 #include "GSkymap.hpp"
 #include "GWcs.hpp"
 #include "GWcsCAR.hpp"

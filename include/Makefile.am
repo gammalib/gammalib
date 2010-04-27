@@ -3,6 +3,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GException.hpp \
                      GNodeArray.hpp \
                      GSkyDir.hpp \
+                     GSkyPixel.hpp \
                      GSkymap.hpp \
                      GWcs.hpp \
                      GWcsCAR.hpp \
