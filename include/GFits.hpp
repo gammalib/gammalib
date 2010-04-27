@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GFits.hpp  - FITS file access class                  *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -71,10 +71,5 @@ private:
     int          m_num_hdu;     //!< Number of HDUs in file
     GFitsHDU*    m_hdu;         //!< Pointers to HDUs
 };
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
 
 #endif /* GFITS_HPP */

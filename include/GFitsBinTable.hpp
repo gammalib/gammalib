@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GFitsBinTable.hpp  - FITS binary table class               *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,6 @@
 #define GFITSBINTABLE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsCfitsio.hpp"
 #include "GFitsData.hpp"
 #include "GFitsTable.hpp"
 
@@ -56,10 +55,5 @@ private:
 
     // Private data area
 };
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
 
 #endif /* GFITSBINTABLE_HPP */

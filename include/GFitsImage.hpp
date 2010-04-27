@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GFitsImage.hpp  - FITS image abstract base class           *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -77,10 +77,5 @@ protected:
     long* m_naxes;       //!< Number of pixels in each dimension
     int   m_num_pixels;  //!< Number of image pixels
 };
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
 
 #endif /* GFITSIMAGE_HPP */

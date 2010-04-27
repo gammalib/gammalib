@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GFitsTable.hpp  - FITS table abstract base class            *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -84,10 +84,5 @@ protected:
     int             m_cols;       //!< Number of columns in table
     GFitsTableCol** m_columns;    //!< Array of table columns
 };
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
 
 #endif /* GFITSTABLE_HPP */

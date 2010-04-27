@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsImageDbl.hpp  - FITS double precision image class          *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -77,10 +77,5 @@ private:
     double* m_nulval;        // NULL value
     int     m_anynul;        // Number of NULLs encountered
 };
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
 
 #endif /* GFITSIMAGEDBL_HPP */

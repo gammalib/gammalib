@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsHeader.hpp  - FITS header handling class             *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -79,10 +79,5 @@ private:
     int              m_num_cards;
     GFitsHeaderCard* m_card;
 };
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
 
 #endif /* GFITSHEADER_HPP */

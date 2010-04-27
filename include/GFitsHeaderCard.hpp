@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsHeaderCard.hpp  - FITS header card class             *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -93,10 +93,5 @@ private:
     std::string m_comment;         //!< Card comment
     int         m_comment_write;   //!< Signals that comment should be written
 };
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
 
 #endif /* GFITSHEADERCARD_HPP */
