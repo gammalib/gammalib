@@ -241,10 +241,10 @@ public:
         skymap(std::string origin, std::string message);
     };
 
-    // Invalid number of maps in set
-    class skymap_bad_nmaps : public GExceptionHandler {
+    // Invalid sky map parameter
+    class skymap_bad_par : public GExceptionHandler {
     public:
-        skymap_bad_nmaps(std::string origin, int nmaps, std::string message = "");
+        skymap_bad_par(std::string origin, int par, std::string message = "");
     };
 
     // Incompatible data size

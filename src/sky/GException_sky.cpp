@@ -35,19 +35,19 @@ GException::skymap::skymap(std::string origin,
 
 
 /***********************************************************************//**
- * @brief Invalid number of maps in set
+ * @brief Bad sky map parameter
  *
  * @param[in] origin Method that throws the error.
- * @param[in] nmaps Requested number of maps.
+ * @param[in] par Map parameter.
  * @param[in] message Error message.
  ***************************************************************************/
-GException::skymap_bad_nmaps::skymap_bad_nmaps(std::string origin,
-                                               int         nmaps,
-                                               std::string message)
+GException::skymap_bad_par::skymap_bad_par(std::string origin,
+                                           int         par,
+                                           std::string message)
 {
     // Set origin and message
     m_origin  = origin;
-    m_message = "Invalid number of maps in set ("+str(nmaps)+"). " + message;
+    m_message = "Invalid map parameter ("+str(par)+"). " + message;
 
     // Return
     return;
