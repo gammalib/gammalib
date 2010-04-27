@@ -9,6 +9,7 @@ INCLUDES = -I$(top_srcdir)/include \
 sources = GSkyDir.cpp \
           GSkymap.cpp \
           GWcs.cpp \
+          GWcsCAR.cpp \
           GWcsHPX.cpp \
           GException_sky.cpp
 

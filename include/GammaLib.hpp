@@ -19,14 +19,67 @@
 #include <config.h>
 #endif
 
-/* __ Core services and tools ____________________________________________ */
+
+/***************************************************************************
+ *                              Core services                              *
+ ***************************************************************************/
+
+/* __ Common tools _______________________________________________________ */
 #include "GException.hpp"
 #include "GNodeArray.hpp"
+
+/* __ Numerics module ____________________________________________________ */
+#include "GMatrixTools.hpp"
+#include "GVector.hpp"
+#include "GMatrixBase.hpp"
+#include "GMatrix.hpp"
+#include "GSymMatrix.hpp"
+#include "GSparseMatrix.hpp"
+
+/* __ FITS module ________________________________________________________ */
+#include "GFits.hpp"
+#include "GFitsHDU.hpp"
+#include "GFitsHeader.hpp"
+#include "GFitsHeaderCard.hpp"
+#include "GFitsData.hpp"
+#include "GFitsImage.hpp"
+#include "GFitsImageFlt.hpp"
+#include "GFitsImageDbl.hpp"
+#include "GFitsAsciiTable.hpp"
+#include "GFitsBinTable.hpp"
+#include "GFitsTableCol.hpp"
+#include "GFitsTableLogCol.hpp"
+#include "GFitsTableStrCol.hpp"
+#include "GFitsTableShtCol.hpp"
+#include "GFitsTableLngCol.hpp"
+#include "GFitsTableFltCol.hpp"
+#include "GFitsTableDblCol.hpp"
+
+/* __ Parameter interface module _________________________________________ */
+
+
+/* __ Reporting module ___________________________________________________ */
+
+
+/* __ Application module _________________________________________________ */
+
+
+/* __ Optimizer module ___________________________________________________ */
+#include "GOptimizer.hpp"
+#include "GOptimizerLM.hpp"
+#include "GOptimizerPars.hpp"
+#include "GOptimizerFunction.hpp"
+
+
+/***************************************************************************
+ *                        Analysis support services                        *
+ ***************************************************************************/
 
 /* __ Skymap handling ____________________________________________________ */
 #include "GSkyDir.hpp"
 #include "GSkymap.hpp"
 #include "GWcs.hpp"
+#include "GWcsCAR.hpp"
 #include "GWcsHPX.hpp"
 
 /* __ Observation handling _______________________________________________ */
@@ -51,38 +104,10 @@
 #include "GModelTemporal.hpp"
 #include "GModelTemporalConst.hpp"
 
-/* __ FITS module ________________________________________________________ */
-#include "GFits.hpp"
-#include "GFitsHDU.hpp"
-#include "GFitsHeader.hpp"
-#include "GFitsHeaderCard.hpp"
-#include "GFitsData.hpp"
-#include "GFitsImage.hpp"
-#include "GFitsImageFlt.hpp"
-#include "GFitsImageDbl.hpp"
-#include "GFitsAsciiTable.hpp"
-#include "GFitsBinTable.hpp"
-#include "GFitsTableCol.hpp"
-#include "GFitsTableLogCol.hpp"
-#include "GFitsTableStrCol.hpp"
-#include "GFitsTableShtCol.hpp"
-#include "GFitsTableLngCol.hpp"
-#include "GFitsTableFltCol.hpp"
-#include "GFitsTableDblCol.hpp"
 
-/* __ Optimizer module ___________________________________________________ */
-#include "GOptimizer.hpp"
-#include "GOptimizerLM.hpp"
-#include "GOptimizerPars.hpp"
-#include "GOptimizerFunction.hpp"
-
-/* __ LINALG module ______________________________________________________ */
-#include "GMatrixTools.hpp"
-#include "GVector.hpp"
-#include "GMatrixBase.hpp"
-#include "GMatrix.hpp"
-#include "GSymMatrix.hpp"
-#include "GSparseMatrix.hpp"
+/***************************************************************************
+ *                      Instrument specific services                       *
+ ***************************************************************************/
 
 /* __ Fermi/LAT specific code ____________________________________________ */
 #include "GLATObservation.hpp"
