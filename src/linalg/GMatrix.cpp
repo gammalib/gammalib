@@ -130,14 +130,14 @@ GMatrix& GMatrix::operator= (const GMatrix& m)
         // Copy base class members
         this->GMatrixBase::operator=(m);
 
-      // Free members
-      free_members();
+        // Free members
+        free_members();
 
-      // Initialise private members for clean destruction
-      init_members();
+        // Initialise private members for clean destruction
+        init_members();
 
-      // Copy members
-      copy_members(m);
+        // Copy members
+        copy_members(m);
 
     } // endif: object was not identical
 
