@@ -1,0 +1,105 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% GammaLib Coding conventions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definitions for manual package
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\task}{\mbox{GammaLib}}
+\newcommand{\this}{\mbox{\tt \task}}
+\newcommand{\shorttype}{\mbox{CODING}}
+\newcommand{\doctype}{\mbox{Coding Conventions}}
+\newcommand{\version}{\mbox{draft}}
+\newcommand{\calendar}{\mbox{28 April 2010}}
+\newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
+\newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document definition
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}[12pt,a4]
+\usepackage{epsfig}
+\usepackage{manual}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Begin of document body
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\frontpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+The present document summarises the coding conventions that should be
+followed in implementing the \this\ toolbox.
+The respect of coherent coding conventions throughout the code
+improves code readibility and enhances the portability of the code.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% System architectural design
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Rules}
+
+The following general rules should be followed:
+\begin{itemize}
+\item Each function and/or method terminates with a {\tt return;} statement.
+\item Put a blank line at the end of each file.
+\end{itemize}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Documentation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Documentation}
+
+Code documentation should be done within the source files using Doxygen
+compliant annotations.
+
+The following rules apply.
+
+
+\subsection{File descriptor}
+
+Put a 80 character wide header comment on top of {\bf each file}
+(header, source code, templates, etc.).
+The header contains
+the file name,
+a brief description of the file content,
+the development period and the name of the person which {\bf initially}
+created the file, and
+a standard GNU Public License statement.
+The header comment is immediately followed by a Doxygen compliant
+file description that provides
+the file name,
+a brief description of the file content, and
+the name of the person which {\bf initially} created the file.
+\begin{verbatim}
+/***************************************************************************
+ *                       GMatrix.cpp  -  matrix class                      *
+ * ----------------------------------------------------------------------- *
+ *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
+ * ----------------------------------------------------------------------- *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+/**
+ * @file GMatrix.cpp
+ * @brief GVector class implementation.
+ * @author J. Knodlseder
+ */
+\end{verbatim}
+
+\end{document}
+
