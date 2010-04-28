@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GSky.cpp
+ * @brief Testing of sky module.
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include <stdlib.h>
@@ -34,7 +39,7 @@ void test_GSkymap_healpix_construct(void)
     }
     catch (std::exception &e) {
         std::cout << std::endl 
-                  << "TEST ERROR: Unable to construct empty Healpix map."
+                  << "TEST ERROR: Unable to construct empty map."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -201,7 +206,7 @@ void test_GSkymap_healpix_io(void)
 
     // Define Healpix map for comparison
     GSkymap refmap("HPX", "GAL", 4, "RING", 1);
-    
+
     // Test Healpix map saving
     try {
         for (int pix = 0; pix < refmap.npix(); ++pix)
@@ -259,13 +264,57 @@ void test_GSkymap_healpix_io(void)
     }
     catch (std::exception &e) {
         std::cout << std::endl 
-                  << "TEST ERROR: Unable to instatiate Healpix map from FITS file."
+                  << "TEST ERROR: Unable to create Healpix instance from FITS file."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
     std::cout << ".";
-    
+
+    // Signal final test success
+    std::cout << " ok." << std::endl;
+
+    // Exit test
+    return;
+
+}
+
+
+/***************************************************************************
+ *  Test: GSkymap_map_construct                                            *
+ ***************************************************************************/
+void test_GSkymap_map_construct(void)
+{
+    // Dump header
+    std::cout << "Test non Healpix GSkymap constructors: ";
+
+    // Test void constructor
+    try {
+        GSkymap map;
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to construct empty map."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test correct Healpix constructors
+    try {
+        GSkymap map1("CAR", "GAL", 0.0, 0.0, 1.0, 1.0, 100, 100);
+std::cout << map1 << std::endl;
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to construct sky map(s)."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
     // Signal final test success
     std::cout << " ok." << std::endl;
 
@@ -289,6 +338,7 @@ int main(void)
     // Execute Healpix tests
     test_GSkymap_healpix_construct();
     test_GSkymap_healpix_io();
+    test_GSkymap_map_construct();
 
     // Return
     return 0;
