@@ -25,8 +25,8 @@
 #endif
 #include <math.h>
 #include <iostream>
-#include "GException.hpp"
 #include <stdlib.h>
+#include "GException.hpp"
 #include "GMatrixBase.hpp"
 
 /* __ Definitions ________________________________________________________ */
