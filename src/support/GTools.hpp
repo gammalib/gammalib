@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.hpp  -  GammaLib tools                     *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GTools.hpp
+ * @brief Gammalib tools definition
+ * @author J. Knodlseder
+ */
 
 #ifndef GTOOLS_HPP
 #define GTOOLS_HPP
@@ -37,6 +42,8 @@ const double fourthird   =  4.0/3.0;
 /* __ Prototypes ________________________________________________________ */
 std::string strip_whitespace(const std::string& arg);
 std::string str(const int& value);
+std::string str(const float& value);
+std::string str(const double& value);
 std::string toupper(const std::string& s);
 std::string tolower(const std::string& s);
 double      modulo(double v1, double v2);

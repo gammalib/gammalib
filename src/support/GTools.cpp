@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTools.cpp  -  GammaLib tools                  *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GTools.cpp
+ * @brief Gammalib tools implementation
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include <sstream>
@@ -23,7 +28,7 @@
 /***********************************************************************//**
  * @brief Strip leading and trailing whitespace from string
  *
- * @param[in] arg String which should be stripped of whitespace.
+ * @param[in] arg String from which whitespace should be stripped.
  ***************************************************************************/
 std::string strip_whitespace(const std::string& arg)
 {
@@ -49,9 +54,35 @@ std::string strip_whitespace(const std::string& arg)
 /***********************************************************************//**
  * @brief Convert integer value into string
  *
- * @param[in] value Value to be converted into a string.
+ * @param[in] value Integer to be converted into string.
  ***************************************************************************/
 std::string str(const int& value)
+{
+    std::ostringstream s_value;
+    s_value << value;
+    return  s_value.str();
+}
+
+
+/***********************************************************************//**
+ * @brief Convert single precision value into string
+ *
+ * @param[in] value Single precision value to be converted into string.
+ ***************************************************************************/
+std::string str(const float& value)
+{
+    std::ostringstream s_value;
+    s_value << value;
+    return  s_value.str();
+}
+
+
+/***********************************************************************//**
+ * @brief Convert double precision value into string
+ *
+ * @param[in] value Double precision value to be converted into string.
+ ***************************************************************************/
+std::string str(const double& value)
 {
     std::ostringstream s_value;
     s_value << value;
