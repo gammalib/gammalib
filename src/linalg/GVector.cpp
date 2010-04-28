@@ -136,9 +136,23 @@ GVector& GVector::operator= (const GVector& v)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Set vector elements to 0
+ ***************************************************************************/
+void GVector::clear(void)
+{
+    // Set all elements to 0
+    for (int i = 0; i < m_num; ++i)
+        m_data[i] = 0.0;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Returns number of non-zero elements in vector
  ***************************************************************************/
-int GVector::non_zeros() const
+int GVector::non_zeros(void) const
 {
     // Initialise number of non-zeros
     int non_zeros = 0;

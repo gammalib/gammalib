@@ -104,8 +104,9 @@ public:
     GVector  operator- () const;
 
     // Vector methods
-    int size() const;       // Return dimension of vector
-    int non_zeros() const;  // Returns # of non zeros in vector
+    void clear(void);
+    int  size(void) const;
+    int  non_zeros(void) const;
 
 private:
     // Private methods
@@ -115,8 +116,8 @@ private:
     void free_members(void);
 
     // Private data area
-    int     m_num;  //!< Number of elements in vector
-    double* m_data; //!< Vector array
+    int     m_num;    //!< Number of elements in vector
+    double* m_data;   //!< Vector array
 };
 
 
