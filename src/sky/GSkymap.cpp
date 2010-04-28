@@ -11,19 +11,27 @@
  *                                                                         *
  * ----------------------------------------------------------------------- *
  ***************************************************************************/
+/**
+ * @file GSkymap.cpp
+ * @brief GSkymap class implementation.
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GSkymap.hpp"
+#include "GWcsCAR.hpp"
 #include "GWcsHPX.hpp"
 #include "GFits.hpp"
 #include "GFitsTableDblCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CONSTRUCT_HPX "GSkymap::GSkymap(std::string,std::string,int,std::string,int)"
-#define G_CONSTRUCT_MAP "GSkymap::GSkymap(std::string,std::string,GSkyDir,int,int,double,double,int)"
+#define G_CONSTRUCT_HPX     "GSkymap::GSkymap(std::string,std::string,int," \
+                                                           "std::string,int)"
+#define G_CONSTRUCT_MAP "GSkymap::GSkymap(std::string,std::string,GSkyDir," \
+                                                 "int,int,double,double,int)"
 #define G_OP_ACCESS                              "GSkymap::operator(int,int)"
 #define G_READ                               "GSkymap::read(const GFitsHDU*)"
 #define G_PIX2DIR                                     "GSkymap::pix2dir(int)"
@@ -31,6 +39,8 @@
 #define G_XY2DIR                                 "GSkymap::xy2dir(GSkyPixel)"
 #define G_DIR2XY                                   "GSkymap::dir2xy(GSkyDir)"
 #define G_OMEGA                                         "GSkymap::omega(int)"
+#define G_SET_WCS "GSkymap::set_wcs(std::string,std::string,double,double," \
+                               "double,double,double,double,GMatrix,GVector)"
 #define G_READ_HEALPIX                     "GSkymap::read_healpix(GFitsHDU*)"
 
 /* __ Macros _____________________________________________________________ */
@@ -89,16 +99,10 @@ GSkymap::GSkymap(const std::string& filename)
  * @param[in] order Pixel ordering (RING or NEST).
  * @param[in] nmaps Number of maps in set (default=1).
  *
- * @exception GException::wcs_invalid 
+ * @exception GException::wcs_invalid
  *            Invalid wcs parameter.
  * @exception GException::skymap_bad_par
  *            Invalid sky map parameter.
- * @exception GException::wcs_hpx_bad_nside 
- *            Invalid nside parameter.
- * @exception GException::wcs_bad_coords 
- *            Invalid coordsys parameter.
- * @exception GException::wcs_hpx_bad_ordering 
- *            Invalid ordering parameter.
  ***************************************************************************/
 GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
                  const int& nside, const std::string& order,
@@ -137,45 +141,57 @@ GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
  *
  * @param[in] wcs World Coordinate System.
  * @param[in] coords Coordinate System (CEL or GAL).
- * @param[in] dir Centre of skymap.
- * @param[in] nlon Number of pixels in longitude.
- * @param[in] nlat Number of pixels in latitude.
- * @param[in] dlon Size of pixels in longitude.
- * @param[in] dlat Size of pixels in latitude.
+ * @param[in] x X coordinate of sky map centre (deg).
+ * @param[in] y Y coordinate of sky map centre (deg).
+ * @param[in] dx Pixel size in x direction at centre (deg/pixel).
+ * @param[in] dy Pixel size in y direction at centre (deg/pixel).
+ * @param[in] nx Number of pixels in x direction.
+ * @param[in] ny Number of pixels in y direction.
  * @param[in] nmaps Number of maps in set (default=1).
  *
  * @exception GException::skymap_bad_par
  *            Invalid sky map parameter.
  ***************************************************************************/
 GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
-                 GSkyDir& dir, const int& nlon, const int& nlat,
-                 const double& dlon, const double& dlat, const int nmaps)
+                 double const& x, double const& y,
+                 double const& dx, double const& dy,
+                 const int& nx, const int& ny, const int nmaps)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Check parameters
-    if (nlon < 1)
-        throw GException::skymap_bad_par(G_CONSTRUCT_MAP, nlon,
-                                         "nlon parameter must be >0.");
-    if (nlat < 1)
-        throw GException::skymap_bad_par(G_CONSTRUCT_MAP, nlat,
-                                         "nlat parameter must be >0.");
+    if (nx < 1)
+        throw GException::skymap_bad_par(G_CONSTRUCT_MAP, nx,
+                                         "nx parameter must be >0.");
+    if (ny < 1)
+        throw GException::skymap_bad_par(G_CONSTRUCT_MAP, ny,
+                                         "ny parameter must be >0.");
     if (nmaps < 1)
         throw GException::skymap_bad_par(G_CONSTRUCT_MAP, nmaps,
                                          "nmaps parameter must be >0.");
 
-    //TODO: Implement non HEALPix constructor
+    // Set WCS
+    double  crval1 = x;
+    double  crval2 = y;
+    double  crpix1 = double(nx)/2.0;
+    double  crpix2 = double(ny)/2.0;
+    double  cdelt1 = dx;
+    double  cdelt2 = dy;
+    GMatrix cd(2,2);
+    GVector pv2(21);
+    set_wcs(wcs, coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2, 
+            cd, pv2);
 
     // Set number of pixels and number of maps
-    m_num_x      = nlon;
-    m_num_y      = nlat;
+    m_num_x      = nx;
+    m_num_y      = ny;
     m_num_pixels = m_num_x * m_num_y;
     m_num_maps   = nmaps;
-    
+
     // Allocate pixels
     alloc_pixels();
-    
+
     // Return
     return;
 }
@@ -279,7 +295,7 @@ double& GSkymap::operator() (const GSkyPixel& pixel, const int map)
 {
     // Get pixel index
     int index = xy2pix(pixel);
-    
+
     // Throw error if pixel is not in range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= m_num_pixels ||
@@ -306,7 +322,7 @@ const double& GSkymap::operator() (const GSkyPixel& pixel, const int map) const
 {
     // Get pixel index
     int index = xy2pix(pixel);
-    
+
     // Throw error if pixel is not in range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= m_num_pixels ||
@@ -771,7 +787,7 @@ void GSkymap::free_members(void)
     // Signal free pointers
     m_wcs        = NULL;
     m_pixels     = NULL;
-    
+
     // Reset number of pixels
     m_num_pixels = 0;
     m_num_maps   = 0;
@@ -781,6 +797,56 @@ void GSkymap::free_members(void)
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Set WCS
+ *
+ * @param[in] wcs World Coordinate System type (3 characters, upper case).
+ * @param[in] coords Coordinate system.
+ * @param[in] crval1 X value of reference pixel.
+ * @param[in] crval1 Y value of reference pixel.
+ * @param[in] crpix1 X index of reference pixel.
+ * @param[in] crpix2 Y index of reference pixel.
+ * @param[in] cdelt1 Increment in x direction at reference pixel (deg).
+ * @param[in] cdelt2 Increment in y direction at reference pixel (deg).
+ * @param[in] cd Astrometry parameters (2x2 matrix, deg/pixel).
+ * @param[in] pv2 Projection parameters (length WCS type dependent).
+ *
+ * @exception GException::wcs_invalid
+ *            Invalid wcs parameter (World Coordinate System not supported
+ *            or known to method).
+ *
+ * This method sets the WCS projection pointer based on the WCS type and
+ * sky map parameters.
+ ***************************************************************************/
+void GSkymap::set_wcs(const std::string& wcs, const std::string& coords,
+                      const double& crval1, const double& crval2,
+                      const double& crpix1, const double& crpix2,
+                      const double& cdelt1, const double& cdelt2,
+                      const GMatrix& cd, const GVector& pv2)
+{
+    // Convert WCS to upper case
+    std::string uwcs = toupper(wcs);
+
+    // Check projections
+    if (uwcs == "" || uwcs == "CAR") {
+        m_wcs = new GWcsCAR(coords, crval1, crval2, crpix1, crpix2,
+                            cdelt1, cdelt2, cd, pv2);
+    }
+    else if (uwcs == "HPX") {         // HPX not allowed with this method
+       throw GException::wcs_invalid(G_SET_WCS, wcs,
+                                     "Method not valid for HPX projection.");
+    }
+    else {
+       throw GException::wcs_invalid(G_SET_WCS, wcs,
+                                     "Projection type not known to method.");
+    }
+
+    // Return
+    return;
+}
+
 
 
 /***********************************************************************//**
@@ -796,7 +862,7 @@ int GSkymap::xy2pix(const GSkyPixel& pix) const
     // Get x and y indices by rounding the (x,y) values
     int ix = int(pix.x()+0.5);
     int iy = int(pix.y()+0.5);
-    
+
     // Return index
     return (ix+iy*m_num_x);
 }
@@ -823,10 +889,10 @@ GSkyPixel GSkymap::pix2xy(const int& pix) const
         x = double(pix);
         y = 0.0;
     }
-    
+
     // Set pixel
     GSkyPixel pixel(x, y);
-    
+
     // Return pixel
     return pixel;
 }
@@ -1039,12 +1105,19 @@ std::ostream& operator<< (std::ostream& os, const GSkymap& map)
 {
     // Put header in stream
     os << "=== GSkymap ===" << std::endl;
+    os << " Number of pixels ..........: " << map.m_num_pixels << std::endl;
+    os << " Number of maps ............: " << map.m_num_maps << std::endl;
+    os << " X axis dimension ..........: " << map.m_num_x << std::endl;
+    os << " Y axis dimension ..........: " << map.m_num_y << std::endl;
 
     // Put WCS information in stream
     if (map.m_wcs != NULL) {
-        if (map.m_wcs->type() == "HPX")
+        if (map.m_wcs->type() == "CAR")
+            os << *((GWcsCAR*)map.m_wcs);
+        else if (map.m_wcs->type() == "HPX")
             os << *((GWcsHPX*)map.m_wcs);
-        //os << std::endl;
+        else
+            os << " WCS projection ............: UNKNOWN";
     }
 
     // Return output stream
