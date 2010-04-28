@@ -20,6 +20,9 @@
 #define GMATRIX_HPP
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GMatrixBase.hpp"
 
 

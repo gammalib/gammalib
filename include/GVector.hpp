@@ -20,9 +20,13 @@
 #define GVECTOR_HPP
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include <math.h>
+#include <iostream>
+#include <stdlib.h>
 #include "GException.hpp"
-#include <math.h>                             // Mathematics functions
-#include <iostream>                           // std::ostream
 
 
 /***********************************************************************//**
