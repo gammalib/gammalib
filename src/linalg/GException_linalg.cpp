@@ -137,13 +137,14 @@ GException::matrix_mismatch::matrix_mismatch(std::string origin, int rows1,
 
 
 /***************************************************************************
- *                           Matrix not rectangular                        *
+ *                           Matrix not square                             *
  ***************************************************************************/
-GException::matrix_not_rectangular::matrix_not_rectangular(std::string origin,
-                                                           int rows, int cols)
+GException::matrix_not_square::matrix_not_square(std::string origin,
+                                                 int         rows,
+                                                 int         cols)
 {
     m_origin  = origin;
-    m_message = "Matrix is not rectangular [" + str(rows) + "," + str(cols) + "]";
+    m_message = "Matrix is not square [" + str(rows) + "," + str(cols) + "]";
 }
 
 
