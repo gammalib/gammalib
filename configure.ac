@@ -71,10 +71,10 @@ dnl ============================
 dnl ==============================
 dnl Check for range cheking option
 dnl ==============================
-RANGE_CHECK="no"
-AC_ARG_ENABLE(range_check, 
-             [  --enable-range-check    performs index range checking], 
-             [ RANGE_CHECK="$enableval" ]) 
+RANGE_CHECK="yes"
+AC_ARG_ENABLE(range_check,
+             [  --enable-range-check    performs index range checking (default=yes)],
+             [ RANGE_CHECK="$enableval" ])
 if test "x$RANGE_CHECK" = "xyes"; then
         AC_DEFINE([G_RANGE_CHECK], [1], [Define if range checking should be performed])
 fi
@@ -97,7 +97,7 @@ AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
 
 AC_ARG_ENABLE([python-binding],
               AS_HELP_STRING([--enable-python-binding],
-                             [build python binding (default=yes]),
+                             [build python binding (default=yes)]),
                              [ac_enable_python_binding=no],
                              [ac_enable_python_binding=yes])
 if test "x$ac_enable_python_binding" = "xyes"
