@@ -86,10 +86,10 @@ public:
                         int cols2);
     };
 
-    // Matrix not rectangular
-    class matrix_not_rectangular : public GExceptionHandler {
+    // Matrix not square
+    class matrix_not_square : public GExceptionHandler {
     public:
-        matrix_not_rectangular(std::string origin, int rows, int cols);
+        matrix_not_square(std::string origin, int rows, int cols);
     };
 
     // Matrix not positive definite
