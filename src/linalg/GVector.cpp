@@ -46,11 +46,11 @@ GVector::GVector(void)
 /***********************************************************************//**
  * @brief Vector constructor
  *
- * @param[in] num Number of elements in vector
+ * @param[in] num Number of elements in vector.
  *
- * Initialises a vector with num elements (values are set to 0)
+ * Initialises a vector with num elements (all values are set to 0).
  ***************************************************************************/
-GVector::GVector(int num)
+GVector::GVector(const int& num)
 {
     // Initialise class members
     init_members();
@@ -60,6 +60,90 @@ GVector::GVector(int num)
 
     // Allocate vector (filled with 0)
     alloc_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Single element vector constructor
+ *
+ * @param[in] a Value of first and single vector element.
+ *
+ * Initialises 1-element vector.
+ ***************************************************************************/
+GVector::GVector(const double& a)
+{
+    // Initialise class members
+    init_members();
+
+    // Store vector size
+    m_num = 1;
+
+    // Allocate vector
+    alloc_members();
+    
+    // Set value
+    m_data[0] = a;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Two elements vector constructor
+ *
+ * @param[in] a Value of first vector element.
+ * @param[in] b Value of second vector element.
+ *
+ * Initialises 2-elements vector.
+ ***************************************************************************/
+GVector::GVector(const double& a, const double& b)
+{
+    // Initialise class members
+    init_members();
+
+    // Store vector size
+    m_num = 2;
+
+    // Allocate vector
+    alloc_members();
+    
+    // Set values
+    m_data[0] = a;
+    m_data[1] = b;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Three elements vector constructor
+ *
+ * @param[in] a Value of first vector element.
+ * @param[in] b Value of second vector element.
+ * @param[in] c Value of third vector element.
+ *
+ * Initialises 3-elements vector.
+ ***************************************************************************/
+GVector::GVector(const double& a, const double& b, const double& c)
+{
+    // Initialise class members
+    init_members();
+
+    // Store vector size
+    m_num = 3;
+
+    // Allocate vector
+    alloc_members();
+    
+    // Set values
+    m_data[0] = a;
+    m_data[1] = b;
+    m_data[2] = c;
 
     // Return
     return;

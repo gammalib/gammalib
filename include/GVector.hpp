@@ -88,7 +88,10 @@ class GVector {
 public:
     // Constructors and destructors
     GVector(void);
-    explicit GVector(int num);
+    explicit GVector(const int& num);
+    explicit GVector(const double& a);
+    explicit GVector(const double& a, const double& b);
+    explicit GVector(const double& a, const double& b, const double& c);
     GVector(const GVector& v);
    ~GVector(void);
 
