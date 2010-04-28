@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GVector.cpp  -  vector class                      *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2010         by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -10,9 +10,18 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GVector.cpp
+ * @brief GVector class implementation.
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include "GVector.hpp"
+
+
+/* __ Method name definitions ____________________________________________ */
+#define G_CROSS                                      "cross(GVector,GVector)"
 
 
 /*==========================================================================
@@ -21,60 +30,70 @@
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                              Constructor                                *
+/***********************************************************************//**
+ * @brief Void vector constructor (contains no elements)
+ ***************************************************************************/
+GVector::GVector(void)
+{
+    // Initialise class members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Vector constructor
+ *
+ * @param[in] num Number of elements in vector
+ *
+ * Initialises a vector with num elements (values are set to 0)
  ***************************************************************************/
 GVector::GVector(int num)
 {
-  // Throw exception if requested vector length is zero
-  if (num == 0)
-    throw GException::empty("GVector constructor");
-	
-  // Allocate vector array. Throw exception if allocation failed
-  m_data = new double[num];
-  if (m_data == NULL)
-	throw GException::mem_alloc("GVector constructor", num);
-	
-  // Store vector size and initialize elements to 0.0
-  m_num = num;
-  for (int i = 0; i < m_num; ++i)
-    m_data[i] = 0.0;
-	
-  // Return
-  return;
+    // Initialise class members
+    init_members();
+
+    // Store vector size
+    m_num = num;
+
+    // Allocate vector (filled with 0)
+    alloc_members();
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                            Copy constructor                             *
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] v Vector from which class should be instantiated.
  ***************************************************************************/
 GVector::GVector(const GVector& v)
 {
-  // Allocate vector array. Throw exception if allocation failed
-  m_data = new double[v.m_num];
-  if (m_data == NULL)
-	throw GException::mem_alloc("GVector copy constructor", v.m_num);
+    // Initialise class members
+    init_members();
 
-  // Store vector size and copy elements
-  m_num = v.m_num;
-  for (int i = 0; i < m_num; ++i)
-    m_data[i] = v.m_data[i];
-	
-  // Return
-  return;
+    // Copy members
+    copy_members(v);
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                               Destructor                                *
+/***********************************************************************//**
+ * @brief Destructor
  ***************************************************************************/
-GVector::~GVector()
+GVector::~GVector(void)
 {
-  // Deallocate only if memory has indeed been allocated
-  if (m_data != NULL) delete[] m_data;
+    // Free members
+    free_members();
 
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
@@ -84,63 +103,134 @@ GVector::~GVector()
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                       GVector assignment operator                       *
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param[in] v GVector instance to be assigned
  ***************************************************************************/
 GVector& GVector::operator= (const GVector& v)
 {
-  // Assign only if not identical
-  if (this != &v) {
-  
-    // First delete old data if it exists
-    if (m_data != NULL) delete [] m_data;
-	
-    // Allocate vector array. Throw exception if allocation failed
-    m_data = new double[v.m_num];
-    if (m_data == NULL)
-	  throw GException::mem_alloc("GVector assignment operator", v.m_num);
+    // Execute only if object is not identical
+    if (this != &v) {
 
-    // Store vector size and copy elements
-    m_num = v.m_num;
-    for (int i = 0; i < m_num; ++i)
-      m_data[i] = v.m_data[i];
-  }
-  
-  // Return vector
-  return *this;
+        // Free members
+        free_members();
+
+        // Initialise private members
+        init_members();
+
+        // Copy members
+        copy_members(v);
+
+    } // endif: object was not identical
+
+    // Return this object
+    return *this;
 }
 
 
 /*==========================================================================
  =                                                                         =
- =                         GVector member functions                        =
+ =                          GVector public methods                         =
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                   Returns number of non-zeros in vector                 *
+/***********************************************************************//**
+ * @brief Returns number of non-zero elements in vector
  ***************************************************************************/
 int GVector::non_zeros() const
 {
-  // Initialise number of non-zeros
-  int non_zeros = 0;
-  
-  // Gather all non-zero elements
-  for (int i = 0; i < m_num; ++i) {
-    if (m_data[i] != 0.0)
-	  non_zeros++;
-  }
-  
-  // Return number of non-zero elements
-  return non_zeros;
+    // Initialise number of non-zeros
+    int non_zeros = 0;
+
+    // Gather all non-zero elements
+    for (int i = 0; i < m_num; ++i) {
+        if (m_data[i] != 0.0)
+            non_zeros++;
+    }
+
+    // Return number of non-zero elements
+    return non_zeros;
 }
 
 
 /*==========================================================================
  =                                                                         =
- =                         GVector private functions                       =
+ =                          GVector private methods                        =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ ***************************************************************************/
+void GVector::init_members(void)
+{
+    // Initialise members
+    m_num  = 0;
+    m_data = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Allocate vector
+ ***************************************************************************/
+void GVector::alloc_members(void)
+{
+    // Continue only if vector has non-zero length
+    if (m_num > 0) {
+
+        // Allocate vector and initialize elements to 0
+        m_data = new double[m_num];
+        for (int i = 0; i < m_num; ++i)
+            m_data[i] = 0.0;
+
+    } // endif: vector had non-zero length
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] v Vector from which members should be copied.
+ ***************************************************************************/
+void GVector::copy_members(const GVector& v)
+{
+    // Copy attributes
+    m_num = v.m_num;
+
+    // Copy elements
+    if (m_num > 0) {
+        alloc_members();
+        for (int i = 0; i <  m_num; ++i)
+            m_data[i] = v.m_data[i];
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ ***************************************************************************/
+void GVector::free_members(void)
+{
+    // Free memory
+    if (m_data != NULL) delete m_data;
+
+    // Signal free pointers
+    m_data = NULL;
+
+    // Return
+    return;
+}
+
 
 /*==========================================================================
  =                                                                         =
@@ -148,32 +238,57 @@ int GVector::non_zeros() const
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                          GVector output operator                        *
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] v Vector to put in output stream.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GVector& v)
 {
-  for (int i = 0; i < v.m_num; ++i) {
-    os << v(i);
-	if (i != v.m_num-1)
-	  os << ", ";
-  }
-  return os;
+    // Prepend (
+    os << "(";
+
+    // Put all elements in stream
+    for (int i = 0; i < v.m_num; ++i) {
+        os << v(i);
+        if (i != v.m_num-1)
+            os << ", ";
+    }
+
+    // Append )
+    os << ")";
+
+    // Return output stream
+    return os;
 }
 
 
-/***************************************************************************
- *                           GVector cross product                         *
+/***********************************************************************//**
+ * @brief GVector cross product
+ *
+ * @param[in] a First vector for cross product.
+ * @param[in] b Second vector for cross product.
+ *
+ * Computes the cross product between two 3-element vectors (note that the
+ * cross product is only defined for 3-element vectors).
  ***************************************************************************/
 GVector cross(const GVector &a, const GVector &b)
 {
-  if (a.m_num != b.m_num)
-    throw GException::vector_mismatch("cross(GVector&, GVector&)", a.m_num, b.m_num);
-  if (a.m_num != 3)
-    throw GException::vector_bad_cross_dim("cross(GVector&, GVector&)", a.m_num);
-  GVector result(3);
-  result(0) = a.m_data[1]*b.m_data[2] - a.m_data[2]*b.m_data[1];
-  result(1) = a.m_data[2]*b.m_data[0] - a.m_data[0]*b.m_data[2];
-  result(2) = a.m_data[0]*b.m_data[1] - a.m_data[1]*b.m_data[0];
-  return result;
+    // Verify that vectors have same dimensions
+    if (a.m_num != b.m_num)
+        throw GException::vector_mismatch(G_CROSS, a.m_num, b.m_num);
+
+    // Verify that vectors have 3 elements
+    if (a.m_num != 3)
+       throw GException::vector_bad_cross_dim(G_CROSS, a.m_num);
+
+    // Compute cross product
+    GVector result(3);
+    result(0) = a.m_data[1]*b.m_data[2] - a.m_data[2]*b.m_data[1];
+    result(1) = a.m_data[2]*b.m_data[0] - a.m_data[0]*b.m_data[2];
+    result(2) = a.m_data[0]*b.m_data[1] - a.m_data[1]*b.m_data[0];
+
+    // Return result
+    return result;
 }
