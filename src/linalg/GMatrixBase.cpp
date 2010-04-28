@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GMatrixBase.cpp  -  matrix abstract base class            *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GMatrixBase.cpp
+ * @brief GMatrixBase class implementation.
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include "GMatrixBase.hpp"
@@ -17,8 +22,11 @@
 #include "GVector.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_COPY_MEMBERS    "GMatrixBase::copy_members(const GMatrixBase&)"
-#define G_SELECT_NON_ZERO "GMatrixBase::select_non_zero()"
+#define G_COPY_MEMBERS               "GMatrixBase::copy_members(GMatrixBase)"
+#define G_SELECT_NON_ZERO                    "GMatrixBase::select_non_zero()"
+
+/* __ Debugging definitions ______________________________________________ */
+//#define G_DEBUG_COPY_MEMBERS                      // Dump copy_members info
 
 
 /*==========================================================================
@@ -27,50 +35,50 @@
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                               Constructor                               *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Void matrix constructor (contains no elements)
  ***************************************************************************/
-GMatrixBase::GMatrixBase()
+GMatrixBase::GMatrixBase(void)
 {
-  // Initialise class members for clean destruction
-  init_members();
+    // Initialise class members for clean destruction
+    init_members();
 
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                              Copy constructor                           *
- * ----------------------------------------------------------------------- *
- * The copy constructor is sufficiently general to provide the base        *
- * constructor for all derived classes, including sparse matrices.         *
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] m Matrix from which class should be instantiated.
+ *
+ * The copy constructor is sufficiently general to provide the base
+ * constructor for all derived classes, including sparse matrices.
  ***************************************************************************/
 GMatrixBase::GMatrixBase(const GMatrixBase& m)
 {
-  // Initialise class members for clean destruction
-  init_members();
+    // Initialise class members for clean destruction
+    init_members();
 
-  // Copy members
-  copy_members(m);
+    // Copy members
+    copy_members(m);
 
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                                Destructor                               *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Destructor
  ***************************************************************************/
 GMatrixBase::~GMatrixBase()
 {
-  // Free class members
-  free_members();
+    // Free class members
+    free_members();
 
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
@@ -80,24 +88,25 @@ GMatrixBase::~GMatrixBase()
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                            Assignment operator                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param[in] m Matrix instance to be assigned.
  ***************************************************************************/
 GMatrixBase& GMatrixBase::operator= (const GMatrixBase& m)
 {
-  // Execute only if object is not identical
-  if (this != &m) {
-  
-    // Free members
-    free_members();
-  
-    // Initialise private members for clean destruction
-    init_members();
+    // Execute only if object is not identical
+    if (this != &m) {
 
-    // Copy members
-    copy_members(m);
-	
+        // Free members
+        free_members();
+
+        // Initialise private members for clean destruction
+        init_members();
+
+        // Copy members
+        copy_members(m);
+
   } // endif: object was not identical
 
   // Return this object
@@ -105,11 +114,13 @@ GMatrixBase& GMatrixBase::operator= (const GMatrixBase& m)
 }
 
 
-/***************************************************************************
- *                              Equalty operator                           *
- * ----------------------------------------------------------------------- *
- * Two matrixes are considered equal if they have the same dimensions and  *
- * identicial elements.                                                    *
+/***********************************************************************//**
+ * @brief Equalty operator
+ *
+ * @param[in] m Matrix to be compared.
+ *
+ * Two matrixes are considered equal if they have the same dimensions and
+ * identicial elements.
  ***************************************************************************/
 int GMatrixBase::operator== (const GMatrixBase& m) const
 {
@@ -442,100 +453,108 @@ void GMatrixBase::select_non_zero(void)
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                         Initialise class members                        *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Initialise class members
  ***************************************************************************/
 void GMatrixBase::init_members(void)
 {
-  // Initialise GMatrixBase members
-  m_rows       = 0;      // Number of rows
-  m_cols       = 0;      // Number of columns
-  m_elements   = 0;      // Logically used number of elements
-  m_alloc      = 0;      // Allocated # of elements (>= m_elements)
-  m_num_rowsel = 0;      // Number of selected rows (for comp. decomp.)
-  m_num_colsel = 0;      // Number of selected columns (for comp. decomp.)
-  m_data       = NULL;   // Matrix data
-  m_colstart   = NULL;   // Column start indices (m_cols+1)
-  m_rowsel     = NULL;   // Row selection (for compressed decomposition)
-  m_colsel     = NULL;   // Column selection (for compressed decomposition)
-  
-  // Return
-  return;
+    // Initialise GMatrixBase members
+    m_rows       = 0;      // Number of rows
+    m_cols       = 0;      // Number of columns
+    m_elements   = 0;      // Logically used number of elements
+    m_alloc      = 0;      // Allocated # of elements (>= m_elements)
+    m_num_rowsel = 0;      // Number of selected rows (for comp. decomp.)
+    m_num_colsel = 0;      // Number of selected columns (for comp. decomp.)
+    m_data       = NULL;   // Matrix data
+    m_colstart   = NULL;   // Column start indices (m_cols+1)
+    m_rowsel     = NULL;   // Row selection (for compressed decomposition)
+    m_colsel     = NULL;   // Column selection (for compressed decomposition)
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                            Copy class members                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] m Matrix from which members should be copied.
  ***************************************************************************/
 void GMatrixBase::copy_members(const GMatrixBase& m)
 {
-  // Copy matrix attributes
-  m_rows       = m.m_rows;
-  m_cols       = m.m_cols;
-  m_elements   = m.m_elements;
-  m_alloc      = m.m_alloc;
-  m_num_rowsel = m.m_num_rowsel;
-  m_num_colsel = m.m_num_colsel;
+    // Copy matrix attributes
+    m_rows       = m.m_rows;
+    m_cols       = m.m_cols;
+    m_elements   = m.m_elements;
+    m_alloc      = m.m_alloc;
+    m_num_rowsel = m.m_num_rowsel;
+    m_num_colsel = m.m_num_colsel;
 
-  // Allocate memory for column start array and copy content
-  m_colstart = new int[m_cols+1];
-  if (m_colstart == NULL)
-    throw GException::mem_alloc(G_COPY_MEMBERS, m_cols+1);
-  for (int i = 0; i <= m_cols; ++i)
-    m_colstart[i] = m.m_colstart[i];
-  
-  // Allocate memory for elements and copy them (only if there are elements)
-  if (m.m_data != NULL && m_alloc > 0) {
-    m_data = new double[m_alloc];
-    if (m_data == NULL)
-	  throw GException::mem_alloc(G_COPY_MEMBERS, m_alloc);
-    for (int i = 0; i < m_elements; ++i)
-      m_data[i] = m.m_data[i];
-  }
-  
-  // If there is a row selection then copy it
-  if (m.m_rowsel != NULL && m_num_rowsel > 0) {
-    m_rowsel = new int[m_num_rowsel];
-    if (m_rowsel == NULL)
-	  throw GException::mem_alloc(G_COPY_MEMBERS, m_num_rowsel);
-    for (int i = 0; i < m_num_rowsel; ++i)
-      m_rowsel[i] = m.m_rowsel[i];
-  }
+    // Allocate only memory if we have rows and columns and data to copy
+    if (m_rows > 0 && m_cols > 0) {
 
-  // If there is a column selection then copy it
-  if (m.m_colsel != NULL && m_num_colsel > 0) {
-    m_colsel = new int[m_num_colsel];
-    if (m_colsel == NULL)
-	  throw GException::mem_alloc(G_COPY_MEMBERS, m_num_colsel);
-    for (int i = 0; i < m_num_colsel; ++i)
-      m_colsel[i] = m.m_colsel[i];
-  }
+        // Allocate memory for column start array and copy content
+        if (m.m_colstart != NULL) {
+            m_colstart = new int[m_cols+1];
+            for (int i = 0; i <= m_cols; ++i)
+                m_colstart[i] = m.m_colstart[i];
+        }
 
-  // Return
-  return;
+        // Allocate memory for elements and copy them
+        if (m.m_data != NULL && m_alloc > 0) {
+            m_data = new double[m_alloc];
+            for (int i = 0; i < m_elements; ++i)
+                m_data[i] = m.m_data[i];
+        }
+
+        // If there is a row selection then copy it
+        if (m.m_rowsel != NULL && m_num_rowsel > 0) {
+            m_rowsel = new int[m_num_rowsel];
+            for (int i = 0; i < m_num_rowsel; ++i)
+                m_rowsel[i] = m.m_rowsel[i];
+        }
+
+        // If there is a column selection then copy it
+        if (m.m_colsel != NULL && m_num_colsel > 0) {
+            m_colsel = new int[m_num_colsel];
+            for (int i = 0; i < m_num_colsel; ++i)
+                m_colsel[i] = m.m_colsel[i];
+        }
+
+    } // endif: there were data to copy
+
+    // Optionally show debug information
+    #if defined(G_DEBUG_COPY_MEMBERS)
+    std::cout << "GMatrixBase::copy_members:"
+              << " m_colstart=" << m.m_colstart << "->" << m_colstart
+              << " m_data="     << m.m_data     << "->" << m_data
+              << " m_rowsel="   << m.m_rowsel   << "->" << m_rowsel
+              << " m_colsel="   << m.m_colsel   << "->" << m_colsel
+              << std::endl;
+    #endif
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                           Delete class members                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Delete class members
  ***************************************************************************/
 void GMatrixBase::free_members(void)
 {
-  // De-allocate only if memory has indeed been allocated
-  if (m_colsel   != NULL) delete [] m_colsel;
-  if (m_rowsel   != NULL) delete [] m_rowsel;
-  if (m_data     != NULL) delete [] m_data;
-  if (m_colstart != NULL) delete [] m_colstart;
+    // De-allocate only if memory has indeed been allocated
+    if (m_colsel   != NULL) delete [] m_colsel;
+    if (m_rowsel   != NULL) delete [] m_rowsel;
+    if (m_data     != NULL) delete [] m_data;
+    if (m_colstart != NULL) delete [] m_colstart;
 
-  // Properly mark members as free
-  m_colstart = NULL;
-  m_data     = NULL;
-  m_rowsel   = NULL;
-  m_colsel   = NULL;
-  
-  // Return
-  return;
+    // Properly mark members as free
+    m_colstart = NULL;
+    m_data     = NULL;
+    m_rowsel   = NULL;
+    m_colsel   = NULL;
+
+    // Return
+    return;
 }
