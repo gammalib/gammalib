@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_GSparseMatrix.cpp  -  test GSparseMatrix class          *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -10,8 +10,14 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GSparseMatrix.cpp
+ * @brief Testing of GSparseMatrix class
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
+#include <stdlib.h>
 #include "test_GSparseMatrix.hpp"
 
 /* __ Namespaces _________________________________________________________ */
@@ -997,36 +1003,41 @@ void test_comparison(const GSparseMatrix& m_test)
  ***************************************************************************/
 void test_conversion(void)
 {
-  cout << "Test GSparseMatrix: Matrix conversions: ";
-  try {
-    //
-    // Setup a symmetric sparse matrix
-    int           num = 10;
-    GSparseMatrix sparse(num,num);
-    for (int i = 0; i < num; ++i)
-      sparse(i,i) = (i+1);
-    for (int j = 1; j < num; ++j) {
-      sparse(0,j) = (j+1);
-      sparse(j,0) = (j+1);
-    }
-    cout << ".";
-    //
-    // Convert GSparseMatrix matrix into GSymMatrix object
-    GSymMatrix converted = sym_matrix(sparse);
-    cout << ".";
-    //
-    // Convert GSymMatrix back to GSparseMatrix matrix
-    GSparseMatrix back_convert = sparse_matrix(converted);
-    cout << ".";
-    //
-    // Compare back converted matrix to original one. They should be identical
-    if (sparse != back_convert) {
-      cout << endl << "TEST ERROR: Unable to convert matrixes (symmetric)." << endl;
-      cout << "Original matrix " << sparse << endl;
-      cout << "GSymMatrix matrix " << converted << endl;
-      cout << "Back converted matrix " << back_convert << endl;
-      throw;
-    }
+    // Dump header
+    std::cout << "Test GSparseMatrix: Matrix conversions: ";
+
+    // Test 1
+    try {
+      //
+      // Setup a symmetric sparse matrix
+      int           num = 10;
+      GSparseMatrix sparse(num,num);
+      for (int i = 0; i < num; ++i)
+          sparse(i,i) = (i+1);
+      for (int j = 1; j < num; ++j) {
+          sparse(0,j) = (j+1);
+          sparse(j,0) = (j+1);
+      }
+      std::cout << ".";
+      //
+      // Convert GSparseMatrix matrix into GSymMatrix object
+      GSymMatrix converted = sym_matrix(sparse);
+      std::cout << ".";
+      //
+      // Convert GSymMatrix back to GSparseMatrix matrix
+      GSparseMatrix back_convert = sparse_matrix(converted);
+      std::cout << ".";
+      //
+      // Compare back converted matrix to original one. They should be identical
+      if (sparse != back_convert) {
+          std::cout << std::endl
+                    << "TEST ERROR: Unable to convert matrixes (symmetric)."
+                    << std::endl;
+          std::cout << "Original matrix " << sparse << std::endl;
+          std::cout << "GSymMatrix matrix " << converted << std::endl;
+          std::cout << "Back converted matrix " << back_convert << std::endl;
+        throw;
+      }
     //
     // Determine the fill of the matrix. It should be 0.28
     double fill = back_convert.fill();
@@ -1136,70 +1147,76 @@ void test_conversion(void)
  ***************************************************************************/
 void test_cholesky(void)
 {
-  cout << "Test GSparseMatrix: Cholesky decomposition, solver and inverter: ";
-  try {
-	//
-	// Setup matrix for Cholesky decomposition
-	GSparseMatrix m_chol_test(5,5);
-	m_chol_test(0,0) = 1.0;
-	m_chol_test(0,1) = 0.2;
-	m_chol_test(0,2) = 0.2;
-	m_chol_test(0,3) = 0.2;
-	m_chol_test(0,4) = 0.2;
-	m_chol_test(1,0) = 0.2;
-	m_chol_test(2,0) = 0.2;
-	m_chol_test(3,0) = 0.2;
-	m_chol_test(4,0) = 0.2;
-	m_chol_test(1,1) = 1.0;
-	m_chol_test(2,2) = 1.0;
-	m_chol_test(3,3) = 1.0;
-	m_chol_test(4,4) = 1.0;
-	//
-	// Try to solve now (should not work)
-	try {
-	  GVector v_test12(5);
-	  v_test12 = m_chol_test.cholesky_solver(v_test12);
-    }
-    catch (GException::matrix_not_factorised) {
-	  cout << ".";
-    }
-    catch (exception &e) {
-      cout << e.what() << endl;
-	  throw;
-    }
-	//
-    // Test Cholesky decomposition
-	GSparseMatrix cd = cholesky_decompose(m_chol_test);
-	cout << ".";
-	//
-    // Test inplace Cholesky decomposition
-	cd = m_chol_test;
-	cd.cholesky_decompose();
-	cout << ".";
-	//
-    // Test Cholesky solver
-	GVector e0(5);
-	GVector a0(5);
-	e0(0) = 1.0;
-	a0(0) = 1.0;
-	a0(1) = 0.2;
-	a0(2) = 0.2;
-	a0(3) = 0.2;
-	a0(4) = 0.2;
-	GVector s0 = cd.cholesky_solver(a0);
-	double res = max(fabs(s0-e0));
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << " Res(S0)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_solver(GVector) function." << endl;
-	  cout << "Residual vector (all elements should be zero):" << endl;
-	  cout << s0 << endl;
-	  throw;
-	}
+    // Dump header
+    std::cout << "Test GSparseMatrix: Cholesky decomposition, solver and inverter: ";
+
+    // Test 1
+    try {
+        //
+        // Setup matrix for Cholesky decomposition
+        GSparseMatrix m_chol_test(5,5);
+        m_chol_test(0,0) = 1.0;
+        m_chol_test(0,1) = 0.2;
+        m_chol_test(0,2) = 0.2;
+        m_chol_test(0,3) = 0.2;
+        m_chol_test(0,4) = 0.2;
+        m_chol_test(1,0) = 0.2;
+        m_chol_test(2,0) = 0.2;
+        m_chol_test(3,0) = 0.2;
+        m_chol_test(4,0) = 0.2;
+        m_chol_test(1,1) = 1.0;
+        m_chol_test(2,2) = 1.0;
+        m_chol_test(3,3) = 1.0;
+        m_chol_test(4,4) = 1.0;
+        //
+        // Try to solve now (should not work)
+        try {
+            GVector v_test12(5);
+            v_test12 = m_chol_test.cholesky_solver(v_test12);
+        }
+        catch (GException::matrix_not_factorised) {
+            std::cout << ".";
+        }
+        catch (exception &e) {
+            std::cout << e.what() << std::endl;
+            throw;
+        }
+        //
+        // Test Cholesky decomposition
+        GSparseMatrix cd = cholesky_decompose(m_chol_test);
+        std::cout << ".";
+        //
+        // Test inplace Cholesky decomposition
+        cd = m_chol_test;
+        cd.cholesky_decompose();
+        std::cout << ".";
+        //
+        // Test Cholesky solver
+        GVector e0(5);
+        GVector a0(5);
+        e0(0) = 1.0;
+        a0(0) = 1.0;
+        a0(1) = 0.2;
+        a0(2) = 0.2;
+        a0(3) = 0.2;
+        a0(4) = 0.2;
+        GVector s0 = cd.cholesky_solver(a0);
+        double res = max(fabs(s0-e0));
+        if (res < 1.0e-15) {
+            #if defined(DUMP_RESIDUALS)
+            std::cout << " Res(S0)=" << res << " ";
+            #else
+            std::cout << ".";
+            #endif
+        }
+        else {
+            std::cout << std::endl
+                      << "TEST ERROR: Corrupt cholesky_solver(GVector) function."
+                      << std::endl;
+            std::cout << "Residual vector (all elements should be zero):" << std::endl;
+            std::cout << s0 << std::endl;
+            throw;
+        }
 	//
 	e0(0) = 0.0;
 	e0(1) = 1.0;
@@ -1569,36 +1586,44 @@ void test_cholesky(void)
 	  throw;
 	}
 	//
-	// Test Cholesky inverter for compressed matrix
-	unit = GSparseMatrix(6,6);
-	unit(0,0) = 1.0;
-	unit(1,1) = 1.0;
-	unit(2,2) = 1.0;
-	unit(4,4) = 1.0;
-	unit(5,5) = 1.0;
-	GSparseMatrix m_chol_test_zero_inv = m_chol_test_zero;
-	m_chol_test_zero_inv.cholesky_invert();
-    GSparseMatrix ciz_product   = m_chol_test_zero * m_chol_test_zero_inv;
-    GSparseMatrix ciz_residuals = ciz_product - unit;
-	res = (fabs(ciz_residuals)).max();
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(CIZ)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt compressed GSparseMatrix.cholesky_invert() function." << endl;
-	  cout << "Residual matrix (all elements should be zero):" << endl;
-	  cout << ciz_residuals << endl;
-	  throw;
-	}
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  cout << "ok." << endl;
+        // Test Cholesky inverter for compressed matrix
+        unit = GSparseMatrix(6,6);
+        unit(0,0) = 1.0;
+        unit(1,1) = 1.0;
+        unit(2,2) = 1.0;
+        unit(4,4) = 1.0;
+        unit(5,5) = 1.0;
+        GSparseMatrix m_chol_test_zero_inv = m_chol_test_zero;
+        m_chol_test_zero_inv.cholesky_invert();
+        GSparseMatrix ciz_product   = m_chol_test_zero * m_chol_test_zero_inv;
+        GSparseMatrix ciz_residuals = ciz_product - unit;
+        res = (fabs(ciz_residuals)).max();
+        if (res < 1.0e-15) {
+            #if defined(DUMP_RESIDUALS)
+            std::cout << "Res(CIZ)=" << res << " ";
+            #else
+            std::cout << ".";
+            #endif
+        }
+       else {
+           std::cout << std::endl
+                << "TEST ERROR: Corrupt compressed GSparseMatrix.cholesky_invert()"
+                   " method." << std::endl;
+           std::cout << "Residual matrix (all elements should be zero):" << std::endl;
+           std::cout << ciz_residuals << std::endl;
+           throw;
+       }
+    }
+    catch (exception &e) {
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+
+    // Dump final test ok
+    std::cout << "ok." << std::endl;
+
+    // Return
+    return;
 }
 
 
@@ -1747,32 +1772,32 @@ void test_heavy(int block = 512)
  ***************************************************************************/
 int main(void)
 {
-  // Dump header
-  cout << endl;
-  cout << "*******************************" << endl;
-  cout << "* GSparseMatrix class testing *" << endl;
-  cout << "*******************************" << endl;
+    // Dump header
+    std::cout << std::endl;
+    std::cout << "*******************************" << std::endl;
+    std::cout << "* GSparseMatrix class testing *" << std::endl;
+    std::cout << "*******************************" << std::endl;
 
-  // Set test matrix and vector
-  GSparseMatrix m_test = set_matrix();
-  GVector       v_test = set_vector();
+    // Set test matrix and vector
+    GSparseMatrix m_test = set_matrix();
+    GVector       v_test = set_vector();
 
-  // Execute the tests
-  test_output(m_test);
-  test_allocate();
-  test_assign_values(m_test);
-  test_copy_constructor(m_test);
-  test_assign_matrix(m_test);
-  test_transpose(m_test);
-  test_matrix_vector(m_test, v_test);
-  test_matrix_matrix(m_test);
-  test_arithmetics(m_test);
-  test_functions(m_test);
-  test_comparison(m_test);
-  test_conversion();
-  test_cholesky();
-  test_heavy();
+    // Execute the tests
+    test_output(m_test);
+    test_allocate();
+    test_assign_values(m_test);
+    test_copy_constructor(m_test);
+    test_assign_matrix(m_test);
+    test_transpose(m_test);
+    test_matrix_vector(m_test, v_test);
+    test_matrix_matrix(m_test);
+    test_arithmetics(m_test);
+    test_functions(m_test);
+    test_comparison(m_test);
+    test_conversion();
+    test_cholesky();
+    test_heavy();
 
-  // Return
-  return 0;
+    // Return
+    return 0;
 }
