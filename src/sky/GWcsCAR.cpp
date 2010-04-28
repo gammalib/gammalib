@@ -60,16 +60,23 @@ GWcsCAR::GWcsCAR(void) : GWcs()
 /***********************************************************************//**
  * @brief Constructor
  *
- * @param[in] crval Coordinates of reference pixel.
- * @param[in] crpix1 X coordinate of reference pixel.
- * @param[in] crpix2 Y coordinate of reference pixel.
- * @param[in] cdelt1 X increment at reference point in degrees/pixel.
- * @param[in] cdelt2 Y increment at reference point in degrees/pixel.
- * @param[in] coords Coordinate system ('EQU' or 'GAL').
+ * @param[in] coords Coordinate system.
+ * @param[in] crval1 X value of reference pixel.
+ * @param[in] crval1 Y value of reference pixel.
+ * @param[in] crpix1 X index of reference pixel.
+ * @param[in] crpix2 Y index of reference pixel.
+ * @param[in] cdelt1 Increment in x direction at reference pixel (deg).
+ * @param[in] cdelt2 Increment in y direction at reference pixel (deg).
+ * @param[in] cd Astrometry parameters (2x2 matrix, deg/pixel).
+ * @param[in] pv2 Projection parameters (length WCS type dependent).
  ***************************************************************************/
-GWcsCAR::GWcsCAR(GSkyDir& crval, const double& crpix1, const double& crpix2,
+GWcsCAR::GWcsCAR(const std::string& coords,
+                 const double& crval1, const double& crval2,
+                 const double& crpix1, const double& crpix2,
                  const double& cdelt1, const double& cdelt2,
-                 const std::string& coords) : GWcs()
+                 const GMatrix& cd, const GVector& pv2) :
+                 GWcs(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2)
+
 {
     // Initialise class members
     init_members();

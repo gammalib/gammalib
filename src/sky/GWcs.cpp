@@ -57,6 +57,54 @@ GWcs::GWcs(void)
 
 
 /***********************************************************************//**
+ * @brief Standard 2D sky map constructor
+ *
+ * @param[in] coords Coordinate system.
+ * @param[in] crval1 X value of reference pixel.
+ * @param[in] crval1 Y value of reference pixel.
+ * @param[in] crpix1 X index of reference pixel.
+ * @param[in] crpix2 Y index of reference pixel.
+ * @param[in] cdelt1 Increment in x direction at reference pixel (deg).
+ * @param[in] cdelt2 Increment in y direction at reference pixel (deg).
+ *
+ * Construct standard 2D sky map from standard definition parameters. This
+ * method
+ ***************************************************************************/
+GWcs::GWcs(const std::string& coords,
+           const double& crval1, const double& crval2,
+           const double& crpix1, const double& crpix2,
+           const double& cdelt1, const double& cdelt2)
+
+{
+    // Initialise class members
+    init_members();
+
+    //TODO: Check parameters
+
+    // Set coordinate system
+    coordsys(coords);
+
+    // Set parameters
+    m_crval[0] = crval1;
+    m_crval[1] = crval2;
+    m_crpix[0] = crpix1;
+    m_crpix[1] = crpix2;
+    m_cdelt[0] = cdelt1;
+    m_cdelt[1] = cdelt2;
+
+    // Set standard CD without rotation is a unit matrix
+    m_cd(0,0) = m_cd(1,1) = 1.0;
+    m_cd(0,1) = m_cd(1,0) = 0.0;
+
+    // Compute inverse CD matrix
+    m_invcd = invert(m_cd); //NOTE: invert method not yet implemented
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param wcs GWcs instance which should be used for construction
@@ -135,9 +183,9 @@ void GWcs::read(const GFitsHDU* hdu)
     // Free memory and initialise members
     free_members();
     init_members();
-    
+
     //TODO: Implement WCS definition reading
-    
+
     // Return
     return;
 }
@@ -189,7 +237,8 @@ std::string GWcs::coordsys(void) const
  *
  * @param[in] coordsys Coordinate system (EQU/CEL/E/C or GAL/G)
  *
- * @exception GException::wcs_bad_coords Invalid coordsys parameter.
+ * @exception GException::wcs_bad_coords 
+ *            Invalid coordsys parameter.
  ***************************************************************************/
 void GWcs::coordsys(const std::string& coordsys)
 {
@@ -222,8 +271,7 @@ void GWcs::coordsys(const std::string& coordsys)
 void GWcs::init_members(void)
 {
     // Initialise members
-//    m_ctype[0].clear();
-//    m_ctype[1].clear();
+    m_coordsys =     0;
     m_cdelt[0] =   0.0;
     m_cdelt[1] =   0.0;
     m_crpix[0] =   0.0;
@@ -232,9 +280,9 @@ void GWcs::init_members(void)
     m_crval[1] =   0.0;
     m_longpole = 180.0;
     m_latpole  =   0.0;
-    m_pv2[0]   =   0.0;
-    m_pv2[1]   =   0.0;
-    m_coordsys =     0;
+    m_cd       = GMatrix(2,2);
+    m_invcd    = GMatrix(2,2);
+    m_pv2      = GVector(21);
 
     // Return
     return;
@@ -249,8 +297,7 @@ void GWcs::init_members(void)
 void GWcs::copy_members(const GWcs& wcs)
 {
     // Copy attributes
-//    m_ctype[0] = wcs.m_ctype[0];
-//    m_ctype[1] = wcs.m_ctype[1];
+    m_coordsys = wcs.m_coordsys;
     m_cdelt[0] = wcs.m_cdelt[0];
     m_cdelt[1] = wcs.m_cdelt[1];
     m_crpix[0] = wcs.m_crpix[0];
@@ -259,9 +306,9 @@ void GWcs::copy_members(const GWcs& wcs)
     m_crval[1] = wcs.m_crval[1];
     m_longpole = wcs.m_longpole;
     m_latpole  = wcs.m_latpole;
-    m_pv2[0]   = wcs.m_pv2[0];
-    m_pv2[1]   = wcs.m_pv2[1];
-    m_coordsys = wcs.m_coordsys;
+    m_cd       = wcs.m_cd;
+    m_invcd    = wcs.m_invcd;
+    m_pv2      = wcs.m_pv2;
 
     // Return
     return;
@@ -273,46 +320,6 @@ void GWcs::copy_members(const GWcs& wcs)
  ***************************************************************************/
 void GWcs::free_members(void)
 {
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Constructor
- *
- * @param[in] crval Coordinates of reference pixel.
- * @param[in] crpix1 X coordinate of reference pixel.
- * @param[in] crpix2 Y coordinate of reference pixel.
- * @param[in] cdelt1 X increment at reference point in degrees/pixel.
- * @param[in] cdelt2 Y increment at reference point in degrees/pixel.
- * @param[in] coords Coordinate system ('EQU' or 'GAL').
- ***************************************************************************/
-void GWcs::set_wcs(const double& crval1, const double& crval2, 
-                   const double& crpix1, const double& crpix2,
-                   const double& cdelt1, const double& cdelt2,
-                   const std::string& coords, 
-                   const double* cd, const double* pv)
-{
-    // Initialise class members
-    init_members();
-
-    // Set members
-    m_crval[0] = crval1;
-    m_crval[1] = crval2;
-    m_crpix[0] = crpix1;
-    m_crpix[1] = crpix2;
-    m_cdelt[0] = cdelt1;
-    m_cdelt[1] = cdelt2;
-
-    // Set coordinate system
-    coordsys(coords);
-    
-    // TODO: Set CD
-    
-    // TODO: Compute inverted CD
-    //cdinv=invert(ds)
-
     // Return
     return;
 }
