@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSparseMatrix.cpp  -  sparse matrix class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2009 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,42 +18,41 @@
  * Column 'col' covers therefore [m_colstart[j], ..., m_colstart[j+1]-1]   *
  * Note that 'm_colstart' has m_cols+1 elements.                           *
  ***************************************************************************/
+/**
+ * @file GSparseMatrix.cpp
+ * @brief GSparseMatrix class implementation
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
-#include "GException.hpp"
 #include "GVector.hpp"
-#include "GMatrix.hpp"
-#include "GSymMatrix.hpp"
 #include "GSparseMatrix.hpp"
 #include "GSparseSymbolic.hpp"
 #include "GSparseNumeric.hpp"
 
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
 /* __ Method name definitions ____________________________________________ */
-#define G_OP_MUL_VEC   "GSparseMatrix::operator* (const GVector&) const"
-#define G_OP_ADD       "GSparseMatrix::operator+= (const GSparseMatrix&)"
-#define G_OP_SUB       "GSparseMatrix::operator-= (const GSparseMatrix&)"
-#define G_OP_MAT_MUL   "GSparseMatrix::operator*= (const GSparseMatrix&)"
-#define G_ADD_COL      "GSparseMatrix::add_col(const GVector&, int)"
-#define G_ADD_COL2     "GSparseMatrix::add_col(const double*, const int*, int, int)"
-#define G_CHOL_DECOMP  "GSparseMatrix::cholesky_decompose(int)"
-#define G_CHOL_SOLVE   "GSparseMatrix::cholesky_solver(const GVector&, int)"
-#define G_EXTRACT_ROW  "GSparseMatrix::extract_row(int) const"
-#define G_EXTRACT_COL  "GSparseMatrix::extract_col(int) const"
-#define G_INSERT_COL   "GSparseMatrix::insert_col(const GVector&, int)"
-#define G_INSERT_COL2  "GSparseMatrix::insert_col(const double*, const int*, int, int)"
-#define G_STACK_INIT   "GSparseMatrix::stack_init(int, int)"
-#define G_STACK_PUSH   "GSparseMatrix::stack_push_column(const double*, const int*, int, int)"
-#define G_STACK_FLUSH  "GSparseMatrix::stack_flush()"
-#define G_CONSTRUCTOR  "GSparseMatrix::constructor(int, int, int)"
-#define G_COPY_MEMBERS "GSparseMatrix::copy_members(const GSparseMatrix&)"
-#define G_ALLOC        "GSparseMatrix::alloc_elements(int, int)"
-#define G_FREE         "GSparseMatrix::free_elements(int, int)"
-#define G_REMOVE_ZERO  "GSparseMatrix::remove_zero_row_col()"
-#define G_SYMPERM      "cs_symperm(GSparseMatrix*, const int*, int)"
-#define G_TRANSPOSE    "cs_transpose(GSparseMatrix*, int)"
+#define G_OP_MUL_VEC                     "GSparseMatrix::operator* (GVector)"
+#define G_OP_ADD                  "GSparseMatrix::operator+= (GSparseMatrix)"
+#define G_OP_SUB                  "GSparseMatrix::operator-= (GSparseMatrix)"
+#define G_OP_MAT_MUL              "GSparseMatrix::operator*= (GSparseMatrix)"
+#define G_ADD_COL                       "GSparseMatrix::add_col(GVector,int)"
+#define G_ADD_COL2              "GSparseMatrix::add_col(double*,int*int,int)"
+#define G_CHOL_DECOMP                "GSparseMatrix::cholesky_decompose(int)"
+#define G_CHOL_SOLVE            "GSparseMatrix::cholesky_solver(GVector,int)"
+#define G_EXTRACT_ROW                       "GSparseMatrix::extract_row(int)"
+#define G_EXTRACT_COL                       "GSparseMatrix::extract_col(int)"
+#define G_INSERT_COL                 "GSparseMatrix::insert_col(GVector,int)"
+#define G_INSERT_COL2       "GSparseMatrix::insert_col(double*,int*,int,int)"
+#define G_STACK_INIT                     "GSparseMatrix::stack_init(int,int)"
+#define G_STACK_PUSH "GSparseMatrix::stack_push_column(double*,int*,int,int)"
+#define G_STACK_FLUSH                      "GSparseMatrix::stack_flush(void)"
+#define G_CONSTRUCTOR               "GSparseMatrix::constructor(int,int,int)"
+#define G_COPY_MEMBERS           "GSparseMatrix::copy_members(GSparseMatrix)"
+#define G_ALLOC                      "GSparseMatrix::alloc_elements(int,int)"
+#define G_FREE                        "GSparseMatrix::free_elements(int,int)"
+#define G_REMOVE_ZERO              "GSparseMatrix::remove_zero_row_col(void)"
+#define G_SYMPERM                       "cs_symperm(GSparseMatrix*,int*,int)"
+#define G_TRANSPOSE                        "cs_transpose(GSparseMatrix*,int)"
 
 /* __ Macros _____________________________________________________________ */
 #define G_MIN(a,b) (((a) < (b)) ? (a) : (b))
@@ -80,126 +79,62 @@ using namespace std;
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                               Constructor                               *
- * ----------------------------------------------------------------------- *
- * First calls the void base class constructor that initialises all base   *
- * class members, then call the GSparseMatrix initialisation method and    *
- * finally construct the object.                                           *
+/***********************************************************************//**
+ * @brief Matrix constructor
+ *
+ * @param[in] rows Number of rows in matrix.
+ * @param[in] cols Number of columns in matrix.
+ * @param[in] elements Number of elements for which memory should be allocated.
+ *
+ * First calls the void base class constructor that initialises all base
+ * class members, then call the GSparseMatrix initialisation method and
+ * finally construct the object.
  ***************************************************************************/
 GSparseMatrix::GSparseMatrix(int rows, int cols, int elements) : GMatrixBase()
 {
-  // Initialise private members for clean destruction
-  init_members();
+    // Initialise private members for clean destruction
+    init_members();
 
-  // Construct sparse matrix
-  constructor(rows, cols, elements);
+    // Construct sparse matrix
+    constructor(rows, cols, elements);
 
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                             Copy constructor                            *
- * ----------------------------------------------------------------------- *
- * First calls the void base class copy constructor that copys all base    *
- * class members, then call the GSparseMatrix member copy method.          *
- * NOTE: The copy constructor does NOT fill a pending element.             *
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] m Matrix from which class should be instantiated.
+ *
+ * First calls the void base class copy constructor that copys all base
+ * class members, then call the GSparseMatrix member copy method.
+ * NOTE: The copy constructor does NOT fill a pending element.
  ***************************************************************************/
 GSparseMatrix::GSparseMatrix(const GSparseMatrix& m) : GMatrixBase(m)
 {
-  // Initialise private members for clean destruction
-  init_members();
+    // Initialise private members for clean destruction
+    init_members();
 
-  // Copy members
-  copy_members(m);
+    // Copy members
+    copy_members(m);
 
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *              GMatrix -> GSparseMatrix storage class conversion          *
- * ----------------------------------------------------------------------- *
- * First calls the void base class constructor that initialises all base   *
- * class members, then call the GSparseMatrix initialisation method and    *
- * finally construct the object and fill it with the GMatrix data.         *
+/***********************************************************************//**
+ * @brief Destructor
  ***************************************************************************/
-/*
-GSparseMatrix::GSparseMatrix(const GMatrix& m) : GMatrixBase()
-{ 
-  // Initialise private members for clean destruction
-  init_members();
-
-  // Construct sparse matrix
-  constructor(m.rows(), m.cols());
-
-  // Use a fill-stack for better performance
-  stack_init(m_cols, G_SPARSE_MATRIX_DEFAULT_STACK_ENTRIES);
-  
-  // Loop over all columns
-  GVector column(m_cols);
-  for (int col = 0; col < m_cols; ++col) {
-    column = m.extract_col(col);
-	insert_col(column, col);
-  }
-  
-  // Destroy fill stack
-  stack_destroy();
-  
-  // Return result
-  return;
-}
-*/
-
-/***************************************************************************
- *          GSymMatrix -> GSparseMatrix storage class conversion           *
- * ----------------------------------------------------------------------- *
- * First calls the void base class constructor that initialises all base   *
- * class members, then call the GSparseMatrix initialisation method and    *
- * finally construct the object and fill it with the GSymMatrix data.      *
- ***************************************************************************/
-/*
-GSparseMatrix::GSparseMatrix(const GSymMatrix& m) : GMatrixBase()
-{ 
-  // Initialise private members for clean destruction
-  init_members();
-
-  // Construct sparse matrix
-  constructor(m.rows(), m.cols());
-
-  // Use a fill-stack for better performance
-  stack_init(m_cols, G_SPARSE_MATRIX_DEFAULT_STACK_ENTRIES);
-  
-  // Loop over all columns
-  GVector column(m_cols);
-  for (int col = 0; col < m_cols; ++col) {
-    column = m.extract_col(col);
-	insert_col(column, col);
-  }
-  
-  // Destroy fill stack
-  stack_destroy();
-  
-  // Return result
-  return;
-}
-*/
-
-/***************************************************************************
- *                                Destructor                               *
- * ----------------------------------------------------------------------- *
- * First destroys class members, then destroy base class members.          *
- ***************************************************************************/
-GSparseMatrix::~GSparseMatrix()
+GSparseMatrix::~GSparseMatrix(void)
 {
-  // Free members
-  free_members();
+    // Free members
+    free_members();
 
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
@@ -209,237 +144,255 @@ GSparseMatrix::~GSparseMatrix()
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                            Assignment operator                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param[in] m GSparseMatrix instance to be assigned
  ***************************************************************************/
 GSparseMatrix& GSparseMatrix::operator= (const GSparseMatrix& m)
 {
-  // Execute only if object is not identical
-  if (this != &m) {
+    // Execute only if object is not identical
+    if (this != &m) {
 
-    // Copy base class members
-    this->GMatrixBase::operator=(m);
+        // Copy base class members
+        this->GMatrixBase::operator=(m);
 
-    // Free members
-    free_members();
+        // Free members
+        free_members();
 
-    // Initialise private members for clean destruction
-    init_members();
+        // Initialise private members for clean destruction
+        init_members();
 
-    // Copy members
-    copy_members(m);
+        // Copy members
+        copy_members(m);
 
-  } // endif: object was not identical
+    } // endif: object was not identical
 
-  // Return
-  return *this;
+    // Return
+    return *this;
 }
 
 
-/***************************************************************************
- *                           Vector multiplication                         *
- * ----------------------------------------------------------------------- *
- * Performs sparse matrix*vector multiplication including an eventually    *
- * pending fill.                                                           *
+/***********************************************************************//**
+ * @brief Vector multiplication
+ *
+ * @param[in] v GVector with which matrix is to be multiplied
+ *
+ * Performs sparse matrix*vector multiplication including any pending fill.
  ***************************************************************************/
 GVector GSparseMatrix::operator* (const GVector& v) const
 {
-  // Raise an exception if the matrix and vector dimensions are not compatible
-  if (m_cols != v.m_num)
-    throw GException::matrix_vector_mismatch(G_OP_MUL_VEC, v.m_num, m_rows, m_cols);
+    // Raise an exception if the matrix and vector dimensions are not compatible
+    if (m_cols != v.m_num)
+        throw GException::matrix_vector_mismatch(G_OP_MUL_VEC, v.m_num,
+                                                 m_rows, m_cols);
 
-  // Initialise result vector
-  GVector result(m_rows);
+    // Initialise result vector
+    GVector result(m_rows);
 
-  // Multiply only if there are elements in matrix
-  if (m_elements > 0) {
+    // Multiply only if there are elements in matrix
+    if (m_elements > 0) {
 
-    // Perform vector multiplication
-    for (int col = 0; col < m_cols; ++col) {
-      int  i_start    = m_colstart[col];
-      int  i_stop     = m_colstart[col+1];
-      double*   ptr_data   = m_data   + i_start;
-      int* ptr_rowinx = m_rowinx + i_start;
-      for (int i = i_start; i < i_stop; ++i)
-       result(*ptr_rowinx++) += *ptr_data++ * v(col);
-    }
+        // Perform vector multiplication
+        for (int col = 0; col < m_cols; ++col) {
+            int     i_start    = m_colstart[col];
+            int     i_stop     = m_colstart[col+1];
+            double* ptr_data   = m_data   + i_start;
+            int*    ptr_rowinx = m_rowinx + i_start;
+            for (int i = i_start; i < i_stop; ++i)
+                result(*ptr_rowinx++) += *ptr_data++ * v(col);
+        }
 
-    // If fill is pending then add-in also this element into the product
-    if (m_fill_val != 0.0) {
-      result(m_fill_row) += m_fill_val * v(m_fill_col);
-      #if defined(G_DEBUG_SPARSE_PENDING)
-      cout << G_OP_MUL_VEC << ": pending value " << m_fill_val << 
-          " for location (" <<  m_fill_row << "," << m_fill_col <<
-          ") has been used." << endl;
-      #endif
-    }
+        // If fill is pending then add-in also this element into the product
+        if (m_fill_val != 0.0) {
+            result(m_fill_row) += m_fill_val * v(m_fill_col);
+            #if defined(G_DEBUG_SPARSE_PENDING)
+            std::cout << G_OP_MUL_VEC << ": pending value " << m_fill_val
+                      << " for location (" <<  m_fill_row << "," << m_fill_col
+                      << ") has been used." << std::endl;
+            #endif
+        }
 
-  } // endif: there were elements in matrix
+    } // endif: there were elements in matrix
 
-  // Return result
-  return result;
+    // Return result
+    return result;
 }
 
 
-/***************************************************************************
- *                              Equalty operator                           *
- * ----------------------------------------------------------------------- *
- * Two matrixes are considered equal if they have the same dimensions and  *
- * identicial elements.                                                    *
- *                     !!! NOT YET IN NATIVE CODING !!!                    *
+/***********************************************************************//**
+ * @brief Equalty operator
+ *
+ * @param[in] m Matrix to compare with.
+ *
+ * Two matrixes are considered equal if they have the same dimensions and
+ * identicial elements. The return value is 1 if the matrices are identical,
+ * 0 otherwise.
+ * TODO: Implement native sparse code
  ***************************************************************************/
 int GSparseMatrix::operator== (const GSparseMatrix &m) const
 {
-  // Initalise the result to 'equal matrices'
-  int result = 1;
+    // Initalise the result to 'equal matrices'
+    int result = 1;
 
-  // Perform comparison (only if matrix dimensions are identical)
-  if (m_rows == m.m_rows && m_cols == m.m_cols) {
+    // Perform comparison (only if matrix dimensions are identical)
+    if (m_rows == m.m_rows && m_cols == m.m_cols) {
 
-    // Loop over all matrix elements
-    for (int row = 0; row < m_rows; ++row) {
-      for (int col = 0; col < m_cols; ++col) {
-        if ((*this)(row,col) != m(row,col)) {
-          result = 0;
-          break;
+        // Loop over all matrix elements
+        for (int row = 0; row < m_rows; ++row) {
+            for (int col = 0; col < m_cols; ++col) {
+                if ((*this)(row,col) != m(row,col)) {
+                    result = 0;
+                    break;
+                }
+            }
+            if (!result)
+                break;
         }
-      }
-      if (!result)
-        break;
     }
-  }
-  else
-    result = 0;
+    else
+      result = 0;
 
-  // Return result
-  return result;
+    // Return result
+    return result;
 }
 
 
-/***************************************************************************
- *                              Equalty operator                           *
- * ----------------------------------------------------------------------- *
- * Two matrixes are considered equal if they have the same dimensions and  *
- * identicial elements.                                                    *
- *                     !!! NOT YET IN NATIVE CODING !!!                    *
+/***********************************************************************//**
+ * @brief Unequalty operator
+ *
+ * @param[in] m Matrix to compare with.
+ *
+ * Two matrixes are considered unequal if they have different dimensions or
+ * differing elements. The return value is 1 if the matrices are not
+ * identical and 0 if they are identical.
+ * TODO: Implement native sparse code
  ***************************************************************************/
 int GSparseMatrix::operator!= (const GSparseMatrix &m) const
 {
-  // Initalise the result to 'equal matrices'
-  int result = 0;
+    // Initalise the result to 'equal matrices'
+    int result = 0;
 
-  // Perform comparison (only if matrix dimensions are identical)
-  if (m_rows == m.m_rows && m_cols == m.m_cols) {
+    // Perform comparison (only if matrix dimensions are identical)
+    if (m_rows == m.m_rows && m_cols == m.m_cols) {
 
-    // Loop over all matrix elements
-    for (int row = 0; row < m_rows; ++row) {
-      for (int col = 0; col < m_cols; ++col) {
-        if ((*this)(row,col) != m(row,col)) {
-          result = 1;
-          break;
+        // Loop over all matrix elements
+        for (int row = 0; row < m_rows; ++row) {
+            for (int col = 0; col < m_cols; ++col) {
+                if ((*this)(row,col) != m(row,col)) {
+                    result = 1;
+                    break;
+                }
+            }
+            if (!result)
+                break;
         }
-      }
-      if (!result)
-        break;
     }
-  }
-  else
-    result = 1;
+    else
+      result = 1;
 
-  // Return result
-  return result;
+    // Return result
+    return result;
 }
 
 
-/***************************************************************************
- *                        Unary matrix addition operator                   *
- * ----------------------------------------------------------------------- *
- *                     !!! NOT YET IN NATIVE CODING !!!                    *
+/***********************************************************************//**
+ * @brief Unary matrix addition operator
+ *
+ * @param[in] m Matrix to be added.
+ *
+ * TODO: Implement native sparse code
  ***************************************************************************/
 GSparseMatrix& GSparseMatrix::operator+= (const GSparseMatrix& m)
 {
-  // Raise an exception if the matrix dimensions are not compatible
-  if (m_rows != m.m_rows || m_cols != m.m_cols)
-    throw GException::matrix_mismatch(G_OP_ADD, m_rows, m_cols, m.m_rows, m.m_cols);
+    // Raise an exception if the matrix dimensions are not compatible
+    if (m_rows != m.m_rows || m_cols != m.m_cols)
+        throw GException::matrix_mismatch(G_OP_ADD, m_rows, m_cols,
+                                          m.m_rows, m.m_cols);
 
-  // Perform inplace matrix addition
-  for (int col = 0; col < m_cols; ++col) {
-    GVector v_result  = extract_col(col);
-    GVector v_operand = m.extract_col(col);
-    v_result += v_operand;
-    insert_col(v_result, col);
-  }
+    // Perform inplace matrix addition using vectors
+    for (int col = 0; col < m_cols; ++col) {
+        GVector v_result  = extract_col(col);
+        GVector v_operand = m.extract_col(col);
+        v_result += v_operand;
+        insert_col(v_result, col);
+    }
 
-  // Return result
-  return *this;
+    // Return result
+    return *this;
 }
 
 
-/***************************************************************************
- *                      Unary matrix subtraction operator                  *
- * ----------------------------------------------------------------------- *
- *                     !!! NOT YET IN NATIVE CODING !!!                    *
+/***********************************************************************//**
+ * @brief Unary matrix subtraction operator
+ *
+ * @param[in] m Matrix to be subtracted.
+ *
+ * TODO: Implement native sparse code
  ***************************************************************************/
 GSparseMatrix& GSparseMatrix::operator-= (const GSparseMatrix& m)
 {
-  // Raise an exception if the matrix dimensions are not compatible
-  if (m_rows != m.m_rows || m_cols != m.m_cols)
-    throw GException::matrix_mismatch(G_OP_SUB, m_rows, m_cols, m.m_rows, m.m_cols);
+    // Raise an exception if the matrix dimensions are not compatible
+    if (m_rows != m.m_rows || m_cols != m.m_cols)
+        throw GException::matrix_mismatch(G_OP_SUB, m_rows, m_cols,
+                                          m.m_rows, m.m_cols);
 
-  // Perform inplace matrix subtraction
-  for (int col = 0; col < m_cols; ++col) {
-    GVector v_result  = extract_col(col);
-    GVector v_operand = m.extract_col(col);
-    v_result -= v_operand;
-    insert_col(v_result, col);
-  }
+    // Perform inplace matrix subtraction
+    for (int col = 0; col < m_cols; ++col) {
+      GVector v_result  = extract_col(col);
+      GVector v_operand = m.extract_col(col);
+      v_result -= v_operand;
+      insert_col(v_result, col);
+    }
 
-  // Return result
-  return *this;
+    // Return result
+    return *this;
 }
 
 
-/***************************************************************************
- *          Matrix multiplication (unary multiplication operator)          *
- * ----------------------------------------------------------------------- *
- *                     !!! NOT YET IN NATIVE CODING !!!                    *
+/***********************************************************************//**
+ * @brief Unary matrix multiplication operator
+ *
+ * @param[in] m Matrix to be multiplied.
+ *
+ * TODO: Implement native sparse code
  ***************************************************************************/
 GSparseMatrix& GSparseMatrix::operator*= (const GSparseMatrix& m)
 {
-  // Raise an exception if the matrix dimensions are not compatible
-  if (m_cols != m.m_rows || m_rows != m.m_cols)
-    throw GException::matrix_mismatch(G_OP_MAT_MUL, m_rows, m_cols, m.m_rows, m.m_cols);
+    // Raise an exception if the matrix dimensions are not compatible
+    if (m_cols != m.m_rows || m_rows != m.m_cols)
+        throw GException::matrix_mismatch(G_OP_MAT_MUL, m_rows, m_cols,
+                                          m.m_rows, m.m_cols);
 
-  // Allocate result matrix
-  GSparseMatrix result(m_rows, m.m_cols);
+    // Allocate result matrix
+    GSparseMatrix result(m_rows, m.m_cols);
 
-  // Multiply only if there are elements in both matrices
-  if (m_elements > 0 && m.m_elements > 0) {
+    // Multiply only if there are elements in both matrices
+    if (m_elements > 0 && m.m_elements > 0) {
 
-    // Loop over all elements of result matrix
-    for (int row = 0; row < m_rows; ++row) {
-      for (int col = 0; col < m.m_cols; ++col) {
-        double sum = 0.0;
-        for (int i = 0; i < m_cols; ++i)
-          sum += (*this)(row,i) * m(i,col);
-        result(row,col) = sum;
-      }
+        // Loop over all elements of result matrix
+        for (int row = 0; row < m_rows; ++row) {
+            for (int col = 0; col < m.m_cols; ++col) {
+                double sum = 0.0;
+                for (int i = 0; i < m_cols; ++i)
+                    sum += (*this)(row,i) * m(i,col);
+                result(row,col) = sum;
+            }
+        }
+
     }
 
-  }
+    // Assign result
+    *this = result;
 
-  // Assign result
-  *this = result;
-
-  // Return result
-  return *this;
+    // Return result
+    return *this;
 }
 
 
 /*==========================================================================
  =                                                                         =
- =                          GSparseMatrix methods                          =
+ =                      GSparseMatrix public methods                       =
  =                                                                         =
  ==========================================================================*/
 
@@ -714,214 +667,215 @@ void GSparseMatrix::cholesky_decompose(int compress)
 }
 
 
-/***************************************************************************
- *                      GSparseMatrix Cholesky solver                      *
- * ----------------------------------------------------------------------- *
- * Solves the linear equation A*x=b using a Cholesky decomposition of A.   *
- * This function is to be applied on a GSparseMatrix matrix for which a    *
- * Choleksy factorization has been produced using 'cholesky_decompose'.    *
+/***********************************************************************//**
+ * @brief Cholesky solver
+ *
+ * @param[in] v Solution vector.
+ * @param[in] compress Request matrix compression.
+ *
+ * Solves the linear equation A*x=b using a Cholesky decomposition of A.
+ * This function is to be applied on a GSparseMatrix matrix for which a
+ * Choleksy factorization has been produced using 'cholesky_decompose'.
  ***************************************************************************/
 GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
 {
-  // Declare loop variables
-  int row;
-  int col;
-  int c_row;
-  int c_col;
+    // Declare loop variables
+    int row;
+    int col;
+    int c_row;
+    int c_col;
 
-  // Dump header
-  #if defined(G_DEBUG_SPARSE_COMPRESSION)
-  cout << "GSparseMatrix::cholesky_solver" << endl;
-  cout << " Input vector .....: " << v << endl;
-  #endif
-
-  // Raise an exception if the matrix and vector dimensions are incompatible
-  if (m_rows != v.m_num)
-    throw GException::matrix_vector_mismatch(G_CHOL_SOLVE, v.m_num, m_rows, m_cols);
-
-  // Raise an exception if there is no symbolic pointer
-  if (!m_symbolic)
-    throw GException::matrix_not_factorised(G_CHOL_SOLVE, "Cholesky decomposition");
-
-  // Get symbolic pointer
-  GSparseSymbolic* symbolic = (GSparseSymbolic*)m_symbolic;
-
-  // Raise an exception if there is no permutation
-  if (!symbolic->m_pinv)
-    throw GException::matrix_not_factorised(G_CHOL_SOLVE, "Cholesky decomposition");
-
-  // Flag row and column compression
-  int row_compressed = (m_rowsel != NULL && m_num_rowsel < m_rows);
-  int col_compressed = (m_colsel != NULL && m_num_colsel < m_cols);
-
-  // Decide if we need a compression algorithm or not
-  int no_zero = !(compress && (row_compressed || col_compressed));
-
-  // Allocate vector for permutation and result vector
-  GVector result(m_cols);
-
-  // Setup pointers to L matrix and x vector
-  int*    Lp = m_colstart;
-  int*    Li = m_rowinx; 
-  double* Lx = m_data;
-
-  // Case A: no zero-row/col compression needed
-  if (no_zero) {
-
-    // Declare working vector
-    GVector x(m_rows);
-
-    // Perform inverse vector permutation
-    for (int i = 0; i < v.m_num; ++i)
-      x.m_data[symbolic->m_pinv[i]] = v.m_data[i];  
-
-    // Inplace solve L\x=x
-    for (col = 0; col < m_cols; ++col) {                // loop over columns
-      x.m_data[col] /= Lx[Lp[col]];                     // divide by diag. 
-      for (int p = Lp[col]+1; p < Lp[col+1]; p++)       // loop over elements
-        x.m_data[Li[p]] -= Lx[p] * x.m_data[col];
-    }
-
-    // Inplace solve L'\x=x
-    for (col = m_cols-1; col >= 0; --col) {             // loop over columns
-      for (int p = Lp[col]+1; p < Lp[col+1]; p++)       // loop over elements  
-        x.m_data[col] -= Lx[p] * x.m_data[Li[p]];
-        x.m_data[col] /= Lx[Lp[col]];
-    }
-
-    // Perform vector permutation
-    for (int i = 0; i < m_cols; ++i)
-      result.m_data[i] = x.m_data[symbolic->m_pinv[i]];
-
-  } // endif: Case A
-
-  // Case B: zero-row/column compression requested
-  else {
-
-    // Allocate row and column mapping arrays
-    int* row_map = new int[m_rows];
-    if (row_map == NULL)
-      throw GException::mem_alloc(G_CHOL_SOLVE, m_rows);
-    int* col_map = new int[m_cols];
-    if (col_map == NULL)
-      throw GException::mem_alloc(G_CHOL_SOLVE, m_cols);
-
-    // Setup row mapping array that maps original matrix rows into compressed
-    // matrix rows. An entry of -1 indicates that the row should be dropped.
-    // If no selection exists then setup an identity map.
-    if (row_compressed) { 
-      for (row = 0; row < m_rows; ++row)
-        row_map[row] = -1;
-      for (c_row = 0; c_row < m_num_rowsel; ++c_row)
-        row_map[m_rowsel[c_row]] = c_row;
-    }
-    else {
-      for (row = 0; row < m_rows; ++row)
-        row_map[row] = row;
-    }
+    // Dump header
     #if defined(G_DEBUG_SPARSE_COMPRESSION)
-    cout << " Row mapping ......:";
-    for (row = 0; row < m_rows; ++row)
-      cout << " " << row_map[row];
-    cout << endl;
+    std::cout << "GSparseMatrix::cholesky_solver" << std::endl;
+    std::cout << " Input vector .....: " << v << std::endl;
     #endif
 
-    // Setup column mapping array that maps original matrix column into compressed
-    // matrix columns. An entry of -1 indicates that the column should be dropped
-    // If no selection exists then setup an identity map.
-    if (col_compressed) {
-      for (col = 0; col < m_cols; ++col)
-        col_map[col] = -1;
-      for (c_col = 0; c_col < m_num_colsel; ++c_col)
-        col_map[m_colsel[c_col]] = c_col;
-    }
-    else {
-      for (col = 0; col < m_cols; ++col)
-        col_map[col] = col;
-    }
-    #if defined(G_DEBUG_SPARSE_COMPRESSION)
-    cout << " Column mapping ...:";
-    for (col = 0; col < m_cols; ++col)
-      cout << " " << col_map[col];
-    cout << endl;
-    #endif
+    // Raise an exception if the matrix and vector dimensions are incompatible
+    if (m_rows != v.m_num)
+        throw GException::matrix_vector_mismatch(G_CHOL_SOLVE, v.m_num,
+                                                 m_rows, m_cols);
+    // Raise an exception if there is no symbolic pointer
+    if (!m_symbolic)
+        throw GException::matrix_not_factorised(G_CHOL_SOLVE, 
+                                                "Cholesky decomposition");
 
-    // Declare working vector
-    GVector x(row_compressed ? m_num_rowsel : m_rows);
+    // Get symbolic pointer
+    GSparseSymbolic* symbolic = (GSparseSymbolic*)m_symbolic;
 
-    // Compress input vector v -> c_v if required
-    if (m_rowsel != NULL && m_num_rowsel < m_rows) {
-      for (c_row = 0; c_row < m_num_rowsel; ++c_row)
-        x.m_data[c_row] = v.m_data[m_rowsel[c_row]];
-    }
-    else
-      x = v;
-    #if defined(G_DEBUG_SPARSE_COMPRESSION)
-    cout << " Compressed vector : " << x << endl;
-    #endif
+    // Raise an exception if there is no permutation
+    if (!symbolic->m_pinv)
+        throw GException::matrix_not_factorised(G_CHOL_SOLVE, 
+                                                "Cholesky decomposition");
 
-    // Perform inverse permutation
-    x = iperm(x, symbolic->m_pinv);
-    #if defined(G_DEBUG_SPARSE_COMPRESSION)
-    cout << " Permutated vector : " << x << endl;
-    #endif
+    // Flag row and column compression
+    int row_compressed = (m_rowsel != NULL && m_num_rowsel < m_rows);
+    int col_compressed = (m_colsel != NULL && m_num_colsel < m_cols);
 
-    // Inplace solve L\x=x. The column and row maps are just use to see which 
-    // columns or rows should be skipped in the calculations.
-    for (col = 0; col < m_cols; ++col) {                // loop over columns
-      if ((c_col = col_map[col]) >= 0) {                // use only non-zero cols
-        x.m_data[c_col] /= Lx[Lp[col]];                 // divide by diag.
-        for (int p = Lp[col]+1; p < Lp[col+1]; p++) {   // loop over elements
-          if ((c_row = row_map[Li[p]]) >= 0)            // use only non-zero rows
-            x.m_data[c_row] -= Lx[p] * x.m_data[c_col];
+    // Decide if we need a compression algorithm or not
+    int no_zero = !(compress && (row_compressed || col_compressed));
+
+    // Allocate vector for permutation and result vector
+    GVector result(m_cols);
+
+    // Setup pointers to L matrix and x vector
+    int*    Lp = m_colstart;
+    int*    Li = m_rowinx; 
+    double* Lx = m_data;
+
+    // Case A: no zero-row/col compression needed
+    if (no_zero) {
+
+        // Declare working vector
+        GVector x(m_rows);
+
+        // Perform inverse vector permutation
+        for (int i = 0; i < v.m_num; ++i)
+            x.m_data[symbolic->m_pinv[i]] = v.m_data[i];  
+
+        // Inplace solve L\x=x
+        for (col = 0; col < m_cols; ++col) {                // loop over columns
+            x.m_data[col] /= Lx[Lp[col]];                   // divide by diag.
+            for (int p = Lp[col]+1; p < Lp[col+1]; p++)     // loop over elements
+                x.m_data[Li[p]] -= Lx[p] * x.m_data[col];
         }
-      }
-    }
-    #if defined(G_DEBUG_SPARSE_COMPRESSION)
-    cout << " Solve Lx=x .......: " << x << endl;
-    #endif
 
-    // Inplace solve L'\x=x. The column and row maps are just use to see which 
-    // columns or rows should be skipped in the calculations.
-    for (col = m_cols-1; col >= 0; --col) {             // loop over columns
-      if ((c_col = col_map[col]) >= 0) {                // use only non-zero cols
-        for (int p = Lp[col]+1; p < Lp[col+1]; p++) {   // loop over elements
-          if ((c_row = row_map[Li[p]]) >= 0)            // use only non-zero rows
-            x.m_data[c_col] -= Lx[p] * x.m_data[c_row];
+        // Inplace solve L'\x=x
+        for (col = m_cols-1; col >= 0; --col) {             // loop over columns
+            for (int p = Lp[col]+1; p < Lp[col+1]; p++)     // loop over elements
+                x.m_data[col] -= Lx[p] * x.m_data[Li[p]];
+                x.m_data[col] /= Lx[Lp[col]];
         }
-        x.m_data[c_col] /= Lx[Lp[col]];
-      }
-    }
-    #if defined(G_DEBUG_SPARSE_COMPRESSION)
-    cout << " Solve L'x=x ......: " << x << endl;
-    #endif
 
-    // Perform vector permutation
-    x = perm(x, symbolic->m_pinv);
-    #if defined(G_DEBUG_SPARSE_COMPRESSION)
-    cout << " Permutated vector : " << x << endl;
-    #endif
+        // Perform vector permutation
+        for (int i = 0; i < m_cols; ++i)
+            result.m_data[i] = x.m_data[symbolic->m_pinv[i]];
 
-    // If column compression has been performed the expand the result vector
-    // accordingly
-    if (m_colsel != NULL && m_num_colsel < m_cols) {
-      for (c_col = 0; c_col < m_num_colsel; ++c_col)
-        result.m_data[m_colsel[c_col]] = x.m_data[c_col];
-    }
-    else
-    result = x;
-    #if defined(G_DEBUG_SPARSE_COMPRESSION)
-    cout << " Restored vector ..: " << result << endl;
-    #endif
+    } // endif: Case A
 
-  // Free mapping arrays
-  delete [] row_map;
-  delete [] col_map;
+    // Case B: zero-row/column compression requested
+    else {
 
-  } // endelse: Case B
+        // Allocate row and column mapping arrays
+        int* row_map = new int[m_rows];
+        int* col_map = new int[m_cols];
 
-  // Return result vector
-  return result;
+        // Setup row mapping array that maps original matrix rows into compressed
+        // matrix rows. An entry of -1 indicates that the row should be dropped.
+        // If no selection exists then setup an identity map.
+        if (row_compressed) {
+            for (row = 0; row < m_rows; ++row)
+                row_map[row] = -1;
+            for (c_row = 0; c_row < m_num_rowsel; ++c_row)
+                row_map[m_rowsel[c_row]] = c_row;
+        }
+        else {
+            for (row = 0; row < m_rows; ++row)
+                row_map[row] = row;
+        }
+        #if defined(G_DEBUG_SPARSE_COMPRESSION)
+        std::cout << " Row mapping ......:";
+        for (row = 0; row < m_rows; ++row)
+            std::cout << " " << row_map[row];
+        std::cout << std::endl;
+        #endif
+
+        // Setup column mapping array that maps original matrix column into compressed
+        // matrix columns. An entry of -1 indicates that the column should be dropped
+        // If no selection exists then setup an identity map.
+        if (col_compressed) {
+            for (col = 0; col < m_cols; ++col)
+                col_map[col] = -1;
+            for (c_col = 0; c_col < m_num_colsel; ++c_col)
+                col_map[m_colsel[c_col]] = c_col;
+        }
+        else {
+            for (col = 0; col < m_cols; ++col)
+                col_map[col] = col;
+        }
+        #if defined(G_DEBUG_SPARSE_COMPRESSION)
+        std::cout << " Column mapping ...:";
+        for (col = 0; col < m_cols; ++col)
+            std::cout << " " << col_map[col];
+        std::cout << std::endl;
+        #endif
+
+        // Declare working vector
+        GVector x(row_compressed ? m_num_rowsel : m_rows);
+
+        // Compress input vector v -> c_v if required
+        if (m_rowsel != NULL && m_num_rowsel < m_rows) {
+            for (c_row = 0; c_row < m_num_rowsel; ++c_row)
+                x.m_data[c_row] = v.m_data[m_rowsel[c_row]];
+        }
+        else
+            x = v;
+        #if defined(G_DEBUG_SPARSE_COMPRESSION)
+        std::cout << " Compressed vector : " << x << std::endl;
+        #endif
+
+        // Perform inverse permutation
+        x = iperm(x, symbolic->m_pinv);
+        #if defined(G_DEBUG_SPARSE_COMPRESSION)
+        std::cout << " Permutated vector : " << x << std::endl;
+        #endif
+
+        // Inplace solve L\x=x. The column and row maps are just use to see which
+        // columns or rows should be skipped in the calculations.
+        for (col = 0; col < m_cols; ++col) {                  // loop over columns
+            if ((c_col = col_map[col]) >= 0) {                // use only non-zero cols
+                x.m_data[c_col] /= Lx[Lp[col]];               // divide by diag.
+                for (int p = Lp[col]+1; p < Lp[col+1]; p++) { // loop over elements
+                    if ((c_row = row_map[Li[p]]) >= 0)        // use only non-zero rows
+                        x.m_data[c_row] -= Lx[p] * x.m_data[c_col];
+                }
+            }
+        }
+        #if defined(G_DEBUG_SPARSE_COMPRESSION)
+        std::cout << " Solve Lx=x .......: " << x << std::endl;
+        #endif
+
+        // Inplace solve L'\x=x. The column and row maps are just use to see which
+        // columns or rows should be skipped in the calculations.
+        for (col = m_cols-1; col >= 0; --col) {               // loop over columns
+            if ((c_col = col_map[col]) >= 0) {                // use only non-zero cols
+                for (int p = Lp[col]+1; p < Lp[col+1]; p++) { // loop over elements
+                    if ((c_row = row_map[Li[p]]) >= 0)        // use only non-zero rows
+                        x.m_data[c_col] -= Lx[p] * x.m_data[c_row];
+                }
+                x.m_data[c_col] /= Lx[Lp[col]];
+            }
+        }
+        #if defined(G_DEBUG_SPARSE_COMPRESSION)
+        std::cout << " Solve L'x=x ......: " << x << std::endl;
+        #endif
+
+        // Perform vector permutation
+        x = perm(x, symbolic->m_pinv);
+        #if defined(G_DEBUG_SPARSE_COMPRESSION)
+        std::cout << " Permutated vector : " << x << std::endl;
+        #endif
+
+        // If column compression has been performed the expand the result vector
+        // accordingly
+        if (m_colsel != NULL && m_num_colsel < m_cols) {
+            for (c_col = 0; c_col < m_num_colsel; ++c_col)
+                result.m_data[m_colsel[c_col]] = x.m_data[c_col];
+        }
+        else
+            result = x;
+        #if defined(G_DEBUG_SPARSE_COMPRESSION)
+        std::cout << " Restored vector ..: " << result << std::endl;
+        #endif
+
+        // Free mapping arrays
+        delete [] row_map;
+        delete [] col_map;
+
+    } // endelse: Case B
+
+    // Return result vector
+    return result;
 }
 
 
@@ -963,21 +917,20 @@ void GSparseMatrix::cholesky_invert(int compress)
 }
 
 
-/***************************************************************************
- *                       Set all matrix elements to 0                      *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Set all matrix elements to 0
  ***************************************************************************/
-void GSparseMatrix::clear()
+void GSparseMatrix::clear(void)
 {
-  // Free memory
-  free_elements(0, m_elements);
+    // Free memory
+    free_elements(0, m_elements);
 
-  // Initialise column start indices to 0
-  for (int col = 0; col <= m_cols; ++col)
-    m_colstart[col] = 0;
+    // Initialise column start indices to 0
+    for (int col = 0; col <= m_cols; ++col)
+         m_colstart[col] = 0;
 
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
@@ -1057,17 +1010,35 @@ GVector GSparseMatrix::extract_col(int col) const
 }
 
 
-/***************************************************************************
- *                               Get matrix fill                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Returns fill of matrix
+ *
+ * The fill of a matrix is defined as the number non-zero elements devided
+ * by the number of total elements. By definiton, the fill is comprised
+ * in the interval [0,..,1]. The fill of an undefined matrix is defined to
+ * be 0.
  ***************************************************************************/
 double GSparseMatrix::fill() const
 {
-  // Determine number of elements in matrix
-  int num = (m_fill_val == 0.0) ? m_elements : m_elements + 1;
+    // Initialise result
+    double result = 0.0;
 
-  // Return fill
-  return (double(num) / double(m_rows*m_cols));
+    // Compute matrix size
+    int size = m_rows*m_cols;
+
+    // Continue only if matrix has elements
+    if (size > 0) {
+
+        // Determine number of elements in matrix
+        int num = (m_fill_val == 0.0) ? m_elements : m_elements + 1;
+
+        // Compute fill
+        result = double(num) / double(size);
+
+    } // endif: there were elements in matrix
+
+    // Return fill
+    return result;
 }
 
 
@@ -1842,182 +1813,187 @@ double GSparseMatrix::sum() const
 
 /*==========================================================================
  =                                                                         =
- =                     GSparseMatrix private functions                     =
+ =                      GSparseMatrix private methods                      =
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                            Constructor method                           *
- * ----------------------------------------------------------------------- *
- * This is the main constructor code, without any initialisation in it.    *
- * It is used as service function to a number of different constructors of *
- * the GSparseMatrix class.                                                *
+/***********************************************************************//**
+ * @brief Allocate matrix
+ *
+ * @param[in] rows Number of rows to be allocated.
+ * @param[in] cols Number of columns to be allocated.
+ * @param[in] elements Number of matrix elements to be physically allocated.
+ *
+ * This is the main constructor code that allocates and initialises memory
+ * for matrix elements.
  ***************************************************************************/
 void GSparseMatrix::constructor(int rows, int cols, int elements)
 {
-  // Allocate column start array. This is the only array that we can
-  // allocate at this time. The other arrays can only be allocated during
-  // filling of the matrix
-  m_colstart = new int[cols+1];
-  if (m_colstart == NULL)
-    throw GException::mem_alloc(G_CONSTRUCTOR, cols+1);
+    // Continue only if matrix is not empty
+    if (rows > 0 && cols > 0) {
 
-  // Store (logical) matrix size
-  m_rows = rows;
-  m_cols = cols;
+        // Allocate column start array. This is the only array that we can
+        // allocate at this time. The other arrays can only be allocated during
+        // filling of the matrix
+        m_colstart = new int[cols+1];
 
-  // Initialise column start indices to 0
-  for (int col = 0; col <= m_cols; ++col)
-    m_colstart[col] = 0;
+        // Store (logical) matrix size
+        m_rows = rows;
+        m_cols = cols;
 
-  // Optionally allocate elements
-  if (elements > 0)
-    alloc_elements(0, elements);
+        // Initialise column start indices to 0
+        for (int col = 0; col <= m_cols; ++col)
+            m_colstart[col] = 0;
 
-  // Return
-  return;
+        // Optionally allocate memory for matrix elements
+        if (elements > 0)
+            alloc_elements(0, elements);
+
+    } // endif: matrix was not empty
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                         Initialise class members                        *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Initialise class mambers
  ***************************************************************************/
 void GSparseMatrix::init_members(void)
 {
-  // Initialise sparse matrix members
-  m_rowinx    = NULL;
-  m_mem_block = G_SPARSE_MATRIX_DEFAULT_MEM_BLOCK;
-  m_zero      = 0.0;
-  m_fill_val  = 0.0;
-  m_fill_row  = 0;
-  m_fill_col  = 0;
-  m_symbolic  = NULL;
-  m_numeric   = NULL;
+    // Initialise sparse matrix members
+    m_rowinx    = NULL;
+    m_mem_block = G_SPARSE_MATRIX_DEFAULT_MEM_BLOCK;
+    m_zero      = 0.0;
+    m_fill_val  = 0.0;
+    m_fill_row  = 0;
+    m_fill_col  = 0;
+    m_symbolic  = NULL;
+    m_numeric   = NULL;
 
-  // Initialise stack members
-  init_stack_members();
+    // Initialise stack members
+    init_stack_members();
 
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                          Initialise fill-stack                          *
- * ----------------------------------------------------------------------- *
- ***************************************************************************/
-void GSparseMatrix::init_stack_members(void)
-{
-  // Initialise stack members
-  m_stack_max_entries = 0;
-  m_stack_size        = 0;
-  m_stack_entries     = 0;
-  m_stack_colinx      = NULL;
-  m_stack_start       = NULL;
-  m_stack_data        = NULL;
-  m_stack_rowinx      = NULL;
-  m_stack_work        = NULL;
-  m_stack_buffer      = NULL;
-
-  // Return
-  return;
-}
-
-
-/***************************************************************************
- *                            Copy class members                           *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Allocate matrix
+ *
+ * @param[in] m Matrix to be copied.
  ***************************************************************************/
 void GSparseMatrix::copy_members(const GSparseMatrix& m)
 {
-  // Copy GSparseMatrix members
-  m_mem_block = m.m_mem_block;
-  m_zero      = m.m_zero;
-  m_fill_val  = m.m_fill_val;
-  m_fill_row  = m.m_fill_row;
-  m_fill_col  = m.m_fill_col;
+    // Copy GSparseMatrix members
+    m_mem_block = m.m_mem_block;
+    m_zero      = m.m_zero;
+    m_fill_val  = m.m_fill_val;
+    m_fill_row  = m.m_fill_row;
+    m_fill_col  = m.m_fill_col;
 
-  // Copy row indices
-  if (m.m_rowinx != NULL && m.m_alloc > 0) {
-    m_rowinx = new int[m.m_alloc];
-    if (m_rowinx == NULL)
-      throw GException::mem_alloc(G_COPY_MEMBERS, m.m_alloc);
-    for (int i = 0; i < m.m_elements; ++i)
-      m_rowinx[i] = m.m_rowinx[i];
-  }
+    // Copy row indices if they exist
+    if (m.m_rowinx != NULL && m.m_alloc > 0) {
+        m_rowinx = new int[m.m_alloc];
+        for (int i = 0; i < m.m_elements; ++i)
+            m_rowinx[i] = m.m_rowinx[i];
+    }
 
-  // Copy symbolic decomposition
-  if (m.m_symbolic != NULL) {
-    GSparseSymbolic* symbolic = new GSparseSymbolic();
-    if (symbolic == NULL)
-      throw GException::mem_alloc(G_COPY_MEMBERS, 1);
-    *symbolic  = *((GSparseSymbolic*)m.m_symbolic);
-    m_symbolic = (void*)symbolic;
-  }
+    // Copy symbolic decomposition if it exists
+    if (m.m_symbolic != NULL) {
+        GSparseSymbolic* symbolic = new GSparseSymbolic();
+        *symbolic  = *((GSparseSymbolic*)m.m_symbolic);
+        m_symbolic = (void*)symbolic;
+    }
 
-  // Copy numeric decomposition
-  if (m.m_numeric != NULL) {
-    GSparseNumeric* numeric = new GSparseNumeric();
-    if (numeric == NULL)
-      throw GException::mem_alloc(G_COPY_MEMBERS, 1);
-    *numeric  = *((GSparseNumeric*)m.m_numeric);
-    m_numeric = (void*)numeric;
-  }
+    // Copy numeric decomposition if it exists
+    if (m.m_numeric != NULL) {
+        GSparseNumeric* numeric = new GSparseNumeric();
+        *numeric  = *((GSparseNumeric*)m.m_numeric);
+        m_numeric = (void*)numeric;
+    }
 
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                           Delete class members                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Delete class members
  ***************************************************************************/
 void GSparseMatrix::free_members(void)
 {
-  // De-allocate only if memory has indeed been allocated
-  if (m_numeric  != NULL) delete (GSparseNumeric*)m_numeric;
-  if (m_symbolic != NULL) delete (GSparseSymbolic*)m_symbolic;
-  if (m_rowinx   != NULL) delete [] m_rowinx;
+    // De-allocate only if memory has indeed been allocated
+    if (m_numeric  != NULL) delete (GSparseNumeric*)m_numeric;
+    if (m_symbolic != NULL) delete (GSparseSymbolic*)m_symbolic;
+    if (m_rowinx   != NULL) delete [] m_rowinx;
 
-  // Properly mark members as free
-  m_rowinx   = NULL;
-  m_symbolic = NULL;
-  m_numeric  = NULL;
+    // Properly mark members as free
+    m_rowinx   = NULL;
+    m_symbolic = NULL;
+    m_numeric  = NULL;
 
-  // Free stack members
-  free_stack_members();
+    // Free stack members
+    free_stack_members();
 
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                      Delete fill-stack class members                    *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Initialise fill stack
+ *
+ * The fill stack is used to fill the sparse matrix without any prior know-
+ * ledge about the number of location of the non-zero matrix elements.
+ * Values are first filled into the stack and flushed into the sparse
+ * matrix once the stack is full.
+ ***************************************************************************/
+void GSparseMatrix::init_stack_members(void)
+{
+    // Initialise stack members
+    m_stack_max_entries = 0;
+    m_stack_size        = 0;
+    m_stack_entries     = 0;
+    m_stack_colinx      = NULL;
+    m_stack_start       = NULL;
+    m_stack_data        = NULL;
+    m_stack_rowinx      = NULL;
+    m_stack_work        = NULL;
+    m_stack_buffer      = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete fill-stack class members
+ *
+ * Deletes all memory that has been allocated using the init_stack_members()
+ * method.
  ***************************************************************************/
 void GSparseMatrix::free_stack_members(void)
 {
-  // Free stack members
-  if (m_stack_colinx != NULL) delete [] m_stack_colinx;
-  if (m_stack_start  != NULL) delete [] m_stack_start;
-  if (m_stack_data   != NULL) delete [] m_stack_data;
-  if (m_stack_rowinx != NULL) delete [] m_stack_rowinx;
-  if (m_stack_work   != NULL) delete [] m_stack_work;
-  if (m_stack_buffer != NULL) delete [] m_stack_buffer;
+    // Free stack members
+    if (m_stack_colinx != NULL) delete [] m_stack_colinx;
+    if (m_stack_start  != NULL) delete [] m_stack_start;
+    if (m_stack_data   != NULL) delete [] m_stack_data;
+    if (m_stack_rowinx != NULL) delete [] m_stack_rowinx;
+    if (m_stack_work   != NULL) delete [] m_stack_work;
+    if (m_stack_buffer != NULL) delete [] m_stack_buffer;
 
-  // Properly mark members as free
-  m_stack_colinx = NULL;
-  m_stack_start  = NULL;
-  m_stack_data   = NULL;
-  m_stack_rowinx = NULL;
-  m_stack_work   = NULL;
-  m_stack_buffer = NULL;
+    // Properly mark members as free
+    m_stack_colinx = NULL;
+    m_stack_start  = NULL;
+    m_stack_data   = NULL;
+    m_stack_rowinx = NULL;
+    m_stack_work   = NULL;
+    m_stack_buffer = NULL;
 
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
@@ -2704,75 +2680,81 @@ void GSparseMatrix::mix_column(const double* src1_data, const int* src1_row,
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                             Output operator                             *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] m Matrix to put in output stream.
  ***************************************************************************/
-ostream& operator<< (ostream& os, const GSparseMatrix& m)
+std::ostream& operator<< (std::ostream& os, const GSparseMatrix& m)
 {
-  // Put header in stream
-  os << "=== GSparseMatrix ===" << endl;
-  if (m.m_rowsel != NULL)
-    os << " Number of rows ............: " << m.m_rows << " (compressed " <<
-          m.m_num_rowsel << ")" << endl;
-  else
-    os << " Number of rows ............: " << m.m_rows << endl;
-  if (m.m_colsel != NULL)
-    os << " Number of columns .........: " << m.m_cols << " (compressed " <<
-          m.m_num_colsel << ")" << endl;
-  else
-    os << " Number of columns .........: " << m.m_cols << endl;
-  if (m.m_fill_val == 0.0)
-    os << " Number of non-zero elements: " << m.m_colstart[m.m_cols] << " (" <<
-          m.m_elements << ")" << endl;
-  else {
-    os << " Number of non-zero elements: " << m.m_colstart[m.m_cols]+1 << " (" <<
-          m.m_elements+1 << ")" << endl;
-    os << " Pending element ...........: (" << m.m_fill_row << "," << m.m_fill_col <<
-          ")=" << m.m_fill_val << endl;
-  }
-  os << " Number of allocated cells .: " << m.m_alloc << endl;
-  os << " Memory block size .........: " << m.m_mem_block << endl;
-  os << " Sparse matrix fill ........: " << m.fill() << endl;
+    // Determine number of elements
+    int nonzero;
+    int elements = m.m_elements;
+    if (m.m_fill_val == 0.0) {
+        nonzero  = (m.m_colstart != NULL) ? m.m_colstart[m.m_cols] : 0;
+    }
+    else {
+        nonzero  = (m.m_colstart != NULL) ? m.m_colstart[m.m_cols]+1 : 0;
+        elements++;
+    }
 
-  // Dump elements and compression schemes
-  m.dump_elements(os);
-  m.dump_row_comp(os);
-  m.dump_col_comp(os);
+    // Put header in stream
+    os << "=== GSparseMatrix ===" << std::endl;
+    if (m.m_rowsel != NULL) {
+        os << " Number of rows ............: " << m.m_rows
+           << " (compressed " << m.m_num_rowsel << ")" << std::endl;
+    }
+    else
+        os << " Number of rows ............: " << m.m_rows << std::endl;
+    if (m.m_colsel != NULL) {
+        os << " Number of columns .........: " << m.m_cols
+           << " (compressed " << m.m_num_colsel << ")" << std::endl;
+    }
+    else
+        os << " Number of columns .........: " << m.m_cols << std::endl;
+    os << " Number of non-zero elements: " << nonzero
+       << " (" << elements << ")" << std::endl;
+    if (m.m_fill_val != 0.0) {
+        os << " Pending element ...........: (" << m.m_fill_row << ","
+           << m.m_fill_col << ")=" << m.m_fill_val << std::endl;
+    }
+    os << " Number of allocated cells .: " << m.m_alloc << std::endl;
+    os << " Memory block size .........: " << m.m_mem_block << std::endl;
+    os << " Sparse matrix fill ........: " << m.fill() << std::endl;
 
-  // If there is a symbolic decomposition then put it also in the stream
-  if (m.m_symbolic != NULL) {
-    os << endl << *((GSparseSymbolic*)m.m_symbolic);
-  }
+    // If there is a symbolic decomposition then put it also in the stream
+    if (m.m_symbolic != NULL)
+        os << std::endl << *((GSparseSymbolic*)m.m_symbolic);
 
-  // If there is a numeric decomposition then put it also in the stream
-  if (m.m_numeric != NULL) {
-    os << endl << *((GSparseNumeric*)m.m_numeric);
-  }
+    // If there is a numeric decomposition then put it also in the stream
+    if (m.m_numeric != NULL)
+        os << std::endl << *((GSparseNumeric*)m.m_numeric);
 
-  // Return output stream
-  return os;
+    // Return output stream
+    return os;
 }
 
 
-/***************************************************************************
- *                          Matrix absolute values                         *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Return matrix with absolute values of all elements
+ *
+ * @param[in] m Matrix for which absolute values are to be returned.
  ***************************************************************************/
 GSparseMatrix fabs(const GSparseMatrix& m)
 {
-  // Define result matrix
-  GSparseMatrix result = m;
+    // Define result matrix
+    GSparseMatrix result = m;
 
-  // Fill pending element
-  result.fill_pending();
+    // Fill pending element
+    result.fill_pending();
 
-  // Convert all elements to absolute values  
-  for (int i = 0; i < result.m_elements; ++i)
-    result.m_data[i] = fabs(result.m_data[i]);
+    // Convert all elements to absolute values
+    for (int i = 0; i < result.m_elements; ++i)
+        result.m_data[i] = fabs(result.m_data[i]);
 
-  // Return result
-  return result;
+    // Return result
+    return result;
 }
 
 
