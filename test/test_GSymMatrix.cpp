@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GSymMatrix.cpp  -  test GSymMatrix class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2009 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GSymMatrix.cpp
+ * @brief Testing of GSymMatrix class
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include "test_GSymMatrix.hpp"
@@ -376,19 +381,19 @@ int main(void)
     cout << e.what() << endl;
 	throw;
   }
-  #if defined(G_RANGE_CHECK)
-  try {
-    GSymMatrix test3(3,3);
-    test3(3,3) = 1.0;
-  }
-  catch (GMatrix::out_of_range &e) {
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  #endif  
-  cout << "ok." << endl;
+    #if defined(G_RANGE_CHECK)
+    try {
+        GSymMatrix test3(3,3);
+        test3(3,3) = 1.0;
+    }
+    catch (GException::out_of_range &e) {
+    }
+    catch (exception &e) {
+        cout << e.what() << endl;
+        throw;
+    }
+    #endif
+    cout << "ok." << endl;
 
   // Test 4: Matrix copy constructor
   try {

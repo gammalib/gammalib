@@ -565,19 +565,19 @@ int main(void)
     cout << e.what() << endl;
 	throw;
   }
-  #if defined(G_RANGE_CHECK)
-  try {
-    GMatrix test3(3,3);
-    test3(3,3) = 1.0;
-  }
-  catch (GMatrix::out_of_range &e) {
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  #endif  
-  cout << "ok." << endl;
+    #if defined(G_RANGE_CHECK)
+    try {
+        GMatrix test3(3,3);
+        test3(3,3) = 1.0;
+    }
+    catch (GException::out_of_range &e) {
+    }
+    catch (exception &e) {
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    #endif
+    cout << "ok." << endl;
 
   // Test 4: Matrix copy constructor
   try {

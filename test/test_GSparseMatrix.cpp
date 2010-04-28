@@ -369,19 +369,19 @@ void test_assign_values(const GSparseMatrix& m_test)
     cout << e.what() << endl;
 	throw;
   }
-  #if defined(G_RANGE_CHECK)
-  try {
-    GSparseMatrix test(3,3);
-    test(3,3) = 1.0;
-  }
-  catch (GMatrix::out_of_range &e) {
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  cout << ".";
-  #endif
+    #if defined(G_RANGE_CHECK)
+    try {
+        GSparseMatrix test(3,3);
+        test(3,3) = 1.0;
+    }
+    catch (GException::out_of_range &e) {
+    }
+    catch (exception &e) {
+        cout << e.what() << endl;
+        throw;
+    }
+    cout << ".";
+    #endif
   //
   // Insert column into 10 x 10 matrix using matrix stack and the
   // compressed vector format
