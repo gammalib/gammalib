@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GEbounds.cpp  -  Energy boundary class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,12 +27,12 @@
 #include "GEbounds.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_COPY_MEMBERS              "GEbounds::copy_members(const GEbounds&)"
-#define G_LOAD       "GEbounds::load(const std::string&, const std::string&)"
-#define G_EMIN                                    "GEbounds::emin(int) const"
-#define G_EMAX                                    "GEbounds::emax(int) const"
-#define G_EMEAN                                  "GEbounds::emean(int) const"
-#define G_ELOGMEAN                            "GEbounds::elogmean(int) const"
+#define G_COPY_MEMBERS                     "GEbounds::copy_members(GEbounds)"
+#define G_LOAD                      "GEbounds::load(std::string,std::string)"
+#define G_EMIN                                          "GEbounds::emin(int)"
+#define G_EMAX                                          "GEbounds::emax(int)"
+#define G_EMEAN                                        "GEbounds::emean(int)"
+#define G_ELOGMEAN                                  "GEbounds::elogmean(int)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -151,21 +151,21 @@ GEbounds& GEbounds::operator= (const GEbounds& ebds)
  ***************************************************************************/
 void GEbounds::load(const std::string& filename, const std::string& extname)
 {
-	// Allocate FITS file
-	GFits file;
-	
-	// Open FITS file
-	file.open(filename);
-	
-	// Get energy boundary HDU
-	GFitsHDU* hdu = file.hdu(extname);
+     // Allocate FITS file
+     GFits file;
+
+     // Open FITS file
+    file.open(filename);
+
+    // Get energy boundary HDU
+    GFitsHDU* hdu = file.hdu(extname);
 
     // Load energy boundaries
     load(hdu);
 
-	// Close FITS file
-	file.close();
-	
+    // Close FITS file
+    file.close();
+
     // Return
     return;
 }
@@ -178,19 +178,19 @@ void GEbounds::load(const std::string& filename, const std::string& extname)
  ***************************************************************************/
 void GEbounds::load(GFitsHDU* hdu)
 {
-	// Free members
-	free_members();
+    // Free members
+    free_members();
 
-	// Initialise attributes
-	init_members();
-	
+    // Initialise attributes
+    init_members();
+
     // Continue only if HDU is valid
     if (hdu != NULL) {
 
         // Extract energy boundary information from FITS file
         m_num = hdu->card("NAXIS2")->integer();
         if (m_num > 0) {
-	
+
             // Allocate memory
             m_channel = new int[m_num];
             m_emin    = new double[m_num];
@@ -204,21 +204,21 @@ void GEbounds::load(GFitsHDU* hdu)
                 m_emin[i]    = hdu->column("E_MIN")->real(i) / 1000.0;
                 m_emax[i]    = hdu->column("E_MAX")->real(i) / 1000.0;
             }
-        
+
         } // endif: there were channels to read
-    
+
         // Get OGIP keywords
         m_telescope   = hdu->card("TELESCOP")->string();
         m_instrument  = hdu->card("INSTRUME")->string();
         m_filter      = hdu->card("FILTER")->string();
         m_chantype    = hdu->card("CHANTYPE")->string();
         m_detchannels = hdu->card("DETCHANS")->string();
-    
+
         // Fix energy scale
         m_escale = 1.0;
-    
+
     }
-	
+
     // Return
     return;
 }
@@ -233,7 +233,7 @@ double GEbounds::emin(int index) const
 {
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= m_num)
-        throw GException::out_of_range(G_MIN, index, 0, m_num-1);
+        throw GException::out_of_range(G_EMIN, index, 0, m_num-1);
     #endif
 
     // Return
@@ -250,7 +250,7 @@ double GEbounds::emax(int index) const
 {
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= m_num)
-        throw GException::out_of_range(G_MAX, index, 0, m_num-1);
+        throw GException::out_of_range(G_EMAX, index, 0, m_num-1);
     #endif
 
     // Return
@@ -267,12 +267,12 @@ double GEbounds::emean(int index) const
 {
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= m_num)
-        throw GException::out_of_range(G_MEAN, index, 0, m_num-1);
+        throw GException::out_of_range(G_EMEAN, index, 0, m_num-1);
     #endif
 
     // Compute mean energy
     double emean = 0.5 * (m_emin[index] + m_emax[index]);
-    
+
     // Return
     return emean;
 }
@@ -287,14 +287,14 @@ double GEbounds::elogmean(int index) const
 {
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= m_num)
-        throw GException::out_of_range(G_LOGMEAN, index, 0, m_num-1);
+        throw GException::out_of_range(G_ELOGMEAN, index, 0, m_num-1);
     #endif
 
     // Compute logarithmic mean energy
     double elogmin  = log10(m_emin[index]);
     double elogmax  = log10(m_emax[index]);
     double elogmean = pow(10.0, 0.5 * (elogmin + elogmax));
-    
+
     // Return
     return elogmean;
 }
@@ -313,9 +313,9 @@ void GEbounds::init_members(void)
 {
     // Initialise members
     m_num     = 0;
-	m_channel = NULL;
-	m_emin    = NULL;
-	m_emax    = NULL;
+    m_channel = NULL;
+    m_emin    = NULL;
+    m_emax    = NULL;
     m_escale  = 1.0;
     m_telescope.clear();
     m_instrument.clear();
@@ -374,9 +374,9 @@ void GEbounds::free_members(void)
     if (m_emax    != NULL) delete [] m_emax;
 
     // Signal free pointers
-	m_channel = NULL;
-	m_emin    = NULL;
-	m_emax    = NULL;
+    m_channel = NULL;
+    m_emin    = NULL;
+    m_emax    = NULL;
 
     // Return
     return;
@@ -407,7 +407,7 @@ std::ostream& operator<< (std::ostream& os, const GEbounds& ebds)
     os << " Channel type ..............: " << ebds.m_chantype << std::endl;
     os << " Telescope .................: " << ebds.m_telescope << std::endl;
     os << " Instrument ................: " << ebds.m_instrument;
-	
+
     // Return output stream
     return os;
 }
