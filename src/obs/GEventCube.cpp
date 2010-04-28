@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GEventCube.cpp  -  Abstract event cube container class         *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,7 +23,8 @@
 #include "GEventCube.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_COPY_MEMBERS          "GEventCube::copy_members(const GEventCube&)"
+#define G_COPY_MEMBERS                 "GEventCube::copy_members(GEventCube)"
+#define G_NAXIS                                      "GEventCube::naxis(int)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -155,7 +156,7 @@ int GEventCube::naxis(int axis) const
     if (m_naxis == NULL || axis < 0 || axis >= m_dim)
         throw GException::out_of_range(G_NAXIS, axis, 0, m_dim-1);
     #endif
-        
+
     // Return axis dimension
     return m_naxis[axis];
 }
@@ -176,7 +177,7 @@ void GEventCube::init_members(void)
     m_elements = 0;
     m_dim      = 0;
     m_naxis    = NULL;
-    
+
     // Return
     return;
 }
@@ -195,7 +196,7 @@ void GEventCube::copy_members(const GEventCube& cube)
 
     // If the cube is not empty then copy it
     if (m_dim > 0 && cube.m_naxis != NULL) {
-    
+
         // Allocate memory
         m_naxis = new int[m_dim];
         if (m_naxis == NULL)
@@ -251,11 +252,11 @@ std::ostream& operator<< (std::ostream& os, const GEventCube& cube)
         os << " Number of cube elements ...: " << cube.elements() << std::endl;
         os << " Cube dimension ............: " << cube.dim() << std::endl;
         for (int axis = 0; axis < cube.m_dim; ++axis) {
-            os << " Axis " << axis+1 << " dimension ..........: " 
+            os << " Axis " << axis+1 << " dimension ..........: "
                << cube.naxis(axis) << std::endl;
         }
     }
-        
+
     // Return output stream
     return os;
 }
