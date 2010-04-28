@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GSkymap.i  -  Sky map class SWIG definition              *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2010 by Jurgen Knodlseder                   *
+ *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -36,21 +36,26 @@ public:
             const int& nside, const std::string& order,
             const int nmaps = 1);
     GSkymap(const std::string& wcs, const std::string& coords,
-            GSkyDir& dir, const int& nlon, const int& nlat,
-            const double& dlon, const double& dlat, const int nmaps = 1);
+            double const& x, double const& y,
+            double const& dx, double const& dy,
+            const int& nx, const int& ny, const int nmaps = 1);
     GSkymap(const GSkymap& map);
     virtual ~GSkymap(void);
 
     // Methods
-    void    load(const std::string& filename);
-    void    save(const std::string& filename, int clobber = 0);
-    void    read(const GFitsHDU* hdu);
-    void    write(GFitsHDU* hdu);
-    GSkyDir pix2dir(const int& ipix);
-    int     dir2pix(GSkyDir dir) const;
-    double  omega(const int& pix) const;
-    int     npix(void) const;
-    int     nmaps(void) const;
+    GSkyDir   pix2dir(const int& pix);
+    int       dir2pix(GSkyDir dir) const;
+    double    omega(const int& pix) const;
+    GSkyDir   xy2dir(const GSkyPixel& pix);
+    GSkyPixel dir2xy(GSkyDir dir) const;
+    void      load(const std::string& filename);
+    void      save(const std::string& filename, int clobber = 0);
+    void      read(const GFitsHDU* hdu);
+    void      write(GFitsHDU* hdu);
+    int       npix(void) const;
+    int       nx(void) const;
+    int       ny(void) const;
+    int       nmaps(void) const;
 };
 
 
