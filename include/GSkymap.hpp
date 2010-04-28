@@ -24,6 +24,8 @@
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
 #include "GFitsHDU.hpp"
+#include "GMatrix.hpp"
+#include "GVector.hpp"
 
 
 /***********************************************************************//**
@@ -44,8 +46,9 @@ public:
             const int& nside, const std::string& order,
             const int nmaps = 1);
     GSkymap(const std::string& wcs, const std::string& coords,
-            GSkyDir& dir, const int& nlon, const int& nlat,
-            const double& dlon, const double& dlat, const int nmaps = 1);
+            double const& x, double const& y,
+            double const& dx, double const& dy,
+            const int& nx, const int& ny, const int nmaps = 1);
     GSkymap(const GSkymap& map);
     virtual ~GSkymap(void);
 
@@ -58,7 +61,7 @@ public:
     GSkyDir       pix2dir(const int& pix);
     int           dir2pix(GSkyDir dir) const;
     double        omega(const int& pix) const;
-    
+
     // 2D pixel methods
     double&       operator() (const GSkyPixel& pixel, const int map = 0);
     const double& operator() (const GSkyPixel& pixel, const int map = 0) const;
@@ -74,21 +77,26 @@ public:
     int       nx(void) const;
     int       ny(void) const;
     int       nmaps(void) const;
-    
+
 private:
     // Private methods
     void      init_members(void);
     void      alloc_pixels(void);
     void      copy_members(const GSkymap& map);
     void      free_members(void);
+    void      set_wcs(const std::string& wcs, const std::string& coords,
+                      const double& crval1, const double& crval2,
+                      const double& crpix1, const double& crpix2,
+                      const double& cdelt1, const double& cdelt2,
+                      const GMatrix& cd, const GVector& pv2);
     int       xy2pix(const GSkyPixel& pix) const;
     GSkyPixel pix2xy(const int& pix) const;
     void      read_healpix(const GFitsHDU* hdu);
     GFitsHDU* create_healpix_hdu(void);
 
     // Private data area
-    int     m_num_pixels;   //!< Number of pixels
-    int     m_num_maps;     //!< Number of maps
+    int     m_num_pixels;   //!< Number of pixels (used for pixel allocation)
+    int     m_num_maps;     //!< Number of maps (used for pixel allocation)
     int     m_num_x;        //!< Number of pixels in x direction (only 2D)
     int     m_num_y;        //!< Number of pixels in y direction (only 2D)
     GWcs*   m_wcs;          //!< Pointer to WCS projection

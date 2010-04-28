@@ -38,9 +38,11 @@ class GWcsCAR : public GWcs {
 public:
     // Constructors and destructors
     GWcsCAR(void);
-    GWcsCAR(GSkyDir& crval, const double& crpix1, const double& crpix2,
+    GWcsCAR(const std::string& coords,
+            const double& crval1, const double& crval2,
+            const double& crpix1, const double& crpix2,
             const double& cdelt1, const double& cdelt2,
-            const std::string& coords);
+            const GMatrix& cd, const GVector& pv2);
     GWcsCAR(const GFitsHDU* hdu);
     GWcsCAR(const GWcsCAR& wcs);
     virtual ~GWcsCAR(void);

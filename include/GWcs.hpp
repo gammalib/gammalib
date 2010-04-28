@@ -23,6 +23,8 @@
 #include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
+#include "GMatrix.hpp"
+#include "GVector.hpp"
 
 
 /***********************************************************************//**
@@ -38,6 +40,10 @@ class GWcs {
 public:
     // Constructors and destructors
     GWcs(void);
+    GWcs(const std::string& coords,
+         const double& crval1, const double& crval2,
+         const double& crpix1, const double& crpix2,
+         const double& cdelt1, const double& cdelt2);
     GWcs(const GWcs& wcs);
     virtual ~GWcs(void);
 
@@ -65,24 +71,18 @@ private:
     void          copy_members(const GWcs& wcs);
     void          free_members(void);
     virtual GWcs* clone(void) const = 0;
-    void          set_wcs(const double& crval1, const double& crval2, 
-                          const double& crpix1, const double& crpix2,
-                          const double& cdelt1, const double& cdelt2,
-                          const std::string& coords, 
-                          const double* cd = NULL, const double* pv = NULL);
 
 protected:
     // Protected data area
-    int          m_coordsys;     //!< 0=celestial, 1=galactic
-
-    // WCS projection parameters
-    double       m_crval[2];     //!< Coordinates of reference point
-    double       m_crpix[2];     //!< x and y coordinates of the reference point
-    double       m_cdelt[2];     //!< Increment at reference point (deg/pixel)
-    double       m_longpole;     //!< Native longitude of North Pole
-    double       m_latpole;      //!< Native latitude of North Pole
-    double       m_cd[4];        //!< Astrometry parameters
-    double       m_pv2[2];       //!< Additional parameters
+    int     m_coordsys;     //!< 0=celestial, 1=galactic
+    double  m_crval[2];     //!< Coordinates of reference point
+    double  m_crpix[2];     //!< x and y coordinates of the reference point
+    double  m_cdelt[2];     //!< Increment at reference point (deg/pixel)
+    double  m_longpole;     //!< Native longitude of North Pole
+    double  m_latpole;      //!< Native latitude of North Pole
+    GMatrix m_cd;           //!< Astrometry parameters (2x2 matrix, deg/pixel)
+    GMatrix m_invcd;        //!< Inverse of CD matrix
+    GVector m_pv2;          //!< Projection parameters (up to 21)
 };
 
 #endif /* GWCS_HPP */
