@@ -18,6 +18,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include <cmath>
 #include "GException.hpp"
@@ -218,144 +221,6 @@ std::string GWcsHPX::type(void) const
 
 
 /***********************************************************************//**
- * @brief Returns sky direction of pixel
- *
- * @param[in] pix Pixel number (0,1,...,m_num_pixels).
- ***************************************************************************/
-GSkyDir GWcsHPX::pix2dir(const int& pix)
-{
-    // Declare result
-    GSkyDir result;
-    double  theta = 0.0;
-    double  phi   = 0.0;
-
-    // Perform ordering dependent conversion
-    switch (m_ordering) {
-    case 0:
-        pix2ang_ring(pix, &theta, &phi);
-        break;
-    case 1:
-        pix2ang_nest(pix, &theta, &phi);
-        break;
-    default:
-        break;
-    }
-
-    // Store coordinate system dependent result
-    switch (m_coordsys) {
-    case 0:
-        result.radec(phi, pihalf-theta);
-        break;
-    case 1:
-        result.lb(phi, pihalf-theta);
-        break;
-    default:
-        break;
-    }
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Returns sky direction of pixel (method should never be called)
- *
- * @param[in] pix Sky pixel.
- ***************************************************************************/
-GSkyDir GWcsHPX::xy2dir(const GSkyPixel& pix)
-{
-    // Throw error
-    throw GException::wcs(G_XY2DIR, "WCS method not defined for HPX type.");
-}
-
-
-/***********************************************************************//**
- * @brief Returns pixel for a given sky direction
- *
- * @param[in] dir Sky direction.
- ***************************************************************************/
-int GWcsHPX::dir2pix(GSkyDir dir) const
-{
-    // Declare result
-    int    pix;
-    double z;
-    double phi;
-
-    // Compute coordinate system dependent (z,phi)
-    switch (m_coordsys) {
-    case 0:
-        z   = cos(pihalf-dir.dec());
-        phi = dir.ra();
-        break;
-    case 1:
-        z   = cos(pihalf-dir.b());
-        phi = dir.l();
-        break;
-    default:
-        break;
-    }
-
-    // Perform ordering dependent conversion
-    switch (m_ordering) {
-    case 0:
-        pix = ang2pix_z_phi_ring(z, phi);
-        break;
-    case 1:
-        pix = ang2pix_z_phi_nest(z, phi);
-        break;
-    default:
-        break;
-    }
-    
-    // Return pixel index
-    return pix;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pixel of sky direction (method should never be called)
- *
- * @param[in] dir Sky direction.
- ***************************************************************************/
-GSkyPixel GWcsHPX::dir2xy(GSkyDir dir) const
-{
-    // Throw error
-    throw GException::wcs(G_DIR2XY, "WCS method not defined for HPX type.");
-}
-
-
-/***********************************************************************//**
- * @brief Returns solid angle of pixel
- *
- * @param[in] pix Pixel number (0,1,...,num_pixels).
- *
- * HEALPix pixels have all the same solid angle, hence the pix argument is
- * not used.
- ***************************************************************************/
-double GWcsHPX::omega(const int& pix) const
-{
-    // Return solid angle
-    return m_omega;
-}
-
-
-/***********************************************************************//**
- * @brief Returns solid angle of pixel
- *
- * @param[in] pix Pixel index (x,y).
- *
- * HEALPix pixels have all the same solid angle, hence the pix argument is
- * not used.
- ***************************************************************************/
-double GWcsHPX::omega(const GSkyPixel& pix) const
-{
-    // Return solid angle
-    return m_omega;
-}
-
-
-/***********************************************************************//**
  * @brief Read Healpix definiton from FITS header.
  *
  * @param[in] hdu FITS HDU containing the Healpix definition.
@@ -440,13 +305,114 @@ void GWcsHPX::write(GFitsHDU* hdu)
         hdu->card("NSIDE",    nside(),    "HEALPix resolution parameter");
         hdu->card("FIRSTPIX", 0,          "Index of first pixel");
         hdu->card("LASTPIX",  npix()-1,   "Index of last pixel");
-        hdu->card("ORDERING", ordering(), "Pixel ordering scheme, either RING or NESTED");
-        hdu->card("COORDSYS", coordsys(), "Coordinate system, either EQU or GAL");
+        hdu->card("ORDERING", ordering(),
+                  "Pixel ordering scheme, either RING or NESTED");
+        hdu->card("COORDSYS", coordsys(),
+                  "Coordinate system, either EQU or GAL");
 
     } // endif: HDU was valid
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns solid angle of pixel
+ *
+ * @param[in] pix Pixel number (0,1,...,num_pixels).
+ *
+ * HEALPix pixels have all the same solid angle, hence the pix argument is
+ * not used.
+ ***************************************************************************/
+double GWcsHPX::omega(const int& pix) const
+{
+    // Return solid angle
+    return m_omega;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns sky direction of pixel
+ *
+ * @param[in] pix Pixel number (0,1,...,m_num_pixels).
+ ***************************************************************************/
+GSkyDir GWcsHPX::pix2dir(const int& pix)
+{
+    // Declare result
+    GSkyDir result;
+    double  theta = 0.0;
+    double  phi   = 0.0;
+
+    // Perform ordering dependent conversion
+    switch (m_ordering) {
+    case 0:
+        pix2ang_ring(pix, &theta, &phi);
+        break;
+    case 1:
+        pix2ang_nest(pix, &theta, &phi);
+        break;
+    default:
+        break;
+    }
+
+    // Store coordinate system dependent result
+    switch (m_coordsys) {
+    case 0:
+        result.radec(phi, pihalf-theta);
+        break;
+    case 1:
+        result.lb(phi, pihalf-theta);
+        break;
+    default:
+        break;
+    }
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pixel for a given sky direction
+ *
+ * @param[in] dir Sky direction.
+ ***************************************************************************/
+int GWcsHPX::dir2pix(GSkyDir dir) const
+{
+    // Declare result
+    int    pix;
+    double z;
+    double phi;
+
+    // Compute coordinate system dependent (z,phi)
+    switch (m_coordsys) {
+    case 0:
+        z   = cos(pihalf-dir.dec());
+        phi = dir.ra();
+        break;
+    case 1:
+        z   = cos(pihalf-dir.b());
+        phi = dir.l();
+        break;
+    default:
+        break;
+    }
+
+    // Perform ordering dependent conversion
+    switch (m_ordering) {
+    case 0:
+        pix = ang2pix_z_phi_ring(z, phi);
+        break;
+    case 1:
+        pix = ang2pix_z_phi_nest(z, phi);
+        break;
+    default:
+        break;
+    }
+
+    // Return pixel index
+    return pix;
 }
 
 
@@ -499,7 +465,7 @@ std::string GWcsHPX::ordering(void) const
  *
  * @param[in] ordering Pixel ordering (RING or NEST/NESTED).
  *
- * @exception GException::wcs_hpx_bad_ordering 
+ * @exception GException::wcs_hpx_bad_ordering
  *            Invalid ordering parameter.
  ***************************************************************************/
 void GWcsHPX::ordering(const std::string& ordering)
@@ -667,7 +633,7 @@ int GWcsHPX::xy2pix(int x, int y) const
  * @param[out] theta Pointer to result zenith angle in radians.
  * @param[out] phi Pointer to result azimuth angle in radians.
  *
- * @exception GException::out_of_range 
+ * @exception GException::out_of_range
  *            Pixel index is out of range.
  ***************************************************************************/
 void GWcsHPX::pix2ang_ring(int ipix, double* theta, double* phi)
@@ -716,7 +682,7 @@ void GWcsHPX::pix2ang_ring(int ipix, double* theta, double* phi)
  * @param[out] theta Pointer to result zenith angle in radians.
  * @param[out] phi Pointer to result azimuth angle in radians.
  *
- * @exception GException::out_of_range 
+ * @exception GException::out_of_range
  *            Pixel index is out of range.
  ***************************************************************************/
 void GWcsHPX::pix2ang_nest(int ipix, double* theta, double* phi)
@@ -932,10 +898,3 @@ std::ostream& operator<< (std::ostream& os, const GWcsHPX& wcs)
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                      Other functions used by GWcsHPX                    =
- =                                                                         =
- ==========================================================================*/

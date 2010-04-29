@@ -20,6 +20,9 @@
 #define GWCSHPX_HPP
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GWcs.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
@@ -40,7 +43,7 @@ public:
     GWcsHPX(void);
     GWcsHPX(const int& nside, const std::string& ordering = "NESTED",
             const std::string& coordsys = "GAL");
-    GWcsHPX(const GFitsHDU* hdu);
+    explicit GWcsHPX(const GFitsHDU* hdu);
     GWcsHPX(const GWcsHPX& wcs);
     virtual ~GWcsHPX(void);
 
@@ -49,16 +52,15 @@ public:
 
     // Implemented pure virtual methods
     std::string type(void) const;
-    GSkyDir     pix2dir(const int& pix);
-    GSkyDir     xy2dir(const GSkyPixel& pix);
-    int         dir2pix(GSkyDir dir) const;
-    GSkyPixel   dir2xy(GSkyDir dir) const;
+
+    // Overloaded base class methods
+    void        read(const GFitsHDU* hdu);
+    void        write(GFitsHDU* hdu);
     double      omega(const int& pix) const;
-    double      omega(const GSkyPixel& pix) const;
+    GSkyDir     pix2dir(const int& pix);
+    int         dir2pix(GSkyDir dir) const;
 
     // Class specific methods
-    void        read(const GFitsHDU* hdu); // overwrites base class method
-    void        write(GFitsHDU* hdu);      // overwrites base class method
     int         npix(void) const;
     int         nside(void) const;
     std::string ordering(void) const;
