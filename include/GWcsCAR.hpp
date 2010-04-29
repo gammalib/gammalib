@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GWcsCAR.hpp  -  Healpix projection class                *
+ *                GWcsCAR.hpp  -  Cartesian projection class               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
@@ -46,21 +46,18 @@ public:
             const double& crpix1, const double& crpix2,
             const double& cdelt1, const double& cdelt2,
             const GMatrix& cd, const GVector& pv2);
-    GWcsCAR(const GFitsHDU* hdu);
+    explicit GWcsCAR(const GFitsHDU* hdu);
     GWcsCAR(const GWcsCAR& wcs);
     virtual ~GWcsCAR(void);
 
     // Operators
     GWcsCAR& operator= (const GWcsCAR& wcs);
 
-    // Implemented virtual methods
+    // Implemented pure virtual methods
     std::string type(void) const;
-    GSkyDir     pix2dir(const int& pix);
-    GSkyDir     xy2dir(const GSkyPixel& pix);
-    int         dir2pix(GSkyDir dir) const;
-    GSkyPixel   dir2xy(GSkyDir dir) const;
-    double      omega(const int& pix) const;
-    double      omega(const GSkyPixel& pix) const;
+
+    // Overloaded base class methods
+    double omega(const GSkyPixel& pix) const;
 
 private:
     // Private methods
@@ -68,6 +65,8 @@ private:
     void     copy_members(const GWcsCAR& wcs);
     void     free_members(void);
     GWcsCAR* clone(void) const;
+    void     std2nat(GVector *coord) const;
+    void     nat2std(GVector *coord) const;
 
     // Private data area
 };

@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GWcsCAR.cpp  -  Healpix projection class                *
+ *                 GWcsCAR.cpp  -  Cartesian projection class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
@@ -26,16 +26,14 @@
 #include "GWcsCAR.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_XY2DIR                                 "GWcsCAR::xy2dir(GSkyPixel)"
-#define G_DIR2XY                                   "GWcsCAR::dir2xy(GSkyDir)"
+#define G_XY2DIR                                      "GWcsCAR::pix2dir(int)"
+#define G_DIR2XY                                  "GWcsCAR::dir2pix(GSkyDir)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DIR2XY_DEBUG                                      // Debug dir2xy
-//#define G_XY2DIR_DEBUG                                      // Debug xy2dir
 
 /* __ Local prototypes ___________________________________________________ */
 
@@ -87,11 +85,12 @@ GWcsCAR::GWcsCAR(const std::string& coords,
     // Initialise class members
     init_members();
 
-    // Derive projection parameters
-    m_theta0      = 0.0;
-    m_native_pole = wcs_getpole(m_theta0);
-    m_rot         = wcs_get_rot();
-    m_trot        = transpose(m_rot);
+    // Initialise derived projection parameters
+    wcs_init(0.0);  // theta0 = 0.0
+
+    // Set projection function pointers
+    m_std2nat = (_wcspf)&GWcsCAR::std2nat;
+    m_nat2std = (_wcspf)&GWcsCAR::nat2std;
 
     // Return
     return;
@@ -199,133 +198,6 @@ std::string GWcsCAR::type(void) const
 
 
 /***********************************************************************//**
- * @brief Returns sky direction of pixel (method should never be called)
- *
- * @param[in] pix Pixel number (0,1,...,m_num_pixels).
- ***************************************************************************/
-GSkyDir GWcsCAR::pix2dir(const int& pix)
-{
-    // Throw error
-    throw GException::wcs(G_XY2DIR, 
-                          "WCS method not defined for CAR projection.");
-
-    // Define constant direction
-    const GSkyDir dir;
-
-    // Return
-    return dir;
-}
-
-
-/***********************************************************************//**
- * @brief Returns sky direction of pixel
- *
- * @param[in] pix Sky pixel.
- *
- * Note that pixel indices start from 0.
- ***************************************************************************/
-GSkyDir GWcsCAR::xy2dir(const GSkyPixel& pix)
-{
-    // Set constants
-    const int __permutation[2] = {1,0};
-
-    // Determine offset
-    GVector offset = GVector(pix.x(), pix.y());
-
-    // Determine xy
-    GVector xy = m_cd * (offset - m_refpix);
-
-    // Swap result if coordinates are reversed
-    if (m_reverse)
-        xy = perm(xy, __permutation);
-
-    // Perform CAR map projection
-    GVector native = xy * deg2rad;
-
-    // Get sky direction for native coordinates
-    GSkyDir dir = wcs_native2dir(native);
-    
-    // Debug: Dump transformation steps
-    #if defined(G_XY2DIR_DEBUG)
-    std::cout << "xy2dir: pixel=" << offset << " xy=" << xy
-              << " native=" << native << " dir=" << dir << std::endl;
-    #endif
-
-    // Return
-    return dir;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pixel for sky direction (method should never be called)
- *
- * @param[in] dir Sky direction.
- ***************************************************************************/
-int GWcsCAR::dir2pix(GSkyDir dir) const
-{
-    // Throw error
-    throw GException::wcs(G_DIR2XY, 
-                          "WCS method not defined for CAR projection.");
-    
-    // Return
-    return 0;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pixel of sky direction
- *
- * @param[in] dir Sky direction.
- *
- * Note that pixel indices start from 0.
- ***************************************************************************/
-GSkyPixel GWcsCAR::dir2xy(GSkyDir dir) const
-{
-    // Set constants
-    const int __permutation[2] = {1,0};
-        
-    // Get native coordinates for sky direction in radians
-    GVector native = wcs_dir2native(dir);
-    
-    // Perform CAR map projection
-    GVector xy = native * rad2deg;
-    
-    // Swap result if coordinates are reversed
-    if (m_reverse)
-        xy = perm(xy, __permutation);
-    
-    // Determine pixel offset
-    GVector offset = m_invcd * xy + m_refpix;
-
-    // Set sky pixel
-    GSkyPixel pixel(offset(0), offset(1));
-
-    // Debug: Dump transformation steps
-    #if defined(G_DIR2XY_DEBUG)
-    std::cout << "dir2xy: dir=" << dir << " native=" << native
-              << " xy=" << xy << " pixel=" << offset << std::endl;
-    #endif
-
-    // Return sky pixel
-    return pixel;
-}
-
-
-/***********************************************************************//**
- * @brief Returns solid angle of pixel
- *
- * @param[in] pix Pixel number (0,1,...,m_num_pixels).
- ***************************************************************************/
-double GWcsCAR::omega(const int& pix) const
-{
-    // TODO: Implement
-    
-    // Return solid angle
-    return 0.0;
-}
-
-
-/***********************************************************************//**
  * @brief Returns solid angle of pixel
  *
  * @param[in] pix Pixel index (x,y)
@@ -333,7 +205,7 @@ double GWcsCAR::omega(const int& pix) const
 double GWcsCAR::omega(const GSkyPixel& pix) const
 {
     // TODO: Implement
-    
+
     // Return solid angle
     return 0.0;
 }
@@ -390,6 +262,41 @@ GWcsCAR* GWcsCAR::clone(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Projects from standard to native coordinates
+ *
+ * @param[in,out] coord Pointer to coordinate vector.
+ *
+ * Transforms coordinate vector from the standard coordinate system to the
+ * native coordinate system.
+ ***************************************************************************/
+void GWcsCAR::std2nat(GVector *coord) const
+{
+    // Perform CAR projection
+    *coord *= rad2deg;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Projects from native to standard coordinates
+ *
+ * @param[in,out] coord Pointer to coordinate vector.
+ *
+ * Transforms coordinate vector from the native coordinate system to the
+ * standard coordinate system.
+ ***************************************************************************/
+void GWcsCAR::nat2std(GVector *coord) const
+{
+    // Perform CAR projection
+    *coord *= deg2rad;
+
+    // Return
+    return;
+}
+
 /*==========================================================================
  =                                                                         =
  =                              GWcsCAR friends                            =
@@ -406,7 +313,7 @@ std::ostream& operator<< (std::ostream& os, const GWcsCAR& wcs)
 {
     // Put header in stream
     os << "=== GWcsCAR ===" << std::endl;
-    
+
     // Add WCS information
     wcs.dump_wcs(os);
 
