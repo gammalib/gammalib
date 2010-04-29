@@ -634,7 +634,7 @@ GSkyPixel GSkymap::dir2xy(GSkyDir dir) const
                                    : m_wcs->dir2xy(dir);
 
     // Return pixel index
-    return (m_wcs->dir2xy(dir));
+    return pix;
 }
 
 
