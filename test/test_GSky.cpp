@@ -17,6 +17,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <stdlib.h>
 #include "test_GSky.hpp"
 
@@ -285,6 +288,9 @@ void test_GSkymap_healpix_io(void)
  ***************************************************************************/
 void test_GSkymap_map_construct(void)
 {
+    // Set precision
+    double eps = 1.0e-10;
+    
     // Dump header
     std::cout << "Test non Healpix GSkymap constructors: ";
 
@@ -301,10 +307,9 @@ void test_GSkymap_map_construct(void)
     }
     std::cout << ".";
 
-    // Test correct Healpix constructors
+    // Test non-Healpix constructors
     try {
         GSkymap map1("CAR", "GAL", 0.0, 0.0, 1.0, 1.0, 100, 100);
-std::cout << map1 << std::endl;
     }
     catch (std::exception &e) {
         std::cout << std::endl
@@ -314,6 +319,37 @@ std::cout << map1 << std::endl;
         throw;
     }
     std::cout << ".";
+
+    // Test CAR projection
+    try {
+        GSkymap map1("CAR", "GAL", 138.817, 37.293, 0.521, 0.931, 100, 100);
+std::cout << map1 << std::endl;
+        GSkyDir dir;
+        for (int l = -179; l < 179; ++l) {
+            for (int b = -89; b < 89; ++b) {
+                dir.lb_deg(double(l),double(b));        
+                GSkyPixel pixel    = map1.dir2xy(dir);
+                GSkyDir   dir_back = map1.xy2dir(pixel);
+                double    dl = dir.l_deg() - dir_back.l_deg();
+                double    db = dir.b_deg() - dir_back.b_deg();
+                if (fabs(dl) > eps || fabs(db) > eps) {
+                    std::cout << std::endl
+                      << "TEST ERROR: Sky direction differs: dir="
+                      << dir << " dir_back=" << dir_back << std::endl;
+                    throw;
+                }
+            }
+        }
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to construct sky map(s)."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
 
     // Signal final test success
     std::cout << " ok." << std::endl;
