@@ -18,6 +18,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
@@ -174,8 +177,8 @@ GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
     // Set WCS
     double  crval1 = x;
     double  crval2 = y;
-    double  crpix1 = double(nx)/2.0;
-    double  crpix2 = double(ny)/2.0;
+    double  crpix1 = double(nx+1)/2.0;
+    double  crpix2 = double(ny+1)/2.0;
     double  cdelt1 = dx;
     double  cdelt2 = dy;
     GMatrix cd(2,2);
