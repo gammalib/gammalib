@@ -70,6 +70,7 @@ public:
     const double& operator() (const GSkyPixel& pixel, const int map = 0) const;
     GSkyDir       xy2dir(const GSkyPixel& pix);
     GSkyPixel     dir2xy(GSkyDir dir) const;
+    double        omega(const GSkyPixel& pix) const;
 
     // Methods
     void      load(const std::string& filename);

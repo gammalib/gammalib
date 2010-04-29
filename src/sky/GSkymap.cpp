@@ -41,7 +41,8 @@
 #define G_DIR2PIX                                 "GSkymap::dir2pix(GSkyDir)"
 #define G_XY2DIR                                 "GSkymap::xy2dir(GSkyPixel)"
 #define G_DIR2XY                                   "GSkymap::dir2xy(GSkyDir)"
-#define G_OMEGA                                         "GSkymap::omega(int)"
+#define G_OMEGA1                                        "GSkymap::omega(int)"
+#define G_OMEGA2                                  "GSkymap::omega(GSkyPixel)"
 #define G_SET_WCS "GSkymap::set_wcs(std::string,std::string,double,double," \
                                "double,double,double,double,GMatrix,GVector)"
 #define G_READ_HEALPIX                     "GSkymap::read_healpix(GFitsHDU*)"
@@ -51,7 +52,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_READ_HEALPIX_DEBUG 0  // Debug read_healpix
+//#define G_READ_HEALPIX_DEBUG                          // Debug read_healpix
 
 /* __ Prototype __________________________________________________________ */
 
@@ -653,10 +654,39 @@ double GSkymap::omega(const int& pix) const
 {
     // Throw error if WCS is not valid
     if (m_wcs == NULL)
-        throw GException::wcs(G_OMEGA, "No valid WCS found.");
+        throw GException::wcs(G_OMEGA1, "No valid WCS found.");
+
+    // Determine solid angle from pixel. Use 2D version if sky map is
+    // 2D, otherwise use 1D version.
+    double omega = (m_num_x == 0) ? m_wcs->omega(pix)
+                                  : m_wcs->omega(pix2xy(pix));
 
     // Return solid angle
-    return (m_wcs->omega(pix));
+    return omega;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns solid angle of pixel
+ *
+ * @param[in] pix Sky map pixel.
+ *
+ * @exception GException::wcs
+ *            No valid WCS found.
+ ***************************************************************************/
+double GSkymap::omega(const GSkyPixel& pix) const
+{
+    // Throw error if WCS is not valid
+    if (m_wcs == NULL)
+        throw GException::wcs(G_OMEGA2, "No valid WCS found.");
+
+    // Determine solid angle from pixel. Use 2D version if sky map is
+    // 2D, otherwise use 1D version.
+    double omega = (m_num_x == 0) ? m_wcs->omega(xy2pix(pix))
+                                  : m_wcs->omega(pix);
+
+    // Return solid angle
+    return omega;
 }
 
 
@@ -929,7 +959,7 @@ void GSkymap::read_healpix(const GFitsHDU* hdu)
         // Determine number of rows and columns in table
         int nrows = ((GFitsTable*)hdu->data())->nrows();
         int ncols = ((GFitsTable*)hdu->data())->ncols();
-        #if G_READ_HEALPIX_DEBUG
+        #if defined(G_READ_HEALPIX_DEBUG)
         std::cout << "nrows=" << nrows << " ncols=" << ncols << std::endl;
         #endif
 
@@ -941,7 +971,7 @@ void GSkymap::read_healpix(const GFitsHDU* hdu)
 
         // Set number of pixels based on NSIDE parameter
         m_num_pixels = ((GWcsHPX*)m_wcs)->npix();
-        #if G_READ_HEALPIX_DEBUG
+        #if defined(G_READ_HEALPIX_DEBUG)
         std::cout << "m_num_pixels=" << m_num_pixels << std::endl;
         #endif
 
@@ -953,7 +983,7 @@ void GSkymap::read_healpix(const GFitsHDU* hdu)
 
         // Determine vector length for HEALPix data storage
         int nentry = m_num_pixels / nrows;
-        #if G_READ_HEALPIX_DEBUG
+        #if defined(G_READ_HEALPIX_DEBUG)
         std::cout << "nentry=" << nentry << std::endl;
         #endif
 
@@ -971,7 +1001,7 @@ void GSkymap::read_healpix(const GFitsHDU* hdu)
                     m_num_maps += col->number() / nentry;
             }
         }
-        #if G_READ_HEALPIX_DEBUG
+        #if defined(G_READ_HEALPIX_DEBUG)
         std::cout << "m_num_maps=" << m_num_maps << std::endl;
         #endif
 
@@ -1001,10 +1031,11 @@ void GSkymap::read_healpix(const GFitsHDU* hdu)
                     // Load map
                     double *ptr = m_pixels + imap;
                     for (int row = 0; row < col->length(); ++row) {
-                        for (int inx = inx_start; inx < inx_end; ++inx, ptr+=m_num_maps)
+                        for (int inx = inx_start; inx < inx_end;
+                             ++inx, ptr+=m_num_maps)
                                 *ptr = col->real(row,inx);
                     }
-                    #if G_READ_HEALPIX_DEBUG
+                    #if defined(G_READ_HEALPIX_DEBUG)
                     std::cout << "Load map=" << imap << " index="
                               << inx_start << "-" << inx_end << std::endl;
                     #endif
