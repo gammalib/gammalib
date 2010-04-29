@@ -34,8 +34,8 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DIR2XY_DEBUG                                      // Debug dir2xy
-#define G_XY2DIR_DEBUG                                      // Debug xy2dir
+//#define G_DIR2XY_DEBUG                                      // Debug dir2xy
+//#define G_XY2DIR_DEBUG                                      // Debug xy2dir
 
 /* __ Local prototypes ___________________________________________________ */
 
