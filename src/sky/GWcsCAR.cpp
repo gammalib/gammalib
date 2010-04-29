@@ -188,12 +188,46 @@ GWcsCAR& GWcsCAR::operator= (const GWcsCAR& wcs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Returns WCS type
+ * @brief Read WCS definiton from FITS header
+ *
+ * @param[in] hdu FITS HDU containing the Healpix definition.
  ***************************************************************************/
-std::string GWcsCAR::type(void) const
+void GWcsCAR::read(const GFitsHDU* hdu)
 {
-    // Return Healix type
-    return "CAR";
+    // Free memory and initialise members
+    free_members();
+    init_members();
+
+    // Continue only if HDU is valid
+    if (hdu != NULL) {
+
+        // Read standard WCS definition
+        wcs_read(hdu);
+
+    } // endif: HDU was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write Healpix definiton into FITS HDU
+ *
+ * @param[in] hdu FITS HDU to which the Healpix definition will be written.
+ ***************************************************************************/
+void GWcsCAR::write(GFitsHDU* hdu) const
+{
+    // Continue only if HDU is valid
+    if (hdu != NULL) {
+
+        // Write standard WCS definition
+        wcs_write(hdu);
+
+    } // endif: HDU was valid
+
+    // Return
+    return;
 }
 
 
@@ -223,6 +257,7 @@ double GWcsCAR::omega(const GSkyPixel& pix) const
 void GWcsCAR::init_members(void)
 {
     // Initialise members
+    m_type = "CAR";
 
     // Return
     return;
@@ -315,7 +350,7 @@ std::ostream& operator<< (std::ostream& os, const GWcsCAR& wcs)
     os << "=== GWcsCAR ===" << std::endl;
 
     // Add WCS information
-    wcs.dump_wcs(os);
+    wcs.wcs_dump(os);
 
     // Return output stream
     return os;

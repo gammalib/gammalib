@@ -211,16 +211,6 @@ GWcsHPX& GWcsHPX::operator= (const GWcsHPX& wcs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Returns WCS type
- ***************************************************************************/
-std::string GWcsHPX::type(void) const
-{
-    // Return Healix type
-    return "HPX";
-}
-
-
-/***********************************************************************//**
  * @brief Read Healpix definiton from FITS header
  *
  * @param[in] hdu FITS HDU containing the Healpix definition.
@@ -498,6 +488,7 @@ void GWcsHPX::ordering(const std::string& ordering)
 void GWcsHPX::init_members(void)
 {
     // Initialise members
+    m_type        = "HPX";
     m_nside       = 0;
     m_npface      = 0;
     m_ncap        = 0;

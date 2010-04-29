@@ -267,8 +267,8 @@ void test_GSkymap_healpix_io(void)
     }
     catch (std::exception &e) {
         std::cout << std::endl 
-                  << "TEST ERROR: Unable to create Healpix instance from FITS file."
-                  << std::endl;
+                  << "TEST ERROR: Unable to create Healpix instance"
+                     " from FITS file." << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
@@ -284,15 +284,15 @@ void test_GSkymap_healpix_io(void)
 
 
 /***************************************************************************
- *  Test: GSkymap_map_construct                                            *
+ *  Test: GSkymap_wcs_construct                                            *
  ***************************************************************************/
-void test_GSkymap_map_construct(void)
+void test_GSkymap_wcs_construct(void)
 {
     // Set precision
-    double eps = 1.0e-10;
-    
+    double eps = 1.0e-6;
+
     // Dump header
-    std::cout << "Test non Healpix GSkymap constructors: ";
+    std::cout << "Test WCS GSkymap constructors: ";
 
     // Test void constructor
     try {
@@ -323,19 +323,18 @@ void test_GSkymap_map_construct(void)
     // Test CAR projection
     try {
         GSkymap map1("CAR", "GAL", 138.817, 37.293, 0.521, 0.931, 100, 100);
-std::cout << map1 << std::endl;
         GSkyDir dir;
-        for (int l = -179; l < 179; ++l) {
-            for (int b = -89; b < 89; ++b) {
-                dir.lb_deg(double(l),double(b));        
+        for (int l = -180; l < 180; ++l) {
+            for (int b = -90; b < 90; ++b) {
+                dir.lb_deg(double(l),double(b));
                 GSkyPixel pixel    = map1.dir2xy(dir);
                 GSkyDir   dir_back = map1.xy2dir(pixel);
-                double    dl = dir.l_deg() - dir_back.l_deg();
-                double    db = dir.b_deg() - dir_back.b_deg();
-                if (fabs(dl) > eps || fabs(db) > eps) {
+                double    dist     = dir.dist_deg(dir_back);
+                if (dist > eps) {
                     std::cout << std::endl
                       << "TEST ERROR: Sky direction differs: dir="
-                      << dir << " dir_back=" << dir_back << std::endl;
+                      << dir << " dir_back=" << dir_back << " dist="
+                      << dist << " deg" << std::endl;
                     throw;
                 }
             }
@@ -361,6 +360,101 @@ std::cout << map1 << std::endl;
 
 
 /***************************************************************************
+ *  Test: GSkymap_wcs_io                                                   *
+ ***************************************************************************/
+void test_GSkymap_wcs_io(void)
+{
+    // Set filenames
+    const std::string file1 = "test_skymap_wcs_1.fits";
+    const std::string file2 = "test_skymap_wcs_2.fits";
+
+    // Dump header
+    std::cout << "Test WCS GSkymap I/O: ";
+
+    // Define WCS map for comparison
+    GSkymap refmap1("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 100, 100);
+    GSkymap refmap2("CAR", "CEL", 0.0, 0.0, -0.3, 0.3, 200, 200);
+
+    // Test WCS map saving
+    try {
+        for (int pix = 0; pix < refmap1.npix(); ++pix)
+            refmap1(pix) = pix+1;
+        refmap1.save(file1, 1);
+        for (int pix = 0; pix < refmap2.npix(); ++pix)
+            refmap2(pix) = pix+1;
+        refmap2.save(file2, 1);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to save WCS map."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test WCS map loading (1)
+    try {
+        GSkymap map;
+        map.load(file1);
+        int diff = 0;
+        for (int pix = 0; pix < refmap1.npix(); ++pix) {
+            if (map(pix) != refmap1(pix))
+                diff++;
+        }
+        if (diff > 0) {
+            std::cout << std::endl
+                      << "TEST ERROR: Loaded file "+file1+
+                         " differs from saved file ."
+                      << std::endl;
+            throw;
+        }
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to load WCS map."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test WCS map loading (2)
+    try {
+        GSkymap map;
+        map.load(file2);
+        int diff = 0;
+        for (int pix = 0; pix < refmap2.npix(); ++pix) {
+            if (map(pix) != refmap2(pix))
+                diff++;
+        }
+        if (diff > 0) {
+            std::cout << std::endl
+                      << "TEST ERROR: Loaded file "+file2+
+                         " differs from saved file ."
+                      << std::endl;
+            throw;
+        }
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to load WCS map."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Signal final test success
+    std::cout << " ok." << std::endl;
+
+    // Exit test
+    return;
+
+}
+
+
+/***************************************************************************
  *                            Main test function                           *
  ***************************************************************************/
 int main(void)
@@ -374,7 +468,8 @@ int main(void)
     // Execute Healpix tests
     test_GSkymap_healpix_construct();
     test_GSkymap_healpix_io();
-    test_GSkymap_map_construct();
+    test_GSkymap_wcs_construct();
+    test_GSkymap_wcs_io();
 
     // Return
     return 0;

@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GSkymap.cpp
@@ -29,6 +28,7 @@
 #include "GWcsHPX.hpp"
 #include "GFits.hpp"
 #include "GFitsTableDblCol.hpp"
+#include "GFitsImageDbl.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT_HPX     "GSkymap::GSkymap(std::string,std::string,int," \
@@ -46,6 +46,8 @@
 #define G_SET_WCS "GSkymap::set_wcs(std::string,std::string,double,double," \
                                "double,double,double,double,GMatrix,GVector)"
 #define G_READ_HEALPIX                     "GSkymap::read_healpix(GFitsHDU*)"
+#define G_READ_WCS                             "GSkymap::read_wcs(GFitsHDU*)"
+#define G_ALLOC_WCS                           "GSkymap::alloc_wcs(GFitsHDU*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -53,6 +55,7 @@
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_READ_HEALPIX_DEBUG                          // Debug read_healpix
+//#define G_READ_WCS_DEBUG                                  // Debug read_wcs
 
 /* __ Prototype __________________________________________________________ */
 
@@ -141,7 +144,7 @@ GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
 
 
 /***********************************************************************//**
- * @brief 2D sky map constructor
+ * @brief WCS sky map constructor
  *
  * @param[in] wcs World Coordinate System.
  * @param[in] coords Coordinate System (CEL or GAL).
@@ -405,7 +408,7 @@ void GSkymap::load(const std::string& filename)
         // Get pointer to HDU
         hdu = fits.hdu(extno);
 
-        // Check if PIXTYPE keyword equals "HEALPIX"
+        // If PIXTYPE keyword equals "HEALPIX" then load map
         try {
             if (hdu->card("PIXTYPE")->string() == "HEALPIX") {
                 read_healpix(hdu);
@@ -422,9 +425,23 @@ void GSkymap::load(const std::string& filename)
     // Skip empty images
     if (loaded == 0) {
         for (int extno = 0; extno < num; ++extno) {
-            //TODO: Implement non HEALPix loading
-        }
-    }
+
+            // Get pointer to HDU
+            hdu = fits.hdu(extno);
+
+            // Skip if extension is not an image
+            if (extno > 0) {
+                if (hdu->card("XTENSION")->string() != "IMAGE")
+                    continue;
+            }
+
+            // Load WCS map
+            read_wcs(hdu);
+            loaded = 1;
+            break;
+
+        } // endfor: looped over HDUs
+    } // endif: no HEALPix map found
 
     // Close FITS file
     fits.close();
@@ -453,9 +470,8 @@ void GSkymap::save(const std::string& filename, int clobber)
             hdu = create_healpix_hdu();
 
         // Case B: Skymap is not Healpix
-        else {
-            //TODO: Implement non HEALPix saving
-        }
+        else
+            hdu = create_wcs_hdu();
 
         // Create FITS file and save it to disk
         if (hdu != NULL) {
@@ -500,8 +516,14 @@ void GSkymap::read(const GFitsHDU* hdu)
 
         // ... otherwise try loading as non HEALPix map
         if (loaded == 0) {
-            //TODO: Implement non HEALPix loading
-        }
+
+            // Load only if HDU contains an image
+            if (hdu->card("XTENSION")->string() == "IMAGE") {
+                read_wcs(hdu);
+                loaded = 1;
+            }
+
+        } // endif
 
     } // endif: HDU pointer was valid
 
@@ -1068,6 +1090,127 @@ void GSkymap::read_healpix(const GFitsHDU* hdu)
 
 
 /***********************************************************************//**
+ * @brief Read WCS image from FITS HDU
+ *
+ * @param[in] hdu FITS HDU containing the WCS image.
+ *
+ * @exception GException::skymap_bad_image_dim
+ *            WCS image has invalid dimension (naxis=2 or 3).
+ ***************************************************************************/
+void GSkymap::read_wcs(const GFitsHDU* hdu)
+{
+    // Continue only if HDU is valid
+    if (hdu != NULL) {
+
+        // Allocate WCS
+        alloc_wcs(hdu);
+
+        // Read WCS information from FITS header
+        m_wcs->read(hdu);
+
+        // Load FITS image
+        GFitsImageDbl* image = (GFitsImageDbl*)hdu->data();
+
+        // Extract map dimension and number of maps from image
+        if (image->naxis() == 2) {
+            m_num_x    = image->naxes(0);
+            m_num_y    = image->naxes(1);
+            m_num_maps = 1;
+        }
+        else if (image->naxis() >= 3) {
+            m_num_x    = image->naxes(0);
+            m_num_y    = image->naxes(1);
+            m_num_maps = image->naxes(2);
+        }
+        else
+            throw GException::skymap_bad_image_dim(G_READ_WCS, image->naxis());
+        #if defined(G_READ_WCS_DEBUG)
+        std::cout << "m_num_x=" << m_num_x << std::endl;
+        std::cout << "m_num_y=" << m_num_y << std::endl;
+        std::cout << "m_num_maps=" << m_num_maps << std::endl;
+        #endif
+
+        // Compute number of pixels
+        m_num_pixels = m_num_x * m_num_y;
+        #if defined(G_READ_WCS_DEBUG)
+        std::cout << "m_num_pixels=" << m_num_pixels << std::endl;
+        #endif
+
+        // Allocate pixels to hold the map
+        alloc_pixels();
+
+        // Read image
+        if (image->naxis() == 2) {
+            double* ptr = m_pixels;
+            for (int iy = 0; iy < m_num_y; ++iy) {
+                for (int ix = 0; ix < m_num_x; ++ix, ++ptr)
+                    *ptr = (*image)(ix,iy);
+            }
+        }
+        else {
+            double* ptr = m_pixels;
+            for (int iy = 0; iy < m_num_y; ++iy) {
+                for (int ix = 0; ix < m_num_x; ++ix) {
+                    for (int imap = 0; imap < m_num_maps; ++imap, ++ptr)
+                         *ptr = (*image)(ix,iy,imap);
+                }
+            }
+        }
+
+    } // endif: HDU was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Allocate WCS class
+ *
+ * @param[in] hdu FITS HDU containing the WCS image.
+ *
+ * @exception GException::fits_key_not_found
+ *            Unable to find required FITS header keyword.
+ * @exception GException::skymap_bad_ctype
+ *            CTYPE1 and CTYPE2 keywords are incompatible.
+ * @exception GException::wcs_invalid
+ *            WCS projection of FITS file not supported by GammaLib.
+ ***************************************************************************/
+void GSkymap::alloc_wcs(const GFitsHDU* hdu)
+{
+    // Continue only if HDU is valid
+    if (hdu != NULL) {
+
+        // Get standard keywords
+        std::string ctype1 = hdu->card("CTYPE1")->string();
+        std::string ctype2 = hdu->card("CTYPE2")->string();
+
+        // Extract projection type
+        std::string xproj = ctype1.substr(5,3);
+        std::string yproj = ctype2.substr(5,3);
+
+        // Check that projection type is identical on both axes
+        if (xproj != yproj)
+            throw GException::skymap_bad_ctype(G_ALLOC_WCS,
+                                               ctype1, ctype2);
+
+        // Allocate WCS class
+        if (xproj == "CAR") {
+            m_wcs = new GWcsCAR;
+        }
+        else
+            throw GException::wcs_invalid(G_ALLOC_WCS, xproj,
+                                          "WCS projection found in FITS file"
+                                          " is currently not supported.");
+
+    } // endif: HDU was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Create FITS HDU containing Healpix data
  *
  * Returns pointer to HDU that contains the Healpix data. Deallocation of the
@@ -1117,6 +1260,71 @@ GFitsHDU* GSkymap::create_healpix_hdu(void)
 
     // Set additional keywords
     hdu->card("NBRBINS", m_num_maps, "Number of HEALPix maps");
+
+    // Return HDU
+    return hdu;
+}
+
+
+/***********************************************************************//**
+ * @brief Create FITS HDU containing WCS image
+ *
+ * Returns pointer to HDU that contains the WCS image. Deallocation of the
+ * GFitsHDU object has to be done by the client.
+ ***************************************************************************/
+GFitsHDU* GSkymap::create_wcs_hdu(void)
+{
+    // Initialise result to NULL pointer
+    GFitsHDU* hdu = NULL;
+
+    // Compute size of Healpix data
+    int size = m_num_pixels * m_num_maps;
+
+    // Continue only if we have pixels
+    if (size > 0) {
+
+        // Set axis parameters for image construction
+        int naxis   = (m_num_maps == 1) ? 2 : 3;
+        int naxes[] = {m_num_x, m_num_y, m_num_maps};
+
+        // Allocate image
+        GFitsImageDbl image(naxis, naxes);
+
+        // Store data in image
+        if (naxis == 2) {
+            double* ptr = m_pixels;
+            for (int iy = 0; iy < m_num_y; ++iy) {
+                for (int ix = 0; ix < m_num_x; ++ix, ++ptr)
+                    image(ix,iy) = *ptr;
+            }
+        }
+        else {
+            double* ptr = m_pixels;
+            for (int iy = 0; iy < m_num_y; ++iy) {
+                for (int ix = 0; ix < m_num_x; ++ix) {
+                    for (int imap = 0; imap < m_num_maps; ++imap, ++ptr)
+                        image(ix,iy,imap) = *ptr;
+                }
+            }
+        }
+
+        // Create HDU that contains WCS map
+        hdu = new GFitsHDU(image);
+
+    } // endif: there were pixels
+
+    // ... otherwise create an empty header
+    else
+        hdu = new GFitsHDU;
+
+    // Set extension name
+    hdu->extname("IMAGE");
+
+    // If we have WCS information then write into FITS header
+    if (m_wcs != NULL) m_wcs->write(hdu);
+
+    // Set additional keywords
+    //TODO
 
     // Return HDU
     return hdu;

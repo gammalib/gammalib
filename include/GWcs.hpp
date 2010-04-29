@@ -54,11 +54,11 @@ public:
     virtual GWcs& operator= (const GWcs& wcs);
 
     // Pure virtual methods (not implemented)
-    virtual std::string type(void) const = 0;
+    virtual void read(const GFitsHDU* hdu) = 0;
+    virtual void write(GFitsHDU* hdu) const = 0;
 
     // Virtual methods
-    virtual void        read(const GFitsHDU* hdu);
-    virtual void        write(GFitsHDU* hdu);
+    virtual std::string type(void) const;
     virtual std::string coordsys(void) const;
     virtual void        coordsys(const std::string& coordsys);
     virtual double      omega(const int& pix) const;
@@ -79,23 +79,32 @@ protected:
     // Typdefs
     typedef void (GWcs::*_wcspf)(GVector* coord) const;
 
-    // Protected methods
-    GVector wcs_dir2native(GSkyDir dir) const;
-    GSkyDir wcs_native2dir(GVector native) const;
-    void    wcs_init(const double& theta0);
-    GVector wcs_getpole(const double& theta0);
-    GMatrix wcs_get_rot(void);
-    void    dump_wcs(std::ostream& os) const;
+    // Protected methods (providing services to derived classes)
+    GVector     wcs_dir2native(GSkyDir dir) const;
+    GSkyDir     wcs_native2dir(GVector native) const;
+    void        wcs_init(const double& theta0);
+    GVector     wcs_getpole(const double& theta0);
+    GMatrix     wcs_get_rot(void);
+    void        wcs_set(const std::string& coords,
+                        const double& crval1, const double& crval2,
+                        const double& crpix1, const double& crpix2,
+                        const double& cdelt1, const double& cdelt2);
+    void        wcs_read(const GFitsHDU* hdu);
+    void        wcs_write(GFitsHDU* hdu) const;
+    std::string wcs_crval1(void) const;
+    std::string wcs_crval2(void) const;
+    void        wcs_dump(std::ostream& os) const;
 
     // Protected data area (astr structure)
-    int     m_coordsys;     //!< 0=celestial, 1=galactic
-    int     m_reverse;      //!< Reverse axes (1=true)
-    GVector m_crval;        //!< Value of reference point
-    GVector m_crpix;        //!< Pixel of reference point (starting from 1)
-    GVector m_cdelt;        //!< Increment at reference point (deg/pixel)
-    GVector m_npole;        //!< Native coordinate of North Pole
-    GMatrix m_cd;           //!< Astrometry parameters (2x2 matrix, deg/pixel)
-    GVector m_pv2;          //!< Projection parameters (up to 21)
+    std::string m_type;     //!< WCS type
+    int         m_coordsys; //!< 0=celestial, 1=galactic
+    int         m_reverse;  //!< Reverse axes (1=true)
+    GVector     m_crval;    //!< Value of reference point
+    GVector     m_crpix;    //!< Pixel of reference point (starting from 1)
+    GVector     m_cdelt;    //!< Increment at reference point (deg/pixel)
+    GVector     m_npole;    //!< Native coordinate of North Pole
+    GMatrix     m_cd;       //!< Astrometry parameters (2x2 matrix, deg/pixel)
+    GVector     m_pv2;      //!< Projection parameters (up to 21)
 
     // Derived parameters
     double  m_theta0;       //!< Native latitude of the fiducial point

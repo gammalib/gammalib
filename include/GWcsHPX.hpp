@@ -51,9 +51,8 @@ public:
     GWcsHPX& operator= (const GWcsHPX& wcs);
 
     // Implemented pure virtual methods
-    std::string type(void) const;
-    void        read(const GFitsHDU* hdu);
-    void        write(GFitsHDU* hdu) const;
+    void read(const GFitsHDU* hdu);
+    void write(GFitsHDU* hdu) const;
 
     // Overloaded base class methods
     double      omega(const int& pix) const;

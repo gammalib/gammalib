@@ -54,7 +54,8 @@ public:
     GWcsCAR& operator= (const GWcsCAR& wcs);
 
     // Implemented pure virtual methods
-    std::string type(void) const;
+    void read(const GFitsHDU* hdu);
+    void write(GFitsHDU* hdu) const;
 
     // Overloaded base class methods
     double omega(const GSkyPixel& pix) const;

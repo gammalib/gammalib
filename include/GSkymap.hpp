@@ -96,7 +96,10 @@ private:
     int       xy2pix(const GSkyPixel& pix) const;
     GSkyPixel pix2xy(const int& pix) const;
     void      read_healpix(const GFitsHDU* hdu);
+    void      read_wcs(const GFitsHDU* hdu);
+    void      alloc_wcs(const GFitsHDU* hdu);
     GFitsHDU* create_healpix_hdu(void);
+    GFitsHDU* create_wcs_hdu(void);
 
     // Private data area
     int     m_num_pixels;   //!< Number of pixels (used for pixel allocation)
