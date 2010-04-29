@@ -12,6 +12,9 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GException.hpp"
 #include "GTools.hpp"
 
@@ -128,6 +131,24 @@ GException::wcs_bad_coords::wcs_bad_coords(std::string origin,
     m_origin  = origin;
     m_message = "Invalid WCS coordinate system ("+coordsys+"). "
                 "Should be one of 'EQU', 'CEL' or 'GAL'.";
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief No projection function declared
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::wcs_no_proj_fct::wcs_no_proj_fct(std::string origin,
+                                             std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "No projection function declared. " + message;
 
     // Return
     return;

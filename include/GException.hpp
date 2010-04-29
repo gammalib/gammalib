@@ -15,6 +15,9 @@
 #define GEXCEPTION_HPP
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <string>                             // string
 #include <sstream>                            // ostringstream
 #include <stdexcept>                          // exception
@@ -238,7 +241,7 @@ public:
     // General GSkymap error
     class skymap : public GExceptionHandler {
     public:
-        skymap(std::string origin, std::string message);
+        skymap(std::string origin, std::string message = "");
     };
 
     // Invalid sky map parameter
@@ -257,19 +260,26 @@ public:
     // General GWcs error
     class wcs : public GExceptionHandler {
     public:
-        wcs(std::string origin, std::string message);
+        wcs(std::string origin, std::string message = "");
     };
 
     // Invalid WCS
     class wcs_invalid : public GExceptionHandler {
     public:
-        wcs_invalid(std::string origin, std::string wcs, std::string message);
+        wcs_invalid(std::string origin, std::string wcs, 
+                    std::string message = "");
     };
 
     // Coordinate system invalid
     class wcs_bad_coords : public GExceptionHandler {
     public:
         wcs_bad_coords(std::string origin, std::string coordsys);
+    };
+
+    // No projection function declared
+    class wcs_no_proj_fct : public GExceptionHandler {
+    public:
+        wcs_no_proj_fct(std::string origin, std::string message = "");
     };
 
     // WCS Healpix resolution invalid
