@@ -52,10 +52,10 @@ public:
 
     // Implemented pure virtual methods
     std::string type(void) const;
+    void        read(const GFitsHDU* hdu);
+    void        write(GFitsHDU* hdu) const;
 
     // Overloaded base class methods
-    void        read(const GFitsHDU* hdu);
-    void        write(GFitsHDU* hdu);
     double      omega(const int& pix) const;
     GSkyDir     pix2dir(const int& pix);
     int         dir2pix(GSkyDir dir) const;

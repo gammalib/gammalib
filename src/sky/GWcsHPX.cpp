@@ -221,15 +221,15 @@ std::string GWcsHPX::type(void) const
 
 
 /***********************************************************************//**
- * @brief Read Healpix definiton from FITS header.
+ * @brief Read Healpix definiton from FITS header
  *
  * @param[in] hdu FITS HDU containing the Healpix definition.
  *
- * @exception GException::wcs 
+ * @exception GException::wcs
  *            Unable to load Healpix definition from HDU.
- * @exception GException::wcs_bad_coords 
+ * @exception GException::wcs_bad_coords
  *            Invalid coordsys parameter.
- * @exception GException::wcs_hpx_bad_ordering 
+ * @exception GException::wcs_hpx_bad_ordering
  *            Invalid ordering parameter.
  ***************************************************************************/
 void GWcsHPX::read(const GFitsHDU* hdu)
@@ -279,7 +279,7 @@ void GWcsHPX::read(const GFitsHDU* hdu)
 
 
 /***********************************************************************//**
- * @brief Write Healpix definiton into FITS HDU.
+ * @brief Write Healpix definiton into FITS HDU
  *
  * @param[in] hdu FITS HDU to which the Healpix definition will be written.
  *
@@ -292,7 +292,7 @@ void GWcsHPX::read(const GFitsHDU* hdu)
  * ORDERING = ordering()
  * COORDSYS = coordsys()
  ***************************************************************************/
-void GWcsHPX::write(GFitsHDU* hdu)
+void GWcsHPX::write(GFitsHDU* hdu) const
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
