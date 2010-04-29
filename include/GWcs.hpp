@@ -55,18 +55,18 @@ public:
 
     // Pure virtual methods (not implemented)
     virtual std::string type(void) const = 0;
-    virtual GSkyDir     pix2dir(const int& pix) = 0;
-    virtual GSkyDir     xy2dir(const GSkyPixel& pix) = 0;
-    virtual int         dir2pix(GSkyDir dir) const = 0;
-    virtual GSkyPixel   dir2xy(GSkyDir dir) const = 0;
-    virtual double      omega(const int& pix) const = 0;
-    virtual double      omega(const GSkyPixel& pix) const = 0;
 
-    // Virtual methods (implemented)
+    // Virtual methods
     virtual void        read(const GFitsHDU* hdu);
     virtual void        write(GFitsHDU* hdu);
     virtual std::string coordsys(void) const;
     virtual void        coordsys(const std::string& coordsys);
+    virtual double      omega(const int& pix) const;
+    virtual double      omega(const GSkyPixel& pix) const;
+    virtual GSkyDir     pix2dir(const int& pix);
+    virtual int         dir2pix(GSkyDir dir) const;
+    virtual GSkyDir     xy2dir(const GSkyPixel& pix);
+    virtual GSkyPixel   dir2xy(GSkyDir dir) const;
 
 private:
     // Private methods
@@ -76,13 +76,17 @@ private:
     virtual GWcs* clone(void) const = 0;
 
 protected:
+    // Typdefs
+    typedef void (GWcs::*_wcspf)(GVector* coord) const;
+
     // Protected methods
     GVector wcs_dir2native(GSkyDir dir) const;
     GSkyDir wcs_native2dir(GVector native) const;
+    void    wcs_init(const double& theta0);
     GVector wcs_getpole(const double& theta0);
     GMatrix wcs_get_rot(void);
     void    dump_wcs(std::ostream& os) const;
-    
+
     // Protected data area (astr structure)
     int     m_coordsys;     //!< 0=celestial, 1=galactic
     int     m_reverse;      //!< Reverse axes (1=true)
@@ -92,7 +96,7 @@ protected:
     GVector m_npole;        //!< Native coordinate of North Pole
     GMatrix m_cd;           //!< Astrometry parameters (2x2 matrix, deg/pixel)
     GVector m_pv2;          //!< Projection parameters (up to 21)
-    
+
     // Derived parameters
     double  m_theta0;       //!< Native latitude of the fiducial point
     GVector m_refval;       //!< Ordered value of reference point
@@ -101,6 +105,8 @@ protected:
     GVector m_native_pole;  //!< Coordinates of native pole
     GMatrix m_rot;          //!< Rotation matrix
     GMatrix m_trot;         //!< Transpose of rotation matrix
+    _wcspf  m_std2nat;      //!< Standard to native projection function
+    _wcspf  m_nat2std;      //!< Native to standard projection function
 };
 
 #endif /* GWCS_HPP */

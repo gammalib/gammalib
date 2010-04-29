@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GWcs.cpp
@@ -29,12 +28,18 @@
 #define G_WCS   "GWcs::GWcs(std::string,double,double,double,double,double,"\
                                                                     "double)"
 #define G_COORDSYS_SET                          "GWcs::coordsys(std::string)"
+#define G_OMEGA1                                           "GWcs::omega(int)"
+#define G_OMEGA2                                     "GWcs::omega(GSkyPixel)"
+#define G_XY2DIR                                    "GWcs::xy2dir(GSkyPixel)"
+#define G_DIR2XY                                      "GWcs::dir2xy(GSkyDir)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DIR2XY_DEBUG                                      // Debug dir2xy
+//#define G_XY2DIR_DEBUG                                      // Debug xy2dir
 
 /* __ Local prototypes ___________________________________________________ */
 
@@ -254,7 +259,7 @@ std::string GWcs::coordsys(void) const
  *
  * @param[in] coordsys Coordinate system (EQU/CEL/E/C or GAL/G)
  *
- * @exception GException::wcs_bad_coords 
+ * @exception GException::wcs_bad_coords
  *            Invalid coordsys parameter.
  *
  * Set coordinate system from std::string. Each of the following is 
@@ -277,6 +282,209 @@ void GWcs::coordsys(const std::string& coordsys)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns solid angle of pixel (DUMMY METHOD)
+ *
+ * @param[in] pix Pixel number (0,1,...,m_num_pixels).
+ *
+ * @exception GException::wcs
+ *            Method not defined for projection.
+ *
+ * This method should be overloaded by the appropriate method of the derived
+ * class. It thus should never get called.
+ ***************************************************************************/
+double GWcs::omega(const int& pix) const
+{
+    // Set error message
+    std::string message = "GWcs method not defined for " +
+                          this->type() + " projection.";
+
+    // Throw error
+    throw GException::wcs(G_OMEGA1, message);
+
+    // Define constant direction
+    const double omega = 0.0;
+
+    // Return solid angle
+    return omega;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns solid angle of pixel (DUMMY METHOD)
+ *
+ * @param[in] pix Sky pixel.
+ *
+ * @exception GException::wcs
+ *            Method not defined for projection.
+ *
+ * This method should be overloaded by the appropriate method of the derived
+ * class. It thus should never get called.
+ ***************************************************************************/
+double GWcs::omega(const GSkyPixel& pix) const
+{
+    // Set error message
+    std::string message = "GWcs method not defined for " +
+                          this->type() + " projection.";
+
+    // Throw error
+    throw GException::wcs(G_OMEGA2, message);
+
+    // Define constant direction
+    const double omega = 0.0;
+
+    // Return solid angle
+    return omega;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns sky direction of pixel (DUMMY METHOD)
+ *
+ * @param[in] pix Pixel number (0,1,...,m_num_pixels).
+ *
+ * @exception GException::wcs
+ *            Method not defined for projection.
+ *
+ * This method should be overloaded by the appropriate method of the derived
+ * class. It thus should never get called.
+ ***************************************************************************/
+GSkyDir GWcs::pix2dir(const int& pix)
+{
+    // Set error message
+    std::string message = "GWcs method not defined for " +
+                          this->type() + " projection.";
+
+    // Throw error
+    throw GException::wcs(G_XY2DIR, message);
+
+    // Define constant direction
+    const GSkyDir dir;
+
+    // Return
+    return dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pixel for sky direction (DUMMY METHOD)
+ *
+ * @param[in] dir Sky direction.
+ *
+ * @exception GException::wcs
+ *            Method not defined for projection.
+ *
+ * This method should be overloaded by the appropriate method of the derived
+ * class. It thus should never get called.
+ ***************************************************************************/
+int GWcs::dir2pix(GSkyDir dir) const
+{
+    // Set error message
+    std::string message = "GWcs method not defined for " +
+                          this->type() + " projection.";
+
+    // Throw error
+    throw GException::wcs(G_DIR2XY, message);
+
+    // Return
+    return 0;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns sky direction of pixel
+ *
+ * @param[in] pix Sky pixel.
+ *
+ * @exception GException::wcs_no_proj_fct
+ *            No WCS projection function has been declared.
+ *
+ * Note that pixel indices start from 0.
+ ***************************************************************************/
+GSkyDir GWcs::xy2dir(const GSkyPixel& pix)
+{
+    // Set constants
+    const int __permutation[2] = {1,0};
+
+    // Throw an error if no projection function exists
+    if (this->m_std2nat == NULL)
+        throw GException::wcs_no_proj_fct(G_XY2DIR);
+
+    // Determine offset
+    GVector offset = GVector(pix.x(), pix.y());
+
+    // Determine xy
+    GVector xy = m_cd * (offset - m_refpix);
+
+    // Swap result if coordinates are reversed
+    if (m_reverse)
+        xy = perm(xy, __permutation);
+
+    // Perform CAR map projection
+    GVector native = xy;
+    (this->*m_nat2std)(&native);
+
+    // Get sky direction for native coordinates
+    GSkyDir dir = wcs_native2dir(native);
+
+    // Debug: Dump transformation steps
+    #if defined(G_XY2DIR_DEBUG)
+    std::cout << "xy2dir: pixel=" << offset << " xy=" << xy
+              << " native=" << native << " dir=" << dir << std::endl;
+    #endif
+
+    // Return
+    return dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pixel of sky direction
+ *
+ * @param[in] dir Sky direction.
+ *
+ * @exception GException::wcs_no_proj_fct
+ *            No WCS projection function has been declared.
+ *
+ * Note that pixel indices start from 0.
+ ***************************************************************************/
+GSkyPixel GWcs::dir2xy(GSkyDir dir) const
+{
+    // Set constants
+    const int __permutation[2] = {1,0};
+
+    // Throw an error if no projection function exists
+    if (this->m_std2nat == NULL)
+        throw GException::wcs_no_proj_fct(G_DIR2XY);
+
+    // Get native coordinates for sky direction in radians
+    GVector native = wcs_dir2native(dir);
+
+    // Perform CAR map projection
+    GVector xy = native;
+    (this->*m_std2nat)(&xy);
+
+    // Swap result if coordinates are reversed
+    if (m_reverse)
+        xy = perm(xy, __permutation);
+
+    // Determine pixel offset
+    GVector offset = m_invcd * xy + m_refpix;
+
+    // Set sky pixel
+    GSkyPixel pixel(offset(0), offset(1));
+
+    // Debug: Dump transformation steps
+    #if defined(G_DIR2XY_DEBUG)
+    std::cout << "dir2xy: dir=" << dir << " native=" << native
+              << " xy=" << xy << " pixel=" << offset << std::endl;
+    #endif
+
+    // Return sky pixel
+    return pixel;
 }
 
 
@@ -304,17 +512,17 @@ GVector GWcs::wcs_dir2native(GSkyDir dir) const
         phi1   = dir.l();
         theta1 = dir.b();
     }
-    
+
     // Define right hand side vector for matrix equation
     double  ct = cos(theta1);
     double  x0 = ct * cos(phi1);
     double  x1 = ct * sin(phi1);
     double  x2 = sin(theta1);
     GVector x(x0,x1,x2);
-    
+
     // Find solution
     GVector b = m_rot * x;
-    
+
     // Account for possible roundoff in 3rd element
     if (b(2) < -1.0) b(2) = -1.0;
     if (b(2) > +1.0) b(2) = +1.0;
@@ -323,7 +531,7 @@ GVector GWcs::wcs_dir2native(GSkyDir dir) const
     double  theta = asin(b(2));
     double  phi   = atan2(b(1),b(0));
     GVector native(phi, theta);
-    
+
     // Return native coordinates
     return native;
 }
@@ -364,9 +572,33 @@ GSkyDir GWcs::wcs_native2dir(GVector native) const
         dir.radec(phi, theta);
     else
         dir.lb(phi, theta);
-    
+
     // Return sky direction
     return dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Initialises derived WCS parameters
+ *
+ * @param[in] theta0 Native latitude of the fiducial point.
+ ***************************************************************************/
+void GWcs::wcs_init(const double& theta0)
+{
+    // Set native latitude of the fiducial point
+    m_theta0 = theta0;
+
+    // Compute the coordinates of native pole for non-polar projection
+    m_native_pole = wcs_getpole(m_theta0);
+
+    // Get matrix for rotation between sky and native coordinates
+    m_rot = wcs_get_rot();
+
+    // Get transpose matrix for inverse rotation
+    m_trot = transpose(m_rot);
+
+    // Return
+    return;
 }
 
 
@@ -375,23 +607,31 @@ GSkyDir GWcs::wcs_native2dir(GVector native) const
  *
  * @param[in] theta0 Native latitude of the fiducial point.
  *
- * Returns the coordinates of the native pole for non-polar projections.
- * The result is in spherical coordinates and in units of radians.
+ * For non-polar (cylindrical or conic) projections, the native pole is
+ * not at the reference point, and this method is used to determine the
+ * position of the native pole. See section 2.4 of the paper
+ * "Representation of Celestial Coordinates in FITS" by 
+ * Calabretta & Greisen (2002) A&A, 395, 1077, also available at
+ * http://www.aoc.nrao.edu/~egreisen.
+ * This method returns the coordinates of the native pole for non-polar
+ * projections in spherical coordinates. Units are radians.
+ * The code has largely be inspired by the IDL routine wcs_getpole.pro
+ * (update of May 1998).
  ***************************************************************************/
 GVector GWcs::wcs_getpole(const double& theta0)
 {
     // Declare result
     double alpha_p;
     double delta_p;
-    
+
     // Compute crval in radians
     double alpha_0 = m_refval(0) * deg2rad;
     double delta_0 = m_refval(1) * deg2rad;
-    
+
     // Get longitude and latitude of pole
     double lonpole = m_npole(0);
     double latpole = m_npole(1);
-    
+
     // If theta0=90 then the coordinate of the native pole are given by crval
     if (theta0 == 90.0) {
         alpha_p = alpha_0;
@@ -407,7 +647,7 @@ GVector GWcs::wcs_getpole(const double& theta0)
         double sd    = sin(delta_0);
         double cd    = sin(delta_0);
         double tand  = sin(delta_0);
-        
+
         // Case A: theta0 = 0
         if (theta0 == 0.0) {
             if (delta_0 == 0.0 && lonpole == 90.0)
@@ -423,7 +663,7 @@ GVector GWcs::wcs_getpole(const double& theta0)
             else
                 alpha_p = alpha_0 - atan2(sp/cd, -tan(delta_p)*tand);
         }
-        
+
         // Case B: theta0 != 0
         else {
             double ctheta = cos(theta0*deg2rad);
@@ -467,9 +707,9 @@ GVector GWcs::wcs_getpole(const double& theta0)
                     } // endelse: sdelt != 1
                 } // endelse: cd != 0
             } // endelse: term2 != 0
-        } // endelse: Case B        
+        } // endelse: Case B
     } // endelse: theta0 != 90
-    
+
     // Set result vector
     GVector pole(alpha_p,delta_p);
 
@@ -487,7 +727,7 @@ GMatrix GWcs::wcs_get_rot(void)
 {
     // Allocate rotation matrix
     GMatrix r(3,3);
-    
+
     // Compute useful quantities relating to reference angles
     double sp = sin(m_npole(0)*deg2rad);
     double cp = cos(m_npole(0)*deg2rad);
@@ -495,7 +735,7 @@ GMatrix GWcs::wcs_get_rot(void)
     double ca = cos(m_native_pole(0));
     double sd = sin(m_native_pole(1));
     double cd = cos(m_native_pole(1));
-    
+
     // Compute rotation matrix
     r(0,0) = -sa*sp - ca*cp*sd;
     r(0,1) =  ca*sp - sa*cp*sd;
@@ -506,7 +746,7 @@ GMatrix GWcs::wcs_get_rot(void)
     r(2,0) =  ca*cd;
     r(2,1) =  sa*cd;
     r(2,2) =  sd;
-    
+
     // Return rotation matrix
     return r;
 }
@@ -535,9 +775,7 @@ void GWcs::dump_wcs(std::ostream& os) const
        << m_invcd(1,1) << std::endl;
     os << " Coordinate of native pole .: " << m_native_pole*rad2deg 
        << " deg" << std::endl;
-//    os << m_rot << std::endl;
-//    os << m_trot << std::endl;
-    
+
     // Return
     return;
 }
@@ -563,7 +801,7 @@ void GWcs::init_members(void)
     m_npole    = GVector(180.0, 0.0);
     m_cd       = GMatrix(2,2);
     m_pv2      = GVector(21);
-    
+
     // Initialise derived members
     m_theta0      = 0.0;
     m_refval      = GVector(2);
@@ -572,6 +810,10 @@ void GWcs::init_members(void)
     m_native_pole = GVector(2);
     m_rot         = GMatrix(3,3);
     m_trot        = GMatrix(3,3);
+
+    // Initialise projection function pointers
+    m_std2nat = NULL;
+    m_nat2std = NULL;
 
     // Return
     return;
@@ -594,7 +836,7 @@ void GWcs::copy_members(const GWcs& wcs)
     m_npole    = wcs.m_npole;
     m_cd       = wcs.m_cd;
     m_pv2      = wcs.m_pv2;
-    
+
     // Copy derived attributes
     m_theta0      = wcs.m_theta0;
     m_refval      = wcs.m_refval;
@@ -603,6 +845,10 @@ void GWcs::copy_members(const GWcs& wcs)
     m_native_pole = wcs.m_native_pole;
     m_rot         = wcs.m_rot;
     m_trot        = wcs.m_trot;
+
+    // Copy projection function pointers
+    m_std2nat = wcs.m_std2nat;
+    m_nat2std = wcs.m_nat2std;
 
     // Return
     return;
@@ -622,12 +868,5 @@ void GWcs::free_members(void)
 /*==========================================================================
  =                                                                         =
  =                               GWcs friends                              =
- =                                                                         =
- ==========================================================================*/
-
-
-/*==========================================================================
- =                                                                         =
- =                       Other functions used by GWcs                      =
  =                                                                         =
  ==========================================================================*/
