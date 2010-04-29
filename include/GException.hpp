@@ -257,6 +257,20 @@ public:
                         std::string message = "");
     };
 
+    // Bad image dimension
+    class skymap_bad_ctype : public GExceptionHandler {
+    public:
+        skymap_bad_ctype(std::string origin, std::string ctype1,
+                         std::string ctype2, std::string message = "");
+    };
+
+    // Bad image dimension
+    class skymap_bad_image_dim : public GExceptionHandler {
+    public:
+        skymap_bad_image_dim(std::string origin, int naxis,
+                             std::string message = "");
+    };
+
     // General GWcs error
     class wcs : public GExceptionHandler {
     public:

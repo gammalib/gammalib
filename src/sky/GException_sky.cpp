@@ -81,6 +81,50 @@ GException::skymap_bad_size::skymap_bad_size(std::string origin,
 
 
 /***********************************************************************//**
+ * @brief Incompatible ctype keywords
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] ctype1 Encountered ctype1 keyword.
+ * @param[in] ctype1 Encountered ctype1 keyword.
+ * @param[in] message Error message.
+ ***************************************************************************/
+GException::skymap_bad_ctype::skymap_bad_ctype(std::string origin,
+                                               std::string ctype1,
+                                               std::string ctype2,
+                                               std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "CTYPE1 "+ctype1+") and CTYPE2 ("+ctype2+") header keywords"
+                " are not compatible. " + message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Bad image dimension
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] naxis Encountered number of axes.
+ * @param[in] message Error message.
+ ***************************************************************************/
+GException::skymap_bad_image_dim::skymap_bad_image_dim(std::string origin,
+                                                       int         naxis,
+                                                       std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Invalid number of image dimensions (naxis="+str(naxis)+")."
+                " " + message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief General GWcs error
  *
  * @param[in] origin Method that throws the error.
