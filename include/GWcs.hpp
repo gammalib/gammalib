@@ -20,6 +20,9 @@
 #define GWCS_HPP
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
@@ -73,16 +76,31 @@ private:
     virtual GWcs* clone(void) const = 0;
 
 protected:
-    // Protected data area
+    // Protected methods
+    GVector wcs_dir2native(GSkyDir dir) const;
+    GSkyDir wcs_native2dir(GVector native) const;
+    GVector wcs_getpole(const double& theta0);
+    GMatrix wcs_get_rot(void);
+    void    dump_wcs(std::ostream& os) const;
+    
+    // Protected data area (astr structure)
     int     m_coordsys;     //!< 0=celestial, 1=galactic
-    double  m_crval[2];     //!< Coordinates of reference point
-    double  m_crpix[2];     //!< x and y coordinates of the reference point
-    double  m_cdelt[2];     //!< Increment at reference point (deg/pixel)
-    double  m_longpole;     //!< Native longitude of North Pole
-    double  m_latpole;      //!< Native latitude of North Pole
+    int     m_reverse;      //!< Reverse axes (1=true)
+    GVector m_crval;        //!< Value of reference point
+    GVector m_crpix;        //!< Pixel of reference point (starting from 1)
+    GVector m_cdelt;        //!< Increment at reference point (deg/pixel)
+    GVector m_npole;        //!< Native coordinate of North Pole
     GMatrix m_cd;           //!< Astrometry parameters (2x2 matrix, deg/pixel)
-    GMatrix m_invcd;        //!< Inverse of CD matrix
     GVector m_pv2;          //!< Projection parameters (up to 21)
+    
+    // Derived parameters
+    double  m_theta0;       //!< Native latitude of the fiducial point
+    GVector m_refval;       //!< Ordered value of reference point
+    GVector m_refpix;       //!< Pixel of reference point (starting from 0)
+    GMatrix m_invcd;        //!< Inverse of CD matrix
+    GVector m_native_pole;  //!< Coordinates of native pole
+    GMatrix m_rot;          //!< Rotation matrix
+    GMatrix m_trot;         //!< Transpose of rotation matrix
 };
 
 #endif /* GWCS_HPP */
