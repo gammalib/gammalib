@@ -20,7 +20,10 @@
 #define GSKYPIXEL_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <sstream>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include <iostream>
 
 
 /***********************************************************************//**
@@ -36,7 +39,7 @@ class GSkyPixel {
 public:
     // Constructors and destructors
     GSkyPixel(void);
-    GSkyPixel(const double& x, const double& y);
+    explicit GSkyPixel(const double& x, const double& y);
     GSkyPixel(const GSkyPixel& pixel);
     virtual ~GSkyPixel(void);
 
