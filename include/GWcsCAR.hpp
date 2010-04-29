@@ -20,6 +20,9 @@
 #define GWCSCAR_HPP
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GWcs.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
@@ -65,10 +68,6 @@ private:
     void     copy_members(const GWcsCAR& wcs);
     void     free_members(void);
     GWcsCAR* clone(void) const;
-
-    // Implemented pure virtual private methods
-    void wcsxy2sph(const double& x, const double& y, double* lon, double* lat) const;
-    void wcssph2xy(const double& lon, const double& lat, double* x, double* y) const;
 
     // Private data area
 };

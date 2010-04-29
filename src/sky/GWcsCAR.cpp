@@ -18,7 +18,11 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GWcsCAR.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -30,6 +34,8 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+#define G_DIR2XY_DEBUG                                      // Debug dir2xy
+#define G_XY2DIR_DEBUG                                      // Debug xy2dir
 
 /* __ Local prototypes ___________________________________________________ */
 
@@ -80,6 +86,12 @@ GWcsCAR::GWcsCAR(const std::string& coords,
 {
     // Initialise class members
     init_members();
+
+    // Derive projection parameters
+    m_theta0      = 0.0;
+    m_native_pole = wcs_getpole(m_theta0);
+    m_rot         = wcs_get_rot();
+    m_trot        = transpose(m_rot);
 
     // Return
     return;
@@ -194,7 +206,14 @@ std::string GWcsCAR::type(void) const
 GSkyDir GWcsCAR::pix2dir(const int& pix)
 {
     // Throw error
-    throw GException::wcs(G_XY2DIR, "WCS method not defined for CAR projection.");
+    throw GException::wcs(G_XY2DIR, 
+                          "WCS method not defined for CAR projection.");
+
+    // Define constant direction
+    const GSkyDir dir;
+
+    // Return
+    return dir;
 }
 
 
@@ -202,14 +221,36 @@ GSkyDir GWcsCAR::pix2dir(const int& pix)
  * @brief Returns sky direction of pixel
  *
  * @param[in] pix Sky pixel.
+ *
+ * Note that pixel indices start from 0.
  ***************************************************************************/
 GSkyDir GWcsCAR::xy2dir(const GSkyPixel& pix)
 {
-    // Allocate sky direction
-    GSkyDir dir;
+    // Set constants
+    const int __permutation[2] = {1,0};
+
+    // Determine offset
+    GVector offset = GVector(pix.x(), pix.y());
+
+    // Determine xy
+    GVector xy = m_cd * (offset - m_refpix);
+
+    // Swap result if coordinates are reversed
+    if (m_reverse)
+        xy = perm(xy, __permutation);
+
+    // Perform CAR map projection
+    GVector native = xy * deg2rad;
+
+    // Get sky direction for native coordinates
+    GSkyDir dir = wcs_native2dir(native);
     
-    //TODO: Implement
-    
+    // Debug: Dump transformation steps
+    #if defined(G_XY2DIR_DEBUG)
+    std::cout << "xy2dir: pixel=" << offset << " xy=" << xy
+              << " native=" << native << " dir=" << dir << std::endl;
+    #endif
+
     // Return
     return dir;
 }
@@ -223,7 +264,11 @@ GSkyDir GWcsCAR::xy2dir(const GSkyPixel& pix)
 int GWcsCAR::dir2pix(GSkyDir dir) const
 {
     // Throw error
-    throw GException::wcs(G_DIR2XY, "WCS method not defined for CAR projection.");
+    throw GException::wcs(G_DIR2XY, 
+                          "WCS method not defined for CAR projection.");
+    
+    // Return
+    return 0;
 }
 
 
@@ -231,15 +276,37 @@ int GWcsCAR::dir2pix(GSkyDir dir) const
  * @brief Returns pixel of sky direction
  *
  * @param[in] dir Sky direction.
+ *
+ * Note that pixel indices start from 0.
  ***************************************************************************/
 GSkyPixel GWcsCAR::dir2xy(GSkyDir dir) const
 {
-    // Allocate sky pixel
-    GSkyPixel pixel;
+    // Set constants
+    const int __permutation[2] = {1,0};
+        
+    // Get native coordinates for sky direction in radians
+    GVector native = wcs_dir2native(dir);
     
-    //TODO: Implement
+    // Perform CAR map projection
+    GVector xy = native * rad2deg;
     
-    // Return
+    // Swap result if coordinates are reversed
+    if (m_reverse)
+        xy = perm(xy, __permutation);
+    
+    // Determine pixel offset
+    GVector offset = m_invcd * xy + m_refpix;
+
+    // Set sky pixel
+    GSkyPixel pixel(offset(0), offset(1));
+
+    // Debug: Dump transformation steps
+    #if defined(G_DIR2XY_DEBUG)
+    std::cout << "dir2xy: dir=" << dir << " native=" << native
+              << " xy=" << xy << " pixel=" << offset << std::endl;
+    #endif
+
+    // Return sky pixel
     return pixel;
 }
 
@@ -323,17 +390,6 @@ GWcsCAR* GWcsCAR::clone(void) const
 }
 
 
-/***********************************************************************//**
- * @brief Clone instance
- ***************************************************************************/
-void GWcsCAR::wcsxy2sph(const double& x, const double& y, double* lon, double* lat) const
-{
-}
-void GWcsCAR::wcssph2xy(const double& lon, const double& lat, double* x, double* y) const
-{
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                              GWcsCAR friends                            =
@@ -350,7 +406,9 @@ std::ostream& operator<< (std::ostream& os, const GWcsCAR& wcs)
 {
     // Put header in stream
     os << "=== GWcsCAR ===" << std::endl;
-    os << " Coordinate system .........: " << wcs.coordsys();
+    
+    // Add WCS information
+    wcs.dump_wcs(os);
 
     // Return output stream
     return os;
