@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GSkyDir.cpp  -  Class that implements a sky direction          *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,10 +9,17 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
+/**
+ * @file GSkyDir.cpp
+ * @brief GSkyDir class implementation.
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
@@ -27,7 +34,7 @@
 /* __ Debug definitions __________________________________________________ */
 
 /* __ Prototype __________________________________________________________ */
-void   euler(const int& type, const double& xin, const double &yin, 
+void   euler(const int& type, const double& xin, const double &yin,
              double* xout, double *yout);
 
 /*==========================================================================
@@ -88,6 +95,8 @@ GSkyDir::~GSkyDir()
 
 /***********************************************************************//**
  * @brief Assignment operator
+ *
+ * @param[in] dir Sky direction to be assigned.
  ***************************************************************************/
 GSkyDir& GSkyDir::operator= (const GSkyDir& dir)
 {
@@ -131,7 +140,7 @@ void GSkyDir::radec(const double& ra, const double& dec)
     // Set direction
     m_ra  = ra;
     m_dec = dec;
-    
+
     // Return
     return;
 }
@@ -152,7 +161,7 @@ void GSkyDir::radec_deg(const double& ra, const double& dec)
     // Set direction
     m_ra  = ra  * deg2rad;
     m_dec = dec * deg2rad;
-    
+
     // Return
     return;
 }
@@ -173,7 +182,7 @@ void GSkyDir::lb(const double& l, const double& b)
     // Set direction
     m_l = l;
     m_b = b;
-    
+
     // Return
     return;
 }
@@ -194,7 +203,7 @@ void GSkyDir::lb_deg(const double& l, const double& b)
     // Set direction
     m_l = l * deg2rad;
     m_b = b * deg2rad;
-    
+
     // Return
     return;
 }
@@ -208,7 +217,7 @@ double GSkyDir::l(void)
     // If we have no galactic coordinates then get them now
     if (!m_has_lb && m_has_radec)
         equ2gal();
-    
+
     // Return galactic longitude
     return m_l;
 }
@@ -222,7 +231,7 @@ double GSkyDir::l_deg(void)
     // If we have no galactic coordinates then get them now
     if (!m_has_lb && m_has_radec)
         equ2gal();
-    
+
     // Return galactic longitude
     return m_l * rad2deg;
 }
@@ -236,7 +245,7 @@ double GSkyDir::b(void)
     // If we have no galactic coordinates then get them now
     if (!m_has_lb && m_has_radec)
         equ2gal();
-    
+
     // Return galactic latitude
     return m_b;
 }
@@ -250,7 +259,7 @@ double GSkyDir::b_deg(void)
     // If we have no galactic coordinates then get them now
     if (!m_has_lb && m_has_radec)
         equ2gal();
-    
+
     // Return galactic latitude
     return m_b * rad2deg;
 }
@@ -264,7 +273,7 @@ double GSkyDir::ra(void)
     // If we have no equatorial coordinates then get them now
     if (!m_has_radec && m_has_lb)
         gal2equ();
-    
+
     // Return Right Ascension
     return m_ra;
 }
@@ -278,7 +287,7 @@ double GSkyDir::ra_deg(void)
     // If we have no equatorial coordinates then get them now
     if (!m_has_radec && m_has_lb)
         gal2equ();
-    
+
     // Return Right Ascension
     return m_ra * rad2deg;
 }
@@ -292,7 +301,7 @@ double GSkyDir::dec(void)
     // If we have no equatorial coordinates then get them now
     if (!m_has_radec && m_has_lb)
         gal2equ();
-    
+
     // Return Declination
     return m_dec;
 }
@@ -306,9 +315,66 @@ double GSkyDir::dec_deg(void)
     // If we have no equatorial coordinates then get them now
     if (!m_has_radec && m_has_lb)
         gal2equ();
-    
+
     // Return Declination
     return m_dec * rad2deg;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute angular distance between sky directions in radians
+ *
+ * @param[in] dir Sky direction to which distance is to be computed.
+ ***************************************************************************/
+double GSkyDir::dist(GSkyDir& dir)
+{
+    // Initialise cosine of distance
+    double cosdis;
+
+    // Compute dependent on coordinate system availability. This speeds
+    // up things by avoiding unnecessary coordinate transformations.
+    if (m_has_lb && dir.m_has_lb) {
+        cosdis = sin(m_b)*sin(dir.m_b) +
+                 cos(m_b)*cos(dir.m_b) * cos(dir.m_l - m_l);
+    }
+    else if (m_has_radec && dir.m_has_radec) {
+        cosdis = sin(m_dec)*sin(dir.m_dec) +
+                 cos(m_dec)*cos(dir.m_dec) * cos(dir.m_ra - m_ra);
+    }
+    else if (m_has_lb) {
+        cosdis = sin(m_b)*sin(dir.b()) +
+                 cos(m_b)*cos(dir.b()) * cos(dir.l() - m_l);
+    }
+    else if (m_has_radec) {
+        cosdis = sin(m_dec)*sin(dir.dec()) +
+                 cos(m_dec)*cos(dir.dec()) * cos(dir.ra() - m_ra);
+    }
+    else {
+        cosdis = sin(dec())*sin(dir.dec()) +
+                 cos(dec())*cos(dir.dec()) * cos(dir.ra() - ra());
+    }
+
+    // Put cosine of distance in [-1,1]
+    if (cosdis < -1.0) cosdis = -1.0;
+    if (cosdis >  1.0) cosdis =  1.0;
+
+    // Compute distance
+    double dist = acos(cosdis);
+
+    // Return distance
+    return dist;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute angular distance between sky directions in degrees
+ *
+ * @param[in] dir Sky direction to which distance is to be computed.
+ ***************************************************************************/
+double GSkyDir::dist_deg(GSkyDir& dir)
+{
+    // Return distance in degrees
+    return (dist(dir) * rad2deg);
 }
 
 
@@ -444,14 +510,14 @@ void euler(const int& type, const double& xin, const double &yin,
     const double stheta[] = {0.88998808748, -0.88998808748};
     const double ctheta[] = {0.45598377618,  0.45598377618};
     const double phi[]    = {4.9368292465,   0.57477043300};
-    
+
     // Perform transformation
     double a    = xin - phi[type];
     double b    = yin;
     double sb   = sin(b);
     double cb   = cos(b);
     double cbsa = cb * sin(a);
-    
+
     //
     a = atan2(ctheta[type] * cbsa + stheta[type] * sb, cb * cos(a));
     b = -stheta[type] * cbsa + ctheta[type] * sb;

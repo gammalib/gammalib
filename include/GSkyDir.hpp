@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GSkyDir.hpp  -  Class that implements a sky direction          *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,6 +20,9 @@
 #define GSKYDIR_HPP
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 
 /***********************************************************************//**
@@ -54,6 +57,8 @@ public:
     double ra_deg(void);
     double dec(void);
     double dec_deg(void);
+    double dist(GSkyDir& dir);
+    double dist_deg(GSkyDir& dir);
 
 private:
     // Private methods
