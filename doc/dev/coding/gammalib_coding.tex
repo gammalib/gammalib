@@ -7,8 +7,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\task}{\mbox{GammaLib}}
 \newcommand{\this}{\mbox{\tt \task}}
-\newcommand{\shorttype}{\mbox{CODING}}
-\newcommand{\doctype}{\mbox{Coding Conventions}}
+\newcommand{\shorttype}{\mbox{CCD}}
+\newcommand{\doctype}{\mbox{Coding Conventions Document}}
 \newcommand{\version}{\mbox{draft}}
 \newcommand{\calendar}{\mbox{28 April 2010}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
@@ -42,17 +42,79 @@ improves code readibility and enhances the portability of the code.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% System architectural design
+% General coding rules
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Rules}
+\section{General coding rules}
 
 The following general rules should be followed:
 \begin{itemize}
-\item Each function and/or method terminates with a {\tt return;} statement.
-\item Put a blank line at the end of each file.
+\item[R1] Each function and/or method terminates with a {\tt return;} statement.
+\item[R2] Put a blank line at the end of each file.
+\item[R3] Use {\tt explicit} for constructors to avoid use of the constructor for unintended.
+\item[R4] Do not use tabs (to make code formating independent of editor configurations)
+type conversion.
 \end{itemize}
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Coding style
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Coding style}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Code configuration}
+
+The code configuration is controlled via an include file that has to be added on top of
+each source and include file.
+Each file thus should start with the following code:
+
+\begin{verbatim}
+/* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+\end{verbatim}
+
+One of the most common options used throughout \this\ is range checking.
+Range checking is particularily important during code development since it allows to catch
+memory leaks.
+However, range checking is time consuming and thus leads to somewhat slower code.
+Range checking can thus be disable during installation of \this\ by using
+{\tt ./configure --disable-range-check} during library installation.
+Within the code, the following instruction adds range checking that dependens on
+the library configuration:
+
+\begin{verbatim}
+#if defined(G_RANGE_CHECK)
+if (inx < 0 || inx >= m_num)
+    throw GException::out_of_range("GVector::operator(int)", inx, m_num);
+#endif
+\end{verbatim}
+
+Range checking is provided if the {\tt G\_RANGE\_CHECK} macro is defined.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{C++ classes}
+
+Memory management should be gathered in a single place to avoid memory leaks.
+For this purpose it is best practice to gather the handling of data associated with a C++
+class in single places.
+For this purpose, each C++ class should have the following {\tt private} methods
+for memory management:
+\begin{itemize}
+\item {\tt init\_members()} initializes all member variables and pointers to well defined
+initial values. The class should be fully operational and consistent with these initial
+values.
+\item {\tt alloc\_members()} allocates all memory required by the class. 
+\item {\tt copy\_members(const \&A a)} copies all members from one instance {\tt a}
+in the {\tt this} instance.
+\item {\tt free\_members()} frees all memory that has been allocated by the class. As
+good practice memory pointers should be set to {\tt NULL} if they do not point to
+any valid memory. This allows for checking if memory has been allocated before
+it is accessed.
+\end{itemize}
+(in the above notation, {\tt A} is the class name and {\tt a} is an instance of the class.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
