@@ -16,6 +16,7 @@ SUBDIRS = support \
           opt \
           obs \
           model \
+          app \
           lat
 
 # Define sources for this directory
@@ -31,5 +32,6 @@ libgamma_la_LIBADD = support/libsupport.la \
                      opt/libopt.la \
                      obs/libobs.la \
                      model/libmodel.la \
+		     app/libapp.la \
                      lat/liblat.la
 libgamma_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
