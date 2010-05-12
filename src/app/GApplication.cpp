@@ -41,6 +41,28 @@ GApplication::GApplication(void)
 {
     // Initialise private members for clean destruction
     init_members();
+
+    // Save the execution start time
+    time(&m_tstart);
+  
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Application constructor
+ ***************************************************************************/
+GApplication::GApplication(std::string name)
+{
+    // Initialise private members for clean destruction
+    init_members();
+    
+    // Set application name
+    m_name = name;
+
+    // Save the execution start time
+    time(&m_tstart);
   
     // Return
     return;
@@ -116,6 +138,33 @@ GApplication& GApplication::operator= (const GApplication& app)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Return application name
+ ***************************************************************************/
+std::string GApplication::name(void) const
+{
+    // Return name
+    return m_name;
+}
+
+
+/***********************************************************************//**
+ * @brief Return application elapsed time in CPU seconds
+ ***************************************************************************/
+double GApplication::telapse(void) const
+{
+    // Get actual time
+    time_t acttime;
+    time(&acttime);
+    
+    // Compute elapsed time
+    double telapse = difftime(acttime, m_tstart);
+
+    // Return elapsed time
+    return telapse;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -143,7 +192,8 @@ void GApplication::init_members(void)
 void GApplication::copy_members(const GApplication& app)
 {
     // Copy attributes
-    m_name  = app.m_name;
+    m_name   = app.m_name;
+    m_tstart = app.m_tstart;
     
     // Return
     return;
@@ -155,12 +205,6 @@ void GApplication::copy_members(const GApplication& app)
  ***************************************************************************/
 void GApplication::free_members(void)
 {
-    // Free memory
-    //if (m_par      != NULL) delete [] m_par;
-
-    // Signal free pointers
-    //m_par      = NULL;
-  
     // Return
     return;
 }

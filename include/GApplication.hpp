@@ -20,6 +20,7 @@
 #define GAPPLICATION_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <time.h>
 #include <iostream>
 
 
@@ -44,6 +45,8 @@ public:
     GApplication& operator= (const GApplication& app);
 
     // Methods
+    std::string name(void) const;
+    double      telapse(void) const;
   
 protected:
     // Protected methods
@@ -53,6 +56,9 @@ protected:
 
     // Protected data members
     std::string     m_name;          //!< Name
+    time_t          m_tstart;        //!< Start time of execution
+    time_t          m_tstop;         //!< Stop time of execution
+
 };
 
 #endif /* GAPPLICATION_HPP */
