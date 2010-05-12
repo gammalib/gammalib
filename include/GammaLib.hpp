@@ -28,6 +28,7 @@
 /* __ Numerics module ____________________________________________________ */
 #include "GVector.hpp"
 #include "GMatrixBase.hpp"
+#include "GMatrixTools.hpp"
 #include "GMatrix.hpp"
 #include "GSymMatrix.hpp"
 #include "GSparseMatrix.hpp"
