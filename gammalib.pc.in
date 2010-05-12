@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: GammaLib
+Description: Versatile toolbox for analysis of astronomical gamma-ray data
+Version: 0.3
+Libs: -L${libdir} -lgamma @LIBS@ -lm
+Cflags: -I${includedir}
