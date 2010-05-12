@@ -54,6 +54,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GFitsTableDblCol.hpp \
                      GFitsHDU.hpp \
                      GFits.hpp \
+		     GFitsCfitsio.hpp \
                      GVector.hpp \
                      GMatrixBase.hpp \
                      GMatrix.hpp \
