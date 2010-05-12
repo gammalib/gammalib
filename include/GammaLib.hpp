@@ -62,7 +62,7 @@
 
 
 /* __ Application module _________________________________________________ */
-
+#include "GApplication.hpp"
 
 /* __ Optimizer module ___________________________________________________ */
 #include "GOptimizer.hpp"

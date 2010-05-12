@@ -28,6 +28,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpectralPlaw.hpp \
                      GModelTemporal.hpp \
                      GModelTemporalConst.hpp \
+                     GApplication.hpp \
                      GLATObservation.hpp \
                      GLATEventList.hpp \
                      GLATEventCube.hpp \
