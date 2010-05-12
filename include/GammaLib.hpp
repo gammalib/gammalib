@@ -29,7 +29,6 @@
 #include "GNodeArray.hpp"
 
 /* __ Numerics module ____________________________________________________ */
-#include "GMatrixTools.hpp"
 #include "GVector.hpp"
 #include "GMatrixBase.hpp"
 #include "GMatrix.hpp"
@@ -37,6 +36,7 @@
 #include "GSparseMatrix.hpp"
 
 /* __ FITS module ________________________________________________________ */
+#include "GFitsCfitsio.hpp"
 #include "GFits.hpp"
 #include "GFitsHDU.hpp"
 #include "GFitsHeader.hpp"
