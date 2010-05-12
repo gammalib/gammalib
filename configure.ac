@@ -4,32 +4,9 @@ dnl =============================================================
 AC_INIT([GammaLib], [0.3], [knodlseder@cesr.fr])
 AC_CONFIG_SRCDIR(src/Makefile.am)
 AC_CONFIG_MACRO_DIR([m4])
-
 AM_INIT_AUTOMAKE([gnu no-dependencies])
-AM_CONFIG_HEADER([config.h])
-AM_MAINTAINER_MODE
-
-
-dnl ===========================
-dnl things required by automake
-dnl ===========================
-dnl AC_ARG_PROGRAM
-AC_PROG_MAKE_SET
-
-
-dnl ======================
-dnl Check for which system
-dnl ======================
-dnl AC_CANONICAL_HOST
-
-
-dnl ===================
-dnl Checks for programs
-dnl ===================
-AC_PROG_CXX
-AC_PROG_INSTALL
-dnl AC_PROG_RANLIB
-AC_PROG_LIBTOOL
+AC_CONFIG_HEADERS([config.h])
+dnl AM_MAINTAINER_MODE
 
 
 dnl ========================================= 
@@ -44,28 +21,81 @@ GAMMALIB_LT_VERSION="0:0:0"
 AC_SUBST(GAMMALIB_LT_VERSION)
 
 
+dnl ===========================
+dnl things required by automake
+dnl ===========================
+dnl AC_ARG_PROGRAM
+AC_PROG_MAKE_SET
+
+
+dnl ===================
+dnl Checks for programs
+dnl ===================
+AC_PROG_CXX
+AC_PROG_INSTALL
+AC_PROG_LIBTOOL
+
+# Checks for SWIG
+AC_PATH_PROG([SWIG], [swig])
+AM_CONDITIONAL(HAVE_SWIG, test "$SWIG")
+
+# Checks for Python
+AM_PATH_PYTHON([2.2],
+	       [],
+	       [AC_MSG_WARN([Python not found. Python is required to build python binding. Python can be obtained from http://www.python.org])])
+AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
+
+AC_ARG_ENABLE([python-binding],
+	      AS_HELP_STRING([--enable-python-binding],
+			     [build python binding (default=yes)]),
+			     [ac_enable_python_binding=no],
+			     [ac_enable_python_binding=yes])
+if test "x$ac_enable_python_binding" = "xyes"
+then
+    if test ! "$SWIG" -a ! "$PYTHON"
+    then
+	AC_MSG_WARN([Python binding for gammalib cannot be built. Ensure that SWIG and Python packages are available.])
+    fi
+else
+    AC_MSG_NOTICE([Python binding for gammalib will not be built.])
+    AC_MSG_NOTICE([Enable Python binding module building with --enable-python-binding])
+fi
+AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes")
+
+
+dnl ====================
+dnl Checks for libraries
+dnl ====================
+# Checks for cfitsio
+AC_SEARCH_LIBS(ffpss, cfitsio,
+    AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available]), ,[-lm])
+
+
 dnl =======================
-dnl Check compiler features
+dnl Checks for header files
 dnl =======================
+AC_STDC_HEADERS
+
+
+dnl =============================================================
+dnl Checks for typedefs, structures, and compiler characteristics
+dnl =============================================================
 dnl AC_TYPE_SIZE_T
 dnl AC_C_CONST
 dnl AC_C_VOLATILE
 dnl AC_C_INLINE
 
 
-dnl =======================
-dnl Checks for header files
-dnl =======================
-
-
-dnl =============================================================
-dnl Checks for typedefs, structures, and compiler characteristics
-dnl =============================================================
-
 
 dnl ============================
 dnl Checks for library functions
 dnl ============================
+
+
+dnl =========================
+dnl Check for system services
+dnl =========================
+dnl AC_CANONICAL_HOST
 
 
 dnl ==============================
@@ -80,60 +110,22 @@ if test "x$RANGE_CHECK" = "xyes"; then
 fi
 
 
-dnl ===============
-dnl Checks for SWIG
-dnl ===============
-AC_PATH_PROG([SWIG], [swig])
-AM_CONDITIONAL(HAVE_SWIG, test "$SWIG")
-
-
-dnl =================
-dnl Checks for Python
-dnl =================
-AM_PATH_PYTHON([2.2],
-               [],
-               [AC_MSG_WARN([Python not found. Python is required to build python binding. Python can be obtained from http://www.python.org])])
-AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
-
-AC_ARG_ENABLE([python-binding],
-              AS_HELP_STRING([--enable-python-binding],
-                             [build python binding (default=yes)]),
-                             [ac_enable_python_binding=no],
-                             [ac_enable_python_binding=yes])
-if test "x$ac_enable_python_binding" = "xyes"
-then
-    if test ! "$SWIG" -a ! "$PYTHON"
-    then
-        AC_MSG_WARN([Python binding for gammalib cannot be built. Ensure that SWIG and Python packages are available.])
-    fi
-else
-    AC_MSG_NOTICE([Python binding for gammalib will not be built.])
-    AC_MSG_NOTICE([Enable Python binding module building with --enable-python-binding])
-fi
-AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes")
-
-
-dnl ==================
-dnl Checks for cfitsio
-dnl ==================
-AC_SEARCH_LIBS(ffpss, cfitsio,
-    AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available]), ,[-lm])
-
-
 dnl ======================================
 dnl Set list of output files to be creates
 dnl ======================================
-AC_OUTPUT([Makefile
-           src/Makefile
-           src/support/Makefile
-           src/linalg/Makefile
-           src/fits/Makefile
-           src/sky/Makefile
-           src/opt/Makefile
-           src/obs/Makefile
-           src/model/Makefile
-           src/lat/Makefile
-           include/Makefile
-           test/Makefile
-           pyext/Makefile
-           pyext/setup.py])
+AC_CONFIG_FILES([Makefile
+                 src/Makefile
+                 src/support/Makefile
+                 src/linalg/Makefile
+                 src/fits/Makefile
+                 src/sky/Makefile
+                 src/opt/Makefile
+                 src/obs/Makefile
+                 src/model/Makefile
+                 src/lat/Makefile
+                 include/Makefile
+                 test/Makefile
+                 pyext/Makefile
+                 pyext/setup.py
+                 gammalib.pc])
+AC_OUTPUT
