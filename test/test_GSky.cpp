@@ -289,7 +289,7 @@ void test_GSkymap_healpix_io(void)
 void test_GSkymap_wcs_construct(void)
 {
     // Set precision
-    double eps = 1.0e-6;
+    double eps = 1.0e-5;
 
     // Dump header
     std::cout << "Test WCS GSkymap constructors: ";
