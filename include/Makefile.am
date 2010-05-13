@@ -29,6 +29,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelTemporal.hpp \
                      GModelTemporalConst.hpp \
                      GApplication.hpp \
+                     GLog.hpp \
                      GLATObservation.hpp \
                      GLATEventList.hpp \
                      GLATEventCube.hpp \

@@ -53,14 +53,9 @@
 #include "GFitsTableFltCol.hpp"
 #include "GFitsTableDblCol.hpp"
 
-/* __ Parameter interface module _________________________________________ */
-
-
-/* __ Reporting module ___________________________________________________ */
-
-
 /* __ Application module _________________________________________________ */
 #include "GApplication.hpp"
+#include "GLog.hpp"
 
 /* __ Optimizer module ___________________________________________________ */
 #include "GOptimizer.hpp"
