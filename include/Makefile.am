@@ -57,6 +57,7 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GFitsCfitsio.hpp \
                      GVector.hpp \
                      GMatrixBase.hpp \
+                     GMatrixTools.hpp \
                      GMatrix.hpp \
                      GSymMatrix.hpp \
                      GSparseMatrix.hpp \
