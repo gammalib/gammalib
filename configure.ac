@@ -9,6 +9,20 @@ AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
 
 
+# ==========
+# Set prefix
+# ==========
+AC_PREFIX_DEFAULT([/usr/local/gamma])
+if test "x$prefix" = xNONE; then
+  AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], [/usr/local/gamma], 
+		     [Location where library is installed])
+else
+  AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], ${prefix}, 
+  		     [Location where library is installed])
+fi
+
+
+
 dnl ========================================= 
 dnl Library versioning (current:revision:age)
 dnl See the libtool manual for an explanation
