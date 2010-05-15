@@ -56,6 +56,8 @@
 /* __ Application module _________________________________________________ */
 #include "GApplication.hpp"
 #include "GLog.hpp"
+#include "GPars.hpp"
+#include "GPar.hpp"
 
 /* __ Optimizer module ___________________________________________________ */
 #include "GOptimizer.hpp"
