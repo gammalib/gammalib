@@ -17,6 +17,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <pwd.h>           // user/passwd function
 #include <unistd.h>        // access() function
 #include <sys/stat.h>      // mkdir() function
@@ -170,6 +173,11 @@ GPars& GPars::operator= (const GPars& pars)
  * @brief Load parameters
  *
  * @param[in] filename Parameter filename.
+ *
+ * @exception GException::par_file_not_found
+ *            Parameter file not found.
+ *
+ * Loads all parameters from parameter file.
  ***************************************************************************/
 void GPars::load(const std::string& filename)
 {
@@ -197,6 +205,14 @@ void GPars::load(const std::string& filename)
  *
  * @param[in] filename Parameter filename.
  * @param[in] args Command line arguments. 
+ *
+ * @exception GException::par_file_not_found
+ *            Parameter file not found.
+ * @exception GException::bad_cmdline_argument
+ *            Invalid command line argument encountered.
+ *
+ * Loads all parameters from parameter file. Parameters are overwritten by
+ * the values specified in the command line arguments.
  ***************************************************************************/
 void GPars::load(const std::string& filename,
                  const std::vector<std::string>& args)
@@ -214,6 +230,47 @@ void GPars::load(const std::string& filename,
 
     // Parse parfile
     parse();
+    
+    // Overwrite parameter values that are specified in the command line
+    for (int i = 1; i < args.size(); ++i) {
+        
+        // Extract parameter name and value
+        size_t pos = args[i].find("=");
+        if (pos == std::string::npos)
+            throw GException::bad_cmdline_argument(G_LOAD2, args[i],
+                                                   "no '=' specified");
+        std::string name  = args[i].substr(0, pos);
+        std::string value = args[i].substr(pos+1);
+        if (name.length() < 1)
+            throw GException::bad_cmdline_argument(G_LOAD2, args[i],
+                                       "no parameter name before '='");
+        if (value.length() < 1)
+            throw GException::bad_cmdline_argument(G_LOAD2, args[i],
+                                       "no parameter value after '='");
+        
+        // Get pointer to parameter
+        GPar* ptr = par(name);
+        if (ptr == NULL)
+            throw GException::bad_cmdline_argument(G_LOAD2, args[i],
+                                  "invalid parameter name '"+name+"'");
+        
+        // Assign value
+        try {
+            ptr->value(value);
+        }
+        catch (GException::par_error &e) {
+            throw GException::bad_cmdline_argument(G_LOAD2, args[i]);
+        }
+        
+        // Set mode to hidden to prevent querying the parameter
+        if (ptr->mode() == "q")
+            ptr->mode("h");
+        else if (ptr->mode() == "ql")
+            ptr->mode("hl");
+        else if (ptr->mode() == "lq")
+            ptr->mode("lh");
+    
+    } // endfor: looped over all parameters
 
     // Return
     return;
@@ -224,6 +281,9 @@ void GPars::load(const std::string& filename,
  * @brief Save parameters
  *
  * @param[in] filename Parameter filename.
+ *
+ * @exception GException::par_file_not_found
+ *            No valid directory to write the parameter file has been found.
  ***************************************************************************/
 void GPars::save(const std::string& filename)
 {
@@ -232,11 +292,39 @@ void GPars::save(const std::string& filename)
     if (path.size() == 0)
         throw GException::par_file_not_found(G_SAVE, filename);
 
+    // Update parameter file
+    update();
+
     // Write parfile
     write(path);
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer on parameter
+ *
+ * @param[in] name Parameter name.
+ *
+ * Method returns a NULL pointer if parameter is not found in list.
+ ***************************************************************************/
+GPar* GPars::par(const std::string& name)
+{
+    // Initialise parameter pointer
+    GPar* ptr = NULL;
+    
+    // Search for parameter
+    for (int i = 0; i < m_pars.size(); ++i) {
+        if (m_pars[i].m_name == name) {
+            ptr = &(m_pars[i]);
+            break;
+        }
+    } // endfor: looped over parameters
+    
+    // Return pointer
+    return ptr;
 }
 
 
@@ -254,6 +342,7 @@ void GPars::init_members(void)
     // Initialise members
     m_parfile.clear();
     m_pars.clear();
+    m_mode = "h";
   
     // Return
     return;
@@ -269,10 +358,8 @@ void GPars::copy_members(const GPars& pars)
 {
     // Copy attributes
     m_parfile = pars.m_parfile;
-    
-    // Copy parameters
-    for (int i = 0; i < pars.m_pars.size(); ++i)
-        m_pars.push_back(pars.m_pars[i]->clone());
+    m_pars    = pars.m_pars;
+    m_mode    = pars.m_mode;
     
     // Return
     return;
@@ -283,13 +370,7 @@ void GPars::copy_members(const GPars& pars)
  * @brief Delete class members
  ***************************************************************************/
 void GPars::free_members(void)
-{
-    // Delete all parameter pointers
-    for (int i = 0; i < m_pars.size(); ++i) {
-        if (m_pars[i] != NULL) delete m_pars[i];
-    }
-    m_pars.clear();
-    
+{    
     // Return
     return;
 }
@@ -365,7 +446,8 @@ std::string GPars::inpath(const std::string& filename) const
     // package (${prefix}/syspfiles)
     #ifdef PACKAGE_PREFIX
     if (path.size() == 0) {
-        std::string fname = PACKAGE_PREFIX + "/syspfiles/" + filename;
+        std::string fname = std::string(PACKAGE_PREFIX) + "/syspfiles/" +
+                            filename;
         if (access(fname.c_str(), R_OK) == 0)
             path = fname;
     }
@@ -382,6 +464,13 @@ std::string GPars::inpath(const std::string& filename) const
  * @brief Determine filepath for parameter file output
  *
  * @param[in] filename Parameter filename.
+ *
+ * @exception GException::home_not_found
+ *            Unable to determine users home directory.
+ * @exception GException::could_not_create_pfiles
+ *            Unable to create pfiles directory.
+ * @exception GException::pfiles_not_accessible
+ *            Unable to make pfiles directory accessible to user.
  *
  * Searchs for first writable directory listed in PFILES environment
  * variable. If PFILES is not set then use pfiles directory in users
@@ -457,6 +546,9 @@ std::string GPars::outpath(const std::string& filename) const
  *
  * @param[in] filename Parameter filename (absolut path).
  *
+ * @exception GException::par_file_open_error
+ *            Unable to open parameter file (read access requested).
+ *
  * Read all lines of the parameter file. Each line is terminated by a newline
  * character.
  ***************************************************************************/
@@ -488,7 +580,10 @@ void GPars::read(const std::string& filename)
  *
  * @param[in] filename Parameter filename (absolut path).
  *
- * Writes out all lines of the parameter file.
+ * @exception GException::par_file_open_error
+ *            Unable to open parameter file (write access requested).
+ *
+ * Writes all lines of the parameter file.
  ***************************************************************************/
 void GPars::write(const std::string& filename) const
 {
@@ -515,9 +610,23 @@ void GPars::write(const std::string& filename) const
 
 /***********************************************************************//**
  * @brief Parse parameter file
+ *
+ * @exception GException::par_file_syntax_error
+ *            Syntax error encountered in parameter file.
+ *
+ * The parameter type has to be one b,i,r,s,f,fr,fw,fe,fn. The fr,fw,fe,fn
+ * types test for read access, write access, file existence, and file
+ * absence, respectively.
+ * The parameter mode has to be one of a,h,l,q,hl,ql,lh,lq. For mode 'a' the
+ * effective mode equals to the value given by the mode parameter, if it
+ * exists. Without the presence of the mode parameter the effective mode
+ * will be 'h'.
  ***************************************************************************/
 void GPars::parse(void)
 {
+    // Preset effective mode to 'hidden'
+    m_mode = "h";
+    
     // Parse all lines
     for (int i = 0; i < m_parfile.size(); ++i) {
     
@@ -534,6 +643,8 @@ void GPars::parse(void)
         size_t      start  = 0;
         size_t      end    = line.length() - 1;
         int         index  = 0;
+        size_t      vstart = 0;
+        size_t      vstop  = 0;
         for (size_t pos = 0; pos < line.length(); ++pos) {
         
             // Toggle quotes
@@ -547,8 +658,13 @@ void GPars::parse(void)
             if (quotes == 0) {
                 if (line[pos] == ',' || pos == end) {
                     if (index < 7) {
-                        fields[index] = strip_chars(line.substr(start, 
-                                                    pos-start), "\"");
+                        fields[index] = 
+                          strip_chars(strip_whitespace(line.substr(start, 
+                                                       pos-start)), "\"");
+                        if (index == 3) {
+                            vstart = start;
+                            vstop  = pos;
+                        }
                         start = pos + 1;
                     }
                     index++;
@@ -561,24 +677,82 @@ void GPars::parse(void)
         if (quotes != 0)
             throw GException::par_file_syntax_error(G_PARSE, 
                                                     strip_chars(line,"\n"),
-                                                "Quotes are not balanced");
+                                                "quotes are not balanced");
 
         // Throw an error if line has not 7 fields
         if (index != 7)
             throw GException::par_file_syntax_error(G_PARSE, 
                                                     strip_chars(line,"\n"),
-                                 "Found "+str(index)+" fields, require 7");
+                                 "found "+str(index)+" fields, require 7");
 
         // Verify if parameter name does not yet exist
-        //TODO
+        if (par(fields[0]) != NULL)
+            throw GException::par_file_syntax_error(G_PARSE, 
+                                                    strip_chars(line,"\n"),
+                          "redefiniton of parameter name '"+fields[0]+"'");
         
-        // Add type dependent parameter
-        //TODO
-        m_pars.push_back(new GPar(fields[0], fields[1], fields[2],
+        // Add parameter
+        try {
+            m_pars.push_back(GPar(fields[0], fields[1], fields[2],
                                   fields[3], fields[4], fields[5],
                                   fields[6]));
+            m_line.push_back(i);
+            m_vstart.push_back(vstart);
+            m_vstop.push_back(vstop);
+        }
+        catch (GException::par_error &e) {
+            throw GException::par_file_syntax_error(G_PARSE, 
+                                                    strip_chars(line,"\n"),
+                                                                 e.what());
+        }
+        
+        // If parameter name is mode then store the effective mode
+        if (fields[0] == "mode") {
+            if (fields[3] != "h"  && fields[3] != "q" &&
+                fields[3] != "hl" && fields[3] != "ql" &&
+                fields[3] != "lh" && fields[3] != "lq")
+                throw GException::par_file_syntax_error(G_PARSE, 
+                                                    strip_chars(line,"\n"),
+                       "mode parameter has invalid value '"+fields[3]+"'");
+            m_mode = fields[3];
+        }
     
     } // endfor: looped over lines
+    
+    // Set effective mode for all parameters that have mode 'auto'
+    for (int i = 0; i < m_pars.size(); ++i) {
+        if (m_pars[i].mode() == "a")
+            m_pars[i].mode(m_mode);
+    }
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update parameter file
+ *
+ * Update lines of parameter file according to the parameter values. This
+ * method handles correctly formatted parameter files by replacing the value
+ * at its original location within the line (preserving additional
+ * whitespace).
+ * Updating is only done of the parameter mode is 'learn'.
+ ***************************************************************************/
+void GPars::update(void)
+{
+    // Loop over all parameters
+    for (int i = 0; i < m_pars.size(); ++i) {
+    
+        // Update only if requested and allowed
+        if (m_pars[i].m_update && m_pars[i].is_learn()) {
+            m_parfile[m_line[i]] = m_parfile[m_line[i]].substr(0, m_vstart[i]) +
+                                   m_pars[i].m_value +
+                                   m_parfile[m_line[i]].substr(m_vstop[i]);
+            m_vstop[i] = m_vstart[i] + m_pars[i].m_value.length();
+        }
+        
+    } // endfor: looped over all parameters
     
     // Return
     return;
@@ -602,7 +776,7 @@ std::ostream& operator<< (std::ostream& os, const GPars& pars)
     // Put object in stream
     os << "=== GPars ===";
     for (int i = 0; i < pars.m_pars.size(); ++i)
-        os << std::endl << *(pars.m_pars[i]);
+        os << std::endl << pars.m_pars[i];
 
     // Return output stream
     return os;
