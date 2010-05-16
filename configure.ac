@@ -14,13 +14,12 @@ dnl AM_MAINTAINER_MODE
 # ==========
 AC_PREFIX_DEFAULT([/usr/local/gamma])
 if test "x$prefix" = xNONE; then
-  AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], [/usr/local/gamma], 
+  AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], ["/usr/local/gamma"], 
 		     [Location where library is installed])
 else
-  AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], ${prefix}, 
+  AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], "${prefix}", 
   		     [Location where library is installed])
 fi
-
 
 
 dnl ========================================= 
@@ -76,6 +75,25 @@ else
 fi
 AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes")
 
+# Checks for readline
+#AC_ARG_WITH([readline],
+#            [AS_HELP_STRING([--with-readline],
+#            [support fancy command line editing @<:@default=check@:>@])],
+#            [],
+#            [with_readline=check])
+#	  
+#LIBREADLINE=
+#AS_IF([test "x$with_readline" != xno],
+#  [AC_CHECK_LIB([readline], [main],
+#    [AC_SUBST([LIBREADLINE], ["-lreadline -lncurses"])
+#     AC_DEFINE([HAVE_LIBREADLINE], [1],
+#               [Define if you have libreadline])
+#    ],
+#    [if test "x$with_readline" != xcheck; then
+#       AC_MSG_FAILURE(
+#         [--with-readline was given, but test for readline failed])
+#     fi
+#    ], -lncurses)])
 
 dnl ====================
 dnl Checks for libraries
