@@ -118,6 +118,48 @@ std::string str(const double& value)
 
 
 /***********************************************************************//**
+ * @brief Convert string into integer value
+ *
+ * @param[in] arg String to be converted.
+ ***************************************************************************/
+int toint(const std::string& arg)
+{
+    std::istringstream iss(arg);
+    int                result;
+    iss >> std::dec >> result;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert string into float value
+ *
+ * @param[in] arg String to be converted.
+ ***************************************************************************/
+float tofloat(const std::string& arg)
+{
+    std::istringstream iss(arg);
+    float              result;
+    iss >> std::dec >> result;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert string into double value
+ *
+ * @param[in] arg String to be converted.
+ ***************************************************************************/
+double todouble(const std::string& arg)
+{
+    std::istringstream iss(arg);
+    double             result;
+    iss >> std::dec >> result;
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Convert string to upper case
  *
  * @param[in] arg String to be converted to upper case.
