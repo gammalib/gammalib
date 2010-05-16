@@ -52,18 +52,59 @@ GApplication::GApplication(void)
 
 /***********************************************************************//**
  * @brief Application constructor
+ *
+ * @param[in] name Application name.
+ * @param[in] version Application version.
  ***************************************************************************/
-GApplication::GApplication(std::string name)
+GApplication::GApplication(const std::string& name, const std::string& version)
 {
     // Initialise private members for clean destruction
     init_members();
     
-    // Set application name
-    m_name = name;
+    // Set application name and version
+    m_name    = name;
+    m_version = version;
 
     // Save the execution start time
     time(&m_tstart);
-  
+
+    // Initialise application parameters
+    m_pars.load(parfilename());
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Application constructor
+ *
+ * @param[in] name Application name.
+ * @param[in] version Application version.
+ * @param[in] argc Number of command line arguments
+ * @param[in] argv Command line arguments
+ ***************************************************************************/
+GApplication::GApplication(const std::string& name, const std::string& version,
+                           int argc, char *argv[])
+{
+    // Initialise private members for clean destruction
+    init_members();
+    
+    // Set application name and version
+    m_name    = name;
+    m_version = version;
+
+    // Save the execution start time
+    time(&m_tstart);
+    
+    // Save arguments as vector of strings
+    for (int i=0; i < argc; ++i)
+        m_args.push_back(argv[i]);
+
+    // Initialise application parameters
+    m_pars.load(parfilename(), m_args);
+    std::cout << m_pars << std::endl;
+
     // Return
     return;
 }
@@ -92,6 +133,9 @@ GApplication::GApplication(const GApplication& app)
  ***************************************************************************/
 GApplication::~GApplication(void)
 {
+    // Save application parameters
+    m_pars.save(parfilename());
+
     // Free members
     free_members();
 
@@ -149,6 +193,16 @@ std::string GApplication::name(void) const
 
 
 /***********************************************************************//**
+ * @brief Return application version
+ ***************************************************************************/
+std::string GApplication::version(void) const
+{
+    // Return version
+    return m_version;
+}
+
+
+/***********************************************************************//**
  * @brief Return application elapsed time in CPU seconds
  ***************************************************************************/
 double GApplication::telapse(void) const
@@ -178,6 +232,9 @@ void GApplication::init_members(void)
 {
     // Initialise members
     m_name.clear();
+    m_version.clear();
+    m_args.clear();
+    m_tstart = 0;
   
     // Return
     return;
@@ -187,13 +244,15 @@ void GApplication::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] c Object from which members which should be copied.
+ * @param[in] app Object from which members which should be copied.
  ***************************************************************************/
 void GApplication::copy_members(const GApplication& app)
 {
     // Copy attributes
-    m_name   = app.m_name;
-    m_tstart = app.m_tstart;
+    m_name    = app.m_name;
+    m_version = app.m_version;
+    m_args    = app.m_args;
+    m_tstart  = app.m_tstart;
     
     // Return
     return;
@@ -207,6 +266,16 @@ void GApplication::free_members(void)
 {
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns parameter filename
+ ***************************************************************************/
+std::string GApplication::parfilename(void) const
+{
+    // Return
+    return (m_name+".par");
 }
 
 
@@ -226,6 +295,17 @@ std::ostream& operator<< (std::ostream& os, const GApplication& app)
 {
     // Put object in stream
     os << "=== GApplication ===" << std::endl;
+    os << " Name ......................: " << app.name() << std::endl;
+    os << " Version ...................: " << app.version();
+    for (int i=0; i < app.m_args.size(); ++i) {
+        if (i == 0)
+            os << std::endl << " Command ...................: " << app.m_args[i];
+        else if (i == 1)
+            os << std::endl << " Arguments .................: " << app.m_args[i];
+        else
+            os << std::endl << "                              " << app.m_args[i];
+    }
+  
 
     // Return output stream
     return os;

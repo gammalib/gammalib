@@ -21,7 +21,11 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <time.h>
+#include <vector>
+#include <string>
 #include <iostream>
+#include "GLog.hpp"
+#include "GPars.hpp"
 
 
 /***********************************************************************//**
@@ -37,7 +41,9 @@ class GApplication {
 public:
     // Constructors and destructors
     GApplication(void);
-    GApplication(std::string name);
+    GApplication(const std::string& name, const std::string& version);
+    GApplication(const std::string& name, const std::string& version,
+                 int argc, char* argv[]);
     GApplication(const GApplication& app);
     ~GApplication(void);
  
@@ -46,19 +52,23 @@ public:
 
     // Methods
     std::string name(void) const;
+    std::string version(void) const;
     double      telapse(void) const;
   
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GApplication& app);
-    void free_members(void);
+    void        init_members(void);
+    void        copy_members(const GApplication& app);
+    void        free_members(void);
+    std::string parfilename(void) const;
 
     // Protected data members
-    std::string     m_name;          //!< Name
-    time_t          m_tstart;        //!< Start time of execution
-    time_t          m_tstop;         //!< Stop time of execution
-
+    std::string              m_name;       //!< Application name
+    std::string              m_version;    //!< Application version
+    std::vector<std::string> m_args;       //!< Command line arguments
+    time_t                   m_tstart;     //!< Start time of execution
+    GLog                     m_logger;     //!< Application logger
+    GPars                    m_pars;       //!< Application parameters
 };
 
 #endif /* GAPPLICATION_HPP */
