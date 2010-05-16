@@ -18,11 +18,10 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <sstream>
-#include "GTools.hpp"
 #include <cmath>
-#include <string>
 #include <algorithm>
 #include <cctype>
+#include "GTools.hpp"
 
 
 /***********************************************************************//**
@@ -32,6 +31,7 @@
  ***************************************************************************/
 std::string strip_whitespace(const std::string& arg)
 {
+/*
     // Return empty string if argument is empty
     if (arg.empty())
         return arg;
@@ -42,6 +42,33 @@ std::string strip_whitespace(const std::string& arg)
 
     // If there is only whitespace in string then return empty string.
     // Otherwise strip off whitespace
+    std::string result;
+    if (start <= stop)
+        result = arg.substr(start, stop-start+1);
+*/
+    // Return result
+    return (strip_chars(arg, " "));
+}
+
+
+/***********************************************************************//**
+ * @brief Strip leading and trailing character from string
+ *
+ * @param[in] arg String from which character should be stripped.
+ * @param[in] chars Character(s) to be stripped.
+ ***************************************************************************/
+std::string strip_chars(const std::string& arg, const std::string& chars)
+{
+    // Return empty string if argument is empty
+    if (arg.empty())
+        return arg;
+
+    // Get start and stop
+    std::string::size_type start = arg.find_first_not_of(chars);
+    std::string::size_type stop  = arg.find_last_not_of(chars);
+
+    // If there is nothing else than the characters to be stripped in string
+    // then return an empty string. Otherwise strip off characters.
     std::string result;
     if (start <= stop)
         result = arg.substr(start, stop-start+1);
@@ -113,6 +140,36 @@ std::string tolower(const std::string& arg)
     std::string s = arg;
     std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) tolower);
     return s;
+}
+
+
+/***********************************************************************//**
+ * @brief Split string
+ *
+ * @param[in] s String to be splitted.
+ * @param[in] sep Separator(s).
+ ***************************************************************************/
+std::vector<std::string> split(const std::string& s, const std::string& sep)
+{
+    // Allocate result string vector
+    std::vector<std::string> result;
+    
+    // Initialise counters
+    size_t pos = 0;
+    size_t len = s.size();
+    
+    // Loop over string
+    while (pos < len && pos != std::string::npos) {
+        size_t index = s.find_first_of(sep, pos);
+        size_t n     = std::string::npos;
+        if (index != std::string::npos)
+            n = index-pos;
+        result.push_back(s.substr(pos, n));
+        pos = (index != std::string::npos) ? index + 1 : std::string::npos;
+    } // endwhile: there were still characters in the string
+    
+    // Return result
+    return result;
 }
 
 
