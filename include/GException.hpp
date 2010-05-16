@@ -15,9 +15,6 @@
 #define GEXCEPTION_HPP
 
 /* __ Includes ___________________________________________________________ */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include <string>                             // string
 #include <sstream>                            // ostringstream
 #include <stdexcept>                          // exception
@@ -238,81 +235,99 @@ public:
         rsp_invalid_type(std::string origin, std::string type);
     };
 
-    // General GSkymap error
+
+    // GSkymap exceptions
     class skymap : public GExceptionHandler {
     public:
         skymap(std::string origin, std::string message = "");
     };
-
-    // Invalid sky map parameter
     class skymap_bad_par : public GExceptionHandler {
     public:
         skymap_bad_par(std::string origin, int par, std::string message = "");
     };
-
-    // Incompatible data size
     class skymap_bad_size : public GExceptionHandler {
     public:
         skymap_bad_size(std::string origin, int size, int expected,
                         std::string message = "");
     };
-
-    // Bad image dimension
     class skymap_bad_ctype : public GExceptionHandler {
     public:
         skymap_bad_ctype(std::string origin, std::string ctype1,
                          std::string ctype2, std::string message = "");
     };
-
-    // Bad image dimension
     class skymap_bad_image_dim : public GExceptionHandler {
     public:
         skymap_bad_image_dim(std::string origin, int naxis,
                              std::string message = "");
     };
 
-    // General GWcs error
+
+    // GWcs exceptions
     class wcs : public GExceptionHandler {
     public:
         wcs(std::string origin, std::string message = "");
     };
-
-    // Invalid WCS
     class wcs_invalid : public GExceptionHandler {
     public:
         wcs_invalid(std::string origin, std::string wcs, 
                     std::string message = "");
     };
-
-    // Coordinate system invalid
     class wcs_bad_coords : public GExceptionHandler {
     public:
         wcs_bad_coords(std::string origin, std::string coordsys);
     };
-
-    // No projection function declared
     class wcs_no_proj_fct : public GExceptionHandler {
     public:
         wcs_no_proj_fct(std::string origin, std::string message = "");
     };
-
-    // WCS Healpix resolution invalid
     class wcs_hpx_bad_nside : public GExceptionHandler {
     public:
         wcs_hpx_bad_nside(std::string origin, int nside);
     };
-
-    // Healpix pixel ordering invalid
     class wcs_hpx_bad_ordering : public GExceptionHandler {
     public:
         wcs_hpx_bad_ordering(std::string origin, std::string ordering);
     };
+
+
+    // Application exceptions
+    class par_file_not_found : public GExceptionHandler {
+    public:
+        par_file_not_found(std::string origin, std::string filename,
+                           std::string message = "");
+    };
+    class par_file_open_error : public GExceptionHandler {
+    public:
+        par_file_open_error(std::string origin, std::string filename,
+                            std::string message = "");
+    };
+    class home_not_found : public GExceptionHandler {
+    public:
+        home_not_found(std::string origin, std::string message = "");
+    };
+    class could_not_create_pfiles : public GExceptionHandler {
+    public:
+        could_not_create_pfiles(std::string origin, std::string home,
+                                std::string message = "");
+    };
+    class pfiles_not_accessible : public GExceptionHandler {
+    public:
+        pfiles_not_accessible(std::string origin, std::string home,
+                              std::string message = "");
+    };
+    class par_file_syntax_error : public GExceptionHandler {
+    public:
+        par_file_syntax_error(std::string origin, std::string home,
+                              std::string message = "");
+    };
+
 
     // Invalid object release
     class gradient_par_mismatch : public GExceptionHandler {
     public:
         gradient_par_mismatch(std::string origin, int nsize, int npars);
     };
+
 
 };
 
