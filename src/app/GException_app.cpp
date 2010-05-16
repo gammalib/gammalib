@@ -143,3 +143,44 @@ GException::par_file_syntax_error::par_file_syntax_error(std::string origin,
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Error encountered in parameter definition
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::par_error::par_error(std::string origin, std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Invalid command line parameter
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] arg Command line argument.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::bad_cmdline_argument::bad_cmdline_argument(std::string origin,
+                                                       std::string arg,
+                                                       std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    if (message.length() > 0)
+        m_message = "Invalid command line parameter encountered ("+message+
+                    "): "+arg;
+    else
+        m_message = "Invalid command line parameter encountered: "+arg;
+
+    // Return
+    return;
+}

@@ -17,7 +17,11 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GApplication.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -99,11 +103,17 @@ GApplication::GApplication(const std::string& name, const std::string& version,
     
     // Save arguments as vector of strings
     for (int i=0; i < argc; ++i)
-        m_args.push_back(argv[i]);
+        m_args.push_back(strip_whitespace(argv[i]));
 
     // Initialise application parameters
     m_pars.load(parfilename(), m_args);
+    
+    // DUMMY FOR TESTING
     std::cout << m_pars << std::endl;
+    std::string value = m_pars.par("chatter")->value();
+    std::cout << value << std::endl;
+    value = m_pars.par("clobber")->value();
+    std::cout << value << std::endl;
 
     // Return
     return;

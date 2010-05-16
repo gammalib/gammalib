@@ -320,6 +320,15 @@ public:
         par_file_syntax_error(std::string origin, std::string home,
                               std::string message = "");
     };
+    class par_error : public GExceptionHandler {
+    public:
+        par_error(std::string origin, std::string message = "");
+    };
+    class bad_cmdline_argument : public GExceptionHandler {
+    public:
+        bad_cmdline_argument(std::string origin, std::string arg,
+                             std::string message = "");
+    };
 
 
     // Invalid object release
