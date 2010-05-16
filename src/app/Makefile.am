@@ -6,7 +6,11 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/src/support
 
 # Define sources for this directory
-sources = GApplication.cpp
+sources = GApplication.cpp \
+          GLog.cpp \
+          GPars.cpp \
+          GPar.cpp \
+          GException_app.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libapp.la
