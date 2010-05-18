@@ -291,7 +291,6 @@ void GPars::save(const std::string& filename)
     std::string path = outpath(filename);
     if (path.size() == 0)
         throw GException::par_file_not_found(G_SAVE, filename);
-printf("%s\n", path.c_str());
 
     // Update parameter file
     update();
