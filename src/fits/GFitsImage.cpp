@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GFitsImage.cpp  - FITS image class                     *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -350,11 +350,11 @@ void GFitsImage::load_image(int datatype, const void* pixels, const void* nulval
         }
         status = __ffgsv(&m_fitsfile, datatype, fpixel, lpixel, inc, (void*)nulval,
                          (void*)pixels, anynul, &status);
-        if (status != 0)
-            throw GException::fits_error(G_LOAD_IMAGE, status);
         delete [] fpixel;
         delete [] lpixel;
         delete [] inc;
+        if (status != 0)
+            throw GException::fits_error(G_LOAD_IMAGE, status);
     }
 
     // Return
