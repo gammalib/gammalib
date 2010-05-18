@@ -21,9 +21,11 @@
 #include <config.h>
 #endif
 #include "GApplication.hpp"
+#include "GException.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_PAR                                "GApplication::par(std::string)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -48,7 +50,7 @@ GApplication::GApplication(void)
 
     // Save the execution start time
     time(&m_tstart);
-  
+
     // Return
     return;
 }
@@ -64,7 +66,7 @@ GApplication::GApplication(const std::string& name, const std::string& version)
 {
     // Initialise private members for clean destruction
     init_members();
-    
+
     // Set application name and version
     m_name    = name;
     m_version = version;
@@ -74,7 +76,7 @@ GApplication::GApplication(const std::string& name, const std::string& version)
 
     // Initialise application parameters
     m_pars.load(parfilename());
-    
+
     // Return
     return;
 }
@@ -93,27 +95,20 @@ GApplication::GApplication(const std::string& name, const std::string& version,
 {
     // Initialise private members for clean destruction
     init_members();
-    
+
     // Set application name and version
     m_name    = name;
     m_version = version;
 
     // Save the execution start time
     time(&m_tstart);
-    
+
     // Save arguments as vector of strings
-    for (int i=0; i < argc; ++i)
+    for (int i = 0; i < argc; ++i)
         m_args.push_back(strip_whitespace(argv[i]));
 
     // Initialise application parameters
     m_pars.load(parfilename(), m_args);
-    
-    // DUMMY FOR TESTING
-    std::cout << m_pars << std::endl;
-    std::string value = m_pars.par("chatter")->value();
-    std::cout << value << std::endl;
-    value = m_pars.par("clobber")->value();
-    std::cout << value << std::endl;
 
     // Return
     return;
@@ -126,7 +121,7 @@ GApplication::GApplication(const std::string& name, const std::string& version,
  * @param[in] app Object from which the instance should be built.
  ***************************************************************************/
 GApplication::GApplication(const GApplication& app)
-{ 
+{
     // Initialise private members for clean destruction
     init_members();
 
@@ -166,7 +161,7 @@ GApplication::~GApplication(void)
  * @param[in] app Object which should be assigned.
  ***************************************************************************/
 GApplication& GApplication::operator= (const GApplication& app)
-{ 
+{
     // Execute only if object is not identical
     if (this != &app) {
 
@@ -180,7 +175,7 @@ GApplication& GApplication::operator= (const GApplication& app)
         copy_members(app);
 
     } // endif: object was not identical
-  
+
     // Return
     return *this;
 }
@@ -220,12 +215,36 @@ double GApplication::telapse(void) const
     // Get actual time
     time_t acttime;
     time(&acttime);
-    
+
     // Compute elapsed time
     double telapse = difftime(acttime, m_tstart);
 
     // Return elapsed time
     return telapse;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to application parameter
+ *
+ * @param[in] name Parameter to be returned.
+ *
+ * @exception GException::par_error
+ *            Parameter not found..
+ ***************************************************************************/
+GPar* GApplication::par(const std::string& name)
+{
+    // Get pointer to application parameter
+    GPar* ptr = m_pars.par(name);
+
+    // Throw exception if parameter does not exist
+    if (ptr == NULL) {
+        throw GException::par_error(G_PAR, "Parameter '"+name+"' not found "
+                                    "in parameter file.");
+    }
+
+    // Return pointer
+    return ptr;
 }
 
 
@@ -245,7 +264,7 @@ void GApplication::init_members(void)
     m_version.clear();
     m_args.clear();
     m_tstart = 0;
-  
+
     // Return
     return;
 }
@@ -263,7 +282,7 @@ void GApplication::copy_members(const GApplication& app)
     m_version = app.m_version;
     m_args    = app.m_args;
     m_tstart  = app.m_tstart;
-    
+
     // Return
     return;
 }
@@ -315,7 +334,6 @@ std::ostream& operator<< (std::ostream& os, const GApplication& app)
         else
             os << std::endl << "                              " << app.m_args[i];
     }
-  
 
     // Return output stream
     return os;
