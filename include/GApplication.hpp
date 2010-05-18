@@ -46,7 +46,7 @@ public:
                  int argc, char* argv[]);
     GApplication(const GApplication& app);
     ~GApplication(void);
- 
+
     // Operators
     GApplication& operator= (const GApplication& app);
 
@@ -54,7 +54,8 @@ public:
     std::string name(void) const;
     std::string version(void) const;
     double      telapse(void) const;
-  
+    GPar*       par(const std::string& name);
+
 protected:
     // Protected methods
     void        init_members(void);

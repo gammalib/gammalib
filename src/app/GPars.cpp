@@ -73,7 +73,7 @@ GPars::GPars(const std::string& filename)
 {
     // Initialise private members for clean destruction
     init_members();
-    
+
     // Load parameters
     load(filename);
 
@@ -91,7 +91,7 @@ GPars::GPars(const std::string& filename, const std::vector<std::string>& args)
 {
     // Initialise private members for clean destruction
     init_members();
-    
+
     // Load parameters
     load(filename, args);
 
@@ -106,7 +106,7 @@ GPars::GPars(const std::string& filename, const std::vector<std::string>& args)
  * @param[in] pars Object from which the instance should be built.
  ***************************************************************************/
 GPars::GPars(const GPars& pars)
-{ 
+{
     // Initialise private members for clean destruction
     init_members();
 
@@ -143,7 +143,7 @@ GPars::~GPars(void)
  * @param[in] pars Object which should be assigned.
  ***************************************************************************/
 GPars& GPars::operator= (const GPars& pars)
-{ 
+{
     // Execute only if object is not identical
     if (this != &pars) {
 
@@ -157,7 +157,7 @@ GPars& GPars::operator= (const GPars& pars)
         copy_members(pars);
 
     } // endif: object was not identical
-  
+
     // Return
     return *this;
 }
@@ -183,15 +183,15 @@ void GPars::load(const std::string& filename)
 {
     // Reset parameters
     m_parfile.clear();
-    
+
     // Get path to parameter file for input
     std::string path = inpath(filename);
-    if (path.size() == 0)
+    if (path.length() == 0)
         throw GException::par_file_not_found(G_LOAD1, filename);
 
     // Read parfile
     read(path);
-    
+
     // Parse parfile
     parse();
 
@@ -222,7 +222,7 @@ void GPars::load(const std::string& filename,
 
     // Get path to parameter file for input
     std::string path = inpath(filename);
-    if (path.size() == 0)
+    if (path.length() == 0)
         throw GException::par_file_not_found(G_LOAD2, filename);
 
     // Read parfile
@@ -230,10 +230,10 @@ void GPars::load(const std::string& filename,
 
     // Parse parfile
     parse();
-    
+
     // Overwrite parameter values that are specified in the command line
     for (int i = 1; i < args.size(); ++i) {
-        
+
         // Extract parameter name and value
         size_t pos = args[i].find("=");
         if (pos == std::string::npos)
@@ -247,13 +247,13 @@ void GPars::load(const std::string& filename,
         if (value.length() < 1)
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],
                                        "no parameter value after '='");
-        
+
         // Get pointer to parameter
         GPar* ptr = par(name);
         if (ptr == NULL)
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],
                                   "invalid parameter name '"+name+"'");
-        
+
         // Assign value
         try {
             ptr->value(value);
@@ -261,7 +261,7 @@ void GPars::load(const std::string& filename,
         catch (GException::par_error &e) {
             throw GException::bad_cmdline_argument(G_LOAD2, args[i]);
         }
-        
+
         // Set mode to hidden to prevent querying the parameter
         if (ptr->mode() == "q")
             ptr->mode("h");
@@ -269,7 +269,7 @@ void GPars::load(const std::string& filename,
             ptr->mode("hl");
         else if (ptr->mode() == "lq")
             ptr->mode("lh");
-    
+
     } // endfor: looped over all parameters
 
     // Return
@@ -291,6 +291,7 @@ void GPars::save(const std::string& filename)
     std::string path = outpath(filename);
     if (path.size() == 0)
         throw GException::par_file_not_found(G_SAVE, filename);
+printf("%s\n", path.c_str());
 
     // Update parameter file
     update();
@@ -314,7 +315,7 @@ GPar* GPars::par(const std::string& name)
 {
     // Initialise parameter pointer
     GPar* ptr = NULL;
-    
+
     // Search for parameter
     for (int i = 0; i < m_pars.size(); ++i) {
         if (m_pars[i].m_name == name) {
@@ -322,7 +323,7 @@ GPar* GPars::par(const std::string& name)
             break;
         }
     } // endfor: looped over parameters
-    
+
     // Return pointer
     return ptr;
 }
@@ -342,8 +343,11 @@ void GPars::init_members(void)
     // Initialise members
     m_parfile.clear();
     m_pars.clear();
+    m_line.clear();
+    m_vstart.clear();
+    m_vstop.clear();
     m_mode = "h";
-  
+
     // Return
     return;
 }
@@ -359,8 +363,11 @@ void GPars::copy_members(const GPars& pars)
     // Copy attributes
     m_parfile = pars.m_parfile;
     m_pars    = pars.m_pars;
+    m_line    = pars.m_line;
+    m_vstart  = pars.m_vstart;
+    m_vstop   = pars.m_vstop;
     m_mode    = pars.m_mode;
-    
+
     // Return
     return;
 }
@@ -370,7 +377,7 @@ void GPars::copy_members(const GPars& pars)
  * @brief Delete class members
  ***************************************************************************/
 void GPars::free_members(void)
-{    
+{
     // Return
     return;
 }
@@ -394,31 +401,31 @@ std::string GPars::inpath(const std::string& filename) const
 {
     // Allocate result path
     std::string path;
-    
+
     // Search for parameter file in PFILES directories
     char* ptr = getenv("PFILES");
     if (ptr != NULL) {
-    
+
         // Extract directories from PFILES environment variable
         std::string              pfiles = ptr;
         std::vector<std::string> dirs   = split(pfiles, ":;");
-        
+
         // Search for first occurence of parameter file
         for (int i = 0; i < dirs.size(); ++i) {
-        
+
             // Build filename
             std::string fname = dirs[i] + "/" + filename;
-            
+
             // If file is accessible for reading then exit loop
             if (access(fname.c_str(), R_OK) == 0) {
                 path = fname;
                 break;
             }
-            
+
         } // endfor: searched all directories given in PFILES
-        
+
     } // endif: PFILES directory has been found
-    
+
     // If we have no valid path so far then search in users pfiles
     // directory
     if (path.size() == 0) {
@@ -441,7 +448,7 @@ std::string GPars::inpath(const std::string& filename) const
                 path = fname;
         }
     }
-    
+
     // If we have no valid path so far then search file within GammaLib
     // package (${prefix}/syspfiles)
     #ifdef PACKAGE_PREFIX
@@ -452,9 +459,9 @@ std::string GPars::inpath(const std::string& filename) const
             path = fname;
     }
     #endif
-    
+
     //printf("parfile=%s\n", path.c_str());
-    
+
     // Return path
     return path;
 }
@@ -479,40 +486,40 @@ std::string GPars::inpath(const std::string& filename) const
  ***************************************************************************/
 std::string GPars::outpath(const std::string& filename) const
 {
-    // Allocate result path
+   // Allocate result path
     std::string path;
-    
+
     // Search for writeable PFILES directories
     char* ptr = getenv("PFILES");
     if (ptr != NULL) {
-    
+
         // Extract directories from PFILES environment variable
         std::string              pfiles = ptr;
         std::vector<std::string> dirs   = split(pfiles, ":;");
-        
+
         // Search for first writeable
         for (int i = 0; i < dirs.size(); ++i) {
-        
+
             // If directory is accessible for writing then exit loop
             if (access(dirs[i].c_str(), W_OK) == 0) {
-                path = dirs[i] + filename;
+                path = dirs[i] + "/" + filename;
                 break;
             }
-            
+
         }
     } // endif: PFILES environment variable exists
-    
+
     // If no valid directory is found in PFILES environment variable then 
     // use pfiles directory in users home directory.
     if (path.size() == 0) {
-    
+
         // Get users home directory
         uid_t uid         = geteuid();
         gid_t gid         = getegid();
         struct passwd* pw = getpwuid(uid);
         if (pw == NULL)
             throw GException::home_not_found(G_OUTPATH);
-        
+
         // Set path
         path = std::string(pw->pw_dir) + "/pfiles";
 
@@ -522,7 +529,7 @@ std::string GPars::outpath(const std::string& filename) const
                 S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0)
                 throw GException::could_not_create_pfiles(G_OUTPATH, path);
         }
-        
+
         // If directory exists but is not writable then make it writable
         else if (access(path.c_str(), W_OK) != 0) {
             if (chown(path.c_str(), uid, gid) != 0 ||
@@ -557,16 +564,16 @@ void GPars::read(const std::string& filename)
     // Allocate line buffer
     const int n = 1000; 
     char  line[n];
-    
+
     // Open parameter file
     FILE* fptr = fopen(filename.c_str(), "r");
     if (fptr == NULL)
         throw GException::par_file_open_error(G_READ, filename);
-    
+
     // Read lines
     while (fgets(line, n, fptr) != NULL)
         m_parfile.push_back(std::string(line));
-    
+
     // Close file
     fclose(fptr);
 
@@ -590,16 +597,16 @@ void GPars::write(const std::string& filename) const
     // Allocate line buffer
     const int n = 1000; 
     char  line[n];
-    
+
     // Open parameter file
     FILE* fptr = fopen(filename.c_str(), "w");
     if (fptr == NULL)
         throw GException::par_file_open_error(G_WRITE, filename);
-    
+
     // Write lines
     for (int i = 0; i < m_parfile.size(); ++i)
         fprintf(fptr, "%s", m_parfile[i].c_str());
-    
+
     // Close file
     fclose(fptr);
 
@@ -626,17 +633,17 @@ void GPars::parse(void)
 {
     // Preset effective mode to 'hidden'
     m_mode = "h";
-    
+
     // Parse all lines
     for (int i = 0; i < m_parfile.size(); ++i) {
-    
+
         // Get line without any leading and trailing whitespace
         std::string line = strip_whitespace(m_parfile[i]);
-        
+
         // If line is empty of if line starts with # then skip the line
         if (line.length() == 0 || line[0] == '#')
             continue;
-        
+
         // Get the 7 text fields of valid a parameter line
         std::string fields[7];
         int         quotes = 0;
@@ -646,11 +653,11 @@ void GPars::parse(void)
         size_t      vstart = 0;
         size_t      vstop  = 0;
         for (size_t pos = 0; pos < line.length(); ++pos) {
-        
+
             // Toggle quotes
             if (line[pos] == '"')
                 quotes = 1-quotes;
-            
+
             // Search for comma only if we are outside quotes. If comma is
             // found or end of line is reached then extract a field and start
             // searching again from the position following the comma. Strip
@@ -670,9 +677,9 @@ void GPars::parse(void)
                     index++;
                 }
             }
-            
+
         } // endfor: looped over line
-        
+
         // Throw an error if quotes are not balanced
         if (quotes != 0)
             throw GException::par_file_syntax_error(G_PARSE, 
@@ -690,7 +697,7 @@ void GPars::parse(void)
             throw GException::par_file_syntax_error(G_PARSE, 
                                                     strip_chars(line,"\n"),
                           "redefiniton of parameter name '"+fields[0]+"'");
-        
+
         // Add parameter
         try {
             m_pars.push_back(GPar(fields[0], fields[1], fields[2],
@@ -705,7 +712,7 @@ void GPars::parse(void)
                                                     strip_chars(line,"\n"),
                                                                  e.what());
         }
-        
+
         // If parameter name is mode then store the effective mode
         if (fields[0] == "mode") {
             if (fields[3] != "h"  && fields[3] != "q" &&
@@ -716,15 +723,15 @@ void GPars::parse(void)
                        "mode parameter has invalid value '"+fields[3]+"'");
             m_mode = fields[3];
         }
-    
+
     } // endfor: looped over lines
-    
+
     // Set effective mode for all parameters that have mode 'auto'
     for (int i = 0; i < m_pars.size(); ++i) {
         if (m_pars[i].mode() == "a")
             m_pars[i].mode(m_mode);
     }
-    
+
     // Return
     return;
 }
@@ -743,7 +750,7 @@ void GPars::update(void)
 {
     // Loop over all parameters
     for (int i = 0; i < m_pars.size(); ++i) {
-    
+
         // Update only if requested and allowed
         if (m_pars[i].m_update && m_pars[i].is_learn()) {
             m_parfile[m_line[i]] = m_parfile[m_line[i]].substr(0, m_vstart[i]) +
@@ -751,9 +758,9 @@ void GPars::update(void)
                                    m_parfile[m_line[i]].substr(m_vstop[i]);
             m_vstop[i] = m_vstart[i] + m_pars[i].m_value.length();
         }
-        
+
     } // endfor: looped over all parameters
-    
+
     // Return
     return;
 }
