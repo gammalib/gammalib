@@ -68,7 +68,7 @@ GPar::GPar(const std::string& name, const std::string& type,
 {
     // Initialise private members for clean destruction
     init_members();
-    
+
     // Set parameter attributes
     m_name = name;
     this->mode(mode);
@@ -89,7 +89,7 @@ GPar::GPar(const std::string& name, const std::string& type,
  * @param[in] par Object from which the instance should be built.
  ***************************************************************************/
 GPar::GPar(const GPar& par)
-{ 
+{
     // Initialise private members for clean destruction
     init_members();
 
@@ -126,7 +126,7 @@ GPar::~GPar(void)
  * @param[in] par Object which should be assigned.
  ***************************************************************************/
 GPar& GPar::operator= (const GPar& par)
-{ 
+{
     // Execute only if object is not identical
     if (this != &par) {
 
@@ -140,7 +140,7 @@ GPar& GPar::operator= (const GPar& par)
         copy_members(par);
 
     } // endif: object was not identical
-  
+
     // Return
     return *this;
 }
@@ -201,7 +201,7 @@ void GPar::value(const std::string& value)
 {
     // Verify that valie is valid
     check_value(value);
-    
+
     // Set mode
     m_value  = value;
 
@@ -250,7 +250,7 @@ std::string GPar::value(void)
 {
     // Query parameter
     query();
-    
+
     // Return value
     return m_value;
 }
@@ -294,7 +294,7 @@ bool GPar::is_learn(void) const
     // Assign result
     bool result = (m_mode == "hl" || m_mode == "ql" || m_mode == "lh" || 
                    m_mode == "lq");
-    
+
     // Return result
     return result;
 }
@@ -307,7 +307,7 @@ bool GPar::is_query(void) const
 {
     // Assign result
     bool result = (m_mode == "q" || m_mode == "ql" || m_mode == "lq");
-    
+
     // Return result
     return result;
 }
@@ -333,7 +333,7 @@ void GPar::init_members(void)
     m_min.clear();
     m_max.clear();
     m_prompt.clear();
-  
+
     // Return
     return;
 }
@@ -355,7 +355,7 @@ void GPar::copy_members(const GPar& par)
     m_min    = par.m_min;
     m_max    = par.m_max;
     m_prompt = par.m_prompt;
-    
+
     // Return
     return;
 }
@@ -388,7 +388,7 @@ void GPar::check_type(const std::string& type) const
         type != "fn")
         throw GException::par_error(G_CHECK_TYPE, 
                                     "invalid parameter type '"+type+"'");
-    
+
     // Return
     return;
 }
@@ -408,7 +408,7 @@ void GPar::check_mode(const std::string& mode) const
         mode != "ql" && mode != "lh" && mode != "lq")
         throw GException::par_error(G_CHECK_MODE, 
                                     "invalid parameter mode '"+mode+"'");
-    
+
     // Return
     return;
 }
@@ -456,12 +456,12 @@ void GPar::check_value_bool(const std::string& value) const
 {
     // Turn value to lower case for testing
     std::string lvalue = tolower(value);
-    
+
     // Test for validity
     if (lvalue != "y" && lvalue != "yes" && lvalue != "n" && lvalue != "no")
         throw GException::par_error(G_CHECK_VALUE_BOOL,
                         "invalid Boolean value '"+value+"'; use y/n/yes/no");
-    
+
     // Return
     return;
 }
@@ -478,7 +478,7 @@ void GPar::check_value_bool(const std::string& value) const
 void GPar::check_value_int(const std::string& value) const
 {
     int ivalue = toint(value);
-    printf(">>> %d\n", ivalue);
+    printf("GPar::check_value_int: %d\n", ivalue);
 
     // Return
     return;
@@ -542,7 +542,7 @@ void GPar::query(void)
 {
     // Continue only if parameter has query mode
     if (is_query()) {
-    
+
         // Dump prompt string
         std::string prompt = m_prompt;
         if (m_min.length() > 0 && m_max.length() > 0)
@@ -553,7 +553,7 @@ void GPar::query(void)
             prompt += " ("+m_max+")";
         prompt += " ["+m_value+"] ";
         std::cout << prompt;
-        
+
         // Get value
 /*
         #ifdef HAVE_LIBREADLINE
@@ -567,7 +567,7 @@ void GPar::query(void)
         char line[1000];
         std::cin.getline(line, 1000);
         std::string value = std::string(line);
-        
+
         // Update value if value is not the default
         if (value.length() > 0) {
             m_value  = value;
