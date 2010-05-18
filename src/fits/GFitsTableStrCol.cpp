@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GFitsTableStrCol.cpp  - FITS table string column class         *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,10 +9,12 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
@@ -317,7 +319,7 @@ std::string* GFitsTableStrCol::data(void)
  * Allows the specification of the FITS table NULL string. If the string
  * is empty the data will not be screened for NULL values.
  ***************************************************************************/
-void GFitsTableStrCol::set_nullval(const std::string string)
+void GFitsTableStrCol::set_nullval(const std::string& string)
 {
     // If NULL string is empty then reset the NULL string
     if (string.empty()) {

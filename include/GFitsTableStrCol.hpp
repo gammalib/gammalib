@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GFitsTableStrCol.hpp  - FITS table string column class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008 by Jurgen Knodlseder                                *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -53,7 +53,7 @@ public:
     double       real(const int& row, const int& col = 0);
     int          integer(const int& row, const int& col = 0);
     std::string* data(void);
-    void         set_nullval(const std::string string);
+    void         set_nullval(const std::string& string);
 
 private:
     // Private methods
