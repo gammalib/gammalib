@@ -593,10 +593,6 @@ void GPars::read(const std::string& filename)
  ***************************************************************************/
 void GPars::write(const std::string& filename) const
 {
-    // Allocate line buffer
-    const int n = 1000; 
-    char  line[n];
-
     // Open parameter file
     FILE* fptr = fopen(filename.c_str(), "w");
     if (fptr == NULL)
