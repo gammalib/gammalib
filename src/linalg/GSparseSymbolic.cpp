@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GSparseSymbolic.cpp  -  sparse matrix symbolic analysis class       *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2010         by Jurgen Knodlseder                   *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,6 +12,9 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GSparseSymbolic.hpp"
 
 /* __ Macros _____________________________________________________________ */
@@ -83,95 +86,80 @@ GSparseSymbolic::~GSparseSymbolic()
  ***************************************************************************/
 GSparseSymbolic& GSparseSymbolic::operator= (const GSparseSymbolic& s)
 { 
-  // Execute only if object is not identical
-  if (this != &s) {
+    // Execute only if object is not identical
+    if (this != &s) {
 
-    // De-allocate only if memory has indeed been allocated
-    if (m_pinv     != NULL) delete [] m_pinv;
-    if (m_q        != NULL) delete [] m_q;
-    if (m_parent   != NULL) delete [] m_parent;
-    if (m_cp       != NULL) delete [] m_cp;
-    if (m_leftmost != NULL) delete [] m_leftmost;
+      // De-allocate only if memory has indeed been allocated
+      if (m_pinv     != NULL) delete [] m_pinv;
+      if (m_q        != NULL) delete [] m_q;
+      if (m_parent   != NULL) delete [] m_parent;
+      if (m_cp       != NULL) delete [] m_cp;
+      if (m_leftmost != NULL) delete [] m_leftmost;
 
-    // Initialise private members for clean destruction
-    m_n_pinv     = 0;
-    m_n_q        = 0;
-    m_n_parent   = 0;
-    m_n_cp       = 0;
-    m_n_leftmost = 0;
-    m_pinv       = NULL;
-    m_q          = NULL;
-    m_parent     = NULL;
-    m_cp         = NULL;
-    m_leftmost   = NULL;
-    m_m2         = 0;
-    m_lnz        = 0.0;
-    m_unz        = 0.0;
+      // Initialise private members for clean destruction
+      m_n_pinv     = 0;
+      m_n_q        = 0;
+      m_n_parent   = 0;
+      m_n_cp       = 0;
+      m_n_leftmost = 0;
+      m_pinv       = NULL;
+      m_q          = NULL;
+      m_parent     = NULL;
+      m_cp         = NULL;
+      m_leftmost   = NULL;
+      m_m2         = 0;
+      m_lnz        = 0.0;
+      m_unz        = 0.0;
 
-    // Copy data members
-    m_m2  = s.m_m2;
-    m_lnz = s.m_lnz;
-    m_unz = s.m_unz;
+      // Copy data members
+      m_m2  = s.m_m2;
+      m_lnz = s.m_lnz;
+      m_unz = s.m_unz;
 	
-	// Copy m_pinv array if it exists
-	if (s.m_pinv != NULL && s.m_n_pinv > 0) {
-	  m_pinv = new int[s.m_n_pinv];
-	  if (m_pinv == NULL)
-	    throw GException::mem_alloc("GSparseSymbolic::operator= (const GSparseSymbolic&)", 
-					    s.m_n_pinv);
-      for (int i = 0; i < s.m_n_pinv; ++i)
-        m_pinv[i] = s.m_pinv[i];
-	  m_n_pinv = s.m_n_pinv;
-	}
+	  // Copy m_pinv array if it exists
+	  if (s.m_pinv != NULL && s.m_n_pinv > 0) {
+	      m_pinv = new int[s.m_n_pinv];
+          for (int i = 0; i < s.m_n_pinv; ++i)
+              m_pinv[i] = s.m_pinv[i];
+	      m_n_pinv = s.m_n_pinv;
+	  }
 
-	// Copy m_q array if it exists
-	if (s.m_q != NULL && s.m_n_q > 0) {
-	  m_q = new int[s.m_n_q];
-	  if (m_q == NULL)
-	    throw GException::mem_alloc("GSparseSymbolic::operator= (const GSparseSymbolic&)", 
-					    s.m_n_q);
-      for (int i = 0; i < s.m_n_q; ++i)
-        m_q[i] = s.m_q[i];
-	  m_n_q = s.m_n_q;
-	}
+	  // Copy m_q array if it exists
+	  if (s.m_q != NULL && s.m_n_q > 0) {
+	      m_q = new int[s.m_n_q];
+          for (int i = 0; i < s.m_n_q; ++i)
+              m_q[i] = s.m_q[i];
+	      m_n_q = s.m_n_q;
+      }
 
-	// Copy m_parent array if it exists
-	if (s.m_parent != NULL && s.m_n_parent > 0) {
-	  m_parent = new int[s.m_n_parent];
-	  if (m_parent == NULL)
-	    throw GException::mem_alloc("GSparseSymbolic::operator= (const GSparseSymbolic&)", 
-					    s.m_n_parent);
-      for (int i = 0; i < s.m_n_parent; ++i)
-        m_parent[i] = s.m_parent[i];
-	  m_n_parent = s.m_n_parent;
-	}
+      // Copy m_parent array if it exists
+	  if (s.m_parent != NULL && s.m_n_parent > 0) {
+	      m_parent = new int[s.m_n_parent];
+          for (int i = 0; i < s.m_n_parent; ++i)
+              m_parent[i] = s.m_parent[i];
+	      m_n_parent = s.m_n_parent;
+	  }
 
-	// Copy m_cp array if it exists
-	if (s.m_cp != NULL && s.m_n_cp > 0) {
-	  m_cp = new int[s.m_n_cp];
-	  if (m_cp == NULL)
-	    throw GException::mem_alloc("GSparseSymbolic::operator= (const GSparseSymbolic&)", 
-					    s.m_n_cp);
-      for (int i = 0; i < s.m_n_cp; ++i)
-        m_cp[i] = s.m_cp[i];
-	  m_n_cp = s.m_n_cp;
-	}
+	  // Copy m_cp array if it exists
+	  if (s.m_cp != NULL && s.m_n_cp > 0) {
+	      m_cp = new int[s.m_n_cp];
+          for (int i = 0; i < s.m_n_cp; ++i)
+              m_cp[i] = s.m_cp[i];
+	      m_n_cp = s.m_n_cp;
+	  }
 
-	// Copy m_leftmost array if it exists
-	if (s.m_leftmost != NULL && s.m_n_leftmost > 0) {
-	  m_leftmost = new int[s.m_n_leftmost];
-	  if (m_leftmost == NULL)
-	    throw GException::mem_alloc("GSparseSymbolic::operator= (const GSparseSymbolic&)", 
-					    s.m_n_leftmost);
-      for (int i = 0; i < s.m_n_leftmost; ++i)
-        m_leftmost[i] = s.m_leftmost[i];
-	  m_n_leftmost = s.m_n_leftmost;
-	}
+	  // Copy m_leftmost array if it exists
+	  if (s.m_leftmost != NULL && s.m_n_leftmost > 0) {
+	      m_leftmost = new int[s.m_n_leftmost];
+          for (int i = 0; i < s.m_n_leftmost; ++i)
+              m_leftmost[i] = s.m_leftmost[i];
+	      m_n_leftmost = s.m_n_leftmost;
+	  }
 
-  } // endif: object was not identical
+    } // endif: object was not identical
 
-  // Return
-  return *this;
+    // Return
+    return *this;
 }
 
 
@@ -306,11 +294,9 @@ void GSparseSymbolic::cholesky_symbolic_analysis(int order,
   // Delete workspace
   if (post != NULL) delete [] post;
   
-  // Allocate column pointers for Cholesky decomposition
-  m_n_cp = n+1;
-  m_cp   = new int[m_n_cp];
-  if (m_cp == NULL)
-	throw GException::mem_alloc("GSparseSymbolic::cs_schol(int, GSparseMatrix*)", m_n_cp);
+    // Allocate column pointers for Cholesky decomposition
+    m_n_cp = n+1;
+    m_cp   = new int[m_n_cp];
 
   // Find column pointers for L
   m_unz = m_lnz = cs_cumsum(m_cp, c, n);
@@ -496,16 +482,12 @@ int* GSparseSymbolic::cs_amd(int order, const GSparseMatrix* A)
   int* Cp  = C.m_colstart;
   int  cnz = Cp[n];
 
-  // Allocate result array
-  int* P = new int[n+1];
-  if (P == NULL)
-	throw GException::mem_alloc("GSparseSymbolic::cs_amd (int, GSparseMatrix*)", n+1);
+    // Allocate result array
+    int* P = new int[n+1];
 
-  // Allocate workspace
-  int  wrk_size = 8*(n+1);
-  int* wrk_int  = new int[wrk_size];
-  if (wrk_int == NULL)
-	throw GException::mem_alloc("GSparseSymbolic::cs_amd (int, GSparseMatrix*)", wrk_size);
+    // Allocate workspace
+    int  wrk_size = 8*(n+1);
+    int* wrk_int  = new int[wrk_size];
 
   // Add elbow room to C  
   int elbow_room = cnz/5 + 2*n;           // Request additional # of elements
@@ -958,31 +940,24 @@ int* GSparseSymbolic::cs_amd(int order, const GSparseMatrix* A)
 int* GSparseSymbolic::cs_counts(const GSparseMatrix* A, const int* parent, 
                                 const int* post, int ata)
 {
-  // Declare loop variables
-  int i, j, k, J, p, q, jleaf;
+    // Declare loop variables
+    int i, j, k, J, p, q, jleaf;
 
-  // Return NULL pointer if input arrays are NULL or sparse matrix is
-  // empty
-  if (!parent || !post) return NULL;
+    // Return NULL pointer if input arrays are NULL or sparse matrix is
+    // empty
+    if (!parent || !post) return NULL;
 
-  // Assign input matrix attributes
-  int m = A->m_rows;
-  int n = A->m_cols;
+    // Assign input matrix attributes
+    int m = A->m_rows;
+    int n = A->m_cols;
   
-  // Allocate result
-  int* colcount = new int[n];
-  if (colcount == NULL)
-	throw GException::mem_alloc(
-	      "GSparseSymbolic::cs_counts(GSparseMatrix*, const int*, const int*, int)", 
-	      n);
-  int* delta = colcount;
+    // Allocate result
+    int* colcount = new int[n];
+    int* delta = colcount;
 
-  // Allocate workspace
-  int  wrk_size = 4*n + (ata ? (n+m+1) : 0);
-  int* wrk_int  = new int[wrk_size];
-  if (wrk_int == NULL)
-	throw GException::mem_alloc("GSparseSymbolic::cs_counts(GSparseMatrix*, const int*, const int*, int)", 
-	                wrk_size);
+    // Allocate workspace
+    int  wrk_size = 4*n + (ata ? (n+m+1) : 0);
+    int* wrk_int  = new int[wrk_size];
 
   // Get (logical) transpose of A: AT = A'
   GSparseMatrix AT = cs_transpose(*A, 0);
@@ -1059,23 +1034,19 @@ int* GSparseSymbolic::cs_counts(const GSparseMatrix* A, const int* parent,
  ***************************************************************************/
 int* GSparseSymbolic::cs_etree(const GSparseMatrix* A, int ata)
 {
-  // Declare loop variables
-  int i, k, p;
+    // Declare loop variables
+    int i, k, p;
 
-  // Assign matrix attributes
-  int m = A->m_rows;
-  int n = A->m_cols;
+    // Assign matrix attributes
+    int m = A->m_rows;
+    int n = A->m_cols;
 
-  // Allocate result array
-  int* parent = new int[n];
-  if (parent == NULL)
-	throw GException::mem_alloc("GSparseSymbolic::cs_etree(GSparseMatrix*, int)", n);
+    // Allocate result array
+    int* parent = new int[n];
 
-  // Allocate workspace
-  int  wrk_size = n + (ata ? m : 0);
-  int* wrk_int  = new int[wrk_size];
-  if (wrk_int == NULL)
-	throw GException::mem_alloc("GSparseSymbolic::cs_etree(GSparseMatrix*, int)", wrk_size);
+    // Allocate workspace
+    int  wrk_size = n + (ata ? m : 0);
+    int* wrk_int  = new int[wrk_size];
 
   // Set-up pointers to workspace. If 'ata=1' then we use also a prev array
   int* ancestor = wrk_int;
@@ -1238,20 +1209,18 @@ int GSparseSymbolic::cs_leaf(int i, int j, const int *first, int *maxfirst,
  ***************************************************************************/
 int* GSparseSymbolic::cs_pinv(int const *p, int n)
 {
-  // Return NULL pointer if input pointer is NULL. This denotes identity
-  if (!p || n < 1) return NULL;
+    // Return NULL pointer if input pointer is NULL. This denotes identity
+    if (!p || n < 1) return NULL;
   
-  // Allocate result array
-  int* pinv = new int[n];
-  if (pinv == NULL)
-	throw GException::mem_alloc("GSparseSymbolic::cs_pinv", n);
+    // Allocate result array
+    int* pinv = new int[n];
   
-  // Invert the permutation
-  for (int k = 0; k < n; ++k) 
-    pinv[p[k]] = k;
+    // Invert the permutation
+    for (int k = 0; k < n; ++k) 
+        pinv[p[k]] = k;
   
-  // Return result
-  return pinv;
+    // Return result
+    return pinv;
 }
 
 
@@ -1265,19 +1234,15 @@ int* GSparseSymbolic::cs_pinv(int const *p, int n)
  ***************************************************************************/
 int* GSparseSymbolic::cs_post(const int* parent, int n)
 {
-  // Return NULL pointer if input pointer is NULL
-  if (!parent || n < 1) return (NULL);
+    // Return NULL pointer if input pointer is NULL
+    if (!parent || n < 1) return (NULL);
 
-  // Allocate result array
-  int* post = new int[n];
-  if (post == NULL)
-	throw GException::mem_alloc("GSparseSymbolic::cs_post(const int*, int)", n);
+    // Allocate result array
+    int* post = new int[n];
 
-  // Allocate workspace
-  int  wrk_size = 3 * n;
-  int* wrk_int  = new int[wrk_size];
-  if (wrk_int == NULL)
-	throw GException::mem_alloc("GSparseSymbolic::cs_post(const int*, int)", wrk_size);
+    // Allocate workspace
+    int  wrk_size = 3 * n;
+    int* wrk_int  = new int[wrk_size];
 
   // Set-up pointers to workspace
   int* head  = wrk_int;
@@ -1453,17 +1418,14 @@ int GSparseSymbolic::cs_diag(int i, int j, double aij, void* other)
  ***************************************************************************/
 int GSparseSymbolic::cs_wclear(int mark, int lemax, int* w, int n)
 {
-  // Declare loop variables
-  int k;
+    // ...
+    if (mark < 2 || (mark + lemax < 0)) {
+	    for (int k = 0; k < n; k++) if (w[k] != 0) w[k] = 1;
+        mark = 2;
+    }
   
-  // ...
-  if (mark < 2 || (mark + lemax < 0)) {
-	for (k = 0; k < n; k++) if (w[k] != 0) w[k] = 1;
-    mark = 2;
-  }
-  
-  // Return mark. At this point, w[0..n-1] < mark holds
-  return (mark);
+    // Return mark. At this point, w[0..n-1] < mark holds
+    return mark;
 }
 
 

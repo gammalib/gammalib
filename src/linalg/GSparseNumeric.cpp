@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GSparseNumeric.cpp  -  sparse matrix numeric analysis class        *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,6 +12,9 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GSparseNumeric.hpp"
 
 /* __ Macros _____________________________________________________________ */
@@ -71,65 +74,51 @@ GSparseNumeric::~GSparseNumeric()
  ***************************************************************************/
 GSparseNumeric& GSparseNumeric::operator= (const GSparseNumeric& n)
 { 
-  // Execute only if object is not identical
-  if (this != &n) {
+    // Execute only if object is not identical
+    if (this != &n) {
 
-    // De-allocate only if memory has indeed been allocated
-    if (m_L    != NULL) delete m_L;
-    if (m_U    != NULL) delete m_U;
-    if (m_pinv != NULL) delete [] m_pinv;
-    if (m_B    != NULL) delete [] m_B;
+        // De-allocate only if memory has indeed been allocated
+        if (m_L    != NULL) delete m_L;
+        if (m_U    != NULL) delete m_U;
+        if (m_pinv != NULL) delete [] m_pinv;
+        if (m_B    != NULL) delete [] m_B;
 
-    // Initialise private members for clean destruction
-    m_L      = NULL;
-    m_U      = NULL;
-    m_pinv   = NULL;
-    m_B      = NULL;
-    m_n_pinv = 0;
-    m_n_B    = 0;
+        // Initialise private members for clean destruction
+        m_L      = NULL;
+        m_U      = NULL;
+        m_pinv   = NULL;
+        m_B      = NULL;
+        m_n_pinv = 0;
+        m_n_B    = 0;
 
-	// Copy m_L if it exists
-	if (n.m_L != NULL) {
-	  m_L = new GSparseMatrix(*n.m_L);
-	  if (m_L == NULL)
-	    throw GException::mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
-					    1);
-	}
+	    // Copy m_L if it exists
+	    if (n.m_L != NULL)
+	        m_L = new GSparseMatrix(*n.m_L);
 
-	// Copy m_U if it exists
-	if (n.m_U != NULL) {
-	  m_U = new GSparseMatrix(*n.m_U);
-	  if (m_U == NULL)
-	    throw GException::mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
-					    1);
-	}
+	    // Copy m_U if it exists
+	    if (n.m_U != NULL)
+	        m_U = new GSparseMatrix(*n.m_U);
 	
-	// Copy m_pinv array if it exists
-	if (n.m_pinv != NULL && n.m_n_pinv > 0) {
-	  m_pinv = new int[n.m_n_pinv];
-	  if (m_pinv == NULL)
-	    throw GException::mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
-					    n.m_n_pinv);
-      for (int i = 0; i < n.m_n_pinv; ++i)
-        m_pinv[i] = n.m_pinv[i];
-	  m_n_pinv = n.m_n_pinv;
-	}
+	    // Copy m_pinv array if it exists
+	    if (n.m_pinv != NULL && n.m_n_pinv > 0) {
+	        m_pinv = new int[n.m_n_pinv];
+            for (int i = 0; i < n.m_n_pinv; ++i)
+                m_pinv[i] = n.m_pinv[i];
+	        m_n_pinv = n.m_n_pinv;
+	    }
 
-	// Copy m_B array if it exists
-	if (n.m_B != NULL && n.m_n_B > 0) {
-	  m_B = new double[n.m_n_B];
-	  if (m_B == NULL)
-	    throw GException::mem_alloc("GSparseNumeric::operator= (const GSparseNumeric&)", 
-					    n.m_n_B);
-      for (int i = 0; i < n.m_n_B; ++i)
-        m_B[i] = n.m_B[i];
-	  m_n_B = n.m_n_B;
-	}
+	    // Copy m_B array if it exists
+	    if (n.m_B != NULL && n.m_n_B > 0) {
+	        m_B = new double[n.m_n_B];
+            for (int i = 0; i < n.m_n_B; ++i)
+                m_B[i] = n.m_B[i];
+	        m_n_B = n.m_n_B;
+	    }
 
-  } // endif: object was not identical
+    } // endif: object was not identical
 
-  // Return
-  return *this;
+    // Return
+    return *this;
 }
 
 
@@ -175,21 +164,13 @@ void GSparseNumeric::cholesky_numeric_analysis(const GSparseMatrix& A,
   // Assign input matrix attributes
   int n = A.m_cols;
 
-  // Allocate int workspace
-  int  wrk_size = 2*n;
-  int* wrk_int  = new int[wrk_size];
-  if (wrk_int == NULL)
-	throw GException::mem_alloc(
-	      "GSparseNumeric::cholesky_numeric_analysis(GSparseMatrix&, const GSparseSymbolic&)",
-          wrk_size);
+    // Allocate int workspace
+    int  wrk_size = 2*n;
+    int* wrk_int  = new int[wrk_size];
 
-  // Allocate double workspace
-  wrk_size = n;
-  double* wrk_double = new double[wrk_size];
-  if (wrk_double == NULL)
-	throw GException::mem_alloc(
-	      "GSparseNumeric::cholesky_numeric_analysis(GSparseMatrix&, const GSparseSymbolic&)",
-          wrk_size);
+    // Allocate double workspace
+    wrk_size = n;
+    double* wrk_double = new double[wrk_size];
 
   // Assign pointers
   int* cp     = S.m_cp;
@@ -209,12 +190,8 @@ void GSparseNumeric::cholesky_numeric_analysis(const GSparseMatrix& A,
   int*    Ci = C.m_rowinx; 
   double* Cx = C.m_data;
   
-  // Allocate L matrix
-  m_L = new GSparseMatrix(n, n, cp[n]);
-  if (m_L == NULL)
-	throw GException::mem_alloc(
-	      "GSparseNumeric::cholesky_numeric_analysis(GSparseMatrix&, const GSparseSymbolic&)",
-		  1);
+    // Allocate L matrix
+    m_L = new GSparseMatrix(n, n, cp[n]);
 
   // Assign L matrix pointers 
   int*    Lp = m_L->m_colstart;
