@@ -25,6 +25,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GVector.hpp"
 #include "GSparseMatrix.hpp"
 #include "GSparseSymbolic.hpp"
@@ -560,8 +563,6 @@ void GSparseMatrix::add_col(const double* values, const int* rows,
     int     wrk_size   = number + i_stop - i_start;
     double* wrk_double = new double[wrk_size];
     int*    wrk_int    = new int[wrk_size];
-    if (wrk_double == NULL || wrk_int == NULL)
-      throw GException::mem_alloc(G_ADD_COL2, wrk_size);
 
     // Mix matrix column with specified data
     int num_mix;
@@ -622,8 +623,6 @@ void GSparseMatrix::cholesky_decompose(int compress)
 
   // Allocate symbolic analysis object
   GSparseSymbolic* symbolic = new GSparseSymbolic();
-  if (symbolic == NULL)
-    throw GException::mem_alloc(G_CHOL_DECOMP, 1);
 
   // Declare numeric analysis object. We don't allocate one since we'll
   // throw it away at the end of the function (the L matrix will be copied
@@ -680,10 +679,10 @@ void GSparseMatrix::cholesky_decompose(int compress)
 GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
 {
     // Declare loop variables
-    int row;
-    int col;
-    int c_row;
-    int c_col;
+//    int row;
+//    int col;
+//    int c_row;
+//    int c_col;
 
     // Dump header
     #if defined(G_DEBUG_SPARSE_COMPRESSION)
@@ -734,14 +733,14 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
             x.m_data[symbolic->m_pinv[i]] = v.m_data[i];  
 
         // Inplace solve L\x=x
-        for (col = 0; col < m_cols; ++col) {                // loop over columns
+        for (int col = 0; col < m_cols; ++col) {            // loop over columns
             x.m_data[col] /= Lx[Lp[col]];                   // divide by diag.
             for (int p = Lp[col]+1; p < Lp[col+1]; p++)     // loop over elements
                 x.m_data[Li[p]] -= Lx[p] * x.m_data[col];
         }
 
         // Inplace solve L'\x=x
-        for (col = m_cols-1; col >= 0; --col) {             // loop over columns
+        for (int col = m_cols-1; col >= 0; --col) {         // loop over columns
             for (int p = Lp[col]+1; p < Lp[col+1]; p++)     // loop over elements
                 x.m_data[col] -= Lx[p] * x.m_data[Li[p]];
                 x.m_data[col] /= Lx[Lp[col]];
@@ -764,18 +763,18 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
         // matrix rows. An entry of -1 indicates that the row should be dropped.
         // If no selection exists then setup an identity map.
         if (row_compressed) {
-            for (row = 0; row < m_rows; ++row)
+            for (int row = 0; row < m_rows; ++row)
                 row_map[row] = -1;
-            for (c_row = 0; c_row < m_num_rowsel; ++c_row)
+            for (int c_row = 0; c_row < m_num_rowsel; ++c_row)
                 row_map[m_rowsel[c_row]] = c_row;
         }
         else {
-            for (row = 0; row < m_rows; ++row)
+            for (int row = 0; row < m_rows; ++row)
                 row_map[row] = row;
         }
         #if defined(G_DEBUG_SPARSE_COMPRESSION)
         std::cout << " Row mapping ......:";
-        for (row = 0; row < m_rows; ++row)
+        for (int row = 0; row < m_rows; ++row)
             std::cout << " " << row_map[row];
         std::cout << std::endl;
         #endif
@@ -784,18 +783,18 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
         // matrix columns. An entry of -1 indicates that the column should be dropped
         // If no selection exists then setup an identity map.
         if (col_compressed) {
-            for (col = 0; col < m_cols; ++col)
+            for (int col = 0; col < m_cols; ++col)
                 col_map[col] = -1;
-            for (c_col = 0; c_col < m_num_colsel; ++c_col)
+            for (int c_col = 0; c_col < m_num_colsel; ++c_col)
                 col_map[m_colsel[c_col]] = c_col;
         }
         else {
-            for (col = 0; col < m_cols; ++col)
+            for (int col = 0; col < m_cols; ++col)
                 col_map[col] = col;
         }
         #if defined(G_DEBUG_SPARSE_COMPRESSION)
         std::cout << " Column mapping ...:";
-        for (col = 0; col < m_cols; ++col)
+        for (int col = 0; col < m_cols; ++col)
             std::cout << " " << col_map[col];
         std::cout << std::endl;
         #endif
@@ -805,7 +804,7 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
 
         // Compress input vector v -> c_v if required
         if (m_rowsel != NULL && m_num_rowsel < m_rows) {
-            for (c_row = 0; c_row < m_num_rowsel; ++c_row)
+            for (int c_row = 0; c_row < m_num_rowsel; ++c_row)
                 x.m_data[c_row] = v.m_data[m_rowsel[c_row]];
         }
         else
@@ -822,11 +821,13 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
 
         // Inplace solve L\x=x. The column and row maps are just use to see which
         // columns or rows should be skipped in the calculations.
-        for (col = 0; col < m_cols; ++col) {                  // loop over columns
-            if ((c_col = col_map[col]) >= 0) {                // use only non-zero cols
+        for (int col = 0; col < m_cols; ++col) {              // loop over columns
+            int c_col = col_map[col];
+            if (c_col >= 0) {                                 // use only non-zero cols
                 x.m_data[c_col] /= Lx[Lp[col]];               // divide by diag.
                 for (int p = Lp[col]+1; p < Lp[col+1]; p++) { // loop over elements
-                    if ((c_row = row_map[Li[p]]) >= 0)        // use only non-zero rows
+                    int c_row = row_map[Li[p]];
+                    if (c_row >= 0)                           // use only non-zero rows
                         x.m_data[c_row] -= Lx[p] * x.m_data[c_col];
                 }
             }
@@ -837,10 +838,12 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
 
         // Inplace solve L'\x=x. The column and row maps are just use to see which
         // columns or rows should be skipped in the calculations.
-        for (col = m_cols-1; col >= 0; --col) {               // loop over columns
-            if ((c_col = col_map[col]) >= 0) {                // use only non-zero cols
+        for (int col = m_cols-1; col >= 0; --col) {           // loop over columns
+            int c_col = col_map[col];
+            if (c_col >= 0) {                                 // use only non-zero cols
                 for (int p = Lp[col]+1; p < Lp[col+1]; p++) { // loop over elements
-                    if ((c_row = row_map[Li[p]]) >= 0)        // use only non-zero rows
+                    int c_row = row_map[Li[p]];
+                    if (c_row >= 0)                           // use only non-zero rows
                         x.m_data[c_col] -= Lx[p] * x.m_data[c_row];
                 }
                 x.m_data[c_col] /= Lx[Lp[col]];
@@ -859,7 +862,7 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
         // If column compression has been performed the expand the result vector
         // accordingly
         if (m_colsel != NULL && m_num_colsel < m_cols) {
-            for (c_col = 0; c_col < m_num_colsel; ++c_col)
+            for (int c_col = 0; c_col < m_num_colsel; ++c_col)
                 result.m_data[m_colsel[c_col]] = x.m_data[c_col];
         }
         else
@@ -1333,35 +1336,27 @@ double GSparseMatrix::max() const
  ***************************************************************************/
 void GSparseMatrix::stack_init(int size, int entries)
 {
-  // Free exisiting stack
-  free_stack_members();
+    // Free exisiting stack
+    free_stack_members();
 
-  // Initialise stack members
-  init_stack_members();
-  m_stack_max_entries = (entries > 0) ? entries : m_cols;
-  m_stack_size        = (size    > 0) ? size    : G_SPARSE_MATRIX_DEFAULT_STACK_SIZE;
+    // Initialise stack members
+    init_stack_members();
+    m_stack_max_entries = (entries > 0) ? entries : m_cols;
+    m_stack_size        = (size    > 0) ? size    : G_SPARSE_MATRIX_DEFAULT_STACK_SIZE;
 
-  // Allocate stack memory. Raise an exception if allocation fails
-  m_stack_colinx = new int[m_stack_max_entries];
-  m_stack_start  = new int[m_stack_max_entries+1];
-  m_stack_data   = new double[m_stack_size];
-  m_stack_rowinx = new int[m_stack_size];
-  m_stack_work   = new int[m_cols];
-  m_stack_buffer = new double[m_cols];
-  if (m_stack_colinx == NULL)
-    throw GException::mem_alloc(G_STACK_INIT, m_stack_max_entries);
-  if (m_stack_start == NULL)
-    throw GException::mem_alloc(G_STACK_INIT, m_stack_max_entries+1);
-  if (m_stack_data == NULL || m_stack_rowinx == NULL)
-    throw GException::mem_alloc(G_STACK_INIT, m_stack_size);
-  if (m_stack_work == NULL || m_stack_buffer == NULL)
-    throw GException::mem_alloc(G_STACK_INIT, m_cols);
+    // Allocate stack memory. Raise an exception if allocation fails
+    m_stack_colinx = new int[m_stack_max_entries];
+    m_stack_start  = new int[m_stack_max_entries+1];
+    m_stack_data   = new double[m_stack_size];
+    m_stack_rowinx = new int[m_stack_size];
+    m_stack_work   = new int[m_cols];
+    m_stack_buffer = new double[m_cols];
 
-  // Initialise next free stack location to the first stack element
-  m_stack_start[0] = 0;
+    // Initialise next free stack location to the first stack element
+    m_stack_start[0] = 0;
 
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
@@ -1666,12 +1661,10 @@ void GSparseMatrix::stack_flush(void)
   cout << " New elements ............: " << new_elements << endl;
   #endif
 
-  // Allocate memory for new matrix (always keep some elbow room)
-  m_alloc = elements + m_mem_block;
-  double* new_data   = new double[m_alloc];
-  int*    new_rowinx = new int[m_alloc];
-  if (new_data == NULL || new_rowinx == NULL)
-    throw GException::mem_alloc(G_STACK_FLUSH, m_alloc);
+    // Allocate memory for new matrix (always keep some elbow room)
+    m_alloc = elements + m_mem_block;
+    double* new_data   = new double[m_alloc];
+    int*    new_rowinx = new int[m_alloc];
 
   // Fill new matrix. For this purpose we loop over all matrix columns
   // and perform the operation that was identified in the previous scan
@@ -2178,11 +2171,9 @@ void GSparseMatrix::alloc_elements(int start, int num)
       int new_propose = m_alloc + m_mem_block;
       m_alloc = (new_size > new_propose) ? new_size : new_propose;
 
-      // Allocate memory for new elements
-      double* new_data   = new double[m_alloc];
-      int*    new_rowinx = new int[m_alloc];
-      if (new_data == NULL || new_rowinx == NULL)
-        throw GException::mem_alloc(G_ALLOC, m_alloc);
+        // Allocate memory for new elements
+        double* new_data   = new double[m_alloc];
+        int*    new_rowinx = new int[m_alloc];
 
       // Copy all elements before index to insert
       #if defined(G_USE_MEMCPY)
@@ -2279,11 +2270,9 @@ void GSparseMatrix::free_elements(int start, int num)
          // Shrink, but leave a memory block for possible future filling
          m_alloc = new_size + m_mem_block;
 
-         // Allocate new memory
-         double* new_data   = new double[m_alloc];
-         int*    new_rowinx = new int[m_alloc];
-         if (new_data == NULL || new_rowinx == NULL)
-           throw GException::mem_alloc(G_FREE, m_alloc);
+           // Allocate new memory
+           double* new_data   = new double[m_alloc];
+           int*    new_rowinx = new int[m_alloc];
 
          // Copy all elements before the starting index
          #if defined(G_USE_MEMCPY)
@@ -2377,10 +2366,8 @@ void GSparseMatrix::remove_zero_row_col(void)
   if (m_num_rowsel < 1 || m_num_colsel < 1)
     throw GException::matrix_zero(G_REMOVE_ZERO);
 
-  // Allocate row mapping array
-  int* row_map = new int[m_rows];
-  if (row_map == NULL)
-    throw GException::mem_alloc(G_REMOVE_ZERO, m_rows);
+    // Allocate row mapping array
+    int* row_map = new int[m_rows];
 
   // Setup row mapping array that maps original matrix rows into compressed
   // matrix rows. An entry of -1 indicates that the row should be dropped
@@ -2781,13 +2768,11 @@ GSparseMatrix cs_symperm(const GSparseMatrix& m, const int* pinv)
   // Allocate result matrix
   GSparseMatrix C(n, n, Ap[n]);
 
-  // Allocate and initialise workspace
-  int  wrk_size = n;
-  int* wrk_int  = new int[wrk_size];
-  if (wrk_int == NULL)
-    throw GException::mem_alloc(G_SYMPERM, wrk_size);
-  for (i = 0; i < wrk_size; ++i)
-    wrk_int[i] = 0;
+    // Allocate and initialise workspace
+    int  wrk_size = n;
+    int* wrk_int  = new int[wrk_size];
+    for (i = 0; i < wrk_size; ++i)
+        wrk_int[i] = 0;
 
   // Assign result matrix attributes
   int*    Cp = C.m_colstart;
@@ -2852,16 +2837,14 @@ GSparseMatrix cs_symperm(const GSparseMatrix& m, const int* pinv)
  ***************************************************************************/
 GSparseMatrix cs_transpose(const GSparseMatrix& m, int values)
 {
-  // Declare and allocate result matrix 
-  GSparseMatrix result(m.m_cols, m.m_rows, m.m_elements);
+    // Declare and allocate result matrix 
+    GSparseMatrix result(m.m_cols, m.m_rows, m.m_elements);
 
-  // Allocate and initialise workspace
-  int  wrk_size = m.m_rows;
-  int* wrk_int  = new int[wrk_size];
-  if (wrk_int == NULL)
-    throw GException::mem_alloc(G_TRANSPOSE, wrk_size);
-  for (int i = 0; i < wrk_size; i++) 
-    wrk_int[i] = 0;
+    // Allocate and initialise workspace
+    int  wrk_size = m.m_rows;
+    int* wrk_int  = new int[wrk_size];
+    for (int i = 0; i < wrk_size; i++) 
+        wrk_int[i] = 0;
 
   // Setup the number of non-zero elements in each row
   for (int p = 0; p < m.m_elements; p++) 
