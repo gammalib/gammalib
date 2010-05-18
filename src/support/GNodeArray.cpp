@@ -230,7 +230,6 @@ void GNodeArray::set_value(const double& value)
         else {
             int low  = 0;
             int high = m_nodes - 1;
-            int mid  = 0;
             while ((high - low) > 1) {
                 int mid = (low+high) / 2;
                 if (m_node[mid] > value)
