@@ -32,6 +32,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GLog.hpp \
 		     GPars.hpp \
 		     GPar.hpp \
+		     GLATEventAtom.hpp \
                      GLATObservation.hpp \
                      GLATEventList.hpp \
                      GLATEventCube.hpp \

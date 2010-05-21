@@ -105,6 +105,9 @@
  *                      Instrument specific services                       *
  ***************************************************************************/
 
+/* __ CTA specific code __________________________________________________ */
+#include "GCTAEventAtom.hpp"
+
 /* __ Fermi/LAT specific code ____________________________________________ */
 #include "GLATObservation.hpp"
 #include "GLATEventList.hpp"
