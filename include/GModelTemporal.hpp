@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelTemporal.hpp  -  Abstract temporal model base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GModelPar.hpp"
+#include "GTime.hpp"
 
 
 /***********************************************************************//**
@@ -45,8 +46,8 @@ public:
     // Virtual methods
     virtual int        npars(void) const = 0;
     virtual GModelPar* par(int index) const = 0;
-    virtual double     eval(double* time) = 0;
-    virtual double     eval_gradients(double* time) = 0;
+    virtual double     eval(GTime* time) = 0;
+    virtual double     eval_gradients(GTime* time) = 0;
   
 protected:
     // Protected methods

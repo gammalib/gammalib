@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelTemporalConst.hpp  -  Temporal constant model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -22,6 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GModelPar.hpp"
 #include "GModelTemporal.hpp"
+#include "GTime.hpp"
 
 
 /***********************************************************************//**
@@ -49,8 +50,8 @@ public:
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
-    double     eval(double* time);
-    double     eval_gradients(double* time);
+    double     eval(GTime* time);
+    double     eval_gradients(GTime* time);
   
 protected:
     // Protected methods
