@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectralPlaw.cpp  -  Spectral power law model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GModelSpectralPlaw.cpp
@@ -18,6 +17,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <math.h>
 #include "GException.hpp"
 #include "GModelSpectralPlaw.hpp"
@@ -165,11 +167,14 @@ GModelPar* GModelSpectralPlaw::par(int index) const
  * @brief Evaluate function
  *
  * @param[in] energy Energy at which the function is to be computed.
+ *
+ * TODO: For the moment the pivot energy is fixed to units of MeV. This may
+ * not be ideal and should eventually be improved in the futur.
  ***************************************************************************/
-double GModelSpectralPlaw::eval(double* energy)
+double GModelSpectralPlaw::eval(GEnergy* energy)
 {
     // Compute function value
-    double e     = *energy/m_pivot.value();
+    double e     = (energy->MeV())/m_pivot.value();
     double p     = pow(e, m_index.value());
     double value = m_norm.value() * p;
 
@@ -181,12 +186,15 @@ double GModelSpectralPlaw::eval(double* energy)
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] energy Energy at which the function and gradients are to be computed.
+ * @param[in] energy Energy at which function and gradients are computed.
+ *
+ * TODO: For the moment the pivot energy is fixed to units of MeV. This may
+ * not be ideal and should eventually be improved in the futur.
  ***************************************************************************/
-double GModelSpectralPlaw::eval_gradients(double* energy)
+double GModelSpectralPlaw::eval_gradients(GEnergy* energy)
 {
     // Compute function value
-    double e     = *energy/m_pivot.value();
+    double e     = (energy->MeV())/m_pivot.value();
     double p     = pow(e, m_index.value());
     double value = m_norm.value() * p;
 
@@ -208,7 +216,7 @@ double GModelSpectralPlaw::eval_gradients(double* energy)
 
         // Compute index gradient
         if (m_index.isfree()) {
-            double g = m_norm.value() * p * log(*energy);
+            double g = m_norm.value() * p * log(energy->MeV());
             m_index.gradient(g);
         }
         else
