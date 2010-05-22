@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModels.hpp  -  Model container class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,6 +25,8 @@
 #include "GModel.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
 
 
 /***********************************************************************//**
@@ -48,8 +50,8 @@ public:
 
     // Methods
     void   add(const GModel& model);
-    double eval(GSkyDir* dir, double* energy, double* time);
-    double eval_gradients(GSkyDir* dir, double* energy, double* time);
+    double eval(GSkyDir* dir, GEnergy* energy, GTime* time);
+    double eval_gradients(GSkyDir* dir, GEnergy* energy, GTime* time);
   
 protected:
     // Protected methods

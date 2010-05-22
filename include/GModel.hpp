@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GModel.hpp  -  Model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -26,6 +26,8 @@
 #include "GModelSpectral.hpp"
 #include "GModelTemporal.hpp"
 #include "GSkyDir.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
 
 
 /***********************************************************************//**
@@ -56,8 +58,8 @@ public:
     void        name(const std::string& name) { m_name=name; return; }
     int         npars(void) const { return m_npars; }
     GModelPar*  par(int index) const;
-    double      eval(GSkyDir* dir, double* energy, double* time);
-    double      eval_gradients(GSkyDir* dir, double* energy, double* time);
+    double      eval(GSkyDir* dir, GEnergy* energy, GTime* time);
+    double      eval_gradients(GSkyDir* dir, GEnergy* energy, GTime* time);
   
 protected:
     // Protected methods
