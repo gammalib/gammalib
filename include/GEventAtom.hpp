@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GEventAtom.hpp  -  Event atom abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,6 +21,8 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GEvent.hpp"
+#include "GTime.hpp"
+#include "GEnergy.hpp"
 #include "GSkyDir.hpp"
 #include "GModels.hpp"
 #include "GVector.hpp"
@@ -55,8 +57,8 @@ public:
     // Implemented methods
     double   counts(void) const { return 1.0; }
     GSkyDir* dir(void) { return &m_dir; }
-    double*  energy(void) { return &m_energy; }
-    double*  time(void) { return &m_time; }
+    GEnergy* energy(void) { return &m_energy; }
+    GTime*   time(void) { return &m_time; }
     bool     isatom(void) const { return true; }
     bool     isbin(void) const { return false; }
     
@@ -68,8 +70,8 @@ protected:
     virtual GEventAtom* clone(void) const = 0;
 
     // Protected data area
-    double  m_time;                //!< Event time (TO BE REPLACED BY GTime)
-	double  m_energy;              //!< Event energy (MeV)
+    GTime   m_time;                //!< Event time
+	GEnergy m_energy;              //!< Event energy
     GSkyDir m_dir;                 //!< Arrivial direction
 
 private:

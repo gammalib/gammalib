@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GEventAtom.cpp  -  Event atom abstract base class           *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,6 +18,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include <iomanip.h>
 #include "GException.hpp"
@@ -135,8 +138,8 @@ GEventAtom& GEventAtom::operator= (const GEventAtom& atom)
 void GEventAtom::init_members(void)
 {
     // Initialise attributes
-    m_time   = 0.0;
-    m_energy = 0.0;
+    m_time.mjd(0.0);
+    m_energy.MeV(0.0);
     m_dir.radec(0.0, 0.0);
 
     // Return

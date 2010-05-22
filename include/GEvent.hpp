@@ -23,6 +23,8 @@
 #include "GModels.hpp"
 #include "GVector.hpp"
 #include "GSkyDir.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
 
 
 /***********************************************************************//**
@@ -49,8 +51,8 @@ public:
     virtual double   model(GModels& models) = 0;
     virtual double   model(GModels& models, GVector* gradient) = 0;
     virtual GSkyDir* dir(void) = 0;
-    virtual double*  energy(void) = 0;
-    virtual double*  time(void) = 0;
+    virtual GEnergy* energy(void) = 0;
+    virtual GTime*   time(void) = 0;
     virtual bool     isatom(void) const = 0;
     virtual bool     isbin(void) const = 0;
     

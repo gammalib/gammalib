@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GEventBin.hpp  -  Event bin abstract base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,6 +24,8 @@
 #include "GModels.hpp"
 #include "GVector.hpp"
 #include "GSkyDir.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
 
 
 /***********************************************************************//**
@@ -50,8 +52,8 @@ public:
     virtual double   model(GModels& models) = 0;
     virtual double   model(GModels& models, GVector* gradient) = 0;
     virtual GSkyDir* dir(void) = 0;
-    virtual double*  energy(void) = 0;
-    virtual double*  time(void) = 0;
+    virtual GEnergy* energy(void) = 0;
+    virtual GTime*   time(void) = 0;
     
     // Implemented methods
     bool isatom(void) const { return false; }
