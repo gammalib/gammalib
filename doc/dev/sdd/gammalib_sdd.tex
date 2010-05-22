@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{SDD}}
 \newcommand{\doctype}{\mbox{Software Design Description}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{28 Mars 2010}}
+\newcommand{\calendar}{\mbox{22 May 2010}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 \newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
@@ -67,6 +67,19 @@ A Python interface allows scripting of library components.
 % Detailed Description of Components
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Detailed Description of Components}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Applications}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GApplication}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GPars}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GLog}}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Skymaps}
@@ -205,6 +218,27 @@ Events can be accessed via an iterator in the following way
 \end{verbatim}
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GEnergy}}
+
+Energy units used in data may differ between instruments.
+For this reason, energies are handled by a unified {\tt GEnergy} class that internally
+stores energy information in MeV, and that provides methods for automatic conversion
+of energies.
+Mathematical operations may be performed on {\tt GEnergy} as if it were a double
+precision variable.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GTime}}
+
+Also time systems used in data may differ between instruments.
+For this reason, times are handled by a unified {\tt GTime} class that internally stores
+time in MJD, and that provides methods for automatic conversion between the various
+time systems that are used.
+Mathematical operations may be performed on {\tt GTime} as if it were a double
+precision variable.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Event handling}
@@ -231,22 +265,16 @@ The class dependencies are shown in Fig.~\ref{fig:GEvent}.
 \end{figure}
 %
 
-The following generic methods are implemented for {\tt GEvent}:
+The following virtual methods are defined for {\tt GEvent}:
 \begin{verbatim}
-  double counts(void) const;       //!< Returns number of counts in event
-  bool   isatom(void) const;       //!< Event is an atom
-  bool   isbin(void) const;        //!< Event is a bin
-\end{verbatim}
-
-In addition, the following generic methods are implemented for {\tt GEventAtom}:
-\begin{verbatim}
-  GTime   time(void) const;        //!< Time tag of event
-  double  energy(void) const;      //!< Returns energy of event in MeV
-  GSkyDir dir(void);               //!< Returns arrival direction of event in sky coordinates
-\end{verbatim}
-and the following generic methods are implemented for {\tt GEventBin}:
-\begin{verbatim}
-  ...
+  double   counts(void) const;                         //!< Number of counts in event
+  double   model(GModels& models);                     //!< Model value
+  double   model(GModels& models, GVector* gradient);  //!< Model value and gradient
+  GTime*   time(void);                                 //!< Time tag of event
+  GEnergy* energy(void);                               //!< Event energy
+  GSkyDir* dir(void);                                  //!< Arrival direction of event
+  bool     isatom(void) const;                         //!< Event is an atom
+  bool     isbin(void) const;                          //!< Event is a bin
 \end{verbatim}
 
 
