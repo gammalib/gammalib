@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GModel.cpp  -  Model class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GModel.cpp
@@ -18,6 +17,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GException.hpp"
 #include "GModel.hpp"
 #include "GModelTemporalConst.hpp"
@@ -171,7 +173,7 @@ GModelPar* GModel::par(int index) const
  * @param[in] energy Pointer to energy used for evaluation.
  * @param[in] time Pointer to time used for evaluation.
  ***************************************************************************/
-double GModel::eval(GSkyDir* dir, double* energy, double* time)
+double GModel::eval(GSkyDir* dir, GEnergy* energy, GTime* time)
 {
     // Initialise value
     double value = 1.0;
@@ -193,7 +195,7 @@ double GModel::eval(GSkyDir* dir, double* energy, double* time)
  * @param[in] energy Pointer to energy used for evaluation.
  * @param[in] time Pointer to time used for evaluation.
  ***************************************************************************/
-double GModel::eval_gradients(GSkyDir* dir, double* energy, double* time)
+double GModel::eval_gradients(GSkyDir* dir, GEnergy* energy, GTime* time)
 {
     // Initialise value
     double value = 1.0;

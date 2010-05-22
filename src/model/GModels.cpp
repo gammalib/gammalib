@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GModels.cpp  -  Model container class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,13 +18,13 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GException.hpp"
 #include "GModels.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ADD                             "GModels::add(const GModel& model)"
-#define G_COPY_MEMBERS                "GModels::copy_members(const GModels&)"
-#define G_SET_POINTERS                              "GModels::set_pointers()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -133,8 +133,6 @@ void GModels::add(const GModel& model)
 {
 	// Allocate fresh memory for models
     GModel* new_model = new GModel[m_elements+1];
-	if (new_model == NULL)
-		throw GException::mem_alloc(G_ADD, m_elements+1);
 
 	// If we have already models then copy them over to the array
     if (m_elements > 0) {
@@ -169,7 +167,7 @@ void GModels::add(const GModel& model)
  * @param[in] energy Pointer to energy used for evaluation.
  * @param[in] time Pointer to time used for evaluation.
  ***************************************************************************/
-double GModels::eval(GSkyDir* dir, double* energy, double* time)
+double GModels::eval(GSkyDir* dir, GEnergy* energy, GTime* time)
 {
     // Initialise function value
     double value = 0.0;
@@ -190,7 +188,7 @@ double GModels::eval(GSkyDir* dir, double* energy, double* time)
  * @param[in] energy Pointer to energy used for evaluation.
  * @param[in] time Pointer to time used for evaluation.
  ***************************************************************************/
-double GModels::eval_gradients(GSkyDir* dir, double* energy, double* time)
+double GModels::eval_gradients(GSkyDir* dir, GEnergy* energy, GTime* time)
 {
     // Initialise function value
     double value = 0.0;
@@ -239,8 +237,6 @@ void GModels::copy_members(const GModels& models)
     
         // Allocate models
         m_model = new GModel[m_elements];
-        if (m_model == NULL)
-            throw GException::mem_alloc(G_COPY_MEMBERS, m_elements);
         
         // Copy models
         for (int i = 0; i < m_elements; ++i)
@@ -291,8 +287,6 @@ void GModels::set_pointers(void)
     
         // Allocate parameter pointers
         m_par = new GModelPar*[m_npars];
-        if (m_par == NULL)
-            throw GException::mem_alloc(G_SET_POINTERS, m_npars);
     
         // Initialise pointer on pointer array
         GModelPar** ptr = m_par;
