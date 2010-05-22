@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelTemporalConst.cpp  -  Temporal constant model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GModelTemporalConst.cpp
@@ -18,6 +17,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GException.hpp"
 #include "GModelTemporalConst.hpp"
 
@@ -144,7 +146,7 @@ GModelPar* GModelTemporalConst::par(int index) const
  *
  * @param[in] time Time at which the function is to be computed.
  ***************************************************************************/
-double GModelTemporalConst::eval(double* time)
+double GModelTemporalConst::eval(GTime* time)
 {
     // Return
     return 1.0;
@@ -154,9 +156,9 @@ double GModelTemporalConst::eval(double* time)
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] time Time at which the function and gradients are to be computed.
+ * @param[in] time Time at which function and gradients are computed.
  ***************************************************************************/
-double GModelTemporalConst::eval_gradients(double* time)
+double GModelTemporalConst::eval_gradients(GTime* time)
 {
     // Return
     return 1.0;
