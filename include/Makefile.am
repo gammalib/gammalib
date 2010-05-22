@@ -8,6 +8,8 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GWcs.hpp \
                      GWcsCAR.hpp \
                      GWcsHPX.hpp \
+                     GEnergy.hpp \
+                     GTime.hpp \
                      GData.hpp \
                      GObservation.hpp \
                      GEvents.hpp \

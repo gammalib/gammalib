@@ -79,6 +79,8 @@
 #include "GWcsHPX.hpp"
 
 /* __ Observation handling _______________________________________________ */
+#include "GEnergy.hpp"
+#include "GTime.hpp"
 #include "GData.hpp"
 #include "GObservation.hpp"
 #include "GEvents.hpp"
