@@ -48,6 +48,7 @@ public:
     GEnergy& operator= (const GEnergy& eng);
 
     // Methods
+    void   clear(void) { m_energy = 0.0; }
     double keV(void) const;
     double MeV(void) const;
     double GeV(void) const;

@@ -48,6 +48,7 @@ public:
     GTime& operator= (const GTime& time);
 
     // Methods
+    void   clear(void) { m_time = 0.0; }
     double mjd(void) const;
     void   mjd(const double& time);
     double met(void) const;
