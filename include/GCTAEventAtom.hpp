@@ -57,9 +57,9 @@ protected:
 
     // CTA data format attributes
     long    m_event_id;             //!< Event identifier
-    int     m_flags;                //!< Flags
+    char    m_flags;                //!< Flags
     int     m_multip;               //!< Multiplicity
-    int     m_telmask;              //!< 
+    char    m_telmask;              //!< Telescope mask
     float   m_dir_err;              //!< Error on event direction
     float   m_detx;                 //!<
     float   m_dety;                 //!<
