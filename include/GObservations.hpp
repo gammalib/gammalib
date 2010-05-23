@@ -32,6 +32,12 @@
  * @class GObservations
  *
  * @brief GObservations container class interface defintion.
+ *
+ * This is the main user interface class that provides high level access to
+ * gamma-ray observations and their analysis. Observations are appended using
+ * the append() method and can be access using the operator(). The class
+ * implements an event iterator GObservations::iterator that allows iterating
+ * over all events in all observations.
  ***************************************************************************/
 class GObservations {
 
@@ -50,11 +56,11 @@ public:
     const GObservation& operator() (int index) const;
 
     // Methods
-	void          append(GObservation &obs);
-    void          models(const GModels& models) { m_models=models; return; }
-    int           elements(void) const { return m_num; }
-    GModels*      models(void) { return &m_models; }
-    void          optimize(GOptimizer& opt);
+	void     append(GObservation &obs);
+    int      size(void) const { return m_num; }
+    void     models(const GModels& models) { m_models=models; return; }
+    GModels* models(void) { return &m_models; }
+    void     optimize(GOptimizer& opt);
 
     // Event iterator
     class iterator {
