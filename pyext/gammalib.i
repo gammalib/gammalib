@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         gammalib - SWIG file                            *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008-2010 by Jurgen Knodlseder              *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,14 +18,13 @@
 /* Support */
 #include "GException.i"
 #include "GNodeArray.i"
-/*#include "GHealpix.i"*/
 
 /* Sky classes */
 #include "GSkyDir.i"
 #include "GSkymap.i"
 
 /* Observation classes */
-#include "GData.i"
+#include "GObservations.i"
 #include "GResponse.i"
 
 /* Fermi LAT classes */
