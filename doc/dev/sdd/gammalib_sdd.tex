@@ -203,16 +203,17 @@ It contains:
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt GData}}
+\subsubsection{{\tt GObservations}}
 
 Observations taken with different instruments or with different instrument configurations are
-gathered together in a {\tt GData} container class which provides an abstract interface to all 
-data.
+gathered together in a {\tt GObservations} container class which provides an abstract interface 
+to all data.
+{\bf This is the main user interface class.}
 Events can be accessed via an iterator in the following way
 \begin{verbatim}
-  GData data;
+  GObservations obs;
   ...
-  for (GData::iterator event = data.begin(); event != data.end(); ++event) {
+  for (GObservations::iterator event = data.begin(); event != data.end(); ++event) {
       cout << *event << endl;
   }
 \end{verbatim}
