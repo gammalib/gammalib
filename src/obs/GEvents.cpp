@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GEvents.cpp  -  Events container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,6 +18,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
 #include "GEvents.hpp"
@@ -33,14 +36,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                      GEvents constructors/destructors                   =
+ =                          Constructors/destructors                       =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GEvents::GEvents()
+GEvents::GEvents(void)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -71,7 +74,7 @@ GEvents::GEvents(const GEvents& events)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GEvents::~GEvents()
+GEvents::~GEvents(void)
 {
     // Free members
     free_members();
@@ -83,7 +86,7 @@ GEvents::~GEvents()
 
 /*==========================================================================
  =                                                                         =
- =                            GEvents operators                            =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -140,7 +143,7 @@ GEvents::iterator::iterator()
 GEvents::iterator::iterator(GEvents *events)
 {
     // Initialise iterator
-    m_num   = (events != NULL) ? events->elements() : 0;
+    m_num   = (events != NULL) ? events->size() : 0;
     m_index = 0;
     m_base  = events;
 
@@ -199,13 +202,13 @@ GEvents::iterator GEvents::end(void)
 
 /*==========================================================================
  =                                                                         =
- =                         GEvents public methods                          =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /*==========================================================================
  =                                                                         =
- =                         GEvents private methods                         =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -243,7 +246,7 @@ void GEvents::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                             GEvents friends                             =
+ =                                  Friends                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -257,16 +260,9 @@ std::ostream& operator<< (std::ostream& os, const GEvents& events)
 {
     // Put header in stream
     os << "=== GEvents ===" << std::endl;
-    os << " Number of elements ........: " << events.elements() << std::endl;
+    os << " Number of elements ........: " << events.size() << std::endl;
     os << " Number of events ..........: " << events.number();
         
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                     Other functions used by GEvents                     =
- =                                                                         =
- ==========================================================================*/

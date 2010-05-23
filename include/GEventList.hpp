@@ -53,8 +53,8 @@ public:
     virtual GEventAtom* pointer(int index) = 0;
 
     // Implemented methods
-    int  number(void) const;
-    int  elements(void) const;
+    int  number(void) const { return m_num; }
+    int  size(void) const { return m_num; }
     bool islist(void) const { return true; }
     bool iscube(void) const { return false; }
 

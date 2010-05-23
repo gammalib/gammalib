@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GEventCube.hpp  -  Abstract event cube container class         *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -41,9 +41,9 @@ class GEventCube : public GEvents {
 
 public:
     // Constructors and destructors
-    GEventCube();
+    GEventCube(void);
     GEventCube(const GEventCube& cube);
-    virtual ~GEventCube();
+    virtual ~GEventCube(void);
 
     // Operators
     virtual GEventCube& operator= (const GEventCube& cube);
@@ -54,8 +54,8 @@ public:
     virtual int     number(void) const = 0;
 
     // Implemented methods
-    int  elements(void) const;
-	int  dim(void) const;
+    int  size(void) const { return m_elements; }
+	int  dim(void) const { return m_dim; }
     int  naxis(int axis) const;
     bool islist(void) const { return false; }
     bool iscube(void) const { return true; }
