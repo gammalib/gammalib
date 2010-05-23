@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GFitsBinTable.cpp  - FITS binary table class               *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,10 +9,12 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
 #include "GFitsBinTable.hpp"
@@ -30,14 +32,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                   GFitsBinTable constructors/destructors                =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GFitsBinTable::GFitsBinTable() : GFitsTable()
+GFitsBinTable::GFitsBinTable(void) : GFitsTable()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -84,7 +86,7 @@ GFitsBinTable::GFitsBinTable(const GFitsBinTable& table) : GFitsTable(table)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GFitsBinTable::~GFitsBinTable()
+GFitsBinTable::~GFitsBinTable(void)
 {
     // Free members
     free_members();
