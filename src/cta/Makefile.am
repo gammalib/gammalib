@@ -6,9 +6,10 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/src/support
 
 # Define sources for this directory
-sources = GCTAEventAtom.cpp
+sources = GCTAObservation.cpp \
+          GCTAEventList.cpp \
+          GCTAEventAtom.cpp
 #sources = GCTAObservation.cpp \
-#          GCTAEventList.cpp \
 #          GCTAEventCube.cpp \
 #          GCTAEventAtom.cpp \
 #          GCTAEventBin.cpp \

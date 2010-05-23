@@ -108,6 +108,8 @@
  ***************************************************************************/
 
 /* __ CTA specific code __________________________________________________ */
+#include "GCTAObservation.hpp"
+#include "GCTAEventList.hpp"
 #include "GCTAEventAtom.hpp"
 
 /* __ Fermi/LAT specific code ____________________________________________ */
