@@ -81,7 +81,7 @@
 /* __ Observation handling _______________________________________________ */
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GData.hpp"
+#include "GObservations.hpp"
 #include "GObservation.hpp"
 #include "GEvents.hpp"
 #include "GEventList.hpp"

@@ -10,7 +10,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GWcsHPX.hpp \
                      GEnergy.hpp \
                      GTime.hpp \
-                     GData.hpp \
+                     GObservations.hpp \
                      GObservation.hpp \
                      GEvents.hpp \
                      GEventList.hpp \

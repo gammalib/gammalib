@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GObservation.hpp  -  Observation abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2009 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -36,7 +36,7 @@
 class GObservation {
 
     // Friend classes
-    friend class GData;
+    friend class GObservations;
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GObservation& obs);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GEvents.hpp  -  Events container class                  *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -32,7 +32,7 @@
 class GEvents {
 
 	// Friend classes
-    friend class GData;
+    friend class GObservations;
     friend class GObservation;
 
     // I/O friends
