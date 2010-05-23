@@ -64,7 +64,7 @@ GObservations::optimizer::optimizer(GObservations *obs) : GOptimizerFunction()
     init_members();
 
     // Set object
-    m_data = obs;
+    m_this = obs;
     
     // Return
     return;
@@ -186,8 +186,8 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         values = new double[npars];
         
         // Iterate over all data bins
-        GObservations::iterator end = m_data->end();
-        for (GObservations::iterator bin = m_data->begin(); bin != end; ++bin) {
+        GObservations::iterator end = m_this->end();
+        for (GObservations::iterator bin = m_this->begin(); bin != end; ++bin) {
         
             // Get number of counts in bin
             double data = bin->counts();
@@ -209,6 +209,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
             }
             
             // Update Poissonian statistics
+            // TODO: add factorial
             m_value -= data * log(model) - model;
             
             // Skip bin now if there are no non-zero derivatives
@@ -292,7 +293,7 @@ void GObservations::optimizer::init_members(void)
     m_value    = 0.0;
     m_gradient = NULL;
     m_covar    = NULL;
-    m_data     = NULL;
+    m_this     = NULL;
 
     // Return
     return;

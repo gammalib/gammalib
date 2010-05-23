@@ -76,7 +76,7 @@ public:
         GEvents::iterator m_event;    //!< Iterator on actual event
         GEvents::iterator m_end;      //!< Iterator on observation end
         GObservation*     m_obs;      //!< Pointer to actual observation
-        GObservations*    m_data;     //!< Pointer to GObservations object
+        GObservations*    m_this;     //!< Pointer to GObservations object
     };
     iterator begin(void);
     iterator end(void);
@@ -100,7 +100,7 @@ public:
         double         m_value;       //!< Function value
         GVector*       m_gradient;    //!< Pointer to gradient vector
         GSparseMatrix* m_covar;       //!< Pointer to covariance matrix
-        GObservations* m_data;        //!< Pointer to GObservations object
+        GObservations* m_this;        //!< Pointer to GObservations object
     };
 
 protected:

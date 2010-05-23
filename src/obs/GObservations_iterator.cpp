@@ -43,7 +43,7 @@
 GObservations::iterator::iterator() 
 {
     // Initialise iterator
-    m_data  = NULL;
+    m_this  = NULL;
     m_index = 0;
     m_obs   = NULL;
     m_event = GEvents::iterator();
@@ -62,7 +62,7 @@ GObservations::iterator::iterator()
 GObservations::iterator::iterator(GObservations *obs)
 {
     // Initialise iterator
-    m_data  = obs;
+    m_this  = obs;
     m_index = 0;
     m_obs   = NULL;
     m_event = GEvents::iterator();
@@ -89,7 +89,7 @@ GObservations::iterator::iterator(GObservations *obs)
 GObservations::iterator& GObservations::iterator::operator++(void)
 {
     // Only iterate if we have a valid data pointer
-    if (m_data != NULL) {
+    if (m_this != NULL) {
         
         // Increment event iterator
         m_event++;
@@ -99,17 +99,17 @@ GObservations::iterator& GObservations::iterator::operator++(void)
         if (m_event == m_end) {
 
             // Find next valid observation
-            while (m_index < m_data->m_num) {
+            while (m_index < m_this->m_num) {
         
                 // Go to next observation
                 m_index++;
             
                 // If we still have an observation then set now the iterator
                 // to the first event from this observation ...
-                if (m_index < m_data->m_num) {
+                if (m_index < m_this->m_num) {
             
                     // Get next observation. Skip if empty
-                    m_obs = m_data->m_obs[m_index];
+                    m_obs = m_this->m_obs[m_index];
                     if (m_obs == NULL)
                         continue;
                 
@@ -129,8 +129,8 @@ GObservations::iterator& GObservations::iterator::operator++(void)
             } // endwhile: searched for next valid observation
         
             // If observations are exhausted then set iterator to signal the end
-            if (m_index >= m_data->m_num) {
-                m_index = m_data->m_num;
+            if (m_index >= m_this->m_num) {
+                m_index = m_this->m_num;
                 m_obs   = NULL;
                 m_event = GEvents::iterator();
                 m_end   = GEvents::iterator();
