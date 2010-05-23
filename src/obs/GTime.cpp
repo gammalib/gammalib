@@ -240,5 +240,3 @@ std::ostream& operator<< (std::ostream& os, const GTime& time)
     // Return output stream
     return os;
 }
-
-

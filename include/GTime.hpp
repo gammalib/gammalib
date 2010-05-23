@@ -38,6 +38,12 @@ class GTime {
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GTime& time);
 
+    // Operator friends
+    friend GTime operator+ (const GTime &a, const GTime &b);
+    friend GTime operator- (const GTime &a, const GTime &b);
+    friend GTime operator* (const double &a, const GTime &b);
+    friend GTime operator* (const GTime &a, const double &b);
+
 public:
     // Constructors and destructors
     GTime(void);
@@ -63,5 +69,39 @@ protected:
     // Protected data members
     double m_time;          //!< Time in MJD
 };
+
+
+/***************************************************************************
+ *                               Inline friends                            *
+ ***************************************************************************/
+inline
+GTime operator+ (const GTime& a, const GTime& b)
+{
+    GTime result;
+    result.m_time = a.m_time + b.m_time;
+    return result;
+}
+inline
+GTime operator- (const GTime& a, const GTime& b)
+{
+    GTime result;
+    result.m_time = a.m_time - b.m_time;
+    return result;
+}
+inline
+GTime operator* (const double& a, const GTime& b)
+{
+    GTime result;
+    result.m_time = a * b.m_time;
+    return result;
+}
+inline
+GTime operator* (const GTime& a, const double& b)
+{
+    GTime result;
+    result.m_time = b * a.m_time;
+    return result;
+}
+
 
 #endif /* GTIME_HPP */
