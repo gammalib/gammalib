@@ -45,13 +45,14 @@ public:
     virtual ~GObservations(void);
 
     // Operators
-    GObservations& operator= (const GObservations& obs);
+    GObservations&      operator= (const GObservations& obs);
+    GObservation&       operator() (int index);
+    const GObservation& operator() (int index) const;
 
     // Methods
 	void          append(GObservation &obs);
     void          models(const GModels& models) { m_models=models; return; }
     int           elements(void) const { return m_num; }
-    GObservation* observation(int index) const;
     GModels*      models(void) { return &m_models; }
     void          optimize(GOptimizer& opt);
 

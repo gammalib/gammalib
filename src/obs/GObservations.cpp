@@ -26,6 +26,8 @@
 #include "GObservations.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_OP_ACCESS1                        "GObservations::operator() (int)"
+#define G_OP_ACCESS2                  "GObservations::operator() (int) const"
 #define G_OBSERVATION                 "GObservations::observation(int) const"
 
 /* __ Macros _____________________________________________________________ */
@@ -117,6 +119,44 @@ GObservations& GObservations::operator= (const GObservations& obs)
 }
 
 
+/***********************************************************************//**
+ * @brief Observation access operator
+ *
+ * @param[in] index Index of observation (0,1,2,...)
+ *
+ * @exception GException::out_of_range
+ *            Operation index is out of range.
+ ***************************************************************************/
+GObservation& GObservations::operator() (int index)
+{
+    // If index is outside boundary then throw an error
+    if (index < 0 || index >= m_num)
+        throw GException::out_of_range(G_OP_ACCESS1, index, 0, m_num-1);
+
+    // Return observation pointer
+    return *(m_obs[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Observation access operator
+ *
+ * @param[in] index Index of observation (0,1,2,...)
+ *
+ * @exception GException::out_of_range
+ *            Operation index is out of range.
+ ***************************************************************************/
+const GObservation& GObservations::operator() (int index) const
+{
+    // If index is outside boundary then throw an error
+    if (index < 0 || index >= m_num)
+        throw GException::out_of_range(G_OP_ACCESS2, index, 0, m_num-1);
+
+    // Return observation pointer
+    return *(m_obs[index]);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                              Public methods                             =
@@ -155,25 +195,6 @@ void GObservations::append(GObservation& obs)
 	
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer on observation
- *
- * @param[in] index Index of observation (0,1,2,...)
- *
- * @exception GException::out_of_range
- *            Operation index is out of range.
- ***************************************************************************/
-GObservation* GObservations::observation(int index) const
-{
-    // If index is outside boundary then throw an error
-    if (index < 0 || index >= m_num)
-        throw GException::out_of_range(G_OBSERVATION, index, 0, m_num-1);
-
-    // Return observation pointer
-    return m_obs[index];
 }
 
 
