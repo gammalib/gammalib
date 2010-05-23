@@ -18,12 +18,14 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
 #include "GEventCube.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_COPY_MEMBERS                 "GEventCube::copy_members(GEventCube)"
 #define G_NAXIS                                      "GEventCube::naxis(int)"
 
 /* __ Macros _____________________________________________________________ */
@@ -35,14 +37,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                    GEventCube constructors/destructors                  =
+ =                          Constructors/destructors                       =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GEventCube::GEventCube() : GEvents()
+GEventCube::GEventCube(void) : GEvents()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -73,7 +75,7 @@ GEventCube::GEventCube(const GEventCube& cube) : GEvents(cube)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GEventCube::~GEventCube()
+GEventCube::~GEventCube(void)
 {
     // Free members
     free_members();
@@ -85,7 +87,7 @@ GEventCube::~GEventCube()
 
 /*==========================================================================
  =                                                                         =
- =                           GEventCube operators                          =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -120,29 +122,9 @@ GEventCube& GEventCube::operator= (const GEventCube& cube)
 
 /*==========================================================================
  =                                                                         =
- =                       GEventCube public methods                         =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Return number of elements in cube
- ***************************************************************************/
-int GEventCube::elements(void) const
-{
-    // Return
-    return m_elements;
-}
-
-
-/***********************************************************************//**
- * @brief Return event cube dimension
- ***************************************************************************/
-int GEventCube::dim(void) const
-{
-    // Return
-    return m_dim;
-}
-
 
 /***********************************************************************//**
  * @brief Return event cube axis dimension
@@ -164,7 +146,7 @@ int GEventCube::naxis(int axis) const
 
 /*==========================================================================
  =                                                                         =
- =                       GEventCube private methods                        =
+ =                           Private methods                               =
  =                                                                         =
  ==========================================================================*/
 
@@ -199,8 +181,6 @@ void GEventCube::copy_members(const GEventCube& cube)
 
         // Allocate memory
         m_naxis = new int[m_dim];
-        if (m_naxis == NULL)
-            throw GException::mem_alloc(G_COPY_MEMBERS, m_dim);
 
         // Copy axis dimensions
         for (int i = 0; i < m_dim; ++i)
@@ -231,7 +211,7 @@ void GEventCube::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                           GEventCube friends                            =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
 
@@ -249,7 +229,7 @@ std::ostream& operator<< (std::ostream& os, const GEventCube& cube)
         os << " Cube is undefined" << std::endl;
     }
     else {
-        os << " Number of cube elements ...: " << cube.elements() << std::endl;
+        os << " Number of cube elements ...: " << cube.size() << std::endl;
         os << " Cube dimension ............: " << cube.dim() << std::endl;
         for (int axis = 0; axis < cube.m_dim; ++axis) {
             os << " Axis " << axis+1 << " dimension ..........: "
@@ -260,10 +240,3 @@ std::ostream& operator<< (std::ostream& os, const GEventCube& cube)
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                   Other functions used by GEventList                    =
- =                                                                         =
- ==========================================================================*/
