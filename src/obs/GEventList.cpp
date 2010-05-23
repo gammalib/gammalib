@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GEventList.cpp  -  Abstract event container class            *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GEventList.cpp
@@ -18,6 +17,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
 #include "GEventList.hpp"
@@ -118,37 +120,13 @@ GEventList& GEventList::operator= (const GEventList& list)
 
 /*==========================================================================
  =                                                                         =
- =                       GEventList public methods                         =
+ =                            Public methods                               =
  =                                                                         =
  ==========================================================================*/
 
-/***********************************************************************//**
- * @brief Return number of events in list
- *
- * The number of events is identical to the number of elements
- ***************************************************************************/
-int GEventList::number(void) const
-{
-    // Return
-    return m_num;
-}
-
-
-/***********************************************************************//**
- * @brief Return number of elements in list
- *
- * The number of elements is identical to the number of events.
- ***************************************************************************/
-int GEventList::elements(void) const
-{
-    // Return
-    return m_num;
-}
-
-
 /*==========================================================================
  =                                                                         =
- =                       GEventList private methods                        =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -186,7 +164,7 @@ void GEventList::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                           GEventList friends                            =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
 
@@ -205,10 +183,3 @@ std::ostream& operator<< (std::ostream& os, const GEventList& list)
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                   Other functions used by GEventList                    =
- =                                                                         =
- ==========================================================================*/
