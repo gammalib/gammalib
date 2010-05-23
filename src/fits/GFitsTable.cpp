@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GFitsTable.cpp  - FITS table base class                 *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,18 +9,22 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsTable.hpp"
+#include "GFitsTableBitCol.hpp"
 #include "GFitsTableLogCol.hpp"
 #include "GFitsTableStrCol.hpp"
 #include "GFitsTableShtCol.hpp"
 #include "GFitsTableLngCol.hpp"
+#include "GFitsTableLlgCol.hpp"
 #include "GFitsTableFltCol.hpp"
 #include "GFitsTableDblCol.hpp"
 
@@ -503,6 +507,9 @@ void GFitsTable::open(__fitsfile* fptr)
 
         // Allocate column
         switch (typecode) {
+        case __TBIT:
+            m_columns[i] = new GFitsTableBitCol();
+            break;
         case __TLOGICAL:
             m_columns[i] = new GFitsTableLogCol();
             break;
@@ -518,10 +525,17 @@ void GFitsTable::open(__fitsfile* fptr)
         case __TFLOAT:
             m_columns[i] = new GFitsTableFltCol();
             break;
+        case __TLONGLONG:
+            m_columns[i] = new GFitsTableLlgCol();
+            break;
         case __TDOUBLE:
             m_columns[i] = new GFitsTableDblCol();
             break;
         default:
+std::cout << "GFitsTable::open => THROW EXCEPTION.";
+std::cout << " Column type " << typecode << " unknown.";
+std::cout << " Column: " << value << std::endl;
+std::cout << "NEED TO IMPLEMENT MORE METHODS AND TRACK DOWN THROW BUG." << std::endl;
             throw GException::fits_unknown_coltype(G_OPEN, typecode);
             break;
         }
@@ -922,6 +936,10 @@ std::ostream& operator<< (std::ostream& os, const GFitsTable& table)
         for (int i = 0; i < table.m_cols; ++i) {
             if (table.m_columns[i] != NULL) {
                 switch (table.m_columns[i]->type()) {
+                case __TBIT:
+                    os << " " << *((GFitsTableBitCol*)table.m_columns[i]) 
+                       << std::endl;
+                    break;
                 case __TLOGICAL:
                     os << " " << *((GFitsTableLogCol*)table.m_columns[i]) 
                        << std::endl;
@@ -940,6 +958,10 @@ std::ostream& operator<< (std::ostream& os, const GFitsTable& table)
                     break;
                 case __TFLOAT:
                     os << " " << *((GFitsTableFltCol*)table.m_columns[i]) 
+                       << std::endl;
+                    break;
+                case __TLONGLONG:
+                    os << " " << *((GFitsTableLlgCol*)table.m_columns[i]) 
                        << std::endl;
                     break;
                 case __TDOUBLE:

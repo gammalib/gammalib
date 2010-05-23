@@ -16,10 +16,12 @@ sources = GFitsHeaderCard.cpp \
           GFitsAsciiTable.cpp \
           GFitsBinTable.cpp \
           GFitsTableCol.cpp \
+	  GFitsTableBitCol.cpp \
           GFitsTableLogCol.cpp \
           GFitsTableStrCol.cpp \
           GFitsTableShtCol.cpp \
           GFitsTableLngCol.cpp \
+	  GFitsTableLlgCol.cpp \
           GFitsTableFltCol.cpp \
           GFitsTableDblCol.cpp \
           GFitsHDU.cpp \
