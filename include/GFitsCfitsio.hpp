@@ -61,16 +61,18 @@
 #define __ffukyj(A, B, C, D, E) ffukyj(A, B, C, D, E)
 #define __ffukyl(A, B, C, D, E) ffukyl(A, B, C, D, E)
 #define __ffukys(A, B, C, D, E) ffukys(A, B, C, D, E)
-#define __TBIT      TBIT
-#define __TBYTE     TBYTE
-#define __TLOGICAL  TLOGICAL
-#define __TSTRING   TSTRING
-#define __TSHORT    TSHORT
-#define __TINT      TINT
-#define __TLONG     TLONG
-#define __TFLOAT    TFLOAT
-#define __TLONGLONG TLONGLONG
-#define __TDOUBLE   TDOUBLE
+#define __TBIT        TBIT
+#define __TBYTE       TBYTE
+#define __TLOGICAL    TLOGICAL
+#define __TSTRING     TSTRING
+#define __TSHORT      TSHORT
+#define __TINT        TINT
+#define __TLONG       TLONG
+#define __TFLOAT      TFLOAT
+#define __TLONGLONG   TLONGLONG
+#define __TDOUBLE     TDOUBLE
+#define __TCOMPLEX    TCOMPLEX
+#define __TDBLCOMPLEX TDBLCOMPLEX
 
 /* __ Type definition ____________________________________________________ */
 typedef fitsfile __fitsfile;
