@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GObservation.cpp  -  Observation abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2009 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GObservation.cpp
@@ -18,6 +17,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
 #include "GObservation.hpp"
@@ -33,14 +35,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                    GObservation constructors/destructors                =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GObservation::GObservation()
+GObservation::GObservation(void)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -71,7 +73,7 @@ GObservation::GObservation(const GObservation& obs)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GObservation::~GObservation()
+GObservation::~GObservation(void)
 {
     // Free members
     free_members();
@@ -83,7 +85,7 @@ GObservation::~GObservation()
 
 /*==========================================================================
  =                                                                         =
- =                          GObservation operators                         =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -115,13 +117,13 @@ GObservation& GObservation::operator= (const GObservation& obs)
 
 /*==========================================================================
  =                                                                         =
- =                       GObservation public methods                       =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /*==========================================================================
  =                                                                         =
- =                       GObservation private methods                      =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -133,10 +135,10 @@ void GObservation::init_members(void)
     // Initialise members
     m_obsname.clear();
     m_instrument.clear();
-    m_tstart   = 0.0;
-    m_tstop    = 0.0;
-    m_emin     = 0.0;
-    m_emax     = 0.0;
+    m_tstart.clear();
+    m_tstop.clear();
+    m_emin.clear();
+    m_emax.clear();
     m_events   = NULL;
     m_response = NULL;
     m_gti      = GGti();
@@ -191,7 +193,7 @@ void GObservation::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                           GObservation friends                          =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
 
@@ -209,9 +211,9 @@ std::ostream& operator<< (std::ostream& os, const GObservation& obs)
     os << " Name ......................: " << obs.m_obsname << std::endl;
     os << " Instrument ................: " << obs.m_instrument << std::endl;
     os << " Time range ................: " << std::fixed << 
-            obs.m_tstart << " - " << obs.m_tstop << std::endl;
+            obs.m_tstart.mjd() << " - " << obs.m_tstop.mjd() << std::endl;
     os << " Energy range ..............: " << std::fixed << 
-            obs.m_emin << " - " << obs.m_emax << " MeV" << std::endl;
+            obs.m_emin.MeV() << " - " << obs.m_emax.MeV() << " MeV" << std::endl;
 
     // Add event list to stream
     if (obs.m_events != NULL)
@@ -223,10 +225,3 @@ std::ostream& operator<< (std::ostream& os, const GObservation& obs)
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                   Other functions used by GObservation                  =
- =                                                                         =
- ==========================================================================*/

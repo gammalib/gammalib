@@ -24,6 +24,8 @@
 #include "GResponse.hpp"
 #include "GGti.hpp"
 #include "GModels.hpp"
+#include "GTime.hpp"
+#include "GEnergy.hpp"
 
 /* __ Typedefs ___________________________________________________________ */
 
@@ -43,9 +45,9 @@ class GObservation {
 
 public:
     // Constructors and destructors
-    GObservation();
+    GObservation(void);
     GObservation(const GObservation& obs);
-    virtual ~GObservation();
+    virtual ~GObservation(void);
 
     // Operators
     virtual GObservation& operator= (const GObservation& obs);
@@ -53,15 +55,15 @@ public:
     // Methods
     void         obsname(const std::string& obsname) { m_obsname=obsname; return; }
     void         instrument(const std::string& instrument) { m_instrument=instrument; return; }
-    void         tstart(const double& tstart) { m_tstart=tstart; return; }
-    void         tstop(const double& tstop) { m_tstop=tstop; return; }
-    void         emin(const double& emin) { m_emin=emin; return; }
-    void         emax(const double& emax) { m_emax=emax; return; }
+    void         tstart(const GTime& tstart) { m_tstart=tstart; return; }
+    void         tstop(const GTime& tstop) { m_tstop=tstop; return; }
+    void         emin(const GEnergy& emin) { m_emin=emin; return; }
+    void         emax(const GEnergy& emax) { m_emax=emax; return; }
     void         gti(const GGti& gti) { m_gti=gti; return; }
-    double       tstart(void) const { return m_tstart; }
-    double       tstop(void) const { return m_tstop; }
-    double       emin(void) const { return m_emin; }
-    double       emax(void) const { return m_emax; }
+    GTime        tstart(void) const { return m_tstart; }
+    GTime        tstop(void) const { return m_tstop; }
+    GEnergy      emin(void) const { return m_emin; }
+    GEnergy      emax(void) const { return m_emax; }
     std::string  obsname(void) const { return m_obsname; }
     std::string  instrument(void) const { return m_instrument; }
     GEvents*     events(void) const { return m_events; }
@@ -78,10 +80,10 @@ protected:
     // Protected data area
     std::string m_obsname;      //!< Name of observation
     std::string m_instrument;   //!< Instrument name
-    double      m_tstart;       //!< Start time of observation
-    double      m_tstop;        //!< Stop time of observations
-    double      m_emin;         //!< Minimum energy covered by observation
-    double      m_emax;         //!< Maximum energy covered by observation
+    GTime       m_tstart;       //!< Start time of observation
+    GTime       m_tstop;        //!< Stop time of observation
+    GEnergy     m_emin;         //!< Minimum energy covered by observation
+    GEnergy     m_emax;         //!< Maximum energy covered by observation
     GEvents*    m_events;       //!< Pointer to events
     GResponse*  m_response;     //!< Pointer to instrument response functions
     GGti        m_gti;          //!< Good time intervals
