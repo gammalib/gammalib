@@ -15,7 +15,7 @@ check_PROGRAMS = test_GVector \
                  test_GFits \
                  test_GResponse \
                  test_GModel \
-                 test_GData \
+                 test_GObservations \
                  test_GOptimizer \
                  test_GSky
 
@@ -26,7 +26,7 @@ TESTS = test_GVector \
         test_GFits \
         test_GResponse \
         test_GModel \
-        test_GData \
+        test_GObservations \
         test_GOptimizer \
         test_GSky
 
@@ -44,8 +44,8 @@ test_GResponse_SOURCES = test_GResponse.cpp
 test_GResponse_LDADD = ../src/libgamma.la
 test_GModel_SOURCES = test_GModel.cpp
 test_GModel_LDADD = ../src/libgamma.la
-test_GData_SOURCES = test_GData.cpp
-test_GData_LDADD = ../src/libgamma.la
+test_GObservations_SOURCES = test_GObservations.cpp
+test_GObservations_LDADD = ../src/libgamma.la
 test_GOptimizer_SOURCES = test_GOptimizer.cpp
 test_GOptimizer_LDADD = ../src/libgamma.la
 test_GSky_SOURCES = test_GSky.cpp
