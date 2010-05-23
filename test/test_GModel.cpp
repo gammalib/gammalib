@@ -146,13 +146,13 @@ void test_model(void)
 //std::cout << models << std::endl;
 
     // Put container in data
-    GData data;
+    GObservations   data;
     GLATObservation obs;
     try {
         GModels models;
         models.add(crab);
         obs.load_unbinned("data/lat/ft1.fits.gz", "data/lat/ft2.fits.gz", "");
-        data.add(obs);
+        data.append(obs);
         data.models(models);
     }
     catch (std::exception &e) {
