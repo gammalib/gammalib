@@ -51,10 +51,10 @@ public:
     // Virtual methods
 	virtual void        load(const std::string& filename) = 0;
     virtual GEventAtom* pointer(int index) = 0;
+    int     number(void) const = 0;
+    int     size(void) const = 0;
 
     // Implemented methods
-    int  number(void) const { return m_num; }
-    int  size(void) const { return m_num; }
     bool islist(void) const { return true; }
     bool iscube(void) const { return false; }
 
@@ -64,12 +64,6 @@ protected:
     void                copy_members(const GEventList& list);
     void                free_members(void);
     virtual GEventList* clone(void) const = 0;
-
-    // Protected data area
-    int         m_num;           //!< Number of events
-    GEventAtom* m_events;        //!< Pointer to events
-
-private:
 };
 
 #endif /* GEVENTLIST_HPP */
