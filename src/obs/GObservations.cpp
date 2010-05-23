@@ -228,10 +228,10 @@ GObservations::iterator GObservations::begin(void)
     GObservations::iterator iter(this);
     
     // Get first valid observation
-    if (iter.m_data != NULL) {
-        while (iter.m_index < iter.m_data->m_num) {
-            if (iter.m_data->m_obs[iter.m_index] != NULL) {
-                iter.m_obs         = iter.m_data->m_obs[iter.m_index];
+    if (iter.m_this != NULL) {
+        while (iter.m_index < iter.m_this->m_num) {
+            if (iter.m_this->m_obs[iter.m_index] != NULL) {
+                iter.m_obs = iter.m_this->m_obs[iter.m_index];
                 break;
             }
         }
@@ -257,7 +257,7 @@ GObservations::iterator GObservations::end(void)
     GObservations::iterator iter(this);
     
     // Set obeservation number beyond last observation
-    iter.m_index = iter.m_data->m_num;
+    iter.m_index = iter.m_this->m_num;
     iter.m_obs   = NULL;
 	
     // Return
