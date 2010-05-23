@@ -23,6 +23,7 @@
 #include <iostream>
 #include "GException.hpp"
 #include "GCTAEventList.hpp"
+#include "GFitsTableBitCol.hpp"
 #include "GFitsTableFltCol.hpp"
 #include "GFitsTableDblCol.hpp"
 #include "GFitsTableLngCol.hpp"
