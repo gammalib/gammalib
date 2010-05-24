@@ -23,6 +23,7 @@
 #include "GEvents.hpp"
 #include "GEventAtom.hpp"
 #include "GFits.hpp"
+#include "GModels.hpp"
 
 
 /***********************************************************************//**
@@ -51,8 +52,9 @@ public:
     // Virtual methods
 	virtual void        load(const std::string& filename) = 0;
     virtual GEventAtom* pointer(int index) = 0;
-    int     number(void) const = 0;
-    int     size(void) const = 0;
+    virtual double      npred(const GModels& pars) const = 0;
+    virtual int         number(void) const = 0;
+    virtual int         size(void) const = 0;
 
     // Implemented methods
     bool islist(void) const { return true; }
