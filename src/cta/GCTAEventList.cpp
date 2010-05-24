@@ -280,6 +280,12 @@ GCTAEventList* GCTAEventList::clone(void) const
  * @param[in] hdu Pointer to FITS HDU from which events are loaded.
  *
  * Note that this method does not handle memory deallocation.
+ *
+ * @todo The actual code is adapted to the HESS MC event file provided by
+ * Karl Kosack and actually shipped in the test/data directory. In this
+ * file the energy is stored in MC_ENERGY. It should go in ENERGY in the
+ * future. This method checks whether the ENERGY is zero, and if so it
+ * gets the energy from MC_ENERGY.
  ***************************************************************************/
 void GCTAEventList::load_events(GFitsHDU* hdu)
 {
@@ -323,12 +329,16 @@ void GCTAEventList::load_events(GFitsHDU* hdu)
             GFitsTableFltCol* ptr_hil_msl     = (GFitsTableFltCol*)hdu->column("HIL_MSL");
             GFitsTableFltCol* ptr_hil_msl_err = (GFitsTableFltCol*)hdu->column("HIL_MSL_ERR");
 
+            // Read also some MC data. Use this only since current MC test data do have
+            // the energy in MC_ENERGY and ENERGY is zero.
+            GFitsTableFltCol* ptr_mc_energy   = (GFitsTableFltCol*)hdu->column("MC_ENERGY");
+
             // Copy data from columns into GCTAEventAtom objects
             GCTAEventAtom* ptr = (GCTAEventAtom*)m_events;
             for (int i = 0; i < m_num; ++i) {
                 ptr[i].m_time.met((*ptr_time)(i));
                 ptr[i].m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
-                ptr[i].m_energy.TeV((*ptr_energy)(i));
+                //ptr[i].m_energy.TeV((*ptr_energy)(i));
                 ptr[i].m_event_id    = (*ptr_eid)(i);
                 ptr[i].m_multip      = (*ptr_multip)(i);
                 ptr[i].m_dir_err     = (*ptr_dir_err)(i);
@@ -348,6 +358,12 @@ void GCTAEventList::load_events(GFitsHDU* hdu)
                 ptr[i].m_hil_msw_err = (*ptr_hil_msw_err)(i);
                 ptr[i].m_hil_msl     = (*ptr_hil_msl)(i);
                 ptr[i].m_hil_msl_err = (*ptr_hil_msl_err)(i);
+                
+                // Specific code for energy extraction
+                if ((*ptr_energy)(i) == 0)
+                    ptr[i].m_energy.TeV((*ptr_mc_energy)(i));
+                else
+                    ptr[i].m_energy.TeV((*ptr_energy)(i));
             }
 
         }
