@@ -36,7 +36,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                GModelSpectralPlaw constructors/destructors              =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
@@ -96,7 +96,7 @@ GModelSpectralPlaw::GModelSpectralPlaw(const GModelSpectralPlaw& model) :
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelSpectralPlaw::~GModelSpectralPlaw()
+GModelSpectralPlaw::~GModelSpectralPlaw(void)
 {
     // Free members
     free_members();
@@ -108,7 +108,7 @@ GModelSpectralPlaw::~GModelSpectralPlaw()
 
 /*==========================================================================
  =                                                                         =
- =                        GModelSpectralPlaw operators                     =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -143,7 +143,7 @@ GModelSpectralPlaw& GModelSpectralPlaw::operator= (const GModelSpectralPlaw& mod
 
 /*==========================================================================
  =                                                                         =
- =                    GModelSpectralPlaw public methods                    =
+ =                              Public methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -168,8 +168,10 @@ GModelPar* GModelSpectralPlaw::par(int index) const
  *
  * @param[in] energy Energy at which the function is to be computed.
  *
- * TODO: For the moment the pivot energy is fixed to units of MeV. This may
+ * @todo For the moment the pivot energy is fixed to units of MeV. This may
  * not be ideal and should eventually be improved in the futur.
+ * Furthermore, the method expects that energy!=0. Otherwise Inf or NaN
+ * may result.
  ***************************************************************************/
 double GModelSpectralPlaw::eval(GEnergy* energy)
 {
@@ -188,8 +190,10 @@ double GModelSpectralPlaw::eval(GEnergy* energy)
  *
  * @param[in] energy Energy at which function and gradients are computed.
  *
- * TODO: For the moment the pivot energy is fixed to units of MeV. This may
+ * @todo For the moment the pivot energy is fixed to units of MeV. This may
  * not be ideal and should eventually be improved in the futur.
+ * Furthermore, the method expects that energy!=0. Otherwise Inf or NaN
+ * may result.
  ***************************************************************************/
 double GModelSpectralPlaw::eval_gradients(GEnergy* energy)
 {
@@ -198,7 +202,7 @@ double GModelSpectralPlaw::eval_gradients(GEnergy* energy)
     double p     = pow(e, m_index.value());
     double value = m_norm.value() * p;
 
-    // Set gradient to 0 is all parameters are fixed ...
+    // Set gradient to 0 if all parameters are fixed ...
     if ( !m_norm.isfree() && !m_index.isfree() && !m_pivot.isfree() ) {
         m_norm.gradient(0.0);
         m_index.gradient(0.0);
@@ -268,7 +272,7 @@ void GModelSpectralPlaw::autoscale(void)
 
 /*==========================================================================
  =                                                                         =
- =                    GModelSpectralPlaw private methods                   =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -345,7 +349,7 @@ GModelSpectralPlaw* GModelSpectralPlaw::clone(void) const
 
 /*==========================================================================
  =                                                                         =
- =                        GModelSpectralPlaw friends                       =
+ =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -369,10 +373,3 @@ std::ostream& operator<< (std::ostream& os, const GModelSpectralPlaw& model)
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                Other functions used by GModelSpectralPlaw               =
- =                                                                         =
- ==========================================================================*/
