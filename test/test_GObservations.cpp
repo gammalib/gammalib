@@ -19,6 +19,9 @@
 
 /* __ Globals ____________________________________________________________ */
 
+/* __ Constants __________________________________________________________ */
+const std::string cta_events = "data/cta/run_00006028_eventlist.fits.gz";
+
 
 /***************************************************************************
  *  Test: LAT unbinned observation handling                                *
@@ -219,6 +222,105 @@ void test_lat_binned(void)
 
 
 /***************************************************************************
+ *  Test: CTA unbinned observation handling                                *
+ ***************************************************************************/
+void test_cta_unbinned(void)
+{
+    // Write header
+    std::cout << "Test CTA unbinned data handling: ";
+
+    // Declare observations
+    GObservations   obs;
+    GCTAObservation run;
+
+    // Load unbinned LAT observation
+    try {
+        run.load_unbinned(cta_events);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl << "TEST ERROR: Unable to load CTA run."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Add observation (twice) to data
+    try {
+        obs.append(run);
+        obs.append(run);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to append CTA run to observations." 
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Loop over all events using iterators
+    try {
+        int num = 0;
+        for (GObservations::iterator event = obs.begin(); event != obs.end(); ++event) {
+//            std::cout << *event << std::endl;
+//            std::cout << event->test() << std::endl;
+            num++;
+        }
+        if (num != 17020) {
+            std::cout << std::endl
+                      << "TEST ERROR: Wrong number of iterations in GObservations::iterator."
+                      << " (excepted 17020, found " << num << ")" << std::endl;
+            throw;
+        }
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to iterate GObservations." << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Loop over all events using iterator
+    try {
+        int num = 0;
+        GCTAEventList *ptr = (GCTAEventList*)run.events();
+        for (GLATEventList::iterator event = ptr->begin(); event != ptr->end(); ++event) {
+//            std::cout << *event << std::endl;
+            num++;
+        }
+        if (num != 8510) {
+            std::cout << std::endl
+                      << "TEST ERROR: Wrong number of iterations in GCTAEventList::iterator."
+                      << " (excepted 8510, found " << num << ")" << std::endl;
+            throw;
+        }
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to iterate GCTAEventList." << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Plot final test success
+    std::cout << " ok." << std::endl;
+
+//GLATEventList *ptr = (GLATEventList*)obs.events();
+//std::cout << obs << std::endl;
+//std::cout << *ptr << std::endl;
+
+    // Exit test
+    return;
+ 
+}
+
+
+
+
+/***************************************************************************
  *                            Main test function                           *
  ***************************************************************************/
 int main(void)
@@ -232,6 +334,7 @@ int main(void)
     // Execute the tests
     test_lat_unbinned();
     test_lat_binned();
+    test_cta_unbinned();
 
     // Return
     return 0;
