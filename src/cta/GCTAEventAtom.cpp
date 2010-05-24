@@ -25,6 +25,7 @@
 #include "GCTAEventAtom.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_MODEL                    "GCTAEventAtom::model(GModels&, GVector*)"
 #define G_COPY_MEMBERS    "GCTAEventAtom::copy_members(const GCTAEventAtom&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -130,12 +131,12 @@ GCTAEventAtom& GCTAEventAtom::operator= (const GCTAEventAtom& atom)
  *
  * @param[in] models Model descriptor.
  *
- * TODO: Method needs to be coded (so far only a dummy)
+ * @todo Add CTA specific code (so far only dummy)
  ***************************************************************************/
 double GCTAEventAtom::model(GModels& models)
 {
-    // DUMMY: Set model value
-    double model = 1.0;
+    // Set model value
+    double model = models.eval(dir(), energy(), time());
     
     // Return
     return model;
@@ -148,16 +149,24 @@ double GCTAEventAtom::model(GModels& models)
  * @param[in] models Model descriptor.
  * @param[out] gradient Pointer to gradient vector.
  *
- * TODO: Method needs to be coded (so far only a dummy)
+ * @todo Add CTA specific code (so far only dummy)
  ***************************************************************************/
 double GCTAEventAtom::model(GModels& models, GVector* gradient)
 {
-    // DUMMY: Set model value
-    double model = 1.0;
-    
-    // Set default gradient
+    // Verify that gradients vector has the same dimension than the
+    // model has parameters
+    #if defined(G_RANGE_CHECK)
+    if (models.npars() != gradient->size())
+        throw GException::gradient_par_mismatch(G_MODEL, gradient->size(), 
+                                                models.npars());
+    #endif
+
+    // Evaluate model and gradients
+    double model = models.eval_gradients(dir(), energy(), time());
+        
+    // Set gradient vector
     for (int i = 0; i < gradient->size(); ++i)
-        (*gradient)(i) = model;
+        (*gradient)(i) = models.par(i)->gradient();
 
     // Return
     return model;
