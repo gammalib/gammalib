@@ -50,6 +50,10 @@
  * @param[in] instPosAng Instrument position angle
  * @param[in] time Photon arrival time
  *
+ * The Point Spread Function defines the probability that a photon coming
+ * from direction 'srcDir' is measured towards direction 'obsDir'.
+ 
+ *
  * @todo Implement method (just a dummy for the moment)
  ***************************************************************************/
 double GCTAResponse::psf(const GSkyDir& obsDir, const GEnergy& obsEng,
