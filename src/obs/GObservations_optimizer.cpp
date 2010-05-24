@@ -21,6 +21,7 @@
 #include <config.h>
 #endif
 #include "GObservations.hpp"
+#include "GEventList.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -29,7 +30,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_EVAL_TIMING 1
+#define G_EVAL_TIMING 0 //!< Perform optimizer timing (0=no, 1=yes)
 
 /* __ Prototypes _________________________________________________________ */
 
@@ -145,9 +146,21 @@ GObservations::optimizer& GObservations::optimizer::operator= (const optimizer& 
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Evaluate function
+ * @brief Evaluate log-likelihood function
  *
  * @param[in] pars Optimizer parameters.
+ *
+ * This method evaluates the log-likelihood function for parameter
+ * optimisation. It handles both binned and unbinned data. 
+ * For binned data the function to optimize is given by
+ * \f$L=-\sum_i n_i \log e_i - e_i\f$
+ * where the sum is taken over all data space bins, \f$n_i\f$ is the
+ * observed number of counts and \f$e_i\f$ is the model.
+ * For unbinned data the function to optimize is given by
+ * \f$L=-\sum_i \log e_i + {\rm Npred}\f$
+ * where the sum is taken over all events and \f${\rm Npred}\f$ is the
+ * total number of events that is predicted by the model.
+ * Note that binned and unbinned observations may be combined.
  ***************************************************************************/
 void GObservations::optimizer::eval(const GOptimizerPars& pars) 
 {
@@ -164,7 +177,6 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
     do {
         // Get number of parameters
         int npars = pars.npars();
-        //int nfree = pars.nfree();
         
         // Fall through if we have no free parameters
         if (npars < 1)
@@ -184,6 +196,14 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         m_covar->stack_init(npars,10000);
         inx    = new int[npars];
         values = new double[npars];
+        
+        // Collect predicted number of events for unbinned observations
+        double npred = 0.0;
+        for (int i = 0; i < m_this->m_num; ++i) {
+            if (m_this->m_obs[i]->events()->islist())
+                npred += ((GEventList*)m_this->m_obs[i]->events())->npred((GModels&)pars);
+        }
+        m_value += npred;
         
         // Iterate over all data bins
         GObservations::iterator end = m_this->end();
@@ -208,9 +228,12 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                 }
             }
             
-            // Update Poissonian statistics
-            // TODO: add factorial
-            m_value -= data * log(model) - model;
+            // Update Poissonian statistics (excluding factorial term for
+            // faster computation)
+            if (bin->isbin())
+                m_value -= data * log(model) - model;
+            else
+                m_value -= log(model);
             
             // Skip bin now if there are no non-zero derivatives
             if (ndev < 1)
