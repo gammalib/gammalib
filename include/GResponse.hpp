@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GResponse.hpp  -  Response abstract base class             *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,6 +21,8 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GSkyDir.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
 
 
 /***********************************************************************//**
@@ -55,10 +57,10 @@ public:
     /// @param[in] instPntDir Instrument pointing direction (e.g. z-axis)
     /// @param[in] instPosAng Instrument position angle
     /// @param[in] time Photon arrival time
-    virtual double irf(const GSkyDir& obsDir, const double& obsEng,
-                       const GSkyDir& srcDir, const double& srcEng,
+    virtual double irf(const GSkyDir& obsDir, const GEnergy& obsEng,
+                       const GSkyDir& srcDir, const GEnergy& srcEng,
                        const GSkyDir& instPntDir, const double& instPosAng,
-                       const double& time) = 0;
+                       const GTime& time) = 0;
 
     /// Pure virtual method to define the interface for the member function
     /// returning the point spread function value
@@ -69,10 +71,10 @@ public:
     /// @param[in] instPntDir Instrument pointing direction (e.g. z-axis)
     /// @param[in] instPosAng Instrument position angle
     /// @param[in] time Photon arrival time
-    virtual double psf(const GSkyDir& obsDir, const double& obsEng,
-                       const GSkyDir& srcDir, const double& srcEng,
+    virtual double psf(const GSkyDir& obsDir, const GEnergy& obsEng,
+                       const GSkyDir& srcDir, const GEnergy& srcEng,
                        const GSkyDir& instPntDir, const double& instPosAng,
-                       const double& time) = 0;
+                       const GTime& time) = 0;
 
     /// Pure virtual method to define the interface for the member function
     /// returning the effective area value
@@ -83,10 +85,10 @@ public:
     /// @param[in] instPntDir Instrument pointing direction (e.g. z-axis)
     /// @param[in] instPosAng Instrument position angle
     /// @param[in] time Photon arrival time
-    virtual double aeff(const GSkyDir& obsDir, const double& obsEng,
-                        const GSkyDir& srcDir, const double& srcEng,
+    virtual double aeff(const GSkyDir& obsDir, const GEnergy& obsEng,
+                        const GSkyDir& srcDir, const GEnergy& srcEng,
                         const GSkyDir& instPntDir, const double& instPosAng,
-                        const double& time) = 0;
+                        const GTime& time) = 0;
 
     /// Pure virtual method to define the interface for the member function
     /// returning the energy dispersion value
@@ -97,10 +99,10 @@ public:
     /// @param[in] instPntDir Instrument pointing direction (e.g. z-axis)
     /// @param[in] instPosAng Instrument position angle
     /// @param[in] time Photon arrival time
-    virtual double edisp(const GSkyDir& obsDir, const double& obsEng,
-                         const GSkyDir& srcDir, const double& srcEng,
+    virtual double edisp(const GSkyDir& obsDir, const GEnergy& obsEng,
+                         const GSkyDir& srcDir, const GEnergy& srcEng,
                          const GSkyDir& instPntDir, const double& instPosAng,
-                         const double& time) = 0;
+                         const GTime& time) = 0;
 
     /// Pure virtual method to define the calibration database
     /// @param[in] caldb Calibration database to be used
@@ -121,10 +123,5 @@ protected:
 
 private:
 };
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
 
 #endif /* GRESPONSE_HPP */
