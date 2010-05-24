@@ -8,7 +8,11 @@ INCLUDES = -I$(top_srcdir)/include \
 # Define sources for this directory
 sources = GCTAObservation.cpp \
           GCTAEventList.cpp \
-          GCTAEventAtom.cpp
+          GCTAEventAtom.cpp \
+	  GCTAResponse.cpp \
+	  GCTAAeff.cpp \
+	  GCTAPsf.cpp \
+	  GCTAEdisp.cpp
 #sources = GCTAObservation.cpp \
 #          GCTAEventCube.cpp \
 #          GCTAEventAtom.cpp \
