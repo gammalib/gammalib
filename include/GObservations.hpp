@@ -66,17 +66,23 @@ public:
     class iterator {
     friend class GObservations;
     public:
-        iterator();
+        // Constructors and destructors
+        iterator(void);
         iterator(GObservations *obs);
-        ~iterator() { return; }
-        iterator& operator++(void);                // Prefix
-        iterator  operator++(int junk);            // Postfix
-        bool      operator==(const iterator& it) const 
-                  { return ((m_index == it.m_index) && (m_event == it.m_event)); }
-        bool      operator!=(const iterator& it) const
-                  { return ((m_index != it.m_index) || (m_event != it.m_event)); }
-        GEvent&   operator*(void) { return *m_event; }
-        GEvent*   operator->(void) { return &(*m_event); }
+        ~iterator(void) { return; }
+        
+        // Operators
+        iterator&     operator++(void);                // Prefix
+        iterator      operator++(int junk);            // Postfix
+        bool          operator==(const iterator& it) const 
+                      { return ((m_index == it.m_index) && (m_event == it.m_event)); }
+        bool          operator!=(const iterator& it) const
+                      { return ((m_index != it.m_index) || (m_event != it.m_event)); }
+        GEvent&       operator*(void) { return *m_event; }
+        GEvent*       operator->(void) { return &(*m_event); }
+        
+        // Methods
+        GObservation* obs(void) { return m_obs; }
     protected:
         int               m_index;    //!< Actual observation index [0,m_num-1]
         GEvents::iterator m_event;    //!< Iterator on actual event
@@ -90,11 +96,16 @@ public:
     // Optimizer
     class optimizer : public GOptimizerFunction {
     public:
-        optimizer();
+        // Constructors and destructors
+        optimizer(void);
         optimizer(GObservations *obs);
         optimizer(const optimizer& fct);
-        ~optimizer();
+        ~optimizer(void);
+        
+        // Operators
         optimizer& operator= (const optimizer& fct);
+        
+        // Methods
         void           eval(const GOptimizerPars& pars);
         double*        value(void) { return &m_value; }
         GVector*       gradient(void) { return m_gradient; }
