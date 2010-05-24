@@ -183,6 +183,23 @@ GCTAEventAtom* GCTAEventList::pointer(int index)
 }
 
 
+/***********************************************************************//**
+ * @brief Return total number of predicted counts for a specific model
+ *
+ * @param[in] pars Model parameters.
+ *
+ * TODO: Method needs to be implemented
+ ***************************************************************************/
+double GCTAEventList::npred(const GModels& pars) const
+{
+    // Dummy
+    double npred = 1.0;
+    
+    // Return prediction
+    return npred;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
