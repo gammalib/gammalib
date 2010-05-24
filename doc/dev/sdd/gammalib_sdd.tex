@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{SDD}}
 \newcommand{\doctype}{\mbox{Software Design Description}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{22 May 2010}}
+\newcommand{\calendar}{\mbox{23 May 2010}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 \newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
@@ -209,6 +209,16 @@ Observations taken with different instruments or with different instrument confi
 gathered together in a {\tt GObservations} container class which provides an abstract interface 
 to all data.
 {\bf This is the main user interface class.}
+
+The following methods are defined for {\tt GObservations}:
+\begin{verbatim}
+  void     append(GObservation &obs);      //!< Append observation
+  int      size(void) const;               //!< Returns number of observations
+  void     models(const GModels& models);  //!< Set models
+  GModels* models(void);                   //!< Returns pointer to models
+  void     optimize(GOptimizer& opt);      //!< Optimize model parameters
+\end{verbatim}
+
 Events can be accessed via an iterator in the following way
 \begin{verbatim}
   GObservations obs;
