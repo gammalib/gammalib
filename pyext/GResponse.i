@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GResponse.i  -  Response abstract base class SWIG interface       *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -34,21 +34,21 @@ public:
     virtual ~GResponse();
 
     // Methods
-    virtual double irf(const GSkyDir& obsDir, const double& obsEng,
-                       const GSkyDir& srcDir, const double& srcEng,
+    virtual double irf(const GSkyDir& obsDir, const GEnergy& obsEng,
+                       const GSkyDir& srcDir, const GEnergy& srcEng,
                        const GSkyDir& instPntDir, const double& instPosAng,
-                       const double& time) = 0;
-    virtual double psf(const GSkyDir& obsDir, const double& obsEng,
-                       const GSkyDir& srcDir, const double& srcEng,
+                       const GTime& time) = 0;
+    virtual double psf(const GSkyDir& obsDir, const GEnergy& obsEng,
+                       const GSkyDir& srcDir, const GEnergy& srcEng,
                        const GSkyDir& instPntDir, const double& instPosAng,
-                       const double& time) = 0;
-    virtual double aeff(const GSkyDir& obsDir, const double& obsEng,
-                        const GSkyDir& srcDir, const double& srcEng,
+                       const GTime& time) = 0;
+    virtual double aeff(const GSkyDir& obsDir, const GEnergy& obsEng,
+                        const GSkyDir& srcDir, const GEnergy& srcEng,
                         const GSkyDir& instPntDir, const double& instPosAng,
-                        const double& time) = 0;
-    virtual double edisp(const GSkyDir& obsDir, const double& obsEng,
-                         const GSkyDir& srcDir, const double& srcEng,
+                        const GTime& time) = 0;
+    virtual double edisp(const GSkyDir& obsDir, const GEnergy& obsEng,
+                         const GSkyDir& srcDir, const GEnergy& srcEng,
                          const GSkyDir& instPntDir, const double& instPosAng,
-                         const double& time) = 0;
+                         const GTime& time) = 0;
     virtual void set_caldb(const std::string& caldb) = 0;
 };

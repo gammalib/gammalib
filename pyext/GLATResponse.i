@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GLATResponse.i  -  GLAST LAT Response class SWIG definition       *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -35,32 +35,32 @@ public:
     ~GLATResponse();
 
     // IRF Methods
-    double irf(const GSkyDir& obsDir, const double& obsEng,
-               const GSkyDir& srcDir, const double& srcEng,
+    double irf(const GSkyDir& obsDir, const GEnergy& obsEng,
+               const GSkyDir& srcDir, const GEnergy& srcEng,
                const GSkyDir& instPntDir, const double& instPosAng,
-               const double& time);
+               const GTime& time);
     // Aeff Methods
-    double aeff(const GSkyDir& obsDir, const double& obsEng,
-                const GSkyDir& srcDir, const double& srcEng,
+    double aeff(const GSkyDir& obsDir, const GEnergy& obsEng,
+                const GSkyDir& srcDir, const GEnergy& srcEng,
                 const GSkyDir& instPntDir, const double& instPosAng,
-                const double& time);
+                const GTime& time);
     double aeff(const double& logE, const double& ctheta);
     void   aeff_ctheta_min(const double& ctheta);
     double aeff_ctheta_min(void) const;
 
     // PSF Methods
-    double  psf(const GSkyDir& obsDir, const double& obsEng,
-                const GSkyDir& srcDir, const double& srcEng,
+    double  psf(const GSkyDir& obsDir, const GEnergy& obsEng,
+                const GSkyDir& srcDir, const GEnergy& srcEng,
                 const GSkyDir& instPntDir, const double& instPosAng,
-                const double& time);
+                const GTime& time);
     double  psf(const double& delta, const double& logE, const double& ctheta);
     GVector psf(const GVector& delta, const double& logE, const double& ctheta);
 
     // Edisp Methods
-    double edisp(const GSkyDir& obsDir, const double& obsEng,
-                 const GSkyDir& srcDir, const double& srcEng,
+    double edisp(const GSkyDir& obsDir, const GEnergy& obsEng,
+                 const GSkyDir& srcDir, const GEnergy& srcEng,
                  const GSkyDir& instPntDir, const double& instPosAng,
-                 const double& time);
+                 const GTime& time);
 
     // Other Methods
     void set_caldb(const std::string& caldb);
