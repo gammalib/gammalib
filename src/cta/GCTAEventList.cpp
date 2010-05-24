@@ -188,9 +188,28 @@ GCTAEventAtom* GCTAEventList::pointer(int index)
  *
  * @param[in] pars Model parameters.
  *
- * TODO: Method needs to be implemented
+ * @todo Method needs to be implemented
  ***************************************************************************/
 double GCTAEventList::npred(const GModels& pars) const
+{
+    // Dummy
+    double npred = 1.0;
+    
+    // Return prediction
+    return npred;
+}
+
+
+/***********************************************************************//**
+ * @brief Return total number of predicted counts and gradient for a
+ * specific model
+ *
+ * @param[in] pars Model parameters.
+ * @param[in] gradient Pointer to parameter gradient.
+ *
+ * @todo Method needs to be implemented.
+ ***************************************************************************/
+double GCTAEventList::npred(const GModels& pars, GVector* gradient) const
 {
     // Dummy
     double npred = 1.0;

@@ -53,6 +53,7 @@ public:
 	virtual void        load(const std::string& filename) = 0;
     virtual GEventAtom* pointer(int index) = 0;
     virtual double      npred(const GModels& pars) const = 0;
+    virtual double      npred(const GModels& pars, GVector* gradient) const = 0;
     virtual int         number(void) const = 0;
     virtual int         size(void) const = 0;
 
