@@ -38,6 +38,14 @@ class GEnergy {
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GEnergy& eng);
 
+    // Operator friends
+    friend GEnergy operator+ (const GEnergy &a, const GEnergy &b);
+    friend GEnergy operator- (const GEnergy &a, const GEnergy &b);
+    friend GEnergy operator* (const double &a, const GEnergy &b);
+    friend GEnergy operator* (const GEnergy &a, const double &b);
+    friend bool    operator== (const GEnergy &a, const GEnergy &b);
+    friend bool    operator!= (const GEnergy &a, const GEnergy &b);
+
 public:
     // Constructors and destructors
     GEnergy(void);
@@ -67,5 +75,47 @@ protected:
     // Protected data members
     double m_energy;          //!< Energy in MeV
 };
+
+/***************************************************************************
+ *                               Inline friends                            *
+ ***************************************************************************/
+inline
+GEnergy operator+ (const GEnergy& a, const GEnergy& b)
+{
+    GEnergy result;
+    result.m_energy = a.m_energy + b.m_energy;
+    return result;
+}
+inline
+GEnergy operator- (const GEnergy& a, const GEnergy& b)
+{
+    GEnergy result;
+    result.m_energy = a.m_energy - b.m_energy;
+    return result;
+}
+inline
+GEnergy operator* (const double& a, const GEnergy& b)
+{
+    GEnergy result;
+    result.m_energy = a * b.m_energy;
+    return result;
+}
+inline
+GEnergy operator* (const GEnergy& a, const double& b)
+{
+    GEnergy result;
+    result.m_energy = b * a.m_energy;
+    return result;
+}
+inline
+bool operator== (const GEnergy &a, const GEnergy &b)
+{
+    return (a.m_energy == b.m_energy);
+}
+inline
+bool operator!= (const GEnergy &a, const GEnergy &b)
+{
+    return (a.m_energy != b.m_energy);
+}
 
 #endif /* GENERGY_HPP */
