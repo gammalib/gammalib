@@ -43,7 +43,7 @@ public:
     // Constructors and destructors
     GModels(void);
     GModels(const GModels& models);
-    ~GModels();
+    ~GModels(void);
  
     // Operators
     GModels& operator= (const GModels& models);
@@ -52,6 +52,7 @@ public:
     void   add(const GModel& model);
     double eval(GSkyDir* dir, GEnergy* energy, GTime* time);
     double eval_gradients(GSkyDir* dir, GEnergy* energy, GTime* time);
+    int    size(void) const { return m_elements; }
   
 protected:
     // Protected methods
