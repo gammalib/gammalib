@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GOptimizerLM.cpp  -  Levenberg Marquardt optimizer           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GOptimizerLM.cpp
@@ -18,6 +17,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GException.hpp"
 #include "GOptimizerLM.hpp"
 
@@ -28,6 +30,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+#define G_DEBUG_OPT 1 //!< Perform optimizer debugging (0=no, 1=yes)
 
 
 /*==========================================================================
@@ -216,6 +219,9 @@ void GOptimizerLM::free_members(void)
  *
  * @param[in] fct Poiner to optimization function.
  * @param[in] par Pointer to parameters to be optimised.
+ *
+ * @todo Implemenet logger to allow for optimizer logging in applications.
+ * So far only use std::cout (definition enabled).
  ***************************************************************************/
 void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
 {
@@ -238,8 +244,10 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
         int    lambda_inc = 0;
         
         // Dump
+        #if G_DEBUG_OPT
         std::cout << "Initial iteration: func=" << m_value << ", Lambda=" 
                   << m_lambda << std::endl;
+        #endif
         
         // Iterative fitting
         for (m_iter = 0; m_iter < m_max_iter; ++m_iter) {
@@ -251,9 +259,11 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
             double delta = value_old - m_value;
             
             // Dump
+            #if G_DEBUG_OPT
             std::cout << "Iteration " << m_iter+1 << ": func=" 
                       << m_value << ", Lambda=" << m_lambda
                       << ", delta=" << delta << std::endl;
+            #endif
             
             // Reset lambda increment if we had success
             if (m_lambda < lambda_old)
