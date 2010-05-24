@@ -52,7 +52,7 @@ public:
     // Operators
     virtual GObservation& operator= (const GObservation& obs);
 
-    // Methods
+    // Implemented methods
     void         obsname(const std::string& obsname) { m_obsname=obsname; return; }
     void         instrument(const std::string& instrument) { m_instrument=instrument; return; }
     void         tstart(const GTime& tstart) { m_tstart=tstart; return; }

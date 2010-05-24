@@ -48,7 +48,7 @@ public:
     GModel(void);
     GModel(const GModelSpatial& spatial, const GModelSpectral& spectral);
     GModel(const GModel& model);
-    ~GModel();
+    ~GModel(void);
  
     // Operators
     GModel& operator= (const GModel& model);
