@@ -154,9 +154,9 @@ AC_CONFIG_FILES([Makefile
                  src/opt/Makefile
                  src/obs/Makefile
                  src/model/Makefile
-		 src/app/Makefile
+                 src/app/Makefile
                  src/cta/Makefile
-		 src/lat/Makefile
+                 src/lat/Makefile
                  include/Makefile
                  test/Makefile
                  pyext/Makefile
