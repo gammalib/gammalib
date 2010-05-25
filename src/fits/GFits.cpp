@@ -171,21 +171,21 @@ void GFits::open(const std::string& filename)
     // Initialise FITS file as readwrite
     m_readwrite = 1;
 
-    // Open FITS file
+    // Try opening FITS file with readwrite access
     int status = 0;
     status     = __ffopen(&m_fitsfile, filename.c_str(), 1, &status);
 
-    // If FITS file does not exist then create it now
-    if (status == 104) {
-        status = 0;
-        status = __ffinit(&m_fitsfile, filename.c_str(), &status);
-    }
-
-    // If FITS file is readonly then open as readonly
-    else if (status == 112 || status == 105) {
+    // If failed then try opening as readonly
+    if (status == 104 || status == 112) {
         status      = 0;
         status      = __ffopen(&m_fitsfile, filename.c_str(), 0, &status);
         m_readwrite = 0;
+    }
+
+    // If failed then create FITS file now
+    if (status == 104) {
+        status = 0;
+        status = __ffinit(&m_fitsfile, filename.c_str(), &status);
     }
 
     // Throw any other error
