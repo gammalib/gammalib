@@ -24,11 +24,12 @@
 #include <string>
 #include <unistd.h>           // access() function
 #include "GCTAResponse.hpp"
+#include "GCTAPointing.hpp"
 #include "GCTAException.hpp"
 #include "GTools.hpp"
-#include "GVector.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_SET_CALDB                   "GCTAResponse::set_caldb(std::string&)"
 #define G_READ           "GCTAResponse::read_performance_table(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -138,20 +139,18 @@ GCTAResponse& GCTAResponse::operator= (const GCTAResponse& rsp)
  * @param[in] obsEng Observed energy of photon.
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
- * @param[in] instPntDir Instrument pointing direction (e.g. z-axis).
- * @param[in] instPosAng Instrument position angle.
+ * @param[in] pnt Pointer to instrument pointing information
  * @param[in] time Photon arrival time.
  ***************************************************************************/
-double GCTAResponse::irf(const GSkyDir& obsDir, const GEnergy& obsEng,
-                         const GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GSkyDir& instPntDir, const double& instPosAng,
-                         const GTime& time)
+double GCTAResponse::irf(GSkyDir& obsDir, const GEnergy& obsEng,
+                         GSkyDir& srcDir, const GEnergy& srcEng,
+                         const GPointing* pnt, const GTime& time)
 {
     // Get IRF components
     double irf;
-    irf  = psf(obsDir, obsEng, srcDir, srcEng, instPntDir, instPosAng, time);
-    irf *= aeff(obsDir, obsEng, srcDir, srcEng, instPntDir, instPosAng, time);
-    irf *= edisp(obsDir, obsEng, srcDir, srcEng, instPntDir, instPosAng, time);
+    irf  = psf(obsDir, obsEng, srcDir, srcEng, pnt, time);
+    irf *= aeff(obsDir, obsEng, srcDir, srcEng, pnt, time);
+    irf *= edisp(obsDir, obsEng, srcDir, srcEng, pnt, time);
 
     // Return IRF value
     return irf;
@@ -165,29 +164,22 @@ double GCTAResponse::irf(const GSkyDir& obsDir, const GEnergy& obsEng,
  * @param[in] obsEng Observed energy of photon.
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
- * @param[in] instPntDir Instrument pointing direction (e.g. z-axis).
- * @param[in] instPosAng Instrument position angle.
+ * @param[in] pnt Pointer to instrument pointing information
  * @param[in] time Photon arrival time.
  *
  * The actual implementation of this method assumes an effective area that
  * depends only on the true photon energy. No dependence on the photon's
  * arrival direction, observatory pointing and arrival time is assumed.
  ***************************************************************************/
-double GCTAResponse::aeff(const GSkyDir& obsDir, const GEnergy& obsEng,
-                          const GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GSkyDir& instPntDir, const double& instPosAng,
-                          const GTime& time)
+double GCTAResponse::aeff(GSkyDir& obsDir, const GEnergy& obsEng,
+                          GSkyDir& srcDir, const GEnergy& srcEng,
+                          const GPointing* pnt, const GTime& time)
 {
     // Get log(E)
     double logE = log10(srcEng.TeV());
     
-    // Interpolate effective area using node array
-    m_nodes.set_value(logE);
-    double aeff = m_aeff.at(m_nodes.inx_left())  * m_nodes.wgt_left() +
-                  m_aeff.at(m_nodes.inx_right()) * m_nodes.wgt_right();
-
-    // Convert from m2 to cm2
-    aeff *= 10000.0;
+    // Interpolate effective area using node array and convert to cm^2
+    double aeff = m_nodes.interpolate(logE, m_aeff) * 10000.0;
 
     // Return effective area
     return aeff;
@@ -201,22 +193,41 @@ double GCTAResponse::aeff(const GSkyDir& obsDir, const GEnergy& obsEng,
  * @param[in] obsEng Observed energy of photon
  * @param[in] srcDir True photon direction
  * @param[in] srcEng True energy of photon
- * @param[in] instPntDir Instrument pointing direction (e.g. z-axis)
- * @param[in] instPosAng Instrument position angle
+ * @param[in] pnt Pointer to instrument pointing information
  * @param[in] time Photon arrival time
  *
- * The Point Spread Function defines the probability that a photon coming
- * from direction 'srcDir' is measured towards direction 'obsDir'.
- *
- * @todo Implement method (just a dummy for the moment)
+ * The Point Spread Function defines the probability density 
+ * \f$d^2P/d\theta d\phi\f$
+ * that a photon coming from direction 'srcDir' is measured towards direction
+ * 'obsDir'. The actual method implements a simple 2D Gaussian for the PSF.
+ * The performance table quotes the size of the PSF as the 68%
+ * containment radius \f$r_{68}\f$ in degrees. 
+ * The containment radius \f$r\f$ is related to the 2D Gaussian 
+ * \f$\sigma\f$ by the relation \f$r=\sigma \sqrt{-2 \ln (1-P)}\f$, where
+ * \f$P\f is the containment fraction. For 68% one obtains
+ * \f$\sigma=0.6624 \times r_{68}\f$.
  ***************************************************************************/
-double GCTAResponse::psf(const GSkyDir& obsDir, const GEnergy& obsEng,
-                         const GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GSkyDir& instPntDir, const double& instPosAng,
-                         const GTime& time)
+double GCTAResponse::psf(GSkyDir& obsDir, const GEnergy& obsEng,
+                         GSkyDir& srcDir, const GEnergy& srcEng,
+                         const GPointing* pnt, const GTime& time)
 {
+    // Get log(E)
+    double logE = log10(srcEng.TeV());
+
+    // Determine Gaussian sigma in degrees
+    double sigma  = m_nodes.interpolate(logE, m_r68) * 0.6624;
+    double sigma2 = sigma * sigma;
+    
+    // Determine angular separation between true and measured photon
+    // direction in degrees
+    GSkyDir dir = obsDir;
+    double  r   = srcDir.dist_deg(dir);
+    
+    // Compute Psf value
+    double psf = exp(-0.5 * r * r / sigma2) / (twopi * sigma2);
+    
     // Return Psf value
-    return 1.0;
+    return psf;
 }
 
 
@@ -227,17 +238,15 @@ double GCTAResponse::psf(const GSkyDir& obsDir, const GEnergy& obsEng,
  * @param[in] obsEng Observed energy of photon.
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
- * @param[in] instPntDir Instrument pointing direction (e.g. z-axis).
- * @param[in] instPosAng Instrument position angle.
+ * @param[in] pnt Pointer to instrument pointing information
  * @param[in] time Photon arrival time.
  *
  * The actual implementation of this method assumes no energy dispersion,
  * which is equivalent of having a Dirac type energy dispersion.
  ***************************************************************************/
-double GCTAResponse::edisp(const GSkyDir& obsDir, const GEnergy& obsEng,
-                           const GSkyDir& srcDir, const GEnergy& srcEng,
-                           const GSkyDir& instPntDir, const double& instPosAng,
-                           const GTime& time)
+double GCTAResponse::edisp(GSkyDir& obsDir, const GEnergy& obsEng,
+                           GSkyDir& srcDir, const GEnergy& srcEng,
+                           const GPointing* pnt, const GTime& time)
 {
     // Dirac energy dispersion
     double edisp = (obsEng == srcEng) ? 1.0 : 0.0;
@@ -254,7 +263,6 @@ double GCTAResponse::edisp(const GSkyDir& obsDir, const GEnergy& obsEng,
  *
  * @todo Implement checking 
  ***************************************************************************/
-#define G_SET_CALDB                   "GCTAResponse::set_caldb(std::string&)"
 void GCTAResponse::set_caldb(const std::string& caldb)
 {
     // Check if calibration database directory is accessible
@@ -411,10 +419,8 @@ void GCTAResponse::read_performance_table(const std::string& filename)
     // If we have nodes then setup node array
     int num = m_logE.size();
     if (num > 0) {
-        GVector logE(num);
         for (int i = 0; i < num; ++i)
-            logE(i) = m_logE.at(i);
-        m_nodes.nodes(logE);
+            m_nodes.append(m_logE.at(i));
     }
 
     // Close file
