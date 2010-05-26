@@ -21,6 +21,7 @@ sources = GEnergy.cpp \
           GGti.cpp \
           GEbounds.cpp \
           GResponse.cpp \
+	  GPointing.cpp \
           GException_obs.cpp
 
 # Build libtool library
