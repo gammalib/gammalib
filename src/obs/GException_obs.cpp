@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GException_obs.cpp  -  obs exception handlers              *
+ *          GException_obs.cpp  -  observations exception handlers         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
@@ -10,24 +10,15 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GException_obs.cpp
+ * @brief Observation exception handler interface implementation.
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
 #include "GTools.hpp"
-
-
-/***********************************************************************//**
- * @brief Response error: invalid response type specified
- *
- * @param[in] origin Method that throws the error.
- * @param[in] type Specified response type.
- ***************************************************************************/
-GException::rsp_invalid_type::rsp_invalid_type(std::string origin,
-                                               std::string type)
-{
-    m_origin  = origin;
-    m_message = "Invalid response type '"+type+"' specified";
-}
 
 
 /***********************************************************************//**
@@ -44,4 +35,35 @@ GException::gradient_par_mismatch::gradient_par_mismatch(std::string origin,
     m_origin  = origin;
     m_message = "Gradient vector size "+str(nsize)+
                 " mismatches number "+str(npars)+" of model parameters.";
+}
+
+
+/***********************************************************************//**
+ * @brief Calibration database directory not found.
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] caldb Name of calibration database.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::caldb_not_found::caldb_not_found(std::string origin,
+                                             std::string caldb,
+                                             std::string message)
+{
+    m_origin  = origin;
+    m_message = "Calibration database '"+caldb+"' not found. "+message;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Response error: invalid response type specified
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] type Specified response type.
+ ***************************************************************************/
+GException::rsp_invalid_type::rsp_invalid_type(std::string origin,
+                                               std::string type)
+{
+    m_origin  = origin;
+    m_message = "Invalid response type '"+type+"' specified";
 }

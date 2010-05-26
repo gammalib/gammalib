@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GException.hpp
+ * @brief Exception handler interface definiton.
+ * @author J. Knodlseder
+ */
 
 #ifndef GEXCEPTION_HPP
 #define GEXCEPTION_HPP
@@ -20,8 +25,10 @@
 #include <stdexcept>                          // exception
 
 
-/***************************************************************************
- *                  Exception handler base class definition                *
+/***********************************************************************//**
+ * @class GExceptionHandler
+ *
+ * @brief Interface for exception handler.
  ***************************************************************************/
 class GExceptionHandler : public std::exception {
 public:
@@ -34,8 +41,12 @@ protected:
 };
 
 
-/***************************************************************************
- *                         Exception class definition                      *
+/***********************************************************************//**
+ * @class GException
+ *
+ * @brief Interface for exceptions.
+ *
+ * This is the object that it thrown in case of an exception.
  ***************************************************************************/
 class GException : public GExceptionHandler {
 public:
@@ -45,7 +56,7 @@ public:
     public:
         mem_alloc(std::string origin, unsigned num);
     };
-
+    
     // Empty object exception class
     class empty : public GExceptionHandler {
     public:
@@ -229,12 +240,6 @@ public:
         fits_wrong_image_operator(std::string origin, int naxis, int nargs);
     };
 
-    // Response invalid response type
-    class rsp_invalid_type : public GExceptionHandler {
-    public:
-        rsp_invalid_type(std::string origin, std::string type);
-    };
-
 
     // GSkymap exceptions
     class skymap : public GExceptionHandler {
@@ -331,11 +336,21 @@ public:
     };
 
 
-    // Invalid object release
+    // Observation exceptions
     class gradient_par_mismatch : public GExceptionHandler {
     public:
         gradient_par_mismatch(std::string origin, int nsize, int npars);
     };
+    class caldb_not_found : public GExceptionHandler {
+    public:
+        caldb_not_found(std::string origin, std::string home, 
+                        std::string message = "");
+    };
+    class rsp_invalid_type : public GExceptionHandler {
+    public:
+        rsp_invalid_type(std::string origin, std::string type);
+    };
+
 
 
 };
