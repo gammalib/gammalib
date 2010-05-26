@@ -10,7 +10,8 @@ sources = GCTAException.cpp \
           GCTAObservation.cpp \
           GCTAEventList.cpp \
           GCTAEventAtom.cpp \
-	  GCTAResponse.cpp
+	  GCTAResponse.cpp \
+	  GCTAPointing.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libcta.la
