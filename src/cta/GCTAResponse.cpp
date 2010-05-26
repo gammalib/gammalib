@@ -22,6 +22,7 @@
 #endif
 #include <vector>
 #include <string>
+#include <unistd.h>           // access() function
 #include "GCTAResponse.hpp"
 #include "GCTAException.hpp"
 #include "GTools.hpp"
