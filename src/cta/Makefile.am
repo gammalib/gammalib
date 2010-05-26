@@ -6,22 +6,11 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/src/support
 
 # Define sources for this directory
-sources = GCTAObservation.cpp \
+sources = GCTAException.cpp \
+          GCTAObservation.cpp \
           GCTAEventList.cpp \
           GCTAEventAtom.cpp \
-	  GCTAResponse.cpp \
-	  GCTAAeff.cpp \
-	  GCTAPsf.cpp \
-	  GCTAEdisp.cpp
-#sources = GCTAObservation.cpp \
-#          GCTAEventCube.cpp \
-#          GCTAEventAtom.cpp \
-#          GCTAEventBin.cpp \
-#          GCTAResponse.cpp \
-#          GCTAResponseTable.cpp \
-#          GCTAAeff.cpp \
-#          GCTAPsf.cpp \
-#          GCTAEdisp.cpp
+	  GCTAResponse.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libcta.la
