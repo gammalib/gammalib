@@ -20,6 +20,7 @@
 #define GRESPONSE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include "GPointing.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
@@ -36,77 +37,28 @@ class GResponse {
   friend class GObservation;
 
 public:
-    /// Constructor
-    GResponse();
-
-    /// Copy constructor
+    // Constructors and destructors
+    GResponse(void);
     GResponse(const GResponse& rsp);
+    virtual ~GResponse(void);
 
-    /// Destructor
-    virtual ~GResponse();
-
-    /// Assignment operator
+    // Operators
     virtual GResponse& operator= (const GResponse& rsp);
 
-    /// Pure virtual method to define the interface for the member function
-    /// returning the instrument response function value
-    /// @param[in] obsDir Observed photon direction
-    /// @param[in] obsEng Observed energy of photon
-    /// @param[in] srcDir True photon direction
-    /// @param[in] srcEng True energy of photon
-    /// @param[in] instPntDir Instrument pointing direction (e.g. z-axis)
-    /// @param[in] instPosAng Instrument position angle
-    /// @param[in] time Photon arrival time
-    virtual double irf(const GSkyDir& obsDir, const GEnergy& obsEng,
-                       const GSkyDir& srcDir, const GEnergy& srcEng,
-                       const GSkyDir& instPntDir, const double& instPosAng,
-                       const GTime& time) = 0;
-
-    /// Pure virtual method to define the interface for the member function
-    /// returning the point spread function value
-    /// @param[in] obsDir Observed photon direction
-    /// @param[in] obsEng Observed energy of photon
-    /// @param[in] srcDir True photon direction
-    /// @param[in] srcEng True energy of photon
-    /// @param[in] instPntDir Instrument pointing direction (e.g. z-axis)
-    /// @param[in] instPosAng Instrument position angle
-    /// @param[in] time Photon arrival time
-    virtual double psf(const GSkyDir& obsDir, const GEnergy& obsEng,
-                       const GSkyDir& srcDir, const GEnergy& srcEng,
-                       const GSkyDir& instPntDir, const double& instPosAng,
-                       const GTime& time) = 0;
-
-    /// Pure virtual method to define the interface for the member function
-    /// returning the effective area value
-    /// @param[in] obsDir Observed photon direction
-    /// @param[in] obsEng Observed energy of photon
-    /// @param[in] srcDir True photon direction
-    /// @param[in] srcEng True energy of photon
-    /// @param[in] instPntDir Instrument pointing direction (e.g. z-axis)
-    /// @param[in] instPosAng Instrument position angle
-    /// @param[in] time Photon arrival time
-    virtual double aeff(const GSkyDir& obsDir, const GEnergy& obsEng,
-                        const GSkyDir& srcDir, const GEnergy& srcEng,
-                        const GSkyDir& instPntDir, const double& instPosAng,
-                        const GTime& time) = 0;
-
-    /// Pure virtual method to define the interface for the member function
-    /// returning the energy dispersion value
-    /// @param[in] obsDir Observed photon direction
-    /// @param[in] obsEng Observed energy of photon
-    /// @param[in] srcDir True photon direction
-    /// @param[in] srcEng True energy of photon
-    /// @param[in] instPntDir Instrument pointing direction (e.g. z-axis)
-    /// @param[in] instPosAng Instrument position angle
-    /// @param[in] time Photon arrival time
-    virtual double edisp(const GSkyDir& obsDir, const GEnergy& obsEng,
-                         const GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GSkyDir& instPntDir, const double& instPosAng,
-                         const GTime& time) = 0;
-
-    /// Pure virtual method to define the calibration database
-    /// @param[in] caldb Calibration database to be used
-    virtual void set_caldb(const std::string& caldb) = 0;
+    // Pure virtual methods
+    virtual double irf(GSkyDir& obsDir, const GEnergy& obsEng,
+                       GSkyDir& srcDir, const GEnergy& srcEng,
+                       const GPointing* pnt, const GTime& time) = 0;
+    virtual double psf(GSkyDir& obsDir, const GEnergy& obsEng,
+                       GSkyDir& srcDir, const GEnergy& srcEng,
+                       const GPointing* pnt, const GTime& time) = 0;
+    virtual double aeff(GSkyDir& obsDir, const GEnergy& obsEng,
+                        GSkyDir& srcDir, const GEnergy& srcEng,
+                        const GPointing* pnt, const GTime& time) = 0;
+    virtual double edisp(GSkyDir& obsDir, const GEnergy& obsEng,
+                         GSkyDir& srcDir, const GEnergy& srcEng,
+                         const GPointing* pnt, const GTime& time) = 0;
+    virtual void   set_caldb(const std::string& caldb) = 0;
 
 protected:
     // Protected methods
@@ -118,10 +70,6 @@ protected:
     // Protected data area 
     std::string m_caldb;    //!< Name of or path to the calibration database
     std::string m_rspname;  //!< Name of the instrument response
-
-
-
-private:
 };
 
 #endif /* GRESPONSE_HPP */

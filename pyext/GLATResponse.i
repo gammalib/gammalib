@@ -30,40 +30,31 @@
 class GLATResponse : public GResponse {
 public:
     // Constructors and destructors
-    GLATResponse();
+    GLATResponse(void);
     GLATResponse(const GLATResponse& rsp);
-    ~GLATResponse();
+    ~GLATResponse(void);
 
-    // IRF Methods
-    double irf(const GSkyDir& obsDir, const GEnergy& obsEng,
-               const GSkyDir& srcDir, const GEnergy& srcEng,
-               const GSkyDir& instPntDir, const double& instPosAng,
-               const GTime& time);
-    // Aeff Methods
-    double aeff(const GSkyDir& obsDir, const GEnergy& obsEng,
-                const GSkyDir& srcDir, const GEnergy& srcEng,
-                const GSkyDir& instPntDir, const double& instPosAng,
-                const GTime& time);
-    double aeff(const double& logE, const double& ctheta);
-    void   aeff_ctheta_min(const double& ctheta);
-    double aeff_ctheta_min(void) const;
-
-    // PSF Methods
-    double  psf(const GSkyDir& obsDir, const GEnergy& obsEng,
-                const GSkyDir& srcDir, const GEnergy& srcEng,
-                const GSkyDir& instPntDir, const double& instPosAng,
-                const GTime& time);
-    double  psf(const double& delta, const double& logE, const double& ctheta);
-    GVector psf(const GVector& delta, const double& logE, const double& ctheta);
-
-    // Edisp Methods
-    double edisp(const GSkyDir& obsDir, const GEnergy& obsEng,
-                 const GSkyDir& srcDir, const GEnergy& srcEng,
-                 const GSkyDir& instPntDir, const double& instPosAng,
-                 const GTime& time);
+    // Implemented virtual base class methods
+    double irf(GSkyDir& obsDir, const GEnergy& obsEng,
+               GSkyDir& srcDir, const GEnergy& srcEng,
+               const GPointing* pnt, const GTime& time);
+    double aeff(GSkyDir& obsDir, const GEnergy& obsEng,
+                GSkyDir& srcDir, const GEnergy& srcEng,
+                const GPointing* pnt, const GTime& time);
+    double  psf(GSkyDir& obsDir, const GEnergy& obsEng,
+                GSkyDir& srcDir, const GEnergy& srcEng,
+                const GPointing* pnt, const GTime& time);
+    double edisp(GSkyDir& obsDir, const GEnergy& obsEng,
+                 GSkyDir& srcDir, const GEnergy& srcEng,
+                 const GPointing* pnt, const GTime& time);
+    void   set_caldb(const std::string& caldb);
 
     // Other Methods
-    void set_caldb(const std::string& caldb);
-    void load(const std::string& rspname, const std::string& rsptype);
-    void save(const std::string& rspname) const;
+    double        aeff(const double& logE, const double& ctheta);
+    void          aeff_ctheta_min(const double& ctheta);
+    double        aeff_ctheta_min(void) const;
+    double        psf(const double& delta, const double& logE, const double& ctheta);
+    GVector       psf(const GVector& delta, const double& logE, const double& ctheta);
+    void          load(const std::string& rspname, const std::string& rsptype);
+    void          save(const std::string& rspname) const;
 };

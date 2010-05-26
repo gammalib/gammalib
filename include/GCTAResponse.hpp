@@ -26,6 +26,7 @@
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GResponse.hpp"
+#include "GPointing.hpp"
 #include "GNodeArray.hpp"
 
 
@@ -49,25 +50,21 @@ public:
     GCTAResponse& operator= (const GCTAResponse & rsp);
 
     // Implemented virtual base class methods
-    double irf(const GSkyDir& obsDir, const GEnergy& obsEng,
-               const GSkyDir& srcDir, const GEnergy& srcEng,
-               const GSkyDir& instPntDir, const double& instPosAng,
-               const GTime& time);
-    double aeff(const GSkyDir& obsDir, const GEnergy& obsEng,
-                const GSkyDir& srcDir, const GEnergy& srcEng,
-                const GSkyDir& instPntDir, const double& instPosAng,
-                const GTime& time);
-    double psf(const GSkyDir& obsDir, const GEnergy& obsEng,
-               const GSkyDir& srcDir, const GEnergy& srcEng,
-               const GSkyDir& instPntDir, const double& instPosAng,
-               const GTime& time);
-    double edisp(const GSkyDir& obsDir, const GEnergy& obsEng,
-                 const GSkyDir& srcDir, const GEnergy& srcEng,
-                 const GSkyDir& instPntDir, const double& instPosAng,
-                 const GTime& time);
+    double irf(GSkyDir& obsDir, const GEnergy& obsEng,
+               GSkyDir& srcDir, const GEnergy& srcEng,
+               const GPointing* pnt, const GTime& time);
+    double aeff(GSkyDir& obsDir, const GEnergy& obsEng,
+                GSkyDir& srcDir, const GEnergy& srcEng,
+                const GPointing* pnt, const GTime& time);
+    double psf(GSkyDir& obsDir, const GEnergy& obsEng,
+               GSkyDir& srcDir, const GEnergy& srcEng,
+               const GPointing* pnt, const GTime& time);
+    double edisp(GSkyDir& obsDir, const GEnergy& obsEng,
+                 GSkyDir& srcDir, const GEnergy& srcEng,
+                 const GPointing* pnt, const GTime& time);
+    void   set_caldb(const std::string& caldb);
 
     // Other Methods
-    void set_caldb(const std::string& caldb);
     void load(const std::string& irfname);
 
 private:
