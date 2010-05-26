@@ -10,30 +10,19 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GException.cpp
+ * @brief Exception handler interface implementation.
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
+#include "GTools.hpp"
 
 
-/***************************************************************************
- *                       Private conversion functions                      *
- ***************************************************************************/
-std::string str(int value)
-{
-    std::ostringstream s_value;
-    s_value << value;
-    return  s_value.str();
-}
-std::string str(double value)
-{
-    std::ostringstream s_value;
-    s_value << std::scientific << value;
-    return  s_value.str();
-}
-
-
-/***************************************************************************
- *                  Exception handler base class definition                *
+/***********************************************************************//**
+ * @brief Exception message.
  ***************************************************************************/
 const char* GExceptionHandler::what() const throw()
 {
@@ -42,13 +31,14 @@ const char* GExceptionHandler::what() const throw()
 }
 
 
-/***************************************************************************
- *                        Memory allocation exception                      *
+/***********************************************************************//**
+ * @brief Memory allocation exception.
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] num Requested amount of memory.
  ***************************************************************************/
 GException::mem_alloc::mem_alloc(std::string origin, unsigned num)
 {
     m_origin  = origin;
     m_message = "Memory allocation error (" + str((int)num) + " elements)";
 }
-
-
