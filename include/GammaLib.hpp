@@ -110,6 +110,7 @@
  ***************************************************************************/
 
 /* __ CTA specific code __________________________________________________ */
+#include "GCTAException.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAEventList.hpp"
 #include "GCTAEventAtom.hpp"
