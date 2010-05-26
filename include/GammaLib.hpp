@@ -91,6 +91,7 @@
 #include "GEvent.hpp"
 #include "GGti.hpp"
 #include "GEbounds.hpp"
+#include "GPointing.hpp"
 #include "GResponse.hpp"
 
 /* __ Model handling _____________________________________________________ */
@@ -114,6 +115,7 @@
 #include "GCTAObservation.hpp"
 #include "GCTAEventList.hpp"
 #include "GCTAEventAtom.hpp"
+#include "GCTAPointing.hpp"
 #include "GCTAResponse.hpp"
 
 /* __ Fermi/LAT specific code ____________________________________________ */
@@ -122,6 +124,7 @@
 #include "GLATEventCube.hpp"
 #include "GLATEventAtom.hpp"
 #include "GLATEventBin.hpp"
+#include "GLATPointing.hpp"
 #include "GLATResponse.hpp"
 
 #endif /* GAMMALIB_HPP */

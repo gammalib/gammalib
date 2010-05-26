@@ -20,6 +20,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GEventBin.hpp \
                      GGti.hpp \
                      GEbounds.hpp \
+		     GPointing.hpp \
                      GResponse.hpp \
                      GModels.hpp \
                      GModel.hpp \
@@ -38,6 +39,7 @@ pkginclude_HEADERS = GammaLib.hpp \
 		     GCTAObservation.hpp \
 		     GCTAEventList.hpp \
 		     GCTAEventAtom.hpp \
+		     GCTAPointing.hpp \
 		     GCTAResponse.hpp \
 		     GLATEventAtom.hpp \
                      GLATObservation.hpp \
@@ -45,6 +47,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GLATEventCube.hpp \
                      GLATEventAtom.hpp \
                      GLATEventBin.hpp \
+		     GLATPointing.hpp \
                      GLATResponse.hpp \
                      GLATResponseTable.hpp \
                      GFitsHeaderCard.hpp \
