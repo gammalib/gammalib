@@ -285,11 +285,20 @@ void GEnergy::free_members(void)
  *
  * @param[in] os Output stream into which the model will be dumped
  * @param[in] eng Object to be dumped
+ *
+ * Dump energy in output stream with automatic adaption of the units.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GEnergy& eng)
 {
     // Put object in stream
-    os << eng.MeV() << std::endl;
+    if (eng.GeV() > 1000.0)
+        os << eng.TeV() << " TeV";
+    else if (eng.MeV() > 1000.0)
+        os << eng.GeV() << " GeV";
+    else if (eng.keV() > 1000.0)
+        os << eng.MeV() << " MeV";
+    else
+        os << eng.keV() << " keV";
 
     // Return output stream
     return os;
