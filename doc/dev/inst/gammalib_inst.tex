@@ -1,0 +1,217 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% GammaLib Instrument Specific Interface
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definitions for manual package
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\task}{\mbox{GammaLib}}
+\newcommand{\this}{\mbox{\tt \task}}
+\newcommand{\shorttype}{\mbox{INST}}
+\newcommand{\doctype}{\mbox{Instrument specific interface}}
+\newcommand{\version}{\mbox{draft}}
+\newcommand{\calendar}{\mbox{27 May 2010}}
+\newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
+\newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document definition
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}[12pt,a4]
+\usepackage{epsfig}
+\usepackage{manual}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Begin of document body
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\frontpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+The present document describes the instrument specific interface of the \this\ toolbox
+and provides guideslines of how to add a new interface to the toolbox.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Instrument response
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Instrument response}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Response model}
+
+The general instrument response function
+$R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)$
+provides the effective detection area per time, energy and solid angle
+(in units of cm$^2$ s$^{-1}$ MeV$^{-1}$ sr$^{-1}$) 
+for measuring a photon at position $\vec{p'}$ with an energy of $E'$ and at the time $t'$ if it 
+arrives on the instrument that is pointed towards $\vec{d}$ from direction $\vec{p}$ with an 
+energy of $E$ at time $t$.
+Note that $\vec{p'}$ is not necessarily a measured arrival direction, but it can also be
+a detector coordinate.
+$R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)$ is factorised following
+\begin{eqnarray}
+R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) = 
+A_{\rm eff}(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \times
+PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \times
+E_{\rm disp}(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \times \nonumber \\
+T_{\rm disp}(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)
+\label{eq:rspfact}
+\end{eqnarray}
+where
+\begin{itemize}
+\item[] $A_{\rm eff}(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)$ is the effective area (in units of cm$^2$)
+\item[] $PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)$ is the point spread function (in units of sr$^{-1}$)
+\item[] $E_{\rm disp}(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)$ is the energy dispersion (in units of MeV$^{-1}$)
+\item[] $T_{\rm disp}(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)$ is the time dispersion (in units of s$^{-1}$)
+\end{itemize}
+The \this\ implementation of the response function and parameters is summarised in 
+Table \ref{tab:respar}.
+
+%%% Response parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!h]
+\caption{\this\ implementation of the response function and parameters. 
+The last column indicates if the function or parameter requires an
+instrument specific implementation (the corresponding class is an abstract base class
+from which the implementation needs to be derived).
+\label{tab:respar}}
+\begin{center}
+\begin{tabular}{lccc}
+\hline
+\hline
+\noalign{\smallskip}
+Response function or parameter & Designation & Class (::method) & Instrument specific \\
+\noalign{\smallskip}
+\hline
+\noalign{\smallskip}
+Response function & $R$ & {\tt GResponse::irf()} & possible \\
+Effective area & $A_{\rm eff}$ & {\tt GResponse::aeff()} & {\bf yes} \\
+Point spread function & $PSF$ & {\tt GResponse::psf()} & {\bf yes} \\
+Energy dispersion & $E_{\rm disp}$ & {\tt GResponse::edisp()} & {\bf yes} \\
+Time dispersion & $T_{\rm disp}$ & {\tt GResponse::tdisp()} & {\bf yes} \\
+Measured location of photon & $\vec{p'}$ & {\tt GInstDir} & {\bf yes} \\
+Measured energy of photon & $E'$ & {\tt GEnergy} & no \\
+Measured arrival time & $t'$ & {\tt GTime} & no \\
+Instrument pointing & $d$ & {\tt GPointing} & {\bf yes} \\
+True arrival direction of photon & $\vec{p}$ & {\tt GSkyDir} & no \\
+True energy of photon & $E$ & {\tt GEnergy} & no \\
+True arrival time of photon & $t$ & {\tt GTime} & no \\
+\noalign{\smallskip}
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Assuming that the photon intensity received from a gamma-ray source is described by
+the source function $S(\vec{p}, E, t)$ (int units of photons cm$^{-2}$ s$^{-1}$ MeV$^{-1}$ sr$^{-1}$)
+the probability of measuring a photon a photon at position $\vec{p'}$ with an
+energy of $E'$ and at the time $t'$ from the source is given by
+\begin{equation}
+N(\vec{p'}, E', t') = \int_{0}^{t'+\Delta t} \int_{0}^{E'+\Delta E} \int_{\Omega} 
+S(\vec{p}, E, t) \times R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \, {\rm d}\vec{p} \, {\rm d}E \,{\rm d}t
+\end{equation}
+(in units of counts s$^{-1}$ MeV$^{-1}$ sr$^{-1}$).
+The terms $\Delta t$ and $\Delta E$ in the upper integration boundaries allow for measurement
+uncertainties in energy and arrivial time.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Response class {\tt GResponse}}
+
+An instrument specific response class {\tt GXXXResponse} (where {\tt XXX} is the instrument code)
+needs to be provided that derives from the abstract base class {\tt GResponse}.
+Below are the methods that need to be implemented in {\tt GXXXResponse} and their interface
+definition.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXResponse::irf()}}
+
+Following the factorisation of the response (cf.~Eq.~\ref{eq:rspfact}) the standard implementation
+of the {\tt GResponse::irf()} is given by the following code:
+\begin{verbatim}
+double GResponse::irf(const GInstDir* obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                      const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                      const GPointing* pnt)
+{
+    double irf = psf(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
+    irf *= aeff(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
+    irf *= edisp(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
+    irf *= tdisp(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
+    return irf;
+}
+\end{verbatim}
+This code is implemented in the {\tt GResponse::irf()} base class as a {\tt virtual} member and
+needs not to be implemented in the derived instrument specific class.
+However, an instrument specific version may be provided as for example {\tt tdisp()} is rarely
+needed and also {\tt edisp()} is often not used.
+By omitting these terms a more efficient response calculation may be provided.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXResponse::aeff()}}
+
+Needs to be implemented and needs to return effective area in units of cm$^2$.
+Interface:
+\begin{verbatim}
+double GXXXResponse::aeff(const GInstDir* obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                          const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                          const GPointing* pnt)
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXResponse::psf()}}
+
+Needs to be implemented and needs to return point spread function in units of sr$^{-1}$.
+Interface:
+\begin{verbatim}
+double GXXXResponse::psf(const GInstDir* obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                         const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                         const GPointing* pnt)
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXResponse::edisp()}}
+
+Needs to be implemented and needs to return energy dispersion in units of MeV$^{-1}$.
+Interface:
+\begin{verbatim}
+double GXXXResponse::edisp(const GInstDir* obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                          const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                          const GPointing* pnt)
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXResponse::tdisp()}}
+
+Needs to be implemented and needs to return time dispersion in units of s$^{-1}$.
+Interface:
+\begin{verbatim}
+double GXXXResponse::tdisp(const GInstDir* obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                          const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                          const GPointing* pnt)
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXInstDir}}
+
+Needs to be implemented.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXPointing}}
+
+Needs to be implemented.
+
+\end{document}
