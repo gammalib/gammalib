@@ -104,7 +104,7 @@ GSkyDir& GSkyDir::operator= (const GSkyDir& dir)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise private members
         init_members();
 
         // Copy members
@@ -122,6 +122,23 @@ GSkyDir& GSkyDir::operator= (const GSkyDir& dir)
  =                              Public methods                             =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear sky direction
+ ***************************************************************************/
+void GSkyDir::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise private members
+    init_members();
+
+    // Return
+    return;
+}
+
+
 
 /***********************************************************************//**
  * @brief Set equatorial sky direction (radians)

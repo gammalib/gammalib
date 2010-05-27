@@ -34,6 +34,7 @@ public:
     virtual ~GSkyDir(void);
 
     // Methods
+    void   clear(void);
     void   radec(const double& ra, const double& dec);
     void   radec_deg(const double& ra, const double& dec);
     void   lb(const double& l, const double& b);

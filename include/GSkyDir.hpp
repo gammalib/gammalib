@@ -52,6 +52,7 @@ public:
     GSkyDir& operator= (const GSkyDir& dir);
 
     // Methods
+    void   clear(void);
     void   radec(const double& ra, const double& dec);
     void   radec_deg(const double& ra, const double& dec);
     void   lb(const double& l, const double& b);
