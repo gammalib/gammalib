@@ -36,23 +36,6 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GLog.hpp \
 		     GPars.hpp \
 		     GPar.hpp \
-		     GCTAException.hpp \
-		     GCTAObservation.hpp \
-		     GCTAEventList.hpp \
-		     GCTAEventAtom.hpp \
-		     GCTAPointing.hpp \
-		     GCTAInstDir.hpp \
-		     GCTAResponse.hpp \
-		     GLATEventAtom.hpp \
-                     GLATObservation.hpp \
-                     GLATEventList.hpp \
-                     GLATEventCube.hpp \
-                     GLATEventAtom.hpp \
-                     GLATEventBin.hpp \
-		     GLATPointing.hpp \
-		     GLATInstDir.hpp \
-                     GLATResponse.hpp \
-                     GLATResponseTable.hpp \
                      GFitsHeaderCard.hpp \
                      GFitsHeader.hpp \
                      GFitsData.hpp \
