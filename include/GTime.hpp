@@ -43,6 +43,8 @@ class GTime {
     friend GTime operator- (const GTime &a, const GTime &b);
     friend GTime operator* (const double &a, const GTime &b);
     friend GTime operator* (const GTime &a, const double &b);
+    friend bool  operator== (const GTime &a, const GTime &b);
+    friend bool  operator!= (const GTime &a, const GTime &b);
 
 public:
     // Constructors and destructors
@@ -101,6 +103,16 @@ GTime operator* (const GTime& a, const double& b)
     GTime result;
     result.m_time = b * a.m_time;
     return result;
+}
+inline
+bool operator== (const GTime &a, const GTime &b)
+{
+    return (a.m_time == b.m_time);
+}
+inline
+bool operator!= (const GTime &a, const GTime &b)
+{
+    return (a.m_time != b.m_time);
 }
 
 
