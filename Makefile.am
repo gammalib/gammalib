@@ -4,7 +4,7 @@
 ACLOCAL_AMFLAGS = -I m4
 
 # Subdirectories
-SUBDIRS = include src test pyext
+SUBDIRS = include inst src test pyext
 
 # Extra files to be distributed in the tar file
 EXTRA_DIST = autogen.sh \
