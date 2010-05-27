@@ -106,28 +106,4 @@
 #include "GModelTemporal.hpp"
 #include "GModelTemporalConst.hpp"
 
-
-/***************************************************************************
- *                      Instrument specific services                       *
- ***************************************************************************/
-
-/* __ CTA specific code __________________________________________________ */
-#include "GCTAException.hpp"
-#include "GCTAObservation.hpp"
-#include "GCTAEventList.hpp"
-#include "GCTAEventAtom.hpp"
-#include "GCTAInstDir.hpp"
-#include "GCTAPointing.hpp"
-#include "GCTAResponse.hpp"
-
-/* __ Fermi/LAT specific code ____________________________________________ */
-#include "GLATObservation.hpp"
-#include "GLATEventList.hpp"
-#include "GLATEventCube.hpp"
-#include "GLATEventAtom.hpp"
-#include "GLATEventBin.hpp"
-#include "GLATInstDir.hpp"
-#include "GLATPointing.hpp"
-#include "GLATResponse.hpp"
-
 #endif /* GAMMALIB_HPP */
