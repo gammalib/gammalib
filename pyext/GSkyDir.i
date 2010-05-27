@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GSkyDir.i  -  Sky direction class SWIG file               *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -29,23 +29,25 @@
 class GSkyDir {
 public:
     // Constructors and destructors
-    GSkyDir();
+    GSkyDir(void);
     GSkyDir(const GSkyDir& dir);
-    virtual ~GSkyDir();
+    virtual ~GSkyDir(void);
 
     // Methods
     void   radec(const double& ra, const double& dec);
     void   radec_deg(const double& ra, const double& dec);
     void   lb(const double& l, const double& b);
     void   lb_deg(const double& l, const double& b);
-    double l(void);
-    double l_deg(void);
-    double b(void);
-    double b_deg(void);
-    double ra(void);
-    double ra_deg(void);
-    double dec(void);
-    double dec_deg(void);
+    double l(void) const;
+    double l_deg(void) const;
+    double b(void) const;
+    double b_deg(void) const;
+    double ra(void) const;
+    double ra_deg(void) const;
+    double dec(void) const;
+    double dec_deg(void) const;
+    double dist(GSkyDir& dir) const;
+    double dist_deg(GSkyDir& dir) const;
 };
 
 

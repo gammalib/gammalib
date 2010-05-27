@@ -33,20 +33,18 @@
 
 /* __ Debug definitions __________________________________________________ */
 
-/* __ Prototype __________________________________________________________ */
-void   euler(const int& type, const double& xin, const double &yin,
-             double* xout, double *yout);
+/* __ Prototypes _________________________________________________________ */
 
 /*==========================================================================
  =                                                                         =
- =                      GSkyDir constructors/destructors                   =
+ =                          Constructors/destructors                       =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GSkyDir::GSkyDir()
+GSkyDir::GSkyDir(void)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -77,7 +75,7 @@ GSkyDir::GSkyDir(const GSkyDir& dir)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GSkyDir::~GSkyDir()
+GSkyDir::~GSkyDir(void)
 {
     // Free members
     free_members();
@@ -89,7 +87,7 @@ GSkyDir::~GSkyDir()
 
 /*==========================================================================
  =                                                                         =
- =                             GSkyDir operators                           =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -121,7 +119,7 @@ GSkyDir& GSkyDir::operator= (const GSkyDir& dir)
 
 /*==========================================================================
  =                                                                         =
- =                          GSkyDir public methods                         =
+ =                              Public methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -134,8 +132,8 @@ GSkyDir& GSkyDir::operator= (const GSkyDir& dir)
 void GSkyDir::radec(const double& ra, const double& dec)
 {
     // Set attributes
-    m_has_lb    = 0;
-    m_has_radec = 1;
+    m_has_lb    = false;
+    m_has_radec = true;
 
     // Set direction
     m_ra  = ra;
@@ -155,8 +153,8 @@ void GSkyDir::radec(const double& ra, const double& dec)
 void GSkyDir::radec_deg(const double& ra, const double& dec)
 {
     // Set attributes
-    m_has_lb    = 0;
-    m_has_radec = 1;
+    m_has_lb    = false;
+    m_has_radec = true;
 
     // Set direction
     m_ra  = ra  * deg2rad;
@@ -176,8 +174,8 @@ void GSkyDir::radec_deg(const double& ra, const double& dec)
 void GSkyDir::lb(const double& l, const double& b)
 {
     // Set attributes
-    m_has_lb    = 1;
-    m_has_radec = 0;
+    m_has_lb    = true;
+    m_has_radec = false;
 
     // Set direction
     m_l = l;
@@ -197,8 +195,8 @@ void GSkyDir::lb(const double& l, const double& b)
 void GSkyDir::lb_deg(const double& l, const double& b)
 {
     // Set attributes
-    m_has_lb    = 1;
-    m_has_radec = 0;
+    m_has_lb    = true;
+    m_has_radec = false;
 
     // Set direction
     m_l = l * deg2rad;
@@ -212,7 +210,7 @@ void GSkyDir::lb_deg(const double& l, const double& b)
 /***********************************************************************//**
  * @brief Returns galactic longitude in radians
  ***************************************************************************/
-double GSkyDir::l(void)
+double GSkyDir::l(void) const
 {
     // If we have no galactic coordinates then get them now
     if (!m_has_lb && m_has_radec)
@@ -226,7 +224,7 @@ double GSkyDir::l(void)
 /***********************************************************************//**
  * @brief Returns galactic longitude in degrees
  ***************************************************************************/
-double GSkyDir::l_deg(void)
+double GSkyDir::l_deg(void) const
 {
     // If we have no galactic coordinates then get them now
     if (!m_has_lb && m_has_radec)
@@ -240,7 +238,7 @@ double GSkyDir::l_deg(void)
 /***********************************************************************//**
  * @brief Returns galactic latitude in radians
  ***************************************************************************/
-double GSkyDir::b(void)
+double GSkyDir::b(void) const
 {
     // If we have no galactic coordinates then get them now
     if (!m_has_lb && m_has_radec)
@@ -254,7 +252,7 @@ double GSkyDir::b(void)
 /***********************************************************************//**
  * @brief Returns galactic latitude in degrees
  ***************************************************************************/
-double GSkyDir::b_deg(void)
+double GSkyDir::b_deg(void) const
 {
     // If we have no galactic coordinates then get them now
     if (!m_has_lb && m_has_radec)
@@ -268,7 +266,7 @@ double GSkyDir::b_deg(void)
 /***********************************************************************//**
  * @brief Returns Right Ascension in radians
  ***************************************************************************/
-double GSkyDir::ra(void)
+double GSkyDir::ra(void) const
 {
     // If we have no equatorial coordinates then get them now
     if (!m_has_radec && m_has_lb)
@@ -282,7 +280,7 @@ double GSkyDir::ra(void)
 /***********************************************************************//**
  * @brief Returns Right Ascension in degrees
  ***************************************************************************/
-double GSkyDir::ra_deg(void)
+double GSkyDir::ra_deg(void) const
 {
     // If we have no equatorial coordinates then get them now
     if (!m_has_radec && m_has_lb)
@@ -296,7 +294,7 @@ double GSkyDir::ra_deg(void)
 /***********************************************************************//**
  * @brief Returns Declination in radians
  ***************************************************************************/
-double GSkyDir::dec(void)
+double GSkyDir::dec(void) const
 {
     // If we have no equatorial coordinates then get them now
     if (!m_has_radec && m_has_lb)
@@ -310,7 +308,7 @@ double GSkyDir::dec(void)
 /***********************************************************************//**
  * @brief Returns Declination in degrees
  ***************************************************************************/
-double GSkyDir::dec_deg(void)
+double GSkyDir::dec_deg(void) const
 {
     // If we have no equatorial coordinates then get them now
     if (!m_has_radec && m_has_lb)
@@ -326,7 +324,7 @@ double GSkyDir::dec_deg(void)
  *
  * @param[in] dir Sky direction to which distance is to be computed.
  ***************************************************************************/
-double GSkyDir::dist(GSkyDir& dir)
+double GSkyDir::dist(GSkyDir& dir) const
 {
     // Initialise cosine of distance
     double cosdis;
@@ -371,7 +369,7 @@ double GSkyDir::dist(GSkyDir& dir)
  *
  * @param[in] dir Sky direction to which distance is to be computed.
  ***************************************************************************/
-double GSkyDir::dist_deg(GSkyDir& dir)
+double GSkyDir::dist_deg(GSkyDir& dir) const
 {
     // Return distance in degrees
     return (dist(dir) * rad2deg);
@@ -380,7 +378,7 @@ double GSkyDir::dist_deg(GSkyDir& dir)
 
 /*==========================================================================
  =                                                                         =
- =                          GSkyDir private methods                        =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -390,8 +388,8 @@ double GSkyDir::dist_deg(GSkyDir& dir)
 void GSkyDir::init_members(void)
 {
     // Initialise members
-    m_has_lb    = 0;
-    m_has_radec = 0;
+    m_has_lb    = false;
+    m_has_radec = false;
     m_l         = 0.0;
     m_b         = 0.0;
     m_ra        = 0.0;
@@ -427,10 +425,6 @@ void GSkyDir::copy_members(const GSkyDir& dir)
  ***************************************************************************/
 void GSkyDir::free_members(void)
 {
-    // Free memory
-
-    // Signal free pointers
-
     // Return
     return;
 }
@@ -439,10 +433,16 @@ void GSkyDir::free_members(void)
 /***********************************************************************//**
  * @brief Convert equatorial to galactic coordinates
  ***************************************************************************/
-void GSkyDir::equ2gal(void)
+void GSkyDir::equ2gal(void) const
 {
+    // Get non-const pointers to data members. This allows to circumvent
+    // the const correctness and allows treating GSkyDir access methods
+    // as const
+    double* l = (double*)&m_l;
+    double* b = (double*)&m_b;
+
     // Convert from equatorial to galactic
-    euler(0, m_ra, m_dec, &m_l, &m_b);
+    euler(0, m_ra, m_dec, l, b);
 
     // Return
     return;
@@ -452,46 +452,21 @@ void GSkyDir::equ2gal(void)
 /***********************************************************************//**
  * @brief Convert galactic to equatorial coordinates
  ***************************************************************************/
-void GSkyDir::gal2equ(void)
+void GSkyDir::gal2equ(void) const
 {
+    // Get non-const pointers to data members. This allows to circumvent
+    // the const correctness and allows treating GSkyDir access methods
+    // as const
+    double* ra  = (double*)&m_ra;
+    double* dec = (double*)&m_dec;
+
     // Convert from galactic to equatorial
-    euler(1, m_l, m_b, &m_ra, &m_dec);
+    euler(1, m_l, m_b, ra, dec);
 
     // Return
     return;
 }
 
-
-/*==========================================================================
- =                                                                         =
- =                              GSkyDir friends                            =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream
- * @param[in] column Sky direction to put in output stream
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GSkyDir& dir)
-{
-    // Create coordinate system dependent output
-    if (dir.m_has_lb)
-        os << "(l,b)=(" << dir.m_l*rad2deg << "," << dir.m_b*rad2deg << ")";
-    else if (dir.m_has_radec)
-        os << "(RA,Dec)=(" << dir.m_ra*rad2deg << "," << dir.m_dec*rad2deg << ")";
-
-    // Return output stream
-    return os;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                      Other functions used by GSkyDir                    =
- =                                                                         =
- ==========================================================================*/
 
 /***********************************************************************//**
  * @brief General coordinate transformation routine for J2000
@@ -502,8 +477,8 @@ std::ostream& operator<< (std::ostream& os, const GSkyDir& dir)
  * @param[out] xout Output longitude in radians.
  * @param[out] yout Output latitude in radians.
  ***************************************************************************/
-void euler(const int& type, const double& xin, const double &yin, 
-           double* xout, double *yout)
+void GSkyDir::euler(const int& type, const double& xin, const double &yin, 
+                    double* xout, double *yout) const
 {
     // Set transformation constants
     const double psi[]    = {0.57477043300,  4.9368292465};
@@ -530,4 +505,29 @@ void euler(const int& type, const double& xin, const double &yin,
 
     // Return
     return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                                 Friends                                 =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream
+ * @param[in] column Sky direction to put in output stream
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GSkyDir& dir)
+{
+    // Create coordinate system dependent output
+    if (dir.m_has_lb)
+        os << "(l,b)=(" << dir.m_l*rad2deg << "," << dir.m_b*rad2deg << ")";
+    else if (dir.m_has_radec)
+        os << "(RA,Dec)=(" << dir.m_ra*rad2deg << "," << dir.m_dec*rad2deg << ")";
+
+    // Return output stream
+    return os;
 }
