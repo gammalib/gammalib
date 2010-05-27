@@ -75,6 +75,22 @@ else
 fi
 AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes")
 
+# Checks for CTA interface
+AC_ARG_WITH([cta],
+            [AS_HELP_STRING([--with-cta],
+                            [compile in CTA specific interface])],
+            [],
+            [with_cta=yes])
+AM_CONDITIONAL(WITH_INST_CTA, test "x$with_cta" = "xyes")
+
+# Checks for LAT interface
+AC_ARG_WITH([lat],
+            [AS_HELP_STRING([--with-lat],
+                            [compile in LAT specific interface])],
+            [],
+            [with_lat=yes])
+AM_CONDITIONAL(WITH_INST_LAT, test "x$with_lat" = "xyes")
+
 # Checks for readline
 #AC_ARG_WITH([readline],
 #            [AS_HELP_STRING([--with-readline],
@@ -156,11 +172,15 @@ AC_CONFIG_FILES([Makefile
                  src/model/Makefile
                  src/app/Makefile
                  inst/Makefile
-                 inst/cta/Makefile
-                 inst/lat/Makefile
                  include/Makefile
                  test/Makefile
                  pyext/Makefile
                  pyext/setup.py
                  gammalib.pc])
+if test "x$with_cta" = "xyes"; then
+    AC_CONFIG_FILES([inst/cta/Makefile])
+fi
+if test "x$with_lat" = "xyes"; then
+    AC_CONFIG_FILES([inst/lat/Makefile])
+fi
 AC_OUTPUT
