@@ -91,6 +91,7 @@
 #include "GEvent.hpp"
 #include "GGti.hpp"
 #include "GEbounds.hpp"
+#include "GInstDir.hpp"
 #include "GPointing.hpp"
 #include "GResponse.hpp"
 
@@ -115,6 +116,7 @@
 #include "GCTAObservation.hpp"
 #include "GCTAEventList.hpp"
 #include "GCTAEventAtom.hpp"
+#include "GCTAInstDir.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAResponse.hpp"
 
@@ -124,6 +126,7 @@
 #include "GLATEventCube.hpp"
 #include "GLATEventAtom.hpp"
 #include "GLATEventBin.hpp"
+#include "GLATInstDir.hpp"
 #include "GLATPointing.hpp"
 #include "GLATResponse.hpp"
 
