@@ -79,7 +79,7 @@ void test_response(void)
     try {
         // Load response
         GCTAResponse rsp;
-        rsp.set_caldb(cta_caldb);
+        rsp.caldb(cta_caldb);
         rsp.load(cta_irf);
         //std::cout << rsp << std::endl;
     }
@@ -95,19 +95,20 @@ void test_response(void)
     try {
         // Load response
         GCTAResponse rsp;
-        rsp.set_caldb(cta_caldb);
+        rsp.caldb(cta_caldb);
         rsp.load(cta_irf);
 
         // Sum over effective area for control
         GEnergy      eng;
-        GSkyDir      dir;
+        GCTAInstDir  obsDir;
+        GSkyDir      srcDir;
         GTime        time;
         GCTAPointing pnt;
         double sum = 0.0;
         double ref = 123299125000.0;
         for (int i = 0; i < 30; ++i) {
             eng.TeV(pow(10.0, -1.7 + 0.1*double(i)));
-            double aeff = rsp.aeff(dir, eng, dir, eng, &pnt, time);
+            double aeff = rsp.aeff(obsDir, eng, time, srcDir, eng, time, pnt);
             //std::cout << eng << " " << aeff << std::endl;
             sum += aeff;
         }
@@ -132,13 +133,13 @@ void test_response(void)
     try {
         // Load response
         GCTAResponse rsp;
-        rsp.set_caldb(cta_caldb);
+        rsp.caldb(cta_caldb);
         rsp.load(cta_irf);
         
         // Integrate Psf
         GEnergy      eng;
         GTime        time;
-        GSkyDir      obsDir;
+        GCTAInstDir  obsDir;
         GSkyDir      srcDir;
         GCTAPointing pnt;
         srcDir.radec_deg(0.0, 0.0);
@@ -146,12 +147,12 @@ void test_response(void)
             eng.TeV(e);
             double r     = 0.0;
             double dr    = 0.001;
-            int    steps = 10.0/dr;
+            int    steps = 1.0/dr;
             double sum   = 0.0;
             for (int i = 0; i < steps; ++i) {
                 r   += dr;
-                obsDir.radec_deg(0.0, r);
-                sum += rsp.psf(obsDir, eng, srcDir, eng, &pnt, time) * twopi * r * dr;
+                obsDir.radec(0.0, r);
+                sum += rsp.psf(obsDir, eng, time, srcDir, eng, time, pnt) * twopi * r * dr;
             }
             if ((sum - 1.0) > 0.001) {
                 std::cout << std::endl
