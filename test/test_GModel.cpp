@@ -146,6 +146,7 @@ void test_model(void)
 //std::cout << models << std::endl;
 
     // Put container in data
+/*
     GObservations   data;
     GLATObservation obs;
     try {
@@ -163,7 +164,7 @@ void test_model(void)
     }
     std::cout << ".";
 //std::cout << data << std::endl;
-
+*/
     // Plot final test success
     std::cout << " ok." << std::endl;
 
