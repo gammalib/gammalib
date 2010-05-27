@@ -11,6 +11,7 @@ sources = GCTAException.cpp \
           GCTAEventList.cpp \
           GCTAEventAtom.cpp \
 	  GCTAResponse.cpp \
+	  GCTAInstDir.cpp \
 	  GCTAPointing.cpp
 
 # Build libtool library
