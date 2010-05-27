@@ -22,14 +22,14 @@
 #endif
 #include <vector>
 #include <string>
-#include <unistd.h>           // access() function
+//#include <unistd.h>           // access() function
+#include "GCTAException.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTAPointing.hpp"
-#include "GCTAException.hpp"
+#include "GCTAInstDir.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_SET_CALDB                   "GCTAResponse::set_caldb(std::string&)"
 #define G_READ           "GCTAResponse::read_performance_table(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -133,47 +133,24 @@ GCTAResponse& GCTAResponse::operator= (const GCTAResponse& rsp)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return value of instrument response function.
+ * @brief Return effective area (units: cm2).
  *
- * @param[in] obsDir Observed photon direction.
+ * @param[in] obsDir Pointer to observed photon direction.
  * @param[in] obsEng Observed energy of photon.
+ * @param[in] obsTime Observed photon arrival time.
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
- * @param[in] pnt Pointer to instrument pointing information
- * @param[in] time Photon arrival time.
- ***************************************************************************/
-double GCTAResponse::irf(GSkyDir& obsDir, const GEnergy& obsEng,
-                         GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GPointing* pnt, const GTime& time)
-{
-    // Get IRF components
-    double irf;
-    irf  = psf(obsDir, obsEng, srcDir, srcEng, pnt, time);
-    irf *= aeff(obsDir, obsEng, srcDir, srcEng, pnt, time);
-    irf *= edisp(obsDir, obsEng, srcDir, srcEng, pnt, time);
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Return effective area un units of cm2.
- *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] pnt Pointer to instrument pointing information
- * @param[in] time Photon arrival time.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Pointer to instrument pointing information.
  *
  * The actual implementation of this method assumes an effective area that
  * depends only on the true photon energy. No dependence on the photon's
  * arrival direction, observatory pointing and arrival time is assumed.
  ***************************************************************************/
-double GCTAResponse::aeff(GSkyDir& obsDir, const GEnergy& obsEng,
-                          GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GPointing* pnt, const GTime& time)
+double GCTAResponse::aeff(const GInstDir& obsDir, const GEnergy& obsEng,
+                          const GTime& obsTime,
+                          const GSkyDir& srcDir, const GEnergy& srcEng,
+                          const GTime& srcTime, const GPointing& pnt)
 {
     // Get log(E)
     double logE = log10(srcEng.TeV());
@@ -187,14 +164,15 @@ double GCTAResponse::aeff(GSkyDir& obsDir, const GEnergy& obsEng,
 
 
 /***********************************************************************//**
- * @brief Return point spread function
+ * @brief Return point spread function (units: sr^-1)
  *
- * @param[in] obsDir Observed photon direction
- * @param[in] obsEng Observed energy of photon
- * @param[in] srcDir True photon direction
- * @param[in] srcEng True energy of photon
- * @param[in] pnt Pointer to instrument pointing information
- * @param[in] time Photon arrival time
+ * @param[in] obsDir Pointer to observed photon direction.
+ * @param[in] obsEng Observed energy of photon.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Pointer to instrument pointing information.
  *
  * The Point Spread Function defines the probability density 
  * \f$d^2P/d\theta d\phi\f$
@@ -207,21 +185,21 @@ double GCTAResponse::aeff(GSkyDir& obsDir, const GEnergy& obsEng,
  * \f$P\f is the containment fraction. For 68% one obtains
  * \f$\sigma=0.6624 \times r_{68}\f$.
  ***************************************************************************/
-double GCTAResponse::psf(GSkyDir& obsDir, const GEnergy& obsEng,
-                         GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GPointing* pnt, const GTime& time)
+double GCTAResponse::psf(const GInstDir& obsDir, const GEnergy& obsEng,
+                         const GTime& obsTime,
+                         const GSkyDir& srcDir, const GEnergy& srcEng,
+                         const GTime& srcTime, const GPointing& pnt)
 {
     // Get log(E)
     double logE = log10(srcEng.TeV());
 
-    // Determine Gaussian sigma in degrees
-    double sigma  = m_nodes.interpolate(logE, m_r68) * 0.6624;
+    // Determine Gaussian sigma in radians
+    double sigma  = m_nodes.interpolate(logE, m_r68) * 0.6624 * deg2rad;
     double sigma2 = sigma * sigma;
     
     // Determine angular separation between true and measured photon
-    // direction in degrees
-    GSkyDir dir = obsDir;
-    double  r   = srcDir.dist_deg(dir);
+    // direction in radians
+    double r = ((GCTAInstDir*)&obsDir)->dist(srcDir);
     
     // Compute Psf value
     double psf = exp(-0.5 * r * r / sigma2) / (twopi * sigma2);
@@ -232,21 +210,23 @@ double GCTAResponse::psf(GSkyDir& obsDir, const GEnergy& obsEng,
 
 
 /***********************************************************************//**
- * @brief Return energy dispersion.
+ * @brief Return energy dispersion (units: MeV^-1)
  *
- * @param[in] obsDir Observed photon direction.
+ * @param[in] obsDir Pointer to observed photon direction.
  * @param[in] obsEng Observed energy of photon.
+ * @param[in] obsTime Observed photon arrival time.
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
- * @param[in] pnt Pointer to instrument pointing information
- * @param[in] time Photon arrival time.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Pointer to instrument pointing information.
  *
  * The actual implementation of this method assumes no energy dispersion,
  * which is equivalent of having a Dirac type energy dispersion.
  ***************************************************************************/
-double GCTAResponse::edisp(GSkyDir& obsDir, const GEnergy& obsEng,
-                           GSkyDir& srcDir, const GEnergy& srcEng,
-                           const GPointing* pnt, const GTime& time)
+double GCTAResponse::edisp(const GInstDir& obsDir, const GEnergy& obsEng,
+                           const GTime& obsTime,
+                           const GSkyDir& srcDir, const GEnergy& srcEng,
+                           const GTime& srcTime, const GPointing& pnt)
 {
     // Dirac energy dispersion
     double edisp = (obsEng == srcEng) ? 1.0 : 0.0;
@@ -257,23 +237,29 @@ double GCTAResponse::edisp(GSkyDir& obsDir, const GEnergy& obsEng,
 
 
 /***********************************************************************//**
- * @brief Set the path to the calibration database.
+ * @brief Return time dispersion (units: s^-1)
  *
- * @param[in] caldb Absolute path to calibration database
+ * @param[in] obsDir Pointer to observed photon direction.
+ * @param[in] obsEng Observed energy of photon.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Pointer to instrument pointing information.
  *
- * @todo Implement checking 
+ * The actual implementation of this method assumes no time dispersion,
+ * which is equivalent of having a Dirac type time dispersion.
  ***************************************************************************/
-void GCTAResponse::set_caldb(const std::string& caldb)
+double GCTAResponse::tdisp(const GInstDir& obsDir, const GEnergy& obsEng,
+                           const GTime& obsTime,
+                           const GSkyDir& srcDir, const GEnergy& srcEng,
+                           const GTime& srcTime, const GPointing& pnt)
 {
-    // Check if calibration database directory is accessible
-    if (access(caldb.c_str(), R_OK) != 0)
-        throw GException::caldb_not_found(G_SET_CALDB, caldb);
+    // Dirac time dispersion
+    double tdisp = (obsTime == srcTime) ? 1.0 : 0.0;
     
-    // Store the path to the calibration database
-    m_caldb = caldb;
-
-    // Return
-    return;
+    // Return time dispersion
+    return tdisp;
 }
 
 
@@ -303,8 +289,6 @@ void GCTAResponse::load(const std::string& irfname)
     // Return
     return;
 }
-
-
 
 
 /*==========================================================================

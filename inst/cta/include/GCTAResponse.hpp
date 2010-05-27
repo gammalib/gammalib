@@ -22,11 +22,12 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <iostream>
+#include "GResponse.hpp"
+#include "GPointing.hpp"
+#include "GInstDir.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GResponse.hpp"
-#include "GPointing.hpp"
 #include "GNodeArray.hpp"
 
 
@@ -49,20 +50,19 @@ public:
     // Operators
     GCTAResponse& operator= (const GCTAResponse & rsp);
 
-    // Implemented virtual base class methods
-    double irf(GSkyDir& obsDir, const GEnergy& obsEng,
-               GSkyDir& srcDir, const GEnergy& srcEng,
-               const GPointing* pnt, const GTime& time);
-    double aeff(GSkyDir& obsDir, const GEnergy& obsEng,
-                GSkyDir& srcDir, const GEnergy& srcEng,
-                const GPointing* pnt, const GTime& time);
-    double psf(GSkyDir& obsDir, const GEnergy& obsEng,
-               GSkyDir& srcDir, const GEnergy& srcEng,
-               const GPointing* pnt, const GTime& time);
-    double edisp(GSkyDir& obsDir, const GEnergy& obsEng,
-                 GSkyDir& srcDir, const GEnergy& srcEng,
-                 const GPointing* pnt, const GTime& time);
-    void   set_caldb(const std::string& caldb);
+    // Implemented pure virtual methods
+    double aeff(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                const GPointing& pnt);
+    double psf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+               const GPointing& pnt);
+    double edisp(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                 const GPointing& pnt);
+    double tdisp(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                 const GPointing& pnt);
 
     // Other Methods
     void load(const std::string& irfname);

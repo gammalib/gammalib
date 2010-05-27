@@ -57,23 +57,25 @@ const double max_sep          = pihalf;  // Maximum angular separation (rad)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return value of point spread function
+ * @brief Return point spread function (units: sr^-1).
  *
- * @param[in] obsDir Observed photon direction
- * @param[in] obsEng Observed energy of photon
- * @param[in] srcDir True photon direction
- * @param[in] srcEng True energy of photon
- * @param[in] pnt Pointer to instrument pointing information
- * @param[in] time Photon arrival time
+ * @param[in] obsDir Pointer to observed photon direction.
+ * @param[in] obsEng Observed energy of photon.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Pointer to instrument pointing information.
  *
- * @todo Implement method (just a dummy for the moment)
+ * @todo Implement method.
  ***************************************************************************/
-double GLATResponse::psf(GSkyDir& obsDir, const GEnergy& obsEng,
-                         GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GPointing* pnt, const GTime& time)
+double GLATResponse::psf(const GInstDir& obsDir, const GEnergy& obsEng,
+                         const GTime& obsTime,
+                         const GSkyDir& srcDir, const GEnergy& srcEng,
+                         const GTime& srcTime, const GPointing& pnt)
 {
     // Return PSF value
-    return 0.0;
+    return 1.0;
 }
 
 

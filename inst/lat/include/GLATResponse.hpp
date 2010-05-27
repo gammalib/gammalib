@@ -20,13 +20,14 @@
 #define GLATRESPONSE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GNodeArray.hpp"
-#include "GVector.hpp"
+#include "GResponse.hpp"
+#include "GPointing.hpp"
+#include "GInstDir.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GResponse.hpp"
-#include "GLATPointing.hpp"
+#include "GNodeArray.hpp"
+#include "GVector.hpp"
 #include "GLATResponseTable.hpp"
 #include "GFits.hpp"
 #include "GFitsHDU.hpp"
@@ -48,20 +49,19 @@ public:
     // Operators
     GLATResponse& operator= (const GLATResponse & rsp);
 
-    // Implemented virtual base class methods
-    double irf(GSkyDir& obsDir, const GEnergy& obsEng,
-               GSkyDir& srcDir, const GEnergy& srcEng,
-               const GPointing* pnt, const GTime& time);
-    double aeff(GSkyDir& obsDir, const GEnergy& obsEng,
-                GSkyDir& srcDir, const GEnergy& srcEng,
-                const GPointing* pnt, const GTime& time);
-    double psf(GSkyDir& obsDir, const GEnergy& obsEng,
-               GSkyDir& srcDir, const GEnergy& srcEng,
-               const GPointing* pnt, const GTime& time);
-    double edisp(GSkyDir& obsDir, const GEnergy& obsEng,
-                 GSkyDir& srcDir, const GEnergy& srcEng,
-                 const GPointing* pnt, const GTime& time);
-    void   set_caldb(const std::string& caldb);
+    // Implemented pure virtual methods
+    double aeff(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                const GPointing& pnt);
+    double psf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+               const GPointing& pnt);
+    double edisp(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                 const GPointing& pnt);
+    double tdisp(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                 const GPointing& pnt);
 
     // Other Methods
     double        aeff(const double& logE, const double& ctheta);

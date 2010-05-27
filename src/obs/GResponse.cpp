@@ -15,11 +15,14 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
+//#include <iostream>
+#include <string>
+#include <unistd.h>           // access() function
 #include "GException.hpp"
 #include "GResponse.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CALDB                              "GResponse::caldb(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -31,14 +34,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                          Constructors/destructors                       =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GResponse::GResponse()
+GResponse::GResponse(void)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -69,7 +72,7 @@ GResponse::GResponse(const GResponse& rsp)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GResponse::~GResponse()
+GResponse::~GResponse(void)
 {
     // Free members
     free_members();
@@ -117,6 +120,60 @@ GResponse& GResponse::operator= (const GResponse& rsp)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Return value of instrument response function.
+ *
+ * @param[in] obsDir Pointer to observed photon direction.
+ * @param[in] obsEng Observed energy of photon.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Pointer to instrument pointing information.
+ *
+ * This method implements the default and complete instrument response
+ * function (IRF). It may be overwritted by a specific method in the derived
+ * class that drops response terms that are not used.
+ ***************************************************************************/
+double GResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
+                      const GTime& obsTime,
+                      const GSkyDir&  srcDir, const GEnergy& srcEng,
+                      const GTime& srcTime, const GPointing& pnt)
+{
+    // Get IRF components
+    double irf;
+    irf  =   psf(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
+    irf *=  aeff(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
+    irf *= edisp(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
+    irf *= tdisp(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Set the path to the calibration database.
+ *
+ * @param[in] caldb Absolute path to calibration database
+ *
+ * This default method simply checks if the calibration database directory
+ * exists. If the directory exists, the path will be stored. No checking is
+ * implemented that checks for the consistency of the calibration database.
+ ***************************************************************************/
+void GResponse::caldb(const std::string& caldb)
+{
+    // Check if calibration database directory is accessible
+    if (access(caldb.c_str(), R_OK) != 0)
+        throw GException::caldb_not_found(G_CALDB, caldb);
+    
+    // Store the path to the calibration database
+    m_caldb = caldb;
+
+    // Return
+    return;
+}
+
 
 /*==========================================================================
  =                                                                         =
@@ -149,8 +206,6 @@ void GResponse::copy_members(const GResponse& rsp)
     m_caldb   = rsp.m_caldb;
     m_rspname = rsp.m_rspname;
 
-    // Copy other membres
-
     // Return
     return;
 }
@@ -161,10 +216,6 @@ void GResponse::copy_members(const GResponse& rsp)
  ***************************************************************************/
 void GResponse::free_members(void)
 {
-    // Free memory
-
-    // Signal free pointers
-
     // Return
     return;
 }

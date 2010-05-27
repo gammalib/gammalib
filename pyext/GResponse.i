@@ -33,18 +33,32 @@ public:
     GResponse(const GResponse& rsp);
     virtual ~GResponse(void);
 
-    // Pure virtual methods
-    virtual double irf(GSkyDir& obsDir, const GEnergy& obsEng,
-                       GSkyDir& srcDir, const GEnergy& srcEng,
-                       const GPointing* pnt, const GTime& time) = 0;
-    virtual double psf(GSkyDir& obsDir, const GEnergy& obsEng,
-                       GSkyDir& srcDir, const GEnergy& srcEng,
-                       const GPointing* pnt, const GTime& time) = 0;
-    virtual double aeff(GSkyDir& obsDir, const GEnergy& obsEng,
-                        GSkyDir& srcDir, const GEnergy& srcEng,
-                        const GPointing* pnt, const GTime& time) = 0;
-    virtual double edisp(GSkyDir& obsDir, const GEnergy& obsEng,
-                         GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GPointing* pnt, const GTime& time) = 0;
-    virtual void   set_caldb(const std::string& caldb) = 0;
+    // Virtual methods
+    virtual double      irf(const GInstDir& obsDir, const GEnergy& obsEng,
+                            const GTime& obsTime,
+                            const GSkyDir&  srcDir, const GEnergy& srcEng,
+                            const GTime& srcTime,
+                            const GPointing& pnt);
+    virtual double      aeff(const GInstDir& obsDir, const GEnergy& obsEng,
+                             const GTime& obsTime,
+                             const GSkyDir&  srcDir, const GEnergy& srcEng,
+                             const GTime& srcTime,
+                             const GPointing& pnt) = 0;
+    virtual double      psf(const GInstDir& obsDir, const GEnergy& obsEng,
+                            const GTime& obsTime,
+                            const GSkyDir&  srcDir, const GEnergy& srcEng,
+                            const GTime& srcTime,
+                            const GPointing& pnt) = 0;
+    virtual double      edisp(const GInstDir& obsDir, const GEnergy& obsEng,
+                              const GTime& obsTime,
+                              const GSkyDir&  srcDir, const GEnergy& srcEng,
+                              const GTime& srcTime,
+                              const GPointing& pnt) = 0;
+    virtual double      tdisp(const GInstDir& obsDir, const GEnergy& obsEng,
+                              const GTime& obsTime,
+                              const GSkyDir&  srcDir, const GEnergy& srcEng,
+                              const GTime& srcTime,
+                              const GPointing& pnt) = 0;
+    virtual void        caldb(const std::string& caldb);
+    virtual std::string caldb(void) const { return m_caldb; }
 };
