@@ -341,7 +341,7 @@ double GSkyDir::dec_deg(void) const
  *
  * @param[in] dir Sky direction to which distance is to be computed.
  ***************************************************************************/
-double GSkyDir::dist(GSkyDir& dir) const
+double GSkyDir::dist(const GSkyDir& dir) const
 {
     // Initialise cosine of distance
     double cosdis;
@@ -386,7 +386,7 @@ double GSkyDir::dist(GSkyDir& dir) const
  *
  * @param[in] dir Sky direction to which distance is to be computed.
  ***************************************************************************/
-double GSkyDir::dist_deg(GSkyDir& dir) const
+double GSkyDir::dist_deg(const GSkyDir& dir) const
 {
     // Return distance in degrees
     return (dist(dir) * rad2deg);
