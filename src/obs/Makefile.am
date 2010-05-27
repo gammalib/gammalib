@@ -21,6 +21,7 @@ sources = GEnergy.cpp \
           GGti.cpp \
           GEbounds.cpp \
           GResponse.cpp \
+	  GInstDir.cpp \
 	  GPointing.cpp \
           GException_obs.cpp
 
