@@ -135,51 +135,6 @@ GLATResponse& GLATResponse::operator= (const GLATResponse& rsp)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return value of instrument response function.
- *
- * @param[in] obsDir Observed photon direction
- * @param[in] obsEng Observed energy of photon
- * @param[in] srcDir True photon direction
- * @param[in] srcEng True energy of photon
- * @param[in] pnt Pointer to instrument pointing information
- * @param[in] time Photon arrival time
- *
- * @todo Implement method (just a dummy for the moment)
- ***************************************************************************/
-double GLATResponse::irf(GSkyDir& obsDir, const GEnergy& obsEng,
-                         GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GPointing* pnt, const GTime& time)
-{
-    // Get IRF components
-    double irf;
-    irf  = psf(obsDir, obsEng, srcDir, srcEng, pnt, time);
-    irf *= aeff(obsDir, obsEng, srcDir, srcEng, pnt, time);
-    irf *= edisp(obsDir, obsEng, srcDir, srcEng, pnt, time);
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Set the path to the calibration database.
- *
- * @param[in] caldb Absolute path to calibration database
- *
- * NOTE: So far no check is done on whether the path exists!
- ***************************************************************************/
-void GLATResponse::set_caldb(const std::string& caldb)
-{
-    // Simply copy path
-    /// @todo Some check should be done on whether the path exists
-    m_caldb = caldb;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Load a specified LAT response function.
  *
  * @param[in] rspname Name of response
