@@ -47,8 +47,8 @@ public:
     double ra_deg(void) const;
     double dec(void) const;
     double dec_deg(void) const;
-    double dist(GSkyDir& dir) const;
-    double dist_deg(GSkyDir& dir) const;
+    double dist(const GSkyDir& dir) const;
+    double dist_deg(const GSkyDir& dir) const;
 };
 
 

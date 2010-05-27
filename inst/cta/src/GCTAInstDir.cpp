@@ -127,7 +127,7 @@ GCTAInstDir& GCTAInstDir::operator= (const GCTAInstDir& dir)
  *
  * @param[in] dir Instrument direction to which distance is to be computed.
  ***************************************************************************/
-double GCTAInstDir::dist(GCTAInstDir& dir) const
+double GCTAInstDir::dist(const GCTAInstDir& dir) const
 {
     // Assign sky direction from instrument direction
     GSkyDir sky;
@@ -148,7 +148,7 @@ double GCTAInstDir::dist(GCTAInstDir& dir) const
  *
  * @param[in] dir Instrument direction to which distance is to be computed.
  ***************************************************************************/
-double GCTAInstDir::dist_deg(GCTAInstDir& dir) const
+double GCTAInstDir::dist_deg(const GCTAInstDir& dir) const
 {
     // Return distance in degrees
     return (dist(dir) * rad2deg);
