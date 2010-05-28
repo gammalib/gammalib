@@ -128,6 +128,21 @@ GLATObservation& GLATObservation::operator= (const GLATObservation& obs)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Load LAT response
+ *
+ * @param[in] irfname Name of instrument response function.
+ * @param[in] caldb Optional path to calibration database.
+ *
+ * @todo Method not yet implemented
+ ***************************************************************************/
+void GLATObservation::response(const std::string& irfname, std::string caldb)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load data for unbinned analysis
  *
  * @param[in] ft1name FT1 FITS filename.

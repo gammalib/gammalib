@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATObservation.hpp  -  LAT Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -44,6 +44,7 @@ public:
     GLATObservation& operator= (const GLATObservation& obs);
 
     // Methods
+    void response(const std::string& irfname, std::string caldb = "");
     void load_unbinned(const std::string& ft1name, 
                        const std::string& ft2name,
                        const std::string& ltcube_name);
