@@ -51,6 +51,9 @@ public:
 
     // Operators
     virtual GObservation& operator= (const GObservation& obs);
+    
+    // Pure virtual methods
+    virtual void response(const std::string& irfname, std::string caldb = "") = 0;
 
     // Implemented methods
     void         obsname(const std::string& obsname) { m_obsname=obsname; return; }
@@ -60,15 +63,15 @@ public:
     void         emin(const GEnergy& emin) { m_emin=emin; return; }
     void         emax(const GEnergy& emax) { m_emax=emax; return; }
     void         gti(const GGti& gti) { m_gti=gti; return; }
+    std::string  obsname(void) const { return m_obsname; }
+    std::string  instrument(void) const { return m_instrument; }
     GTime        tstart(void) const { return m_tstart; }
     GTime        tstop(void) const { return m_tstop; }
     GEnergy      emin(void) const { return m_emin; }
     GEnergy      emax(void) const { return m_emax; }
-    std::string  obsname(void) const { return m_obsname; }
-    std::string  instrument(void) const { return m_instrument; }
+    GGti*        gti(void) { return &m_gti; }
     GEvents*     events(void) const { return m_events; }
     GResponse*   response(void) const { return m_response; }
-    GGti*        gti(void) { return &m_gti; }
 
 protected:
     // Protected methods
