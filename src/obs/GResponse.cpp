@@ -138,7 +138,7 @@ GResponse& GResponse::operator= (const GResponse& rsp)
 double GResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
                       const GTime& obsTime,
                       const GSkyDir&  srcDir, const GEnergy& srcEng,
-                      const GTime& srcTime, const GPointing& pnt)
+                      const GTime& srcTime, const GPointing& pnt) const
 {
     // Get IRF components
     double irf;
