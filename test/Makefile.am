@@ -7,13 +7,13 @@
 # Optional instrument specific tests
 if WITH_INST_CTA
   INST_CTA = test_CTA
-  INCL_CTA = $(top_srcdir)/inst/cta/include
+  INCL_CTA = -I$(top_srcdir)/inst/cta/include
   test_CTA_SOURCES = $(top_srcdir)/inst/cta/test/test_CTA.cpp
   test_CTA_LDADD = $(top_srcdir)/src/libgamma.la
 endif
 if WITH_INST_LAT
   INST_LAT = test_LAT
-  INCL_LAT = $(top_srcdir)/inst/lat/include
+  INCL_LAT = -I$(top_srcdir)/inst/lat/include
   test_LAT_SOURCES = $(top_srcdir)/inst/lat/test/test_LAT.cpp
   test_LAT_LDADD = $(top_srcdir)/src/libgamma.la
 endif
@@ -22,8 +22,8 @@ endif
 INCLUDES = -I$(top_srcdir)/include \
 	   -I$(top_builddir)/src \
 	   -I$(top_srcdir)/src/support \
-	   -I$(INCL_CTA) \
-           -I$(INCL_LAT)
+	   $(INCL_CTA) \
+           $(INCL_LAT)
 
 # Test programs
 check_PROGRAMS = test_GVector \
