@@ -29,12 +29,12 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string lat_caldb  = "test/irf";
+const std::string lat_caldb  = "../inst/lat/test/irf";
 const std::string lat_irf    = "Pass5_v0";
-const std::string lat_ft1    = "test/data/ft1.fits.gz";
-const std::string lat_ft2    = "test/data/ft2.fits.gz";
-const std::string lat_cntmap = "test/data/cntmap.fits.gz";
-const std::string lat_srcmap = "test/data/srcmap.fits.gz";
+const std::string lat_ft1    = "../inst/lat/test/data/ft1.fits.gz";
+const std::string lat_ft2    = "../inst/lat/test/data/ft2.fits.gz";
+const std::string lat_cntmap = "../inst/lat/test/data/cntmap.fits.gz";
+const std::string lat_srcmap = "../inst/lat/test/data/srcmap.fits.gz";
 const double      twopi      =  6.283185307179586476925286766559005768394;
 
 

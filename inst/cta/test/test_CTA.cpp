@@ -29,9 +29,9 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string cta_caldb  = "test/irf";
+const std::string cta_caldb  = "../inst/cta/test/irf";
 const std::string cta_irf    = "kb_E_50h_v3";
-const std::string cta_events = "test/data/run_00006028_eventlist_reco.fits.gz";
+const std::string cta_events = "../inst/cta/test/data/run_00006028_eventlist_reco.fits.gz";
 const double twopi           =  6.283185307179586476925286766559005768394;
 
 

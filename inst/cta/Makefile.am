@@ -30,10 +30,10 @@ libcta_la_SOURCES = $(sources)
 libcta_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
 
 # Programs to run for make check
-check_PROGRAMS = test_CTA
+#check_PROGRAMS = test_CTA
 
 # Tests
-TESTS = test_CTA
+#TESTS = test_CTA
 
-test_CTA_SOURCES = test/test_CTA.cpp
-test_CTA_LDADD = ../../src/libgamma.la
+#test_CTA_SOURCES = test/test_CTA.cpp
+#test_CTA_LDADD = ../../src/libgamma.la

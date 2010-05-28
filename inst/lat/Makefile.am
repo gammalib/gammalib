@@ -37,10 +37,10 @@ liblat_la_SOURCES = $(sources)
 liblat_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
 
 # Programs to run for make check
-check_PROGRAMS = test_LAT
+#check_PROGRAMS = test_LAT
 
 # Tests
-TESTS = test_LAT
+#TESTS = test_LAT
 
-test_LAT_SOURCES = test/test_LAT.cpp
-test_LAT_LDADD = ../../src/libgamma.la
+#test_LAT_SOURCES = test/test_LAT.cpp
+#test_LAT_LDADD = ../../src/libgamma.la
