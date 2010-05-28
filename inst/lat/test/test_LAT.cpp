@@ -55,7 +55,7 @@ GModels crab_plaw(void)
         power_law    = GModelSpectralPlaw(1.0e-7, -2.1);
         crab         = GModel(point_source, power_law);
         crab.name("Crab");
-        models.add(crab);
+        models.append(crab);
     }
     catch (std::exception &e) {
         std::cout << std::endl 
