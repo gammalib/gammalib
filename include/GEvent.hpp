@@ -70,8 +70,8 @@ public:
     virtual bool             isatom(void) const = 0;
     virtual bool             isbin(void) const = 0;
     virtual double           counts(void) const = 0;
-    virtual double           model(GModels& models) = 0;
-    virtual double           model(GModels& models, GVector* gradient) = 0;
+    virtual double           model(GModels& models) const = 0;
+    virtual double           model(GModels& models, GVector* gradient) const = 0;
     virtual const GInstDir*  dir(void) const = 0;
     virtual const GEnergy*   energy(void) const = 0;
     virtual const GTime*     time(void) const = 0;
