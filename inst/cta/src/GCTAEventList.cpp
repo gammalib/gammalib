@@ -21,8 +21,9 @@
 #include <config.h>
 #endif
 #include <iostream>
-#include "GException.hpp"
+#include "GCTAException.hpp"
 #include "GCTAEventList.hpp"
+#include "GCTAObservation.hpp"
 #include "GFitsTableBitCol.hpp"
 #include "GFitsTableFltCol.hpp"
 #include "GFitsTableDblCol.hpp"
@@ -169,14 +170,27 @@ void GCTAEventList::load(const std::string& filename)
  *
  * @param[in] index Event index for which pointer will be returned.
  *
- * A valid pointer is only returned if index is in the valid range. Otherwise
- * a NULL pointer is returned.
+ * A valid pointer is only returned if index is in the valid range.
+ * Otherwise a NULL pointer is returned.
+ *
+ * @todo Should we really return a NULL pointer in case that the list or
+ *       the index is not valid? Should we not better throw an exception? 
  ***************************************************************************/
 GCTAEventAtom* GCTAEventList::pointer(int index)
 {
-    // Assign pointer if in range, NULL otherwise
-    GCTAEventAtom* ptr = (m_events != NULL && index >=0 && index < m_num)
-                       ? &(((GCTAEventAtom*)m_events)[index]) : NULL;
+    // Preset pointer with NULL
+    GCTAEventAtom* ptr = NULL;
+    
+    // Set pointer if index is in range
+    if (m_events != NULL && index >=0 && index < m_num) {
+    
+        // Point to the requested event atom
+        ptr = &(((GCTAEventAtom*)m_events)[index]);
+        
+        // Set instrument response function
+        ptr->m_rsp = (GCTAResponse*)m_obs->response();
+
+    } // endif: valid index
 
     // Return pointer
     return ptr;
