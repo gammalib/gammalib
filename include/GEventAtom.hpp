@@ -21,46 +21,50 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GEvent.hpp"
-#include "GTime.hpp"
-#include "GEnergy.hpp"
-#include "GSkyDir.hpp"
 #include "GModels.hpp"
 #include "GVector.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
 
 
 /***********************************************************************//**
  * @class GEventAtom
  *
- * @brief Abstract interface for the event atom class
+ * @brief Abstract interface for the event atom class.
+ *
+ * An event atom is a single event occuring in an instrument. It has two
+ * generic attributes (m_time and m_energy) that can be access via the
+ * energy() and time() methods (both methods return constant pointers).
+ * Furthermore, the counts() method returns the number of atoms in the event,
+ * which by definition is 1.
  ***************************************************************************/
 class GEventAtom : public GEvent {
 
     // Friend classes
     friend class GEvents;
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GEventAtom& atom);
-
 public:
     // Constructors and destructors
-    GEventAtom();
+    GEventAtom(void);
     GEventAtom(const GEventAtom& atom);
-    virtual ~GEventAtom();
+    virtual ~GEventAtom(void);
 
     // Operators
     virtual GEventAtom& operator= (const GEventAtom& atom);
 
-    // Virtual methods
-    virtual double model(GModels& models) = 0;
-    virtual double model(GModels& models, GVector* gradient) = 0;
+    // Pure virtual methods
+    virtual double           model(GModels& models) = 0;
+    virtual double           model(GModels& models, GVector* gradient) = 0;
+    virtual const GInstDir*  dir(void) const = 0;
+    virtual const GPointing* pnt(void) const = 0;
+    virtual const GResponse* rsp(void) const = 0;
 
     // Implemented methods
-    double   counts(void) const { return 1.0; }
-    GSkyDir* dir(void) { return &m_dir; }
-    GEnergy* energy(void) { return &m_energy; }
-    GTime*   time(void) { return &m_time; }
-    bool     isatom(void) const { return true; }
-    bool     isbin(void) const { return false; }
+    bool           isatom(void) const { return true; }
+    bool           isbin(void) const { return false; }
+    double         counts(void) const { return 1.0; }
+    const GEnergy* energy(void) const { return &m_energy; }
+    const GTime*   time(void) const { return &m_time; }
     
 protected:
     // Protected methods
@@ -70,9 +74,8 @@ protected:
     virtual GEventAtom* clone(void) const = 0;
 
     // Protected data area
-    GTime   m_time;                //!< Event time
-	GEnergy m_energy;              //!< Event energy
-    GSkyDir m_dir;                 //!< Arrivial direction
+    GTime      m_time;         //!< Event time
+	GEnergy    m_energy;       //!< Event energy
 
 private:
 };

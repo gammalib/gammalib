@@ -23,15 +23,28 @@
 #include "GEvent.hpp"
 #include "GModels.hpp"
 #include "GVector.hpp"
-#include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GInstDir.hpp"
+#include "GPointing.hpp"
+#include "GResponse.hpp"
 
 
 /***********************************************************************//**
  * @class GEventBin
  *
- * @brief Abstract interface for the event bin class
+ * @brief Abstract interface for the event bin class.
+ *
+ * An event bin is a collection of event atoms with similar properties.
+ * It has three generic attributes (m_counts, m_time and m_energy) that can
+ * be accessed through the counts(), energy() and time() methods. The
+ * counts() method returns a double precision value, while the energy() and
+ * time() methods return const pointers.
+ *
+ * The event bin class does not actually allocate memory for event bins
+ * but handles pointers that point the information that is relevant for
+ * analysis. Filling of the information is handled by the pointer() method of
+ * the corresponding event cube.
  ***************************************************************************/
 class GEventBin : public GEvent {
 
@@ -40,24 +53,26 @@ class GEventBin : public GEvent {
 
 public:
     // Constructors and destructors
-    GEventBin();
+    GEventBin(void);
     GEventBin(const GEventBin& bin);
-    virtual ~GEventBin();
+    virtual ~GEventBin(void);
 
     // Operators
     virtual GEventBin& operator= (const GEventBin& bin);
 
-    // Virtual methods
-    virtual double   counts(void) const = 0;
-    virtual double   model(GModels& models) = 0;
-    virtual double   model(GModels& models, GVector* gradient) = 0;
-    virtual GSkyDir* dir(void) = 0;
-    virtual GEnergy* energy(void) = 0;
-    virtual GTime*   time(void) = 0;
+    // Pure virtual methods
+    virtual double           model(GModels& models) = 0;
+    virtual double           model(GModels& models, GVector* gradient) = 0;
+    virtual const GInstDir*  dir(void) const = 0;
+    virtual const GPointing* pnt(void) const = 0;
+    virtual const GResponse* rsp(void) const = 0;
     
     // Implemented methods
-    bool isatom(void) const { return false; }
-    bool isbin(void) const { return true; }
+    bool             isatom(void) const { return false; }
+    bool             isbin(void) const { return true; }
+    double           counts(void) const { return *m_counts; }
+    const GEnergy*   energy(void) const { return m_energy; }
+    const GTime*     time(void) const { return m_time; }
     
 protected:
     // Protected methods
@@ -67,6 +82,9 @@ protected:
     virtual GEventBin* clone(void) const = 0;
 
     // Protected data area
+    double*    m_counts;      //!< Pointer to number of counts
+    GTime*     m_time;        //!< Pointer to bin time
+    GEnergy*   m_energy;      //!< Pointer to bin energy
 
 private:
 };

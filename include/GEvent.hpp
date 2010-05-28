@@ -22,15 +22,35 @@
 /* __ Includes ___________________________________________________________ */
 #include "GModels.hpp"
 #include "GVector.hpp"
-#include "GSkyDir.hpp"
+#include "GInstDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPointing.hpp"
+#include "GResponse.hpp"
 
 
 /***********************************************************************//**
  * @class GEvent
  *
  * @brief Abstract interface for the event classes.
+ *
+ * This class provides an abstract interface to a event. A event can be
+ * either a physical event occuring in the instrument (called an event
+ * atom) or a collection of events with similar properties (called an
+ * event bin). While event atoms are used for unbinned analysis, event bins
+ * are used for binned analysis. The methods isatom() and isbin() inform
+ * whether an event is either an atom or a bin.
+ * The counts() method returns the number of event atoms in a event bin.
+ * For an event atom, this method returns by definition 1.
+ * The model() methods returns either the probability for an event atom
+ * to occur (unbinned analysis) or the expected number of counts for an
+ * event bin (binned analysis).
+ * Attributes of an event atom or bin can be accessed through the dir(),
+ * energy(), time(), pnt(), rsp() methods that all return const pointers
+ * to the relevant information.
+ *
+ * This method does not hold any data members. Data members are stored in
+ * the derived classes.
  ***************************************************************************/
 class GEvent {
 
@@ -39,24 +59,24 @@ class GEvent {
 
 public:
     // Constructors and destructors
-    GEvent();
+    GEvent(void);
     GEvent(const GEvent& event);
-    virtual ~GEvent();
+    virtual ~GEvent(void);
 
     // Operators
     virtual GEvent& operator= (const GEvent& event);
 
     // Virtual methods
-    virtual double   counts(void) const = 0;
-    virtual double   model(GModels& models) = 0;
-    virtual double   model(GModels& models, GVector* gradient) = 0;
-    virtual GSkyDir* dir(void) = 0;
-    virtual GEnergy* energy(void) = 0;
-    virtual GTime*   time(void) = 0;
-    virtual bool     isatom(void) const = 0;
-    virtual bool     isbin(void) const = 0;
-    
-    // Implemented methods
+    virtual bool             isatom(void) const = 0;
+    virtual bool             isbin(void) const = 0;
+    virtual double           counts(void) const = 0;
+    virtual double           model(GModels& models) = 0;
+    virtual double           model(GModels& models, GVector* gradient) = 0;
+    virtual const GInstDir*  dir(void) const = 0;
+    virtual const GEnergy*   energy(void) const = 0;
+    virtual const GTime*     time(void) const = 0;
+    virtual const GPointing* pnt(void) const = 0;
+    virtual const GResponse* rsp(void) const = 0;
     
 protected:
     // Protected methods
@@ -64,8 +84,6 @@ protected:
     void            copy_members(const GEvent& event);
     void            free_members(void);
     virtual GEvent* clone(void) const = 0;
-
-    // Protected data area
 
 private:
 };
