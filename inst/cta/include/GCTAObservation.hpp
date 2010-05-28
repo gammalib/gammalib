@@ -43,6 +43,7 @@ public:
     GCTAObservation& operator= (const GCTAObservation& obs);
 
     // Methods
+    void response(const std::string& irfname, std::string caldb = "");
     void load_unbinned(const std::string& evname);
   
 protected:
