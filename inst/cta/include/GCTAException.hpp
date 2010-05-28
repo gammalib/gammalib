@@ -56,6 +56,10 @@ public:
         file_open_error(std::string origin, std::string filename,
                         std::string message = "");
     };
+    class response_not_set : public GCTAExceptionHandler {
+    public:
+        response_not_set(std::string origin,  std::string message = "");
+    };
 };
 
 #endif /* GCTAEXCEPTION_HPP */
