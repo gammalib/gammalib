@@ -21,6 +21,14 @@ SUBDIRS = support \
 # Define sources for this directory
 sources =
 
+# Optional instrument specific libraries
+if WITH_INST_CTA
+  INST_CTA = ../inst/cta/libcta.la
+endif
+if WITH_INST_LAT
+  INST_LAT = ../inst/lat/liblat.la
+endif
+
 # Build libtool library
 lib_LTLIBRARIES = libgamma.la
 libgamma_la_SOURCES = $(sources)
@@ -32,6 +40,6 @@ libgamma_la_LIBADD = support/libsupport.la \
                      obs/libobs.la \
                      model/libmodel.la \
 		     app/libapp.la \
-                     ../inst/cta/libcta.la \
-		     ../inst/lat/liblat.la
+		     $(INST_CTA) \
+		     $(INST_LAT)
 libgamma_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
