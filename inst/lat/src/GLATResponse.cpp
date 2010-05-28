@@ -29,6 +29,7 @@
 #include "GFitsHDU.hpp"
 #include "GFitsImageDbl.hpp"
 #include "GFitsTableFltCol.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD            "load(const std::string&, const std::string&)"
@@ -164,27 +165,42 @@ double GLATResponse::tdisp(const GInstDir& obsDir, const GEnergy& obsEng,
 /***********************************************************************//**
  * @brief Load a specified LAT response function.
  *
- * @param[in] rspname Name of response
- * @param[in] rsptype Type of response ('front' or 'back')
+ * @param[in] rspname Name of response (name::front,name::back)
  *
- * Loads the specified GLAST LAT response from the calibration database and
+ * @exception GException::rsp_invalid_type
+ *            Invalid response type detected.
+ *
+ * Loads the specified LAT response from the calibration database and
  * performs some pre-calculations for faster response determination.
+ *
+ * @todo Implement LAT specific exceptions.
+ * @todo It seems that the split() method has a bug in that it returns an
+ *       empty string in place of the separator.
  ***************************************************************************/
-void GLATResponse::load(const std::string& rspname, const std::string& rsptype)
+void GLATResponse::load(const std::string& rspname)
 {
-    // Store response name
-    m_rspname = rspname;
+    // Separate response type
+    std::vector<std::string> array = split(rspname, "::");
+    
+    // Set response name and type
+    if (array.size() == 3) {
+        m_rspname = array[0];
+        m_rsptype = tolower(array[2]);
+    }
+    else if (array.size() == 1) {
+        m_rspname = array[0];
+        m_rsptype = "front";
+    }
+    else
+        throw GException::rsp_invalid_type(G_LOAD, m_rsptype);
 
     // Convert response type string to section
-    if (rsptype == "front")
+    if (m_rsptype == "front")
         m_section = 0;
-    else if (rsptype == "back")
+    else if (m_rsptype == "back")
         m_section = 1;
     else
-        throw GException::rsp_invalid_type(G_LOAD, rsptype);
-
-    // Store response type
-    m_rsptype = rsptype;
+        throw GException::rsp_invalid_type(G_LOAD, m_rsptype);
 
     // Initialise effective area
     aeff_init();
