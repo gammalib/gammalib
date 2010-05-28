@@ -54,6 +54,6 @@ public:
     double        aeff_ctheta_min(void) const;
     double        psf(const double& delta, const double& logE, const double& ctheta);
     GVector       psf(const GVector& delta, const double& logE, const double& ctheta);
-    void          load(const std::string& rspname, const std::string& rsptype);
+    void          load(const std::string& rspname);
     void          save(const std::string& rspname) const;
 };
