@@ -46,34 +46,35 @@ public:
     // Operators
     virtual GResponse& operator= (const GResponse& rsp);
 
-    // Virtual methods
+    // Methods
     virtual double      irf(const GInstDir& obsDir, const GEnergy& obsEng,
                             const GTime& obsTime,
                             const GSkyDir&  srcDir, const GEnergy& srcEng,
                             const GTime& srcTime,
-                            const GPointing& pnt);
+                            const GPointing& pnt) const;
     virtual double      aeff(const GInstDir& obsDir, const GEnergy& obsEng,
                              const GTime& obsTime,
                              const GSkyDir&  srcDir, const GEnergy& srcEng,
                              const GTime& srcTime,
-                             const GPointing& pnt) = 0;
+                             const GPointing& pnt) const = 0;
     virtual double      psf(const GInstDir& obsDir, const GEnergy& obsEng,
                             const GTime& obsTime,
                             const GSkyDir&  srcDir, const GEnergy& srcEng,
                             const GTime& srcTime,
-                            const GPointing& pnt) = 0;
+                            const GPointing& pnt) const = 0;
     virtual double      edisp(const GInstDir& obsDir, const GEnergy& obsEng,
                               const GTime& obsTime,
                               const GSkyDir&  srcDir, const GEnergy& srcEng,
                               const GTime& srcTime,
-                              const GPointing& pnt) = 0;
+                              const GPointing& pnt) const = 0;
     virtual double      tdisp(const GInstDir& obsDir, const GEnergy& obsEng,
                               const GTime& obsTime,
                               const GSkyDir&  srcDir, const GEnergy& srcEng,
                               const GTime& srcTime,
-                              const GPointing& pnt) = 0;
+                              const GPointing& pnt) const = 0;
     virtual void        caldb(const std::string& caldb);
     virtual std::string caldb(void) const { return m_caldb; }
+    virtual void        load(const std::string& irfname) = 0;
 
 protected:
     // Protected methods
