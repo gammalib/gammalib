@@ -13,8 +13,8 @@ if WITH_INST_CTA
 endif
 if WITH_INST_LAT
   INST_LAT = test_LAT
-  INCL_LAT = $(top_srcdir)/inst/cta/include
-  test_LAT_SOURCES = $(top_srcdir)/inst/cta/test/test_LAT.cpp
+  INCL_LAT = $(top_srcdir)/inst/lat/include
+  test_LAT_SOURCES = $(top_srcdir)/inst/lat/test/test_LAT.cpp
   test_LAT_LDADD = $(top_srcdir)/src/libgamma.la
 endif
 
