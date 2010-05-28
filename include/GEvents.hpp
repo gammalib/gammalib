@@ -28,6 +28,10 @@
  * @class GEvents
  *
  * @brief GEvents container class interface defintion.
+ *
+ * This class is an abstract container base class for events. Events are
+ * generally associated to an observation, and the class keeps the pointer
+ * to an existing observations as a member.
  ***************************************************************************/
 class GEvents {
 
@@ -55,8 +59,10 @@ public:
     virtual bool    islist(void) const = 0;
     virtual bool    iscube(void) const = 0;
     
-    // Implemented methods
-
+    // Other methods
+    void          obs(GObservation* ptr) { m_obs=ptr; return; }
+    GObservation* obs(void) const { return m_obs; }
+    
     // Event iterator
     class iterator {
     friend class GEvents;
@@ -84,6 +90,10 @@ protected:
     void             copy_members(const GEvents& events);
     void             free_members(void);
     virtual GEvents* clone(void) const = 0;
+    
+    // Protected data
+    GObservation*  m_obs;        //!< Pointer to associated observation
+    
 };
 
 #endif /* GEVENTS_HPP */

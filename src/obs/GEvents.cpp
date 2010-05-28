@@ -217,6 +217,9 @@ GEvents::iterator GEvents::end(void)
  ***************************************************************************/
 void GEvents::init_members(void)
 {
+    // Initialise members
+    m_obs = NULL;
+    
     // Return
     return;
 }
@@ -229,6 +232,9 @@ void GEvents::init_members(void)
  ***************************************************************************/
 void GEvents::copy_members(const GEvents& events)
 {
+    // Copy attributes
+    m_obs = events.m_obs;
+    
     // Return
     return;
 }
