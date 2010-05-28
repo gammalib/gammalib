@@ -151,7 +151,7 @@ GLATResponse& GLATResponse::operator= (const GLATResponse& rsp)
 double GLATResponse::tdisp(const GInstDir& obsDir, const GEnergy& obsEng,
                            const GTime& obsTime,
                            const GSkyDir& srcDir, const GEnergy& srcEng,
-                           const GTime& srcTime, const GPointing& pnt)
+                           const GTime& srcTime, const GPointing& pnt) const
 {
     // Dirac time dispersion
     double tdisp = (obsTime == srcTime) ? 1.0 : 0.0;

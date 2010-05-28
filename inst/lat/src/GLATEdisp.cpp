@@ -59,7 +59,7 @@
 double GLATResponse::edisp(const GInstDir& obsDir, const GEnergy& obsEng,
                            const GTime& obsTime,
                            const GSkyDir& srcDir, const GEnergy& srcEng,
-                           const GTime& srcTime, const GPointing& pnt)
+                           const GTime& srcTime, const GPointing& pnt) const
 {
     // Return Edisp value
     return 1.0;

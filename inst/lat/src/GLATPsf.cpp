@@ -72,7 +72,7 @@ const double max_sep          = pihalf;  // Maximum angular separation (rad)
 double GLATResponse::psf(const GInstDir& obsDir, const GEnergy& obsEng,
                          const GTime& obsTime,
                          const GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GTime& srcTime, const GPointing& pnt)
+                         const GTime& srcTime, const GPointing& pnt) const
 {
     // Return PSF value
     return 1.0;

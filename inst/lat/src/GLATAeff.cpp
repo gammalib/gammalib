@@ -62,7 +62,7 @@
 double GLATResponse::aeff(const GInstDir& obsDir, const GEnergy& obsEng,
                           const GTime& obsTime,
                           const GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime, const GPointing& pnt)
+                          const GTime& srcTime, const GPointing& pnt) const
 {
     // Return Aeff value
     return 1.0;
