@@ -23,7 +23,6 @@
 #include <iostream>
 #include "GOptimizerPars.hpp"
 #include "GModel.hpp"
-#include "GModelPar.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
@@ -49,9 +48,9 @@ public:
     GModels& operator= (const GModels& models);
 
     // Methods
-    void   add(const GModel& model);
-    double eval(GSkyDir* dir, GEnergy* energy, GTime* time);
-    double eval_gradients(GSkyDir* dir, GEnergy* energy, GTime* time);
+    void   append(const GModel& model);
+    double eval(const GSkyDir& dir, const GEnergy& energy, const GTime& time);
+    double eval_gradients(const GSkyDir& dir, const GEnergy& energy, const GTime& time);
     int    size(void) const { return m_elements; }
   
 protected:

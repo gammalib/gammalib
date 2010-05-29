@@ -34,6 +34,8 @@
  * @class GModel
  *
  * @brief GModel class interface defintion.
+ *
+ * This class implements a source model.
  ***************************************************************************/
 class GModel {
 
@@ -58,8 +60,8 @@ public:
     void        name(const std::string& name) { m_name=name; return; }
     int         npars(void) const { return m_npars; }
     GModelPar*  par(int index) const;
-    double      eval(GSkyDir* dir, GEnergy* energy, GTime* time);
-    double      eval_gradients(GSkyDir* dir, GEnergy* energy, GTime* time);
+    double      eval(const GSkyDir& dir, const GEnergy& energy, const GTime& time);
+    double      eval_gradients(const GSkyDir& dir, const GEnergy& energy, const GTime& time);
   
 protected:
     // Protected methods
