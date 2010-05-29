@@ -183,9 +183,10 @@ GCTAEventAtom* GCTAEventList::pointer(int index)
     
     // Set pointer if index is in range
     if (m_events != NULL && index >=0 && index < m_num) {
-    
+
         // Point to the requested event atom
-        ptr = &(((GCTAEventAtom*)m_events)[index]);
+        //ptr = &(((GCTAEventAtom*)m_events)[index]);
+        ptr = (GCTAEventAtom*)m_events + index;
         
         // Set instrument response function
         ptr->m_rsp = (GCTAResponse*)m_obs->response();
@@ -353,7 +354,7 @@ void GCTAEventList::load_events(GFitsHDU* hdu)
             GFitsTableFltCol* ptr_core_err    = (GFitsTableFltCol*)hdu->column("CORE_ERR");
             GFitsTableFltCol* ptr_xmax        = (GFitsTableFltCol*)hdu->column("XMAX");
             GFitsTableFltCol* ptr_xmax_err    = (GFitsTableFltCol*)hdu->column("XMAX_ERR");
-            GFitsTableFltCol* ptr_energy      = (GFitsTableFltCol*)hdu->column("ENERGY");
+            GFitsTableDblCol* ptr_energy      = (GFitsTableDblCol*)hdu->column("ENERGY");
             GFitsTableFltCol* ptr_energy_err  = (GFitsTableFltCol*)hdu->column("ENERGY_ERR");
             GFitsTableFltCol* ptr_hil_msw     = (GFitsTableFltCol*)hdu->column("HIL_MSW");
             GFitsTableFltCol* ptr_hil_msw_err = (GFitsTableFltCol*)hdu->column("HIL_MSW_ERR");
