@@ -150,13 +150,14 @@ GCTAResponse& GCTAResponse::operator= (const GCTAResponse& rsp)
 double GCTAResponse::aeff(const GInstDir& obsDir, const GEnergy& obsEng,
                           const GTime& obsTime,
                           const GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime, const GPointing& pnt)
+                          const GTime& srcTime, const GPointing& pnt) const
 {
     // Get log(E)
     double logE = log10(srcEng.TeV());
     
     // Interpolate effective area using node array and convert to cm^2
-    double aeff = m_nodes.interpolate(logE, m_aeff) * 10000.0;
+    GNodeArray* nodes = (GNodeArray*)&m_nodes; // circumvent const correctness
+    double aeff = nodes->interpolate(logE, m_aeff) * 10000.0;
 
     // Return effective area
     return aeff;
@@ -188,18 +189,20 @@ double GCTAResponse::aeff(const GInstDir& obsDir, const GEnergy& obsEng,
 double GCTAResponse::psf(const GInstDir& obsDir, const GEnergy& obsEng,
                          const GTime& obsTime,
                          const GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GTime& srcTime, const GPointing& pnt)
+                         const GTime& srcTime, const GPointing& pnt) const
 {
     // Get log(E)
     double logE = log10(srcEng.TeV());
 
     // Determine Gaussian sigma in radians
-    double sigma  = m_nodes.interpolate(logE, m_r68) * 0.6624 * deg2rad;
+    GNodeArray* nodes = (GNodeArray*)&m_nodes; // circumvent const correctness
+    double sigma  = nodes->interpolate(logE, m_r68) * 0.6624 * deg2rad;
     double sigma2 = sigma * sigma;
     
     // Determine angular separation between true and measured photon
     // direction in radians
     double r = ((GCTAInstDir*)&obsDir)->dist(srcDir);
+    //std::cout << "sigma=" << sigma << " r=" << r << std::endl;
     
     // Compute Psf value
     double psf = exp(-0.5 * r * r / sigma2) / (twopi * sigma2);
@@ -226,7 +229,7 @@ double GCTAResponse::psf(const GInstDir& obsDir, const GEnergy& obsEng,
 double GCTAResponse::edisp(const GInstDir& obsDir, const GEnergy& obsEng,
                            const GTime& obsTime,
                            const GSkyDir& srcDir, const GEnergy& srcEng,
-                           const GTime& srcTime, const GPointing& pnt)
+                           const GTime& srcTime, const GPointing& pnt) const
 {
     // Dirac energy dispersion
     double edisp = (obsEng == srcEng) ? 1.0 : 0.0;
@@ -253,7 +256,7 @@ double GCTAResponse::edisp(const GInstDir& obsDir, const GEnergy& obsEng,
 double GCTAResponse::tdisp(const GInstDir& obsDir, const GEnergy& obsEng,
                            const GTime& obsTime,
                            const GSkyDir& srcDir, const GEnergy& srcEng,
-                           const GTime& srcTime, const GPointing& pnt)
+                           const GTime& srcTime, const GPointing& pnt) const
 {
     // Dirac time dispersion
     double tdisp = (obsTime == srcTime) ? 1.0 : 0.0;

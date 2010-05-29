@@ -53,19 +53,19 @@ public:
     // Implemented pure virtual methods
     double aeff(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                const GPointing& pnt);
+                const GPointing& pnt) const;
     double psf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-               const GPointing& pnt);
+               const GPointing& pnt) const;
     double edisp(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                  const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                 const GPointing& pnt);
+                 const GPointing& pnt) const;
     double tdisp(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                  const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                 const GPointing& pnt);
+                 const GPointing& pnt) const;
+    void   load(const std::string& irfname);
 
     // Other Methods
-    void load(const std::string& irfname);
 
 private:
     // Private methods
