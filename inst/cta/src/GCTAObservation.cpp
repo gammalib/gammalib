@@ -21,7 +21,7 @@
 #include <config.h>
 #endif
 #include <iostream>
-#include "GException.hpp"
+#include "GCTAException.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAEventList.hpp"
 #include "GFits.hpp"
@@ -134,22 +134,48 @@ GCTAObservation& GCTAObservation::operator= (const GCTAObservation& obs)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Set CTA response function
+ *
+ * @param[in] irfname Name of CTA response function.
+ * @param[in] caldb Optional name of calibration database.
+ *
+ * @todo Add a generic method in GResponse that searches for path to
+ *       calibration database using environment variables.
+ ***************************************************************************/
+void GCTAObservation::response(const std::string& irfname, std::string caldb)
+{
+    // Delete old response function
+    if (m_response != NULL) delete m_response;
+    
+    // Allocate new CTA response function
+    m_response = new GCTAResponse;
+    
+    // Set calibration database
+    m_response->caldb(caldb);
+    
+    // Load instrument response function
+    m_response->load(irfname);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load data for unbinned analysis
  *
  * @param[in] evname Event FITS filename.
  ***************************************************************************/
 void GCTAObservation::load_unbinned(const std::string& evname)
 {
-    // Free and initialise base class members
-    this->GObservation::free_members();
-    this->GObservation::init_members();
+    // Delete old events
+    if (m_events != NULL) delete m_events;
 
-    // Free and initialise class members
-    free_members();
-    init_members();
-
-    // Allocate and load events
+    // Allocate events and establish link to observation
     m_events = new GCTAEventList;
+    m_events->obs(this);
+    
+    // Load events
     m_events->load(evname);
 
     // Load GTIs
