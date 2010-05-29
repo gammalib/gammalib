@@ -83,7 +83,7 @@ void test_response(void)
         // Load response
         GLATResponse rsp;
         rsp.caldb(lat_caldb);
-        rsp.load(lat_irf, "front");
+        rsp.load(lat_irf+"::front");
 
         // Save response
         rsp.save("test_rsp.fits");

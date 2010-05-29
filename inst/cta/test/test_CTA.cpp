@@ -47,7 +47,8 @@ GModels crab_plaw(void)
     GModels            models;
     try {
         GSkyDir dir;
-        dir.radec_deg(83.6331, +22.0145);
+        //dir.radec_deg(83.6331, +22.0145);
+        dir.radec_deg(117.0, -33.0);  // Adapt to source position in file
         point_source = GModelSpatialPtsrc(dir);
         power_law    = GModelSpectralPlaw(1.0e-7, -2.1);
         crab         = GModel(point_source, power_law);
@@ -195,6 +196,7 @@ void test_unbinned_obs(void)
     // Load unbinned CTA observation
     try {
         run.load_unbinned(cta_events);
+        run.response(cta_irf,cta_caldb);
     }
     catch (std::exception &e) {
         std::cout << std::endl << "TEST ERROR: Unable to load CTA run."
@@ -222,8 +224,8 @@ void test_unbinned_obs(void)
     try {
         int num = 0;
         for (GObservations::iterator event = obs.begin(); event != obs.end(); ++event) {
-//            std::cout << *event << std::endl;
-//            std::cout << event->test() << std::endl;
+            //std::cout << *event->energy() << std::endl;
+            //std::cout << event->test() << std::endl;
             num++;
         }
         if (num != 17020) {
@@ -246,7 +248,7 @@ void test_unbinned_obs(void)
         int num = 0;
         GCTAEventList *ptr = (GCTAEventList*)run.events();
         for (GCTAEventList::iterator event = ptr->begin(); event != ptr->end(); ++event) {
-//            std::cout << *event << std::endl;
+            //std::cout << *event->energy() << std::endl;
             num++;
         }
         if (num != 8510) {
@@ -291,6 +293,7 @@ void test_unbinned_optimizer(void)
     // Load unbinned CTA observation
     try {
         run.load_unbinned(cta_events);
+        run.response(cta_irf,cta_caldb);
         obs.append(run);
     }
     catch (std::exception &e) {
@@ -312,7 +315,7 @@ void test_unbinned_optimizer(void)
     }
     catch (std::exception &e) {
         std::cout << std::endl 
-                  << "TEST ERROR: Unable setup optimizer." 
+                  << "TEST ERROR: Unable setup optimizer."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
