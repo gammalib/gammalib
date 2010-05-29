@@ -57,21 +57,66 @@ energy of $E$ at time $t$.
 Note that $\vec{p'}$ is not necessarily a measured arrival direction, but it can also be
 a detector coordinate.
 $R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)$ is factorised following
-\begin{eqnarray}
+\begin{equation}
 R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) = 
-A_{\rm eff}(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \times
-PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \times
-E_{\rm disp}(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \times \nonumber \\
-T_{\rm disp}(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)
+A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times
+PSF(\vec{p'} | \vec{d}, \vec{p}, E, t) \times
+E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t) \times
+T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)
 \label{eq:rspfact}
-\end{eqnarray}
+\end{equation}
 where
 \begin{itemize}
-\item[] $A_{\rm eff}(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)$ is the effective area (in units of cm$^2$)
-\item[] $PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)$ is the point spread function (in units of sr$^{-1}$)
-\item[] $E_{\rm disp}(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)$ is the energy dispersion (in units of MeV$^{-1}$)
-\item[] $T_{\rm disp}(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)$ is the time dispersion (in units of s$^{-1}$)
+\item[] $A_{\rm eff}(\vec{d}, \vec{p}, E, t)$ is the effective area (in units of counts photons$^{-1}$cm$^2$),
+\item[] $PSF(\vec{p'} | \vec{d}, \vec{p}, E, t)$ is the point spread function (in units of sr$^{-1}$),
+\item[] $E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t)$ is the energy dispersion (in units of MeV$^{-1}$), and
+\item[] $T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)$ is the time dispersion (in units of s$^{-1}$).
 \end{itemize}
+Note that $A_{\rm eff}$ includes also the livetime fraction.
+Assuming that the photon intensity received from a gamma-ray source is described by
+the source model $S(\vec{p}, E, t)$ (in units of photons cm$^{-2}$ s$^{-1}$ MeV$^{-1}$ sr$^{-1}$)
+the probability of measuring an event at position $\vec{p'}$ with an
+energy of $E'$ at the time $t'$ from the source is given by
+\begin{equation}
+N(\vec{p'}, E', t') = \int_{0}^{t'+\Delta t} \int_{E'-\Delta E}^{\infty} \int_{\Omega} 
+S(\vec{p}, E, t) \times R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \, {\rm d}\vec{p} \, {\rm d}E \,{\rm d}t
+\label{eq:model}
+\end{equation}
+(in units of counts s$^{-1}$ MeV$^{-1}$ sr$^{-1}$).
+The terms $\Delta t$ and $\Delta E$ account for the statistical jitter related to the measurement
+process and are of the order of a few time the rms in the time and energy measurements.
+In the case of no time dispersion, $T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)$ becomes a $\delta$-function
+and Eq.~(\ref{eq:model}) reduces to 
+\begin{equation}
+N(\vec{p'}, E', t') = \int_{E'-\Delta E}^{\infty} \int_{\Omega} 
+S(\vec{p}, E, t) \times A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times
+PSF(\vec{p'} | \vec{d}, \vec{p}, E, t) \times
+E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t) 
+\, {\rm d}\vec{p} \, {\rm d}E \, .
+\end{equation}
+Since for many astrophysical sources $S(\vec{p}, E, t)$ drops quickly with energy, only
+photons near $E'$ contribute effectively to the integral.
+For this reason, energy dispersion can also often be neglected, and also
+$E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t)$ can be approximated by a $\delta$-function,
+leading to
+\begin{equation}
+N(\vec{p'}, E', t') = \int_{\Omega} S(\vec{p}, E, t) \times A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times
+PSF(\vec{p'} | \vec{d}, \vec{p}, E, t) \, {\rm d}\vec{p} \, .
+\end{equation}
+These simplifications may be considered when implementing the computation of
+$N(\vec{p'}, E', t')$ for a specific instrument.
+
+A special type of source model is given by the factorisation
+\begin{equation}
+S(\vec{p}, E, t) = M(\vec{p}) \times P(E) \times V(t)
+\end{equation}
+where
+\begin{itemize}
+\item[] $M(\vec{p})$ is a map of the intensity distribution (in units of sr$^{-1}$),
+\item[] $P(E)$ is the source spectrum (in units of photons cm$^{-2}$ s$^{-1}$ MeV$^{-1}$), and
+\item[] $V(t)$ is a source modulation function (unitless).
+\end{itemize}
+
 The \this\ implementation of the response function and parameters is summarised in 
 Table \ref{tab:respar}.
 
@@ -96,6 +141,8 @@ Effective area & $A_{\rm eff}$ & {\tt GResponse::aeff()} & {\bf yes} \\
 Point spread function & $PSF$ & {\tt GResponse::psf()} & {\bf yes} \\
 Energy dispersion & $E_{\rm disp}$ & {\tt GResponse::edisp()} & {\bf yes} \\
 Time dispersion & $T_{\rm disp}$ & {\tt GResponse::tdisp()} & {\bf yes} \\
+Probability of measuring a photon & $N$ & {\tt GEvent::model()} & {\bf yes} \\
+Source model & $S$ & {\tt GModels}, {\tt GModel} & no \\ 
 Measured location of photon & $\vec{p'}$ & {\tt GInstDir} & {\bf yes} \\
 Measured energy of photon & $E'$ & {\tt GEnergy} & no \\
 Measured arrival time & $t'$ & {\tt GTime} & no \\
@@ -110,17 +157,6 @@ True arrival time of photon & $t$ & {\tt GTime} & no \\
 \end{table}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Assuming that the photon intensity received from a gamma-ray source is described by
-the source function $S(\vec{p}, E, t)$ (int units of photons cm$^{-2}$ s$^{-1}$ MeV$^{-1}$ sr$^{-1}$)
-the probability of measuring a photon a photon at position $\vec{p'}$ with an
-energy of $E'$ and at the time $t'$ from the source is given by
-\begin{equation}
-N(\vec{p'}, E', t') = \int_{0}^{t'+\Delta t} \int_{0}^{E'+\Delta E} \int_{\Omega} 
-S(\vec{p}, E, t) \times R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \, {\rm d}\vec{p} \, {\rm d}E \,{\rm d}t
-\end{equation}
-(in units of counts s$^{-1}$ MeV$^{-1}$ sr$^{-1}$).
-The terms $\Delta t$ and $\Delta E$ in the upper integration boundaries allow for measurement
-uncertainties in energy and arrivial time.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -137,9 +173,9 @@ definition.
 Following the factorisation of the response (cf.~Eq.~\ref{eq:rspfact}) the standard implementation
 of the {\tt GResponse::irf()} is given by the following code:
 \begin{verbatim}
-double GResponse::irf(const GInstDir* obsDir, const GEnergy& obsEng, const GTime& obsTime,
+double GResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                       const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                      const GPointing* pnt)
+                      const GPointing& pnt)
 {
     double irf = psf(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
     irf *= aeff(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
@@ -161,9 +197,9 @@ By omitting these terms a more efficient response calculation may be provided.
 Needs to be implemented and needs to return effective area in units of cm$^2$.
 Interface:
 \begin{verbatim}
-double GXXXResponse::aeff(const GInstDir* obsDir, const GEnergy& obsEng, const GTime& obsTime,
+double GXXXResponse::aeff(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                           const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                          const GPointing* pnt)
+                          const GPointing& pnt)
 \end{verbatim}
 
 
@@ -173,9 +209,9 @@ double GXXXResponse::aeff(const GInstDir* obsDir, const GEnergy& obsEng, const G
 Needs to be implemented and needs to return point spread function in units of sr$^{-1}$.
 Interface:
 \begin{verbatim}
-double GXXXResponse::psf(const GInstDir* obsDir, const GEnergy& obsEng, const GTime& obsTime,
+double GXXXResponse::psf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                          const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                         const GPointing* pnt)
+                         const GPointing& pnt)
 \end{verbatim}
 
 
@@ -197,9 +233,9 @@ double GXXXResponse::edisp(const GInstDir* obsDir, const GEnergy& obsEng, const 
 Needs to be implemented and needs to return time dispersion in units of s$^{-1}$.
 Interface:
 \begin{verbatim}
-double GXXXResponse::tdisp(const GInstDir* obsDir, const GEnergy& obsEng, const GTime& obsTime,
+double GXXXResponse::tdisp(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                           const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                          const GPointing* pnt)
+                          const GPointing& pnt)
 \end{verbatim}
 
 
@@ -213,5 +249,41 @@ Needs to be implemented.
 \subsubsection{{\tt GXXXPointing}}
 
 Needs to be implemented.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Source model}
+
+The following methods are to be implemented to evaluate $N(\vec{p'}, E', t')$.
+Note that the integral of Eq.~(\ref{eq:model}) could be implemented
+generically.
+
+\begin{verbatim}
+GXXXEventAtom::model(GModels& models);
+GXXXEventAtom::model(GModels& models, GVector* gradient);
+GXXXEventBin::model(GModels& models);
+GXXXEventBin::model(GModels& models, GVector* gradient);
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Instrument data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Instrument data}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Events}
+
+Data are comprised of events.
+The are two types of events: event atoms and event bins.
+Events are combined together in {\tt GEvents}.
+{\tt GEvents} implements an iteration that allows iterating over event atoms or event bins
+(the differenciation between both is transparent for the user).
+{\tt GEvents} has an abstract method {\tt pointer(int index)} that returns a pointer to an
+event.
+This method, which has to be implement for each instrument, assigns information to
+all events.
+Note that in general, only a single event can be accessed at a time (any subsequent
+class to the {\tt pointer()} method makes the old pointer invalid.
 
 \end{document}
