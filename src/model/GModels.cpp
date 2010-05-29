@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GModels.cpp
@@ -35,7 +34,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                      GModels constructors/destructors                   =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -73,7 +72,7 @@ GModels::GModels(const GModels& models) : GOptimizerPars(models)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModels::~GModels()
+GModels::~GModels(void)
 {
     // Free members
     free_members();
@@ -85,7 +84,7 @@ GModels::~GModels()
 
 /*==========================================================================
  =                                                                         =
- =                            GModels operators                            =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -120,16 +119,16 @@ GModels& GModels::operator= (const GModels& models)
 
 /*==========================================================================
  =                                                                         =
- =                         GModels public methods                          =
+ =                            Public methods                               =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Add model to container
+ * @brief Append model to container
  *
  * @param[in] model Model to be added.
  ***************************************************************************/
-void GModels::add(const GModel& model)
+void GModels::append(const GModel& model)
 {
 	// Allocate fresh memory for models
     GModel* new_model = new GModel[m_elements+1];
@@ -163,11 +162,12 @@ void GModels::add(const GModel& model)
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] dir Pointer to sky direction used for evaluation.
- * @param[in] energy Pointer to energy used for evaluation.
- * @param[in] time Pointer to time used for evaluation.
+ * @param[in] dir Photon arrival direction.
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
  ***************************************************************************/
-double GModels::eval(GSkyDir* dir, GEnergy* energy, GTime* time)
+double GModels::eval(const GSkyDir& dir, const GEnergy& energy,
+                     const GTime& time)
 {
     // Initialise function value
     double value = 0.0;
@@ -184,11 +184,12 @@ double GModels::eval(GSkyDir* dir, GEnergy* energy, GTime* time)
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] dir Pointer to sky direction used for evaluation.
- * @param[in] energy Pointer to energy used for evaluation.
- * @param[in] time Pointer to time used for evaluation.
+ * @param[in] dir Photon arrival direction.
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
  ***************************************************************************/
-double GModels::eval_gradients(GSkyDir* dir, GEnergy* energy, GTime* time)
+double GModels::eval_gradients(const GSkyDir& dir, const GEnergy& energy,
+                               const GTime& time)
 {
     // Initialise function value
     double value = 0.0;

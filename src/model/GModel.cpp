@@ -169,16 +169,20 @@ GModelPar* GModel::par(int index) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] dir Pointer to sky direction used for evaluation.
- * @param[in] energy Pointer to energy used for evaluation.
- * @param[in] time Pointer to time used for evaluation.
+ * @param[in] dir Photon arrival direction.
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ *
+ * This method implements a source model evaluation assuming a factorisation
+ * of the source term into a spatial, a spectral and a temporal component.
  ***************************************************************************/
-double GModel::eval(GSkyDir* dir, GEnergy* energy, GTime* time)
+double GModel::eval(const GSkyDir& dir, const GEnergy& energy,
+                    const GTime& time)
 {
     // Initialise value
     double value = 1.0;
     
-    // Evaluate gradients in all components
+    // Evaluate model in all components
     if (m_spatial  != NULL) value *= m_spatial->eval(dir);
     if (m_spectral != NULL) value *= m_spectral->eval(energy);
     if (m_temporal != NULL) value *= m_temporal->eval(time);
@@ -191,11 +195,15 @@ double GModel::eval(GSkyDir* dir, GEnergy* energy, GTime* time)
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] dir Pointer to sky direction used for evaluation.
- * @param[in] energy Pointer to energy used for evaluation.
- * @param[in] time Pointer to time used for evaluation.
+ * @param[in] dir Photon arrival direction.
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ *
+ * This method implements a source model evaluation assuming a factorisation
+ * of the source term into a spatial, a spectral and a temporal component.
  ***************************************************************************/
-double GModel::eval_gradients(GSkyDir* dir, GEnergy* energy, GTime* time)
+double GModel::eval_gradients(const GSkyDir& dir, const GEnergy& energy,
+                              const GTime& time)
 {
     // Initialise value
     double value = 1.0;
