@@ -20,9 +20,15 @@
 #define GCTAEVENTATOM_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include "GEventAtom.hpp"
 #include "GModels.hpp"
 #include "GVector.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
+#include "GCTAInstDir.hpp"
+#include "GCTAPointing.hpp"
+#include "GCTAResponse.hpp"
 
 
 /***********************************************************************//**
@@ -35,18 +41,24 @@ class GCTAEventAtom : public GEventAtom {
     // Friend classes
     friend class GCTAEventList;
 
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GCTAEventAtom& atom);
+
 public:
     // Constructors and destructors
-    GCTAEventAtom();
+    GCTAEventAtom(void);
     GCTAEventAtom(const GCTAEventAtom& atom);
-    virtual ~GCTAEventAtom();
+    virtual ~GCTAEventAtom(void);
 
     // Operators
     GCTAEventAtom& operator= (const GCTAEventAtom& atom);
 
     // Methods
-    double model(GModels& models);
-    double model(GModels& models, GVector* gradient);
+    double              model(GModels& models) const;
+    double              model(GModels& models, GVector* gradient) const;
+    const GCTAInstDir*  dir(void) const { return &m_dir; }
+    const GCTAPointing* pnt(void) const { return &m_pnt; }
+    const GCTAResponse* rsp(void) const { return m_rsp; }
     
 protected:
     // Protected methods
@@ -54,6 +66,11 @@ protected:
     void           copy_members(const GCTAEventAtom& atom);
     void           free_members(void);
     GCTAEventAtom* clone(void) const;
+    
+    // CTA attributes
+    GCTAInstDir   m_dir;            //!< Event direction
+    GCTAPointing  m_pnt;            //!< CTA pointing
+    GCTAResponse* m_rsp;            //!< Pointer to CTA instrument response function
 
     // CTA data format attributes
     long    m_event_id;             //!< Event identifier
@@ -77,8 +94,6 @@ protected:
     float   m_hil_msw_err;          //!< Error on Hillas width
     float   m_hil_msl;              //!< Hillas length
     float   m_hil_msl_err;          //!< Error on Hillas length
-    
-    // Other attributes
 };
 
 #endif /* GCTAEVENTATOM_HPP */
