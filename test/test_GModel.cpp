@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GModel.cpp  -  test GModel class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,16 +12,21 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include <ostream>
+#include <stdexcept>
 #include <stdlib.h>
-#include "test_GModel.hpp"
+#include "GammaLib.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
 
 
-/***************************************************************************
- *  Test: Model parameter handling                                         *
+/***********************************************************************//**
+ * @brief Test model parameter handling.
  ***************************************************************************/
 void test_model_par(void)
 {
@@ -64,8 +69,8 @@ void test_model_par(void)
 }
 
 
-/***************************************************************************
- *  Test: Model handling                                                   *
+/***********************************************************************//**
+ * @brief Test model handling.
  ***************************************************************************/
 void test_model(void)
 {
@@ -92,7 +97,7 @@ void test_model(void)
         throw;
     }
     std::cout << ".";
-//std::cout << point_source << std::endl;
+    //std::cout << point_source << std::endl;
 
     // Setup spectral model
     GModelSpectralPlaw power_law;
@@ -112,7 +117,7 @@ void test_model(void)
         throw;
     }
     std::cout << ".";
-//std::cout << power_law << std::endl;
+    //std::cout << power_law << std::endl;
 
     // Setup Crab model
     GModel crab;
@@ -127,14 +132,14 @@ void test_model(void)
         throw;
     }
     std::cout << ".";
-//std::cout << crab << std::endl;
+    //std::cout << crab << std::endl;
 
     // Put model in container
     GModels models;
     try {
-        models.add(crab);
-        models.add(crab);
-        models.add(crab);
+        models.append(crab);
+        models.append(crab);
+        models.append(crab);
     }
     catch (std::exception &e) {
         std::cout << std::endl << "TEST ERROR: Unable setup GModels." 
@@ -143,7 +148,7 @@ void test_model(void)
         throw;
     }
     std::cout << ".";
-//std::cout << models << std::endl;
+    //std::cout << models << std::endl;
 
     // Put container in data
 /*
@@ -151,7 +156,7 @@ void test_model(void)
     GLATObservation obs;
     try {
         GModels models;
-        models.add(crab);
+        models.append(crab);
         obs.load_unbinned("data/lat/ft1.fits.gz", "data/lat/ft2.fits.gz", "");
         data.append(obs);
         data.models(models);
@@ -163,7 +168,7 @@ void test_model(void)
         throw;
     }
     std::cout << ".";
-//std::cout << data << std::endl;
+    //std::cout << data << std::endl;
 */
     // Plot final test success
     std::cout << " ok." << std::endl;
@@ -174,8 +179,8 @@ void test_model(void)
 }
 
 
-/***************************************************************************
- *                            Main test function                           *
+/***********************************************************************//**
+ * @brief Main test function.
  ***************************************************************************/
 int main(void)
 {
