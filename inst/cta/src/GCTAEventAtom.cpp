@@ -21,12 +21,12 @@
 #include <config.h>
 #endif
 #include <iostream>
-#include "GException.hpp"
+#include "GCTAException.hpp"
 #include "GCTAEventAtom.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MODEL                    "GCTAEventAtom::model(GModels&, GVector*)"
-#define G_COPY_MEMBERS    "GCTAEventAtom::copy_members(const GCTAEventAtom&)"
+#define G_MODEL1                             "GCTAEventAtom::model(GModels&)"
+#define G_MODEL2                   "GCTAEventAtom::model(GModels&, GVector*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -131,13 +131,43 @@ GCTAEventAtom& GCTAEventAtom::operator= (const GCTAEventAtom& atom)
  *
  * @param[in] models Model descriptor.
  *
- * @todo Add CTA specific code (so far only dummy)
+ * @exception GCTAException::response_not_set
+ *            Response function has not been set.
+ *
+ * Implements generic model evaluation for the CTA instrument.
+ *
+ * @todo Requires implementation of all model types (not only factorized
+ *       point sources which are currently the only type that is
+ *       supported)
  ***************************************************************************/
-double GCTAEventAtom::model(GModels& models)
+double GCTAEventAtom::model(GModels& models) const
 {
-    // Set model value
-    double model = models.eval(dir(), energy(), time());
+    // Make sure that response pointer exists
+    if (rsp() == NULL)
+        throw GCTAException::response_not_set(G_MODEL1);
     
+    // Integral over source direction, energy and time
+    //for (srcTime = ...
+    //for (srcEng = ...
+    //for (srcDir = ...
+    GTime   srcTime = *time();    // Assume no time dispersion
+    GEnergy srcEng  = *energy();  // Assume no energy dispersion
+    GSkyDir srcDir;               // Needs to be implemented
+
+    // Get source term
+    double source = models.eval(srcDir, srcEng, srcTime);
+    
+    // Get IRF
+    double irf = rsp()->irf((*dir()), (*energy()), (*time()), 
+                            srcDir, srcEng, srcTime, (*pnt()));
+    
+    // Evaluate model
+    double model = source * irf;
+
+    //}
+    //}
+    //}
+
     // Return
     return model;
 }
@@ -149,24 +179,61 @@ double GCTAEventAtom::model(GModels& models)
  * @param[in] models Model descriptor.
  * @param[out] gradient Pointer to gradient vector.
  *
- * @todo Add CTA specific code (so far only dummy)
+ * @exception GCTAException::response_not_set
+ *            Response function has not been set.
+ * @exception GException::gradient_par_mismatch
+ *            Gradient dimension mismatches number of parameters.
+ *
+ * Implements generic model and gradient evaluation for the CTA instrument.
+ *
+ * @todo Needs to communicate source position to psf method !!!!
+ * @todo Requires implementation of all model types (not only factorized
+ *       point sources which are currently the only type that is
+ *       supported)
  ***************************************************************************/
-double GCTAEventAtom::model(GModels& models, GVector* gradient)
+double GCTAEventAtom::model(GModels& models, GVector* gradient) const
 {
-    // Verify that gradients vector has the same dimension than the
-    // model has parameters
+    // Make sure that response pointer exists
+    if (rsp() == NULL)
+        throw GCTAException::response_not_set(G_MODEL2);
+
+    // Verify that number of model parameter is identical to the dimension
+    // of the gradient vector
     #if defined(G_RANGE_CHECK)
     if (models.npars() != gradient->size())
-        throw GException::gradient_par_mismatch(G_MODEL, gradient->size(), 
+        throw GException::gradient_par_mismatch(G_MODEL2, gradient->size(), 
                                                 models.npars());
     #endif
+    // Integral over source direction, energy and time
+    //for (srcTime = ...
+    //for (srcEng = ...
+    //for (srcDir = ...
+    GTime   srcTime = *time();    // Assume no time dispersion
+    GEnergy srcEng  = *energy();  // Assume no energy dispersion
+    GSkyDir srcDir;               // NEEDS TO BE IMPLEMENTED
+    srcDir.radec_deg(117.0, -33.0); // DUMMY: This position should be extracted from model
 
-    // Evaluate model and gradients
-    double model = models.eval_gradients(dir(), energy(), time());
-        
+    // Get source term
+    double source = models.eval_gradients(srcDir, srcEng, srcTime);
+    
+    // Get IRF
+    double aeff = rsp()->aeff(*dir(), *energy(), *time(), srcDir, srcEng, srcTime, *pnt());
+    double psf  = rsp()->psf(*dir(), *energy(), *time(), srcDir, srcEng, srcTime, *pnt());
+    //double irf  = rsp()->irf(*dir(), *energy(), *time(), srcDir, srcEng, srcTime, *pnt());
+    double irf  = aeff*psf;
+    
+    // Evaluate model
+    double model = source * irf;
+    //std::cout << "model=" << model << " source=" << source << " irf=" << irf
+    //          << " aeff=" << aeff << " psf=" << psf << std::endl;
+
     // Set gradient vector
     for (int i = 0; i < gradient->size(); ++i)
-        (*gradient)(i) = models.par(i)->gradient();
+        (*gradient)(i) = irf * models.par(i)->gradient();
+
+    //}
+    //}
+    //}
 
     // Return
     return model;
@@ -181,10 +248,15 @@ double GCTAEventAtom::model(GModels& models, GVector* gradient)
 
 /***********************************************************************//**
  * @brief Initialise class members
+ *
+ * @todo Need to implement GCTAInstDir:clear() and GCTAPointing:clear()
  ***************************************************************************/
 void GCTAEventAtom::init_members(void)
 {
-    // Initialise LAT data format attributes
+    // Initialise CTA data format attributes
+    //m_dir.clear();
+    //m_pnt.clear();
+    m_rsp         = NULL;
     m_event_id    = 0;
     m_flags       = 0;
     m_multip      = 0;
@@ -219,7 +291,10 @@ void GCTAEventAtom::init_members(void)
  ***************************************************************************/
 void GCTAEventAtom::copy_members(const GCTAEventAtom& atom)
 {
-    // Copy LAT data format attributes
+    // Copy CTA data format attributes
+    m_dir         = atom.m_dir;
+    m_pnt         = atom.m_pnt;
+    m_rsp         = atom.m_rsp;
     m_event_id    = atom.m_event_id;
     m_flags       = atom.m_flags;
     m_multip      = atom.m_multip;
@@ -271,3 +346,22 @@ GCTAEventAtom* GCTAEventAtom::clone(void) const
  =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Put atom into output stream
+ *
+ * @param[in] os Output stream into which the atom will be dumped
+ * @param[in] atom Atom to be dumped
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GCTAEventAtom& atom)
+{
+    // Put bin in output stream
+    os.precision(3);
+    os << std::fixed;
+    os << "Time=" << atom.m_time;
+    os << " Energy=" << atom.m_energy;
+    os << atom.m_dir; 
+        
+    // Return output stream
+    return os;
+}
