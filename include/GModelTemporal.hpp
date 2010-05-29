@@ -27,7 +27,10 @@
 /***********************************************************************//**
  * @class GModelTemporal
  *
- * @brief Abstract interface definition for the spatial model class
+ * @brief Abstract interface definition for the temporal model class.
+ *
+ * This class implements the temporal component of the factorised source
+ * model.
  ***************************************************************************/
 class GModelTemporal {
 
@@ -38,7 +41,7 @@ public:
     // Constructors and destructors
     GModelTemporal(void);
     GModelTemporal(const GModelTemporal& model);
-    virtual ~GModelTemporal();
+    virtual ~GModelTemporal(void);
  
     // Operators
     virtual GModelTemporal& operator= (const GModelTemporal& model);
@@ -46,8 +49,8 @@ public:
     // Virtual methods
     virtual int        npars(void) const = 0;
     virtual GModelPar* par(int index) const = 0;
-    virtual double     eval(GTime* time) = 0;
-    virtual double     eval_gradients(GTime* time) = 0;
+    virtual double     eval(const GTime& time) = 0;
+    virtual double     eval_gradients(const GTime& time) = 0;
   
 protected:
     // Protected methods

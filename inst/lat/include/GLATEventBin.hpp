@@ -20,12 +20,13 @@
 #define GLATEVENTBIN_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <ostream>
 #include "GEventBin.hpp"
 #include "GModels.hpp"
 #include "GVector.hpp"
-#include "GSkyDir.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
+#include "GLATInstDir.hpp"
+#include "GLATPointing.hpp"
+#include "GLATResponse.hpp"
 
 
 /***********************************************************************//**
@@ -43,20 +44,19 @@ class GLATEventBin : public GEventBin {
 
 public:
     // Constructors and destructors
-    GLATEventBin();
+    GLATEventBin(void);
     GLATEventBin(const GLATEventBin& bin);
-    virtual ~GLATEventBin();
+    virtual ~GLATEventBin(void);
 
     // Operators
     GLATEventBin& operator= (const GLATEventBin& bin);
 
     // Methods
-    double   counts(void) const { return *m_counts; }
-    double   model(GModels& models);
-    double   model(GModels& models, GVector* gradient);
-    GSkyDir* dir(void) { return m_dir; }
-    GEnergy* energy(void) { return m_energy; }
-    GTime*   time(void) { return m_time; }
+    double              model(GModels& models) const;
+    double              model(GModels& models, GVector* gradient) const;
+    const GLATInstDir*  dir(void) const { return m_dir; }
+    const GLATPointing* pnt(void) const { return m_pnt; }
+    const GLATResponse* rsp(void) const { return m_rsp; }
     
 protected:
     // Protected methods
@@ -65,11 +65,10 @@ protected:
     void          free_members(void);
     GLATEventBin* clone(void) const;
 
-    // Protected data area (defines all LAT specific event attributes)
-    double*  m_counts;      //!< Pointer to number of counts
-    GTime*   m_time;        //!< Pointer to bin time
-    GSkyDir* m_dir;         //!< Pointer to bin direction
-    GEnergy* m_energy;      //!< Pointer to bin energy
+    // LAT specific event attributes
+    GLATInstDir*  m_dir;     //!< Pointer to event direction
+    GLATPointing* m_pnt;     //!< Pointer to instrument pointing
+    GLATResponse* m_rsp;     //!< Pointer to instrument response function
 
 };
 

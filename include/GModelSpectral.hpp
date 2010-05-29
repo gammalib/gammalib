@@ -27,7 +27,10 @@
 /***********************************************************************//**
  * @class GModelSpectral
  *
- * @brief Abstract interface definition for the spectral model class
+ * @brief Abstract interface definition for the spectral model class.
+ *
+ * This class implements the spectral component of the factorised source
+ * model.
  ***************************************************************************/
 class GModelSpectral {
 
@@ -46,8 +49,8 @@ public:
     // Virtual methods
     virtual int        npars(void) const = 0;
     virtual GModelPar* par(int index) const = 0;
-    virtual double     eval(GEnergy* energy) = 0;
-    virtual double     eval_gradients(GEnergy* energy) = 0;
+    virtual double     eval(const GEnergy& energy) = 0;
+    virtual double     eval_gradients(const GEnergy& energy) = 0;
   
 protected:
     // Protected methods

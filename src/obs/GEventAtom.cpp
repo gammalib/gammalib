@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GEvent.cpp
@@ -37,14 +36,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                     GEventAtom constructors/destructors                 =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GEventAtom::GEventAtom() : GEvent()
+GEventAtom::GEventAtom(void) : GEvent()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -75,7 +74,7 @@ GEventAtom::GEventAtom(const GEventAtom& atom) : GEvent(atom)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GEventAtom::~GEventAtom()
+GEventAtom::~GEventAtom(void)
 {
     // Free members
     free_members();
@@ -87,7 +86,7 @@ GEventAtom::~GEventAtom()
 
 /*==========================================================================
  =                                                                         =
- =                           GEventAtom operators                          =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -122,13 +121,13 @@ GEventAtom& GEventAtom::operator= (const GEventAtom& atom)
 
 /*==========================================================================
  =                                                                         =
- =                        GEventAtom public methods                        =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /*==========================================================================
  =                                                                         =
- =                        GEventAtom private methods                       =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -140,7 +139,6 @@ void GEventAtom::init_members(void)
     // Initialise attributes
     m_time.mjd(0.0);
     m_energy.MeV(0.0);
-    m_dir.radec(0.0, 0.0);
 
     // Return
     return;
@@ -157,7 +155,6 @@ void GEventAtom::copy_members(const GEventAtom& atom)
     // Copy attributes
     m_time   = atom.m_time;
     m_energy = atom.m_energy;
-    m_dir    = atom.m_dir;
 
     // Return
     return;
@@ -172,36 +169,3 @@ void GEventAtom::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                            GEventAtom friends                           =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Put atom into output stream
- *
- * @param[in] os Output stream into which the atom will be dumped
- * @param[in] atom Atom to be dumped
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GEventAtom& atom)
-{
-    // Put bin in output stream
-    os.precision(3);
-    os << fixed;
-    os << "Time=" << atom.m_time;
-    os << " Energy=" << atom.m_energy;
-    os << atom.m_dir; 
-        
-    // Return output stream
-    return os;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                   Other functions used by GEventAtom                    =
- =                                                                         =
- ==========================================================================*/

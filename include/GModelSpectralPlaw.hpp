@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectralPlaw.hpp  -  Spectral power law model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,13 +23,21 @@
 #include <iostream>
 #include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
+#include "GSkyDir.hpp"
+#include "GInstDir.hpp"
 #include "GEnergy.hpp"
+#include "GTime.hpp"
+#include "GPointing.hpp"
+#include "GResponse.hpp"
 
 
 /***********************************************************************//**
  * @class GModelSpectralPlaw
  *
- * @brief Powerlaw interface definition
+ * @brief Powerlaw interface definition.
+ *
+ * This class implements the spectral component of the factorised source
+ * model for a power law.
  ***************************************************************************/
 class GModelSpectralPlaw  : public GModelSpectral {
 
@@ -39,9 +47,9 @@ class GModelSpectralPlaw  : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralPlaw(void);
-    GModelSpectralPlaw(const double& norm, const double& index);
+    explicit GModelSpectralPlaw(const double& norm, const double& index);
     GModelSpectralPlaw(const GModelSpectralPlaw& model);
-    virtual ~GModelSpectralPlaw();
+    virtual ~GModelSpectralPlaw(void);
  
     // Operators
     GModelSpectralPlaw& operator= (const GModelSpectralPlaw& model);
@@ -49,8 +57,8 @@ public:
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
-    double     eval(GEnergy* energy);
-    double     eval_gradients(GEnergy* energy);
+    double     eval(const GEnergy& energy);
+    double     eval_gradients(const GEnergy& energy);
     void       autoscale(void);
     double     norm(void) const { return m_norm.real_value(); }
     double     index(void) const { return m_index.real_value(); }

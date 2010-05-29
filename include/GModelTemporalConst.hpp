@@ -28,7 +28,10 @@
 /***********************************************************************//**
  * @class GModelTemporalConst
  *
- * @brief Powerlaw interface definition
+ * @brief Interface definition for the constant model class.
+ *
+ * This class implements the temporal component of the factorised source
+ * model for a constant model.
  ***************************************************************************/
 class GModelTemporalConst  : public GModelTemporal {
 
@@ -42,7 +45,7 @@ public:
     // Constructors and destructors
     GModelTemporalConst(void);
     GModelTemporalConst(const GModelTemporalConst& model);
-    virtual ~GModelTemporalConst();
+    virtual ~GModelTemporalConst(void);
  
     // Operators
     GModelTemporalConst& operator= (const GModelTemporalConst& model);
@@ -50,8 +53,8 @@ public:
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
-    double     eval(GTime* time);
-    double     eval_gradients(GTime* time);
+    double     eval(const GTime& time);
+    double     eval_gradients(const GTime& time);
   
 protected:
     // Protected methods

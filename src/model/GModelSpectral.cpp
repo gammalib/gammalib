@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectral.cpp  -  Abstract spectral model base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GModelSpectral.cpp
@@ -18,6 +17,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GException.hpp"
 #include "GModelSpectral.hpp"
 
@@ -32,7 +34,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                  GModelSpectral constructors/destructors                =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
@@ -70,7 +72,7 @@ GModelSpectral::GModelSpectral(const GModelSpectral& model)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelSpectral::~GModelSpectral()
+GModelSpectral::~GModelSpectral(void)
 {
     // Free members
     free_members();
@@ -82,7 +84,7 @@ GModelSpectral::~GModelSpectral()
 
 /*==========================================================================
  =                                                                         =
- =                          GModelSpectral operators                       =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -114,13 +116,13 @@ GModelSpectral& GModelSpectral::operator= (const GModelSpectral& model)
 
 /*==========================================================================
  =                                                                         =
- =                      GModelSpectral public methods                      =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /*==========================================================================
  =                                                                         =
- =                      GModelSpectral private methods                     =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -154,16 +156,3 @@ void GModelSpectral::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                          GModelSpectral friends                         =
- =                                                                         =
- ==========================================================================*/
-
-/*==========================================================================
- =                                                                         =
- =                  Other functions used by GModelSpectral                 =
- =                                                                         =
- ==========================================================================*/

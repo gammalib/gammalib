@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialPtsrc.hpp  -  Spatial point source model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -29,7 +29,10 @@
 /***********************************************************************//**
  * @class GModelSpatialPtsrc
  *
- * @brief Powerlaw interface definition
+ * @brief Point source model interface definition.
+ *
+ * This class implements the spatial component of the factorised source
+ * model for a point source.
  ***************************************************************************/
 class GModelSpatialPtsrc  : public GModelSpatial {
 
@@ -38,10 +41,10 @@ class GModelSpatialPtsrc  : public GModelSpatial {
 
 public:
     // Constructors and destructors
-    GModelSpatialPtsrc(void);
-    GModelSpatialPtsrc(GSkyDir dir);
+    explicit GModelSpatialPtsrc(void);
+    explicit GModelSpatialPtsrc(const GSkyDir& dir);
     GModelSpatialPtsrc(const GModelSpatialPtsrc& model);
-    virtual ~GModelSpatialPtsrc();
+    virtual ~GModelSpatialPtsrc(void);
  
     // Operators
     GModelSpatialPtsrc& operator= (const GModelSpatialPtsrc& model);
@@ -49,8 +52,8 @@ public:
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
-    double     eval(GSkyDir* dir);
-    double     eval_gradients(GSkyDir* dir);
+    double     eval(const GSkyDir& dir);
+    double     eval_gradients(const GSkyDir& dir);
     double     ra(void) const { return m_ra.real_value(); }
     double     dec(void) const { return m_dec.real_value(); }
   

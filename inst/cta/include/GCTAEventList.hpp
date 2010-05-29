@@ -22,6 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GEventList.hpp"
 #include "GCTAEventAtom.hpp"
+#include "GCTAResponse.hpp"
 #include "GFits.hpp"
 #include "GModels.hpp"
 

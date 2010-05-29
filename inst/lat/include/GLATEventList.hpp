@@ -37,9 +37,9 @@ class GLATEventList : public GEventList {
 
 public:
     // Constructors and destructors
-    GLATEventList();
+    GLATEventList(void);
     GLATEventList(const GLATEventList& list);
-    virtual ~GLATEventList();
+    virtual ~GLATEventList(void);
 
     // Operators
     GLATEventList& operator= (const GLATEventList& list);

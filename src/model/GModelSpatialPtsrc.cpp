@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialPtsrc.cpp  -  Spatial point source model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GModelSpatialPtsrc.cpp
@@ -18,6 +17,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GException.hpp"
 #include "GModelSpatialPtsrc.hpp"
 
@@ -33,7 +35,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                GModelSpatialPtsrc constructors/destructors              =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
@@ -53,9 +55,9 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(void) : GModelSpatial()
 /***********************************************************************//**
  * @brief Constructor
  *
- * @param[in] dir Position of the point source.
+ * @param[in] dir Position of the point source on the sky.
  ***************************************************************************/
-GModelSpatialPtsrc::GModelSpatialPtsrc(GSkyDir dir) : GModelSpatial()
+GModelSpatialPtsrc::GModelSpatialPtsrc(const GSkyDir& dir) : GModelSpatial()
 {
     // Initialise private members for clean destruction
     init_members();
@@ -91,7 +93,7 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(const GModelSpatialPtsrc& model) :
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelSpatialPtsrc::~GModelSpatialPtsrc()
+GModelSpatialPtsrc::~GModelSpatialPtsrc(void)
 {
     // Free members
     free_members();
@@ -103,7 +105,7 @@ GModelSpatialPtsrc::~GModelSpatialPtsrc()
 
 /*==========================================================================
  =                                                                         =
- =                        GModelSpatialPtsrc operators                     =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -138,7 +140,7 @@ GModelSpatialPtsrc& GModelSpatialPtsrc::operator= (const GModelSpatialPtsrc& mod
 
 /*==========================================================================
  =                                                                         =
- =                    GModelSpatialPtsrc public methods                    =
+ =                            Public methods                               =
  =                                                                         =
  ==========================================================================*/
 
@@ -161,9 +163,16 @@ GModelPar* GModelSpatialPtsrc::par(int index) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] dir Sky direction.
+ * @param[in] dir Photon arrival direction.
+ *
+ * This method implements the spatial component of a point source model. It
+ * returns 1 if the photon arrival direction is identical to the point
+ * source direction, otherwise 0 is returned.
+ *
+ * @todo Method not yet fully implement (needs checking of photon arrival
+ *       direction)
  ***************************************************************************/
-double GModelSpatialPtsrc::eval(GSkyDir* dir)
+double GModelSpatialPtsrc::eval(const GSkyDir& dir)
 {
     // Return
     return 1.0;
@@ -173,10 +182,21 @@ double GModelSpatialPtsrc::eval(GSkyDir* dir)
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] dir Sky direction.
+ * @param[in] dir Photon arrival direction.
+ *
+ * This method implements the spatial component of a point source model. It
+ * returns 1 if the photon arrival direction is identical to the point
+ * source direction, otherwise 0 is returned.
+ *
+ * @todo Method not yet fully implement (needs checking of photon arrival
+ *       direction and evaluation of gradients)
  ***************************************************************************/
-double GModelSpatialPtsrc::eval_gradients(GSkyDir* dir)
+double GModelSpatialPtsrc::eval_gradients(const GSkyDir& dir)
 {
+    // Set gradients to 0
+    m_ra.gradient(0.0);
+    m_dec.gradient(0.0);
+
     // Return
     return 1.0;
 }

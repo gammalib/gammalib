@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelTemporal.cpp  -  Abstract temporal model base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GModelTemporal.cpp
@@ -18,6 +17,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GException.hpp"
 #include "GModelTemporal.hpp"
 
@@ -32,7 +34,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                  GModelTemporal constructors/destructors                =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -70,7 +72,7 @@ GModelTemporal::GModelTemporal(const GModelTemporal& model)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelTemporal::~GModelTemporal()
+GModelTemporal::~GModelTemporal(void)
 {
     // Free members
     free_members();
@@ -82,7 +84,7 @@ GModelTemporal::~GModelTemporal()
 
 /*==========================================================================
  =                                                                         =
- =                          GModelTemporal operators                       =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -114,13 +116,13 @@ GModelTemporal& GModelTemporal::operator= (const GModelTemporal& model)
 
 /*==========================================================================
  =                                                                         =
- =                      GModelTemporal public methods                      =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /*==========================================================================
  =                                                                         =
- =                      GModelTemporal private methods                     =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -154,16 +156,3 @@ void GModelTemporal::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                          GModelTemporal friends                         =
- =                                                                         =
- ==========================================================================*/
-
-/*==========================================================================
- =                                                                         =
- =                  Other functions used by GModelTemporal                 =
- =                                                                         =
- ==========================================================================*/

@@ -40,14 +40,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                  GLATEventList constructors/destructors                 =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GLATEventList::GLATEventList() : GEventList()
+GLATEventList::GLATEventList(void) : GEventList()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -78,7 +78,7 @@ GLATEventList::GLATEventList(const GLATEventList& list) : GEventList(list)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GLATEventList::~GLATEventList()
+GLATEventList::~GLATEventList(void)
 {
     // Free members
     free_members();
@@ -90,7 +90,7 @@ GLATEventList::~GLATEventList()
 
 /*==========================================================================
  =                                                                         =
- =                        GLATEventList operators                          =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -125,7 +125,7 @@ GLATEventList& GLATEventList::operator= (const GLATEventList& list)
 
 /*==========================================================================
  =                                                                         =
- =                      GLATEventList public methods                       =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -163,12 +163,29 @@ void GLATEventList::load(const std::string& filename)
  *
  * A valid pointer is only returned if index is in the valid range. Otherwise
  * a NULL pointer is returned.
+ *
+ * @todo Needs assignment of pointing and response function pointers.
+ * @todo Should we really return a NULL pointer in case that the list or
+ *       the index is not valid? Should we not better throw an exception? 
  ***************************************************************************/
 GLATEventAtom* GLATEventList::pointer(int index)
 {
-    // Assign pointer if in range, NULL otherwise
-    GLATEventAtom* ptr = (m_events != NULL && index >=0 && index < m_num)
-                       ? &(((GLATEventAtom*)m_events)[index]) : NULL;
+    // Preset pointer with NULL
+    GLATEventAtom* ptr = NULL;
+    
+    // Set pointer if index is in range
+    if (m_events != NULL && index >=0 && index < m_num) {
+    
+        // Point to the requested event atom
+        ptr = &(((GLATEventAtom*)m_events)[index]);
+        
+        // Set instrument pointing
+        ptr->m_pnt = NULL; // DUMMY
+
+        // Set instrument response function
+        ptr->m_rsp = NULL; // DUMMY
+
+    } // endif: valid index
 
     // Return pointer
     return ptr;
@@ -213,7 +230,7 @@ double GLATEventList::npred(const GModels& pars, GVector* gradient) const
 
 /*==========================================================================
  =                                                                         =
- =                      GLATEventList private methods                      =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -597,10 +614,3 @@ std::ostream& operator<< (std::ostream& os, const GLATEventList& list)
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                  Other functions used by GLATEventList                  =
- =                                                                         =
- ==========================================================================*/

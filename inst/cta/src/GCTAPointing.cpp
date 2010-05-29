@@ -21,7 +21,7 @@
 #include <config.h>
 #endif
 #include <iostream>
-#include "GException.hpp"
+//#include "GCTAException.hpp"
 #include "GCTAPointing.hpp"
 
 /* __ Method name definitions ____________________________________________ */

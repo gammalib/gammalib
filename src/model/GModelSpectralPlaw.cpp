@@ -166,17 +166,17 @@ GModelPar* GModelSpectralPlaw::par(int index) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] energy Energy at which the function is to be computed.
+ * @param[in] dir Photon energy.
  *
  * @todo For the moment the pivot energy is fixed to units of MeV. This may
  * not be ideal and should eventually be improved in the futur.
  * Furthermore, the method expects that energy!=0. Otherwise Inf or NaN
  * may result.
  ***************************************************************************/
-double GModelSpectralPlaw::eval(GEnergy* energy)
+double GModelSpectralPlaw::eval(const GEnergy& energy)
 {
     // Compute function value
-    double e     = (energy->MeV())/m_pivot.value();
+    double e     = energy.MeV() / pivot();
     double p     = pow(e, m_index.value());
     double value = m_norm.value() * p;
 
@@ -188,17 +188,17 @@ double GModelSpectralPlaw::eval(GEnergy* energy)
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] energy Energy at which function and gradients are computed.
+ * @param[in] dir Photon energy.
  *
  * @todo For the moment the pivot energy is fixed to units of MeV. This may
  * not be ideal and should eventually be improved in the futur.
  * Furthermore, the method expects that energy!=0. Otherwise Inf or NaN
  * may result.
  ***************************************************************************/
-double GModelSpectralPlaw::eval_gradients(GEnergy* energy)
+double GModelSpectralPlaw::eval_gradients(const GEnergy& energy)
 {
     // Compute function value
-    double e     = (energy->MeV())/m_pivot.value();
+    double e     = energy.MeV() / pivot();
     double p     = pow(e, m_index.value());
     double value = m_norm.value() * p;
 
@@ -220,7 +220,7 @@ double GModelSpectralPlaw::eval_gradients(GEnergy* energy)
 
         // Compute index gradient
         if (m_index.isfree()) {
-            double g = m_norm.value() * p * log(energy->MeV());
+            double g = m_norm.value() * p * log(energy.MeV());
             m_index.gradient(g);
         }
         else
@@ -228,7 +228,7 @@ double GModelSpectralPlaw::eval_gradients(GEnergy* energy)
 
         // Compute pivot energy gradient
         if (m_pivot.isfree()) {
-            double g = -m_norm.value() * m_index.value() * p / m_pivot.value();
+            double g = -m_norm.value() * m_index.value() * p / pivot();
             m_pivot.gradient(g);
         }
         else

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATEventCube.hpp  -  LAT event cube class               *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,9 +24,11 @@
 #include "GLATEventBin.hpp"
 #include "GEbounds.hpp"
 #include "GFits.hpp"
-#include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GLATInstDir.hpp"
+#include "GLATPointing.hpp"
+#include "GLATResponse.hpp"
 
 
 /***********************************************************************//**
@@ -44,9 +46,9 @@ class GLATEventCube : public GEventCube {
 
 public:
     // Constructors and destructors
-    GLATEventCube();
+    GLATEventCube(void);
     GLATEventCube(const GLATEventCube& cube);
-    virtual ~GLATEventCube();
+    virtual ~GLATEventCube(void);
 
     // Operators
     GLATEventCube& operator= (const GLATEventCube& cube);
@@ -76,7 +78,9 @@ protected:
     double*      m_counts;      //!< Pointer to counts array
     GEnergy*     m_energies;    //!< Pointer to energies
     GTime        m_time;        //!< Event cube mean time
-    GSkyDir*     m_dirs;        //!< Pointer to sky directions
+    GLATInstDir* m_dirs;        //!< Pointer to event directions
+    GLATPointing m_pnt;         //!< LAT pointing
+    GLATResponse m_rsp;         //!< LAT instrument response function
     GEbounds     m_ebds;        //!< Energy boundaries
 
 private:

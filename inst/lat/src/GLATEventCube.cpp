@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GLATEventCube.cpp
@@ -27,7 +26,6 @@
 #include "GFitsImageFlt.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_LOAD_CNTMAP                 "GLATEventCube::load_cntmap(GFitsHDU*)"
 #define G_POINTER                               "GLATEventCube::pointer(int)"
 
 /* __ Macros _____________________________________________________________ */
@@ -39,14 +37,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                  GLATEventCube constructors/destructors                 =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GLATEventCube::GLATEventCube() : GEventCube()
+GLATEventCube::GLATEventCube(void) : GEventCube()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -77,7 +75,7 @@ GLATEventCube::GLATEventCube(const GLATEventCube& cube) : GEventCube(cube)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GLATEventCube::~GLATEventCube()
+GLATEventCube::~GLATEventCube(void)
 {
     // Free members
     free_members();
@@ -89,7 +87,7 @@ GLATEventCube::~GLATEventCube()
 
 /*==========================================================================
  =                                                                         =
- =                        GLATEventCube operators                          =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -124,7 +122,7 @@ GLATEventCube& GLATEventCube::operator= (const GLATEventCube& cube)
 
 /*==========================================================================
  =                                                                         =
- =                      GLATEventCube public methods                       =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -180,7 +178,9 @@ void GLATEventCube::load(const std::string& filename)
  *
  * @param[in] index Event index for which pointer will be returned.
  *
- * TODO: Implement conversion routine from event cube index to sky direction
+ * This method provides the event attributes to the event bin. It 
+ *
+ * @todo Implement conversion routine from event cube index to direction.
  ***************************************************************************/
 GLATEventBin* GLATEventCube::pointer(int index)
 {
@@ -197,6 +197,8 @@ GLATEventBin* GLATEventCube::pointer(int index)
     m_bin.m_time   = &m_time;
     //m_bin.m_dir    = ;
     m_bin.m_energy = &(m_energies[ieng]);
+    m_bin.m_pnt    = &m_pnt;
+    m_bin.m_rsp    = &m_rsp;
 
     // Return pointer
     return (GLATEventBin*)&(m_bin);
@@ -224,7 +226,7 @@ int GLATEventCube::number(void) const
 
 /*==========================================================================
  =                                                                         =
- =                      GLATEventCube private methods                      =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -294,7 +296,7 @@ void GLATEventCube::copy_members(const GLATEventCube& cube)
     if (m_pixels > 0 && cube.m_dirs != NULL) {
 
         // Allocate memory
-        m_dirs = new GSkyDir[m_pixels];
+        m_dirs = new GLATInstDir[m_pixels];
 
         // Copy sky directions
         for (int i = 0; i < m_pixels; ++i)
@@ -363,8 +365,6 @@ void GLATEventCube::load_cntmap(GFitsHDU* hdu)
 
         // Get axis dimensions
         m_naxis = new int[m_dim];
-        if (m_naxis == NULL)
-            throw GException::mem_alloc(G_LOAD_CNTMAP, m_dim);
         char keyword[10];
         for (int i = 0; i < m_dim; ++i) {
             sprintf(keyword, "NAXIS%d", i+1);
@@ -392,17 +392,13 @@ void GLATEventCube::load_cntmap(GFitsHDU* hdu)
 
         // Allocate event cube bins
         m_counts = new double[m_elements];
-        if (m_counts == NULL)
-            throw GException::mem_alloc(G_LOAD_CNTMAP, m_elements);
 
         // Copy pixels into counts map
         for (int i = 0; i < m_elements; ++i)
             m_counts[i] = (ptr->pixels())[i];
 
         // Allocate sky directions
-        m_dirs = new GSkyDir[m_pixels];
-        if (m_dirs == NULL)
-            throw GException::mem_alloc(G_LOAD_CNTMAP, m_pixels);
+        m_dirs = new GLATInstDir[m_pixels];
 
         // Set sky direction
         //TODO TODO TODO

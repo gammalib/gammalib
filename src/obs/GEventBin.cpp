@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GEventBin.cpp  -  Event bin abstract base class            *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GEventBin.cpp
@@ -18,6 +17,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include <iomanip.h>
 #include "GException.hpp"
@@ -34,14 +36,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                      GEventBin constructors/destructors                 =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GEventBin::GEventBin() : GEvent()
+GEventBin::GEventBin(void) : GEvent()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -72,7 +74,7 @@ GEventBin::GEventBin(const GEventBin& bin) : GEvent(bin)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GEventBin::~GEventBin()
+GEventBin::~GEventBin(void)
 {
     // Free members
     free_members();
@@ -84,7 +86,7 @@ GEventBin::~GEventBin()
 
 /*==========================================================================
  =                                                                         =
- =                            GEventBin operators                          =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -119,13 +121,13 @@ GEventBin& GEventBin::operator= (const GEventBin& bin)
 
 /*==========================================================================
  =                                                                         =
- =                         GEventBin public methods                        =
+ =                              Public methods                             =
  =                                                                         =
  ==========================================================================*/
 
 /*==========================================================================
  =                                                                         =
- =                         GEventBin private methods                       =
+ =                              Private methods                            =
  =                                                                         =
  ==========================================================================*/
 
@@ -135,6 +137,9 @@ GEventBin& GEventBin::operator= (const GEventBin& bin)
 void GEventBin::init_members(void)
 {
     // Initialise attributes
+    m_counts = NULL;
+    m_time   = NULL;
+    m_energy = NULL;
 
     // Return
     return;
@@ -149,6 +154,9 @@ void GEventBin::init_members(void)
 void GEventBin::copy_members(const GEventBin& bin)
 {
     // Copy attributes
+    m_counts = bin.m_counts;
+    m_time   = bin.m_time;
+    m_energy = bin.m_energy;
 
     // Return
     return;
@@ -163,16 +171,3 @@ void GEventBin::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                             GEventBin friends                           =
- =                                                                         =
- ==========================================================================*/
-
-/*==========================================================================
- =                                                                         =
- =                    Other functions used by GEventBin                    =
- =                                                                         =
- ==========================================================================*/

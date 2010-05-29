@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpatial.cpp  -  Abstract spatial model base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GModelSpatial.cpp
@@ -18,6 +17,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GException.hpp"
 #include "GModelSpatial.hpp"
 
@@ -32,7 +34,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                   GModelSpatial constructors/destructors                =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
@@ -70,7 +72,7 @@ GModelSpatial::GModelSpatial(const GModelSpatial& model)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelSpatial::~GModelSpatial()
+GModelSpatial::~GModelSpatial(void)
 {
     // Free members
     free_members();
@@ -82,7 +84,7 @@ GModelSpatial::~GModelSpatial()
 
 /*==========================================================================
  =                                                                         =
- =                           GModelSpatial operators                       =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -114,13 +116,13 @@ GModelSpatial& GModelSpatial::operator= (const GModelSpatial& model)
 
 /*==========================================================================
  =                                                                         =
- =                       GModelSpatial public methods                      =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /*==========================================================================
  =                                                                         =
- =                       GModelSpatial private methods                     =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -154,16 +156,3 @@ void GModelSpatial::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                           GModelSpatial friends                         =
- =                                                                         =
- ==========================================================================*/
-
-/*==========================================================================
- =                                                                         =
- =                   Other functions used by GModelSpatial                 =
- =                                                                         =
- ==========================================================================*/

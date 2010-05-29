@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpatial.hpp  -  Abstract spatial model base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,10 +23,14 @@
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
 
+
 /***********************************************************************//**
  * @class GModelSpatial
  *
- * @brief Abstract interface definition for the spatial model class
+ * @brief Abstract interface definition for the spatial model class.
+ *
+ * This class implements the spatial component of the factorised source
+ * model.
  ***************************************************************************/
 class GModelSpatial {
 
@@ -45,8 +49,8 @@ public:
     // Virtual methods
     virtual int        npars(void) const = 0;
     virtual GModelPar* par(int index) const = 0;
-    virtual double     eval(GSkyDir* dir) = 0;
-    virtual double     eval_gradients(GSkyDir* dir) = 0;
+    virtual double     eval(const GSkyDir& dir) = 0;
+    virtual double     eval_gradients(const GSkyDir& dir) = 0;
   
 protected:
     // Protected methods

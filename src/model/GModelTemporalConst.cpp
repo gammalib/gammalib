@@ -35,7 +35,7 @@
 
 /*==========================================================================
  =                                                                         =
- =               GModelTemporalConst constructors/destructors              =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
@@ -74,7 +74,7 @@ GModelTemporalConst::GModelTemporalConst(const GModelTemporalConst& model) :
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelTemporalConst::~GModelTemporalConst()
+GModelTemporalConst::~GModelTemporalConst(void)
 {
     // Free members
     free_members();
@@ -86,7 +86,7 @@ GModelTemporalConst::~GModelTemporalConst()
 
 /*==========================================================================
  =                                                                         =
- =                       GModelTemporalConst operators                     =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -121,7 +121,7 @@ GModelTemporalConst& GModelTemporalConst::operator= (const GModelTemporalConst& 
 
 /*==========================================================================
  =                                                                         =
- =                   GModelTemporalConst public methods                    =
+ =                            Public methods                               =
  =                                                                         =
  ==========================================================================*/
 
@@ -144,9 +144,12 @@ GModelPar* GModelTemporalConst::par(int index) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] time Time at which the function is to be computed.
+ * @param[in] time Photon arrival time.
+ *
+ * This method implements the temporal component of a constant source model.
+ * It returns 1 in all cases.
  ***************************************************************************/
-double GModelTemporalConst::eval(GTime* time)
+double GModelTemporalConst::eval(const GTime& time)
 {
     // Return
     return 1.0;
@@ -156,10 +159,16 @@ double GModelTemporalConst::eval(GTime* time)
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] time Time at which function and gradients are computed.
+ * @param[in] time Photon arrival time.
+ *
+ * This method implements the temporal component of a constant source model.
+ * It returns a model value of 1 and a gradient of 0 in all cases.
  ***************************************************************************/
-double GModelTemporalConst::eval_gradients(GTime* time)
+double GModelTemporalConst::eval_gradients(const GTime& time)
 {
+    // Set gradient to 0
+    m_norm.gradient(0.0);
+
     // Return
     return 1.0;
 }
