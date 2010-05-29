@@ -62,6 +62,7 @@ public:
     double tdisp(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                  const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                  const GPointing& pnt) const;
+    void   load(const std::string& rspname);
 
     // Other Methods
     double        aeff(const double& logE, const double& ctheta);
@@ -69,7 +70,6 @@ public:
     double        aeff_ctheta_min(void) const;
     double        psf(const double& delta, const double& logE, const double& ctheta);
     GVector       psf(const GVector& delta, const double& logE, const double& ctheta);
-    void          load(const std::string& rspname, const std::string& rsptype);
     void          save(const std::string& rspname) const;
 
 private:
