@@ -26,7 +26,7 @@
 #include "GLATEventBin.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MODEL         "GLATEventBin::model(const GModels&, GVector*) const"
+#define G_MODEL                     "GLATEventBin::model(GModels&, GVector*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -37,14 +37,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                    GLATEventBin constructors/destructors                =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GLATEventBin::GLATEventBin() : GEventBin()
+GLATEventBin::GLATEventBin(void) : GEventBin()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -75,7 +75,7 @@ GLATEventBin::GLATEventBin(const GLATEventBin& bin) : GEventBin(bin)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GLATEventBin::~GLATEventBin()
+GLATEventBin::~GLATEventBin(void)
 {
     // Free members
     free_members();
@@ -87,7 +87,7 @@ GLATEventBin::~GLATEventBin()
 
 /*==========================================================================
  =                                                                         =
- =                          GLATEventBin operators                         =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -122,7 +122,7 @@ GLATEventBin& GLATEventBin::operator= (const GLATEventBin& bin)
 
 /*==========================================================================
  =                                                                         =
- =                        GLATEventBin public methods                      =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -131,12 +131,37 @@ GLATEventBin& GLATEventBin::operator= (const GLATEventBin& bin)
  *
  * @param[in] models Model descriptor.
  *
- * @todo Add LAT specific code
+ * Implements generic model evaluation for the CTA instrument.
+ *
+ * @todo Requires multiplication of model with solid angle, duration, and
+ *       energy binsize. Current method not correct.
+ * @todo Requires implementation of all model types (not only factorized
+ *       point sources which are currently the only type that is
+ *       supported)
  ***************************************************************************/
-double GLATEventBin::model(GModels& models)
+double GLATEventBin::model(GModels& models) const
 {
-    // Set model value
-    double model = models.eval(dir(), energy(), time());
+    // Integral over source direction, energy and time
+    //for (srcTime = ...
+    //for (srcEng = ...
+    //for (srcDir = ...
+    GTime   srcTime = *time();    // Assume no time dispersion
+    GEnergy srcEng  = *energy();  // Assume no energy dispersion
+    GSkyDir srcDir;               // Needs to be implemented
+
+    // Get source term
+    double source = models.eval(srcDir, srcEng, srcTime);
+
+    // Get IRF
+    double irf = rsp()->irf(*dir(), *energy(), *time(), 
+                            srcDir, srcEng, srcTime, *pnt());
+    
+    // Evaluate model
+    double model = source * irf;
+
+    //}
+    //}
+    //}
 
     // Return
     return model;
@@ -149,9 +174,18 @@ double GLATEventBin::model(GModels& models)
  * @param[in] models Model descriptor.
  * @param[out] gradient Pointer to gradient vector (NULL=not computed).
  *
- * @todo Add LAT specific code
+ * @exception GException::gradient_par_mismatch
+ *            Dimension of gradient vector mismatches number of parameters.
+ *
+ * Implements generic model and gradient evaluation for the LAT instrument.
+ *
+ * @todo Requires multiplication of model with solid angle, duration, and
+ *       energy binsize. Current method not correct.
+ * @todo Requires implementation of all model types (not only factorized
+ *       point sources which are currently the only type that is
+ *       supported)
  ***************************************************************************/
-double GLATEventBin::model(GModels& models, GVector* gradient)
+double GLATEventBin::model(GModels& models, GVector* gradient) const
 {
     // Verify that gradients vector has the same dimension than the
     // model has parameters
@@ -161,12 +195,31 @@ double GLATEventBin::model(GModels& models, GVector* gradient)
                                                 models.npars());
     #endif
 
-    // Evaluate model and gradients
-    double model = models.eval_gradients(dir(), energy(), time());
-        
+    // Integral over source direction, energy and time
+    //for (srcTime = ...
+    //for (srcEng = ...
+    //for (srcDir = ...
+    GTime   srcTime = *time();    // Assume no time dispersion
+    GEnergy srcEng  = *energy();  // Assume no energy dispersion
+    GSkyDir srcDir;               // Needs to be implemented
+
+    // Get source term
+    double source = models.eval_gradients(srcDir, srcEng, srcTime);
+    
+    // Get IRF
+    double irf = rsp()->irf(*dir(), *energy(), *time(), 
+                            srcDir, srcEng, srcTime, *pnt());
+    
+    // Evaluate model
+    double model = source * irf;
+
     // Set gradient vector
     for (int i = 0; i < gradient->size(); ++i)
-        (*gradient)(i) = models.par(i)->gradient();
+        (*gradient)(i) = irf * models.par(i)->gradient();
+
+    //}
+    //}
+    //}
 
     // Return
     return model;
@@ -175,7 +228,7 @@ double GLATEventBin::model(GModels& models, GVector* gradient)
 
 /*==========================================================================
  =                                                                         =
- =                        GLATEventBin private methods                     =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -228,7 +281,7 @@ GLATEventBin* GLATEventBin::clone(void) const
 
 /*==========================================================================
  =                                                                         =
- =                           GLATEventBin friends                          =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
 
@@ -246,10 +299,3 @@ std::ostream& operator<< (std::ostream& os, const GLATEventBin& bin)
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                  Other functions used by GLATEventBin                   =
- =                                                                         =
- ==========================================================================*/

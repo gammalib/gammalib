@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEventAtom.cpp  -  LAT event atom class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GLATEventAtom.cpp
@@ -18,12 +17,15 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
 #include "GLATEventAtom.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_COPY_MEMBERS    "GLATEventAtom::copy_members(const GLATEventAtom&)"
+#define G_MODEL                    "GLATEventAtom::model(GModels&, GVector*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -34,14 +36,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                   GLATEventAtom constructors/destructors                =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GLATEventAtom::GLATEventAtom() : GEventAtom()
+GLATEventAtom::GLATEventAtom(void) : GEventAtom()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -72,7 +74,7 @@ GLATEventAtom::GLATEventAtom(const GLATEventAtom& atom) : GEventAtom(atom)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GLATEventAtom::~GLATEventAtom()
+GLATEventAtom::~GLATEventAtom(void)
 {
     // Free members
     free_members();
@@ -84,7 +86,7 @@ GLATEventAtom::~GLATEventAtom()
 
 /*==========================================================================
  =                                                                         =
- =                         GLATEventAtom operators                         =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -119,7 +121,7 @@ GLATEventAtom& GLATEventAtom::operator= (const GLATEventAtom& atom)
 
 /*==========================================================================
  =                                                                         =
- =                       GLATEventAtom public methods                      =
+ =                            Public methods                               =
  =                                                                         =
  ==========================================================================*/
 
@@ -127,12 +129,37 @@ GLATEventAtom& GLATEventAtom::operator= (const GLATEventAtom& atom)
  * @brief Return model value
  *
  * @param[in] models Model descriptor.
+ *
+ * Implements generic model evaluation for the LAT instrument.
+ *
+ * @todo Requires implementation of all model types (not only factorized
+ *       point sources which are currently the only type that is
+ *       supported)
  ***************************************************************************/
-double GLATEventAtom::model(GModels& models)
+double GLATEventAtom::model(GModels& models) const
 {
-    // DUMMY: Set model value
-    double model = 1.0;
+    // Integral over source direction, energy and time
+    //for (srcTime = ...
+    //for (srcEng = ...
+    //for (srcDir = ...
+    GTime   srcTime = *time();    // Assume no time dispersion
+    GEnergy srcEng  = *energy();  // Assume no energy dispersion
+    GSkyDir srcDir;               // Needs to be implemented
+
+    // Get source term
+    double source = models.eval(srcDir, srcEng, srcTime);
+
+    // Get IRF
+    double irf = rsp()->irf(*dir(), *energy(), *time(), 
+                            srcDir, srcEng, srcTime, *pnt());
     
+    // Evaluate model
+    double model = source * irf;
+
+    //}
+    //}
+    //}
+
     // Return
     return model;
 }
@@ -142,16 +169,52 @@ double GLATEventAtom::model(GModels& models)
  * @brief Return model value and gradient
  *
  * @param[in] models Model descriptor.
- * @param[out] gradient Pointer to gradient vector.
+ * @param[out] gradient Pointer to gradient vector (NULL=not computed).
+ *
+ * @exception GException::gradient_par_mismatch
+ *            Dimension of gradient vector mismatches number of parameters.
+ *
+ * Implements generic model and gradient evaluation for the LAT instrument.
+ *
+ * @todo Requires implementation of all model types (not only factorized
+ *       point sources which are currently the only type that is
+ *       supported)
  ***************************************************************************/
-double GLATEventAtom::model(GModels& models, GVector* gradient)
+double GLATEventAtom::model(GModels& models, GVector* gradient) const
 {
-    // DUMMY: Set model value
-    double model = 1.0;
+    // Verify that gradients vector has the same dimension than the
+    // model has parameters
+    #if defined(G_RANGE_CHECK)
+    if (models.npars() != gradient->size())
+        throw GException::gradient_par_mismatch(G_MODEL, gradient->size(), 
+                                                models.npars());
+    #endif
+
+    // Integral over source direction, energy and time
+    //for (srcTime = ...
+    //for (srcEng = ...
+    //for (srcDir = ...
+    GTime   srcTime = *time();    // Assume no time dispersion
+    GEnergy srcEng  = *energy();  // Assume no energy dispersion
+    GSkyDir srcDir;               // Needs to be implemented
+
+    // Get source term
+    double source = models.eval_gradients(srcDir, srcEng, srcTime);
     
-    // Set default gradient
+    // Get IRF
+    double irf = rsp()->irf(*dir(), *energy(), *time(), 
+                            srcDir, srcEng, srcTime, *pnt());
+    
+    // Evaluate model
+    double model = source * irf;
+
+    // Set gradient vector
     for (int i = 0; i < gradient->size(); ++i)
-        (*gradient)(i) = model;
+        (*gradient)(i) = irf * models.par(i)->gradient();
+
+    //}
+    //}
+    //}
 
     // Return
     return model;
@@ -160,7 +223,7 @@ double GLATEventAtom::model(GModels& models, GVector* gradient)
 
 /*==========================================================================
  =                                                                         =
- =                       GLATEventAtom private methods                     =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -220,8 +283,6 @@ void GLATEventAtom::copy_members(const GLATEventAtom& atom)
 
         // Allocate memory for diffuse response components
         m_difrsp = new double[m_num_difrsp];
-        if (m_difrsp == NULL)
-            throw GException::mem_alloc(G_COPY_MEMBERS, m_num_difrsp);
 
         // Copy diffuse response components
         for (int i = 0; i < m_num_difrsp; ++i)
@@ -261,13 +322,23 @@ GLATEventAtom* GLATEventAtom::clone(void) const
 
 /*==========================================================================
  =                                                                         =
- =                          GLATEventAtom friends                          =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
 
-
-/*==========================================================================
- =                                                                         =
- =                 Other functions used by GLATEventAtom                   =
- =                                                                         =
- ==========================================================================*/
+/***********************************************************************//**
+ * @brief Put atom into output stream
+ *
+ * @param[in] os Output stream into which the bin will be dumped
+ * @param[in] bin Bin to be dumped
+ *
+ * @todo Needs to be implemented
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GLATEventAtom& atom)
+{
+    // Put atom in output stream
+    os << "..." << " ";
+        
+    // Return output stream
+    return os;
+}
