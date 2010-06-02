@@ -42,7 +42,7 @@
  * whether an event is either an atom or a bin.
  * The counts() method returns the number of event atoms in a event bin.
  * For an event atom, this method returns by definition 1.
- * The model() methods returns either the probability for an event atom
+ * The model() method returns either the probability for an event atom
  * to occur (unbinned analysis) or the expected number of counts for an
  * event bin (binned analysis).
  * Attributes of an event atom or bin can be accessed through the dir(),
@@ -70,8 +70,7 @@ public:
     virtual bool             isatom(void) const = 0;
     virtual bool             isbin(void) const = 0;
     virtual double           counts(void) const = 0;
-    virtual double           model(GModels& models) const = 0;
-    virtual double           model(GModels& models, GVector* gradient) const = 0;
+    virtual double           model(GModels& models, GVector* gradient = NULL) const = 0;
     virtual const GInstDir*  dir(void) const = 0;
     virtual const GEnergy*   energy(void) const = 0;
     virtual const GTime*     time(void) const = 0;
