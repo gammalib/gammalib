@@ -24,6 +24,7 @@
 #include "GModels.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ACCESS                                  "GModels::operator() (int)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -87,6 +88,48 @@ GModels::~GModels(void)
  =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Return pointer to model
+ *
+ * @param[in] index Index of model to be accessed [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Model index is out of range.
+ ***************************************************************************/
+GModel* GModels::operator() (int index)
+{
+    #if defined(G_RANGE_CHECK)
+    // If index is outside boundary then throw an exception
+    if (index < 0 || index >= m_npars)
+        throw GException::out_of_range(G_ACCESS, index, 0, m_elements-1);
+    #endif
+    
+    // Return pointer
+    return &(m_model[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to model
+ *
+ * @param[in] index Index of model to be accessed [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Model index is out of range.
+ ***************************************************************************/
+const GModel* GModels::operator() (int index) const
+{
+    #if defined(G_RANGE_CHECK)
+    // If index is outside boundary then throw an exception
+    if (index < 0 || index >= m_npars)
+        throw GException::out_of_range(G_ACCESS, index, 0, m_elements-1);
+    #endif
+    
+    // Return pointer
+    return &(m_model[index]);
+}
+
 
 /***********************************************************************//**
  * @brief Assignment operator

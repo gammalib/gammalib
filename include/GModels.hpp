@@ -32,6 +32,10 @@
  * @class GModels
  *
  * @brief GModels class interface defintion.
+ *
+ * This container class collects models of gamma-ray emission that are used
+ * for maximum likelihood fitting of data. It derives from the optimizer
+ * parameter class GOptimizerPars.
  ***************************************************************************/
 class GModels : public GOptimizerPars {
 
@@ -45,7 +49,9 @@ public:
     ~GModels(void);
  
     // Operators
-    GModels& operator= (const GModels& models);
+    GModel*       operator() (int index);
+    const GModel* operator() (int index) const;
+    GModels&      operator= (const GModels& models);
 
     // Methods
     void   append(const GModel& model);
