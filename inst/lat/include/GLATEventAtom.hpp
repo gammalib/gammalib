@@ -54,8 +54,7 @@ public:
     GLATEventAtom& operator= (const GLATEventAtom& atom);
 
     // Methods
-    double              model(GModels& models) const;
-    double              model(GModels& models, GVector* gradient) const;
+    double              model(GModels& models, GVector* gradient = NULL) const;
     const GLATInstDir*  dir(void) const { return &m_dir; }
     const GLATPointing* pnt(void) const { return m_pnt; }
     const GLATResponse* rsp(void) const { return m_rsp; }

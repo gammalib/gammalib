@@ -54,8 +54,7 @@ public:
     GCTAEventAtom& operator= (const GCTAEventAtom& atom);
 
     // Methods
-    double              model(GModels& models) const;
-    double              model(GModels& models, GVector* gradient) const;
+    double              model(GModels& models, GVector* gradient = NULL) const;
     const GCTAInstDir*  dir(void) const { return &m_dir; }
     const GCTAPointing* pnt(void) const { return &m_pnt; }
     const GCTAResponse* rsp(void) const { return m_rsp; }

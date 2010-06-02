@@ -127,48 +127,6 @@ GLATEventBin& GLATEventBin::operator= (const GLATEventBin& bin)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return model value
- *
- * @param[in] models Model descriptor.
- *
- * Implements generic model evaluation for the CTA instrument.
- *
- * @todo Requires multiplication of model with solid angle, duration, and
- *       energy binsize. Current method not correct.
- * @todo Requires implementation of all model types (not only factorized
- *       point sources which are currently the only type that is
- *       supported)
- ***************************************************************************/
-double GLATEventBin::model(GModels& models) const
-{
-    // Integral over source direction, energy and time
-    //for (srcTime = ...
-    //for (srcEng = ...
-    //for (srcDir = ...
-    GTime   srcTime = *time();    // Assume no time dispersion
-    GEnergy srcEng  = *energy();  // Assume no energy dispersion
-    GSkyDir srcDir;               // Needs to be implemented
-
-    // Get source term
-    double source = models.eval(srcDir, srcEng, srcTime);
-
-    // Get IRF
-    double irf = rsp()->irf(*dir(), *energy(), *time(), 
-                            srcDir, srcEng, srcTime, *pnt());
-    
-    // Evaluate model
-    double model = source * irf;
-
-    //}
-    //}
-    //}
-
-    // Return
-    return model;
-}
-
-
-/***********************************************************************//**
  * @brief Return model value and (optionally) gradient
  *
  * @param[in] models Model descriptor.
@@ -214,8 +172,10 @@ double GLATEventBin::model(GModels& models, GVector* gradient) const
     double model = source * irf;
 
     // Set gradient vector
-    for (int i = 0; i < gradient->size(); ++i)
-        (*gradient)(i) = irf * models.par(i)->gradient();
+    if (gradient != NULL) {
+        for (int i = 0; i < gradient->size(); ++i)
+            (*gradient)(i) = irf * models.par(i)->gradient();
+    }
 
     //}
     //}

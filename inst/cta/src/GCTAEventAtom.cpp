@@ -127,53 +127,6 @@ GCTAEventAtom& GCTAEventAtom::operator= (const GCTAEventAtom& atom)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return model value
- *
- * @param[in] models Model descriptor.
- *
- * @exception GCTAException::response_not_set
- *            Response function has not been set.
- *
- * Implements generic model evaluation for the CTA instrument.
- *
- * @todo Requires implementation of all model types (not only factorized
- *       point sources which are currently the only type that is
- *       supported)
- ***************************************************************************/
-double GCTAEventAtom::model(GModels& models) const
-{
-    // Make sure that response pointer exists
-    if (rsp() == NULL)
-        throw GCTAException::response_not_set(G_MODEL1);
-    
-    // Integral over source direction, energy and time
-    //for (srcTime = ...
-    //for (srcEng = ...
-    //for (srcDir = ...
-    GTime   srcTime = *time();    // Assume no time dispersion
-    GEnergy srcEng  = *energy();  // Assume no energy dispersion
-    GSkyDir srcDir;               // Needs to be implemented
-
-    // Get source term
-    double source = models.eval(srcDir, srcEng, srcTime);
-    
-    // Get IRF
-    double irf = rsp()->irf((*dir()), (*energy()), (*time()), 
-                            srcDir, srcEng, srcTime, (*pnt()));
-    
-    // Evaluate model
-    double model = source * irf;
-
-    //}
-    //}
-    //}
-
-    // Return
-    return model;
-}
-
-
-/***********************************************************************//**
  * @brief Return model value and gradient
  *
  * @param[in] models Model descriptor.
@@ -204,36 +157,43 @@ double GCTAEventAtom::model(GModels& models, GVector* gradient) const
         throw GException::gradient_par_mismatch(G_MODEL2, gradient->size(), 
                                                 models.npars());
     #endif
-    // Integral over source direction, energy and time
-    //for (srcTime = ...
-    //for (srcEng = ...
-    //for (srcDir = ...
-    GTime   srcTime = *time();    // Assume no time dispersion
-    GEnergy srcEng  = *energy();  // Assume no energy dispersion
-    GSkyDir srcDir;               // NEEDS TO BE IMPLEMENTED
-    srcDir.radec_deg(117.0, -33.0); // DUMMY: This position should be extracted from model
-
-    // Get source term
-    double source = models.eval_gradients(srcDir, srcEng, srcTime);
     
-    // Get IRF
-    double aeff = rsp()->aeff(*dir(), *energy(), *time(), srcDir, srcEng, srcTime, *pnt());
-    double psf  = rsp()->psf(*dir(), *energy(), *time(), srcDir, srcEng, srcTime, *pnt());
-    //double irf  = rsp()->irf(*dir(), *energy(), *time(), srcDir, srcEng, srcTime, *pnt());
-    double irf  = aeff*psf;
+    // Initialise model
+    double model = 0.0;
     
-    // Evaluate model
-    double model = source * irf;
-    //std::cout << "model=" << model << " source=" << source << " irf=" << irf
-    //          << " aeff=" << aeff << " psf=" << psf << std::endl;
+    // Loop over models
+    for (int i = 0; i < models.size(); ++i) {
+    
+        // Integral over source direction, energy and time
+        //for (srcTime = ...
+        //for (srcEng = ...
+        //for (srcDir = ...
+        GTime   srcTime = *time();    // Assume no time dispersion
+        GEnergy srcEng  = *energy();  // Assume no energy dispersion
+        GSkyDir srcDir;               // NEEDS TO BE IMPLEMENTED
+        srcDir.radec_deg(117.0, -33.0); // DUMMY: This position should be extracted from model
 
-    // Set gradient vector
-    for (int i = 0; i < gradient->size(); ++i)
-        (*gradient)(i) = irf * models.par(i)->gradient();
+        // Get source term
+        double source = models(i)->eval_gradients(srcDir, srcEng, srcTime);
+    
+        // Get IRF
+        double aeff = rsp()->aeff(*dir(), *energy(), *time(), srcDir, srcEng, srcTime, *pnt());
+        double psf  = rsp()->psf(*dir(), *energy(), *time(), srcDir, srcEng, srcTime, *pnt());
+        //double irf  = rsp()->irf(*dir(), *energy(), *time(), srcDir, srcEng, srcTime, *pnt());
+        double irf  = aeff*psf;
+    
+        // Evaluate model
+        model += source * irf;
+        //std::cout << "model=" << model << " source=" << source << " irf=" << irf
+        //          << " aeff=" << aeff << " psf=" << psf << std::endl;
+        
+    }
 
-    //}
-    //}
-    //}
+    // Optionally set gradient vector
+    if (gradient != NULL) {
+        for (int i = 0; i < gradient->size(); ++i)
+            (*gradient)(i) = models.par(i)->gradient();
+    }
 
     // Return
     return model;

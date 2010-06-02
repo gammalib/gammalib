@@ -61,8 +61,7 @@ public:
     virtual GEventBin& operator= (const GEventBin& bin);
 
     // Pure virtual methods
-    virtual double           model(GModels& models) const = 0;
-    virtual double           model(GModels& models, GVector* gradient) const = 0;
+    virtual double           model(GModels& models, GVector* gradient = NULL) const = 0;
     virtual const GInstDir*  dir(void) const = 0;
     virtual const GPointing* pnt(void) const = 0;
     virtual const GResponse* rsp(void) const = 0;
