@@ -4,7 +4,7 @@
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/src \
            -I$(top_srcdir)/src/support \
-	   -I$(top_srcdir)/inst/lat/include
+            -I$(top_srcdir)/inst/lat/include
 
 # Define sources for this directory
 sources = src/GLATObservation.cpp \
@@ -14,7 +14,7 @@ sources = src/GLATObservation.cpp \
           src/GLATEventBin.cpp \
           src/GLATResponse.cpp \
           src/GLATInstDir.cpp \
-	  src/GLATPointing.cpp \
+          src/GLATPointing.cpp \
           src/GLATResponseTable.cpp \
           src/GLATAeff.cpp \
           src/GLATPsf.cpp \
@@ -22,14 +22,14 @@ sources = src/GLATObservation.cpp \
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GLATObservation.hpp \
-		     include/GLATEventList.hpp \
-		     include/GLATEventCube.hpp \
-		     include/GLATEventAtom.hpp \
-		     include/GLATEventBin.hpp \
-		     include/GLATPointing.hpp \
-		     include/GLATInstDir.hpp \
-		     include/GLATResponse.hpp \
-		     include/GLATResponseTable.hpp
+                     include/GLATEventList.hpp \
+                     include/GLATEventCube.hpp \
+                     include/GLATEventAtom.hpp \
+                     include/GLATEventBin.hpp \
+                     include/GLATPointing.hpp \
+                     include/GLATInstDir.hpp \
+                     include/GLATResponse.hpp \
+                     include/GLATResponseTable.hpp
 
 # Build libtool library
 noinst_LTLIBRARIES = liblat.la

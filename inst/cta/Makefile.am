@@ -11,18 +11,18 @@ sources = src/GCTAException.cpp \
           src/GCTAObservation.cpp \
           src/GCTAEventList.cpp \
           src/GCTAEventAtom.cpp \
-	  src/GCTAResponse.cpp \
-	  src/GCTAInstDir.cpp \
-	  src/GCTAPointing.cpp
+          src/GCTAResponse.cpp \
+          src/GCTAInstDir.cpp \
+          src/GCTAPointing.cpp
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAObservation.hpp \
-		     include/GCTAEventList.hpp \
-		     include/GCTAEventAtom.hpp \
-		     include/GCTAPointing.hpp \
-		     include/GCTAInstDir.hpp \
-		     include/GCTAResponse.hpp
+                     include/GCTAEventList.hpp \
+                     include/GCTAEventAtom.hpp \
+                     include/GCTAPointing.hpp \
+                     include/GCTAInstDir.hpp \
+                     include/GCTAResponse.hpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libcta.la
