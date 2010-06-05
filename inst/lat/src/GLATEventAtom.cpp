@@ -150,33 +150,26 @@ double GLATEventAtom::model(GModels& models, GVector* gradient) const
                                                 models.npars());
     #endif
 
-    // Integral over source direction, energy and time
-    //for (srcTime = ...
-    //for (srcEng = ...
-    //for (srcDir = ...
-    GTime   srcTime = *time();    // Assume no time dispersion
-    GEnergy srcEng  = *energy();  // Assume no energy dispersion
-    GSkyDir srcDir;               // Needs to be implemented
-
-    // Get source term
-    double source = models.eval_gradients(srcDir, srcEng, srcTime);
+    // Initialise model
+    double model = 0.0;
     
-    // Get IRF
-    double irf = rsp()->irf(*dir(), *energy(), *time(), 
-                            srcDir, srcEng, srcTime, *pnt());
+    // Loop over models
+    for (int i = 0; i < models.size(); ++i) {
     
-    // Evaluate model
-    double model = source * irf;
+        // Check if model is a LAT model and if it should be used for this
+        // event
+        // TO BE IMPLEMENTED
+        
+        // Add model
+        model += models(i)->eval_gradients(*dir(), *energy(), *time(), *rsp(), *pnt());
+        
+    }
 
     // Set gradient vector
     if (gradient != NULL) {
         for (int i = 0; i < gradient->size(); ++i)
-            (*gradient)(i) = irf * models.par(i)->gradient();
+            (*gradient)(i) = models.par(i)->gradient();
     }
-
-    //}
-    //}
-    //}
 
     // Return
     return model;

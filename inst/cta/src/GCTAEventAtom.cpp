@@ -139,10 +139,8 @@ GCTAEventAtom& GCTAEventAtom::operator= (const GCTAEventAtom& atom)
  *
  * Implements generic model and gradient evaluation for the CTA instrument.
  *
- * @todo Needs to communicate source position to psf method !!!!
- * @todo Requires implementation of all model types (not only factorized
- *       point sources which are currently the only type that is
- *       supported)
+ * @todo Implement CTA specific model filtering.
+ * @todo Implement correct gradient computation.
  ***************************************************************************/
 double GCTAEventAtom::model(GModels& models, GVector* gradient) const
 {
@@ -164,28 +162,12 @@ double GCTAEventAtom::model(GModels& models, GVector* gradient) const
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
     
-        // Integral over source direction, energy and time
-        //for (srcTime = ...
-        //for (srcEng = ...
-        //for (srcDir = ...
-        GTime   srcTime = *time();    // Assume no time dispersion
-        GEnergy srcEng  = *energy();  // Assume no energy dispersion
-        GSkyDir srcDir;               // NEEDS TO BE IMPLEMENTED
-        srcDir.radec_deg(117.0, -33.0); // DUMMY: This position should be extracted from model
-
-        // Get source term
-        double source = models(i)->eval_gradients(srcDir, srcEng, srcTime);
-    
-        // Get IRF
-        double aeff = rsp()->aeff(*dir(), *energy(), *time(), srcDir, srcEng, srcTime, *pnt());
-        double psf  = rsp()->psf(*dir(), *energy(), *time(), srcDir, srcEng, srcTime, *pnt());
-        //double irf  = rsp()->irf(*dir(), *energy(), *time(), srcDir, srcEng, srcTime, *pnt());
-        double irf  = aeff*psf;
-    
-        // Evaluate model
-        model += source * irf;
-        //std::cout << "model=" << model << " source=" << source << " irf=" << irf
-        //          << " aeff=" << aeff << " psf=" << psf << std::endl;
+        // Check if model is a CTA model and if it should be used for this
+        // event
+        // TO BE IMPLEMENTED
+        
+        // Add model
+        model += models(i)->eval_gradients(*dir(), *energy(), *time(), *rsp(), *pnt());
         
     }
 
