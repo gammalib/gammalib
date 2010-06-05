@@ -170,7 +170,7 @@ GModelPar* GModelSpatialPtsrc::par(int index) const
  * @param[in] rsp Instrument response function.
  * @param[in] pnt Instrument pointing.
  *
- * This method returns the PSF for a source located at ra() and dec().
+ * This method returns the IRF for a source located at ra() and dec().
  *
  * @todo Implement new response function interface.
  ***************************************************************************/
@@ -187,11 +187,14 @@ double GModelSpatialPtsrc::eval(const GInstDir& obsDir, const GSkyDir& dir,
     GEnergy obsEng;       // to be removed in new response interface
     GTime   obsTime;      // to be removed in new response interface
     
-    // Return PSF value
+    // Get PSF value
     double psf = (&rsp)->psf(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
 
+    // Get Aeff value
+    double aeff = (&rsp)->aeff(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
+
     // Return
-    return psf;
+    return (psf*aeff);
 }
 
 
@@ -205,7 +208,7 @@ double GModelSpatialPtsrc::eval(const GInstDir& obsDir, const GSkyDir& dir,
  * @param[in] rsp Instrument response function.
  * @param[in] pnt Instrument pointing.
  *
- * This method returns the PSF for a source located at ra() and dec().
+ * This method returns the IRF for a source located at ra() and dec().
  *
  * @todo Implement new response function interface.
  ***************************************************************************/
@@ -217,14 +220,14 @@ double GModelSpatialPtsrc::eval_gradients(const GInstDir& obsDir,
                                           const GPointing& pnt)
 {
     // Evaluate function
-    double psf = eval(obsDir, dir, srcEng, srcTime, rsp, pnt);
+    double irf = eval(obsDir, dir, srcEng, srcTime, rsp, pnt);
     
     // Set gradients to 0
     m_ra.gradient(0.0);
     m_dec.gradient(0.0);
 
     // Return
-    return psf;
+    return irf;
 }
 
 

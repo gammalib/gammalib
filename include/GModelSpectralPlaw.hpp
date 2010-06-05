@@ -36,8 +36,7 @@
  *
  * @brief Powerlaw interface definition.
  *
- * This class implements the spectral component of the factorised source
- * model for a power law.
+ * This class implements the spectral component of the gamma-ray data model.
  ***************************************************************************/
 class GModelSpectralPlaw  : public GModelSpectral {
 
@@ -57,8 +56,12 @@ public:
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
-    double     eval(const GEnergy& energy);
-    double     eval_gradients(const GEnergy& energy);
+    double     eval(const GEnergy& obsEng, const GSkyDir& srcDir,
+                    const GEnergy& srcEng, const GTime& srcTime,
+                    const GResponse& rsp, const GPointing& pnt);
+    double     eval_gradients(const GEnergy& obsEng, const GSkyDir& srcDir,
+                              const GEnergy& srcEng, const GTime& srcTime,
+                              const GResponse& rsp, const GPointing& pnt);
     void       autoscale(void);
     double     norm(void) const { return m_norm.real_value(); }
     double     index(void) const { return m_index.real_value(); }

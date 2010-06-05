@@ -34,8 +34,7 @@
  *
  * @brief Abstract interface definition for the spatial model class.
  *
- * This class implements the spatial component of the factorised source
- * model.
+ * This class implements the spatial component of gamma-ray data model.
  ***************************************************************************/
 class GModelSpatial {
 
@@ -54,10 +53,10 @@ public:
     // Virtual methods
     virtual int        npars(void) const = 0;
     virtual GModelPar* par(int index) const = 0;
-    virtual double     eval(const GInstDir& dir, const GSkyDir& srcDir,
+    virtual double     eval(const GInstDir& obsDir, const GSkyDir& srcDir,
                             const GEnergy& srcEng, const GTime& srcTime,
                             const GResponse& rsp, const GPointing& pnt) = 0;
-    virtual double     eval_gradients(const GInstDir& dir,
+    virtual double     eval_gradients(const GInstDir& obsDir,
                                       const GSkyDir& srcDir,
                                       const GEnergy& srcEng,
                                       const GTime& srcTime,

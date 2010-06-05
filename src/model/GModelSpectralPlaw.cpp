@@ -166,17 +166,24 @@ GModelPar* GModelSpectralPlaw::par(int index) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] dir Photon energy.
+ * @param[in] obsEng Observed photon direction (not used).
+ * @param[in] srcDir True photon arrival direction (not used).
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time (not used).
+ * @param[in] rsp Instrument response function (not used).
+ * @param[in] pnt Instrument pointing (not used).
  *
  * @todo For the moment the pivot energy is fixed to units of MeV. This may
  * not be ideal and should eventually be improved in the futur.
  * Furthermore, the method expects that energy!=0. Otherwise Inf or NaN
  * may result.
  ***************************************************************************/
-double GModelSpectralPlaw::eval(const GEnergy& energy)
+double GModelSpectralPlaw::eval(const GEnergy& obsEng, const GSkyDir& srcDir,
+                                const GEnergy& srcEng, const GTime& srcTime,
+                                const GResponse& rsp, const GPointing& pnt)
 {
     // Compute function value
-    double e     = energy.MeV() / pivot();
+    double e     = srcEng.MeV() / pivot();
     double p     = pow(e, m_index.value());
     double value = m_norm.value() * p;
 
@@ -188,17 +195,27 @@ double GModelSpectralPlaw::eval(const GEnergy& energy)
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] dir Photon energy.
+ * @param[in] obsEng Observed photon direction (not used).
+ * @param[in] srcDir True photon arrival direction (not used).
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time (not used).
+ * @param[in] rsp Instrument response function (not used).
+ * @param[in] pnt Instrument pointing (not used).
  *
  * @todo For the moment the pivot energy is fixed to units of MeV. This may
  * not be ideal and should eventually be improved in the futur.
  * Furthermore, the method expects that energy!=0. Otherwise Inf or NaN
  * may result.
  ***************************************************************************/
-double GModelSpectralPlaw::eval_gradients(const GEnergy& energy)
+double GModelSpectralPlaw::eval_gradients(const GEnergy& obsEng,
+                                          const GSkyDir& srcDir,
+                                          const GEnergy& srcEng,
+                                          const GTime& srcTime,
+                                          const GResponse& rsp,
+                                          const GPointing& pnt)
 {
     // Compute function value
-    double e     = energy.MeV() / pivot();
+    double e     = srcEng.MeV() / pivot();
     double p     = pow(e, m_index.value());
     double value = m_norm.value() * p;
 
@@ -220,7 +237,7 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& energy)
 
         // Compute index gradient
         if (m_index.isfree()) {
-            double g = m_norm.value() * p * log(energy.MeV());
+            double g = m_norm.value() * p * log(srcEng.MeV());
             m_index.gradient(g);
         }
         else

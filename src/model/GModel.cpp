@@ -169,23 +169,39 @@ GModelPar* GModel::par(int index) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] dir Photon arrival direction.
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
+ * @param[in] obsDir Observed photon direction.
+ * @param[in] obsEng Observed photon energy.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] rsp Instrument response function.
+ * @param[in] pnt Instrument pointing direction.
  *
  * This method implements a source model evaluation assuming a factorisation
  * of the source term into a spatial, a spectral and a temporal component.
+ *
+ * @todo General method needs to be implemented.
  ***************************************************************************/
-double GModel::eval(const GInstDir& dir, const GEnergy& energy,
-                    const GTime& time)
+double GModel::eval(const GInstDir& obsDir, const GEnergy& obsEng,
+                    const GTime& obsTime, const GResponse& rsp,
+                    const GPointing& pnt)
 {
     // Initialise value
     double value = 1.0;
+
+    // Integral over source direction, energy and time
+    //for (srcTime = ...
+    //for (srcEng = ...
+    //for (srcDir = ...
+    GTime   srcTime = obsTime;    // Assume no time dispersion
+    GEnergy srcEng  = obsEng;     // Assume no energy dispersion
+    GSkyDir srcDir;               // Assume nothing
     
     // Evaluate model in all components
-    if (m_spatial  != NULL) value *= m_spatial->eval(dir);
-    if (m_spectral != NULL) value *= m_spectral->eval(energy);
-    if (m_temporal != NULL) value *= m_temporal->eval(time);
+    if (m_spatial  != NULL)
+        value *= m_spatial->eval(obsDir, srcDir, srcEng, srcTime, rsp, pnt);
+    if (m_spectral != NULL)
+        value *= m_spectral->eval(obsEng, srcDir, srcEng, srcTime, rsp, pnt);
+    if (m_temporal != NULL)
+        value *= m_temporal->eval(obsTime);
     
     // Return
     return value;
@@ -225,7 +241,7 @@ double GModel::eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
     if (m_spatial  != NULL) 
         value *= m_spatial->eval_gradients(obsDir, srcDir, srcEng, srcTime, rsp, pnt);
     if (m_spectral != NULL)
-        value *= m_spectral->eval_gradients(obsEng);
+        value *= m_spectral->eval_gradients(obsEng, srcDir, srcEng, srcTime, rsp, pnt);
     if (m_temporal != NULL)
         value *= m_temporal->eval_gradients(obsTime);
     

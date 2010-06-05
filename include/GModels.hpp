@@ -23,9 +23,11 @@
 #include <iostream>
 #include "GOptimizerPars.hpp"
 #include "GModel.hpp"
-#include "GSkyDir.hpp"
+#include "GInstDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GResponse.hpp"
+#include "GPointing.hpp"
 
 
 /***********************************************************************//**
@@ -33,9 +35,9 @@
  *
  * @brief GModels class interface defintion.
  *
- * This container class collects models of gamma-ray emission that are used
- * for maximum likelihood fitting of data. It derives from the optimizer
- * parameter class GOptimizerPars.
+ * This container class collects models of gamma-ray data that are used
+ * for maximum likelihood fitting. It derives from the optimizer parameter
+ * class GOptimizerPars.
  ***************************************************************************/
 class GModels : public GOptimizerPars {
 
@@ -55,8 +57,12 @@ public:
 
     // Methods
     void   append(const GModel& model);
-    double eval(const GSkyDir& dir, const GEnergy& energy, const GTime& time);
-    double eval_gradients(const GSkyDir& dir, const GEnergy& energy, const GTime& time);
+    double eval(const GInstDir& obsDir, const GEnergy& obsEng,
+                const GTime& obsTime, const GResponse& rsp,
+                const GPointing& pnt);
+    double eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
+                          const GTime& obsTime, const GResponse& rsp,
+                          const GPointing& pnt);
     int    size(void) const { return m_elements; }
   
 protected:

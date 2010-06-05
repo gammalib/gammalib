@@ -205,19 +205,22 @@ void GModels::append(const GModel& model)
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] dir Photon arrival direction.
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
+ * @param[in] obsDir Observed photon direction.
+ * @param[in] obsEng Observed photon energy.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] rsp Instrument response function.
+ * @param[in] pnt Instrument pointing direction.
  ***************************************************************************/
-double GModels::eval(const GSkyDir& dir, const GEnergy& energy,
-                     const GTime& time)
+double GModels::eval(const GInstDir& obsDir, const GEnergy& obsEng,
+                     const GTime& obsTime, const GResponse& rsp,
+                     const GPointing& pnt)
 {
     // Initialise function value
     double value = 0.0;
     
     // Evaluate function for all models
     for (int i = 0; i < m_elements; ++i)
-        value += m_model[i].eval(dir, energy, time);
+        value += m_model[i].eval(obsDir, obsEng, obsTime, rsp, pnt);
     
     // Return
     return value;
@@ -227,19 +230,22 @@ double GModels::eval(const GSkyDir& dir, const GEnergy& energy,
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] dir Photon arrival direction.
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
+ * @param[in] obsDir Observed photon direction.
+ * @param[in] obsEng Observed photon energy.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] rsp Instrument response function.
+ * @param[in] pnt Instrument pointing direction.
  ***************************************************************************/
-double GModels::eval_gradients(const GSkyDir& dir, const GEnergy& energy,
-                               const GTime& time)
+double GModels::eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
+                               const GTime& obsTime, const GResponse& rsp,
+                               const GPointing& pnt)
 {
     // Initialise function value
     double value = 0.0;
     
     // Evaluate function and gradients for all models
     for (int i = 0; i < m_elements; ++i)
-        value += m_model[i].eval_gradients(dir, energy, time);
+        value += m_model[i].eval_gradients(obsDir, obsEng, obsTime, rsp, pnt);
     
     // Return
     return value;
