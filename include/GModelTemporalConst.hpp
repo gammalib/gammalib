@@ -20,9 +20,13 @@
 #define GMODELTEMPORALCONST_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GModelPar.hpp"
 #include "GModelTemporal.hpp"
+#include "GModelPar.hpp"
+#include "GSkyDir.hpp"
+#include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GResponse.hpp"
+#include "GPointing.hpp"
 
 
 /***********************************************************************//**
@@ -30,8 +34,8 @@
  *
  * @brief Interface definition for the constant model class.
  *
- * This class implements the temporal component of the factorised source
- * model for a constant model.
+ * This class implements the temporal component of the factorised model for
+ * a model that is constant in time.
  ***************************************************************************/
 class GModelTemporalConst  : public GModelTemporal {
 
@@ -53,8 +57,12 @@ public:
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
-    double     eval(const GTime& time);
-    double     eval_gradients(const GTime& time);
+    double     eval(const GTime& obsTime, const GSkyDir& srcDir,
+                    const GEnergy& srcEng, const GTime& srcTime,
+                    const GResponse& rsp, const GPointing& pnt);
+    double     eval_gradients(const GTime& obsTime, const GSkyDir& srcDir,
+                              const GEnergy& srcEng, const GTime& srcTime,
+                              const GResponse& rsp, const GPointing& pnt);
   
 protected:
     // Protected methods

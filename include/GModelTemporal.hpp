@@ -21,7 +21,11 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GModelPar.hpp"
+#include "GSkyDir.hpp"
+#include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GResponse.hpp"
+#include "GPointing.hpp"
 
 
 /***********************************************************************//**
@@ -29,8 +33,7 @@
  *
  * @brief Abstract interface definition for the temporal model class.
  *
- * This class implements the temporal component of the factorised source
- * model.
+ * This class implements the temporal component of the factorised model.
  ***************************************************************************/
 class GModelTemporal {
 
@@ -49,8 +52,12 @@ public:
     // Virtual methods
     virtual int        npars(void) const = 0;
     virtual GModelPar* par(int index) const = 0;
-    virtual double     eval(const GTime& time) = 0;
-    virtual double     eval_gradients(const GTime& time) = 0;
+    virtual double     eval(const GTime& obsTime, const GSkyDir& srcDir,
+                            const GEnergy& srcEng, const GTime& srcTime,
+                            const GResponse& rsp, const GPointing& pnt) = 0;
+    virtual double     eval_gradients(const GTime& obsTime, const GSkyDir& srcDir,
+                                      const GEnergy& srcEng, const GTime& srcTime,
+                                      const GResponse& rsp, const GPointing& pnt) = 0;
   
 protected:
     // Protected methods

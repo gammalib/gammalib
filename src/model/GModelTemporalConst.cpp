@@ -144,12 +144,19 @@ GModelPar* GModelTemporalConst::par(int index) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] time Photon arrival time.
+ * @param[in] obsTime Observed photon arrival time (not used).
+ * @param[in] srcDir True photon arrival direction (not used).
+ * @param[in] srcEng True energy of photon (not used).
+ * @param[in] srcTime True photon arrival time (not used).
+ * @param[in] rsp Instrument response function (not used).
+ * @param[in] pnt Instrument pointing (not used).
  *
- * This method implements the temporal component of a constant source model.
- * It returns 1 in all cases.
+ * This method implements the temporal component of a constant model.
+ * It returns a value of 1 in all cases.
  ***************************************************************************/
-double GModelTemporalConst::eval(const GTime& time)
+double GModelTemporalConst::eval(const GTime& obsTime, const GSkyDir& srcDir,
+                                 const GEnergy& srcEng, const GTime& srcTime,
+                                 const GResponse& rsp, const GPointing& pnt)
 {
     // Return
     return 1.0;
@@ -159,12 +166,22 @@ double GModelTemporalConst::eval(const GTime& time)
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] time Photon arrival time.
+ * @param[in] obsTime Observed photon arrival time (not used).
+ * @param[in] srcDir True photon arrival direction (not used).
+ * @param[in] srcEng True energy of photon (not used).
+ * @param[in] srcTime True photon arrival time (not used).
+ * @param[in] rsp Instrument response function (not used).
+ * @param[in] pnt Instrument pointing (not used).
  *
- * This method implements the temporal component of a constant source model.
- * It returns a model value of 1 and a gradient of 0 in all cases.
+ * This method implements the temporal component of a constant model.
+ * It returns a value of 1 and a gradient of 0 in all cases.
  ***************************************************************************/
-double GModelTemporalConst::eval_gradients(const GTime& time)
+double GModelTemporalConst::eval_gradients(const GTime& obsTime,
+                                           const GSkyDir& srcDir,
+                                           const GEnergy& srcEng,
+                                           const GTime& srcTime,
+                                           const GResponse& rsp,
+                                           const GPointing& pnt)
 {
     // Set gradient to 0
     m_norm.gradient(0.0);
