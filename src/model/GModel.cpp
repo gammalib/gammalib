@@ -178,7 +178,9 @@ GModelPar* GModel::par(int index) const
  * This method implements a source model evaluation assuming a factorisation
  * of the source term into a spatial, a spectral and a temporal component.
  *
- * @todo General method needs to be implemented.
+ * @todo General method need to be implemented. Test if there is energy
+ * dispersion and time dispersion to skip integrations if they are not
+ * required.
  ***************************************************************************/
 double GModel::eval(const GInstDir& obsDir, const GEnergy& obsEng,
                     const GTime& obsTime, const GResponse& rsp,
@@ -201,7 +203,7 @@ double GModel::eval(const GInstDir& obsDir, const GEnergy& obsEng,
     if (m_spectral != NULL)
         value *= m_spectral->eval(obsEng, srcDir, srcEng, srcTime, rsp, pnt);
     if (m_temporal != NULL)
-        value *= m_temporal->eval(obsTime);
+        value *= m_temporal->eval(obsTime, srcDir, srcEng, srcTime, rsp, pnt);
     
     // Return
     return value;
@@ -220,7 +222,9 @@ double GModel::eval(const GInstDir& obsDir, const GEnergy& obsEng,
  * This method implements a source model evaluation assuming a factorisation
  * of the source term into a spatial, a spectral and a temporal component.
  *
- * @todo General method needs to be implemented.
+ * @todo General method need to be implemented. Test if there is energy
+ * dispersion and time dispersion to skip integrations if they are not
+ * required.
  ***************************************************************************/
 double GModel::eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
                               const GTime& obsTime, const GResponse& rsp,
@@ -243,7 +247,7 @@ double GModel::eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
     if (m_spectral != NULL)
         value *= m_spectral->eval_gradients(obsEng, srcDir, srcEng, srcTime, rsp, pnt);
     if (m_temporal != NULL)
-        value *= m_temporal->eval_gradients(obsTime);
+        value *= m_temporal->eval_gradients(obsTime, srcDir, srcEng, srcTime, rsp, pnt);
     
     // Return
     return value;
