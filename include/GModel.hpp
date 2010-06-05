@@ -25,9 +25,11 @@
 #include "GModelSpatial.hpp"
 #include "GModelSpectral.hpp"
 #include "GModelTemporal.hpp"
-#include "GSkyDir.hpp"
+#include "GInstDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GResponse.hpp"
+#include "GPointing.hpp"
 
 
 /***********************************************************************//**
@@ -60,8 +62,9 @@ public:
     void        name(const std::string& name) { m_name=name; return; }
     int         npars(void) const { return m_npars; }
     GModelPar*  par(int index) const;
-    double      eval(const GSkyDir& dir, const GEnergy& energy, const GTime& time);
-    double      eval_gradients(const GSkyDir& dir, const GEnergy& energy, const GTime& time);
+    double      eval(const GInstDir& dir, const GEnergy& energy, const GTime& time);
+    double      eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                               const GResponse& rsp, const GPointing& pnt);
   
 protected:
     // Protected methods

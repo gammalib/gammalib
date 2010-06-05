@@ -21,7 +21,12 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GModelPar.hpp"
+#include "GInstDir.hpp"
 #include "GSkyDir.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
+#include "GResponse.hpp"
+#include "GPointing.hpp"
 
 
 /***********************************************************************//**
@@ -49,8 +54,15 @@ public:
     // Virtual methods
     virtual int        npars(void) const = 0;
     virtual GModelPar* par(int index) const = 0;
-    virtual double     eval(const GSkyDir& dir) = 0;
-    virtual double     eval_gradients(const GSkyDir& dir) = 0;
+    virtual double     eval(const GInstDir& dir, const GSkyDir& srcDir,
+                            const GEnergy& srcEng, const GTime& srcTime,
+                            const GResponse& rsp, const GPointing& pnt) = 0;
+    virtual double     eval_gradients(const GInstDir& dir,
+                                      const GSkyDir& srcDir,
+                                      const GEnergy& srcEng,
+                                      const GTime& srcTime,
+                                      const GResponse& rsp,
+                                      const GPointing& pnt) = 0;
   
 protected:
     // Protected methods

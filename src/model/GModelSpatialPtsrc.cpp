@@ -163,42 +163,68 @@ GModelPar* GModelSpatialPtsrc::par(int index) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] dir Photon arrival direction.
+ * @param[in] obsDir Observed photon direction.
+ * @param[in] dir True photon arrival direction (not used).
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] rsp Instrument response function.
+ * @param[in] pnt Instrument pointing.
  *
- * This method implements the spatial component of a point source model. It
- * returns 1 if the photon arrival direction is identical to the point
- * source direction, otherwise 0 is returned.
+ * This method returns the PSF for a source located at ra() and dec().
  *
- * @todo Method not yet fully implement (needs checking of photon arrival
- *       direction)
+ * @todo Implement new response function interface.
  ***************************************************************************/
-double GModelSpatialPtsrc::eval(const GSkyDir& dir)
+double GModelSpatialPtsrc::eval(const GInstDir& obsDir, const GSkyDir& dir,
+                                const GEnergy& srcEng, const GTime& srcTime,
+                                const GResponse& rsp, const GPointing& pnt)
 {
+    // Set source direction
+    GSkyDir srcDir;
+    srcDir.radec_deg(ra(), dec());
+    
+    // Set dummies that will be removed once the new PSF interface is
+    // implemented.
+    GEnergy obsEng;       // to be removed in new response interface
+    GTime   obsTime;      // to be removed in new response interface
+    
+    // Return PSF value
+    double psf = (&rsp)->psf(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
+
     // Return
-    return 1.0;
+    return psf;
 }
 
 
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] dir Photon arrival direction.
+ * @param[in] obsDir Observed photon direction.
+ * @param[in] dir True photon arrival direction (not used).
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] rsp Instrument response function.
+ * @param[in] pnt Instrument pointing.
  *
- * This method implements the spatial component of a point source model. It
- * returns 1 if the photon arrival direction is identical to the point
- * source direction, otherwise 0 is returned.
+ * This method returns the PSF for a source located at ra() and dec().
  *
- * @todo Method not yet fully implement (needs checking of photon arrival
- *       direction and evaluation of gradients)
+ * @todo Implement new response function interface.
  ***************************************************************************/
-double GModelSpatialPtsrc::eval_gradients(const GSkyDir& dir)
+double GModelSpatialPtsrc::eval_gradients(const GInstDir& obsDir,
+                                          const GSkyDir& dir,
+                                          const GEnergy& srcEng,
+                                          const GTime& srcTime,
+                                          const GResponse& rsp,
+                                          const GPointing& pnt)
 {
+    // Evaluate function
+    double psf = eval(obsDir, dir, srcEng, srcTime, rsp, pnt);
+    
     // Set gradients to 0
     m_ra.gradient(0.0);
     m_dec.gradient(0.0);
 
     // Return
-    return 1.0;
+    return psf;
 }
 
 

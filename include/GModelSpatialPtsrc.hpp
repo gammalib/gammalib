@@ -21,9 +21,11 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
-#include "GModelPar.hpp"
 #include "GModelSpatial.hpp"
-#include "GSkyDir.hpp"
+#include "GModelPar.hpp"
+#include "GInstDir.hpp"
+#include "GResponse.hpp"
+#include "GPointing.hpp"
 
 
 /***********************************************************************//**
@@ -52,8 +54,12 @@ public:
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
-    double     eval(const GSkyDir& dir);
-    double     eval_gradients(const GSkyDir& dir);
+    double     eval(const GInstDir& dir, const GSkyDir& srcDir,
+                    const GEnergy& srcEng, const GTime& srcTime,
+                    const GResponse& rsp, const GPointing& pnt);
+    double     eval_gradients(const GInstDir& dir, const GSkyDir& srcDir,
+                              const GEnergy& srcEng, const GTime& srcTime,
+                              const GResponse& rsp, const GPointing& pnt);
     double     ra(void) const { return m_ra.real_value(); }
     double     dec(void) const { return m_dec.real_value(); }
   
