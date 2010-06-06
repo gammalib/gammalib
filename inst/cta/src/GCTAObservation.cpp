@@ -25,6 +25,8 @@
 #include "GCTAObservation.hpp"
 #include "GCTAEventList.hpp"
 #include "GFits.hpp"
+#include "GModelSpatialPtsrc.hpp"
+#include "GIntegral.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -210,7 +212,9 @@ double GCTAObservation::npred(const GModels& models) const
         // TO BE IMPLEMENTED
         
         // Add model
-        //npred += models(i)->npred(*m_response, *pnt());
+        GCTAPointing pnt;
+        std::cout << *models(i) << std::endl;
+        npred += npred_integrate_temporal(*models(i), pnt);
         
     }
 
@@ -270,6 +274,123 @@ void GCTAObservation::free_members(void)
 GCTAObservation* GCTAObservation::clone(void) const
 {
     return new GCTAObservation(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Computes the Npred integrand
+ *
+ * @param[in] model Gamma-ray source model.
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Instrument pointing direction.
+ *
+ * Computes the integrand for the Npred computation. This method is called
+ * by npred_integrate_spatial() which performs the spatial integration of
+ * integrand.
+ ***************************************************************************/
+double GCTAObservation::npred_integrand(const GModel& model,
+                                        const GSkyDir& srcDir,
+                                        const GEnergy& srcEng,
+                                        const GTime& srcTime,
+                                        const GPointing& pnt) const
+{
+    // Compute integrated IRF
+    double nirf = m_response->nirf(srcDir, srcEng, srcTime, pnt);
+
+    // Compute source model
+    GCTAInstDir obsDir;  // unused, to be removed later
+    GEnergy     obsEng;  // unused, to be removed later
+    GTime       obsTime; // unused, to be removed later
+    GModel* ptr    = (GModel*)&model; // impose const-correctness
+    double  source = ptr->value(obsDir, obsEng, obsTime, srcDir, srcEng,
+                                srcTime, *m_response, pnt);
+
+    // Return
+    return (source * nirf);
+}
+
+
+/***********************************************************************//**
+ * @brief Integrates the Npred integrand spatially
+ *
+ * @param[in] model Gamma-ray source model.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Instrument pointing direction.
+ ***************************************************************************/
+double GCTAObservation::npred_integrate_spatial(const GModel& model,
+                                                const GEnergy& srcEng,
+                                                const GTime& srcTime,
+                                                const GPointing& pnt) const
+{
+    // Initialise result
+    double result = 0.0;
+
+    // Determine if integration is needed
+    bool integrate  = (model.spatial() != NULL) ? model.spatial()->depdir() : false;
+
+    // Case A: Integraion
+    if (integrate) {
+        std::cout << "GCTAObservation::npred_integrate_spatial:"
+                  << " Integration not implemented." << std::endl;
+    }
+    
+    // Case B: No integration, then extract point source position from model
+    else {        
+        GSkyDir srcDir;
+        srcDir.radec_deg(((GModelSpatialPtsrc*)model.spatial())->ra(),
+                         ((GModelSpatialPtsrc*)model.spatial())->dec());
+        result = npred_integrand(model, srcDir, srcEng, srcTime, pnt);
+    }
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Integrates the Npred integrand spectrally
+ *
+ * @param[in] model Gamma-ray source model.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Instrument pointing direction.
+ ***************************************************************************/
+double GCTAObservation::npred_integrate_spectral(const GModel& model,
+                                                 const GTime& srcTime,
+                                                 const GPointing& pnt) const
+{
+    // Setup integration function
+    GCTAObservation::int_spec integrand(this, model, srcTime, pnt);
+    GIntegral                 integral(&integrand);
+    
+    // Do Romberg integration
+    double result = integral.romb(0.02, 100.0); // energies in TeV
+    
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Integrates the Npred integrand temporally
+ *
+ * @param[in] model Gamma-ray source model.
+ * @param[in] pnt Instrument pointing direction.
+ ***************************************************************************/
+double GCTAObservation::npred_integrate_temporal(const GModel& model,
+                                                 const GPointing& pnt) const
+{
+    // Setup integration function
+    GCTAObservation::int_temp integrand(this, model, pnt);
+    GIntegral                 integral(&integrand);
+    
+    // Do Romberg integration
+    double result = integral.romb(0.0, 100000.0); // 100000 sec
+    
+    // Return result
+    return result;
 }
 
 
