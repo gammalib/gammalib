@@ -22,7 +22,6 @@
 #endif
 #include <vector>
 #include <string>
-//#include <unistd.h>           // access() function
 #include "GCTAException.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTAPointing.hpp"
@@ -135,9 +134,6 @@ GCTAResponse& GCTAResponse::operator= (const GCTAResponse& rsp)
 /***********************************************************************//**
  * @brief Return effective area (units: cm2).
  *
- * @param[in] obsDir Pointer to observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
@@ -147,9 +143,7 @@ GCTAResponse& GCTAResponse::operator= (const GCTAResponse& rsp)
  * depends only on the true photon energy. No dependence on the photon's
  * arrival direction, observatory pointing and arrival time is assumed.
  ***************************************************************************/
-double GCTAResponse::aeff(const GInstDir& obsDir, const GEnergy& obsEng,
-                          const GTime& obsTime,
-                          const GSkyDir& srcDir, const GEnergy& srcEng,
+double GCTAResponse::aeff(const GSkyDir& srcDir, const GEnergy& srcEng,
                           const GTime& srcTime, const GPointing& pnt) const
 {
     // Get log(E)
@@ -168,8 +162,6 @@ double GCTAResponse::aeff(const GInstDir& obsDir, const GEnergy& obsEng,
  * @brief Return point spread function (units: sr^-1)
  *
  * @param[in] obsDir Pointer to observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
@@ -186,8 +178,7 @@ double GCTAResponse::aeff(const GInstDir& obsDir, const GEnergy& obsEng,
  * \f$P\f is the containment fraction. For 68% one obtains
  * \f$\sigma=0.6624 \times r_{68}\f$.
  ***************************************************************************/
-double GCTAResponse::psf(const GInstDir& obsDir, const GEnergy& obsEng,
-                         const GTime& obsTime,
+double GCTAResponse::psf(const GInstDir& obsDir,
                          const GSkyDir& srcDir, const GEnergy& srcEng,
                          const GTime& srcTime, const GPointing& pnt) const
 {
@@ -215,9 +206,7 @@ double GCTAResponse::psf(const GInstDir& obsDir, const GEnergy& obsEng,
 /***********************************************************************//**
  * @brief Return energy dispersion (units: MeV^-1)
  *
- * @param[in] obsDir Pointer to observed photon direction.
  * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
@@ -226,8 +215,7 @@ double GCTAResponse::psf(const GInstDir& obsDir, const GEnergy& obsEng,
  * The actual implementation of this method assumes no energy dispersion,
  * which is equivalent of having a Dirac type energy dispersion.
  ***************************************************************************/
-double GCTAResponse::edisp(const GInstDir& obsDir, const GEnergy& obsEng,
-                           const GTime& obsTime,
+double GCTAResponse::edisp(const GEnergy& obsEng,
                            const GSkyDir& srcDir, const GEnergy& srcEng,
                            const GTime& srcTime, const GPointing& pnt) const
 {
@@ -242,8 +230,6 @@ double GCTAResponse::edisp(const GInstDir& obsDir, const GEnergy& obsEng,
 /***********************************************************************//**
  * @brief Return time dispersion (units: s^-1)
  *
- * @param[in] obsDir Pointer to observed photon direction.
- * @param[in] obsEng Observed energy of photon.
  * @param[in] obsTime Observed photon arrival time.
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
@@ -253,8 +239,7 @@ double GCTAResponse::edisp(const GInstDir& obsDir, const GEnergy& obsEng,
  * The actual implementation of this method assumes no time dispersion,
  * which is equivalent of having a Dirac type time dispersion.
  ***************************************************************************/
-double GCTAResponse::tdisp(const GInstDir& obsDir, const GEnergy& obsEng,
-                           const GTime& obsTime,
+double GCTAResponse::tdisp(const GTime& obsTime,
                            const GSkyDir& srcDir, const GEnergy& srcEng,
                            const GTime& srcTime, const GPointing& pnt) const
 {

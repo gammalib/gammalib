@@ -170,9 +170,7 @@ GModelPar* GModelSpatialPtsrc::par(int index) const
  * @param[in] rsp Instrument response function.
  * @param[in] pnt Instrument pointing.
  *
- * This method returns the IRF for a source located at ra() and dec().
- *
- * @todo Implement new response function interface.
+ * This method returns Aeff*PSF for a source located at ra() and dec().
  ***************************************************************************/
 double GModelSpatialPtsrc::eval(const GInstDir& obsDir, const GSkyDir& dir,
                                 const GEnergy& srcEng, const GTime& srcTime,
@@ -182,19 +180,14 @@ double GModelSpatialPtsrc::eval(const GInstDir& obsDir, const GSkyDir& dir,
     GSkyDir srcDir;
     srcDir.radec_deg(ra(), dec());
     
-    // Set dummies that will be removed once the new PSF interface is
-    // implemented.
-    GEnergy obsEng;       // to be removed in new response interface
-    GTime   obsTime;      // to be removed in new response interface
-    
     // Get PSF value
-    double psf = (&rsp)->psf(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
+    double psf = (&rsp)->psf(obsDir, srcDir, srcEng, srcTime, pnt);
 
     // Get Aeff value
-    double aeff = (&rsp)->aeff(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
+    double aeff = (&rsp)->aeff(srcDir, srcEng, srcTime, pnt);
 
     // Return
-    return (psf*aeff);
+    return (aeff*psf);
 }
 
 
@@ -208,9 +201,11 @@ double GModelSpatialPtsrc::eval(const GInstDir& obsDir, const GSkyDir& dir,
  * @param[in] rsp Instrument response function.
  * @param[in] pnt Instrument pointing.
  *
- * This method returns the IRF for a source located at ra() and dec().
+ * This method returns Aeff*PSF for a source located at ra() and dec().
+ * The parameter gradients are set to 0.
  *
- * @todo Implement new response function interface.
+ * @todo Correctly set parameter gradients (actual version sets gradients to
+ * 0).
  ***************************************************************************/
 double GModelSpatialPtsrc::eval_gradients(const GInstDir& obsDir,
                                           const GSkyDir& dir,

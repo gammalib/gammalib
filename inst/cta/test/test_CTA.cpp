@@ -101,15 +101,14 @@ void test_response(void)
 
         // Sum over effective area for control
         GEnergy      eng;
-        GCTAInstDir  obsDir;
-        GSkyDir      srcDir;
+        GSkyDir      dir;
         GTime        time;
         GCTAPointing pnt;
         double sum = 0.0;
         double ref = 123299125000.0;
         for (int i = 0; i < 30; ++i) {
             eng.TeV(pow(10.0, -1.7 + 0.1*double(i)));
-            double aeff = rsp.aeff(obsDir, eng, time, srcDir, eng, time, pnt);
+            double aeff = rsp.aeff(dir, eng, time, pnt);
             //std::cout << eng << " " << aeff << std::endl;
             sum += aeff;
         }
@@ -153,7 +152,7 @@ void test_response(void)
             for (int i = 0; i < steps; ++i) {
                 r   += dr;
                 obsDir.radec(0.0, r);
-                sum += rsp.psf(obsDir, eng, time, srcDir, eng, time, pnt) * twopi * r * dr;
+                sum += rsp.psf(obsDir, srcDir, eng, time, pnt) * twopi * r * dr;
             }
             if ((sum - 1.0) > 0.001) {
                 std::cout << std::endl

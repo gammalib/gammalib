@@ -25,7 +25,7 @@
 /***********************************************************************//**
  * @class GLATResponse
  *
- * @brief SWIG interface for the GLAST LAT instrument response function classes.
+ * @brief SWIG interface for the GLAST LAT instrument response function.
  ***************************************************************************/
 class GLATResponse : public GResponse {
 public:
@@ -35,18 +35,20 @@ public:
     ~GLATResponse(void);
 
     // Implemented virtual base class methods
-    double aeff(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+    double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                 const GPointing& pnt);
-    double psf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+    double psf(const GInstDir& obsDir,
                const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                const GPointing& pnt);
-    double edisp(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+    double edisp(const GEnergy& obsEng,
                  const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                  const GPointing& pnt);
-    double tdisp(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+    double tdisp(const GTime& obsTime,
                  const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                  const GPointing& pnt);
+    void   load(const std::string& rspname);
+    bool   hasedisp(void) const { return false; }
+    bool   hastdisp(void) const { return false; }
 
     // Other Methods
     double        aeff(const double& logE, const double& ctheta);
@@ -54,6 +56,5 @@ public:
     double        aeff_ctheta_min(void) const;
     double        psf(const double& delta, const double& logE, const double& ctheta);
     GVector       psf(const GVector& delta, const double& logE, const double& ctheta);
-    void          load(const std::string& rspname);
     void          save(const std::string& rspname) const;
 };

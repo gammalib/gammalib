@@ -138,8 +138,6 @@ GLATResponse& GLATResponse::operator= (const GLATResponse& rsp)
 /***********************************************************************//**
  * @brief Return time dispersion (units: s^-1).
  *
- * @param[in] obsDir Pointer to observed photon direction.
- * @param[in] obsEng Observed energy of photon.
  * @param[in] obsTime Observed photon arrival time.
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
@@ -149,8 +147,7 @@ GLATResponse& GLATResponse::operator= (const GLATResponse& rsp)
  * The actual implementation of this method assumes no time dispersion,
  * which is equivalent of having a Dirac type time dispersion.
  ***************************************************************************/
-double GLATResponse::tdisp(const GInstDir& obsDir, const GEnergy& obsEng,
-                           const GTime& obsTime,
+double GLATResponse::tdisp(const GTime& obsTime,
                            const GSkyDir& srcDir, const GEnergy& srcEng,
                            const GTime& srcTime, const GPointing& pnt) const
 {

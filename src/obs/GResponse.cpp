@@ -141,11 +141,10 @@ double GResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
                       const GTime& srcTime, const GPointing& pnt) const
 {
     // Get IRF components
-    double irf;
-    irf  =   psf(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
-    irf *=  aeff(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
-    irf *= edisp(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
-    irf *= tdisp(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
+    double irf  =  aeff(srcDir,  srcEng, srcTime, pnt);
+    irf        *=   psf(obsDir,  srcDir, srcEng, srcTime, pnt);
+    irf        *= edisp(obsEng,  srcDir, srcEng, srcTime, pnt);
+    irf        *= tdisp(obsTime, srcDir, srcEng, srcTime, pnt);
 
     // Return IRF value
     return irf;

@@ -49,9 +49,6 @@
 /***********************************************************************//**
  * @brief Return effective area (units: cm2).
  *
- * @param[in] obsDir Pointer to observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
@@ -59,9 +56,7 @@
  *
  * @todo Needs to be implemented.
  ***************************************************************************/
-double GLATResponse::aeff(const GInstDir& obsDir, const GEnergy& obsEng,
-                          const GTime& obsTime,
-                          const GSkyDir& srcDir, const GEnergy& srcEng,
+double GLATResponse::aeff(const GSkyDir& srcDir, const GEnergy& srcEng,
                           const GTime& srcTime, const GPointing& pnt) const
 {
     // Return Aeff value

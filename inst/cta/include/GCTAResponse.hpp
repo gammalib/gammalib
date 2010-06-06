@@ -34,7 +34,7 @@
 /***********************************************************************//**
  * @class GCTAResponse
  *
- * @brief Interface for the CTA instrument response function classes.
+ * @brief Interface for the CTA instrument response function.
  ***************************************************************************/
 class GCTAResponse : public GResponse {
 
@@ -51,19 +51,20 @@ public:
     GCTAResponse& operator= (const GCTAResponse & rsp);
 
     // Implemented pure virtual methods
-    double aeff(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+    double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                 const GPointing& pnt) const;
-    double psf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+    double psf(const GInstDir& obsDir,
                const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                const GPointing& pnt) const;
-    double edisp(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+    double edisp(const GEnergy& obsEng,
                  const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                  const GPointing& pnt) const;
-    double tdisp(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+    double tdisp(const GTime& obsTime,
                  const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                  const GPointing& pnt) const;
     void   load(const std::string& irfname);
+    bool   hasedisp(void) const { return false; }
+    bool   hastdisp(void) const { return false; }
 
     // Other Methods
 

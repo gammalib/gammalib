@@ -46,9 +46,7 @@
 /***********************************************************************//**
  * @brief Return energy dispersion (units: MeV^-1).
  *
- * @param[in] obsDir Pointer to observed photon direction.
  * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
@@ -56,8 +54,7 @@
  *
  * @todo Needs to be implemented.
  ***************************************************************************/
-double GLATResponse::edisp(const GInstDir& obsDir, const GEnergy& obsEng,
-                           const GTime& obsTime,
+double GLATResponse::edisp(const GEnergy& obsEng,
                            const GSkyDir& srcDir, const GEnergy& srcEng,
                            const GTime& srcTime, const GPointing& pnt) const
 {
