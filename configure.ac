@@ -165,6 +165,7 @@ AC_CONFIG_FILES([Makefile
                  src/Makefile
                  src/support/Makefile
                  src/linalg/Makefile
+                 src/numerics/Makefile
                  src/fits/Makefile
                  src/sky/Makefile
                  src/opt/Makefile
