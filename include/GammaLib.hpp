@@ -32,6 +32,8 @@
 #include "GMatrix.hpp"
 #include "GSymMatrix.hpp"
 #include "GSparseMatrix.hpp"
+#include "GIntegral.hpp"
+#include "GIntegrand.hpp"
 
 /* __ FITS module ________________________________________________________ */
 #include "GFitsCfitsio.hpp"

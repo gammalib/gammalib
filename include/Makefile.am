@@ -63,6 +63,8 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GMatrix.hpp \
                      GSymMatrix.hpp \
                      GSparseMatrix.hpp \
+                     GIntegral.hpp \
+                     GIntegrand.hpp \
                      GOptimizer.hpp \
                      GOptimizerLM.hpp \
                      GOptimizerPars.hpp \
