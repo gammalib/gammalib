@@ -11,6 +11,7 @@ INCLUDES = -I$(top_srcdir)/include \
 # Set sub directories
 SUBDIRS = support \
           linalg \
+          numerics \
           fits \
           sky \
           opt \
@@ -34,6 +35,7 @@ lib_LTLIBRARIES = libgamma.la
 libgamma_la_SOURCES = $(sources)
 libgamma_la_LIBADD = support/libsupport.la \
                      linalg/liblinalg.la \
+                     numerics/libnumerics.la \
                      fits/libfits.la \
                      sky/libsky.la \
                      opt/libopt.la \
