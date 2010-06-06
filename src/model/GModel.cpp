@@ -349,7 +349,9 @@ double GModel::fct(const GInstDir& obsDir, const GEnergy& obsEng,
                    const GResponse& rsp, const GPointing& pnt, bool grad)
 {
     // Initialise components
-    double value = 1.0;
+    double live  = (&rsp)->live(srcDir, srcEng, srcTime, pnt);
+    double aeff  = (&rsp)->aeff(srcDir, srcEng, srcTime, pnt);
+    double value = live*aeff;
 
     // Evaluate model in all components
     if (grad) {
