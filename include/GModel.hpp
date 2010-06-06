@@ -78,12 +78,19 @@ public:
     void        name(const std::string& name) { m_name=name; return; }
     int         npars(void) const { return m_npars; }
     GModelPar*  par(int index) const;
+    double      value(const GInstDir& obsDir, const GEnergy& obsEng,
+                      const GTime& obsTime, const GSkyDir& srcDir,
+                      const GEnergy& srcEng, const GTime& srcTime,
+                      const GResponse& rsp, const GPointing& pnt);
     double      eval(const GInstDir& obsDir, const GEnergy& obsEng,
                      const GTime& obsTime, const GResponse& rsp,
                      const GPointing& pnt);
     double      eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
                                const GTime& obsTime, const GResponse& rsp,
                                const GPointing& pnt);
+    const GModelSpatial*  spatial(void) const { return m_spatial; }
+    const GModelSpectral* spectral(void) const { return m_spectral; }
+    const GModelTemporal* temporal(void) const { return m_temporal; }
   
 protected:
     // Protected methods
