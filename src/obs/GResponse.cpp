@@ -141,13 +141,41 @@ double GResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
                       const GTime& srcTime, const GPointing& pnt) const
 {
     // Get IRF components
-    double irf  =  aeff(srcDir,  srcEng, srcTime, pnt);
+    double irf  =  live(srcDir,  srcEng, srcTime, pnt);
+    irf        *=  aeff(srcDir,  srcEng, srcTime, pnt);
     irf        *=   psf(obsDir,  srcDir, srcEng, srcTime, pnt);
     irf        *= edisp(obsEng,  srcDir, srcEng, srcTime, pnt);
     irf        *= tdisp(obsTime, srcDir, srcEng, srcTime, pnt);
 
     // Return IRF value
     return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return integral of instrument response function.
+ *
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Pointer to instrument pointing information.
+ *
+ * This method implements the default and complete integral of the instrument
+ * response function (IRF). It may be overwritted by a specific method in the
+ * derived class that drops response terms that are not used.
+ ***************************************************************************/
+double GResponse::nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
+                       const GTime& srcTime, const GPointing& pnt) const
+{
+    // Get IRF components
+    double nirf  =   live(srcDir, srcEng, srcTime, pnt);
+    nirf        *=   aeff(srcDir, srcEng, srcTime, pnt);
+    nirf        *=   npsf(srcDir, srcEng, srcTime, pnt);
+    nirf        *= nedisp(srcDir, srcEng, srcTime, pnt);
+    nirf        *= ntdisp(srcDir, srcEng, srcTime, pnt);
+
+    // Return integrated IRF value
+    return nirf;
 }
 
 
