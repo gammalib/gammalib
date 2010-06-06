@@ -168,6 +168,44 @@ GModelPar* GModel::par(int index) const
 
 
 /***********************************************************************//**
+ * @brief Return source model value
+ *
+ * @param[in] obsDir Observed photon direction (to be removed).
+ * @param[in] obsEng Observed photon energy (to be removed).
+ * @param[in] obsTime Observed photon arrival time (to be removed).
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] rsp Instrument response function (to be removed).
+ * @param[in] pnt Instrument pointing direction (to be removed).
+ *
+ * This method evaluates the factorized source model at a given set of
+ * parameters.
+ *
+ * @todo obsDir, obsEng, obsTime, rsp and pnt arguments are to be removed.
+ ***************************************************************************/
+double GModel::value(const GInstDir& obsDir, const GEnergy& obsEng,
+                     const GTime& obsTime, const GSkyDir& srcDir,
+                     const GEnergy& srcEng, const GTime& srcTime,
+                     const GResponse& rsp, const GPointing& pnt)
+{
+    // Initialise source model
+    double source = 1.0;
+
+    // Evaluate source model
+    if (m_spatial  != NULL)
+        source *= m_spatial->eval(obsDir, srcDir, srcEng, srcTime, rsp, pnt);
+    if (m_spectral != NULL)
+        source *= m_spectral->eval(obsEng, srcDir, srcEng, srcTime, rsp, pnt);
+    if (m_temporal != NULL)
+        source *= m_temporal->eval(obsTime, srcDir, srcEng, srcTime, rsp, pnt);
+
+    // Return
+    return source;
+}
+
+
+/***********************************************************************//**
  * @brief Evaluate function
  *
  * @param[in] obsDir Observed photon direction.

@@ -57,28 +57,29 @@ energy of $E$ at time $t$.
 Note that $\vec{p'}$ is not necessarily a measured arrival direction, but it can also be
 a detector coordinate.
 $R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)$ is factorised following
-\begin{equation}
+\begin{eqnarray}
 R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) = 
+L(\vec{d}, \vec{p}, E, t) \times
 A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times
 PSF(\vec{p'} | \vec{d}, \vec{p}, E, t) \times
-E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t) \times
+E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t) \times \nonumber \\
 T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)
 \label{eq:rspfact}
-\end{equation}
+\end{eqnarray}
 where
 \begin{itemize}
+\item[] $L(\vec{d}, \vec{p}, E, t)$ is the livetime fraction (in units of s s$^{-1}$),
 \item[] $A_{\rm eff}(\vec{d}, \vec{p}, E, t)$ is the effective area (in units of counts photons$^{-1}$cm$^2$),
 \item[] $PSF(\vec{p'} | \vec{d}, \vec{p}, E, t)$ is the point spread function (in units of sr$^{-1}$),
 \item[] $E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t)$ is the energy dispersion (in units of MeV$^{-1}$), and
 \item[] $T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)$ is the time dispersion (in units of s$^{-1}$).
 \end{itemize}
-Note that $A_{\rm eff}$ includes also the livetime fraction.
 Assuming that the photon intensity received from a gamma-ray source is described by
 the source model $S(\vec{p}, E, t)$ (in units of photons cm$^{-2}$ s$^{-1}$ MeV$^{-1}$ sr$^{-1}$)
 the probability of measuring an event at position $\vec{p'}$ with an
 energy of $E'$ at the time $t'$ from the source is given by
 \begin{equation}
-N(\vec{p'}, E', t') = \int_{0}^{t'+\Delta t} \int_{E'-\Delta E}^{\infty} \int_{\Omega} 
+N(\vec{p'}, E', t'| \vec{d}) = \int_{0}^{t'+\Delta t} \int_{E'-\Delta E}^{\infty} \int_{\Omega} 
 S(\vec{p}, E, t) \times R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \, {\rm d}\vec{p} \, {\rm d}E \,{\rm d}t
 \label{eq:model}
 \end{equation}
@@ -87,24 +88,107 @@ The terms $\Delta t$ and $\Delta E$ account for the statistical jitter related t
 process and are of the order of a few time the rms in the time and energy measurements.
 In the case of no time dispersion, $T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)$ becomes a $\delta$-function
 and Eq.~(\ref{eq:model}) reduces to 
-\begin{equation}
-N(\vec{p'}, E', t') = \int_{E'-\Delta E}^{\infty} \int_{\Omega} 
-S(\vec{p}, E, t') \times A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times
-PSF(\vec{p'} | \vec{d}, \vec{p}, E, t') \times
+\begin{eqnarray}
+N(\vec{p'}, E', t' | \vec{d}) = \int_{E'-\Delta E}^{\infty} \int_{\Omega} 
+S(\vec{p}, E, t') \times 
+L(\vec{d}, \vec{p}, E, t') \times
+A_{\rm eff}(\vec{d}, \vec{p}, E, t') \times
+PSF(\vec{p'} | \vec{d}, \vec{p}, E, t') \times \nonumber \\
 E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t') 
 \, {\rm d}\vec{p} \, {\rm d}E \, .
-\end{equation}
+\end{eqnarray}
 Since for many astrophysical sources $S(\vec{p}, E, t)$ drops quickly with energy, only
 photons near $E'$ contribute effectively to the integral.
 For this reason, energy dispersion can also often be neglected, and also
 $E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t)$ can be approximated by a $\delta$-function,
 leading to
 \begin{equation}
-N(\vec{p'}, E', t') = \int_{\Omega} S(\vec{p}, E', t') \times A_{\rm eff}(\vec{d}, \vec{p}, E', t') \times
+N(\vec{p'}, E', t'| \vec{d}) = \int_{\Omega} 
+S(\vec{p}, E', t') \times 
+L(\vec{d}, \vec{p}, E', t') \times
+A_{\rm eff}(\vec{d}, \vec{p}, E', t') \times
 PSF(\vec{p'} | \vec{d}, \vec{p}, E', t') \, {\rm d}\vec{p} \, .
 \end{equation}
 These simplifications may be considered when implementing the computation of
-$N(\vec{p'}, E', t')$ for a specific instrument.
+$N(\vec{p'}, E', t' | \vec{d})$ for a specific instrument.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Total number of predicted events}
+
+The total number of predicted events for a given pointing $\vec{d}$ is given by
+\begin{equation}
+N_{\rm pred} = \int_{\rm GTI} \int_{E_{\rm min}}^{E_{\rm max}} \int_{\rm ROI} 
+N(\vec{p'}, E', t' | \vec{d}) \, {\rm d}\vec{p'} \, {\rm d}E' \,{\rm d}t'
+\end{equation}
+where
+${\rm ROI}$ is the event selection region,
+$E_{\rm min}$ and $E_{\rm max}$ are the event selection energy boundaries, and
+${\rm GTI}$ are the good time intervals.
+Using Eq.~(\ref{eq:model}), $N_{\rm pred}$ can be written as
+\begin{eqnarray}
+N_{\rm pred} = \int_{0}^{\infty} \int_{0}^{\infty} \int_{\Omega} 
+S(\vec{p}, E, t) \times 
+L(\vec{d}, \vec{p}, E, t) \times
+A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times
+N_{\rm PSF}(\vec{d}, \vec{p}, E, t) \times
+N_{\rm Edisp}(\vec{d}, \vec{p}, E, t) \times \nonumber \\
+N_{\rm Tdisp}(\vec{d}, \vec{p}, E, t) 
+\, {\rm d}\vec{p} \, {\rm d}E \, \,{\rm d}t
+\label{eq:npred}
+\end{eqnarray}
+with
+\begin{equation}
+N_{\rm PSF}(\vec{d}, \vec{p}, E, t) = \int_{\rm ROI} PSF(\vec{p'} | \vec{d}, \vec{p}, E, t) \, {\rm d}\vec{p'}
+\end{equation}
+\begin{equation}
+N_{\rm Edisp}(\vec{d}, \vec{p}, E, t) = \int_{E_{\rm min}}^{E_{\rm max}} 
+E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t) \, {\rm d}E'
+\end{equation}
+and
+\begin{equation}
+N_{\rm Tdisp}(\vec{d}, \vec{p}, E, t) = \int_{\rm GTI} T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t) \, {\rm d}t' \, .
+\end{equation}
+Using
+\begin{equation}
+N_{\rm R}(\vec{d}, \vec{p}, E, t) = 
+L(\vec{d}, \vec{p}, E, t) \times
+A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times
+N_{\rm PSF}(\vec{d}, \vec{p}, E, t) \times
+N_{\rm Edisp}(\vec{d}, \vec{p}, E, t) \times
+N_{\rm Tdisp}(\vec{d}, \vec{p}, E, t)
+\end{equation}
+Eq.~(\ref{eq:npred}) simplifies to
+\begin{equation}
+N_{\rm pred} = \int_{0}^{\infty} \int_{0}^{\infty} \int_{\Omega} 
+S(\vec{p}, E, t) \times 
+N_{\rm R}(\vec{d}, \vec{p}, E, t)
+\, {\rm d}\vec{p} \, {\rm d}E \, \,{\rm d}t
+\end{equation}
+
+In the case of no time dispersion, Eq.~(\ref{eq:npred}) reduces to 
+\begin{eqnarray}
+N_{\rm pred} = \int_{0}^{\infty} \int_{0}^{\infty} \int_{\Omega} 
+S(\vec{p}, E, t) \times 
+L(\vec{d}, \vec{p}, E, t) \times
+A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times
+N_{\rm PSF}(\vec{d}, \vec{p}, E, t) \times \nonumber \\
+N_{\rm Edisp}(\vec{d}, \vec{p}, E, t)
+\, {\rm d}\vec{p} \, {\rm d}E \,{\rm d}t
+\end{eqnarray}
+and in addition for no energy dispersion, Eq.~(\ref{eq:npred}) becomes
+\begin{equation}
+N_{\rm pred} = \int_{0}^{\infty} \int_{0}^{\infty} \int_{\Omega} 
+S(\vec{p}, E, t) \times 
+L(\vec{d}, \vec{p}, E, t) \times
+A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times
+N_{\rm PSF}(\vec{d}, \vec{p}, E, t)
+\, {\rm d}\vec{p} \, {\rm d}E \,{\rm d}t .
+\end{equation}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Factorized source model}
 
 A special type of source model is given by the factorisation
 \begin{equation}
@@ -116,6 +200,22 @@ where
 \item[] $P(E)$ is the source spectrum (in units of photons cm$^{-2}$ s$^{-1}$ MeV$^{-1}$), and
 \item[] $V(t)$ is a source modulation function (unitless).
 \end{itemize}
+In this case, Eq.~(\ref{eq:model}) becomes
+
+\begin{eqnarray}
+N(\vec{p'}, E', t' | \vec{d}) = \int_{0}^{t'+\Delta t} \int_{E'-\Delta E}^{\infty} \int_{\Omega} 
+M(\vec{p}) \times P(E) \times V(t) \times 
+L(\vec{d}, \vec{p}, E, t) \times
+A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times \nonumber \\
+PSF(\vec{p'} | \vec{d}, \vec{p}, E, t) \times
+E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t) 
+T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t) 
+\, {\rm d}\vec{p} \, {\rm d}E \, {\rm d}t \, .
+\end{eqnarray}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Implementation}
 
 The \this\ implementation of the response function and parameters is summarised in 
 Table \ref{tab:respar}.
@@ -137,12 +237,18 @@ Response function or parameter & Designation & Class (::method) & Instrument spe
 \hline
 \noalign{\smallskip}
 Response function & $R$ & {\tt GResponse::irf()} & possible \\
+Lifetime fraction & $L$ & {\tt GResponse::live()} & {\bf yes} \\
 Effective area & $A_{\rm eff}$ & {\tt GResponse::aeff()} & {\bf yes} \\
 Point spread function & $PSF$ & {\tt GResponse::psf()} & {\bf yes} \\
 Energy dispersion & $E_{\rm disp}$ & {\tt GResponse::edisp()} & {\bf yes} \\
 Time dispersion & $T_{\rm disp}$ & {\tt GResponse::tdisp()} & {\bf yes} \\
+Integral over response function & $N_{\rm R}$ & {\tt GResponse::nirf()} & possible \\
+Integral over point spread function & $N_{\rm PSF}$ & {\tt GResponse::npsf()} & {\bf yes} \\
+Integral over energy dispersion & $N_{\rm Edisp}$ & {\tt GResponse::nedisp()} & {\bf yes} \\
+Integral over time dispersion & $N_{\rm Tdisp}$ & {\tt GResponse::ntdisp()} & {\bf yes} \\
 Probability of measuring a photon & $N$ & {\tt GEvent::model()} & {\bf yes} \\
-Source model & $S$ & {\tt GModels}, {\tt GModel} & no \\ 
+Predicted number of events & $N_{\rm pred}$ & {\tt GObservation::npred()} & {\bf yes} \\
+Source model & $S$ & {\tt GModel} & no \\ 
 Measured location of photon & $\vec{p'}$ & {\tt GInstDir} & {\bf yes} \\
 Measured energy of photon & $E'$ & {\tt GEnergy} & no \\
 Measured arrival time & $t'$ & {\tt GTime} & no \\
@@ -150,6 +256,8 @@ Instrument pointing & $d$ & {\tt GPointing} & {\bf yes} \\
 True arrival direction of photon & $\vec{p}$ & {\tt GSkyDir} & no \\
 True energy of photon & $E$ & {\tt GEnergy} & no \\
 True arrival time of photon & $t$ & {\tt GTime} & no \\
+Region of interets & ${\rm ROI}$ & {\tt GRoi} & {\bf yes} \\
+Good Time Interval & ${\rm GTI}$ & {\tt GGti} & no \\
 \noalign{\smallskip}
 \hline
 \end{tabular}
