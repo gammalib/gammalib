@@ -89,9 +89,9 @@ In the case of no time dispersion, $T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)$ b
 and Eq.~(\ref{eq:model}) reduces to 
 \begin{equation}
 N(\vec{p'}, E', t') = \int_{E'-\Delta E}^{\infty} \int_{\Omega} 
-S(\vec{p}, E, t) \times A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times
-PSF(\vec{p'} | \vec{d}, \vec{p}, E, t) \times
-E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t) 
+S(\vec{p}, E, t') \times A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times
+PSF(\vec{p'} | \vec{d}, \vec{p}, E, t') \times
+E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t') 
 \, {\rm d}\vec{p} \, {\rm d}E \, .
 \end{equation}
 Since for many astrophysical sources $S(\vec{p}, E, t)$ drops quickly with energy, only
@@ -100,8 +100,8 @@ For this reason, energy dispersion can also often be neglected, and also
 $E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t)$ can be approximated by a $\delta$-function,
 leading to
 \begin{equation}
-N(\vec{p'}, E', t') = \int_{\Omega} S(\vec{p}, E, t) \times A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times
-PSF(\vec{p'} | \vec{d}, \vec{p}, E, t) \, {\rm d}\vec{p} \, .
+N(\vec{p'}, E', t') = \int_{\Omega} S(\vec{p}, E', t') \times A_{\rm eff}(\vec{d}, \vec{p}, E', t') \times
+PSF(\vec{p'} | \vec{d}, \vec{p}, E', t') \, {\rm d}\vec{p} \, .
 \end{equation}
 These simplifications may be considered when implementing the computation of
 $N(\vec{p'}, E', t')$ for a specific instrument.

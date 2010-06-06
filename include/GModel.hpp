@@ -25,6 +25,7 @@
 #include "GModelSpatial.hpp"
 #include "GModelSpectral.hpp"
 #include "GModelTemporal.hpp"
+#include "GSkyDir.hpp"
 #include "GInstDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
@@ -39,6 +40,20 @@
  *
  * This class implements a source model that is factoried in a spatial,
  * a spectral and a temporal component.
+ * The class has two methods for model evaluation. The eval() method
+ * evaluates the model for a given observed photon direction, photon energy
+ * and photon arrival time, given a reponse function and a pointing. The
+ * eval_gradients() also evaluates the model, but also sets the gradients
+ * of the model.
+ * Protected methods are implemented to handle source parameter integrations
+ * depending on the requirements. Integration of the model (method fct) is
+ * first done over all sky directions (method spatial), then over all
+ * energies (method spectral) and then over all times (method temporal).
+ * The eval() and eval_gradients() methods call temporal() to perform the
+ * nested integrations.
+ *
+ * @todo Do we need a separate eval_gradients() method or can we just use
+ * eval() since we anyway need gradients for function optimization?
  ***************************************************************************/
 class GModel {
 
