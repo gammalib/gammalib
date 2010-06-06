@@ -175,35 +175,14 @@ GModelPar* GModel::par(int index) const
  * @param[in] rsp Instrument response function.
  * @param[in] pnt Instrument pointing direction.
  *
- * This method implements a source model evaluation assuming a factorisation
- * of the source term into a spatial, a spectral and a temporal component.
- *
- * @todo General method need to be implemented. Test if there is energy
- * dispersion and time dispersion to skip integrations if they are not
- * required.
+ * This method evaluates the source model.
  ***************************************************************************/
 double GModel::eval(const GInstDir& obsDir, const GEnergy& obsEng,
                     const GTime& obsTime, const GResponse& rsp,
                     const GPointing& pnt)
 {
-    // Initialise value
-    double value = 1.0;
-
-    // Integral over source direction, energy and time
-    //for (srcTime = ...
-    //for (srcEng = ...
-    //for (srcDir = ...
-    GTime   srcTime = obsTime;    // Assume no time dispersion
-    GEnergy srcEng  = obsEng;     // Assume no energy dispersion
-    GSkyDir srcDir;               // Assume nothing
-    
-    // Evaluate model in all components
-    if (m_spatial  != NULL)
-        value *= m_spatial->eval(obsDir, srcDir, srcEng, srcTime, rsp, pnt);
-    if (m_spectral != NULL)
-        value *= m_spectral->eval(obsEng, srcDir, srcEng, srcTime, rsp, pnt);
-    if (m_temporal != NULL)
-        value *= m_temporal->eval(obsTime, srcDir, srcEng, srcTime, rsp, pnt);
+    // Evaluate function
+    double value = temporal(obsDir, obsEng, obsTime, rsp, pnt, false);
     
     // Return
     return value;
@@ -219,35 +198,14 @@ double GModel::eval(const GInstDir& obsDir, const GEnergy& obsEng,
  * @param[in] rsp Instrument response function.
  * @param[in] pnt Instrument pointing direction.
  *
- * This method implements a source model evaluation assuming a factorisation
- * of the source term into a spatial, a spectral and a temporal component.
- *
- * @todo General method need to be implemented. Test if there is energy
- * dispersion and time dispersion to skip integrations if they are not
- * required.
+ * This method evaluates the source model and sets the model gradients.
  ***************************************************************************/
 double GModel::eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
                               const GTime& obsTime, const GResponse& rsp,
                               const GPointing& pnt)
 {
-    // Initialise value
-    double value = 1.0;
-
-    // Integral over source direction, energy and time
-    //for (srcTime = ...
-    //for (srcEng = ...
-    //for (srcDir = ...
-    GTime   srcTime = obsTime;    // Assume no time dispersion
-    GEnergy srcEng  = obsEng;     // Assume no energy dispersion
-    GSkyDir srcDir;               // Assume nothing
-    
-    // Evaluate model and gradients in all components
-    if (m_spatial  != NULL) 
-        value *= m_spatial->eval_gradients(obsDir, srcDir, srcEng, srcTime, rsp, pnt);
-    if (m_spectral != NULL)
-        value *= m_spectral->eval_gradients(obsEng, srcDir, srcEng, srcTime, rsp, pnt);
-    if (m_temporal != NULL)
-        value *= m_temporal->eval_gradients(obsTime, srcDir, srcEng, srcTime, rsp, pnt);
+    // Evaluate function
+    double value = temporal(obsDir, obsEng, obsTime, rsp, pnt, true);
     
     // Return
     return value;
@@ -366,6 +324,181 @@ void GModel::set_pointers(void)
     
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Evaluate function
+ *
+ * @param[in] obsDir Observed photon direction.
+ * @param[in] obsEng Observed photon energy.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] rsp Instrument response function.
+ * @param[in] pnt Instrument pointing direction.
+ * @parem[in] grad Compute also model gradients (default=false).
+ *
+ * This method evaluates the factorized source model at a given set of
+ * parameters.
+ ***************************************************************************/
+double GModel::fct(const GInstDir& obsDir, const GEnergy& obsEng,
+                   const GTime& obsTime, const GSkyDir&  srcDir,
+                   const GEnergy& srcEng, const GTime& srcTime,
+                   const GResponse& rsp, const GPointing& pnt, bool grad)
+{
+    // Initialise components
+    double value = 1.0;
+
+    // Evaluate model in all components
+    if (grad) {
+        if (m_spatial  != NULL)
+            value *= m_spatial->eval_gradients(obsDir, srcDir, srcEng, srcTime, rsp, pnt);
+        if (m_spectral != NULL)
+            value *= m_spectral->eval_gradients(obsEng, srcDir, srcEng, srcTime, rsp, pnt);
+        if (m_temporal != NULL)
+            value *= m_temporal->eval_gradients(obsTime, srcDir, srcEng, srcTime, rsp, pnt);
+    }
+    else {
+        if (m_spatial  != NULL)
+            value *= m_spatial->eval(obsDir, srcDir, srcEng, srcTime, rsp, pnt);
+        if (m_spectral != NULL)
+            value *= m_spectral->eval(obsEng, srcDir, srcEng, srcTime, rsp, pnt);
+        if (m_temporal != NULL)
+            value *= m_temporal->eval(obsTime, srcDir, srcEng, srcTime, rsp, pnt);
+    }
+    
+    // Return
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Perform integration over spatial component
+ *
+ * @param[in] obsDir Observed photon direction.
+ * @param[in] obsEng Observed photon energy.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] rsp Instrument response function.
+ * @param[in] pnt Instrument pointing direction.
+ * @parem[in] grad Compute also model gradients (default=false).
+ *
+ * This method integrates the source model over the spatial component. If
+ * the model does not explicitely depend on the sky direction (e.g. because
+ * the model is a point source) no spatial integration is needed.
+ *
+ * @todo Needs implementation of spatial integration.
+ ***************************************************************************/
+double GModel::spatial(const GInstDir& obsDir, const GEnergy& obsEng,
+                       const GTime& obsTime,
+                       const GEnergy& srcEng, const GTime& srcTime,
+                       const GResponse& rsp, const GPointing& pnt, bool grad)
+{
+    // Initialise result
+    double value = 0.0;
+
+    // Determine if integration is needed
+    bool integrate  = (m_spatial != NULL) ? m_spatial->depdir() : false;
+
+    // Case A: Integraion
+    if (integrate) {
+        std::cout << "GModel::spatial: Integration not implemented." << std::endl;
+    }
+    
+    // Case B: No integration
+    else {
+        GSkyDir srcDir;
+        value = fct(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, rsp, pnt);
+    }
+    
+    // Return value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Perform integration over spectral component
+ *
+ * @param[in] obsDir Observed photon direction.
+ * @param[in] obsEng Observed photon energy.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] rsp Instrument response function.
+ * @param[in] pnt Instrument pointing direction.
+ * @parem[in] grad Compute also model gradients (default=false).
+ *
+ * This method integrates the source model over the spectral component. If
+ * the response function has no energy dispersion then no spectral
+ * integration is needed and the observed photon energy is identical to the
+ * true photon energy.
+ *
+ * @todo Needs implementation of spectral integration.
+ ***************************************************************************/
+double GModel::spectral(const GInstDir& obsDir, const GEnergy& obsEng,
+                        const GTime& obsTime, const GTime& srcTime,
+                        const GResponse& rsp, const GPointing& pnt, bool grad)
+{
+    // Initialise result
+    double value = 0.0;
+
+    // Determine if energy integration is needed
+    bool integrate = rsp.hasedisp();
+
+    // Case A: Integraion
+    if (integrate) {
+        std::cout << "GModel::spectral: Integration not implemented." << std::endl;
+    }
+    
+    // Case B: No integration (assume no energy dispersion)
+    else
+        value = spatial(obsDir, obsEng, obsTime, obsEng, srcTime, rsp, pnt);
+    
+    // Return value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Perform integration over temporal component
+ *
+ * @param[in] obsDir Observed photon direction.
+ * @param[in] obsEng Observed photon energy.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] rsp Instrument response function.
+ * @param[in] pnt Instrument pointing direction.
+ * @parem[in] grad Compute also model gradients (default=false).
+ *
+ * This method integrates the source model over the temporal component. If
+ * the response function has no time dispersion then no temporal integration
+ * is needed and the observed photon arrival time is identical to the true
+ * photon arrival time.
+ *
+ * @todo Needs implementation of temporal integration.
+ ***************************************************************************/
+double GModel::temporal(const GInstDir& obsDir, const GEnergy& obsEng,
+                        const GTime& obsTime,
+                        const GResponse& rsp, const GPointing& pnt, bool grad)
+{
+    // Initialise result
+    double value = 0.0;
+
+    // Determine if time integration is needed
+    bool integrate = rsp.hastdisp();
+
+    // Case A: Integraion
+    if (integrate) {
+        std::cout << "GModel::temporal: Integration not implemented." << std::endl;
+    }
+    
+    // Case B: No integration (assume no time dispersion)
+    else
+        value = spectral(obsDir, obsEng, obsTime, obsTime, rsp, pnt);
+    
+    // Return value
+    return value;
 }
 
 
