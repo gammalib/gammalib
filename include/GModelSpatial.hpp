@@ -34,7 +34,10 @@
  *
  * @brief Abstract interface definition for the spatial model class.
  *
- * This class implements the spatial component of gamma-ray data model.
+ * This class implements the spatial component of the factorized source
+ * model.
+ * The depdir(), depeng(), and deptime() methods specify whether the spatial
+ * models depends on the srcDir, srcEng, and srcTime parameters.
  ***************************************************************************/
 class GModelSpatial {
 
@@ -62,6 +65,9 @@ public:
                                       const GTime& srcTime,
                                       const GResponse& rsp,
                                       const GPointing& pnt) = 0;
+    virtual bool       depdir(void) const = 0;
+    virtual bool       depeng(void) const = 0;
+    virtual bool       deptime(void) const = 0;
   
 protected:
     // Protected methods

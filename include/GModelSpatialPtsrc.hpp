@@ -60,6 +60,9 @@ public:
     double     eval_gradients(const GInstDir& dir, const GSkyDir& srcDir,
                               const GEnergy& srcEng, const GTime& srcTime,
                               const GResponse& rsp, const GPointing& pnt);
+    bool       depdir(void) const { return false; }
+    bool       depeng(void) const { return true; }
+    bool       deptime(void) const  { return true; }
     double     ra(void) const { return m_ra.real_value(); }
     double     dec(void) const { return m_dec.real_value(); }
   
