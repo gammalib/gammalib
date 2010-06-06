@@ -204,6 +204,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                 npred += m_this->m_obs[i]->npred((GModels&)pars);
         }
         m_value += npred;
+        std::cout << "Npred=" << npred << std::endl;
         
         // Iterate over all data bins
         GObservations::iterator end = m_this->end();

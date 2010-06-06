@@ -146,7 +146,6 @@ GIntegral& GIntegral::operator= (const GIntegral& integral)
  ***************************************************************************/
 double GIntegral::romb(double a, double b)
 {
-//	float trapzd(float (*func)(float), float a, float b, int n);
     // Set constants
     const int k = 5;
     
@@ -159,19 +158,20 @@ double GIntegral::romb(double a, double b)
     double* h = new double[m_max_iter+1];
 
     // Initialise step size
-	h[1] = 1.0;
+	h[0] = 1.0;
     
     // Loop
-	for (int j = 1; j <= m_max_iter; ++j) {
+	for (int j = 0; j < m_max_iter; ++j) {
     
-        // Trapezoid
-		s[j]=trapzd(a, b, j);
+        // Initial integration using Trapezoid rule (j=0 initialises method)
+		s[j] = trapzd(a, b, j+1);
         
         //
-		if (j >= k) {
+		if (j+1 >= k) {
             double ss;
             double dss;
-			polint(&h[j-k], &s[j-k], k, 0.0, &ss, &dss);
+			polint(&h[j-k+1], &s[j-k+1], k, 0.0, &ss, &dss);
+        //std::cout << j << " s[j]=" << s[j] << " ss=" << ss << " dss=" << dss << std::endl;
 			if (fabs(dss) <= m_eps * fabs(ss)) {
                 converged = true;
                 result    = ss;
