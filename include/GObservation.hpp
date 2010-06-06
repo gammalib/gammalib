@@ -53,7 +53,8 @@ public:
     virtual GObservation& operator= (const GObservation& obs);
     
     // Pure virtual methods
-    virtual void response(const std::string& irfname, std::string caldb = "") = 0;
+    virtual void   response(const std::string& irfname, std::string caldb = "") = 0;
+    virtual double npred(const GModels& models) const = 0;
 
     // Implemented methods
     void         obsname(const std::string& obsname) { m_obsname=obsname; return; }

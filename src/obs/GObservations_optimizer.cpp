@@ -201,7 +201,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         double npred = 0.0;
         for (int i = 0; i < m_this->m_num; ++i) {
             if (m_this->m_obs[i]->events()->islist())
-                npred += ((GEventList*)m_this->m_obs[i]->events())->npred((GModels&)pars);
+                npred += m_this->m_obs[i]->npred((GModels&)pars);
         }
         m_value += npred;
         
