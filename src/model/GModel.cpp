@@ -23,6 +23,7 @@
 #include "GException.hpp"
 #include "GModel.hpp"
 #include "GModelTemporalConst.hpp"
+#include "GModelSpatialPtsrc.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_PAR                                        "GModel::par(int) const"
@@ -341,34 +342,57 @@ void GModel::set_pointers(void)
  * @parem[in] grad Compute also model gradients (default=false).
  *
  * This method evaluates the factorized source model at a given set of
- * parameters.
+ * parameters and multipies it with the corresponding value of the IRF.
+ * Optionally, the parameter gradients are also evaluated and multiplied
+ * with the corresponding IRF value. The result of this method needs to be
+ * integrated over srcDir, srcEng, and srcTime to get the probability of
+ * measuring an event.
  ***************************************************************************/
 double GModel::fct(const GInstDir& obsDir, const GEnergy& obsEng,
-                   const GTime& obsTime, const GSkyDir&  srcDir,
+                   const GTime& obsTime, const GSkyDir& srcDir,
                    const GEnergy& srcEng, const GTime& srcTime,
                    const GResponse& rsp, const GPointing& pnt, bool grad)
 {
-    // Initialise components
-    double live  = (&rsp)->live(srcDir, srcEng, srcTime, pnt);
-    double aeff  = (&rsp)->aeff(srcDir, srcEng, srcTime, pnt);
-    double value = live*aeff;
+    // Initialise value
+    double value = 0.0;
+    
+    // Compute IRF
+    double irf = (&rsp)->irf(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
+
+    // Compute source model
+    double source = 1.0;
 
     // Evaluate model in all components
     if (grad) {
+    
+        // Evaluate source model
         if (m_spatial  != NULL)
-            value *= m_spatial->eval_gradients(obsDir, srcDir, srcEng, srcTime, rsp, pnt);
+            source *= m_spatial->eval_gradients(obsDir, srcDir, srcEng, srcTime, rsp, pnt);
         if (m_spectral != NULL)
-            value *= m_spectral->eval_gradients(obsEng, srcDir, srcEng, srcTime, rsp, pnt);
+            source *= m_spectral->eval_gradients(obsEng, srcDir, srcEng, srcTime, rsp, pnt);
         if (m_temporal != NULL)
-            value *= m_temporal->eval_gradients(obsTime, srcDir, srcEng, srcTime, rsp, pnt);
+            source *= m_temporal->eval_gradients(obsTime, srcDir, srcEng, srcTime, rsp, pnt);
+
+        // Set value
+        value = source * irf;
+    
+        // Set gradients
+        for (int i = 0; i < m_npars; ++i)
+            m_par[i]->gradient(m_par[i]->gradient() * irf);
+    
     }
     else {
+    
+        // Evaluate source model
         if (m_spatial  != NULL)
-            value *= m_spatial->eval(obsDir, srcDir, srcEng, srcTime, rsp, pnt);
+            source *= m_spatial->eval(obsDir, srcDir, srcEng, srcTime, rsp, pnt);
         if (m_spectral != NULL)
-            value *= m_spectral->eval(obsEng, srcDir, srcEng, srcTime, rsp, pnt);
+            source *= m_spectral->eval(obsEng, srcDir, srcEng, srcTime, rsp, pnt);
         if (m_temporal != NULL)
-            value *= m_temporal->eval(obsTime, srcDir, srcEng, srcTime, rsp, pnt);
+            source *= m_temporal->eval(obsTime, srcDir, srcEng, srcTime, rsp, pnt);
+
+        // Set value
+        value = source * irf;
     }
     
     // Return
@@ -392,7 +416,9 @@ double GModel::fct(const GInstDir& obsDir, const GEnergy& obsEng,
  * the model does not explicitely depend on the sky direction (e.g. because
  * the model is a point source) no spatial integration is needed.
  *
- * @todo Needs implementation of spatial integration.
+ * @todo Needs implementation of spatial integration. Spatial integration
+ * gets the integration region from the spatial model.
+ * @todo Quick and dirty source location extraction from GModelSpatialPtsrc.
  ***************************************************************************/
 double GModel::spatial(const GInstDir& obsDir, const GEnergy& obsEng,
                        const GTime& obsTime,
@@ -410,10 +436,12 @@ double GModel::spatial(const GInstDir& obsDir, const GEnergy& obsEng,
         std::cout << "GModel::spatial: Integration not implemented." << std::endl;
     }
     
-    // Case B: No integration
-    else {
+    // Case B: No integration, then extract point source position from model
+    else {        
         GSkyDir srcDir;
-        value = fct(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, rsp, pnt);
+        srcDir.radec_deg(((GModelSpatialPtsrc*)m_spatial)->ra(),
+                         ((GModelSpatialPtsrc*)m_spatial)->dec());
+        value = fct(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, rsp, pnt, grad);
     }
     
     // Return value
@@ -456,7 +484,7 @@ double GModel::spectral(const GInstDir& obsDir, const GEnergy& obsEng,
     
     // Case B: No integration (assume no energy dispersion)
     else
-        value = spatial(obsDir, obsEng, obsTime, obsEng, srcTime, rsp, pnt);
+        value = spatial(obsDir, obsEng, obsTime, obsEng, srcTime, rsp, pnt, grad);
     
     // Return value
     return value;
@@ -497,7 +525,7 @@ double GModel::temporal(const GInstDir& obsDir, const GEnergy& obsEng,
     
     // Case B: No integration (assume no time dispersion)
     else
-        value = spectral(obsDir, obsEng, obsTime, obsTime, rsp, pnt);
+        value = spectral(obsDir, obsEng, obsTime, obsTime, rsp, pnt, grad);
     
     // Return value
     return value;
