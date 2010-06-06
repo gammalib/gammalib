@@ -164,7 +164,7 @@ GModelPar* GModelSpatialPtsrc::par(int index) const
  * @brief Evaluate function
  *
  * @param[in] obsDir Observed photon direction.
- * @param[in] dir True photon arrival direction (not used).
+ * @param[in] srcDir True photon arrival direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] rsp Instrument response function.
@@ -172,19 +172,19 @@ GModelPar* GModelSpatialPtsrc::par(int index) const
  *
  * This method returns PSF for a source located at ra() and dec().
  ***************************************************************************/
-double GModelSpatialPtsrc::eval(const GInstDir& obsDir, const GSkyDir& dir,
+double GModelSpatialPtsrc::eval(const GInstDir& obsDir, const GSkyDir& srcDir,
                                 const GEnergy& srcEng, const GTime& srcTime,
                                 const GResponse& rsp, const GPointing& pnt)
 {
     // Set source direction
-    GSkyDir srcDir;
-    srcDir.radec_deg(ra(), dec());
+    //GSkyDir srcDir;
+    //srcDir.radec_deg(ra(), dec());
     
     // Get PSF value
-    double psf = (&rsp)->psf(obsDir, srcDir, srcEng, srcTime, pnt);
+    //double psf = (&rsp)->psf(obsDir, srcDir, srcEng, srcTime, pnt);
 
     // Return
-    return psf;
+    return 1.0;
 }
 
 
@@ -192,7 +192,7 @@ double GModelSpatialPtsrc::eval(const GInstDir& obsDir, const GSkyDir& dir,
  * @brief Evaluate function and gradients
  *
  * @param[in] obsDir Observed photon direction.
- * @param[in] dir True photon arrival direction (not used).
+ * @param[in] dir True photon arrival direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] rsp Instrument response function.
@@ -205,21 +205,21 @@ double GModelSpatialPtsrc::eval(const GInstDir& obsDir, const GSkyDir& dir,
  * 0).
  ***************************************************************************/
 double GModelSpatialPtsrc::eval_gradients(const GInstDir& obsDir,
-                                          const GSkyDir& dir,
+                                          const GSkyDir& srcDir,
                                           const GEnergy& srcEng,
                                           const GTime& srcTime,
                                           const GResponse& rsp,
                                           const GPointing& pnt)
 {
     // Evaluate function
-    double psf = eval(obsDir, dir, srcEng, srcTime, rsp, pnt);
+//    double psf = eval(obsDir, dir, srcEng, srcTime, rsp, pnt);
     
     // Set gradients to 0
     m_ra.gradient(0.0);
     m_dec.gradient(0.0);
 
     // Return
-    return psf;
+    return 1.0;
 }
 
 
