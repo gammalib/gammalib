@@ -132,6 +132,27 @@ GCTAResponse& GCTAResponse::operator= (const GCTAResponse& rsp)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Return livetime fraction (units: s s-1).
+ *
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Pointer to instrument pointing information.
+ *
+ * Dummy livetime fraction of 0.8.
+ ***************************************************************************/
+double GCTAResponse::live(const GSkyDir& srcDir, const GEnergy& srcEng,
+                          const GTime& srcTime, const GPointing& pnt) const
+{
+    // Dummy
+    double live = 0.8;
+    
+    // Return effective area
+    return live;
+}
+
+
+/***********************************************************************//**
  * @brief Return effective area (units: cm2).
  *
  * @param[in] srcDir True photon direction.
@@ -248,6 +269,69 @@ double GCTAResponse::tdisp(const GTime& obsTime,
     
     // Return time dispersion
     return tdisp;
+}
+
+
+/***********************************************************************//**
+ * @brief Return integral over PSF
+ *
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Pointer to instrument pointing information.
+ *
+ * @todo Implement integration over ROI.
+ ***************************************************************************/
+double GCTAResponse::npsf(const GSkyDir& srcDir, const GEnergy& srcEng,
+                          const GTime& srcTime, const GPointing& pnt) const
+{
+    // Dummy
+    double npsf = 1.0;
+    
+    // Return integral
+    return npsf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return integral over energy dispersion
+ *
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Pointer to instrument pointing information.
+ *
+ * @todo Implement integration over energy range.
+ ***************************************************************************/
+double GCTAResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
+                            const GTime& srcTime, const GPointing& pnt) const
+{
+    // Dummy
+    double nedisp = 1.0;
+    
+    // Return integral
+    return nedisp;
+}
+
+
+/***********************************************************************//**
+ * @brief Return integral over time dispersion
+ *
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Pointer to instrument pointing information.
+ *
+ * @todo Implement integration over GTIs.
+ ***************************************************************************/
+double GCTAResponse::ntdisp(const GSkyDir& srcDir, const GEnergy& srcEng,
+                            const GTime& srcTime, const GPointing& pnt) const
+{
+    // Dummy
+    double ntdisp = 1.0;
+    
+    // Return integral
+    return ntdisp;
 }
 
 

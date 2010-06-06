@@ -51,6 +51,8 @@ public:
     GCTAResponse& operator= (const GCTAResponse & rsp);
 
     // Implemented pure virtual methods
+    double live(const GSkyDir&  srcDir, const GEnergy& srcEng,
+                const GTime& srcTime, const GPointing& pnt) const;
     double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                 const GPointing& pnt) const;
     double psf(const GInstDir& obsDir,
@@ -62,6 +64,12 @@ public:
     double tdisp(const GTime& obsTime,
                  const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                  const GPointing& pnt) const;
+    double npsf(const GSkyDir&  srcDir, const GEnergy& srcEng,
+                const GTime& srcTime, const GPointing& pnt) const;
+    double nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
+                  const GTime& srcTime, const GPointing& pnt) const;
+    double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
+                  const GTime& srcTime, const GPointing& pnt) const;
     void   load(const std::string& irfname);
     bool   hasedisp(void) const { return false; }
     bool   hastdisp(void) const { return false; }
