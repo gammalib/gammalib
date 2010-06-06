@@ -25,8 +25,7 @@
 #include "GCTAEventAtom.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MODEL1                             "GCTAEventAtom::model(GModels&)"
-#define G_MODEL2                   "GCTAEventAtom::model(GModels&, GVector*)"
+#define G_MODEL                    "GCTAEventAtom::model(GModels&, GVector*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -146,13 +145,13 @@ double GCTAEventAtom::model(GModels& models, GVector* gradient) const
 {
     // Make sure that response pointer exists
     if (rsp() == NULL)
-        throw GCTAException::response_not_set(G_MODEL2);
+        throw GCTAException::response_not_set(G_MODEL);
 
     // Verify that number of model parameter is identical to the dimension
     // of the gradient vector
     #if defined(G_RANGE_CHECK)
     if (models.npars() != gradient->size())
-        throw GException::gradient_par_mismatch(G_MODEL2, gradient->size(), 
+        throw GException::gradient_par_mismatch(G_MODEL, gradient->size(), 
                                                 models.npars());
     #endif
     
