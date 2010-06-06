@@ -192,42 +192,6 @@ GLATEventAtom* GLATEventList::pointer(int index)
 }
 
 
-/***********************************************************************//**
- * @brief Return total number of predicted counts for a specific model
- *
- * @param[in] pars Model parameters.
- *
- * @todo Method needs to be implemented.
- ***************************************************************************/
-double GLATEventList::npred(const GModels& pars) const
-{
-    // Dummy
-    double npred = 1.0;
-    
-    // Return prediction
-    return npred;
-}
-
-
-/***********************************************************************//**
- * @brief Return total number of predicted counts and gradient for a
- * specific model
- *
- * @param[in] pars Model parameters.
- * @param[in] gradient Pointer to parameter gradient.
- *
- * @todo Method needs to be implemented.
- ***************************************************************************/
-double GLATEventList::npred(const GModels& pars, GVector* gradient) const
-{
-    // Dummy
-    double npred = 1.0;
-    
-    // Return prediction
-    return npred;
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                            Private methods                              =

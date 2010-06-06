@@ -226,6 +226,35 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
 }
 
 
+/***********************************************************************//**
+ * @brief Return total number of predicted counts for all models.
+ *
+ * @param[in] models Models.
+ *
+ * @todo Method needs to be implemented
+ ***************************************************************************/
+double GLATObservation::npred(const GModels& models) const
+{
+    // Initialise predicted number of counts
+    double npred = 0.0;
+    
+    // Loop over models
+    for (int i = 0; i < models.size(); ++i) {
+    
+        // Check if model is a LAT model and if it should be used for this
+        // event
+        // TO BE IMPLEMENTED
+        
+        // Add model
+        //npred += models(i)->npred(*m_response, *pnt());
+        
+    }
+
+    // Return prediction
+    return npred;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Private methods                              =

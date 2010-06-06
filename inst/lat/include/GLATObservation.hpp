@@ -44,13 +44,14 @@ public:
     GLATObservation& operator= (const GLATObservation& obs);
 
     // Methods
-    void response(const std::string& irfname, std::string caldb = "");
-    void load_unbinned(const std::string& ft1name, 
-                       const std::string& ft2name,
+    void   response(const std::string& irfname, std::string caldb = "");
+    void   load_unbinned(const std::string& ft1name, 
+                         const std::string& ft2name,
+                         const std::string& ltcube_name);
+    void   load_binned(const std::string& cntmap_name, 
+                       const std::string& expmap_name, 
                        const std::string& ltcube_name);
-    void load_binned(const std::string& cntmap_name, 
-                     const std::string& expmap_name, 
-                     const std::string& ltcube_name);
+    double npred(const GModels& pars) const;
   
 protected:
     // Protected methods

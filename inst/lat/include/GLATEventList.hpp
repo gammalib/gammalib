@@ -47,8 +47,6 @@ public:
     // Methods
 	void           load(const std::string& filename);
     GLATEventAtom* pointer(int index);
-    double         npred(const GModels& pars) const;
-    double         npred(const GModels& pars, GVector* gradient) const;
     int            number(void) const { return m_num; }
     int            size(void) const { return m_num; }
     
