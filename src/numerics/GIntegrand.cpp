@@ -41,7 +41,7 @@ GIntegrand::GIntegrand(void)
 {
     // Initialise private members for clean destruction
     init_members();
-  
+
     // Return
     return;
 }
@@ -53,7 +53,7 @@ GIntegrand::GIntegrand(void)
  * @param[in] arg Object from which the instance should be built.
  ***************************************************************************/
 GIntegrand::GIntegrand(const GIntegrand& arg)
-{ 
+{
     // Initialise private members for clean destruction
     init_members();
 
@@ -90,7 +90,7 @@ GIntegrand::~GIntegrand(void)
  * @param[in] arg Object to be assigned.
  ***************************************************************************/
 GIntegrand& GIntegrand::operator= (const GIntegrand& arg)
-{ 
+{
     // Execute only if object is not identical
     if (this != &arg) {
 
@@ -104,7 +104,7 @@ GIntegrand& GIntegrand::operator= (const GIntegrand& arg)
         copy_members(arg);
 
     } // endif: object was not identical
-  
+
     // Return
     return *this;
 }

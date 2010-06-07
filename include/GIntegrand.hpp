@@ -27,6 +27,11 @@
  * @class GIntegrand
  *
  * @brief GIntegrand class interface defintion.
+ *
+ * This class implements the abstract interface for the integration kernel
+ * function. It has no members. The only pure virtual method that has to
+ * be implemented by the derived class is the eval() method that provides
+ * function evaluation at a given value x, e.g. y=eval(x).
  ***************************************************************************/
 class GIntegrand {
 
@@ -51,9 +56,6 @@ protected:
     void init_members(void);
     void copy_members(const GIntegrand& arg);
     void free_members(void);
-    
-    // Protected data area
-
 };
 
 #endif /* GINTEGRAND_HPP */
