@@ -23,9 +23,7 @@
 #include <iostream>
 #include "GModelSpatial.hpp"
 #include "GModelPar.hpp"
-#include "GInstDir.hpp"
-#include "GResponse.hpp"
-#include "GPointing.hpp"
+#include "GSkyDir.hpp"
 
 
 /***********************************************************************//**
@@ -47,32 +45,28 @@ public:
     explicit GModelSpatialPtsrc(const GSkyDir& dir);
     GModelSpatialPtsrc(const GModelSpatialPtsrc& model);
     virtual ~GModelSpatialPtsrc(void);
- 
+
     // Operators
     GModelSpatialPtsrc& operator= (const GModelSpatialPtsrc& model);
 
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
-    double     eval(const GInstDir& dir, const GSkyDir& srcDir,
-                    const GEnergy& srcEng, const GTime& srcTime,
-                    const GResponse& rsp, const GPointing& pnt);
-    double     eval_gradients(const GInstDir& dir, const GSkyDir& srcDir,
-                              const GEnergy& srcEng, const GTime& srcTime,
-                              const GResponse& rsp, const GPointing& pnt);
+    double     eval(const GSkyDir& srcDir);
+    double     eval_gradients(const GSkyDir& srcDir);
     bool       depdir(void) const { return false; }
     bool       depeng(void) const { return true; }
     bool       deptime(void) const  { return true; }
     double     ra(void) const { return m_ra.real_value(); }
     double     dec(void) const { return m_dec.real_value(); }
-  
+
 protected:
     // Protected methods
     void                init_members(void);
     void                copy_members(const GModelSpatialPtsrc& model);
     void                free_members(void);
     GModelSpatialPtsrc* clone(void) const;
-    
+
     // Data area
     int        m_npars;           //!< Number of parameters
     GModelPar* m_par[2];          //!< Pointers to parameters

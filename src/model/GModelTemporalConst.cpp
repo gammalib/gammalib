@@ -46,7 +46,7 @@ GModelTemporalConst::GModelTemporalConst(void) : GModelTemporal()
 {
     // Initialise private members for clean destruction
     init_members();
-  
+
     // Return
     return;
 }
@@ -57,9 +57,9 @@ GModelTemporalConst::GModelTemporalConst(void) : GModelTemporal()
  *
  * @param[in] model Model from which the instance should be built.
  ***************************************************************************/
-GModelTemporalConst::GModelTemporalConst(const GModelTemporalConst& model) : 
+GModelTemporalConst::GModelTemporalConst(const GModelTemporalConst& model) :
     GModelTemporal(model)
-{ 
+{
     // Initialise private members for clean destruction
     init_members();
 
@@ -96,7 +96,7 @@ GModelTemporalConst::~GModelTemporalConst(void)
  * @param[in] model Model which should be assigned.
  ***************************************************************************/
 GModelTemporalConst& GModelTemporalConst::operator= (const GModelTemporalConst& model)
-{ 
+{
     // Execute only if object is not identical
     if (this != &model) {
 
@@ -113,7 +113,7 @@ GModelTemporalConst& GModelTemporalConst::operator= (const GModelTemporalConst& 
         copy_members(model);
 
     } // endif: object was not identical
-  
+
     // Return
     return *this;
 }
@@ -129,13 +129,16 @@ GModelTemporalConst& GModelTemporalConst::operator= (const GModelTemporalConst& 
  * @brief Get pointer to model parameter
  *
  * @param[in] index Parameter index.
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of valid range
  ***************************************************************************/
 GModelPar* GModelTemporalConst::par(int index) const
 {
     // If index is outside boundary then throw an error
     if (index < 0 || index >= m_npars)
         throw GException::out_of_range(G_PAR, index, 0, m_npars-1);
-    
+
     // Return parameter pointer
     return m_par[index];
 }
@@ -144,19 +147,12 @@ GModelPar* GModelTemporalConst::par(int index) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] obsTime Observed photon arrival time (not used).
- * @param[in] srcDir True photon arrival direction (not used).
- * @param[in] srcEng True energy of photon (not used).
  * @param[in] srcTime True photon arrival time (not used).
- * @param[in] rsp Instrument response function (not used).
- * @param[in] pnt Instrument pointing (not used).
  *
  * This method implements the temporal component of a constant model.
  * It returns a value of 1 in all cases.
  ***************************************************************************/
-double GModelTemporalConst::eval(const GTime& obsTime, const GSkyDir& srcDir,
-                                 const GEnergy& srcEng, const GTime& srcTime,
-                                 const GResponse& rsp, const GPointing& pnt)
+double GModelTemporalConst::eval(const GTime& srcTime)
 {
     // Return
     return 1.0;
@@ -166,22 +162,12 @@ double GModelTemporalConst::eval(const GTime& obsTime, const GSkyDir& srcDir,
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] obsTime Observed photon arrival time (not used).
- * @param[in] srcDir True photon arrival direction (not used).
- * @param[in] srcEng True energy of photon (not used).
  * @param[in] srcTime True photon arrival time (not used).
- * @param[in] rsp Instrument response function (not used).
- * @param[in] pnt Instrument pointing (not used).
  *
  * This method implements the temporal component of a constant model.
  * It returns a value of 1 and a gradient of 0 in all cases.
  ***************************************************************************/
-double GModelTemporalConst::eval_gradients(const GTime& obsTime,
-                                           const GSkyDir& srcDir,
-                                           const GEnergy& srcEng,
-                                           const GTime& srcTime,
-                                           const GResponse& rsp,
-                                           const GPointing& pnt)
+double GModelTemporalConst::eval_gradients(const GTime& srcTime)
 {
     // Set gradient to 0
     m_norm.gradient(0.0);
@@ -205,14 +191,14 @@ void GModelTemporalConst::init_members(void)
     // Initialise parameters
     m_npars  = 1;
     m_par[0] = &m_norm;
-    
+
     // Initialise normalisation parameter
     m_norm = GModelPar();
     m_norm.name("Constant");
     m_norm.unit("(relative value)");
     m_norm.value(1.0);
     m_norm.fix();
-    
+
     // Return
     return;
 }
@@ -228,7 +214,7 @@ void GModelTemporalConst::copy_members(const GModelTemporalConst& model)
     // Copy model parameters (we do not need to copy the rest since it is
     // static)
     m_norm  = model.m_norm;
-    
+
     // Return
     return;
 }
@@ -275,14 +261,7 @@ std::ostream& operator<< (std::ostream& os, const GModelTemporalConst& model)
             os << std::endl;
         os << " Parameter .................: " << *(model.m_par[i]);
     }
-        
+
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                Other functions used by GModelTemporalConst               =
- =                                                                         =
- ==========================================================================*/

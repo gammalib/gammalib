@@ -46,7 +46,7 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(void) : GModelSpatial()
 {
     // Initialise private members for clean destruction
     init_members();
-  
+
     // Return
     return;
 }
@@ -61,11 +61,11 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(const GSkyDir& dir) : GModelSpatial()
 {
     // Initialise private members for clean destruction
     init_members();
-    
+
     // Assign Right Ascension and Declination
     m_ra.value(dir.ra_deg());
     m_dec.value(dir.dec_deg());
-    
+
     // Return
     return;
 }
@@ -76,9 +76,9 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(const GSkyDir& dir) : GModelSpatial()
  *
  * @param[in] model Model from which the instance should be built.
  ***************************************************************************/
-GModelSpatialPtsrc::GModelSpatialPtsrc(const GModelSpatialPtsrc& model) : 
+GModelSpatialPtsrc::GModelSpatialPtsrc(const GModelSpatialPtsrc& model) :
    GModelSpatial(model)
-{ 
+{
     // Initialise private members for clean destruction
     init_members();
 
@@ -115,7 +115,7 @@ GModelSpatialPtsrc::~GModelSpatialPtsrc(void)
  * @param[in] model Model which should be assigned.
  ***************************************************************************/
 GModelSpatialPtsrc& GModelSpatialPtsrc::operator= (const GModelSpatialPtsrc& model)
-{ 
+{
     // Execute only if object is not identical
     if (this != &model) {
 
@@ -132,7 +132,7 @@ GModelSpatialPtsrc& GModelSpatialPtsrc::operator= (const GModelSpatialPtsrc& mod
         copy_members(model);
 
     } // endif: object was not identical
-  
+
     // Return
     return *this;
 }
@@ -145,16 +145,19 @@ GModelSpatialPtsrc& GModelSpatialPtsrc::operator= (const GModelSpatialPtsrc& mod
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Get pointer to model parameter
+ * @brief Returns pointer to a model parameter
  *
  * @param[in] index Parameter index.
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of valid range
  ***************************************************************************/
 GModelPar* GModelSpatialPtsrc::par(int index) const
 {
     // If index is outside boundary then throw an error
     if (index < 0 || index >= m_npars)
         throw GException::out_of_range(G_PAR, index, 0, m_npars-1);
-    
+
     // Return parameter pointer
     return m_par[index];
 }
@@ -163,63 +166,49 @@ GModelPar* GModelSpatialPtsrc::par(int index) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] obsDir Observed photon direction.
  * @param[in] srcDir True photon arrival direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] rsp Instrument response function.
- * @param[in] pnt Instrument pointing.
  *
- * This method returns PSF for a source located at ra() and dec().
+ * Evaluates the spatial part for a point source model. It implements a delta
+ * function with respect to the coordinates of the source.
+ *
+ * @todo Implement delta function (just returns 1.0 for the moment).
  ***************************************************************************/
-double GModelSpatialPtsrc::eval(const GInstDir& obsDir, const GSkyDir& srcDir,
-                                const GEnergy& srcEng, const GTime& srcTime,
-                                const GResponse& rsp, const GPointing& pnt)
+double GModelSpatialPtsrc::eval(const GSkyDir& srcDir)
 {
-    // Set source direction
-    //GSkyDir srcDir;
-    //srcDir.radec_deg(ra(), dec());
-    
-    // Get PSF value
-    //double psf = (&rsp)->psf(obsDir, srcDir, srcEng, srcTime, pnt);
+    // Set value dependent on source distance
+    //double value = (srcDir.dist(ra(), dec()) < 1.0e-6) ? 1.0 : 0.0;
+    double value = 1.0;
 
-    // Return
-    return 1.0;
+    // Return value
+    return value;
 }
 
 
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] dir True photon arrival direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] rsp Instrument response function.
- * @param[in] pnt Instrument pointing.
+ * @param[in] srcDir True photon arrival direction.
  *
- * This method returns PSF for a source located at ra() and dec().
- * The parameter gradients are set to 0.
+ * Evaluates the spatial part for a point source model and the gradient.
+ * It implements a delta function with respect to the coordinates of the
+ * source and returns 0 gradients.
  *
+ * @todo Implement delta function (just returns 1.0 for the moment).
  * @todo Correctly set parameter gradients (actual version sets gradients to
  * 0).
  ***************************************************************************/
-double GModelSpatialPtsrc::eval_gradients(const GInstDir& obsDir,
-                                          const GSkyDir& srcDir,
-                                          const GEnergy& srcEng,
-                                          const GTime& srcTime,
-                                          const GResponse& rsp,
-                                          const GPointing& pnt)
+double GModelSpatialPtsrc::eval_gradients(const GSkyDir& srcDir)
 {
-    // Evaluate function
-//    double psf = eval(obsDir, dir, srcEng, srcTime, rsp, pnt);
-    
+    // Set value dependent on source distance
+    //double value = (srcDir.dist(ra(), dec()) < 1.0e-6) ? 1.0 : 0.0;
+    double value = 1.0;
+
     // Set gradients to 0
     m_ra.gradient(0.0);
     m_dec.gradient(0.0);
 
-    // Return
-    return 1.0;
+    // Return value
+    return value;
 }
 
 
@@ -244,13 +233,13 @@ void GModelSpatialPtsrc::init_members(void)
     m_ra.name("RA");
     m_ra.unit("deg");
     m_ra.fix();
-    
+
     // Initialise Declination
     m_dec = GModelPar();
     m_dec.name("DEC");
     m_dec.unit("deg");
     m_dec.fix();
-    
+
     // Return
     return;
 }
@@ -267,7 +256,7 @@ void GModelSpatialPtsrc::copy_members(const GModelSpatialPtsrc& model)
     // static)
     m_ra  = model.m_ra;
     m_dec = model.m_dec;
-    
+
     // Return
     return;
 }
@@ -314,14 +303,7 @@ std::ostream& operator<< (std::ostream& os, const GModelSpatialPtsrc& model)
             os << std::endl;
         os << " Parameter .................: " << *(model.m_par[i]);
     }
-        
+
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                Other functions used by GModelSpatialPtsrc               =
- =                                                                         =
- ==========================================================================*/

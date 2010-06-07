@@ -23,12 +23,7 @@
 #include <iostream>
 #include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
-#include "GSkyDir.hpp"
-#include "GInstDir.hpp"
 #include "GEnergy.hpp"
-#include "GTime.hpp"
-#include "GPointing.hpp"
-#include "GResponse.hpp"
 
 
 /***********************************************************************//**
@@ -49,31 +44,27 @@ public:
     explicit GModelSpectralPlaw(const double& norm, const double& index);
     GModelSpectralPlaw(const GModelSpectralPlaw& model);
     virtual ~GModelSpectralPlaw(void);
- 
+
     // Operators
     GModelSpectralPlaw& operator= (const GModelSpectralPlaw& model);
 
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
-    double     eval(const GEnergy& obsEng, const GSkyDir& srcDir,
-                    const GEnergy& srcEng, const GTime& srcTime,
-                    const GResponse& rsp, const GPointing& pnt);
-    double     eval_gradients(const GEnergy& obsEng, const GSkyDir& srcDir,
-                              const GEnergy& srcEng, const GTime& srcTime,
-                              const GResponse& rsp, const GPointing& pnt);
+    double     eval(const GEnergy& srcEng);
+    double     eval_gradients(const GEnergy& srcEng);
     void       autoscale(void);
     double     norm(void) const { return m_norm.real_value(); }
     double     index(void) const { return m_index.real_value(); }
     double     pivot(void) const { return m_pivot.real_value(); }
-  
+
 protected:
     // Protected methods
     void                init_members(void);
     void                copy_members(const GModelSpectralPlaw& model);
     void                free_members(void);
     GModelSpectralPlaw* clone(void) const;
-    
+
     // Data area
     int        m_npars;           //!< Number of parameters
     GModelPar* m_par[3];          //!< Pointers to parameters

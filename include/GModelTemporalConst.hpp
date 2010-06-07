@@ -22,11 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GModelTemporal.hpp"
 #include "GModelPar.hpp"
-#include "GSkyDir.hpp"
-#include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GResponse.hpp"
-#include "GPointing.hpp"
 
 
 /***********************************************************************//**
@@ -50,27 +46,23 @@ public:
     GModelTemporalConst(void);
     GModelTemporalConst(const GModelTemporalConst& model);
     virtual ~GModelTemporalConst(void);
- 
+
     // Operators
     GModelTemporalConst& operator= (const GModelTemporalConst& model);
 
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
-    double     eval(const GTime& obsTime, const GSkyDir& srcDir,
-                    const GEnergy& srcEng, const GTime& srcTime,
-                    const GResponse& rsp, const GPointing& pnt);
-    double     eval_gradients(const GTime& obsTime, const GSkyDir& srcDir,
-                              const GEnergy& srcEng, const GTime& srcTime,
-                              const GResponse& rsp, const GPointing& pnt);
-  
+    double     eval(const GTime& srcTime);
+    double     eval_gradients(const GTime& srcTime);
+
 protected:
     // Protected methods
     void                 init_members(void);
     void                 copy_members(const GModelTemporalConst& model);
     void                 free_members(void);
     GModelTemporalConst* clone(void) const;
-    
+
     // Data area
     int        m_npars;           //!< Number of parameters
     GModelPar* m_par[1];          //!< Pointers to parameters

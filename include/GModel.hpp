@@ -59,7 +59,7 @@ class GModel {
 
     // Friend classes
     friend class GModels;
-    
+
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GModel& model);
 
@@ -69,7 +69,7 @@ public:
     GModel(const GModelSpatial& spatial, const GModelSpectral& spectral);
     GModel(const GModel& model);
     ~GModel(void);
- 
+
     // Operators
     GModel& operator= (const GModel& model);
 
@@ -78,10 +78,8 @@ public:
     void        name(const std::string& name) { m_name=name; return; }
     int         npars(void) const { return m_npars; }
     GModelPar*  par(int index) const;
-    double      value(const GInstDir& obsDir, const GEnergy& obsEng,
-                      const GTime& obsTime, const GSkyDir& srcDir,
-                      const GEnergy& srcEng, const GTime& srcTime,
-                      const GResponse& rsp, const GPointing& pnt);
+    double      value(const GSkyDir& srcDir, const GEnergy& srcEng,
+                      const GTime& srcTime);
     double      eval(const GInstDir& obsDir, const GEnergy& obsEng,
                      const GTime& obsTime, const GResponse& rsp,
                      const GPointing& pnt);
@@ -91,7 +89,7 @@ public:
     const GModelSpatial*  spatial(void) const { return m_spatial; }
     const GModelSpectral* spectral(void) const { return m_spectral; }
     const GModelTemporal* temporal(void) const { return m_temporal; }
-  
+
 protected:
     // Protected methods
     void   init_members(void);

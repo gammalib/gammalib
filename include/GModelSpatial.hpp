@@ -21,12 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GModelPar.hpp"
-#include "GInstDir.hpp"
 #include "GSkyDir.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
-#include "GResponse.hpp"
-#include "GPointing.hpp"
 
 
 /***********************************************************************//**
@@ -49,26 +44,19 @@ public:
     GModelSpatial(void);
     GModelSpatial(const GModelSpatial& model);
     virtual ~GModelSpatial();
- 
+
     // Operators
     virtual GModelSpatial& operator= (const GModelSpatial& model);
 
     // Virtual methods
     virtual int        npars(void) const = 0;
     virtual GModelPar* par(int index) const = 0;
-    virtual double     eval(const GInstDir& obsDir, const GSkyDir& srcDir,
-                            const GEnergy& srcEng, const GTime& srcTime,
-                            const GResponse& rsp, const GPointing& pnt) = 0;
-    virtual double     eval_gradients(const GInstDir& obsDir,
-                                      const GSkyDir& srcDir,
-                                      const GEnergy& srcEng,
-                                      const GTime& srcTime,
-                                      const GResponse& rsp,
-                                      const GPointing& pnt) = 0;
+    virtual double     eval(const GSkyDir& srcDir) = 0;
+    virtual double     eval_gradients(const GSkyDir& srcDir) = 0;
     virtual bool       depdir(void) const = 0;
     virtual bool       depeng(void) const = 0;
     virtual bool       deptime(void) const = 0;
-  
+
 protected:
     // Protected methods
     void                   init_members(void);

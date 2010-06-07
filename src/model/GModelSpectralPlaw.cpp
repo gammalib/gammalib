@@ -47,7 +47,7 @@ GModelSpectralPlaw::GModelSpectralPlaw(void) : GModelSpectral()
 {
     // Initialise private members for clean destruction
     init_members();
-  
+
     // Return
     return;
 }
@@ -59,16 +59,16 @@ GModelSpectralPlaw::GModelSpectralPlaw(void) : GModelSpectral()
  * @param[in] norm Power law normalization.
  * @param[in] index Power law index.
  ***************************************************************************/
-GModelSpectralPlaw::GModelSpectralPlaw(const double& norm, const double& index) : 
+GModelSpectralPlaw::GModelSpectralPlaw(const double& norm, const double& index) :
     GModelSpectral()
 {
     // Initialise private members for clean destruction
     init_members();
-    
+
     // Set parameters
     m_norm.value(norm);
     m_index.value(index);
-    
+
     // Return
     return;
 }
@@ -79,9 +79,9 @@ GModelSpectralPlaw::GModelSpectralPlaw(const double& norm, const double& index) 
  *
  * @param[in] model Model from which the instance should be built.
  ***************************************************************************/
-GModelSpectralPlaw::GModelSpectralPlaw(const GModelSpectralPlaw& model) : 
+GModelSpectralPlaw::GModelSpectralPlaw(const GModelSpectralPlaw& model) :
     GModelSpectral(model)
-{ 
+{
     // Initialise private members for clean destruction
     init_members();
 
@@ -118,7 +118,7 @@ GModelSpectralPlaw::~GModelSpectralPlaw(void)
  * @param[in] model Model which should be assigned.
  ***************************************************************************/
 GModelSpectralPlaw& GModelSpectralPlaw::operator= (const GModelSpectralPlaw& model)
-{ 
+{
     // Execute only if object is not identical
     if (this != &model) {
 
@@ -135,7 +135,7 @@ GModelSpectralPlaw& GModelSpectralPlaw::operator= (const GModelSpectralPlaw& mod
         copy_members(model);
 
     } // endif: object was not identical
-  
+
     // Return
     return *this;
 }
@@ -148,16 +148,19 @@ GModelSpectralPlaw& GModelSpectralPlaw::operator= (const GModelSpectralPlaw& mod
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Get pointer to model parameter
+ * @brief Returns pointer to a model parameter
  *
  * @param[in] index Parameter index.
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of valid range
  ***************************************************************************/
 GModelPar* GModelSpectralPlaw::par(int index) const
 {
     // If index is outside boundary then throw an error
     if (index < 0 || index >= m_npars)
         throw GException::out_of_range(G_PAR, index, 0, m_npars-1);
-    
+
     // Return parameter pointer
     return m_par[index];
 }
@@ -166,21 +169,14 @@ GModelPar* GModelSpectralPlaw::par(int index) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] obsEng Observed photon direction (not used).
- * @param[in] srcDir True photon arrival direction (not used).
  * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time (not used).
- * @param[in] rsp Instrument response function (not used).
- * @param[in] pnt Instrument pointing (not used).
  *
  * @todo For the moment the pivot energy is fixed to units of MeV. This may
  * not be ideal and should eventually be improved in the futur.
  * Furthermore, the method expects that energy!=0. Otherwise Inf or NaN
  * may result.
  ***************************************************************************/
-double GModelSpectralPlaw::eval(const GEnergy& obsEng, const GSkyDir& srcDir,
-                                const GEnergy& srcEng, const GTime& srcTime,
-                                const GResponse& rsp, const GPointing& pnt)
+double GModelSpectralPlaw::eval(const GEnergy& srcEng)
 {
     // Compute function value
     double e     = srcEng.MeV() / pivot();
@@ -195,24 +191,14 @@ double GModelSpectralPlaw::eval(const GEnergy& obsEng, const GSkyDir& srcDir,
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] obsEng Observed photon direction (not used).
- * @param[in] srcDir True photon arrival direction (not used).
  * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time (not used).
- * @param[in] rsp Instrument response function (not used).
- * @param[in] pnt Instrument pointing (not used).
  *
  * @todo For the moment the pivot energy is fixed to units of MeV. This may
  * not be ideal and should eventually be improved in the futur.
  * Furthermore, the method expects that energy!=0. Otherwise Inf or NaN
  * may result.
  ***************************************************************************/
-double GModelSpectralPlaw::eval_gradients(const GEnergy& obsEng,
-                                          const GSkyDir& srcDir,
-                                          const GEnergy& srcEng,
-                                          const GTime& srcTime,
-                                          const GResponse& rsp,
-                                          const GPointing& pnt)
+double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng)
 {
     // Compute function value
     double e     = srcEng.MeV() / pivot();
@@ -225,10 +211,10 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& obsEng,
         m_index.gradient(0.0);
         m_pivot.gradient(0.0);
     }
-    
+
     // ... otherwise compute gradient
     else {
-        
+
         // Compute normalization gradient
         if (m_norm.isfree())
             m_norm.gradient(p);
@@ -252,7 +238,7 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& obsEng,
             m_pivot.gradient(0.0);
 
     } // endelse: gradient computation required
-    
+
     // Return
     return value;
 }
@@ -265,10 +251,10 @@ void GModelSpectralPlaw::autoscale(void)
 {
     // Autoscale normalization to a value of 1.0
     if (m_norm.value() != 0.0) {
-    
+
         // Get inverse scaling factor
         double invscale = 1.0 / m_norm.value();
-        
+
         // Set values, error, min and max
         m_norm.value(m_norm.value() * invscale);
         m_norm.error(m_norm.error() * invscale);
@@ -276,12 +262,12 @@ void GModelSpectralPlaw::autoscale(void)
             m_norm.min(m_norm.min() * invscale);
         if (m_norm.hasmax())
             m_norm.max(m_norm.max() * invscale);
-        
+
         // Set scale
         m_norm.scale(1.0 / invscale);
-        
+
     }
-    
+
     // Return
     return;
 }
@@ -321,7 +307,7 @@ void GModelSpectralPlaw::init_members(void)
     m_pivot.unit("MeV");
     m_pivot.value(100.0);
     m_pivot.fix();
-    
+
     // Return
     return;
 }
@@ -339,7 +325,7 @@ void GModelSpectralPlaw::copy_members(const GModelSpectralPlaw& model)
     m_norm  = model.m_norm;
     m_index = model.m_index;
     m_pivot = model.m_pivot;
-    
+
     // Return
     return;
 }
@@ -386,7 +372,7 @@ std::ostream& operator<< (std::ostream& os, const GModelSpectralPlaw& model)
             os << std::endl;
         os << " Parameter .................: " << *(model.m_par[i]);
     }
-        
+
     // Return output stream
     return os;
 }

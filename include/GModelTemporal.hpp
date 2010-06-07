@@ -21,11 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GModelPar.hpp"
-#include "GSkyDir.hpp"
-#include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GResponse.hpp"
-#include "GPointing.hpp"
 
 
 /***********************************************************************//**
@@ -45,20 +41,16 @@ public:
     GModelTemporal(void);
     GModelTemporal(const GModelTemporal& model);
     virtual ~GModelTemporal(void);
- 
+
     // Operators
     virtual GModelTemporal& operator= (const GModelTemporal& model);
 
     // Virtual methods
     virtual int        npars(void) const = 0;
     virtual GModelPar* par(int index) const = 0;
-    virtual double     eval(const GTime& obsTime, const GSkyDir& srcDir,
-                            const GEnergy& srcEng, const GTime& srcTime,
-                            const GResponse& rsp, const GPointing& pnt) = 0;
-    virtual double     eval_gradients(const GTime& obsTime, const GSkyDir& srcDir,
-                                      const GEnergy& srcEng, const GTime& srcTime,
-                                      const GResponse& rsp, const GPointing& pnt) = 0;
-  
+    virtual double     eval(const GTime& srcTime) = 0;
+    virtual double     eval_gradients(const GTime& srcTime) = 0;
+
 protected:
     // Protected methods
     void                    init_members(void);
