@@ -20,6 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cmath>
 #include "GObservations.hpp"
 #include "GEventList.hpp"
 
@@ -31,6 +32,7 @@
 
 /* __ Debug definitions __________________________________________________ */
 #define G_EVAL_TIMING 0 //!< Perform optimizer timing (0=no, 1=yes)
+#define G_EVAL_DEBUG  0 //!< Perform optimizer debugging (0=no, 1=yes)
 
 /* __ Prototypes _________________________________________________________ */
 
@@ -48,7 +50,7 @@ GObservations::optimizer::optimizer(void) : GOptimizerFunction()
 {
     // Initialise iterator
     init_members();
-    
+
     // Return
     return;
 }
@@ -66,7 +68,7 @@ GObservations::optimizer::optimizer(GObservations *obs) : GOptimizerFunction()
 
     // Set object
     m_this = obs;
-    
+
     // Return
     return;
 }
@@ -168,118 +170,167 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
     #if G_EVAL_TIMING
     clock_t t_start = clock();
     #endif
-    
+
     // Allocate pointers for temporary memory
     int*    inx    = NULL;
     double* values = NULL;
-    
+
     // Single loop for common exit point
     do {
         // Get number of parameters
         int npars = pars.npars();
-        
+
         // Fall through if we have no free parameters
         if (npars < 1)
             continue;
-        
+
         // Free old memory
         if (m_gradient != NULL) delete m_gradient;
         if (m_covar    != NULL) delete m_covar;
-        
+
         // Initialise value, gradient vector and curvature matrix
         m_value    = 0.0;
+        m_npred    = 0.0;
         m_gradient = new GVector(npars);
         m_covar    = new GSparseMatrix(npars,npars);
-        
+
         // Allocate some working arrays
         GVector grad(npars);
         m_covar->stack_init(npars,10000);
         inx    = new int[npars];
         values = new double[npars];
-        
+
         // Collect predicted number of events for unbinned observations
-        double npred = 0.0;
         for (int i = 0; i < m_this->m_num; ++i) {
-            if (m_this->m_obs[i]->events()->islist())
-                npred += m_this->m_obs[i]->npred((GModels&)pars);
-            std::cout << "Npred=" << npred << std::endl;
-            npred = 1.0; // Dummy to avoid enless iterations
+            if (m_this->m_obs[i]->events()->islist()) {
+                m_npred += m_this->m_obs[i]->npred((GModels&)pars, &grad);
+                for (int k = 0; k < npars; ++k)
+                    (*m_gradient)(k) += grad(k);
+                //#if G_EVAL_DEBUG
+                std::cout << "Npred=" << m_npred << " Grad="
+                          << *m_gradient << std::endl;
+                //#endif
+            }
         }
-        m_value += npred;
-        
+        m_value += m_npred;
+
         // Iterate over all data bins
         GObservations::iterator end = m_this->end();
         for (GObservations::iterator bin = m_this->begin(); bin != end; ++bin) {
-        
+
             // Get number of counts in bin
             double data = bin->counts();
-            
+
             // Get model and derivative
             double model = bin->model((GModels&)pars, &grad);
-            
+
             // Skip bin if model is empty
             if (model <= 0.0)
                 continue;
-            
+
             // Create index array of non-zero derivatives
             int ndev = 0;
             for (int i = 0; i < npars; ++i) {
-                if (grad(i) != 0.0) {
+                if (grad(i) != 0.0 && !std::isinf(grad(i))) {
                     inx[ndev] = i;
                     ndev++;
                 }
             }
-            
-            // Update Poissonian statistics (excluding factorial term for
-            // faster computation)
-            if (bin->isbin())
+
+            // Case A: binned analysis
+            if (bin->isbin()) {
+
+                // Update Poissonian statistics (excluding factorial
+                // term for faster computation)
                 m_value -= data * log(model) - model;
-            else
+
+                // Skip bin now if there are no non-zero derivatives
+                if (ndev < 1)
+                    continue;
+
+                // Update gradient vector and curvature matrix. To avoid
+                // unneccessary computations we distinguish the case where
+                // data>0 and data=0. The second case requires much less
+                // computation since it does not contribute to the covariance
+                // matrix ...
+                if (data > 0.0) {
+
+                    // Pre computation
+                    double fb = data / model;
+                    double fc = (1.0 - fb);
+                    double fa = fb / model;
+
+                    // Loop over columns
+                    for (int jdev = 0; jdev < ndev; ++jdev) {
+
+                        // Initialise computation
+                        register int jpar    = inx[jdev];
+                        double       g       = grad(jpar);
+                        double       fa_i    = fa * g;
+
+                        // Update gradient
+                        (*m_gradient)(jpar) += fc * g;
+
+                        // Loop over rows
+                        register int* ipar = inx;
+                        for (register int idev = 0; idev < ndev; ++idev, ++ipar)
+                            values[idev] = fa_i * grad(*ipar);
+
+                        // Add column to matrix
+                        m_covar->add_col(values, inx, ndev, jpar);
+                    } // endfor: looped over columns
+                } // endif: data was > 0
+
+                // ... handle now data=0
+                else {
+                    register int* ipar = inx;
+                    for (register int idev = 0; idev < ndev; ++idev, ++ipar)
+                        (*m_gradient)(*ipar) += grad(*ipar);
+                }
+
+            } // endif: analysis was binned
+
+            // Case B: unbinned analysis
+            else {
+
+                // Skip event if probability is too small (this avoids
+                // -Inf errors)
+                if (model < 1.0e-100)
+                    continue;
+
+                // Update Poissonian statistics (excluding factorial term
+                // for faster computation)
                 m_value -= log(model);
-            
-            // Skip bin now if there are no non-zero derivatives
-            if (ndev < 1)
-                continue;
-            
-            // Update gradient vector and curvature matrix. To avoid unneccessary
-            // computation we distinguish the case where data>0 and data=0. The
-            // second case requires much less computation since it does not
-            // contribute to the covariance matrix ...
-            if (data > 0.0) {
-            
-                // Pre computation
-                double fb = data / model;
-                double fc = (1.0 - fb);
+
+                // Skip bin now if there are no non-zero derivatives
+                if (ndev < 1)
+                    continue;
+
+                // Update gradient vector and curvature matrix.
+                double fb = 1.0 / model;
                 double fa = fb / model;
-                
-                // Loop over columns
                 for (int jdev = 0; jdev < ndev; ++jdev) {
-                
+
                     // Initialise computation
                     register int jpar    = inx[jdev];
                     double       g       = grad(jpar);
                     double       fa_i    = fa * g;
-                    
-                    // Update gradient
-                    (*m_gradient)(jpar) += fc * g;
-                    
+
+                    // Update gradient.
+                    (*m_gradient)(jpar) -= fb * g;
+
                     // Loop over rows
                     register int* ipar = inx;
                     for (register int idev = 0; idev < ndev; ++idev, ++ipar)
                         values[idev] = fa_i * grad(*ipar);
-                    
+
                     // Add column to matrix
                     m_covar->add_col(values, inx, ndev, jpar);
-                }
-            }
-            
-            // ... handle now data=0
-            else {
-                register int* ipar = inx;
-                for (register int idev = 0; idev < ndev; ++idev, ++ipar)
-                    (*m_gradient)(*ipar) += grad(*ipar);
-            }
-        
+
+                } // endfor: looped over columns
+
+            } // endelse: analysis was unbinned
+
         } // endfor: iterated over all data bins
 
         // Release stack
@@ -291,13 +342,19 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
     if (values != NULL) delete [] values;
     if (inx    != NULL) delete [] inx;
 
+    // Optionally dump gradient and covariance matrix
+    #if G_EVAL_DEBUG
+    std::cout << *m_gradient << std::endl;
+    std::cout << *m_covar << std::endl;
+    #endif
+
     // Timing measurement
     #if G_EVAL_TIMING
     double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
     std::cout << "GObservations::optimizer::eval: CPU usage = "
               << t_elapse << " sec" << std::endl;
     #endif
-    
+
     // Return
     return;
 }
@@ -316,6 +373,7 @@ void GObservations::optimizer::init_members(void)
 {
     // Initialise members
     m_value    = 0.0;
+    m_npred    = 0.0;
     m_gradient = NULL;
     m_covar    = NULL;
     m_this     = NULL;
@@ -334,7 +392,8 @@ void GObservations::optimizer::copy_members(const optimizer& fct)
 {
     // Copy attributes
     m_value = fct.m_value;
-    
+    m_npred = fct.m_npred;
+
     // Copy gradient if it exists
     if (fct.m_gradient != NULL)
         m_gradient = new GVector(*fct.m_gradient);
@@ -342,7 +401,7 @@ void GObservations::optimizer::copy_members(const optimizer& fct)
     // Copy covariance matrix if it exists
     if (fct.m_covar != NULL)
         m_covar = new GSparseMatrix(*fct.m_covar);
-    
+
     // Return
     return;
 }
@@ -354,9 +413,9 @@ void GObservations::optimizer::copy_members(const optimizer& fct)
 void GObservations::optimizer::free_members(void)
 {
     // Free members
-	if (m_gradient != NULL) delete m_gradient;
-	if (m_covar    != NULL) delete m_covar;
-    
+    if (m_gradient != NULL) delete m_gradient;
+    if (m_covar    != NULL) delete m_covar;
+
     // Signal free pointers
     m_gradient = NULL;
     m_covar    = NULL;
