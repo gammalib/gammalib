@@ -35,6 +35,11 @@
  * @class GObservation
  *
  * @brief Abstract interface for the observation classes.
+ *
+ * The class implements support methods to compute Npred values and
+ * parameter gradients. These support methods can be overloaded by derived
+ * classes that implement instrument specific observations in order to
+ * optimize the execution speed for model fitting.
  ***************************************************************************/
 class GObservation {
 
@@ -110,11 +115,7 @@ protected:
                         const GTime& srcTime, const GPointing* pnt) :
                         m_parent(parent), m_model(&model), m_time(&srcTime),
                         m_pnt(pnt) { return; }
-        double eval(double x) {
-                 GEnergy eng;
-                 eng.TeV(x);
-                 return ((m_parent)->npred_spat(*m_model,eng,*m_time,*m_pnt));
-                 }
+        double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to model
@@ -143,12 +144,7 @@ protected:
                              const GPointing* pnt) :
                              m_parent(parent), m_model(&model), m_ipar(ipar),
                              m_time(&srcTime), m_pnt(pnt) { return; }
-        double eval(double x) {
-                 GEnergy eng;
-                 eng.TeV(x);
-                 return (m_parent->npred_grad_spat(*m_model, m_ipar, eng,
-                         *m_time, *m_pnt));
-                 }
+        double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to model
