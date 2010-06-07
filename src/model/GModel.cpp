@@ -38,7 +38,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                       GModel constructors/destructors                   =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -115,7 +115,7 @@ GModel::~GModel()
 
 /*==========================================================================
  =                                                                         =
- =                             GModel operators                            =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -147,7 +147,7 @@ GModel& GModel::operator= (const GModel& model)
 
 /*==========================================================================
  =                                                                         =
- =                          GModel public methods                          =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -171,7 +171,7 @@ GModelPar* GModel::par(int index) const
 
 
 /***********************************************************************//**
- * @brief Return source model value
+ * @brief Returns value of source model
  *
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True photon energy.
@@ -179,8 +179,6 @@ GModelPar* GModel::par(int index) const
  *
  * This method evaluates the factorized source model at a given set of
  * parameters.
- *
- * @todo obsDir, obsEng, obsTime, rsp and pnt arguments are to be removed.
  ***************************************************************************/
 double GModel::value(const GSkyDir& srcDir, const GEnergy& srcEng,
                      const GTime& srcTime)
@@ -195,6 +193,37 @@ double GModel::value(const GSkyDir& srcDir, const GEnergy& srcEng,
 
     // Return
     return source;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns parameter gradients of source model
+ *
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ *
+ * This method returns the parameter gradients of the factorized source model
+ * at a given set of parameters.
+ ***************************************************************************/
+GVector GModel::gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
+                          const GTime& srcTime)
+{
+    // Evaluate source model gradients
+    if (m_spatial  != NULL) m_spatial->eval_gradients(srcDir);
+    if (m_spectral != NULL) m_spectral->eval_gradients(srcEng);
+    if (m_temporal != NULL) m_temporal->eval_gradients(srcTime);
+
+    // Set vector of gradients
+    GVector gradients;
+    if (npars() > 0) {
+        gradients = GVector(npars());
+        for (int i = 0; i < npars(); ++i)
+            gradients(i) = m_par[i]->gradient();
+    }
+
+    // Return gradients
+    return gradients;
 }
 
 
@@ -241,6 +270,20 @@ double GModel::eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
 
     // Return
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Verifies if model is valid for a given instrument
+ *
+ * @param[in] name Instrument name for which validity is to be checked.
+ *
+ * @todo Implement method (dummy method always returns true)
+ ***************************************************************************/
+bool GModel::isvalid(const std::string& name)
+{
+    // Return
+    return true;
 }
 
 
