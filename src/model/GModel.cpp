@@ -484,7 +484,6 @@ double GModel::fct(const GInstDir& obsDir, const GEnergy& obsEng,
  *
  * @todo Needs implementation of spatial integration. Spatial integration
  * gets the integration region from the spatial model.
- * @todo Quick and dirty source location extraction from GModelSpatialPtsrc.
  ***************************************************************************/
 double GModel::spatial(const GInstDir& obsDir, const GEnergy& obsEng,
                        const GTime& obsTime,
@@ -494,21 +493,32 @@ double GModel::spatial(const GInstDir& obsDir, const GEnergy& obsEng,
     // Initialise result
     double value = 0.0;
 
-    // Determine if integration is needed
-    bool integrate  = (m_spatial != NULL) ? m_spatial->depdir() : false;
+    // Continue only if the gamma-ray source model has a spatial component
+    if (m_spatial != NULL) {
 
-    // Case A: Integraion
-    if (integrate) {
-        std::cout << "GModel::spatial: Integration not implemented." << std::endl;
-    }
+        // Case A: Model is a point source
+        if (m_spatial->isptsource()) {
+        
+            // Build sky direction from point source parameters
+            GSkyDir srcDir;
+            srcDir.radec_deg(((GModelSpatialPtsrc*)m_spatial)->ra(),
+                             ((GModelSpatialPtsrc*)m_spatial)->dec());
 
-    // Case B: No integration, then extract point source position from model
-    else {        
-        GSkyDir srcDir;
-        srcDir.radec_deg(((GModelSpatialPtsrc*)m_spatial)->ra(),
-                         ((GModelSpatialPtsrc*)m_spatial)->dec());
-        value = fct(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, rsp, pnt, grad);
-    }
+            // Get function value at that position
+            value = fct(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, rsp, pnt, grad);
+
+        } // endif: Model was a point source
+
+        // Case B: Model is not a point source
+        else {
+
+            // Dump warning that integration is not yet implemented
+            std::cout << "WARNING: GModel::spatial:"
+                      << " Sky integration not implemented." << std::endl;
+
+        } // endelse: Model was not a point source
+
+    } // endif: Gamma-ray source model had a spatial component
 
     // Return value
     return value;
