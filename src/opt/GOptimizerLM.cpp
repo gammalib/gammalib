@@ -46,7 +46,7 @@ GOptimizerLM::GOptimizerLM(void) : GOptimizer()
 {
     // Initialise private members for clean destruction
     init_members();
-  
+
     // Return
     return;
 }
@@ -58,7 +58,7 @@ GOptimizerLM::GOptimizerLM(void) : GOptimizer()
  * @param[in] opt Optimizer from which the instance should be built.
  ***************************************************************************/
 GOptimizerLM::GOptimizerLM(const GOptimizerLM& opt) : GOptimizer(opt)
-{ 
+{
     // Initialise private members for clean destruction
     init_members();
 
@@ -95,7 +95,7 @@ GOptimizerLM::~GOptimizerLM()
  * @param[in] opt Optimizer to be assigned.
  ***************************************************************************/
 GOptimizerLM& GOptimizerLM::operator= (const GOptimizerLM& opt)
-{ 
+{
     // Execute only if object is not identical
     if (this != &opt) {
 
@@ -112,7 +112,7 @@ GOptimizerLM& GOptimizerLM::operator= (const GOptimizerLM& opt)
         copy_members(opt);
 
     } // endif: object was not identical
-  
+
     // Return
     return *this;
 }
@@ -128,10 +128,10 @@ GOptimizerPars& GOptimizerLM::operator() (GOptimizerFunction& fct, GOptimizerPar
 {
     // Initalise output parameters with input parameters
     GOptimizerPars* pars = new GOptimizerPars(p);
-    
+
     // Perform LM optimization
     optimize(&fct, pars);
-    
+
     // Return
     return *pars;
 }
@@ -147,7 +147,7 @@ GModels& GOptimizerLM::operator() (GOptimizerFunction& fct, GModels& m)
 {
     // Initalise output parameters with input parameters
     GModels* models = new GModels(m);
-    
+
     // Perform LM optimization
     optimize(&fct, models);
 
@@ -199,6 +199,18 @@ void GOptimizerLM::init_members(void)
  ***************************************************************************/
 void GOptimizerLM::copy_members(const GOptimizerLM& opt)
 {
+    // Copy attributes
+    m_lambda_start = opt.m_lambda_start;
+    m_lambda_inc   = opt.m_lambda_inc;
+    m_lambda_dec   = opt.m_lambda_dec;
+    m_eps          = opt.m_eps;
+    m_max_iter     = opt.m_max_iter;
+    m_max_stall    = opt.m_max_stall;
+    m_lambda       = opt.m_lambda;
+    m_value        = opt.m_value;
+    m_status       = opt.m_status;
+    m_iter         = opt.m_iter;
+
     // Return
     return;
 }
@@ -227,44 +239,44 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
 {
     // Single loop for common exit point
     do {
-    
+
         // Initialise optimization parameters
         m_lambda = m_lambda_start;
         m_status = 0;
-        
+
         // Initial evaluation
         fct->eval(*pars);
-        
+
         // Save parameters
         m_value = *(fct->value());
-        
+
         // Save initial statistics and lambda values
         double value_old  = m_value;
         double lambda_old = m_lambda;
         int    lambda_inc = 0;
-        
+
         // Dump
         #if G_DEBUG_OPT
-        std::cout << "Initial iteration: func=" << m_value << ", Lambda=" 
+        std::cout << "Initial iteration: func=" << m_value << ", Lambda="
                   << m_lambda << std::endl;
         #endif
-        
+
         // Iterative fitting
         for (m_iter = 0; m_iter < m_max_iter; ++m_iter) {
-        
+
             // Perform one iteration
             iteration(fct, pars);
-            
+
             // Compute function improvement (>0 means decrease)
             double delta = value_old - m_value;
-            
+
             // Dump
             #if G_DEBUG_OPT
             std::cout << "Iteration " << m_iter+1 << ": func=" 
                       << m_value << ", Lambda=" << m_lambda
                       << ", delta=" << delta << std::endl;
             #endif
-            
+
             // Reset lambda increment if we had success
             if (m_lambda < lambda_old)
                 lambda_inc = 0;
@@ -294,9 +306,9 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
                 value_old = m_value;
 
         } // endfor: iterations
-    
+
     } while (0); // endwhile: main loop
-    
+
     // Return
     return;
 }
@@ -316,23 +328,23 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
         int            npars = pars->npars();
         GVector*       grad  = fct->gradient();
         GSparseMatrix* covar = fct->covar();
-    
+
         // Save function value, gradient and covariance matrix
         double         save_value = m_value;
         GVector        save_grad  = GVector(*grad);
         GSparseMatrix  save_covar = GSparseMatrix(*covar);
-        
+
         // Save parameter values in vector
         GVector save_pars(npars);
         for (int ipar = 0; ipar < npars; ++ipar)
             save_pars(ipar) = pars->par(ipar)->value();
-        
+
         // Setup matrix and vector for covariance computation
         for (int ipar = 0; ipar < npars; ++ipar) {
             (*covar)(ipar,ipar) *= (1.0 + m_lambda);
             (*grad)(ipar)        = -(*grad)(ipar);
         }
-        
+
         // Solve: covar * X = grad. Handle matrix problems
         try {
             (*covar).cholesky_decompose(1);
@@ -353,22 +365,22 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
         catch (std::exception &e) {
             throw;
         }
-        
+
         // Derive new parameter vector
         double step = 1.0; // NOTE: STEP SIZE ADJUSTMENT TBW
 
         // Derive new parameter vector
         for (int ipar = 0; ipar < npars; ++ipar) {
-        
+
             // Get actual parameter value, limits and scale
             double p     = pars->par(ipar)->value();
             double p_min = pars->par(ipar)->min();
             double p_max = pars->par(ipar)->max();
             double scale = pars->par(ipar)->scale();
-        
+
             // Compute new parameter value
             p += (*grad)(ipar) * scale * step;
-            
+
             // Constrain parameter to within the valid range
             if (pars->par(ipar)->hasmin() && p < p_min) {
                 std::cout << "Parameter " << ipar << " hits minimum: " << p << " < "
@@ -380,19 +392,19 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
                           << p_max << std::endl;
                 p = p_max;
             }
-            
+
             // Set parameter value
             pars->par(ipar)->value(p);
-            
+
         } // endfor: computed new parameter vector
-        
+
         // Evaluate function at new parameters
         fct->eval(*pars);
-        
+
         // Fetch new pointers since eval will allocate new memory
         grad  = fct->gradient();
         covar = fct->covar();
-        
+
         // Retrieve new function value
         m_value = *(fct->value());
 
@@ -408,7 +420,7 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
         double delta = save_value - m_value;
         if (delta > 0.0)
             m_lambda *= m_lambda_dec;
-            
+
         // ... if function is identical then accept new solution. If the parameters 
         // have changed then increase lambda, otherwise decrease lambda
         else if (delta == 0.0) {
@@ -417,12 +429,12 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
             else
                 m_lambda *= m_lambda_dec;
         }
-        
+
         // ... if function worsened slightly then accept new solution and increase
         // lambda
         else if (delta > 1.0e-6)
             m_lambda *= m_lambda_inc;
-        
+
         // ... otherwise,  if the statistics did not improve then use old parameters
         // and increase lamdba. Restore also the best statistics value that was 
         // reached so far, the gradient vector and the curve matrix.
@@ -436,7 +448,7 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
         }
 
     } while (0); // endwhile: main loop
-    
+
     // Return
     return;
 
@@ -453,7 +465,7 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
  * @brief Put optimizer in output stream
  *
  * @param[in] os Output stream into which the optimizer will be dumped
- * @param[in] pars Parameters to be dumped
+ * @param[in] opt Object to be dumped
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GOptimizerLM& opt)
 {
@@ -463,10 +475,3 @@ std::ostream& operator<< (std::ostream& os, const GOptimizerLM& opt)
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                    Other functions used by GOptimizer                   =
- =                                                                         =
- ==========================================================================*/
