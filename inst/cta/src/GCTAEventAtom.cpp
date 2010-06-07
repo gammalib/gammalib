@@ -21,6 +21,7 @@
 #include <config.h>
 #endif
 #include <iostream>
+#include <cmath>
 #include "GCTAException.hpp"
 #include "GCTAEventAtom.hpp"
 
