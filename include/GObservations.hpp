@@ -56,7 +56,7 @@ public:
     const GObservation& operator() (int index) const;
 
     // Methods
-	void     append(GObservation &obs);
+    void     append(GObservation &obs);
     int      size(void) const { return m_num; }
     void     models(const GModels& models) { m_models=models; return; }
     GModels* models(void) { return &m_models; }
@@ -70,7 +70,7 @@ public:
         iterator(void);
         iterator(GObservations *obs);
         ~iterator(void) { return; }
-        
+
         // Operators
         iterator&     operator++(void);                // Prefix
         iterator      operator++(int junk);            // Postfix
@@ -80,7 +80,7 @@ public:
                       { return ((m_index != it.m_index) || (m_event != it.m_event)); }
         GEvent&       operator*(void) { return *m_event; }
         GEvent*       operator->(void) { return &(*m_event); }
-        
+
         // Methods
         GObservation* obs(void) { return m_obs; }
     protected:
@@ -92,7 +92,7 @@ public:
     };
     iterator begin(void);
     iterator end(void);
-    
+
     // Optimizer
     class optimizer : public GOptimizerFunction {
     public:
@@ -101,10 +101,10 @@ public:
         optimizer(GObservations *obs);
         optimizer(const optimizer& fct);
         ~optimizer(void);
-        
+
         // Operators
         optimizer& operator= (const optimizer& fct);
-        
+
         // Methods
         void           eval(const GOptimizerPars& pars);
         double*        value(void) { return &m_value; }
@@ -115,6 +115,7 @@ public:
         void           copy_members(const optimizer& fct);
         void           free_members(void);
         double         m_value;       //!< Function value
+        double         m_npred;       //!< Total number of predicted events
         GVector*       m_gradient;    //!< Pointer to gradient vector
         GSparseMatrix* m_covar;       //!< Pointer to covariance matrix
         GObservations* m_this;        //!< Pointer to GObservations object
@@ -127,10 +128,10 @@ protected:
     void           free_members(void);
 
     // Protected data area
-	int            m_num;            //!< Number of observations
-	GObservation** m_obs;            //!< Pointers to observations
+    int            m_num;            //!< Number of observations
+    GObservation** m_obs;            //!< Pointers to observations
     GModels        m_models;         //!< Models
-	
+
 };
 
 #endif /* GOBSERVATIONS_HPP */

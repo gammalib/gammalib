@@ -60,7 +60,7 @@ protected:
     void free_members(void);
     void optimize(GOptimizerFunction* fct, GOptimizerPars* pars);
     void iteration(GOptimizerFunction* fct, GOptimizerPars* pars);
-    
+
     // Protected data area
     double m_lambda_start;      //!< Initial start value
     double m_lambda_inc;        //!< Lambda increase
