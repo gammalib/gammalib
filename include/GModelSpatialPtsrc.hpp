@@ -54,9 +54,7 @@ public:
     GModelPar* par(int index) const;
     double     eval(const GSkyDir& srcDir);
     double     eval_gradients(const GSkyDir& srcDir);
-    bool       depdir(void) const { return false; }
-    bool       depeng(void) const { return true; }
-    bool       deptime(void) const  { return true; }
+    bool       isptsource(void) const { return true; }
     double     ra(void) const { return m_ra.real_value(); }
     double     dec(void) const { return m_dec.real_value(); }
 

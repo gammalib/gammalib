@@ -29,10 +29,10 @@
  *
  * @brief Abstract interface definition for the spatial model class.
  *
- * This class implements the spatial component of the factorized source
- * model.
- * The depdir(), depeng(), and deptime() methods specify whether the spatial
- * models depends on the srcDir, srcEng, and srcTime parameters.
+ * This class implements the spatial component of the factorized gamma-ray
+ * source model. Typical examples of spatial components are a point source
+ * or an intensity map. The method isptsource() signals of the spatial
+ * model is indeed a point source.
  ***************************************************************************/
 class GModelSpatial {
 
@@ -41,7 +41,7 @@ class GModelSpatial {
 
 public:
     // Constructors and destructors
-    GModelSpatial(void);
+    explicit GModelSpatial(void);
     GModelSpatial(const GModelSpatial& model);
     virtual ~GModelSpatial();
 
@@ -53,9 +53,7 @@ public:
     virtual GModelPar* par(int index) const = 0;
     virtual double     eval(const GSkyDir& srcDir) = 0;
     virtual double     eval_gradients(const GSkyDir& srcDir) = 0;
-    virtual bool       depdir(void) const = 0;
-    virtual bool       depeng(void) const = 0;
-    virtual bool       deptime(void) const = 0;
+    virtual bool       isptsource(void) const { return false; }
 
 protected:
     // Protected methods
