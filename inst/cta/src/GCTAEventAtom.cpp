@@ -138,9 +138,6 @@ GCTAEventAtom& GCTAEventAtom::operator= (const GCTAEventAtom& atom)
  *            Gradient dimension mismatches number of parameters.
  *
  * Implements generic model and gradient evaluation for the CTA instrument.
- *
- * @todo Implement CTA specific model filtering.
- * @todo Implement correct gradient computation.
  ***************************************************************************/
 double GCTAEventAtom::model(GModels& models, GVector* gradient) const
 {
@@ -162,14 +159,16 @@ double GCTAEventAtom::model(GModels& models, GVector* gradient) const
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
 
-        // Check if model is a CTA model and if it should be used for this
-        // event
-        // TO BE IMPLEMENTED
+        // Check if model applies to CTA
+        if (models(i)->isvalid("CTA")) {
 
-        // Add model
-        model += models(i)->eval_gradients(*dir(), *energy(), *time(), *rsp(), *pnt());
+            // Add model
+            model += models(i)->eval_gradients(*dir(), *energy(), *time(),
+                                               *rsp(), *pnt());
 
-    }
+        } // endif: model was applicable
+
+    } // endfor: looped over models
 
     // Optionally set gradient vector
     if (gradient != NULL) {
