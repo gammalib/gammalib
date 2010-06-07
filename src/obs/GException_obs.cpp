@@ -84,3 +84,20 @@ GException::gti_invalid::gti_invalid(std::string origin, const GGti* gti,
     m_origin  = origin;
     m_message = "Invalid Good Time Intervals specified. "+message;
 }
+
+
+/***********************************************************************//**
+ * @brief Energy range is not valid.
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] emin Minimum energy in MeV.
+ * @param[in] emax Maximum energy in MeV.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::erange_invalid::erange_invalid(std::string origin, double emin, 
+                                           double emax, std::string message)
+{
+    m_origin  = origin;
+    m_message = "Invalid energy range (Emin="+str(emin)+" MeV, Emax="+
+                str(emax)+" MeV. "+message;
+}

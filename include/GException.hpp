@@ -356,6 +356,11 @@ public:
         gti_invalid(std::string origin, const GGti* gti,
                     std::string message = "");
     };
+    class erange_invalid : public GExceptionHandler {
+    public:
+        erange_invalid(std::string origin, double emin, 
+                       double emax, std::string message = "");
+    };
 
 };
 
