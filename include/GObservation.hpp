@@ -152,9 +152,9 @@ protected:
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to model
+        int                 m_ipar;   //!< Parameter index
         const GTime*        m_time;   //!< Pointer to time
         const GPointing*    m_pnt;    //!< Pointer to pointing
-        int                 m_ipar;   //!< Parameter index
     };
     class npred_grad_kern_spec : public GIntegrand {
     public:
