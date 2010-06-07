@@ -23,6 +23,7 @@
 #include <string>                             // string
 #include <sstream>                            // ostringstream
 #include <stdexcept>                          // exception
+#include "GGti.hpp"
 
 
 /***********************************************************************//**
@@ -56,7 +57,7 @@ public:
     public:
         mem_alloc(std::string origin, unsigned num);
     };
-    
+
     // Empty object exception class
     class empty : public GExceptionHandler {
     public:
@@ -350,8 +351,11 @@ public:
     public:
         rsp_invalid_type(std::string origin, std::string type);
     };
-
-
+    class gti_invalid : public GExceptionHandler {
+    public:
+        gti_invalid(std::string origin, const GGti* gti,
+                    std::string message = "");
+    };
 
 };
 

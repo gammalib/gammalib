@@ -65,5 +65,22 @@ GException::rsp_invalid_type::rsp_invalid_type(std::string origin,
                                                std::string type)
 {
     m_origin  = origin;
-    m_message = "Invalid response type '"+type+"' specified";
+    m_message = "Invalid response type '"+type+"' specified.";
+}
+
+
+/***********************************************************************//**
+ * @brief Good Time Intervals are not valid.
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] gti Pointer to invalid Good Time Intervals.
+ * @param[in] message Optional error message.
+ *
+ * @todo Implement GTI dumping.
+ ***************************************************************************/
+GException::gti_invalid::gti_invalid(std::string origin, const GGti* gti,
+                                     std::string message)
+{
+    m_origin  = origin;
+    m_message = "Invalid Good Time Intervals specified. "+message;
 }
