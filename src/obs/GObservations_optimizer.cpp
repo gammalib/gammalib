@@ -202,9 +202,10 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         for (int i = 0; i < m_this->m_num; ++i) {
             if (m_this->m_obs[i]->events()->islist())
                 npred += m_this->m_obs[i]->npred((GModels&)pars);
+            std::cout << "Npred=" << npred << std::endl;
+            npred = 1.0; // Dummy to avoid enless iterations
         }
         m_value += npred;
-        std::cout << "Npred=" << npred << std::endl;
         
         // Iterate over all data bins
         GObservations::iterator end = m_this->end();

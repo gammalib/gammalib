@@ -289,6 +289,8 @@ GCTAObservation* GCTAObservation::clone(void) const
  * Computes the integrand for the Npred computation. This method is called
  * by npred_integrate_spatial() which performs the spatial integration of
  * integrand.
+ *
+ * @todo Also handle Npred gradient!!!
  ***************************************************************************/
 double GCTAObservation::npred_integrand(const GModel& model,
                                         const GSkyDir& srcDir,

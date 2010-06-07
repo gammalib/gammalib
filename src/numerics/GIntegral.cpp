@@ -152,6 +152,8 @@ double GIntegral::romb(double a, double b)
     // Initialise result
     bool   converged = false;
     double result    = 0.0;
+    double ss        = 0.0;
+    double dss       = 0.0;
     
     // Allocate temporal storage
     double* s = new double[m_max_iter];
@@ -168,8 +170,6 @@ double GIntegral::romb(double a, double b)
         
         //
 		if (j+1 >= k) {
-            double ss;
-            double dss;
 			polint(&h[j-k+1], &s[j-k+1], k, 0.0, &ss, &dss);
         //std::cout << j << " s[j]=" << s[j] << " ss=" << ss << " dss=" << dss << std::endl;
 			if (fabs(dss) <= m_eps * fabs(ss)) {
@@ -188,8 +188,10 @@ double GIntegral::romb(double a, double b)
     delete [] h;
     
     // Dump warning
-    if (!converged)
-        std::cout << "GIntegral::romb: Integration did not converge." << std::endl;
+    if (!converged) {
+        std::cout << "GIntegral::romb: Integration did not converge (result="
+                  << ss << ")" << std::endl;
+    }
         
     // Return result
     return result;
