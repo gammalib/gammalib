@@ -154,26 +154,28 @@ double GCTAEventAtom::model(GModels& models, GVector* gradient) const
         throw GException::gradient_par_mismatch(G_MODEL, gradient->size(), 
                                                 models.npars());
     #endif
-    
+
     // Initialise model
     double model = 0.0;
-    
+
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
-    
+
         // Check if model is a CTA model and if it should be used for this
         // event
         // TO BE IMPLEMENTED
-        
+
         // Add model
         model += models(i)->eval_gradients(*dir(), *energy(), *time(), *rsp(), *pnt());
-        
+
     }
 
     // Optionally set gradient vector
     if (gradient != NULL) {
-        for (int i = 0; i < gradient->size(); ++i)
-            (*gradient)(i) = models.par(i)->gradient();
+        for (int i = 0; i < gradient->size(); ++i) {
+            double grad    = models.par(i)->gradient();
+            (*gradient)(i) = (std::isinf(grad)) ? 0.0 : grad;
+        }
     }
 
     // Return
