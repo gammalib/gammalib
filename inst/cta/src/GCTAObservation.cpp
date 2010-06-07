@@ -22,6 +22,7 @@
 #endif
 #include <iostream>
 #include "GCTAException.hpp"
+#include "GException.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAEventList.hpp"
 #include "GFits.hpp"
@@ -29,6 +30,8 @@
 #include "GIntegral.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_NPRED_TEMP               "GCTAObservation::npred_temp(GModel&,int)"
+#define G_NPRED_GRAD_TEMP     "GCTAObservation::npred_grad_temp(GModel&,int)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -148,16 +151,16 @@ void GCTAObservation::response(const std::string& irfname, std::string caldb)
 {
     // Delete old response function
     if (m_response != NULL) delete m_response;
-    
+
     // Allocate new CTA response function
     m_response = new GCTAResponse;
-    
+
     // Set calibration database
     m_response->caldb(caldb);
-    
+
     // Load instrument response function
     m_response->load(irfname);
-    
+
     // Return
     return;
 }
@@ -176,7 +179,7 @@ void GCTAObservation::load_unbinned(const std::string& evname)
     // Allocate events and establish link to observation
     m_events = new GCTAEventList;
     m_events->obs(this);
-    
+
     // Load events
     m_events->load(evname);
 
@@ -196,27 +199,41 @@ void GCTAObservation::load_unbinned(const std::string& evname)
  * @brief Return total number of predicted counts for all models.
  *
  * @param[in] models Models.
- *
- * @todo Method needs to be implemented
+ * @param[in] gradient Model parameter gradients.
  ***************************************************************************/
-double GCTAObservation::npred(const GModels& models) const
+double GCTAObservation::npred(const GModels& models, GVector* gradient) const
 {
-    // Initialise predicted number of counts
-    double npred = 0.0;
-    
+    // Initialise
+    double npred = 0.0;    // Reset predicted number of counts
+    int    igrad = 0;      // Reset gradient counter
+
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
-    
-        // Check if model is a CTA model and if it should be used for this
-        // event
-        // TO BE IMPLEMENTED
-        
-        // Add model
-        GCTAPointing pnt;
-        std::cout << *models(i) << std::endl;
-        npred += npred_integrate_temporal(*models(i), pnt);
-        
-    }
+
+        // Extract pointer to model (bypass const-correctness)
+        GModel* model = (GModel*)models(i);
+
+        // Handle only components that are relevant for CTA
+        if (model->isvalid("CTA")) {
+
+            // Determine Npred for model
+            npred += npred_temp(*model);
+
+            // Determine Npred gradients (perform computation only for free
+            // parameters)
+            for (int k = 0; k < model->npars(); ++k) {
+                if (model->par(k)->isfree()) {
+                    double grad = npred_grad_temp(*model, k);
+                    (*gradient)(igrad+k) = grad;
+                }
+            }
+
+        } // endif: model component was valid for instrument
+
+        // Increment parameter counter for gradient
+        igrad += model->npars();
+
+    } // endfor: Looped over models
 
     // Return prediction
     return npred;
@@ -277,120 +294,80 @@ GCTAObservation* GCTAObservation::clone(void) const
 }
 
 
-/***********************************************************************//**
- * @brief Computes the Npred integrand
- *
- * @param[in] model Gamma-ray source model.
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing direction.
- *
- * Computes the integrand for the Npred computation. This method is called
- * by npred_integrate_spatial() which performs the spatial integration of
- * integrand.
- *
- * @todo Also handle Npred gradient!!!
- ***************************************************************************/
-double GCTAObservation::npred_integrand(const GModel& model,
-                                        const GSkyDir& srcDir,
-                                        const GEnergy& srcEng,
-                                        const GTime& srcTime,
-                                        const GPointing& pnt) const
-{
-    // Compute integrated IRF
-    double nirf = m_response->nirf(srcDir, srcEng, srcTime, pnt);
-
-    // Compute source model
-    GCTAInstDir obsDir;  // unused, to be removed later
-    GEnergy     obsEng;  // unused, to be removed later
-    GTime       obsTime; // unused, to be removed later
-    GModel* ptr    = (GModel*)&model; // impose const-correctness
-    double  source = ptr->value(obsDir, obsEng, obsTime, srcDir, srcEng,
-                                srcTime, *m_response, pnt);
-
-    // Return
-    return (source * nirf);
-}
-
+/*==========================================================================
+ =                                                                         =
+ =                        Npred integration methods                        =
+ =                                                                         =
+ ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Integrates the Npred integrand spatially
+ * @brief Temporally integrate spatially & spectrally integrated Npred kernel
  *
  * @param[in] model Gamma-ray source model.
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing direction.
+ *
+ * @exception GException::gti_invalid
+ *            Good Time Interval invalid.
+ *
+ * Implement the temporal integration as a simple multiplication by the
+ * elapsed time. This assumes that the source is non-variable during the
+ * observation and that the CTA pointing is stable.
+ *
+ * @todo Use GGti instead of tstart and tstop
  ***************************************************************************/
-double GCTAObservation::npred_integrate_spatial(const GModel& model,
-                                                const GEnergy& srcEng,
-                                                const GTime& srcTime,
-                                                const GPointing& pnt) const
+double GCTAObservation::npred_temp(const GModel& model) const
 {
-    // Initialise result
-    double result = 0.0;
+    // Set integration interval in MET
+    double tstart  = m_tstart.met();
+    double tstop   = m_tstop.met();
+    double telapse = tstop - tstart;
 
-    // Determine if integration is needed
-    bool integrate  = (model.spatial() != NULL) ? model.spatial()->depdir() : false;
+    // Throw exception if time interval is not valid
+    if (tstop <= tstart)
+        throw GException::gti_invalid(G_NPRED_TEMP, &m_gti);
 
-    // Case A: Integraion
-    if (integrate) {
-        std::cout << "GCTAObservation::npred_integrate_spatial:"
-                  << " Integration not implemented." << std::endl;
-    }
-    
-    // Case B: No integration, then extract point source position from model
-    else {        
-        GSkyDir srcDir;
-        srcDir.radec_deg(((GModelSpatialPtsrc*)model.spatial())->ra(),
-                         ((GModelSpatialPtsrc*)model.spatial())->dec());
-        result = npred_integrand(model, srcDir, srcEng, srcTime, pnt);
-    }
+    // Integration is a simple multiplication by the time
+    double result = npred_spec(model, m_tstart) * telapse;
 
     // Return result
     return result;
 }
 
 
-/***********************************************************************//**
- * @brief Integrates the Npred integrand spectrally
- *
- * @param[in] model Gamma-ray source model.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing direction.
- ***************************************************************************/
-double GCTAObservation::npred_integrate_spectral(const GModel& model,
-                                                 const GTime& srcTime,
-                                                 const GPointing& pnt) const
-{
-    // Setup integration function
-    GCTAObservation::int_spec integrand(this, model, srcTime, pnt);
-    GIntegral                 integral(&integrand);
-    
-    // Do Romberg integration
-    double result = integral.romb(0.02, 100.0); // energies in TeV
-    
-    // Return result
-    return result;
-}
-
+/*==========================================================================
+ =                                                                         =
+ =                    Npred gradient integration methods                   =
+ =                                                                         =
+ ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Integrates the Npred integrand temporally
+ * @brief Temporally integrate spatially & spectrally integrated Npred gradient kernel
  *
  * @param[in] model Gamma-ray source model.
- * @param[in] pnt Instrument pointing direction.
+ * @param[in] ipar Parameter index for which gradient should be returned.
+ *
+ * @exception GException::gti_invalid
+ *            Good Time Interval invalid.
+ *
+ * Implement the temporal integration as a simple multiplication by the
+ * elapsed time. This assumes that the source is non-variable during the
+ * observation and that the CTA pointing is stable.
+ *
+ * @todo Use GGti instead of tstart and tstop
  ***************************************************************************/
-double GCTAObservation::npred_integrate_temporal(const GModel& model,
-                                                 const GPointing& pnt) const
+double GCTAObservation::npred_grad_temp(const GModel& model, int ipar) const
 {
-    // Setup integration function
-    GCTAObservation::int_temp integrand(this, model, pnt);
-    GIntegral                 integral(&integrand);
-    
-    // Do Romberg integration
-    double result = integral.romb(0.0, 100000.0); // 100000 sec
-    
+    // Set integration interval in MET
+    double tstart  = m_tstart.met();
+    double tstop   = m_tstop.met();
+    double telapse = tstop - tstart;
+
+    // Throw exception if time interval is not valid
+    if (tstop <= tstart)
+        throw GException::gti_invalid(G_NPRED_GRAD_TEMP, &m_gti);
+
+    // Integration is a simple multiplication by the time
+    double result = npred_grad_spec(model, ipar, m_tstart) * telapse;
+
     // Return result
     return result;
 }
@@ -431,7 +408,7 @@ std::ostream& operator<< (std::ostream& os, const GCTAObservation& obs)
 
     // Add GTIs to stream
     os << obs.m_gti << std::endl;
-    
+
     // Return output stream
     return os;
 }
