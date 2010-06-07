@@ -51,9 +51,9 @@ public:
     // Methods
     int        npars(void) const { return m_npars; }
     GModelPar* par(int index) const;
-    GModelPar* par_norm(void) const { return m_norm; }
-    GModelPar* par_index(void) const { return m_index; }
-    GModelPar* par_pivot(void) const { return m_pivot; }
+    GModelPar* par_norm(void) { return &m_norm; }
+    GModelPar* par_index(void) { return &m_index; }
+    GModelPar* par_pivot(void) { return &m_pivot; }
     double     eval(const GEnergy& srcEng);
     double     eval_gradients(const GEnergy& srcEng);
     void       autoscale(void);
