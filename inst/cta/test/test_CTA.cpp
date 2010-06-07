@@ -321,6 +321,7 @@ void test_unbinned_optimizer(void)
     // Setup LM optimizer
     GOptimizerLM opt;
     try {
+        opt.max_iter(1000);
         obs.optimize(opt);
     }
     catch (std::exception &e) {
