@@ -205,7 +205,7 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
     // Allocate and load LAT events from counts map file
     m_events = new GLATEventCube;
     m_events->load(cntmap_name);
-    
+
     // Get pointer to energy boundaries
     GEbounds* ebds = &(((GLATEventCube*)m_events)->m_ebds);
 
@@ -217,7 +217,7 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
     m_tstop.met(m_gti.tstop());
     m_emin.MeV(ebds->emin(0));
     m_emax.MeV(ebds->emax(ebds->elements()-1));
-    
+
     // Set mean time
     ((GLATEventCube*)m_events)->m_time = 0.5 * (m_tstart + m_tstop);
 
@@ -230,24 +230,25 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
  * @brief Return total number of predicted counts for all models.
  *
  * @param[in] models Models.
+ * @param[in] gradient Vector of parameter gradients
  *
  * @todo Method needs to be implemented
  ***************************************************************************/
-double GLATObservation::npred(const GModels& models) const
+double GLATObservation::npred(const GModels& models, GVector* gradient) const
 {
     // Initialise predicted number of counts
     double npred = 0.0;
-    
+
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
-    
+
         // Check if model is a LAT model and if it should be used for this
         // event
         // TO BE IMPLEMENTED
-        
+
         // Add model
         //npred += models(i)->npred(*m_response, *pnt());
-        
+
     }
 
     // Return prediction
@@ -343,7 +344,7 @@ std::ostream& operator<< (std::ostream& os, const GLATObservation& obs)
 
     // Add GTIs to stream
     os << obs.m_gti << std::endl;
-    
+
     // Return output stream
     return os;
 }

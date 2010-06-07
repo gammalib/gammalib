@@ -51,8 +51,8 @@ public:
     void   load_binned(const std::string& cntmap_name, 
                        const std::string& expmap_name, 
                        const std::string& ltcube_name);
-    double npred(const GModels& pars) const;
-  
+    double npred(const GModels& pars, GVector* gradient) const;
+
 protected:
     // Protected methods
     void             init_members(void);
