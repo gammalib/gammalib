@@ -28,6 +28,9 @@
  * @class GIntegral
  *
  * @brief GIntegral class interface defintion.
+ *
+ * This class allows to perform integration using various methods. The
+ * integrand is implemented by a derived class of GIntegrand.
  ***************************************************************************/
 class GIntegral {
 
@@ -48,7 +51,7 @@ public:
     // Methods
     void              integrand(GIntegrand* integrand) { m_integrand = integrand; }
     const GIntegrand* integrand(void) const { return m_integrand; }
-    double            romb(double a, double b);
+    double            romb(double a, double b, int k = 5);
 
 protected:
     // Protected methods
@@ -57,7 +60,7 @@ protected:
     void   free_members(void);
     void   polint(double* xa, double* ya, int n, double x, double *y, double *dy);
     double trapzd(double a, double b, int n);
-    
+
     // Protected data area
     GIntegrand* m_integrand;    //!< Pointer to integrand
     double      m_eps;          //!< Integration precision

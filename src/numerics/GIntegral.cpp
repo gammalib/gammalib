@@ -42,7 +42,7 @@ GIntegral::GIntegral(void)
 {
     // Initialise private members
     init_members();
-  
+
     // Return
     return;
 }
@@ -60,10 +60,10 @@ GIntegral::GIntegral(GIntegrand* integrand)
 {
     // Initialise private members
     init_members();
-    
+
     // Set integrand
     m_integrand = integrand;
-  
+
     // Return
     return;
 }
@@ -112,7 +112,7 @@ GIntegral::~GIntegral(void)
  * @param[in] integral Object to be assigned.
  ***************************************************************************/
 GIntegral& GIntegral::operator= (const GIntegral& integral)
-{ 
+{
     // Execute only if object is not identical
     if (this != &integral) {
 
@@ -126,7 +126,7 @@ GIntegral& GIntegral::operator= (const GIntegral& integral)
         copy_members(integral);
 
     } // endif: object was not identical
-  
+
     // Return
     return *this;
 }
@@ -143,56 +143,61 @@ GIntegral& GIntegral::operator= (const GIntegral& integral)
  *
  * @param[in] a Left integration boundary.
  * @param[in] b Right integration boundary.
+ * @param[in] k Integration order (default: k=5)
+ *
+ * Returns the integral of the integrand from a to b. Integration is
+ * performed by Romberg's method of order 2K, where e.g. K=2 in Simpson's
+ * rule.
+ * The number of iterations is limited by m_max_iter. m_eps specifies the
+ * requested fractional accuracy. By default it is set to 1e-6.
+ *
+ * @todo Check that k is smaller than m_max_iter
  ***************************************************************************/
-double GIntegral::romb(double a, double b)
+double GIntegral::romb(double a, double b, int k)
 {
-    // Set constants
-    const int k = 5;
-    
     // Initialise result
     bool   converged = false;
     double result    = 0.0;
     double ss        = 0.0;
     double dss       = 0.0;
-    
+
     // Allocate temporal storage
     double* s = new double[m_max_iter];
     double* h = new double[m_max_iter+1];
 
     // Initialise step size
-	h[0] = 1.0;
-    
+    h[0] = 1.0;
+
     // Loop
-	for (int j = 0; j < m_max_iter; ++j) {
-    
-        // Initial integration using Trapezoid rule (j=0 initialises method)
-		s[j] = trapzd(a, b, j+1);
-        
-        //
-		if (j+1 >= k) {
-			polint(&h[j-k+1], &s[j-k+1], k, 0.0, &ss, &dss);
-        //std::cout << j << " s[j]=" << s[j] << " ss=" << ss << " dss=" << dss << std::endl;
-			if (fabs(dss) <= m_eps * fabs(ss)) {
+    for (int iter = 1; iter <= m_max_iter; ++iter) {
+
+        // Integration using Trapezoid rule (j=0 initialises method)
+        s[iter-1] = trapzd(a, b, iter);
+
+        // Starting from iteration k on, use polynomial interpolation
+        if (iter >= k) {
+            polint(&h[iter-k], &s[iter-k], k, 0.0, &ss, &dss);
+            if (fabs(dss) <= m_eps * fabs(ss)) {
                 converged = true;
                 result    = ss;
                 break;
             }
-		}
-        
+        }
+
         // Reduce step size
-		h[j+1]= 0.25 * h[j];
-	}
-    
+        h[iter]= 0.25 * h[iter-1];
+    }
+
     // Free temporal storage
     delete [] s;
     delete [] h;
-    
+
     // Dump warning
     if (!converged) {
         std::cout << "GIntegral::romb: Integration did not converge (result="
                   << ss << ")" << std::endl;
     }
-        
+
     // Return result
     return result;
 }
@@ -213,7 +218,7 @@ void GIntegral::init_members(void)
     m_integrand = NULL;
     m_eps       = 1.0e-6;
     m_max_iter  = 20;
-    
+
     // Return
     return;
 }
@@ -230,7 +235,7 @@ void GIntegral::copy_members(const GIntegral& integral)
     m_integrand = integral.m_integrand;
     m_eps       = integral.m_eps;
     m_max_iter  = integral.m_max_iter;
-    
+
     // Return
     return;
 }
@@ -254,63 +259,70 @@ void GIntegral::free_members(void)
  * @param[in] n Number of elements in arrays.
  * @param[in] x X value at which interpolations should be performed.
  * @param[out] y Interpolated Y value.
- * @param[out] dy ...
+ * @param[out] dy Error estimate for interpolated values.
+ *
+ * Given arrays xa[0,..,n-1] and ya[0,..,n-1], and given a value x, this
+ * method returns a value y, and an error estimate dy. If P(x) is the
+ * polynomial of degree n-1, then the returned value y=P(x).
+ *
+ * @todo Implement exceptions instead of screen dump.
  ***************************************************************************/
-void GIntegral::polint(double* xa, double* ya, int n, double x, double *y, double *dy)
+void GIntegral::polint(double* xa, double* ya, int n, double x, double *y,
+                       double *dy)
 {
     // Allocate temporary memory
     double* c = new double[n];
     double* d = new double[n];
 
     // Compute initial distance to first node
-	double dif = fabs(x-xa[0]);
-    
+    double dif = fabs(x-xa[0]);
+
     // Find index ns of the closest table entry
     int ns = 0;
-	for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         double dift = fabs(x-xa[i]);
-		if (dift < dif) {
-			ns  = i;
-			dif = dift;
-		}
-		c[i] = ya[i];
-		d[i] = ya[i];
-	}
-    
+        if (dift < dif) {
+            ns  = i;
+            dif = dift;
+        }
+        c[i] = ya[i];
+        d[i] = ya[i];
+    }
+
     // Get initial approximation to y
-	*y = ya[ns--];
-    
+    *y = ya[ns--];
+
     // Loop over each column of the tableau
-	for (int m = 1; m < n; ++m) {
-    
+    for (int m = 1; m < n; ++m) {
+
         // Update current c's and d's
-		for (int i = 0; i < n-m; ++i) {
-			double ho  = xa[i]   - x;
-			double hp  = xa[i+m] - x;
-			double w   = c[i+1] - d[i];
+        for (int i = 0; i < n-m; ++i) {
+            double ho  = xa[i]   - x;
+            double hp  = xa[i+m] - x;
+            double w   = c[i+1] - d[i];
             double den = ho - hp;
-			if (den == 0.0) {
+            if (den == 0.0) {
                 std::cout << "GIntegral::polint: an error occured. "
                           << "This error can only occur if two input xa's are identical."
                           << std::endl;
             }
-			den  = w/den;
-			d[i] = hp*den;
-			c[i] = ho*den;
-		}
-        
+            den  = w/den;
+            d[i] = hp*den;
+            c[i] = ho*den;
+        }
+
         // Compute y correction
         *dy = (2*(ns+1) < (n-m)) ? c[ns+1] : d[ns--];
-        
+
         // Update y
         *y += *dy;
 
-	} // endfor: looped over columns of tableau
-    
+    } // endfor: looped over columns of tableau
+
     // Delete temporary memory
     delete [] d;
     delete [] c;
-    
+
     // Return
     return;
 }
@@ -332,30 +344,30 @@ double GIntegral::trapzd(double a, double b, int n)
     static double result;
 
     // Case A: Only a single step is requested
-	if (n == 1)
+    if (n == 1)
         result = 0.5*(b-a)*(m_integrand->eval(a) + m_integrand->eval(b));
-    
+
     // Case B: Mone than a single step is requested
-	else {
+    else {
         //
         int it = 1;
-		for (int j = 1; j < n-1; ++j)
+        for (int j = 1; j < n-1; ++j)
             it <<= 1;
-            
+
         // Set step size
-		double tnm = double(it);
-		double del = (b-a)/tnm;
-        
+        double tnm = double(it);
+        double del = (b-a)/tnm;
+
         // Sum up values
-		double x   = a + 0.5*del;
+        double x   = a + 0.5*del;
         double sum = 0.0;
-		for (int j = 1; j <= it; ++j, x+=del)
+        for (int j = 1; j <= it; ++j, x+=del)
             sum += m_integrand->eval(x);
-        
+
         // Set result
         result = 0.5*(result + (b-a)*sum/tnm);
-	}
-    
+    }
+
     // Return result
     return result;
 }
@@ -366,3 +378,20 @@ double GIntegral::trapzd(double a, double b, int n)
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Put object in output stream
+ *
+ * @param[in] os Output stream into which the model will be dumped
+ * @param[in] integral Object to be dumped
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GIntegral& integral)
+{
+    // Put object in stream
+    os << "=== GIntegral ===" << std::endl;
+    os << " Integration precision .....: " << integral.m_eps << std::endl;
+    os << " Max. number of iterations .: " << integral.m_max_iter;
+
+    // Return output stream
+    return os;
+}
