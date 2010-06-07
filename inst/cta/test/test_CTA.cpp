@@ -51,6 +51,7 @@ GModels crab_plaw(void)
         dir.radec_deg(117.0, -33.0);  // Adapt to source position in file
         point_source = GModelSpatialPtsrc(dir);
         power_law    = GModelSpectralPlaw(1.0e-7, -2.1);
+        power_law.par(0)->min(1.0e-9);
         crab         = GModel(point_source, power_law);
         crab.name("Crab");
         models.append(crab);
@@ -62,7 +63,7 @@ GModels crab_plaw(void)
         std::cout << e.what() << std::endl;
         throw;
     }
-    
+
     // Return model
     return models;
 }
@@ -135,7 +136,7 @@ void test_response(void)
         GCTAResponse rsp;
         rsp.caldb(cta_caldb);
         rsp.load(cta_irf);
-        
+
         // Integrate Psf
         GEnergy      eng;
         GTime        time;
@@ -147,7 +148,7 @@ void test_response(void)
             eng.TeV(e);
             double r     = 0.0;
             double dr    = 0.001;
-            int    steps = 1.0/dr;
+            int    steps = int(1.0/dr);
             double sum   = 0.0;
             for (int i = 0; i < steps; ++i) {
                 r   += dr;
@@ -162,7 +163,7 @@ void test_response(void)
                 throw;
             }
         }
-        
+
     }
     catch (std::exception &e) {
         std::cout << std::endl
@@ -281,7 +282,7 @@ void test_unbinned_optimizer(void)
 {
     // Write header
     std::cout << "Test unbinned optimizer: ";
-    
+
     // Number of observations in data
     int nobs = 1;
 
@@ -291,8 +292,18 @@ void test_unbinned_optimizer(void)
 
     // Load unbinned CTA observation
     try {
+        GEnergy emin, emax;
+        GTime   tstart, tstop;
+        emin.TeV(0.02);
+        emax.TeV(100.0);
+        tstart.met(0.0);
+        tstop.met(10000.0);
         run.load_unbinned(cta_events);
         run.response(cta_irf,cta_caldb);
+        run.emin(emin);
+        run.emax(emax);
+        run.tstart(tstart);
+        run.tstop(tstop);
         obs.append(run);
     }
     catch (std::exception &e) {
