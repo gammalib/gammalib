@@ -430,18 +430,18 @@ void GLATEventCube::load_ebds(GFitsHDU* hdu)
         m_ebds.load(hdu);
 
         // Fall through if there are no energy boundaries
-        if (m_ebds.elements() < 1)
+        if (m_ebds.size() < 1)
             continue;
 
         // Set number of energy bins
-        m_ebins = m_ebds.elements();
+        m_ebins = m_ebds.size();
 
         // Setup bin energies
         m_energies = new GEnergy[m_ebins];
 
         // Set log mean energies
         for (int i = 0; i < m_ebins; ++i)
-            m_energies[i].MeV(m_ebds.elogmean(i));
+            m_energies[i] = m_ebds.elogmean(i);
 
     } while (0); // end of main loop
 
