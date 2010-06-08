@@ -67,15 +67,16 @@ protected:
     void  set_attributes(void);
     GGti* clone(void) const;
     void  insert(int inx, const GTime& tstart, const GTime& tstop);
+    void  merge(void);
 
     // Protected data area
-	int     m_num;          //!< Number of intervals
-	GTime   m_tstart;       //!< Start of observation
-	GTime   m_tstop;        //!< Stop of observation
-	double  m_ontime;       //!< Sum of GTI durations (in seconds)
-	double  m_telapse;      //!< Time between start of first GTI and stop of last GTI (in seconds)
-	GTime  *m_start;        //!< Array of start times
-	GTime  *m_stop;         //!< Array of stop times
+	int     m_num;      //!< Number of intervals
+	GTime   m_tstart;   //!< Start of observation
+	GTime   m_tstop;    //!< Stop of observation
+	double  m_ontime;   //!< Sum of GTI durations (in seconds)
+	double  m_telapse;  //!< Time between start of first GTI and stop of last GTI (in seconds)
+	GTime  *m_start;    //!< Array of start times
+	GTime  *m_stop;     //!< Array of stop times
 
 private:
 };
