@@ -31,8 +31,6 @@
 #include "GIntegral.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_NPRED_TEMP               "GCTAObservation::npred_temp(GModel&,int)"
-#define G_NPRED_GRAD_TEMP     "GCTAObservation::npred_grad_temp(GModel&,int)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -306,28 +304,25 @@ GCTAObservation* GCTAObservation::clone(void) const
  *
  * @param[in] model Gamma-ray source model.
  *
- * @exception GException::gti_invalid
- *            Good Time Interval invalid.
- *
  * Implement the temporal integration as a simple multiplication by the
  * elapsed time. This assumes that the source is non-variable during the
  * observation and that the CTA pointing is stable.
- *
- * @todo Use GGti instead of tstart and tstop
  ***************************************************************************/
 double GCTAObservation::npred_temp(const GModel& model) const
 {
-    // Set integration interval in MET
-    double tstart  = m_tstart.met();
-    double tstop   = m_tstop.met();
-    double telapse = tstop - tstart;
+    // Initialise result
+    double result = 0.0;
 
-    // Throw exception if time interval is not valid
-    if (tstop <= tstart)
-        throw GException::gti_invalid(G_NPRED_TEMP, &m_gti);
+    // Determine ontime
+    double ontime = m_gti.ontime();
+    
+    // Integrate only if ontime is positive
+    if (ontime > 0.0) {
 
-    // Integration is a simple multiplication by the time
-    double result = npred_spec(model, m_tstart) * telapse;
+        // Integration is a simple multiplication by the time
+        result = npred_spec(model, m_gti.tstart()) * ontime;
+
+    }
 
     // Return result
     return result;
@@ -346,28 +341,25 @@ double GCTAObservation::npred_temp(const GModel& model) const
  * @param[in] model Gamma-ray source model.
  * @param[in] ipar Parameter index for which gradient should be returned.
  *
- * @exception GException::gti_invalid
- *            Good Time Interval invalid.
- *
  * Implement the temporal integration as a simple multiplication by the
  * elapsed time. This assumes that the source is non-variable during the
  * observation and that the CTA pointing is stable.
- *
- * @todo Use GGti instead of tstart and tstop
  ***************************************************************************/
 double GCTAObservation::npred_grad_temp(const GModel& model, int ipar) const
 {
-    // Set integration interval in MET
-    double tstart  = m_tstart.met();
-    double tstop   = m_tstop.met();
-    double telapse = tstop - tstart;
+    // Initialise result
+    double result = 0.0;
 
-    // Throw exception if time interval is not valid
-    if (tstop <= tstart)
-        throw GException::gti_invalid(G_NPRED_GRAD_TEMP, &m_gti);
+    // Determine ontime
+    double ontime = m_gti.ontime();
+    
+    // Integrate only if ontime is positive
+    if (ontime > 0.0) {
 
-    // Integration is a simple multiplication by the time
-    double result = npred_grad_spec(model, ipar, m_tstart) * telapse;
+        // Integration is a simple multiplication by the time
+        result = npred_grad_spec(model, ipar, m_gti.tstart()) * ontime;
+
+    }
 
     // Return result
     return result;

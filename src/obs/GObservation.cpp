@@ -373,25 +373,32 @@ double GObservation::npred_kern_spat::eval(double x)
  *
  * @exception GException::gti_invalid
  *            Good Time Interval is invalid.
- *
- * @todo Use GGti instead of tstart and tstop.
  ***************************************************************************/
 double GObservation::npred_temp(const GModel& model) const
 {
-    // Set integration interval in MET
-    double tstart = m_tstart.met();
-    double tstop  = m_tstop.met();
+    // Initialise result
+    double result = 0.0;
 
-    // Throw exception if time interval is not valid
-    if (tstop <= tstart)
-        throw GException::gti_invalid(G_NPRED_TEMP, &m_gti);
+    // Loop over GTIs
+    for (int i = 0; i < m_gti.size(); ++i) {
 
-    // Setup integration function
-    GObservation::npred_kern_spec integrand(this, model);
-    GIntegral                     integral(&integrand);
+        // Set integration interval in MET
+        double tstart = m_gti.tstart(i).met();
+        double tstop  = m_gti.tstop(i).met();
 
-    // Do Romberg integration
-    double result = integral.romb(tstart, tstop);
+        // Throw exception if time interval is not valid
+        if (tstop <= tstart)
+            throw GException::gti_invalid(G_NPRED_TEMP, m_gti.tstart(i),
+                                          m_gti.tstop(i));
+
+        // Setup integration function
+        GObservation::npred_kern_spec integrand(this, model);
+        GIntegral                     integral(&integrand);
+
+        // Do Romberg integration
+        result += integral.romb(tstart, tstop);
+
+    } // endfor: looped over GTIs
 
     // Return result
     return result;
@@ -570,25 +577,32 @@ double GObservation::npred_grad_kern_spat::eval(double x)
  *
  * @exception GException::gti_invalid
  *            Good Time Interval invalid.
- *
- * @todo Use GGti instead of tstart and tstop.
  ***************************************************************************/
 double GObservation::npred_grad_temp(const GModel& model, int ipar) const
 {
-    // Set integration interval in MET
-    double tstart = m_tstart.met();
-    double tstop  = m_tstop.met();
+    // Initialise result
+    double result = 0.0;
 
-    // Throw exception if time interval is not valid
-    if (tstop <= tstart)
-        throw GException::gti_invalid(G_NPRED_GRAD_TEMP, &m_gti);
+    // Loop over GTIs
+    for (int i = 0; i < m_gti.size(); ++i) {
 
-    // Setup integration function
-    GObservation::npred_grad_kern_spec integrand(this, model, ipar);
-    GIntegral                          integral(&integrand);
+        // Set integration interval in MET
+        double tstart = m_gti.tstart(i).met();
+        double tstop  = m_gti.tstop(i).met();
 
-    // Do Romberg integration
-    double result = integral.romb(tstart, tstop);
+        // Throw exception if time interval is not valid
+        if (tstop <= tstart)
+            throw GException::gti_invalid(G_NPRED_GRAD_TEMP, m_gti.tstart(i),
+                                          m_gti.tstop(i));
+
+        // Setup integration function
+        GObservation::npred_grad_kern_spec integrand(this, model, ipar);
+        GIntegral                          integral(&integrand);
+
+        // Do Romberg integration
+        result += integral.romb(tstart, tstop);
+
+    } // endfor: looped over GTIs
 
     // Return result
     return result;
