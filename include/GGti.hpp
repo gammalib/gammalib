@@ -56,6 +56,8 @@ public:
     int    size(void) const { return m_num; }
 	GTime  tstart(void) const { return m_tstart; }
 	GTime  tstop(void) const { return m_tstop; }
+	GTime  tstart(int inx) const;
+	GTime  tstop(int inx) const;
 	double telapse(void) const { return m_telapse; }
 	double ontime(void) const { return m_ontime; }
   

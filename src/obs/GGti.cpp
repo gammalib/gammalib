@@ -26,6 +26,8 @@
 #include "GFits.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_TSTART                                          "GGti::tstart(int)"
+#define G_TSTOP                                            "GGti::tstop(int)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -221,6 +223,44 @@ void GGti::load(const std::string& filename)
 	
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns start time of specific GTI
+ *
+ * @param[in] inx Index of GTI in array.
+ *
+ * @exception GException::out_of_range
+ *            Specified index is out of range.
+ ***************************************************************************/
+GTime GGti::tstart(int inx) const
+{
+    // If index is outside boundary then throw an error
+    if (inx < 0 || inx >= m_num)
+        throw GException::out_of_range(G_TSTART, inx, 0, m_num-1);
+    
+    // Return
+    return (m_start[inx]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns stop time of specific GTI
+ *
+ * @param[in] inx Index of GTI in array.
+ *
+ * @exception GException::out_of_range
+ *            Specified index is out of range.
+ ***************************************************************************/
+GTime GGti::tstop(int inx) const
+{
+    // If index is outside boundary then throw an error
+    if (inx < 0 || inx >= m_num)
+        throw GException::out_of_range(G_TSTOP, inx, 0, m_num-1);
+    
+    // Return
+    return (m_stop[inx]);
 }
 
 
