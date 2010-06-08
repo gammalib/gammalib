@@ -19,6 +19,7 @@ sources = GEnergy.cpp \
           GEventAtom.cpp \
           GEventBin.cpp \
           GGti.cpp \
+          GRoi.cpp \
           GEbounds.cpp \
           GResponse.cpp \
 	  GInstDir.cpp \
