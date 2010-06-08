@@ -235,7 +235,7 @@ void GTime::free_members(void)
 std::ostream& operator<< (std::ostream& os, const GTime& time)
 {
     // Put object in stream
-    os << time.mjd() << std::endl;
+    os << time.mjd();
 
     // Return output stream
     return os;
