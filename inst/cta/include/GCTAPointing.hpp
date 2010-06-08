@@ -20,6 +20,7 @@
 #define GCTAPOINTING_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include "GPointing.hpp"
 
 
@@ -32,6 +33,9 @@
  ***************************************************************************/
 class GCTAPointing : public GPointing {
 
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GCTAPointing& pnt);
+
 public:
     // Constructors and destructors
     GCTAPointing(void);
@@ -42,6 +46,7 @@ public:
     GCTAPointing& operator= (const GCTAPointing& pnt);
 
     // Methods
+    void clear(void);
 
 protected:
     // Protected methods

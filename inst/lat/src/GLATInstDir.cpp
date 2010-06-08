@@ -123,6 +123,22 @@ GLATInstDir& GLATInstDir::operator= (const GLATInstDir& dir)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear sky direction
+ ***************************************************************************/
+void GLATInstDir::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise private members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Compute angular distance between instrument directions in radians
  *
  * @param[in] dir Instrument direction to which distance is to be computed.

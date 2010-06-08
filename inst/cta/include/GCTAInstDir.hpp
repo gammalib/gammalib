@@ -20,6 +20,7 @@
 #define GCTAINSTDIR_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include "GInstDir.hpp"
 #include "GSkyDir.hpp"
 
@@ -47,6 +48,7 @@ public:
     GCTAInstDir& operator= (const GCTAInstDir& dir);
 
     // Methods
+    void   clear(void);
     void   radec(const double& ra, const double& dec) { m_dir.radec(ra,dec); }
     void   radec_deg(const double& ra, const double& dec) { m_dir.radec_deg(ra,dec); }
     void   lb(const double& l, const double& b) { m_dir.lb(l,b); }

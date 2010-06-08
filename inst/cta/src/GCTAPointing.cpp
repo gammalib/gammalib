@@ -43,7 +43,7 @@
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GCTAPointing::GCTAPointing(void)
+GCTAPointing::GCTAPointing(void) : GPointing()
 {
     // Initialise class members
     init_members();
@@ -58,7 +58,7 @@ GCTAPointing::GCTAPointing(void)
  *
  * @param[in] pnt Pointing from which the instance should be built.
  ***************************************************************************/
-GCTAPointing::GCTAPointing(const GCTAPointing& pnt)
+GCTAPointing::GCTAPointing(const GCTAPointing& pnt) : GPointing(pnt)
 {
     // Initialise class members
     init_members();
@@ -100,6 +100,9 @@ GCTAPointing& GCTAPointing::operator= (const GCTAPointing& pnt)
     // Execute only if object is not identical
     if (this != &pnt) {
 
+        // Copy base class members
+        this->GPointing::operator=(pnt);
+
         // Free members
         free_members();
 
@@ -121,6 +124,21 @@ GCTAPointing& GCTAPointing::operator= (const GCTAPointing& pnt)
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear pointing
+ ***************************************************************************/
+void GCTAPointing::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise private members
+    init_members();
+
+    // Return
+    return;
+}
 
 
 /*==========================================================================
@@ -175,3 +193,18 @@ GCTAPointing* GCTAPointing::clone(void) const
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Put pointing into output stream
+ *
+ * @param[in] os Output stream into which the atom will be dumped
+ * @param[in] roi Pointing to be dumped
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GCTAPointing& pnt)
+{
+    // Put pointing in output stream
+    os << "Pointing(" << ")";
+        
+    // Return output stream
+    return os;
+}

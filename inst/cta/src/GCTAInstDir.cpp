@@ -42,7 +42,7 @@
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GCTAInstDir::GCTAInstDir(void)
+GCTAInstDir::GCTAInstDir(void) : GInstDir()
 {
     // Initialise class members
     init_members();
@@ -58,7 +58,7 @@ GCTAInstDir::GCTAInstDir(void)
  * @param[in] dir Instrument direction from which class should be
  *                instantiated.
  ***************************************************************************/
-GCTAInstDir::GCTAInstDir(const GCTAInstDir& dir)
+GCTAInstDir::GCTAInstDir(const GCTAInstDir& dir) : GInstDir(dir)
 {
     // Initialise class members
     init_members();
@@ -100,6 +100,9 @@ GCTAInstDir& GCTAInstDir::operator= (const GCTAInstDir& dir)
     // Execute only if object is not identical
     if (this != &dir) {
 
+        // Copy base class members
+        this->GInstDir::operator=(dir);
+
         // Free members
         free_members();
 
@@ -121,6 +124,22 @@ GCTAInstDir& GCTAInstDir::operator= (const GCTAInstDir& dir)
  =                              Public methods                             =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear sky direction
+ ***************************************************************************/
+void GCTAInstDir::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise private members
+    init_members();
+
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Compute angular distance between instrument directions in radians
