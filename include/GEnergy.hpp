@@ -45,6 +45,10 @@ class GEnergy {
     friend GEnergy operator* (const GEnergy &a, const double &b);
     friend bool    operator== (const GEnergy &a, const GEnergy &b);
     friend bool    operator!= (const GEnergy &a, const GEnergy &b);
+    friend bool    operator< (const GEnergy &a, const GEnergy &b);
+    friend bool    operator<= (const GEnergy &a, const GEnergy &b);
+    friend bool    operator> (const GEnergy &a, const GEnergy &b);
+    friend bool    operator>= (const GEnergy &a, const GEnergy &b);
 
 public:
     // Constructors and destructors
@@ -116,6 +120,26 @@ inline
 bool operator!= (const GEnergy &a, const GEnergy &b)
 {
     return (a.m_energy != b.m_energy);
+}
+inline
+bool operator< (const GEnergy &a, const GEnergy &b)
+{
+    return (a.m_energy < b.m_energy);
+}
+inline
+bool operator<= (const GEnergy &a, const GEnergy &b)
+{
+    return (a.m_energy <= b.m_energy);
+}
+inline
+bool operator> (const GEnergy &a, const GEnergy &b)
+{
+    return (a.m_energy > b.m_energy);
+}
+inline
+bool operator>= (const GEnergy &a, const GEnergy &b)
+{
+    return (a.m_energy >= b.m_energy);
 }
 
 #endif /* GENERGY_HPP */
