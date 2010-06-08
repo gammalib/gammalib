@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GGti.hpp  -  Good time interval class                   *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,12 +20,17 @@
 #define GGTI_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
+#include "GTime.hpp"
 
 
 /***********************************************************************//**
  * @class GGti
  *
  * @brief Interface for the GTI class.
+ *
+ * This class holds a list of Good Time Intervals, i.e. time intervals that
+ * are valid for science analysis. Times are stored using the GTime class.
  ***************************************************************************/
 class GGti {
 
@@ -37,35 +42,40 @@ class GGti {
 
 public:
     // Constructors and destructors
-    GGti();
+    GGti(void);
     GGti(const GGti& gti);
-    ~GGti();
+    ~GGti(void);
 
     // Operators
     GGti& operator= (const GGti& gti);
 
     // Methods
+    void   clear(void);
+    void   append(const GTime& tstart, const GTime& tstop);
 	void   load(const std::string& filename);
-	double tstart(void);
-	double tstop(void);
-	double ontime(void);
-	double elapse(void);
+    int    size(void) const { return m_num; }
+	GTime  tstart(void) const { return m_tstart; }
+	GTime  tstop(void) const { return m_tstop; }
+	double telapse(void) const { return m_telapse; }
+	double ontime(void) const { return m_ontime; }
   
 protected:
     // Protected methods
     void  init_members(void);
     void  copy_members(const GGti& gti);
     void  free_members(void);
+    void  set_attributes(void);
     GGti* clone(void) const;
+    void  insert(int inx, const GTime& tstart, const GTime& tstop);
 
     // Protected data area
 	int     m_num;          //!< Number of intervals
-	double  m_tstart;       //!< Start of observation
-	double  m_tstop;        //!< Stop of observation
-	double  m_ontime;       //!< Sum of GTI durations
-	double  m_elapse;       //!< Time between start of first GTI and stop of last GTI
-	double *m_start;        //!< Array of start times
-	double *m_stop;         //!< Array of stop times
+	GTime   m_tstart;       //!< Start of observation
+	GTime   m_tstop;        //!< Stop of observation
+	double  m_ontime;       //!< Sum of GTI durations (in seconds)
+	double  m_telapse;      //!< Time between start of first GTI and stop of last GTI (in seconds)
+	GTime  *m_start;        //!< Array of start times
+	GTime  *m_stop;         //!< Array of stop times
 
 private:
 };
