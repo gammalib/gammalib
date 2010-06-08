@@ -25,6 +25,7 @@
 #include "GException.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAEventList.hpp"
+#include "GCTARoi.hpp"
 #include "GFits.hpp"
 #include "GModelSpatialPtsrc.hpp"
 #include "GIntegral.hpp"
@@ -396,6 +397,7 @@ std::ostream& operator<< (std::ostream& os, const GCTAObservation& obs)
             obs.m_tstart.mjd() << " - " << obs.m_tstop.mjd() << std::endl;
     os << " Energy range ..............: " << std::fixed << 
             obs.m_emin.TeV() << " - " << obs.m_emax.TeV() << " TeV" << std::endl;
+    os << " Region of interest ........: " << *((GCTARoi*)obs.m_roi) << std::endl;
 
     // Add events to stream
     if (obs.m_events != NULL) {
