@@ -21,7 +21,6 @@
 #include <config.h>
 #endif
 #include <iostream>
-#include <iomanip.h>
 #include "GException.hpp"
 #include "GGti.hpp"
 #include "GFits.hpp"
@@ -152,23 +151,25 @@ void GGti::clear(void)
  * exists, the intervals will be merged. Otherwise a new interval will
  * be inserted, respecting the time ordering of the intervals. If the
  * time interval is not valid (tstop <= tstart), nothing is done.
- *
- * @todo Throw error if specified time interval is not valid.
- * @todo Method not yet implemented.
  ***************************************************************************/
 void GGti::append(const GTime& tstart, const GTime& tstop)
 {
     // Continue only if time interval is valid
     if (tstop > tstart) {
-    
-        // If GTI is empty then append interval ...
-        if (m_num < 1)
-            insert(0, tstart, tstop);
 
-        // ... otherwise check for overlaps and perform proper action
-        else {
+        // Determine index at which GTI should be inserted
+        int inx = 0;
+        for (int i = 0; i < m_num; ++i) {
+            if (tstart < m_start[i])
+                break;
         }
-    
+        
+        // Insert GTI
+        insert(inx, tstart, tstop);
+
+        // Merge any overlapping GTIs
+        merge();
+        
     } // endif: Time interval was valid
 
     // Return
@@ -338,12 +339,22 @@ GGti* GGti::clone(void) const
  * @param[in] tstart Start time of interval to be appended.
  * @param[in] tstop Stop time of interval to be appended.
  *
- * @todo Check than inx is valid.
+ * Inserts a GTI at a given position in the GTI array. This method does not
+ * assure the time ordering of the GTIs, this has to be done by the client
+ * that determines the appropriate value of inx.
+ * Invalid parameters do not produce any exception, but are handled
+ * transparently. If the GTI is invalid (tstop <= tstart), no interval
+ * will be inserted. If the index is out of the valid range, the index
+ * will be adjusted to either the first or the last element.
  ***************************************************************************/
 void GGti::insert(int inx, const GTime& tstart, const GTime& tstop)
 {
     // Continue only if time interval is valid
     if (tstop > tstart) {
+
+        // If inx is out of range than adjust it
+        if (inx < 0)     inx = 0;
+        if (inx > m_num) inx = m_num;
     
         // Allocate new intervals
         int    num   = m_num+1;
@@ -380,6 +391,47 @@ void GGti::insert(int inx, const GTime& tstart, const GTime& tstop)
     
     } // endif: Time interval was valid
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Merge all overlapping Good Time Intervals
+ *
+ * Merges all overlapping GTIs into a single GTI. This method assumes that
+ * the GTI are ordered correctly by start time. Note that the method does
+ * not actually reduce the memory size but just updates the information on
+ * the number of elements in the array.
+ ***************************************************************************/
+void GGti::merge(void)
+{
+    // Find overlaps
+    int i   = 0;
+    int num = m_num;
+    while (i < num-1) {
+
+        // If GTI overlaps with following one then merge both GTIs, move
+        // all remaining GTIs one position up, and reduce number of elements
+        if (m_start[i+1] <= m_stop[i]) {
+            m_start[i] = (m_start[i] < m_start[i+1]) ? m_start[i] : m_start[i+1];
+            m_stop[i]  = (m_stop[i]  > m_stop[i+1])  ? m_stop[i]  : m_stop[i+1];
+            for (int k = i+2; k < num; ++k) {
+                m_start[k-1] = m_start[k];
+                m_stop[k-1]  = m_stop[k];
+            }
+            num--;
+        }
+
+        // Otherwise increment GTI index
+        else
+            i++;
+
+    } // endwhile: there were still GTIs to check
+    
+    // Update number of elements in GTI
+    m_num = num;
+    
     // Return
     return;
 }
