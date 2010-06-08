@@ -279,11 +279,13 @@ double GCTAResponse::tdisp(const GTime& obsTime,
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] pnt Pointer to instrument pointing information.
+ * @param[in] roi Region of interest of data selection.
  *
  * @todo Implement integration over ROI.
  ***************************************************************************/
 double GCTAResponse::npsf(const GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime, const GPointing& pnt) const
+                          const GTime& srcTime, const GPointing& pnt,
+                          const GRoi& roi) const
 {
     // Dummy
     double npsf = 1.0;
@@ -300,11 +302,13 @@ double GCTAResponse::npsf(const GSkyDir& srcDir, const GEnergy& srcEng,
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] pnt Pointer to instrument pointing information.
+ * @param[in] ebds Energy boundaries of data selection.
  *
  * @todo Implement integration over energy range.
  ***************************************************************************/
 double GCTAResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
-                            const GTime& srcTime, const GPointing& pnt) const
+                            const GTime& srcTime, const GPointing& pnt,
+                            const GEbounds& ebds) const
 {
     // Dummy
     double nedisp = 1.0;
@@ -321,11 +325,13 @@ double GCTAResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] pnt Pointer to instrument pointing information.
+ * @param[in] gti Good Time Intervals of data selection.
  *
  * @todo Implement integration over GTIs.
  ***************************************************************************/
 double GCTAResponse::ntdisp(const GSkyDir& srcDir, const GEnergy& srcEng,
-                            const GTime& srcTime, const GPointing& pnt) const
+                            const GTime& srcTime, const GPointing& pnt,
+                            const GGti& gti) const
 {
     // Dummy
     double ntdisp = 1.0;

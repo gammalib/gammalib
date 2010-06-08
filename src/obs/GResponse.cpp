@@ -159,20 +159,25 @@ double GResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] pnt Pointer to instrument pointing information.
+ * @param[in] roi Region of interest of data selection.
+ * @param[in] ebds Energy boundaries of data selection.
+ * @param[in] gti Good Time Intervals of data selection.
  *
  * This method implements the default and complete integral of the instrument
  * response function (IRF). It may be overwritted by a specific method in the
  * derived class that drops response terms that are not used.
  ***************************************************************************/
 double GResponse::nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                       const GTime& srcTime, const GPointing& pnt) const
+                       const GTime& srcTime,  const GPointing& pnt,
+                       const GRoi& roi, const GEbounds& ebds,
+                       const GGti& gti) const
 {
     // Get IRF components
     double nirf  =   live(srcDir, srcEng, srcTime, pnt);
     nirf        *=   aeff(srcDir, srcEng, srcTime, pnt);
-    nirf        *=   npsf(srcDir, srcEng, srcTime, pnt);
-    nirf        *= nedisp(srcDir, srcEng, srcTime, pnt);
-    nirf        *= ntdisp(srcDir, srcEng, srcTime, pnt);
+    nirf        *=   npsf(srcDir, srcEng, srcTime, pnt, roi);
+    nirf        *= nedisp(srcDir, srcEng, srcTime, pnt, ebds);
+    nirf        *= ntdisp(srcDir, srcEng, srcTime, pnt, gti);
 
     // Return integrated IRF value
     return nirf;

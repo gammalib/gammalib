@@ -25,6 +25,9 @@
 #include "GResponse.hpp"
 #include "GPointing.hpp"
 #include "GInstDir.hpp"
+#include "GRoi.hpp"
+#include "GGti.hpp"
+#include "GEbounds.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
@@ -65,11 +68,11 @@ public:
                  const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                  const GPointing& pnt) const;
     double npsf(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                const GTime& srcTime, const GPointing& pnt) const;
+                const GTime& srcTime, const GPointing& pnt, const GRoi& roi) const;
     double nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                  const GTime& srcTime, const GPointing& pnt) const;
+                  const GTime& srcTime, const GPointing& pnt, const GEbounds& ebds) const;
     double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                  const GTime& srcTime, const GPointing& pnt) const;
+                  const GTime& srcTime, const GPointing& pnt, const GGti& gti) const;
     void   load(const std::string& irfname);
     bool   hasedisp(void) const { return false; }
     bool   hastdisp(void) const { return false; }

@@ -22,6 +22,9 @@
 /* __ Includes ___________________________________________________________ */
 #include "GPointing.hpp"
 #include "GInstDir.hpp"
+#include "GRoi.hpp"
+#include "GGti.hpp"
+#include "GEbounds.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
@@ -65,13 +68,18 @@ public:
                          const GSkyDir&  srcDir, const GEnergy& srcEng,
                          const GTime& srcTime, const GPointing& pnt) const = 0;
     virtual double nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                        const GTime& srcTime, const GPointing& pnt) const;
+                        const GTime& srcTime, const GPointing& pnt,
+                        const GRoi& roi, const GEbounds& ebds,
+                        const GGti& gti) const;
     virtual double npsf(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                        const GTime& srcTime, const GPointing& pnt) const = 0;
+                        const GTime& srcTime, const GPointing& pnt,
+                        const GRoi& roi) const = 0;
     virtual double nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime, const GPointing& pnt) const = 0;
+                          const GTime& srcTime, const GPointing& pnt,
+                          const GEbounds& ebds) const = 0;
     virtual double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime, const GPointing& pnt) const = 0;
+                          const GTime& srcTime, const GPointing& pnt,
+                          const GGti& gti) const = 0;
 
     // Other methods
     virtual void        caldb(const std::string& caldb);
