@@ -65,26 +65,22 @@ public:
     virtual double npred(const GModels& models, GVector* gradient = NULL) const = 0;
 
     // Implemented methods
-    void         obsname(const std::string& obsname) { m_obsname=obsname; return; }
-    void         instrument(const std::string& instrument) { m_instrument=instrument; return; }
-    void         tstart(const GTime& tstart) { m_tstart=tstart; return; }
-    void         tstop(const GTime& tstop) { m_tstop=tstop; return; }
-    void         emin(const GEnergy& emin) { m_emin=emin; return; }
-    void         emax(const GEnergy& emax) { m_emax=emax; return; }
-    void         roi(const GRoi& roi) { m_roi=roi.clone(); return; }
-    void         ebounds(const GEbounds& ebounds) { m_ebounds=ebounds; return; }
-    void         gti(const GGti& gti) { m_gti=gti; return; }
-    std::string  obsname(void) const { return m_obsname; }
-    std::string  instrument(void) const { return m_instrument; }
-    GTime        tstart(void) const { return m_tstart; }
-    GTime        tstop(void) const { return m_tstop; }
-    GEnergy      emin(void) const { return m_emin; }
-    GEnergy      emax(void) const { return m_emax; }
-    GRoi*        roi(void) { return m_roi; }
-    GEbounds*    ebounds(void) { return &m_ebounds; }
-    GGti*        gti(void) { return &m_gti; }
-    GEvents*     events(void) const { return m_events; }
-    GResponse*   response(void) const { return m_response; }
+    void        obsname(const std::string& obsname) { m_obsname=obsname; return; }
+    void        instrument(const std::string& instrument) { m_instrument=instrument; return; }
+    void        roi(const GRoi& roi) { m_roi=roi.clone(); return; }
+    void        ebounds(const GEbounds& ebounds) { m_ebounds=ebounds; return; }
+    void        gti(const GGti& gti) { m_gti=gti; return; }
+    std::string obsname(void) const { return m_obsname; }
+    std::string instrument(void) const { return m_instrument; }
+    GTime       tstart(void) const { return m_gti.tstart(); }
+    GTime       tstop(void) const { return  m_gti.tstop(); }
+    GEnergy     emin(void) const { return m_ebounds.emin(); }
+    GEnergy     emax(void) const { return m_ebounds.emax(); }
+    GRoi*       roi(void) { return m_roi; }
+    GEbounds*   ebounds(void) { return &m_ebounds; }
+    GGti*       gti(void) { return &m_gti; }
+    GEvents*    events(void) const { return m_events; }
+    GResponse*  response(void) const { return m_response; }
 
 protected:
     // Protected methods
@@ -177,15 +173,11 @@ protected:
     // Protected data area
     std::string m_obsname;      //!< Name of observation
     std::string m_instrument;   //!< Instrument name
-    GTime       m_tstart;       //!< Start time of observation
-    GTime       m_tstop;        //!< Stop time of observation
-    GEnergy     m_emin;         //!< Minimum energy covered by observation
-    GEnergy     m_emax;         //!< Maximum energy covered by observation
+    GEbounds    m_ebounds;      //!< Energy boundaries used for analysis
+    GGti        m_gti;          //!< Good time intervals used for analysis
+    GRoi*       m_roi;          //!< Pointer to region of interest used for analysis
     GEvents*    m_events;       //!< Pointer to events
     GResponse*  m_response;     //!< Pointer to instrument response functions
-    GRoi*       m_roi;          //!< Pointer to region of interest
-    GEbounds    m_ebounds;      //!< Energy boundaries
-    GGti        m_gti;          //!< Good time intervals
 
 private:
 };

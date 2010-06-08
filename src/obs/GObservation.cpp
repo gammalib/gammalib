@@ -144,15 +144,11 @@ void GObservation::init_members(void)
     // Initialise members
     m_obsname.clear();
     m_instrument.clear();
-    m_tstart.clear();
-    m_tstop.clear();
-    m_emin.clear();
-    m_emax.clear();
+    m_ebounds.clear();
+    m_gti.clear();
+    m_roi      = NULL;
     m_events   = NULL;
     m_response = NULL;
-    m_roi      = NULL;
-    //m_ebounds.clear();
-    //m_gti.clear();
 
     // Return
     return;
@@ -169,17 +165,13 @@ void GObservation::copy_members(const GObservation& obs)
     // Copy attributes
     m_obsname    = obs.m_obsname;
     m_instrument = obs.m_instrument;
-    m_tstart     = obs.m_tstart;
-    m_tstop      = obs.m_tstop;
-    m_emin       = obs.m_emin;
-    m_emax       = obs.m_emax;
     m_ebounds    = obs.m_ebounds;
     m_gti        = obs.m_gti;
 
     // Clone members that exist
+    m_roi      = (obs.m_roi      != NULL) ? obs.m_roi->clone()      : NULL;
     m_events   = (obs.m_events   != NULL) ? obs.m_events->clone()   : NULL;
     m_response = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;
-    m_roi      = (obs.m_roi      != NULL) ? obs.m_roi->clone() : NULL;
 
     // Return
     return;
@@ -192,8 +184,8 @@ void GObservation::copy_members(const GObservation& obs)
 void GObservation::free_members(void)
 {
     // Free memory
-    if (m_events   != NULL) delete m_events;
     if (m_response != NULL) delete m_response;
+    if (m_events   != NULL) delete m_events;
     if (m_roi      != NULL) delete m_roi;
 
     // Signal free pointers
@@ -306,8 +298,8 @@ double GObservation::npred_spat(const GModel& model, const GEnergy& srcEng,
 double GObservation::npred_spec(const GModel& model, const GTime& srcTime) const
 {
     // Set integration energy interval in MeV
-    double emin = m_emin.MeV();
-    double emax = m_emax.MeV();
+    double emin = m_ebounds.emin().MeV();
+    double emax = m_ebounds.emax().MeV();
 
     // Throw exception if energy range is not valid
     if (emax <= emin)
@@ -509,8 +501,8 @@ double GObservation::npred_grad_spec(const GModel& model, int ipar,
                                      const GTime& srcTime) const
 {
     // Set integration energy interval in TeV
-    double emin = m_emin.MeV();
-    double emax = m_emax.MeV();
+    double emin = m_ebounds.emin().MeV();
+    double emax = m_ebounds.emax().MeV();
 
     // Throw exception if energy range is not valid
     if (emax <= emin)
@@ -628,14 +620,19 @@ std::ostream& operator<< (std::ostream& os, const GObservation& obs)
     os << "=== GObservation ===" << std::endl;
     os << " Name ......................: " << obs.m_obsname << std::endl;
     os << " Instrument ................: " << obs.m_instrument << std::endl;
-    os << " Time range ................: " << std::fixed << 
-            obs.m_tstart.mjd() << " - " << obs.m_tstop.mjd() << std::endl;
-    os << " Energy range ..............: " << std::fixed << 
-            obs.m_emin.MeV() << " - " << obs.m_emax.MeV() << " MeV" << std::endl;
+    os << " Time range ................: " << std::fixed
+       << obs.m_gti.tstart().mjd() << " - "
+       << obs.m_gti.tstop().mjd() << " days" << std::endl;
+    os << " Energy range ..............: " << std::fixed
+       << obs.m_ebounds.emin().MeV() << " - "
+       << obs.m_ebounds.emax().MeV() << " MeV" << std::endl;
 
     // Add event list to stream
     if (obs.m_events != NULL)
         os << *(obs.m_events) << std::endl;
+
+    // Add energy intervals to stream
+    os << obs.m_ebounds << std::endl;
 
     // Add GTIs to stream
     os << obs.m_gti << std::endl;
