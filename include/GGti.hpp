@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
+#include "GFits.hpp"
 #include "GTime.hpp"
 
 
@@ -51,8 +52,12 @@ public:
 
     // Methods
     void   clear(void);
+    void   add(const GTime& tstart, const GTime& tstop);
     void   append(const GTime& tstart, const GTime& tstop);
-	void   load(const std::string& filename);
+    void   insert(const GTime& tstart, const GTime& tstop);
+	void   load(const std::string& filename,
+                const std::string& extname = "GTI");
+    void   load(GFitsHDU* hdu);
     int    size(void) const { return m_num; }
 	GTime  tstart(void) const { return m_tstart; }
 	GTime  tstop(void) const { return m_tstop; }
@@ -68,8 +73,8 @@ protected:
     void  free_members(void);
     void  set_attributes(void);
     GGti* clone(void) const;
-    void  insert(int inx, const GTime& tstart, const GTime& tstop);
-    void  merge(void);
+    void  insert_gti(int inx, const GTime& tstart, const GTime& tstop);
+    void  merge_gtis(void);
 
     // Protected data area
 	int     m_num;      //!< Number of intervals

@@ -126,7 +126,7 @@ GGti& GGti::operator= (const GGti& gti)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear region of interest
+ * @brief Clear Good Time Intervals
  ***************************************************************************/
 void GGti::clear(void)
 {
@@ -142,19 +142,19 @@ void GGti::clear(void)
 
 
 /***********************************************************************//**
- * @brief Append Good Time Interval
+ * @brief Add Good Time Interval to object
  *
  * @param[in] tstart Start time of interval to be appended.
  * @param[in] tstop Stop time of interval to be appended.
  *
- * This method appends a new GTI to the object. If the specified time
- * interval overlaps with an existing time interval, the existing time
- * interval will be extended. If overlap with more than a single interval
- * exists, the intervals will be merged. Otherwise a new interval will
- * be inserted, respecting the time ordering of the intervals. If the
- * time interval is not valid (tstop <= tstart), nothing is done.
+ * This method adds a new GTI to the object. Adding means that if the
+ * specified time interval overlaps with an existing time interval, the
+ * existing time interval will be extended. If overlap with more than a
+ * single interval exists, the intervals will be merged. Otherwise a new
+ * interval will be inserted, respecting the time ordering of the intervals.
+ * If the time interval is not valid (tstop <= tstart), nothing is done.
  ***************************************************************************/
-void GGti::append(const GTime& tstart, const GTime& tstop)
+void GGti::add(const GTime& tstart, const GTime& tstop)
 {
     // Continue only if time interval is valid
     if (tstop > tstart) {
@@ -167,12 +167,100 @@ void GGti::append(const GTime& tstart, const GTime& tstop)
         }
         
         // Insert GTI
-        insert(inx, tstart, tstop);
+        insert_gti(inx, tstart, tstop);
 
         // Merge any overlapping GTIs
-        merge();
+        merge_gtis();
         
     } // endif: Time interval was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append Good Time Interval to object
+ *
+ * @param[in] tstart Start time of interval to be appended.
+ * @param[in] tstop Stop time of interval to be appended.
+ *
+ * This method append a new GTI at the end of the object. No checking of
+ * time ordering or interval overlapping will be done.
+ * If the time interval is not valid (tstop <= tstart), nothing is done.
+ ***************************************************************************/
+void GGti::append(const GTime& tstart, const GTime& tstop)
+{
+    // Continue only if time interval is valid
+    if (tstop > tstart) {
+
+        // Insert GTI at end of list
+        insert_gti(m_num, tstart, tstop);
+        
+    } // endif: Time interval was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert Good Time Interval into object
+ *
+ * @param[in] tstart Start time of interval to be appended.
+ * @param[in] tstop Stop time of interval to be appended.
+ *
+ * This method inserts a new GTI at the appropriate time ordered position in
+ * the object. Time ordering will be done based on the start time of the GTI.
+ * No check for interval overlap will be done.
+ * If the time interval is not valid (tstop <= tstart), nothing is done.
+ ***************************************************************************/
+void GGti::insert(const GTime& tstart, const GTime& tstop)
+{
+    // Continue only if time interval is valid
+    if (tstop > tstart) {
+
+        // Determine index at which GTI should be inserted
+        int inx = 0;
+        for (int i = 0; i < m_num; ++i) {
+            if (tstart < m_start[i])
+                break;
+        }
+        
+        // Insert GTI
+        insert_gti(inx, tstart, tstop);
+
+    } // endif: Time interval was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load GTIs from file.
+ *
+ * @param[in] filename FITS filename from which GTIs are to be loaded.
+ * @param[in] extname FITS extension name of the GTIs.
+ *
+ * This method loads the Goot Time Intervals from a FITS file.
+ ***************************************************************************/
+void GGti::load(const std::string& filename, const std::string& extname)
+{
+    // Allocate FITS file
+    GFits file;
+
+    // Open FITS file
+    file.open(filename);
+
+    // Get GTI HDU
+    GFitsHDU* hdu = file.hdu(extname);
+
+    // Load GTI
+    load(hdu);
+
+    // Close FITS file
+    file.close();
 
     // Return
     return;
@@ -184,25 +272,15 @@ void GGti::append(const GTime& tstart, const GTime& tstop)
  *
  * @param[in] filename Name of file from which GTIs are to be loaded.
  *
- * @todo Method assumes that times are in MET. Probably this method should
- * not exist but be instrument specific.
+ * @todo Method assumes that times are in MET.
  ***************************************************************************/
-void GGti::load(const std::string& filename)
+void GGti::load(GFitsHDU* hdu)
 {
 	// Free members
 	free_members();
 
 	// Initialise attributes
 	init_members();
-	
-	// Allocate FITS file
-	GFits file;
-	
-	// Open FITS file
-	file.open(filename);
-	
-	// Get GTI HDU
-	GFitsHDU* hdu = file.hdu("GTI");
 	
 	// Extract GTI information from FITS file
 	m_num = hdu->card("NAXIS2")->integer();
@@ -236,10 +314,12 @@ void GGti::load(const std::string& filename)
  ***************************************************************************/
 GTime GGti::tstart(int inx) const
 {
+    #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
     if (inx < 0 || inx >= m_num)
         throw GException::out_of_range(G_TSTART, inx, 0, m_num-1);
-    
+    #endif
+
     // Return
     return (m_start[inx]);
 }
@@ -255,9 +335,11 @@ GTime GGti::tstart(int inx) const
  ***************************************************************************/
 GTime GGti::tstop(int inx) const
 {
+    #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
     if (inx < 0 || inx >= m_num)
         throw GException::out_of_range(G_TSTOP, inx, 0, m_num-1);
+    #endif
     
     // Return
     return (m_stop[inx]);
@@ -376,8 +458,8 @@ GGti* GGti::clone(void) const
  * @brief Insert Good Time Interval
  *
  * @param[in] inx Index at which GTI is to be inserted.
- * @param[in] tstart Start time of interval to be appended.
- * @param[in] tstop Stop time of interval to be appended.
+ * @param[in] tstart Start time of interval to be inserted.
+ * @param[in] tstop Stop time of interval to be inserted.
  *
  * Inserts a GTI at a given position in the GTI array. This method does not
  * assure the time ordering of the GTIs, this has to be done by the client
@@ -387,19 +469,19 @@ GGti* GGti::clone(void) const
  * will be inserted. If the index is out of the valid range, the index
  * will be adjusted to either the first or the last element.
  ***************************************************************************/
-void GGti::insert(int inx, const GTime& tstart, const GTime& tstop)
+void GGti::insert_gti(int inx, const GTime& tstart, const GTime& tstop)
 {
     // Continue only if time interval is valid
     if (tstop > tstart) {
 
-        // If inx is out of range than adjust it
+        // If inx is out of range then adjust it
         if (inx < 0)     inx = 0;
         if (inx > m_num) inx = m_num;
     
         // Allocate new intervals
         int    num   = m_num+1;
-        GTime* start = new GTime[m_num];
-        GTime* stop  = new GTime[m_num];
+        GTime* start = new GTime[num];
+        GTime* stop  = new GTime[num];
         
         // Copy intervals before GTI to be inserted
         for (int i = 0; i < inx; ++i) {
@@ -444,7 +526,7 @@ void GGti::insert(int inx, const GTime& tstart, const GTime& tstop)
  * not actually reduce the memory size but just updates the information on
  * the number of elements in the array.
  ***************************************************************************/
-void GGti::merge(void)
+void GGti::merge_gtis(void)
 {
     // Find overlaps
     int i   = 0;
