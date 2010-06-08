@@ -71,6 +71,8 @@ public:
     void         tstop(const GTime& tstop) { m_tstop=tstop; return; }
     void         emin(const GEnergy& emin) { m_emin=emin; return; }
     void         emax(const GEnergy& emax) { m_emax=emax; return; }
+    void         roi(const GRoi& roi) { m_roi=roi.clone(); return; }
+    void         ebounds(const GEbounds& ebounds) { m_ebounds=ebounds; return; }
     void         gti(const GGti& gti) { m_gti=gti; return; }
     std::string  obsname(void) const { return m_obsname; }
     std::string  instrument(void) const { return m_instrument; }
@@ -78,6 +80,8 @@ public:
     GTime        tstop(void) const { return m_tstop; }
     GEnergy      emin(void) const { return m_emin; }
     GEnergy      emax(void) const { return m_emax; }
+    GRoi*        roi(void) { return m_roi; }
+    GEbounds*    ebounds(void) { return &m_ebounds; }
     GGti*        gti(void) { return &m_gti; }
     GEvents*     events(void) const { return m_events; }
     GResponse*   response(void) const { return m_response; }
