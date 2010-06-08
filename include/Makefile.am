@@ -21,6 +21,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GGti.hpp \
                      GEbounds.hpp \
 		     GPointing.hpp \
+                     GRoi.hpp \
 		     GInstDir.hpp \
                      GResponse.hpp \
                      GModels.hpp \

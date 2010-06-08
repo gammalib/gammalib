@@ -92,6 +92,7 @@
 #include "GEventCube.hpp"
 #include "GEvent.hpp"
 #include "GGti.hpp"
+#include "GRoi.hpp"
 #include "GEbounds.hpp"
 #include "GInstDir.hpp"
 #include "GPointing.hpp"
