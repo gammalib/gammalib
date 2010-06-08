@@ -45,6 +45,10 @@ class GTime {
     friend GTime operator* (const GTime &a, const double &b);
     friend bool  operator== (const GTime &a, const GTime &b);
     friend bool  operator!= (const GTime &a, const GTime &b);
+    friend bool  operator< (const GTime &a, const GTime &b);
+    friend bool  operator<= (const GTime &a, const GTime &b);
+    friend bool  operator> (const GTime &a, const GTime &b);
+    friend bool  operator>= (const GTime &a, const GTime &b);
 
 public:
     // Constructors and destructors
@@ -114,6 +118,25 @@ bool operator!= (const GTime &a, const GTime &b)
 {
     return (a.m_time != b.m_time);
 }
-
+inline
+bool operator< (const GTime &a, const GTime &b)
+{
+    return (a.m_time < b.m_time);
+}
+inline
+bool operator<= (const GTime &a, const GTime &b)
+{
+    return (a.m_time <= b.m_time);
+}
+inline
+bool operator> (const GTime &a, const GTime &b)
+{
+    return (a.m_time > b.m_time);
+}
+inline
+bool operator>= (const GTime &a, const GTime &b)
+{
+    return (a.m_time >= b.m_time);
+}
 
 #endif /* GTIME_HPP */
