@@ -13,6 +13,7 @@ sources = src/GCTAException.cpp \
           src/GCTAEventAtom.cpp \
           src/GCTAResponse.cpp \
           src/GCTAInstDir.cpp \
+          src/GCTARoi.cpp \
           src/GCTAPointing.cpp
 
 # Define headers to be installed
@@ -22,6 +23,7 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAEventAtom.hpp \
                      include/GCTAPointing.hpp \
                      include/GCTAInstDir.hpp \
+                     include/GCTARoi.hpp \
                      include/GCTAResponse.hpp
 
 # Build libtool library
