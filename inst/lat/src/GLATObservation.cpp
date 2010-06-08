@@ -25,6 +25,7 @@
 #include "GLATObservation.hpp"
 #include "GLATEventList.hpp"
 #include "GLATEventCube.hpp"
+#include "GLATRoi.hpp"
 #include "GFits.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -173,10 +174,6 @@ void GLATObservation::load_unbinned(const std::string& ft1name,
     // Load GTIs from FT1 file
     m_gti.load(ft1name);
 
-    // Set attributes
-    m_tstart = m_gti.tstart();
-    m_tstop  = m_gti.tstop();
-
     // Return
     return;
 }
@@ -189,7 +186,7 @@ void GLATObservation::load_unbinned(const std::string& ft1name,
  * @param[in] expmap_name Binned explosure map FITS filename
  * @param[in] ltcube_name Lifetime cube FITS filename
  *
- * @todo So far nothing is dine with the expmap and the ltcube files.
+ * @todo So far nothing is done with the expmap and the ltcube files.
  *       Approriate loading needs to be implemented.
  * @todo Implement proper GTI loading method that provides correct time
  *       conversion
@@ -210,20 +207,15 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
     m_events = new GLATEventCube;
     m_events->load(cntmap_name);
 
-    // Get pointer to energy boundaries
-    GEbounds* ebds = &(((GLATEventCube*)m_events)->m_ebds);
+    // Copy over energy boundaries from events cube
+    m_ebounds = (((GLATEventCube*)m_events)->m_ebds);
 
     // Load GTIs from counts map file
     m_gti.load(cntmap_name);
 
-    // Set attributes
-    m_tstart = m_gti.tstart();
-    m_tstop  = m_gti.tstop();
-    m_emin.MeV(ebds->emin(0));
-    m_emax.MeV(ebds->emax(ebds->elements()-1));
-
     // Set mean time
-    ((GLATEventCube*)m_events)->m_time = 0.5 * (m_tstart + m_tstop);
+    ((GLATEventCube*)m_events)->m_time = 
+                                0.5 * (m_gti.tstart() + m_gti.tstop());
 
     // Return
     return;
@@ -333,10 +325,13 @@ std::ostream& operator<< (std::ostream& os, const GLATObservation& obs)
     os << "=== GLATObservation ===" << std::endl;
     os << " Name ......................: " << obs.m_obsname << std::endl;
     os << " Instrument ................: " << obs.m_instrument << std::endl;
-    os << " Time range ................: " << std::fixed << 
-            obs.m_tstart << " - " << obs.m_tstop << std::endl;
-    os << " Energy range ..............: " << std::fixed << 
-            obs.m_emin << " - " << obs.m_emax << " MeV" << std::endl;
+    os << " Time range ................: " << std::fixed
+       << obs.m_gti.tstart().mjd() << " - "
+       << obs.m_gti.tstop().mjd() << " days" << std::endl;
+    os << " Energy range ..............: " << std::fixed
+       << obs.m_ebounds.emin().MeV() << " - "
+       << obs.m_ebounds.emax().MeV() << " MeV" << std::endl;
+    os << " Region of interest ........: " << *((GLATRoi*)obs.m_roi) << std::endl;
 
     // Add events to stream
     if (obs.m_events != NULL) {

@@ -292,22 +292,18 @@ void test_unbinned_optimizer(void)
 
     // Load unbinned CTA observation
     try {
-        GEnergy emin;
-        GEnergy emax;
-        GTime   tstart;
-        GTime   tstop;
-        GGti    gti;
+        GEnergy  emin;
+        GEnergy  emax;
+        GTime    tstart;
+        GTime    tstop;
         emin.TeV(0.02);
         emax.TeV(100.0);
         tstart.met(0.0);
         tstop.met(10000.0);
         run.load_unbinned(cta_events);
         run.response(cta_irf,cta_caldb);
-        run.emin(emin);
-        run.emax(emax);
-        run.tstart(tstart);
-        run.tstop(tstop);
-        run.gti()->append(tstart, tstop);
+        run.gti()->add(tstart, tstop);
+        run.ebounds()->append(emin, emax);
         obs.append(run);
     }
     catch (std::exception &e) {

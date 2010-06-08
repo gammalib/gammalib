@@ -385,10 +385,12 @@ std::ostream& operator<< (std::ostream& os, const GCTAObservation& obs)
     os << "=== GCTAObservation ===" << std::endl;
     os << " Name ......................: " << obs.m_obsname << std::endl;
     os << " Instrument ................: " << obs.m_instrument << std::endl;
-    os << " Time range ................: " << std::fixed << 
-            obs.m_tstart.mjd() << " - " << obs.m_tstop.mjd() << std::endl;
-    os << " Energy range ..............: " << std::fixed << 
-            obs.m_emin.TeV() << " - " << obs.m_emax.TeV() << " TeV" << std::endl;
+    os << " Time range ................: " << std::fixed
+       << obs.m_gti.tstart().mjd() << " - "
+       << obs.m_gti.tstop().mjd() << " days" << std::endl;
+    os << " Energy range ..............: " << std::fixed
+       << obs.m_ebounds.emin().MeV() << " - "
+       << obs.m_ebounds.emax().MeV() << " MeV" << std::endl;
     os << " Region of interest ........: " << *((GCTARoi*)obs.m_roi) << std::endl;
 
     // Add events to stream
