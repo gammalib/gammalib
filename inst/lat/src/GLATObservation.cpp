@@ -149,8 +149,10 @@ void GLATObservation::response(const std::string& irfname, std::string caldb)
  * @param[in] ft2name FT2 FITS filename.
  * @param[in] ltcube_name Lifetime cube FITS filename
  *
- * TODO: So far nothing is done with the ft2 file and the ltcube file.
- * Loading of the relevant information needs to be implemented.
+ * @todo So far nothing is done with the ft2 file and the ltcube file.
+ *       Loading of the relevant information needs to be implemented.
+ * @todo Implement proper GTI loading method that provides correct time
+ *       conversion
  ***************************************************************************/
 void GLATObservation::load_unbinned(const std::string& ft1name, 
                                     const std::string& ft2name,
@@ -172,8 +174,8 @@ void GLATObservation::load_unbinned(const std::string& ft1name,
     m_gti.load(ft1name);
 
     // Set attributes
-    m_tstart.met(m_gti.tstart());
-    m_tstop.met(m_gti.tstop());
+    m_tstart = m_gti.tstart();
+    m_tstop  = m_gti.tstop();
 
     // Return
     return;
@@ -187,8 +189,10 @@ void GLATObservation::load_unbinned(const std::string& ft1name,
  * @param[in] expmap_name Binned explosure map FITS filename
  * @param[in] ltcube_name Lifetime cube FITS filename
  *
- * TODO: So far nothing is dine with the expmap and the ltcube files.
- * Approriate loading needs to be implemented.
+ * @todo So far nothing is dine with the expmap and the ltcube files.
+ *       Approriate loading needs to be implemented.
+ * @todo Implement proper GTI loading method that provides correct time
+ *       conversion
  ***************************************************************************/
 void GLATObservation::load_binned(const std::string& cntmap_name, 
                                   const std::string& expmap_name, 
@@ -213,8 +217,8 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
     m_gti.load(cntmap_name);
 
     // Set attributes
-    m_tstart.met(m_gti.tstart());
-    m_tstop.met(m_gti.tstop());
+    m_tstart = m_gti.tstart();
+    m_tstop  = m_gti.tstop();
     m_emin.MeV(ebds->emin(0));
     m_emax.MeV(ebds->emax(ebds->elements()-1));
 
