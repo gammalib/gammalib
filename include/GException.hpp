@@ -23,7 +23,7 @@
 #include <string>                             // string
 #include <sstream>                            // ostringstream
 #include <stdexcept>                          // exception
-#include "GGti.hpp"
+#include "GTime.hpp"
 
 
 /***********************************************************************//**
@@ -353,7 +353,7 @@ public:
     };
     class gti_invalid : public GExceptionHandler {
     public:
-        gti_invalid(std::string origin, const GGti* gti,
+        gti_invalid(std::string origin, GTime tstart, GTime tstop,
                     std::string message = "");
     };
     class erange_invalid : public GExceptionHandler {

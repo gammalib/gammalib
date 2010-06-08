@@ -73,16 +73,20 @@ GException::rsp_invalid_type::rsp_invalid_type(std::string origin,
  * @brief Good Time Intervals are not valid.
  *
  * @param[in] origin Method that throws the error.
- * @param[in] gti Pointer to invalid Good Time Intervals.
+ * @param[in] start Good Time Interval start time.
+ * @param[in] start Good Time Interval stop time.
  * @param[in] message Optional error message.
- *
- * @todo Implement GTI dumping.
  ***************************************************************************/
-GException::gti_invalid::gti_invalid(std::string origin, const GGti* gti,
-                                     std::string message)
+GException::gti_invalid::gti_invalid(std::string origin, GTime tstart,
+                                     GTime tstop, std::string message)
 {
+    std::ostringstream s_tstart;
+    std::ostringstream s_tstop;
+    s_tstart  << tstart;
+    s_tstop   << tstop;
     m_origin  = origin;
-    m_message = "Invalid Good Time Intervals specified. "+message;
+    m_message = "Invalid Good Time Interval ("+s_tstart.str()+"-"+
+                s_tstop.str()+") specified. "+message;
 }
 
 
