@@ -22,6 +22,8 @@
 /* __ Includes ___________________________________________________________ */
 #include "GEvents.hpp"
 #include "GResponse.hpp"
+#include "GRoi.hpp"
+#include "GEbounds.hpp"
 #include "GGti.hpp"
 #include "GModels.hpp"
 #include "GTime.hpp"
@@ -177,6 +179,8 @@ protected:
     GEnergy     m_emax;         //!< Maximum energy covered by observation
     GEvents*    m_events;       //!< Pointer to events
     GResponse*  m_response;     //!< Pointer to instrument response functions
+    GRoi*       m_roi;          //!< Pointer to region of interest
+    GEbounds    m_ebounds;      //!< Energy boundaries
     GGti        m_gti;          //!< Good time intervals
 
 private:

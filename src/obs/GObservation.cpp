@@ -136,6 +136,8 @@ GObservation& GObservation::operator= (const GObservation& obs)
 
 /***********************************************************************//**
  * @brief Initialise class members
+ *
+ * @todo Implement clear() methods for GEbounds and GGti
  ***************************************************************************/
 void GObservation::init_members(void)
 {
@@ -148,7 +150,9 @@ void GObservation::init_members(void)
     m_emax.clear();
     m_events   = NULL;
     m_response = NULL;
-    m_gti      = GGti();
+    m_roi      = NULL;
+    //m_ebounds.clear();
+    //m_gti.clear();
 
     // Return
     return;
@@ -169,11 +173,13 @@ void GObservation::copy_members(const GObservation& obs)
     m_tstop      = obs.m_tstop;
     m_emin       = obs.m_emin;
     m_emax       = obs.m_emax;
+    m_ebounds    = obs.m_ebounds;
     m_gti        = obs.m_gti;
 
     // Clone members that exist
     m_events   = (obs.m_events   != NULL) ? obs.m_events->clone()   : NULL;
     m_response = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;
+    m_roi      = (obs.m_roi      != NULL) ? obs.m_roi->clone() : NULL;
 
     // Return
     return;
@@ -188,10 +194,12 @@ void GObservation::free_members(void)
     // Free memory
     if (m_events   != NULL) delete m_events;
     if (m_response != NULL) delete m_response;
+    if (m_roi      != NULL) delete m_roi;
 
     // Signal free pointers
     m_events   = NULL;
     m_response = NULL;
+    m_roi      = NULL;
 
     // Return
     return;
@@ -222,7 +230,8 @@ double GObservation::npred_kern(const GModel& model, const GSkyDir& srcDir,
                                 const GPointing& pnt) const
 {
     // Compute integrated IRF
-    double nirf = m_response->nirf(srcDir, srcEng, srcTime, pnt);
+    double nirf = m_response->nirf(srcDir, srcEng, srcTime, pnt,
+                                   *m_roi, m_ebounds, m_gti);
 
     // Compute source model
     GModel* ptr    = (GModel*)&model; // bypass const-correctness
@@ -412,7 +421,8 @@ double GObservation::npred_grad_kern(const GModel& model, int ipar,
                                      const GPointing& pnt) const
 {
     // Compute integrated IRF
-    double nirf = m_response->nirf(srcDir, srcEng, srcTime, pnt);
+    double nirf = m_response->nirf(srcDir, srcEng, srcTime, pnt,
+                                   *m_roi, m_ebounds, m_gti);
 
     // Get model gradients
     GModel* ptr       = (GModel*)&model; // bypass const-correctness
