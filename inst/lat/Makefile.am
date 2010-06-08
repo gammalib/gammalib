@@ -14,6 +14,7 @@ sources = src/GLATObservation.cpp \
           src/GLATEventBin.cpp \
           src/GLATResponse.cpp \
           src/GLATInstDir.cpp \
+          src/GLATRoi.cpp \
           src/GLATPointing.cpp \
           src/GLATResponseTable.cpp \
           src/GLATAeff.cpp \
@@ -28,6 +29,7 @@ pkginclude_HEADERS = include/GLATObservation.hpp \
                      include/GLATEventBin.hpp \
                      include/GLATPointing.hpp \
                      include/GLATInstDir.hpp \
+                     include/GLATRoi.hpp \
                      include/GLATResponse.hpp \
                      include/GLATResponseTable.hpp
 
