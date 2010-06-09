@@ -270,7 +270,7 @@ double GCTAResponse::tdisp(const GTime& obsTime,
 
 
 /***********************************************************************//**
- * @brief Return integral over PSF
+ * @brief Return result of PSF integration over ROI.
  *
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
@@ -299,7 +299,7 @@ double GCTAResponse::npsf(const GSkyDir& srcDir, const GEnergy& srcEng,
 
 
 /***********************************************************************//**
- * @brief Return integral over energy dispersion
+ * @brief Return result of energy dispersion integral over energy range
  *
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
@@ -322,7 +322,7 @@ double GCTAResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
 
 
 /***********************************************************************//**
- * @brief Return integral over time dispersion
+ * @brief Return result of time dispersion integral over GTIs
  *
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
@@ -381,7 +381,8 @@ void GCTAResponse::load(const std::string& irfname)
 /***********************************************************************//**
  * @brief Return point spread function (in units of sr^-1)
  *
- * @param[in] theta Distance between true-measured photon directions (radians).
+ * @param[in] theta Angular separation between true and measured photon
+ *            directions (radians).
  * @param[in] sigma Width of point spread function (radians).
  *
  * A simple Gaussian function is assumed to describe the CTA point spread
