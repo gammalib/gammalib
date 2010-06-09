@@ -32,6 +32,7 @@
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GNodeArray.hpp"
+#include "GIntegrand.hpp"
 
 
 /***********************************************************************//**
@@ -78,6 +79,9 @@ public:
     bool   hastdisp(void) const { return false; }
 
     // Other Methods
+    double psf(const double& theta, const double& sigma) const;
+    double psf_sigma(const GEnergy& srcEng) const;
+    double npsf(const double& psf, const double& radroi, const double& sigma) const;
 
 private:
     // Private methods
@@ -86,6 +90,31 @@ private:
     void          free_members(void);
     GCTAResponse* clone(void) const;
     void          read_performance_table(const std::string& filename);
+    
+    // Integration
+    double npsf_kern_azsym(const double& rad,
+                           const double& roi, const double& cosroi,
+                           const double& psf, const double& cospsf,
+                           const double& sinpsf) const;
+    class npsf_kern_rad_azsym : public GIntegrand {
+    public:
+        npsf_kern_rad_azsym(const GCTAResponse* parent, double roi, double cosroi,
+                            double psf, double cospsf, double sinpsf, double sigma) :
+                            m_parent(parent), m_roi(roi), m_cosroi(cosroi),
+                            m_psf(psf), m_cospsf(cospsf), m_sinpsf(sinpsf),
+                            m_sigma(sigma) { return; }
+        double eval(double r);
+    protected:
+        const GCTAResponse* m_parent;  //!< Pointer to parent
+        GEnergy             m_srcEng;  //!< Source energy
+        double              m_roi;     //!< ROI radius in radians
+        double              m_cosroi;  //!< Cosine of ROI radius
+        double              m_psf;     //!< PSF-ROI centre distance in radians
+        double              m_cospsf;  //!< Cosine of PSF-ROI centre distance
+        double              m_sinpsf;  //!< Sine of PSF-ROI centre distance
+        double              m_sigma;   //!< Width of PSF in radians
+    };
+
     
     // Private data members
     GNodeArray          m_nodes; //!< log(E) nodes for interpolation

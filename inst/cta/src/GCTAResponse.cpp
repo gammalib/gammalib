@@ -26,7 +26,10 @@
 #include "GCTAResponse.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAInstDir.hpp"
+#include "GCTARoi.hpp"
 #include "GTools.hpp"
+#include "GIntegral.hpp"
+#include "GIntegrand.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ           "GCTAResponse::read_performance_table(std::string&)"
@@ -185,8 +188,8 @@ double GCTAResponse::aeff(const GSkyDir& srcDir, const GEnergy& srcEng,
  * @param[in] obsDir Pointer to observed photon direction.
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Pointer to instrument pointing information.
+ * @param[in] srcTime True photon arrival time (not used).
+ * @param[in] pnt Pointer to instrument pointing information (not used).
  *
  * The Point Spread Function defines the probability density 
  * \f$d^2P/d\theta d\phi\f$
@@ -203,24 +206,18 @@ double GCTAResponse::psf(const GInstDir& obsDir,
                          const GSkyDir& srcDir, const GEnergy& srcEng,
                          const GTime& srcTime, const GPointing& pnt) const
 {
-    // Get log(E)
-    double logE = log10(srcEng.TeV());
+    // Determine energy dependent width of PSF
+    double sigma = psf_sigma(srcEng);
 
-    // Determine Gaussian sigma in radians
-    GNodeArray* nodes = (GNodeArray*)&m_nodes; // circumvent const correctness
-    double sigma  = nodes->interpolate(logE, m_r68) * 0.6624 * deg2rad;
-    double sigma2 = sigma * sigma;
-    
     // Determine angular separation between true and measured photon
     // direction in radians
-    double r = ((GCTAInstDir*)&obsDir)->dist(srcDir);
-    //std::cout << "sigma=" << sigma << " r=" << r << std::endl;
-    
-    // Compute Psf value
-    double psf = exp(-0.5 * r * r / sigma2) / (twopi * sigma2);
-    
-    // Return Psf value
-    return psf;
+    double theta = ((GCTAInstDir*)&obsDir)->dist(srcDir);
+
+    // Get PSF value
+    double value = psf(theta, sigma);
+
+    // Return PSF value
+    return value;
 }
 
 
@@ -277,21 +274,27 @@ double GCTAResponse::tdisp(const GTime& obsTime,
  *
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Pointer to instrument pointing information.
+ * @param[in] srcTime True photon arrival time (not used).
+ * @param[in] pnt Pointer to instrument pointing information (nut used).
  * @param[in] roi Region of interest of data selection.
- *
- * @todo Implement integration over ROI.
  ***************************************************************************/
 double GCTAResponse::npsf(const GSkyDir& srcDir, const GEnergy& srcEng,
                           const GTime& srcTime, const GPointing& pnt,
                           const GRoi& roi) const
 {
-    // Dummy
-    double npsf = 1.0;
+    // Get pointer to CTA ROI (bypass const correctness)
+    GCTARoi* ctaroi = (GCTARoi*)&roi;
     
+    // Extract relevant parameters from arguments
+    double radroi = ctaroi->radius() * deg2rad;
+    double psf    = ctaroi->centre().dist(srcDir);
+    double sigma  = psf_sigma(srcEng);
+
+    // Compute integrated PSF
+    double value = npsf(psf, radroi, sigma);
+
     // Return integral
-    return npsf;
+    return value;
 }
 
 
@@ -366,6 +369,191 @@ void GCTAResponse::load(const std::string& irfname)
 
     // Return
     return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                         CTA specific IRF methods                        =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Return point spread function (in units of sr^-1)
+ *
+ * @param[in] theta Distance between true-measured photon directions (radians).
+ * @param[in] sigma Width of point spread function (radians).
+ *
+ * A simple Gaussian function is assumed to describe the CTA point spread
+ * function.
+ ***************************************************************************/
+double GCTAResponse::psf(const double& theta, const double& sigma) const
+{
+    // Compute Psf value
+    double sigma2 = sigma * sigma;
+    double value  = exp(-0.5 * theta * theta / sigma2) / (twopi * sigma2);
+    
+    // Return PSF value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Return width parameter of point spread function (in radians)
+ *
+ * @param[in] srcEng True energy of photon.
+ *
+ * This method returns the Gaussian sigma of the CTA PSF as function of
+ * incident photon energy.
+ ***************************************************************************/
+double GCTAResponse::psf_sigma(const GEnergy& srcEng) const
+{
+    // Get log(E)
+    double logE = log10(srcEng.TeV());
+
+    // Determine Gaussian sigma in radians
+    GNodeArray* nodes = (GNodeArray*)&m_nodes; // bypass const correctness
+    double sigma  = nodes->interpolate(logE, m_r68) * 0.6624 * deg2rad;
+
+    // Return result
+    return sigma;
+}
+
+
+/***********************************************************************//**
+ * @brief Integrate the PSF over the ROI.
+ *
+ * @param[in] psf Angular separation between PSF-ROI centres (radians).
+ * @param[in] radroi Radius of ROI (radians).
+ * @param[in] sigma PSF width parameter (radians).
+ *
+ * This method integrates the PSF over the circular region of interest.
+ * Integration is done in a polar coordinate system centred on the PSF since
+ * the PSF is assumed to be azimuthally symmetric. The polar integration is
+ * done using the method npsf_kern_rad_azsym() that computes analytically
+ * the arclength that is comprised within the ROI. The radial integration
+ * is done using a standard Romberg integration. Note that the integration
+ * is only performed when the PSF is sufficiently close to the ROI border so
+ * that part of the PSF may be outside the ROI. For all other cases, the
+ * integral is simply 1.
+ ***************************************************************************/
+double GCTAResponse::npsf(const double& psf, const double& radroi,
+                          const double& sigma) const
+{
+    // Declare result
+    double value;
+    
+    // Get maximum PSF radius
+    double rmax = 5.0*sigma;
+    
+    // If PSF is sufficiently enclosed by ROI, skip the numerical integration
+    // and assume that the integral is 1.0
+    if (psf+rmax < radroi)
+        value = 1.0;
+
+    // ... otherwise perform numerical integration
+    else {
+
+        // Pre-computations
+        double cosroi = cos(radroi);
+        double cospsf = cos(psf);
+        double sinpsf = sin(psf);
+
+        // Setup integration function
+        GCTAResponse::npsf_kern_rad_azsym integrand(this, radroi, cosroi,
+                                                    psf, cospsf, sinpsf, sigma);
+        GIntegral integral(&integrand);
+
+        // Integrate PSF
+        value = integral.romb(0.0, rmax);
+
+    } // endelse: numerical integration required
+
+    // Return integral
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Integration kernel for npsf() method
+ *
+ * @param[in] theta Zenith angle with respect to PSF centre.
+ *
+ * This method implements the integration kernel needed for the npsf()
+ * method.
+ ***************************************************************************/
+double GCTAResponse::npsf_kern_rad_azsym::eval(double theta)
+{
+    // Get arclength for given radius in radians
+    double phi = m_parent->npsf_kern_azsym(theta, m_roi, m_cosroi, m_psf, 
+                                           m_cospsf, m_sinpsf);
+
+    // Get PSF value
+    double value = m_parent->psf(theta, m_sigma) * phi * theta;
+
+    // Return
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Integration kernel for npsf integration for azimuthally symmetric PSF
+ *
+ * @param[in] rad Radial distance of PSF centre in radians (<pi).
+ * @param[in] roi ROI radius in radians.
+ * @param[in] cosroi Cosine of ROI radius.
+ * @param[in] psf PSF distance to ROI centre in radians (<pi).
+ * @param[in] cospsf Cosine of PSF distance to ROI centre.
+ * @param[in] sinpsf Sinus of PSF distance to ROI centre.
+ *
+ * This method returns the arclength in radians of a circle of radius 'rad'
+ * with a centre that is offset by 'psf' from the ROI centre, where the ROI
+ * radius is given by 'roi'. To speed-up computations, the cosines and sinus
+ * of 'roi' and 'psf' should be calculated by the client and be passed to
+ * the method.
+ ***************************************************************************/
+double GCTAResponse::npsf_kern_azsym(const double& rad,
+                                     const double& roi, const double& cosroi,
+                                     const double& psf, const double& cospsf,
+                                     const double& sinpsf) const
+{
+    // Declare arclength
+    double arclength;
+    
+    // Handle special case of identical PSF and ROI centres
+    if (psf == 0.0) {
+        if (rad > roi) arclength = 0.0;   // PSF radius outside ROI
+        else           arclength = twopi; // PSF radius inside ROI
+    }
+    
+    // ... PSF and ROI centres are not identical
+    else {
+
+        // Handle special case of zero radial distance to PSF centre
+        if (rad == 0.0) {
+            if (psf > roi) arclength = 0.0;   // PSF centre outside ROI
+            else           arclength = twopi; // PSF centre inside ROI
+        }
+        
+        // Handle general case
+        else {
+            double dist = roi - psf;
+            if (-rad >= dist) 
+                arclength = 0.0;
+            else if (rad <= dist) 
+                arclength = twopi;
+            else {
+                double cosrad = cos(rad);
+                double sinrad = sin(rad);
+                double cosang = (cosroi - cospsf*cosrad) / (sinpsf*sinrad);
+                arclength = acos(cosang);
+            }
+        }
+    
+    } // endelse: PSF and ROI centres were not identical
+    
+    // Return arclength
+    return arclength;
 }
 
 
