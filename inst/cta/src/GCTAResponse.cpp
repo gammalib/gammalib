@@ -199,7 +199,7 @@ double GCTAResponse::aeff(const GSkyDir& srcDir, const GEnergy& srcEng,
  * containment radius \f$r_{68}\f$ in degrees. 
  * The containment radius \f$r\f$ is related to the 2D Gaussian 
  * \f$\sigma\f$ by the relation \f$r=\sigma \sqrt{-2 \ln (1-P)}\f$, where
- * \f$P\f is the containment fraction. For 68% one obtains
+ * \f$P\f$ is the containment fraction. For 68% one obtains
  * \f$\sigma=0.6624 \times r_{68}\f$.
  ***************************************************************************/
 double GCTAResponse::psf(const GInstDir& obsDir,
