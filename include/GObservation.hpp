@@ -128,11 +128,7 @@ protected:
     public:
         npred_kern_spec(const GObservation* parent, const GModel& model) :
                         m_parent(parent), m_model(&model) { return; }
-        double eval(double x) {
-                 GTime time;
-                 time.met(x);
-                 return (m_parent->npred_spec(*m_model,time));
-                 }
+        double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to model
@@ -159,11 +155,7 @@ protected:
         npred_grad_kern_spec(const GObservation* parent, const GModel& model,
                              int ipar) : m_parent(parent), m_model(&model),
                              m_ipar(ipar) { return; }
-        double eval(double x) {
-                 GTime time;
-                 time.met(x);
-                 return (m_parent->npred_grad_spec(*m_model, m_ipar, time));
-                 }
+        double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to model

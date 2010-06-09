@@ -27,8 +27,10 @@
 #include "GIntegral.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_NPRED_KERN "GObservation::npred_kern(GModel&,GSkyDir&,GEnergy&,GTime&,GPointing&)"
 #define G_NPRED_SPEC              "GObservation::npred_spec(GModel&, GTime&)"
 #define G_NPRED_TEMP                  "GObservation::npred_temp(GModel&,int)"
+#define G_NPRED_GRAD_KERN "GObservation::npred_grad_kern(GModel&,int,GSkyDir&,GEnergy&,GTime&,GPointing&)"
 #define G_NPRED_GRAD_SPEC "GObservation::npred_grad_spec(GModel&,int,GTime&)"
 #define G_NPRED_GRAD_TEMP        "GObservation::npred_grad_temp(GModel&,int)"
 
@@ -213,6 +215,9 @@ void GObservation::free_members(void)
  * @param[in] srcTime Photon arrival time.
  * @param[in] pnt Instrument pointing direction.
  *
+ * @exception GException::roi_invalid
+ *            No valid ROI found for observation.
+ *
  * Computes the integrand (or integral kernel) for the Npred computation.
  * This method is called by npred_spat() which performs the spatial
  * integration of the kernel.
@@ -221,6 +226,11 @@ double GObservation::npred_kern(const GModel& model, const GSkyDir& srcDir,
                                 const GEnergy& srcEng, const GTime& srcTime,
                                 const GPointing& pnt) const
 {
+    // Make sure that ROI has been set
+    if (m_roi == NULL)
+        throw GException::roi_invalid(G_NPRED_KERN,
+                          "No ROI has been defined for observation.");
+
     // Compute integrated IRF
     double nirf = m_response->nirf(srcDir, srcEng, srcTime, pnt,
                                    *m_roi, m_ebounds, m_gti);
@@ -306,7 +316,7 @@ double GObservation::npred_spec(const GModel& model, const GTime& srcTime) const
         throw GException::erange_invalid(G_NPRED_SPEC, emin, emax);
 
     // Get telescope pointing for a given time
-    GPointing* pnt;
+    GPointing* pnt; // DUMMY
 
     // Setup integration function
     GObservation::npred_kern_spat integrand(this, model, srcTime, pnt);
@@ -365,6 +375,12 @@ double GObservation::npred_kern_spat::eval(double x)
  *
  * @exception GException::gti_invalid
  *            Good Time Interval is invalid.
+ *
+ *
+ * Note that MET is used for the time integration interval. This, however,
+ * is no specialisation since npred_grad_kern_spec::eval() converts the
+ * argument back in a GTime object by assuming that the argument is in MET,
+ * hence the correct time system will be used at the end by the method.
  ***************************************************************************/
 double GObservation::npred_temp(const GModel& model) const
 {
@@ -397,6 +413,25 @@ double GObservation::npred_temp(const GModel& model) const
 }
 
 
+/***********************************************************************//**
+ * @brief Integration kernel for npred_temp() method
+ *
+ * @param[in] x Function value.
+ *
+ * Note that MET is used for the time conversion. This, however, is no
+ * specialisation since npred_grad_temp() hands MET.
+ ***************************************************************************/
+double GObservation::npred_kern_spec::eval(double x)
+{
+    // Convert argument in MET
+    GTime time;
+    time.met(x);
+
+    // Return value
+    return (m_parent->npred_spec(*m_model,time));
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                    Npred gradient integration methods                   =
@@ -412,6 +447,9 @@ double GObservation::npred_temp(const GModel& model) const
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
  * @param[in] pnt Instrument pointing direction.
+ *
+ * @exception GException::roi_invalid
+ *            No valid ROI found for observation.
  ***************************************************************************/
 double GObservation::npred_grad_kern(const GModel& model, int ipar,
                                      const GSkyDir& srcDir,
@@ -419,6 +457,11 @@ double GObservation::npred_grad_kern(const GModel& model, int ipar,
                                      const GTime& srcTime,
                                      const GPointing& pnt) const
 {
+    // Make sure that ROI has been set
+    if (m_roi == NULL)
+        throw GException::roi_invalid(G_NPRED_GRAD_KERN,
+                          "No ROI has been defined for observation.");
+
     // Compute integrated IRF
     double nirf = m_response->nirf(srcDir, srcEng, srcTime, pnt,
                                    *m_roi, m_ebounds, m_gti);
@@ -509,11 +552,11 @@ double GObservation::npred_grad_spec(const GModel& model, int ipar,
         throw GException::erange_invalid(G_NPRED_GRAD_SPEC, emin, emax);
 
     // Set telescope pointing for given time
-    GPointing *pnt;
+    GPointing *pnt; // DUMMY
 
     // Setup integration function
     GObservation::npred_grad_kern_spat integrand(this, model, ipar, srcTime, pnt);
-    GIntegral                          integral(&integrand);
+    GIntegral integral(&integrand);
 
     // Do Romberg integration
     #if G_LN_ENERGY_INT
@@ -569,6 +612,11 @@ double GObservation::npred_grad_kern_spat::eval(double x)
  *
  * @exception GException::gti_invalid
  *            Good Time Interval invalid.
+ *
+ * Note that MET is used for the time integration interval. This, however,
+ * is no specialisation since npred_grad_kern_spec::eval() converts the
+ * argument back in a GTime object by assuming that the argument is in MET,
+ * hence the correct time system will be used at the end by the method.
  ***************************************************************************/
 double GObservation::npred_grad_temp(const GModel& model, int ipar) const
 {
@@ -583,13 +631,13 @@ double GObservation::npred_grad_temp(const GModel& model, int ipar) const
         double tstop  = m_gti.tstop(i).met();
 
         // Throw exception if time interval is not valid
-        if (tstop <= tstart)
+        if (m_gti.tstop(i) <= m_gti.tstart(i))
             throw GException::gti_invalid(G_NPRED_GRAD_TEMP, m_gti.tstart(i),
                                           m_gti.tstop(i));
 
         // Setup integration function
         GObservation::npred_grad_kern_spec integrand(this, model, ipar);
-        GIntegral                          integral(&integrand);
+        GIntegral integral(&integrand);
 
         // Do Romberg integration
         result += integral.romb(tstart, tstop);
@@ -598,6 +646,25 @@ double GObservation::npred_grad_temp(const GModel& model, int ipar) const
 
     // Return result
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Integration kernel for npred_grad_temp() method
+ *
+ * @param[in] x Function value.
+ *
+ * Note that MET is used for the time conversion. This, however, is no
+ * specialisation since npred_grad_temp() hands MET.
+ ***************************************************************************/
+double GObservation::npred_grad_kern_spec::eval(double x)
+{
+    // Convert argument in MET
+    GTime time;
+    time.met(x);
+
+    // Return value
+    return (m_parent->npred_grad_spec(*m_model, m_ipar, time));
 }
 
 
