@@ -162,17 +162,18 @@ double GIntegral::romb(double a, double b, int k)
     double dss       = 0.0;
 
     // Allocate temporal storage
-    double* s = new double[m_max_iter];
-    double* h = new double[m_max_iter+1];
+    double* s = new double[m_max_iter+2];
+    double* h = new double[m_max_iter+2];
 
     // Initialise step size
-    h[0] = 1.0;
+    h[1] = 1.0;
+    s[0] = 0.0;
 
     // Loop
     for (int iter = 1; iter <= m_max_iter; ++iter) {
 
-        // Integration using Trapezoid rule (j=0 initialises method)
-        s[iter-1] = trapzd(a, b, iter);
+        // Integration using Trapezoid rule
+        s[iter] = trapzd(a, b, iter, s[iter-1]);
 
         // Starting from iteration k on, use polynomial interpolation
         if (iter >= k) {
@@ -185,7 +186,8 @@ double GIntegral::romb(double a, double b, int k)
         }
 
         // Reduce step size
-        h[iter]= 0.25 * h[iter-1];
+        h[iter+1]= 0.25 * h[iter];
+
     }
 
     // Free temporal storage
@@ -261,7 +263,7 @@ void GIntegral::free_members(void)
  * @param[out] y Interpolated Y value.
  * @param[out] dy Error estimate for interpolated values.
  *
- * Given arrays xa[0,..,n-1] and ya[0,..,n-1], and given a value x, this
+ * Given arrays xa[1,..,n] and ya[1,..,n], and given a value x, this
  * method returns a value y, and an error estimate dy. If P(x) is the
  * polynomial of degree n-1, then the returned value y=P(x).
  *
@@ -271,15 +273,15 @@ void GIntegral::polint(double* xa, double* ya, int n, double x, double *y,
                        double *dy)
 {
     // Allocate temporary memory
-    double* c = new double[n];
-    double* d = new double[n];
+    double* c = new double[n+1];
+    double* d = new double[n+1];
 
     // Compute initial distance to first node
-    double dif = fabs(x-xa[0]);
+    double dif = fabs(x-xa[1]);
 
     // Find index ns of the closest table entry
-    int ns = 0;
-    for (int i = 0; i < n; ++i) {
+    int ns = 1;
+    for (int i = 1; i <= n; ++i) {
         double dift = fabs(x-xa[i]);
         if (dift < dif) {
             ns  = i;
@@ -296,7 +298,7 @@ void GIntegral::polint(double* xa, double* ya, int n, double x, double *y,
     for (int m = 1; m < n; ++m) {
 
         // Update current c's and d's
-        for (int i = 0; i < n-m; ++i) {
+        for (int i = 1; i <= n-m; ++i) {
             double ho  = xa[i]   - x;
             double hp  = xa[i+m] - x;
             double w   = c[i+1] - d[i];
@@ -312,7 +314,7 @@ void GIntegral::polint(double* xa, double* ya, int n, double x, double *y,
         }
 
         // Compute y correction
-        *dy = (2*(ns+1) < (n-m)) ? c[ns+1] : d[ns--];
+        *dy = (2*ns < (n-m)) ? c[ns+1] : d[ns--];
 
         // Update y
         *y += *dy;
@@ -334,20 +336,20 @@ void GIntegral::polint(double* xa, double* ya, int n, double x, double *y,
  * @param[in] a Left integration boundary.
  * @param[in] b Right integration boundary.
  * @param[in] n Number of steps.
+ * @param[in] result Result from a previous trapezoidal integration step.
  *
- * Note that this method keeps track about the last result using a static
- * variable. Initialisation is done by setting n=1.
+ * The original Numerical Recipes function had result declared as a static
+ * variable, yet this led to some untrackable integration problems. For this
+ * reason, previous results are now passed using an argument.
+ * Result initialisation is done if n=1.
  ***************************************************************************/
-double GIntegral::trapzd(double a, double b, int n)
+double GIntegral::trapzd(double a, double b, int n, double result)
 {
-    // Declare result as static
-    static double result;
-
     // Case A: Only a single step is requested
     if (n == 1)
         result = 0.5*(b-a)*(m_integrand->eval(a) + m_integrand->eval(b));
 
-    // Case B: Mone than a single step is requested
+    // Case B: More than a single step is requested
     else {
         //
         int it = 1;

@@ -59,7 +59,7 @@ protected:
     void   copy_members(const GIntegral& integral);
     void   free_members(void);
     void   polint(double* xa, double* ya, int n, double x, double *y, double *dy);
-    double trapzd(double a, double b, int n);
+    double trapzd(double a, double b, int n, double result);
 
     // Protected data area
     GIntegrand* m_integrand;    //!< Pointer to integrand
