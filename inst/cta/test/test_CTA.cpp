@@ -51,7 +51,7 @@ GModels crab_plaw(void)
         dir.radec_deg(117.0, -33.0);  // Adapt to source position in file
         point_source = GModelSpatialPtsrc(dir);
         power_law    = GModelSpectralPlaw(1.0e-7, -2.1);
-        power_law.par(0)->min(1.0e-9);
+        power_law.par(0)->min(1.0e-12);
         crab         = GModel(point_source, power_law);
         crab.name("Crab");
         models.append(crab);
@@ -70,30 +70,10 @@ GModels crab_plaw(void)
 
 
 /***********************************************************************//**
- * @brief Test CTA response handling.
+ * @brief Test CTA Aeff computation.
  ***************************************************************************/
-void test_response(void)
+void test_response_aeff(void)
 {
-    // Dump header
-    std::cout << "Test GCTAResponse: ";
-
-    // Test CTA response loading
-    try {
-        // Load response
-        GCTAResponse rsp;
-        rsp.caldb(cta_caldb);
-        rsp.load(cta_irf);
-        //std::cout << rsp << std::endl;
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to load CTA response." << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-
-    // Test CTA Aeff response
     try {
         // Load response
         GCTAResponse rsp;
@@ -130,6 +110,16 @@ void test_response(void)
     }
     std::cout << ".";
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test CTA psf computation.
+ ***************************************************************************/
+void test_response_psf(void)
+{
     // Test CTA Psf response
     try {
         // Load response
@@ -172,6 +162,135 @@ void test_response(void)
         throw;
     }
     std::cout << ".";
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test CTA npsf computation.
+ ***************************************************************************/
+void test_response_npsf(void)
+{
+    // Setup CTA response
+    GCTAResponse rsp;
+    rsp.caldb(cta_caldb);
+    rsp.load(cta_irf);
+
+    // Setup npsf computation
+    GSkyDir      srcDir;
+    GEnergy      srcEng;
+    GTime        srcTime;
+    GCTAPointing pnt;
+    GCTARoi      roi;
+    GCTAInstDir  instDir;
+    instDir.radec_deg(0.0, 0.0);
+    roi.centre(instDir);
+    roi.radius(2.0);
+    srcEng.TeV(0.1);
+    
+    // Try block to catch any problems in the computation
+    try {
+    
+        // Test PSF centred on ROI
+        srcDir.radec_deg(0.0, 0.0);
+        double npsf = rsp.npsf(srcDir, srcEng, srcTime, pnt, roi);
+        double ref  = 1.0;
+        if (fabs(npsf - ref) > 1.0e-3) {
+            std::cout << std::endl
+                      << "TEST ERROR: Uncertainty in PSF(0,0) integration >0.1%"
+                      << " (difference=" << fabs(npsf - 1.0) << ")"
+                      << std::endl;
+            throw;
+        }
+        std::cout << ".";
+        
+        // Test PSF offset but inside ROI
+        srcDir.radec_deg(1.0, 1.0);
+        npsf = rsp.npsf(srcDir, srcEng, srcTime, pnt, roi);
+        ref  = 1.0;
+        if (fabs(npsf - ref) > 1.0e-3) {
+            std::cout << std::endl
+                      << "TEST ERROR: Uncertainty in PS(1,1) integration >0.1%"
+                      << " (difference=" << fabs(npsf - ref) << ")"
+                      << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Test PSF outside and overlapping ROI
+        srcDir.radec_deg(0.0, 2.1);
+        npsf = rsp.npsf(srcDir, srcEng, srcTime, pnt, roi);
+        ref  = 0.0458168;
+        if (fabs(npsf - ref) > 1.0e-3) {
+            std::cout << std::endl
+                      << "TEST ERROR: Uncertainty in PS(0,2.1) integration >0.1%"
+                      << " (difference=" << fabs(npsf - ref) << ")"
+                      << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Test PSF outside ROI
+        srcDir.radec_deg(2.0, 2.0);
+        npsf = rsp.npsf(srcDir, srcEng, srcTime, pnt, roi);
+        ref  = 0.0;
+        if (fabs(npsf - ref) > 1.0e-3) {
+            std::cout << std::endl
+                      << "TEST ERROR: Uncertainty in PS(2,2) integration >0.1%"
+                      << " (difference=" << fabs(npsf - ref) << ")"
+                      << std::endl;
+            throw;
+        }
+        std::cout << ".";
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to compute GCTAResponse::npsf."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test CTA response handling.
+ ***************************************************************************/
+void test_response(void)
+{
+    // Dump header
+    std::cout << "Test GCTAResponse: ";
+
+    // Test CTA response loading
+    try {
+        // Load response
+        GCTAResponse rsp;
+        rsp.caldb(cta_caldb);
+        rsp.load(cta_irf);
+        //std::cout << rsp << std::endl;
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to load CTA response." << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test CTA Aeff response
+    test_response_aeff();
+
+    // Test CTA Psf response
+    test_response_psf();
+    
+    // Test GCTAResponse::npsf
+    test_response_npsf();
 
     // Dump final ok
     std::cout << " ok." << std::endl;
@@ -292,16 +411,31 @@ void test_unbinned_optimizer(void)
 
     // Load unbinned CTA observation
     try {
-        GEnergy  emin;
-        GEnergy  emax;
-        GTime    tstart;
-        GTime    tstop;
+        // Setup ROI covered by data
+        GCTAInstDir instDir;
+        GCTARoi     roi;
+//        instDir.radec_deg(117.0, -33.0);  // Adapt to file
+        instDir.radec_deg(117.5, -33.5);  // Adapt to file
+        roi.centre(instDir);
+        roi.radius(20.0);
+        
+        // Setup energy range covered by data
+        GEnergy emin;
+        GEnergy emax;
         emin.TeV(0.02);
         emax.TeV(100.0);
+        
+        // Setup time range covered by data
+        GTime tstart;
+        GTime tstop;
         tstart.met(0.0);
         tstop.met(10000.0);
+        
+        // Load data and response and set ROI, energy range and time range
+        // for analysis
         run.load_unbinned(cta_events);
         run.response(cta_irf,cta_caldb);
+        run.roi(roi);
         run.gti()->add(tstart, tstop);
         run.ebounds()->append(emin, emax);
         obs.append(run);
@@ -318,7 +452,7 @@ void test_unbinned_optimizer(void)
     GModels models = crab_plaw();
     obs.models(models);
 
-    // Setup LM optimizer
+    // Perform LM optimization
     GOptimizerLM opt;
     try {
         opt.max_iter(1000);
@@ -326,7 +460,7 @@ void test_unbinned_optimizer(void)
     }
     catch (std::exception &e) {
         std::cout << std::endl 
-                  << "TEST ERROR: Unable setup optimizer."
+                  << "TEST ERROR: Unable to perform LM optimization."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
