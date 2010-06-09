@@ -17,6 +17,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GException.hpp"
 #include "GTools.hpp"
 
@@ -67,6 +70,20 @@ GException::rsp_invalid_type::rsp_invalid_type(std::string origin,
     m_origin  = origin;
     m_message = "Invalid response type '"+type+"' specified.";
 }
+
+
+/***********************************************************************//**
+ * @brief Region of interest is not valid.
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::roi_invalid::roi_invalid(std::string origin, std::string message)
+{
+    m_origin  = origin;
+    m_message = "Invalid Region of interest. "+message;
+}
+
 
 
 /***********************************************************************//**

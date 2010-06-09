@@ -351,6 +351,10 @@ public:
     public:
         rsp_invalid_type(std::string origin, std::string type);
     };
+    class roi_invalid : public GExceptionHandler {
+    public:
+        roi_invalid(std::string origin, std::string message = "");
+    };
     class gti_invalid : public GExceptionHandler {
     public:
         gti_invalid(std::string origin, GTime tstart, GTime tstop,
