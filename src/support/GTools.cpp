@@ -17,6 +17,7 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include <sstream>
 #include <cmath>
 #include <algorithm>
@@ -44,19 +45,26 @@ std::string strip_whitespace(const std::string& arg)
  ***************************************************************************/
 std::string strip_chars(const std::string& arg, const std::string& chars)
 {
-    // Return empty string if argument is empty
-    if (arg.empty())
-        return arg;
-
-    // Get start and stop
-    std::string::size_type start = arg.find_first_not_of(chars);
-    std::string::size_type stop  = arg.find_last_not_of(chars);
-
-    // If there is nothing else than the characters to be stripped in string
-    // then return an empty string. Otherwise strip off characters.
+    // Initialise empty result string
     std::string result;
-    if (start <= stop)
-        result = arg.substr(start, stop-start+1);
+    
+    // Continue only if argument is not empty
+    if (!arg.empty()) {
+
+        // Get start and stop
+        std::string::size_type start = arg.find_first_not_of(chars);
+        std::string::size_type stop  = arg.find_last_not_of(chars);
+
+        // Continue only is start and stop are valid
+        if (start != std::string::npos && stop != std::string::npos) {
+
+            // Continue only if stop is larger then or equal to  start
+            if (start <= stop)
+                result = arg.substr(start, stop-start+1);
+
+        } // endif: start and stop were valid
+
+    } // endif: argument was not empty
 
     // Return result
     return result;
