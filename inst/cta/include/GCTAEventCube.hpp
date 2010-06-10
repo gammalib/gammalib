@@ -63,8 +63,10 @@ public:
 	void          load(const std::string& filename);
     GCTAEventBin* pointer(int index);
     int           number(void) const;
+    int           nx(void) const { return m_map.nx(); }
+    int           ny(void) const { return m_map.ny(); }
+    int           npix(void) const { return m_map.npix(); }
     int           ebins(void) const { return m_map.nmaps(); }
-    int           pixels(void) const { return m_map.npix(); }
     
 protected:
     // Protected methods
@@ -75,18 +77,26 @@ protected:
     void           load_cntmap(GFitsHDU* hdu);
     void           load_ebds(GFitsHDU* hdu);
     void           load_gti(GFitsHDU* hdu);
+    void           set_directions(void);
+    void           set_energies(void);
+    void           set_time(void);
 
-    // Protected data area
-    GCTAEventBin m_bin;         //!< Actual event bin
+    // Protected fundamental data
     GSkymap      m_map;         //!< Counts map stored as sky map
-    double*      m_counts;      //!< Pointer to skymap pixels
-    GCTAInstDir* m_dirs;        //!< Array of events directions
-    GEnergy*     m_energies;    //!< Array of log mean energies
-    GTime        m_time;        //!< Event cube mean time
-    GCTAPointing m_pnt;         //!< CTA pointing
-    GCTAResponse m_rsp;         //!< CTA instrument response function
     GEbounds     m_ebds;        //!< Energy boundaries
     GGti         m_gti;         //!< Good Time Intervals
+
+    // Protected derived data
+    GCTAEventBin m_bin;         //!< Actual event bin
+    double*      m_counts;      //!< Pointer to skymap pixels
+    GCTAInstDir* m_dirs;        //!< Array of event directions
+    double*      m_omega;       //!< Array of solid angles (sr)
+    GEnergy*     m_energies;    //!< Array of log mean energies
+    GEnergy*     m_ewidth;      //!< Array of energy bin widths
+    GTime        m_time;        //!< Event cube mean time
+    double       m_ontime;      //!< Event cube ontime (sec)
+    GCTAPointing m_pnt;         //!< CTA pointing
+    GCTAResponse m_rsp;         //!< CTA instrument response function
 };
 
 #endif /* GCTAEVENTCUBE_HPP */
