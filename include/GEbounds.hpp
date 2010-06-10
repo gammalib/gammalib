@@ -59,6 +59,7 @@ public:
                  const std::string& extname = "EBOUNDS");
     void    read(GFitsHDU* hdu);
     void    write(GFits* file, const std::string& extname = "EBOUNDS");
+    int     index(const GEnergy& eng) const;
     int     size(void) const { return m_num; }
     GEnergy emin(void) const { return m_emin; }
     GEnergy emax(void) const { return m_emax; }
