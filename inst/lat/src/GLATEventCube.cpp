@@ -427,7 +427,7 @@ void GLATEventCube::load_ebds(GFitsHDU* hdu)
             continue;
 
         // Load energy boundaries
-        m_ebds.load(hdu);
+        m_ebds.read(hdu);
 
         // Fall through if there are no energy boundaries
         if (m_ebds.size() < 1)

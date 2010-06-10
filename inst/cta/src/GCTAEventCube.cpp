@@ -418,7 +418,7 @@ void GCTAEventCube::load_ebds(GFitsHDU* hdu)
     if (hdu != NULL) {
 
         // Load energy boundaries
-        m_ebds.load(hdu);
+        m_ebds.read(hdu);
 
         // Set log mean energies and energy widths
         set_energies();
