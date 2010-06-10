@@ -21,7 +21,9 @@
 #include <config.h>
 #endif
 #include <iostream>
+#include <cmath>
 #include "GException.hpp"
+#include "GCTAException.hpp"
 #include "GCTAEventBin.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -131,19 +133,21 @@ GCTAEventBin& GCTAEventBin::operator= (const GCTAEventBin& bin)
  * @param[in] models Model descriptor.
  * @param[out] gradient Pointer to gradient vector (NULL=not computed).
  *
+ * @exception GCTAException::no_response
+ *            Response function has not been set.
  * @exception GException::gradient_par_mismatch
  *            Dimension of gradient vector mismatches number of parameters.
  *
  * Implements generic model and gradient evaluation for the CTA instrument.
  *
- * @todo Requires multiplication of model with solid angle, duration, and
- *       energy binsize. Current method not correct.
- * @todo Requires implementation of all model types (not only factorized
- *       point sources which are currently the only type that is
- *       supported)
+ * Implements generic model and gradient evaluation for the CTA instrument.
  ***************************************************************************/
 double GCTAEventBin::model(GModels& models, GVector* gradient) const
 {
+    // Make sure that response pointer exists
+    if (rsp() == NULL)
+        throw GCTAException::no_response(G_MODEL);
+
     // Verify that gradients vector has the same dimension than the
     // model has parameters
     #if defined(G_RANGE_CHECK)
@@ -157,20 +161,30 @@ double GCTAEventBin::model(GModels& models, GVector* gradient) const
     
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
-    
-        // Check if model is a CTA model and if it should be used for this
-        // event
-        // TO BE IMPLEMENTED
-        
-        // Add model
-        model += models(i)->eval_gradients(*dir(), *energy(), *time(), *rsp(), *pnt());
-        
-    }
 
-    // Set gradient vector
+        // Check if model applies to CTA
+        if (models(i)->isvalid("CTA")) {
+
+            // Compute model value
+            double value = models(i)->eval_gradients(*dir(), *energy(),
+                                                     *time(), *rsp(), *pnt());
+
+            // Multiply by bin size
+            value *= *omega() * ewidth()->MeV() * *ontime();
+        
+            // Add to model
+            model += value;
+
+        } // endif: model was applicable
+
+    } // endfor: looped over models
+
+    // Optionally set gradient vector
     if (gradient != NULL) {
-        for (int i = 0; i < gradient->size(); ++i)
-            (*gradient)(i) = models.par(i)->gradient();
+        for (int i = 0; i < gradient->size(); ++i) {
+            double grad    = models.par(i)->gradient();
+            (*gradient)(i) = (std::isinf(grad)) ? 0.0 : grad;
+        }
     }
 
     // Return
@@ -190,9 +204,12 @@ double GCTAEventBin::model(GModels& models, GVector* gradient) const
 void GCTAEventBin::init_members(void)
 {
     // Initialise CTA specific attributes
-    m_dir = NULL;
-    m_pnt = NULL;
-    m_rsp = NULL;
+    m_dir    = NULL;
+    m_pnt    = NULL;
+    m_rsp    = NULL;
+    m_omega  = NULL;
+    m_ewidth = NULL;
+    m_ontime = NULL;
 
     // Return
     return;
@@ -207,9 +224,12 @@ void GCTAEventBin::init_members(void)
 void GCTAEventBin::copy_members(const GCTAEventBin& bin)
 {
     // Copy CTA specific attributes
-    m_dir = bin.m_dir;
-    m_pnt = bin.m_pnt;
-    m_rsp = bin.m_rsp;
+    m_dir    = bin.m_dir;
+    m_pnt    = bin.m_pnt;
+    m_rsp    = bin.m_rsp;
+    m_omega  = bin.m_omega;
+    m_ewidth = bin.m_ewidth;
+    m_ontime = bin.m_ontime;
 
     // Return
     return;
