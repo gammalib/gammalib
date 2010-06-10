@@ -69,4 +69,5 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GOptimizer.hpp \
                      GOptimizerLM.hpp \
                      GOptimizerPars.hpp \
-                     GOptimizerFunction.hpp
+                     GOptimizerFunction.hpp \
+                     GTools.hpp
