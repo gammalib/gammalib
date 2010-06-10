@@ -635,7 +635,11 @@ void GPars::parse(void)
         // Get line without any leading and trailing whitespace
         std::string line = strip_whitespace(m_parfile[i]);
 
-        // If line is empty of if line starts with # then skip the line
+        // If line contains a single linefeed then skip the line
+        if (line.length() == 1 && line[0] == '\n')
+            continue;
+
+        // If line is empty or if line starts with # then skip the line
         if (line.length() == 0 || line[0] == '#')
             continue;
 
