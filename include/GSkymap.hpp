@@ -76,7 +76,7 @@ public:
     void      load(const std::string& filename);
     void      save(const std::string& filename, int clobber = 0);
     void      read(const GFitsHDU* hdu);
-    void      write(GFitsHDU* hdu);
+    void      write(GFits* file);
     int       npix(void) const;
     int       nx(void) const;
     int       ny(void) const;

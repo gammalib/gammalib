@@ -533,13 +533,31 @@ void GSkymap::read(const GFitsHDU* hdu)
 
 
 /***********************************************************************//**
- * @brief Write skymap into FITS HDU
+ * @brief Write skymap into FITS file
  *
- * @param[in] hdu FITS HDU into which skymap should be written.
+ * @param[in] file FITS file into which skymap should be written.
  ***************************************************************************/
-void GSkymap::write(GFitsHDU* hdu)
+void GSkymap::write(GFits* file)
 {
-    // TODO: Skymap writing
+    // Continue only if we have data to save
+    if (m_wcs != NULL) {
+
+        // Initialise HDU pointer
+        GFitsHDU* hdu = NULL;
+
+        // Case A: Skymap is Healpix
+        if (m_wcs->type() == "HPX")
+            hdu = create_healpix_hdu();
+
+        // Case B: Skymap is not Healpix
+        else
+            hdu = create_wcs_hdu();
+
+        // Append HDU to FITS file
+        if (hdu != NULL)
+            file->append_hdu(*hdu);
+
+    } // endif: we had data to save
 
     // Return
     return;
