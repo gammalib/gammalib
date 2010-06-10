@@ -64,6 +64,7 @@ public:
     void   append(const double& node);
     double interpolate(const double& value, const std::vector<double>& vector);
     void   set_value(const double& value);
+    int    size(void) { return m_node.size(); }
     int    inx_left(void) { return m_inx_left; }
     int    inx_right(void) { return m_inx_right; }
     double wgt_left(void) { return m_wgt_left; }
