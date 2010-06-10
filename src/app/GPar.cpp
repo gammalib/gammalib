@@ -531,6 +531,11 @@ void GPar::query(void)
             m_value  = value;
             m_update = true;
         }
+        
+        // Don't query parameter again
+        if (m_mode == "q")  m_mode = "h";
+        if (m_mode == "ql") m_mode = "hl";
+        if (m_mode == "lq") m_mode = "lh";
 
     } // endif: parameter had query mode
 
