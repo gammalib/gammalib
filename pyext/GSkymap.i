@@ -49,13 +49,15 @@ public:
     GSkyDir   xy2dir(const GSkyPixel& pix);
     GSkyPixel dir2xy(GSkyDir dir) const;
     void      load(const std::string& filename);
-    void      save(const std::string& filename, int clobber = 0);
+    void      save(const std::string& filename, bool clobber = false);
     void      read(const GFitsHDU* hdu);
-    void      write(GFitsHDU* hdu);
+    void      write(GFits* file);
     int       npix(void) const;
     int       nx(void) const;
     int       ny(void) const;
     int       nmaps(void) const;
+    GWcs*     wcs(void) { return m_wcs; }
+    double*   pixels(void) { return m_pixels; }
 };
 
 
