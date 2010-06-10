@@ -54,8 +54,7 @@ GCTAException::file_open_error::file_open_error(std::string origin,
  * @param[in] origin Name of method that has thrown the exception.
  * @param[in] message Optional error message.
  ***************************************************************************/
-GCTAException::response_not_set::response_not_set(std::string origin,
-                                                  std::string message)
+GCTAException::no_response::no_response(std::string origin, std::string message)
 {
     m_origin  = origin;
     m_message = "Attempt to model CTA response, but no response function"
