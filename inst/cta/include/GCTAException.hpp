@@ -60,6 +60,18 @@ public:
     public:
         response_not_set(std::string origin,  std::string message = "");
     };
+    class no_sky : public GCTAExceptionHandler {
+    public:
+        no_sky(std::string origin,  std::string message = "");
+    };
+    class no_ebds : public GCTAExceptionHandler {
+    public:
+        no_ebds(std::string origin,  std::string message = "");
+    };
+    class no_gti : public GCTAExceptionHandler {
+    public:
+        no_gti(std::string origin,  std::string message = "");
+    };
 };
 
 #endif /* GCTAEXCEPTION_HPP */

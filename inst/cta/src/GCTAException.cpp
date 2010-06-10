@@ -65,3 +65,43 @@ GCTAException::response_not_set::response_not_set(std::string origin,
 }
 
 
+/***********************************************************************//**
+ * @brief No sky pixels found.
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCTAException::no_sky::no_sky(std::string origin, std::string message)
+{
+    m_origin  = origin;
+    m_message = "No sky pixels have been found. "+message;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief No energy boundary information found.
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCTAException::no_ebds::no_ebds(std::string origin, std::string message)
+{
+    m_origin  = origin;
+    m_message = "No energy boundaries have been found. "+message;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief No Good Time Intervals found.
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCTAException::no_gti::no_gti(std::string origin, std::string message)
+{
+    m_origin  = origin;
+    m_message = "No Good Time Intervals (GTIs) have been found. "+message;
+    return;
+}
