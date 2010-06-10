@@ -43,6 +43,7 @@ class GEnergy {
     friend GEnergy operator- (const GEnergy &a, const GEnergy &b);
     friend GEnergy operator* (const double &a, const GEnergy &b);
     friend GEnergy operator* (const GEnergy &a, const double &b);
+    friend GEnergy operator/ (const GEnergy &a, const double &b);
     friend bool    operator== (const GEnergy &a, const GEnergy &b);
     friend bool    operator!= (const GEnergy &a, const GEnergy &b);
     friend bool    operator< (const GEnergy &a, const GEnergy &b);
@@ -58,6 +59,8 @@ public:
  
     // Operators
     GEnergy& operator= (const GEnergy& eng);
+    GEnergy& operator+= (const GEnergy& eng);
+    GEnergy& operator-= (const GEnergy& eng);
 
     // Methods
     void   clear(void) { m_energy = 0.0; }
@@ -84,6 +87,18 @@ protected:
  *                               Inline friends                            *
  ***************************************************************************/
 inline
+GEnergy& GEnergy::operator+= (const GEnergy& eng)
+{
+    m_energy += eng.m_energy;
+    return *this;
+}
+inline
+GEnergy& GEnergy::operator-= (const GEnergy& eng)
+{
+    m_energy += eng.m_energy;
+    return *this;
+}
+inline
 GEnergy operator+ (const GEnergy& a, const GEnergy& b)
 {
     GEnergy result;
@@ -109,6 +124,13 @@ GEnergy operator* (const GEnergy& a, const double& b)
 {
     GEnergy result;
     result.m_energy = b * a.m_energy;
+    return result;
+}
+inline
+GEnergy operator/ (const GEnergy& a, const double& b)
+{
+    GEnergy result;
+    result.m_energy = a.m_energy / b;
     return result;
 }
 inline
