@@ -455,9 +455,9 @@ void GSkymap::load(const std::string& filename)
  * @brief Save skymap into FITS file.
  *
  * @param[in] filename FITS file into which the skymap will be saved.
- * @param[in] clobber Overwrite existing file (0=false, 1=true).
+ * @param[in] clobber Overwrite existing file.
  ***************************************************************************/
-void GSkymap::save(const std::string& filename, int clobber)
+void GSkymap::save(const std::string& filename, bool clobber)
 {
     // Continue only if we have data to save
     if (m_wcs != NULL) {

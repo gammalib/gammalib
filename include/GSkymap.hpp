@@ -74,7 +74,7 @@ public:
 
     // Methods
     void      load(const std::string& filename);
-    void      save(const std::string& filename, int clobber = 0);
+    void      save(const std::string& filename, bool clobber = false);
     void      read(const GFitsHDU* hdu);
     void      write(GFits* file);
     int       npix(void) const;
