@@ -24,6 +24,10 @@
 #include <math.h>
 #include "GException.hpp"
 #include "GEbounds.hpp"
+#include "GFits.hpp"
+#include "GFitsHDU.hpp"
+#include "GFitsBinTable.hpp"
+#include "GFitsTableDblCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_EMIN                                          "GEbounds::emin(int)"
@@ -202,6 +206,66 @@ void GEbounds::insert(const GEnergy& emin, const GEnergy& emax)
 
 
 /***********************************************************************//**
+ * @brief Set linearly spaced energy bins
+ *
+ * @param[in] emin Minimum energy of boundaries.
+ * @param[in] emax Maximum energy of boundaries.
+ * @param[in] num Number of energy bins.
+ ***************************************************************************/
+void GEbounds::setlin(const GEnergy& emin, const GEnergy& emax, const int& num)
+{
+    // Initialise members
+    clear();
+    
+    // Compute bin width
+    GEnergy ebin = (emax - emin)/double(num); 
+
+    // Append boundaries
+    GEnergy min = emin;
+    GEnergy max = emin + ebin;
+    for (int i = 0; i < num; ++i) {
+        append(min, max);
+        min += ebin;
+        max += ebin;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set logarithmically spaced energy bins
+ *
+ * @param[in] emin Minimum energy of boundaries.
+ * @param[in] emax Maximum energy of boundaries.
+ * @param[in] num Number of energy bins.
+ ***************************************************************************/
+void GEbounds::setlog(const GEnergy& emin, const GEnergy& emax, const int& num)
+{
+    // Initialise members
+    clear();
+    
+    // Compute bin width
+    double elogmin = log10(emin.MeV());
+    double elogmax = log10(emax.MeV());
+    double elogbin = (elogmax - elogmin)/double(num);
+
+    // Append boundaries
+    GEnergy min;
+    GEnergy max;
+    for (int i = 0; i < num; ++i) {
+        min.MeV(pow(10.0, double(i)*elogbin   + elogmin));
+        max.MeV(pow(10.0, double(i+1)*elogbin + elogmin));
+        append(min, max);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load energy boundaries from file.
  *
  * @param[in] filename FITS filename from which GEbounds is to be loaded.
@@ -220,8 +284,8 @@ void GEbounds::load(const std::string& filename, const std::string& extname)
     // Get energy boundary HDU
     GFitsHDU* hdu = file.hdu(extname);
 
-    // Load energy boundaries
-    load(hdu);
+    // Read energy boundaries from HDU
+    read(hdu);
 
     // Close FITS file
     file.close();
@@ -232,17 +296,42 @@ void GEbounds::load(const std::string& filename, const std::string& extname)
 
 
 /***********************************************************************//**
- * @brief Load energy boundaries from file.
+ * @brief Save energy boundaries to FITS file.
+ *
+ * @param[in] filename Name of file into which energy boundaries are to be saved.
+ * @param[in] clobber Overwrite any existing file.
+ * @param[in] extname Energy boundary extension name (default is "EBOUNDS")
+ ***************************************************************************/
+void GEbounds::save(const std::string& filename, bool clobber,
+                    const std::string& extname)
+{
+    // Allocate FITS file
+    GFits file;
+
+    // Write GTI to FITS file
+    write(&file, extname);
+
+    // Save to file
+    file.saveto(filename, clobber);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read energy boundaries from HDU.
  *
  * @param[in] hdu Pointer to FITS HDU from which GEbounds are loaded.
  *
- * This method loads the energy boundary definitions from a FITS HDU.
+ * This method loads the energy boundary definitions from a FITS HDU. It
+ * assumes that the energy is stored in units of keV.
  *
  * @todo Needs to interpret energy units. We could also add an optional
  *       string parameter that allows external specification about how
  *       the energies should be interpreted.
  ***************************************************************************/
-void GEbounds::load(GFitsHDU* hdu)
+void GEbounds::read(GFitsHDU* hdu)
 {
     // Free members
     free_members();
@@ -263,8 +352,8 @@ void GEbounds::load(GFitsHDU* hdu)
 
             // Copy information
             for (int i = 0; i < m_num; ++i) {
-                m_min[i].MeV(hdu->column("E_MIN")->real(i) / 1000.0);
-                m_max[i].MeV(hdu->column("E_MAX")->real(i) / 1000.0);
+                m_min[i].keV(hdu->column("E_MIN")->real(i));
+                m_max[i].keV(hdu->column("E_MAX")->real(i));
             }
 
         } // endif: there were channels to read
@@ -274,6 +363,45 @@ void GEbounds::load(GFitsHDU* hdu)
 
     } // endif: HDU was valid
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write energy boundaries into FITS file.
+ *
+ * @param[in] file Pointer to FITS file.
+ * @param[in] extname Energy boundary extension name (default is "EBOUNDS")
+ *
+ * This methods write energy boundaries in units of keV.
+ *
+ * @todo Write header keywords.
+ ***************************************************************************/
+void GEbounds::write(GFits* file, const std::string& extname)
+{
+    // Create energy boundary columns
+    GFitsTableDblCol cemin = GFitsTableDblCol("E_MIN", m_num);
+    GFitsTableDblCol cemax = GFitsTableDblCol("E_MAX", m_num);
+
+    // Fill energy boundary columns
+    for (int i = 0; i < m_num; ++i) {
+        cemin(i) = m_min[i].keV();
+        cemax(i) = m_max[i].keV();
+    }
+
+    // Create binary table
+    GFitsBinTable table = GFitsBinTable(m_num);
+    table.append_column(cemin);
+    table.append_column(cemax);
+
+    // Create HDU
+    GFitsHDU hdu(table);
+    hdu.extname(extname);
+
+    // Write to FITS file
+    file->append_hdu(hdu);
+    
     // Return
     return;
 }
