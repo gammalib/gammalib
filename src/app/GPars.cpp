@@ -751,7 +751,7 @@ void GPars::update(void)
     for (int i = 0; i < m_pars.size(); ++i) {
 
         // Update only if requested and allowed
-        if (m_pars[i].m_update && m_pars[i].is_learn()) {
+        if (m_pars[i].m_update && m_pars[i].islearn()) {
             m_parfile[m_line[i]] = m_parfile[m_line[i]].substr(0, m_vstart[i]) +
                                    m_pars[i].m_value +
                                    m_parfile[m_line[i]].substr(m_vstop[i]);
