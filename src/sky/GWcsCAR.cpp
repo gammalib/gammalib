@@ -89,8 +89,8 @@ GWcsCAR::GWcsCAR(const std::string& coords,
     wcs_init(0.0);  // theta0 = 0.0
 
     // Set projection function pointers
-    m_std2nat = (_wcspf)&GWcsCAR::std2nat;
-    m_nat2std = (_wcspf)&GWcsCAR::nat2std;
+    //m_std2nat = (_wcspf)&GWcsCAR::std2nat;
+    //m_nat2std = (_wcspf)&GWcsCAR::nat2std;
 
     // Return
     return;
@@ -258,6 +258,10 @@ void GWcsCAR::init_members(void)
 {
     // Initialise members
     m_type = "CAR";
+
+    // Set projection function pointers
+    m_std2nat = (_wcspf)&GWcsCAR::std2nat;
+    m_nat2std = (_wcspf)&GWcsCAR::nat2std;
 
     // Return
     return;
