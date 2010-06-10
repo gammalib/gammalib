@@ -22,6 +22,8 @@
 #include "GCTAObservation.hpp"
 #include "GCTAEventList.hpp"
 #include "GCTAEventAtom.hpp"
+#include "GCTAEventCube.hpp"
+#include "GCTAEventBin.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTARoi.hpp"
 #include "GCTAPointing.hpp"

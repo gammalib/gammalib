@@ -11,6 +11,8 @@ sources = src/GCTAException.cpp \
           src/GCTAObservation.cpp \
           src/GCTAEventList.cpp \
           src/GCTAEventAtom.cpp \
+          src/GCTAEventCube.cpp \
+          src/GCTAEventBin.cpp \
           src/GCTAResponse.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
@@ -21,6 +23,8 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAObservation.hpp \
                      include/GCTAEventList.hpp \
                      include/GCTAEventAtom.hpp \
+                     include/GCTAEventCube.hpp \
+                     include/GCTAEventBin.hpp \
                      include/GCTAPointing.hpp \
                      include/GCTAInstDir.hpp \
                      include/GCTARoi.hpp \
@@ -30,12 +34,3 @@ pkginclude_HEADERS = include/GCTAException.hpp \
 noinst_LTLIBRARIES = libcta.la
 libcta_la_SOURCES = $(sources)
 libcta_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
-
-# Programs to run for make check
-#check_PROGRAMS = test_CTA
-
-# Tests
-#TESTS = test_CTA
-
-#test_CTA_SOURCES = test/test_CTA.cpp
-#test_CTA_LDADD = ../../src/libgamma.la
