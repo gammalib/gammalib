@@ -57,6 +57,10 @@ public:
     public:
         mem_alloc(std::string origin, unsigned num);
     };
+    class not_enough_nodes : public GExceptionHandler {
+    public:
+        not_enough_nodes(std::string origin, int num);
+    };
 
     // Empty object exception class
     class empty : public GExceptionHandler {

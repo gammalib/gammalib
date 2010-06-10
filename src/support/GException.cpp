@@ -42,3 +42,16 @@ GException::mem_alloc::mem_alloc(std::string origin, unsigned num)
     m_origin  = origin;
     m_message = "Memory allocation error (" + str((int)num) + " elements)";
 }
+
+
+/***********************************************************************//**
+ * @brief Not enough nodes in node array
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] num Number of nodes in node array.
+ ***************************************************************************/
+GException::not_enough_nodes::not_enough_nodes(std::string origin, int num)
+{
+    m_origin  = origin;
+    m_message = "Not enough nodes in node array (" + str(num) + " nodes).";
+}
