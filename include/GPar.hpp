@@ -54,15 +54,15 @@ public:
     void        type(const std::string& type);
     void        mode(const std::string& mode);
     void        value(const std::string& value);
-    std::string name(void) const;
-    std::string type(void) const;
-    std::string mode(void) const;
+    std::string name(void) const { return m_name; }
+    std::string type(void) const { return m_type; }
+    std::string mode(void) const { return m_mode; }
     std::string value(void);
-    std::string min(void) const;
-    std::string max(void) const;
-    std::string prompt(void) const;
-    bool        is_learn(void) const;
-    bool        is_query(void) const;
+    std::string min(void) const { return m_min; }
+    std::string max(void) const { return m_max; }
+    std::string prompt(void) const { return m_prompt; }
+    bool        islearn(void) const;
+    bool        isquery(void) const;
   
 protected:
     // Protected methods
