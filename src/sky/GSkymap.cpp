@@ -518,7 +518,7 @@ void GSkymap::read(const GFitsHDU* hdu)
         if (loaded == 0) {
 
             // Load only if HDU contains an image
-            if (hdu->card("XTENSION")->string() == "IMAGE") {
+            if (hdu->exttype() == 0) {
                 read_wcs(hdu);
                 loaded = 1;
             }
