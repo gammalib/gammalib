@@ -31,21 +31,6 @@
  ***************************************************************************/
 std::string strip_whitespace(const std::string& arg)
 {
-/*
-    // Return empty string if argument is empty
-    if (arg.empty())
-        return arg;
-
-    // Get start and stop
-    std::string::size_type start = arg.find_first_not_of(' ');
-    std::string::size_type stop  = arg.find_last_not_of(' ');
-
-    // If there is only whitespace in string then return empty string.
-    // Otherwise strip off whitespace
-    std::string result;
-    if (start <= stop)
-        result = arg.substr(start, stop-start+1);
-*/
     // Return result
     return (strip_chars(arg, " "));
 }
