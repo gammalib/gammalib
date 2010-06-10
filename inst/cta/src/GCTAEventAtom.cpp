@@ -22,6 +22,7 @@
 #endif
 #include <iostream>
 #include <cmath>
+#include "GException.hpp"
 #include "GCTAException.hpp"
 #include "GCTAEventAtom.hpp"
 
@@ -132,7 +133,7 @@ GCTAEventAtom& GCTAEventAtom::operator= (const GCTAEventAtom& atom)
  * @param[in] models Model descriptor.
  * @param[out] gradient Pointer to gradient vector.
  *
- * @exception GCTAException::response_not_set
+ * @exception GCTAException::no_response
  *            Response function has not been set.
  * @exception GException::gradient_par_mismatch
  *            Gradient dimension mismatches number of parameters.
@@ -143,7 +144,7 @@ double GCTAEventAtom::model(GModels& models, GVector* gradient) const
 {
     // Make sure that response pointer exists
     if (rsp() == NULL)
-        throw GCTAException::response_not_set(G_MODEL);
+        throw GCTAException::no_response(G_MODEL);
 
     // Verify that number of model parameter is identical to the dimension
     // of the gradient vector
