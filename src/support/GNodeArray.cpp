@@ -224,6 +224,8 @@ void GNodeArray::append(const double& node)
  * @param[in] value Value \f$x\f$ at which interpolation should be done.
  * @param[in] vector Vector \f$y_i\f$ that should be interpolated.
  *
+ * @exception GException::not_enough_nodes
+ *            Not enough nodes for interpolation in node array.
  * @exception GException::vector_mismatch
  *            Size of node vector does not match the size of vector argument.
  *
@@ -233,6 +235,10 @@ void GNodeArray::append(const double& node)
 double GNodeArray::interpolate(const double& value,
                                const std::vector<double>& vector)
 {
+    // Throw exception if there are not enough nodes
+    if (m_node.size() < 2)
+        throw GException::not_enough_nodes(G_INTERPOLATE, m_node.size());
+
     // Throw exception if vectors have not the same size
     if (m_node.size() != vector.size())
         throw GException::vector_mismatch(G_INTERPOLATE, m_node.size(),
@@ -332,9 +338,6 @@ void GNodeArray::set_value(const double& value)
 void GNodeArray::init_members(void)
 {
     // Initialise members
-//    m_nodes         = 0;
-//    m_node          = NULL;
-//    m_step          = NULL;
     m_node.clear();
     m_step.clear();
     m_is_linear     = 0;
@@ -360,16 +363,7 @@ void GNodeArray::copy_members(const GNodeArray& array)
     m_is_linear     = array.m_is_linear;
     m_linear_slope  = array.m_linear_slope;
     m_linear_offset = array.m_linear_offset;
-    
-    // Copy nodes
-/*
-    if (m_nodes > 0) {
-        m_node = new double[m_nodes];
-        m_step = new double[m_nodes];
-        memcpy(m_node, array.m_node, m_nodes*sizeof(double));
-        memcpy(m_step, array.m_step, m_nodes*sizeof(double));
-    }
-*/
+
     // Return
     return;
 }
@@ -380,14 +374,6 @@ void GNodeArray::copy_members(const GNodeArray& array)
  ***************************************************************************/
 void GNodeArray::free_members(void)
 {
-    // Free memory
-//    if (m_node != NULL) delete [] m_node;
-//    if (m_step != NULL) delete [] m_step;
-
-    // Signal that memory is free
-//    m_node = NULL;
-//    m_step = NULL;
-
     // Return
     return;
 }
