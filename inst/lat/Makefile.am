@@ -31,7 +31,8 @@ pkginclude_HEADERS = include/GLATObservation.hpp \
                      include/GLATInstDir.hpp \
                      include/GLATRoi.hpp \
                      include/GLATResponse.hpp \
-                     include/GLATResponseTable.hpp
+                     include/GLATResponseTable.hpp \
+                     include/GLATLib.hpp
 
 # Build libtool library
 noinst_LTLIBRARIES = liblat.la
