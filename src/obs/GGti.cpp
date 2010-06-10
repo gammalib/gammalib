@@ -24,6 +24,9 @@
 #include "GException.hpp"
 #include "GGti.hpp"
 #include "GFits.hpp"
+#include "GFitsHDU.hpp"
+#include "GFitsBinTable.hpp"
+#include "GFitsTableDblCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_TSTART                                          "GGti::tstart(int)"
@@ -238,12 +241,12 @@ void GGti::insert(const GTime& tstart, const GTime& tstop)
 
 
 /***********************************************************************//**
- * @brief Load GTIs from file.
+ * @brief Load GTIs from FITS file.
  *
  * @param[in] filename FITS filename from which GTIs are to be loaded.
- * @param[in] extname FITS extension name of the GTIs.
+ * @param[in] extname GTI extension name (default is "GTI")
  *
- * This method loads the Goot Time Intervals from a FITS file.
+ * This method loads the Good Time Intervals from a FITS file. The exten
  ***************************************************************************/
 void GGti::load(const std::string& filename, const std::string& extname)
 {
@@ -256,8 +259,8 @@ void GGti::load(const std::string& filename, const std::string& extname)
     // Get GTI HDU
     GFitsHDU* hdu = file.hdu(extname);
 
-    // Load GTI
-    load(hdu);
+    // Read GTI from HDU
+    read(hdu);
 
     // Close FITS file
     file.close();
@@ -268,13 +271,44 @@ void GGti::load(const std::string& filename, const std::string& extname)
 
 
 /***********************************************************************//**
- * @brief Load GTI intervals from file.
+ * @brief Save GTI intervals to FITS file.
  *
- * @param[in] filename Name of file from which GTIs are to be loaded.
+ * @param[in] filename Name of file into which GTIs are to be saved.
+ * @param[in] clobber Overwrite any existing GTI extension.
+ * @param[in] extname GTI extension name (default is "GTI")
+ *
+ * The method saves GTI into a FITS file. If the file does not exist it is
+ * created. If the file exists the GTI is appended as extension. If another
+ * GTI exists already it is overwritten if clobber=true.
  *
  * @todo Method assumes that times are in MET.
  ***************************************************************************/
-void GGti::load(GFitsHDU* hdu)
+void GGti::save(const std::string& filename, bool clobber,
+                const std::string& extname)
+{
+    // Allocate FITS file
+    GFits file;
+
+    // Write GTI to FITS file
+    write(&file, extname);
+
+    // Save to file
+    file.saveto(filename, clobber);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read GTI intervals from file.
+ *
+ * @param[in] hdu Pointer to HDU from which GTIs are to be loaded.
+ *
+ * @todo Method assumes that times are in MET.
+ * @todo Read header keywords.
+ ***************************************************************************/
+void GGti::read(GFitsHDU* hdu)
 {
 	// Free members
 	free_members();
@@ -299,6 +333,48 @@ void GGti::load(GFitsHDU* hdu)
 
 	}
 	
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write GTI intervals into FITS file.
+ *
+ * @param[in] file Pointer to FITS file.
+ * @param[in] extname GTI extension name (default is "GTI")
+ *
+ * The method saves GTI into a FITS file. If the file does not exist it is
+ * created. If the file exists the GTI is appended as extension. If another
+ * GTI exists already it is overwritten if clobber=true.
+ *
+ * @todo Method assumes that times are in MET.
+ * @todo Write header keywords.
+ ***************************************************************************/
+void GGti::write(GFits* file, const std::string& extname)
+{
+    // Create GTI columns
+    GFitsTableDblCol cstart = GFitsTableDblCol("START", m_num);
+    GFitsTableDblCol cstop  = GFitsTableDblCol("STOP", m_num);
+
+    // Fill GTI columns
+    for (int i = 0; i < m_num; ++i) {
+        cstart(i) = m_start[i].met();
+        cstop(i)  = m_stop[i].met();
+    }
+
+    // Create GTI table
+    GFitsBinTable table = GFitsBinTable(m_num);
+    table.append_column(cstart);
+    table.append_column(cstop);
+
+    // Create GTI HDU
+    GFitsHDU hdu(table);
+    hdu.extname(extname);
+
+    // Write to FITS file
+    file->append_hdu(hdu);
+    
     // Return
     return;
 }
