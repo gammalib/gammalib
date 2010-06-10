@@ -214,36 +214,6 @@ void GPar::value(const std::string& value)
 
 
 /***********************************************************************//**
- * @brief Returns parameter name
- ***************************************************************************/
-std::string GPar::name(void) const
-{
-    // Return name
-    return m_name;
-}
-
-
-/***********************************************************************//**
- * @brief Returns parameter type
- ***************************************************************************/
-std::string GPar::type(void) const
-{
-    // Return type
-    return m_type;
-}
-
-
-/***********************************************************************//**
- * @brief Returns parameter mode
- ***************************************************************************/
-std::string GPar::mode(void) const
-{
-    // Return mode
-    return m_mode;
-}
-
-
-/***********************************************************************//**
  * @brief Returns parameter value (as string)
  ***************************************************************************/
 std::string GPar::value(void)
@@ -257,39 +227,9 @@ std::string GPar::value(void)
 
 
 /***********************************************************************//**
- * @brief Returns parameter minimum
- ***************************************************************************/
-std::string GPar::min(void) const
-{
-    // Return minimum
-    return m_min;
-}
-
-
-/***********************************************************************//**
- * @brief Returns parameter maximum
- ***************************************************************************/
-std::string GPar::max(void) const
-{
-    // Return maximum
-    return m_max;
-}
-
-
-/***********************************************************************//**
- * @brief Returns parameter prompt
- ***************************************************************************/
-std::string GPar::prompt(void) const
-{
-    // Return prompt
-    return m_prompt;
-}
-
-
-/***********************************************************************//**
  * @brief Returns if parameter mode is 'learn'
  ***************************************************************************/
-bool GPar::is_learn(void) const
+bool GPar::islearn(void) const
 {
     // Assign result
     bool result = (m_mode == "hl" || m_mode == "ql" || m_mode == "lh" || 
@@ -303,7 +243,7 @@ bool GPar::is_learn(void) const
 /***********************************************************************//**
  * @brief Returns if parameter mode is 'query'
  ***************************************************************************/
-bool GPar::is_query(void) const
+bool GPar::isquery(void) const
 {
     // Assign result
     bool result = (m_mode == "q" || m_mode == "ql" || m_mode == "lq");
@@ -376,6 +316,9 @@ void GPar::free_members(void)
  *
  * @param[in] type Type string.
  *
+ * @exception GException::par_error
+ *            Invalid parameter type specified.
+ *
  * The parameter type has to be one of b,i,r,s,f,fr,fw,fe,fn. 
  * The fr,fw,fe,fn types test for read access, write access, file existence,
  * and file absence, respectively.
@@ -398,6 +341,9 @@ void GPar::check_type(const std::string& type) const
  * @brief Test validity of mode string
  *
  * @param[in] mode Mode string.
+ *
+ * @exception GException::par_error
+ *            Invalid parameter mode.
  *
  * The parameter mode has to be one of a,h,l,q,hl,ql,lh,lq.
  ***************************************************************************/
@@ -474,11 +420,13 @@ void GPar::check_value_bool(const std::string& value) const
  *
  * Requires that m_type, m_min and m_max are set. The method does not verify
  * if m_type is valid.
+ *
+ * @todo Implement method.
  ***************************************************************************/
 void GPar::check_value_int(const std::string& value) const
 {
+    // Convert value to integer
     int ivalue = toint(value);
-    printf("GPar::check_value_int: %d\n", ivalue);
 
     // Return
     return;
@@ -492,6 +440,8 @@ void GPar::check_value_int(const std::string& value) const
  *
  * Requires that m_type, m_min and m_max are set. The method does not verify
  * if m_type is valid.
+ *
+ * @todo Implement method.
  ***************************************************************************/
 void GPar::check_value_real(const std::string& value) const
 {
@@ -508,6 +458,8 @@ void GPar::check_value_real(const std::string& value) const
  *
  * Requires that m_type, m_min and m_max are set. The method does not verify
  * if m_type is valid.
+ *
+ * @todo Implement method.
  ***************************************************************************/
 void GPar::check_value_string(const std::string& value) const
 {
@@ -524,6 +476,9 @@ void GPar::check_value_string(const std::string& value) const
  *
  * Requires that m_type, m_min and m_max are set. The method does not verify
  * if m_type is valid.
+ *
+ * @todo Implement method.
+ * @todo NONE is equivalent to an empty string.
  ***************************************************************************/
 void GPar::check_value_filename(const std::string& value) const
 {
@@ -536,12 +491,15 @@ void GPar::check_value_filename(const std::string& value) const
 /***********************************************************************//**
  * @brief Query parameter if required
  *
- * TODO: Optional use of readline library
+ * This method queries the parameter from the stardard input if it is needed
+ * to be input by the user.
+ *
+ * @todo Optional use of readline library
  ***************************************************************************/
 void GPar::query(void)
 {
     // Continue only if parameter has query mode
-    if (is_query()) {
+    if (isquery()) {
 
         // Dump prompt string
         std::string prompt = m_prompt;
@@ -609,5 +567,4 @@ std::ostream& operator<< (std::ostream& os, const GPar& par)
     // Return output stream
     return os;
 }
-
 
