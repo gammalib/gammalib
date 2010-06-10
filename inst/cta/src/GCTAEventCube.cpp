@@ -165,13 +165,13 @@ void GCTAEventCube::load(const std::string& filename)
     GFitsHDU* hdu_gti     = file.hdu("GTI");
 
     // Load counts map
-    load_cntmap(hdu_cntmap);
+    read_cntmap(hdu_cntmap);
 
     // Load energy boundaries
-    load_ebds(hdu_ebounds);
+    read_ebds(hdu_ebounds);
 
     // Load energy boundaries
-    load_gti(hdu_gti);
+    read_gti(hdu_gti);
 
     // Close FITS file
     file.close();
@@ -364,18 +364,18 @@ GCTAEventCube* GCTAEventCube::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Load CTA counts map from HDU.
+ * @brief Read CTA counts map from HDU.
  *
  * @param[in] hdu Pointer to FITS HDU from which events are loaded.
  *
- * This method load a CTA counts map from a FITS HDU. The counts map is
+ * This method reads a CTA counts map from a FITS HDU. The counts map is
  * stored in a GSkymap object, and a pointer is set up to access the pixels
  * individually. Recall that skymap pixels are stored in the order
  * (ebin,ix,iy), i.e. the energy axis is the most rapidely varying axis,
  * while the counts map is stored in the order (ix,iy,ebin), i.e. the x
  * axis is the most rapidely varying axis.
  ***************************************************************************/
-void GCTAEventCube::load_cntmap(GFitsHDU* hdu)
+void GCTAEventCube::read_cntmap(GFitsHDU* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
@@ -405,19 +405,18 @@ void GCTAEventCube::load_cntmap(GFitsHDU* hdu)
 
 
 /***********************************************************************//**
- * @brief Load energy boundaries from HDU.
+ * @brief Read energy boundaries from HDU.
  *
  * @param[in] hdu Pointer to FITS HDU from which energy boundaries are loaded.
  *
- * Loads the energy boundaries for a CTA counts map from the HDU. This
- * method 
+ * Read the energy boundaries from the HDU.
  ***************************************************************************/
-void GCTAEventCube::load_ebds(GFitsHDU* hdu)
+void GCTAEventCube::read_ebds(GFitsHDU* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
 
-        // Load energy boundaries
+        // Read energy boundaries
         m_ebds.read(hdu);
 
         // Set log mean energies and energy widths
@@ -431,16 +430,19 @@ void GCTAEventCube::load_ebds(GFitsHDU* hdu)
 
 
 /***********************************************************************//**
- * @brief Load GTIs from HDU.
+ * @brief Read GTIs from HDU.
  *
  * @param[in] hdu Pointer to FITS HDU from which GTIs are loaded.
  *
- * @todo Implement method.
+ * Reads the Good Time Intervals from the GTI extension.
  ***************************************************************************/
-void GCTAEventCube::load_gti(GFitsHDU* hdu)
+void GCTAEventCube::read_gti(GFitsHDU* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
+
+        // Read Good Time Intervals
+        m_gti.read(hdu);
 
         // Set time
         set_time();

@@ -74,9 +74,9 @@ protected:
     void           copy_members(const GCTAEventCube& cube);
     void           free_members(void);
     GCTAEventCube* clone(void) const;
-    void           load_cntmap(GFitsHDU* hdu);
-    void           load_ebds(GFitsHDU* hdu);
-    void           load_gti(GFitsHDU* hdu);
+    void           read_cntmap(GFitsHDU* hdu);
+    void           read_ebds(GFitsHDU* hdu);
+    void           read_gti(GFitsHDU* hdu);
     void           set_directions(void);
     void           set_energies(void);
     void           set_time(void);
