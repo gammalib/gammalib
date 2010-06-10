@@ -81,6 +81,8 @@ public:
     int       nx(void) const;
     int       ny(void) const;
     int       nmaps(void) const;
+    GWcs*     wcs(void) { return m_wcs; }
+    double*   pixels(void) { return m_pixels; }
 
 private:
     // Private methods
