@@ -28,7 +28,8 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAPointing.hpp \
                      include/GCTAInstDir.hpp \
                      include/GCTARoi.hpp \
-                     include/GCTAResponse.hpp
+                     include/GCTAResponse.hpp \
+                     include/GCTALib.hpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libcta.la
