@@ -41,6 +41,7 @@ class GCTAInstDir : public GInstDir {
 public:
     // Constructors and destructors
     GCTAInstDir(void);
+    explicit GCTAInstDir(const GSkyDir& dir);
     GCTAInstDir(const GCTAInstDir& dir);
     virtual ~GCTAInstDir(void);
 

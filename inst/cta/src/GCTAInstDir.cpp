@@ -40,12 +40,32 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GCTAInstDir::GCTAInstDir(void) : GInstDir()
 {
     // Initialise class members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief GSkyDir constructor
+ *
+ * @param[in] dir Sky direction from which object is to be constructed.
+ *
+ * Construct CTA instrument direction from sky direction.
+ ***************************************************************************/
+GCTAInstDir::GCTAInstDir(const GSkyDir& dir) : GInstDir()
+{
+    // Initialise class members
+    init_members();
+    
+    // Assign sky direction
+    m_dir = dir;
 
     // Return
     return;
