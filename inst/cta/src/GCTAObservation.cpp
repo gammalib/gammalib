@@ -25,6 +25,7 @@
 #include "GException.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAEventList.hpp"
+#include "GCTAEventCube.hpp"
 #include "GCTARoi.hpp"
 #include "GFits.hpp"
 #include "GModelSpatialPtsrc.hpp"
@@ -391,19 +392,25 @@ std::ostream& operator<< (std::ostream& os, const GCTAObservation& obs)
     os << " Energy range ..............: " << std::fixed
        << obs.m_ebounds.emin().MeV() << " - "
        << obs.m_ebounds.emax().MeV() << " MeV" << std::endl;
-    os << " Region of interest ........: " << *((GCTARoi*)obs.m_roi) << std::endl;
+
+    // Add ROI to stream if it exists
+    if (obs.m_roi != NULL)
+        os << " Region of interest ........: " << *((GCTARoi*)obs.m_roi) << std::endl;
+
+    // Add GTIs to stream
+    os << obs.m_gti << std::endl;
+
+    // Add response to stream if it exists
+    if (obs.m_response != NULL)
+        os << *((GCTAResponse*)obs.m_response) << std::endl;
 
     // Add events to stream
     if (obs.m_events != NULL) {
         if (obs.m_events->islist())
             os << *((GCTAEventList*)obs.m_events) << std::endl;
         else
-            os << std::endl;
-//            os << *((GCTAEventCube*)obs.m_events) << std::endl;
+            os << *((GCTAEventCube*)obs.m_events) << std::endl;
     }
-
-    // Add GTIs to stream
-    os << obs.m_gti << std::endl;
 
     // Return output stream
     return os;
