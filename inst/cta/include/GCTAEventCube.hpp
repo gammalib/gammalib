@@ -59,7 +59,7 @@ public:
     GCTAEventCube& operator= (const GCTAEventCube& cube);
 
     // Methods
-    void          clear();
+    void          clear(void);
     void          load(const std::string& filename);
     GCTAEventBin* pointer(int index);
     int           number(void) const;

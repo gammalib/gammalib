@@ -45,7 +45,7 @@ public:
     GCTAEventList& operator= (const GCTAEventList& list);
 
     // Methods
-    void           clear();
+    void           clear(void);
     void           load(const std::string& filename);
     GCTAEventAtom* pointer(int index);
     int            number(void) const { return m_num; }
