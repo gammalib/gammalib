@@ -24,6 +24,8 @@
 //#include "GException.hpp"
 #include "GCTAException.hpp"
 #include "GCTAEventCube.hpp"
+#include "GCTAObservation.hpp"
+#include "GCTAResponse.hpp"
 #include "GFitsImageDbl.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -188,38 +190,52 @@ void GCTAEventCube::load(const std::string& filename)
  *
  * This method provides the event attributes to the event bin. The event bin
  * is in fact physically stored in the event cube, and only a single event
- * bin is indeed allocated. This methods sets up the pointers in the event
+ * bin is indeed allocated. This method sets up the pointers in the event
  * bin so that a client can easily access the information of individual bins
  * as if they were stored in an array.
+ * The method returns a NULL pointer if the index is out of the valid range.
  *
  * @todo Static pointers could be set by init_members().
+ * @todo Should we really return a NULL pointer in case that the index
+ *       is not valid? Should we not better throw an exception? 
  ***************************************************************************/
 GCTAEventBin* GCTAEventCube::pointer(int index)
 {
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= m_elements)
-        throw GException::out_of_range(G_POINTER, index, 0, m_elements-1);
-    #endif
+//    #if defined(G_RANGE_CHECK)
+//    if (index < 0 || index >= m_elements)
+//        throw GException::out_of_range(G_POINTER, index, 0, m_elements-1);
+//    #endif
 
-    // Get pixel and energy bin
-    int ipix = index / ebins();
-    int ieng = index % npix();
+    // Preset pointer with NULL
+    GCTAEventBin* ptr = NULL;
+    
+    // Set pointer if index is in range
+    if (index >=0 && index < m_elements) {
 
-    // Set GEventBin pointers
-    m_bin.m_counts = &(m_counts[index]);
-    m_bin.m_time   = &m_time;
-    m_bin.m_energy = &(m_energies[ieng]);
+        // Set pointer to static element
+        ptr = (GCTAEventBin*)&m_bin;
 
-    // Set GCTAEventBin pointers
-    m_bin.m_dir    = &(m_dirs[ipix]);
-    m_bin.m_pnt    = &m_pnt;
-    m_bin.m_rsp    = &m_rsp;
-    m_bin.m_omega  = &(m_omega[ipix]);
-    m_bin.m_ewidth = &(m_ewidth[ieng]);
-    m_bin.m_ontime = &m_ontime;
+        // Get pixel and energy bin
+        int ipix = index / ebins();
+        int ieng = index % npix();
+
+        // Set GEventBin pointers
+        ptr->m_counts = &(m_counts[index]);
+        ptr->m_time   = &m_time;
+        ptr->m_energy = &(m_energies[ieng]);
+
+        // Set GCTAEventBin pointers
+        ptr->m_dir    = &(m_dirs[ipix]);
+        ptr->m_pnt    = &m_pnt;
+        ptr->m_rsp    = (GCTAResponse*)m_obs->response();
+        ptr->m_omega  = &(m_omega[ipix]);
+        ptr->m_ewidth = &(m_ewidth[ieng]);
+        ptr->m_ontime = &m_ontime;
+
+    } // endif: valid index
     
     // Return pointer
-    return (GCTAEventBin*)&(m_bin);
+    return ptr;
 }
 
 
@@ -251,8 +267,7 @@ int GCTAEventCube::number(void) const
 /***********************************************************************//**
  * @brief Initialise class members
  *
- * @todo Implement GSkymap.clear(), GCTAEventBin.clear(), and 
- *       GCTAResponse.clear() methods
+ * @todo Implement GSkymap.clear(), GCTAEventBin.clear() methods
  ***************************************************************************/
 void GCTAEventCube::init_members(void)
 {
@@ -269,8 +284,6 @@ void GCTAEventCube::init_members(void)
     m_time.clear();
     m_ontime   = 0.0;
     m_pnt.clear();
-    //m_rsp.clear();
-    m_rsp      = GCTAResponse();
     m_ebds.clear();
     m_gti.clear();
 
@@ -292,7 +305,6 @@ void GCTAEventCube::copy_members(const GCTAEventCube& cube)
     m_time   = cube.m_time;
     m_ontime = cube.m_ontime;
     m_pnt    = cube.m_pnt;
-    m_rsp    = cube.m_rsp;
     m_ebds   = cube.m_ebds;
     m_gti    = cube.m_gti;
 
