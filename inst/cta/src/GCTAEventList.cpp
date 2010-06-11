@@ -138,14 +138,41 @@ GCTAEventList& GCTAEventList::operator= (const GCTAEventList& list)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear object.
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GCTAEventList::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GEventList::free_members();
+    this->GEvents::free_members();
+
+    // Initialise members
+    this->GEvents::init_members();
+    this->GEventList::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load events from event FITS file.
  *
  * @param[in] filename Name of FITS file from which events are loaded.
  *
- * Load events from CTA event file (extension EVENTS).
+ * Load events from CTA event file (extension EVENTS). The method clears the
+ * object before loading, thus any events residing in the object before
+ * loading will be lost.
  ***************************************************************************/
 void GCTAEventList::load(const std::string& filename)
 {
+    // Clear object
+    clear();
+
     // Declarse FITS file
     GFits file;
 
@@ -181,15 +208,15 @@ GCTAEventAtom* GCTAEventList::pointer(int index)
 {
     // Preset pointer with NULL
     GCTAEventAtom* ptr = NULL;
-    
+
     // Set pointer if index is in range
     if (m_events != NULL && index >=0 && index < m_num) {
 
         // Point to the requested event atom
         ptr = (GCTAEventAtom*)m_events + index;
-        
+
         // Set instrument response function
-        ptr->m_rsp = (GCTAResponse*)m_obs->response();
+        ptr->m_rsp = (m_obs != NULL) ? (GCTAResponse*)m_obs->response() : NULL;
 
     } // endif: valid index
 

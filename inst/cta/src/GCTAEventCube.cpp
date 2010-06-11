@@ -21,7 +21,6 @@
 #include <config.h>
 #endif
 #include <iostream>
-//#include "GException.hpp"
 #include "GCTAException.hpp"
 #include "GCTAEventCube.hpp"
 #include "GCTAObservation.hpp"
@@ -133,27 +132,42 @@ GCTAEventCube& GCTAEventCube::operator= (const GCTAEventCube& cube)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear object.
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GCTAEventCube::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GEventCube::free_members();
+    this->GEvents::free_members();
+
+    // Initialise members
+    this->GEvents::init_members();
+    this->GEventCube::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load CTA counts map from FITS file.
  *
  * @param[in] filename Counts map FITS filename to be loaded.
  *
  * It is assumed that the counts map resides in the primary extension of the
  * FITS file, the energy boundaries reside in the EBOUNDS extension and the
- * Good Time Intervals reside in the GTI extension.
+ * Good Time Intervals reside in the GTI extension.  The method clears the
+ * object before loading, thus any events residing in the object before
+ * loading will be lost.
  ***************************************************************************/
 void GCTAEventCube::load(const std::string& filename)
 {
-    // Free and initialise base class members
-    this->GEvents::free_members();
-    this->GEvents::init_members();
-
-    // Free and initialise base class members
-    this->GEventCube::free_members();
-    this->GEventCube::init_members();
-
-    // Free and initialise class members
-    free_members();
-    init_members();
+    // Clear object
+    clear();
 
     // Allocate FITS file
     GFits file;
@@ -208,16 +222,17 @@ GCTAEventBin* GCTAEventCube::pointer(int index)
 
     // Preset pointer with NULL
     GCTAEventBin* ptr = NULL;
-    
+
     // Set pointer if index is in range
     if (index >=0 && index < m_elements) {
 
         // Set pointer to static element
         ptr = (GCTAEventBin*)&m_bin;
 
-        // Get pixel and energy bin
+        // Get pixel and energy bin indices. Note that in GSkymap that holds
+        // the counts, the energy axis is the most rapidely varying axis.
         int ipix = index / ebins();
-        int ieng = index % npix();
+        int ieng = index % ebins();
 
         // Set GEventBin pointers
         ptr->m_counts = &(m_counts[index]);
@@ -227,13 +242,13 @@ GCTAEventBin* GCTAEventCube::pointer(int index)
         // Set GCTAEventBin pointers
         ptr->m_dir    = &(m_dirs[ipix]);
         ptr->m_pnt    = &m_pnt;
-        ptr->m_rsp    = (GCTAResponse*)m_obs->response();
+        ptr->m_rsp    = (m_obs != NULL) ? (GCTAResponse*)m_obs->response() : NULL;
         ptr->m_omega  = &(m_omega[ipix]);
         ptr->m_ewidth = &(m_ewidth[ieng]);
         ptr->m_ontime = &m_ontime;
 
     } // endif: valid index
-    
+
     // Return pointer
     return ptr;
 }
@@ -433,7 +448,7 @@ void GCTAEventCube::read_ebds(GFitsHDU* hdu)
 
         // Set log mean energies and energy widths
         set_energies();
-        
+
     } // endif: HDU was valid
 
     // Return

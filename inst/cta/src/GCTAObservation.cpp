@@ -170,6 +170,8 @@ void GCTAObservation::response(const std::string& irfname, std::string caldb)
  * @brief Load data for unbinned analysis
  *
  * @param[in] filename Event FITS file name.
+ *
+ * @todo Implement GTI loading.
  ***************************************************************************/
 void GCTAObservation::load_unbinned(const std::string& filename)
 {
@@ -189,7 +191,9 @@ void GCTAObservation::load_unbinned(const std::string& filename)
     //m_tstart.met(m_gti.tstart());
     //m_tstop.met(m_gti.tstop());
 
-    // Link observations to events
+    // Link observations to events. This has to be done after loading since
+    // loading initialises the GCTAEventList object, hence resets the pointer
+    // to the observation.
     m_events->obs(this);
 
     // Return
@@ -217,7 +221,9 @@ void GCTAObservation::load_binned(const std::string& filename)
     m_ebounds = ((GCTAEventCube*)m_events)->m_ebds;
     m_gti     = ((GCTAEventCube*)m_events)->m_gti;
 
-    // Link observations to events
+    // Link observations to events. This has to be done after loading since
+    // loading initialises the GCTAEventList object, hence resets the pointer
+    // to the observation.
     m_events->obs(this);
 
     // Return

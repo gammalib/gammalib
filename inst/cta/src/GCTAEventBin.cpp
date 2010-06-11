@@ -271,7 +271,7 @@ std::ostream& operator<< (std::ostream& os, const GCTAEventBin& bin)
 {
     // Put bin in output stream
     os << bin.m_counts << " ";
-        
+
     // Return output stream
     return os;
 }
