@@ -24,6 +24,7 @@
 #include "GCTAException.hpp"
 #include "GCTAEventList.hpp"
 #include "GCTAObservation.hpp"
+#include "GCTAResponse.hpp"
 #include "GFitsTableBitCol.hpp"
 #include "GFitsTableFltCol.hpp"
 #include "GFitsTableDblCol.hpp"
@@ -185,7 +186,6 @@ GCTAEventAtom* GCTAEventList::pointer(int index)
     if (m_events != NULL && index >=0 && index < m_num) {
 
         // Point to the requested event atom
-        //ptr = &(((GCTAEventAtom*)m_events)[index]);
         ptr = (GCTAEventAtom*)m_events + index;
         
         // Set instrument response function
