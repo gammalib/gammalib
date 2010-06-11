@@ -96,7 +96,6 @@ protected:
     GTime        m_time;        //!< Event cube mean time
     double       m_ontime;      //!< Event cube ontime (sec)
     GCTAPointing m_pnt;         //!< CTA pointing
-    GCTAResponse m_rsp;         //!< CTA instrument response function
 };
 
 #endif /* GCTAEVENTCUBE_HPP */
