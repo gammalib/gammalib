@@ -39,7 +39,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                          Constructors/destructors                       =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -170,29 +170,29 @@ const GObservation& GObservations::operator() (int index) const
  ***************************************************************************/
 void GObservations::append(GObservation& obs)
 {
-	// Allocate new observation pointers
+    // Allocate new observation pointers
     GObservation** new_obs = new GObservation*[m_num+1];
 
-	// If we have already observation pointers then copy them over to the
+    // If we have already observation pointers then copy them over to the
     // new pointer array
     if (m_num > 0) {
         for (int i = 0; i < m_num; ++i)
-			new_obs[i] = m_obs[i];
-	}
-	
-	// Create a copy of the observation that should be added and store the
+            new_obs[i] = m_obs[i];
+    }
+
+    // Create a copy of the observation that should be added and store the
     // pointer to this copy as last element of the pointer array
-	new_obs[m_num] = obs.clone();
-	
-	// Release old pointer array
-	if (m_obs != NULL) delete [] m_obs;
-	
-	// Attach new pointer array to this object
-	m_obs = new_obs;
-	
-	// Increment number of observations
-	m_num++;
-	
+    new_obs[m_num] = obs.clone();
+
+    // Release old pointer array
+    if (m_obs != NULL) delete [] m_obs;
+
+    // Attach new pointer array to this object
+    m_obs = new_obs;
+
+    // Increment number of observations
+    m_num++;
+
     // Return
     return;
 }
@@ -211,6 +211,9 @@ void GObservations::optimize(GOptimizer& opt)
     // Optimise model parameters
     m_models = opt(fct, m_models);
 
+    // Store total number of predicted events
+    m_npred = fct.npred();
+
     // Return
     return;
 }
@@ -226,7 +229,7 @@ GObservations::iterator GObservations::begin(void)
 {
     // Allocate iterator object
     GObservations::iterator iter(this);
-    
+
     // Get first valid observation
     if (iter.m_this != NULL) {
         while (iter.m_index < iter.m_this->m_num) {
@@ -236,13 +239,13 @@ GObservations::iterator GObservations::begin(void)
             }
         }
     }
-    
+
     // Initialise event iterator
     if (iter.m_obs != NULL) {
         iter.m_event = iter.m_obs->events()->begin();
         iter.m_end   = iter.m_obs->events()->end();
     }
-	
+
     // Return
     return iter;
 }
@@ -255,11 +258,11 @@ GObservations::iterator GObservations::end(void)
 {
     // Allocate iterator object
     GObservations::iterator iter(this);
-    
+
     // Set obeservation number beyond last observation
     iter.m_index = iter.m_this->m_num;
     iter.m_obs   = NULL;
-	
+
     // Return
     return iter;
 }
@@ -273,13 +276,16 @@ GObservations::iterator GObservations::end(void)
 
 /***********************************************************************//**
  * @brief Initialise class members
+ *
+ * @todo Implement GModels::clear() method.
  ***************************************************************************/
 void GObservations::init_members(void)
 {
     // Initialise members
     m_num    = 0;
-	m_obs    = NULL;
+    m_obs    = NULL;
     m_models = GModels();
+    m_npred  = 0.0;
 
     // Return
     return;
@@ -299,18 +305,19 @@ void GObservations::copy_members(const GObservations& obs)
     // Copy attributes
     m_num    = obs.m_num;
     m_models = obs.m_models;
-	
-	// Copy observations
+    m_npred  = obs.m_npred;
+
+    // Copy observations
     if (m_num > 0) {
         m_obs = new GObservation*[m_num];
         for (int i = 0; i < m_num; ++i) {
-			if (obs.m_obs[i] != NULL)
-				m_obs[i] = (obs.m_obs[i])->clone();
-			else
-				m_obs[i] = NULL;
-		}
-	}
-    
+            if (obs.m_obs[i] != NULL)
+                m_obs[i] = (obs.m_obs[i])->clone();
+            else
+                m_obs[i] = NULL;
+        }
+    }
+
     // Return
     return;
 }
@@ -324,13 +331,13 @@ void GObservations::free_members(void)
     // Free memory
     if (m_obs != NULL) {
         for (int i = 0; i < m_num; ++i) {
-			if (m_obs[i] != NULL) delete m_obs[i];
+            if (m_obs[i] != NULL) delete m_obs[i];
         }
-		delete [] m_obs;
-	}
-	
+        delete [] m_obs;
+    }
+
     // Mark memory as free
-	m_obs = NULL;
+    m_obs = NULL;
 
     // Return
     return;
@@ -355,11 +362,12 @@ std::ostream& operator<< (std::ostream& os, const GObservations& obs)
     os << "=== GObservations ===" << std::endl;
     os << " Number of observations ....: " << obs.m_num << std::endl;
 
-	// Put observations in stream
-	for (int i = 0; i < obs.m_num; ++i)
-		os << *(obs.m_obs[i]);
+    // Put observations in stream
+    for (int i = 0; i < obs.m_num; ++i)
+        os << *(obs.m_obs[i]);
 
     // Add models to stream
+    os << " Number of predicted events : " << obs.m_npred << std::endl;
     os << obs.m_models;
 
     // Return output stream

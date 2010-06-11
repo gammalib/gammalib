@@ -108,6 +108,7 @@ public:
         // Methods
         void           eval(const GOptimizerPars& pars);
         double*        value(void) { return &m_value; }
+        double         npred(void) const { return m_npred; }
         GVector*       gradient(void) { return m_gradient; }
         GSparseMatrix* covar(void) { return m_covar; }
     protected:
@@ -132,6 +133,7 @@ protected:
     int            m_num;            //!< Number of observations
     GObservation** m_obs;            //!< Pointers to observations
     GModels        m_models;         //!< Models
+    double         m_npred;          //!< Total number of predicted events
 
 };
 
