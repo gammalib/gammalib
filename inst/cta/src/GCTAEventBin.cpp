@@ -158,7 +158,7 @@ double GCTAEventBin::model(GModels& models, GVector* gradient) const
 
     // Initialise model
     double model = 0.0;
-    
+
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
 
@@ -171,7 +171,7 @@ double GCTAEventBin::model(GModels& models, GVector* gradient) const
 
             // Multiply by bin size
             value *= *omega() * ewidth()->MeV() * *ontime();
-        
+
             // Add to model
             model += value;
 
