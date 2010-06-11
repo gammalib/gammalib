@@ -190,10 +190,10 @@ void test_response_npsf(void)
     roi.centre(instDir);
     roi.radius(2.0);
     srcEng.TeV(0.1);
-    
+
     // Try block to catch any problems in the computation
     try {
-    
+
         // Test PSF centred on ROI
         srcDir.radec_deg(0.0, 0.0);
         double npsf = rsp.npsf(srcDir, srcEng, srcTime, pnt, roi);
@@ -206,7 +206,7 @@ void test_response_npsf(void)
             throw;
         }
         std::cout << ".";
-        
+
         // Test PSF offset but inside ROI
         srcDir.radec_deg(1.0, 1.0);
         npsf = rsp.npsf(srcDir, srcEng, srcTime, pnt, roi);
@@ -289,7 +289,7 @@ void test_response(void)
 
     // Test CTA Psf response
     test_response_psf();
-    
+
     // Test GCTAResponse::npsf
     test_response_npsf();
 
@@ -415,23 +415,22 @@ void test_unbinned_optimizer(void)
         // Setup ROI covered by data
         GCTAInstDir instDir;
         GCTARoi     roi;
-//        instDir.radec_deg(117.0, -33.0);  // Adapt to file
-        instDir.radec_deg(117.5, -33.5);  // Adapt to file
+        instDir.radec_deg(117.02, -33.35);  // Adapt to file
         roi.centre(instDir);
-        roi.radius(20.0);
-        
+        roi.radius(2.5);
+
         // Setup energy range covered by data
         GEnergy emin;
         GEnergy emax;
         emin.TeV(0.02);
         emax.TeV(100.0);
-        
+
         // Setup time range covered by data
         GTime tstart;
         GTime tstop;
         tstart.met(0.0);
         tstop.met(10000.0);
-        
+
         // Load data and response and set ROI, energy range and time range
         // for analysis
         run.load_unbinned(cta_events);
