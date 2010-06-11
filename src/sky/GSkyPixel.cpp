@@ -51,7 +51,7 @@ GSkyPixel::GSkyPixel()
  * @param[in] x X index.
  * @param[in] y Y index.
  ***************************************************************************/
-GSkyPixel::GSkyPixel(const double& x, const double& y)
+GSkyPixel::GSkyPixel(double x, double y)
 {
     // Set members
     m_x = x;

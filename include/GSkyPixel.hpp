@@ -39,7 +39,7 @@ class GSkyPixel {
 public:
     // Constructors and destructors
     GSkyPixel(void);
-    explicit GSkyPixel(const double& x, const double& y);
+    explicit GSkyPixel(double x, double y);
     GSkyPixel(const GSkyPixel& pixel);
     virtual ~GSkyPixel(void);
 
