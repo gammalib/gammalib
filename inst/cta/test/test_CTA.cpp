@@ -548,7 +548,7 @@ void test_binned_optimizer(void)
     // Perform LM optimization
     GOptimizerLM opt;
     try {
-        opt.max_iter(10);
+        opt.max_iter(1000);
         obs.optimize(opt);
     }
     catch (std::exception &e) {
@@ -559,6 +559,7 @@ void test_binned_optimizer(void)
         throw;
     }
     std::cout << ".";
+    std::cout << opt;
     std::cout << obs << std::endl;
 
     // Plot final test success
