@@ -20,10 +20,9 @@
 #define GWCSCAR_HPP
 
 /* __ Includes ___________________________________________________________ */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include "GWcs.hpp"
+#include "GFits.hpp"
+#include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
 
@@ -41,11 +40,11 @@ class GWcsCAR : public GWcs {
 public:
     // Constructors and destructors
     GWcsCAR(void);
-    GWcsCAR(const std::string& coords,
-            const double& crval1, const double& crval2,
-            const double& crpix1, const double& crpix2,
-            const double& cdelt1, const double& cdelt2,
-            const GMatrix& cd, const GVector& pv2);
+    explicit GWcsCAR(const std::string& coords,
+                     const double& crval1, const double& crval2,
+                     const double& crpix1, const double& crpix2,
+                     const double& cdelt1, const double& cdelt2,
+                     const GMatrix& cd, const GVector& pv2);
     explicit GWcsCAR(const GFitsHDU* hdu);
     GWcsCAR(const GWcsCAR& wcs);
     virtual ~GWcsCAR(void);
@@ -54,8 +53,9 @@ public:
     GWcsCAR& operator= (const GWcsCAR& wcs);
 
     // Implemented pure virtual methods
+    void clear(void);
     void read(const GFitsHDU* hdu);
-    void write(GFitsHDU* hdu) const;
+    void write(GFits* file) const;
 
     // Overloaded base class methods
     double omega(const GSkyPixel& pix) const;
@@ -68,8 +68,6 @@ private:
     GWcsCAR* clone(void) const;
     void     std2nat(GVector *coord) const;
     void     nat2std(GVector *coord) const;
-
-    // Private data area
 };
 
 #endif /* GWCSCAR_HPP */

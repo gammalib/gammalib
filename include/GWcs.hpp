@@ -20,9 +20,7 @@
 #define GWCS_HPP
 
 /* __ Includes ___________________________________________________________ */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "GFits.hpp"
 #include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
@@ -43,10 +41,10 @@ class GWcs {
 public:
     // Constructors and destructors
     GWcs(void);
-    GWcs(const std::string& coords,
-         const double& crval1, const double& crval2,
-         const double& crpix1, const double& crpix2,
-         const double& cdelt1, const double& cdelt2);
+    explicit GWcs(const std::string& coords,
+                  const double& crval1, const double& crval2,
+                  const double& crpix1, const double& crpix2,
+                  const double& cdelt1, const double& cdelt2);
     GWcs(const GWcs& wcs);
     virtual ~GWcs(void);
 
@@ -54,8 +52,9 @@ public:
     virtual GWcs& operator= (const GWcs& wcs);
 
     // Pure virtual methods (not implemented)
+    virtual void clear(void) = 0;
     virtual void read(const GFitsHDU* hdu) = 0;
-    virtual void write(GFitsHDU* hdu) const = 0;
+    virtual void write(GFits* file) const = 0;
 
     // Virtual methods
     virtual std::string type(void) const;
@@ -68,14 +67,13 @@ public:
     virtual GSkyDir     xy2dir(const GSkyPixel& pix);
     virtual GSkyPixel   dir2xy(GSkyDir dir) const;
 
-private:
-    // Private methods
+protected:
+    // Protected methods
     void          init_members(void);
     void          copy_members(const GWcs& wcs);
     void          free_members(void);
     virtual GWcs* clone(void) const = 0;
 
-protected:
     // Typdefs
     typedef void (GWcs::*_wcspf)(GVector* coord) const;
 

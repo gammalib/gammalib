@@ -20,10 +20,9 @@
 #define GWCSHPX_HPP
 
 /* __ Includes ___________________________________________________________ */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include "GWcs.hpp"
+#include "GFits.hpp"
+#include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
 
@@ -41,8 +40,8 @@ class GWcsHPX : public GWcs {
 public:
     // Constructors and destructors
     GWcsHPX(void);
-    GWcsHPX(const int& nside, const std::string& ordering = "NESTED",
-            const std::string& coordsys = "GAL");
+    explicit GWcsHPX(const int& nside, const std::string& ordering = "NESTED",
+                     const std::string& coordsys = "GAL");
     explicit GWcsHPX(const GFitsHDU* hdu);
     GWcsHPX(const GWcsHPX& wcs);
     virtual ~GWcsHPX(void);
@@ -51,8 +50,9 @@ public:
     GWcsHPX& operator= (const GWcsHPX& wcs);
 
     // Implemented pure virtual methods
+    void clear(void);
     void read(const GFitsHDU* hdu);
-    void write(GFitsHDU* hdu) const;
+    void write(GFits* file) const;
 
     // Overloaded base class methods
     double      omega(const int& pix) const;
