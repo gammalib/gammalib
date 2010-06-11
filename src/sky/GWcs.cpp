@@ -42,8 +42,8 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DIR2XY_DEBUG                                      // Debug dir2xy
-#define G_XY2DIR_DEBUG                                      // Debug xy2dir
+//#define G_DIR2XY_DEBUG                                      // Debug dir2xy
+//#define G_XY2DIR_DEBUG                                      // Debug xy2dir
 
 /* __ Local prototypes ___________________________________________________ */
 
@@ -527,10 +527,7 @@ GSkyDir GWcs::wcs_native2dir(GVector native) const
         dir.radec(phi, theta);
     else
         dir.lb(phi, theta);
-std::cout << "wcs_native2dir: phi1=" << phi1 << " theta1=" << theta1;
-std::cout << " b(0)=" << b(0) << " b(1)=" << b(1) << " b(2)=" << b(2);
-std::cout << " phi=" << phi << " theta=" << theta << std::endl;
-std::cout << "Matrix=" << m_rot << " Transpose=" << m_trot << std::endl;
+
     // Return sky direction
     return dir;
 }
