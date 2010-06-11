@@ -42,8 +42,8 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DIR2XY_DEBUG                                      // Debug dir2xy
-//#define G_XY2DIR_DEBUG                                      // Debug xy2dir
+#define G_DIR2XY_DEBUG                                      // Debug dir2xy
+#define G_XY2DIR_DEBUG                                      // Debug xy2dir
 
 /* __ Local prototypes ___________________________________________________ */
 
@@ -527,7 +527,10 @@ GSkyDir GWcs::wcs_native2dir(GVector native) const
         dir.radec(phi, theta);
     else
         dir.lb(phi, theta);
-
+std::cout << "wcs_native2dir: phi1=" << phi1 << " theta1=" << theta1;
+std::cout << " b(0)=" << b(0) << " b(1)=" << b(1) << " b(2)=" << b(2);
+std::cout << " phi=" << phi << " theta=" << theta << std::endl;
+std::cout << "Matrix=" << m_rot << " Transpose=" << m_trot << std::endl;
     // Return sky direction
     return dir;
 }
@@ -721,7 +724,11 @@ GMatrix GWcs::wcs_get_rot(void)
  * @exception GException::wcs
  *            Unable to invert CD matrix.
  *
- * Note that this method does not initialize the class members.
+ * This method sets the WCS standard parameters as class members. It does
+ * however not set the rotation matrices. A call to wcs_init is mandatory
+ * before the projection can be used.
+ *
+ * @todo Implement parameter check
  ***************************************************************************/
 void GWcs::wcs_set(const std::string& coords,
                    const double& crval1, const double& crval2,
@@ -773,7 +780,11 @@ void GWcs::wcs_set(const std::string& coords,
  * @exception GException::wcs_bad_coords
  *            Coordinate system is not of valid type.
  *
- * Note that this method does not initialize the class members.
+ * This method reads the WCS definition from the FITS header. It calls the
+ * wcs_set() method
+ *
+ * @todo Projection ketwords are not yet extracted from the header. Assume
+ *       theta0=0.0 for the moment.
  ***************************************************************************/
 void GWcs::wcs_read(const GFitsHDU* hdu)
 {
@@ -818,6 +829,9 @@ void GWcs::wcs_read(const GFitsHDU* hdu)
 
         // Get projection keywords
         //TODO
+
+        // Initialise derived projection parameters
+        wcs_init(0.0);  // theta0 = 0.0
 
     } // endif: HDU was valid
 

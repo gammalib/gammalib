@@ -57,7 +57,7 @@ static short utab[0x100];
 
 /*==========================================================================
  =                                                                         =
- =                      GWcsHPX constructors/destructors                   =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -171,7 +171,7 @@ GWcsHPX::~GWcsHPX()
 
 /*==========================================================================
  =                                                                         =
- =                            GWcsHPX operators                            =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -206,9 +206,30 @@ GWcsHPX& GWcsHPX::operator= (const GWcsHPX& wcs)
 
 /*==========================================================================
  =                                                                         =
- =                          GWcsHPX public methods                         =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear object
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GWcsHPX::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GWcs::free_members();
+
+    // Initialise members
+    this->GWcs::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
 
 /***********************************************************************//**
  * @brief Read Healpix definiton from FITS header
@@ -224,9 +245,8 @@ GWcsHPX& GWcsHPX::operator= (const GWcsHPX& wcs)
  ***************************************************************************/
 void GWcsHPX::read(const GFitsHDU* hdu)
 {
-    // Free memory and initialise members
-    free_members();
-    init_members();
+    // Clear object
+    clear();
 
     // Check if we have a healpix representation
     if (hdu->card("PIXTYPE")->string() != "HEALPIX")
@@ -271,9 +291,9 @@ void GWcsHPX::read(const GFitsHDU* hdu)
 /***********************************************************************//**
  * @brief Write Healpix definiton into FITS HDU
  *
- * @param[in] hdu FITS HDU to which the Healpix definition will be written.
+ * @param[in] file FITS HDU to which the Healpix definition will be written.
  *
- * Writes or updates the following keywords in the FITS HDU:
+ * Writes the following keywords in the FITS HDU:
  * EXTNAME  = HEALPIX
  * PIXTYPE  = HEALPIX
  * NSIDE    = nside() = m_nside
@@ -284,7 +304,7 @@ void GWcsHPX::read(const GFitsHDU* hdu)
  ***************************************************************************/
 void GWcsHPX::write(GFitsHDU* hdu) const
 {
-    // Continue only if HDU is valid
+    // Continue only if file pointer is valid
     if (hdu != NULL) {
 
         // Set extension name
@@ -478,7 +498,7 @@ void GWcsHPX::ordering(const std::string& ordering)
 
 /*==========================================================================
  =                                                                         =
- =                          GWcsHPX private methods                        =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -862,7 +882,7 @@ unsigned int GWcsHPX::isqrt(unsigned int arg)
 
 /*==========================================================================
  =                                                                         =
- =                              GWcsHPX friends                            =
+ =                                  Friends                                =
  =                                                                         =
  ==========================================================================*/
 

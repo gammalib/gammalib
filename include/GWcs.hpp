@@ -20,7 +20,6 @@
 #define GWCS_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFits.hpp"
 #include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
@@ -54,7 +53,7 @@ public:
     // Pure virtual methods (not implemented)
     virtual void clear(void) = 0;
     virtual void read(const GFitsHDU* hdu) = 0;
-    virtual void write(GFits* file) const = 0;
+    virtual void write(GFitsHDU* hdu) const = 0;
 
     // Virtual methods
     virtual std::string type(void) const;

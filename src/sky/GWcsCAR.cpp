@@ -43,7 +43,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                      GWcsCAR constructors/destructors                   =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -131,7 +131,7 @@ GWcsCAR::GWcsCAR(const GWcsCAR& wcs) : GWcs(wcs)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GWcsCAR::~GWcsCAR()
+GWcsCAR::~GWcsCAR(void)
 {
     // Free members
     free_members();
@@ -143,7 +143,7 @@ GWcsCAR::~GWcsCAR()
 
 /*==========================================================================
  =                                                                         =
- =                            GWcsCAR operators                            =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -178,9 +178,29 @@ GWcsCAR& GWcsCAR::operator= (const GWcsCAR& wcs)
 
 /*==========================================================================
  =                                                                         =
- =                          GWcsCAR public methods                         =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear object
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GWcsCAR::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GWcs::free_members();
+
+    // Initialise members
+    this->GWcs::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Read WCS definiton from FITS header
@@ -189,9 +209,8 @@ GWcsCAR& GWcsCAR::operator= (const GWcsCAR& wcs)
  ***************************************************************************/
 void GWcsCAR::read(const GFitsHDU* hdu)
 {
-    // Free memory and initialise members
-    free_members();
-    init_members();
+    // Clear object
+    clear();
 
     // Continue only if HDU is valid
     if (hdu != NULL) {
@@ -209,11 +228,11 @@ void GWcsCAR::read(const GFitsHDU* hdu)
 /***********************************************************************//**
  * @brief Write Healpix definiton into FITS HDU
  *
- * @param[in] hdu FITS HDU to which the Healpix definition will be written.
+ * @param[in] hdu FITS HDU to which the WCS definition will be written.
  ***************************************************************************/
 void GWcsCAR::write(GFitsHDU* hdu) const
 {
-    // Continue only if HDU is valid
+    // Continue only if HDU pointer is valid
     if (hdu != NULL) {
 
         // Write standard WCS definition

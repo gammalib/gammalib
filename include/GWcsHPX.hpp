@@ -21,7 +21,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GWcs.hpp"
-#include "GFits.hpp"
 #include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
@@ -52,7 +51,7 @@ public:
     // Implemented pure virtual methods
     void clear(void);
     void read(const GFitsHDU* hdu);
-    void write(GFits* file) const;
+    void write(GFitsHDU* hdu) const;
 
     // Overloaded base class methods
     double      omega(const int& pix) const;
