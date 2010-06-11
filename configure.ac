@@ -1,7 +1,7 @@
 dnl =============================================================
 dnl Process this file with autoconf to produce a configure script
 dnl =============================================================
-AC_INIT([GammaLib], [0.3], [knodlseder@cesr.fr])
+AC_INIT([GammaLib], [0.4], [knodlseder@cesr.fr])
 AC_CONFIG_SRCDIR(src/Makefile.am)
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies])
@@ -29,6 +29,7 @@ dnl
 dnl gammalib-0.1     libgamma 0:0:0
 dnl gammalib-0.2     libgamma 0:0:0
 dnl gammalib-0.3     libgamma 0:0:0
+dnl gammalib-0.4     libgamma 0:0:0
 dnl =========================================
 GAMMALIB_LT_VERSION="0:0:0"
 AC_SUBST(GAMMALIB_LT_VERSION)
