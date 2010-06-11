@@ -224,8 +224,8 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
             // Get model and derivative
             double model = bin->model((GModels&)pars, &grad);
 
-            // Skip bin if model is empty
-            if (model <= 0.0)
+            // Skip bin if model is too small (avoids -Inf or NaN gradients)
+            if (model <= m_minmod)
                 continue;
 
             // Create index array of non-zero derivatives
@@ -292,11 +292,6 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
 
             // Case B: unbinned analysis
             else {
-
-                // Skip event if probability is too small (this avoids
-                // -Inf errors)
-                if (model < 1.0e-100)
-                    continue;
 
                 // Update Poissonian statistics (excluding factorial term
                 // for faster computation)
@@ -374,6 +369,7 @@ void GObservations::optimizer::init_members(void)
     // Initialise members
     m_value    = 0.0;
     m_npred    = 0.0;
+    m_minmod   = 1.0e-100;
     m_gradient = NULL;
     m_covar    = NULL;
     m_this     = NULL;
@@ -391,8 +387,9 @@ void GObservations::optimizer::init_members(void)
 void GObservations::optimizer::copy_members(const optimizer& fct)
 {
     // Copy attributes
-    m_value = fct.m_value;
-    m_npred = fct.m_npred;
+    m_value  = fct.m_value;
+    m_npred  = fct.m_npred;
+    m_minmod = fct.m_minmod;
 
     // Copy gradient if it exists
     if (fct.m_gradient != NULL)

@@ -116,6 +116,7 @@ public:
         void           free_members(void);
         double         m_value;       //!< Function value
         double         m_npred;       //!< Total number of predicted events
+        double         m_minmod;      //!< Minimum model value
         GVector*       m_gradient;    //!< Pointer to gradient vector
         GSparseMatrix* m_covar;       //!< Pointer to covariance matrix
         GObservations* m_this;        //!< Pointer to GObservations object
