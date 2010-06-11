@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GWcsCAR.cpp
@@ -87,10 +86,6 @@ GWcsCAR::GWcsCAR(const std::string& coords,
 
     // Initialise derived projection parameters
     wcs_init(0.0);  // theta0 = 0.0
-
-    // Set projection function pointers
-    //m_std2nat = (_wcspf)&GWcsCAR::std2nat;
-    //m_nat2std = (_wcspf)&GWcsCAR::nat2std;
 
     // Return
     return;
@@ -232,16 +227,45 @@ void GWcsCAR::write(GFitsHDU* hdu) const
 
 
 /***********************************************************************//**
- * @brief Returns solid angle of pixel
+ * @brief Returns solid angle of pixel in units of steradians
  *
  * @param[in] pix Pixel index (x,y)
+ *
+ * Estimate solid angles of pixel by compuing the coordinates in the 4 pixel
+ * corners. The surface is computed using a cartesian approximation:
+ *           a
+ *     1-----------2                 a+b
+ * h  /             \    where A = h ---
+ *   4---------------3                2
+ *           b
+ * This is a brute force technique that works sufficiently well for non-
+ * rotated sky maps. Something more intelligent should be implemented in
+ * the future.
+ *
+ * @todo Implement accurate solid angle computation (so far only brute force
+ *       estimation)
  ***************************************************************************/
 double GWcsCAR::omega(const GSkyPixel& pix) const
 {
-    // TODO: Implement
+    // Bypass const correctness
+    GWcsCAR* ptr = (GWcsCAR*)this;
+
+    // Get the sky directions of the 4 corners
+    GSkyDir dir1 = ptr->xy2dir(GSkyPixel(pix.x()-0.5, pix.y()-0.5));
+    GSkyDir dir2 = ptr->xy2dir(GSkyPixel(pix.x()+0.5, pix.y()-0.5));
+    GSkyDir dir3 = ptr->xy2dir(GSkyPixel(pix.x()+0.5, pix.y()+0.5));
+    GSkyDir dir4 = ptr->xy2dir(GSkyPixel(pix.x()-0.5, pix.y()+0.5));
+
+    // Compute distances between sky directions
+    double a = dir1.dist(dir2);
+    double b = dir3.dist(dir4);
+    double h = dir1.dist(dir4);
+
+    // Compute solid angle
+    double omega = 0.5*(h*(a+b));
 
     // Return solid angle
-    return 0.0;
+    return omega;
 }
 
 
