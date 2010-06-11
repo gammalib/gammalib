@@ -32,6 +32,7 @@
 const std::string cta_caldb  = "../inst/cta/test/irf";
 const std::string cta_irf    = "kb_E_50h_v3";
 const std::string cta_events = "../inst/cta/test/data/run_00006028_eventlist_reco.fits.gz";
+const std::string cta_cntmap = "../inst/cta/test/data/run_00006028_cntmap.fits.gz";
 const double twopi           =  6.283185307179586476925286766559005768394;
 
 
@@ -478,6 +479,99 @@ void test_unbinned_optimizer(void)
 
 
 /***********************************************************************//**
+ * @brief Test unbinned observation handling.
+ ***************************************************************************/
+void test_binned_obs(void)
+{
+    // Write header
+    std::cout << "Test CTA binned observation handling: ";
+
+    // Declare observations
+    GObservations   obs;
+    GCTAObservation run;
+
+    // Load binned CTA observation
+    try {
+        run.load_binned(cta_cntmap);
+        run.response(cta_irf,cta_caldb);
+        //std::cout << run << std::endl;
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl << "TEST ERROR: Unable to load CTA run."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Notify final test success
+    std::cout << " ok." << std::endl;
+
+    // Exit test
+    return;
+ 
+}
+
+
+/***********************************************************************//**
+ * @brief Test binned optimizer.
+ ***************************************************************************/
+void test_binned_optimizer(void)
+{
+    // Write header
+    std::cout << "Test binned optimizer: ";
+
+    // Number of observations in data
+    int nobs = 1;
+
+    // Declare observations
+    GObservations   obs;
+    GCTAObservation run;
+
+    // Load binned CTA observation
+    try {
+        run.load_binned(cta_cntmap);
+        run.response(cta_irf,cta_caldb);
+        obs.append(run);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl << "TEST ERROR: Unable to load CTA run."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Setup GModels for optimizing
+    GModels models = crab_plaw();
+    obs.models(models);
+
+    // Perform LM optimization
+    GOptimizerLM opt;
+    try {
+        opt.max_iter(10);
+        obs.optimize(opt);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to perform LM optimization."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+    std::cout << obs << std::endl;
+
+    // Plot final test success
+    std::cout << " ok." << std::endl;
+
+    // Exit test
+    return;
+
+}
+
+
+/***********************************************************************//**
  * @brief Main test function .
  ***************************************************************************/
 int main(void)
@@ -491,7 +585,9 @@ int main(void)
     // Execute the tests
     test_response();
     test_unbinned_obs();
+    test_binned_obs();
     test_unbinned_optimizer();
+    test_binned_optimizer();
 
     // Return
     return 0;
