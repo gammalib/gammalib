@@ -35,7 +35,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                   GOptimizerLM constructors/destructors                 =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
@@ -85,7 +85,7 @@ GOptimizerLM::~GOptimizerLM()
 
 /*==========================================================================
  =                                                                         =
- =                          GOptimizerLM operators                         =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -158,13 +158,13 @@ GModels& GOptimizerLM::operator() (GOptimizerFunction& fct, GModels& m)
 
 /*==========================================================================
  =                                                                         =
- =                        GOptimizerLM public methods                      =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /*==========================================================================
  =                                                                         =
- =                        GOptimizerLM private methods                     =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -457,7 +457,7 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
 
 /*==========================================================================
  =                                                                         =
- =                            GOptimizerLM friends                         =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
 
@@ -471,6 +471,10 @@ std::ostream& operator<< (std::ostream& os, const GOptimizerLM& opt)
 {
     // Put optimizer in stream
     os << "=== GOptimizerLM ===" << std::endl;
+    os << " Function value ............: " << opt.m_value << std::endl;
+    os << " Optimization status .......: " << opt.m_status << std::endl;
+    os << " Number of iterations ......: " << opt.m_iter << std::endl;
+    os << " Lambda ....................: " << opt.m_lambda << std::endl;
 
     // Return output stream
     return os;
