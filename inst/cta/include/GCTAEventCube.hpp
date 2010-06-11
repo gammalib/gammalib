@@ -25,12 +25,11 @@
 #include "GSkymap.hpp"
 #include "GEbounds.hpp"
 #include "GGti.hpp"
-//#include "GFits.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTAPointing.hpp"
-#include "GCTAResponse.hpp"
+#include "GFitsHDU.hpp"
 
 
 /***********************************************************************//**
@@ -60,14 +59,15 @@ public:
     GCTAEventCube& operator= (const GCTAEventCube& cube);
 
     // Methods
-	void          load(const std::string& filename);
+    void          clear();
+    void          load(const std::string& filename);
     GCTAEventBin* pointer(int index);
     int           number(void) const;
     int           nx(void) const { return m_map.nx(); }
     int           ny(void) const { return m_map.ny(); }
     int           npix(void) const { return m_map.npix(); }
     int           ebins(void) const { return m_map.nmaps(); }
-    
+
 protected:
     // Protected methods
     void           init_members(void);

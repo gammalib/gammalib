@@ -22,9 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GEventList.hpp"
 #include "GCTAEventAtom.hpp"
-#include "GCTAResponse.hpp"
-#include "GFits.hpp"
-#include "GModels.hpp"
+#include "GFitsHDU.hpp"
 
 
 /***********************************************************************//**
@@ -47,11 +45,12 @@ public:
     GCTAEventList& operator= (const GCTAEventList& list);
 
     // Methods
-	void           load(const std::string& filename);
+    void           clear();
+    void           load(const std::string& filename);
     GCTAEventAtom* pointer(int index);
     int            number(void) const { return m_num; }
     int            size(void) const { return m_num; }
-    
+
 protected:
     // Protected methods
     void           init_members(void);
@@ -61,8 +60,8 @@ protected:
     void           load_events(GFitsHDU* hdu);
 
     // Protected data area
-    int            m_num;           //!< Number of events
-    GCTAEventAtom* m_events;        //!< Pointer to events
+    int            m_num;         //!< Number of events
+    GCTAEventAtom* m_events;      //!< Pointer to events
 };
 
 #endif /* GCTAEVENTLIST_HPP */
