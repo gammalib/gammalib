@@ -76,7 +76,7 @@ public:
                         const GRoi& roi) const = 0;
     virtual double nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
                           const GTime& srcTime, const GPointing& pnt,
-                          const GEbounds& ebds) const = 0;
+                          const GEbounds& ebds) const;
     virtual double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
                           const GTime& srcTime, const GPointing& pnt,
                           const GGti& gti) const;
