@@ -526,6 +526,29 @@ GEnergy GEbounds::elogmean(int inx) const
 }
 
 
+/***********************************************************************//**
+ * @brief Tests whether energy is within energy boundaries intervals
+ *
+ * @param[in] eng Energy to be tested.
+ ***************************************************************************/
+bool GEbounds::isin(const GEnergy& eng) const
+{
+    // Initialise test
+    bool found = false;
+
+    // Test all GTIs
+    for (int i = 0; i < m_num; ++i) {
+        if (eng >= m_min[i] && eng <= m_max[i]) {
+            found = true;
+            break;
+        }
+    }
+
+    // Return result
+    return found;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Private methods                              =

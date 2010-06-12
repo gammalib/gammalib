@@ -22,6 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include "GFits.hpp"
+#include "GFitsHDU.hpp"
 #include "GEnergy.hpp"
 
 
@@ -67,6 +68,7 @@ public:
     GEnergy emax(int inx) const;
     GEnergy emean(int inx) const;
     GEnergy elogmean(int inx) const;
+    bool    isin(const GEnergy& eng) const;
     
 protected:
     // Protected methods
