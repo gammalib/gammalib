@@ -422,6 +422,29 @@ GTime GGti::tstop(int inx) const
 }
 
 
+/***********************************************************************//**
+ * @brief Tests whether time is within GTI intervals
+ *
+ * @param[in] t Time to be tested.
+ ***************************************************************************/
+bool GGti::isin(const GTime& t) const
+{
+    // Initialise test
+    bool found = false;
+
+    // Test all GTIs
+    for (int i = 0; i < m_num; ++i) {
+        if (t >= m_start[i] && t <= m_stop[i]) {
+            found = true;
+            break;
+        }
+    }
+
+    // Return result
+    return found;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =

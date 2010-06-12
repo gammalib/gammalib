@@ -68,6 +68,7 @@ public:
 	GTime  tstop(int inx) const;
 	double telapse(void) const { return m_telapse; }
 	double ontime(void) const { return m_ontime; }
+    bool   isin(const GTime& t) const;
   
 protected:
     // Protected methods
