@@ -79,7 +79,7 @@ public:
                           const GEbounds& ebds) const = 0;
     virtual double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
                           const GTime& srcTime, const GPointing& pnt,
-                          const GGti& gti) const = 0;
+                          const GGti& gti) const;
 
     // Other methods
     virtual void        caldb(const std::string& caldb);
