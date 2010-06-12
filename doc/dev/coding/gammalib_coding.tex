@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{CCD}}
 \newcommand{\doctype}{\mbox{Coding Conventions Document}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{28 April 2010}}
+\newcommand{\calendar}{\mbox{12 Juin 2010}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 \newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
@@ -50,9 +50,11 @@ The following general rules should be followed:
 \begin{itemize}
 \item[R1] Each function and/or method terminates with a {\tt return;} statement.
 \item[R2] Put a blank line at the end of each file.
-\item[R3] Use {\tt explicit} for constructors to avoid use of the constructor for unintended.
+\item[R3] Use {\tt explicit} for constructors to avoid use of the constructor for unintended
+type conversion.
 \item[R4] Do not use tabs (to make code formating independent of editor configurations)
 type conversion.
+\item[R5] Blocks are indented by 4 characters.
 \end{itemize}
 
 
@@ -65,8 +67,8 @@ type conversion.
 \subsection{Code configuration}
 
 The code configuration is controlled via an include file that has to be added on top of
-each source and include file.
-Each file thus should start with the following code:
+each source file.
+Each source file should start with:
 
 \begin{verbatim}
 /* __ Includes ___________________________________________________________ */
@@ -74,6 +76,9 @@ Each file thus should start with the following code:
 #include <config.h>
 #endif
 \end{verbatim}
+
+Note that the {\tt config.h} file should {\bf not be included in header files}, since header file
+are used by the outside world for which a different {\tt config.h} include file may exist.
 
 One of the most common options used throughout \this\ is range checking.
 Range checking is particularily important during code development since it allows to catch
@@ -97,24 +102,198 @@ Range checking is provided if the {\tt G\_RANGE\_CHECK} macro is defined.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{C++ classes}
 
-Memory management should be gathered in a single place to avoid memory leaks.
-For this purpose it is best practice to gather the handling of data associated with a C++
-class in single places.
-For this purpose, each C++ class should have the following {\tt private} methods
-for memory management:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Data}
+
+Class data should be either {\tt private} or {\tt protected}, the latter being generally used
+when a derived class should be able to access base class data.
+
+Data members should be prefixed by {\tt m\_} and should be in lower case.
+For long member names, additional underscores may be added.
+Examples of valid member names are
+\begin{verbatim}
+  m_num
+  m_response
+  m_grid_length
+  m_axis_dir_qual
+\end{verbatim}
+
+Initialisation, copying and deleting of class members should be gathered in a single
+place to avoid memory leaks.
+For this purpose, each C++ class should have the following {\tt private} or {\tt protected}
+methods for memory management:
 \begin{itemize}
 \item {\tt init\_members()} initializes all member variables and pointers to well defined
 initial values. The class should be fully operational and consistent with these initial
-values.
-\item {\tt alloc\_members()} allocates all memory required by the class. 
+values. All pointers that will hold dynamically allocated memory should be
+initialised to {\tt NULL}.
 \item {\tt copy\_members(const \&A a)} copies all members from one instance {\tt a}
-in the {\tt this} instance.
-\item {\tt free\_members()} frees all memory that has been allocated by the class. As
-good practice memory pointers should be set to {\tt NULL} if they do not point to
-any valid memory. This allows for checking if memory has been allocated before
-it is accessed.
+to the {\tt this} instance.
+\item {\tt free\_members()} frees all memory that has been allocated by the class.
+Memory pointers should be set to {\tt NULL} after the memory was deleted to signal
+that no valid memory is associated to the pointer.
+This allows for checking if memory has been allocated before it is accessed.
 \end{itemize}
-(in the above notation, {\tt A} is the class name and {\tt a} is an instance of the class.
+(in the above notation, {\tt A} is the class name and {\tt a} is an instance of the class).
+
+An example for valid {\tt init\_members()}, {\tt copy\_members(const \&A a)} and
+{\tt free\_members()} methods is:
+\begin{verbatim}
+void GEbounds::init_members(void)
+{
+    m_num = 0;
+    m_min = NULL;
+    m_max = NULL;
+    return;
+}
+
+void GEbounds::copy_members(const GEbounds& ebds)
+{
+    m_num  = ebds.m_num;
+    if (m_num > 0) {
+        m_min = new GEnergy[m_num];
+        m_max = new GEnergy[m_num];
+        for (int i = 0; i < m_num; ++i) {
+            m_min[i] = ebds.m_min[i];
+            m_max[i] = ebds.m_max[i];
+        }
+    }
+    return;
+}
+
+void GEbounds::free_members(void)
+{
+    if (m_min != NULL) delete [] m_min;
+    if (m_max != NULL) delete [] m_max;
+    m_min = NULL;
+    m_max = NULL;
+    return;
+}
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Constructors, destructors and operators}
+
+Each class should have at least a void constructor, a copy constructor, a destructor and
+an assignment operator.
+Additional constructors and operators can be implemented as required.
+The following example shows the basic implementation for these 4 methods.
+Due to the usage of the {\tt init\_members()}, {\tt copy\_members(const \&A a)} and the
+{\tt free\_members()} methods, most classes will have exactly this kind of syntax:
+\begin{verbatim}
+GEbounds::GEbounds(void)
+{
+    init_members();
+    return;
+}
+
+GEbounds::GEbounds(const GEbounds& ebds)
+{
+    init_members();
+    copy_members(ebds);
+    return;
+}
+
+GEbounds::~GEbounds(void)
+{
+    free_members();
+    return;
+}
+
+GEbounds& GEbounds::operator= (const GEbounds& ebds)
+{
+    if (this != &ebds) {
+        free_members();
+        init_members();
+        copy_members(ebds);
+    }
+    return *this;
+}
+\end{verbatim}
+Note that for a derived class, the assignment operator will have the form:
+\begin{verbatim}
+GEventCube& GEventCube::operator= (const GEventCube& cube)
+{
+    if (this != &cube) {
+        this->GEvents::operator=(cube);    // Copy base class members
+        free_members();
+        init_members();
+        copy_members(cube);
+    }
+    return *this;
+}
+\end{verbatim}
+Also note that {\bf for a derived class, {\tt init\_members()}, {\tt copy\_members(const \&A a)}
+and {\tt free\_members()} should only act on derived class members but not on
+base class members}.
+Any exception from this rule needs very careful documentation since it can easily be
+the source of memory leaks.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Methods}
+
+Uniform {\tt public} method names should be provided throughout \this\ for all classes.
+Unless the {\tt public} method names are very long (which should be avoided), names
+should not comprise underscores as separators.
+{\tt Public} method names are all lowercase.
+
+{\tt Private} or {\tt protected} may differ from this since they are hidden within the class.
+Yet also here, all method names should be lowercase, and the use of underscores
+should be limited.
+ 
+In addition, the following {\tt public} method names should be used:
+
+%%% Naming conventions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!h]
+\caption{Naming conventions for class methods.
+\label{tab:naming}}
+\begin{center}
+\begin{tabular}{lll}
+\hline
+\hline
+\noalign{\smallskip}
+Method & Usage & Implementation \\
+\noalign{\smallskip}
+\hline
+\noalign{\smallskip}
+{\tt clear()} & Set object to initial empty state & All classes \\
+{\tt append()} & Append element to list of elements & Class containing elements \\
+{\tt size()} & Return number of elements in object & Class containing elements \\
+{\tt load()} & Load data from file (open, read, close) & When useful \\
+{\tt save()} & Save data into file (open, write, close) & When useful \\
+{\tt read()} & Read data from open file & When useful \\
+{\tt write()} & Write data into open file & When useful \\
+\noalign{\smallskip}
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Note the difference between {\tt load()} and {\tt read()} and between {\tt save()} and {\tt write()}.
+The {\tt load()} and {\tt save()} methods should take as arguments a file name, and they
+will open the file, read or write some data, and then close the file.
+In contrast, {\tt read()} and {\tt write()} will operate on files that are already open, and after
+the read or write operation the files will remain open.
+Typically, these methods take a {\tt GFits*} or a {\tt GFitsHDU*} pointer as argument.
+
+Methods that perform checks should return a {\tt bool} type and should start with the
+prefix {\tt is} or {\tt has}.
+
+Valid examples are:
+\begin{verbatim}
+  islong()
+  isin()
+  hasedisp()
+\end{verbatim}
+
+Method arguments should be generally passed as {\tt const} and by reference.
+
+Numeric argument types should be typically {\tt int} and {\tt double}.
+Unless absolutely required, {\tt short int}, {\tt long}, and {\tt float} should be avoided.
+True/false checks should always be done using {\tt bool}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
