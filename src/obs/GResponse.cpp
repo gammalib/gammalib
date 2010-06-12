@@ -185,6 +185,27 @@ double GResponse::nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
 
 
 /***********************************************************************//**
+ * @brief Return time dispersion integral for the case of no time dispersion
+ *
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Pointer to instrument pointing information.
+ * @param[in] gti Good Time Intervals of data selection.
+ ***************************************************************************/
+double GResponse::ntdisp(const GSkyDir& srcDir, const GEnergy& srcEng,
+                         const GTime& srcTime, const GPointing& pnt,
+                         const GGti& gti) const
+{
+    // Assign result
+    double ntdisp = (gti.isin(srcTime)) ? 1.0 : 0.0;
+    
+    // Return integral
+    return ntdisp;
+}
+
+
+/***********************************************************************//**
  * @brief Set the path to the calibration database.
  *
  * @param[in] caldb Absolute path to calibration database
