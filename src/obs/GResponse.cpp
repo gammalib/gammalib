@@ -185,6 +185,27 @@ double GResponse::nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
 
 
 /***********************************************************************//**
+ * @brief Return energy dispersion integral for the case of no energy dispersion
+ *
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Pointer to instrument pointing information.
+ * @param[in] ebds Energy boundaries of data selection.
+ ***************************************************************************/
+double GResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
+                         const GTime& srcTime, const GPointing& pnt,
+                         const GEbounds& ebds) const
+{
+    // Assign result
+    double nedisp = (ebds.isin(srcEng)) ? 1.0 : 0.0;
+    
+    // Return integral
+    return nedisp;
+}
+
+
+/***********************************************************************//**
  * @brief Return time dispersion integral for the case of no time dispersion
  *
  * @param[in] srcDir True photon direction.
