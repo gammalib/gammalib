@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{INST}}
 \newcommand{\doctype}{\mbox{Instrument specific interface}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{27 May 2010}}
+\newcommand{\calendar}{\mbox{13 Juin 2010}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 \newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
@@ -38,6 +38,80 @@
 The present document describes the instrument specific interface of the \this\ toolbox
 and provides guideslines of how to add a new interface to the toolbox.
 
+The general philosophy of \this\ is that instrument specific interfaces are implemented
+as classes that derive from abstract base classes (i.e. the base class can not be instantiated).
+The base class will implement as most methods as possible to reduce the workload
+for integration of new instrument specific interfaces.
+Most base class methods, however, are declared as {\tt virtual} and may be overloaded by
+instrument specific methods that implement more efficient computations adapted to
+the specific telescope.
+
+The instrument specific aspects that have to be considered are the implementation of
+the instrument response functions (base class {\tt GResponse}) and of the instrument
+data (base classes {\tt GEvent} and {\tt GEvents}).
+Each instrument may come with its own ``data space'', and methods are needed
+that provide an abstract representation of this data space (base classes {\tt GInstDir}
+and {\tt GRoi}).
+Also, instruments may point the sky in various ways and strategies (in particular when
+comparing ground based telescopes to satellites), and also here an abstract representation
+is needed of these strategies (base class {\tt GPointing}).
+Finally, the data related to the observation with a given instrument differ, and an abstract
+interface is needed to combined those (base class {\tt GObservation}).
+
+Instrument specific classes are defined by inserting the instrument code {\tt XXX}
+between the capital {\tt G} and the remaining part of the name.
+For example, the {\tt GResponse} class for {\tt CTA} becomes {\tt GCTAResponse}.
+Throughout this document, we will indicate derived class names by inserting the
+instrument code {\tt XXX} in the name.
+Instrument codes should always be 3 letters, unless name confusion imposes the
+use of more letters.
+
+The following table summarizes the C++ classes that have to be implemented for
+each instrument.
+Examples for the names of the derived classes are given for {\tt CTA}.
+
+%%% Response parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!h]
+\caption{Instrument specific classes that have to be implemented.
+\label{tab:classes}}
+\begin{center}
+\begin{tabular}{llcl}
+\hline
+\hline
+\noalign{\smallskip}
+Name & CTA name & Section & Usage \\
+\noalign{\smallskip}
+\hline
+\noalign{\smallskip}
+{\tt GEventAtom} & {\tt GCTAEventAtom} & \ref{sec:GEvent} 
+  & Implements individual events for unbinned analysis \\
+{\tt GEventBin} & {\tt GCTAEventBin} &  \ref{sec:GEvent}
+  & Implements data space bins for binned analysis \\
+{\tt GEventCube} & {\tt GCTAEventCube} & \ref{sec:GEvents}
+  & Container of data space bins (event cube) \\
+{\tt GEventList} & {\tt GCTAEventList} & \ref{sec:GEvents}
+  & Container of events (event list) \\
+{\tt GInstDir} & {\tt GCTAInstDir} & \ref{sec:GInstDir}
+  & Photon ``direction'' in instrument coordinates \\
+{\tt GObservation} & {\tt GCTAObservation} & \ref{sec:GObservation}
+  & Implements instrument specific observation \\
+{\tt GPointing} & {\tt GCTAPointing} & \ref{sec:GPointing}
+  & Implements instrument specific pointing \\
+{\tt GResponse} & {\tt GCTAResponse} & \ref{sec:GResponse} 
+  & Implements instrument specific response function \\
+{\tt GRoi} & {\tt GCTARoi} & \ref{sec:GRoi}
+  & Implements instrument specific data selection \\
+\noalign{\smallskip}
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+To start from scratch the implementation of a new instrument interface, we strongly
+recommend to use the corresponding classes in the {\tt template} directory of the \this\ 
+distribution (instrument code {\tt XXX}).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Instrument response
@@ -46,6 +120,9 @@ and provides guideslines of how to add a new interface to the toolbox.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Response model}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Instrument response function}
 
 The general instrument response function
 $R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)$
@@ -59,20 +136,20 @@ a detector coordinate.
 $R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)$ is factorised following
 \begin{eqnarray}
 R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) = 
-L(\vec{d}, \vec{p}, E, t) \times
-A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times
-PSF(\vec{p'} | \vec{d}, \vec{p}, E, t) \times
-E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t) \times \nonumber \\
-T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)
+  L(\vec{d}, \vec{p}, E, t) \,
+  A_{\rm eff}(\vec{d}, \vec{p}, E, t) \,
+  PSF(\vec{p'} | \vec{d}, \vec{p}, E, t) \,
+  E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t) \,
+  T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)
 \label{eq:rspfact}
 \end{eqnarray}
 where
 \begin{itemize}
-\item[] $L(\vec{d}, \vec{p}, E, t)$ is the livetime fraction (in units of s s$^{-1}$),
-\item[] $A_{\rm eff}(\vec{d}, \vec{p}, E, t)$ is the effective area (in units of counts photons$^{-1}$cm$^2$),
-\item[] $PSF(\vec{p'} | \vec{d}, \vec{p}, E, t)$ is the point spread function (in units of sr$^{-1}$),
-\item[] $E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t)$ is the energy dispersion (in units of MeV$^{-1}$), and
-\item[] $T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)$ is the time dispersion (in units of s$^{-1}$).
+\item $L(\vec{d}, \vec{p}, E, t)$ is the livetime fraction (in units of s s$^{-1}$),
+\item $A_{\rm eff}(\vec{d}, \vec{p}, E, t)$ is the effective area (in units of counts photons$^{-1}$cm$^2$),
+\item $PSF(\vec{p'} | \vec{d}, \vec{p}, E, t)$ is the point spread function (in units of sr$^{-1}$),
+\item $E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t)$ is the energy dispersion (in units of MeV$^{-1}$), and
+\item $T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)$ is the time dispersion (in units of s$^{-1}$).
 \end{itemize}
 Assuming that the photon intensity received from a gamma-ray source is described by
 the source model $S(\vec{p}, E, t)$ (in units of photons cm$^{-2}$ s$^{-1}$ MeV$^{-1}$ sr$^{-1}$)
@@ -80,7 +157,7 @@ the probability of measuring an event at position $\vec{p'}$ with an
 energy of $E'$ at the time $t'$ from the source is given by
 \begin{equation}
 N(\vec{p'}, E', t'| \vec{d}) = \int_{0}^{t'+\Delta t} \int_{E'-\Delta E}^{\infty} \int_{\Omega} 
-S(\vec{p}, E, t) \times R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \, {\rm d}\vec{p} \, {\rm d}E \,{\rm d}t
+  S(\vec{p}, E, t) \, R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \, {\rm d}\vec{p} \, {\rm d}E \,{\rm d}t
 \label{eq:model}
 \end{equation}
 (in units of counts s$^{-1}$ MeV$^{-1}$ sr$^{-1}$).
@@ -90,11 +167,11 @@ In the case of no time dispersion, $T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)$ b
 and Eq.~(\ref{eq:model}) reduces to 
 \begin{eqnarray}
 N(\vec{p'}, E', t' | \vec{d}) = \int_{E'-\Delta E}^{\infty} \int_{\Omega} 
-S(\vec{p}, E, t') \times 
-L(\vec{d}, \vec{p}, E, t') \times
-A_{\rm eff}(\vec{d}, \vec{p}, E, t') \times
-PSF(\vec{p'} | \vec{d}, \vec{p}, E, t') \times \nonumber \\
-E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t') 
+  S(\vec{p}, E, t') \,
+  L(\vec{d}, \vec{p}, E, t') \,
+  A_{\rm eff}(\vec{d}, \vec{p}, E, t') \,
+  PSF(\vec{p'} | \vec{d}, \vec{p}, E, t') \,  \nonumber \\
+  E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t') 
 \, {\rm d}\vec{p} \, {\rm d}E \, .
 \end{eqnarray}
 Since for many astrophysical sources $S(\vec{p}, E, t)$ drops quickly with energy, only
@@ -104,10 +181,10 @@ $E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t)$ can be approximated by a $\delta$-fu
 leading to
 \begin{equation}
 N(\vec{p'}, E', t'| \vec{d}) = \int_{\Omega} 
-S(\vec{p}, E', t') \times 
-L(\vec{d}, \vec{p}, E', t') \times
-A_{\rm eff}(\vec{d}, \vec{p}, E', t') \times
-PSF(\vec{p'} | \vec{d}, \vec{p}, E', t') \, {\rm d}\vec{p} \, .
+  S(\vec{p}, E', t') \,
+  L(\vec{d}, \vec{p}, E', t') \,
+  A_{\rm eff}(\vec{d}, \vec{p}, E', t') \,
+  PSF(\vec{p'} | \vec{d}, \vec{p}, E', t') \, {\rm d}\vec{p} \, .
 \end{equation}
 These simplifications may be considered when implementing the computation of
 $N(\vec{p'}, E', t' | \vec{d})$ for a specific instrument.
@@ -118,60 +195,470 @@ $N(\vec{p'}, E', t' | \vec{d})$ for a specific instrument.
 
 The total number of predicted events for a given pointing $\vec{d}$ is given by
 \begin{equation}
-N_{\rm pred} = \int_{\rm GTI} \int_{E_{\rm min}}^{E_{\rm max}} \int_{\rm ROI} 
+N_{\rm pred} = \int_{\rm GTI} \int_{E_{\rm bounds}} \int_{\rm ROI} 
 N(\vec{p'}, E', t' | \vec{d}) \, {\rm d}\vec{p'} \, {\rm d}E' \,{\rm d}t'
 \end{equation}
 where
 ${\rm ROI}$ is the event selection region,
-$E_{\rm min}$ and $E_{\rm max}$ are the event selection energy boundaries, and
+$E_{\rm bounds}$ are the energy boundaries, and
 ${\rm GTI}$ are the good time intervals.
-Using Eq.~(\ref{eq:model}), $N_{\rm pred}$ can be written as
+These three selections are commonly referred to as data space selections.
+
+Using $N(\vec{p'}, E', t' | \vec{d})$ given by Eq.~(\ref{eq:model}), $N_{\rm pred}$ can be
+written as
 \begin{eqnarray}
 N_{\rm pred} = \int_{0}^{\infty} \int_{0}^{\infty} \int_{\Omega} 
-S(\vec{p}, E, t) \times 
-L(\vec{d}, \vec{p}, E, t) \times
-A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times
-N_{\rm PSF}(\vec{d}, \vec{p}, E, t) \times
-N_{\rm Edisp}(\vec{d}, \vec{p}, E, t) \times \nonumber \\
-N_{\rm Tdisp}(\vec{d}, \vec{p}, E, t) 
+  S(\vec{p}, E, t) \,
+  L(\vec{d}, \vec{p}, E, t) \,
+  A_{\rm eff}(\vec{d}, \vec{p}, E, t) \,
+  N_{\rm PSF}(\vec{d}, \vec{p}, E, t) \, \nonumber \\
+  N_{\rm Edisp}(\vec{d}, \vec{p}, E, t) \,
+  N_{\rm Tdisp}(\vec{d}, \vec{p}, E, t) 
 \, {\rm d}\vec{p} \, {\rm d}E \, \,{\rm d}t
 \label{eq:npred}
 \end{eqnarray}
 where the three integrals are to be taken over all possible photon arrival times $t$, 
 true energies $E$, and arrivial directions $\vec{p}$.
-The integrations over the data selection regions (${\rm ROI}$, $E_{\rm min}$ and $E_{\rm max}$,
-${\rm GTI}$) have been written as
-\begin{equation}
-N_{\rm PSF}(\vec{d}, \vec{p}, E, t) = \int_{\rm ROI} PSF(\vec{p'} | \vec{d}, \vec{p}, E, t) \, {\rm d}\vec{p'}
-\end{equation}
-\begin{equation}
-N_{\rm Edisp}(\vec{d}, \vec{p}, E, t) = \int_{E_{\rm min}}^{E_{\rm max}} 
-E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t) \, {\rm d}E'
-\end{equation}
-and
-\begin{equation}
-N_{\rm Tdisp}(\vec{d}, \vec{p}, E, t) = \int_{\rm GTI} T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t) \, {\rm d}t' \, .
-\end{equation}
+The integrations over the data space selections have been compactly written
+as
+\begin{eqnarray}
+N_{\rm PSF}(\vec{d}, \vec{p}, E, t) & = & 
+\int_{\rm ROI} PSF(\vec{p'} | \vec{d}, \vec{p}, E, t) \, {\rm d}\vec{p'} \\
+N_{\rm Edisp}(\vec{d}, \vec{p}, E, t) & = & 
+\int_{E_{\rm bounds}} E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t) \, {\rm d}E' \\
+N_{\rm Tdisp}(\vec{d}, \vec{p}, E, t) & = & 
+\int_{\rm GTI} T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t) \, {\rm d}t' \, .
+\end{eqnarray}
 By combining all terms related to the instrument response function in
 \begin{equation}
 N_{\rm R}(\vec{d}, \vec{p}, E, t) = 
-L(\vec{d}, \vec{p}, E, t) \times
-A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times
-N_{\rm PSF}(\vec{d}, \vec{p}, E, t) \times
-N_{\rm Edisp}(\vec{d}, \vec{p}, E, t) \times
-N_{\rm Tdisp}(\vec{d}, \vec{p}, E, t)
+  L(\vec{d}, \vec{p}, E, t) \,
+  A_{\rm eff}(\vec{d}, \vec{p}, E, t) \,
+  N_{\rm PSF}(\vec{d}, \vec{p}, E, t) \,
+  N_{\rm Edisp}(\vec{d}, \vec{p}, E, t) \,
+  N_{\rm Tdisp}(\vec{d}, \vec{p}, E, t)
+\label{eq:nirf}
 \end{equation}
 Eq.~(\ref{eq:npred}) simplifies to
 \begin{equation}
 N_{\rm pred} = \int_{0}^{\infty} \int_{0}^{\infty} \int_{\Omega} 
-S(\vec{p}, E, t) \times 
-N_{\rm R}(\vec{d}, \vec{p}, E, t)
+  S(\vec{p}, E, t) \,
+  N_{\rm R}(\vec{d}, \vec{p}, E, t)
 \, {\rm d}\vec{p} \, {\rm d}E \, \,{\rm d}t
 \end{equation}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Factorized source model}
+\subsection{Response class {\tt GResponse}}
+\label{sec:GResponse}
+
+The \this\ implementation of the response function and parameters is summarised in 
+Table \ref{tab:respar}.
+
+%%% Response parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!h]
+\caption{\this\ implementation of the response function and parameters. 
+The last column indicates if the function or parameter requires an
+instrument specific implementation that has to be derived from the abstract
+base class specified in the third column.
+\label{tab:respar}}
+\begin{center}
+\begin{tabular}{lccc}
+\hline
+\hline
+\noalign{\smallskip}
+Response function or parameter & Designation & Class (::method) & Instrument specific \\
+\noalign{\smallskip}
+\hline
+\noalign{\smallskip}
+Response function & $R$ & {\tt GResponse::irf()} & optional \\
+Lifetime fraction & $L$ & {\tt GResponse::live()} & {\bf yes} \\
+Effective area & $A_{\rm eff}$ & {\tt GResponse::aeff()} & {\bf yes} \\
+Point spread function & $PSF$ & {\tt GResponse::psf()} & {\bf yes} \\
+Energy dispersion & $E_{\rm disp}$ & {\tt GResponse::edisp()} & {\bf yes} \\
+Time dispersion & $T_{\rm disp}$ & {\tt GResponse::tdisp()} & {\bf yes} \\
+Integral over response function & $N_{\rm R}$ & {\tt GResponse::nirf()} & optional \\
+Integral over point spread function & $N_{\rm PSF}$ & {\tt GResponse::npsf()} & {\bf yes} \\
+Integral over energy dispersion & $N_{\rm Edisp}$ & {\tt GResponse::nedisp()} & optional \\
+Integral over time dispersion & $N_{\rm Tdisp}$ & {\tt GResponse::ntdisp()} & optional \\
+Probability of measuring a photon & $N$ & {\tt GEvent::model()} & optional \\
+Predicted number of events & $N_{\rm pred}$ & {\tt GObservation::npred()} & optional \\
+Source model & $S$ & {\tt GModel} & no \\ 
+Measured location of photon & $\vec{p'}$ & {\tt GInstDir} & {\bf yes} \\
+Measured energy of photon & $E'$ & {\tt GEnergy} & no \\
+Measured arrival time & $t'$ & {\tt GTime} & no \\
+Instrument pointing & $d$ & {\tt GPointing} & {\bf yes} \\
+True arrival direction of photon & $\vec{p}$ & {\tt GSkyDir} & no \\
+True energy of photon & $E$ & {\tt GEnergy} & no \\
+True arrival time of photon & $t$ & {\tt GTime} & no \\
+Region of interets & ${\rm ROI}$ & {\tt GRoi} & {\bf yes} \\
+Good Time Interval & ${\rm GTI}$ & {\tt GGti} & no \\
+\noalign{\smallskip}
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+An instrument specific response class {\tt GXXXResponse} (where {\tt XXX} is the instrument code)
+needs to be provided that derives from the abstract base class {\tt GResponse}.
+The following sections provide a description of the {\tt GResponse} data members and the
+methods and their interfaces that are required to be implemented in {\tt GXXXResponse}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Data members}
+
+The abstract base class {\tt GResponse} implements the following protected members:
+
+\begin{verbatim}
+  std::string m_caldb;    //!< Path to the calibration database
+\end{verbatim}
+This string is set by the method {\tt void caldb(const std::string\& caldb)} and can be
+accessed using {\tt std::string caldb(void)}.
+It contains the path to the calibration database.
+This member will be used by the {\tt GResponse} class to find the available instrument
+calibration functions in the database.
+
+\begin{verbatim}
+  std::string m_rspname;  //!< Name of the instrument response
+\end{verbatim}
+This string is the name of the response function in the database that is used by the
+{\tt GResponse} object.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXResponse::irf()} (optional)}
+\label{sec:GXXXResponse::irf}
+
+\begin{verbatim}
+double GResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                      const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                      const GPointing& pnt) const
+\end{verbatim}
+implements the instrument response function $R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)$.
+This method is implemented as virtual method in {\tt GResponse} following
+Eq.~(\ref{eq:rspfact}):
+\begin{verbatim}
+  double irf  =  live(srcDir,  srcEng, srcTime, pnt);
+  irf        *=  aeff(srcDir,  srcEng, srcTime, pnt);
+  irf        *=   psf(obsDir,  srcDir, srcEng, srcTime, pnt);
+  irf        *= edisp(obsEng,  srcDir, srcEng, srcTime, pnt);
+  irf        *= tdisp(obsTime, srcDir, srcEng, srcTime, pnt);
+  return irf;
+\end{verbatim}
+Implementation of this method in {\tt GXXXResponse} is {\bf optional}, but it should
+be considered if terms in Eq.~(\ref{eq:rspfact}) can be omitted (e.g. in case of no time
+and/or no energy dispersion).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXResponse::live()}}
+\label{sec:GXXXResponse::live}
+
+\begin{verbatim}
+double live(const GSkyDir& srcDir, const GEnergy& srcEng,
+            const GTime& srcTime, const GPointing& pnt) const;
+\end{verbatim}
+implements the livetime fraction $L(\vec{d}, \vec{p}, E, t)$.
+Note that the livetime depends rarely on the photon arrival direction $\vec{p}$ ({\tt srcDir}),
+the photon energy $E$ ({\tt srcEng}), and often these arguments are not used by the
+method.
+The livetime depends generally on the photon arrival time $t$ ({\tt srcTime}), yet in most
+cases, additional information about the instrument is needed (such as detector count rates)
+to compute the livetime at a given time $t$.
+This additional information can be provided via the {\tt pnt} argument to the
+{\tt live()} method.
+{\tt GPointing} requires an instrument specific implementation that can be designed
+to transport instrument information required for livetime computation 
+(see section \ref{sec:GXXXPointing}).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXResponse::aeff()}}
+
+\begin{verbatim}
+double GXXXResponse::aeff(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                          const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                          const GPointing& pnt)
+\end{verbatim}
+implements the effective area $A_{\rm eff}(\vec{d}, \vec{p}, E, t)$ which has to be returned
+in units of cm$^2$.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXResponse::psf()}}
+
+\begin{verbatim}
+double GXXXResponse::psf(const GInstDir& obsDir, const GEnergy& obsEng,
+                         const GTime& obsTime, const GSkyDir& srcDir,
+                         const GEnergy& srcEng, const GTime& srcTime,
+                         const GPointing& pnt)
+\end{verbatim}
+implements the point spread function $PSF(\vec{p'} | \vec{d}, \vec{p}, E, t)$ which has to be returned
+in units of sr$^{-1}$.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXResponse::edisp()}}
+
+\begin{verbatim}
+double GXXXResponse::edisp(const GInstDir* obsDir, const GEnergy& obsEng,
+                           const GTime& obsTime, const GSkyDir& srcDir,
+                           const GEnergy& srcEng, const GTime& srcTime,
+                           const GPointing* pnt)
+\end{verbatim}
+implements the energy dispersion $E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t)$ which has to be returned
+in units of MeV$^{-1}$.
+If the instrument has no noticable energy dispersion, a $\delta$-function can be implemented
+using
+\begin{verbatim}
+  double edisp = (obsEng == srcEng) ? 1.0 : 0.0;
+  return edisp;
+\end{verbatim}
+In addition the {\tt edisp()} term should be dropped from the computation of the 
+instrument response function to speed-up computations
+(see section \ref{sec:GXXXResponse::irf}),
+and no energy integration should be done in the computation of
+$N_{\rm Edisp}(\vec{d}, \vec{p}, E, t)$ (see section \ref{sec:GXXXResponse:: nedisp}).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXResponse::tdisp()}}
+
+\begin{verbatim}
+double GXXXResponse::tdisp(const GInstDir& obsDir, const GEnergy& obsEng,
+                           const GTime& obsTime, const GSkyDir& srcDir,
+                           const GEnergy& srcEng, const GTime& srcTime,
+                           const GPointing& pnt)
+\end{verbatim}
+implements the energy dispersion $T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)$ which has to be returned
+in units of s$^{-1}$.
+If the instrument has no noticable time dispersion, a $\delta$-function can be implemented
+using
+\begin{verbatim}
+  double tdisp = (obsTime == srcTime) ? 1.0 : 0.0;
+  return tdisp;
+\end{verbatim}
+In addition the {\tt tdisp()} term should be dropped from the computation of the 
+instrument response function to speed-up computations
+(see section \ref{sec:GXXXResponse::irf}),
+and no time integration should be done in the computation of
+$N_{\rm Tdisp}(\vec{d}, \vec{p}, E, t)$ (see section \ref{sec:GXXXResponse:: ntdisp}).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXResponse::nirf()} (optional)}
+
+\begin{verbatim}
+double GResponse::nirf(const GSkyDir& srcDir, const GEnergy& srcEng,
+                       const GTime& srcTime, const GPointing& pnt) const
+\end{verbatim}
+implements the data space integral $N_{\rm R}(\vec{d}, \vec{p}, E, t)$ over the instrument
+response function.
+This method is implemented as virtual method in {\tt GResponse} following
+Eq.~(\ref{eq:nirf}):
+\begin{verbatim}
+  double nirf  =   live(srcDir, srcEng, srcTime, pnt);
+  nirf        *=   aeff(srcDir, srcEng, srcTime, pnt);
+  nirf        *=   npsf(srcDir, srcEng, srcTime, pnt);
+  nirf        *= nedisp(srcDir, srcEng, srcTime, pnt);
+  nirf        *= ntdisp(srcDir, srcEng, srcTime, pnt);
+  return nirf;
+\end{verbatim}
+Implementation of this method in {\tt GXXXResponse} is {\bf optional}, but it should
+be considered if terms in Eq.~(\ref{eq:rspfact}) can be omitted (e.g. in case of no time
+and/or no energy dispersion).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXResponse::npsf()}}
+
+\begin{verbatim}
+double npsf(const GSkyDir& srcDir, const GEnergy& srcEng,
+            const GTime& srcTime, const GPointing& pnt,
+            const GRoi& roi) const;
+\end{verbatim}
+implements the integral $N_{\rm PSF}(\vec{d}, \vec{p}, E, t)$ of the point spread function 
+over the region of interest (ROI) following
+\begin{equation}
+N_{\rm PSF}(\vec{d}, \vec{p}, E, t) = \int_{\rm ROI} PSF(\vec{p'} | \vec{d}, \vec{p}, E, t) \, {\rm d}\vec{p'}
+\label{eq:npsf}
+\end{equation}
+The ROI is specified by the {\tt roi} argument.
+{\tt GRoi} requires an instrument specific implementation that defines a ROI
+representation for a given instrument (see section \ref{sec:GXXXROI}).
+
+Integration can be done numerically using the {\tt GIntegral} and {\tt GIntegrand}
+classes (see section \ref{sec:integration}).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXResponse::nedisp()} (optional)}
+\label{sec:GXXXResponse:: nedisp}
+
+\begin{verbatim}
+double nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
+              const GTime& srcTime, const GPointing& pnt,
+              const GEbounds& ebds) const;
+\end{verbatim}
+implements the integral $N_{\rm Edisp}(\vec{d}, \vec{p}, E, t)$ of the energy dispersion
+over the selected energies following
+\begin{equation}
+N_{\rm Edisp}(\vec{d}, \vec{p}, E, t) = 
+\sum_{i=1}^N \left(
+\int_{{\rm emin}_i}^{{\rm emax}_i}
+E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t) \, {\rm d}E' \,
+\right)
+\label{eq:nedisp}
+\end{equation}
+This formulation assumes that the observation is split in $N$ energy bins
+whose minimum and maximum times are specified by the {\tt ebds} argument.
+In case that the energy dispersion is negligible, Eq.~(\ref{eq:nedisp}) simplifies to
+\begin{equation}
+N_{\rm Edisp}(\vec{d}, \vec{p}, E, t) = \left\{ 
+\begin{array}{l l}
+  1 & \quad \mbox{if $E' \in {\tt ebds}$}\\
+  0 & \quad \mbox{else}\\ \end{array} \right.
+\end{equation}
+This equation is implemented in {\tt GResponse} as the default method using
+\begin{verbatim}
+  double nedisp = (ebds.isin(srcEng)) ? 1.0 : 0.0;
+  return nedisp;
+\end{verbatim}
+Thus, if no energy dispersion is required the default implementation may be used
+and {\tt GXXXResponse::nedisp()} needs not the be implement in the
+intrument specific class.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXResponse::ntdisp()} (optional)}
+\label{sec:GXXXResponse:: ntdisp}
+
+\begin{verbatim}
+double ntdisp(const GSkyDir& srcDir, const GEnergy& srcEng,
+              const GTime& srcTime, const GPointing& pnt,
+              const GGti& gti) const;
+\end{verbatim}
+implements the integral $N_{\rm Tdisp}(\vec{d}, \vec{p}, E, t)$ of the time dispersion
+over the selected time intervals following
+\begin{equation}
+N_{\rm Tdisp}(\vec{d}, \vec{p}, E, t) = 
+\sum_{i=1}^N \left(
+\int_{{\rm tstart}_i}^{{\rm tstop}_i}
+T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t) \, {\rm d}t' \,
+\right)
+\label{eq:ntdisp}
+\end{equation}
+This formulation assumes that the observation is split in $N$ Good Time
+Intervals (GTIs) whose start and stop times are specified by the {\tt gti} argument.
+In the (usual) case that the time dispersion is negligible, Eq.~(\ref{eq:ntdisp}) simplifies to
+\begin{equation}
+N_{\rm Tdisp}(\vec{d}, \vec{p}, E, t) = \left\{ 
+\begin{array}{l l}
+  1 & \quad \mbox{if $t' \in {\tt gti}$}\\
+  0 & \quad \mbox{else}\\ \end{array} \right.
+\end{equation}
+This equation is implemented in {\tt GResponse} as the default method using
+\begin{verbatim}
+  double ntdisp = (gti.isin(srcTime)) ? 1.0 : 0.0;
+  return ntdisp;
+\end{verbatim}
+Thus, if no time dispersion is required the default implementation may be used
+and {\tt GXXXResponse::ntdisp()} needs not the be implement in the
+intrument specific class.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Response support classes}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXInstDir}}
+\label{sec:GInstDir}
+
+Needs to be implemented.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXRoi}}
+\label{sec:GRoi}
+
+Region in instrument directions.
+Needs to be implemented.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXPointing}}
+\label{sec:GPointing}
+
+Needs to be implemented.
+Carry instrument specific information for livetime computation 
+(see section \ref{sec:GXXXResponse::live}).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Instrument data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Instrument data}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Events}
+
+Data are comprised of events.
+The are two types of events: event atoms and event bins.
+Events are combined together in {\tt GEvents}.
+{\tt GEvents} implements an iteration that allows iterating over event atoms or event bins
+(the differenciation between both is transparent for the user).
+{\tt GEvents} has an abstract method {\tt pointer(int index)} that returns a pointer to an
+event.
+This method, which has to be implement for each instrument, assigns information to
+all events.
+Note that in general, only a single event can be accessed at a time (any subsequent
+class to the {\tt pointer()} method makes the old pointer invalid.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Event containers {\tt GEventList} and {\tt GEventCube}}
+\label{sec:GEvents}
+
+The following methods can {\bf optionally} be implemented to compute $N(\vec{p'}, E', t')$
+more efficiently that is done by the generic method {\tt GEvents::model()}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXEventList::model()}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXEventCube::model()}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Event classes {\tt GEventAtom} and {\tt GEventBin}}
+\label{sec:GEvent}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXEventAtom::model()}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXEventBin::model()}}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Observations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Observations}
+\label{sec:GObservation}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Source Models
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Source models}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Factorized source model}
 
 A special type of source model is given by the factorisation
 \begin{equation}
@@ -197,226 +684,43 @@ T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)
 \end{eqnarray}
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Implementation}
-
-The \this\ implementation of the response function and parameters is summarised in 
-Table \ref{tab:respar}.
-
-%%% Response parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{table}[!h]
-\caption{\this\ implementation of the response function and parameters. 
-The last column indicates if the function or parameter requires an
-instrument specific implementation (the corresponding class is an abstract base class
-from which the implementation needs to be derived).
-\label{tab:respar}}
-\begin{center}
-\begin{tabular}{lccc}
-\hline
-\hline
-\noalign{\smallskip}
-Response function or parameter & Designation & Class (::method) & Instrument specific \\
-\noalign{\smallskip}
-\hline
-\noalign{\smallskip}
-Response function & $R$ & {\tt GResponse::irf()} & possible \\
-Lifetime fraction & $L$ & {\tt GResponse::live()} & {\bf yes} \\
-Effective area & $A_{\rm eff}$ & {\tt GResponse::aeff()} & {\bf yes} \\
-Point spread function & $PSF$ & {\tt GResponse::psf()} & {\bf yes} \\
-Energy dispersion & $E_{\rm disp}$ & {\tt GResponse::edisp()} & {\bf yes} \\
-Time dispersion & $T_{\rm disp}$ & {\tt GResponse::tdisp()} & {\bf yes} \\
-Integral over response function & $N_{\rm R}$ & {\tt GResponse::nirf()} & possible \\
-Integral over point spread function & $N_{\rm PSF}$ & {\tt GResponse::npsf()} & {\bf yes} \\
-Integral over energy dispersion & $N_{\rm Edisp}$ & {\tt GResponse::nedisp()} & {\bf yes} \\
-Integral over time dispersion & $N_{\rm Tdisp}$ & {\tt GResponse::ntdisp()} & {\bf yes} \\
-Probability of measuring a photon & $N$ & {\tt GEvent::model()} & possible \\
-Predicted number of events & $N_{\rm pred}$ & {\tt GObservation::npred()} & possible \\
-Source model & $S$ & {\tt GModel} & no \\ 
-Measured location of photon & $\vec{p'}$ & {\tt GInstDir} & {\bf yes} \\
-Measured energy of photon & $E'$ & {\tt GEnergy} & no \\
-Measured arrival time & $t'$ & {\tt GTime} & no \\
-Instrument pointing & $d$ & {\tt GPointing} & {\bf yes} \\
-True arrival direction of photon & $\vec{p}$ & {\tt GSkyDir} & no \\
-True energy of photon & $E$ & {\tt GEnergy} & no \\
-True arrival time of photon & $t$ & {\tt GTime} & no \\
-Region of interets & ${\rm ROI}$ & {\tt GRoi} & {\bf yes} \\
-Good Time Interval & ${\rm GTI}$ & {\tt GGti} & no \\
-\noalign{\smallskip}
-\hline
-\end{tabular}
-\end{center}
-\end{table}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Response class {\tt GResponse}}
+% Supporting classes and methods
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Supporting classes and methods}
 
-An instrument specific response class {\tt GXXXResponse} (where {\tt XXX} is the instrument code)
-needs to be provided that derives from the abstract base class {\tt GResponse}.
-The following sections provide a description of the methods and their interfaces that
-must be implemented in {\tt GXXXResponse}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Sky directions, energies and times}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GSkyDir}}
+\label{sec:GSkyDir}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GEnergy}}
+\label{sec:GEnergy}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GEbounds}}
+\label{sec:GEbounds}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GTime}}
+\label{sec:GTime}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GGti}}
+\label{sec:GGti}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt GXXXResponse::irf()} (optional)}
-
-Following the factorisation of the response (cf.~Eq.~\ref{eq:rspfact}) the standard implementation
-of the {\tt GResponse::irf()} is given by the following code:
-\begin{verbatim}
-double GResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                      const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                      const GPointing& pnt) const
-{
-    double irf  =  live(srcDir,  srcEng, srcTime, pnt);
-    irf        *=  aeff(srcDir,  srcEng, srcTime, pnt);
-    irf        *=   psf(obsDir,  srcDir, srcEng, srcTime, pnt);
-    irf        *= edisp(obsEng,  srcDir, srcEng, srcTime, pnt);
-    irf        *= tdisp(obsTime, srcDir, srcEng, srcTime, pnt);
-    return irf;
-}
-\end{verbatim}
-This code is implemented in the {\tt GResponse::irf()} base class as a {\tt virtual} member and
-{\bf needs not to be implemented in the derived instrument specific class.}
-However, an instrument specific version may be provided as for example {\tt tdisp()} is rarely
-needed and also {\tt edisp()} is often not used.
-By omitting these terms a more efficient response calculation may be provided.
+\subsection{Sky maps}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt GXXXResponse::live()}}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt GXXXResponse::aeff()}}
-
-Needs to be implemented and needs to return effective area in units of cm$^2$.
-Interface:
-\begin{verbatim}
-double GXXXResponse::aeff(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                          const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                          const GPointing& pnt)
-\end{verbatim}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt GXXXResponse::psf()}}
-
-Needs to be implemented and needs to return point spread function in units of sr$^{-1}$.
-Interface:
-\begin{verbatim}
-double GXXXResponse::psf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                         const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                         const GPointing& pnt)
-\end{verbatim}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt GXXXResponse::edisp()}}
-
-Needs to be implemented and needs to return energy dispersion in units of MeV$^{-1}$.
-Interface:
-\begin{verbatim}
-double GXXXResponse::edisp(const GInstDir* obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                          const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                          const GPointing* pnt)
-\end{verbatim}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt GXXXResponse::tdisp()}}
-
-Needs to be implemented and needs to return time dispersion in units of s$^{-1}$.
-Interface:
-\begin{verbatim}
-double GXXXResponse::tdisp(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                          const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                          const GPointing& pnt)
-\end{verbatim}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt GXXXResponse::nirf()} (optional)}
-
-\begin{verbatim}
-double GResponse::nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                       const GTime& srcTime, const GPointing& pnt) const
-{
-    double nirf  =   live(srcDir, srcEng, srcTime, pnt);
-    nirf        *=   aeff(srcDir, srcEng, srcTime, pnt);
-    nirf        *=   npsf(srcDir, srcEng, srcTime, pnt);
-    nirf        *= nedisp(srcDir, srcEng, srcTime, pnt);
-    nirf        *= ntdisp(srcDir, srcEng, srcTime, pnt);
-    return nirf;
-}
-\end{verbatim}
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt GXXXResponse::npsf()}}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt GXXXResponse::nedisp()}}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt GXXXResponse::ntdisp()}}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Response support classes}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt GXXXInstDir}}
-
-Needs to be implemented.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt GXXXRoi}}
-
-Region in instrument directions.
-Needs to be implemented.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt GXXXPointing}}
-
-Needs to be implemented.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Instrument data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Instrument data}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Events}
-
-Data are comprised of events.
-The are two types of events: event atoms and event bins.
-Events are combined together in {\tt GEvents}.
-{\tt GEvents} implements an iteration that allows iterating over event atoms or event bins
-(the differenciation between both is transparent for the user).
-{\tt GEvents} has an abstract method {\tt pointer(int index)} that returns a pointer to an
-event.
-This method, which has to be implement for each instrument, assigns information to
-all events.
-Note that in general, only a single event can be accessed at a time (any subsequent
-class to the {\tt pointer()} method makes the old pointer invalid.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Event classes {\tt GEventAtom} and {\tt GEventbin}}
-
-The following methods can {\bf optionally} be implemented to compute $N(\vec{p'}, E', t')$
-more efficiently that is done by the generic method {\tt GEvents::model()}.
-
-\begin{verbatim}
-GXXXEventAtom::model(GModels& models, GVector* gradient);
-GXXXEventBin::model(GModels& models, GVector* gradient);
-\end{verbatim}
+\subsection{Numerical integration}
+\label{sec:integration}
 
 \end{document}
