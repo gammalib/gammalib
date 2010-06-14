@@ -130,6 +130,52 @@ GObservation& GObservation::operator= (const GObservation& obs)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Return total number of predicted counts for all models.
+ *
+ * @param[in] models Models.
+ * @param[in] gradient Model parameter gradients.
+ ***************************************************************************/
+double GObservation::npred(const GModels& models, GVector* gradient) const
+{
+    // Initialise
+    double npred = 0.0;    // Reset predicted number of counts
+    int    igrad = 0;      // Reset gradient counter
+
+    // Loop over models
+    for (int i = 0; i < models.size(); ++i) {
+
+        // Extract pointer to model (bypass const-correctness)
+        GModel* model = (GModel*)models(i);
+
+        // Handle only components that are relevant for the actual
+        // instrument
+        if (model->isvalid(m_instrument)) {
+
+            // Determine Npred for model
+            npred += npred_temp(*model);
+
+            // Determine Npred gradients (perform computation only for free
+            // parameters)
+            for (int k = 0; k < model->npars(); ++k) {
+                if (model->par(k)->isfree()) {
+                    double grad = npred_grad_temp(*model, k);
+                    (*gradient)(igrad+k) = grad;
+                }
+            }
+
+        } // endif: model component was valid for instrument
+
+        // Increment parameter counter for gradient
+        igrad += model->npars();
+
+    } // endfor: Looped over models
+
+    // Return prediction
+    return npred;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
