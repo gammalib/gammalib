@@ -208,6 +208,11 @@ void GPar::value(const std::string& value)
     // Signal update
     m_update = true;
 
+    // Don't query parameter again
+    if (m_mode == "q")  m_mode = "h";
+    if (m_mode == "ql") m_mode = "hl";
+    if (m_mode == "lq") m_mode = "lh";
+
     // Return
     return;
 }
