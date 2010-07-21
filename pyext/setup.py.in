@@ -1,4 +1,5 @@
 from distutils.core import setup, Extension
+import glob
 setup(name='@PACKAGE_NAME@',
       version='@PACKAGE_VERSION@',
       description='gammalib Python binding',
@@ -11,4 +12,5 @@ setup(name='@PACKAGE_NAME@',
                              library_dirs=['../src/.libs'],
                              libraries=['gamma','cfitsio'],
                              runtime_library_dirs=['@prefix@/lib'])],
-     )
+      data_files=[('@prefix@/share/gammalib/swig', glob.glob('@top_srcdir@/pyext/*.i'))],
+      )
