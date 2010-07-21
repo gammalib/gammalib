@@ -15,23 +15,21 @@
  ***************************************************************************/
 %module gammalib
 
-/* Support */
+/* __ Common tools _______________________________________________________ */
 #include "GException.i"
 #include "GNodeArray.i"
 
-/* Sky classes */
-#include "GSkyDir.i"
-#include "GSkymap.i"
+/* __ Numerics module ____________________________________________________ */
+#include "GVector.i"
+#include "GMatrixBase.i"
+//#include "GMatrixTools.hpp"
+#include "GMatrix.i"
+#include "GSymMatrix.i"
+#include "GSparseMatrix.i"
+//#include "GIntegral.hpp"
+//#include "GIntegrand.hpp"
 
-/* Observation classes */
-#include "GObservations.i"
-#include "GResponse.i"
-
-/* Fermi LAT classes */
-#include "GLATObservation.i"
-#include "GLATResponse.i"
-
-/* FITS file class */
+/* __ FITS module ________________________________________________________ */
 #include "GFits.i"
 #include "GFitsHDU.i"
 #include "GFitsHeader.i"
@@ -50,13 +48,57 @@
 #include "GFitsTableShtCol.i"
 #include "GFitsTableStrCol.i"
 
-/* Model fitting */
-/*#include "GFitPar.i"*/
+/* __ Application module _________________________________________________ */
+#include "GApplication.i"
+//#include "GLog.i"
+#include "GPars.i"
+#include "GPar.i"
 
-/* Linear Algebra */
-#include "GVector.i"
-#include "GMatrixBase.i"
-#include "GMatrix.i"
-#include "GSparseMatrix.i"
-#include "GSymMatrix.i"
+/* __ Optimizer module ___________________________________________________ */
+//#include "GOptimizer.i"
+//#include "GOptimizerLM.i"
+//#include "GOptimizerPars.i"
+//#include "GOptimizerFunction.i"
+
+
+/***************************************************************************
+ *                        Analysis support services                        *
+ ***************************************************************************/
+
+/* __ Skymap handling ____________________________________________________ */
+#include "GSkyDir.i"
+//#include "GSkyPixel.i"
+#include "GSkymap.i"
+//#include "GWcs.i"
+//#include "GWcsCAR.i"
+//#include "GWcsHPX.i"
+
+/* __ Observation handling _______________________________________________ */
+//#include "GEnergy.i"
+//#include "GTime.i"
+//#include "GObservations.i"
+//#include "GObservation.i"
+//#include "GEvents.i"
+//#include "GEventList.i"
+//#include "GEventCube.i"
+//#include "GEvent.i"
+//#include "GGti.i"
+//#include "GRoi.i"
+//#include "GEbounds.i"
+//#include "GInstDir.i"
+//#include "GPointing.i"
+//#include "GResponse.i"
+
+/* __ Model handling _____________________________________________________ */
+//#include "GModels.i"
+//#include "GModel.i"
+//#include "GModelPar.i"
+//#include "GModelSpatial.i"
+//#include "GModelSpatialPtsrc.i"
+//#include "GModelSpectral.i"
+//#include "GModelSpectralPlaw.i"
+//#include "GModelTemporal.i"
+//#include "GModelTemporalConst.i"
+
+
 
