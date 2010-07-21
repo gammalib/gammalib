@@ -313,17 +313,16 @@ The abstract base class {\tt GResponse} implements the following protected membe
 
 \begin{verbatim}
   std::string m_caldb;    //!< Path to the calibration database
+  std::string m_rspname;  //!< Name of the instrument response
 \end{verbatim}
-This string is set by the method {\tt void caldb(const std::string\& caldb)} and can be
+
+{\tt m\_caldb} is set by the method {\tt void caldb(const std::string\& caldb)} and can be
 accessed using {\tt std::string caldb(void)}.
 It contains the path to the calibration database.
 This member will be used by the {\tt GResponse} class to find the available instrument
 calibration functions in the database.
 
-\begin{verbatim}
-  std::string m_rspname;  //!< Name of the instrument response
-\end{verbatim}
-This string is the name of the response function in the database that is used by the
+{\tt m\_rspname} is the name of the response function in the database that is used by the
 {\tt GResponse} object.
 
 
@@ -648,8 +647,55 @@ more efficiently that is done by the generic method {\tt GEvents::model()}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Observations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Observations}
+\section{Observation class {\tt GObservation}}
 \label{sec:GObservation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Data members}
+
+The abstract base class {\tt GObservation} implements the following protected members:
+
+\begin{verbatim}
+  std::string m_obsname;      //!< Name of observation
+  std::string m_instrument;   //!< Instrument name
+  GEbounds    m_ebounds;      //!< Energy boundaries used for analysis
+  GGti        m_gti;          //!< Good time intervals used for analysis
+  GRoi*       m_roi;          //!< Pointer to region of interest used for analysis
+  GEvents*    m_events;       //!< Pointer to events
+  GResponse*  m_response;     //!< Pointer to instrument response functions
+\end{verbatim}
+
+{\tt m\_obsname} is the name of the observation, and can be any arbitrary string of
+characters.
+The precise value of this string is not relevant.
+
+{\tt m\_instrument} is the name of the instrument to which corresponds the observation.
+It should correspond to the {\tt XXX} designation of the instrument specific source
+classes, and it should set to the correct value as soon as the instrument specific 
+{\tt GXXXObservation} object is implemented.
+The best place to perform this initialisation is in the {\tt init\_members()} method
+of {\tt GXXXObservation}.
+For example, the CTA {\tt init\_members()} has the following form:
+\begin{verbatim}
+void GCTAObservation::init_members(void)
+{
+    m_instrument = "CTA";
+    return;
+}
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Methods}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXObservation::response()}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXObservation::clone()}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{{\tt GXXXObservation::npred()} (optional)}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
