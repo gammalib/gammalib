@@ -48,12 +48,12 @@ public:
  ***************************************************************************/
 %extend GObservations {
     char *__str__() {
-        static char str_buffer[1001];
+        static char str_buffer[10001];
         std::ostringstream buffer;
         buffer << *self;
         std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 1001);
-        str_buffer[1000] = '\0';
+        strncpy(str_buffer, (char*)str.c_str(), 10001);
+        str_buffer[10000] = '\0';
         return str_buffer;
     }
     GObservation& __getitem__(int index) {
