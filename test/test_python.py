@@ -246,6 +246,41 @@ def test_skymap():
     #print pixels
 
 
+#===================#
+# Test optimisation #
+#===================#
+def test_optimise():
+    """
+    """
+    # Load CTA run
+    run_cta = GCTAObservation()
+    run_cta.load_binned("../inst/cta/test/data/run_00006028_cntmap.fits.gz")
+    run_cta.response("kb_E_50h_v3", "../inst/cta/test/irf")
+
+    # Build observation list
+    obs = GObservations()
+    obs.append(run_cta)
+
+    # Setup model for optimizing
+    dir          = GSkyDir()
+    dir.radec_deg(117.0, -33.0)
+    point_source = GModelSpatialPtsrc(dir)
+    power_law    = GModelSpectralPlaw(1.0e-7, -2.1)
+    power_law.par(0).min(1.0e-12)
+    crab         = GModel(point_source, power_law)
+    crab.name("Crab")
+    models       = GModels()
+    models.append(crab)
+    obs.models(models)
+
+    # Perform LM optimization
+    opt = GOptimizerLM()
+    opt.max_iter(1000)
+    obs.optimize(opt)
+    print opt
+    print obs
+
+
 #==========================#
 # Main routine entry point #
 #==========================#
@@ -257,4 +292,6 @@ if __name__ == '__main__':
 #    test_node_array()
 #    test_lat_response()
 #    test_lat_observation()
-    test_skymap()
+#    test_skymap()
+    test_optimise()
+    
