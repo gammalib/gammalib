@@ -42,26 +42,6 @@ public:
     void  load(const std::string& filename, const std::vector<std::string>& args);
     void  save(const std::string& filename);
     GPar* par(const std::string& name);
-  
-protected:
-    // Protected methods
-    void        init_members(void);
-    void        copy_members(const GPars& pars);
-    void        free_members(void);
-    std::string inpath(const std::string& filename) const;
-    std::string outpath(const std::string& filename) const;
-    void        read(const std::string& filename);
-    void        write(const std::string& filename) const;
-    void        parse(void);
-    void        update(void);
-
-    // Protected data members
-    std::vector<std::string> m_parfile;   //!< Parameter file lines
-    std::vector<GPar>        m_pars;      //!< Parameters
-    std::vector<int>         m_line;      //!< Line number of parameter
-    std::vector<size_t>      m_vstart;    //!< Column of value start
-    std::vector<size_t>      m_vstop;     //!< Column of value stop
-    std::string              m_mode;      //!< Effective mode
 };
 
 

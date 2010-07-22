@@ -42,21 +42,6 @@ public:
     std::string version(void) const;
     double      telapse(void) const;
     GPar*       par(const std::string& name);
-
-protected:
-    // Protected methods
-    void        init_members(void);
-    void        copy_members(const GApplication& app);
-    void        free_members(void);
-    std::string parfilename(void) const;
-
-    // Protected data members
-    std::string              m_name;       //!< Application name
-    std::string              m_version;    //!< Application version
-    std::vector<std::string> m_args;       //!< Command line arguments
-    time_t                   m_tstart;     //!< Start time of execution
-    GLog                     m_logger;     //!< Application logger
-    GPars                    m_pars;       //!< Application parameters
 };
 
 
