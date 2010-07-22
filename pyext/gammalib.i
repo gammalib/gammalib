@@ -55,9 +55,9 @@
 #include "GPar.i"
 
 /* __ Optimizer module ___________________________________________________ */
-//#include "GOptimizer.i"
-//#include "GOptimizerLM.i"
-//#include "GOptimizerPars.i"
+#include "GOptimizer.i"
+#include "GOptimizerLM.i"
+#include "GOptimizerPars.i"
 //#include "GOptimizerFunction.i"
 
 
@@ -76,8 +76,8 @@
 /* __ Observation handling _______________________________________________ */
 //#include "GEnergy.i"
 //#include "GTime.i"
-//#include "GObservations.i"
-//#include "GObservation.i"
+#include "GObservations.i"
+#include "GObservation.i"
 //#include "GEvents.i"
 //#include "GEventList.i"
 //#include "GEventCube.i"
@@ -90,15 +90,18 @@
 //#include "GResponse.i"
 
 /* __ Model handling _____________________________________________________ */
-//#include "GModels.i"
-//#include "GModel.i"
-//#include "GModelPar.i"
-//#include "GModelSpatial.i"
-//#include "GModelSpatialPtsrc.i"
-//#include "GModelSpectral.i"
-//#include "GModelSpectralPlaw.i"
-//#include "GModelTemporal.i"
-//#include "GModelTemporalConst.i"
+#include "GModels.i"
+#include "GModel.i"
+#include "GModelPar.i"
+#include "GModelSpatial.i"
+#include "GModelSpatialPtsrc.i"
+#include "GModelSpectral.i"
+#include "GModelSpectralPlaw.i"
+#include "GModelTemporal.i"
+#include "GModelTemporalConst.i"
+
+/* __ CTA ________________________________________________________________ */
+#include "GCTAObservation.i"
 
 
 
