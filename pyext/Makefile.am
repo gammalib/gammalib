@@ -20,7 +20,7 @@ clean-local:
 	
 gammalib_wrap.cpp gammalib.py: $(SWIG_INTERFACE)
 	$(SWIG) -c++ -python -Wall -includeall -I$(top_srcdir)/src -o gammalib_wrap.cpp -outdir . $(srcdir)/$(SWIG_INTERFACE)
-	@if test "x`uname -o`" = "xCygwin"; then \
+	@if test "x`uname`" = "xCygwin"; then \
 		echo "WARNING: working around bug in SWIG on Windows/Cygwin platforms ONLY"; \
 		sed -i.bak -f $(srcdir)/fix_wrapper.sed gammalib_wrap.cpp; \
 	fi
