@@ -29,6 +29,7 @@
 #include "GLATInstDir.hpp"
 #include "GLATPointing.hpp"
 #include "GLATResponse.hpp"
+#include "GFitsHDU.hpp"
 
 
 /***********************************************************************//**
