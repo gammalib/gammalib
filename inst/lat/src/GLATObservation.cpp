@@ -168,11 +168,16 @@ void GLATObservation::load_unbinned(const std::string& ft1name,
     init_members();
 
     // Allocate and load LAT events from FT1 file
-    m_events = new GLATEventList;
-    m_events->load(ft1name);
+    //m_events = new GLATEventList;
+    //m_events->load(ft1name);
 
     // Load GTIs from FT1 file
     m_gti.load(ft1name);
+
+    // Link observations to events. This has to be done after loading since
+    // loading initialises the GCTAEventList object, hence resets the pointer
+    // to the observation.
+    //m_events->obs(this);
 
     // Return
     return;
@@ -216,6 +221,11 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
     // Set mean time
     ((GLATEventCube*)m_events)->m_time = 
                                 0.5 * (m_gti.tstart() + m_gti.tstop());
+
+    // Link observations to events. This has to be done after loading since
+    // loading initialises the GLATEventList object, hence resets the pointer
+    // to the observation.
+    m_events->obs(this);
 
     // Return
     return;
