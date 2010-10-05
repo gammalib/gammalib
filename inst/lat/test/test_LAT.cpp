@@ -64,7 +64,7 @@ GModels crab_plaw(void)
         std::cout << e.what() << std::endl;
         throw;
     }
-    
+
     // Return model
     return models;
 }
@@ -107,15 +107,15 @@ void test_unbinned_obs(void)
     std::cout << "Test unbinned observation handling: ";
 
     // Declare observations
-    GObservations   data;
-    GLATObservation obs;
+    GObservations   obs;
+    GLATObservation run;
 
     // Load unbinned LAT observation
     try {
-        obs.load_unbinned(lat_ft1, lat_ft2, "");
+        run.load_unbinned(lat_ft1, lat_ft2, "");
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to load LAT observation."
+        std::cout << std::endl << "TEST ERROR: Unable to load unbinned LAT run."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -124,11 +124,11 @@ void test_unbinned_obs(void)
 
     // Add observation (twice) to data
     try {
-        data.append(obs);
-        data.append(obs);
+        obs.append(run);
+        obs.append(run);
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to add LAT observation to data." 
+        std::cout << std::endl << "TEST ERROR: Unable to add LAT run to observations." 
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -138,20 +138,21 @@ void test_unbinned_obs(void)
     // Loop over all events in GObservations using iterators
     try {
         int num = 0;
-        for (GObservations::iterator event = data.begin(); event != data.end(); ++event) {
-//            std::cout << *event << std::endl;
-//            std::cout << event->test() << std::endl;
+        for (GObservations::iterator event = obs.begin(); event != obs.end(); ++event) {
+            //std::cout << *(event->energy()) << std::endl;
+            //std::cout << num << std::endl;
             num++;
         }
         if (num != 4038) {
-            std::cout << std::endl << 
+            std::cout << std::endl <<
                       "TEST ERROR: Wrong number of iterations in GObservations::iterator."
                       << std::endl;
             throw;
         }
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to iterate GObservations." << std::endl;
+        std::cout << std::endl << "TEST ERROR: Unable to iterate GObservations."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
@@ -160,20 +161,21 @@ void test_unbinned_obs(void)
     // Loop over all events using iterator
     try {
         int num = 0;
-        GLATEventList *ptr = (GLATEventList*)obs.events();
+        GLATEventList *ptr = (GLATEventList*)run.events();
         for (GLATEventList::iterator event = ptr->begin(); event != ptr->end(); ++event) {
-//            std::cout << *event << std::endl;
+            //std::cout << *event->energy() << std::endl;
             num++;
         }
         if (num != 2019) {
-            std::cout << std::endl << 
+            std::cout << std::endl <<
                       "TEST ERROR: Wrong number of iterations in GLATEventList::iterator."
-                      << std::endl;
+                      << " (excepted 2019, found " << num << ")" << std::endl;
             throw;
         }
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to iterate GLATEventList." << std::endl;
+        std::cout << std::endl << "TEST ERROR: Unable to iterate GLATEventList."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
@@ -182,13 +184,9 @@ void test_unbinned_obs(void)
     // Plot final test success
     std::cout << " ok." << std::endl;
 
-//GLATEventList *ptr = (GLATEventList*)obs.events();
-//std::cout << obs << std::endl;
-//std::cout << *ptr << std::endl;
-
     // Exit test
     return;
- 
+
 }
 
 
@@ -201,15 +199,15 @@ void test_binned_obs(void)
     std::cout << "Test LAT binned observation handling: ";
 
     // Declare observations
-    GObservations   data;
-    GLATObservation obs;
+    GObservations   obs;
+    GLATObservation run;
 
     // Load LAT binned observation
     try {
-        obs.load_binned(lat_cntmap, "", "");
+        run.load_binned(lat_cntmap, "", "");
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to load binned LAT observation." 
+        std::cout << std::endl << "TEST ERROR: Unable to load binned LAT run."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -218,10 +216,10 @@ void test_binned_obs(void)
 
     // Reload LAT binned observation from srcmap
     try {
-        obs.load_binned(lat_srcmap, "", "");
+        run.load_binned(lat_srcmap, "", "");
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to reload binned LAT observation." 
+        std::cout << std::endl << "TEST ERROR: Unable to reload binned LAT run."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -230,11 +228,11 @@ void test_binned_obs(void)
 
     // Add observation (twice) to data
     try {
-        data.append(obs);
-        data.append(obs);
+        obs.append(run);
+        obs.append(run);
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to add LAT observation to data." 
+        std::cout << std::endl << "TEST ERROR: Unable to add LAT run to observation."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -245,19 +243,20 @@ void test_binned_obs(void)
     try {
         int num = 0;
         int sum = 0;
-        for (GObservations::iterator event = data.begin(); event != data.end(); ++event) {
+        for (GObservations::iterator event = obs.begin(); event != obs.end(); ++event) {
             num++;
             sum += (int)event->counts();
         }
         if (sum != 2718 || num != 400000) {
-            std::cout << std::endl << 
+            std::cout << std::endl <<
                       "TEST ERROR: Wrong number of iterations in GObservations::iterator."
                       << std::endl;
             throw;
         }
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to iterate GObservations." << std::endl;
+        std::cout << std::endl << "TEST ERROR: Unable to iterate GObservations."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
@@ -267,21 +266,22 @@ void test_binned_obs(void)
     try {
         int num = 0;
         int sum = 0;
-        GLATEventCube *ptr = (GLATEventCube*)obs.events();
+        GLATEventCube *ptr = (GLATEventCube*)run.events();
         for (GLATEventCube::iterator event = ptr->begin(); event != ptr->end(); ++event) {
 //            std::cout << *((GLATEventBin*)&(*event));
             num++;
             sum += (int)event->counts();
         }
         if (sum != 1359 || num != 200000) {
-            std::cout << std::endl << 
+            std::cout << std::endl <<
                       "TEST ERROR: Wrong number of iterations in GLATEventCube::iterator."
                       << std::endl;
             throw;
         }
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to iterate GLATEventCube." << std::endl;
+        std::cout << std::endl << "TEST ERROR: Unable to iterate GLATEventCube."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
@@ -303,31 +303,31 @@ void test_binned_optimizer(void)
 {
     // Write header
     std::cout << "Test binned optimizer: ";
-    
+
     // Number of observations in data
     int nobs = 1;
 
     // Setup GObservations for optimizing
-    GObservations   data;
-    GLATObservation obs;
+    GObservations   obs;
+    GLATObservation run;
     try {
-        obs.load_binned(lat_cntmap, "", "");
+        run.load_binned(lat_cntmap, "", "");
         for (int i = 0; i < nobs; ++i)
-            data.append(obs);
+            obs.append(run);
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable setup GData for optimizing." 
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to setup observation for optimizing."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
     std::cout << ".";
-//std::cout << data << std::endl;
+//std::cout << obs << std::endl;
 
-    // Setup GModels for optimizing
+    // Set model for observations
     GModels models = crab_plaw();
-    data.models(models);
+    obs.models(models);
 
     // Setup parameters for optimizing
     GOptimizerPars pars;
@@ -336,7 +336,7 @@ void test_binned_optimizer(void)
     }
     catch (std::exception &e) {
         std::cout << std::endl 
-                  << "TEST ERROR: Unable setup GOptimizerPars for optimizing." 
+                  << "TEST ERROR: Unable setup GOptimizerPars for optimizing."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -350,7 +350,7 @@ void test_binned_optimizer(void)
         clock_t t_start = clock();
         int num = 0;
         int sum = 0;
-        for (GObservations::iterator event = data.begin(); event != data.end(); ++event) {
+        for (GObservations::iterator event = obs.begin(); event != obs.end(); ++event) {
             num++;
             sum += (int)event->counts();
         }
@@ -358,29 +358,29 @@ void test_binned_optimizer(void)
     }
     catch (std::exception &e) {
         std::cout << std::endl 
-                  << "TEST ERROR: Unable to iterate GObservations." 
+                  << "TEST ERROR: Unable to iterate GObservations."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
     std::cout << "." << std::endl;
-    std::cout << " - Reference time for GData::iterator: " << t_elapse << std::endl;
+    std::cout << " - Reference time for GObservations::iterator: " << t_elapse << std::endl;
 
     // Setup LM optimizer
     GOptimizerLM opt;
     try {
-        data.optimize(opt);
+        obs.optimize(opt);
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable setup optimizer." 
+        std::cout << std::endl
+                  << "TEST ERROR: Unable setup optimizer."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
     std::cout << ".";
 //std::cout << opt << std::endl;
-std::cout << data << std::endl;
+std::cout << obs << std::endl;
 
     // Plot final test success
     std::cout << " ok." << std::endl;
