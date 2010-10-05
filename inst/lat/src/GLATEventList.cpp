@@ -132,15 +132,15 @@ GLATEventList& GLATEventList::operator= (const GLATEventList& list)
 /***********************************************************************//**
  * @brief Load LAT events from FT1 file.
  *
- * @param[in] filename FT1 FITS filename from which events are loaded.
+ * @param[in] ft1name FT1 FITS filename from which events are loaded.
  ***************************************************************************/
-void GLATEventList::load(const std::string& filename)
+void GLATEventList::load(const std::string& ft1name)
 {
     // Allocate FITS file
     GFits file;
 
     // Open FT1 FITS file
-    file.open(filename);
+    file.open(ft1name);
 
     // Get HDU
     GFitsHDU* hdu = file.hdu("EVENTS");
@@ -166,19 +166,19 @@ void GLATEventList::load(const std::string& filename)
  *
  * @todo Needs assignment of pointing and response function pointers.
  * @todo Should we really return a NULL pointer in case that the list or
- *       the index is not valid? Should we not better throw an exception? 
+ *       the index is not valid? Should we not better throw an exception?
  ***************************************************************************/
 GLATEventAtom* GLATEventList::pointer(int index)
 {
     // Preset pointer with NULL
     GLATEventAtom* ptr = NULL;
-    
+
     // Set pointer if index is in range
     if (m_events != NULL && index >=0 && index < m_num) {
-    
+
         // Point to the requested event atom
         ptr = &(((GLATEventAtom*)m_events)[index]);
-        
+
         // Set instrument pointing
         ptr->m_pnt = NULL; // DUMMY
 

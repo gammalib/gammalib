@@ -45,11 +45,11 @@ public:
     GLATEventList& operator= (const GLATEventList& list);
 
     // Methods
-	void           load(const std::string& filename);
+    void           load(const std::string& filename);
     GLATEventAtom* pointer(int index);
     int            number(void) const { return m_num; }
     int            size(void) const { return m_num; }
-    
+
 protected:
     // Protected methods
     void           init_members(void);
@@ -67,7 +67,7 @@ protected:
     // Diffuse response information
     int            m_num_difrsp;       //!< Number of diffuse response models
     std::string*   m_difrsp_label;     //!< Diffuse response model labels
-    
+
     // Data selection information
     int            m_ds_num;           //!< Number of data selection keys
     std::string*   m_ds_type;          //!< Data selection types
