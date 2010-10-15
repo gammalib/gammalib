@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GLATEventBin.cpp
@@ -155,17 +154,17 @@ double GLATEventBin::model(GModels& models, GVector* gradient) const
 
     // Initialise model
     double model = 0.0;
-    
+
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
-    
+
         // Check if model is a LAT model and if it should be used for this
         // event
         // TO BE IMPLEMENTED
-        
+
         // Add model
         model += models(i)->eval_gradients(*dir(), *energy(), *time(), *rsp(), *pnt());
-        
+
     }
 
     // Set gradient vector
@@ -191,7 +190,9 @@ double GLATEventBin::model(GModels& models, GVector* gradient) const
 void GLATEventBin::init_members(void)
 {
     // Initialise attributes
-    m_counts = NULL;
+    m_dir = NULL;
+    m_pnt = NULL;
+    m_rsp = NULL;
 
     // Return
     return;
@@ -206,7 +207,9 @@ void GLATEventBin::init_members(void)
 void GLATEventBin::copy_members(const GLATEventBin& bin)
 {
     // Copy attributes
-    m_counts = bin.m_counts;
+    m_dir = bin.m_dir;
+    m_pnt = bin.m_pnt;
+    m_rsp = bin.m_rsp;
 
     // Return
     return;
@@ -248,7 +251,7 @@ std::ostream& operator<< (std::ostream& os, const GLATEventBin& bin)
 {
     // Put bin in output stream
     os << bin.m_counts << " ";
-        
+
     // Return output stream
     return os;
 }

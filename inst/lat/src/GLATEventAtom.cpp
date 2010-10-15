@@ -187,6 +187,11 @@ double GLATEventAtom::model(GModels& models, GVector* gradient) const
  ***************************************************************************/
 void GLATEventAtom::init_members(void)
 {
+    // Initialise LAT attributes
+    m_dir = GLATInstDir();
+    m_pnt = NULL;
+    m_rsp = NULL;
+
     // Initialise LAT data format attributes
     m_theta               = 0.0;
     m_phi                 = 0.0;
@@ -203,6 +208,9 @@ void GLATEventAtom::init_members(void)
     m_livetime            = 0.0;
     m_difrsp              = NULL;
 
+    // Initialise other attributes
+    m_num_difrsp = 0;
+
     // Return
     return;
 }
@@ -215,6 +223,11 @@ void GLATEventAtom::init_members(void)
  ***************************************************************************/
 void GLATEventAtom::copy_members(const GLATEventAtom& atom)
 {
+    // Copy LAT attributes
+    m_dir = atom.m_dir;
+    m_pnt = atom.m_pnt;
+    m_rsp = atom.m_rsp;
+
     // Copy LAT data format attributes
     m_theta               = atom.m_theta;
     m_phi                 = atom.m_phi;

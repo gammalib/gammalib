@@ -58,7 +58,7 @@ public:
     const GLATInstDir*  dir(void) const { return &m_dir; }
     const GLATPointing* pnt(void) const { return m_pnt; }
     const GLATResponse* rsp(void) const { return m_rsp; }
-    
+
 protected:
     // Protected methods
     void           init_members(void);
@@ -84,7 +84,7 @@ protected:
     short   m_conversion_type;      //!< Type of conversion: 0=Front, 1=Back
     double  m_livetime;             //!< Accumulated livetime since mission start
     double* m_difrsp;               //!< Diffuse response components
-    
+
     // Other attributes
     int     m_num_difrsp;           //!< Number of diffuse model components
 };
