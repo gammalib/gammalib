@@ -21,7 +21,7 @@
 #include <config.h>
 #endif
 #include <iostream>
-#include <iomanip.h>
+#include <iomanip>
 #include "GException.hpp"
 #include "GEventBin.hpp"
 
