@@ -20,9 +20,9 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GEventBin.hpp \
                      GGti.hpp \
                      GEbounds.hpp \
-		     GPointing.hpp \
+                     GPointing.hpp \
                      GRoi.hpp \
-		     GInstDir.hpp \
+                     GInstDir.hpp \
                      GResponse.hpp \
                      GModels.hpp \
                      GModel.hpp \
@@ -35,8 +35,9 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelTemporalConst.hpp \
                      GApplication.hpp \
                      GLog.hpp \
-		     GPars.hpp \
-		     GPar.hpp \
+                     GPars.hpp \
+                     GPar.hpp \
+                     GXml.hpp \
                      GFitsHeaderCard.hpp \
                      GFitsHeader.hpp \
                      GFitsData.hpp \
@@ -47,17 +48,17 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GFitsAsciiTable.hpp \
                      GFitsBinTable.hpp \
                      GFitsTableCol.hpp \
-		     GFitsTableBitCol.hpp \
+                     GFitsTableBitCol.hpp \
                      GFitsTableLogCol.hpp \
                      GFitsTableStrCol.hpp \
                      GFitsTableShtCol.hpp \
                      GFitsTableLngCol.hpp \
-		     GFitsTableLlgCol.hpp \
+                     GFitsTableLlgCol.hpp \
                      GFitsTableFltCol.hpp \
                      GFitsTableDblCol.hpp \
                      GFitsHDU.hpp \
                      GFits.hpp \
-		     GFitsCfitsio.hpp \
+                     GFitsCfitsio.hpp \
                      GVector.hpp \
                      GMatrixBase.hpp \
                      GMatrixTools.hpp \
