@@ -67,7 +67,7 @@
 
 /* __ Skymap handling ____________________________________________________ */
 #include "GSkyDir.i"
-//#include "GSkyPixel.i"
+#include "GSkyPixel.i"
 #include "GSkymap.i"
 #include "GWcs.i"
 #include "GWcsCAR.i"
