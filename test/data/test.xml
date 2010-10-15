@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="no"?>
+<source_library title="source library">
+  <source name="LMC" type="DiffuseSource">
+    <spectrum type="PLSuperExpCutoff">
+      <parameter free="1" max="1000" min="1e-07" name="Prefactor" scale="1e-07" value="0.02754520844" />
+      <parameter free="1" max="5" min="-5" name="Index1" scale="1" value="-2.0458781" />
+      <parameter free="0" max="1000000" min="10" name="Scale" scale="1" value="100" />
+      <parameter free="1" max="100000" min="500" name="Cutoff" scale="1" value="8244.185952" />
+      <parameter free="0" max="5" min="0" name="Index2" scale="1" value="1" />
+    </spectrum>
+    <spatialModel file="LMC.fits" type="SpatialMap">
+      <parameter free="0" max="1000" min="0.001" name="Prefactor" scale="1" value="1" />
+    </spatialModel>
+  </source>
+</source_library>
