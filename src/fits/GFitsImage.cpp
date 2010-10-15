@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
@@ -63,10 +62,10 @@ GFitsImage::GFitsImage(int naxis, const int* naxes) : GFitsData()
 {
     // Initialise class members for clean destruction
     init_members();
-    
+
     // Store number of axis and bitpix
     m_naxis = naxis;
-    
+
     // Copy number of pixels in each dimension and calculate the total
     // number of pixels
     if (m_naxis > 0) {
@@ -246,9 +245,10 @@ void GFitsImage::copy_members(const GFitsImage& image)
     // Copy axes
     if (image.m_naxes != NULL && m_naxis > 0) {
         m_naxes = new long[m_naxis];
-        memcpy(m_naxes, image.m_naxes, m_naxis*sizeof(long));
+        for (int i = 0; i < m_naxis; ++i)
+            m_naxes[i] = image.m_naxes[i];
     }
-    
+
     // Return
     return;
 }
@@ -445,10 +445,3 @@ std::ostream& operator<< (std::ostream& os, const GFitsImage& image)
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                    Other functions used by GFitsImage                   =
- =                                                                         =
- ==========================================================================*/
