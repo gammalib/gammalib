@@ -57,6 +57,10 @@
 #include "GFitsTableFltCol.hpp"
 #include "GFitsTableDblCol.hpp"
 
+/* __ XML module _________________________________________________________ */
+#include "GXml.hpp"
+#include "GXmlNode.hpp"
+
 /* __ Application module _________________________________________________ */
 #include "GApplication.hpp"
 #include "GLog.hpp"
