@@ -55,3 +55,16 @@ GException::not_enough_nodes::not_enough_nodes(std::string origin, int num)
     m_origin  = origin;
     m_message = "Not enough nodes in node array (" + str(num) + " nodes).";
 }
+
+
+/***********************************************************************//**
+ * @brief File open error
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] filename Filename.
+ ***************************************************************************/
+GException::file_open_error::file_open_error(std::string origin, std::string filename)
+{
+    m_origin  = origin;
+    m_message = "Unable to open file: " + filename;
+}

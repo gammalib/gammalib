@@ -62,6 +62,12 @@ public:
         not_enough_nodes(std::string origin, int num);
     };
 
+    // File open error
+    class file_open_error : public GExceptionHandler {
+    public:
+        file_open_error(std::string origin, std::string filename);
+    };
+
     // Empty object exception class
     class empty : public GExceptionHandler {
     public:
