@@ -13,6 +13,7 @@ SUBDIRS = support \
           linalg \
           numerics \
           fits \
+          xml \
           sky \
           opt \
           obs \
@@ -37,11 +38,12 @@ libgamma_la_LIBADD = support/libsupport.la \
                      linalg/liblinalg.la \
                      numerics/libnumerics.la \
                      fits/libfits.la \
+                     xml/libxml.la \
                      sky/libsky.la \
                      opt/libopt.la \
                      obs/libobs.la \
                      model/libmodel.la \
-		     app/libapp.la \
-		     $(INST_CTA) \
-		     $(INST_LAT)
+                     app/libapp.la \
+                     $(INST_CTA) \
+                     $(INST_LAT)
 libgamma_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
