@@ -92,7 +92,7 @@ void GLATResponse::aeff_ctheta_min(const double& ctheta)
 {
     // Set minimum cos(theta) value
     m_aeff_ctheta_min = ctheta;
-    
+
     // Return
     return;
 }
@@ -203,7 +203,7 @@ void GLATResponse::aeff_init_members(void)
     // Initialise Aeff members
     m_aeff_ctheta_min = 0.0;
     m_aeff            = NULL;
-    
+
     // Return
     return;
 }
@@ -223,7 +223,8 @@ void GLATResponse::aeff_copy_members(const GLATResponse& rsp)
         int size = m_aeff_bins.num_energy() * m_aeff_bins.num_ctheta();
         if (size > 0) {
             m_aeff = new double[size];
-            memcpy(m_aeff, rsp.m_aeff, size*sizeof(double));
+            for (int i = 0; i < size; ++i)
+                m_aeff[i] = rsp.m_aeff[i];
         }
     }
 

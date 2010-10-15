@@ -100,20 +100,20 @@ double GLATResponse::psf(const double& delta, const double& logE,
 
     // Compute stretch factor
     double stretch = sigma * scale;
-    
+
     // Compute maximum allowed angular separation
     double delta_max = m_psf_angle_max * stretch;
     if (delta_max >= max_sep)
         delta_max = max_sep;
-    
+
     // If maximum angular separation is exceeded then return 0.0
     double psf;
     if (delta > delta_max)
         psf = 0.0;
-        
+
     // ... otherwise interpolate PSF value
     else {
-    
+
         // Get PSF value from table
         double r    = delta / stretch;  // real angular distance in radians
         m_psf_angle.set_value(r);       // interpolate array
@@ -194,7 +194,7 @@ GVector GLATResponse::psf(const GVector& delta, const double& logE,
 
         // Normalize PSF
         psf(i) *= norm;
-        
+
     } // endfor: looped over angular separations
 
     // Return PSF vector
@@ -234,7 +234,7 @@ void GLATResponse::psf_init(void)
 
     // Get the energy and cos(theta) bins
     m_psf_bins.load(hdu);
-    
+
     // Get the PSF characterisation data
     GVector v_ncore = get_fits_vector(hdu, "NCORE");
     GVector v_sigma = get_fits_vector(hdu, "SIGMA");
@@ -264,7 +264,7 @@ void GLATResponse::psf_init(void)
         xaxis(i) = x;
         u(i)     = 0.5*x*x;
     }
-    
+
     // Setup angle nodes
     m_psf_angle.nodes(xaxis);
 
@@ -362,7 +362,7 @@ void GLATResponse::psf_append(GFits& file) const
     GFitsHDU hdu_bounds;
     m_psf_bins.save(&hdu_bounds);
     hdu_bounds.extname("PBOUNDS");
-    
+
     // Build PSF tables and images
     int naxes2[] = {m_psf_bins.num_energy(), m_psf_bins.num_ctheta()};
     int naxes3[] = {angle_num, m_psf_bins.num_energy(), m_psf_bins.num_ctheta()};
@@ -542,27 +542,30 @@ void GLATResponse::psf_copy_members(const GLATResponse& rsp)
     m_psf_bins      = rsp.m_psf_bins;
     m_psf_angle     = rsp.m_psf_angle;
     m_psf_angle_max = rsp.m_psf_angle_max;
-    
+
     // Copy arrays
     if (rsp.m_psf != NULL) {
         int size = m_psf_bins.num_energy() * m_psf_bins.num_ctheta() * angle_num;
         if (size > 0) {
             m_psf = new double[size];
-            memcpy(m_psf, rsp.m_psf, size*sizeof(double));
+            for (int i = 0; i < size; ++i)
+                m_psf[i] = rsp.m_psf[i];
         }
     }
     if (rsp.m_norm != NULL) {
         int size = m_psf_bins.num_energy() * m_psf_bins.num_ctheta();
         if (size > 0) {
             m_norm = new double[size];
-            memcpy(m_norm, rsp.m_norm, size*sizeof(double));
+            for (int i = 0; i < size; ++i)
+                m_norm[i] = rsp.m_norm[i];
         }
     }
     if (rsp.m_sigma != NULL) {
         int size = m_psf_bins.num_energy() * m_psf_bins.num_ctheta();
         if (size > 0) {
             m_sigma = new double[size];
-            memcpy(m_sigma, rsp.m_sigma, size*sizeof(double));
+            for (int i = 0; i < size; ++i)
+                m_sigma[i] = rsp.m_sigma[i];
         }
     }
 
