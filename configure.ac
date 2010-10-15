@@ -133,7 +133,7 @@ dnl AC_TYPE_SIZE_T
 dnl AC_C_CONST
 dnl AC_C_VOLATILE
 dnl AC_C_INLINE
-
+dnl gl_VISIBILITY
 
 
 dnl ============================
@@ -144,7 +144,7 @@ dnl ============================
 dnl =========================
 dnl Check for system services
 dnl =========================
-dnl AC_CANONICAL_HOST
+AC_CANONICAL_HOST
 
 
 dnl ==============================
