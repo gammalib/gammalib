@@ -378,7 +378,7 @@ GSkymap& GSkymap::operator= (const GSkymap& map)
 /***********************************************************************//**
  * @brief Load skymap from FITS file.
  *
- * @param[in] filename FITS file into which the skymap will be saved.
+ * @param[in] filename FITS file from which the skymap will be loaded.
  *
  * Loads HEALPix and non HEALPix skymaps. First searches for HEALPix map in
  * FITS file by scanning all HDUs for PIXTYPE=HEALPIX. If no HEALPix map has
