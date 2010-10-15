@@ -20,9 +20,12 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdio>
 #include "GXml.hpp"
+#include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_LOAD                                     "GXml::load(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -62,6 +65,24 @@ GXml::GXml(const GXml& xml)
 
     // Copy members
     copy_members(xml);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load constructor
+ *
+ * @param[in] filename XML file from which object should be constructed.
+ ***************************************************************************/
+GXml::GXml(const std::string& filename)
+{
+    // Initialise private members for clean destruction
+    init_members();
+
+    // Load XML file
+    load(filename);
 
     // Return
     return;
@@ -119,6 +140,68 @@ GXml& GXml::operator= (const GXml& xml)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Clear object.
+ *
+ * Reset object to a clean initial state.
+ ***************************************************************************/
+void GXml::clear(void)
+{
+    // Free memory and initialise members
+    free_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load XML file.
+ *
+ * @param[in] filename Name of file to be loaded.
+ *
+ * @exception GException::file_open_error
+ *            Unable to open parameter file (read access requested).
+ *
+ * Loads XML file by reading all lines from the XML file.
+ ***************************************************************************/
+void GXml::load(const std::string& filename)
+{
+    // Clear object
+    clear();
+
+    // Open parameter file
+    FILE* fptr = fopen(filename.c_str(), "r");
+    if (fptr == NULL)
+        throw GException::file_open_error(G_LOAD, filename);
+
+    // Parse file
+    parse(fptr);
+
+    // Close file
+    fclose(fptr);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save XML file.
+ *
+ * @param[in] filename Name of file to be saved.
+ *
+ * Save XML file.
+ ***************************************************************************/
+void GXml::save(const std::string& filename)
+{
+    
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -166,6 +249,71 @@ void GXml::free_members(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Parse XML file
+ *
+ * @param[in] fptr Pointer to file to be parsed.
+ ***************************************************************************/
+void GXml::parse(FILE* fptr)
+{
+    // Define parser modes
+    enum Mode { OPEN,          // Wait for next '<'
+                CLOSE };       // Wait for next '>'
+
+    // Initialise parser
+    int  c;
+    int  level = 0;
+    Mode mode  = OPEN;
+
+    // Main parsing loop
+    while ((c = fgetc(fptr)) != EOF) {
+
+        // Perform mode dependent action
+        switch (mode) {
+        case OPEN:
+            if (c == '<') {
+                mode = CLOSE;
+                std::cout << "CLOSE" << level;
+            }
+            else if (!is_whitespace(c)) {
+                std::cout << " ***ERROR*** ";
+            }
+            break;
+        case CLOSE:
+            if (c == '>') {
+                mode = OPEN;
+                std::cout << "OPEN" << level;
+            }
+            break;
+        default:
+            break;
+        }
+
+        // Get next character
+        std::cout << (char)c;
+
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Check if character is whitespace
+ *
+ * @param[in] c Character to check.
+ ***************************************************************************/
+bool GXml::is_whitespace(const int& c)
+{
+    // Set result
+    bool result = (c == ' ');
+
+    // Return result
+    return result;
 }
 
 

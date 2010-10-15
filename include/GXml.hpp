@@ -37,18 +37,24 @@ public:
     // Constructors and destructors
     GXml(void);
     GXml(const GXml& xml);
+    GXml(const std::string& filename);
     ~GXml(void);
 
     // Operators
     GXml& operator= (const GXml& xml);
 
     // Methods
+    void clear(void);
+    void load(const std::string& filename);
+    void save(const std::string& filename);
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GXml& xml);
     void free_members(void);
+    void parse(FILE* fptr);
+    bool is_whitespace(const int& c);
 
     // Protected data members
     std::string     m_name;          //!< Name
