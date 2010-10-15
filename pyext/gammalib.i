@@ -69,9 +69,9 @@
 #include "GSkyDir.i"
 //#include "GSkyPixel.i"
 #include "GSkymap.i"
-//#include "GWcs.i"
-//#include "GWcsCAR.i"
-//#include "GWcsHPX.i"
+#include "GWcs.i"
+#include "GWcsCAR.i"
+#include "GWcsHPX.i"
 
 /* __ Observation handling _______________________________________________ */
 //#include "GEnergy.i"
