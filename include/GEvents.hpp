@@ -35,7 +35,7 @@
  ***************************************************************************/
 class GEvents {
 
-	// Friend classes
+    // Friend classes
     friend class GObservations;
     friend class GObservation;
 
@@ -52,17 +52,13 @@ public:
     virtual GEvents& operator= (const GEvents& events);
 
     // Virtual methods
-	virtual void    load(const std::string& filename) = 0;
+    virtual void    load(const std::string& filename) = 0;
     virtual GEvent* pointer(int index) = 0;
     virtual int     number(void) const = 0;
     virtual int     size(void) const = 0;
     virtual bool    islist(void) const = 0;
     virtual bool    iscube(void) const = 0;
-    
-    // Other methods
-    void          obs(GObservation* ptr) { m_obs=ptr; return; }
-    GObservation* obs(void) const { return m_obs; }
-    
+
     // Event iterator
     class iterator {
     friend class GEvents;
@@ -90,10 +86,6 @@ protected:
     void             copy_members(const GEvents& events);
     void             free_members(void);
     virtual GEvents* clone(void) const = 0;
-    
-    // Protected data
-    GObservation*  m_obs;        //!< Pointer to associated observation
-    
 };
 
 #endif /* GEVENTS_HPP */

@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GEvents.cpp
@@ -159,10 +158,10 @@ GEvents::iterator GEvents::iterator::operator++(int junk)
 {
     // Save actual iterator
     GEvents::iterator actual = *this;
-    
+
     // Increment using prefix iterator
     ++(*this);
-    
+
     // Return actual iterator
     return actual;
 }
@@ -178,7 +177,7 @@ GEvents::iterator GEvents::begin(void)
 
     // Set iterator for first event
     iter.m_index = 0;
-	
+
     // Return
     return iter;
 }
@@ -191,10 +190,10 @@ GEvents::iterator GEvents::end(void)
 {
     // Allocate iterator object
     GEvents::iterator iter(this);
-    
+
     // Set iterator beyond last event
     iter.m_index = iter.m_num;
-	
+
     // Return
     return iter;
 }
@@ -218,8 +217,7 @@ GEvents::iterator GEvents::end(void)
 void GEvents::init_members(void)
 {
     // Initialise members
-    m_obs = NULL;
-    
+
     // Return
     return;
 }
@@ -233,8 +231,7 @@ void GEvents::init_members(void)
 void GEvents::copy_members(const GEvents& events)
 {
     // Copy attributes
-    m_obs = events.m_obs;
-    
+
     // Return
     return;
 }
@@ -268,7 +265,7 @@ std::ostream& operator<< (std::ostream& os, const GEvents& events)
     os << "=== GEvents ===" << std::endl;
     os << " Number of elements ........: " << events.size() << std::endl;
     os << " Number of events ..........: " << events.number();
-        
+
     // Return output stream
     return os;
 }
