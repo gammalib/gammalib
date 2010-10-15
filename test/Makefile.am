@@ -36,6 +36,7 @@ check_PROGRAMS = test_GVector \
                  test_GSparseMatrix \
                  test_GNumerics \
                  test_GFits \
+                 test_GXml \
                  test_GModel \
                  test_GSky \
                  $(INST_CTA) $(INST_LAT)
@@ -50,6 +51,7 @@ TESTS = test_GVector \
         test_GSparseMatrix \
         test_GNumerics \
         test_GFits \
+        test_GXml \
         test_GModel \
         test_GSky \
         $(INST_CTA) $(INST_LAT)
@@ -84,6 +86,11 @@ test_GFits_SOURCES = test_GFits.cpp
 test_GFits_LDFLAGS = @LDFLAGS@
 test_GFits_CPPFLAGS = @CPPFLAGS@
 test_GFits_LDADD = $(top_srcdir)/src/libgamma.la
+#
+test_GXml_SOURCES = test_GXml.cpp
+test_GXml_LDFLAGS = @LDFLAGS@
+test_GXml_CPPFLAGS = @CPPFLAGS@
+test_GXml_LDADD = $(top_srcdir)/src/libgamma.la
 #
 test_GModel_SOURCES = test_GModel.cpp
 test_GModel_LDFLAGS = @LDFLAGS@
