@@ -40,6 +40,7 @@
 /* __ Debug definitions __________________________________________________ */
 
 
+
 /*==========================================================================
  =                                                                         =
  =                        Constructors/destructors                         =
@@ -242,7 +243,8 @@ GCTAEventBin* GCTAEventCube::pointer(int index)
         // Set GCTAEventBin pointers
         ptr->m_dir    = &(m_dirs[ipix]);
         ptr->m_pnt    = &m_pnt;
-        ptr->m_rsp    = (m_obs != NULL) ? (GCTAResponse*)m_obs->response() : NULL;
+        ptr->m_rsp    = (m_obs != NULL) ?
+                        (GCTAResponse*)((GObservation*)m_obs)->response() : NULL;
         ptr->m_omega  = &(m_omega[ipix]);
         ptr->m_ewidth = &(m_ewidth[ieng]);
         ptr->m_ontime = &m_ontime;
@@ -296,6 +298,7 @@ void GCTAEventCube::init_members(void)
     m_omega    = NULL;
     m_energies = NULL;
     m_ewidth   = NULL;
+    m_obs      = NULL;
     m_time.clear();
     m_ontime   = 0.0;
     m_pnt.clear();
@@ -322,6 +325,7 @@ void GCTAEventCube::copy_members(const GCTAEventCube& cube)
     m_pnt    = cube.m_pnt;
     m_ebds   = cube.m_ebds;
     m_gti    = cube.m_gti;
+    m_obs    = cube.m_obs;
 
     // Set counter to copied skymap pixels
     m_counts = m_map.pixels();
@@ -497,7 +501,7 @@ void GCTAEventCube::set_directions(void)
 {
     // Throw an error if we have no sky pixels
     if (npix() < 1)
-        throw GCTAException::no_sky(G_SET_ENERGIES, "Every CTA event cube"
+        throw GCTAException::no_sky(G_SET_DIRECTIONS, "Every CTA event cube"
                                    " needs a definiton of the sky pixels.");
 
     // Set pixel pointer

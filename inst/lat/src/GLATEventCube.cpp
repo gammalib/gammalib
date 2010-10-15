@@ -246,6 +246,7 @@ void GLATEventCube::init_members(void)
     m_time.met(0.0);
     m_dirs     = NULL;
     m_ebds     = GEbounds();
+    m_obs      = NULL;
 
     // Return
     return;
@@ -267,6 +268,7 @@ void GLATEventCube::copy_members(const GLATEventCube& cube)
     m_ebins  = cube.m_ebins;
     m_time   = cube.m_time;
     m_ebds   = cube.m_ebds;
+    m_obs    = cube.m_obs;
 
     // Copy cube
     if (m_elements > 0 && cube.m_counts != NULL) {

@@ -22,6 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GEventCube.hpp"
 #include "GLATEventBin.hpp"
+#include "GLATObservation.hpp"
 #include "GEbounds.hpp"
 #include "GFits.hpp"
 #include "GEnergy.hpp"
@@ -55,12 +56,14 @@ public:
     GLATEventCube& operator= (const GLATEventCube& cube);
 
     // Methods
-	void          load(const std::string& filename);
-    GLATEventBin* pointer(int index);
-    int           number(void) const;
-    int           ebins(void) const { return m_ebins; }
-    int           pixels(void) const { return m_pixels; }
-    
+    void             load(const std::string& filename);
+    GLATEventBin*    pointer(int index);
+    int              number(void) const;
+    int              ebins(void) const { return m_ebins; }
+    int              pixels(void) const { return m_pixels; }
+    void             obs(GLATObservation* ptr) { m_obs=ptr; return; }
+    GLATObservation* obs(void) const { return m_obs; }
+
 protected:
     // Protected methods
     void           init_members(void);
@@ -71,18 +74,19 @@ protected:
     void           load_ebds(GFitsHDU* hdu);
 
     // Protected data area
-    GLATEventBin m_bin;         //!< Actual energy bin
-    int          m_nx;          //!< Number of pixels in x
-    int          m_ny;          //!< Number of pixels in y
-    int          m_pixels;      //!< Number of pixels in x and y
-    int          m_ebins;       //!< Number of energy bins
-    double*      m_counts;      //!< Pointer to counts array
-    GEnergy*     m_energies;    //!< Pointer to energies
-    GTime        m_time;        //!< Event cube mean time
-    GLATInstDir* m_dirs;        //!< Pointer to event directions
-    GLATPointing m_pnt;         //!< LAT pointing
-    GLATResponse m_rsp;         //!< LAT instrument response function
-    GEbounds     m_ebds;        //!< Energy boundaries
+    GLATEventBin     m_bin;            //!< Actual energy bin
+    int              m_nx;             //!< Number of pixels in x
+    int              m_ny;             //!< Number of pixels in y
+    int              m_pixels;         //!< Number of pixels in x and y
+    int              m_ebins;          //!< Number of energy bins
+    double*          m_counts;         //!< Pointer to counts array
+    GEnergy*         m_energies;       //!< Pointer to energies
+    GTime            m_time;           //!< Event cube mean time
+    GLATInstDir*     m_dirs;           //!< Pointer to event directions
+    GLATPointing     m_pnt;            //!< LAT pointing
+    GLATResponse     m_rsp;            //!< LAT instrument response function
+    GEbounds         m_ebds;           //!< Energy boundaries
+    GLATObservation* m_obs;            //!< Points back to observation
 
 private:
 };

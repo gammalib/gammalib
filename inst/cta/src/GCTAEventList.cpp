@@ -202,7 +202,7 @@ void GCTAEventList::load(const std::string& filename)
  * Otherwise a NULL pointer is returned.
  *
  * @todo Should we really return a NULL pointer in case that the list or
- *       the index is not valid? Should we not better throw an exception? 
+ *       the index is not valid? Should we not better throw an exception?
  ***************************************************************************/
 GCTAEventAtom* GCTAEventList::pointer(int index)
 {
@@ -215,8 +215,9 @@ GCTAEventAtom* GCTAEventList::pointer(int index)
         // Point to the requested event atom
         ptr = (GCTAEventAtom*)m_events + index;
 
-        // Set instrument response function
-        ptr->m_rsp = (m_obs != NULL) ? (GCTAResponse*)m_obs->response() : NULL;
+        // Set instrument response function.
+        ptr->m_rsp = (m_obs != NULL) ?
+                     (GCTAResponse*)((GObservation*)m_obs)->response() : NULL;
 
     } // endif: valid index
 
@@ -239,6 +240,7 @@ void GCTAEventList::init_members(void)
     // Initialise base class members
     m_num    = 0;
     m_events = NULL;
+    m_obs    = NULL;
 
     // Return
     return;
@@ -254,6 +256,7 @@ void GCTAEventList::copy_members(const GCTAEventList& list)
 {
     // Copy attributes
     m_num = list.m_num;
+    m_obs = list.m_obs;
 
     // If there are events then copy them
     if (m_num > 0 && list.m_events != NULL) {

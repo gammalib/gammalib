@@ -130,12 +130,37 @@ GLATEventList& GLATEventList::operator= (const GLATEventList& list)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear object.
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GLATEventList::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GEventList::free_members();
+    this->GEvents::free_members();
+
+    // Initialise members
+    this->GEvents::init_members();
+    this->GEventList::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load LAT events from FT1 file.
  *
  * @param[in] ft1name FT1 FITS filename from which events are loaded.
  ***************************************************************************/
 void GLATEventList::load(const std::string& ft1name)
 {
+    // Clear object
+    clear();
+
     // Allocate FITS file
     GFits file;
 
@@ -206,6 +231,7 @@ void GLATEventList::init_members(void)
     // Initialise members
     m_num    = 0;
     m_events = NULL;
+    m_obs    = NULL;
 
     // Initialise diffuse models
     m_num_difrsp   = 0;
@@ -232,6 +258,7 @@ void GLATEventList::copy_members(const GLATEventList& list)
 {
     // Copy attributes
     m_num        = list.m_num;
+    m_obs        = list.m_obs;
     m_num_difrsp = list.m_num_difrsp;
     m_ds_num     = list.m_ds_num;
 
