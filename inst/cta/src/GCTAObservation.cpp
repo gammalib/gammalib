@@ -178,11 +178,12 @@ void GCTAObservation::load_unbinned(const std::string& filename)
     // Delete old events
     if (m_events != NULL) delete m_events;
 
-    // Allocate event list
-    m_events = new GCTAEventList;
+    // Allocate events
+    GCTAEventList* events = new GCTAEventList;
+    m_events = events;
 
     // Load events into list
-    m_events->load(filename);
+    events->load(filename);
 
     // Load GTIs
     //m_gti.load(filename);
@@ -194,7 +195,7 @@ void GCTAObservation::load_unbinned(const std::string& filename)
     // Link observations to events. This has to be done after loading since
     // loading initialises the GCTAEventList object, hence resets the pointer
     // to the observation.
-    m_events->obs(this);
+    events->obs(this);
 
     // Return
     return;
@@ -211,20 +212,21 @@ void GCTAObservation::load_binned(const std::string& filename)
     // Delete old events
     if (m_events != NULL) delete m_events;
 
-    // Allocate event cube
-    m_events = new GCTAEventCube;
+    // Allocate events
+    GCTAEventCube* events = new GCTAEventCube;
+    m_events = events;
 
     // Load events into cube
-    m_events->load(filename);
+    events->load(filename);
 
     // Copy energy boundaries and GTIs from event cube
     m_ebounds = ((GCTAEventCube*)m_events)->m_ebds;
     m_gti     = ((GCTAEventCube*)m_events)->m_gti;
 
     // Link observations to events. This has to be done after loading since
-    // loading initialises the GCTAEventList object, hence resets the pointer
+    // loading initialises the GCTAEventCube object, hence resets the pointer
     // to the observation.
-    m_events->obs(this);
+    events->obs(this);
 
     // Return
     return;
