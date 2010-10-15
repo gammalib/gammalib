@@ -26,6 +26,7 @@
 #include "GWcs.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
+#include "GFits.hpp"
 #include "GFitsHDU.hpp"
 #include "GMatrix.hpp"
 #include "GVector.hpp"
