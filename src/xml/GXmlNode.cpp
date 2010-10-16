@@ -20,9 +20,12 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GException.hpp"
 #include "GXmlNode.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_OP_ACCESS1                             "GXmlNode::operator() (int)"
+#define G_OP_ACCESS2                       "GXmlNode::operator() (int) const"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -113,6 +116,44 @@ GXmlNode& GXmlNode::operator= (const GXmlNode& node)
 }
 
 
+/***********************************************************************//**
+ * @brief Node access operator
+ *
+ * @param[in] index Index of node (0,1,2,...)
+ *
+ * @exception GException::out_of_range
+ *            Node index is out of range.
+ ***************************************************************************/
+GXmlNode& GXmlNode::operator() (int index)
+{
+    // If index is outside boundary then throw an error
+    if (index < 0 || index >= m_nodes.size())
+        throw GException::out_of_range(G_OP_ACCESS1, index, 0, m_nodes.size()-1);
+
+    // Return node
+    return *(m_nodes[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Node access operator
+ *
+ * @param[in] index Index of node (0,1,2,...)
+ *
+ * @exception GException::out_of_range
+ *            Node index is out of range.
+ ***************************************************************************/
+const GXmlNode& GXmlNode::operator() (int index) const
+{
+    // If index is outside boundary then throw an error
+    if (index < 0 || index >= m_nodes.size())
+        throw GException::out_of_range(G_OP_ACCESS2, index, 0, m_nodes.size()-1);
+
+    // Return observation pointer
+    return *(m_nodes[index]);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
@@ -145,8 +186,9 @@ void GXmlNode::init_members(void)
  ***************************************************************************/
 void GXmlNode::copy_members(const GXmlNode& node)
 {
-    // Copy attributes
-    m_nodes = node.m_nodes;
+    // Copy nodes
+    for (int i = 0; i < node.m_nodes.size(); ++i)
+        m_nodes.push_back((node.m_nodes[i]->clone()));
 
     // Return
     return;
@@ -158,6 +200,10 @@ void GXmlNode::copy_members(const GXmlNode& node)
  ***************************************************************************/
 void GXmlNode::free_members(void)
 {
+    // Free nodes
+    for (int i = 0; i < m_nodes.size(); ++i)
+        delete m_nodes[i];
+
     // Return
     return;
 }

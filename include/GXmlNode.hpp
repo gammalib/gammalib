@@ -21,7 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <vector>
-
+#include <iostream>
 
 /***********************************************************************//**
  * @class GXmlNode
@@ -37,15 +37,36 @@ public:
     ~GXmlNode(void);
 
     // Operators
-    GXmlNode& operator= (const GXmlNode& node);
+    GXmlNode&       operator= (const GXmlNode& node);
+    GXmlNode&       operator() (int index);
+    const GXmlNode& operator() (int index) const;
 
+    // Public enumerators
+    enum NodeType {
+        NT_DOCUMENT,
+        NT_ELEMENT,
+        NT_COMMENT,
+        NT_UNKNOWN,
+        NT_TEXT,
+        NT_DECLARATION,
+        NT_TYPECOUNT
+    };
+
+    // Pure virtual methods
+    virtual void     clear(void) = 0;
+    virtual void     print(std::ostream& os, int indent = 0) const = 0;
+    virtual NodeType type(void) const = 0;
+    
     // Methods
+    void append(GXmlNode* node) { m_nodes.push_back(node); }
+    int  size(void) const { return m_nodes.size(); }
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GXmlNode& node);
-    void free_members(void);
+    void              init_members(void);
+    void              copy_members(const GXmlNode& node);
+    void              free_members(void);
+    virtual GXmlNode* GXmlNode::clone(void) const = 0;
 
     // Protected data members
     std::vector<GXmlNode*> m_nodes;    //!< Pointer to nodes contained in node
