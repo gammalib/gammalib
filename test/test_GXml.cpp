@@ -53,6 +53,7 @@ void test_GXml_construct(void)
     // Test load constructor
     try {
         GXml xml(xml_file);
+        std::cout << xml << std::endl;
     }
     catch (std::exception &e) {
         std::cout << std::endl 
