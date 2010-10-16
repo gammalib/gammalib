@@ -376,6 +376,13 @@ public:
                        double emax, std::string message = "");
     };
 
+    // XML exceptions
+    class xml_syntax_error : public GExceptionHandler {
+    public:
+        xml_syntax_error(std::string origin, std::string segment, 
+                         std::string message = "");
+    };
+    
 };
 
 #endif /* GEXCEPTION_HPP */
