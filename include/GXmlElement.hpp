@@ -1,0 +1,71 @@
+/***************************************************************************
+ *            GXmlElement.hpp - XML element node class definition          *
+ * ----------------------------------------------------------------------- *
+ *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ * ----------------------------------------------------------------------- *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+/**
+ * @file GXmlElement.hpp
+ * @brief XML element node class definition
+ * @author J. Knodlseder
+ */
+
+#ifndef GXMLELEMENT_HPP
+#define GXMLELEMENT_HPP
+
+/* __ Includes ___________________________________________________________ */
+#include <string>
+#include <iostream>
+#include "GXml.hpp"
+#include "GXmlNode.hpp"
+
+
+/***********************************************************************//**
+ * @class GXmlElement
+ *
+ * @brief XML element node class interface defintion.
+ ***************************************************************************/
+class GXmlElement : public GXmlNode {
+
+    // Friend classes
+    friend class GXml;
+
+public:
+    // Constructors and destructors
+    GXmlElement(void);
+    GXmlElement(const GXmlElement& node);
+    GXmlElement(const std::string& segment);
+    ~GXmlElement(void);
+
+    // Operators
+    GXmlElement& operator= (const GXmlElement& node);
+
+    // Methods
+    void        clear(void);
+    void        print(std::ostream& os, int indent = 0) const;
+    NodeType    type(void) const { return NT_ELEMENT; }
+    std::string name(void) const { return m_name; }
+    GXmlNode*   parent(void) const { return m_parent; }
+    void        parent(GXmlNode* node) { m_parent = node; }
+
+protected:
+    // Protected methods
+    void         init_members(void);
+    void         copy_members(const GXmlElement& node);
+    void         free_members(void);
+    GXmlElement* GXmlElement::clone(void) const;
+    void         parse_start(const std::string& segment);
+    void         parse_stop(const std::string& segment);
+
+    // Protected data members
+    std::string m_name;       //!< Element name
+    GXmlNode*   m_parent;     //!< Pointer on parent node
+};
+
+#endif /* GXMLELEMENT_HPP */
