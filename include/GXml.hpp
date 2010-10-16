@@ -21,6 +21,9 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
+#include "GXmlNode.hpp"
+#include "GXmlDocument.hpp"
+#include "GXmlText.hpp"
 
 
 /***********************************************************************//**
@@ -29,6 +32,11 @@
  * @brief XML class interface defintion.
  ***************************************************************************/
 class GXml {
+
+    // Friend classes
+    friend class GXmlNode;
+    friend class GXmlDocument;
+    friend class GXmlText;
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GXml& xml);
@@ -49,15 +57,29 @@ public:
     void save(const std::string& filename);
 
 protected:
+    // Protected enumerators
+    enum TagType {
+        TT_ELEMENT_START,
+        TT_ELEMENT_END,
+        TT_ELEMENT_EMPTY,
+        TT_COMMENT,
+        TT_DECLARATION,
+        TT_PROCESSING,
+        TT_INVALID
+    };
+
     // Protected methods
-    void init_members(void);
-    void copy_members(const GXml& xml);
-    void free_members(void);
-    void parse(FILE* fptr);
-    bool is_whitespace(const int& c);
+    void    init_members(void);
+    void    copy_members(const GXml& xml);
+    void    free_members(void);
+    void    parse(FILE* fptr);
+    void    process_tag(GXmlNode** current, const std::string& segment);
+    void    process_text(GXmlNode** current, const std::string& segment);
+    TagType get_tagtype(const std::string& segment) const;
+    bool    is_whitespace(const int& c) const;
 
     // Protected data members
-    std::string     m_name;          //!< Name
+    GXmlDocument m_root;         //!< Root node
 };
 
 #endif /* GXML_HPP */
