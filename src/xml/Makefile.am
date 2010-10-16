@@ -7,7 +7,11 @@ INCLUDES = -I$(top_srcdir)/include \
 
 # Define sources for this directory
 sources = GXml.cpp \
-          GXmlNode.cpp
+          GXmlNode.cpp \
+          GXmlDocument.cpp \
+          GXmlText.cpp \
+          GXmlElement.cpp \
+          GException_xml.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libxml.la
