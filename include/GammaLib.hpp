@@ -60,6 +60,9 @@
 /* __ XML module _________________________________________________________ */
 #include "GXml.hpp"
 #include "GXmlNode.hpp"
+#include "GXmlDocument.hpp"
+#include "GXmlText.hpp"
+#include "GXmlElement.hpp"
 
 /* __ Application module _________________________________________________ */
 #include "GApplication.hpp"
