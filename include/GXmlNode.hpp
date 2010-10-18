@@ -49,6 +49,7 @@ public:
         NT_UNKNOWN,
         NT_TEXT,
         NT_DECLARATION,
+        NT_PI,
         NT_TYPECOUNT
     };
 
