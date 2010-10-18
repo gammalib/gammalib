@@ -29,6 +29,7 @@
 #include "GXmlText.hpp"
 #include "GXmlElement.hpp"
 #include "GXmlComment.hpp"
+#include "GXmlPI.hpp"
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -460,12 +461,14 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
 
         // Delete temporary element
         delete element;
+        //std::cout << "DECL:" << segment << ":" << std::endl;
         break;
 
     // Processing tag
     case MT_PROCESSING:
-        // Just add unknown
-        std::cout << "PI:" << segment << ":" << std::endl;
+        GXmlPI* pi = new GXmlPI(segment);
+        (*current)->append(pi);
+        //std::cout << "PI:" << segment << ":" << std::endl;
         break;
 
     // Invalid tag, throw an error

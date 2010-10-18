@@ -13,6 +13,7 @@ sources = GXml.cpp \
           GXmlElement.cpp \
           GXmlComment.cpp \
           GXmlAttribute.cpp \
+          GXmlPI.cpp \
           GException_xml.cpp
 
 # Build libtool library
