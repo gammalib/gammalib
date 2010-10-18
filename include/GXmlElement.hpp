@@ -54,7 +54,6 @@ public:
     void        clear(void);
     void        print(std::ostream& os, int indent = 0) const;
     NodeType    type(void) const { return NT_ELEMENT; }
-    int         size(void) const { return m_attr.size(); }
     std::string name(void) const { return m_name; }
     std::string attribute(const std::string& name) const;
     GXmlNode*   parent(void) const { return m_parent; }
