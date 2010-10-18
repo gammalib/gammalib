@@ -42,6 +42,8 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GXmlDocument.hpp \
                      GXmlText.hpp \
                      GXmlElement.hpp \
+                     GXmlComment.hpp \
+                     GXmlAttribute.hpp \
                      GFitsHeaderCard.hpp \
                      GFitsHeader.hpp \
                      GFitsData.hpp \
