@@ -29,6 +29,8 @@
  * @class GXmlText
  *
  * @brief XML text node class interface defintion.
+ *
+ * This class implements a text segment of a XML document.
  ***************************************************************************/
 class GXmlText : public GXmlNode {
 
@@ -42,8 +44,9 @@ public:
     // Operators
     GXmlText& operator= (const GXmlText& node);
 
-    // Methods
+    // Implemented virtual methods
     void     clear(void);
+    void     write(FILE* fptr, int indent = 0) const;
     void     print(std::ostream& os, int indent = 0) const;
     NodeType type(void) const { return NT_TEXT; }
 

@@ -164,13 +164,30 @@ void GXmlComment::clear(void)
 
 
 /***********************************************************************//**
- * @brief Print node in output stream
+ * @brief Write comment into file
+ *
+ * @param[in] fptr File pointer.
+ ***************************************************************************/
+void GXmlComment::write(FILE* fptr, int indent) const
+{
+    // Write comment into file
+    for (int k = 0; k < indent; ++k)
+        fprintf(fptr, " ");
+    fprintf(fptr, "<!--%s-->\n", m_comment.c_str());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Print comment in output stream
  *
  * @param[in] os Output stream into which the node will be printed.
  ***************************************************************************/
 void GXmlComment::print(std::ostream& os, int indent) const
 {
-    // Put element name in output stream
+    // Put comment into output stream
     for (int k = 0; k < indent; ++k)
         os << " ";
     os << "GXmlComment::" << m_comment;

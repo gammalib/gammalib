@@ -164,13 +164,31 @@ void GXmlPI::clear(void)
 
 
 /***********************************************************************//**
- * @brief Print node in output stream
+ * @brief Write Processing Instruction into file
+ *
+ * @param[in] fptr File pointer.
+ ***************************************************************************/
+void GXmlPI::write(FILE* fptr, int indent) const
+{
+    // Write Processing Instruction into file
+    for (int k = 0; k < indent; ++k)
+        fprintf(fptr, " ");
+    fprintf(fptr, "<?%s?>\n", m_pi.c_str());
+
+    // Return
+    return;
+}
+
+
+
+/***********************************************************************//**
+ * @brief Print Processing Instruction in output stream
  *
  * @param[in] os Output stream into which the node will be printed.
  ***************************************************************************/
 void GXmlPI::print(std::ostream& os, int indent) const
 {
-    // Put element name in output stream
+    // Put Processing Instruction in output stream
     for (int k = 0; k < indent; ++k)
         os << " ";
     os << "GXmlPI::" << m_pi;

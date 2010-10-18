@@ -27,6 +27,8 @@
  * @class GXmlNode
  *
  * @brief XML node base class interface defintion.
+ *
+ * This class defines an abstract node of a XML document.
  ***************************************************************************/
 class GXmlNode {
 
@@ -55,12 +57,13 @@ public:
 
     // Pure virtual methods
     virtual void     clear(void) = 0;
+    virtual void     write(FILE* fptr, int indent = 0) const = 0;
     virtual void     print(std::ostream& os, int indent = 0) const = 0;
     virtual NodeType type(void) const = 0;
     
     // Methods
     void append(GXmlNode* node) { m_nodes.push_back(node); }
-    int  size(void) const { return m_nodes.size(); }
+    int  children(void) const { return m_nodes.size(); }
 
 protected:
     // Protected methods

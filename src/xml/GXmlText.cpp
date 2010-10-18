@@ -162,15 +162,35 @@ void GXmlText::clear(void)
 
 
 /***********************************************************************//**
- * @brief Print node in output stream
+ * @brief Write text into file
+ *
+ * @param[in] fptr File pointer.
+ ***************************************************************************/
+void GXmlText::write(FILE* fptr, int indent) const
+{
+    // Write comment into file
+    for (int k = 0; k < indent; ++k)
+        fprintf(fptr, " ");
+
+    // Write document header in file
+    fprintf(fptr, "%s", m_text.c_str());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Print text in output stream
  *
  * @param[in] os Output stream into which the node will be printed.
  ***************************************************************************/
 void GXmlText::print(std::ostream& os, int indent) const
 {
-    // Put node in output stream
-    os << "=== GXmlText ===" << std::endl;
-    os << m_text;
+    // Put text in output stream
+    for (int k = 0; k < indent; ++k)
+        os << " ";
+    os << "GXmlText::" << m_text;
 
     // Return
     return;

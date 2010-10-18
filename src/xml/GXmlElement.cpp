@@ -30,6 +30,9 @@
 #define G_PARSE_STOP                  "GXmlElement::parse_stop(std::string&)"
 #define G_PARSE_ATTRIBUTE "GXmlElement::parse_attribute(size_t*,std::string&)"
 
+/* __ Constants __________________________________________________________ */
+const int g_indent = 2;                      //!< Indent for XML file writing
+
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
@@ -167,6 +170,47 @@ void GXmlElement::clear(void)
 
 
 /***********************************************************************//**
+ * @brief Write node into file
+ *
+ * @param[in] fptr File pointer.
+ ***************************************************************************/
+void GXmlElement::write(FILE* fptr, int indent) const
+{
+    // Write element name into file
+    for (int k = 0; k < indent; ++k)
+        fprintf(fptr, " ");
+    fprintf(fptr, "<%s", m_name.c_str());
+
+    // Write attributes into file
+    for (int k = 0; k < m_attr.size(); ++k)
+        m_attr[k]->write(fptr);
+
+    // If there are no children then write an empty tag
+    if (children() < 1) {
+        fprintf(fptr, " />\n");
+    }
+
+    // ... otherwise finish start tag, write children and write end tag
+    else {
+        // Finish start tag
+        fprintf(fptr, ">\n");
+
+        // Write children in file
+        for (int i = 0; i < children(); ++i)
+            m_nodes[i]->write(fptr, indent+g_indent);
+
+        // Write end tag
+        for (int k = 0; k < indent; ++k)
+            fprintf(fptr, " ");
+        fprintf(fptr, "</%s>\n", m_name.c_str());
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print node in output stream
  *
  * @param[in] os Output stream into which the node will be printed.
@@ -181,9 +225,9 @@ void GXmlElement::print(std::ostream& os, int indent) const
         m_attr[k]->print(os);
 
     // Put children in stream
-    for (int i = 0; i < size(); ++i) {
+    for (int i = 0; i < children(); ++i) {
         os << std::endl;
-        m_nodes[i]->print(os, indent+4);
+        m_nodes[i]->print(os, indent+g_indent);
     }
 
     // Return

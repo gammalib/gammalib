@@ -159,7 +159,22 @@ void GXmlAttribute::clear(void)
 
 
 /***********************************************************************//**
- * @brief Print node in output stream
+ * @brief Write attribute into file
+ *
+ * @param[in] fptr File pointer.
+ ***************************************************************************/
+void GXmlAttribute::write(FILE* fptr) const
+{
+    // Write attribute into file
+    fprintf(fptr, " %s=%s", m_name.c_str(), m_value.c_str());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Print attribute in output stream
  *
  * @param[in] os Output stream into which the node will be printed.
  ***************************************************************************/

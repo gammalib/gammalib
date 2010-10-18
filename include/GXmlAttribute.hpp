@@ -46,6 +46,7 @@ public:
 
     // Methods
     void        clear(void);
+    void        write(FILE* fptr) const;
     void        print(std::ostream& os) const;
     std::string name(void) const { return m_name; }
     std::string value(void) const { return m_value; }

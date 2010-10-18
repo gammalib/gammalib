@@ -144,6 +144,28 @@ void GXmlDocument::clear(void)
 
 
 /***********************************************************************//**
+ * @brief Write node into file
+ *
+ * @param[in] fptr File pointer.
+ ***************************************************************************/
+void GXmlDocument::write(FILE* fptr, int indent) const
+{
+    // Write document header in file
+    fprintf(fptr, "<?xml version=%s encoding=%s standalone=%s?>\n",
+            version().c_str(),
+            encoding().c_str(),
+            standalone().c_str());
+
+    // Write children in file
+    for (int i = 0; i < children(); ++i)
+        m_nodes[i]->write(fptr, indent);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print node in output stream
  *
  * @param[in] os Output stream into which the node will be printed.
@@ -159,7 +181,7 @@ void GXmlDocument::print(std::ostream& os, int indent) const
     os << "standalone=" << standalone() << " ";
 
     // Put children in stream
-    for (int i = 0; i < size(); ++i) {
+    for (int i = 0; i < children(); ++i) {
         os << std::endl;
         m_nodes[i]->print(os, indent);
     }
@@ -187,9 +209,9 @@ void GXmlDocument::init_members(void)
     m_version.name("version");
     m_encoding.name("encoding");
     m_standalone.name("m_standalone");
-    m_version.value("1.0");
-    m_encoding.value("UTF-8");
-    m_standalone.value("no");
+    m_version.value("\"1.0\"");
+    m_encoding.value("\"UTF-8\"");
+    m_standalone.value("\"no\"");
 
     // Return
     return;

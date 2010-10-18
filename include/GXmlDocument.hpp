@@ -45,10 +45,13 @@ public:
     // Operators
     GXmlDocument& operator= (const GXmlDocument& node);
 
+    // Implemented virtual methods
+    void     clear(void);
+    void     write(FILE* fptr, int indent = 0) const;
+    void     print(std::ostream& os, int indent = 0) const;
+    NodeType type(void) const { return NT_DOCUMENT; }
+
     // Methods
-    void        clear(void);
-    void        print(std::ostream& os, int indent = 0) const;
-    NodeType    type(void) const { return NT_DOCUMENT; }
     std::string version(void) const { return m_version.value(); }
     std::string encoding(void) const { return m_encoding.value(); }
     std::string standalone(void) const { return m_standalone.value(); }

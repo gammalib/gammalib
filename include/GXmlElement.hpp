@@ -33,7 +33,7 @@
  *
  * @brief XML element node class interface defintion.
  *
- * This class implements and XML element with it's associated attributes.
+ * This class implements an XML element with it's associated attributes.
  ***************************************************************************/
 class GXmlElement : public GXmlNode {
 
@@ -50,10 +50,13 @@ public:
     // Operators
     GXmlElement& operator= (const GXmlElement& node);
 
+    // Implemented virtual methods
+    void     clear(void);
+    void     write(FILE* fptr, int indent = 0) const;
+    void     print(std::ostream& os, int indent = 0) const;
+    NodeType type(void) const { return NT_ELEMENT; }
+
     // Methods
-    void        clear(void);
-    void        print(std::ostream& os, int indent = 0) const;
-    NodeType    type(void) const { return NT_ELEMENT; }
     std::string name(void) const { return m_name; }
     std::string attribute(const std::string& name) const;
     GXmlNode*   parent(void) const { return m_parent; }
