@@ -238,7 +238,7 @@ void GXmlElement::print(std::ostream& os, int indent) const
 /***********************************************************************//**
  * @brief Return attribute value
  *
- * @param[in] os Output stream into which the node will be printed.
+ * @param[in] name Attribute name.
  *
  * If requested attribute was not found an empty string is returned. Note
  * that this allows testing of presence of an attribute since any valid
@@ -259,6 +259,45 @@ std::string GXmlElement::attribute(const std::string& name) const
     
     // Return value
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Set attribute value
+ *
+ * @param[in] name Attribute name.
+ * @param[in] value Attribute value.
+ *
+ * Sets an attribute of the element. If the attribute name exist the value
+ * is modified. If the attribute does not yet exist it is created and
+ * added to the list of attributes.
+ ***************************************************************************/
+void GXmlElement::attribute(const std::string& name, const std::string& value)
+{
+    // Initialise attribute NULL pointer
+    GXmlAttribute* attr = NULL;
+
+    // Search attribute value in list of attributes
+    for (int i = 0; i < m_attr.size(); ++i) {
+        if (m_attr[i]->name() == name) {
+            attr = m_attr[i];
+            break;
+        }
+    }
+
+    // If no attribute with specified name has been found then add a new
+    // attribute to the list of attributes
+    if (attr == NULL) {
+        attr = new GXmlAttribute;
+        attr->name(name);
+        m_attr.push_back(attr);
+    }
+
+    // Set or update value of attribute
+    attr->value(value);
+
+    // Return
+    return;
 }
 
 
@@ -502,7 +541,6 @@ void GXmlElement::parse_attribute(size_t* pos, const std::string& segment)
     // Return
     return;
 }
-
 
 
 /*==========================================================================

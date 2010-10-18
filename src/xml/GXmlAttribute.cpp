@@ -21,9 +21,11 @@
 #include <config.h>
 #endif
 #include <iostream>
+#include "GException.hpp"
 #include "GXmlAttribute.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_VALUE                           "GXmlAttribute::value(std::string)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -81,8 +83,8 @@ GXmlAttribute::GXmlAttribute(const std::string& name, const std::string& value)
     init_members();
 
     // Set attribute
-    m_name  = name;
-    m_value = value;
+    this->name(name);
+    this->value(value);
 
     // Return
     return;
@@ -182,6 +184,74 @@ void GXmlAttribute::print(std::ostream& os) const
 {
     // Put attribute in output stream
     os << " " << m_name << "=" << m_value;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set attribute value
+ *
+ * @param[in] value Attribute value.
+ *
+ * @exception GException::xml_attribute_value
+ *            Invalid XML attribute value.
+ *
+ * Set attribute value. The method automatically adds the proper hyphens to
+ * the value string if they do not exist.
+ ***************************************************************************/
+void GXmlAttribute::value(std::string value)
+{
+    // Get length of value string
+    int n = value.length();
+
+    // Count hyphens and signal their presence at start/end
+    int  n_hyphens1 = 0;
+    int  n_hyphens2 = 0;
+    bool has_hyphens1 = (n >= 2 && value[0] == '\'' && value[n-1] == '\'');
+    bool has_hyphens2 = (n >= 2 && value[0] ==  '"' && value[n-1] ==  '"');
+    for (int i = 0; i < n; ++i) {
+        if (value[i] == '\'') n_hyphens1++;
+        if (value[i] ==  '"') n_hyphens2++;
+    }
+
+    // Case A: value has ' start and end hyphens. Keep value as is if no other
+    // ' hyphens are found. Otherwise, if more than 2 ' but no " hyphen is found
+    // then enclose the value in " hyphens. Finally, if more than 2 ' and at
+    // least one " hyphen is found we have an invalid value and throw an
+    // exception.
+    if (has_hyphens1) {
+        if (n_hyphens1 > 2 && n_hyphens2 == 0)
+            value = "\"" + value + "\"";
+        else if (n_hyphens1 > 2 && n_hyphens2 > 0)
+            throw GException::xml_attribute_value(G_VALUE, value);
+    }
+
+    // Case B: value has " start and end hyphens. Keep value as is if no other
+    // " hyphens are found. Otherwise, if more than 2 " but no ' hyphen is found
+    // then enclose the value in ' hyphens. Finally, if more than 2 " and at
+    // least one ' hyphen is found we have an invalid value and throw an
+    // exception.
+    else if (has_hyphens2) {
+        if (n_hyphens1 == 0 && n_hyphens2 > 2)
+            value = "'" + value + "'";
+        else if (n_hyphens1 > 0 && n_hyphens2 > 2)
+            throw GException::xml_attribute_value(G_VALUE, value);
+    }
+
+    // Case C: value has no start and end hyphens.
+    else {
+        if (n_hyphens1 >= 0 && n_hyphens2 == 0)
+            value = "\"" + value + "\"";
+        else if (n_hyphens1 == 0 && n_hyphens2 > 0)
+            value = "'" + value + "'";
+        else
+            throw GException::xml_attribute_value(G_VALUE, value);
+    }
+
+    // Set value
+    m_value = value;
 
     // Return
     return;

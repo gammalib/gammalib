@@ -62,6 +62,7 @@ public:
     GXmlNode*   parent(void) const { return m_parent; }
     void        name(const std::string& name) { m_name=name; }
     void        parent(GXmlNode* node) { m_parent = node; }
+    void        attribute(const std::string& name, const std::string& value);
 
 protected:
     // Protected methods
