@@ -382,6 +382,10 @@ public:
         xml_syntax_error(std::string origin, std::string segment, 
                          std::string message = "");
     };
+    class xml_attribute_value : public GExceptionHandler {
+    public:
+        xml_attribute_value(std::string origin, std::string value);
+    };
     
 };
 

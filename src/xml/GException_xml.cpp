@@ -37,3 +37,21 @@ GException::xml_syntax_error::xml_syntax_error(std::string origin,
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Invalid XML attribute value
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] value XML attribute value.
+ ***************************************************************************/
+GException::xml_attribute_value::xml_attribute_value(std::string origin,
+                                                     std::string value)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Invalid XML attribute value: "+value;
+
+    // Return
+    return;
+}
