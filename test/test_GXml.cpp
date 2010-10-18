@@ -30,124 +30,6 @@ const std::string xml_file = "data/test.xml";
 
 
 /***************************************************************************
- * Test: GXml constructors                                                 *
- ***************************************************************************/
-void test_GXml_construct(void)
-{
-    // Dump header
-    std::cout << "Test XML constructors: ";
-
-    // Test void constructor
-    try {
-        GXml xml;
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to construct empty XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-
-    // Test load constructor
-    try {
-        GXml xml(xml_file);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to construct empty XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-
-    // Test copy constructor
-    try {
-        GXml xml1(xml_file);
-        GXml xml2 = xml1;
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to copy construct XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-
-    // Signal final test success
-    std::cout << " ok." << std::endl;
-
-    // Exit test
-    return;
-
-}
-
-
-/***************************************************************************
- * Test: GXml loading/saving                                               *
- ***************************************************************************/
-void test_GXml_load(void)
-{
-    // Dump header
-    std::cout << "Test XML loading and saving: ";
-
-    // Test loading
-    try {
-        GXml xml;
-        xml.load(xml_file);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to load XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-
-    // Test saving
-    try {
-        GXml xml;
-        xml.load(xml_file);
-        xml.save("test.xml");
-        xml.load("test.xml");
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to save XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-
-    // Test loading of saved XML document
-    try {
-        GXml xml;
-        xml.load("test.xml");
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to load previously saved XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-
-    // Signal final test success
-    std::cout << " ok." << std::endl;
-
-    // Exit test
-    return;
-
-}
-
-
-/***************************************************************************
  * Test: GXml element attributes                                           *
  ***************************************************************************/
 void test_GXml_attributes(void)
@@ -293,6 +175,180 @@ void test_GXml_attributes(void)
 
 
 /***************************************************************************
+ * Test: GXml elements                                                     *
+ ***************************************************************************/
+void test_GXml_elements(void)
+{
+    // Dump header
+    std::cout << "Test XML elements: ";
+
+    // Test attribute setting
+    try {
+        GXmlElement   element;
+        element.attribute("test", "1.0");
+        if (element.attribute("test") != "\"1.0\"") {
+            std::cout << std::endl
+                      << "TEST ERROR: Unexpected attribute "
+                      << element.attribute("test") << std::endl;
+            throw;
+        }
+        std::cout << ".";
+        element.attribute("test", "2.0");
+        if (element.attribute("test") != "\"2.0\"") {
+            std::cout << std::endl
+                      << "TEST ERROR: Unexpected attribute "
+                      << element.attribute("test") << std::endl;
+            throw;
+        }
+        std::cout << ".";
+        element.attribute("test2", "1.0");
+        if (element.attribute("test")  != "\"2.0\"" ||
+            element.attribute("test2") != "\"1.0\"") {
+            std::cout << std::endl
+                      << "TEST ERROR: Unexpected attributes "
+                      << element.attribute("test")
+                      << " " << element.attribute("test2") << std::endl;
+            throw;
+        }
+        std::cout << ".";
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to assign XML attributes."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Signal final test success
+    std::cout << " ok." << std::endl;
+
+    // Exit test
+    return;
+
+}
+
+
+/***************************************************************************
+ * Test: GXml constructors                                                 *
+ ***************************************************************************/
+void test_GXml_construct(void)
+{
+    // Dump header
+    std::cout << "Test XML constructors: ";
+
+    // Test void constructor
+    try {
+        GXml xml;
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to construct empty XML document."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test load constructor
+    try {
+        GXml xml(xml_file);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to construct empty XML document."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test copy constructor
+    try {
+        GXml xml1(xml_file);
+        GXml xml2 = xml1;
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to copy construct XML document."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Signal final test success
+    std::cout << " ok." << std::endl;
+
+    // Exit test
+    return;
+
+}
+
+
+/***************************************************************************
+ * Test: GXml loading/saving                                               *
+ ***************************************************************************/
+void test_GXml_load(void)
+{
+    // Dump header
+    std::cout << "Test XML loading and saving: ";
+
+    // Test loading
+    try {
+        GXml xml;
+        xml.load(xml_file);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to load XML document."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test saving
+    try {
+        GXml xml;
+        xml.load(xml_file);
+        xml.save("test.xml");
+        xml.load("test.xml");
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to save XML document."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test loading of saved XML document
+    try {
+        GXml xml;
+        xml.load("test.xml");
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to load previously saved XML document."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Signal final test success
+    std::cout << " ok." << std::endl;
+
+    // Exit test
+    return;
+
+}
+
+
+/***************************************************************************
  *                            Main test function                           *
  ***************************************************************************/
 int main(void)
@@ -305,6 +361,7 @@ int main(void)
 
     // Execute XML tests
     test_GXml_attributes();
+    test_GXml_elements();
     test_GXml_construct();
     test_GXml_load();
 
