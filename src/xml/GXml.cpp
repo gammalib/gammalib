@@ -34,6 +34,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD                                     "GXml::load(std::string&)"
+#define G_SAVE                                     "GXml::load(std::string&)"
 #define G_PARSE                                          "GXml::parse(FILE*)"
 #define G_PROCESS              "GXml::process(GXmlNode*, const std::string&)"
 
@@ -206,6 +207,16 @@ void GXml::load(const std::string& filename)
  ***************************************************************************/
 void GXml::save(const std::string& filename)
 {
+    // Open parameter file
+    FILE* fptr = fopen(filename.c_str(), "w");
+    if (fptr == NULL)
+        throw GException::file_open_error(G_SAVE, filename);
+
+    // Write XML document
+    m_root.write(fptr);
+
+    // Close file
+    fclose(fptr);
     
     // Return
     return;
@@ -438,7 +449,7 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
         if (*current != &m_root)
             throw GException::xml_syntax_error(G_PROCESS, segment,
                               "unexpected declaration markup encountered");
-        if (m_root.size() > 0)
+        if (m_root.children() > 0)
             throw GException::xml_syntax_error(G_PROCESS, segment,
                               "declaration markup only allowed in first line");
 
