@@ -187,6 +187,7 @@ void GXmlNode::init_members(void)
 void GXmlNode::copy_members(const GXmlNode& node)
 {
     // Copy nodes
+    m_nodes.clear();
     for (int i = 0; i < node.m_nodes.size(); ++i)
         m_nodes.push_back((node.m_nodes[i]->clone()));
 
