@@ -30,7 +30,7 @@ const std::string xml_file = "data/test.xml";
 
 
 /***************************************************************************
- * Test: GXml_construct                                                    *
+ * Test: GXml constructors                                                 *
  ***************************************************************************/
 void test_GXml_construct(void)
 {
@@ -53,7 +53,6 @@ void test_GXml_construct(void)
     // Test load constructor
     try {
         GXml xml(xml_file);
-        std::cout << xml << std::endl;
     }
     catch (std::exception &e) {
         std::cout << std::endl 
@@ -88,6 +87,67 @@ void test_GXml_construct(void)
 
 
 /***************************************************************************
+ * Test: GXml loading/saving                                               *
+ ***************************************************************************/
+void test_GXml_load(void)
+{
+    // Dump header
+    std::cout << "Test XML loading and saving: ";
+
+    // Test loading
+    try {
+        GXml xml;
+        xml.load(xml_file);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to load XML document."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test saving
+    try {
+        GXml xml;
+        xml.load(xml_file);
+        xml.save("test.xml");
+        xml.load("test.xml");
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to save XML document."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test loading of saved XML document
+    try {
+        GXml xml;
+        xml.load("test.xml");
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to load previously saved XML document."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Signal final test success
+    std::cout << " ok." << std::endl;
+
+    // Exit test
+    return;
+
+}
+
+
+/***************************************************************************
  *                            Main test function                           *
  ***************************************************************************/
 int main(void)
@@ -100,6 +160,7 @@ int main(void)
 
     // Execute XML tests
     test_GXml_construct();
+    test_GXml_load();
 
     // Return
     return 0;
