@@ -1,5 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 <!--This-->
+<?xml-app?>
 <source_library title="source library">
   <source name="LMC" type="DiffuseSource">
     <spectrum type="PLSuperExpCutoff">

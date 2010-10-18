@@ -65,6 +65,7 @@
 #include "GXmlElement.hpp"
 #include "GXmlComment.hpp"
 #include "GXmlAttribute.hpp"
+#include "GXmlPI.hpp"
 
 /* __ Application module _________________________________________________ */
 #include "GApplication.hpp"
