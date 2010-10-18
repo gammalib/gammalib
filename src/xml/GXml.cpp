@@ -386,13 +386,6 @@ void GXml::parse(FILE* fptr)
  ***************************************************************************/
 void GXml::process_markup(GXmlNode** current, const std::string& segment)
 {
-    // Initialise some variables
-    GXmlElement* element;
-    size_t       pos;
-    std::string  version;
-    std::string  encoding;
-    std::string  standalone;
-
     // Determine segment tag type
     MarkupType type = get_markuptype(segment);
 
@@ -401,85 +394,89 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
 
     // Handle element start tag
     case MT_ELEMENT_START:
-        // Create new element node, set it's parent, append it to the current
-        // node and make it the current node
-        element = new GXmlElement(segment);
-        element->parent(*current);
-        (*current)->append(element);
-        (*current) = element;
-        //std::cout << "START:" << segment << ":" << std::endl;
+        {
+            // Create new element node, set it's parent, append it to the current
+            // node and make it the current node
+            GXmlElement* element = new GXmlElement(segment);
+            element->parent(*current);
+            (*current)->append(element);
+            (*current) = element;
+        }
         break;
 
     // Handle element end tag
     case MT_ELEMENT_END:
-        // Check if we expect an element end tag
-        if ((*current)->type() != GXmlNode::NT_ELEMENT)
-            throw GException::xml_syntax_error(G_PROCESS, segment,
-                              "unexpected element end tag encountered");
+        {
+            // Check if we expect an element end tag
+            if ((*current)->type() != GXmlNode::NT_ELEMENT)
+                throw GException::xml_syntax_error(G_PROCESS, segment,
+                      "unexpected element end tag encountered");
 
-        // Check if we have the correct end tag
-        element = (GXmlElement*)(*current);
-        element->parse_stop(segment);
+            // Check if we have the correct end tag
+            GXmlElement* element = (GXmlElement*)(*current);
+            element->parse_stop(segment);
         
-        // Set current node pointer back to parent of the current node
-        (*current) = element->parent();
-        //std::cout << "STOP:" << segment << ":" << std::endl;
+            // Set current node pointer back to parent of the current node
+            (*current) = element->parent();
+        }
         break;
 
     // Append empty-element tag
     case MT_ELEMENT_EMPTY:
-        // Create new element node, set it's parent, and append it to the
-        // current node
-        element = new GXmlElement(segment);
-        element->parent(*current);
-        (*current)->append(element);
-        //std::cout << "EMPTY:" << segment << ":" << std::endl;
+        {
+            GXmlElement* element = new GXmlElement(segment);
+            element->parent(*current);
+            (*current)->append(element);
+        }
         break;
 
     // Append comment markup
     case MT_COMMENT:
-        GXmlComment* comment = new GXmlComment(segment);
-        (*current)->append(comment);
-        //std::cout << "COMMENT:" << segment << ":" << std::endl;
+        {
+            GXmlComment* comment = new GXmlComment(segment);
+            (*current)->append(comment);
+        }
         break;
 
     // Declaration markup
     case MT_DECLARATION:
-        // Verify if declaration tag is allowed
-        if (*current != &m_root)
-            throw GException::xml_syntax_error(G_PROCESS, segment,
-                              "unexpected declaration markup encountered");
-        if (m_root.children() > 0)
-            throw GException::xml_syntax_error(G_PROCESS, segment,
-                              "declaration markup only allowed in first line");
+        {
+            // Verify if declaration tag is allowed
+            if (*current != &m_root)
+                throw GException::xml_syntax_error(G_PROCESS, segment,
+                      "unexpected declaration markup encountered");
+            if (m_root.children() > 0)
+                throw GException::xml_syntax_error(G_PROCESS, segment,
+                      "declaration markup only allowed in first line");
 
-        // Create temporary element to read in declaration attributes
-        element = new GXmlElement(segment);
-        pos     = 5;
-        while (pos != std::string::npos)
-            element->parse_attribute(&pos, segment);
+            // Create temporary element to read in declaration attributes
+            GXmlElement* element = new GXmlElement(segment);
+            size_t       pos     = 5;
+            while (pos != std::string::npos)
+                element->parse_attribute(&pos, segment);
 
-        // Set attribute values
-        version    = element->attribute("version");
-        encoding   = element->attribute("encoding");
-        standalone = element->attribute("standalone");
-        if (version.length() > 0)
-            m_root.version(version);
-        if (encoding.length() > 0)
-            m_root.encoding(encoding);
-        if (standalone.length() > 0)
-            m_root.standalone(standalone);
+            // Set attribute values
+            std::string version    = element->attribute("version");
+            std::string encoding   = element->attribute("encoding");
+            std::string standalone = element->attribute("standalone");
+            if (version.length() > 0)
+                m_root.version(version);
+            if (encoding.length() > 0)
+                m_root.encoding(encoding);
+            if (standalone.length() > 0)
+                m_root.standalone(standalone);
 
-        // Delete temporary element
-        delete element;
-        //std::cout << "DECL:" << segment << ":" << std::endl;
+            // Delete temporary element
+            delete element;
+        }
         break;
 
     // Processing tag
     case MT_PROCESSING:
-        GXmlPI* pi = new GXmlPI(segment);
-        (*current)->append(pi);
-        //std::cout << "PI:" << segment << ":" << std::endl;
+        {
+            GXmlPI* pi = new GXmlPI(segment);
+            (*current)->append(pi);
+        }
         break;
 
     // Invalid tag, throw an error
