@@ -30,6 +30,8 @@
  * @class GXml
  *
  * @brief XML class interface defintion.
+ *
+ * This class implements an XML document. It holds the root node.
  ***************************************************************************/
 class GXml {
 
@@ -58,25 +60,24 @@ public:
 
 protected:
     // Protected enumerators
-    enum TagType {
-        TT_ELEMENT_START,
-        TT_ELEMENT_END,
-        TT_ELEMENT_EMPTY,
-        TT_COMMENT,
-        TT_DECLARATION,
-        TT_PROCESSING,
-        TT_INVALID
+    enum MarkupType {
+        MT_ELEMENT_START,
+        MT_ELEMENT_END,
+        MT_ELEMENT_EMPTY,
+        MT_COMMENT,
+        MT_DECLARATION,
+        MT_PROCESSING,
+        MT_INVALID
     };
 
     // Protected methods
-    void    init_members(void);
-    void    copy_members(const GXml& xml);
-    void    free_members(void);
-    void    parse(FILE* fptr);
-    void    process_tag(GXmlNode** current, const std::string& segment);
-    void    process_text(GXmlNode** current, const std::string& segment);
-    TagType get_tagtype(const std::string& segment) const;
-    bool    is_whitespace(const int& c) const;
+    void       init_members(void);
+    void       copy_members(const GXml& xml);
+    void       free_members(void);
+    void       parse(FILE* fptr);
+    void       process_markup(GXmlNode** current, const std::string& segment);
+    void       process_text(GXmlNode** current, const std::string& segment);
+    MarkupType get_markuptype(const std::string& segment) const;
 
     // Protected data members
     GXmlDocument m_root;         //!< Root node
