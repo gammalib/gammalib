@@ -21,15 +21,19 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include <iostream>
 #include "GXml.hpp"
 #include "GXmlNode.hpp"
+#include "GXmlAttribute.hpp"
 
 
 /***********************************************************************//**
  * @class GXmlElement
  *
  * @brief XML element node class interface defintion.
+ *
+ * This class implements and XML element with it's associated attributes.
  ***************************************************************************/
 class GXmlElement : public GXmlNode {
 
@@ -50,8 +54,11 @@ public:
     void        clear(void);
     void        print(std::ostream& os, int indent = 0) const;
     NodeType    type(void) const { return NT_ELEMENT; }
+    int         size(void) const { return m_attr.size(); }
     std::string name(void) const { return m_name; }
+    std::string attribute(const std::string& name) const;
     GXmlNode*   parent(void) const { return m_parent; }
+    void        name(const std::string& name) { m_name=name; }
     void        parent(GXmlNode* node) { m_parent = node; }
 
 protected:
@@ -62,10 +69,12 @@ protected:
     GXmlElement* GXmlElement::clone(void) const;
     void         parse_start(const std::string& segment);
     void         parse_stop(const std::string& segment);
+    void         parse_attribute(size_t* pos, const std::string& segment);
 
     // Protected data members
-    std::string m_name;       //!< Element name
-    GXmlNode*   m_parent;     //!< Pointer on parent node
+    std::string                 m_name;       //!< Element name
+    GXmlNode*                   m_parent;     //!< Pointer on parent node
+    std::vector<GXmlAttribute*> m_attr;       //!< Attributes
 };
 
 #endif /* GXMLELEMENT_HPP */

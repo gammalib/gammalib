@@ -28,6 +28,7 @@
 #include "GXmlDocument.hpp"
 #include "GXmlText.hpp"
 #include "GXmlElement.hpp"
+#include "GXmlComment.hpp"
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -200,7 +201,7 @@ void GXml::load(const std::string& filename)
  *
  * @param[in] filename Name of file to be saved.
  *
- * Save XML file.
+ * @TODO Save XML file.
  ***************************************************************************/
 void GXml::save(const std::string& filename)
 {
@@ -276,18 +277,27 @@ void GXml::parse(FILE* fptr)
 {
     // Initialise parser
     int         c;
-    bool        in_tag  = false;
+    bool        in_markup  = false;
     std::string segment;
     GXmlNode*   current = &m_root;
 
     // Main parsing loop
     while ((c = fgetc(fptr)) != EOF) {
 
-        // If we are not within a tag and if a tag is reached then add
-        // the text segment to the nodes and switch to in_tag mode
-        if (in_tag == false) {
+        // Convert special characters into line feeds
+        if (c == '\x85' || c == L'\x2028') {
+            if (in_markup)
+                 throw GException::xml_syntax_error(G_PARSE, segment,
+                                   "invalid character encountered");
+            else
+                c = '\x0a';
+        }
 
-            // Tag start reached?
+        // If we are not within a markup and if a markup is reached then add
+        // the text segment to the nodes and switch to in_markup mode
+        if (in_markup == false) {
+
+            // Markup start reached?
             if (c == '<') {
 
                 // Add text segment to nodes (ignores empty segments)
@@ -296,10 +306,10 @@ void GXml::parse(FILE* fptr)
                 // Prepare new segment and signal that we are within tag
                 segment.clear();
                 segment.append(1, (char)c);
-                in_tag = true;
+                in_markup = true;
             }
 
-            // Tag stop encountered?
+            // Markup stop encountered?
             else if (c == '>') {
                  segment.append(1, (char)c);
                  throw GException::xml_syntax_error(G_PARSE, segment,
@@ -311,23 +321,23 @@ void GXml::parse(FILE* fptr)
                 segment.append(1, (char)c);
         }
 
-        // If we are within a tag and if a tag end is reached then process
-        // the tag and switch to not in_tag mode
+        // If we are within a markuo and if a markup end is reached then process
+        // the markup and switch to not in_tag mode
         else {
 
-            // Tag stop reached?
+            // Markup stop reached?
             if (c == '>') {
 
-                // Process tag
+                // Process markup
                 segment.append(1, (char)c);
-                process_tag(&current, segment);
+                process_markup(&current, segment);
 
-                // Prepare new segment and signal that we are not within tag
+                // Prepare new segment and signal that we are not within markup
                 segment.clear();
-                in_tag = false;
+                in_markup = false;
             }
 
-            // Tag start encountered?
+            // Markup start encountered?
             else if (c == '<') {
                  segment.append(1, (char)c);
                  throw GException::xml_syntax_error(G_PARSE, segment,
@@ -343,8 +353,8 @@ void GXml::parse(FILE* fptr)
 
     // Process any pending segment
     if (segment.size() > 0) {
-        if (in_tag)
-            process_tag(&current, segment);
+        if (in_markup)
+            process_markup(&current, segment);
         else
             process_text(&current, segment);
     } // endif: there was a pending segment
@@ -355,41 +365,45 @@ void GXml::parse(FILE* fptr)
 
 
 /***********************************************************************//**
- * @brief Process tag segment
+ * @brief Process markup segment
  *
  * @param[in] current Handle to current node.
  * @param[in] segment Segment string.
  *
- * Process a tag segment.
+ * Process markup segment.
  ***************************************************************************/
-void GXml::process_tag(GXmlNode** current, const std::string& segment)
+void GXml::process_markup(GXmlNode** current, const std::string& segment)
 {
     // Initialise some variables
     GXmlElement* element;
+    size_t       pos;
+    std::string  version;
+    std::string  encoding;
+    std::string  standalone;
 
     // Determine segment tag type
-    TagType type = get_tagtype(segment);
+    MarkupType type = get_markuptype(segment);
 
     // Do tag specific processing
     switch (type) {
 
-    // Element start tag
-    case TT_ELEMENT_START:
+    // Handle element start tag
+    case MT_ELEMENT_START:
         // Create new element node, set it's parent, append it to the current
         // node and make it the current node
         element = new GXmlElement(segment);
         element->parent(*current);
         (*current)->append(element);
         (*current) = element;
-        std::cout << "START:" << segment << ":" << std::endl;
+        //std::cout << "START:" << segment << ":" << std::endl;
         break;
 
-    // Element end tag
-    case TT_ELEMENT_END:
+    // Handle element end tag
+    case MT_ELEMENT_END:
         // Check if we expect an element end tag
         if ((*current)->type() != GXmlNode::NT_ELEMENT)
             throw GException::xml_syntax_error(G_PROCESS, segment,
-                              "unexpected element end tag");
+                              "unexpected element end tag encountered");
 
         // Check if we have the correct end tag
         element = (GXmlElement*)(*current);
@@ -397,39 +411,65 @@ void GXml::process_tag(GXmlNode** current, const std::string& segment)
         
         // Set current node pointer back to parent of the current node
         (*current) = element->parent();
-        std::cout << "STOP:" << segment << ":" << std::endl;
+        //std::cout << "STOP:" << segment << ":" << std::endl;
         break;
 
-    // Empty-element tag
-    case TT_ELEMENT_EMPTY:
+    // Append empty-element tag
+    case MT_ELEMENT_EMPTY:
         // Create new element node, set it's parent, and append it to the
         // current node
         element = new GXmlElement(segment);
         element->parent(*current);
         (*current)->append(element);
-        std::cout << "EMPTY:" << segment << ":" << std::endl;
+        //std::cout << "EMPTY:" << segment << ":" << std::endl;
         break;
 
-    // Comment tag
-    case TT_COMMENT:
-        std::cout << "COMMENT:" << segment << ":" << std::endl;
-        // Just add comment
+    // Append comment markup
+    case MT_COMMENT:
+        GXmlComment* comment = new GXmlComment(segment);
+        (*current)->append(comment);
+        //std::cout << "COMMENT:" << segment << ":" << std::endl;
         break;
 
-    // Declaration tag
-    case TT_DECLARATION:
-        std::cout << "DECL:" << segment << ":" << std::endl;
-        // Only valid if we are in root node on first element (must be 1st line)
+    // Declaration markup
+    case MT_DECLARATION:
+        // Verify if declaration tag is allowed
+        if (*current != &m_root)
+            throw GException::xml_syntax_error(G_PROCESS, segment,
+                              "unexpected declaration markup encountered");
+        if (m_root.size() > 0)
+            throw GException::xml_syntax_error(G_PROCESS, segment,
+                              "declaration markup only allowed in first line");
+
+        // Create temporary element to read in declaration attributes
+        element = new GXmlElement(segment);
+        pos     = 5;
+        while (pos != std::string::npos)
+            element->parse_attribute(&pos, segment);
+
+        // Set attribute values
+        version    = element->attribute("version");
+        encoding   = element->attribute("encoding");
+        standalone = element->attribute("standalone");
+        if (version.length() > 0)
+            m_root.version(version);
+        if (encoding.length() > 0)
+            m_root.encoding(encoding);
+        if (standalone.length() > 0)
+            m_root.standalone(standalone);
+
+        // Delete temporary element
+        delete element;
         break;
 
     // Processing tag
-    case TT_PROCESSING:
-        std::cout << "PI:" << segment << ":" << std::endl;
+    case MT_PROCESSING:
         // Just add unknown
+        std::cout << "PI:" << segment << ":" << std::endl;
         break;
 
     // Invalid tag, throw an error
-    case TT_INVALID:
+    case MT_INVALID:
         throw GException::xml_syntax_error(G_PROCESS, segment, "invalid tag");
         break;
     }
@@ -470,16 +510,16 @@ void GXml::process_text(GXmlNode** current, const std::string& segment)
 
 
 /***********************************************************************//**
- * @brief Get Tag Type of segment
+ * @brief Get Markup type of segment
  *
- * @param[in] segement Segment for which Tag Type should be determined.
+ * @param[in] segement Segment for which Markup Type should be determined.
  *
- * Returns Tag Type of segment.
+ * Returns Markup Type of segment.
  ***************************************************************************/
-GXml::TagType GXml::get_tagtype(const std::string& segment) const
+GXml::MarkupType GXml::get_markuptype(const std::string& segment) const
 {
-    // Initialise with invalid Tag Type
-    TagType type = TT_INVALID;
+    // Initialise with invalid Markup Type
+    MarkupType type = MT_INVALID;
     
     // Get length of segment
     int n = segment.length();
@@ -487,57 +527,35 @@ GXml::TagType GXml::get_tagtype(const std::string& segment) const
     // Check for comment
     if (n >= 7 && (segment.compare(0,4,"<!--") == 0) &&
              (segment.compare(n-3,3,"-->") == 0))
-        type = TT_COMMENT;
+        type = MT_COMMENT;
 
     // Check for declaration
-    else if (n >= 7 && (segment.compare(0,5,"<?xml") == 0) &&
+    else if (n >= 7 && (segment.compare(0,6,"<?xml ") == 0) &&
              (segment.compare(n-2,2,"?>") == 0))
-        type = TT_DECLARATION;
+        type = MT_DECLARATION;
 
     // Check for processing instruction
     else if (n >= 4 && (segment.compare(0,2,"<?") == 0) &&
              (segment.compare(n-2,2,"?>") == 0))
-        type = TT_PROCESSING;
+        type = MT_PROCESSING;
 
     // Check for empty element tag
     else if (n >= 3 && (segment.compare(0,1,"<") == 0) &&
              (segment.compare(n-2,2,"/>") == 0))
-        type = TT_ELEMENT_EMPTY;
+        type = MT_ELEMENT_EMPTY;
 
     // Check for element end tag
     else if (n >= 3 && (segment.compare(0,2,"</") == 0) &&
              (segment.compare(n-1,1,">") == 0))
-        type = TT_ELEMENT_END;
+        type = MT_ELEMENT_END;
 
     // Check for element start tag
     else if (n >= 2 && (segment.compare(0,1,"<") == 0) &&
              (segment.compare(n-1,1,">") == 0))
-        type = TT_ELEMENT_START;
+        type = MT_ELEMENT_START;
 
     // Return type
     return type;
-}
-
-
-/***********************************************************************//**
- * @brief Check if character is whitespace
- *
- * @param[in] c Character to check.
- *
- * Checks if character is a XML 1.1 whitespace character
- ***************************************************************************/
-bool GXml::is_whitespace(const int& c) const
-{
-    // Set result
-    bool result = (c == '\x20' ||    // Whitespace
-                   c == '\x09' ||    // Tab
-                   c == '\x0d' ||    // Carriage return
-                   c == '\x0a' ||    // Line feed
-                   c == '\x85' ||    // Next line
-                   c == L'\x2028');  // Line separator
-
-    // Return result
-    return result;
 }
 
 
