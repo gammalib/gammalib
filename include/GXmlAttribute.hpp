@@ -51,7 +51,7 @@ public:
     std::string name(void) const { return m_name; }
     std::string value(void) const { return m_value; }
     void        name(const std::string& name) { m_name=name; }
-    void        value(const std::string& value) { m_value=value; }
+    void        value(std::string value);
 
 protected:
     // Protected methods
