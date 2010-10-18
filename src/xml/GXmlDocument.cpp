@@ -154,6 +154,9 @@ void GXmlDocument::print(std::ostream& os, int indent) const
     for (int k = 0; k < indent; ++k)
         os << " ";
     os << "GXmlDocument::";
+    os << "version=" << version() << " ";
+    os << "encoding=" << encoding() << " ";
+    os << "standalone=" << standalone() << " ";
 
     // Put children in stream
     for (int i = 0; i < size(); ++i) {
@@ -178,6 +181,15 @@ void GXmlDocument::print(std::ostream& os, int indent) const
 void GXmlDocument::init_members(void)
 {
     // Initialise members
+    m_version.clear();
+    m_encoding.clear();
+    m_standalone.clear();
+    m_version.name("version");
+    m_encoding.name("encoding");
+    m_standalone.name("m_standalone");
+    m_version.value("1.0");
+    m_encoding.value("UTF-8");
+    m_standalone.value("no");
 
     // Return
     return;
@@ -192,6 +204,9 @@ void GXmlDocument::init_members(void)
 void GXmlDocument::copy_members(const GXmlDocument& node)
 {
     // Copy attributes
+    m_version    = node.m_version;
+    m_encoding   = node.m_encoding;
+    m_standalone = node.m_standalone;
 
     // Return
     return;
