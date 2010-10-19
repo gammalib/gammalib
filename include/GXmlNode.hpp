@@ -40,8 +40,6 @@ public:
 
     // Operators
     GXmlNode&       operator= (const GXmlNode& node);
-    GXmlNode&       operator() (int index);
-    const GXmlNode& operator() (int index) const;
 
     // Public enumerators
     enum NodeType {
@@ -62,15 +60,20 @@ public:
     virtual NodeType type(void) const = 0;
     
     // Methods
-    void append(GXmlNode* node) { m_nodes.push_back(node); }
-    int  children(void) const { return m_nodes.size(); }
+    void      append(GXmlNode* node);
+    int       children(void) const;
+    GXmlNode* child(int index) const;
+    int       elements(void) const;
+    int       elements(const std::string& name) const;
+    GXmlNode* element(int index) const;
+    GXmlNode* element(const std::string& name, int index) const;
 
 protected:
     // Protected methods
     void              init_members(void);
     void              copy_members(const GXmlNode& node);
     void              free_members(void);
-    virtual GXmlNode* GXmlNode::clone(void) const = 0;
+    virtual GXmlNode* clone(void) const = 0;
 
     // Protected data members
     std::vector<GXmlNode*> m_nodes;    //!< Pointer to nodes contained in node
