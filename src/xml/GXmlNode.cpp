@@ -22,10 +22,12 @@
 #endif
 #include "GException.hpp"
 #include "GXmlNode.hpp"
+#include "GXmlElement.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OP_ACCESS1                             "GXmlNode::operator() (int)"
-#define G_OP_ACCESS2                       "GXmlNode::operator() (int) const"
+#define G_CHILD1                             "GXmlNode* GXmlNode::child(int)"
+#define G_ELEMENT1                         "GXmlNode* GXmlNode::element(int)"
+#define G_ELEMENT2           "GXmlNode* GXmlNode::element(std::string&, int)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -116,49 +118,168 @@ GXmlNode& GXmlNode::operator= (const GXmlNode& node)
 }
 
 
-/***********************************************************************//**
- * @brief Node access operator
- *
- * @param[in] index Index of node (0,1,2,...)
- *
- * @exception GException::out_of_range
- *            Node index is out of range.
- ***************************************************************************/
-GXmlNode& GXmlNode::operator() (int index)
-{
-    // If index is outside boundary then throw an error
-    if (index < 0 || index >= m_nodes.size())
-        throw GException::out_of_range(G_OP_ACCESS1, index, 0, m_nodes.size()-1);
-
-    // Return node
-    return *(m_nodes[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Node access operator
- *
- * @param[in] index Index of node (0,1,2,...)
- *
- * @exception GException::out_of_range
- *            Node index is out of range.
- ***************************************************************************/
-const GXmlNode& GXmlNode::operator() (int index) const
-{
-    // If index is outside boundary then throw an error
-    if (index < 0 || index >= m_nodes.size())
-        throw GException::out_of_range(G_OP_ACCESS2, index, 0, m_nodes.size()-1);
-
-    // Return observation pointer
-    return *(m_nodes[index]);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Append child node to node
+ *
+ * @param[in] node Child node.
+ ***************************************************************************/
+void GXmlNode::append(GXmlNode* node)
+{
+    // Append node
+    m_nodes.push_back(node);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of children of node
+ ***************************************************************************/
+int GXmlNode::children(void) const
+{
+    // Return number of nodes
+    return m_nodes.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer on child node
+ *
+ * @param[in] index Index of node (0,1,2,...)
+ *
+ * @exception GException::out_of_range
+ *            Node index is out of range.
+ ***************************************************************************/
+GXmlNode* GXmlNode::child(int index) const
+{
+    // If index is outside boundary then throw an error
+    if (index < 0 || index >= children())
+        throw GException::out_of_range(G_CHILD1, index, 0, children()-1);
+
+    // Return node
+    return m_nodes[index];
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of child elements in node
+ *
+ * The number of child elements is the number of nodes of type NT_ELEMENT.
+ ***************************************************************************/
+int GXmlNode::elements(void) const
+{
+    // Compute number of child elements in node
+    int elements = 0;
+    for (int i = 0; i < children(); ++i) {
+        if (child(i)->type() == NT_ELEMENT)
+            elements++;
+    }
+
+    // Return number of child elements
+    return elements;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of child elements of given name in node
+ *
+ * @param[in] name Name of child elements.
+ *
+ * The number of child elements is the number of nodes of type NT_ELEMENT
+ * that have the same name as is specified by the argument.
+ ***************************************************************************/
+int GXmlNode::elements(const std::string& name) const
+{
+    // Compute number of child elements in node
+    int elements = 0;
+    for (int i = 0; i < children(); ++i) {
+        if (child(i)->type() == NT_ELEMENT) {
+            if (((GXmlElement*)child(i))->name() == name)
+                elements++;
+        }
+    }
+
+    // Return number of child elements
+    return elements;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer on child element
+ *
+ * @param[in] index Index of child element (0,1,2,...)
+ *
+ * @exception GException::out_of_range
+ *            Child element index is out of range.
+ ***************************************************************************/
+GXmlNode* GXmlNode::element(int index) const
+{
+    // If index is outside boundary then throw an error
+    if (index < 0 || index >= elements())
+        throw GException::out_of_range(G_ELEMENT1, index, 0, elements()-1);
+
+    // Compute number of child elements in node
+    GXmlNode* element  = NULL;
+    int       elements = 0;
+    for (int i = 0; i < children(); ++i) {
+        if (child(i)->type() == NT_ELEMENT) {
+            if (elements == index) {
+                element = child(i);
+                break;
+            }
+            elements++;
+        }
+    }
+
+    // Return child element
+    return element;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer on child element of a given name
+ *
+ * @param[in] name Name of child elements.
+ * @param[in] index Index of child element (0,1,2,...)
+ *
+ * @exception GException::out_of_range
+ *            Child element index is out of range.
+ ***************************************************************************/
+GXmlNode* GXmlNode::element(const std::string& name, int index) const
+{
+    // Determine number of child elements
+    int n = elements(name);
+
+    // If index is outside boundary then throw an error
+    if (index < 0 || index >= n)
+        throw GException::out_of_range(G_ELEMENT2, index, 0, n-1);
+
+    // Compute number of child elements in node
+    GXmlNode* element  = NULL;
+    int       elements = 0;
+    for (int i = 0; i < children(); ++i) {
+        if (child(i)->type() == NT_ELEMENT) {
+            if (((GXmlElement*)child(i))->name() == name) {
+                if (elements == index) {
+                    element = child(i);
+                    break;
+                }
+                elements++;
+            }
+        }
+    }
+
+    // Return child element
+    return element;
+}
+
 
 /*==========================================================================
  =                                                                         =
