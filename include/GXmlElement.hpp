@@ -23,7 +23,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-//#include "GXml.hpp"
 #include "GXmlNode.hpp"
 #include "GXmlAttribute.hpp"
 
