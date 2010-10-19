@@ -64,7 +64,7 @@ protected:
     void          init_members(void);
     void          copy_members(const GXmlDocument& node);
     void          free_members(void);
-    GXmlDocument* GXmlDocument::clone(void) const;
+    GXmlDocument* clone(void) const;
 
     // Protected data members
     GXmlAttribute m_version;      //!< XML version ("1.0", "1.1")

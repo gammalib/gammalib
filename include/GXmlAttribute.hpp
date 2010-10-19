@@ -58,7 +58,7 @@ protected:
     void           init_members(void);
     void           copy_members(const GXmlAttribute& attr);
     void           free_members(void);
-    GXmlAttribute* GXmlAttribute::clone(void) const;
+    GXmlAttribute* clone(void) const;
 
     // Protected data members
     std::string m_name;       //!< Attribute name

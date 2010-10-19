@@ -69,7 +69,7 @@ protected:
     void         init_members(void);
     void         copy_members(const GXmlElement& node);
     void         free_members(void);
-    GXmlElement* GXmlElement::clone(void) const;
+    GXmlElement* clone(void) const;
     void         parse_start(const std::string& segment);
     void         parse_stop(const std::string& segment);
     void         parse_attribute(size_t* pos, const std::string& segment);

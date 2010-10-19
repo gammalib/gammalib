@@ -56,7 +56,7 @@ protected:
     void         init_members(void);
     void         copy_members(const GXmlComment& node);
     void         free_members(void);
-    GXmlComment* GXmlComment::clone(void) const;
+    GXmlComment* clone(void) const;
     void         parse(const std::string& segment);
     std::string  comment(void) const { return m_comment; }
     void         comment(const std::string& comment) { m_comment=comment; }

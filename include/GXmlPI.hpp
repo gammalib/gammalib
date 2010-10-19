@@ -55,7 +55,7 @@ protected:
     void         init_members(void);
     void         copy_members(const GXmlPI& node);
     void         free_members(void);
-    GXmlPI*      GXmlPI::clone(void) const;
+    GXmlPI*      clone(void) const;
     void         parse(const std::string& segment);
     std::string  pi(void) const { return m_pi; }
     void         pi(const std::string& pi) { m_pi=pi; }
