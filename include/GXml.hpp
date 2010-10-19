@@ -23,7 +23,10 @@
 #include <iostream>
 #include "GXmlNode.hpp"
 #include "GXmlDocument.hpp"
+#include "GXmlElement.hpp"
 #include "GXmlText.hpp"
+
+/* __ Forward declarations _______________________________________________ */
 
 
 /***********************************************************************//**
@@ -54,9 +57,15 @@ public:
     GXml& operator= (const GXml& xml);
 
     // Methods
-    void clear(void);
-    void load(const std::string& filename);
-    void save(const std::string& filename);
+    void         clear(void);
+    void         load(const std::string& filename);
+    void         save(const std::string& filename);
+    int          children(void) const;
+    GXmlNode*    child(int index) const;
+    int          elements(void) const;
+    int          elements(const std::string& name) const;
+    GXmlElement* element(int index) const;
+    GXmlElement* element(const std::string& name, int index) const;
 
 protected:
     // Protected enumerators
