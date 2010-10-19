@@ -223,6 +223,75 @@ void GXml::save(const std::string& filename)
 }
 
 
+/***********************************************************************//**
+ * @brief Return number of children in document root
+ ***************************************************************************/
+int GXml::children(void) const
+{
+    // Return number of document root children
+    return m_root.children();
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer on document child node
+ *
+ * @param[in] index Index of node (0,1,2,...)
+ ***************************************************************************/
+GXmlNode* GXml::child(int index) const
+{
+    // Return pointer
+    return m_root.child(index);
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of child elements in document root
+ ***************************************************************************/
+int GXml::elements(void) const
+{
+    // Return number
+    return m_root.elements();
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of child elements of given name in document root
+ *
+ * @param[in] name Name of child elements.
+ ***************************************************************************/
+int GXml::elements(const std::string& name) const
+{
+    // Return number
+    return m_root.elements(name);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer on child element
+ *
+ * @param[in] index Index of child element (0,1,2,...)
+ ***************************************************************************/
+GXmlElement* GXml::element(int index) const
+{
+    // Return pointer
+    return (GXmlElement*)m_root.element(index);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer on child element of a given name
+ *
+ * @param[in] name Name of child elements.
+ * @param[in] index Index of child element (0,1,2,...)
+ ***************************************************************************/
+GXmlElement* GXml::element(const std::string& name, int index) const
+{
+    // Return pointer
+    return (GXmlElement*)m_root.element(name, index);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
