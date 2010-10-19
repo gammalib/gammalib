@@ -349,6 +349,76 @@ void test_GXml_load(void)
 
 
 /***************************************************************************
+ * Test: GXml element access                                               *
+ ***************************************************************************/
+void test_GXml_access(void)
+{
+    // Dump header
+    std::cout << "Test XML element access: ";
+
+    // Test root document access
+    try {
+        GXml xml;
+        xml.load(xml_file);
+        std::cout << ".";
+        if (xml.children() != 3) {
+            std::cout << std::endl
+                      << "TEST ERROR: Unexpected number of children in document "
+                      << xml.children() << std::endl;
+            throw;
+        }
+        std::cout << ".";
+        for (int i = 0; i < xml.children(); ++i)
+            GXmlNode* ptr = xml.child(i);
+        std::cout << ".";
+        if (xml.elements() != 1) {
+            std::cout << std::endl
+                      << "TEST ERROR: Unexpected number of child elements in document "
+                      << xml.elements() << std::endl;
+            throw;
+        }
+        std::cout << ".";
+        for (int i = 0; i < xml.elements(); ++i)
+            GXmlNode* ptr = xml.element(i);
+        std::cout << ".";
+        if (xml.elements("source_library") != 1) {
+            std::cout << std::endl
+                      << "TEST ERROR: Unexpected number of child elements in document "
+                      << xml.elements("source_library") << std::endl;
+            throw;
+        }
+        std::cout << ".";
+        for (int i = 0; i < xml.elements("source_library"); ++i) {
+            GXmlElement* ptr = xml.element("source_library", i);
+            if (ptr->name() != "source_library") {
+                std::cout << std::endl
+                        << "TEST ERROR: Unexpected element name "
+                        << ptr->name() << std::endl;
+                throw;
+            }
+        }
+        std::cout << ".";
+        //std::cout << xml.elements("source_library") << std::endl;
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to access XML elements."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Signal final test success
+    std::cout << " ok." << std::endl;
+
+    // Exit test
+    return;
+
+}
+
+
+/***************************************************************************
  *                            Main test function                           *
  ***************************************************************************/
 int main(void)
@@ -364,6 +434,7 @@ int main(void)
     test_GXml_elements();
     test_GXml_construct();
     test_GXml_load();
+    test_GXml_access();
 
     // Return
     return 0;
