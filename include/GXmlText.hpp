@@ -55,7 +55,7 @@ protected:
     void      init_members(void);
     void      copy_members(const GXmlText& node);
     void      free_members(void);
-    GXmlText* GXmlText::clone(void) const;
+    GXmlText* clone(void) const;
 
     // Protected data members
     std::string m_text;       //!< Text
