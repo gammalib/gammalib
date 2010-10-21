@@ -18,7 +18,10 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <stdlib.h>
-#include "test_GSparseMatrix.hpp"
+#include <iostream>                           // cout, cerr
+#include <stdexcept>                          // std::exception
+#include <math.h>
+#include "GammaLib.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 using namespace std;
@@ -1021,7 +1024,8 @@ void test_conversion(void)
       std::cout << ".";
       //
       // Convert GSparseMatrix matrix into GSymMatrix object
-      GSymMatrix converted = sym_matrix(sparse);
+//      GSymMatrix converted = sym_matrix(sparse);
+      GSymMatrix converted = GSymMatrix(sparse);
       std::cout << ".";
       //
       // Convert GSymMatrix back to GSparseMatrix matrix
