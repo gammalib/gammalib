@@ -56,6 +56,24 @@ GModel::GModel(void)
 
 
 /***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] model Model from which the instance should be built.
+ ***************************************************************************/
+GModel::GModel(const GModel& model)
+{
+    // Initialise private members for clean destruction
+    init_members();
+
+    // Copy members
+    copy_members(model);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Construct from spatial and spectral models
  *
  * @param[in] spatial Spatial model.
@@ -83,17 +101,28 @@ GModel::GModel(const GModelSpatial& spatial, const GModelSpectral& spectral)
 
 
 /***********************************************************************//**
- * @brief Copy constructor
+ * @brief Construct from spatial and spectral XML elements
  *
- * @param[in] model Model from which the instance should be built.
+ * @param[in] spatial Spatial XML element.
+ * @param[in] spectral Spectral XML element.
+ *
+ * @TODO Needs to be implemented.
  ***************************************************************************/
-GModel::GModel(const GModel& model)
+GModel::GModel(const GXmlElement& spatial, const GXmlElement& spectral)
 {
     // Initialise private members for clean destruction
     init_members();
 
-    // Copy members
-    copy_members(model);
+    // Allocate constant
+    GModelTemporalConst temporal;
+
+    // Clone spatial and spectral models
+    //m_spatial  = spatial.clone();
+    //m_spectral = spectral.clone();
+    m_temporal = temporal.clone();
+
+    // Set parameter pointers
+    set_pointers();
 
     // Return
     return;
