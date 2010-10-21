@@ -32,6 +32,7 @@
 #include "GResponse.hpp"
 #include "GPointing.hpp"
 #include "GVector.hpp"
+#include "GXmlElement.hpp"
 
 
 /***********************************************************************//**
@@ -67,8 +68,9 @@ class GModel {
 public:
     // Constructors and destructors
     GModel(void);
-    GModel(const GModelSpatial& spatial, const GModelSpectral& spectral);
     GModel(const GModel& model);
+    GModel(const GModelSpatial& spatial, const GModelSpectral& spectral);
+    GModel(const GXmlElement& spatial, const GXmlElement& spectral);
     ~GModel(void);
 
     // Operators
