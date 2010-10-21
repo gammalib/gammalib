@@ -258,24 +258,37 @@ GXmlComment* GXmlComment::clone(void) const
  * @exception GException::xml_syntax_error
  *            XML syntax error.
  *
- * Parse the segment string.
+ * Parse the segment string and extract the comment.
+ *
+ * @TODO Check validity of characters in comment string
  ***************************************************************************/
 void GXmlComment::parse(const std::string& segment)
 {
+    // Initialise comment string
+    m_comment.clear();
+
     // Get length of segment
     int n = segment.length();
 
-    // Check on existence of brackets
-    if (n < 7 || (segment.compare(0,4,"<!--") != 0) &&
-                 (segment.compare(n-3,3,"-->") != 0))
-        throw GException::xml_syntax_error(G_PARSE, segment,
-                          "missing or invalid comment brackets");
+    // Do nothing if string is empty
+    if (n > 0) {
 
-    // Set comment
-    if (n > 7)
-        m_comment = segment.substr(4, n-7);
-    else
-        m_comment.clear();
+        // If string starts with brackets then check that the brackets are
+        // valid comment brackets
+        if (segment[0] == '<') {
+            if (n < 7 || (segment.compare(0,4,"<!--") != 0) &&
+                          (segment.compare(n-3,3,"-->") != 0))
+                throw GException::xml_syntax_error(G_PARSE, segment,
+                                  "invalid comment brackets");
+            else
+                m_comment = segment.substr(4, n-7);
+        }
+        else
+            m_comment = segment;
+
+        //TODO Check validity of characters comment string
+
+    } // endif: string is not empty
 
     // Return
     return;
