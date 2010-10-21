@@ -25,6 +25,7 @@
 #include "GXmlElement.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_APPEND                                "GXmlNode::append(GXmlNode*)"
 #define G_CHILD1                             "GXmlNode* GXmlNode::child(int)"
 #define G_ELEMENT1                         "GXmlNode* GXmlNode::element(int)"
 #define G_ELEMENT2           "GXmlNode* GXmlNode::element(std::string&, int)"
@@ -128,9 +129,18 @@ GXmlNode& GXmlNode::operator= (const GXmlNode& node)
  * @brief Append child node to node
  *
  * @param[in] node Child node.
+ *
+ * @exception GException::file_open_error
+ *            Unable to open XML file (write access requested).
  ***************************************************************************/
 void GXmlNode::append(GXmlNode* node)
 {
+    // Make sure that node is not a document (only the root document is
+    // allowed to exist in a XML document
+    if (node->type() == NT_DOCUMENT)
+        throw GException::xml_bad_node_type(G_APPEND, "GXmlDocument",
+                          "Only the root node is of type GXmlDocument.");
+
     // Append node
     m_nodes.push_back(node);
 
@@ -249,6 +259,8 @@ GXmlNode* GXmlNode::element(int index) const
  * @param[in] name Name of child elements.
  * @param[in] index Index of child element (0,1,2,...)
  *
+ * @exception GException::xml_name_not_found
+ *            Child element name not found.
  * @exception GException::out_of_range
  *            Child element index is out of range.
  ***************************************************************************/
@@ -256,6 +268,10 @@ GXmlNode* GXmlNode::element(const std::string& name, int index) const
 {
     // Determine number of child elements
     int n = elements(name);
+
+    // Signal if no children exist
+    if (n < 1)
+        throw GException::xml_name_not_found(G_ELEMENT2, name);
 
     // If index is outside boundary then throw an error
     if (index < 0 || index >= n)
