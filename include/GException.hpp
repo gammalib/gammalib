@@ -379,14 +379,24 @@ public:
     // XML exceptions
     class xml_syntax_error : public GExceptionHandler {
     public:
-        xml_syntax_error(std::string origin, std::string segment, 
+        xml_syntax_error(std::string origin, std::string segment,
                          std::string message = "");
     };
     class xml_attribute_value : public GExceptionHandler {
     public:
         xml_attribute_value(std::string origin, std::string value);
     };
-    
+    class xml_bad_node_type : public GExceptionHandler {
+    public:
+        xml_bad_node_type(std::string origin, std::string type,
+                          std::string message = "");
+    };
+    class xml_name_not_found : public GExceptionHandler {
+    public:
+        xml_name_not_found(std::string origin, std::string type,
+                           std::string message = "");
+    };
+
 };
 
 #endif /* GEXCEPTION_HPP */

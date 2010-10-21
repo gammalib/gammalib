@@ -55,3 +55,43 @@ GException::xml_attribute_value::xml_attribute_value(std::string origin,
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Invalid XML node type
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] type XML node type.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::xml_bad_node_type::xml_bad_node_type(std::string origin,
+                                                 std::string type,
+                                                 std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Invalid XML node type ("+type+"). "+message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief XML element name not found
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] name XML element name.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::xml_name_not_found::xml_name_not_found(std::string origin,
+                                                   std::string name,
+                                                   std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "XML element name \""+name+"\" not found. "+message;
+
+    // Return
+    return;
+}
