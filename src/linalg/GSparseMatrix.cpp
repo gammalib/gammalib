@@ -34,6 +34,8 @@
 #include "GSparseNumeric.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ACCESS1                          "GSparseMatrix::operator(int,int)"
+#define G_ACCESS2                    "GSparseMatrix::operator(int,int) const"
 #define G_OP_MUL_VEC                     "GSparseMatrix::operator* (GVector)"
 #define G_OP_ADD                  "GSparseMatrix::operator+= (GSparseMatrix)"
 #define G_OP_SUB                  "GSparseMatrix::operator-= (GSparseMatrix)"
@@ -173,6 +175,76 @@ GSparseMatrix& GSparseMatrix::operator= (const GSparseMatrix& m)
 
     // Return
     return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Access operator
+ *
+ * @param[in] row Matrix row.
+ * @param[in] col Matrix column.
+ *
+ * @exception GException::out_of_range
+ *            Row or column index out of range.
+ ***************************************************************************/
+double& GSparseMatrix::operator() (int row, int col)
+{
+    // Compile option: perform range check
+    #if defined(G_RANGE_CHECK)
+    if (row >= m_rows || col >= m_cols)
+        throw GException::out_of_range(G_ACCESS1, row, col, m_rows, m_cols);
+    #endif
+
+    // Get element
+    fill_pending();
+    int inx = get_index(row,col);
+    double* value;
+    if (inx < 0) {
+        value      = &m_fill_val;
+        m_fill_row = row;
+        m_fill_col = col;
+    }
+    else
+        value = &(m_data[inx]);
+
+    // Return element
+    return *value;
+}
+
+
+/***********************************************************************//**
+ * @brief Access operator (const version)
+ *
+ * @param[in] row Matrix row.
+ * @param[in] col Matrix column.
+ *
+ * @exception GException::out_of_range
+ *            Row or column index out of range.
+ *
+ * We need here the zero element to return also a pointer for 0.0 entry that
+ * is not stored. Since we have the const version we don't have to care about
+ * modification of this zero value.
+ ***************************************************************************/
+const double& GSparseMatrix::operator() (int row, int col) const
+{
+    // Compile option: perform range check
+    #if defined(G_RANGE_CHECK)
+    if (row >= m_rows || col >= m_cols)
+        throw GException::out_of_range(G_ACCESS2, row, col, m_rows, m_cols);
+    #endif
+
+    // Get element
+    int inx = get_index(row,col);
+    double* value;
+    if (inx < 0)
+        value = (double*)&m_zero;
+    else if (inx == m_elements)
+        value = (double*)&m_fill_val;
+    else
+        value = (double*)&(m_data[inx]);
+
+    // Return element
+    return *value;
 }
 
 
@@ -1873,7 +1945,7 @@ void GSparseMatrix::init_members(void)
 
 
 /***********************************************************************//**
- * @brief Allocate matrix
+ * @brief Copy class members
  *
  * @param[in] m Matrix to be copied.
  ***************************************************************************/

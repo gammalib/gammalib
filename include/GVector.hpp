@@ -20,9 +20,6 @@
 #define GVECTOR_HPP
 
 /* __ Includes ___________________________________________________________ */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include <math.h>
 #include <iostream>
 #include <stdlib.h>
@@ -131,29 +128,6 @@ private:
 /***************************************************************************
  *                               Inline members                            *
  ***************************************************************************/
-
-// Vector element access operator
-inline
-double& GVector::operator() (int inx)
-{
-    #if defined(G_RANGE_CHECK)
-    if (inx < 0 || inx >= m_num)
-        throw GException::out_of_range("GVector::operator(int)", inx, m_num);
-    #endif
-    return m_data[inx];
-}
-
-// Vector element access operator (const version)
-inline
-const double& GVector::operator() (int inx) const
-{
-    #if defined(G_RANGE_CHECK)
-    if (inx < 0 || inx >= m_num)
-        throw GException::out_of_range("GVector::operator(int)", inx, m_num);
-    #endif
-    return m_data[inx];
-}
-
 // Vector unary addition operator
 inline
 GVector& GVector::operator+= (const GVector& v)
@@ -171,8 +145,8 @@ inline
 GVector& GVector::operator-= (const GVector& v)
 {
     if (m_num != v.m_num)
-      throw GException::vector_mismatch("GVector::operator-=(GVector)",
-                                        m_num, v.m_num);
+        throw GException::vector_mismatch("GVector::operator-=(GVector)",
+                                          m_num, v.m_num);
     for (int i = 0; i < m_num; ++i)
         m_data[i] -= v.m_data[i];
     return *this;
@@ -235,7 +209,7 @@ GVector GVector::operator- ( ) const
 
 // Return size of vector
 inline
-int   GVector::size() const
+int GVector::size() const
 {
     return m_num;
 }

@@ -20,9 +20,6 @@
 #define GMATRIX_HPP
 
 /* __ Includes ___________________________________________________________ */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include "GMatrixBase.hpp"
 
 
@@ -95,30 +92,6 @@ private:
 /***************************************************************************
  *                            Inline operators                             *
  ***************************************************************************/
-// Matrix element access operator
-inline
-double& GMatrix::operator() (int row, int col)
-{
-    #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols)
-        throw GException::out_of_range("GMatrix::operator(int,int)",
-                                       row, col, m_rows, m_cols);
-    #endif
-    return m_data[m_colstart[col]+row];
-}
-
-// Matrix element access operator (const version)
-inline
-const double& GMatrix::operator() (int row, int col) const
-{
-    #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols)
-      throw GException::out_of_range("GMatrix::operator(int,int) const",
-                                     row, col, m_rows, m_cols);
-    #endif
-    return m_data[m_colstart[col]+row];
-}
-
 // Binary matrix addition
 inline
 GMatrix GMatrix::operator+ (const GMatrix& m) const

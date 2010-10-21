@@ -17,11 +17,16 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GException.hpp"
 #include "GVector.hpp"
 #include "GMatrix.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ACCESS1                                "GMatrix::operator(int,int)"
+#define G_ACCESS2                          "GMatrix::operator(int,int) const"
 #define G_OP_MUL_VEC                           "GMatrix::operator* (GVector)"
 #define G_OP_ADD                              "GMatrix::operator+= (GMatrix)"
 #define G_OP_SUB                              "GMatrix::operator-= (GMatrix)"
@@ -144,6 +149,51 @@ GMatrix& GMatrix::operator= (const GMatrix& m)
     // Return this object
     return *this;
 }
+
+
+/***********************************************************************//**
+ * @brief Access operator
+ *
+ * @param[in] row Matrix row.
+ * @param[in] col Matrix column.
+ *
+ * @exception GException::out_of_range
+ *            Row or column index out of range.
+ ***************************************************************************/
+double& GMatrix::operator() (int row, int col)
+{
+    // Compile option: perform range check
+    #if defined(G_RANGE_CHECK)
+    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols)
+        throw GException::out_of_range(G_ACCESS1, row, col, m_rows, m_cols);
+    #endif
+
+    // Return element
+    return m_data[m_colstart[col]+row];
+}
+
+
+/***********************************************************************//**
+ * @brief Access operator (const version)
+ *
+ * @param[in] row Matrix row.
+ * @param[in] col Matrix column.
+ *
+ * @exception GException::out_of_range
+ *            Row or column index out of range.
+ ***************************************************************************/
+const double& GMatrix::operator() (int row, int col) const
+{
+    // Compile option: perform range check
+    #if defined(G_RANGE_CHECK)
+    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols)
+      throw GException::out_of_range(G_ACCESS2, row, col, m_rows, m_cols);
+    #endif
+
+    // Return element
+    return m_data[m_colstart[col]+row];
+}
+
 
 
 /***********************************************************************//**

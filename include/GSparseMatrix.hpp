@@ -20,9 +20,6 @@
 #define GSPARSEMATRIX_HPP
 
 /* __ Includes ___________________________________________________________ */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include <math.h>
 #include <iostream>
 #include <stdlib.h>
@@ -164,51 +161,6 @@ private:
 /***************************************************************************
  *              Inline members that override base class members            *
  ***************************************************************************/
-// Matrix element access operator
-inline
-double& GSparseMatrix::operator() (int row, int col)
-{
-    #if defined(G_RANGE_CHECK)
-    if (row >= m_rows || col >= m_cols)
-        throw GException::out_of_range("GSparseMatrix::operator(int,int)",
-                                       row, col, m_rows, m_cols);
-    #endif
-    fill_pending();
-    int inx = get_index(row,col);
-    double* value;
-    if (inx < 0) {
-        value      = &m_fill_val;
-        m_fill_row = row;
-        m_fill_col = col;
-    }
-    else
-        value = &(m_data[inx]);
-    return *value;
-}
-
-// Matrix element access operator (const version)
-// We need here the zero element to return also a pointer for 0.0 entry that is
-// not stored. Since we have the const version we don't have to care about
-// modification of this zero value.
-inline
-const double& GSparseMatrix::operator() (int row, int col) const
-{
-    #if defined(G_RANGE_CHECK)
-    if (row >= m_rows || col >= m_cols)
-        throw GException::out_of_range("GSparseMatrix::operator(int,int)",
-                                       row, col, m_rows, m_cols);
-    #endif
-    int inx = get_index(row,col);
-    double* value;
-    if (inx < 0)
-        value = (double*)&m_zero;
-    else if (inx == m_elements)
-        value = (double*)&m_fill_val;
-    else
-        value = (double*)&(m_data[inx]);
-    return *value;
-}
-
 // Binary matrix addition
 inline
 GSparseMatrix GSparseMatrix::operator+ (const GSparseMatrix& m) const
