@@ -243,7 +243,7 @@ void test_GXml_construct(void)
         GXml xml;
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
+        std::cout << std::endl
                   << "TEST ERROR: Unable to construct empty XML document."
                   << std::endl;
         std::cout << e.what() << std::endl;
@@ -256,7 +256,7 @@ void test_GXml_construct(void)
         GXml xml(xml_file);
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
+        std::cout << std::endl
                   << "TEST ERROR: Unable to construct empty XML document."
                   << std::endl;
         std::cout << e.what() << std::endl;
@@ -270,7 +270,44 @@ void test_GXml_construct(void)
         GXml xml2 = xml1;
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to copy construct XML document."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test XML file creation
+    try {
+        GXml xml;
+        xml.append(new GXmlComment("This is a comment."));
+        xml.append(new GXmlElement("source_library"));
+        GXmlElement* lib = xml.element("source_library", 0);
+        lib->append(new GXmlElement("source name=\"LMC\" type=\"DiffuseSource\""));
+        GXmlNode* src = lib->element("source", 0);
+        src->append(new GXmlElement("spectrum type=\"PLSuperExpCutoff\""));
+        GXmlNode* spec = src->element("spectrum", 0);
+        spec->append(new GXmlElement("parameter free=\"1\" max=\"1000\" min=\"1e-07\""
+                                     " name=\"Prefactor\" scale=\"1e-07\""
+                                     " value=\"0.02754520844\""));
+        spec->append(new GXmlElement("parameter free=\"1\" max=\"5\" min=\"-5\""
+                                     " name=\"Index1\" scale=\"1\" value=\"-2.0458781\""));
+        GXmlElement* par = (GXmlElement*)spec->element("parameter", 0);
+        par->attribute("value", "1.01");
+        par->attribute("error", "3.145");
+        par = (GXmlElement*)spec->element("parameter", 1);
+        par->attribute("value", "-2.100");
+        par->attribute("error", "9.876");
+        src->append(new GXmlElement("spatialModel file=\"LMC.fits\" type=\"SpatialMap\""));
+        GXmlNode* spat = src->element("spatialModel", 0);
+        spat->append(new GXmlElement("parameter free=\"0\" max=\"1000\" min=\"0.001\""
+                                     " name=\"Prefactor\" scale=\"1\" value=\"1\""));
+        //xml.save("test2.xml");
+        //std::cout << xml << std::endl;
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
                   << "TEST ERROR: Unable to copy construct XML document."
                   << std::endl;
         std::cout << e.what() << std::endl;
