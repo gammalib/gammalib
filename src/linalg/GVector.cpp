@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GVector.cpp  -  vector class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2010         by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,10 +17,15 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GVector.hpp"
 
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ACCESS1                                    "GVector::operator(int)"
+#define G_ACCESS2                              "GVector::operator(int) const"
 #define G_CROSS                                      "cross(GVector,GVector)"
 
 
@@ -83,7 +88,7 @@ GVector::GVector(const double& a)
 
     // Allocate vector
     alloc_members();
-    
+
     // Set value
     m_data[0] = a;
 
@@ -110,7 +115,7 @@ GVector::GVector(const double& a, const double& b)
 
     // Allocate vector
     alloc_members();
-    
+
     // Set values
     m_data[0] = a;
     m_data[1] = b;
@@ -139,7 +144,7 @@ GVector::GVector(const double& a, const double& b, const double& c)
 
     // Allocate vector
     alloc_members();
-    
+
     // Set values
     m_data[0] = a;
     m_data[1] = b;
@@ -210,6 +215,48 @@ GVector& GVector::operator= (const GVector& v)
 
     // Return this object
     return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Vector element access operator
+ *
+ * @exception GException::out_of_range
+ *            Element index is out of range.
+ *
+ * @param[in] inx Vector element index to be accessed (0,1,...).
+ ***************************************************************************/
+double& GVector::operator() (int inx)
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (inx < 0 || inx >= m_num)
+        throw GException::out_of_range(G_ACCESS1, inx, m_num);
+    #endif
+
+    // Return vector element
+    return m_data[inx];
+}
+
+
+/***********************************************************************//**
+ * @brief Vector element access operator
+ *
+ * @exception GException::out_of_range
+ *            Element index is out of range.
+ *
+ * @param[in] inx Vector element index to be accessed (0,1,...).
+ ***************************************************************************/
+const double& GVector::operator() (int inx) const
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (inx < 0 || inx >= m_num)
+        throw GException::out_of_range(G_ACCESS2, inx, m_num);
+    #endif
+
+    // Return vector element
+    return m_data[inx];
 }
 
 
@@ -367,6 +414,9 @@ std::ostream& operator<< (std::ostream& os, const GVector& v)
  *
  * @param[in] a First vector for cross product.
  * @param[in] b Second vector for cross product.
+ *
+ * @exception GException::vector_mismatch
+ *            Mismatch between vector size.
  *
  * Computes the cross product between two 3-element vectors (note that the
  * cross product is only defined for 3-element vectors).
