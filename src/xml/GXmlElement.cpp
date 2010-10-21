@@ -371,28 +371,43 @@ GXmlElement* GXmlElement::clone(void) const
  *            XML syntax error.
  *
  * Parse the segment string and set class members based on the information
- * that is found. The method also performs syntax checking.
+ * that is found. The method also performs syntax checking. It does not
+ * require brackets to be set.
  ***************************************************************************/
 void GXmlElement::parse_start(const std::string& segment)
 {
+    // Initialize position check
+    size_t pos_start = 0;
+
     // Get length of segment
     int n = segment.length();
 
-    // Check on existence of brackets
-    if (n < 2 || (segment.compare(0,1,"<") != 0) ||
-                 (segment.compare(n-1,1,">") != 0))
+    // Throw an error is segment is empty
+    if (n < 1)
         throw GException::xml_syntax_error(G_PARSE_START, segment,
-                                           "tag brackets missing");
+                          "no element name specified");
+
+    // If string starts with brackets then check that the brackets are
+    // valid comment brackets
+    if (segment[0] == '<') {
+        if (n < 2 || (segment.compare(0,1,"<") != 0) ||
+                     (segment.compare(n-1,1,">") != 0))
+            throw GException::xml_syntax_error(G_PARSE_START, segment,
+                                               "invalid tag brackets");
+        pos_start = 1;
+    } // endif: there were brackets
 
     // Extract element name
     size_t pos = segment.find_first_of("\x20\x09\x0d\x0a>", 1);
-    if (pos == 1)
+    if (pos == pos_start)
         throw GException::xml_syntax_error(G_PARSE_START, segment,
-                          "no whitespace allowed after '<'");
-    if (pos == std::string::npos)
-        throw GException::xml_syntax_error(G_PARSE_START, segment,
-                          "element name not found");
-    m_name = segment.substr(1, pos-1);
+                          "no whitespace allowed before element name");
+    if (pos == std::string::npos) {
+        if (pos_start == 1)
+            throw GException::xml_syntax_error(G_PARSE_START, segment,
+                              "element name not found");
+    }
+    m_name = segment.substr(pos_start, pos-pos_start);
 
     // Extract attributes
     while (pos != std::string::npos)
