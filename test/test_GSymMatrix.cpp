@@ -17,7 +17,10 @@
  */
 
 /* __ Includes ___________________________________________________________ */
-#include "test_GSymMatrix.hpp"
+#include <iostream>                           // cout, cerr
+#include <stdexcept>                          // std::exception
+#include <math.h>
+#include "GammaLib.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 using namespace std;
