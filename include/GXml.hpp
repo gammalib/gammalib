@@ -58,6 +58,7 @@ public:
 
     // Methods
     void         clear(void);
+    void         append(GXmlNode* node);
     void         load(const std::string& filename);
     void         save(const std::string& filename);
     int          children(void) const;

@@ -168,12 +168,27 @@ void GXml::clear(void)
 
 
 /***********************************************************************//**
+ * @brief Append child node to XML document.
+ *
+ * @param[in] node Child node.
+ ***************************************************************************/
+void GXml::append(GXmlNode* node)
+{
+    // Append node
+    m_root.append(node);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load XML file.
  *
  * @param[in] filename Name of file to be loaded.
  *
  * @exception GException::file_open_error
- *            Unable to open parameter file (read access requested).
+ *            Unable to open XML file (read access requested).
  *
  * Loads XML file by reading all lines from the XML file.
  ***************************************************************************/
@@ -203,7 +218,10 @@ void GXml::load(const std::string& filename)
  *
  * @param[in] filename Name of file to be saved.
  *
- * @TODO Save XML file.
+ * @exception GException::file_open_error
+ *            Unable to open XML file (write access requested).
+ *
+ * Save XML document into file.
  ***************************************************************************/
 void GXml::save(const std::string& filename)
 {
@@ -217,7 +235,7 @@ void GXml::save(const std::string& filename)
 
     // Close file
     fclose(fptr);
-    
+
     // Return
     return;
 }
