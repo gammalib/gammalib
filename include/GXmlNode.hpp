@@ -36,7 +36,7 @@ public:
     // Constructors and destructors
     GXmlNode(void);
     GXmlNode(const GXmlNode& node);
-    ~GXmlNode(void);
+    virtual ~GXmlNode(void);
 
     // Operators
     GXmlNode&       operator= (const GXmlNode& node);
