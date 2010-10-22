@@ -45,7 +45,7 @@ GModelSpatial::GModelSpatial(void)
 {
     // Initialise private members for clean destruction
     init_members();
-  
+
     // Return
     return;
 }
@@ -57,7 +57,7 @@ GModelSpatial::GModelSpatial(void)
  * @param[in] model Model from which the instance should be built.
  ***************************************************************************/
 GModelSpatial::GModelSpatial(const GModelSpatial& model)
-{ 
+{
     // Initialise private members for clean destruction
     init_members();
 
@@ -94,7 +94,7 @@ GModelSpatial::~GModelSpatial(void)
  * @param[in] model Model which should be assigned.
  ***************************************************************************/
 GModelSpatial& GModelSpatial::operator= (const GModelSpatial& model)
-{ 
+{
     // Execute only if object is not identical
     if (this != &model) {
 
@@ -108,7 +108,7 @@ GModelSpatial& GModelSpatial::operator= (const GModelSpatial& model)
         copy_members(model);
 
     } // endif: object was not identical
-  
+
     // Return
     return *this;
 }
