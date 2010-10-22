@@ -24,10 +24,12 @@
 #include "GModel.hpp"
 #include "GModelTemporalConst.hpp"
 #include "GModelSpatialPtsrc.hpp"
+#include "GModelSpectralPlaw.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_PAR                                        "GModel::par(int) const"
-#define G_SET_POINTERS                               "GModel::set_pointers()"
+#define G_PAR                                              "GModel::par(int)"
+#define G_XML_SPATIAL                     "GModel::xml_spatial(GXmlElement&)"
+#define G_XML_SPECTRAL                   "GModel::xml_spectral(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -105,8 +107,6 @@ GModel::GModel(const GModelSpatial& spatial, const GModelSpectral& spectral)
  *
  * @param[in] spatial Spatial XML element.
  * @param[in] spectral Spectral XML element.
- *
- * @TODO Needs to be implemented.
  ***************************************************************************/
 GModel::GModel(const GXmlElement& spatial, const GXmlElement& spectral)
 {
@@ -117,8 +117,8 @@ GModel::GModel(const GXmlElement& spatial, const GXmlElement& spectral)
     GModelTemporalConst temporal;
 
     // Clone spatial and spectral models
-    //m_spatial  = spatial.clone();
-    //m_spectral = spectral.clone();
+    m_spatial  = xml_spatial(spatial);
+    m_spectral = xml_spectral(spectral);
     m_temporal = temporal.clone();
 
     // Set parameter pointers
@@ -430,6 +430,80 @@ void GModel::set_pointers(void)
 
 
 /***********************************************************************//**
+ * @brief Construct spatial model from XML element
+ *
+ * @param[in] spatial XML element containing spatial model information.
+ *
+ * @exception GException::model_invalid_spatial
+ *            Invalid spatial model type encountered.
+ ***************************************************************************/
+GModelSpatial* GModel::xml_spatial(const GXmlElement& spatial) const
+{
+    // Initialize spatial pointer
+    GModelSpatial* ptr = NULL;
+
+    // Get spatial model type
+    std::string type = spatial.attribute("type");
+
+    // Type=SkyDirFunction
+    if (type == "SkyDirFunction")
+        ptr = new GModelSpatialPtsrc(spatial);
+
+    // Type=SpatialMap
+    else if (type == "SpatialMap")
+        throw GException::model_invalid_spatial(G_XML_SPATIAL, type);
+
+    // Type=MapCubeFunction
+    else if (type == "MapCubeFunction")
+        throw GException::model_invalid_spatial(G_XML_SPATIAL, type);
+
+    // Type=ConstantValue
+    else if (type == "ConstantValue")
+        throw GException::model_invalid_spatial(G_XML_SPATIAL, type);
+
+    // Unknown spatial model type
+    else
+        throw GException::model_invalid_spatial(G_XML_SPATIAL, type);
+
+    // Return pointer
+    return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Construct spectral model from XML element
+ *
+ * @param[in] spectral XML element containing spectral model information.
+ *
+ * @exception GException::model_invalid_spectral
+ *            Invalid spatial model type encountered.
+ ***************************************************************************/
+GModelSpectral* GModel::xml_spectral(const GXmlElement& spectral) const
+{
+    // Initialize spectral pointer
+    GModelSpectral* ptr = NULL;
+
+    // Get spatial model type
+    std::string type = spectral.attribute("type");
+
+    // Type=PowerLaw
+    if (type == "PowerLaw")
+        ptr = new GModelSpectralPlaw(spectral);
+
+    // Type=PowerLaw2
+    else if (type == "PowerLaw2")
+        throw GException::model_invalid_spectral(G_XML_SPECTRAL, type);
+
+    // Unknown spectral model type
+    else
+        throw GException::model_invalid_spectral(G_XML_SPECTRAL, type);
+
+    // Return pointer
+    return ptr;
+}
+
+
+/***********************************************************************//**
  * @brief Evaluate function
  *
  * @param[in] obsDir Observed photon direction.
@@ -527,7 +601,7 @@ double GModel::spatial(const GInstDir& obsDir, const GEnergy& obsEng,
 
         // Case A: Model is a point source
         if (m_spatial->isptsource()) {
-        
+
             // Build sky direction from point source parameters
             GSkyDir srcDir;
             srcDir.radec_deg(((GModelSpatialPtsrc*)m_spatial)->ra(),

@@ -100,21 +100,23 @@ public:
 
 protected:
     // Protected methods
-    void   init_members(void);
-    void   copy_members(const GModel& model);
-    void   free_members(void);
-    void   set_pointers(void);
-    double fct(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-               const GResponse& rsp, const GPointing& pnt, bool grad = false);
-    double spatial(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                   const GEnergy& srcEng, const GTime& srcTime,
-                   const GResponse& rsp, const GPointing& pnt, bool grad = false);
-    double spectral(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                    const GTime& srcTime,
-                    const GResponse& rsp, const GPointing& pnt, bool grad = false);
-    double temporal(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                    const GResponse& rsp, const GPointing& pnt, bool grad = false);
+    void            init_members(void);
+    void            copy_members(const GModel& model);
+    void            free_members(void);
+    void            set_pointers(void);
+    GModelSpatial*  xml_spatial(const GXmlElement& spatial) const;
+    GModelSpectral* xml_spectral(const GXmlElement& spectral) const;
+    double          fct(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                        const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                        const GResponse& rsp, const GPointing& pnt, bool grad = false);
+    double          spatial(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                            const GEnergy& srcEng, const GTime& srcTime,
+                            const GResponse& rsp, const GPointing& pnt, bool grad = false);
+    double          spectral(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                             const GTime& srcTime,
+                             const GResponse& rsp, const GPointing& pnt, bool grad = false);
+    double          temporal(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                             const GResponse& rsp, const GPointing& pnt, bool grad = false);
 
     // Proteced data members
     std::string     m_name;          //!< Model name
