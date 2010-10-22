@@ -151,7 +151,7 @@ void GXmlDocument::clear(void)
 void GXmlDocument::write(FILE* fptr, int indent) const
 {
     // Write document header in file
-    fprintf(fptr, "<?xml version=%s encoding=%s standalone=%s?>\n",
+    fprintf(fptr, "<?xml version=\"%s\" encoding=\"%s\" standalone=\"%s\"?>\n",
             version().c_str(),
             encoding().c_str(),
             standalone().c_str());
