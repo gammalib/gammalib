@@ -24,6 +24,7 @@
 #include "GModelSpatial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
+#include "GXmlElement.hpp"
 
 
 /***********************************************************************//**
@@ -43,6 +44,7 @@ public:
     // Constructors and destructors
     explicit GModelSpatialPtsrc(void);
     explicit GModelSpatialPtsrc(const GSkyDir& dir);
+    explicit GModelSpatialPtsrc(const GXmlElement& xml);
     GModelSpatialPtsrc(const GModelSpatialPtsrc& model);
     virtual ~GModelSpatialPtsrc(void);
 
@@ -57,6 +59,8 @@ public:
     bool       isptsource(void) const { return true; }
     double     ra(void) const { return m_ra.real_value(); }
     double     dec(void) const { return m_dec.real_value(); }
+    void       read(const GXmlElement& xml);
+    void       write(GXmlElement& xml) const;
 
 protected:
     // Protected methods

@@ -21,10 +21,12 @@
 #include <config.h>
 #endif
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GModelSpatialPtsrc.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_PAR                            "GModelSpatialPtsrc::par(int) const"
+#define G_PAR                                  "GModelSpatialPtsrc::par(int)"
+#define G_READ                       "GModelSpatialPtsrc::read(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -65,6 +67,24 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(const GSkyDir& dir) : GModelSpatial()
     // Assign Right Ascension and Declination
     m_ra.value(dir.ra_deg());
     m_dec.value(dir.dec_deg());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Constructor
+ *
+ * @param[in] xml XML element containing position information.
+ ***************************************************************************/
+GModelSpatialPtsrc::GModelSpatialPtsrc(const GXmlElement& xml) : GModelSpatial()
+{
+    // Initialise private members for clean destruction
+    init_members();
+
+    // Read information from XML element
+    read(xml);
 
     // Return
     return;
@@ -209,6 +229,66 @@ double GModelSpatialPtsrc::eval_gradients(const GSkyDir& srcDir)
 
     // Return value
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Read model from XML element
+ *
+ * @param[in] xml XML element containing point source model information.
+ *
+ * @exception GException::model_invalid_skydir
+ *            Invalid sky direction specification found in XML element.
+ ***************************************************************************/
+void GModelSpatialPtsrc::read(const GXmlElement& xml)
+{
+    // Verify that XML element has exactly 2 parameters
+    if (xml.elements("parameter") != 2)
+        throw GException::model_invalid_skydir(G_READ, xml,
+              "Point source model requires exactly 2 parameters.");
+
+    // Get pointers on both model parameters
+    GXmlElement* par1 = (GXmlElement*)xml.element("parameter", 0);
+    GXmlElement* par2 = (GXmlElement*)xml.element("parameter", 1);
+
+    // Get sky direction
+    GSkyDir dir;
+    if (par1->attribute("name") == "RA" && par2->attribute("name") == "DEC")
+        dir.radec_deg(todouble(par1->attribute("value")),
+                      todouble(par2->attribute("value")));
+    else if (par2->attribute("name") == "RA" && par1->attribute("name") == "DEC")
+        dir.radec_deg(todouble(par2->attribute("value")),
+                      todouble(par1->attribute("value")));
+    else if (par1->attribute("name") == "GLON" && par2->attribute("name") == "GLAT")
+        dir.lb_deg(todouble(par1->attribute("value")),
+                   todouble(par2->attribute("value")));
+    else if (par2->attribute("name") == "GLON" && par1->attribute("name") == "GLAT")
+        dir.lb_deg(todouble(par2->attribute("value")),
+                   todouble(par1->attribute("value")));
+    else
+        throw GException::model_invalid_skydir(G_READ, xml,
+              "Invalid parameter names (either RA/DEC or GLON/GLAT required).");
+
+    // Assign sky direction
+    m_ra.value(dir.ra_deg());
+    m_dec.value(dir.dec_deg());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write model into XML element
+ *
+ * @param[in] xml XML element into which model information is written.
+ *
+ * @todo Implement method
+ ***************************************************************************/
+void GModelSpatialPtsrc::write(GXmlElement& xml) const
+{
+    // Return
+    return;
 }
 
 
