@@ -40,80 +40,80 @@ void test_GXml_attributes(void)
     // Test valid attributes
     try {
         GXmlAttribute attr("test", "1.0");
-        if (attr.value() != "\"1.0\"") {
+        if (attr.value() != "1.0") {
             std::cout << std::endl
-                      << "TEST ERROR: Unexpected attribute "
+                      << "TEST 1 ERROR: Unexpected attribute "
                       << attr.value() << std::endl;
             throw;
         }
         std::cout << ".";
         attr.value("\"1.0\"");
-        if (attr.value() != "\"1.0\"") {
+        if (attr.value() != "1.0") {
             std::cout << std::endl
-                      << "TEST ERROR: Unexpected attribute "
+                      << "TEST 2 ERROR: Unexpected attribute "
                       << attr.value() << std::endl;
             throw;
         }
         std::cout << ".";
         attr.value("'1.0'");
-        if (attr.value() != "'1.0'") {
+        if (attr.value() != "1.0") {
             std::cout << std::endl
-                      << "TEST ERROR: Unexpected attribute "
+                      << "TEST 3 ERROR: Unexpected attribute "
                       << attr.value() << std::endl;
             throw;
         }
         std::cout << ".";
         attr.value("''1.0'");
-        if (attr.value() != "\"''1.0'\"") {
+        if (attr.value() != "''1.0'") {
             std::cout << std::endl
-                      << "TEST ERROR: Unexpected attribute "
+                      << "TEST 4 ERROR: Unexpected attribute "
                       << attr.value() << std::endl;
             throw;
         }
         std::cout << ".";
         attr.value("'1.0");
-        if (attr.value() != "\"'1.0\"") {
+        if (attr.value() != "'1.0") {
             std::cout << std::endl
-                      << "TEST ERROR: Unexpected attribute "
+                      << "TEST 5 ERROR: Unexpected attribute "
                       << attr.value() << std::endl;
             throw;
         }
         std::cout << ".";
         attr.value("1.0'");
-        if (attr.value() != "\"1.0'\"") {
+        if (attr.value() != "1.0'") {
             std::cout << std::endl
-                      << "TEST ERROR: Unexpected attribute "
+                      << "TEST 6 ERROR: Unexpected attribute "
                       << attr.value() << std::endl;
             throw;
         }
         std::cout << ".";
         attr.value("\"1.0");
-        if (attr.value() != "'\"1.0'") {
+        if (attr.value() != "\"1.0") {
             std::cout << std::endl
-                      << "TEST ERROR: Unexpected attribute "
+                      << "TEST 7 ERROR: Unexpected attribute "
                       << attr.value() << std::endl;
             throw;
         }
         std::cout << ".";
         attr.value("1.0\"");
-        if (attr.value() != "'1.0\"'") {
+        if (attr.value() != "1.0\"") {
             std::cout << std::endl
-                      << "TEST ERROR: Unexpected attribute "
+                      << "TEST 8 ERROR: Unexpected attribute "
                       << attr.value() << std::endl;
             throw;
         }
         std::cout << ".";
         attr.value("\"\"1.0\"");
-        if (attr.value() != "'\"\"1.0\"'") {
+        if (attr.value() != "\"\"1.0\"") {
             std::cout << std::endl
-                      << "TEST ERROR: Unexpected attribute "
+                      << "TEST 9 ERROR: Unexpected attribute "
                       << attr.value() << std::endl;
             throw;
         }
         std::cout << ".";
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
+        std::cout << std::endl
                   << "TEST ERROR: Unable to assign valid XML attributes."
                   << std::endl;
         std::cout << e.what() << std::endl;
@@ -130,7 +130,7 @@ void test_GXml_attributes(void)
     }
     catch (std::exception &e) {
         std::cout << std::endl 
-                  << "TEST ERROR: Unable to catch invalid XML attribute."
+                  << "TEST 10 ERROR: Unable to catch invalid XML attribute."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -144,7 +144,7 @@ void test_GXml_attributes(void)
     }
     catch (std::exception &e) {
         std::cout << std::endl 
-                  << "TEST ERROR: Unable to catch invalid XML attribute."
+                  << "TEST 11 ERROR: Unable to catch invalid XML attribute."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -158,7 +158,7 @@ void test_GXml_attributes(void)
     }
     catch (std::exception &e) {
         std::cout << std::endl 
-                  << "TEST ERROR: Unable to catch invalid XML attribute."
+                  << "TEST 12 ERROR: Unable to catch invalid XML attribute."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -186,26 +186,26 @@ void test_GXml_elements(void)
     try {
         GXmlElement   element;
         element.attribute("test", "1.0");
-        if (element.attribute("test") != "\"1.0\"") {
+        if (element.attribute("test") != "1.0") {
             std::cout << std::endl
-                      << "TEST ERROR: Unexpected attribute "
+                      << "TEST 1 ERROR: Unexpected attribute "
                       << element.attribute("test") << std::endl;
             throw;
         }
         std::cout << ".";
         element.attribute("test", "2.0");
-        if (element.attribute("test") != "\"2.0\"") {
+        if (element.attribute("test") != "2.0") {
             std::cout << std::endl
-                      << "TEST ERROR: Unexpected attribute "
+                      << "TEST 2 ERROR: Unexpected attribute "
                       << element.attribute("test") << std::endl;
             throw;
         }
         std::cout << ".";
         element.attribute("test2", "1.0");
-        if (element.attribute("test")  != "\"2.0\"" ||
-            element.attribute("test2") != "\"1.0\"") {
+        if (element.attribute("test")  != "2.0" ||
+            element.attribute("test2") != "1.0") {
             std::cout << std::endl
-                      << "TEST ERROR: Unexpected attributes "
+                      << "TEST 3 ERROR: Unexpected attributes "
                       << element.attribute("test")
                       << " " << element.attribute("test2") << std::endl;
             throw;
@@ -213,7 +213,7 @@ void test_GXml_elements(void)
         std::cout << ".";
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
+        std::cout << std::endl
                   << "TEST ERROR: Unable to assign XML attributes."
                   << std::endl;
         std::cout << e.what() << std::endl;
