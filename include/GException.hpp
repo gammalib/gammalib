@@ -24,6 +24,7 @@
 #include <sstream>                            // ostringstream
 #include <stdexcept>                          // exception
 #include "GTime.hpp"
+#include "GXmlElement.hpp"
 
 
 /***********************************************************************//**
@@ -376,6 +377,7 @@ public:
                        double emax, std::string message = "");
     };
 
+
     // XML exceptions
     class xml_syntax_error : public GExceptionHandler {
     public:
@@ -395,6 +397,29 @@ public:
     public:
         xml_name_not_found(std::string origin, std::string type,
                            std::string message = "");
+    };
+
+
+    // GModel exceptions
+    class model_invalid_spatial : public GExceptionHandler {
+    public:
+        model_invalid_spatial(std::string origin, std::string type,
+                              std::string message = "");
+    };
+    class model_invalid_spectral : public GExceptionHandler {
+    public:
+        model_invalid_spectral(std::string origin, std::string type,
+                               std::string message = "");
+    };
+    class model_invalid_parnum : public GExceptionHandler {
+    public:
+        model_invalid_parnum(std::string origin, GXmlElement xml,
+                             std::string message = "");
+    };
+    class model_invalid_parnames : public GExceptionHandler {
+    public:
+        model_invalid_parnames(std::string origin, GXmlElement xml,
+                               std::string message = "");
     };
 
 };
