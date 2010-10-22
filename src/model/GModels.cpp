@@ -317,7 +317,7 @@ void GModels::read(const GXml* xml)
             GXmlElement* spat = (GXmlElement*)src->element("spatialModel", 0);
 
             // Build model from GXml elements
-            GModel model(*spec, *spat);
+            GModel model(*spat, *spec);
 
             // Append model
             append(model);
