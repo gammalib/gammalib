@@ -237,14 +237,16 @@ double GModelSpatialPtsrc::eval_gradients(const GSkyDir& srcDir)
  *
  * @param[in] xml XML element containing point source model information.
  *
- * @exception GException::model_invalid_skydir
- *            Invalid sky direction specification found in XML element.
+ * @exception GException::model_invalid_parnum
+ *            Invalid number of model parameters found in XML element.
+ * @exception GException::model_invalid_parnames
+ *            Invalid model parameter names found in XML element.
  ***************************************************************************/
 void GModelSpatialPtsrc::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 2 parameters
     if (xml.elements("parameter") != 2)
-        throw GException::model_invalid_skydir(G_READ, xml,
+        throw GException::model_invalid_parnum(G_READ, xml,
               "Point source model requires exactly 2 parameters.");
 
     // Get pointers on both model parameters
@@ -266,8 +268,8 @@ void GModelSpatialPtsrc::read(const GXmlElement& xml)
         dir.lb_deg(todouble(par2->attribute("value")),
                    todouble(par1->attribute("value")));
     else
-        throw GException::model_invalid_skydir(G_READ, xml,
-              "Invalid parameter names (either RA/DEC or GLON/GLAT required).");
+        throw GException::model_invalid_parnames(G_READ, xml,
+                          "Require either RA/DEC or GLON/GLAT.");
 
     // Assign sky direction
     m_ra.value(dir.ra_deg());

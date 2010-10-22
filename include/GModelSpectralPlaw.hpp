@@ -24,6 +24,7 @@
 #include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
 #include "GEnergy.hpp"
+#include "GXmlElement.hpp"
 
 
 /***********************************************************************//**
@@ -40,8 +41,9 @@ class GModelSpectralPlaw  : public GModelSpectral {
 
 public:
     // Constructors and destructors
-    GModelSpectralPlaw(void);
+    explicit GModelSpectralPlaw(void);
     explicit GModelSpectralPlaw(const double& norm, const double& index);
+    explicit GModelSpectralPlaw(const GXmlElement& xml);
     GModelSpectralPlaw(const GModelSpectralPlaw& model);
     virtual ~GModelSpectralPlaw(void);
 
@@ -60,6 +62,8 @@ public:
     double     norm(void) const { return m_norm.real_value(); }
     double     index(void) const { return m_index.real_value(); }
     double     pivot(void) const { return m_pivot.real_value(); }
+    void       read(const GXmlElement& xml);
+    void       write(GXmlElement& xml) const;
 
 protected:
     // Protected methods

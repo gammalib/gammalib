@@ -22,10 +22,12 @@
 #endif
 #include <math.h>
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GModelSpectralPlaw.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_PAR                            "GModelSpectralPlaw::par(int) const"
+#define G_PAR                                  "GModelSpectralPlaw::par(int)"
+#define G_READ                   "GModelSpectralPlaw::read(GXmlElement& xml)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -68,6 +70,24 @@ GModelSpectralPlaw::GModelSpectralPlaw(const double& norm, const double& index) 
     // Set parameters
     m_norm.value(norm);
     m_index.value(index);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Constructor
+ *
+ * @param[in] xml XML element containing position information.
+ ***************************************************************************/
+GModelSpectralPlaw::GModelSpectralPlaw(const GXmlElement& xml) : GModelSpectral()
+{
+    // Initialise private members for clean destruction
+    init_members();
+
+    // Read information from XML element
+    read(xml);
 
     // Return
     return;
@@ -268,6 +288,98 @@ void GModelSpectralPlaw::autoscale(void)
 
     }
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read model from XML element
+ *
+ * @param[in] xml XML element containing power law model information.
+ *
+ * @exception GException::model_invalid_parnum
+ *            Invalid number of model parameters found in XML element.
+ * @exception GException::model_invalid_parnames
+ *            Invalid model parameter names found in XML element.
+ ***************************************************************************/
+void GModelSpectralPlaw::read(const GXmlElement& xml)
+{
+    // Verify that XML element has exactly 3 parameters
+    if (xml.elements("parameter") != 3)
+        throw GException::model_invalid_parnum(G_READ, xml,
+              "Power law model requires exactly 3 parameters.");
+
+    // Extract model parameters
+    int npar[] = {0, 0, 0};
+    for (int i = 0; i < 3; ++i) {
+
+        // Get parameter element
+        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+
+        // Handle prefactor
+        if (par->attribute("name") == "Prefactor") {
+            m_norm.value(todouble(par->attribute("value")));
+            m_norm.scale(todouble(par->attribute("scale")));
+            m_norm.min(todouble(par->attribute("min")));
+            m_norm.max(todouble(par->attribute("max")));
+            if (par->attribute("free") == "1" ||
+                tolower(par->attribute("free")) == "true")
+                m_norm.free();
+            else
+                m_norm.fix();
+            npar[0]++;
+        }
+
+        // Handle index
+        else if (par->attribute("name") == "Index") {
+            m_index.value(todouble(par->attribute("value")));
+            m_index.scale(todouble(par->attribute("scale")));
+            m_index.min(todouble(par->attribute("min")));
+            m_index.max(todouble(par->attribute("max")));
+            if (par->attribute("free") == "1" ||
+                tolower(par->attribute("free")) == "true")
+                m_index.free();
+            else
+                m_index.fix();
+            npar[1]++;
+        }
+
+        // Handle pivot energy
+        else if (par->attribute("name") == "Scale") {
+            m_pivot.value(todouble(par->attribute("value")));
+            m_pivot.scale(todouble(par->attribute("scale")));
+            m_pivot.min(todouble(par->attribute("min")));
+            m_pivot.max(todouble(par->attribute("max")));
+            if (par->attribute("free") == "1" ||
+                tolower(par->attribute("free")) == "true")
+                m_pivot.free();
+            else
+                m_pivot.fix();
+            npar[2]++;
+        }
+
+    } // endfor: looped over all parameters
+
+    // Verify that all parameters were found
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1)
+        throw GException::model_invalid_parnames(G_READ, xml,
+                          "Require \"Prefactor\", \"Index\" and \"Scale\".");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write model into XML element
+ *
+ * @param[in] xml XML element into which model information is written.
+ *
+ * @todo Implement method
+ ***************************************************************************/
+void GModelSpectralPlaw::write(GXmlElement& xml) const
+{
     // Return
     return;
 }
