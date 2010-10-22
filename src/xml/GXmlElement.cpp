@@ -240,14 +240,12 @@ void GXmlElement::print(std::ostream& os, int indent) const
  *
  * @param[in] name Attribute name.
  *
- * If requested attribute was not found an empty string is returned. Note
- * that this allows testing of presence of an attribute since any valid
- * value has a minimum length of 2 as the attribute includes hyphens.
+ * If the requested attribute was not found an empty string is returned.
  ***************************************************************************/
 std::string GXmlElement::attribute(const std::string& name) const
 {
     // Initialise empty value (i.e. attribute not found)
-    std::string value;
+    std::string value = "";
 
     // Search attribute value in list of attributes
     for (int i = 0; i < m_attr.size(); ++i) {
@@ -256,7 +254,7 @@ std::string GXmlElement::attribute(const std::string& name) const
             break;
         }
     }
-    
+
     // Return value
     return value;
 }

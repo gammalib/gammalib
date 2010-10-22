@@ -49,7 +49,7 @@ public:
     void        write(FILE* fptr) const;
     void        print(std::ostream& os) const;
     std::string name(void) const { return m_name; }
-    std::string value(void) const { return m_value; }
+    std::string value(void) const;
     void        name(const std::string& name) { m_name=name; }
     void        value(std::string value);
 

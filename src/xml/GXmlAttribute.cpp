@@ -191,6 +191,26 @@ void GXmlAttribute::print(std::ostream& os) const
 
 
 /***********************************************************************//**
+ * @brief Returns attribute value
+ *
+ * The method returns the attribute value by stripping the hyphens.
+ ***************************************************************************/
+std::string GXmlAttribute::value(void) const
+{
+    // Initialise attribute value
+    std::string value = "";
+
+    // Extract value by stripping hyphens
+    int n = m_value.length();
+    if (n > 2)
+        value = m_value.substr(1, n-2);
+
+    // Return value
+    return value;
+}
+
+
+/***********************************************************************//**
  * @brief Set attribute value
  *
  * @param[in] value Attribute value.
