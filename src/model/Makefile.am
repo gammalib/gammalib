@@ -14,7 +14,8 @@ sources = GModels.cpp \
 	  GModelSpectral.cpp \
 	  GModelSpectralPlaw.cpp \
 	  GModelTemporal.cpp \
-	  GModelTemporalConst.cpp
+	  GModelTemporalConst.cpp \
+          GException_model.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libmodel.la
