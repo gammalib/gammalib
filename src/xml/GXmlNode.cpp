@@ -339,8 +339,8 @@ void GXmlNode::copy_members(const GXmlNode& node)
 void GXmlNode::free_members(void)
 {
     // Free nodes
-    for (int i = 0; i < m_nodes.size(); ++i)
-        delete m_nodes[i];
+//    for (int i = 0; i < m_nodes.size(); ++i)
+//        delete m_nodes[i];
 
     // Return
     return;
