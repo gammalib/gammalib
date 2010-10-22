@@ -349,11 +349,6 @@ void GXml::copy_members(const GXml& xml)
  ***************************************************************************/
 void GXml::free_members(void)
 {
-    // Free memory
-    //if (m_par      != NULL) delete [] m_par;
-
-    // Signal free pointers
-    //m_par      = NULL;
 
     // Return
     return;
