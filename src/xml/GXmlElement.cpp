@@ -343,8 +343,8 @@ void GXmlElement::copy_members(const GXmlElement& node)
 void GXmlElement::free_members(void)
 {
     // Free attributes
-    for (int i = 0; i < m_attr.size(); ++i)
-        delete m_attr[i];
+//    for (int i = 0; i < m_attr.size(); ++i)
+//        delete m_attr[i];
 
     // Return
     return;
