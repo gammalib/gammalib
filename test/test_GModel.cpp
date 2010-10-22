@@ -22,7 +22,7 @@
 #include "GammaLib.hpp"
 
 /* __ Globals ____________________________________________________________ */
-const std::string xml_file = "data/test.xml";
+const std::string xml_file = "data/crab.xml";
 
 
 /***********************************************************************//**
