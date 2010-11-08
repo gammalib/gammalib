@@ -191,6 +191,12 @@ GModelPar* GModelSpectralPlaw::par(int index) const
  *
  * @param[in] srcEng True energy of photon.
  *
+ * The power law function is defined as \f$I(E)=norm (E/pivot)^index\f$
+ * where 
+ * \f$norm\f$ is the normalization or prefactor,
+ * \f$pivot\f$ is the pivot energy, and
+ * \f$index\f$ is the spectral index.
+ *
  * @todo For the moment the pivot energy is fixed to units of MeV. This may
  * not be ideal and should eventually be improved in the futur.
  * Furthermore, the method expects that energy!=0. Otherwise Inf or NaN
@@ -200,8 +206,8 @@ double GModelSpectralPlaw::eval(const GEnergy& srcEng)
 {
     // Compute function value
     double e     = srcEng.MeV() / pivot();
-    double p     = pow(e, m_index.value());
-    double value = m_norm.value() * p;
+    double power = pow(e, index());
+    double value = norm() * power;
 
     // Return
     return value;
@@ -213,6 +219,17 @@ double GModelSpectralPlaw::eval(const GEnergy& srcEng)
  *
  * @param[in] srcEng True energy of photon.
  *
+ * The power law function is defined as \f$I(E)=norm (E/pivot)^index\f$
+ * where 
+ * \f$norm=n_s n_v\f$ is the normalization or prefactor,
+ * \f$pivot=p_s p_v\f$ is the pivot energy, and
+ * \f$index=i_s i_v\f$ is the spectral index (each parameter is factorised
+ * in a scaling factor and a value).
+ * The partial derivatives of the parameter values are given by
+ * \f$dI/dn_v=n_s (E/pivot)^index\f$,
+ * \f$dI/di_v=norm (E/pivot)^index \ln((E/pivot)^i_s)\f$, and
+ * \f$dI/dp_v=norm (E/pivot)^index (-index) / p_v\f$, and
+ *
  * @todo For the moment the pivot energy is fixed to units of MeV. This may
  * not be ideal and should eventually be improved in the futur.
  * Furthermore, the method expects that energy!=0. Otherwise Inf or NaN
@@ -222,42 +239,18 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng)
 {
     // Compute function value
     double e     = srcEng.MeV() / pivot();
-    double p     = pow(e, m_index.value());
-    double value = m_norm.value() * p;
+    double power = pow(e, index());
+    double value = norm() * power;
 
-    // Set gradient to 0 if all parameters are fixed ...
-    if ( !m_norm.isfree() && !m_index.isfree() && !m_pivot.isfree() ) {
-        m_norm.gradient(0.0);
-        m_index.gradient(0.0);
-        m_pivot.gradient(0.0);
-    }
+    // Compute gradients
+    double g_norm  = (m_norm.isfree())  ? m_norm.scale() * power : 0.0;
+    double g_index = (m_index.isfree()) ? value * log(pow(e, m_index.scale())) : 0.0;
+    double g_pivot = (m_pivot.isfree()) ? -value * index() / m_pivot.value() : 0.0;
 
-    // ... otherwise compute gradient
-    else {
-
-        // Compute normalization gradient
-        if (m_norm.isfree())
-            m_norm.gradient(p);
-        else
-            m_norm.gradient(0.0);
-
-        // Compute index gradient
-        if (m_index.isfree()) {
-            double g = m_norm.value() * p * log(srcEng.MeV());
-            m_index.gradient(g);
-        }
-        else
-            m_index.gradient(0.0);
-
-        // Compute pivot energy gradient
-        if (m_pivot.isfree()) {
-            double g = -m_norm.value() * m_index.value() * p / pivot();
-            m_pivot.gradient(g);
-        }
-        else
-            m_pivot.gradient(0.0);
-
-    } // endelse: gradient computation required
+    // Set gradients
+    m_norm.gradient(g_norm);
+    m_index.gradient(g_index);
+    m_pivot.gradient(g_pivot);
 
     // Return
     return value;
