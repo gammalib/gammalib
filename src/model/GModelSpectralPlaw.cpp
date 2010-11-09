@@ -191,7 +191,8 @@ GModelPar* GModelSpectralPlaw::par(int index) const
  *
  * @param[in] srcEng True energy of photon.
  *
- * The power law function is defined as \f$I(E)=norm (E/pivot)^index\f$
+ * The power law function is defined as 
+ * \f[I(E)=norm (E/pivot)^{index}\f]
  * where 
  * \f$norm\f$ is the normalization or prefactor,
  * \f$pivot\f$ is the pivot energy, and
@@ -219,16 +220,17 @@ double GModelSpectralPlaw::eval(const GEnergy& srcEng)
  *
  * @param[in] srcEng True energy of photon.
  *
- * The power law function is defined as \f$I(E)=norm (E/pivot)^index\f$
+ * The power law function is defined as 
+ * \f[I(E)=norm (E/pivot)^{index}\f]
  * where 
  * \f$norm=n_s n_v\f$ is the normalization or prefactor,
  * \f$pivot=p_s p_v\f$ is the pivot energy, and
  * \f$index=i_s i_v\f$ is the spectral index (each parameter is factorised
- * in a scaling factor and a value).
+ * into a scaling factor and a value).
  * The partial derivatives of the parameter values are given by
- * \f$dI/dn_v=n_s (E/pivot)^index\f$,
- * \f$dI/di_v=norm (E/pivot)^index \ln((E/pivot)^i_s)\f$, and
- * \f$dI/dp_v=norm (E/pivot)^index (-index) / p_v\f$, and
+ * \f[dI/dn_v=n_s (E/pivot)^{index}\f]
+ * \f[dI/di_v=norm (E/pivot)^{index} \ln((E/pivot)^{i_s})\f]
+ * \f[dI/dp_v=norm (E/pivot)^{index} (-index) / {p_v}\f]
  *
  * @todo For the moment the pivot energy is fixed to units of MeV. This may
  * not be ideal and should eventually be improved in the futur.
