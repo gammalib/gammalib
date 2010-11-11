@@ -51,6 +51,8 @@ public:
     virtual GModelPar* par(int index) const = 0;
     virtual double     eval(const GEnergy& srcEng) = 0;
     virtual double     eval_gradients(const GEnergy& srcEng) = 0;
+    virtual void       read(const GXmlElement& xml) = 0;
+    virtual void       write(GXmlElement& xml) const = 0;
 
 protected:
     // Protected methods

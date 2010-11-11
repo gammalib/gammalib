@@ -54,6 +54,9 @@ public:
     virtual double     eval(const GSkyDir& srcDir) = 0;
     virtual double     eval_gradients(const GSkyDir& srcDir) = 0;
     virtual bool       isptsource(void) const { return false; }
+    virtual void       read(const GXmlElement& xml) = 0;
+    virtual void       write(GXmlElement& xml) const = 0;
+
 
 protected:
     // Protected methods
