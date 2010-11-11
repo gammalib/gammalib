@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModelPar.cpp  -  Model parameter class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GModelPar.cpp
@@ -18,8 +17,12 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GException.hpp"
 #include "GModelPar.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_VALUE                             "GModelPar::value(const double&)"
@@ -211,6 +214,102 @@ void GModelPar::range(const double& min, const double& max)
     m_hasmin = true;
     m_hasmax = true;
     
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Extract parameter attributes from XML element
+ *
+ * @param[in] xml XML element containing parameter attributes.
+ *
+ * The following parameter attributes may exist (they take the default
+ * values when they are not found in the XML element):
+ * 'value' (default=0.0), 'error' (default=0.0), 'scale' (default=1.0),
+ * 'min' (default=INDEF), 'max' (default=INDEF), 'free' (default=0).
+ ***************************************************************************/
+void GModelPar::read(const GXmlElement& xml)
+{
+    // Get value
+    std::string arg = xml.attribute("value");
+    if (arg != "")
+        m_value = todouble(arg);
+    else
+        m_value = 0.0;
+
+    // Get error
+    arg = xml.attribute("error");
+    if (arg != "")
+        m_error = todouble(arg);
+    else
+        m_error = 0.0;
+
+    // Get scale factor
+    arg = xml.attribute("scale");
+    if (arg != "")
+        m_scale = todouble(arg);
+    else
+        m_scale = 1.0;
+
+    // Get min
+    arg = xml.attribute("min");
+    if (arg != "")
+        min(todouble(arg));
+
+    // Get max
+    arg = xml.attribute("max");
+    if (arg != "")
+        max(todouble(arg));
+
+    // Get free
+    if (xml.attribute("free") == "1" || 
+        tolower(xml.attribute("free")) == "true")
+        free();
+    else
+        fix();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set or update parameter attributes in XML element
+ *
+ * @param[in] xml XML element containing parameter attributes.
+ *
+ * The following parameter attributes may exist (they take the default
+ * values when they are not found in the XML element):
+ * 'value' (default=0.0), 'error' (default=0.0), 'scale' (default=1.0),
+ * 'min' (default=INDEF), 'max' (default=INDEF), 'free' (default=0).
+ ***************************************************************************/
+void GModelPar::write(GXmlElement& xml) const
+{
+    // Set value
+    xml.attribute("value", str(m_value));
+
+    // Set error (only if parameter is free)
+    if (isfree())
+        xml.attribute("error", str(m_error));
+
+    // Set scale
+    xml.attribute("scale", str(m_scale));
+
+    // Set minimum
+    if (hasmin())
+        xml.attribute("min", str(m_min));
+
+    // Set maximum
+    if (hasmax())
+        xml.attribute("max", str(m_max));
+
+    // Set free/fix flag
+    if (isfree())
+        xml.attribute("free", "1");
+    else
+        xml.attribute("free", "0");
+
     // Return
     return;
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GModelPar.hpp  -  Model parameter class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,6 +21,8 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
+#include "GXmlElement.hpp"
+#include <string>
 #include <iostream>
 
 
@@ -73,6 +75,8 @@ public:
     void        remove_range(void) { m_hasmin=false; m_hasmax=false; return; }
     void        free(void) { m_free=true; return; }
     void        fix(void) { m_free=false; return; }
+    void        read(const GXmlElement& xml);
+    void        write(GXmlElement& xml) const;
   
 protected:
     // Protected methods
