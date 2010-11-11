@@ -27,7 +27,8 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_PAR                                  "GModelSpectralPlaw::par(int)"
-#define G_READ                   "GModelSpectralPlaw::read(GXmlElement& xml)"
+#define G_READ                       "GModelSpectralPlaw::read(GXmlElement&)"
+#define G_WRITE                     "GModelSpectralPlaw::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -43,7 +44,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GModelSpectralPlaw::GModelSpectralPlaw(void) : GModelSpectral()
 {
@@ -60,9 +61,12 @@ GModelSpectralPlaw::GModelSpectralPlaw(void) : GModelSpectral()
  *
  * @param[in] norm Power law normalization.
  * @param[in] index Power law index.
+ *
+ * Construct a spectral power law from a normalization value and a spectral
+ * index.
  ***************************************************************************/
 GModelSpectralPlaw::GModelSpectralPlaw(const double& norm, const double& index) :
-    GModelSpectral()
+                                                                 GModelSpectral()
 {
     // Initialise private members for clean destruction
     init_members();
@@ -80,6 +84,8 @@ GModelSpectralPlaw::GModelSpectralPlaw(const double& norm, const double& index) 
  * @brief Constructor
  *
  * @param[in] xml XML element containing position information.
+ *
+ * Construct a spectral power law from a XML element.
  ***************************************************************************/
 GModelSpectralPlaw::GModelSpectralPlaw(const GXmlElement& xml) : GModelSpectral()
 {
@@ -100,7 +106,7 @@ GModelSpectralPlaw::GModelSpectralPlaw(const GXmlElement& xml) : GModelSpectral(
  * @param[in] model Model from which the instance should be built.
  ***************************************************************************/
 GModelSpectralPlaw::GModelSpectralPlaw(const GModelSpectralPlaw& model) :
-    GModelSpectral(model)
+                                                        GModelSpectral(model)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -261,6 +267,9 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng)
 
 /***********************************************************************//**
  * @brief Autoscale normalization
+ *
+ * Set the internal scaling of the normalization parameter so that the
+ * parameter value equals 1.
  ***************************************************************************/
 void GModelSpectralPlaw::autoscale(void)
 {
@@ -297,11 +306,15 @@ void GModelSpectralPlaw::autoscale(void)
  *            Invalid number of model parameters found in XML element.
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
+ *
+ * Read the spectral power law information from an XML element. The XML
+ * element is required to have 3 parameters with names 'Prefactor', 'Index',
+ * and 'Scale'.
  ***************************************************************************/
 void GModelSpectralPlaw::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 3 parameters
-    if (xml.elements("parameter") != 3)
+    if (xml.elements() != 3 || xml.elements("parameter") != 3)
         throw GException::model_invalid_parnum(G_READ, xml,
               "Power law model requires exactly 3 parameters.");
 
@@ -314,43 +327,19 @@ void GModelSpectralPlaw::read(const GXmlElement& xml)
 
         // Handle prefactor
         if (par->attribute("name") == "Prefactor") {
-            m_norm.value(todouble(par->attribute("value")));
-            m_norm.scale(todouble(par->attribute("scale")));
-            m_norm.min(todouble(par->attribute("min")));
-            m_norm.max(todouble(par->attribute("max")));
-            if (par->attribute("free") == "1" ||
-                tolower(par->attribute("free")) == "true")
-                m_norm.free();
-            else
-                m_norm.fix();
+            m_norm.read(*par);
             npar[0]++;
         }
 
         // Handle index
         else if (par->attribute("name") == "Index") {
-            m_index.value(todouble(par->attribute("value")));
-            m_index.scale(todouble(par->attribute("scale")));
-            m_index.min(todouble(par->attribute("min")));
-            m_index.max(todouble(par->attribute("max")));
-            if (par->attribute("free") == "1" ||
-                tolower(par->attribute("free")) == "true")
-                m_index.free();
-            else
-                m_index.fix();
+            m_index.read(*par);
             npar[1]++;
         }
 
         // Handle pivot energy
         else if (par->attribute("name") == "Scale") {
-            m_pivot.value(todouble(par->attribute("value")));
-            m_pivot.scale(todouble(par->attribute("scale")));
-            m_pivot.min(todouble(par->attribute("min")));
-            m_pivot.max(todouble(par->attribute("max")));
-            if (par->attribute("free") == "1" ||
-                tolower(par->attribute("free")) == "true")
-                m_pivot.free();
-            else
-                m_pivot.fix();
+            m_pivot.read(*par);
             npar[2]++;
         }
 
@@ -371,10 +360,72 @@ void GModelSpectralPlaw::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element into which model information is written.
  *
- * @todo Implement method
+ * @exception GException::model_invalid_spectral
+ *            Existing XML element is not of type 'PowerLaw'
+ * @exception GException::model_invalid_parnum
+ *            Invalid number of model parameters or nodes found in XML element.
+ * @exception GException::model_invalid_parnames
+ *            Invalid model parameter names found in XML element.
+ *
+ * Write the spectral power law information into an XML element. The XML
+ * element has to be of type 'PowerLaw' and will have 3 parameter leafs
+ * named 'Prefactor', 'Index', and 'Scale'.
  ***************************************************************************/
 void GModelSpectralPlaw::write(GXmlElement& xml) const
 {
+    // Set model type
+    if (xml.attribute("type") == "")
+        xml.attribute("type", "PowerLaw");
+
+    // Verify model type
+    if (xml.attribute("type") != "PowerLaw")
+        throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
+              "Spatial model is not of type \"PowerLaw\".");
+
+    // If XML element has 0 nodes then append 3 parameter nodes
+    if (xml.elements() == 0) {
+        xml.append(new GXmlElement("parameter name=\"Prefactor\""));
+        xml.append(new GXmlElement("parameter name=\"Index\""));
+        xml.append(new GXmlElement("parameter name=\"Scale\""));
+    }
+
+    // Verify that XML element has exactly 3 parameters
+    if (xml.elements() != 3 || xml.elements("parameter") != 3)
+        throw GException::model_invalid_parnum(G_WRITE, xml,
+              "Power law model requires exactly 3 parameters.");
+
+    // Set or update model parameter attributes
+    int npar[] = {0, 0, 0};
+    for (int i = 0; i < 3; ++i) {
+
+        // Get parameter element
+        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+
+        // Handle prefactor
+        if (par->attribute("name") == "Prefactor") {
+            npar[0]++;
+            m_norm.write(*par);
+        }
+
+        // Handle index
+        else if (par->attribute("name") == "Index") {
+            npar[1]++;
+            m_index.write(*par);
+        }
+
+        // Handle pivot energy
+        else if (par->attribute("name") == "Scale") {
+            m_pivot.write(*par);
+            npar[2]++;
+        }
+
+    } // endfor: looped over all parameters
+
+    // Check of all required parameters are present
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1)
+        throw GException::model_invalid_parnames(G_WRITE, xml,
+                          "Require \"Prefactor\", \"Index\" and \"Scale\".");
+
     // Return
     return;
 }

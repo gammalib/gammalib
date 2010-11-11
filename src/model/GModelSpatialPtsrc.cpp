@@ -27,6 +27,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_PAR                                  "GModelSpatialPtsrc::par(int)"
 #define G_READ                       "GModelSpatialPtsrc::read(GXmlElement&)"
+#define G_WRITE                     "GModelSpatialPtsrc::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -241,11 +242,15 @@ double GModelSpatialPtsrc::eval_gradients(const GSkyDir& srcDir)
  *            Invalid number of model parameters found in XML element.
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
+ *
+ * Read the point source information from an XML element. The XML element
+ * is required to have 2 parameters named either 'RA' and 'DEC' or 'GLON'
+ * and 'GLAT'.
  ***************************************************************************/
 void GModelSpatialPtsrc::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 2 parameters
-    if (xml.elements("parameter") != 2)
+    if (xml.elements() != 2 || xml.elements("parameter") != 2)
         throw GException::model_invalid_parnum(G_READ, xml,
               "Point source model requires exactly 2 parameters.");
 
@@ -285,10 +290,59 @@ void GModelSpatialPtsrc::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element into which model information is written.
  *
- * @todo Implement method
+ * @exception GException::model_invalid_spatial
+ *            Existing XML element is not of type 'SkyDirFunction'
+ * @exception GException::model_invalid_parnum
+ *            Invalid number of model parameters found in XML element.
+ * @exception GException::model_invalid_parnames
+ *            Invalid model parameter names found in XML element.
+ *
+ * Write the point source information into an XML element. The XML element
+ * has to be of type 'SkyDirFunction' and will have 2 parameter leafs
+ * named 'RA' and 'DEC'.
+ *
+ * @todo The case that an existing spatial XML element with 'GLON' and 'GLAT'
+ * as coordinates is not supported.
  ***************************************************************************/
 void GModelSpatialPtsrc::write(GXmlElement& xml) const
 {
+    // Set model type
+    if (xml.attribute("type") == "")
+        xml.attribute("type", "SkyDirFunction");
+
+    // Verify model type
+    if (xml.attribute("type") != "SkyDirFunction")
+        throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
+              "Spatial model is not of type \"SkyDirFunction\".");
+
+    // If XML element has 0 nodes then append 2 parameter nodes
+    if (xml.elements() == 0) {
+        xml.append(new GXmlElement("parameter name=\"RA\""));
+        xml.append(new GXmlElement("parameter name=\"DEC\""));
+    }
+
+    // Verify that XML element has exactly 2 parameters
+    if (xml.elements() != 2 || xml.elements("parameter") != 2)
+        throw GException::model_invalid_parnum(G_WRITE, xml,
+              "Point source model requires exactly 2 parameters.");
+
+    // Get pointers on both model parameters
+    GXmlElement* par1 = (GXmlElement*)xml.element("parameter", 0);
+    GXmlElement* par2 = (GXmlElement*)xml.element("parameter", 1);
+
+    // Set or update sky direction
+    if (par1->attribute("name") == "RA" && par2->attribute("name") == "DEC") {
+        m_ra.write(*par1);
+        m_dec.write(*par2);
+    }
+    else if (par2->attribute("name") == "RA" && par1->attribute("name") == "DEC") {
+        m_ra.write(*par2);
+        m_dec.write(*par1);
+    }
+    else
+        throw GException::model_invalid_parnames(G_WRITE, xml,
+                          "Require RA and DEC parameters.");
+
     // Return
     return;
 }

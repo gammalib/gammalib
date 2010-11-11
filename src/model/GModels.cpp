@@ -260,7 +260,7 @@ void GModels::load(const std::string& filename)
     GXml xml(filename);
 
     // Read models from XML document
-    read(&xml);
+    read(xml);
 
     // Return
     return;
@@ -274,11 +274,11 @@ void GModels::load(const std::string& filename)
  ***************************************************************************/
 void GModels::save(const std::string& filename) const
 {
-    // Initialise XML document
+    // Declare empty XML document
     GXml xml;
 
     // Write models into XML file
-    write(&xml);
+    write(xml);
 
     // Save XML document
     xml.save(filename);
@@ -289,42 +289,47 @@ void GModels::save(const std::string& filename) const
 
 
 /***********************************************************************//**
- * @brief Read models from XML object.
+ * @brief Read models from XML document
  *
- * @param[in] xml Pointer to XML object.
+ * @param[in] xml XML document.
  *
- * Read models from XML document. It is assumed that each model is composed
- * of a spectral and a spatial model (Fermi-LAT style). The decoding of the
- * spatial and spectral XML elements is done by GModel methods.
+ * Read models from the first source library found in the XML document. It is
+ * assumed that each model is composed of a spectral and a spatial model
+ * (Fermi-LAT style). The decoding of the spatial and spectral XML elements
+ * is done within a GModel constructor.
+ *
+ * @todo Sources names are not verified so far for uniqueness. This would be
+ * required to achieve an unambiguous update of parameters in an already
+ * existing XML file when using the write method. Also, no control is
+ * performed that only a single spectral and spatial component exists in
+ * each source definition.
  ***************************************************************************/
-void GModels::read(const GXml* xml)
+void GModels::read(const GXml& xml)
 {
-    // Continue only if XML object is valid
-    if (xml != NULL) {
+    // Get pointer on source library
+    GXmlElement* lib = xml.element("source_library", 0);
 
-        // Get pointer on source library
-        GXmlElement* lib = xml->element("source_library", 0);
+    // Loop over all sources
+    int n = lib->elements("source");
+    for (int i = 0; i < n; ++i) {
 
-        // Loop over all sources
-        int n = lib->elements("source");
-        for (int i = 0; i < n; ++i) {
+        // Get pointer on source
+        GXmlElement* src = (GXmlElement*)lib->element("source", i);
 
-            // Get pointer on source
-            GXmlElement* src = (GXmlElement*)lib->element("source", i);
+        // Get pointers on spectrum and spatial model
+        GXmlElement* spec = (GXmlElement*)src->element("spectrum", 0);
+        GXmlElement* spat = (GXmlElement*)src->element("spatialModel", 0);
 
-            // Get pointers on spectrum and spatial model
-            GXmlElement* spec = (GXmlElement*)src->element("spectrum", 0);
-            GXmlElement* spat = (GXmlElement*)src->element("spatialModel", 0);
+        // Build model from GXml elements
+        GModel model(*spat, *spec);
 
-            // Build model from GXml elements
-            GModel model(*spat, *spec);
+        // Set model name
+        model.name(src->attribute("name"));
 
-            // Append model
-            append(model);
+        // Append model
+        append(model);
 
-        } // endfor: looped over all sources
-
-    } // endif: XML object was valid
+    } // endfor: looped over all sources
 
     // Return
     return;
@@ -332,15 +337,61 @@ void GModels::read(const GXml* xml)
 
 
 /***********************************************************************//**
- * @brief Write models into XML object.
+ * @brief Write models into XML document
  *
- * @param[in] xml Pointer to XML object.
+ * @param[in] xml XML document.
  *
- * @TODO: Implement method.
+ * Write models into the first source library that is found in the XML
+ * document. In case that no source library exists, one is added to the
+ * document.
+ *
+ * @todo No detailed check is performed to verify the coherence of any
+ * existing source elements.
  ***************************************************************************/
-void GModels::write(GXml* xml) const
+void GModels::write(GXml& xml) const
 {
-    // TODO: Implement writing
+    // If there is no source library then append one
+    if (xml.elements("source_library") == 0) {
+        xml.append(new GXmlElement("source_library title=\"source library\""));
+    }
+    
+    // Get pointer on source library
+    GXmlElement* lib = xml.element("source_library", 0);
+
+    // Write all sources into library
+    for (int i = 0; i < m_elements; ++i) {
+
+        // Initialise pointer on source
+        GXmlElement* src = NULL;
+
+        // Search corresponding source
+        int n = lib->elements("source");
+        for (int k = 0; k < n; ++k) {
+            GXmlElement* element = (GXmlElement*)lib->element("source", k);
+            if (element->attribute("name") == m_model[i].name()) {
+                src = element;
+                break;
+            }
+        }
+
+        // If no source with corresponding name was found then append one
+        if (src == NULL) {
+            src = new GXmlElement("source");
+            src->attribute("name") = m_model[i].name();
+            src->append(new GXmlElement("spectrum"));
+            src->append(new GXmlElement("spatialModel"));
+            lib->append(src);
+        }
+
+        // Get pointers on spectrum and spatial model
+        GXmlElement* spec = (GXmlElement*)src->element("spectrum", 0);
+        GXmlElement* spat = (GXmlElement*)src->element("spatialModel", 0);
+
+        // Write spectral and spatial information
+        m_model[i].spectral()->write(*spec);
+        m_model[i].spatial()->write(*spat);
+
+    } // endfor: wrote all sources into library
 
     // Return
     return;
