@@ -187,9 +187,6 @@ void test_models(void)
     // Write header
     std::cout << "Test GModels: ";
 
-    // Plot final test success
-    std::cout << " ok." << std::endl;
-
     // Test void constructor
     try {
         GModels models;
@@ -206,7 +203,6 @@ void test_models(void)
     // Test load constructor
     try {
         GModels models(xml_file);
-std::cout << models << std::endl;
     }
     catch (std::exception &e) {
         std::cout << std::endl
@@ -216,6 +212,26 @@ std::cout << models << std::endl;
         throw;
     }
     std::cout << ".";
+
+    // Test saving and loading
+    try {
+        GModels models(xml_file);
+        models.save("test.xml");
+        models.load("test.xml");
+        models.save("test.xml");
+        models.load("test.xml");
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to save model container in XML document."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Plot final test success
+    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
