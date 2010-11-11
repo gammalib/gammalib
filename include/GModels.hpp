@@ -63,8 +63,8 @@ public:
     void   append(const GModel& model);
     void   load(const std::string& filename);
     void   save(const std::string& filename) const;
-    void   read(const GXml* xml);
-    void   write(GXml* xml) const;
+    void   read(const GXml& xml);
+    void   write(GXml& xml) const;
     double eval(const GInstDir& obsDir, const GEnergy& obsEng,
                 const GTime& obsTime, const GResponse& rsp,
                 const GPointing& pnt);
