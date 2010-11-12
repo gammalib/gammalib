@@ -613,7 +613,11 @@ std::ostream& operator<< (std::ostream& os, const GCTAEventCube& cube)
     os << " Number of pixels ..........: " << cube.npix() << std::endl;
     os << " Number of energy bins .....: " << cube.ebins() << std::endl;
     os << " Number of events ..........: " << cube.number() << std::endl;
-    os << cube.m_ebds;
+    os << " Observation back pointer ..: " << cube.m_obs << std::endl;
+    if (cube.m_obs != NULL) {
+        os << " Response pointer ..........: "
+           << (GCTAResponse*)((GObservation*)cube.m_obs)->response() << std::endl;
+    }
 
     // Return output stream
     return os;
