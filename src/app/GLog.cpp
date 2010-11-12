@@ -180,14 +180,80 @@ void GLog::operator()(const char *msgFormat, ...)
 
 
 /***********************************************************************//**
- * @brief Insert string into output stream
+ * @brief Insert C++ string into output stream
  *
- * @param[in] value String to be inserted.
+ * @param[in] str C++ string to be inserted.
  ***************************************************************************/
-GLog& GLog::operator<<(const std::string& value)
+GLog& GLog::operator<<(const std::string& str)
 {
     // Add string to buffer
-    m_buffer.append(value);
+    m_buffer.append(str);
+
+    // Flush buffer
+    flush();
+
+    // Return logger
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert C string into output stream
+ *
+ * @param[in] str C string to be inserted.
+ ***************************************************************************/
+GLog& GLog::operator<<(const char* str)
+{
+    // Add string to buffer
+    m_buffer.append(str);
+
+    // Flush buffer
+    flush();
+
+    // Return logger
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert character value into output stream
+ *
+ * @param[in] value Character value to be inserted.
+ ***************************************************************************/
+GLog& GLog::operator<<(const char& value)
+{
+    // Allocate output stream
+    std::ostringstream oss;
+
+    // Put value into stream
+    oss << value;
+
+    // Append stream to buffer
+    m_buffer.append(oss.str());
+
+    // Flush buffer
+    flush();
+
+    // Return logger
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert unsigned character value into output stream
+ *
+ * @param[in] value Unsigned character value to be inserted.
+ ***************************************************************************/
+GLog& GLog::operator<<(const unsigned char& value)
+{
+    // Allocate output stream
+    std::ostringstream oss;
+
+    // Put value into stream
+    oss << value;
+
+    // Append stream to buffer
+    m_buffer.append(oss.str());
 
     // Flush buffer
     flush();
@@ -243,11 +309,11 @@ GLog& GLog::operator<<(const int& value)
 
 
 /***********************************************************************//**
- * @brief Insert double precision value into output stream
+ * @brief Insert unsigned integer into output stream
  *
- * @param[in] value Double precision value to be inserted.
+ * @param[in] value Unsigned integer to be inserted.
  ***************************************************************************/
-GLog& GLog::operator<<(const double& value)
+GLog& GLog::operator<<(const unsigned int& value)
 {
     // Allocate output stream
     std::ostringstream oss;
@@ -267,11 +333,11 @@ GLog& GLog::operator<<(const double& value)
 
 
 /***********************************************************************//**
- * @brief Insert character value into output stream
+ * @brief Insert double precision value into output stream
  *
- * @param[in] value Character value to be inserted.
+ * @param[in] value Double precision value to be inserted.
  ***************************************************************************/
-GLog& GLog::operator<<(const char& value)
+GLog& GLog::operator<<(const double& value)
 {
     // Allocate output stream
     std::ostringstream oss;

@@ -61,11 +61,14 @@ public:
     // Operators
     GLog& operator= (const GLog& log);
     void  operator()(const char *msgFormat, ...);
-    GLog& operator<<(const std::string& value);
+    GLog& operator<<(const std::string& str);
+    GLog& operator<<(const char* str);
+    GLog& operator<<(const char& value);
+    GLog& operator<<(const unsigned char& value);
     GLog& operator<<(const bool& value);
     GLog& operator<<(const int& value);
+    GLog& operator<<(const unsigned int& value);
     GLog& operator<<(const double& value);
-    GLog& operator<<(const char& value);
     GLog& operator<<(std::ostream& (*fn)(std::ostream&));
 
     // Methods
