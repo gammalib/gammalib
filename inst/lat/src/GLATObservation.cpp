@@ -262,10 +262,24 @@ void GLATObservation::init_members(void)
  * @brief Copy class members
  *
  * @param[in] obs Observation to be copied
+ *
+ * @todo Try to avoid the back pointer if possible, or flesh out a way that
+ * makes this more solid. The point is: when events are copied the back
+ * pointer to the observation needs to be updated, yet when the copying is
+ * done in the events class the class does not known about the observation.
+ * Thus, back pointer update has to be done by the observation class.
  ***************************************************************************/
 void GLATObservation::copy_members(const GLATObservation& obs)
 {
     // Copy members
+
+    // Update the back pointer to link observation the actual observation
+    // to the events. This has to be done here since the events that were
+    // copied do not yet know to which observation they belong.
+    if (m_events->islist())
+        ((GLATEventList*)m_events)->obs(this);
+    else
+        ((GLATEventCube*)m_events)->obs(this);
 
     // Return
     return;
