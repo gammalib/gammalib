@@ -28,6 +28,9 @@
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_BOOLEAN                                           "GPar::boolean()"
+#define G_INTEGER                                           "GPar::integer()"
+#define G_REAL                                                 "GPar::real()"
 #define G_CHECK_TYPE                          "GPar::check_type(std::string)"
 #define G_CHECK_MODE                          "GPar::check_mode(std::string)"
 #define G_CHECK_VALUE_BOOL              "GPar::check_value_bool(std::string)"
@@ -232,6 +235,84 @@ std::string GPar::value(void)
 
 
 /***********************************************************************//**
+ * @brief Returns boolean
+ *
+ * @exception GException::par_error
+ *            Parameter is not of Boolean type.
+ *
+ * Returns the value of a Boolean parameter.
+ ***************************************************************************/
+bool GPar::boolean(void)
+{
+    // Query parameter
+    query();
+
+    // Check if parameter is boolean
+    if (m_type != "b")
+        throw GException::par_error(G_BOOLEAN, 
+              "Boolean parameter type expected, \""+m_type+"\" found.");
+
+    // Set result
+    bool result = (toupper(m_value) == "YES" || toupper(m_value) == "TRUE");
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns integer
+ *
+ * @exception GException::par_error
+ *            Parameter is not of integer type.
+ *
+ * Returns the value of an integer parameter.
+ ***************************************************************************/
+int GPar::integer(void)
+{
+    // Query parameter
+    query();
+
+    // Check if parameter is integer
+    if (m_type != "i")
+        throw GException::par_error(G_INTEGER, 
+              "Integer parameter type expected, \""+m_type+"\" found.");
+
+    // Set result
+    int result = toint(m_value);
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns real
+ *
+ * @exception GException::par_error
+ *            Parameter is not of real type.
+ *
+ * Returns the value of a real parameter.
+ ***************************************************************************/
+double GPar::real(void)
+{
+    // Query parameter
+    query();
+
+    // Check if parameter is integer
+    if (m_type != "r")
+        throw GException::par_error(G_REAL, 
+              "Real parameter type expected, \""+m_type+"\" found.");
+
+    // Set result
+    double result = todouble(m_value);
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Returns if parameter mode is 'learn'
  ***************************************************************************/
 bool GPar::islearn(void) const
@@ -330,7 +411,7 @@ void GPar::free_members(void)
  ***************************************************************************/
 void GPar::check_type(const std::string& type) const
 {
-    // Check of mode is valid
+    // Check if type is valid
     if (type != "b"  && type != "i"  && type != "r"  && type != "s" &&
         type != "f"  && type != "fr" && type != "fw" && type != "fe" &&
         type != "fn")

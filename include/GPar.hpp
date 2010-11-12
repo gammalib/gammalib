@@ -58,6 +58,9 @@ public:
     std::string type(void) const { return m_type; }
     std::string mode(void) const { return m_mode; }
     std::string value(void);
+    bool        boolean(void);
+    int         integer(void);
+    double      real(void);
     std::string min(void) const { return m_min; }
     std::string max(void) const { return m_max; }
     std::string prompt(void) const { return m_prompt; }
