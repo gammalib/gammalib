@@ -170,6 +170,22 @@ GPars& GPars::operator= (const GPars& pars)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear object
+ ***************************************************************************/
+void GPars::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Init members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load parameters
  *
  * @param[in] filename Parameter filename.
@@ -774,10 +790,10 @@ void GPars::update(void)
 /***********************************************************************//**
  * @brief Put object in output stream
  *
- * @param[in] os Output stream into which the model will be dumped
- * @param[in] GPars Object to be dumped
+ * @param[in] os Output stream into which the model will be dumped.
+ * @param[in] pars Parameters to be dumped.
  ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GPars& pars)
+std::ostream& operator<<(std::ostream& os, const GPars& pars)
 {
     // Put object in stream
     os << "=== GPars ===";
@@ -788,4 +804,24 @@ std::ostream& operator<< (std::ostream& os, const GPars& pars)
     return os;
 }
 
+
+/***********************************************************************//**
+ * @brief Write parameters into logger
+ *
+ * @param[in] log Logger.
+ * @param[in] pars Parameters to be writted.
+ ***************************************************************************/
+GLog& operator<<(GLog& log, const GPars& pars)
+{
+    // Write parameters in logger
+    for (int i = 0; i < pars.size(); ++i) {
+        if (i == 0)
+            log << pars.m_pars[i];
+        else
+            log << std::endl << pars.m_pars[i];
+    }
+
+    // Return logger
+    return log;
+}
 

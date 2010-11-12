@@ -410,6 +410,32 @@ std::ostream& operator<< (std::ostream& os, const GVector& v)
 
 
 /***********************************************************************//**
+ * @brief Write vector into logger
+ *
+ * @param[in] log Logger.
+ * @param[in] v Vector to write into logger.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GVector& v)
+{
+    // Prepend (
+    log << "(";
+
+    // Put all vector elements in logger
+    for (int i = 0; i < v.m_num; ++i) {
+        log << v(i);
+        if (i != v.m_num-1)
+            log << ", ";
+    }
+
+    // Append )
+    log << ")";
+
+    // Return logger
+    return log;
+}
+
+
+/***********************************************************************//**
  * @brief GVector cross product
  *
  * @param[in] a First vector for cross product.
