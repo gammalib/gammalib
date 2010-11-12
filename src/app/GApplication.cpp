@@ -30,6 +30,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+const int header_width = 80;                                //!< Header width
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -74,8 +75,14 @@ GApplication::GApplication(const std::string& name, const std::string& version)
     // Save the execution start time
     time(&m_tstart);
 
+    // Initialise the application logger
+    log.open(log_filename(), true);
+
     // Initialise application parameters
-    m_pars.load(parfilename());
+    m_pars.load(par_filename());
+
+    // Get standard parameters from parameter file
+    get_par_standard();
 
     // Return
     return;
@@ -103,12 +110,18 @@ GApplication::GApplication(const std::string& name, const std::string& version,
     // Save the execution start time
     time(&m_tstart);
 
+    // Initialise the application logger
+    log.open(log_filename(), true);
+
     // Save arguments as vector of strings
     for (int i = 0; i < argc; ++i)
         m_args.push_back(strip_whitespace(argv[i]));
 
     // Initialise application parameters
-    m_pars.load(parfilename(), m_args);
+    m_pars.load(par_filename(), m_args);
+
+    // Get standard parameters from parameter file
+    get_par_standard();
 
     // Return
     return;
@@ -138,9 +151,6 @@ GApplication::GApplication(const GApplication& app)
  ***************************************************************************/
 GApplication::~GApplication(void)
 {
-    // Save application parameters
-    m_pars.save(parfilename());
-
     // Free members
     free_members();
 
@@ -248,6 +258,69 @@ GPar* GApplication::par(const std::string& name)
 }
 
 
+/***********************************************************************//**
+ * @brief Signal terse logging
+ *
+ * The terse level is used for the most crucial application information that
+ * should be logged in all cases (chatter >= 1).
+ ***************************************************************************/
+bool GApplication::logTerse(void) const
+{
+    // Return terse logging condition
+    return (m_chatter > 0);
+}
+
+
+/***********************************************************************//**
+ * @brief Signal normal logging
+ *
+ * The normal level is used for standard application information that should
+ * be logged in normal operations (chatter >= 2).
+ ***************************************************************************/
+bool GApplication::logNormal(void) const
+{
+    // Return normal logging condition
+    return (m_chatter > 1);
+}
+
+
+/***********************************************************************//**
+ * @brief Signal explicit logging
+ *
+ * The explicit level is used for detailed application information that
+ * should be logged in detailed studies (chatter >= 3).
+ ***************************************************************************/
+bool GApplication::logExplicit(void) const
+{
+    // Return explicit logging condition
+    return (m_chatter > 2);
+}
+
+
+/***********************************************************************//**
+ * @brief Signal verbose logging
+ *
+ * The verbose level is used for full application information (chatter >= 4).
+ ***************************************************************************/
+bool GApplication::logVerbose(void) const
+{
+    // Return verbose logging condition
+    return (m_chatter > 3);
+}
+
+
+/***********************************************************************//**
+ * @brief Signal debug logging
+ *
+ * The debug level is used for application debugging.
+ ***************************************************************************/
+bool GApplication::logDebug(void) const
+{
+    // Return debug condition
+    return (m_debug);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -259,11 +332,18 @@ GPar* GApplication::par(const std::string& name)
  ***************************************************************************/
 void GApplication::init_members(void)
 {
-    // Initialise members
+    // Initialise public members
+    log.clear();
+
+    // Initialise protected members
+    m_tstart = 0;
     m_name.clear();
     m_version.clear();
     m_args.clear();
-    m_tstart = 0;
+    m_pars.clear();
+    m_chatter = 1;
+    m_clobber = true;
+    m_debug   = false;
 
     // Return
     return;
@@ -277,11 +357,18 @@ void GApplication::init_members(void)
  ***************************************************************************/
 void GApplication::copy_members(const GApplication& app)
 {
-    // Copy attributes
+    // Copy public attributes
+    log = app.log;
+
+    // Copy protected attributes
     m_name    = app.m_name;
     m_version = app.m_version;
     m_args    = app.m_args;
     m_tstart  = app.m_tstart;
+    m_pars    = app.m_pars;
+    m_chatter = app.m_chatter;
+    m_clobber = app.m_clobber;
+    m_debug   = app.m_debug;
 
     // Return
     return;
@@ -293,6 +380,15 @@ void GApplication::copy_members(const GApplication& app)
  ***************************************************************************/
 void GApplication::free_members(void)
 {
+    // Save application parameters
+    m_pars.save(par_filename());
+
+    // Put trailer in log file
+    log_trailer();
+
+    // Close log file
+    log.close();
+
     // Return
     return;
 }
@@ -300,11 +396,101 @@ void GApplication::free_members(void)
 
 /***********************************************************************//**
  * @brief Returns parameter filename
+ *
+ * The parameter filename is given by the task name to which the suffix
+ * '.par' is added.
  ***************************************************************************/
-std::string GApplication::parfilename(void) const
+std::string GApplication::par_filename(void) const
 {
     // Return
     return (m_name+".par");
+}
+
+
+/***********************************************************************//**
+ * @brief Returns log filename
+ *
+ * The log filename is given by the task name to which the suffix '.log' is
+ * added.
+ ***************************************************************************/
+std::string GApplication::log_filename(void) const
+{
+    // Return
+    return (m_name+".log");
+}
+
+
+/***********************************************************************//**
+ * @brief Get standard parameters from parameter file
+ ***************************************************************************/
+void GApplication::get_par_standard(void)
+{
+    // Get parameter pointers (NULL if not found)
+    GPar* par_chatter = par("chatter");
+    GPar* par_clobber = par("clobber");
+    GPar* par_debug   = par("debug");
+
+    // Extract parameters if they exist
+    if (par_chatter != NULL)
+        m_chatter = par_chatter->integer();
+    if (par_clobber != NULL)
+        m_clobber = par_clobber->boolean();
+    if (par_debug != NULL)
+        m_debug = par_debug->boolean();
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Dump application header in log file
+ *
+ * Dump the application header into the log file. The header is composed of
+ * a fixed width block delimined by '*' characters that contains information
+ * about the application name and version.
+ ***************************************************************************/
+void GApplication::log_header(void)
+{
+    // Reset any indentation
+    log.indent(0);
+
+    // Dump header
+    log << fill("*", header_width) << std::endl;
+    log << "*" << center(m_name, header_width-2) << "*" << std::endl;
+    log << "* " << fill("-", header_width-4) << " *" << std::endl;
+    log << "* Version: " << left(m_version, header_width-12) << "*" << std::endl;
+    log << fill("*", header_width) << std::endl;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Dump application trailer in log file
+ *
+ * The application trailer gives the total number of elapsed CPU time.
+ ***************************************************************************/
+void GApplication::log_trailer(void)
+{
+    // Get elapsed time
+    double t = telapse();
+
+    // Reset any indentation
+    log.indent(0);
+
+    // Dump trailer
+    log << "Application \"" << m_name << "\" terminated after";
+    log << " consuming " << telapse() << " seconds of CPU time.";
+    if (t < 0.1)
+         log << " This was rather quick!";
+    if (t > 86400.0)
+         log << " We hope it was worth waiting ...";
+    log << std::endl;
+
+    // Return
+    return;
 }
 
 

@@ -55,21 +55,35 @@ public:
     std::string version(void) const;
     double      telapse(void) const;
     GPar*       par(const std::string& name);
+    bool        logTerse(void) const;
+    bool        logNormal(void) const;
+    bool        logExplicit(void) const;
+    bool        logVerbose(void) const;
+    bool        logDebug(void) const;
 
+    // Public members
+    GLog        log;                       //!< Application logger
+    
 protected:
     // Protected methods
     void        init_members(void);
     void        copy_members(const GApplication& app);
     void        free_members(void);
-    std::string parfilename(void) const;
+    std::string par_filename(void) const;
+    std::string log_filename(void) const;
+    void        get_par_standard(void);
+    void        log_header(void);
+    void        log_trailer(void);
 
     // Protected data members
     std::string              m_name;       //!< Application name
     std::string              m_version;    //!< Application version
     std::vector<std::string> m_args;       //!< Command line arguments
     time_t                   m_tstart;     //!< Start time of execution
-    GLog                     m_logger;     //!< Application logger
     GPars                    m_pars;       //!< Application parameters
+    int                      m_chatter;    //!< Chatter level
+    bool                     m_clobber;    //!< Clobber flag
+    bool                     m_debug;      //!< Debugging mode activated
 };
 
 #endif /* GAPPLICATION_HPP */
