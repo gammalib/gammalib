@@ -22,6 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
+#include <GLog.hpp>
 
 
 /***********************************************************************//**
@@ -33,9 +34,11 @@ class GPar {
 
     // Friend classes
     friend class GPars;
+    friend class GApplication;
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GPar& par);
+    friend std::ostream& operator<<(std::ostream& os, const GPar& par);
+    friend GLog&         operator<<(GLog& log, const GPar& par);
 
 public:
     // Constructors and destructors

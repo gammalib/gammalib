@@ -24,6 +24,7 @@
 #include <string>
 #include <iostream>
 #include "GPar.hpp"
+#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -33,8 +34,12 @@
  ***************************************************************************/
 class GPars {
 
+    // Friend classes
+    friend class GApplication;
+
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GPars& pars);
+    friend std::ostream& operator<<(std::ostream& os, const GPars& pars);
+    friend GLog&         operator<<(GLog& log, const GPars& pars);
 
 public:
     // Constructors and destructors
@@ -48,6 +53,8 @@ public:
     GPars& operator= (const GPars& pars);
 
     // Methods
+    void  clear(void);
+    int   size(void) const { return m_pars.size(); }
     void  load(const std::string& filename);
     void  load(const std::string& filename, const std::vector<std::string>& args);
     void  save(const std::string& filename);
