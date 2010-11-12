@@ -206,10 +206,10 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                 m_npred += m_this->m_obs[i]->npred((GModels&)pars, &grad);
                 for (int k = 0; k < npars; ++k)
                     (*m_gradient)(k) += grad(k);
-                //#if G_EVAL_DEBUG
+                #if G_EVAL_DEBUG
                 std::cout << "Npred=" << m_npred << " Grad="
                           << *m_gradient << std::endl;
-                //#endif
+                #endif
             }
         }
         m_value += m_npred;
