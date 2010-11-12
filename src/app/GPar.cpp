@@ -640,9 +640,9 @@ void GPar::query(void)
  * @brief Put object in output stream
  *
  * @param[in] os Output stream into which the model will be dumped
- * @param[in] GPar Object to be dumped
+ * @param[in] par Object to be dumped
  ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GPar& par)
+std::ostream& operator<<(std::ostream& os, const GPar& par)
 {
     // Put object in stream
     os << par.name() << "=" << par.m_value;
@@ -657,5 +657,29 @@ std::ostream& operator<< (std::ostream& os, const GPar& par)
 
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Write parameter into logger
+ *
+ * @param[in] log Logger.
+ * @param[in] par Parameter to be written.
+ ***************************************************************************/
+GLog& operator<<(GLog& log, const GPar& par)
+{
+    // Write parameter in logger
+    log << par.name() << "=" << par.m_value;
+    if (par.min().length() > 0 && par.max().length() > 0)
+        log << " (" << par.min() << "-" << par.max() << ")";
+    else if (par.min().length() > 0)
+        log << " (>" << par.min() << ")";
+    else if (par.max().length() > 0)
+        log << " (<" << par.max() << ")";
+    log << " t=" << par.type() << " m=" << par.mode();
+    log << " " << par.prompt();
+
+    // Return logger
+    return log;
 }
 
