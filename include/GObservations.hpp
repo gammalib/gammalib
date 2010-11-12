@@ -38,6 +38,17 @@
  * the append() method and can be access using the operator(). The class
  * implements an event iterator GObservations::iterator that allows iterating
  * over all events in all observations.
+ *
+ * @todo Implement models pointer instead of models elements since models
+ * should be attached without loosing the external link to the model
+ * parameters.
+ *
+ * @todo Implement append() method using a pointer instead of a reference
+ * to make clear that the observation is linked from the outside (and thus
+ * has to be preserved). Or should we have both options????
+ *
+ * @todo Use std::vector for building a list of pointers to observations
+ * instead of a proper memory handling implementation.
  ***************************************************************************/
 class GObservations {
 
@@ -56,11 +67,13 @@ public:
     const GObservation& operator() (int index) const;
 
     // Methods
-    void     append(GObservation &obs);
+    void     clear(void);
+    void     append(GObservation& obs);
     int      size(void) const { return m_num; }
     void     models(const GModels& models) { m_models=models; return; }
     GModels* models(void) { return &m_models; }
     void     optimize(GOptimizer& opt);
+    double   npred(void) const { return m_npred; }
 
     // Event iterator
     class iterator {
@@ -98,7 +111,7 @@ public:
     public:
         // Constructors and destructors
         optimizer(void);
-        optimizer(GObservations *obs);
+        optimizer(GObservations* obs);
         optimizer(const optimizer& fct);
         ~optimizer(void);
 

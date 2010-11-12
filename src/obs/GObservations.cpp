@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GObservations.cpp
@@ -162,6 +161,22 @@ const GObservation& GObservations::operator() (int index) const
  =                              Public methods                             =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear container
+ ***************************************************************************/
+void GObservations::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Append observation to container
