@@ -20,10 +20,11 @@
 #define GMODELPAR_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GException.hpp"
-#include "GXmlElement.hpp"
 #include <string>
 #include <iostream>
+#include "GException.hpp"
+#include "GXmlElement.hpp"
+#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -34,7 +35,8 @@
 class GModelPar {
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GModelPar& par);
+    friend std::ostream& operator<<(std::ostream& os, const GModelPar& par);
+    friend GLog&         operator<<(GLog& log, const GModelPar& par);
 
 public:
     // Constructors and destructors

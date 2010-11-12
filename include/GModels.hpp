@@ -29,6 +29,7 @@
 #include "GResponse.hpp"
 #include "GPointing.hpp"
 #include "GXml.hpp"
+#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -43,7 +44,8 @@
 class GModels : public GOptimizerPars {
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GModels& models);
+    friend std::ostream& operator<<(std::ostream& os, const GModels& models);
+    friend GLog&         operator<<(GLog& log, const GModels& models);
 
 public:
     // Constructors and destructors

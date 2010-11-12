@@ -23,9 +23,9 @@
 #include "GOptimizer.hpp"
 #include "GOptimizerFunction.hpp"
 #include "GModels.hpp"
+#include "GLog.hpp"
 
-
-/* __ Includes ___________________________________________________________ */
+/* __ Definitions ________________________________________________________ */
 #define G_LM_CONVERGED            0
 #define G_LM_STALLED              1
 #define G_LM_SINGULAR             2
@@ -40,11 +40,13 @@ class GOptimizerLM : public GOptimizer {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GOptimizerLM& opt);
+    friend GLog&         operator<< (GLog& log, const GOptimizerLM& opt);
 
 public:
 
     // Constructors and destructors
     GOptimizerLM(void);
+    GOptimizerLM(GLog& log);
     GOptimizerLM(const GOptimizerLM& opt);
     virtual ~GOptimizerLM(void);
 
@@ -90,6 +92,7 @@ protected:
     double m_value;             //!< Actual function value
     int    m_status;            //!< Fit status
     int    m_iter;              //!< Iteration
+    GLog*  m_logger;            //!< Pointer to optional logger
 
 };
 

@@ -581,7 +581,7 @@ void GModels::set_pointers(void)
  * @param[in] os Output stream into which the model will be dumped
  * @param[in] model Model to be dumped
  ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GModels& models)
+std::ostream& operator<<(std::ostream& os, const GModels& models)
 {
     // Allocate filler
     std::string filler = " ..............";
@@ -607,8 +607,33 @@ std::ostream& operator<< (std::ostream& os, const GModels& models)
 }
 
 
-/*==========================================================================
- =                                                                         =
- =                      Other functions used by GModels                     =
- =                                                                         =
- ==========================================================================*/
+/***********************************************************************//**
+ * @brief Write models in logger
+ *
+ * @param[in] log Logger.
+ * @param[in] model Model to be written.
+ ***************************************************************************/
+GLog& operator<<(GLog& log, const GModels& models)
+{
+    // Allocate filler
+    std::string filler = " ..............";
+
+    // Put model in stream
+    log << "=== GModels ===" << std::endl;
+    log << " Number of models ..........: " << models.m_elements << std::endl;
+    log << " Number of parameters ......: " << models.m_npars;
+    int i = 0;
+    for (int k = 0; k < models.m_elements; ++k) {
+        log << std::endl << " Model name ................: " << models.m_model[k].name();
+        for (int j = 0; j < models.m_model[k].npars(); ++j, ++i) {
+            log << std::endl;
+            if (i == 10) filler = " .............";
+            if (i == 100) filler = " ............";
+            if (i == 1000) filler = " ...........";
+            log << "  Parameter " << i << filler << ": " << *(models.m_par[i]);
+        }
+    }
+
+    // Return logger
+    return log;
+}

@@ -30,7 +30,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DEBUG_OPT 1 //!< Perform optimizer debugging (0=no, 1=yes)
+#define G_DEBUG_OPT 0          //!< Perform optimizer debugging (0=no, 1=yes)
 
 
 /*==========================================================================
@@ -40,12 +40,30 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GOptimizerLM::GOptimizerLM(void) : GOptimizer()
 {
     // Initialise private members for clean destruction
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Constructor with logger
+ *
+ * @param[in] log Logger to use in optimizer.
+ ***************************************************************************/
+GOptimizerLM::GOptimizerLM(GLog& log) : GOptimizer()
+{
+    // Initialise private members for clean destruction
+    init_members();
+
+    // Set pointer to logger
+    m_logger = &log;
 
     // Return
     return;
@@ -187,6 +205,9 @@ void GOptimizerLM::init_members(void)
     m_status = 0;
     m_iter   = 0;
 
+    // Initialise pointer to logger
+    m_logger = NULL;
+
     // Return
     return;
 }
@@ -210,6 +231,7 @@ void GOptimizerLM::copy_members(const GOptimizerLM& opt)
     m_value        = opt.m_value;
     m_status       = opt.m_status;
     m_iter         = opt.m_iter;
+    m_logger       = opt.m_logger;
 
     // Return
     return;
@@ -255,7 +277,12 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
         double lambda_old = m_lambda;
         int    lambda_inc = 0;
 
-        // Dump
+        // Optionally write initial iteration into logger
+        if (m_logger != NULL) {
+            *m_logger << "Initial iteration: ";
+            *m_logger << "func=" << m_value << ", ";
+            *m_logger << "Lambda=" << m_lambda << std::endl;
+        }
         #if G_DEBUG_OPT
         std::cout << "Initial iteration: func=" << m_value << ", Lambda="
                   << m_lambda << std::endl;
@@ -270,7 +297,13 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
             // Compute function improvement (>0 means decrease)
             double delta = value_old - m_value;
 
-            // Dump
+            // Optionally write iteration results into logger
+            if (m_logger != NULL) {
+                *m_logger << "Iteration " << m_iter+1 << ": ";
+                *m_logger << "func=" << m_value << ", ";
+                *m_logger << "Lambda=" << m_lambda << ", ";
+                *m_logger << "delta=" << delta << std::endl;
+            }
             #if G_DEBUG_OPT
             std::cout << "Iteration " << m_iter+1 << ": func=" 
                       << m_value << ", Lambda=" << m_lambda
@@ -347,19 +380,25 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
 
         // Solve: covar * X = grad. Handle matrix problems
         try {
-            (*covar).cholesky_decompose(1);
-            *grad = (*covar).cholesky_solver(*grad);
+            covar->cholesky_decompose(1);
+            *grad = covar->cholesky_solver(*grad);
         }
         catch (GException::matrix_zero &e) {
             m_status = G_LM_SINGULAR;
-            std::cout << "GOptimizerLM::iteration: all curvature matrix"
-                      << " elements are 0." << std::endl;
+            if (m_logger != NULL) {
+                *m_logger << "GOptimizerLM::iteration: "
+                          << "All curvature matrix elements are zero."
+                          << std::endl;
+            }
             continue;
         }
         catch (GException::matrix_not_pos_definite &e) {
             m_status = G_LM_NOT_POSTIVE_DEFINITE;
-            std::cout << "GOptimizerLM::iteration: Curvature matrix not"
-                      << " positive definite." << std::endl;
+            if (m_logger != NULL) {
+                *m_logger << "GOptimizerLM::iteration: "
+                          << "Curvature matrix not positive definite."
+                          << std::endl;
+            }
             continue;
         }
         catch (std::exception &e) {
@@ -383,13 +422,17 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
 
             // Constrain parameter to within the valid range
             if (pars->par(ipar)->hasmin() && p < p_min) {
-                std::cout << "Parameter " << ipar << " hits minimum: " << p << " < "
-                          << p_min << std::endl;
+                if (m_logger != NULL) {
+                    *m_logger << "Parameter " << ipar << " hits minimum: ";
+                    *m_logger << p << " < " << p_min << std::endl;
+                }
                 p = p_min;
             }
             if (pars->par(ipar)->hasmax() && p > p_max) {
-                std::cout << "Parameter " << ipar << " hits maximum: " << p << " > "
-                          << p_max << std::endl;
+                if (m_logger != NULL) {
+                    *m_logger << "Parameter " << ipar << " hits maximum: ";
+                    *m_logger << p << " > " << p_max << std::endl;
+                }
                 p = p_max;
             }
 
@@ -464,18 +507,40 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
 /***********************************************************************//**
  * @brief Put optimizer in output stream
  *
- * @param[in] os Output stream into which the optimizer will be dumped
- * @param[in] opt Object to be dumped
+ * @param[in] os Output stream into which the optimizer will be dumped.
+ * @param[in] opt Object to be dumped.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GOptimizerLM& opt)
 {
     // Put optimizer in stream
     os << "=== GOptimizerLM ===" << std::endl;
-    os << " Function value ............: " << opt.m_value << std::endl;
+    os << " Optimised function value ..: " << opt.m_value << std::endl;
+    os << " Absolute precision ........: " << opt.m_eps << std::endl;
     os << " Optimization status .......: " << opt.m_status << std::endl;
     os << " Number of iterations ......: " << opt.m_iter << std::endl;
-    os << " Lambda ....................: " << opt.m_lambda << std::endl;
+    os << " Lambda ....................: " << opt.m_lambda;
 
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Write optimizer into logger
+ *
+ * @param[in] log Logger
+ * @param[in] opt Optimizer to be writted into logger.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GOptimizerLM& opt)
+{
+    // Write optimizer into logger
+    log << "=== GOptimizerLM ===" << std::endl;
+    log << " Optimised function value ..: " << opt.m_value << std::endl;
+    log << " Absolute precision ........: " << opt.m_eps << std::endl;
+    log << " Optimization status .......: " << opt.m_status << std::endl;
+    log << " Number of iterations ......: " << opt.m_iter << std::endl;
+    log << " Lambda ....................: " << opt.m_lambda;
+
+    // Return logger
+    return log;
 }

@@ -389,8 +389,8 @@ void GModelPar::free_members(void)
 /***********************************************************************//**
  * @brief Put parameter in output stream
  *
- * @param[in] os Output stream into which the parameter will be dumped
- * @param[in] par Parameter to be dumped
+ * @param[in] os Output stream into which the parameter will be dumped.
+ * @param[in] par Parameter to be dumped.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GModelPar& par)
 {
@@ -398,8 +398,10 @@ std::ostream& operator<< (std::ostream& os, const GModelPar& par)
     os << std::scientific;
     os << par.m_name << ": ";
     os << par.real_value();
-    os << " +/- ";
-    os << par.real_error();
+    if (par.m_free) {
+        os << " +/- ";
+        os << par.real_error();
+    }
     if (par.m_hasmin && par.m_hasmax)
         os << " [" << par.real_min() << "," << par.real_max() << "]";
     else if (par.m_hasmin)
@@ -418,8 +420,46 @@ std::ostream& operator<< (std::ostream& os, const GModelPar& par)
 }
 
 
-/*==========================================================================
- =                                                                         =
- =                     Other functions used by GModelPar                   =
- =                                                                         =
- ==========================================================================*/
+/***********************************************************************//**
+ * @brief Write parameter in logger
+ *
+ * @param[in] log Logger.
+ * @param[in] par Parameter to be written.
+ ***************************************************************************/
+GLog& operator<<(GLog& log, const GModelPar& par)
+{
+    // Write parameter name
+    log << par.m_name << ": ";
+
+    // Write value
+    log << par.real_value();
+
+    // For free parameters, write statistical uncertainty
+    if (par.m_free) {
+        log << " +/- ";
+        log << par.real_error();
+    }
+
+    // Write parameter limites if they exist
+    if (par.m_hasmin && par.m_hasmax)
+        log << " [" << par.real_min() << "," << par.real_max() << "]";
+    else if (par.m_hasmin)
+        log << " [" << par.real_min() << ",infty[";
+    else if (par.m_hasmax)
+        log << " ]-infty," << par.real_max() << "]";
+
+    // Write parameter unit
+    log << " " << par.m_unit;
+
+    // Signal if parameter was free or fixed
+    if (par.m_free)
+        log << " (free,";
+    else
+        log << " (fixed,";
+
+    // Write parameter scale
+    log << "scale=" << par.m_scale << ")";
+
+    // Return logger
+    return log;
+}
