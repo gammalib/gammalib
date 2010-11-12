@@ -50,14 +50,43 @@ void test_GLog(void)
     }
     std::cout << ".";
 
-    // Test output stream
+    // Test stream logger
     try {
         GLog log;
-        log << "This is a text";
+        log.date(true);
+        log.name("Test");
+        log.open("test_GApplication.log", true);
+        log << "1. This is a C++ string" << std::endl;
+        log << "2. This is an integer: " << int(1) << std::endl;
+        log << "3. This is a single precision: " << float(1.23456789) << std::endl;
+        log << "4. This is a double precision: " << double(1.23456789) << std::endl;
+        log << "5. This is a character: " << 'a' << std::endl;
+        log << "6. This is a C string: " << "a" << std::endl;
+        log << "7. This is a Boolean: " << true << std::endl;
     }
     catch (std::exception &e) {
         std::cout << std::endl 
-                  << "TEST ERROR: Unable to put stream into GLog object."
+                  << "TEST ERROR: Unable to stream into GLog object."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test C logger
+    try {
+        GLog log;
+        log.date(true);
+        log.name("Test");
+        log.open("test_GApplication.log");
+        log("%s", "8. This is a C++ string");
+        log("%s %d", "9. This is an integer:", int(1));
+        log("%s %f", "10. This is a single precision:", float(1.23456789));
+        log("%s %f", "11. This is a double precision:", double(1.23456789));
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to write into GLog object."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
