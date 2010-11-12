@@ -24,6 +24,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include "GException.hpp"
+#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -54,6 +55,7 @@ class GVector {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GVector& v);
+    friend GLog&         operator<< (GLog& log, const GVector& v);
 
     // Friend functions
     friend GVector  cross(const GVector &a, const GVector &b);

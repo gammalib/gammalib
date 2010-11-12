@@ -17,6 +17,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include <sstream>
 #include <cmath>
@@ -203,6 +206,95 @@ std::vector<std::string> split(const std::string& s, const std::string& sep)
         pos = (index != std::string::npos) ? index + 1 : std::string::npos;
     } // endwhile: there were still characters in the string
     
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Fill string with n strings of same type
+ *
+ * @param[in] s String to be filled.
+ * @param[in] n Number of fillings.
+ *
+ * Replicates a given string n time.
+ ***************************************************************************/
+std::string fill(const std::string& s, int n)
+{
+    // Initialise result
+    std::string result = "";
+
+    // Replicate string
+    for (int i = 0; i < n; ++i)
+        result.append(s);
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Left justify string to achieve a length of n characters
+ *
+ * @param[in] s String to be centred.
+ * @param[in] n Requested total width.
+ *
+ * Left justify string by adding whitespace to the right to achieve a length
+ * of n characters.
+ ***************************************************************************/
+std::string left(const std::string& s, int n)
+{
+    // Compute number of characters to fill right
+    int n_right  = n - s.length();
+    
+    // Set result
+    std::string result = s + fill(" ", n_right);
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Right justify string to achieve a length of n characters
+ *
+ * @param[in] s String to be centred.
+ * @param[in] n Requested total width.
+ *
+ * Right justify string by adding whitespace to the left to achieve a length
+ * of n characters.
+ ***************************************************************************/
+std::string right(const std::string& s, int n)
+{
+    // Compute number of characters to fill right
+    int n_left  = n - s.length();
+    
+    // Set result
+    std::string result = fill(" ", n_left) + s;
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Center string to achieve a length of n characters
+ *
+ * @param[in] s String to be centred.
+ * @param[in] n Requested total width.
+ *
+ * Center string by adding whitespace to the left and the right to achieve a
+ * length of n characters.
+ ***************************************************************************/
+std::string center(const std::string& s, int n)
+{
+    // Compute number of characters to fill left and right
+    int n_right = (n-s.length()) / 2;
+    int n_left  = n - s.length() - n_right;
+    
+    // Set result
+    std::string result = fill(" ", n_left) + s + fill(" ", n_right);
+
     // Return result
     return result;
 }
