@@ -444,7 +444,7 @@ void GApplication::get_par_standard(void)
 
 
 /***********************************************************************//**
- * @brief Dump application header in log file
+ * @brief Write application header in log file
  *
  * Dump the application header into the log file. The header is composed of
  * a fixed width block delimined by '*' characters that contains information
@@ -468,7 +468,7 @@ void GApplication::log_header(void)
 
 
 /***********************************************************************//**
- * @brief Dump application trailer in log file
+ * @brief Write application trailer in log file
  *
  * The application trailer gives the total number of elapsed CPU time.
  ***************************************************************************/
@@ -488,6 +488,37 @@ void GApplication::log_trailer(void)
     if (t > 86400.0)
          log << " We hope it was worth waiting ...";
     log << std::endl;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write application parameters in log file
+ *
+ * The application trailer gives the total number of elapsed CPU time.
+ ***************************************************************************/
+void GApplication::log_parameters(void)
+{
+    // Write header
+    log.header1("Parameters");
+
+    // Write parameters in logger
+    for (int i = 0; i < m_pars.size(); ++i) {
+
+        // Add line feed
+        if (i > 0)
+            log << std::endl;
+
+        // Set parameter name
+        std::string name = " " + m_pars.m_pars[i].name() + " ";
+        name = name + fill(".", 28-name.length()) + ": ";
+
+        // Write parameter
+        log << name << m_pars.m_pars[i].m_value;
+
+    }
 
     // Return
     return;

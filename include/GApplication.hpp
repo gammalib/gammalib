@@ -74,6 +74,7 @@ protected:
     void        get_par_standard(void);
     void        log_header(void);
     void        log_trailer(void);
+    void        log_parameters(void);
 
     // Protected data members
     std::string              m_name;       //!< Application name
