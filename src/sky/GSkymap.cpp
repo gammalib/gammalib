@@ -394,7 +394,7 @@ void GSkymap::load(const std::string& filename)
     GFits fits(filename);
 
     // Get number of HDUs
-    int num = fits.num_hdus();
+    int num = fits.size();
 
     // Initialize pointer to HDU and load flag
     GFitsHDU* hdu    = NULL;
@@ -476,7 +476,7 @@ void GSkymap::save(const std::string& filename, bool clobber)
         // Create FITS file and save it to disk
         if (hdu != NULL) {
             GFits fits;
-            fits.append_hdu(*hdu);
+            fits.append(*hdu);
             fits.saveto(filename, clobber);
         }
 
@@ -555,7 +555,7 @@ void GSkymap::write(GFits* file)
 
         // Append HDU to FITS file
         if (hdu != NULL)
-            file->append_hdu(*hdu);
+            file->append(*hdu);
 
     } // endif: we had data to save
 
