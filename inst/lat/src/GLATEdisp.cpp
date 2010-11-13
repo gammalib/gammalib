@@ -121,7 +121,7 @@ void GLATResponse::edisp_append(GFits& file) const
     hdu_bounds.extname("EBOUNDS");
 
     // Append HDUs to FITS file
-    file.append_hdu(hdu_bounds);
+    file.append(hdu_bounds);
 
     // Return
     return;

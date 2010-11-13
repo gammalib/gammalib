@@ -373,7 +373,7 @@ void GGti::write(GFits* file, const std::string& extname)
     hdu.extname(extname);
 
     // Write to FITS file
-    file->append_hdu(hdu);
+    file->append(hdu);
     
     // Return
     return;

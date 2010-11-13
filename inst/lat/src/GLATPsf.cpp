@@ -379,10 +379,10 @@ void GLATResponse::psf_append(GFits& file) const
     hdu_psf.extname("PSF");
 
     // Append HDUs to FITS file
-    file.append_hdu(hdu_bounds);
-    file.append_hdu(hdu_norm);
-    file.append_hdu(hdu_sigma);
-    file.append_hdu(hdu_psf);
+    file.append(hdu_bounds);
+    file.append(hdu_norm);
+    file.append(hdu_sigma);
+    file.append(hdu_psf);
 
     // Return
     return;

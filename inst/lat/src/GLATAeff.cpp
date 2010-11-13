@@ -187,8 +187,8 @@ void GLATResponse::aeff_append(GFits& file) const
     hdu_aeff.header()->update(GFitsHeaderCard("BUNIT", "cm2", "Pixel unit"));
 
     // Append HDUs to FITS file
-    file.append_hdu(hdu_bounds);
-    file.append_hdu(hdu_aeff);
+    file.append(hdu_bounds);
+    file.append(hdu_aeff);
 
     // Return
     return;
