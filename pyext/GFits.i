@@ -39,19 +39,16 @@ public:
     GFits(const GFits& fits);
     ~GFits();
 
-    // Operators
-    //GFits& operator= (const GFits& fits);
-
     // Methods
+    void      clear(void);
+    int       size(void) const;
     void      open(const std::string& filename);
-    void      append_hdu(const GFitsHDU& hdu);
-    void      save(void);
-    void      saveto(const std::string& filename, int clobber = 0);
     void      close(void);
-    GFitsHDU* hdu(const std::string& extname);
-    GFitsHDU* hdu(int extno);
-    int       num_hdus(void) const;
-
+    void      save(void);
+    void      saveto(const std::string& filename, bool clobber = false);
+    void      append(const GFitsHDU& hdu);
+    GFitsHDU* hdu(const std::string& extname) const;
+    GFitsHDU* hdu(int extno) const;
 };
 
 

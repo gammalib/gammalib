@@ -21,11 +21,11 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPEN     "GFits::open(std::string)"
-#define G_SAVETO   "GFits::saveto(const std::string, int)"
-#define G_HDU1     "GFits::hdu(const std::string&)"
-#define G_HDU2     "GFits::hdu(int extno)"
-#define G_FREE_MEM "GFits::free_members()"
+#define G_OPEN                              "GFits::open(const std::string&)"
+#define G_SAVETO                    "GFits::saveto(const std::string&, bool)"
+#define G_HDU1                               "GFits::hdu(const std::string&)"
+#define G_HDU2                                              "GFits::hdu(int)"
+#define G_FREE_MEM                                    "GFits::free_members()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -37,12 +37,12 @@
 
 /*==========================================================================
  =                                                                         =
- =                       GFits constructors/destructors                    =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GFits::GFits()
 {
@@ -57,7 +57,10 @@ GFits::GFits()
 /***********************************************************************//**
  * @brief Constructor from FITS file
  *
- * @param[in] filename FITS file name
+ * @param[in] filename FITS file name.
+ *
+ * Construct an object by opening a FITS file. If the file does not exist it
+ * is created.
  ***************************************************************************/
 GFits::GFits(const std::string& filename)
 {
@@ -105,7 +108,7 @@ GFits::~GFits()
 
 /*==========================================================================
  =                                                                         =
- =                             GFits operators                             =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -137,9 +140,35 @@ GFits& GFits::operator= (const GFits& fits)
 
 /*==========================================================================
  =                                                                         =
- =                          GFits public methods                           =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Reset object to an initial state
+ ***************************************************************************/
+void GFits::clear(void)
+{
+    // Close file and free all members 
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns number of HDUs in FITS file
+ ***************************************************************************/
+int GFits::size(void) const
+{
+    // Return number of HDUs
+    return m_num_hdu;
+}
+
 
 /***********************************************************************//**
  * @brief Opens or creates FITS file
@@ -149,7 +178,8 @@ GFits& GFits::operator= (const GFits& fits)
  * @exception GException::fits_already_opened
  *            Class instance contains already an opened FITS file.
  *            Close file before opening a new one using GFits::close().
- * @exception GException::fits_open_error Unable to open the specified file.
+ * @exception GException::fits_open_error 
+ *            Unable to open the specified file.
  * @exception GException::fits_error
  *            Unable to determine number of HDUs in the FITS file.
  *
@@ -214,6 +244,104 @@ void GFits::open(const std::string& filename)
 
 
 /***********************************************************************//**
+ * @brief Close FITS file
+ *
+ * Closing detaches a FITS file from the GFits object and returns a clean
+ * empty object.
+ ***************************************************************************/
+void GFits::close(void)
+{
+    // Close file and free all members 
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Saves FITS file
+ *
+ * Saves all HDUs to the FITS file by looping over the GFitsHDU::save()
+ * method.
+ ***************************************************************************/
+void GFits::save(void)
+{
+    // Save all HDUs
+    for (int i = 0; i < m_num_hdu; ++i)
+        m_hdu[i].save();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Saves to specified FITS file
+ *
+ * @param[in] filename Name of file into which should be saved.
+ * @param[in] clobber Overwrite existing FITS file.
+ *
+ * @exception GException::fits_file_exist
+ *            File specified by 'filename' exists already.
+ *            To overwrite an existing file set 'clobber=1'.
+ * @exception GException::fits_error
+ *            Unable to delete exiting FITS file.
+ * @exception GException::fits_open_error
+ *            Unable to create new FITS file.
+ ***************************************************************************/
+void GFits::saveto(const std::string& filename, bool clobber)
+{
+    // Check if specified FITS file exists. If yes, saving will only be
+    // allowed if clobber is true. If this is the case the specified file
+    // will be deleted.
+    __fitsfile* tmp = NULL;
+    int status      = 0;
+    status          = __ffopen(&tmp, filename.c_str(), 1, &status);
+    if (status == 0) {
+
+        // If overwriting was not allowed the throw an exception
+        if (!clobber)
+            throw GException::fits_file_exist(G_SAVETO, filename, status);
+
+        // Delete existing file
+        status = __ffdelt(tmp, &status);
+        if (status != 0)
+            throw GException::fits_error(G_SAVETO, status);
+
+    }
+
+    // If error differs from 'file does not exist' then throw exception
+    else if (status != 104)
+        throw GException::fits_error(G_SAVETO, status);
+
+    // If file does not exist this is okay
+    else
+        status = 0;
+
+    // Create a new FITS file now
+    GFits new_fits;
+    new_fits.open(filename);
+
+    // Copy headers in new FITS file
+    for (int i = 0; i < m_num_hdu; ++i)
+        new_fits.append(m_hdu[i]);
+
+    // Save new FITS file
+    new_fits.save();
+
+    // Close new FITS file
+    new_fits.close();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Append HDU to FITS file
  *
  * @param[in] hdu FITS HDU that should be appended
@@ -223,7 +351,7 @@ void GFits::open(const std::string& filename)
  * an empty primary image will be inserted as first HDU in the FITS file.
  * This guarantees the compatibility with the FITS standard.
  ***************************************************************************/
-void GFits::append_hdu(const GFitsHDU& hdu)
+void GFits::append(const GFitsHDU& hdu)
 {
     // Determine number of HDUs to add. If there are no HDUs so far and if
     // the HDU to append is not an image then we have to add a primary
@@ -275,104 +403,6 @@ void GFits::append_hdu(const GFitsHDU& hdu)
         m_num_hdu++;
 
     }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Saves FITS file
- *
- * Saves all HDUs to the FITS file by looping over the GFitsHDU::save()
- * method.
- ***************************************************************************/
-void GFits::save(void)
-{
-    // Save all HDUs
-    for (int i = 0; i < m_num_hdu; ++i)
-        m_hdu[i].save();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Saves to specified FITS file
- *
- * @param[in] filename Name of file into which should be saved.
- * @param[in] clobber Overwrite existing FITS file (0=false, 1=true).
- *
- * @exception GException::fits_file_exist
- *            File specified by 'filename' exists already.
- *            To overwrite an existing file set 'clobber=1'.
- * @exception GException::fits_error
- *            Unable to delete exiting FITS file.
- * @exception GException::fits_open_error
- *            Unable to create new FITS file.
- ***************************************************************************/
-void GFits::saveto(const std::string& filename, int clobber)
-{
-    // Check if specified FITS file exists. If yes, saving will only be
-    // allowed if clobber is true. If this is the case the specified file
-    // will be deleted.
-    __fitsfile* tmp = NULL;
-    int status      = 0;
-    status          = __ffopen(&tmp, filename.c_str(), 1, &status);
-    if (status == 0) {
-
-        // If overwriting was not allowed the throw an exception
-        if (!clobber)
-            throw GException::fits_file_exist(G_SAVETO, filename, status);
-
-        // Delete existing file
-        status = __ffdelt(tmp, &status);
-        if (status != 0)
-            throw GException::fits_error(G_SAVETO, status);
-
-    }
-
-    // If error differs from 'file does not exist' then throw exception
-    else if (status != 104)
-        throw GException::fits_error(G_SAVETO, status);
-
-    // If file does not exist this is okay
-    else
-        status = 0;
-
-    // Create a new FITS file now
-    GFits new_fits;
-    new_fits.open(filename);
-
-    // Copy headers in new FITS file
-    for (int i = 0; i < m_num_hdu; ++i)
-        new_fits.append_hdu(m_hdu[i]);
-
-    // Save new FITS file
-    new_fits.save();
-
-    // Close new FITS file
-    new_fits.close();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Close FITS file
- *
- * Closing detaches a FITS file from the GFits object and returns a clean
- * empty object.
- ***************************************************************************/
-void GFits::close(void)
-{
-    // Close file and free all members 
-    free_members();
-
-    // Initialise members
-    init_members();
 
     // Return
     return;
@@ -447,19 +477,9 @@ GFitsHDU* GFits::hdu(int extno) const
 }
 
 
-/***********************************************************************//**
- * @brief Returns number of HDUs
- ***************************************************************************/
-int GFits::num_hdus(void) const
-{
-    // Return number of HDUs
-    return m_num_hdu;
-}
-
-
 /*==========================================================================
  =                                                                         =
- =                          GFits private methods                          =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -556,7 +576,7 @@ void GFits::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                               GFits friends                             =
+ =                                  Friends                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -583,10 +603,3 @@ std::ostream& operator<< (std::ostream& os, const GFits& fits)
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                       Other functions used by GFits                     =
- =                                                                         =
- ==========================================================================*/

@@ -32,6 +32,9 @@
  * GFits is the basic FITS file interface. All FITS file handlings operate
  * via members of GFits. A FITS file is composed of Header Data Units (HDU)
  * which are implemented by the GFitsHDU class.
+ *
+ * @todo Implement GFitsFile* to replace __fitsfile* in GFits classes.
+ * This class implements then all interfaces to FITS routines ...
  ***************************************************************************/
 class GFits {
 
@@ -49,14 +52,15 @@ public:
     GFits& operator= (const GFits& fits);
 
     // Methods
+    void      clear(void);
+    int       size(void) const;
     void      open(const std::string& filename);
-    void      append_hdu(const GFitsHDU& hdu);
-    void      save(void);
-    void      saveto(const std::string& filename, int clobber = 0);
     void      close(void);
+    void      save(void);
+    void      saveto(const std::string& filename, bool clobber = false);
+    void      append(const GFitsHDU& hdu);
     GFitsHDU* hdu(const std::string& extname) const;
     GFitsHDU* hdu(int extno) const;
-    int       num_hdus(void) const;
 
 private:
     // Private methods
