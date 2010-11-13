@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GFits.cpp  -  test FITS classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,8 +12,10 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>                           // cout, cerr
+#include <stdexcept>                          // std::exception
 #include <stdlib.h>
-#include "test_GFits.hpp"
+#include "GammaLib.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 using namespace std;
@@ -55,7 +57,7 @@ void test_create(void)
         fits.open("test.fits");
         GFitsImageDbl image;
         GFitsHDU hdu(image);
-        fits.append_hdu(hdu);
+        fits.append(hdu);
         fits.save();
     }
     catch (exception &e) {
@@ -82,7 +84,7 @@ void test_create(void)
             }
         }
         GFitsHDU hdu(image);
-        fits.append_hdu(hdu);
+        fits.append(hdu);
         fits.save();
     }
     catch (exception &e) {
@@ -141,7 +143,7 @@ void test_create(void)
 
         // Create HDU and append to FILE file
         GFitsHDU hdu(table);
-        fits.append_hdu(hdu);
+        fits.append(hdu);
 
         // Save FITS file
         fits.save();
@@ -434,7 +436,7 @@ void test_bintable_double(void)
 
         // Create HDU and append to FILE file
         GFitsHDU hdu(table);
-        fits.append_hdu(hdu);
+        fits.append(hdu);
 
         // Save FITS file
         fits.save();
@@ -792,7 +794,7 @@ void test_bintable_float(void)
 
         // Create HDU and append to FILE file
         GFitsHDU hdu(table);
-        fits.append_hdu(hdu);
+        fits.append(hdu);
 
         // Save FITS file
         fits.save();
@@ -1153,7 +1155,7 @@ void test_bintable_short(void)
 
         // Create HDU and append to FILE file
         GFitsHDU hdu(table);
-        fits.append_hdu(hdu);
+        fits.append(hdu);
 
         // Save FITS file
         fits.save();
@@ -1514,7 +1516,7 @@ void test_bintable_long(void)
 
         // Create HDU and append to FILE file
         GFitsHDU hdu(table);
-        fits.append_hdu(hdu);
+        fits.append(hdu);
 
         // Save FITS file
         fits.save();
@@ -1873,7 +1875,7 @@ void test_bintable_string(void)
 
         // Create HDU and append to FILE file
         GFitsHDU hdu(table);
-        fits.append_hdu(hdu);
+        fits.append(hdu);
 
         // Save FITS file
         fits.save();
@@ -2233,7 +2235,7 @@ void test_bintable_logical(void)
 
         // Create HDU and append to FILE file
         GFitsHDU hdu(table);
-        fits.append_hdu(hdu);
+        fits.append(hdu);
 
         // Save FITS file
         fits.save();
