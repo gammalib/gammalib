@@ -304,7 +304,7 @@ void GFits::saveto(const std::string& filename, bool clobber)
     if (status == 0) {
 
         // If overwriting was not allowed the throw an exception
-        if (!clobber)
+        if (clobber == false)
             throw GException::fits_file_exist(G_SAVETO, filename, status);
 
         // Delete existing file
@@ -380,9 +380,9 @@ void GFits::append(const GFitsHDU& hdu)
 
             // Set FITS file pointer for new HDU
             if (m_fitsfile != NULL) {
-              __fitsfile fptr  = *m_fitsfile;
-              fptr.HDUposition = m_num_hdu;
-              m_hdu[m_num_hdu].connect(&fptr);
+                __fitsfile fptr  = *m_fitsfile;
+                fptr.HDUposition = m_num_hdu;
+                m_hdu[m_num_hdu].connect(&fptr);
             }
 
             // Increment number of HDUs
@@ -394,9 +394,9 @@ void GFits::append(const GFitsHDU& hdu)
 
         // Set FITS file pointer for new HDU
         if (m_fitsfile != NULL) {
-          __fitsfile fptr  = *m_fitsfile;
-          fptr.HDUposition = m_num_hdu;
-          m_hdu[m_num_hdu].connect(&fptr);
+            __fitsfile fptr  = *m_fitsfile;
+            fptr.HDUposition = m_num_hdu;
+            m_hdu[m_num_hdu].connect(&fptr);
         }
 
         // Increment number of HDUs
@@ -576,15 +576,15 @@ void GFits::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                                  Friends                                =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param os Output stream into which the FITS file will be dumped
- * @param fits FITS file to dump
+ * @param os Output stream into which the FITS file will be dumped.
+ * @param fits FITS file to dump.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFits& fits)
 {
