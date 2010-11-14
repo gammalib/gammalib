@@ -23,20 +23,22 @@
 #include "GFitsTableBitCol.hpp"
 #include "GFitsTableLogCol.hpp"
 #include "GFitsTableStrCol.hpp"
+#include "GFitsTableUStCol.hpp"
 #include "GFitsTableShtCol.hpp"
+#include "GFitsTableULgCol.hpp"
 #include "GFitsTableLngCol.hpp"
 #include "GFitsTableLlgCol.hpp"
 #include "GFitsTableFltCol.hpp"
 #include "GFitsTableDblCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPEN          "GFitsTable::open(fitsfile*)"
-#define G_SAVE          "GFitsTable::save()"
-#define G_APPEND_COLUMN "GFitsTable::append_column(GFitsTableCol*)"
-#define G_INSERT_COLUMN "GFitsTable::insert_column(int, GFitsTableCol*)"
-#define G_COLUMN1       "GFitsTable::column(const std::string&)"
-#define G_COLUMN2       "GFitsTable::column(const int&)"
-#define G_GET_TFORM     "GFitsTable::get_tform(const int&)"
+#define G_OPEN                                  "GFitsTable::open(fitsfile*)"
+#define G_SAVE                                           "GFitsTable::save()"
+#define G_APPEND_COLUMN           "GFitsTable::append_column(GFitsTableCol*)"
+#define G_INSERT_COLUMN      "GFitsTable::insert_column(int, GFitsTableCol*)"
+#define G_COLUMN1                    "GFitsTable::column(const std::string&)"
+#define G_COLUMN2                            "GFitsTable::column(const int&)"
+#define G_GET_TFORM                       "GFitsTable::get_tform(const int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -506,6 +508,27 @@ void GFitsTable::open(__fitsfile* fptr)
         if (status != 0)
             throw GException::fits_error(G_OPEN, status);
 
+        // Check for unsigned columns
+        unsigned long offset;
+        sprintf(keyname, "TZERO%d", i+1);
+        status = __ffgky(&m_fitsfile, __TULONG, keyname, &offset, NULL, &status);
+        if (status == 0) {
+            if (typecode == __TSHORT && offset == 32678u)
+                typecode = __TUSHORT;
+            else if (typecode == __TLONG && offset == 2147483648u)
+                typecode = __TULONG;
+            else if (typecode == __TINT && offset == 2147483648u)
+                typecode = __TUINT;
+            else {
+std::cout << "GFitsTable::open => THROW EXCEPTION.";
+std::cout << " Column type " << typecode << " has associated TZERO=" << offset << std::endl;
+std::cout << " Column: " << value << std::endl;
+std::cout << "NEED TO DEBUG." << std::endl;            
+            }
+        }
+        else
+            status = 0;
+        
         // Allocate column
         switch (typecode) {
         case __TBIT:
@@ -517,8 +540,14 @@ void GFitsTable::open(__fitsfile* fptr)
         case __TSTRING:
             m_columns[i] = new GFitsTableStrCol();
             break;
+        case __TUSHORT:
+            m_columns[i] = new GFitsTableUStCol();
+            break;
         case __TSHORT:
             m_columns[i] = new GFitsTableShtCol();
+            break;
+        case __TULONG:
+            m_columns[i] = new GFitsTableULgCol();
             break;
         case __TLONG:
             m_columns[i] = new GFitsTableLngCol();

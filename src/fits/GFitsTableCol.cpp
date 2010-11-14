@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableCol.cpp  - FITS table column abstract base class       *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
@@ -33,7 +32,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                   GFitsTableCol constructors/destructors                =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -116,7 +115,7 @@ GFitsTableCol::~GFitsTableCol()
 
 /*==========================================================================
  =                                                                         =
- =                         GFitsTableCol operators                         =
+ =                                 Operators                               =
  =                                                                         =
  ==========================================================================*/
 
@@ -148,7 +147,7 @@ GFitsTableCol& GFitsTableCol::operator= (const GFitsTableCol& column)
 
 /*==========================================================================
  =                                                                         =
- =                        GFitsTableCol public methods                     =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -253,7 +252,7 @@ int GFitsTableCol::length(void)
 
 /*==========================================================================
  =                                                                         =
- =                        GFitsTableCol private methods                    =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -377,14 +376,14 @@ void GFitsTableCol::load_column(void)
                                   NULL, &status);
             if (status != 0)
                 throw GException::fits_hdu_not_found(G_LOAD_COLUMN,
-                                                 (m_fitsfile.HDUposition)+1,
-                                                 status);
+                                  (m_fitsfile.HDUposition)+1, status);
 
             // Load data
             status = __ffgcv(&m_fitsfile, m_type, m_colnum, 1, 1, m_size,
                              ptr_nulval(), ptr_data(), &m_anynul, &status);
             if (status != 0)
-                throw GException::fits_error(G_LOAD_COLUMN, status);
+                throw GException::fits_error(G_LOAD_COLUMN, status,
+                                  "for column \""+m_name+"\".");
         }
 
         // ... otherwise initialise all column values

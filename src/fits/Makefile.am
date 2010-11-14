@@ -19,7 +19,9 @@ sources = GFitsHeaderCard.cpp \
 	  GFitsTableBitCol.cpp \
           GFitsTableLogCol.cpp \
           GFitsTableStrCol.cpp \
+          GFitsTableUStCol.cpp \
           GFitsTableShtCol.cpp \
+          GFitsTableULgCol.cpp \
           GFitsTableLngCol.cpp \
 	  GFitsTableLlgCol.cpp \
           GFitsTableFltCol.cpp \
