@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GFits.hpp  - FITS file access class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008 by Jurgen Knodlseder                                *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -34,7 +34,8 @@
  * which are implemented by the GFitsHDU class.
  *
  * @todo Implement GFitsFile* to replace __fitsfile* in GFits classes.
- * This class implements then all interfaces to FITS routines ...
+ * This class implements then all interfaces to FITS routines ... well, not
+ * sure that this is so easy ...
  ***************************************************************************/
 class GFits {
 

@@ -37,6 +37,9 @@
  * and a data area. The header is composed of cards and is implemented by
  * the GFitsHeader class. The data are is either an image or a table and
  * is implemented by the abstract GFitsData base class.
+ *
+ * @todo Implement GFitsHDU* select(const std::string& expr) that applies
+ * to a table HDU for row selection.
  ***************************************************************************/
 class GFitsHDU {
 
