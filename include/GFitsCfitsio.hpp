@@ -41,6 +41,7 @@
 #define __ffgidm(A, B, C) ffgidm(A, B, C)
 #define __ffgipr(A, B, C, D, E, F) ffgipr(A, B, C, D, E, F)
 #define __ffgisz(A, B, C, D) ffgisz(A, B, C, D)
+#define __ffgky(A, B, C, D, E, F) ffgky(A, B, C, D, E, F)
 #define __ffgkey(A, B, C, D, E) ffgkey(A, B, C, D, E)
 #define __ffgkyn(A, B, C, D, E, F) ffgkyn(A, B, C, D, E, F)
 #define __ffgnrw(A, B, C) ffgnrw(A, B, C)
@@ -63,10 +64,14 @@
 #define __ffukys(A, B, C, D, E) ffukys(A, B, C, D, E)
 #define __TBIT        TBIT
 #define __TBYTE       TBYTE
+#define __TSBYTE      TSBYTE
 #define __TLOGICAL    TLOGICAL
 #define __TSTRING     TSTRING
+#define __TUSHORT     TUSHORT
 #define __TSHORT      TSHORT
+#define __TUINT       TUINT
 #define __TINT        TINT
+#define __TULONG      TULONG
 #define __TLONG       TLONG
 #define __TFLOAT      TFLOAT
 #define __TLONGLONG   TLONGLONG
@@ -117,10 +122,14 @@ typedef fitsfile __fitsfile;
 #define __ffukys(A, B, C, D, E) __dummy()
 #define __TBIT          1
 #define __TBYTE        11
+#define __TSBYTE       12
 #define __TLOGICAL     14
 #define __TSTRING      16
+#define __TUSHORT      20
 #define __TSHORT       21
+#define __TUINT        30
 #define __TINT         31
+#define __TULONG       40
 #define __TLONG        41
 #define __TFLOAT       42
 #define __TLONGLONG    81
