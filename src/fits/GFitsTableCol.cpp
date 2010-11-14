@@ -22,6 +22,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD_COLUMN                          "GFitsTableCol::load_column()"
 #define G_SAVE_COLUMN                          "GFitsTableCol::save_column()"
+#define G_OFFSET              "GFitsTableCol::offset(const int&, const int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -252,53 +253,19 @@ int GFitsTableCol::length(void)
 
 /*==========================================================================
  =                                                                         =
- =                             Private methods                             =
+ =                            Protected methods                            =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Initialise class members
- ***************************************************************************/
-void GFitsTableCol::init_members(void)
-{
-    // Initialise members
-    m_name.clear();
-    m_unit.clear();
-    m_colnum               = 0;
-    m_type                 = 0;
-    m_repeat               = 0;
-    m_width                = 0;
-    m_number               = 0;
-    m_length               = 0;
-    m_size                 = 0;
-    m_anynul               = 0;
-    m_fitsfile.HDUposition = 0;
-    m_fitsfile.Fptr        = NULL;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Copy class members
+ * @brief Save table column into FITS file
  *
- * @param[in] column Column to be copied
+ * Refer to GFitsTableCol::save_column() for more information.
  ***************************************************************************/
-void GFitsTableCol::copy_members(const GFitsTableCol& column)
+void GFitsTableCol::save(void)
 {
-    // Copy attributes
-    m_name     = column.m_name;
-    m_unit     = column.m_unit;
-    m_colnum   = column.m_colnum;
-    m_type     = column.m_type;
-    m_repeat   = column.m_repeat;
-    m_width    = column.m_width;
-    m_number   = column.m_number;
-    m_length   = column.m_length;
-    m_size     = column.m_size;
-    m_anynul   = column.m_anynul;
-    m_fitsfile = column.m_fitsfile;
+    // Save column
+    save_column();
 
     // Return
     return;
@@ -306,29 +273,18 @@ void GFitsTableCol::copy_members(const GFitsTableCol& column)
 
 
 /***********************************************************************//**
- * @brief Delete class members
- ***************************************************************************/
-void GFitsTableCol::free_members(void)
-{
-    // Free memory
-
-    // Mark memory as freed
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Connect table column to FITS file
+ * @brief Fetch column data
  *
- * @param[in] fptr FITS file pointer to which the table column should be
- *                 connected
+ * If a FITS file is attached to the column the data are loaded into memory
+ * from the FITS file. If no FITS file is attached, memory is allocated
+ * to hold the column data and all cells are set to 0.
+ *
+ * Refer to GFitsTableCol::load_column for more information.
  ***************************************************************************/
-void GFitsTableCol::connect(__fitsfile* fptr)
+void GFitsTableCol::fetch_data(void)
 {
-    // Connect Image
-    m_fitsfile = *fptr;
+    // Save column
+    load_column();
 
     // Return
     return;
@@ -347,11 +303,11 @@ void GFitsTableCol::connect(__fitsfile* fptr)
  * from the FITS file. If no FITS file is attached, memory is allocated
  * to hold the column data and all cells are set to 0.
  *
- * The method make use of the virtual methods 
- *   GFitsTableCol::alloc_data,
- *   GFitsTableCol::init_data,
- *   GFitsTableCol::ptr_data, and
- *   GFitsTableCol::ptr_nulval.
+ * The method makes use of the virtual methods 
+ * GFitsTableCol::alloc_data,
+ * GFitsTableCol::init_data,
+ * GFitsTableCol::ptr_data, and
+ * GFitsTableCol::ptr_nulval.
  * These methods are implemented by the derived column classes which 
  * implement a specific storage class (i.e. float, double, short, ...).
  ***************************************************************************/
@@ -482,6 +438,125 @@ void GFitsTableCol::dump_column(std::ostream& os, void* data) const
 
     // Set length
     os << " length=" << m_length;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert row and vector index into column offset
+ *
+ * @param[in] row Row of column.
+ * @param[in] inx Vector index in column row.
+ *
+ * @exception GException::out_of_range
+ *            Table row or vector index are out of valid range.
+ *
+ * Converts the row and vector index of a column into a linear offset from
+ * the column start.
+ ***************************************************************************/
+int GFitsTableCol::offset(const int& row, const int& inx) const
+{
+    // Check row value
+    #if defined(G_RANGE_CHECK)
+    if (row < 0 || row >= m_length)
+        throw GException::out_of_range(G_OFFSET, row, 0, m_length-1);
+    #endif
+    
+    // Check inx value
+    #if defined(G_RANGE_CHECK)
+    if (inx < 0 || inx >= m_number)
+        throw GException::out_of_range(G_OFFSET, inx, 0, m_number-1);
+    #endif
+
+    // Calculate pixel offset
+    int offset = row * m_number + inx;
+
+    // Return offset
+    return offset;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                             Private methods                             =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ ***************************************************************************/
+void GFitsTableCol::init_members(void)
+{
+    // Initialise members
+    m_name.clear();
+    m_unit.clear();
+    m_colnum               = 0;
+    m_type                 = 0;
+    m_repeat               = 0;
+    m_width                = 0;
+    m_number               = 0;
+    m_length               = 0;
+    m_size                 = 0;
+    m_anynul               = 0;
+    m_fitsfile.HDUposition = 0;
+    m_fitsfile.Fptr        = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] column Column to be copied
+ ***************************************************************************/
+void GFitsTableCol::copy_members(const GFitsTableCol& column)
+{
+    // Copy attributes
+    m_name     = column.m_name;
+    m_unit     = column.m_unit;
+    m_colnum   = column.m_colnum;
+    m_type     = column.m_type;
+    m_repeat   = column.m_repeat;
+    m_width    = column.m_width;
+    m_number   = column.m_number;
+    m_length   = column.m_length;
+    m_size     = column.m_size;
+    m_anynul   = column.m_anynul;
+    m_fitsfile = column.m_fitsfile;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ ***************************************************************************/
+void GFitsTableCol::free_members(void)
+{
+    // Free memory
+
+    // Mark memory as freed
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Connect table column to FITS file
+ *
+ * @param[in] fptr FITS file pointer to which the table column should be
+ *                 connected
+ ***************************************************************************/
+void GFitsTableCol::connect(__fitsfile* fptr)
+{
+    // Connect Image
+    m_fitsfile = *fptr;
 
     // Return
     return;

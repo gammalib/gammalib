@@ -37,11 +37,11 @@ class GFitsTableCol {
 
 public:
     // Constructors and destructors
-    GFitsTableCol();
+    GFitsTableCol(void);
     GFitsTableCol(const std::string& name, const int& length,
                   const int& number,       const int& width);
     GFitsTableCol(const GFitsTableCol& column);
-    virtual ~GFitsTableCol();
+    virtual ~GFitsTableCol(void);
 
     // Operators
     GFitsTableCol& operator= (const GFitsTableCol& column);
@@ -81,20 +81,21 @@ protected:
     __fitsfile  m_fitsfile;  //!< FITS file associated with column
 
     // Protected virtual methods
-    virtual void           save(void) = 0;
     virtual GFitsTableCol* clone(void) const = 0;
     virtual std::string    ascii_format(void) const = 0;
     virtual std::string    binary_format(void) const = 0;
     virtual void           alloc_data(void) = 0;
     virtual void           init_data(void) = 0;
-    virtual void           fetch_data(void) = 0;
     virtual void*          ptr_data(void) = 0;
     virtual void*          ptr_nulval(void) = 0;
 
     // Protected methods
-    void load_column(void);
-    void save_column(void);
-    void dump_column(std::ostream& os, void* data) const;
+    virtual void save(void);
+    virtual void fetch_data(void);
+    virtual void load_column(void);
+    virtual void save_column(void);
+    virtual void dump_column(std::ostream& os, void* data) const;
+    virtual int  offset(const int& row, const int& inx) const; 
 
 private:
     // Private methods

@@ -17,15 +17,15 @@ sources = GFitsHeaderCard.cpp \
           GFitsBinTable.cpp \
           GFitsTableCol.cpp \
 	  GFitsTableBitCol.cpp \
-          GFitsTableLogCol.cpp \
-          GFitsTableStrCol.cpp \
-          GFitsTableUStCol.cpp \
-          GFitsTableShtCol.cpp \
-          GFitsTableULgCol.cpp \
-          GFitsTableLngCol.cpp \
-	  GFitsTableLlgCol.cpp \
-          GFitsTableFltCol.cpp \
-          GFitsTableDblCol.cpp \
+          GFitsTableBoolCol.cpp \
+          GFitsTableStringCol.cpp \
+          GFitsTableUShortCol.cpp \
+          GFitsTableShortCol.cpp \
+          GFitsTableULongCol.cpp \
+          GFitsTableLongCol.cpp \
+	  GFitsTableLongLongCol.cpp \
+          GFitsTableFloatCol.cpp \
+          GFitsTableDoubleCol.cpp \
           GFitsHDU.cpp \
           GFits.cpp \
           GException_fits.cpp

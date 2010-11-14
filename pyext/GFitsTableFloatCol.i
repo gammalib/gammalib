@@ -1,7 +1,7 @@
 /***************************************************************************
- *    GFitsTableLngCol.i  - FITS table long column class SWIG definiton    *
+ *  GFitsTableFloatCol.i  - FITS table float column class SWIG definition  *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -11,43 +11,44 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GFitsTableLngCol.i
- * @brief GFitsTableLngCol class SWIG file.
+ * @file GFitsTableFloatCol.i
+ * @brief GFitsTableFloatCol class SWIG file.
  * @author J. Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GFitsTableLngCol.hpp"
+#include "GFitsTableFloatCol.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GFitsTableLngCol
+ * @class GFitsTableFloatCol
  *
- * @brief SWIG interface for FITS table long integer column
+ * @brief SWIG interface for FITS table floating point column
  ***************************************************************************/
-class GFitsTableLngCol : public GFitsTableCol {
+class GFitsTableFloatCol : public GFitsTableCol {
 public:
     // Constructors and destructors
-    GFitsTableLngCol();
-    GFitsTableLngCol(const std::string& name, const int& length,
-                     const int& size = 1);
-    GFitsTableLngCol(const GFitsTableLngCol& column);
-    virtual ~GFitsTableLngCol();
+    GFitsTableFloatCol(void);
+    GFitsTableFloatCol(const std::string& name, const int& length,
+                       const int& size = 1);
+    GFitsTableFloatCol(const GFitsTableFloatCol& column);
+    virtual ~GFitsTableFloatCol(void);
 
     // Methods
     std::string string(const int& row, const int& col = 0);
     double      real(const int& row, const int& col = 0);
     int         integer(const int& row, const int& col = 0);
-    long*       data(void);
-    void        set_nullval(const long* value);
+    float*      data(void) { return m_data; }
+    void        nullval(const float* value);
+    float*      nullval(void) { return m_nulval; }
 };
 
 
 /***********************************************************************//**
- * @brief GFitsTableLngCol class extension
+ * @brief GFitsTableFloatCol class extension
  ***************************************************************************/
-%extend GFitsTableLngCol {
+%extend GFitsTableFloatCol {
     char *__str__() {
         static char str_buffer[1001];
         std::ostringstream buffer;
@@ -57,19 +58,19 @@ public:
 	    str_buffer[1000] = '\0';
 	    return str_buffer;
     }
-    long get(const int& row) {
+    float get(const int& row) {
         return (*self)(row);
     }
-    long get(const int& row, const int& col) {
+    float get(const int& row, const int& col) {
         return (*self)(row, col);
     }
-    void set(const int& row, const long& value) {
+    void set(const int& row, const float& value) {
         (*self)(row) = value;
     }
-    void set(const int& row, const int& col, const long& value) {
+    void set(const int& row, const int& col, const float& value) {
         (*self)(row, col) = value;
     }
-    GFitsTableLngCol copy() {
+    GFitsTableFloatCol copy() {
         return (*self);
     }
 };

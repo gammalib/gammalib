@@ -30,8 +30,8 @@
  *
  * This class implements a FITS table Bit column.
  *
- * TODO: Each Bit is actually stored in one Byte. To save memory a more
- * compact storage scheme should be implemented.
+ * @todo Each Bit is actually stored in one Byte. To save memory a more
+ * compact storage scheme could be implemented.
  ***************************************************************************/
 class GFitsTableBitCol : public GFitsTableCol {
 
@@ -55,21 +55,22 @@ public:
     std::string string(const int& row, const int& col = 0);
     double      real(const int& row, const int& col = 0);
     int         integer(const int& row, const int& col = 0);
-    char*       data(void);
-    void        set_nullval(const char* value);
+    char*       data(void) { return m_data; }
+    void        nullval(const char* value);
+    char*       nullval(void) { return m_nulval; }
 
 private:
     // Private methods
     void              init_members(void);
     void              copy_members(const GFitsTableBitCol& column);
     void              free_members(void);
-    void              save(void);
     GFitsTableBitCol* clone(void) const;
     std::string       ascii_format(void) const;
     std::string       binary_format(void) const;
     void              alloc_data(void);
+    void              release_data(void);
+    void              alloc_nulval(const char* value);
     void              init_data(void);
-    void              fetch_data(void);
     void*             ptr_data(void) { return m_data; }
     void*             ptr_nulval(void) { return m_nulval; }
 

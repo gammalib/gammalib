@@ -1,7 +1,7 @@
 /***************************************************************************
- *   GFitsTableFltCol.i  - FITS table float column class SWIG definition   *
+ * GFitsTableUShortCol.i  - FITS table unsigned short column class SWIG def*
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -11,43 +11,44 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GFitsTableFltCol.i
- * @brief GFitsTableFltCol class SWIG file.
+ * @file GFitsTableUShortCol.i
+ * @brief GFitsTableUShortCol class SWIG file.
  * @author J. Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GFitsTableFltCol.hpp"
+#include "GFitsTableUShortCol.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GFitsTableFltCol
+ * @class GFitsTableUShortCol
  *
- * @brief SWIG interface for FITS table floating point column
+ * @brief SWIG interface for FITS table short integer column
  ***************************************************************************/
-class GFitsTableFltCol : public GFitsTableCol {
+class GFitsTableUShortCol : public GFitsTableCol {
 public:
     // Constructors and destructors
-    GFitsTableFltCol();
-    GFitsTableFltCol(const std::string& name, const int& length,
-                     const int& size = 1);
-    GFitsTableFltCol(const GFitsTableFltCol& column);
-    virtual ~GFitsTableFltCol();
+    GFitsTableUShortCol(void);
+    GFitsTableUShortCol(const std::string& name, const int& length,
+                        const int& size = 1);
+    GFitsTableUShortCol(const GFitsTableUShortCol& column);
+    virtual ~GFitsTableUShortCol(void);
 
     // Methods
-    std::string string(const int& row, const int& col = 0);
-    double      real(const int& row, const int& col = 0);
-    int         integer(const int& row, const int& col = 0);
-    float*      data(void);
-    void        set_nullval(const float* value);
+    std::string     string(const int& row, const int& col = 0);
+    double          real(const int& row, const int& col = 0);
+    int             integer(const int& row, const int& col = 0);
+    unsigned short* data(void) { return m_data; }
+    void            nullval(const unsigned short* value);
+    unsigned short* nullval(void) { return m_nulval; }
 };
 
 
 /***********************************************************************//**
- * @brief GFitsTableFltCol class extension
+ * @brief GFitsTableUShortCol class extension
  ***************************************************************************/
-%extend GFitsTableFltCol {
+%extend GFitsTableUShortCol {
     char *__str__() {
         static char str_buffer[1001];
         std::ostringstream buffer;
@@ -57,19 +58,19 @@ public:
 	    str_buffer[1000] = '\0';
 	    return str_buffer;
     }
-    float get(const int& row) {
+    unsigned short get(const int& row) {
         return (*self)(row);
     }
-    float get(const int& row, const int& col) {
+    unsigned short get(const int& row, const int& col) {
         return (*self)(row, col);
     }
-    void set(const int& row, const float& value) {
+    void set(const int& row, const unsigned short& value) {
         (*self)(row) = value;
     }
-    void set(const int& row, const int& col, const float& value) {
+    void set(const int& row, const int& col, const unsigned short& value) {
         (*self)(row, col) = value;
     }
-    GFitsTableFltCol copy() {
+    GFitsTableUShortCol copy() {
         return (*self);
     }
 };

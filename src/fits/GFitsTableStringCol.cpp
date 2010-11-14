@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GFitsTableBitCol.cpp  - FITS table Bit column class           *
+ *        GFitsTableStringCol.cpp  - FITS table string column class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -16,9 +16,10 @@
 #include <config.h>
 #endif
 #include <iostream>
+#include <string.h>
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GFitsTableBitCol.hpp"
+#include "GFitsTableStringCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -38,7 +39,7 @@
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GFitsTableBitCol::GFitsTableBitCol(void) : GFitsTableCol()
+GFitsTableStringCol::GFitsTableStringCol(void) : GFitsTableCol()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -53,12 +54,14 @@ GFitsTableBitCol::GFitsTableBitCol(void) : GFitsTableCol()
  *
  * @param[in] name Name of column.
  * @param[in] length Length of column.
- * @param[in] size Vector size of column.
+ * @param[in] width Length of individual string.
+ * @param[in] size Number of strings in each column.
  ***************************************************************************/
-GFitsTableBitCol::GFitsTableBitCol(const std::string& name,
-                                   const int&         length,
-                                   const int&         size)
-                                   : GFitsTableCol(name, length, size, 2)
+GFitsTableStringCol::GFitsTableStringCol(const std::string& name,
+                                         const int&         length,
+                                         const int&         width,
+                                         const int&         size)
+                                   : GFitsTableCol(name, length, size, width)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -73,7 +76,7 @@ GFitsTableBitCol::GFitsTableBitCol(const std::string& name,
  *
  * @param[in] column Column from which class instance should be built.
  ***************************************************************************/
-GFitsTableBitCol::GFitsTableBitCol(const GFitsTableBitCol& column) 
+GFitsTableStringCol::GFitsTableStringCol(const GFitsTableStringCol& column) 
                                                       : GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
@@ -90,7 +93,7 @@ GFitsTableBitCol::GFitsTableBitCol(const GFitsTableBitCol& column)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GFitsTableBitCol::~GFitsTableBitCol(void)
+GFitsTableStringCol::~GFitsTableStringCol(void)
 {
     // Free members
     free_members();
@@ -102,7 +105,7 @@ GFitsTableBitCol::~GFitsTableBitCol(void)
 
 /*==========================================================================
  =                                                                         =
- =                               Operators                                 =
+ =                                 Operators                               =
  =                                                                         =
  ==========================================================================*/
 
@@ -111,7 +114,7 @@ GFitsTableBitCol::~GFitsTableBitCol(void)
  *
  * @param[in] column Column which should be assigned
  ***************************************************************************/
-GFitsTableBitCol& GFitsTableBitCol::operator= (const GFitsTableBitCol& column)
+GFitsTableStringCol& GFitsTableStringCol::operator= (const GFitsTableStringCol& column)
 {
     // Execute only if object is not identical
     if (this != &column) {
@@ -143,7 +146,7 @@ GFitsTableBitCol& GFitsTableBitCol::operator= (const GFitsTableBitCol& column)
  *
  * Provides access to data in a column.
  ***************************************************************************/
-char& GFitsTableBitCol::operator() (const int& row, const int& inx)
+std::string& GFitsTableStringCol::operator() (const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
@@ -161,10 +164,10 @@ char& GFitsTableBitCol::operator() (const int& row, const int& inx)
  *
  * Provides access to data in a column.
  ***************************************************************************/
-const char& GFitsTableBitCol::operator() (const int& row, const int& inx) const
+const std::string& GFitsTableStringCol::operator() (const int& row, const int& inx) const
 {
     // If data are not available then load them now
-    if (m_data == NULL) ((GFitsTableBitCol*)this)->fetch_data();
+    if (m_data == NULL) ((GFitsTableStringCol*)this)->fetch_data();
 
     // Return data bin
     return m_data[offset(row, inx)];
@@ -185,16 +188,13 @@ const char& GFitsTableBitCol::operator() (const int& row, const int& inx) const
  *
  * Returns value of specified row and vector index as string.
  ***************************************************************************/
-std::string GFitsTableBitCol::string(const int& row, const int& inx)
+std::string GFitsTableStringCol::string(const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
 
-    // Convert bit into string
-    std::string result = (m_data[offset(row,inx)]) ? "1" : "0";
-    
     // Return value
-    return result;
+    return m_data[offset(row,inx)];
 }
 
 
@@ -206,13 +206,13 @@ std::string GFitsTableBitCol::string(const int& row, const int& inx)
  *
  * Returns value of specified row and vector index as double precision.
  ***************************************************************************/
-double GFitsTableBitCol::real(const int& row, const int& inx)
+double GFitsTableStringCol::real(const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
 
-    // Convert bit into double
-    double value = (double)m_data[offset(row,inx)];
+    // Assign string to double
+    double value = todouble(m_data[offset(row,inx)]);
 
     // Return value
     return value;
@@ -227,13 +227,13 @@ double GFitsTableBitCol::real(const int& row, const int& inx)
  *
  * Returns value of specified row and vector index as integer.
  ***************************************************************************/
-int GFitsTableBitCol::integer(const int& row, const int& inx)
+int GFitsTableStringCol::integer(const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
 
-    // Convert bit into int
-    int value = (int)m_data[offset(row,inx)];
+    // Assign string to int
+    int value = toint(m_data[offset(row,inx)]);
 
     // Return value
     return value;
@@ -241,20 +241,14 @@ int GFitsTableBitCol::integer(const int& row, const int& inx)
 
 
 /***********************************************************************//**
- * @brief Set NULL value
+ * @brief Set NULL string
  *
- * @param[in] value Pointer on NULL value
+ * @param[in] value Pointer on NULL string
  *
- * Allows the specification of the FITS table NULL value. If value=NULL the
- * data will not be screened for NULL values.
- *
- * @todo To correctly reflect the NULL value in the data, the column should
- * be reloaded. However, the column may have been changed, so in principle
- * saving is needed. However, we may not want to store the data, hence saving
- * is also not desired. We thus have to develop a method to update the
- * column information for a new NULL value in place ...
+ * Allows the specification of the FITS table NULL string. If the string
+ * is empty the data will not be screened for NULL values.
  ***************************************************************************/
-void GFitsTableBitCol::nullval(const char* value)
+void GFitsTableStringCol::nullval(const std::string& value)
 {
     // Allocate nul value
     alloc_nulval(value);
@@ -272,18 +266,19 @@ void GFitsTableBitCol::nullval(const char* value)
 
 /*==========================================================================
  =                                                                         =
- =                             Private methods                             =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GFitsTableBitCol::init_members(void)
+void GFitsTableStringCol::init_members(void)
 {
     // Initialise members
-    m_type   = __TBIT;
+    m_type   = __TSTRING;
     m_data   = NULL;
+    m_buffer = NULL;
     m_nulval = NULL;
 
     // Return
@@ -295,13 +290,18 @@ void GFitsTableBitCol::init_members(void)
  * @brief Copy class members
  *
  * @param[in] column Column for which members should be copied.
+ *
+ * Sets the content of the vector column by copying from another column.
+ * If the code is compiled with the small memory option, and if the source
+ * column has not yet been loaded, then we only load the column temporarily
+ * for copying purposes and release it again once copying is finished.
  ***************************************************************************/
-void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
+void GFitsTableStringCol::copy_members(const GFitsTableStringCol& column)
 {
     // Fetch column data if not yet fetched. The casting circumvents the
     // const correctness
     bool not_loaded = (column.m_data == NULL);
-    if (not_loaded) ((GFitsTableBitCol*)(&column))->fetch_data();
+    if (not_loaded) ((GFitsTableStringCol*)(&column))->fetch_data();
 
     // Copy attributes
     m_type = column.m_type;
@@ -315,11 +315,11 @@ void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
     }
 
     // Copy NULL value
-    alloc_nulval(column.m_nulval);
+    alloc_nulval(std::string(column.m_nulval));
 
     // Small memory option: release column if it was fetch above
     #if defined(G_SMALL_MEMORY)
-    if (not_loaded) ((GFitsTableBitCol*)(&column))->release_data();
+    if (not_loaded) ((GFitsTableStringCol*)(&column))->release_data();
     #endif
 
     // Return
@@ -330,7 +330,7 @@ void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GFitsTableBitCol::free_members(void)
+void GFitsTableStringCol::free_members(void)
 {
     // Free memory
     if (m_data   != NULL) delete [] m_data;
@@ -343,6 +343,41 @@ void GFitsTableBitCol::free_members(void)
     // Reset load flag
     m_size = 0;
 
+    // Free buffer
+    free_buffer();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save table column into FITS file
+ *
+ * The table column is only saved if it is linked to a FITS file and if the
+ * data are indeed present in the class instance. This avoids saving of data
+ * that have not been modified.
+ *
+ * Refer to GFitsTableCol::save_column() for more information.
+ ***************************************************************************/
+void GFitsTableStringCol::save(void)
+{
+    // Free buffer
+    free_buffer();
+
+    // Allocate buffer
+    alloc_buffer();
+
+    // Transfer string into buffer
+    for (int i = 0; i < m_size; ++i)
+       strncpy(m_buffer[i], m_data[i].c_str(), m_width);
+
+    // Save column
+    save_column();
+
+    // Free buffer
+    free_buffer();
+
     // Return
     return;
 }
@@ -351,22 +386,22 @@ void GFitsTableBitCol::free_members(void)
 /***********************************************************************//**
  * @brief Clone column
  ***************************************************************************/
-GFitsTableBitCol* GFitsTableBitCol::clone(void) const
+GFitsTableStringCol* GFitsTableStringCol::clone(void) const
 {
-    return new GFitsTableBitCol(*this);
+    return new GFitsTableStringCol(*this);
 }
 
 
 /***********************************************************************//**
  * @brief Returns format string of ASCII table
  ***************************************************************************/
-std::string GFitsTableBitCol::ascii_format(void) const
+std::string GFitsTableStringCol::ascii_format(void) const
 {
     // Initialize format string
     std::string format;
 
     // Set type code
-    format.append("X");
+    format.append("A");
 
     // Set width
     format.append(str(m_width));
@@ -379,16 +414,20 @@ std::string GFitsTableBitCol::ascii_format(void) const
 /***********************************************************************//**
  * @brief Returns format string of binary table
  ***************************************************************************/
-std::string GFitsTableBitCol::binary_format(void) const
+std::string GFitsTableStringCol::binary_format(void) const
 {
     // Initialize format string
     std::string format;
 
     // Set number of elements
-    format.append(str(m_number));
+    format.append(str(m_repeat));
 
     // Set type code
-    format.append("X");
+    format.append("A");
+
+    // If there are substrings then add width of substring
+    if (m_repeat > m_width)
+        format.append(str(m_width));
 
     // Return format
     return format;
@@ -398,9 +437,9 @@ std::string GFitsTableBitCol::binary_format(void) const
 /***********************************************************************//**
  * @brief Allocates column data
  ***************************************************************************/
-void GFitsTableBitCol::alloc_data(void)
+void GFitsTableStringCol::alloc_data(void)
 {
-    // Free any existing memory
+    // Free memory
     if (m_data != NULL) delete [] m_data;
 
     // Mark pointer as free
@@ -408,7 +447,7 @@ void GFitsTableBitCol::alloc_data(void)
 
     // Allocate new data
     if (m_size > 0)
-        m_data = new char[m_size];
+        m_data = new std::string[m_size];
 
     // Return
     return;
@@ -418,7 +457,7 @@ void GFitsTableBitCol::alloc_data(void)
 /***********************************************************************//**
  * @brief Release column data
  ***************************************************************************/
-void GFitsTableBitCol::release_data(void)
+void GFitsTableStringCol::release_data(void)
 {
     // Free any existing memory
     if (m_data != NULL) delete [] m_data;
@@ -433,9 +472,9 @@ void GFitsTableBitCol::release_data(void)
 
 
 /***********************************************************************//**
- * @brief Allocates null value
+ * @brief Allocate null value
  ***************************************************************************/
-void GFitsTableBitCol::alloc_nulval(const char* value)
+void GFitsTableStringCol::alloc_nulval(const std::string& value)
 {
     // Free any existing memory
     if (m_nulval != NULL) delete m_nulval;
@@ -444,9 +483,9 @@ void GFitsTableBitCol::alloc_nulval(const char* value)
     m_nulval = NULL;
 
     // If we have valid value, allocate and set nul value
-    if (value != NULL) {
-        m_nulval  = new char;
-        *m_nulval = *value;
+    if (value.empty()) {
+        m_nulval = new char[m_width+1];
+        strncpy(m_nulval, value.c_str(), m_width);
     }
 
     // Return
@@ -457,12 +496,98 @@ void GFitsTableBitCol::alloc_nulval(const char* value)
 /***********************************************************************//**
  * @brief Initialise column data
  ***************************************************************************/
-void GFitsTableBitCol::init_data(void)
+void GFitsTableStringCol::init_data(void)
 {
     // Initialise data if they exist
     if (m_data != NULL) {
         for (int i = 0; i < m_size; ++i)
-            m_data[i] = 0;
+            m_data[i].clear();
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fetch column data
+ *
+ * If a FITS file is attached to the column the data are loaded into memory
+ * from the FITS file. If no FITS file is attached, memory is allocated
+ * to hold the column data and all cells are set to 0.
+ *
+ * Refer to GFitsTableCol::load_column for more information.
+ ***************************************************************************/
+void GFitsTableStringCol::fetch_data(void)
+{
+    // Calculate size of memory
+    m_size = m_number * m_length;
+
+    // Free old buffer memory
+    free_buffer();
+
+    // Allocate buffer memory
+    alloc_buffer();
+
+    // Save column
+    load_column();
+
+    // Extract string from buffer
+    for (int i = 0; i < m_size; ++i) {
+       if (m_buffer[i] != NULL)
+           m_data[i].assign(m_buffer[i]);
+    }
+
+    // Free buffer memory
+    free_buffer();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Allocate CFITSIO transfer buffer
+ *
+ * The CFITSIO transfer buffer allows transparent conversion from the CFITSIO
+ * storage format to a vector of strings.
+ ***************************************************************************/
+void GFitsTableStringCol::alloc_buffer(void)
+{
+    // Allocate buffer memory
+    if (m_size > 0) {
+        m_buffer = new char*[m_size];
+        for (int i = 0; i < m_size; ++i)
+            m_buffer[i] = new char[m_width+1];
+    }
+
+    // Initialise buffer
+    if (m_buffer != NULL) {
+        for (int i = 0; i < m_size; ++i) {
+            for (int j = 0; j <= m_width; ++j)
+                (m_buffer[i])[j] = '\0';
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Free CFITSIO transfer buffer
+ *
+ * Release memory that has been allocated for the CFITSIO transfer buffer.
+ ***************************************************************************/
+void GFitsTableStringCol::free_buffer(void)
+{
+    // If there was a buffer allocated then free it
+    if (m_buffer != NULL) {
+        for (int i = 0; i < m_size; ++i) {
+            if (m_buffer[i] != NULL) delete [] m_buffer[i];
+        }
+        delete [] m_buffer;
+        m_buffer = NULL;
     }
 
     // Return
@@ -482,7 +607,7 @@ void GFitsTableBitCol::init_data(void)
  * @param[in] os Output stream.
  * @param[in] column Column to put in output stream.
  ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GFitsTableBitCol& column)
+std::ostream& operator<< (std::ostream& os, const GFitsTableStringCol& column)
 {
     // Dump column in output stream
     column.dump_column(os, column.m_data);

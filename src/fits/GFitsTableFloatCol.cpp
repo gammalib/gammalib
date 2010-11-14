@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GFitsTableStrCol.cpp  - FITS table string column class         *
+ *        GFitsTableFloatCol.cpp  - FITS table float column class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -16,15 +16,11 @@
 #include <config.h>
 #endif
 #include <iostream>
-#include <string.h>
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GFitsTableStrCol.hpp"
+#include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_STRING           "GFitsTableStrCol::string(const int&, const int&)"
-#define G_REAL               "GFitsTableStrCol::real(const int&, const int&)"
-#define G_INTEGER         "GFitsTableStrCol::integer(const int&, const int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -35,14 +31,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                        Constructors/destructors                         =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GFitsTableStrCol::GFitsTableStrCol() : GFitsTableCol()
+GFitsTableFloatCol::GFitsTableFloatCol(void) : GFitsTableCol()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -57,14 +53,12 @@ GFitsTableStrCol::GFitsTableStrCol() : GFitsTableCol()
  *
  * @param[in] name Name of column.
  * @param[in] length Length of column.
- * @param[in] width Length of individual string.
- * @param[in] size Number of strings in each column.
+ * @param[in] size Vector size of column.
  ***************************************************************************/
-GFitsTableStrCol::GFitsTableStrCol(const std::string& name,
-                                   const int&         length,
-                                   const int&         width,
-                                   const int&         size)
-                                   : GFitsTableCol(name, length, size, width)
+GFitsTableFloatCol::GFitsTableFloatCol(const std::string& name,
+                                         const int&         length,
+                                         const int&         size)
+                                       : GFitsTableCol(name, length, size, 2)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -79,7 +73,7 @@ GFitsTableStrCol::GFitsTableStrCol(const std::string& name,
  *
  * @param[in] column Column from which class instance should be built.
  ***************************************************************************/
-GFitsTableStrCol::GFitsTableStrCol(const GFitsTableStrCol& column) 
+GFitsTableFloatCol::GFitsTableFloatCol(const GFitsTableFloatCol& column)
                                                       : GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
@@ -96,7 +90,7 @@ GFitsTableStrCol::GFitsTableStrCol(const GFitsTableStrCol& column)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GFitsTableStrCol::~GFitsTableStrCol()
+GFitsTableFloatCol::~GFitsTableFloatCol(void)
 {
     // Free members
     free_members();
@@ -108,7 +102,7 @@ GFitsTableStrCol::~GFitsTableStrCol()
 
 /*==========================================================================
  =                                                                         =
- =                                 Operators                               =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -117,7 +111,7 @@ GFitsTableStrCol::~GFitsTableStrCol()
  *
  * @param[in] column Column which should be assigned
  ***************************************************************************/
-GFitsTableStrCol& GFitsTableStrCol::operator= (const GFitsTableStrCol& column)
+GFitsTableFloatCol& GFitsTableFloatCol::operator= (const GFitsTableFloatCol& column)
 {
     // Execute only if object is not identical
     if (this != &column) {
@@ -147,23 +141,15 @@ GFitsTableStrCol& GFitsTableStrCol::operator= (const GFitsTableStrCol& column)
  * @param[in] row Row of column to access.
  * @param[in] inx Vector index in column row to access
  *
- * Provides access to data in a column. No range checking is performed.
- * Use one of
- *   GFitsTableStrCol::string(ix,iy),
- *   GFitsTableStrCol::real(ix;iy) or
- *   GFitsTableStrCol::integer(ix;iy)
- * if range checking is required.
+ * Provides access to data in a column.
  ***************************************************************************/
-std::string& GFitsTableStrCol::operator() (const int& row, const int& inx)
+float& GFitsTableFloatCol::operator() (const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
 
-    // Calculate pixel offset
-    int offset = row * m_number + inx;
-
     // Return data bin
-    return m_data[offset];
+    return m_data[offset(row, inx)];
 }
 
 
@@ -173,30 +159,21 @@ std::string& GFitsTableStrCol::operator() (const int& row, const int& inx)
  * @param[in] row Row of column to access.
  * @param[in] inx Vector index in column row to access
  *
- * Provides access to data in a column. No range checking is performed.
- * Use one of
- *   GFitsTableStrCol::string(ix,iy),
- *   GFitsTableStrCol::real(ix;iy) or
- *   GFitsTableStrCol::integer(ix;iy)
- * if range checking is required.
+ * Provides access to data in a column.
  ***************************************************************************/
-const std::string& GFitsTableStrCol::operator() (const int& row, const int& inx)
-                                                 const
+const float& GFitsTableFloatCol::operator() (const int& row, const int& inx) const
 {
     // If data are not available then load them now
-    if (m_data == NULL) ((GFitsTableStrCol*)this)->fetch_data();
-
-    // Calculate pixel offset
-    int offset = row * m_number + inx;
+    if (m_data == NULL) ((GFitsTableFloatCol*)this)->fetch_data();
 
     // Return data bin
-    return m_data[offset];
+    return m_data[offset(row, inx)];
 }
 
 
 /*==========================================================================
  =                                                                         =
- =                             Public methods                              =
+ =                               Public methods                            =
  =                                                                         =
  ==========================================================================*/
 
@@ -206,29 +183,19 @@ const std::string& GFitsTableStrCol::operator() (const int& row, const int& inx)
  * @param[in] row Table row.
  * @param[in] inx Table column vector index.
  *
- * @exception GException::out_of_range
- *            Table row or vector index are out of valid range.
- *
  * Returns value of specified row and vector index as string.
  ***************************************************************************/
-std::string GFitsTableStrCol::string(const int& row, const int& inx)
+std::string GFitsTableFloatCol::string(const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
 
-    // Check row value
-    if (row < 0 || row >= m_length)
-        throw GException::out_of_range(G_STRING, row, 0, m_length-1);
-
-    // Check inx value
-    if (inx < 0 || inx >= m_number)
-        throw GException::out_of_range(G_STRING, inx, 0, m_number-1);
-
-    // Get index
-    int offset = row * m_number + inx;
+    // Convert float into string
+    std::ostringstream s_value;
+    s_value << m_data[offset(row,inx)];
 
     // Return value
-    return m_data[offset];
+    return s_value.str();
 }
 
 
@@ -238,29 +205,15 @@ std::string GFitsTableStrCol::string(const int& row, const int& inx)
  * @param[in] row Table row.
  * @param[in] inx Table column vector index.
  *
- * @exception GException::out_of_range
- *            Table row or vector index are out of valid range.
- *
  * Returns value of specified row and vector index as double precision.
  ***************************************************************************/
-double GFitsTableStrCol::real(const int& row, const int& inx)
+double GFitsTableFloatCol::real(const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
 
-    // Check row value
-    if (row < 0 || row >= m_length)
-        throw GException::out_of_range(G_REAL, row, 0, m_length-1);
-
-    // Check inx value
-    if (inx < 0 || inx >= m_number)
-        throw GException::out_of_range(G_REAL, inx, 0, m_number-1);
-
-    // Get index
-    int offset = row * m_number + inx;
-
-    // Assign C string to double
-    double value = atof(m_data[offset].c_str());
+    // Convert float into double
+    double value = (double)m_data[offset(row,inx)];
 
     // Return value
     return value;
@@ -273,29 +226,15 @@ double GFitsTableStrCol::real(const int& row, const int& inx)
  * @param[in] row Table row.
  * @param[in] inx Table column vector index.
  *
- * @exception GException::out_of_range
- *            Table row or vector index are out of valid range.
- *
  * Returns value of specified row and vector index as integer.
  ***************************************************************************/
-int GFitsTableStrCol::integer(const int& row, const int& inx)
+int GFitsTableFloatCol::integer(const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
 
-    // Check row value
-    if (row < 0 || row >= m_length)
-        throw GException::out_of_range(G_INTEGER, row, 0, m_length-1);
-
-    // Check inx value
-    if (inx < 0 || inx >= m_number)
-        throw GException::out_of_range(G_INTEGER, inx, 0, m_number-1);
-
-    // Get index
-    int offset = row * m_number + inx;
-
-    // Assign C string to int
-    int value = int(atof(m_data[offset].c_str()));
+    // Convert float into int
+    int value = (int)m_data[offset(row,inx)];
 
     // Return value
     return value;
@@ -303,45 +242,29 @@ int GFitsTableStrCol::integer(const int& row, const int& inx)
 
 
 /***********************************************************************//**
- * @brief Return pointer to std::string column
- ***************************************************************************/
-std::string* GFitsTableStrCol::data(void)
-{
-    return m_data;
-}
-
-
-
-/***********************************************************************//**
- * @brief Set NULL string
+ * @brief Set NULL value
  *
- * @param[in] value Pointer on NULL string
+ * @param[in] value Pointer on NULL value
  *
- * Allows the specification of the FITS table NULL string. If the string
- * is empty the data will not be screened for NULL values.
+ * Allows the specification of the FITS table NULL value. If value=NULL the
+ * data will not be screened for NULL values.
+ *
+ * @todo To correctly reflect the NULL value in the data, the column should
+ * be reloaded. However, the column may have been changed, so in principle
+ * saving is needed. However, we may not want to store the data, hence saving
+ * is also not desired. We thus have to develop a method to update the
+ * column information for a new NULL value in place ...
  ***************************************************************************/
-void GFitsTableStrCol::set_nullval(const std::string& string)
+void GFitsTableFloatCol::nullval(const float* value)
 {
-    // If NULL string is empty then reset the NULL string
-    if (string.empty()) {
-        if (m_nulval != NULL) delete [] m_nulval;
-        m_nulval = NULL;
-    }
+    // Allocate nul value
+    alloc_nulval(value);
 
-    // ... otherwise copy string into NULL string
-    else {
-        if (m_nulval != NULL) delete [] m_nulval;
-        m_nulval = new char[m_width+1];
-        strncpy(m_nulval, string.c_str(), m_width);
-    }
-
-    // Re-load column
-/*
-    if (m_data != NULL) {
-        save();
-        load();
-    }
-*/
+    // Update column
+//    if (m_data != NULL) {
+//        save();
+//        load();
+//    }
 
     // Return
     return;
@@ -350,19 +273,18 @@ void GFitsTableStrCol::set_nullval(const std::string& string)
 
 /*==========================================================================
  =                                                                         =
- =                            Private methods                              =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GFitsTableStrCol::init_members(void)
+void GFitsTableFloatCol::init_members(void)
 {
     // Initialise members
-    m_type   = __TSTRING;
+    m_type   = __TFLOAT;
     m_data   = NULL;
-    m_buffer = NULL;
     m_nulval = NULL;
 
     // Return
@@ -374,13 +296,18 @@ void GFitsTableStrCol::init_members(void)
  * @brief Copy class members
  *
  * @param[in] column Column for which members should be copied.
+ *
+ * Sets the content of the vector column by copying from another column.
+ * If the code is compiled with the small memory option, and if the source
+ * column has not yet been loaded, then we only load the column temporarily
+ * for copying purposes and release it again once copying is finished.
  ***************************************************************************/
-void GFitsTableStrCol::copy_members(const GFitsTableStrCol& column)
+void GFitsTableFloatCol::copy_members(const GFitsTableFloatCol& column)
 {
     // Fetch column data if not yet fetched. The casting circumvents the
     // const correctness
-    if (column.m_data == NULL)
-        ((GFitsTableStrCol*)(&column))->fetch_data();
+    bool not_loaded = (column.m_data == NULL);
+    if (not_loaded) ((GFitsTableFloatCol*)(&column))->fetch_data();
 
     // Copy attributes
     m_type = column.m_type;
@@ -393,11 +320,13 @@ void GFitsTableStrCol::copy_members(const GFitsTableStrCol& column)
             m_data[i] = column.m_data[i];
     }
 
-    // Copy nulval data
-    if (column.m_nulval != NULL) {
-        m_nulval = new char[m_width+1];
-        strncpy(m_nulval, column.m_nulval, m_width);
-    }
+    // Copy NULL value
+    alloc_nulval(column.m_nulval);
+
+    // Small memory option: release column if it was fetch above
+    #if defined(G_SMALL_MEMORY)
+    if (not_loaded) ((GFitsTableFloatCol*)(&column))->release_data();
+    #endif
 
     // Return
     return;
@@ -407,7 +336,7 @@ void GFitsTableStrCol::copy_members(const GFitsTableStrCol& column)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GFitsTableStrCol::free_members(void)
+void GFitsTableFloatCol::free_members(void)
 {
     // Free memory
     if (m_data   != NULL) delete [] m_data;
@@ -417,40 +346,8 @@ void GFitsTableStrCol::free_members(void)
     m_data   = NULL;
     m_nulval = NULL;
 
-    // Free buffer
-    free_buffer();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Save table column into FITS file
- *
- * The table column is only saved if it is linked to a FITS file and if the
- * data are indeed present in the class instance. This avoids saving of data
- * that have not been modified.
- *
- * Refer to GFitsTableCol::save_column() for more information.
- ***************************************************************************/
-void GFitsTableStrCol::save(void)
-{
-    // Free buffer
-    free_buffer();
-
-    // Allocate buffer
-    alloc_buffer();
-
-    // Transfer string into buffer
-    for (int i = 0; i < m_size; ++i)
-       strncpy(m_buffer[i], m_data[i].c_str(), m_width);
-
-    // Save column
-    save_column();
-
-    // Free buffer
-    free_buffer();
+    // Reset load flag
+    m_size = 0;
 
     // Return
     return;
@@ -460,22 +357,22 @@ void GFitsTableStrCol::save(void)
 /***********************************************************************//**
  * @brief Clone column
  ***************************************************************************/
-GFitsTableStrCol* GFitsTableStrCol::clone(void) const
+GFitsTableFloatCol* GFitsTableFloatCol::clone(void) const
 {
-    return new GFitsTableStrCol(*this);
+    return new GFitsTableFloatCol(*this);
 }
 
 
 /***********************************************************************//**
  * @brief Returns format string of ASCII table
  ***************************************************************************/
-std::string GFitsTableStrCol::ascii_format(void) const
+std::string GFitsTableFloatCol::ascii_format(void) const
 {
     // Initialize format string
     std::string format;
 
     // Set type code
-    format.append("A");
+    format.append("F");
 
     // Set width
     format.append(str(m_width));
@@ -488,20 +385,16 @@ std::string GFitsTableStrCol::ascii_format(void) const
 /***********************************************************************//**
  * @brief Returns format string of binary table
  ***************************************************************************/
-std::string GFitsTableStrCol::binary_format(void) const
+std::string GFitsTableFloatCol::binary_format(void) const
 {
     // Initialize format string
     std::string format;
 
     // Set number of elements
-    format.append(str(m_repeat));
+    format.append(str(m_number));
 
     // Set type code
-    format.append("A");
-
-    // If there are substrings then add width of substring
-    if (m_repeat > m_width)
-        format.append(str(m_width));
+    format.append("E");
 
     // Return format
     return format;
@@ -511,9 +404,9 @@ std::string GFitsTableStrCol::binary_format(void) const
 /***********************************************************************//**
  * @brief Allocates column data
  ***************************************************************************/
-void GFitsTableStrCol::alloc_data(void)
+void GFitsTableFloatCol::alloc_data(void)
 {
-    // Free memory
+    // Free any existing memory
     if (m_data != NULL) delete [] m_data;
 
     // Mark pointer as free
@@ -521,7 +414,46 @@ void GFitsTableStrCol::alloc_data(void)
 
     // Allocate new data
     if (m_size > 0)
-        m_data = new std::string[m_size];
+        m_data = new float[m_size];
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Release column data
+ ***************************************************************************/
+void GFitsTableFloatCol::release_data(void)
+{
+    // Free any existing memory
+    if (m_data != NULL) delete [] m_data;
+
+    // Mark pointer as free and reset loaded vector size
+    m_data = NULL;
+    m_size = 0;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Allocates null value
+ ***************************************************************************/
+void GFitsTableFloatCol::alloc_nulval(const float* value)
+{
+    // Free any existing memory
+    if (m_nulval != NULL) delete m_nulval;
+
+    // Mark pointer as free
+    m_nulval = NULL;
+
+    // If we have valid value, allocate and set nul value
+    if (value != NULL) {
+        m_nulval  = new float;
+        *m_nulval = *value;
+    }
 
     // Return
     return;
@@ -531,93 +463,12 @@ void GFitsTableStrCol::alloc_data(void)
 /***********************************************************************//**
  * @brief Initialise column data
  ***************************************************************************/
-void GFitsTableStrCol::init_data(void)
+void GFitsTableFloatCol::init_data(void)
 {
     // Initialise data if they exist
     if (m_data != NULL) {
         for (int i = 0; i < m_size; ++i)
-            m_data[i].clear();
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Fetch column data
- *
- * If a FITS file is attached to the column the data are loaded into memory
- * from the FITS file. If no FITS file is attached, memory is allocated
- * to hold the column data and all cells are set to 0.
- *
- * Refer to GFitsTableCol::load_column for more information.
- ***************************************************************************/
-void GFitsTableStrCol::fetch_data(void)
-{
-    // Calculate size of memory
-    m_size = m_number * m_length;
-
-    // Free old buffer memory
-    free_buffer();
-
-    // Allocate buffer memory
-    alloc_buffer();
-
-    // Save column
-    load_column();
-
-    // Extract string from buffer
-    for (int i = 0; i < m_size; ++i) {
-       if (m_buffer[i] != NULL)
-           m_data[i].assign(m_buffer[i]);
-    }
-
-    // Free buffer memory
-    free_buffer();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Allocate buffer memory
- ***************************************************************************/
-void GFitsTableStrCol::alloc_buffer(void)
-{
-    // Allocate buffer memory
-    if (m_size > 0) {
-        m_buffer = new char*[m_size];
-        for (int i = 0; i < m_size; ++i)
-            m_buffer[i] = new char[m_width+1];
-    }
-
-    // Initialise buffer
-    if (m_buffer != NULL) {
-        for (int i = 0; i < m_size; ++i) {
-            for (int j = 0; j <= m_width; ++j)
-                (m_buffer[i])[j] = '\0';
-        }
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Free buffer memory
- ***************************************************************************/
-void GFitsTableStrCol::free_buffer(void)
-{
-    // If there was a buffer allocated then free it
-    if (m_buffer != NULL) {
-        for (int i = 0; i < m_size; ++i) {
-            if (m_buffer[i] != NULL) delete [] m_buffer[i];
-        }
-        delete [] m_buffer;
-        m_buffer = NULL;
+            m_data[i] = 0.0;
     }
 
     // Return
@@ -627,7 +478,7 @@ void GFitsTableStrCol::free_buffer(void)
 
 /*==========================================================================
  =                                                                         =
- =                                 Friends                                 =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
 
@@ -637,7 +488,7 @@ void GFitsTableStrCol::free_buffer(void)
  * @param[in] os Output stream.
  * @param[in] column Column to put in output stream.
  ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GFitsTableStrCol& column)
+std::ostream& operator<< (std::ostream& os, const GFitsTableFloatCol& column)
 {
     // Dump column in output stream
     column.dump_column(os, column.m_data);

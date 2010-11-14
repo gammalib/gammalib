@@ -27,7 +27,7 @@
 #include "GFits.hpp"
 #include "GFitsHDU.hpp"
 #include "GFitsBinTable.hpp"
-#include "GFitsTableDblCol.hpp"
+#include "GFitsTableDoubleCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_EMIN                                          "GEbounds::emin(int)"
@@ -381,8 +381,8 @@ void GEbounds::read(GFitsHDU* hdu)
 void GEbounds::write(GFits* file, const std::string& extname)
 {
     // Create energy boundary columns
-    GFitsTableDblCol cemin = GFitsTableDblCol("E_MIN", m_num);
-    GFitsTableDblCol cemax = GFitsTableDblCol("E_MAX", m_num);
+    GFitsTableDoubleCol cemin = GFitsTableDoubleCol("E_MIN", m_num);
+    GFitsTableDoubleCol cemax = GFitsTableDoubleCol("E_MAX", m_num);
 
     // Fill energy boundary columns
     for (int i = 0; i < m_num; ++i) {

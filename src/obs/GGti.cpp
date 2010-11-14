@@ -26,7 +26,7 @@
 #include "GFits.hpp"
 #include "GFitsHDU.hpp"
 #include "GFitsBinTable.hpp"
-#include "GFitsTableDblCol.hpp"
+#include "GFitsTableDoubleCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_TSTART                                          "GGti::tstart(int)"
@@ -354,8 +354,8 @@ void GGti::read(GFitsHDU* hdu)
 void GGti::write(GFits* file, const std::string& extname)
 {
     // Create GTI columns
-    GFitsTableDblCol cstart = GFitsTableDblCol("START", m_num);
-    GFitsTableDblCol cstop  = GFitsTableDblCol("STOP", m_num);
+    GFitsTableDoubleCol cstart = GFitsTableDoubleCol("START", m_num);
+    GFitsTableDoubleCol cstop  = GFitsTableDoubleCol("STOP", m_num);
 
     // Fill GTI columns
     for (int i = 0; i < m_num; ++i) {

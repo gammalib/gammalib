@@ -27,7 +27,7 @@
 #include "GWcsCAR.hpp"
 #include "GWcsHPX.hpp"
 #include "GFits.hpp"
-#include "GFitsTableDblCol.hpp"
+#include "GFitsTableDoubleCol.hpp"
 #include "GFitsImageDbl.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -1250,7 +1250,7 @@ GFitsHDU* GSkymap::create_healpix_hdu(void)
         int number = m_num_maps;
 
         // Create column to hold Healpix data
-        GFitsTableDblCol column = GFitsTableDblCol("DATA", rows, number);
+        GFitsTableDoubleCol column = GFitsTableDoubleCol("DATA", rows, number);
 
         // Fill data into column
         double* ptr = m_pixels;

@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GFitsTableLogCol.i  - FITS table logical column class SWIG definition  *
+ * GFitsTableStringCol.i  - FITS table string column class SWIG definition *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -11,43 +11,44 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GFitsTableLogCol.i
- * @brief GFitsTableLogCol class SWIG file.
+ * @file GFitsTableStringCol.i
+ * @brief GFitsTableStringCol class SWIG file.
  * @author J. Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GFitsTableLogCol.hpp"
+#include "GFitsTableStringCol.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GFitsTableLogCol
+ * @class GFitsTableStringCol
  *
- * @brief SWIG interface for FITS table logical column
+ * @brief SWIG interface for FITS table string column
  ***************************************************************************/
-class GFitsTableLogCol : public GFitsTableCol {
+class GFitsTableStringCol : public GFitsTableCol {
 public:
     // Constructors and destructors
-    GFitsTableLogCol();
-    GFitsTableLogCol(const std::string& name, const int& length,
-                     const int& size = 1);
-    GFitsTableLogCol(const GFitsTableLogCol& column);
-    virtual ~GFitsTableLogCol();
+    GFitsTableStringCol(void);
+    GFitsTableStringCol(const std::string& name, const int& length,
+                        const int& width, const int& size = 1);
+    GFitsTableStringCol(const GFitsTableStringCol& column);
+    virtual ~GFitsTableStringCol(void);
 
     // Methods
-    std::string string(const int& row, const int& col = 0);
-    double      real(const int& row, const int& col = 0);
-    int         integer(const int& row, const int& col = 0);
-    char*       data(void);
-    void        set_nullval(const char* value);
+    std::string  string(const int& row, const int& col = 0);
+    double       real(const int& row, const int& col = 0);
+    int          integer(const int& row, const int& col = 0);
+    std::string* data(void) { return m_data; }
+    void         nullval(const std::string value);
+    char*        nullval(void) { return m_nulval; }
 };
 
 
 /***********************************************************************//**
- * @brief GFitsTableLogCol class extension
+ * @brief GFitsTableStringCol class extension
  ***************************************************************************/
-%extend GFitsTableLogCol {
+%extend GFitsTableStringCol {
     char *__str__() {
         static char str_buffer[1001];
         std::ostringstream buffer;
@@ -57,19 +58,19 @@ public:
 	    str_buffer[1000] = '\0';
 	    return str_buffer;
     }
-    char get(const int& row) {
+    std::string get(const int& row) {
         return (*self)(row);
     }
-    char get(const int& row, const int& col) {
+    std::string get(const int& row, const int& col) {
         return (*self)(row, col);
     }
-    void set(const int& row, const char& value) {
+    void set(const int& row, const std::string& value) {
         (*self)(row) = value;
     }
-    void set(const int& row, const int& col, const char& value) {
+    void set(const int& row, const int& col, const std::string& value) {
         (*self)(row, col) = value;
     }
-    GFitsTableLogCol copy() {
+    GFitsTableStringCol copy() {
         return (*self);
     }
 };

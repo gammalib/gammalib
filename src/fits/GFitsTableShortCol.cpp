@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GFitsTableBitCol.cpp  - FITS table Bit column class           *
+ *         GFitsTableShortCol.cpp  - FITS table short column class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,7 +18,7 @@
 #include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GFitsTableBitCol.hpp"
+#include "GFitsTableShortCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -31,14 +31,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                        Constructors/destructors                         =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GFitsTableBitCol::GFitsTableBitCol(void) : GFitsTableCol()
+GFitsTableShortCol::GFitsTableShortCol(void) : GFitsTableCol()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -55,10 +55,10 @@ GFitsTableBitCol::GFitsTableBitCol(void) : GFitsTableCol()
  * @param[in] length Length of column.
  * @param[in] size Vector size of column.
  ***************************************************************************/
-GFitsTableBitCol::GFitsTableBitCol(const std::string& name,
-                                   const int&         length,
-                                   const int&         size)
-                                   : GFitsTableCol(name, length, size, 2)
+GFitsTableShortCol::GFitsTableShortCol(const std::string& name,
+                                       const int&         length,
+                                       const int&         size)
+                                       : GFitsTableCol(name, length, size, 2)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -73,7 +73,7 @@ GFitsTableBitCol::GFitsTableBitCol(const std::string& name,
  *
  * @param[in] column Column from which class instance should be built.
  ***************************************************************************/
-GFitsTableBitCol::GFitsTableBitCol(const GFitsTableBitCol& column) 
+GFitsTableShortCol::GFitsTableShortCol(const GFitsTableShortCol& column)
                                                       : GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
@@ -90,7 +90,7 @@ GFitsTableBitCol::GFitsTableBitCol(const GFitsTableBitCol& column)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GFitsTableBitCol::~GFitsTableBitCol(void)
+GFitsTableShortCol::~GFitsTableShortCol(void)
 {
     // Free members
     free_members();
@@ -102,7 +102,7 @@ GFitsTableBitCol::~GFitsTableBitCol(void)
 
 /*==========================================================================
  =                                                                         =
- =                               Operators                                 =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -111,7 +111,7 @@ GFitsTableBitCol::~GFitsTableBitCol(void)
  *
  * @param[in] column Column which should be assigned
  ***************************************************************************/
-GFitsTableBitCol& GFitsTableBitCol::operator= (const GFitsTableBitCol& column)
+GFitsTableShortCol& GFitsTableShortCol::operator= (const GFitsTableShortCol& column)
 {
     // Execute only if object is not identical
     if (this != &column) {
@@ -143,7 +143,7 @@ GFitsTableBitCol& GFitsTableBitCol::operator= (const GFitsTableBitCol& column)
  *
  * Provides access to data in a column.
  ***************************************************************************/
-char& GFitsTableBitCol::operator() (const int& row, const int& inx)
+short& GFitsTableShortCol::operator() (const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
@@ -161,10 +161,10 @@ char& GFitsTableBitCol::operator() (const int& row, const int& inx)
  *
  * Provides access to data in a column.
  ***************************************************************************/
-const char& GFitsTableBitCol::operator() (const int& row, const int& inx) const
+const short& GFitsTableShortCol::operator() (const int& row, const int& inx) const
 {
     // If data are not available then load them now
-    if (m_data == NULL) ((GFitsTableBitCol*)this)->fetch_data();
+    if (m_data == NULL) ((GFitsTableShortCol*)this)->fetch_data();
 
     // Return data bin
     return m_data[offset(row, inx)];
@@ -173,7 +173,7 @@ const char& GFitsTableBitCol::operator() (const int& row, const int& inx) const
 
 /*==========================================================================
  =                                                                         =
- =                             Public methods                              =
+ =                               Public methods                            =
  =                                                                         =
  ==========================================================================*/
 
@@ -185,16 +185,17 @@ const char& GFitsTableBitCol::operator() (const int& row, const int& inx) const
  *
  * Returns value of specified row and vector index as string.
  ***************************************************************************/
-std::string GFitsTableBitCol::string(const int& row, const int& inx)
+std::string GFitsTableShortCol::string(const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
 
-    // Convert bit into string
-    std::string result = (m_data[offset(row,inx)]) ? "1" : "0";
-    
+    // Convert short into string
+    std::ostringstream s_value;
+    s_value << m_data[offset(row,inx)];
+
     // Return value
-    return result;
+    return s_value.str();
 }
 
 
@@ -206,12 +207,12 @@ std::string GFitsTableBitCol::string(const int& row, const int& inx)
  *
  * Returns value of specified row and vector index as double precision.
  ***************************************************************************/
-double GFitsTableBitCol::real(const int& row, const int& inx)
+double GFitsTableShortCol::real(const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
 
-    // Convert bit into double
+    // Convert short into double
     double value = (double)m_data[offset(row,inx)];
 
     // Return value
@@ -227,12 +228,12 @@ double GFitsTableBitCol::real(const int& row, const int& inx)
  *
  * Returns value of specified row and vector index as integer.
  ***************************************************************************/
-int GFitsTableBitCol::integer(const int& row, const int& inx)
+int GFitsTableShortCol::integer(const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
 
-    // Convert bit into int
+    // Convert short into int
     int value = (int)m_data[offset(row,inx)];
 
     // Return value
@@ -254,7 +255,7 @@ int GFitsTableBitCol::integer(const int& row, const int& inx)
  * is also not desired. We thus have to develop a method to update the
  * column information for a new NULL value in place ...
  ***************************************************************************/
-void GFitsTableBitCol::nullval(const char* value)
+void GFitsTableShortCol::nullval(const short* value)
 {
     // Allocate nul value
     alloc_nulval(value);
@@ -279,10 +280,10 @@ void GFitsTableBitCol::nullval(const char* value)
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GFitsTableBitCol::init_members(void)
+void GFitsTableShortCol::init_members(void)
 {
     // Initialise members
-    m_type   = __TBIT;
+    m_type   = __TSHORT;
     m_data   = NULL;
     m_nulval = NULL;
 
@@ -295,13 +296,18 @@ void GFitsTableBitCol::init_members(void)
  * @brief Copy class members
  *
  * @param[in] column Column for which members should be copied.
+ *
+ * Sets the content of the vector column by copying from another column.
+ * If the code is compiled with the small memory option, and if the source
+ * column has not yet been loaded, then we only load the column temporarily
+ * for copying purposes and release it again once copying is finished.
  ***************************************************************************/
-void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
+void GFitsTableShortCol::copy_members(const GFitsTableShortCol& column)
 {
     // Fetch column data if not yet fetched. The casting circumvents the
     // const correctness
     bool not_loaded = (column.m_data == NULL);
-    if (not_loaded) ((GFitsTableBitCol*)(&column))->fetch_data();
+    if (not_loaded) ((GFitsTableShortCol*)(&column))->fetch_data();
 
     // Copy attributes
     m_type = column.m_type;
@@ -319,7 +325,7 @@ void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
 
     // Small memory option: release column if it was fetch above
     #if defined(G_SMALL_MEMORY)
-    if (not_loaded) ((GFitsTableBitCol*)(&column))->release_data();
+    if (not_loaded) ((GFitsTableShortCol*)(&column))->release_data();
     #endif
 
     // Return
@@ -330,7 +336,7 @@ void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GFitsTableBitCol::free_members(void)
+void GFitsTableShortCol::free_members(void)
 {
     // Free memory
     if (m_data   != NULL) delete [] m_data;
@@ -351,22 +357,22 @@ void GFitsTableBitCol::free_members(void)
 /***********************************************************************//**
  * @brief Clone column
  ***************************************************************************/
-GFitsTableBitCol* GFitsTableBitCol::clone(void) const
+GFitsTableShortCol* GFitsTableShortCol::clone(void) const
 {
-    return new GFitsTableBitCol(*this);
+    return new GFitsTableShortCol(*this);
 }
 
 
 /***********************************************************************//**
  * @brief Returns format string of ASCII table
  ***************************************************************************/
-std::string GFitsTableBitCol::ascii_format(void) const
+std::string GFitsTableShortCol::ascii_format(void) const
 {
     // Initialize format string
     std::string format;
 
     // Set type code
-    format.append("X");
+    format.append("I");
 
     // Set width
     format.append(str(m_width));
@@ -379,7 +385,7 @@ std::string GFitsTableBitCol::ascii_format(void) const
 /***********************************************************************//**
  * @brief Returns format string of binary table
  ***************************************************************************/
-std::string GFitsTableBitCol::binary_format(void) const
+std::string GFitsTableShortCol::binary_format(void) const
 {
     // Initialize format string
     std::string format;
@@ -388,7 +394,7 @@ std::string GFitsTableBitCol::binary_format(void) const
     format.append(str(m_number));
 
     // Set type code
-    format.append("X");
+    format.append("I");
 
     // Return format
     return format;
@@ -398,7 +404,7 @@ std::string GFitsTableBitCol::binary_format(void) const
 /***********************************************************************//**
  * @brief Allocates column data
  ***************************************************************************/
-void GFitsTableBitCol::alloc_data(void)
+void GFitsTableShortCol::alloc_data(void)
 {
     // Free any existing memory
     if (m_data != NULL) delete [] m_data;
@@ -408,7 +414,7 @@ void GFitsTableBitCol::alloc_data(void)
 
     // Allocate new data
     if (m_size > 0)
-        m_data = new char[m_size];
+        m_data = new short[m_size];
 
     // Return
     return;
@@ -418,7 +424,7 @@ void GFitsTableBitCol::alloc_data(void)
 /***********************************************************************//**
  * @brief Release column data
  ***************************************************************************/
-void GFitsTableBitCol::release_data(void)
+void GFitsTableShortCol::release_data(void)
 {
     // Free any existing memory
     if (m_data != NULL) delete [] m_data;
@@ -435,7 +441,7 @@ void GFitsTableBitCol::release_data(void)
 /***********************************************************************//**
  * @brief Allocates null value
  ***************************************************************************/
-void GFitsTableBitCol::alloc_nulval(const char* value)
+void GFitsTableShortCol::alloc_nulval(const short* value)
 {
     // Free any existing memory
     if (m_nulval != NULL) delete m_nulval;
@@ -445,7 +451,7 @@ void GFitsTableBitCol::alloc_nulval(const char* value)
 
     // If we have valid value, allocate and set nul value
     if (value != NULL) {
-        m_nulval  = new char;
+        m_nulval  = new short;
         *m_nulval = *value;
     }
 
@@ -457,7 +463,7 @@ void GFitsTableBitCol::alloc_nulval(const char* value)
 /***********************************************************************//**
  * @brief Initialise column data
  ***************************************************************************/
-void GFitsTableBitCol::init_data(void)
+void GFitsTableShortCol::init_data(void)
 {
     // Initialise data if they exist
     if (m_data != NULL) {
@@ -472,17 +478,17 @@ void GFitsTableBitCol::init_data(void)
 
 /*==========================================================================
  =                                                                         =
- =                                 Friends                                 =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param[in] os Output stream.
- * @param[in] column Column to put in output stream.
+ * @param[in] os Output stream
+ * @param[in] column Column to put in output stream
  ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GFitsTableBitCol& column)
+std::ostream& operator<< (std::ostream& os, const GFitsTableShortCol& column)
 {
     // Dump column in output stream
     column.dump_column(os, column.m_data);

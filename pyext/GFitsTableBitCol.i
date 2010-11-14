@@ -1,7 +1,7 @@
 /***************************************************************************
- *   GFitsTableDblCol.i  - FITS table double column class SWIG definiton   *
+ *    GFitsTableBitCol.i  - FITS table bit column class SWIG definition    *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2010 by Jurgen Knodlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -11,65 +11,66 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GFitsTableDblCol.i
- * @brief GFitsTableDblCol class SWIG file.
+ * @file GFitsTableBitCol.i
+ * @brief GFitsTableBitCol class SWIG file.
  * @author J. Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GFitsTableDblCol.hpp"
+#include "GFitsTableBitCol.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GFitsTableDblCol
+ * @class GFitsTableBitCol
  *
- * @brief SWIG interface for FITS table double precision column
+ * @brief SWIG interface for FITS table logical column
  ***************************************************************************/
-class GFitsTableDblCol : public GFitsTableCol {
+class GFitsTableBitCol : public GFitsTableCol {
 public:
     // Constructors and destructors
-    GFitsTableDblCol();
-    GFitsTableDblCol(const std::string& name, const int& length,
+    GFitsTableBitCol(void);
+    GFitsTableBitCol(const std::string& name, const int& length,
                      const int& size = 1);
-    GFitsTableDblCol(const GFitsTableDblCol& column);
-    virtual ~GFitsTableDblCol();
+    GFitsTableBitCol(const GFitsTableBitCol& column);
+    virtual ~GFitsTableBitCol(void);
 
     // Methods
-    std::string string(const int& row, const int& inx = 0);
-    double      real(const int& row, const int& inx = 0);
-    int         integer(const int& row, const int& inx = 0);
-    double*     data(void);
-    void        set_nullval(const double* value);
+    std::string string(const int& row, const int& col = 0);
+    double      real(const int& row, const int& col = 0);
+    int         integer(const int& row, const int& col = 0);
+    char*       data(void) { return m_data; }
+    void        nullval(const char* value);
+    char*       nullval(void) { return m_nulval; }
 };
 
 
 /***********************************************************************//**
- * @brief GFitsTableDblCol class extension
+ * @brief GFitsTableBitCol class extension
  ***************************************************************************/
-%extend GFitsTableDblCol {
+%extend GFitsTableBitCol {
     char *__str__() {
         static char str_buffer[1001];
         std::ostringstream buffer;
         buffer << *self;
-        std::string str = buffer.str();
+	    std::string str = buffer.str();
         strncpy(str_buffer, (char*)str.c_str(), 1001);
-        str_buffer[1000] = '\0';
-        return str_buffer;
+	    str_buffer[1000] = '\0';
+	    return str_buffer;
     }
-    double get(const int& row) {
+    char get(const int& row) {
         return (*self)(row);
     }
-    double get(const int& row, const int& col) {
+    char get(const int& row, const int& col) {
         return (*self)(row, col);
     }
-    void set(const int& row, const double& value) {
+    void set(const int& row, const char& value) {
         (*self)(row) = value;
     }
-    void set(const int& row, const int& col, const double& value) {
+    void set(const int& row, const int& col, const char& value) {
         (*self)(row, col) = value;
     }
-    GFitsTableDblCol copy() {
+    GFitsTableBitCol copy() {
         return (*self);
     }
 };
