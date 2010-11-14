@@ -28,7 +28,6 @@
 #include "GFits.hpp"
 #include "GFitsHDU.hpp"
 #include "GFitsImageDbl.hpp"
-#include "GFitsTableFltCol.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */

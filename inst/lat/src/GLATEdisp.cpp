@@ -23,7 +23,6 @@
 #include "GLATResponse.hpp"
 #include "GLATPointing.hpp"
 #include "GFitsImageDbl.hpp"
-#include "GFitsTableFltCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_INIT_EDISP                             "GLATResponse::init_edisp()"
