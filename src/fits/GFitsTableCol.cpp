@@ -13,13 +13,16 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
 #include "GFitsTableCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_LOAD_COLUMN "GFitsTableCol::load_column(void*, void*)"
-#define G_SAVE_COLUMN "GFitsTableCol::save_column(void*, void*)"
+#define G_LOAD_COLUMN                          "GFitsTableCol::load_column()"
+#define G_SAVE_COLUMN                          "GFitsTableCol::save_column()"
 
 /* __ Macros _____________________________________________________________ */
 

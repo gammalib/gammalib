@@ -22,9 +22,9 @@
 #include "GFitsTableStrCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_STRING  "GFitsTableStrCol::string(const int&, const int&)"
-#define G_REAL    "GFitsTableStrCol::real(const int&, const int&)"
-#define G_INTEGER "GFitsTableStrCol::integer(const int&, const int&)"
+#define G_STRING           "GFitsTableStrCol::string(const int&, const int&)"
+#define G_REAL               "GFitsTableStrCol::real(const int&, const int&)"
+#define G_INTEGER         "GFitsTableStrCol::integer(const int&, const int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -35,7 +35,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                  GFitsTableStrCol constructors/destructors              =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
@@ -80,7 +80,7 @@ GFitsTableStrCol::GFitsTableStrCol(const std::string& name,
  * @param[in] column Column from which class instance should be built.
  ***************************************************************************/
 GFitsTableStrCol::GFitsTableStrCol(const GFitsTableStrCol& column) 
-                                   : GFitsTableCol(column)
+                                                      : GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -108,7 +108,7 @@ GFitsTableStrCol::~GFitsTableStrCol()
 
 /*==========================================================================
  =                                                                         =
- =                       GFitsTableStrCol operators                        =
+ =                                 Operators                               =
  =                                                                         =
  ==========================================================================*/
 
@@ -196,7 +196,7 @@ const std::string& GFitsTableStrCol::operator() (const int& row, const int& inx)
 
 /*==========================================================================
  =                                                                         =
- =                      GFitsTableStrCol public methods                    =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -350,7 +350,7 @@ void GFitsTableStrCol::set_nullval(const std::string& string)
 
 /*==========================================================================
  =                                                                         =
- =                      GFitsTableStrCol private methods                   =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -377,9 +377,18 @@ void GFitsTableStrCol::init_members(void)
  ***************************************************************************/
 void GFitsTableStrCol::copy_members(const GFitsTableStrCol& column)
 {
+    // Fetch column data if not yet fetched. The casting circumvents the
+    // const correctness
+    if (column.m_data == NULL)
+        ((GFitsTableStrCol*)(&column))->fetch_data();
+
+    // Copy attributes
+    m_type = column.m_type;
+    m_size = column.m_size;
+
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
-        m_data = new std::string[m_size];
+        alloc_data();
         for (int i = 0; i < m_size; ++i)
             m_data[i] = column.m_data[i];
     }
@@ -618,15 +627,15 @@ void GFitsTableStrCol::free_buffer(void)
 
 /*==========================================================================
  =                                                                         =
- =                          GFitsTableStrCol friends                       =
+ =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param[in] os Output stream
- * @param[in] column Column to put in output stream
+ * @param[in] os Output stream.
+ * @param[in] column Column to put in output stream.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFitsTableStrCol& column)
 {
@@ -636,10 +645,3 @@ std::ostream& operator<< (std::ostream& os, const GFitsTableStrCol& column)
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                  Other functions used by GFitsTableStrCol               =
- =                                                                         =
- ==========================================================================*/

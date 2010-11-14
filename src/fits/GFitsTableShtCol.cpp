@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GFitsTableShtCol.cpp  - FITS table short column class         *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,19 +9,21 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsTableShtCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_STRING  "GFitsTableShtCol::string(const int&, const int&)"
-#define G_REAL    "GFitsTableShtCol::real(const int&, const int&)"
-#define G_INTEGER "GFitsTableShtCol::integer(const int&, const int&)"
+#define G_STRING           "GFitsTableShtCol::string(const int&, const int&)"
+#define G_REAL               "GFitsTableShtCol::real(const int&, const int&)"
+#define G_INTEGER         "GFitsTableShtCol::integer(const int&, const int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -32,7 +34,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                  GFitsTableShtCol constructors/destructors              =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -74,7 +76,8 @@ GFitsTableShtCol::GFitsTableShtCol(const std::string& name,
  *
  * @param[in] column Column from which class instance should be built.
  ***************************************************************************/
-GFitsTableShtCol::GFitsTableShtCol(const GFitsTableShtCol& column) : GFitsTableCol(column)
+GFitsTableShtCol::GFitsTableShtCol(const GFitsTableShtCol& column)
+                                                      : GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -102,7 +105,7 @@ GFitsTableShtCol::~GFitsTableShtCol()
 
 /*==========================================================================
  =                                                                         =
- =                       GFitsTableShtCol operators                        =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -190,7 +193,7 @@ const short& GFitsTableShtCol::operator() (const int& row, const int& inx)
 
 /*==========================================================================
  =                                                                         =
- =                      GFitsTableShtCol public methods                    =
+ =                               Public methods                            =
  =                                                                         =
  ==========================================================================*/
 
@@ -346,7 +349,7 @@ void GFitsTableShtCol::set_nullval(const short* value)
 
 /*==========================================================================
  =                                                                         =
- =                      GFitsTableShtCol private methods                   =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -372,12 +375,18 @@ void GFitsTableShtCol::init_members(void)
  ***************************************************************************/
 void GFitsTableShtCol::copy_members(const GFitsTableShtCol& column)
 {
+    // Fetch column data if not yet fetched. The casting circumvents the
+    // const correctness
+    if (column.m_data == NULL)
+        ((GFitsTableShtCol*)(&column))->fetch_data();
+
     // Copy attributes
+    m_type = column.m_type;
+    m_size = column.m_size;
 
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
-        if (m_data != NULL) delete [] m_data;
-        m_data = new short[m_size];
+        alloc_data();
         for (int i = 0; i < m_size; ++i)
             m_data[i] = column.m_data[i];
     }
@@ -535,7 +544,7 @@ void GFitsTableShtCol::fetch_data(void)
 
 /*==========================================================================
  =                                                                         =
- =                          GFitsTableShtCol friends                       =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
 
@@ -553,10 +562,3 @@ std::ostream& operator<< (std::ostream& os, const GFitsTableShtCol& column)
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                  Other functions used by GFitsTableShtCol               =
- =                                                                         =
- ==========================================================================*/

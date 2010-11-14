@@ -374,12 +374,18 @@ void GFitsTableBitCol::init_members(void)
  ***************************************************************************/
 void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
 {
+    // Fetch column data if not yet fetched. The casting circumvents the
+    // const correctness
+    if (column.m_data == NULL)
+        ((GFitsTableBitCol*)(&column))->fetch_data();
+
     // Copy attributes
+    m_type = column.m_type;
+    m_size = column.m_size;
 
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
-        if (m_data != NULL) delete [] m_data;
-        m_data = new char[m_size];
+        alloc_data();
         for (int i = 0; i < m_size; ++i)
             m_data[i] = column.m_data[i];
     }

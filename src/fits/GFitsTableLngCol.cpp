@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GFitsTableLngCol.cpp  - FITS table long column class          *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,19 +9,21 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsTableLngCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_STRING  "GFitsTableLngCol::string(const int&, const int&)"
-#define G_REAL    "GFitsTableLngCol::real(const int&, const int&)"
-#define G_INTEGER "GFitsTableLngCol::integer(const int&, const int&)"
+#define G_STRING           "GFitsTableLngCol::string(const int&, const int&)"
+#define G_REAL               "GFitsTableLngCol::real(const int&, const int&)"
+#define G_INTEGER         "GFitsTableLngCol::integer(const int&, const int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -32,7 +34,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                  GFitsTableLngCol constructors/destructors              =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -103,7 +105,7 @@ GFitsTableLngCol::~GFitsTableLngCol()
 
 /*==========================================================================
  =                                                                         =
- =                       GFitsTableLngCol operators                        =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -191,7 +193,7 @@ const long& GFitsTableLngCol::operator() (const int& row, const int& inx)
 
 /*==========================================================================
  =                                                                         =
- =                      GFitsTableLngCol public methods                    =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -348,7 +350,7 @@ void GFitsTableLngCol::set_nullval(const long* value)
 
 /*==========================================================================
  =                                                                         =
- =                      GFitsTableLngCol private methods                   =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -374,12 +376,18 @@ void GFitsTableLngCol::init_members(void)
  ***************************************************************************/
 void GFitsTableLngCol::copy_members(const GFitsTableLngCol& column)
 {
+    // Fetch column data if not yet fetched. The casting circumvents the
+    // const correctness
+    if (column.m_data == NULL)
+        ((GFitsTableLngCol*)(&column))->fetch_data();
+
     // Copy attributes
+    m_type = column.m_type;
+    m_size = column.m_size;
 
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
-        if (m_data != NULL) delete [] m_data;
-        m_data = new long[m_size];
+        alloc_data();
         for (int i = 0; i < m_size; ++i)
             m_data[i] = column.m_data[i];
     }
@@ -537,15 +545,15 @@ void GFitsTableLngCol::fetch_data(void)
 
 /*==========================================================================
  =                                                                         =
- =                          GFitsTableLngCol friends                       =
+ =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param[in] os Output stream
- * @param[in] column Column to put in output stream
+ * @param[in] os Output stream.
+ * @param[in] column Column to put in output stream.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFitsTableLngCol& column)
 {
@@ -555,10 +563,3 @@ std::ostream& operator<< (std::ostream& os, const GFitsTableLngCol& column)
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                  Other functions used by GFitsTableLngCol               =
- =                                                                         =
- ==========================================================================*/

@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
@@ -377,12 +376,18 @@ void GFitsTableLlgCol::init_members(void)
  ***************************************************************************/
 void GFitsTableLlgCol::copy_members(const GFitsTableLlgCol& column)
 {
+    // Fetch column data if not yet fetched. The casting circumvents the
+    // const correctness
+    if (column.m_data == NULL)
+        ((GFitsTableLlgCol*)(&column))->fetch_data();
+
     // Copy attributes
+    m_type = column.m_type;
+    m_size = column.m_size;
 
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
-        if (m_data != NULL) delete [] m_data;
-        m_data = new long long[m_size];
+        alloc_data();
         for (int i = 0; i < m_size; ++i)
             m_data[i] = column.m_data[i];
     }

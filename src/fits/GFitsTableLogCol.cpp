@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsTableLogCol.cpp  - FITS table logical column class         *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,19 +9,21 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsTableLogCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_STRING  "GFitsTableLogCol::string(const int&, const int&)"
-#define G_REAL    "GFitsTableLogCol::real(const int&, const int&)"
-#define G_INTEGER "GFitsTableLogCol::integer(const int&, const int&)"
+#define G_STRING           "GFitsTableLogCol::string(const int&, const int&)"
+#define G_REAL               "GFitsTableLogCol::real(const int&, const int&)"
+#define G_INTEGER         "GFitsTableLogCol::integer(const int&, const int&)"
 
 /* __ Macros _____________________________________________________________ */
 
