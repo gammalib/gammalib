@@ -22,14 +22,17 @@
  *
  * @param[in] origin Method that throws the error.
  * @param[in] status cfitsio status.
+ * @param[in] message Optional error message.
  ***************************************************************************/
-GException::fits_error::fits_error(std::string origin, int status)
+GException::fits_error::fits_error(std::string origin, 
+                                   int         status,
+                                   std::string message)
 {
     m_origin  = origin;
     std::ostringstream s_error;
     char err_text[31];
     __ffgerr(status, err_text);
-    s_error << err_text << " (status=" << status << ")";
+    s_error << err_text << " (status=" << status << ") " + message;
     m_message = s_error.str();
 }
 

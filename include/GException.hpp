@@ -149,7 +149,7 @@ public:
     // General FITS error
     class fits_error : public GExceptionHandler {
     public:
-        fits_error(std::string origin, int status);
+        fits_error(std::string origin, int status, std::string message = "");
     };
 
     // FITS file open error
