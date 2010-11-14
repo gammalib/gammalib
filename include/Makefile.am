@@ -56,15 +56,15 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GFitsBinTable.hpp \
                      GFitsTableCol.hpp \
                      GFitsTableBitCol.hpp \
-                     GFitsTableLogCol.hpp \
-                     GFitsTableStrCol.hpp \
-                     GFitsTableUStCol.hpp \
-                     GFitsTableShtCol.hpp \
-                     GFitsTableULgCol.hpp \
-                     GFitsTableLngCol.hpp \
-                     GFitsTableLlgCol.hpp \
-                     GFitsTableFltCol.hpp \
-                     GFitsTableDblCol.hpp \
+                     GFitsTableBoolCol.hpp \
+                     GFitsTableStringCol.hpp \
+                     GFitsTableUShortCol.hpp \
+                     GFitsTableShortCol.hpp \
+                     GFitsTableULongCol.hpp \
+                     GFitsTableLongCol.hpp \
+                     GFitsTableLongLongCol.hpp \
+                     GFitsTableFloatCol.hpp \
+                     GFitsTableDoubleCol.hpp \
                      GFitsHDU.hpp \
                      GFits.hpp \
                      GFitsCfitsio.hpp \
