@@ -231,7 +231,7 @@ public:
     // FITS unknown column type
     class fits_unknown_coltype : public GExceptionHandler {
     public:
-        fits_unknown_coltype(std::string origin, int type);
+        fits_unknown_coltype(std::string origin, std::string colname, int type);
     };
 
     // FITS bad column length

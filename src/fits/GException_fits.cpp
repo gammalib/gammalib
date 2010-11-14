@@ -255,13 +255,15 @@ GException::fits_unknown_tabtype::fits_unknown_tabtype(std::string origin,
  * @brief FITS error: Column type is unknown
  *
  * @param[in] origin Method that throws the error.
+ * @param[in] colname Column name.
  * @param[in] type Specified column type.
  ***************************************************************************/
 GException::fits_unknown_coltype::fits_unknown_coltype(std::string origin,
+                                                       std::string colname,
                                                        int         type)
 {
     m_origin  = origin;
-    m_message = "Column type '" + str(type) + "' is unknown";
+    m_message = "Column \""+colname+"\" has unsupported typecode="+str(type);
 }
 
 
