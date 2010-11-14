@@ -28,7 +28,7 @@
 #include "GFitsTableBitCol.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GFitsTableDoubleCol.hpp"
-#include "GFitsTableLongCol.hpp"
+#include "GFitsTableULongCol.hpp"
 #include "GFitsTableShortCol.hpp"
 #include "GFitsTableStringCol.hpp"
 
@@ -331,7 +331,7 @@ void GCTAEventList::load_events(GFitsHDU* hdu)
             m_events = new GCTAEventAtom[m_num];
 
             // Get column pointers
-            GFitsTableLongCol*   ptr_eid         = (GFitsTableLongCol*)hdu->column("EVENT_ID");
+            GFitsTableULongCol*  ptr_eid         = (GFitsTableULongCol*)hdu->column("EVENT_ID");
             GFitsTableDoubleCol* ptr_time        = (GFitsTableDoubleCol*)hdu->column("TIME");
             GFitsTableShortCol*  ptr_multip      = (GFitsTableShortCol*)hdu->column("MULTIP");
             GFitsTableFloatCol*  ptr_ra          = (GFitsTableFloatCol*)hdu->column("RA");
