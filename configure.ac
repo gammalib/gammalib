@@ -147,15 +147,27 @@ dnl =========================
 AC_CANONICAL_HOST
 
 
-dnl ==============================
-dnl Check for range cheking option
-dnl ==============================
+dnl =====================
+dnl Range checking option
+dnl =====================
 RANGE_CHECK="yes"
 AC_ARG_ENABLE(range_check,
              [  --enable-range-check    performs index range checking (default=yes)],
              [ RANGE_CHECK="$enableval" ])
 if test "x$RANGE_CHECK" = "xyes"; then
         AC_DEFINE([G_RANGE_CHECK], [1], [Define if range checking should be performed])
+fi
+
+
+dnl ===================
+dnl Small memory option
+dnl ===================
+SMALL_MEMORY="yes"
+AC_ARG_ENABLE(small_memory,
+             [  --enable-small-memory   optimizes code for small memory (default=yes)],
+             [ SMALL_MEMORY="$enableval" ])
+if test "x$SMALL_MEMORY" = "xyes"; then
+        AC_DEFINE([G_SMALL_MEMORY], [1], [Define if small memory optimization is selected])
 fi
 
 
