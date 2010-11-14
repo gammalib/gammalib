@@ -21,15 +21,15 @@
 #include "GTools.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableBitCol.hpp"
-#include "GFitsTableLogCol.hpp"
-#include "GFitsTableStrCol.hpp"
-#include "GFitsTableUStCol.hpp"
-#include "GFitsTableShtCol.hpp"
-#include "GFitsTableULgCol.hpp"
-#include "GFitsTableLngCol.hpp"
-#include "GFitsTableLlgCol.hpp"
-#include "GFitsTableFltCol.hpp"
-#include "GFitsTableDblCol.hpp"
+#include "GFitsTableBoolCol.hpp"
+#include "GFitsTableStringCol.hpp"
+#include "GFitsTableUShortCol.hpp"
+#include "GFitsTableShortCol.hpp"
+#include "GFitsTableULongCol.hpp"
+#include "GFitsTableLongCol.hpp"
+#include "GFitsTableLongLongCol.hpp"
+#include "GFitsTableFloatCol.hpp"
+#include "GFitsTableDoubleCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OPEN                                  "GFitsTable::open(fitsfile*)"
@@ -452,7 +452,7 @@ void GFitsTable::free_members(void)
  * @exception GException::fits_error
  *            A CFITSIO error occured during loading the table.
  * @exception GException::fits_unknown_coltype
- *            FITS column of unknown type has been found in the FITS file.
+ *            FITS column of unsupported type has been found in the FITS file.
  *
  * Builds a description of the table in memory.
  * Columns are not loaded but column descriptors are allocated.
@@ -520,10 +520,10 @@ void GFitsTable::open(__fitsfile* fptr)
             else if (typecode == __TINT && offset == 2147483648u)
                 typecode = __TUINT;
             else {
-std::cout << "GFitsTable::open => THROW EXCEPTION.";
-std::cout << " Column type " << typecode << " has associated TZERO=" << offset << std::endl;
-std::cout << " Column: " << value << std::endl;
-std::cout << "NEED TO DEBUG." << std::endl;            
+                std::ostringstream message;
+                message << "Column " << value << " has typecode " << typecode
+                        << " and unexpected associated TZERO=" << offset;
+                throw GException::fits_error(G_OPEN, 0, message.str());
             }
         }
         else
@@ -535,38 +535,36 @@ std::cout << "NEED TO DEBUG." << std::endl;
             m_columns[i] = new GFitsTableBitCol();
             break;
         case __TLOGICAL:
-            m_columns[i] = new GFitsTableLogCol();
+            m_columns[i] = new GFitsTableBoolCol();
             break;
         case __TSTRING:
-            m_columns[i] = new GFitsTableStrCol();
+            m_columns[i] = new GFitsTableStringCol();
             break;
         case __TUSHORT:
-            m_columns[i] = new GFitsTableUStCol();
+            m_columns[i] = new GFitsTableUShortCol();
             break;
         case __TSHORT:
-            m_columns[i] = new GFitsTableShtCol();
+            m_columns[i] = new GFitsTableShortCol();
             break;
         case __TULONG:
-            m_columns[i] = new GFitsTableULgCol();
+            m_columns[i] = new GFitsTableULongCol();
             break;
         case __TLONG:
-            m_columns[i] = new GFitsTableLngCol();
+            m_columns[i] = new GFitsTableLongCol();
             break;
         case __TFLOAT:
-            m_columns[i] = new GFitsTableFltCol();
+            m_columns[i] = new GFitsTableFloatCol();
             break;
         case __TLONGLONG:
-            m_columns[i] = new GFitsTableLlgCol();
+            m_columns[i] = new GFitsTableLongLongCol();
             break;
         case __TDOUBLE:
-            m_columns[i] = new GFitsTableDblCol();
+            m_columns[i] = new GFitsTableDoubleCol();
             break;
         default:
-std::cout << "GFitsTable::open => THROW EXCEPTION.";
-std::cout << " Column type " << typecode << " unknown.";
-std::cout << " Column: " << value << std::endl;
-std::cout << "NEED TO IMPLEMENT MORE METHODS AND TRACK DOWN THROW BUG." << std::endl;
-            throw GException::fits_unknown_coltype(G_OPEN, typecode);
+            std::ostringstream colname;
+            colname << value;
+            throw GException::fits_unknown_coltype(G_OPEN, colname.str(), typecode);
             break;
         }
 
@@ -971,31 +969,39 @@ std::ostream& operator<< (std::ostream& os, const GFitsTable& table)
                        << std::endl;
                     break;
                 case __TLOGICAL:
-                    os << " " << *((GFitsTableLogCol*)table.m_columns[i]) 
+                    os << " " << *((GFitsTableBoolCol*)table.m_columns[i]) 
                        << std::endl;
                     break;
                 case __TSTRING:
-                    os << " " << *((GFitsTableStrCol*)table.m_columns[i]) 
+                    os << " " << *((GFitsTableStringCol*)table.m_columns[i]) 
+                       << std::endl;
+                    break;
+                case __TUSHORT:
+                    os << " " << *((GFitsTableUShortCol*)table.m_columns[i]) 
                        << std::endl;
                     break;
                 case __TSHORT:
-                    os << " " << *((GFitsTableShtCol*)table.m_columns[i]) 
+                    os << " " << *((GFitsTableShortCol*)table.m_columns[i]) 
+                       << std::endl;
+                    break;
+                case __TULONG:
+                    os << " " << *((GFitsTableULongCol*)table.m_columns[i]) 
                        << std::endl;
                     break;
                 case __TLONG:
-                    os << " " << *((GFitsTableLngCol*)table.m_columns[i]) 
+                    os << " " << *((GFitsTableLongCol*)table.m_columns[i]) 
                        << std::endl;
                     break;
                 case __TFLOAT:
-                    os << " " << *((GFitsTableFltCol*)table.m_columns[i]) 
+                    os << " " << *((GFitsTableFloatCol*)table.m_columns[i]) 
                        << std::endl;
                     break;
                 case __TLONGLONG:
-                    os << " " << *((GFitsTableLlgCol*)table.m_columns[i]) 
+                    os << " " << *((GFitsTableLongLongCol*)table.m_columns[i]) 
                        << std::endl;
                     break;
                 case __TDOUBLE:
-                    os << " " << *((GFitsTableDblCol*)table.m_columns[i]) 
+                    os << " " << *((GFitsTableDoubleCol*)table.m_columns[i]) 
                        << std::endl;
                     break;
                 default:
