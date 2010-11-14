@@ -23,11 +23,11 @@
 #include <iostream>
 #include "GException.hpp"
 #include "GLATEventList.hpp"
-#include "GFitsTableFltCol.hpp"
-#include "GFitsTableDblCol.hpp"
-#include "GFitsTableLngCol.hpp"
-#include "GFitsTableShtCol.hpp"
-#include "GFitsTableStrCol.hpp"
+#include "GFitsTableFloatCol.hpp"
+#include "GFitsTableDoubleCol.hpp"
+#include "GFitsTableLongCol.hpp"
+#include "GFitsTableShortCol.hpp"
+#include "GFitsTableStringCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -402,21 +402,21 @@ void GLATEventList::load_events(GFitsHDU* hdu)
             m_events = new GLATEventAtom[m_num];
 
             // Get column pointers
-            GFitsTableDblCol* ptr_time    = (GFitsTableDblCol*)hdu->column("TIME");
-            GFitsTableFltCol* ptr_energy  = (GFitsTableFltCol*)hdu->column("ENERGY");
-            GFitsTableFltCol* ptr_ra      = (GFitsTableFltCol*)hdu->column("RA");
-            GFitsTableFltCol* ptr_dec     = (GFitsTableFltCol*)hdu->column("DEC");
-            GFitsTableFltCol* ptr_theta   = (GFitsTableFltCol*)hdu->column("THETA");
-            GFitsTableFltCol* ptr_phi     = (GFitsTableFltCol*)hdu->column("PHI");
-            GFitsTableFltCol* ptr_zenith  = (GFitsTableFltCol*)hdu->column("ZENITH_ANGLE");
-            GFitsTableFltCol* ptr_azimuth = (GFitsTableFltCol*)hdu->column("EARTH_AZIMUTH_ANGLE");
-            GFitsTableLngCol* ptr_eid     = (GFitsTableLngCol*)hdu->column("EVENT_ID");
-            GFitsTableLngCol* ptr_rid     = (GFitsTableLngCol*)hdu->column("RUN_ID");
-            GFitsTableShtCol* ptr_recon   = (GFitsTableShtCol*)hdu->column("RECON_VERSION");
-            GFitsTableShtCol* ptr_calib   = (GFitsTableShtCol*)hdu->column("CALIB_VERSION");
-            GFitsTableShtCol* ptr_class   = (GFitsTableShtCol*)hdu->column("EVENT_CLASS");
-            GFitsTableShtCol* ptr_conv    = (GFitsTableShtCol*)hdu->column("CONVERSION_TYPE");
-            GFitsTableDblCol* ptr_ltime   = (GFitsTableDblCol*)hdu->column("LIVETIME");
+            GFitsTableDoubleCol* ptr_time    = (GFitsTableDoubleCol*)hdu->column("TIME");
+            GFitsTableFloatCol*  ptr_energy  = (GFitsTableFloatCol*)hdu->column("ENERGY");
+            GFitsTableFloatCol*  ptr_ra      = (GFitsTableFloatCol*)hdu->column("RA");
+            GFitsTableFloatCol*  ptr_dec     = (GFitsTableFloatCol*)hdu->column("DEC");
+            GFitsTableFloatCol*  ptr_theta   = (GFitsTableFloatCol*)hdu->column("THETA");
+            GFitsTableFloatCol*  ptr_phi     = (GFitsTableFloatCol*)hdu->column("PHI");
+            GFitsTableFloatCol*  ptr_zenith  = (GFitsTableFloatCol*)hdu->column("ZENITH_ANGLE");
+            GFitsTableFloatCol*  ptr_azimuth = (GFitsTableFloatCol*)hdu->column("EARTH_AZIMUTH_ANGLE");
+            GFitsTableLongCol*   ptr_eid     = (GFitsTableLongCol*)hdu->column("EVENT_ID");
+            GFitsTableLongCol*   ptr_rid     = (GFitsTableLongCol*)hdu->column("RUN_ID");
+            GFitsTableShortCol*  ptr_recon   = (GFitsTableShortCol*)hdu->column("RECON_VERSION");
+            GFitsTableShortCol*  ptr_calib   = (GFitsTableShortCol*)hdu->column("CALIB_VERSION");
+            GFitsTableShortCol*  ptr_class   = (GFitsTableShortCol*)hdu->column("EVENT_CLASS");
+            GFitsTableShortCol*  ptr_conv    = (GFitsTableShortCol*)hdu->column("CONVERSION_TYPE");
+            GFitsTableDoubleCol* ptr_ltime   = (GFitsTableDoubleCol*)hdu->column("LIVETIME");
 
             // Copy data from columns into GLATEventAtom objects
             GLATEventAtom* ptr = (GLATEventAtom*)m_events;
@@ -468,7 +468,7 @@ void GLATEventList::load_events(GFitsHDU* hdu)
                     }
 
                     // Get column pointer
-                    GFitsTableFltCol* ptr_dif = (GFitsTableFltCol*)hdu->column(std::string(keyword));
+                    GFitsTableFloatCol* ptr_dif = (GFitsTableFloatCol*)hdu->column(std::string(keyword));
 
                     // Copy data from columns into GLATEventAtom objects
                     GLATEventAtom* ptr = (GLATEventAtom*)m_events;

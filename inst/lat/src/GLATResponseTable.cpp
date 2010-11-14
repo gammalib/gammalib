@@ -17,7 +17,7 @@
 #include "GException.hpp"
 #include "GLATResponseTable.hpp"
 #include "GFitsHDU.hpp"
-#include "GFitsTableFltCol.hpp"
+#include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -39,7 +39,7 @@
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GLATResponseTable::GLATResponseTable()
+GLATResponseTable::GLATResponseTable(void)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -70,7 +70,7 @@ GLATResponseTable::GLATResponseTable(const GLATResponseTable& table)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GLATResponseTable::~GLATResponseTable()
+GLATResponseTable::~GLATResponseTable(void)
 {
     // Free members
     free_members();
@@ -204,10 +204,10 @@ void GLATResponseTable::save(GFitsHDU* hdu) const
     GFitsBinTable table(1);
 
     // Allocate floating point vector columns
-    GFitsTableFltCol col_energy_lo = GFitsTableFltCol("ENERG_LO",  1, m_energy_num);
-    GFitsTableFltCol col_energy_hi = GFitsTableFltCol("ENERG_HI",  1, m_energy_num);
-    GFitsTableFltCol col_ctheta_lo = GFitsTableFltCol("CTHETA_LO", 1, m_ctheta_num);
-    GFitsTableFltCol col_ctheta_hi = GFitsTableFltCol("CTHETA_HI", 1, m_ctheta_num);
+    GFitsTableFloatCol col_energy_lo = GFitsTableFloatCol("ENERG_LO",  1, m_energy_num);
+    GFitsTableFloatCol col_energy_hi = GFitsTableFloatCol("ENERG_HI",  1, m_energy_num);
+    GFitsTableFloatCol col_ctheta_lo = GFitsTableFloatCol("CTHETA_LO", 1, m_ctheta_num);
+    GFitsTableFloatCol col_ctheta_hi = GFitsTableFloatCol("CTHETA_HI", 1, m_ctheta_num);
 
     // Set column values
     for (int i = 0; i < m_energy_num; ++i) {

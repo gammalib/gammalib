@@ -26,11 +26,11 @@
 #include "GCTAObservation.hpp"
 #include "GCTAResponse.hpp"
 #include "GFitsTableBitCol.hpp"
-#include "GFitsTableFltCol.hpp"
-#include "GFitsTableDblCol.hpp"
-#include "GFitsTableLngCol.hpp"
-#include "GFitsTableShtCol.hpp"
-#include "GFitsTableStrCol.hpp"
+#include "GFitsTableFloatCol.hpp"
+#include "GFitsTableDoubleCol.hpp"
+#include "GFitsTableLongCol.hpp"
+#include "GFitsTableShortCol.hpp"
+#include "GFitsTableStringCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -331,29 +331,29 @@ void GCTAEventList::load_events(GFitsHDU* hdu)
             m_events = new GCTAEventAtom[m_num];
 
             // Get column pointers
-            GFitsTableLngCol* ptr_eid         = (GFitsTableLngCol*)hdu->column("EVENT_ID");
-            GFitsTableDblCol* ptr_time        = (GFitsTableDblCol*)hdu->column("TIME");
-            GFitsTableShtCol* ptr_multip      = (GFitsTableShtCol*)hdu->column("MULTIP");
-            GFitsTableFltCol* ptr_ra          = (GFitsTableFltCol*)hdu->column("RA");
-            GFitsTableFltCol* ptr_dec         = (GFitsTableFltCol*)hdu->column("DEC");
-            GFitsTableFltCol* ptr_dir_err     = (GFitsTableFltCol*)hdu->column("DIR_ERR");
-            GFitsTableFltCol* ptr_detx        = (GFitsTableFltCol*)hdu->column("DETX");
-            GFitsTableFltCol* ptr_dety        = (GFitsTableFltCol*)hdu->column("DETY");
-            GFitsTableFltCol* ptr_alt_pnt     = (GFitsTableFltCol*)hdu->column("ALT_PNT");
-            GFitsTableFltCol* ptr_az_pnt      = (GFitsTableFltCol*)hdu->column("AZ_PNT");
-            GFitsTableFltCol* ptr_alt         = (GFitsTableFltCol*)hdu->column("ALT");
-            GFitsTableFltCol* ptr_az          = (GFitsTableFltCol*)hdu->column("AZ");
-            GFitsTableFltCol* ptr_corex       = (GFitsTableFltCol*)hdu->column("COREX");
-            GFitsTableFltCol* ptr_corey       = (GFitsTableFltCol*)hdu->column("COREY");
-            GFitsTableFltCol* ptr_core_err    = (GFitsTableFltCol*)hdu->column("CORE_ERR");
-            GFitsTableFltCol* ptr_xmax        = (GFitsTableFltCol*)hdu->column("XMAX");
-            GFitsTableFltCol* ptr_xmax_err    = (GFitsTableFltCol*)hdu->column("XMAX_ERR");
-            GFitsTableDblCol* ptr_energy      = (GFitsTableDblCol*)hdu->column("ENERGY");
-            GFitsTableFltCol* ptr_energy_err  = (GFitsTableFltCol*)hdu->column("ENERGY_ERR");
-            GFitsTableFltCol* ptr_hil_msw     = (GFitsTableFltCol*)hdu->column("HIL_MSW");
-            GFitsTableFltCol* ptr_hil_msw_err = (GFitsTableFltCol*)hdu->column("HIL_MSW_ERR");
-            GFitsTableFltCol* ptr_hil_msl     = (GFitsTableFltCol*)hdu->column("HIL_MSL");
-            GFitsTableFltCol* ptr_hil_msl_err = (GFitsTableFltCol*)hdu->column("HIL_MSL_ERR");
+            GFitsTableLongCol*   ptr_eid         = (GFitsTableLongCol*)hdu->column("EVENT_ID");
+            GFitsTableDoubleCol* ptr_time        = (GFitsTableDoubleCol*)hdu->column("TIME");
+            GFitsTableShortCol*  ptr_multip      = (GFitsTableShortCol*)hdu->column("MULTIP");
+            GFitsTableFloatCol*  ptr_ra          = (GFitsTableFloatCol*)hdu->column("RA");
+            GFitsTableFloatCol*  ptr_dec         = (GFitsTableFloatCol*)hdu->column("DEC");
+            GFitsTableFloatCol*  ptr_dir_err     = (GFitsTableFloatCol*)hdu->column("DIR_ERR");
+            GFitsTableFloatCol*  ptr_detx        = (GFitsTableFloatCol*)hdu->column("DETX");
+            GFitsTableFloatCol*  ptr_dety        = (GFitsTableFloatCol*)hdu->column("DETY");
+            GFitsTableFloatCol*  ptr_alt_pnt     = (GFitsTableFloatCol*)hdu->column("ALT_PNT");
+            GFitsTableFloatCol*  ptr_az_pnt      = (GFitsTableFloatCol*)hdu->column("AZ_PNT");
+            GFitsTableFloatCol*  ptr_alt         = (GFitsTableFloatCol*)hdu->column("ALT");
+            GFitsTableFloatCol*  ptr_az          = (GFitsTableFloatCol*)hdu->column("AZ");
+            GFitsTableFloatCol*  ptr_corex       = (GFitsTableFloatCol*)hdu->column("COREX");
+            GFitsTableFloatCol*  ptr_corey       = (GFitsTableFloatCol*)hdu->column("COREY");
+            GFitsTableFloatCol*  ptr_core_err    = (GFitsTableFloatCol*)hdu->column("CORE_ERR");
+            GFitsTableFloatCol*  ptr_xmax        = (GFitsTableFloatCol*)hdu->column("XMAX");
+            GFitsTableFloatCol*  ptr_xmax_err    = (GFitsTableFloatCol*)hdu->column("XMAX_ERR");
+            GFitsTableDoubleCol* ptr_energy      = (GFitsTableDoubleCol*)hdu->column("ENERGY");
+            GFitsTableFloatCol*  ptr_energy_err  = (GFitsTableFloatCol*)hdu->column("ENERGY_ERR");
+            GFitsTableFloatCol*  ptr_hil_msw     = (GFitsTableFloatCol*)hdu->column("HIL_MSW");
+            GFitsTableFloatCol*  ptr_hil_msw_err = (GFitsTableFloatCol*)hdu->column("HIL_MSW_ERR");
+            GFitsTableFloatCol*  ptr_hil_msl     = (GFitsTableFloatCol*)hdu->column("HIL_MSL");
+            GFitsTableFloatCol*  ptr_hil_msl_err = (GFitsTableFloatCol*)hdu->column("HIL_MSL_ERR");
 
             // Copy data from columns into GCTAEventAtom objects
             GCTAEventAtom* ptr = (GCTAEventAtom*)m_events;
