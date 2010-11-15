@@ -1352,7 +1352,7 @@ void test_bintable_ushort(void)
 
     // Dump header
     std::cout << "Test GFitsTableUShortCol: ";
-    
+
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
     system(cmd.c_str());
@@ -1390,7 +1390,7 @@ void test_bintable_ushort(void)
         // Set table
         GFitsTableUShortCol col_sht = GFitsTableUShortCol("USHORT", nrows);
         for (int i = 0; i < nrows; ++i) {
-            unsigned short val_sht = (unsigned short)(1000.0 * cos(0.1*float(i)));
+            unsigned short val_sht = (unsigned short)abs(1000.0 * cos(0.1*float(i)));
             col_sht(i)    = val_sht;
             sum_sht      += val_sht;
             sum_sht_int  += int(val_sht);
@@ -1454,7 +1454,7 @@ void test_bintable_ushort(void)
         GFitsTableUShortCol col_sht10 = GFitsTableUShortCol("USHORT10", nrows, nvec);
         for (int i = 0; i < nrows; ++i) {
             for (int j = 0; j < nvec; ++j) {
-                unsigned short val_sht  = 
+                unsigned short val_sht  =
                   (unsigned short)(abs(100.0*cos(0.1*float(i))*cos(0.33*float(j))));
                 col_sht10(i,j) = val_sht;
                 sum_sht10     += val_sht;
@@ -2433,7 +2433,7 @@ void test_bintable_ulong(void)
 
     // Dump header
     std::cout << "Test GFitsTableULongCol: ";
-    
+
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
     system(cmd.c_str());
@@ -2471,7 +2471,7 @@ void test_bintable_ulong(void)
         // Set table
         GFitsTableULongCol col_lng = GFitsTableULongCol("ULONG", nrows);
         for (int i = 0; i < nrows; ++i) {
-            unsigned long val_lng  = (unsigned long)(100000.0 * cos(0.1*float(i)));
+            unsigned long val_lng  = (unsigned long)abs(100000.0 * cos(0.1*float(i)));
             col_lng(i)    = val_lng;
             sum_lng      += val_lng;
             sum_lng_int  += int(val_lng);
@@ -2535,8 +2535,8 @@ void test_bintable_ulong(void)
         GFitsTableULongCol col_lng10 = GFitsTableULongCol("ULONG10", nrows, nvec);
         for (int i = 0; i < nrows; ++i) {
             for (int j = 0; j < nvec; ++j) {
-                unsigned long val_lng = (unsigned long)(1000.0*cos(0.1*float(i))*
-                                                        cos(0.33*float(j)));
+                unsigned long val_lng = (unsigned long)abs(1000.0*cos(0.1*float(i))*
+                                                           cos(0.33*float(j)));
                 col_lng10(i,j) = val_lng;
                 sum_lng10     += val_lng;
                 sum_lng10_int += int(val_lng);
@@ -2793,7 +2793,7 @@ void test_bintable_string(void)
 
     // Dump header
     std::cout << "Test GFitsTableStringCol: ";
-    
+
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
     system(cmd.c_str());
@@ -2805,7 +2805,7 @@ void test_bintable_string(void)
     double      sum_str10_dbl = 0;
     double      sum_str_int   = 0;
     double      sum_str10_int = 0;
-    
+
     // Build tables
     try {
         // Open FITS file
@@ -3152,7 +3152,7 @@ void test_bintable_logical(void)
 
     // Dump header
     std::cout << "Test GFitsTableBoolCol: ";
-    
+
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
     system(cmd.c_str());
@@ -3517,7 +3517,7 @@ void test_bintable_bit(void)
 
     // Dump header
     std::cout << "Test GFitsTableBitCol: ";
-    
+
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
     system(cmd.c_str());
