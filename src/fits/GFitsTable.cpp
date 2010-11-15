@@ -483,9 +483,13 @@ void GFitsTable::open(__fitsfile* fptr)
     if (status != 0)
         throw GException::fits_error(G_OPEN, status);
 
-    // Allocate memory for column pointers
+    // Allocate and initialise memory for column pointers. Note that this
+    // initialisation is needed to allow for a clean free_members() call
+    // in case of any exception.
     if (m_columns != NULL) delete [] m_columns;
     m_columns = new GFitsTableCol*[m_cols];
+    for (int i = 0; i < m_cols; ++i)
+        m_columns[i] = NULL;
 
     // Get table column information
     int  typecode = 0;
@@ -513,7 +517,7 @@ void GFitsTable::open(__fitsfile* fptr)
         sprintf(keyname, "TZERO%d", i+1);
         status = __ffgky(&m_fitsfile, __TULONG, keyname, &offset, NULL, &status);
         if (status == 0) {
-            if (typecode == __TSHORT && offset == 32678u)
+            if (typecode == __TSHORT && offset == 32768u)
                 typecode = __TUSHORT;
             else if (typecode == __TLONG && offset == 2147483648u)
                 typecode = __TULONG;
@@ -521,8 +525,8 @@ void GFitsTable::open(__fitsfile* fptr)
                 typecode = __TUINT;
             else {
                 std::ostringstream message;
-                message << "Column " << value << " has typecode " << typecode
-                        << " and unexpected associated TZERO=" << offset;
+                message << ", but column " << value << " has typecode " << typecode
+                        << " and unexpected associated TZERO=" << offset << ".";
                 throw GException::fits_error(G_OPEN, 0, message.str());
             }
         }
