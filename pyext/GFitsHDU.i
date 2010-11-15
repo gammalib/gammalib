@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GFitsHDU.i  - FITS HDU handling class SWIG file             *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -36,23 +36,31 @@
 class GFitsHDU {
 public:
     // Constructors and destructors
-    GFitsHDU();
+    GFitsHDU(void);
     GFitsHDU(const GFitsImage& image);
     GFitsHDU(const GFitsAsciiTable& table);
     GFitsHDU(const GFitsBinTable& table);
     GFitsHDU(const GFitsHDU& hdu);
-    ~GFitsHDU();
+    virtual ~GFitsHDU(void);
 
     // Methods
-    std::string    extname(void) const;
-    void           extname(const std::string& extname);
-    int            extno(void) const;
-    int            exttype(void) const;
-    GFitsHeader*   header(void) const;
-    GFitsData*     data(void) const;
-    GFitsTableCol* column(const std::string& colname) const;
-    void           primary(void);
-
+    std::string      extname(void) const;
+    void             extname(const std::string& extname);
+    int              extno(void) const;
+    int              exttype(void) const;
+    GFitsHeader*     header(void) const;
+    GFitsData*       data(void) const;
+    GFitsHeaderCard* card(const std::string& keyname) const;
+    GFitsHeaderCard* card(const int& cardno) const;
+    void             card(const std::string& keyname, const std::string& value,
+                          const std::string& comment);
+    void             card(const std::string& keyname, const double& value,
+                          const std::string& comment);
+    void             card(const std::string& keyname, const int& value,
+                          const std::string& comment);
+    GFitsTableCol*   column(const std::string& colname) const;
+    GFitsTableCol*   column(const int& colnum) const;
+    void             primary(void);
 };
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsHeaderCard.hpp  - FITS header card class SWIG file         *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -35,7 +35,7 @@
 class GFitsHeaderCard {
 public:
     // Constructors & Destructors
-    GFitsHeaderCard();
+    GFitsHeaderCard(void);
     GFitsHeaderCard(const std::string& keyname, const std::string& value,
                     const std::string& comment);
     GFitsHeaderCard(const std::string& keyname, const double& value,
@@ -43,7 +43,7 @@ public:
     GFitsHeaderCard(const std::string& keyname, const int& value,
                     const std::string& comment);
     GFitsHeaderCard(const GFitsHeaderCard& card);
-    ~GFitsHeaderCard();
+    virtual ~GFitsHeaderCard(void);
 
     // Methods to set card properties
     void         keyname(const std::string& keyname);

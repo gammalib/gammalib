@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GFitsImageDbl.hpp  - FITS double precision image class SWIG interface  *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -30,9 +30,9 @@ class GFitsImageDbl : public GFitsImage {
 
 public:
     // Constructors and destructors
-    GFitsImageDbl();
+    GFitsImageDbl(void);
     GFitsImageDbl(const GFitsImageDbl& image);
-    ~GFitsImageDbl();
+    virtual ~GFitsImageDbl(void);
 
     // Methods
     void    link(double* pixels);

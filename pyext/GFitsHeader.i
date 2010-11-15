@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GFitsHeader.i  - FITS header handling class SWIG file         *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -37,11 +37,13 @@
 class GFitsHeader {
 public:
     // Constructors and destructors
-    GFitsHeader();
+    GFitsHeader(void);
     GFitsHeader(const GFitsHeader& header);
-    ~GFitsHeader();
+    virtual ~GFitsHeader(void);
 
     // Methods
+    void             clear(void);
+    int              size(void) const;
     void             update(const GFitsHeaderCard& card);
     GFitsHeaderCard* card(const std::string& keyname);
     GFitsHeaderCard* card(const int& cardno);

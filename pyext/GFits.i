@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GFits.i  - FITS file access class SWIG file             *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -34,10 +34,10 @@
 class GFits {
 public:
     // Constructors and destructors
-    GFits();
+    GFits(void);
     GFits(const std::string& filename);
     GFits(const GFits& fits);
-    ~GFits();
+    virtual ~GFits(void);
 
     // Methods
     void      clear(void);

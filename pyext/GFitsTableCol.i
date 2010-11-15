@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GFitsTableCol.i  - FITS table column abstract base class SWIG file   *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -29,11 +29,11 @@
 class GFitsTableCol {
 public:
     // Constructors and destructors
-    GFitsTableCol();
+    GFitsTableCol(void);
     GFitsTableCol(const std::string& name, const int& length,
                   const int& number,       const int& width);
     GFitsTableCol(const GFitsTableCol& column);
-    virtual ~GFitsTableCol();
+    virtual ~GFitsTableCol(void);
 
     // Virtual Methods
     virtual std::string string(const int& row, const int& inx = 0) = 0;
