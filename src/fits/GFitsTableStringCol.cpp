@@ -315,7 +315,10 @@ void GFitsTableStringCol::copy_members(const GFitsTableStringCol& column)
     }
 
     // Copy NULL value
-    alloc_nulval(std::string(column.m_nulval));
+    if (column.m_nulval != NULL) {
+        m_nulval = new char[m_width+1];
+        strncpy(m_nulval, column.m_nulval, m_width);        
+    }
 
     // Small memory option: release column if it was fetch above
     #if defined(G_SMALL_MEMORY)
@@ -477,13 +480,13 @@ void GFitsTableStringCol::release_data(void)
 void GFitsTableStringCol::alloc_nulval(const std::string& value)
 {
     // Free any existing memory
-    if (m_nulval != NULL) delete m_nulval;
+    if (m_nulval != NULL) delete [] m_nulval;
 
     // Mark pointer as free
     m_nulval = NULL;
 
     // If we have valid value, allocate and set nul value
-    if (value.empty()) {
+    if (!value.empty()) {
         m_nulval = new char[m_width+1];
         strncpy(m_nulval, value.c_str(), m_width);
     }
