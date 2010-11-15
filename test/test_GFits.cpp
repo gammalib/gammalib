@@ -16,6 +16,7 @@
 #include <stdexcept>                          // std::exception
 #include <stdlib.h>
 #include "GammaLib.hpp"
+#include "GTools.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -23,7 +24,7 @@
 
 
 /***************************************************************************
- *                         Verification routines                           *
+ * @brief Verification routines
  ***************************************************************************/
 int equal(double val, double ref, double eps)
 {
@@ -40,7 +41,7 @@ int dequal(double val, double ref)
 
 
 /***************************************************************************
- *                            Test: Creation                               *
+ * @brief Test FITS file creation
  ***************************************************************************/
 void test_create(void)
 {
@@ -142,8 +143,8 @@ void test_create(void)
         first(1)  =  2.0;
         first(2)  =  3.0;
         second(0) = -99.0;
-        std::cout << std::endl << first << std::endl;
-        std::cout << second << std::endl;
+        //std::cout << std::endl << first << std::endl;
+        //std::cout << second << std::endl;
         table.append_column(first);
         table.append_column(second);
 
@@ -169,7 +170,7 @@ void test_create(void)
 
 
 /***************************************************************************
- *                        Test: GFitsDblImage test                         *
+ * @brief Test GFitsDblImage class
  ***************************************************************************/
 void test_image_double(void)
 {
@@ -265,7 +266,7 @@ void test_image_double(void)
 
 
 /***************************************************************************
- *                  Test: double precision FITS binary table               *
+ * @brief Test double precision FITS binary table
  ***************************************************************************/
 void test_bintable_double(void)
 {
@@ -316,9 +317,7 @@ void test_bintable_double(void)
             col_dbl(i)   = val_dbl;
             sum_dbl     += val_dbl;
             sum_dbl_int += int(val_dbl);
-            std::ostringstream s_value;
-            s_value << std::scientific << val_dbl;
-            sum_dbl_str += ":"+s_value.str();
+            sum_dbl_str += ":"+str(val_dbl);
         }
         std::cout << ".";
 
@@ -382,9 +381,7 @@ void test_bintable_double(void)
                 col_dbl10(i,j) = val_dbl;
                 sum_dbl10     += val_dbl;
                 sum_dbl10_int += int(val_dbl);
-                std::ostringstream s_value;
-                s_value << std::scientific << val_dbl;
-                sum_dbl10_str += ":"+s_value.str();
+                sum_dbl10_str += ":"+str(val_dbl);
             }
         }
         std::cout << ".";
@@ -463,7 +460,9 @@ void test_bintable_double(void)
         std::cout << ".";
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to build tables." << std::endl;
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to build GFitsTableDoubleCol tables."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
@@ -613,7 +612,9 @@ void test_bintable_double(void)
         std::cout << ".";
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to build tables." << std::endl;
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to read GFitsTableDoubleCol tables."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
@@ -623,7 +624,7 @@ void test_bintable_double(void)
 
 
 /***************************************************************************
- *                  Test: single precision FITS binary table               *
+ * @brief Test single precision FITS binary table
  ***************************************************************************/
 void test_bintable_float(void)
 {
@@ -674,9 +675,7 @@ void test_bintable_float(void)
             col_flt(i)   = val_flt;
             sum_flt     += val_flt;
             sum_flt_int += int(val_flt);
-            std::ostringstream s_value;
-            s_value << std::scientific << val_flt;
-            sum_flt_str += ":"+s_value.str();
+            sum_flt_str += ":"+str(val_flt);
         }
         std::cout << ".";
 
@@ -740,9 +739,7 @@ void test_bintable_float(void)
                 col_flt10(i,j) = val_flt;
                 sum_flt10     += val_flt;
                 sum_flt10_int += int(val_flt);
-                std::ostringstream s_value;
-                s_value << std::scientific << val_flt;
-                sum_flt10_str += ":"+s_value.str();
+                sum_flt10_str += ":"+str(val_flt);
             }
         }
         std::cout << ".";
@@ -973,7 +970,9 @@ void test_bintable_float(void)
 
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to build tables." << std::endl;
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to read GFitsTableFloatCol tables."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
@@ -983,7 +982,7 @@ void test_bintable_float(void)
 
 
 /***************************************************************************
- *                       Test: FITS binary table test                      *
+ * @brief Test short FITS binary table
  ***************************************************************************/
 void test_bintable_short(void)
 {
@@ -1034,9 +1033,7 @@ void test_bintable_short(void)
             col_sht(i)    = val_sht;
             sum_sht      += val_sht;
             sum_sht_int  += int(val_sht);
-            std::ostringstream s_value;
-            s_value << val_sht;
-            sum_sht_str += ":"+s_value.str();
+            sum_sht_str += ":"+str(val_sht);
         }
         std::cout << ".";
 
@@ -1101,9 +1098,7 @@ void test_bintable_short(void)
                 col_sht10(i,j) = val_sht;
                 sum_sht10     += val_sht;
                 sum_sht10_int += int(val_sht);
-                std::ostringstream s_value;
-                s_value << val_sht;
-                sum_sht10_str += ":"+s_value.str();
+                sum_sht10_str += ":"+str(val_sht);
             }
         }
         std::cout << ".";
@@ -1183,7 +1178,9 @@ void test_bintable_short(void)
 
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to build tables." << std::endl;
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to build GFitsTableShortCol tables."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
@@ -1334,7 +1331,9 @@ void test_bintable_short(void)
         std::cout << ".";
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to build tables." << std::endl;
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to read GFitsTableShortCol tables."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
@@ -1344,7 +1343,368 @@ void test_bintable_short(void)
 
 
 /***************************************************************************
- *                       Test: FITS binary table test                      *
+ * @brief Test unsigned short FITS binary table
+ ***************************************************************************/
+void test_bintable_ushort(void)
+{
+    // Set filename
+    std::string filename = "test_bintable_ushort.fits";
+
+    // Dump header
+    std::cout << "Test GFitsTableUShortCol: ";
+    
+    // Remove FITS file
+    std::string cmd = "rm -rf "+ filename;
+    system(cmd.c_str());
+
+    // Allocate reference sums
+    unsigned short sum_sht       = 0;
+    unsigned short sum_sht10     = 0;
+    unsigned short sum_sht_int   = 0;
+    unsigned short sum_sht10_int = 0;
+    std::string    sum_sht_str;
+    std::string    sum_sht10_str;
+
+    // Build tables
+    try {
+        // Open FITS file
+        GFits fits;
+        fits.open(filename);
+
+        // Set number of rows
+        int nrows = 10;
+        int nvec  = 10;
+
+        // Initial control sums
+        float          tot_flt = 0.0;
+        double         tot_dbl = 0.0;
+        int            tot_int = 0;
+        long           tot_lng = 0;
+        unsigned short tot_sht = 0;
+        std::string    tot_str;
+
+        //
+        // ===== U S H O R T =====
+        //
+
+        // Set table
+        GFitsTableUShortCol col_sht = GFitsTableUShortCol("USHORT", nrows);
+        for (int i = 0; i < nrows; ++i) {
+            unsigned short val_sht = (unsigned short)(1000.0 * cos(0.1*float(i)));
+            col_sht(i)    = val_sht;
+            sum_sht      += val_sht;
+            sum_sht_int  += int(val_sht);
+            sum_sht_str += ":"+str(val_sht);
+        }
+        std::cout << ".";
+
+        // Check table (operator access)
+        tot_sht = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_sht += col_sht(i);
+        if (tot_sht != sum_sht) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::operator()";
+            std::cout << std::endl << "  Reference sum: " << sum_sht;
+            std::cout << std::endl << "  Derived sum:   " << tot_sht << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_dbl += col_sht.real(i);
+        if (!dequal(tot_dbl, double(sum_sht))) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::real()";
+            std::cout << std::endl << "  Reference sum: " << sum_sht;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_int += col_sht.integer(i);
+        if (tot_int != sum_sht_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::integer()";
+            std::cout << std::endl << "  Reference sum: " << sum_sht_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i)
+            tot_str += ":"+col_sht.string(i);
+        if (tot_str != sum_sht_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::string()";
+            std::cout << std::endl << "  Reference sum: " << sum_sht_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        //
+        // ===== S H O R T  1 0 =====
+        //
+
+        // Set table
+        GFitsTableUShortCol col_sht10 = GFitsTableUShortCol("USHORT10", nrows, nvec);
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j) {
+                unsigned short val_sht  = 
+                  (unsigned short)(abs(100.0*cos(0.1*float(i))*cos(0.33*float(j))));
+                col_sht10(i,j) = val_sht;
+                sum_sht10     += val_sht;
+                sum_sht10_int += int(val_sht);
+                sum_sht10_str += ":"+str(val_sht);
+            }
+        }
+        std::cout << ".";
+
+        // Check table (operator access)
+        tot_sht = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_sht += col_sht10(i,j);
+        }
+        if (tot_sht != sum_sht10) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::operator() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_sht10;
+            std::cout << std::endl << "  Derived sum:   " << tot_sht << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_dbl += col_sht10.real(i,j);
+        }
+        if (!dequal(tot_dbl, sum_sht10)) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::real() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_sht10;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_int += col_sht10.integer(i,j);
+        }
+        if (tot_int != sum_sht10_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::integer() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_sht10_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_str += ":"+col_sht10.string(i,j);
+        }
+        if (tot_str != sum_sht10_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::string() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_sht10_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        //
+        // ===== W R I T E   T A B L E =====
+        //
+
+        // Build binary table
+        GFitsBinTable table = GFitsBinTable(nrows);
+        table.append_column(col_sht);
+        table.insert_column(0, col_sht10);
+
+        // Create HDU and append to FILE file
+        GFitsHDU hdu(table);
+        fits.append(hdu);
+
+        // Save FITS file
+        fits.save();
+        std::cout << ".";
+
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to build GFitsTableUShortCol tables."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+
+    //================================================================
+    //================================================================
+    //================================================================
+    // Read tables
+    //================================================================
+    //================================================================
+    //================================================================
+    try {
+        // Open FITS file
+        GFits fits;
+        fits.open(filename);
+
+        // Set number of rows
+        int nrows = 10;
+        int nvec  = 10;
+
+        // Initial control sums
+        float          tot_flt = 0.0;
+        unsigned short tot_sht = 0;
+        double         tot_dbl = 0.0;
+        int            tot_int = 0;
+        std::string    tot_str;
+
+        //
+        // ===== U S H O R T =====
+        //
+
+        // Get column
+        GFitsTableUShortCol* col_sht =
+                    (GFitsTableUShortCol*)fits.hdu(1)->column("USHORT");
+
+        // Check table (operator access)
+        tot_sht = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_sht += (*col_sht)(i);
+        if (tot_sht != sum_sht) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::operator()";
+            std::cout << std::endl << "  Reference sum: " << sum_sht;
+            std::cout << std::endl << "  Derived sum:   " << tot_sht << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_dbl += col_sht->real(i);
+        if (!dequal(tot_dbl, double(sum_sht))) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::real()";
+            std::cout << std::endl << "  Reference sum: " << sum_sht;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_int += col_sht->integer(i);
+        if (tot_int != sum_sht_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::integer()";
+            std::cout << std::endl << "  Reference sum: " << sum_sht_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i)
+            tot_str += ":"+col_sht->string(i);
+        if (tot_str != sum_sht_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::string()";
+            std::cout << std::endl << "  Reference sum: " << sum_sht_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        //
+        // ===== U S H O R T  1 0 =====
+        //
+
+        // Get column
+        GFitsTableUShortCol* col_sht10 =
+                    (GFitsTableUShortCol*)fits.hdu(1)->column("USHORT10");
+
+        // Check table (operator access)
+        tot_sht = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_sht += (*col_sht10)(i,j);
+        }
+        if (tot_sht != sum_sht10) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::operator() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_sht10;
+            std::cout << std::endl << "  Derived sum:   " << tot_sht << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_dbl += col_sht10->real(i,j);
+        }
+        if (!dequal(tot_dbl, sum_sht10)) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::real() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_sht10;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_int += col_sht10->integer(i,j);
+        }
+        if (tot_int != sum_sht10_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::integer() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_sht10_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_str += ":"+col_sht10->string(i,j);
+        }
+        if (tot_str != sum_sht10_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableUShortCol::string() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_sht10_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to read GFitsTableUShortCol tables."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ". ok." << std::endl;
+
+}
+
+
+/***************************************************************************
+ * @brief Test long FITS binary table
  ***************************************************************************/
 void test_bintable_long(void)
 {
@@ -1395,9 +1755,7 @@ void test_bintable_long(void)
             col_lng(i)    = val_lng;
             sum_lng      += val_lng;
             sum_lng_int  += int(val_lng);
-            std::ostringstream s_value;
-            s_value << val_lng;
-            sum_lng_str += ":"+s_value.str();
+            sum_lng_str += ":"+str((int)val_lng);
         }
         std::cout << ".";
 
@@ -1462,9 +1820,7 @@ void test_bintable_long(void)
                 col_lng10(i,j) = val_lng;
                 sum_lng10     += val_lng;
                 sum_lng10_int += int(val_lng);
-                std::ostringstream s_value;
-                s_value << val_lng;
-                sum_lng10_str += ":"+s_value.str();
+                sum_lng10_str += ":"+str((int)val_lng);
             }
         }
         std::cout << ".";
@@ -1543,7 +1899,9 @@ void test_bintable_long(void)
         std::cout << ".";
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to build tables." << std::endl;
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to build GFitsTableLongCol tables."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
@@ -1694,7 +2052,9 @@ void test_bintable_long(void)
         std::cout << ".";
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to build tables." << std::endl;
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to read GFitsTableLongCol tables."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
@@ -1704,7 +2064,727 @@ void test_bintable_long(void)
 
 
 /***************************************************************************
- *                       Test: FITS binary table test                      *
+ * @brief Test long long FITS binary table
+ ***************************************************************************/
+void test_bintable_longlong(void)
+{
+    // Set filename
+    std::string filename = "test_bintable_longlong.fits";
+
+    // Dump header
+    std::cout << "Test GFitsTableLongLongCol: ";
+    
+    // Remove FITS file
+    std::string cmd = "rm -rf "+ filename;
+    system(cmd.c_str());
+
+    // Allocate reference sums
+    long long   sum_lng       = 0;
+    long long   sum_lng10     = 0;
+    long long   sum_lng_int   = 0;
+    long long   sum_lng10_int = 0;
+    std::string sum_lng_str;
+    std::string sum_lng10_str;
+
+    // Build tables
+    try {
+        // Open FITS file
+        GFits fits;
+        fits.open(filename);
+
+        // Set number of rows
+        int nrows = 10;
+        int nvec  = 10;
+
+        // Initial control sums
+        float       tot_flt = 0.0;
+        double      tot_dbl = 0.0;
+        int         tot_int = 0;
+        long long   tot_lng = 0;
+        short       tot_sht = 0;
+        std::string tot_str;
+
+        //
+        // ===== L O N G  L O N G=====
+        //
+
+        // Set table
+        GFitsTableLongLongCol col_lng = GFitsTableLongLongCol("LONGLONG", nrows);
+        for (int i = 0; i < nrows; ++i) {
+            long val_lng  = long(100000.0 * cos(0.1*float(i)));
+            col_lng(i)    = val_lng;
+            sum_lng      += val_lng;
+            sum_lng_int  += int(val_lng);
+            sum_lng_str += ":"+str((int)val_lng);
+        }
+        std::cout << ".";
+
+        // Check table (operator access)
+        tot_lng = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_lng += col_lng(i);
+        if (tot_lng != sum_lng) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::operator()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng;
+            std::cout << std::endl << "  Derived sum:   " << tot_lng << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_dbl += col_lng.real(i);
+        if (!dequal(tot_dbl, double(sum_lng))) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::real()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_int += col_lng.integer(i);
+        if (tot_int != sum_lng_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::integer()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i)
+            tot_str += ":"+col_lng.string(i);
+        if (tot_str != sum_lng_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::string()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        //
+        // ===== L O N G  L O N G 1 0 =====
+        //
+
+        // Set long table
+        GFitsTableLongLongCol col_lng10 = GFitsTableLongLongCol("LONGLONG10", nrows, nvec);
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j) {
+                long val_lng   = long(1000.0*cos(0.1*float(i))*
+                                             cos(0.33*float(j)));
+                col_lng10(i,j) = val_lng;
+                sum_lng10     += val_lng;
+                sum_lng10_int += int(val_lng);
+                sum_lng10_str += ":"+str((int)val_lng);
+            }
+        }
+        std::cout << ".";
+
+        // Check table (operator access)
+        tot_lng = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_lng += col_lng10(i,j);
+        }
+        if (tot_lng != sum_lng10) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::operator() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10;
+            std::cout << std::endl << "  Derived sum:   " << tot_lng << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_dbl += col_lng10.real(i,j);
+        }
+        if (!dequal(tot_dbl, sum_lng10)) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::real() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_int += col_lng10.integer(i,j);
+        }
+        if (tot_int != sum_lng10_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::integer() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_str += ":"+col_lng10.string(i,j);
+        }
+        if (tot_str != sum_lng10_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::string() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        //
+        // ===== W R I T E   T A B L E =====
+        //
+
+        // Build binary table
+        GFitsBinTable table = GFitsBinTable(nrows);
+        table.append_column(col_lng);
+        table.insert_column(99, col_lng10);
+
+        // Create HDU and append to FILE file
+        GFitsHDU hdu(table);
+        fits.append(hdu);
+
+        // Save FITS file
+        fits.save();
+        std::cout << ".";
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to build GFitsTableLongLongCol tables."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+
+    //================================================================
+    //================================================================
+    //================================================================
+    // Read tables
+    //================================================================
+    //================================================================
+    //================================================================
+    try {
+        // Open FITS file
+        GFits fits;
+        fits.open(filename);
+
+        // Set number of rows
+        int nrows = 10;
+        int nvec  = 10;
+
+        // Initial control sums
+        float       tot_flt = 0.0;
+        double      tot_dbl = 0.0;
+        int         tot_int = 0;
+        long long   tot_lng = 0;
+        std::string tot_str;
+
+        //
+        // ===== L O N G L O N G =====
+        //
+
+        // Get column
+        GFitsTableLongLongCol* col_lng =
+                    (GFitsTableLongLongCol*)fits.hdu(1)->column("LONGLONG");
+
+        // Check table (operator access)
+        tot_lng = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_lng += (*col_lng)(i);
+        if (tot_lng != sum_lng) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::operator()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng;
+            std::cout << std::endl << "  Derived sum:   " << tot_lng << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_dbl += col_lng->real(i);
+        if (!dequal(tot_dbl, double(sum_lng))) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::real()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_int += col_lng->integer(i);
+        if (tot_int != sum_lng_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::integer()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i)
+            tot_str += ":"+col_lng->string(i);
+        if (tot_str != sum_lng_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::string()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        //
+        // ===== L O N G  L O N G 1 0 =====
+        //
+
+        // Get column
+        GFitsTableLongLongCol* col_lng10 =
+                    (GFitsTableLongLongCol*)fits.hdu(1)->column("LONGLONG10");
+
+        // Check table (operator access)
+        tot_lng = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_lng += (*col_lng10)(i,j);
+        }
+        if (tot_lng != sum_lng10) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::operator() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10;
+            std::cout << std::endl << "  Derived sum:   " << tot_lng << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_dbl += col_lng10->real(i,j);
+        }
+        if (!dequal(tot_dbl, sum_lng10)) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::real() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_int += col_lng10->integer(i,j);
+        }
+        if (tot_int != sum_lng10_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::integer() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_str += ":"+col_lng10->string(i,j);
+        }
+        if (tot_str != sum_lng10_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableLongLongCol::string() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to read GFitsTableLongLongCol tables."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ". ok." << std::endl;
+
+}
+
+
+/***************************************************************************
+ * @brief Test unsigned long FITS binary table
+ ***************************************************************************/
+void test_bintable_ulong(void)
+{
+    // Set filename
+    std::string filename = "test_bintable_ulong.fits";
+
+    // Dump header
+    std::cout << "Test GFitsTableULongCol: ";
+    
+    // Remove FITS file
+    std::string cmd = "rm -rf "+ filename;
+    system(cmd.c_str());
+
+    // Allocate reference sums
+    unsigned long sum_lng       = 0;
+    unsigned long sum_lng10     = 0;
+    unsigned long sum_lng_int   = 0;
+    unsigned long sum_lng10_int = 0;
+    std::string   sum_lng_str;
+    std::string   sum_lng10_str;
+
+    // Build tables
+    try {
+        // Open FITS file
+        GFits fits;
+        fits.open(filename);
+
+        // Set number of rows
+        int nrows = 10;
+        int nvec  = 10;
+
+        // Initial control sums
+        float         tot_flt = 0.0;
+        double        tot_dbl = 0.0;
+        int           tot_int = 0;
+        unsigned long tot_lng = 0;
+        short         tot_sht = 0;
+        std::string   tot_str;
+
+        //
+        // ===== U L O N G=====
+        //
+
+        // Set table
+        GFitsTableULongCol col_lng = GFitsTableULongCol("ULONG", nrows);
+        for (int i = 0; i < nrows; ++i) {
+            unsigned long val_lng  = (unsigned long)(100000.0 * cos(0.1*float(i)));
+            col_lng(i)    = val_lng;
+            sum_lng      += val_lng;
+            sum_lng_int  += int(val_lng);
+            sum_lng_str += ":"+str((int)val_lng);
+        }
+        std::cout << ".";
+
+        // Check table (operator access)
+        tot_lng = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_lng += col_lng(i);
+        if (tot_lng != sum_lng) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::operator()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng;
+            std::cout << std::endl << "  Derived sum:   " << tot_lng << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_dbl += col_lng.real(i);
+        if (!dequal(tot_dbl, double(sum_lng))) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::real()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_int += col_lng.integer(i);
+        if (tot_int != sum_lng_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::integer()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i)
+            tot_str += ":"+col_lng.string(i);
+        if (tot_str != sum_lng_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::string()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        //
+        // ===== U L O N G 1 0 =====
+        //
+
+        // Set long table
+        GFitsTableULongCol col_lng10 = GFitsTableULongCol("ULONG10", nrows, nvec);
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j) {
+                unsigned long val_lng = (unsigned long)(1000.0*cos(0.1*float(i))*
+                                                        cos(0.33*float(j)));
+                col_lng10(i,j) = val_lng;
+                sum_lng10     += val_lng;
+                sum_lng10_int += int(val_lng);
+                sum_lng10_str += ":"+str((int)val_lng);
+            }
+        }
+        std::cout << ".";
+
+        // Check table (operator access)
+        tot_lng = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_lng += col_lng10(i,j);
+        }
+        if (tot_lng != sum_lng10) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::operator() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10;
+            std::cout << std::endl << "  Derived sum:   " << tot_lng << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_dbl += col_lng10.real(i,j);
+        }
+        if (!dequal(tot_dbl, sum_lng10)) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::real() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_int += col_lng10.integer(i,j);
+        }
+        if (tot_int != sum_lng10_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::integer() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_str += ":"+col_lng10.string(i,j);
+        }
+        if (tot_str != sum_lng10_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::string() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        //
+        // ===== W R I T E   T A B L E =====
+        //
+
+        // Build binary table
+        GFitsBinTable table = GFitsBinTable(nrows);
+        table.append_column(col_lng);
+        table.insert_column(99, col_lng10);
+
+        // Create HDU and append to FILE file
+        GFitsHDU hdu(table);
+        fits.append(hdu);
+
+        // Save FITS file
+        fits.save();
+        std::cout << ".";
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to build GFitsTableULongCol tables."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+
+    //================================================================
+    //================================================================
+    //================================================================
+    // Read tables
+    //================================================================
+    //================================================================
+    //================================================================
+    try {
+        // Open FITS file
+        GFits fits;
+        fits.open(filename);
+
+        // Set number of rows
+        int nrows = 10;
+        int nvec  = 10;
+
+        // Initial control sums
+        float         tot_flt = 0.0;
+        double        tot_dbl = 0.0;
+        int           tot_int = 0;
+        unsigned long tot_lng = 0;
+        std::string   tot_str;
+
+        //
+        // ===== U L O N G =====
+        //
+
+        // Get column
+        GFitsTableULongCol* col_lng =
+                    (GFitsTableULongCol*)fits.hdu(1)->column("ULONG");
+
+        // Check table (operator access)
+        tot_lng = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_lng += (*col_lng)(i);
+        if (tot_lng != sum_lng) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::operator()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng;
+            std::cout << std::endl << "  Derived sum:   " << tot_lng << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_dbl += col_lng->real(i);
+        if (!dequal(tot_dbl, double(sum_lng))) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::real()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_int += col_lng->integer(i);
+        if (tot_int != sum_lng_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::integer()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i)
+            tot_str += ":"+col_lng->string(i);
+        if (tot_str != sum_lng_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::string()";
+            std::cout << std::endl << "  Reference sum: " << sum_lng_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        //
+        // ===== U L O N G 1 0 =====
+        //
+
+        // Get column
+        GFitsTableULongCol* col_lng10 =
+                    (GFitsTableULongCol*)fits.hdu(1)->column("ULONG10");
+
+        // Check table (operator access)
+        tot_lng = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_lng += (*col_lng10)(i,j);
+        }
+        if (tot_lng != sum_lng10) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::operator() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10;
+            std::cout << std::endl << "  Derived sum:   " << tot_lng << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_dbl += col_lng10->real(i,j);
+        }
+        if (!dequal(tot_dbl, sum_lng10)) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::real() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_int += col_lng10->integer(i,j);
+        }
+        if (tot_int != sum_lng10_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::integer() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_str += ":"+col_lng10->string(i,j);
+        }
+        if (tot_str != sum_lng10_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableULongCol::string() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum_lng10_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to read GFitsTableULongCol tables."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ". ok." << std::endl;
+
+}
+
+
+/***************************************************************************
+ * @brief Test string FITS binary table
  ***************************************************************************/
 void test_bintable_string(void)
 {
@@ -1752,10 +2832,8 @@ void test_bintable_string(void)
         GFitsTableStringCol col_str = GFitsTableStringCol("STRING", nrows, 20);
         for (int i = 0; i < nrows; ++i) {
             double val_dbl = 100.0 * cos(0.1*double(i));
-            std::ostringstream s_value;
-            s_value << std::scientific << val_dbl;
-            col_str(i)   = s_value.str();
-            sum_str     += ":" + s_value.str();
+            col_str(i)   = str(val_dbl);
+            sum_str     += ":" + str(val_dbl);
             sum_str_dbl += val_dbl;
             sum_str_int += int(val_dbl);
         }
@@ -1777,7 +2855,7 @@ void test_bintable_string(void)
         tot_dbl = 0.0;
         for (int i = 0; i < nrows; ++i)
             tot_dbl += col_str.real(i);
-        if (!equal(tot_dbl, sum_str_dbl, 1.0e-4)) {
+        if (!equal(tot_dbl, sum_str_dbl, 1.0e-2)) {
             std::cout << std::endl << "TEST ERROR: GFitsTableStringCol::real()";
             std::cout << std::endl << "  Reference sum: " << sum_str_dbl;
             std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
@@ -1818,10 +2896,8 @@ void test_bintable_string(void)
         for (int i = 0; i < nrows; ++i) {
             for (int j = 0; j < nvec; ++j) {
                 double val_dbl = 100.0 * cos(0.1*double(i)) * cos(0.3*double(j));
-                std::ostringstream s_value;
-                s_value << std::scientific << val_dbl;
-                col_str10(i,j)  = s_value.str();
-                sum_str10      += ":" + s_value.str();
+                col_str10(i,j)  = str(val_dbl);
+                sum_str10      += ":" + str(val_dbl);
                 sum_str10_dbl  += val_dbl;
                 sum_str10_int  += int(val_dbl);
             }
@@ -1848,7 +2924,7 @@ void test_bintable_string(void)
             for (int j = 0; j < nvec; ++j)
                 tot_dbl += col_str10.real(i,j);
         }
-        if (!equal(tot_dbl, sum_str10_dbl, 1.0e-4)) {
+        if (!equal(tot_dbl, sum_str10_dbl, 1.0e-2)) {
             std::cout << std::endl << "TEST ERROR: GFitsTableStringCol::real() - 10";
             std::cout << std::endl << "  Reference sum: " << sum_str10_dbl;
             std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
@@ -1900,14 +2976,16 @@ void test_bintable_string(void)
         // Save FITS file
         fits.save();
         std::cout << ".";
+
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to build tables." << std::endl;
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to build GFitsTableStringCol tables."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
     std::cout << ".";
-
 
     //================================================================
     //================================================================
@@ -1955,7 +3033,7 @@ void test_bintable_string(void)
         tot_dbl = 0.0;
         for (int i = 0; i < nrows; ++i)
             tot_dbl += col_str->real(i);
-        if (!equal(tot_dbl, sum_str_dbl, 1.0e-4)) {
+        if (!equal(tot_dbl, sum_str_dbl, 1.0e-2)) {
             std::cout << std::endl << "TEST ERROR: GFitsTableStringCol::real()";
             std::cout << std::endl << "  Reference sum: " << sum_str_dbl;
             std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
@@ -1995,7 +3073,7 @@ void test_bintable_string(void)
         GFitsTableStringCol* col_str10 =
                          (GFitsTableStringCol*)fits.hdu(1)->column("STRING10");
 
-        // Check string table (operator access)
+        // Check table (operator access)
         tot_str.clear();
         for (int i = 0; i < nrows; ++i) {
             for (int j = 0; j < nvec; ++j)
@@ -2009,13 +3087,13 @@ void test_bintable_string(void)
         }
         std::cout << ".";
 
-        // Check string table (real access)
+        // Check table (real access)
         tot_dbl = 0.0;
         for (int i = 0; i < nrows; ++i) {
             for (int j = 0; j < nvec; ++j)
                 tot_dbl += col_str10->real(i,j);
         }
-        if (!equal(tot_dbl, sum_str10_dbl, 1.0e-4)) {
+        if (!equal(tot_dbl, sum_str10_dbl, 1.0e-2)) {
             std::cout << std::endl << "TEST ERROR: GFitsTableStringCol::real() - 10";
             std::cout << std::endl << "  Reference sum: " << sum_str10_dbl;
             std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
@@ -2023,7 +3101,7 @@ void test_bintable_string(void)
         }
         std::cout << ".";
 
-        // Check string table (int access)
+        // Check table (int access)
         tot_int = 0;
         for (int i = 0; i < nrows; ++i) {
             for (int j = 0; j < nvec; ++j)
@@ -2037,7 +3115,7 @@ void test_bintable_string(void)
         }
         std::cout << ".";
 
-        // Check string table (string access)
+        // Check table (string access)
         tot_str.clear();
         for (int i = 0; i < nrows; ++i) {
             for (int j = 0; j < nvec; ++j)
@@ -2053,7 +3131,9 @@ void test_bintable_string(void)
 
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to read tables." << std::endl;
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to read GFitsTableStringCol tables."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
@@ -2063,7 +3143,7 @@ void test_bintable_string(void)
 
 
 /***************************************************************************
- *                       Test: FITS binary table test                      *
+ * @brief Test boolean FITS binary table
  ***************************************************************************/
 void test_bintable_logical(void)
 {
@@ -2263,7 +3343,9 @@ void test_bintable_logical(void)
 
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to build tables." << std::endl;
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to build GFitsTableBoolCol tables."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
@@ -2337,7 +3419,7 @@ void test_bintable_logical(void)
         }
         std::cout << ".";
 
-        // Check single precision table (string access)
+        // Check table (string access)
         tot_str.clear();
         for (int i = 0; i < nrows; ++i)
             tot_str += ":"+col->string(i);
@@ -2399,7 +3481,7 @@ void test_bintable_logical(void)
         }
         std::cout << ".";
 
-        // Check single precision table (string access)
+        // Check table (string access)
         tot_str.clear();
         for (int i = 0; i < nrows; ++i) {
             for (int j = 0; j < nvec; ++j)
@@ -2414,7 +3496,373 @@ void test_bintable_logical(void)
         std::cout << ".";
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to build tables." << std::endl;
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to read GFitsTableBoolCol tables."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ". ok." << std::endl;
+
+}
+
+
+/***************************************************************************
+ * @brief Test bit FITS binary table
+ ***************************************************************************/
+void test_bintable_bit(void)
+{
+    // Set filename
+    std::string filename = "test_bintable_bit.fits";
+
+    // Dump header
+    std::cout << "Test GFitsTableBitCol: ";
+    
+    // Remove FITS file
+    std::string cmd = "rm -rf "+ filename;
+    system(cmd.c_str());
+
+    // Allocate reference sums
+    int         sum       = 0;
+    int         sum10     = 0;
+    int         sum_int   = 0;
+    int         sum10_int = 0;
+    std::string sum_str;
+    std::string sum10_str;
+
+    // Build tables
+    try {
+        // Open FITS file
+        GFits fits;
+        fits.open(filename);
+
+        // Set number of rows
+        int nrows = 10;
+        int nvec  = 10;
+
+        // Initial control sums
+        float       tot_flt = 0.0;
+        double      tot_dbl = 0.0;
+        int         tot_int = 0;
+        long        tot_lng = 0;
+        std::string tot_str;
+
+        //
+        // ===== B I T =====
+        //
+
+        // Set table
+        GFitsTableBitCol col = GFitsTableBitCol("BIT", nrows);
+        for (int i = 0; i < nrows; ++i) {
+            char val  = (i % 2) ? 1 : 0;
+            col(i)    = val;
+            sum      += val;
+            sum_int  += int(val);
+            if (val)
+                sum_str += ":1";
+            else
+                sum_str += ":0";
+        }
+        std::cout << ".";
+
+        // Check table (operator access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_int += col(i);
+        if (tot_int != sum) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::operator()";
+            std::cout << std::endl << "  Reference sum: " << sum;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_dbl += col.real(i);
+        if (!dequal(tot_dbl, double(sum))) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::real()";
+            std::cout << std::endl << "  Reference sum: " << sum;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_int += col.integer(i);
+        if (tot_int != sum_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::integer()";
+            std::cout << std::endl << "  Reference sum: " << sum_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i)
+            tot_str += ":"+col.string(i);
+        if (tot_str != sum_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::string()";
+            std::cout << std::endl << "  Reference sum: " << sum_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        //
+        // ===== B I T  1 0 =====
+        //
+
+        // Set table
+        GFitsTableBitCol col10 = GFitsTableBitCol("BIT10", nrows, nvec);
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j) {
+                char val  = (i % 2) * (j % 2);
+                col10(i,j) = val;
+                sum10     += val;
+                sum10_int += int(val);
+                if (val)
+                    sum10_str += ":1";
+                else
+                    sum10_str += ":0";
+            }
+        }
+        std::cout << ".";
+
+        // Check table (operator access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_int += col10(i,j);
+        }
+        if (tot_int != sum10) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::operator() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum10;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_dbl += col10.real(i,j);
+        }
+        if (!dequal(tot_dbl, sum10)) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::real() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum10;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_int += col10.integer(i,j);
+        }
+        if (tot_int != sum10_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::integer() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum10_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_str += ":"+col10.string(i,j);
+        }
+        if (tot_str != sum10_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::string() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum10_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        //
+        // ===== W R I T E   T A B L E =====
+        //
+
+        // Build binary table
+        GFitsBinTable table = GFitsBinTable(nrows);
+        table.append_column(col);
+        table.insert_column(0, col10);
+
+        // Create HDU and append to FILE file
+        GFitsHDU hdu(table);
+        fits.append(hdu);
+
+        // Save FITS file
+        fits.save();
+        std::cout << ".";
+
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to build GFitsTableBitCol tables."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+
+    //================================================================
+    //================================================================
+    //================================================================
+    // Read tables
+    //================================================================
+    //================================================================
+    //================================================================
+    try {
+        // Open FITS file
+        GFits fits;
+        fits.open(filename);
+
+        // Set number of rows
+        int nrows = 10;
+        int nvec  = 10;
+
+        // Initial control sums
+        float       tot_flt = 0.0;
+        short       tot_sht = 0;
+        double      tot_dbl = 0.0;
+        int         tot_int = 0;
+        std::string tot_str;
+
+        //
+        // ===== B I T =====
+        //
+
+        // Get column
+        GFitsTableBitCol* col = (GFitsTableBitCol*)fits.hdu(1)->column("BIT");
+
+        // Check table (operator access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_int += (*col)(i);
+        if (tot_int != sum) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::operator()";
+            std::cout << std::endl << "  Reference sum: " << sum;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i)
+            tot_dbl += col->real(i);
+        if (!dequal(tot_dbl, double(sum))) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::real()";
+            std::cout << std::endl << "  Reference sum: " << sum;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i)
+            tot_int += col->integer(i);
+        if (tot_int != sum_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::integer()";
+            std::cout << std::endl << "  Reference sum: " << sum_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i)
+            tot_str += ":"+col->string(i);
+        if (tot_str != sum_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::string()";
+            std::cout << std::endl << "  Reference sum: " << sum_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        //
+        // ===== B I T  1 0 =====
+        //
+
+        // Get column
+        GFitsTableBitCol* col10 =
+                    (GFitsTableBitCol*)fits.hdu(1)->column("BIT10");
+
+        // Check table (operator access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_int += (*col10)(i,j);
+        }
+        if (tot_int != sum10) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::operator() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum10;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (real access)
+        tot_dbl = 0.0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_dbl += col10->real(i,j);
+        }
+        if (!dequal(tot_dbl, sum10)) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::real() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum10;
+            std::cout << std::endl << "  Derived sum:   " << tot_dbl << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (int access)
+        tot_int = 0;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_int += col10->integer(i,j);
+        }
+        if (tot_int != sum10_int) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::integer() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum10_int;
+            std::cout << std::endl << "  Derived sum:   " << tot_int << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Check table (string access)
+        tot_str.clear();
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < nvec; ++j)
+                tot_str += ":"+col10->string(i,j);
+        }
+        if (tot_str != sum10_str) {
+            std::cout << std::endl << "TEST ERROR: GFitsTableBitCol::string() - 10";
+            std::cout << std::endl << "  Reference sum: " << sum10_str;
+            std::cout << std::endl << "  Derived sum:   " << tot_str << std::endl;
+            throw;
+        }
+        std::cout << ".";
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to read GFitsTableBitCol tables."
+                  << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
@@ -2437,12 +3885,16 @@ int main(void)
     // Execute the tests
     test_create();
     test_image_double();
+    test_bintable_bit();
+    test_bintable_logical();
+    test_bintable_string();
     test_bintable_double();
     test_bintable_float();
+    test_bintable_ushort();
     test_bintable_short();
+    test_bintable_ulong();
     test_bintable_long();
-    test_bintable_string();
-    test_bintable_logical();
+    test_bintable_longlong();
     
     // Return
     return 0;
