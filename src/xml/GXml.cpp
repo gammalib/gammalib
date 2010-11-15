@@ -31,6 +31,7 @@
 #include "GXmlComment.hpp"
 #include "GXmlPI.hpp"
 #include "GException.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD                                     "GXml::load(std::string&)"
@@ -187,6 +188,8 @@ void GXml::append(GXmlNode* node)
  *
  * @param[in] filename Name of file to be loaded.
  *
+ * @exception GException::file_not_found
+ *            XML file not found.
  * @exception GException::file_open_error
  *            Unable to open XML file (read access requested).
  *
@@ -197,6 +200,10 @@ void GXml::load(const std::string& filename)
     // Clear object
     clear();
 
+    // Check if file exists
+    if (!file_exists(filename))
+        throw GException::file_not_found(G_LOAD, filename);
+    
     // Open parameter file
     FILE* fptr = fopen(filename.c_str(), "r");
     if (fptr == NULL)
