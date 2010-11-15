@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GFitsHDU.hpp  - FITS HDU handling class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008 by Jurgen Knodlseder                                *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,6 @@
 #define GFITSHDU_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsCfitsio.hpp"
 #include "GFitsHeader.hpp"
 #include "GFitsData.hpp"
 #include "GFitsImage.hpp"
@@ -51,12 +50,12 @@ class GFitsHDU {
 
 public:
     // Constructors and destructors
-    GFitsHDU();
+    GFitsHDU(void);
     GFitsHDU(const GFitsImage& image);
     GFitsHDU(const GFitsAsciiTable& table);
     GFitsHDU(const GFitsBinTable& table);
     GFitsHDU(const GFitsHDU& hdu);
-    ~GFitsHDU();
+    virtual ~GFitsHDU(void);
 
     // Operators
     GFitsHDU& operator= (const GFitsHDU& hdu);
@@ -85,13 +84,13 @@ private:
     void        init_members(void);
     void        copy_members(const GFitsHDU& hdu);
     void        free_members(void);
-    void        connect(__fitsfile* fptr);
+    void        connect(void* fptr);
     GFitsImage* new_image(void);
-    void        open(__fitsfile* fptr, int hdunum);
+    void        open(void* vptr, int hdunum);
     void        save(void);
 
     // Private data area
-    __fitsfile   m_fitsfile;    //!< FITS file pointer
+    void*        m_fitsfile;    //!< FITS file pointer
     int          m_hdunum;      //!< HDU number (starting from 0)
     std::string  m_name;        //!< HDU name (extname)
     int          m_type;        //!< HDU type

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsData.cpp  - FITS data handling abstract base class         *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,12 +9,15 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
+#include "GFitsCfitsio.hpp"
 #include "GFitsData.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -29,38 +32,49 @@
 
 /*==========================================================================
  =                                                                         =
- =                     GFitsData constructors/destructors                  =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***************************************************************************
- *                                Constructor                              *
- * ----------------------------------------------------------------------- *
+ * @brief Void constructor
  ***************************************************************************/
-GFitsData::GFitsData()
+GFitsData::GFitsData(void)
 {
+    // Initialise class members for clean destruction
+    init_members();
+
     // Return
     return;
 }
 
 
 /***************************************************************************
- *                              Copy constructor                           *
- * ----------------------------------------------------------------------- *
+ * @brief Copy constructor
+ *
+ * @param data Data to use for construction.
  ***************************************************************************/
 GFitsData::GFitsData(const GFitsData& data)
 {
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Copy members
+    copy_members(data);
+
     // Return
     return;
 }
 
 
 /***************************************************************************
- *                               Destructor                                *
- * ----------------------------------------------------------------------- *
+ * @brief Destructor
  ***************************************************************************/
-GFitsData::~GFitsData()
+GFitsData::~GFitsData(void)
 {
+    // Free members
+    free_members();
+
     // Return
     return;
 }
@@ -68,18 +82,28 @@ GFitsData::~GFitsData()
 
 /*==========================================================================
  =                                                                         =
- =                           GFitsData operators                           =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                            Assignment operator                          *
- * ----------------------------------------------------------------------- *
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param data Data to be assigned.
  ***************************************************************************/
 GFitsData& GFitsData::operator= (const GFitsData& data)
 {
     // Execute only if object is not identical
     if (this != &data) {
+
+        // Free members
+        free_members();
+
+        // Initialise private members for clean destruction
+        init_members();
+
+        // Copy members
+        copy_members(data);
 
     } // endif: object was not identical
 
@@ -90,26 +114,29 @@ GFitsData& GFitsData::operator= (const GFitsData& data)
 
 /*==========================================================================
  =                                                                         =
- =                         GFitsData public methods                        =
+ =                              Public methods                             =
  =                                                                         =
  ==========================================================================*/
 
 
 /*==========================================================================
  =                                                                         =
- =                         GFitsData private methods                       =
+ =                             Protected methods                           =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Connect data to FITS file
  *
- * @param[in] fptr FITS file pointer to which the data should be connected
+ * @param[in] vptr Date file pointer.
+ *
+ * The data is connected to a FITS file by copying the FITS file pointer that
+ * points towards the FITS data structure into the m_fitsfile member.
  ***************************************************************************/
-void GFitsData::connect(__fitsfile* fptr)
+void GFitsData::connect(void* vptr)
 {
-    // Connect data
-    m_fitsfile = *fptr;
+    // Connect data by copying the data file pointer
+    FPTR_COPY(m_fitsfile, vptr);
 
     // Return
     return;
@@ -118,13 +145,58 @@ void GFitsData::connect(__fitsfile* fptr)
 
 /*==========================================================================
  =                                                                         =
- =                             GFitsData friends                           =
+ =                              Private methods                            =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ ***************************************************************************/
+void GFitsData::init_members(void)
+{
+    // Initialise members
+    m_fitsfile = new __fitsfile;
+    FPTR(m_fitsfile)->HDUposition = 0;
+    FPTR(m_fitsfile)->Fptr        = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] data Data to be copied.
+ ***************************************************************************/
+void GFitsData::copy_members(const GFitsData& data)
+{
+    // Copy members
+    FPTR_COPY(m_fitsfile, data.m_fitsfile);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ ***************************************************************************/
+void GFitsData::free_members(void)
+{
+    // Free memory
+    if (m_fitsfile != NULL) delete FPTR(m_fitsfile);
+
+    // Properly mark as free
+    m_fitsfile = NULL;
+
+    // Return
+    return;
+}
 
 
 /*==========================================================================
  =                                                                         =
- =                     Other functions used by GFitsData                   =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/

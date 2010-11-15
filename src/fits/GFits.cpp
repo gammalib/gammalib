@@ -17,13 +17,14 @@
 #endif
 #include <iostream>
 #include "GException.hpp"
+#include "GFitsCfitsio.hpp"
 #include "GFits.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPEN                              "GFits::open(const std::string&)"
-#define G_SAVETO                    "GFits::saveto(const std::string&, bool)"
-#define G_HDU1                               "GFits::hdu(const std::string&)"
+#define G_OPEN                                    "GFits::open(std::string&)"
+#define G_SAVETO                           "GFits::saveto(std::string&,bool)"
+#define G_HDU1                                     "GFits::hdu(std::string&)"
 #define G_HDU2                                              "GFits::hdu(int)"
 #define G_FREE_MEM                                    "GFits::free_members()"
 
@@ -32,7 +33,6 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-
 
 
 /*==========================================================================
@@ -44,7 +44,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GFits::GFits()
+GFits::GFits(void)
 {
     // Initialise class members
     init_members();
@@ -96,7 +96,7 @@ GFits::GFits(const GFits& fits)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GFits::~GFits()
+GFits::~GFits(void)
 {
     // Free members
     free_members();
@@ -203,19 +203,19 @@ void GFits::open(const std::string& filename)
 
     // Try opening FITS file with readwrite access
     int status = 0;
-    status     = __ffopen(&m_fitsfile, filename.c_str(), 1, &status);
+    status     = __ffopen(FHANDLE(m_fitsfile), filename.c_str(), 1, &status);
 
     // If failed then try opening as readonly
     if (status == 104 || status == 112) {
         status      = 0;
-        status      = __ffopen(&m_fitsfile, filename.c_str(), 0, &status);
+        status      = __ffopen(FHANDLE(m_fitsfile), filename.c_str(), 0, &status);
         m_readwrite = 0;
     }
 
     // If failed then create FITS file now
     if (status == 104) {
         status = 0;
-        status = __ffinit(&m_fitsfile, filename.c_str(), &status);
+        status = __ffinit(FHANDLE(m_fitsfile), filename.c_str(), &status);
     }
 
     // Throw any other error
@@ -226,7 +226,7 @@ void GFits::open(const std::string& filename)
     m_filename = filename;
 
     // Determine number of HDUs
-    status = __ffthdu(m_fitsfile, &m_num_hdu, &status);
+    status = __ffthdu(FPTR(m_fitsfile), &m_num_hdu, &status);
     if (status != 0)
         throw GException::fits_error(G_OPEN, status);
 
@@ -380,7 +380,7 @@ void GFits::append(const GFitsHDU& hdu)
 
             // Set FITS file pointer for new HDU
             if (m_fitsfile != NULL) {
-                __fitsfile fptr  = *m_fitsfile;
+                __fitsfile fptr  = *(FPTR(m_fitsfile));
                 fptr.HDUposition = m_num_hdu;
                 m_hdu[m_num_hdu].connect(&fptr);
             }
@@ -394,7 +394,7 @@ void GFits::append(const GFitsHDU& hdu)
 
         // Set FITS file pointer for new HDU
         if (m_fitsfile != NULL) {
-            __fitsfile fptr  = *m_fitsfile;
+            __fitsfile fptr  = *(FPTR(m_fitsfile));
             fptr.HDUposition = m_num_hdu;
             m_hdu[m_num_hdu].connect(&fptr);
         }
@@ -546,22 +546,25 @@ void GFits::free_members(void)
         // If there are no HDUs then delete the file (don't worry about error)
         if (m_num_hdu == 0) {
             int status = 0;
-            __ffdelt(m_fitsfile, &status);
+            __ffdelt(FPTR(m_fitsfile), &status);
         }
 
         // ... otherwise close the file
         else {
             int status = 0;
-            status     = __ffclos(m_fitsfile, &status);
+            status     = __ffclos(FPTR(m_fitsfile), &status);
             if (status == 252) {
                 int new_status = 0;
-                __ffdelt(m_fitsfile, &new_status);
+                __ffdelt(FPTR(m_fitsfile), &new_status);
                 throw GException::fits_error(G_FREE_MEM, status);
             }
             else if (status != 0)
                 throw GException::fits_error(G_FREE_MEM, status);
         }
     }
+
+    // Reset FITS file pointer
+    m_fitsfile = NULL;
 
     // Free memory
     if (m_hdu != NULL) delete [] m_hdu;

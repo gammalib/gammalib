@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GFitsHeaderCard.cpp  - FITS header card abstract base class       *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,19 +9,22 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GFitsCfitsio.hpp"
 #include "GFitsHeaderCard.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ_NUM   "GFitsHeaderCard::read(fitsfile*, int)"
-#define G_READ_STR   "GFitsHeaderCard::read(fitsfile*, std::string)"
-#define G_WRITE      "GFitsHeaderCard::write(fitsfile*)"
+#define G_READ_NUM                         "GFitsHeaderCard::read(void*,int)"
+#define G_READ_STR                 "GFitsHeaderCard::read(void*,std::string)"
+#define G_WRITE                               "GFitsHeaderCard::write(void*)"
 
 /* __ Definitions ________________________________________________________ */
 #define CT_UNKNOWN 0
@@ -44,14 +47,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                     GFitsHDU constructors/destructors                   =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GFitsHeaderCard::GFitsHeaderCard()
+GFitsHeaderCard::GFitsHeaderCard(void)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -161,7 +164,7 @@ GFitsHeaderCard::GFitsHeaderCard(const GFitsHeaderCard& card)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GFitsHeaderCard::~GFitsHeaderCard()
+GFitsHeaderCard::~GFitsHeaderCard(void)
 {
     // Free members
     free_members();
@@ -172,15 +175,14 @@ GFitsHeaderCard::~GFitsHeaderCard()
 
 /*==========================================================================
  =                                                                         =
- =                         GFitsHeaderCard operators                       =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param card[in] Header card that will be assigned to GFitsHeaderCard 
- *                 instance
+ * @param card[in] Header card to be assigned.
  ***************************************************************************/
 GFitsHeaderCard& GFitsHeaderCard::operator= (const GFitsHeaderCard& card)
 {
@@ -205,14 +207,14 @@ GFitsHeaderCard& GFitsHeaderCard::operator= (const GFitsHeaderCard& card)
 
 /*==========================================================================
  =                                                                         =
- =                      GFitsHeaderCard public methods                     =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Set name of header card
  *
- * @param[in] keyname Name of header card
+ * @param[in] keyname Name of header card.
  ***************************************************************************/
 void GFitsHeaderCard::keyname(const std::string& keyname)
 {
@@ -227,7 +229,7 @@ void GFitsHeaderCard::keyname(const std::string& keyname)
 /***********************************************************************//**
  * @brief Set string value of header card
  *
- * @param[in] value String value of header card
+ * @param[in] value String value of header card.
  ***************************************************************************/
 void GFitsHeaderCard::value(const std::string& value)
 {
@@ -251,7 +253,7 @@ void GFitsHeaderCard::value(const std::string& value)
 /***********************************************************************//**
  * @brief Set floating point value of header card
  *
- * @param[in] value Floating point value of header card
+ * @param[in] value Floating point value of header card.
  ***************************************************************************/
 void GFitsHeaderCard::value(const double& value)
 {
@@ -273,7 +275,7 @@ void GFitsHeaderCard::value(const double& value)
 /***********************************************************************//**
  * @brief Set integer value of header card
  *
- * @param[in] value Integer value of header card
+ * @param[in] value Integer value of header card.
  ***************************************************************************/
 void GFitsHeaderCard::value(const int& value)
 {
@@ -295,7 +297,7 @@ void GFitsHeaderCard::value(const int& value)
 /***********************************************************************//**
  * @brief Set unit of header card value
  *
- * @param[in] value Unit of header card
+ * @param[in] value Unit of header card.
  ***************************************************************************/
 void GFitsHeaderCard::unit(const std::string& unit)
 {
@@ -310,7 +312,7 @@ void GFitsHeaderCard::unit(const std::string& unit)
 /***********************************************************************//**
  * @brief Set comment of header card
  *
- * @param[in] value Header card comment
+ * @param[in] value Header card comment.
  ***************************************************************************/
 void GFitsHeaderCard::comment(const std::string& comment)
 {
@@ -486,7 +488,7 @@ int GFitsHeaderCard::integer(void)
 
 /*==========================================================================
  =                                                                         =
- =                      GFitsHeaderCard private methods                    =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -498,11 +500,11 @@ void GFitsHeaderCard::init_members(void)
     // Initialise members
     m_keyname.clear();
     m_value.clear();
-    m_value_type     = CT_UNKNOWN;
-    m_value_decimals = 10;
     m_unit.clear();
     m_comment.clear();
-    m_comment_write = 0;
+    m_value_type     = CT_UNKNOWN;
+    m_value_decimals = 10;
+    m_comment_write  = 0;
 
     // Return
     return;
@@ -614,14 +616,15 @@ int GFitsHeaderCard::get_value_type(const std::string& value)
 /***********************************************************************//**
  * @brief Read header card from FITS file
  *
- * @param[in] fptr Pointer to FITS file from which the card is read
- * @param[in] keynum Number of the header card
+ * @param[in] vptr FITS file void pointer.
+ * @param[in] keynum Number of the header card.
  ***************************************************************************/
-void GFitsHeaderCard::read(__fitsfile* fptr, int keynum)
+void GFitsHeaderCard::read(void* vptr, int keynum)
 {
     // Move to HDU
     int status = 0;
-    status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
+    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL,
+                          &status);
     if (status != 0)
         throw GException::fits_error(G_READ_NUM, status);
 
@@ -629,7 +632,7 @@ void GFitsHeaderCard::read(__fitsfile* fptr, int keynum)
     char keyname[80];
     char value[80];
     char comment[80];
-    status = __ffgkyn(fptr, keynum, keyname, value, comment, &status);
+    status = __ffgkyn(FPTR(vptr), keynum, keyname, value, comment, &status);
     if (status != 0)
         throw GException::fits_error(G_READ_NUM, status);
 
@@ -649,21 +652,23 @@ void GFitsHeaderCard::read(__fitsfile* fptr, int keynum)
 /***********************************************************************//**
  * @brief Read header card from FITS file
  *
- * @param[in] fptr Pointer to FITS file from which the card is read
- * @param[in] keyname Name of the header card
+ * @param[in] fptr FITS file void pointer.
+ * @param[in] keyname Name of the header card.
  ***************************************************************************/
-void GFitsHeaderCard::read(__fitsfile* fptr, const std::string& keyname)
+void GFitsHeaderCard::read(void* vptr, const std::string& keyname)
 {
     // Move to HDU
     int status = 0;
-    status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
+    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL,
+                          &status);
     if (status != 0)
         throw GException::fits_error(G_READ_NUM, status);
 
     // Read keyword
     char value[80];
     char comment[80];
-    status = __ffgkey(fptr, (char*)keyname.c_str(), value, comment, &status);
+    status = __ffgkey(FPTR(vptr), (char*)keyname.c_str(), value, comment,
+                      &status);
 
     // Catch error
     if (status == 202)       // Keyword not found
@@ -687,16 +692,16 @@ void GFitsHeaderCard::read(__fitsfile* fptr, const std::string& keyname)
 /***********************************************************************//**
  * @brief Write header card
  *
- * @param fptr[in] Pointer to FITS file into which the header card should be
- *                  written
+ * @param fptr[in] FITS file void pointer.
  *
  * Writes any kind of header card to a FITS file.
  ***************************************************************************/
-void GFitsHeaderCard::write(__fitsfile* fptr)
+void GFitsHeaderCard::write(void* vptr)
 {
     // Move to HDU
     int status = 0;
-    status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
+    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL,
+                          &status);
     if (status != 0)
         throw GException::fits_error(G_READ_NUM, status);
 
@@ -707,29 +712,29 @@ void GFitsHeaderCard::write(__fitsfile* fptr)
     case CT_INVALID:
         break;
     case CT_STRING:
-        status = __ffukys(fptr, (char*)m_keyname.c_str(),
+        status = __ffukys(FPTR(vptr), (char*)m_keyname.c_str(),
                           (char*)string().c_str(), (char*)m_comment.c_str(), 
                           &status);
         break;
     case CT_INT:
-        status = __ffukyj(fptr, (char*)m_keyname.c_str(), integer(),
+        status = __ffukyj(FPTR(vptr), (char*)m_keyname.c_str(), integer(),
                           (char*)m_comment.c_str(), &status);
         break;
     case CT_FLOAT:
-        status = __ffukyd(fptr, (char*)m_keyname.c_str(), real(),
+        status = __ffukyd(FPTR(vptr), (char*)m_keyname.c_str(), real(),
                           decimals(), (char*)m_comment.c_str(), &status);
         break;
     case CT_BOOL:
-        status = __ffukyl(fptr, (char*)m_keyname.c_str(), integer(),
+        status = __ffukyl(FPTR(vptr), (char*)m_keyname.c_str(), integer(),
                           (char*)m_comment.c_str(), &status);
         break;
     case CT_COMMENT:
         if (m_comment_write)
-            status = __ffpcom(fptr, (char*)m_comment.c_str(), &status);
+            status = __ffpcom(FPTR(vptr), (char*)m_comment.c_str(), &status);
         break;
     case CT_HISTORY:
         if (m_comment_write)
-            status = __ffphis(fptr, (char*)m_comment.c_str(), &status);
+            status = __ffphis(FPTR(vptr), (char*)m_comment.c_str(), &status);
         break;
     default:
         break;
@@ -744,15 +749,15 @@ void GFitsHeaderCard::write(__fitsfile* fptr)
 
 /*==========================================================================
  =                                                                         =
- =                         GFitsHeaderCard friends                         =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param[in] os Output stream
- * @param[in] card Card that should be put in output stream
+ * @param[in] os Output stream.
+ * @param[in] card Header card.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFitsHeaderCard& card)
 {

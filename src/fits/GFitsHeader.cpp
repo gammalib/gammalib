@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsHeader.cpp  - FITS header handling class             *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,19 +9,22 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
+#include "GFitsCfitsio.hpp"
 #include "GFitsHeader.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CARD     "GFitsHeader::card(const int&)"
-#define G_CARD_PTR "GFitsHeader::card_ptr(const std::string&)"
-#define G_OPEN     "GFitsHeader::open(fitsfile*)"
-#define G_SAVE     "GFitsHeader::save(fitsfile*)"
+#define G_CARD                                      "GFitsHeader::card(int&)"
+#define G_CARD_PTR                      "GFitsHeader::card_ptr(std::string&)"
+#define G_OPEN                                     "GFitsHeader::open(void*)"
+#define G_SAVE                                     "GFitsHeader::save(void*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -33,14 +36,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                    GFitsHeader constructors/destructors                 =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GFitsHeader::GFitsHeader()
+GFitsHeader::GFitsHeader(void)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -71,7 +74,7 @@ GFitsHeader::GFitsHeader(const GFitsHeader& header)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GFitsHeader::~GFitsHeader()
+GFitsHeader::~GFitsHeader(void)
 {
     // Free members
     free_members();
@@ -83,7 +86,7 @@ GFitsHeader::~GFitsHeader()
 
 /*==========================================================================
  =                                                                         =
- =                          GFitsHeader operators                          =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -115,9 +118,37 @@ GFitsHeader& GFitsHeader::operator= (const GFitsHeader& header)
 
 /*==========================================================================
  =                                                                         =
- =                        GFitsHeader public methods                       =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear object
+ *
+ * Sets the FITS header in an initial proper state.
+ ***************************************************************************/
+void GFitsHeader::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns number of header cards
+ ***************************************************************************/
+int GFitsHeader::size(void) const
+{
+    // Return number of header cards
+    return m_num_cards;
+}
+
 
 /***********************************************************************//**
  * @brief Update card in header or append card to header
@@ -209,7 +240,7 @@ GFitsHeaderCard* GFitsHeader::card(const int& cardno)
 /***********************************************************************//**
  * @brief Get specified header card value as string
  *
- * @param[in] keyname Name of header card
+ * @param[in] keyname Name of header card.
  *
  * If the header card is not found an empty string is returned.
  ***************************************************************************/
@@ -229,7 +260,7 @@ std::string GFitsHeader::string(const std::string& keyname)
 /***********************************************************************//**
  * @brief Get specified header card value as string
  *
- * @param[in] cardno Header card number (starting from 0)
+ * @param[in] cardno Header card number (starting from 0).
  *
  * If the header card number does not exist an empty string is returned.
  ***************************************************************************/
@@ -249,7 +280,7 @@ std::string GFitsHeader::string(const int& cardno)
 /***********************************************************************//**
  * @brief Get specified header card value as double precision value
  *
- * @param[in] keyname Name of header card
+ * @param[in] keyname Name of header card.
  *
  * If the header card is not found 0 is returned.
  ***************************************************************************/
@@ -269,7 +300,7 @@ double GFitsHeader::real(const std::string& keyname)
 /***********************************************************************//**
  * @brief Get specified header card value as double precision value
  *
- * @param[in] cardno Header card number (starting from 0)
+ * @param[in] cardno Header card number (starting from 0).
  *
  * If the header card number does not exist 0 is returned.
  ***************************************************************************/
@@ -289,7 +320,7 @@ double GFitsHeader::real(const int& cardno)
 /***********************************************************************//**
  * @brief Get specified header card value as integer value
  *
- * @param keyname Name of header card
+ * @param keyname Name of header card.
  *
  * If the header card is not found 0 is returned.
  ***************************************************************************/
@@ -309,7 +340,7 @@ int GFitsHeader::integer(const std::string& keyname)
 /***********************************************************************//**
  * @brief Get specified header card value as integer value
  *
- * @param[in] cardno Header card number (starting from 0)
+ * @param[in] cardno Header card number (starting from 0).
  *
  * If the header card number does not exist 0 is returned.
  ***************************************************************************/
@@ -337,6 +368,8 @@ GFitsHeader* GFitsHeader::clone(void) const
 
 /***********************************************************************//**
  * @brief Returns number of header cards
+ *
+ * @todo Depreceated method. Use size() instead.
  ***************************************************************************/
 int GFitsHeader::num_cards(void) const
 {
@@ -347,7 +380,7 @@ int GFitsHeader::num_cards(void) const
 
 /*==========================================================================
  =                                                                         =
- =                         GFitsHeader private methods                     =
+ =                              Private methods                            =
  =                                                                         =
  ==========================================================================*/
 
@@ -440,23 +473,24 @@ GFitsHeaderCard* GFitsHeader::card_ptr(const std::string& keyname)
 /***********************************************************************//**
  * @brief Open Header
  *
- * @param[in] fptr Pointer to FITS file from which the header will be loaded
+ * @param[in] vptr FITS file void pointer.
  *
- * @exception GException::fits_error FITS error occured.
+ * @exception GException::fits_error
+ *            FITS error occured.
  *
  * Loads all header cards into memory. Any header cards that existed before
  * will be dropped.
  ***************************************************************************/
-void GFitsHeader::open(__fitsfile* fptr)
+void GFitsHeader::open(void* vptr)
 {
     // Move to HDU
     int status = 0;
-    status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
+    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
     if (status != 0)
         throw GException::fits_error(G_OPEN, status);
 
     // Determine number of cards in header
-    status = __ffghsp(fptr, &m_num_cards, NULL, &status);
+    status = __ffghsp(FPTR(vptr), &m_num_cards, NULL, &status);
     if (status != 0)
         throw GException::fits_error(G_OPEN, status);
 
@@ -468,7 +502,7 @@ void GFitsHeader::open(__fitsfile* fptr)
 
     // Read all cards
     for (int i = 0; i < m_num_cards; ++i)
-        m_card[i].read(fptr, i+1);
+        m_card[i].read(FPTR(vptr), i+1);
 
     // Return
     return;
@@ -478,9 +512,10 @@ void GFitsHeader::open(__fitsfile* fptr)
 /***********************************************************************//**
  * @brief Save Header to FITS file
  *
- * @param[in] fptr Pointer to FITS file into which the header cards will be saved
+ * @param[in] fptr FITS file void pointer.
  *
- * @exception GException::fits_error FITS error occured.
+ * @exception GException::fits_error
+ *            FITS error occured.
  *
  * Saves all header cards into HDU. This method does not write the following
  * mandatory keywords to the HDU (those will be writted by methods handling
@@ -492,11 +527,11 @@ void GFitsHeader::open(__fitsfile* fptr)
  * 'PCOUNT'
  * 'GCOUNT'
  ***************************************************************************/
-void GFitsHeader::save(__fitsfile* fptr)
+void GFitsHeader::save(void* vptr)
 {
     // Move to HDU
     int status = 0;
-    status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
+    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
     if (status != 0)
         throw GException::fits_error(G_SAVE, status);
 
@@ -509,7 +544,7 @@ void GFitsHeader::save(__fitsfile* fptr)
             m_card[i].keyname() != "PCOUNT" &&
             m_card[i].keyname() != "GCOUNT" &&
             m_card[i].keyname().find("NAXIS") == std::string::npos) {
-            m_card[i].write(fptr);
+            m_card[i].write(FPTR(vptr));
         }
     }
 
@@ -547,8 +582,8 @@ void GFitsHeader::close(void)
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param[in] os Output stream
- * @param[in] header Header to put in output stream
+ * @param[in] os Output stream.
+ * @param[in] header FITS header.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFitsHeader& header)
 {
@@ -560,10 +595,3 @@ std::ostream& operator<< (std::ostream& os, const GFitsHeader& header)
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                    Other functions used by GFitsHeader                  =
- =                                                                         =
- ==========================================================================*/

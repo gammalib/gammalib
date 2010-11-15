@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsHeaderCard.hpp  - FITS header card class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008 by Jurgen Knodlseder                                *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,6 @@
 #define GFITSHEADERCARD_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsCfitsio.hpp"
 
 
 /***********************************************************************//**
@@ -42,7 +41,7 @@ class GFitsHeaderCard {
 
 public:
     // Constructors & Destructors
-    GFitsHeaderCard();
+    GFitsHeaderCard(void);
     GFitsHeaderCard(const std::string& keyname, const std::string& value,
                     const std::string& comment);
     GFitsHeaderCard(const std::string& keyname, const double& value,
@@ -50,7 +49,7 @@ public:
     GFitsHeaderCard(const std::string& keyname, const int& value,
                     const std::string& comment);
     GFitsHeaderCard(const GFitsHeaderCard& card);
-    ~GFitsHeaderCard();
+    virtual ~GFitsHeaderCard(void);
 
     // Operators
     GFitsHeaderCard& operator= (const GFitsHeaderCard& card);
@@ -80,9 +79,9 @@ private:
     void copy_members(const GFitsHeaderCard& card);
     void free_members(void);
     int  get_value_type(const std::string& value);
-    void read(__fitsfile* fptr, int keynum);
-    void read(__fitsfile* fptr, const std::string& keyname);
-    void write(__fitsfile* fptr);
+    void read(void* vptr, int keynum);
+    void read(void* fptr, const std::string& keyname);
+    void write(void* fptr);
 
     // Private data area
     std::string m_keyname;         //!< Name of the card

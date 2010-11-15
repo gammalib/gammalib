@@ -17,12 +17,13 @@
 #endif
 #include <iostream>
 #include "GException.hpp"
+#include "GFitsCfitsio.hpp"
 #include "GFitsTableCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD_COLUMN                          "GFitsTableCol::load_column()"
 #define G_SAVE_COLUMN                          "GFitsTableCol::save_column()"
-#define G_OFFSET              "GFitsTableCol::offset(const int&, const int&)"
+#define G_OFFSET                           "GFitsTableCol::offset(int&,int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -40,7 +41,7 @@
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GFitsTableCol::GFitsTableCol()
+GFitsTableCol::GFitsTableCol(void)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -104,7 +105,7 @@ GFitsTableCol::GFitsTableCol(const GFitsTableCol& column)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GFitsTableCol::~GFitsTableCol()
+GFitsTableCol::~GFitsTableCol(void)
 {
     // Free members
     free_members();
@@ -193,10 +194,14 @@ int GFitsTableCol::colnum(void)
  * Returns one of the following:
  *   1 (TBIT)
  *  11 (TBYTE)
+ *  12 (TSBYTE)
  *  14 (TLOGICAL)
  *  16 (TSTRING)
+ *  21 (TUSHORT)
  *  21 (TSHORT)
+ *  31 (TUINT)
  *  31 (TINT)
+ *  41 (TULONG)
  *  41 (TLONG)
  *  42 (TFLOAT)
  *  81 (TLONGLONG)
@@ -324,18 +329,18 @@ void GFitsTableCol::load_column(void)
 
         // If a FITS file is attached then load column data from the FITS
         // file
-        if (m_fitsfile.Fptr != NULL) {
+        if (FPTR(m_fitsfile)->Fptr != NULL) {
 
             // Move to the HDU
             int status = 0;
-            status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1,
+            status     = __ffmahd(FPTR(m_fitsfile), (FPTR(m_fitsfile)->HDUposition)+1,
                                   NULL, &status);
             if (status != 0)
                 throw GException::fits_hdu_not_found(G_LOAD_COLUMN,
-                                  (m_fitsfile.HDUposition)+1, status);
+                                  (FPTR(m_fitsfile)->HDUposition)+1, status);
 
             // Load data
-            status = __ffgcv(&m_fitsfile, m_type, m_colnum, 1, 1, m_size,
+            status = __ffgcv(FPTR(m_fitsfile), m_type, m_colnum, 1, 1, m_size,
                              ptr_nulval(), ptr_data(), &m_anynul, &status);
             if (status != 0)
                 throw GException::fits_error(G_LOAD_COLUMN, status,
@@ -374,18 +379,18 @@ void GFitsTableCol::load_column(void)
 void GFitsTableCol::save_column(void)
 {
     // Continue only if a FITS file is connected and data have been loaded
-    if (m_fitsfile.Fptr != NULL && m_colnum > 0 && ptr_data() != NULL) {
+    if (FPTR(m_fitsfile)->Fptr != NULL && m_colnum > 0 && ptr_data() != NULL) {
 
         // Move to the HDU
         int status = 0;
-        status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL,
+        status     = __ffmahd(FPTR(m_fitsfile), (FPTR(m_fitsfile)->HDUposition)+1, NULL,
                               &status);
         if (status != 0)
             throw GException::fits_hdu_not_found(G_SAVE_COLUMN,
-                                                 (m_fitsfile.HDUposition)+1,
+                                                 (FPTR(m_fitsfile)->HDUposition)+1,
                                                  status);
         // Save the column data
-        status = __ffpcn(&m_fitsfile, m_type, m_colnum, 1, 1,
+        status = __ffpcn(FPTR(m_fitsfile), m_type, m_colnum, 1, 1,
                          (long)m_size, ptr_data(), ptr_nulval(), &status);
         if (status != 0)
             throw GException::fits_error(G_SAVE_COLUMN, status);
@@ -400,8 +405,8 @@ void GFitsTableCol::save_column(void)
 /***********************************************************************//**
  * @brief Put column information in output stream
  *
- * @param[in] os Output stream
- * @param[in] column Column to put in output stream
+ * @param[in] os Output stream.
+ * @param[in] column Column to put in output stream.
  ***************************************************************************/
 void GFitsTableCol::dump_column(std::ostream& os, void* data) const
 {
@@ -489,19 +494,22 @@ int GFitsTableCol::offset(const int& row, const int& inx) const
  ***************************************************************************/
 void GFitsTableCol::init_members(void)
 {
+    // Allocate FITS file pointer
+    m_fitsfile = new __fitsfile;
+    FPTR(m_fitsfile)->HDUposition = 0;
+    FPTR(m_fitsfile)->Fptr        = NULL;
+    
     // Initialise members
     m_name.clear();
     m_unit.clear();
-    m_colnum               = 0;
-    m_type                 = 0;
-    m_repeat               = 0;
-    m_width                = 0;
-    m_number               = 0;
-    m_length               = 0;
-    m_size                 = 0;
-    m_anynul               = 0;
-    m_fitsfile.HDUposition = 0;
-    m_fitsfile.Fptr        = NULL;
+    m_colnum = 0;
+    m_type   = 0;
+    m_repeat = 0;
+    m_width  = 0;
+    m_number = 0;
+    m_length = 0;
+    m_size   = 0;
+    m_anynul = 0;
 
     // Return
     return;
@@ -511,7 +519,7 @@ void GFitsTableCol::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] column Column to be copied
+ * @param[in] column Column to be copied.
  ***************************************************************************/
 void GFitsTableCol::copy_members(const GFitsTableCol& column)
 {
@@ -526,7 +534,7 @@ void GFitsTableCol::copy_members(const GFitsTableCol& column)
     m_length   = column.m_length;
     m_size     = column.m_size;
     m_anynul   = column.m_anynul;
-    m_fitsfile = column.m_fitsfile;
+    FPTR_COPY(m_fitsfile, column.m_fitsfile);
 
     // Return
     return;
@@ -539,8 +547,10 @@ void GFitsTableCol::copy_members(const GFitsTableCol& column)
 void GFitsTableCol::free_members(void)
 {
     // Free memory
+    if (m_fitsfile != NULL) delete FPTR(m_fitsfile);
 
-    // Mark memory as freed
+    // Mark memory as free
+    m_fitsfile = NULL;
 
     // Return
     return;
@@ -550,13 +560,12 @@ void GFitsTableCol::free_members(void)
 /***********************************************************************//**
  * @brief Connect table column to FITS file
  *
- * @param[in] fptr FITS file pointer to which the table column should be
- *                 connected
+ * @param[in] vptr Column file void pointer.
  ***************************************************************************/
-void GFitsTableCol::connect(__fitsfile* fptr)
+void GFitsTableCol::connect(void* vptr)
 {
-    // Connect Image
-    m_fitsfile = *fptr;
+    // Connect table column by copying the column file pointer
+    FPTR_COPY(m_fitsfile, vptr);
 
     // Return
     return;
@@ -565,13 +574,6 @@ void GFitsTableCol::connect(__fitsfile* fptr)
 
 /*==========================================================================
  =                                                                         =
- =                           GFitsTableCol friends                         =
- =                                                                         =
- ==========================================================================*/
-
-
-/*==========================================================================
- =                                                                         =
- =                    Other functions used by GFitsTableCol                =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/

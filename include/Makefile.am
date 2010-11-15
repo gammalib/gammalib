@@ -67,7 +67,6 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GFitsTableDoubleCol.hpp \
                      GFitsHDU.hpp \
                      GFits.hpp \
-                     GFitsCfitsio.hpp \
                      GVector.hpp \
                      GMatrixBase.hpp \
                      GMatrixTools.hpp \

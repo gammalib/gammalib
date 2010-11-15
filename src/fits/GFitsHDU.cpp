@@ -23,18 +23,19 @@
 #include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GFitsCfitsio.hpp"
 #include "GFitsHDU.hpp"
 #include "GFitsHeaderCard.hpp"
 #include "GFitsImageFlt.hpp"
 #include "GFitsImageDbl.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPEN      "GFitsHDU::open(int)"
-#define G_SAVE      "GFitsHDU::save()"
-#define G_HEADER    "GFitsHDU::header()"
-#define G_DATA      "GFitsHDU::data()"
-#define G_COLUMN    "GFitsHDU::column(const std::string&)"
-#define G_NEW_IMAGE "GFitsHDU::new_image()"
+#define G_OPEN                                          "GFitsHDU::open(int)"
+#define G_SAVE                                             "GFitsHDU::save()"
+#define G_HEADER                                         "GFitsHDU::header()"
+#define G_DATA                                             "GFitsHDU::data()"
+#define G_COLUMN                             "GFitsHDU::column(std::string&)"
+#define G_NEW_IMAGE                                   "GFitsHDU::new_image()"
 
 /* __ Definitions ________________________________________________________ */
 #define HT_IMAGE       0
@@ -51,14 +52,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                     GFitsHDU constructors/destructors                   =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
-GFitsHDU::GFitsHDU()
+GFitsHDU::GFitsHDU(void)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -216,7 +217,7 @@ GFitsHDU::GFitsHDU(const GFitsHDU& hdu)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GFitsHDU::~GFitsHDU()
+GFitsHDU::~GFitsHDU(void)
 {
     // Free members
     free_members();
@@ -228,7 +229,7 @@ GFitsHDU::~GFitsHDU()
 
 /*==========================================================================
  =                                                                         =
- =                           GFitsHDU operators                            =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -260,7 +261,7 @@ GFitsHDU& GFitsHDU::operator= (const GFitsHDU& hdu)
 
 /*==========================================================================
  =                                                                         =
- =                          GFitsHDU public methods                        =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -523,7 +524,10 @@ GFitsTableCol* GFitsHDU::column(const int& colnum) const
 void GFitsHDU::primary(void)
 {
     // Free any allocated header and data
-    free_members();
+    if (m_header != NULL) delete m_header;
+    if (m_data   != NULL) delete m_data;
+    m_header   = NULL;
+    m_data     = NULL;
 
     // Create primary image in memory
     int status = 0;
@@ -534,9 +538,9 @@ void GFitsHDU::primary(void)
     // Open HDU
     this->open(fptr,1);
 
-    // Detach FITS file pointer
-    this->m_fitsfile.HDUposition = 0;
-    this->m_fitsfile.Fptr        = NULL;
+    // Initialise FITS file pointer
+    FPTR(this->m_fitsfile)->HDUposition = 0;
+    FPTR(this->m_fitsfile)->Fptr        = NULL;
 
     // Return
     return;
@@ -545,7 +549,7 @@ void GFitsHDU::primary(void)
 
 /*==========================================================================
  =                                                                         =
- =                         GFitsHDU private methods                        =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -556,14 +560,17 @@ void GFitsHDU::primary(void)
  ***************************************************************************/
 void GFitsHDU::init_members(void)
 {
+    // Allocate and initialise FITS file pointer
+    m_fitsfile = new __fitsfile;
+    FPTR(m_fitsfile)->HDUposition = 0;
+    FPTR(m_fitsfile)->Fptr        = NULL;
+
     // Initialise members
-    m_fitsfile.HDUposition = 0;
-    m_fitsfile.Fptr        = NULL;
-    m_hdunum               = 0;
+    m_hdunum = 0;
+    m_type   = 0;
+    m_header = NULL;
+    m_data   = NULL;
     m_name.clear();
-    m_type                 = 0;
-    m_header               = NULL;
-    m_data                 = NULL;
 
     // Return
     return;
@@ -580,7 +587,7 @@ void GFitsHDU::init_members(void)
 void GFitsHDU::copy_members(const GFitsHDU& hdu)
 {
     // Copy members
-    m_fitsfile = hdu.m_fitsfile;
+    FPTR_COPY(m_fitsfile, hdu.m_fitsfile);
     m_hdunum   = hdu.m_hdunum;
     m_name     = hdu.m_name;
     m_type     = hdu.m_type;
@@ -598,12 +605,14 @@ void GFitsHDU::copy_members(const GFitsHDU& hdu)
 void GFitsHDU::free_members(void)
 {
     // Free memory
-    if (m_header != NULL) delete m_header;
-    if (m_data   != NULL) delete m_data;
+    if (m_fitsfile != NULL) delete FPTR(m_fitsfile);
+    if (m_header   != NULL) delete m_header;
+    if (m_data     != NULL) delete m_data;
 
     // Signal free pointers
-    m_header = NULL;
-    m_data   = NULL;
+    m_fitsfile = NULL;
+    m_header   = NULL;
+    m_data     = NULL;
 
     // Return
     return;
@@ -613,25 +622,27 @@ void GFitsHDU::free_members(void)
 /***********************************************************************//**
  * @brief Connect HDU to FITS file
  *
- * @param[in] fptr FITS file pointer to which the HDU should be connected.
+ * @param[in] vptr HDU file pointer.
  *
  * Connects the HDU and the associated data area to the specified FITS file.
  * Note that the header area does not require a FITS pointer, hence no
  * connection is required.
  ***************************************************************************/
-void GFitsHDU::connect(__fitsfile* fptr)
+void GFitsHDU::connect(void* vptr)
 {
-    // Connect only if pointer is valid
-    if (fptr != NULL) {
+    // Continue only if file pointer is valid
+    if (vptr != NULL) {
+    
+        // Connect HDU by copying the file pointer
+        FPTR_COPY(m_fitsfile, vptr);
 
-        // First connect HDU
-        m_fitsfile = *fptr;
-        m_hdunum   = m_fitsfile.HDUposition;
+        // Extract HDU number from file pointer
+        m_hdunum = FPTR(m_fitsfile)->HDUposition;
 
         // Then connect data
-        if (m_data != NULL) m_data->connect(fptr);
+        if (m_data != NULL) m_data->connect(vptr);
 
-    } // endif: FITS file pointer was valid
+    } // endif: file pointer was valid
 
     // Return
     return;
@@ -652,6 +663,8 @@ void GFitsHDU::connect(__fitsfile* fptr)
  * GFitsDblImage (bitpix=-64)
  * The information about the number of bits per pixels is extracted from
  * the actual HDU.
+ *
+ * @todo Many image classes need still to be implemented.
  ***************************************************************************/
 GFitsImage* GFitsHDU::new_image(void)
 {
@@ -661,7 +674,7 @@ GFitsImage* GFitsHDU::new_image(void)
     // Get number of bits per pixel
     int status =   0;
     int bitpix = -64;
-    status     = __ffgipr(&m_fitsfile, 0, &bitpix, NULL, NULL, &status);
+    status     = __ffgipr(FPTR(m_fitsfile), 0, &bitpix, NULL, NULL, &status);
     if (status != 0)
         throw GException::fits_error(G_NEW_IMAGE, status);
 
@@ -698,7 +711,7 @@ GFitsImage* GFitsHDU::new_image(void)
 /***********************************************************************//**
  * @brief Open HDU
  *
- * @param[in] fptr FITS file pointer.
+ * @param[in] vptr FITS file pointer.
  * @param[in] hdunum Number of HDU (starting from 0).
  *
  * Opens an (existing) HDU in the FITS file. This method does NOT create any
@@ -706,28 +719,28 @@ GFitsImage* GFitsHDU::new_image(void)
  * (by opening an associated GFitsHeader instance) and of opening the data
  * area (which can be of type Image or Table)
  ***************************************************************************/
-void GFitsHDU::open(__fitsfile* fptr, int hdunum)
+void GFitsHDU::open(void* vptr, int hdunum)
 {
     // Move to HDU
     int status = 0;
-    status     = __ffmahd(fptr, hdunum, NULL, &status);
+    status     = __ffmahd(FPTR(vptr), hdunum, NULL, &status);
     if (status != 0)
         throw GException::fits_error(G_OPEN, status);
 
     // Store information.
     // Note that the HDU number is stored in m_fitsfile->HDUposition !!!
-    m_fitsfile = *fptr;
-    m_hdunum   = hdunum;
+    FPTR_COPY(m_fitsfile, vptr);
+    m_hdunum  = hdunum;
 
     // Get HDU type
-    status = __ffghdt(&m_fitsfile, &m_type, &status);
+    status = __ffghdt(FPTR(m_fitsfile), &m_type, &status);
     if (status != 0)
         throw GException::fits_error(G_OPEN, status);
 
     // Allocate and open HDU header
     if (m_header != NULL) delete m_header;
     m_header = new GFitsHeader();
-    m_header->open(&m_fitsfile);
+    m_header->open(FPTR(m_fitsfile));
 
     // Open HDU data area
     if (m_data != NULL) delete m_data;
@@ -745,7 +758,7 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
         throw GException::fits_unknown_HDU_type(G_OPEN, m_type);
         break;
     }
-    m_data->open(&m_fitsfile);
+    m_data->open(FPTR(m_fitsfile));
 
     // Get HDU name from header
     try {
@@ -778,13 +791,12 @@ void GFitsHDU::open(__fitsfile* fptr, int hdunum)
 void GFitsHDU::save(void)
 {
 //cout << "GFitsHDU::save entry" << endl;
-
     // Save data and header if they exist
     if (m_data != NULL) {
-        m_data->connect(&m_fitsfile);
+        m_data->connect(FPTR(m_fitsfile));
         m_data->save();
         if (m_header != NULL)
-            m_header->save(&m_fitsfile);
+            m_header->save(FPTR(m_fitsfile));
     }
 
     // ... otherwise make sure that the FITS file has at least a primary
@@ -793,13 +805,13 @@ void GFitsHDU::save(void)
 
         // Special case: The first HDU does not exist. A FITS file needs at
         // least one primary HDU. Thus an empty image is created.
-        if (m_fitsfile.HDUposition == 0) {
+        if (FPTR(m_fitsfile)->HDUposition == 0) {
             int status = 0;
-            status     = __ffcrim(&m_fitsfile, 8, 0, NULL, &status);
+            status     = __ffcrim(FPTR(m_fitsfile), 8, 0, NULL, &status);
             if (status != 0)
                 throw GException::fits_error(G_SAVE, status);
             if (m_header != NULL)
-                m_header->save(&m_fitsfile);
+                m_header->save(FPTR(m_fitsfile));
         }
 
     } // endelse: no data were available
@@ -868,10 +880,3 @@ std::ostream& operator<< (std::ostream& os, const GFitsHDU& hdu)
     // Return output stream
     return os;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                     Other functions used by GFitsHDU                    =
- =                                                                         =
- ==========================================================================*/

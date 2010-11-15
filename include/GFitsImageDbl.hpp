@@ -20,7 +20,6 @@
 #define GFITSIMAGEDBL_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsCfitsio.hpp"
 #include "GFitsData.hpp"
 #include "GFitsImage.hpp"
 
@@ -29,17 +28,16 @@
  * @class GFitsImageDbl
  *
  * @brief Implements a FITS double precision image
- *
  ***************************************************************************/
 class GFitsImageDbl : public GFitsImage {
 
 public:
     // Constructors and destructors
-    GFitsImageDbl();
+    GFitsImageDbl(void);
     GFitsImageDbl(int naxis, const int* naxes);
     GFitsImageDbl(int naxis, const int* naxes, const double* pixels);
     GFitsImageDbl(const GFitsImageDbl& image);
-    ~GFitsImageDbl();
+    virtual ~GFitsImageDbl(void);
 
     // Operators
     GFitsImageDbl& operator= (const GFitsImageDbl& image);
@@ -66,7 +64,7 @@ private:
     void           copy_members(const GFitsImageDbl& image);
     void           free_members(void);
     void           fetch_pixels(void);
-    void           open(__fitsfile* fptr);
+    void           open(void* vptr);
     void           save(void);
     void           close(void);
     GFitsImageDbl* clone(void) const;

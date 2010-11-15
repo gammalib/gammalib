@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsHeader.hpp  - FITS header handling class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008 by Jurgen Knodlseder                                *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,6 @@
 #define GFITSHEADER_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsCfitsio.hpp"
 #include "GFitsHeaderCard.hpp"
 
 
@@ -45,14 +44,16 @@ class GFitsHeader {
 
 public:
     // Constructors and destructors
-    GFitsHeader();
+    GFitsHeader(void);
     GFitsHeader(const GFitsHeader& header);
-    ~GFitsHeader();
+    virtual ~GFitsHeader(void);
 
     // Operators
     GFitsHeader& operator= (const GFitsHeader& header);
 
     // Methods
+    void             clear(void);
+    int              size(void) const;
     void             update(const GFitsHeaderCard& card);
     GFitsHeaderCard* card(const std::string& keyname);
     GFitsHeaderCard* card(const int& cardno);
@@ -71,8 +72,8 @@ private:
     void             copy_members(const GFitsHeader& header);
     void             free_members(void);
     GFitsHeaderCard* card_ptr(const std::string& keyname);
-    void             open(__fitsfile* fptr);
-    void             save(__fitsfile* fptr);
+    void             open(void* vptr);
+    void             save(void* vptr);
     void             close(void);
 
     // Private data area

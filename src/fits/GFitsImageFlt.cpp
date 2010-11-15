@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsImageFlt.cpp  - FITS single precision image class          *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2009 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2009-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,18 +9,21 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
+#include "GFitsCfitsio.hpp"
 #include "GFitsImageFlt.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPERATOR2 "GFitsImageFlt::operator() (int, int)"
-#define G_OPEN      "GFitsImageFlt::open(fitsfile*)"
-#define G_SAVE      "GFitsImageFlt::save()"
+#define G_OPERATOR2                     "GFitsImageFlt::operator() (int,int)"
+#define G_OPEN                                   "GFitsImageFlt::open(void*)"
+#define G_SAVE                                        "GFitsImageFlt::save()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -32,14 +35,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                  GFitsImageFlt constructors/destructors                 =
+ =                          Constructors/destructors                       =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GFitsImageFlt::GFitsImageFlt() : GFitsImage()
+GFitsImageFlt::GFitsImageFlt(void) : GFitsImage()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -133,7 +136,7 @@ GFitsImageFlt::GFitsImageFlt(const GFitsImageFlt& image) : GFitsImage(image)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GFitsImageFlt::~GFitsImageFlt()
+GFitsImageFlt::~GFitsImageFlt(void)
 {
     // Free members
     free_members();
@@ -145,7 +148,7 @@ GFitsImageFlt::~GFitsImageFlt()
 
 /*==========================================================================
  =                                                                         =
- =                          GFitsImageFlt operators                        =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
@@ -495,7 +498,7 @@ float* GFitsImageFlt::pixels(void)
 
 /*==========================================================================
  =                                                                         =
- =                       GFitsImageFlt private methods                     =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -602,7 +605,7 @@ void GFitsImageFlt::fetch_pixels(void)
         m_pixels = new float[m_num_pixels];
 
         // Case 1: A FITS is attached. Load pixels now.
-        if (m_fitsfile.Fptr != NULL)
+        if (FPTR(m_fitsfile)->Fptr != NULL)
             load_image(__TFLOAT, m_pixels, m_nulval, &m_anynul);
 
         // Case 2: No FITS file is attached. Allocate pixels and set them all to 0.0
@@ -623,12 +626,12 @@ void GFitsImageFlt::fetch_pixels(void)
 /***********************************************************************//**
  * @brief Open FITS image
  *
- * @param fptr FITS file pointer
+ * @param fptr FITS file void pointer
  *
  * Open FITS image in FITS file. Opening means connecting the FITS file
  * pointer to the image and reading the image and axes dimensions.
  ***************************************************************************/
-void GFitsImageFlt::open(__fitsfile* fptr)
+void GFitsImageFlt::open(void* vptr)
 {
     // Initialise base class members
     GFitsImage::init_members();
@@ -637,7 +640,7 @@ void GFitsImageFlt::open(__fitsfile* fptr)
     init_members();
 
     // Open image
-    open_image(fptr);
+    open_image(vptr);
 
     // Return
     return;
@@ -700,13 +703,6 @@ GFitsImageFlt* GFitsImageFlt::clone(void) const
 
 /*==========================================================================
  =                                                                         =
- =                          GFitsImageFlt friends                          =
- =                                                                         =
- ==========================================================================*/
-
-
-/*==========================================================================
- =                                                                         =
- =                   Other functions used by GFitsImageFlt                 =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/

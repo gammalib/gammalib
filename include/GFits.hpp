@@ -20,7 +20,6 @@
 #define GFITS_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsCfitsio.hpp"
 #include "GFitsHDU.hpp"
 
 
@@ -31,11 +30,8 @@
  *
  * GFits is the basic FITS file interface. All FITS file handlings operate
  * via members of GFits. A FITS file is composed of Header Data Units (HDU)
- * which are implemented by the GFitsHDU class.
- *
- * @todo Implement GFitsFile* to replace __fitsfile* in GFits classes.
- * This class implements then all interfaces to FITS routines ... well, not
- * sure that this is so easy ...
+ * which are implemented by the GFitsHDU class. Each HDU is composed of a
+ * header (GFitsHeader) and some data (GFitsData).
  ***************************************************************************/
 class GFits {
 
@@ -44,10 +40,10 @@ class GFits {
 
 public:
     // Constructors and destructors
-    GFits();
+    GFits(void);
     GFits(const std::string& filename);
     GFits(const GFits& fits);
-    ~GFits();
+    virtual ~GFits(void);
 
     // Operators
     GFits& operator= (const GFits& fits);
@@ -71,7 +67,7 @@ private:
 
     // Private data area
     std::string  m_filename;    //!< FITS file name
-    __fitsfile*  m_fitsfile;    //!< FITS file pointer
+    void*        m_fitsfile;    //!< FITS file pointer
     int          m_readwrite;   //!< FITS file is read/write (1=true, 0=false)
     int          m_num_hdu;     //!< Number of HDUs in file
     GFitsHDU*    m_hdu;         //!< Pointers to HDUs

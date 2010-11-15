@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsImageDbl.cpp  - FITS double precision image class          *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,18 +9,21 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
+#include "GFitsCfitsio.hpp"
 #include "GFitsImageDbl.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPERATOR2 "GFitsImageDbl::operator() (int, int)"
-#define G_OPEN      "GFitsImageDbl::open(fitsfile*)"
-#define G_SAVE      "GFitsImageDbl::save()"
+#define G_OPERATOR2                     "GFitsImageDbl::operator() (int,int)"
+#define G_OPEN                                   "GFitsImageDbl::open(void*)"
+#define G_SAVE                                        "GFitsImageDbl::save()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -32,14 +35,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                  GFitsImageDbl constructors/destructors                 =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GFitsImageDbl::GFitsImageDbl() : GFitsImage()
+GFitsImageDbl::GFitsImageDbl(void) : GFitsImage()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -133,7 +136,7 @@ GFitsImageDbl::GFitsImageDbl(const GFitsImageDbl& image) : GFitsImage(image)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GFitsImageDbl::~GFitsImageDbl()
+GFitsImageDbl::~GFitsImageDbl(void)
 {
     // Free members
     free_members();
@@ -145,7 +148,7 @@ GFitsImageDbl::~GFitsImageDbl()
 
 /*==========================================================================
  =                                                                         =
- =                          GFitsImageDbl operators                        =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -410,7 +413,7 @@ const double& GFitsImageDbl::operator() (const int& ix, const int& iy, const int
 
 /*==========================================================================
  =                                                                         =
- =                       GFitsImageDbl public methods                      =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -495,7 +498,7 @@ double* GFitsImageDbl::pixels(void)
 
 /*==========================================================================
  =                                                                         =
- =                       GFitsImageDbl private methods                     =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -602,7 +605,7 @@ void GFitsImageDbl::fetch_pixels(void)
         m_pixels = new double[m_num_pixels];
 
         // Case 1: A FITS is attached. Load pixels now.
-        if (m_fitsfile.Fptr != NULL)
+        if (FPTR(m_fitsfile)->Fptr != NULL)
             load_image(__TDOUBLE, m_pixels, m_nulval, &m_anynul);
 
         // Case 2: No FITS file is attached. Allocate pixels and set them all to 0.0
@@ -623,12 +626,12 @@ void GFitsImageDbl::fetch_pixels(void)
 /***********************************************************************//**
  * @brief Open FITS image
  *
- * @param fptr FITS file pointer
+ * @param fptr FITS file void pointer.
  *
  * Open FITS image in FITS file. Opening means connecting the FITS file
  * pointer to the image and reading the image and axes dimensions.
  ***************************************************************************/
-void GFitsImageDbl::open(__fitsfile* fptr)
+void GFitsImageDbl::open(void* vptr)
 {
     // Initialise base class members
     GFitsImage::init_members();
@@ -637,7 +640,7 @@ void GFitsImageDbl::open(__fitsfile* fptr)
     init_members();
 
     // Open image
-    open_image(fptr);
+    open_image(vptr);
 
     // Return
     return;
@@ -700,13 +703,6 @@ GFitsImageDbl* GFitsImageDbl::clone(void) const
 
 /*==========================================================================
  =                                                                         =
- =                          GFitsImageDbl friends                          =
- =                                                                         =
- ==========================================================================*/
-
-
-/*==========================================================================
- =                                                                         =
- =                   Other functions used by GFitsImageDbl                 =
+ =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/

@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableCol.hpp  - FITS table column abstract base class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008 by Jurgen Knodlseder                                *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,6 @@
 #define GFITSTABLECOL_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsCfitsio.hpp"
 
 
 /***********************************************************************//**
@@ -39,7 +38,7 @@ public:
     // Constructors and destructors
     GFitsTableCol(void);
     GFitsTableCol(const std::string& name, const int& length,
-                  const int& number,       const int& width);
+                  const int& number, const int& width);
     GFitsTableCol(const GFitsTableCol& column);
     virtual ~GFitsTableCol(void);
 
@@ -78,7 +77,7 @@ protected:
     int         m_length;    //!< Length of column
     int         m_size;      //!< Size of allocated data area (0 if not loaded)
     int         m_anynul;    //!< Number of NULLs encountered
-    __fitsfile  m_fitsfile;  //!< FITS file associated with column
+    void*       m_fitsfile;  //!< FITS file pointer associated with column
 
     // Protected virtual methods
     virtual GFitsTableCol* clone(void) const = 0;
@@ -102,7 +101,7 @@ private:
     void init_members(void);
     void copy_members(const GFitsTableCol& column);
     void free_members(void);
-    void connect(__fitsfile* fptr);
+    void connect(void* vptr);
 };
 
 #endif /* GFITSTABLECOL_HPP */

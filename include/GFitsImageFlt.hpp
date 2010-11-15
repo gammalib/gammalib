@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsImageFlt.hpp  - FITS single precision image class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,6 @@
 #define GFITSIMAGEFLT_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsCfitsio.hpp"
 #include "GFitsData.hpp"
 #include "GFitsImage.hpp"
 
@@ -35,11 +34,11 @@ class GFitsImageFlt : public GFitsImage {
 
 public:
     // Constructors and destructors
-    GFitsImageFlt();
+    GFitsImageFlt(void);
     GFitsImageFlt(int naxis, const int* naxes);
     GFitsImageFlt(int naxis, const int* naxes, const float* pixels);
     GFitsImageFlt(const GFitsImageFlt& image);
-    ~GFitsImageFlt();
+    virtual ~GFitsImageFlt(void);
 
     // Operators
     GFitsImageFlt& operator= (const GFitsImageFlt& image);
@@ -48,12 +47,9 @@ public:
     float&         operator() (const int& ix, const int& iy);
     const float&   operator() (const int& ix, const int& iy) const;
     float&         operator() (const int& ix, const int& iy, const int& iz);
-    const float&   operator() (const int& ix, const int& iy, const int& iz)
-                               const;
-    float&         operator() (const int& ix, const int& iy, const int& iz,
-                               const int& it);
-    const float&   operator() (const int& ix, const int& iy, const int& iz,
-                               const int& it) const;
+    const float&   operator() (const int& ix, const int& iy, const int& iz) const;
+    float&         operator() (const int& ix, const int& iy, const int& iz, const int& it);
+    const float&   operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Methods
     void   link(float* pixels);
@@ -66,7 +62,7 @@ private:
     void           copy_members(const GFitsImageFlt& image);
     void           free_members(void);
     void           fetch_pixels(void);
-    void           open(__fitsfile* fptr);
+    void           open(void* vptr);
     void           save(void);
     void           close(void);
     GFitsImageFlt* clone(void) const;

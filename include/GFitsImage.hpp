@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GFitsImage.hpp  - FITS image abstract base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008 by Jurgen Knodlseder                                *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,6 @@
 #define GFITSIMAGE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsCfitsio.hpp"
 #include "GFitsData.hpp"
 
 
@@ -41,10 +40,10 @@ class GFitsImage : public GFitsData {
 
 public:
     // Constructors and destructors
-    GFitsImage();
+    GFitsImage(void);
     GFitsImage(int naxis, const int* naxes);
     GFitsImage(const GFitsImage& image);
-    ~GFitsImage();
+    virtual ~GFitsImage(void);
 
     // Operators
     GFitsImage& operator= (const GFitsImage& image);
@@ -60,13 +59,13 @@ protected:
     void init_members(void);
     void copy_members(const GFitsImage& image);
     void free_members(void);
-    void open_image(__fitsfile* fptr);
+    void open_image(void* vptr);
     void load_image(int datatype, const void* pixels, const void* nulval,
                     int* anynul);
     void save_image(int datatype, const void* pixels);
 
     // Pure virtual methods
-    virtual void        open(__fitsfile* fptr) = 0;
+    virtual void        open(void* vptr) = 0;
     virtual void        save(void) = 0;
     virtual void        close(void) = 0;
     virtual GFitsImage* clone(void) const = 0;

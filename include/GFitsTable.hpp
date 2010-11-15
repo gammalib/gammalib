@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GFitsTable.hpp  - FITS table abstract base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008 by Jurgen Knodlseder                                *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,6 @@
 #define GFITSTABLE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsCfitsio.hpp"
 #include "GFitsData.hpp"
 #include "GFitsTableCol.hpp"
 
@@ -46,10 +45,10 @@ class GFitsTable : public GFitsData {
 
 public:
     // Constructors and destructors
-    GFitsTable();
+    GFitsTable(void);
     GFitsTable(int nrows);
     GFitsTable(const GFitsTable& table);
-    virtual ~GFitsTable();
+    virtual ~GFitsTable(void);
 
     // Operators
     GFitsTable& operator= (const GFitsTable& table);
@@ -57,8 +56,8 @@ public:
     // Methods
     void           append_column(GFitsTableCol& column);
     void           insert_column(int colnum, GFitsTableCol& column);
-    //void           append_rows(const int& nrows);
-    //void           insert_rows(const int& rownum, const int& nrows);
+    void           append_rows(const int& nrows);
+    void           insert_rows(const int& rownum, const int& nrows);
     GFitsTableCol* column(const std::string& colname);
     GFitsTableCol* column(const int& colnum);
     int            nrows(void) const;
@@ -69,10 +68,10 @@ protected:
     void        init_members(void);
     void        copy_members(const GFitsTable& table);
     void        free_members(void);
-    void        open(__fitsfile* fptr);
+    void        open(void* vptr);
     void        save(void);
     void        close(void);
-    void        connect(__fitsfile* fptr);
+    void        connect(void* vptr);
     GFitsTable* clone(void) const = 0;
     char*       get_ttype(const int& colnum) const;
     char*       get_tform(const int& colnum) const;

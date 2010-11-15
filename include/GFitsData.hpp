@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsData.hpp  - FITS data handling abstract base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008 by Jurgen Knodlseder                                *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -10,16 +10,22 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsData.hpp
+ * @brief GFitsData class definition.
+ * @author J. Knodlseder
+ */
 
 #ifndef GFITSDATA_HPP
 #define GFITSDATA_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsCfitsio.hpp"
 
 
-/***************************************************************************
- *                        GFitsData class definition                       *
+/***********************************************************************//**
+ * @class GFitsData
+ *
+ * @brief Interface for abstract FITS data class
  ***************************************************************************/
 class GFitsData {
 
@@ -28,23 +34,28 @@ class GFitsData {
 
 public:
     // Constructors and destructors
-    GFitsData();
+    GFitsData(void);
     GFitsData(const GFitsData& data);
-    virtual ~GFitsData();
+    virtual ~GFitsData(void);
 
     // Operators
     virtual GFitsData& operator= (const GFitsData& data);
 
 protected:
     // Protected methods
-    virtual void       open(__fitsfile* fptr) = 0;
+    virtual void       open(void* vptr) = 0;
     virtual void       save(void) = 0;
     virtual void       close(void) = 0;
     virtual GFitsData* clone(void) const = 0;
-    virtual void       connect(__fitsfile* fptr);
+    virtual void       connect(void* vptr);
+
+    // Private methods
+    void init_members(void);
+    void copy_members(const GFitsData& data);
+    void free_members(void);
 
     // Protected data area
-    __fitsfile m_fitsfile;    //!< FITS file
+    void* m_fitsfile;         //!< Pointer on FITS file data
 };
 
 #endif /* GFITSDATA_HPP */

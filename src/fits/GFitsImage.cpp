@@ -12,15 +12,19 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include "GException.hpp"
+#include "GFitsCfitsio.hpp"
 #include "GFitsImage.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_NAXES      "GFitsImage::naxes(int)"
-#define G_OPEN_IMAGE "GFitsImage::open(fitsfile*)"
-#define G_LOAD_IMAGE "GFitsImage::load_image(int, const void*, const void*, int*)"
-#define G_SAVE_IMAGE "GFitsImage::save_image(int, const void*)"
+#define G_NAXES                                      "GFitsImage::naxes(int)"
+#define G_OPEN_IMAGE                                "GFitsImage::open(void*)"
+#define G_LOAD_IMAGE           "GFitsImage::load_image(int,void*,void*,int*)"
+#define G_SAVE_IMAGE                      "GFitsImage::save_image(int,void*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -31,14 +35,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                    GFitsImage constructors/destructors                  =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GFitsImage::GFitsImage() : GFitsData()
+GFitsImage::GFitsImage(void) : GFitsData()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -51,8 +55,8 @@ GFitsImage::GFitsImage() : GFitsData()
 /***********************************************************************//**
  * @brief Constructor
  *
- * @param naxis Image dimensions (0,1,2,3,4)
- * @param naxes Number of pixels in each dimension
+ * @param naxis Image dimensions (0,1,2,3,4).
+ * @param naxes Number of pixels in each dimension.
  *
  * Construct instance of GFitsImage by specifying the image dimension and
  * the number of pixels in each dimension. Note that this constructor does
@@ -85,7 +89,7 @@ GFitsImage::GFitsImage(int naxis, const int* naxes) : GFitsData()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param image FITS image which should be used for construction
+ * @param image FITS image which should be used for construction.
  ***************************************************************************/
 GFitsImage::GFitsImage(const GFitsImage& image) : GFitsData(image)
 {
@@ -103,7 +107,7 @@ GFitsImage::GFitsImage(const GFitsImage& image) : GFitsData(image)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GFitsImage::~GFitsImage()
+GFitsImage::~GFitsImage(void)
 {
     // Free members
     free_members();
@@ -115,7 +119,7 @@ GFitsImage::~GFitsImage()
 
 /*==========================================================================
  =                                                                         =
- =                           GFitsImage operators                          =
+ =                                 Operators                               =
  =                                                                         =
  ==========================================================================*/
 
@@ -150,7 +154,7 @@ GFitsImage& GFitsImage::operator= (const GFitsImage& image)
 
 /*==========================================================================
  =                                                                         =
- =                        GFitsImage public methods                        =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -206,7 +210,7 @@ int GFitsImage::num_pixels(void) const
 
 /*==========================================================================
  =                                                                         =
- =                        GFitsImage private methods                       =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -216,12 +220,10 @@ int GFitsImage::num_pixels(void) const
 void GFitsImage::init_members(void)
 {
     // Initialise members
-    m_fitsfile.HDUposition = 0;
-    m_fitsfile.Fptr        = NULL;
-    m_bitpix               = 8;
-    m_naxis                = 0;
-    m_naxes                = NULL;
-    m_num_pixels           = 0;
+    m_bitpix     = 8;
+    m_naxis      = 0;
+    m_naxes      = NULL;
+    m_num_pixels = 0;
 
     // Return
     return;
@@ -236,7 +238,6 @@ void GFitsImage::init_members(void)
 void GFitsImage::copy_members(const GFitsImage& image)
 {
     // Copy attributes
-    m_fitsfile   = image.m_fitsfile;
     m_bitpix     = image.m_bitpix;
     m_naxis      = image.m_naxis;
     m_naxes      = NULL;
@@ -273,24 +274,24 @@ void GFitsImage::free_members(void)
 /***********************************************************************//**
  * @brief Open Image
  *
- * @param[in] fptr FITS file pointer
+ * @param[in] fptr FITS file void pointer.
  *
  * Open FITS image in FITS file. Opening means connecting the FITS file
  * pointer to the image and reading the image and axes dimensions.
  ***************************************************************************/
-void GFitsImage::open_image(__fitsfile* fptr)
+void GFitsImage::open_image(void* vptr)
 {
     // Move to HDU
     int status = 0;
-    status     = __ffmahd(fptr, (fptr->HDUposition)+1, NULL, &status);
+    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
     if (status != 0)
         throw GException::fits_error(G_OPEN_IMAGE, status);
 
     // Save FITS file pointer
-    m_fitsfile = *fptr;
+    FPTR_COPY(m_fitsfile, vptr);
 
     // Get the image dimensions
-    status = __ffgidm(&m_fitsfile, &m_naxis, &status);
+    status = __ffgidm(FPTR(m_fitsfile), &m_naxis, &status);
     if (status != 0)
         throw GException::fits_error(G_OPEN_IMAGE, status);
 
@@ -305,7 +306,7 @@ void GFitsImage::open_image(__fitsfile* fptr)
         m_naxes      = new long[m_naxis];
 
         // Get the axes dimensions
-        status = __ffgisz(&m_fitsfile, m_naxis, m_naxes, &status);
+        status = __ffgisz(FPTR(m_fitsfile), m_naxis, m_naxes, &status);
         if (status != 0)
             throw GException::fits_error(G_OPEN_IMAGE, status);
 
@@ -324,17 +325,20 @@ void GFitsImage::open_image(__fitsfile* fptr)
 /***********************************************************************//**
  * @brief Load FITS image
  *
- * @param[in] datatype Datatype of pixels to be saved
- * @param[in] pixels Pixel array to be saved
+ * @param[in] datatype Datatype of pixels to be saved.
+ * @param[in] pixels Pixel array to be saved.
+ * @param[in] nulval Pixel null value.
+ * @param[in] anynul ?
  *
  * Load image pixels from FITS file.
  ***************************************************************************/
-void GFitsImage::load_image(int datatype, const void* pixels, const void* nulval,
-                            int* anynul)
+void GFitsImage::load_image(int datatype, const void* pixels,
+                            const void* nulval, int* anynul)
 {
     // Move to HDU
     int status = 0;
-    status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
+    status     = __ffmahd(FPTR(m_fitsfile), (FPTR(m_fitsfile)->HDUposition)+1,
+                          NULL, &status);
     if (status != 0)
         throw GException::fits_error(G_LOAD_IMAGE, status);
 
@@ -348,8 +352,8 @@ void GFitsImage::load_image(int datatype, const void* pixels, const void* nulval
             lpixel[i] = m_naxes[i];
             inc[i]    = 1;
         }
-        status = __ffgsv(&m_fitsfile, datatype, fpixel, lpixel, inc, (void*)nulval,
-                         (void*)pixels, anynul, &status);
+        status = __ffgsv(FPTR(m_fitsfile), datatype, fpixel, lpixel, inc,
+                         (void*)nulval, (void*)pixels, anynul, &status);
         delete [] fpixel;
         delete [] lpixel;
         delete [] inc;
@@ -376,12 +380,13 @@ void GFitsImage::save_image(int datatype, const void* pixels)
 {
     // Move to HDU
     int status = 0;
-    status     = __ffmahd(&m_fitsfile, (m_fitsfile.HDUposition)+1, NULL, &status);
+    status     = __ffmahd(FPTR(m_fitsfile), (FPTR(m_fitsfile)->HDUposition)+1,
+                          NULL, &status);
 
     // If HDU does not yet exist in file then create it now
     if (status == 107) {
         status = 0;
-        status = __ffcrim(&m_fitsfile, m_bitpix, m_naxis, m_naxes, &status);
+        status = __ffcrim(FPTR(m_fitsfile), m_bitpix, m_naxis, m_naxes, &status);
         if (status != 0)
             throw GException::fits_error(G_SAVE_IMAGE, status);
     }
@@ -392,11 +397,11 @@ void GFitsImage::save_image(int datatype, const void* pixels)
     // primary HDU, since __ffmahd gives no error if the primary HDU is empty.
     // By checking the number of keywords in the HDU we detect an empty HDU ...
     int num = 0;
-    status  = __ffghsp(&m_fitsfile, &num, NULL, &status);
+    status  = __ffghsp(FPTR(m_fitsfile), &num, NULL, &status);
     if (status != 0)
         throw GException::fits_error(G_SAVE_IMAGE, status);
     if (num == 0) {
-        status = __ffcrim(&m_fitsfile, m_bitpix, m_naxis, m_naxes, &status);
+        status = __ffcrim(FPTR(m_fitsfile), m_bitpix, m_naxis, m_naxes, &status);
         if (status != 0)
             throw GException::fits_error(G_SAVE_IMAGE, status);
     }
@@ -409,7 +414,8 @@ void GFitsImage::save_image(int datatype, const void* pixels)
             fpixel[i] = 1;
             lpixel[i] = m_naxes[i];
         }
-        status = __ffpss(&m_fitsfile, datatype, fpixel, lpixel, (void*)pixels, &status);
+        status = __ffpss(FPTR(m_fitsfile), datatype, fpixel, lpixel,
+                         (void*)pixels, &status);
         if (status != 0)
             throw GException::fits_error(G_SAVE_IMAGE, status);
         delete [] fpixel;
@@ -423,15 +429,15 @@ void GFitsImage::save_image(int datatype, const void* pixels)
 
 /*==========================================================================
  =                                                                         =
- =                            GFitsImage friends                           =
+ =                               Friends                                   =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param os Output stream into which the result will be writted
- * @param image FITS image which should be put in the output stream
+ * @param os Output stream.
+ * @param image FITS image.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFitsImage& image)
 {
