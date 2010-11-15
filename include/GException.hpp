@@ -63,6 +63,12 @@ public:
         not_enough_nodes(std::string origin, int num);
     };
 
+    // File not found
+    class file_not_found : public GExceptionHandler {
+    public:
+        file_not_found(std::string origin, std::string filename);
+    };
+
     // File open error
     class file_open_error : public GExceptionHandler {
     public:

@@ -58,6 +58,19 @@ GException::not_enough_nodes::not_enough_nodes(std::string origin, int num)
 
 
 /***********************************************************************//**
+ * @brief File not found
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] filename Filename.
+ ***************************************************************************/
+GException::file_not_found::file_not_found(std::string origin, std::string filename)
+{
+    m_origin  = origin;
+    m_message = "File \"" + filename +"\" not found.";
+}
+
+
+/***********************************************************************//**
  * @brief File open error
  *
  * @param[in] origin Name of method that has thrown the exception.
@@ -66,5 +79,5 @@ GException::not_enough_nodes::not_enough_nodes(std::string origin, int num)
 GException::file_open_error::file_open_error(std::string origin, std::string filename)
 {
     m_origin  = origin;
-    m_message = "Unable to open file: " + filename;
+    m_message = "Unable to open file \"" + filename +"\"";
 }
