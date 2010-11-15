@@ -19,6 +19,7 @@
 #include <string.h>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GFitsCfitsio.hpp"
 #include "GFitsTableStringCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */

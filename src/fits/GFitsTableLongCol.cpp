@@ -18,6 +18,7 @@
 #include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GFitsCfitsio.hpp"
 #include "GFitsTableLongCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
