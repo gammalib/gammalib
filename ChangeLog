@@ -1,9 +1,12 @@
-2009-10-09  Juergen Knoedlseder  <knodlseder@cesr.fr>
+2010-11-15  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
-        * Version 0.2.0 released
+        * Version 0.4.1 released
         ========================
 
-        Tag sources with VER-0-2-0
+        Tag sources with GammaLib-00-04-01
+        Prototype implementation of XML interface
+        Prototype implementation of application logger
+        Cleanup of FITS interface
 
 2010-06-11  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
@@ -11,3 +14,10 @@
         ========================
 
         Tag sources with GammaLib-00-04-00
+
+2009-10-09  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+        * Version 0.2.0 released
+        ========================
+
+        Tag sources with VER-0-2-0
