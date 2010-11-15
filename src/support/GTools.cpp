@@ -25,6 +25,8 @@
 #include <cmath>
 #include <algorithm>
 #include <cctype>
+#include <unistd.h>        // access() function
+#include <sys/stat.h>
 #include "GTools.hpp"
 
 
@@ -315,3 +317,33 @@ double modulo(double v1, double v2)
     // Return
     return (v1 >= 0) ? ((v1 < v2) ? v1 : fmod(v1,v2)) : (fmod(v1,v2)+v2);
 }
+
+
+/***********************************************************************//**
+ * @brief Checks if a file exists.
+ *
+ * @param[in] filename File name.
+ *
+ * Checks if a file exists. If a directory with the same name if found, false
+ * is returned.
+ ***************************************************************************/
+bool file_exists(const std::string& filename)
+{
+    // Initialise result
+    bool result = false;
+
+    // Allocate file information structure
+    struct stat info;
+
+    // Get file information structure
+    int ret = stat(filename.c_str(), &info);
+
+    // Check if file is a regular file
+    if (ret == 0 && S_ISREG(info.st_mode))
+        result = true;
+
+    // Return result
+    return result;
+}
+
+

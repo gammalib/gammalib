@@ -59,5 +59,6 @@ std::string              left(const std::string& s, int n);
 std::string              right(const std::string& s, int n);
 std::string              center(const std::string& s, int n);
 double                   modulo(double v1, double v2);
+bool                     file_exists(const std::string& filename);
 
 #endif /* GTOOLS_HPP */
