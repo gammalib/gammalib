@@ -36,7 +36,6 @@
 #include "GIntegrand.hpp"
 
 /* __ FITS module ________________________________________________________ */
-#include "GFitsCfitsio.hpp"
 #include "GFits.hpp"
 #include "GFitsHDU.hpp"
 #include "GFitsHeader.hpp"
