@@ -22,6 +22,9 @@
 #include "GFitsTableBitCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_LOAD_COLUMN                       "GFitsTableBitCol::load_column()"
+#define G_SAVE_COLUMN                       "GFitsTableBitCol::save_column()"
+#define G_GET_BIT                      "GFitsTableBitCol::get_bit(int&,int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -59,7 +62,7 @@ GFitsTableBitCol::GFitsTableBitCol(void) : GFitsTableCol()
 GFitsTableBitCol::GFitsTableBitCol(const std::string& name,
                                    const int&         length,
                                    const int&         size)
-                                   : GFitsTableCol(name, length, size, 2)
+                                   : GFitsTableCol(name, length, size, 1)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -144,13 +147,25 @@ GFitsTableBitCol& GFitsTableBitCol::operator= (const GFitsTableBitCol& column)
  *
  * Provides access to data in a column.
  ***************************************************************************/
-char& GFitsTableBitCol::operator() (const int& row, const int& inx)
+bool& GFitsTableBitCol::operator() (const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
 
-    // Return data bin
-    return m_data[offset(row, inx)];
+    // Set any pending Bit
+    set_pending();
+
+    // Get Bit
+    get_bit(row, inx);
+
+    // Signal that a Bit is pending. We need this here since the non-const
+    // operator allows changing the Bit after exiting the method, hence
+    // we have to signal that the actual value of 'm_bit_value' could have
+    // been modified and needs to be written back into the data array.
+    m_bit_pending = true;
+
+    // Return Bit
+    return m_bit_value;
 }
 
 
@@ -162,13 +177,20 @@ char& GFitsTableBitCol::operator() (const int& row, const int& inx)
  *
  * Provides access to data in a column.
  ***************************************************************************/
-const char& GFitsTableBitCol::operator() (const int& row, const int& inx) const
+const bool& GFitsTableBitCol::operator() (const int& row, const int& inx) const
 {
-    // If data are not available then load them now
+    // If data are not available then load them now (circumvent const
+    // correctness)
     if (m_data == NULL) ((GFitsTableBitCol*)this)->fetch_data();
 
+    // Set any pending Bit (circumvent const correctness)
+    ((GFitsTableBitCol*)this)->set_pending();
+
+    // Get Bit (circumvent const correctness)
+    ((GFitsTableBitCol*)this)->get_bit(row, inx);
+
     // Return data bin
-    return m_data[offset(row, inx)];
+    return m_bit_value;
 }
 
 
@@ -188,13 +210,13 @@ const char& GFitsTableBitCol::operator() (const int& row, const int& inx) const
  ***************************************************************************/
 std::string GFitsTableBitCol::string(const int& row, const int& inx)
 {
-    // If data are not available then load them now
-    if (m_data == NULL) fetch_data();
+    // Get Bit value
+    bool bit = (*this)(row, inx);
 
     // Convert bit into string
-    std::string result = (m_data[offset(row,inx)]) ? "1" : "0";
-    
-    // Return value
+    std::string result = (bit) ? "T" : "F";
+
+    // Return result
     return result;
 }
 
@@ -209,14 +231,14 @@ std::string GFitsTableBitCol::string(const int& row, const int& inx)
  ***************************************************************************/
 double GFitsTableBitCol::real(const int& row, const int& inx)
 {
-    // If data are not available then load them now
-    if (m_data == NULL) fetch_data();
+    // Get Bit value
+    bool bit = (*this)(row, inx);
 
     // Convert bit into double
-    double value = (double)m_data[offset(row,inx)];
+    double result = (bit) ? 1.0 : 0.0;
 
-    // Return value
-    return value;
+    // Return result
+    return result;
 }
 
 
@@ -230,14 +252,14 @@ double GFitsTableBitCol::real(const int& row, const int& inx)
  ***************************************************************************/
 int GFitsTableBitCol::integer(const int& row, const int& inx)
 {
-    // If data are not available then load them now
-    if (m_data == NULL) fetch_data();
+    // Get Bit value
+    bool bit = (*this)(row, inx);
 
-    // Convert bit into int
-    int value = (int)m_data[offset(row,inx)];
+    // Convert bit into double
+    int result = (bit) ? 1 : 0;
 
-    // Return value
-    return value;
+    // Return result
+    return result;
 }
 
 
@@ -255,7 +277,7 @@ int GFitsTableBitCol::integer(const int& row, const int& inx)
  * is also not desired. We thus have to develop a method to update the
  * column information for a new NULL value in place ...
  ***************************************************************************/
-void GFitsTableBitCol::nullval(const char* value)
+void GFitsTableBitCol::nullval(const unsigned char* value)
 {
     // Allocate nul value
     alloc_nulval(value);
@@ -283,9 +305,16 @@ void GFitsTableBitCol::nullval(const char* value)
 void GFitsTableBitCol::init_members(void)
 {
     // Initialise members
-    m_type   = __TBIT;
-    m_data   = NULL;
-    m_nulval = NULL;
+    m_type          = __TBIT;
+    m_bits          = 0;
+    m_bytes_per_row = 0;
+    m_bits_per_row  = 0;
+    m_data          = NULL;
+    m_nulval        = NULL;
+    m_bit_pending   = false;
+    m_bit_value     = false;
+    m_bit_byte      = 0;
+    m_bit_mask      = 0;
 
     // Return
     return;
@@ -305,8 +334,15 @@ void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
     if (not_loaded) ((GFitsTableBitCol*)(&column))->fetch_data();
 
     // Copy attributes
-    m_type = column.m_type;
-    m_size = column.m_size;
+    m_type          = column.m_type;
+    m_size          = column.m_size;
+    m_bits          = column.m_bits;
+    m_bytes_per_row = column.m_bytes_per_row;
+    m_bits_per_row  = column.m_bits_per_row;
+    m_bit_pending   = column.m_bit_pending;
+    m_bit_value     = column.m_bit_value;
+    m_bit_byte      = column.m_bit_byte;
+    m_bit_mask      = column.m_bit_mask;
 
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
@@ -409,7 +445,7 @@ void GFitsTableBitCol::alloc_data(void)
 
     // Allocate new data
     if (m_size > 0)
-        m_data = new char[m_size];
+        m_data = new unsigned char[m_size];
 
     // Return
     return;
@@ -436,7 +472,7 @@ void GFitsTableBitCol::release_data(void)
 /***********************************************************************//**
  * @brief Allocates null value
  ***************************************************************************/
-void GFitsTableBitCol::alloc_nulval(const char* value)
+void GFitsTableBitCol::alloc_nulval(const unsigned char* value)
 {
     // Free any existing memory
     if (m_nulval != NULL) delete m_nulval;
@@ -446,7 +482,7 @@ void GFitsTableBitCol::alloc_nulval(const char* value)
 
     // If we have valid value, allocate and set nul value
     if (value != NULL) {
-        m_nulval  = new char;
+        m_nulval  = new unsigned char;
         *m_nulval = *value;
     }
 
@@ -464,6 +500,177 @@ void GFitsTableBitCol::init_data(void)
     if (m_data != NULL) {
         for (int i = 0; i < m_size; ++i)
             m_data[i] = 0;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load table column from FITS file
+ *
+ * @exception GException::fits_hdu_not_found
+ *            Specified HDU not found in FITS file.
+ * @exception GException::fits_error
+ *            An error occured while loading column data from FITS file.
+ *
+ * Load Bit (vector) column into memory by reading 8 Bits at once.
+ ***************************************************************************/
+void GFitsTableBitCol::load_column(void)
+{
+    // Compute total number of Bits in column
+    m_bits = m_number * m_length;
+
+    // Compute number of Bytes and Bits per row
+    m_bytes_per_row = (m_number > 0) ? ((m_number-1) / 8) + 1 : 0;
+    m_bits_per_row  = m_bytes_per_row * 8;
+    
+    // Compute length of memory array
+    m_size = m_bytes_per_row * m_length;
+/*
+std::cout << m_name
+          << " size=" << m_size
+          << " bits=" << m_bits
+          << " bytes_per_row=" << m_bytes_per_row
+          << " bits_per_row=" << m_bits_per_row << std::endl;
+*/
+    
+    // Load only if the column has a positive size
+    if (m_size > 0) {
+
+        // Allocate and initialise fresh memory
+        alloc_data();
+        init_data();
+
+        // If a FITS file is attached then load column data from the FITS
+        // file
+        if (FPTR(m_fitsfile)->Fptr != NULL) {
+
+            // Move to the HDU
+            int status = 0;
+            status     = __ffmahd(FPTR(m_fitsfile),
+                                  (FPTR(m_fitsfile)->HDUposition)+1,
+                                  NULL, &status);
+            if (status != 0)
+                throw GException::fits_hdu_not_found(G_LOAD_COLUMN,
+                                  (FPTR(m_fitsfile)->HDUposition)+1,
+                                  status);
+
+            // Load data 8 Bits at once
+            status = __ffgcv(FPTR(m_fitsfile), __TBYTE, m_colnum, 1, 1, m_size,
+                             m_nulval, m_data, &m_anynul, &status);
+            if (status != 0)
+                throw GException::fits_error(G_LOAD_COLUMN, status,
+                                  "for column \""+m_name+"\".");
+        }
+
+    } // endif: column has a positive size
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save table column into FITS file
+ *
+ * @exception GException::fits_hdu_not_found
+ *            Specified HDU not found in FITS file.
+ * @exception GException::fits_error
+ *            Error occured during writing of the column data.
+ *
+ * Save Bit (vector) column into FITS file by writing 8 Bits at once.
+ ***************************************************************************/
+void GFitsTableBitCol::save_column(void)
+{
+    // Continue only if a FITS file is connected and data have been loaded
+    if (FPTR(m_fitsfile)->Fptr != NULL && m_colnum > 0 && m_data != NULL) {
+
+        // Set any pending Bit
+        set_pending();
+
+        // Move to the HDU
+        int status = 0;
+        status     = __ffmahd(FPTR(m_fitsfile),
+                              (FPTR(m_fitsfile)->HDUposition)+1, NULL,
+                              &status);
+        if (status != 0)
+            throw GException::fits_hdu_not_found(G_SAVE_COLUMN,
+                              (FPTR(m_fitsfile)->HDUposition)+1,
+                              status);
+
+        // Save data 8 Bits at once
+        status = __ffpcn(FPTR(m_fitsfile), __TBYTE, m_colnum, 1, 1,
+                         m_size, m_data, m_nulval, &status);
+        if (status != 0)
+            throw GException::fits_error(G_SAVE_COLUMN, status);
+
+    } // endif: FITS file was connected
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get Bit for boolean access
+ *
+ * @param[in] row Row of column.
+ * @param[in] inx Vector index in column row.
+ *
+ * @exception GException::out_of_range
+ *            Table row or vector index are out of valid range.
+ *
+ * Set the Bit for boolean data access. Note that this method assumes that
+ * the data have already been loaded.
+ ***************************************************************************/
+void GFitsTableBitCol::get_bit(const int& row, const int& inx)
+{
+    // Check row value
+    #if defined(G_RANGE_CHECK)
+    if (row < 0 || row >= m_length)
+        throw GException::out_of_range(G_GET_BIT, row, 0, m_length-1);
+    #endif
+    
+    // Check inx value
+    #if defined(G_RANGE_CHECK)
+    if (inx < 0 || inx >= m_number)
+        throw GException::out_of_range(G_GET_BIT, inx, 0, m_number-1);
+    #endif
+
+    // Compute Byte and Bit mask
+    m_bit_byte = row * m_bytes_per_row + inx / 8;
+    m_bit_mask = 1 << (7 - (inx % 8));
+
+    // Set Bit value
+    m_bit_value = (m_data[m_bit_byte] & m_bit_mask);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set pending Bit
+ *
+ * Write the pending Bit into the data. Note that this method assumes that
+ * the data have already been loaded.
+ ***************************************************************************/
+void GFitsTableBitCol::set_pending(void)
+{
+    // Continue only if we have a pending Bit
+    if (m_bit_pending) {
+
+        // Set or unset Bit
+        if (m_bit_value)
+            m_data[m_bit_byte] = m_data[m_bit_byte] | m_bit_mask;
+        else
+            m_data[m_bit_byte] = m_data[m_bit_byte] & ~m_bit_mask;
+
+        // Signal that no more Bit is pending
+        m_bit_pending = false;
+
     }
 
     // Return
