@@ -171,7 +171,7 @@ void GFitsTableCol::name(const std::string& name)
 /***********************************************************************//**
  * @brief Get column name
  ***************************************************************************/
-std::string GFitsTableCol::name(void)
+std::string GFitsTableCol::name(void) const
 {
     // Return Name
     return m_name;
@@ -181,7 +181,7 @@ std::string GFitsTableCol::name(void)
 /***********************************************************************//**
  * @brief Get number of column in FITS file (starting from 1)
  ***************************************************************************/
-int GFitsTableCol::colnum(void)
+int GFitsTableCol::colnum(void) const
 {
     // Return column number
     return m_colnum;
@@ -209,7 +209,7 @@ int GFitsTableCol::colnum(void)
  *  83 (TCOMPLEX)
  * 163 (TDBLCOMPLEX)
  ***************************************************************************/
-int GFitsTableCol::type(void)
+int GFitsTableCol::type(void) const
 {
     // Return column type
     return m_type;
@@ -219,7 +219,7 @@ int GFitsTableCol::type(void)
 /***********************************************************************//**
  * @brief Get column repeat value (only used for binary tables)
  ***************************************************************************/
-int GFitsTableCol::repeat(void)
+int GFitsTableCol::repeat(void) const
 {
     // Return column repeat value
     return m_repeat;
@@ -229,7 +229,7 @@ int GFitsTableCol::repeat(void)
 /***********************************************************************//**
  * @brief Get width of one element in column
  ***************************************************************************/
-int GFitsTableCol::width(void)
+int GFitsTableCol::width(void) const
 {
     // Return width of one element in column
     return m_width;
@@ -239,7 +239,7 @@ int GFitsTableCol::width(void)
 /***********************************************************************//**
  * @brief Get number of elements in a column
  ***************************************************************************/
-int GFitsTableCol::number(void)
+int GFitsTableCol::number(void) const
 {
     // Return number of elements in a column
     return m_number;
@@ -249,10 +249,20 @@ int GFitsTableCol::number(void)
 /***********************************************************************//**
  * @brief Get column length
  ***************************************************************************/
-int GFitsTableCol::length(void)
+int GFitsTableCol::length(void) const
 {
     // Return column length
     return m_length;
+}
+
+
+/***********************************************************************//**
+ * @brief Get number of NULLs encountered
+ ***************************************************************************/
+int GFitsTableCol::anynul(void) const
+{
+    // Return column length
+    return m_anynul;
 }
 
 
