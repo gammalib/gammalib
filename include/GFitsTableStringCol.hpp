@@ -53,8 +53,8 @@ public:
     double       real(const int& row, const int& col = 0);
     int          integer(const int& row, const int& col = 0);
     std::string* data(void) { return m_data; }
-    void         nullval(const std::string& value);
-    char*        nullval(void) { return m_nulval; }
+    void         nulval(const std::string& value);
+    char*        nulval(void) { return m_nulval; }
 
 private:
     // Private methods

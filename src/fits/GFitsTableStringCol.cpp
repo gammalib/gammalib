@@ -242,14 +242,21 @@ int GFitsTableStringCol::integer(const int& row, const int& inx)
 
 
 /***********************************************************************//**
- * @brief Set NULL string
+ * @brief Set nul value
  *
- * @param[in] value Pointer on NULL string
+ * @param[in] value Nul value string
  *
- * Allows the specification of the FITS table NULL string. If the string
- * is empty the data will not be screened for NULL values.
+ * Allows the specification of the FITS table nul string. The default nul
+ * strings is an empty string which results in NULL entries in case that
+ * no data has been written.
+ *
+ * @todo To correctly reflect the nul value in the data, the column should
+ * be reloaded. However, the column may have been changed, so in principle
+ * saving is needed. However, we may not want to store the data, hence saving
+ * is also not desired. We thus have to develop a method to update the
+ * column information for a new nul value in place ...
  ***************************************************************************/
-void GFitsTableStringCol::nullval(const std::string& value)
+void GFitsTableStringCol::nulval(const std::string& value)
 {
     // Allocate nul value
     alloc_nulval(value);
@@ -281,6 +288,9 @@ void GFitsTableStringCol::init_members(void)
     m_data   = NULL;
     m_buffer = NULL;
     m_nulval = NULL;
+
+    // Initialise nul value
+    alloc_nulval("");
 
     // Return
     return;
@@ -358,6 +368,9 @@ void GFitsTableStringCol::free_members(void)
 /***********************************************************************//**
  * @brief Save table column into FITS file
  *
+ * The data is transferred from the internal string vector into a character
+ * transfer buffer that can be handled by the cfitsio routines.
+ *
  * The table column is only saved if it is linked to a FITS file and if the
  * data are indeed present in the class instance. This avoids saving of data
  * that have not been modified.
@@ -369,12 +382,15 @@ void GFitsTableStringCol::save(void)
     // Free buffer
     free_buffer();
 
-    // Allocate buffer
+    // Allocate buffer. This also fills the entire buffer with '\0'
+    // characters.
     alloc_buffer();
 
     // Transfer string into buffer
-    for (int i = 0; i < m_size; ++i)
-       strncpy(m_buffer[i], m_data[i].c_str(), m_width);
+    for (int i = 0; i < m_size; ++i) {
+        if (m_data[i].length() > 0)
+            strncpy(m_buffer[i], m_data[i].c_str(), m_width);
+    }
 
     // Save column
     save_column();
@@ -476,7 +492,7 @@ void GFitsTableStringCol::release_data(void)
 
 
 /***********************************************************************//**
- * @brief Allocate null value
+ * @brief Allocate nul value
  ***************************************************************************/
 void GFitsTableStringCol::alloc_nulval(const std::string& value)
 {
@@ -486,11 +502,13 @@ void GFitsTableStringCol::alloc_nulval(const std::string& value)
     // Mark pointer as free
     m_nulval = NULL;
 
-    // If we have valid value, allocate and set nul value
-    if (!value.empty()) {
-        m_nulval = new char[m_width+1];
-        strncpy(m_nulval, value.c_str(), m_width);
-    }
+    // Allocate and initialise nul value
+    m_nulval = new char[m_width+1];
+    for (int j = 0; j <= m_width; ++j)
+        m_nulval[j] = '\0';
+
+    // Set nul value
+    strncpy(m_nulval, value.c_str(), m_width);
 
     // Return
     return;
