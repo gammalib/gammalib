@@ -77,11 +77,89 @@ std::string strip_chars(const std::string& arg, const std::string& chars)
 
 
 /***********************************************************************//**
+ * @brief Convert short integer value into string
+ *
+ * @param[in] value Short integer to be converted into string.
+ ***************************************************************************/
+std::string str(const short& value)
+{
+    std::ostringstream s_value;
+    s_value << value;
+    return  s_value.str();
+}
+
+
+/***********************************************************************//**
+ * @brief Convert short unsigned integer value into string
+ *
+ * @param[in] value Short unsigned integer to be converted into string.
+ ***************************************************************************/
+std::string str(const unsigned short& value)
+{
+    std::ostringstream s_value;
+    s_value << value;
+    return  s_value.str();
+}
+
+
+/***********************************************************************//**
  * @brief Convert integer value into string
  *
  * @param[in] value Integer to be converted into string.
  ***************************************************************************/
 std::string str(const int& value)
+{
+    std::ostringstream s_value;
+    s_value << value;
+    return  s_value.str();
+}
+
+
+/***********************************************************************//**
+ * @brief Convert unsigned integer value into string
+ *
+ * @param[in] value Unsigned integer to be converted into string.
+ ***************************************************************************/
+std::string str(const unsigned int& value)
+{
+    std::ostringstream s_value;
+    s_value << value;
+    return  s_value.str();
+}
+
+
+/***********************************************************************//**
+ * @brief Convert long integer value into string
+ *
+ * @param[in] value Long integer to be converted into string.
+ ***************************************************************************/
+std::string str(const long& value)
+{
+    std::ostringstream s_value;
+    s_value << value;
+    return  s_value.str();
+}
+
+
+/***********************************************************************//**
+ * @brief Convert long unsigned integer value into string
+ *
+ * @param[in] value Long unsigned integer to be converted into string.
+ ***************************************************************************/
+std::string str(const unsigned long& value)
+{
+    std::ostringstream s_value;
+    s_value << value;
+    return  s_value.str();
+}
+
+
+/***********************************************************************//**
+ * @brief Convert long long integer value into string
+ *
+ * @param[in] value Long long integer to be converted into string.
+ ***************************************************************************/
+std::string str(const long long& value)
 {
     std::ostringstream s_value;
     s_value << value;
@@ -116,6 +194,34 @@ std::string str(const double& value)
 
 
 /***********************************************************************//**
+ * @brief Convert string into short value
+ *
+ * @param[in] arg String to be converted.
+ ***************************************************************************/
+short toshort(const std::string& arg)
+{
+    std::istringstream iss(arg);
+    short              result;
+    iss >> std::dec >> result;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert string into unsigned short value
+ *
+ * @param[in] arg String to be converted.
+ ***************************************************************************/
+unsigned short toushort(const std::string& arg)
+{
+    std::istringstream iss(arg);
+    unsigned short     result;
+    iss >> std::dec >> result;
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Convert string into integer value
  *
  * @param[in] arg String to be converted.
@@ -124,6 +230,76 @@ int toint(const std::string& arg)
 {
     std::istringstream iss(arg);
     int                result;
+    iss >> std::dec >> result;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert string into unsigned integer value
+ *
+ * @param[in] arg String to be converted.
+ ***************************************************************************/
+unsigned int touint(const std::string& arg)
+{
+    std::istringstream iss(arg);
+    unsigned int       result;
+    iss >> std::dec >> result;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert string into long value
+ *
+ * @param[in] arg String to be converted.
+ ***************************************************************************/
+long tolong(const std::string& arg)
+{
+    std::istringstream iss(arg);
+    long               result;
+    iss >> std::dec >> result;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert string into unsigned long value
+ *
+ * @param[in] arg String to be converted.
+ ***************************************************************************/
+unsigned long toulong(const std::string& arg)
+{
+    std::istringstream iss(arg);
+    unsigned long      result;
+    iss >> std::dec >> result;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert string into long long value
+ *
+ * @param[in] arg String to be converted.
+ ***************************************************************************/
+long long tolonglong(const std::string& arg)
+{
+    std::istringstream iss(arg);
+    long long          result;
+    iss >> std::dec >> result;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert string into unsigned long long value
+ *
+ * @param[in] arg String to be converted.
+ ***************************************************************************/
+unsigned long long toulonglong(const std::string& arg)
+{
+    std::istringstream iss(arg);
+    unsigned long long result;
     iss >> std::dec >> result;
     return result;
 }
