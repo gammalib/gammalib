@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GWcsHPX.cpp
@@ -249,11 +248,11 @@ void GWcsHPX::read(const GFitsHDU* hdu)
     clear();
 
     // Check if we have a healpix representation
-    if (hdu->card("PIXTYPE")->string() != "HEALPIX")
+    if (hdu->string("PIXTYPE") != "HEALPIX")
         throw GException::wcs(G_READ, "HDU does not contain Healpix data");
 
     // Get pixel ordering
-    std::string order = hdu->card("ORDERING")->string();
+    std::string order = hdu->string("ORDERING");
 
     // Get coordinate system.
     // First search for HIER_CRD keyword (this has been used in older
@@ -261,10 +260,10 @@ void GWcsHPX::read(const GFitsHDU* hdu)
     // COORDSYS keyword.
     std::string coords;
     try {
-        coords = hdu->card("HIER_CRD")->string();
+        coords = hdu->string("HIER_CRD");
     }
     catch (GException::fits_key_not_found &e) {
-        coords = hdu->card("COORDSYS")->string();
+        coords = hdu->string("COORDSYS");
     }
 
     // Set coordinate system
@@ -274,7 +273,7 @@ void GWcsHPX::read(const GFitsHDU* hdu)
     ordering(order);
 
     // Get Healpix resolution and determine number of pixels and solid angle
-    m_nside      = hdu->card("NSIDE")->integer();
+    m_nside      = hdu->integer("NSIDE");
     m_npface     = m_nside * m_nside;
     m_ncap       = 2 * (m_npface - m_nside);
     m_num_pixels = 12 * m_npface;

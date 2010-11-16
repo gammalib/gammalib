@@ -257,7 +257,7 @@ void GGti::load(const std::string& filename, const std::string& extname)
     file.open(filename);
 
     // Get GTI HDU
-    GFitsHDU* hdu = file.hdu(extname);
+    GFitsBinTable* hdu = (GFitsBinTable*)file.hdu(extname);
 
     // Read GTI from HDU
     read(hdu);
@@ -308,7 +308,7 @@ void GGti::save(const std::string& filename, bool clobber,
  * @todo Method assumes that times are in MET.
  * @todo Read header keywords.
  ***************************************************************************/
-void GGti::read(GFitsHDU* hdu)
+void GGti::read(GFitsBinTable* hdu)
 {
 	// Free members
 	free_members();
@@ -317,7 +317,7 @@ void GGti::read(GFitsHDU* hdu)
 	init_members();
 	
 	// Extract GTI information from FITS file
-	m_num = hdu->card("NAXIS2")->integer();
+	m_num = hdu->integer("NAXIS2");
 	if (m_num > 0) {
 	
 		// Set GTIs

@@ -282,7 +282,7 @@ void GEbounds::load(const std::string& filename, const std::string& extname)
     file.open(filename);
 
     // Get energy boundary HDU
-    GFitsHDU* hdu = file.hdu(extname);
+    GFitsBinTable* hdu = (GFitsBinTable*)file.hdu(extname);
 
     // Read energy boundaries from HDU
     read(hdu);
@@ -331,7 +331,7 @@ void GEbounds::save(const std::string& filename, bool clobber,
  *       string parameter that allows external specification about how
  *       the energies should be interpreted.
  ***************************************************************************/
-void GEbounds::read(GFitsHDU* hdu)
+void GEbounds::read(GFitsBinTable* hdu)
 {
     // Free members
     free_members();
@@ -343,7 +343,7 @@ void GEbounds::read(GFitsHDU* hdu)
     if (hdu != NULL) {
 
         // Extract energy boundary information from FITS file
-        m_num = hdu->card("NAXIS2")->integer();
+        m_num = hdu->integer("NAXIS2");
         if (m_num > 0) {
 
             // Allocate memory
@@ -394,13 +394,10 @@ void GEbounds::write(GFits* file, const std::string& extname)
     GFitsBinTable table = GFitsBinTable(m_num);
     table.append_column(cemin);
     table.append_column(cemax);
-
-    // Create HDU
-    GFitsHDU hdu(table);
-    hdu.extname(extname);
+    table.extname(extname);
 
     // Write to FITS file
-    file->append(hdu);
+    file->append(table);
     
     // Return
     return;

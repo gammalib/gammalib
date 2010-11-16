@@ -22,6 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include "GFits.hpp"
+#include "GFitsBinTable.hpp"
 #include "GTime.hpp"
 
 
@@ -45,7 +46,7 @@ public:
     // Constructors and destructors
     GGti(void);
     GGti(const GGti& gti);
-    ~GGti(void);
+    virtual ~GGti(void);
 
     // Operators
     GGti& operator= (const GGti& gti);
@@ -59,7 +60,7 @@ public:
                 const std::string& extname = "GTI");
 	void   save(const std::string& filename, bool clobber,
                 const std::string& extname = "GTI");
-    void   read(GFitsHDU* hdu);
+    void   read(GFitsBinTable* hdu);
     void   write(GFits* file, const std::string& extname = "GTI");
     int    size(void) const { return m_num; }
 	GTime  tstart(void) const { return m_tstart; }

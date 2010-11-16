@@ -789,14 +789,14 @@ void GWcs::wcs_read(const GFitsHDU* hdu)
     if (hdu != NULL) {
 
         // Get standard keywords
-        std::string ctype1 = hdu->card("CTYPE1")->string();
-        std::string ctype2 = hdu->card("CTYPE2")->string();
-        double      crval1 = hdu->card("CRVAL1")->real();
-        double      crval2 = hdu->card("CRVAL2")->real();
-        double      crpix1 = hdu->card("CRPIX1")->real();
-        double      crpix2 = hdu->card("CRPIX2")->real();
-        double      cdelt1 = hdu->card("CDELT1")->real();
-        double      cdelt2 = hdu->card("CDELT2")->real();
+        std::string ctype1 = hdu->string("CTYPE1");
+        std::string ctype2 = hdu->string("CTYPE2");
+        double      crval1 = hdu->real("CRVAL1");
+        double      crval2 = hdu->real("CRVAL2");
+        double      crpix1 = hdu->real("CRPIX1");
+        double      crpix2 = hdu->real("CRPIX2");
+        double      cdelt1 = hdu->real("CDELT1");
+        double      cdelt2 = hdu->real("CDELT2");
 
         // Determine coordinate system
         std::string coords;
