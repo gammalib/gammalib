@@ -60,6 +60,7 @@ public:
     bool        logExplicit(void) const;
     bool        logVerbose(void) const;
     bool        logDebug(void) const;
+    bool        clobber(void) const { return m_clobber; }
 
     // Public members
     GLog        log;                       //!< Application logger
