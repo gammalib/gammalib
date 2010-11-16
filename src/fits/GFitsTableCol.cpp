@@ -324,8 +324,9 @@ void GFitsTableCol::load_column(void)
     // Load only if the column has a positive size
     if (m_size > 0) {
 
-        // Allocate fresh memory
+        // Allocate and initialise fresh memory
         alloc_data();
+        init_data();
 
         // If a FITS file is attached then load column data from the FITS
         // file
@@ -333,11 +334,13 @@ void GFitsTableCol::load_column(void)
 
             // Move to the HDU
             int status = 0;
-            status     = __ffmahd(FPTR(m_fitsfile), (FPTR(m_fitsfile)->HDUposition)+1,
+            status     = __ffmahd(FPTR(m_fitsfile),
+                                  (FPTR(m_fitsfile)->HDUposition)+1,
                                   NULL, &status);
             if (status != 0)
                 throw GException::fits_hdu_not_found(G_LOAD_COLUMN,
-                                  (FPTR(m_fitsfile)->HDUposition)+1, status);
+                                  (FPTR(m_fitsfile)->HDUposition)+1,
+                                  status);
 
             // Load data
             status = __ffgcv(FPTR(m_fitsfile), m_type, m_colnum, 1, 1, m_size,
@@ -346,10 +349,6 @@ void GFitsTableCol::load_column(void)
                 throw GException::fits_error(G_LOAD_COLUMN, status,
                                   "for column \""+m_name+"\".");
         }
-
-        // ... otherwise initialise all column values
-        else
-            init_data();
 
     } // endif: column has a positive size
 
@@ -383,15 +382,17 @@ void GFitsTableCol::save_column(void)
 
         // Move to the HDU
         int status = 0;
-        status     = __ffmahd(FPTR(m_fitsfile), (FPTR(m_fitsfile)->HDUposition)+1, NULL,
+        status     = __ffmahd(FPTR(m_fitsfile),
+                              (FPTR(m_fitsfile)->HDUposition)+1, NULL,
                               &status);
         if (status != 0)
             throw GException::fits_hdu_not_found(G_SAVE_COLUMN,
-                                                 (FPTR(m_fitsfile)->HDUposition)+1,
-                                                 status);
+                              (FPTR(m_fitsfile)->HDUposition)+1,
+                              status);
+
         // Save the column data
         status = __ffpcn(FPTR(m_fitsfile), m_type, m_colnum, 1, 1,
-                         (long)m_size, ptr_data(), ptr_nulval(), &status);
+                         m_size, ptr_data(), ptr_nulval(), &status);
         if (status != 0)
             throw GException::fits_error(G_SAVE_COLUMN, status);
 
