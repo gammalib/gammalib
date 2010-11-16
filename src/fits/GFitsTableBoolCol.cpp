@@ -59,7 +59,7 @@ GFitsTableBoolCol::GFitsTableBoolCol(void) : GFitsTableCol()
 GFitsTableBoolCol::GFitsTableBoolCol(const std::string& name,
                                    const int&         length,
                                    const int&         size)
-                                   : GFitsTableCol(name, length, size, 2)
+                                   : GFitsTableCol(name, length, size, 1)
 {
     // Initialise class members for clean destruction
     init_members();

@@ -59,7 +59,7 @@ GFitsTableLongLongCol::GFitsTableLongLongCol(void) : GFitsTableCol()
 GFitsTableLongLongCol::GFitsTableLongLongCol(const std::string& name,
                                          const int&         length,
                                          const int&         size)
-                                       : GFitsTableCol(name, length, size, 2)
+                                       : GFitsTableCol(name, length, size, 8)
 {
     // Initialise class members for clean destruction
     init_members();
