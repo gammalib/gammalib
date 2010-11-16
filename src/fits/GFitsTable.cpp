@@ -650,7 +650,7 @@ void GFitsTable::open(void* vptr)
  * All columns with a length of zero will be excluded from saving, and if
  * they exist in the FITS file, they will be removed from the file.
  *
- * @todo Implementation not yet compoeted. Row adding and deletion is still
+ * @todo Implementation not yet completed. Row adding and deletion is still
  * missing.
  ***************************************************************************/
 void GFitsTable::save(void)

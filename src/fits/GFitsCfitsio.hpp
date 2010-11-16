@@ -58,6 +58,7 @@
 #define __ffpss(A, B, C, D, E, F) ffpss(A, B, C, D, E, F)
 #define __ffthdu(A, B, C) ffthdu(A, B, C)
 #define __ffuky(A, B, C, D, E, F) ffuky(A, B, C, D, E, F)
+#define __ffukye(A, B, C, D, E, F) ffukye(A, B, C, D, E, F)
 #define __ffukyd(A, B, C, D, E, F) ffukyd(A, B, C, D, E, F)
 #define __ffukyj(A, B, C, D, E) ffukyj(A, B, C, D, E)
 #define __ffukyl(A, B, C, D, E) ffukyl(A, B, C, D, E)
