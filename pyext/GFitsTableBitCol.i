@@ -36,12 +36,12 @@ public:
     virtual ~GFitsTableBitCol(void);
 
     // Methods
-    std::string string(const int& row, const int& col = 0);
-    double      real(const int& row, const int& col = 0);
-    int         integer(const int& row, const int& col = 0);
-    char*       data(void) { return m_data; }
-    void        nullval(const char* value);
-    char*       nullval(void) { return m_nulval; }
+    std::string    string(const int& row, const int& col = 0);
+    double         real(const int& row, const int& col = 0);
+    int            integer(const int& row, const int& col = 0);
+    unsigned char* data(void) { return m_data; }
+    void           nullval(const unsigned char* value);
+    unsigned char* nullval(void) { return m_nulval; }
 };
 
 
@@ -58,16 +58,16 @@ public:
 	    str_buffer[1000] = '\0';
 	    return str_buffer;
     }
-    char get(const int& row) {
+    bool get(const int& row) {
         return (*self)(row);
     }
-    char get(const int& row, const int& col) {
+    bool get(const int& row, const int& col) {
         return (*self)(row, col);
     }
-    void set(const int& row, const char& value) {
+    void set(const int& row, const bool& value) {
         (*self)(row) = value;
     }
-    void set(const int& row, const int& col, const char& value) {
+    void set(const int& row, const int& col, const bool& value) {
         (*self)(row, col) = value;
     }
     GFitsTableBitCol copy() {
