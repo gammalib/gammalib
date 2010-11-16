@@ -48,15 +48,22 @@ public:
     // Methods to set card properties
     void         keyname(const std::string& keyname);
     void         value(const std::string& value);
+    void         value(const bool& value);
+    void         value(const float& value);
     void         value(const double& value);
+    void         value(const unsigned short& value);
+    void         value(const short& value);
+    void         value(const unsigned int& value);
     void         value(const int& value);
+    void         value(const long& value);
+    void         value(const unsigned long& value);
+    void         value(const long long& value);
     void         unit(const std::string& unit);
     void         comment(const std::string& comment);
 
     // Methods to get card properties
     std::string  keyname(void) const;
     std::string  value(void) const;
-    int          value_type(void) const;
     int          decimals(void) const;
     std::string  unit(void) const;
     std::string  comment(void) const;
