@@ -1017,14 +1017,16 @@ void GFitsHeaderCard::write(void* vptr)
         if (m_comment_write)
             status = __ffphis(FPTR(vptr), (char*)m_comment.c_str(), &status);
     }
-    
+
     // If card holds a native data type then write it
     else if (m_value_dtype != NULL) {
         switch (m_dtype) {
         case __TLOGICAL:
+            {
             int value = (*((bool*)m_value_dtype)) ? 1 : 0;
             status = __ffukyl(FPTR(vptr), (char*)m_keyname.c_str(), value,
                               (char*)m_comment.c_str(), &status);
+            }
             break;
         case __TSTRING:
             status = __ffukys(FPTR(vptr), (char*)m_keyname.c_str(),
