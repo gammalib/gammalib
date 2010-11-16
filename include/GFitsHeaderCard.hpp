@@ -30,6 +30,8 @@
  * This class implements FITS header card. Each card consists of a
  * keyname (string), a value (string, floating pointer, integer or logical)
  * and a comment (string). COMMENT or HISTORY cards do not have any value.
+ *
+ * @todo Many more datatypes may exist for a header card.
  ***************************************************************************/
 class GFitsHeaderCard {
 
@@ -57,15 +59,22 @@ public:
     // Methods to set card properties
     void         keyname(const std::string& keyname);
     void         value(const std::string& value);
+    void         value(const bool& value);
+    void         value(const float& value);
     void         value(const double& value);
+    void         value(const unsigned short& value);
+    void         value(const short& value);
+    void         value(const unsigned int& value);
     void         value(const int& value);
+    void         value(const long& value);
+    void         value(const unsigned long& value);
+    void         value(const long long& value);
     void         unit(const std::string& unit);
     void         comment(const std::string& comment);
 
     // Methods to get card properties
     std::string  keyname(void) const;
     std::string  value(void) const;
-    int          value_type(void) const;
     int          decimals(void) const;
     std::string  unit(void) const;
     std::string  comment(void) const;
@@ -78,7 +87,9 @@ private:
     void init_members(void);
     void copy_members(const GFitsHeaderCard& card);
     void free_members(void);
-    int  get_value_type(const std::string& value);
+    void copy_dtype(const GFitsHeaderCard& card);
+    void free_dtype(void);
+    void set_dtype(const std::string& value);
     void read(void* vptr, int keynum);
     void read(void* fptr, const std::string& keyname);
     void write(void* fptr);
@@ -86,11 +97,12 @@ private:
     // Private data area
     std::string m_keyname;         //!< Name of the card
     std::string m_value;           //!< Value of the card as read from file
-    int         m_value_type;      //!< Type of the card value
+    void*       m_value_dtype;     //!< Value in native data type
+    int         m_dtype;           //!< Native data type
     int         m_value_decimals;  //!< Decimals of value (for float)
     std::string m_unit;            //!< Unit of the card value
     std::string m_comment;         //!< Card comment
-    int         m_comment_write;   //!< Signals that comment should be written
+    bool        m_comment_write;   //!< Signals that comment should be written
 };
 
 #endif /* GFITSHEADERCARD_HPP */

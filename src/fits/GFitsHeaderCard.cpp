@@ -16,6 +16,8 @@
 #include <config.h>
 #endif
 #include <iostream>
+#include <limits.h>
+#include <float.h>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
@@ -27,14 +29,6 @@
 #define G_WRITE                               "GFitsHeaderCard::write(void*)"
 
 /* __ Definitions ________________________________________________________ */
-#define CT_UNKNOWN 0
-#define CT_INVALID 1
-#define CT_STRING  2
-#define CT_INT     3
-#define CT_FLOAT   4
-#define CT_BOOL    5
-#define CT_COMMENT 6
-#define CT_HISTORY 7
 
 /* __ Macros _____________________________________________________________ */
 
@@ -230,20 +224,33 @@ void GFitsHeaderCard::keyname(const std::string& keyname)
  * @brief Set string value of header card
  *
  * @param[in] value String value of header card.
+ *
+ * This method sets the value of a string header card. The internal string
+ * representation contains hyphens, yet for keyword writing the hyphens are
+ * stripped.
  ***************************************************************************/
 void GFitsHeaderCard::value(const std::string& value)
 {
-    // Set value and value type
-    m_value      = value;
-    m_value_type = get_value_type(value);
+    // Free data type
+    free_dtype();
 
-    // Attach hyphens if required
-    if (m_value_type == CT_STRING) {
-        if (m_value[0] != '\x27')
-            m_value = "'" + m_value;
-        if (m_value[m_value.length()-1] != '\x27')
-            m_value += "'";
-    }
+    // Set value
+    m_value = value;
+
+    // Attach hyphens to internal string representation if required
+    if (m_value[0] != '\x27')
+        m_value = "'" + m_value;
+    if (m_value[m_value.length()-1] != '\x27')
+        m_value = m_value + "'";
+
+    // Strip hyphens and whitespace from datatype value that is used for
+    // keyword writing
+    std::string value_dtype = 
+                strip_whitespace(m_value.substr(1, m_value.length() - 2));
+
+    // Set data type
+    m_dtype       = __TSTRING;
+    m_value_dtype = new std::string(value_dtype);
 
     // Return
     return;
@@ -251,21 +258,119 @@ void GFitsHeaderCard::value(const std::string& value)
 
 
 /***********************************************************************//**
- * @brief Set floating point value of header card
+ * @brief Set boolean value of header card
  *
- * @param[in] value Floating point value of header card.
+ * @param[in] value Single precision value.
+ ***************************************************************************/
+void GFitsHeaderCard::value(const bool& value)
+{
+    // Free data type
+    free_dtype();
+
+    // Set value and data type
+    m_value       = (value) ? "T" : "F";
+    m_dtype       = __TLOGICAL;
+    m_value_dtype = new bool(value);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set single precision value of header card
+ *
+ * @param[in] value Single precision value.
+ ***************************************************************************/
+void GFitsHeaderCard::value(const float& value)
+{
+    // Free data type
+    free_dtype();
+
+    // Set value and data type
+    m_value       = str(value);
+    m_dtype       = __TFLOAT;
+    m_value_dtype = new float(value);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set double precision value of header card
+ *
+ * @param[in] value Double precision value.
  ***************************************************************************/
 void GFitsHeaderCard::value(const double& value)
 {
-    // Convert value to string
-    std::ostringstream s_value;
-    s_value << std::scientific << value;
+    // Free data type
+    free_dtype();
 
-    // Assign value
-    m_value = s_value.str();
+    // Set value and data type
+    m_value       = str(value);
+    m_dtype       = __TDOUBLE;
+    m_value_dtype = new double(value);
 
-    // Set value type
-    m_value_type = get_value_type(m_value);
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set unsigned short integer value of header card
+ *
+ * @param[in] value Unsigned short integer value.
+ ***************************************************************************/
+void GFitsHeaderCard::value(const unsigned short& value)
+{
+    // Free data type
+    free_dtype();
+
+    // Set value and data type
+    m_value       = str(value);
+    m_dtype       = __TUSHORT;
+    m_value_dtype = new unsigned short(value);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set short integer value of header card
+ *
+ * @param[in] value Short integer value.
+ ***************************************************************************/
+void GFitsHeaderCard::value(const short& value)
+{
+    // Free data type
+    free_dtype();
+
+    // Set value and data type
+    m_value       = str(value);
+    m_dtype       = __TSHORT;
+    m_value_dtype = new short(value);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set unsigned integer value of header card
+ *
+ * @param[in] value Unsigned integer value.
+ ***************************************************************************/
+void GFitsHeaderCard::value(const unsigned int& value)
+{
+    // Free data type
+    free_dtype();
+
+    // Set value and data type
+    m_value       = str(value);
+    m_dtype       = __TUINT;
+    m_value_dtype = new unsigned int(value);
 
     // Return
     return;
@@ -275,19 +380,77 @@ void GFitsHeaderCard::value(const double& value)
 /***********************************************************************//**
  * @brief Set integer value of header card
  *
- * @param[in] value Integer value of header card.
+ * @param[in] value Integer value.
  ***************************************************************************/
 void GFitsHeaderCard::value(const int& value)
 {
-    // Convert value to string
-    std::ostringstream s_value;
-    s_value << value;
+    // Free data type
+    free_dtype();
 
-    // Assign value
-    m_value = s_value.str();
+    // Set value and data type
+    m_value       = str(value);
+    m_dtype       = __TINT;
+    m_value_dtype = new int(value);
 
-    // Set value type
-    m_value_type = get_value_type(m_value);
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set long integer value of header card
+ *
+ * @param[in] value Long integer value.
+ ***************************************************************************/
+void GFitsHeaderCard::value(const long& value)
+{
+    // Free data type
+    free_dtype();
+
+    // Set value and data type
+    m_value       = str(value);
+    m_dtype       = __TLONG;
+    m_value_dtype = new long(value);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set unsigned integer long value of header card
+ *
+ * @param[in] value Unsigned long integer value.
+ ***************************************************************************/
+void GFitsHeaderCard::value(const unsigned long& value)
+{
+    // Free data type
+    free_dtype();
+
+    // Set value and data type
+    m_value       = str(value);
+    m_dtype       = __TULONG;
+    m_value_dtype = new unsigned long(value);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set long long integer value of header card
+ *
+ * @param[in] value Long long integer value.
+ ***************************************************************************/
+void GFitsHeaderCard::value(const long long& value)
+{
+    // Free data type
+    free_dtype();
+
+    // Set value and data type
+    m_value       = str(value);
+    m_dtype       = __TLONGLONG;
+    m_value_dtype = new long long(value);
 
     // Return
     return;
@@ -345,16 +508,6 @@ std::string GFitsHeaderCard::value(void) const
 
 
 /***********************************************************************//**
- * @brief Return header card value type
-  ***************************************************************************/
-int GFitsHeaderCard::value_type(void) const
-{
-    // Return
-    return m_value_type;
-}
-
-
-/***********************************************************************//**
  * @brief Return header card decimals
   ***************************************************************************/
 int GFitsHeaderCard::decimals(void) const
@@ -392,22 +545,19 @@ std::string GFitsHeaderCard::comment(void) const
  ***************************************************************************/
 std::string GFitsHeaderCard::string(void)
 {
-    // Initialize return value to empty string
-    std::string result;
+    // Initialize return value to actual value string
+    std::string result = m_value;
 
     // Type dependent conversion
-    switch (m_value_type) {
-    case CT_STRING:
-        if (m_value.length() > 2)
-            result = strip_whitespace(m_value.substr(1, m_value.length() - 2));
-        break;
-    case CT_INT:
-    case CT_FLOAT:
-    case CT_BOOL:
-        result = m_value;
-        break;
-    default:
-        break;
+    if (m_value_dtype != NULL) {
+        switch (m_dtype) {
+        case __TSTRING:
+            if (m_value.length() > 2)
+                result = strip_whitespace(m_value.substr(1, m_value.length() - 2));
+            break;
+        default:
+            break;
+        }
     }
 
     // Return string
@@ -429,20 +579,19 @@ double GFitsHeaderCard::real(void)
     double result = 0.0;
 
     // Type dependent conversion
-    switch (m_value_type) {
-    case CT_STRING:
-        if (m_value.length() > 2)
-            result = atof(m_value.substr(1, m_value.length() - 2).c_str());
-        break;
-    case CT_INT:
-    case CT_FLOAT:
-        result = atof(m_value.c_str());
-        break;
-    case CT_BOOL:
-        result = (m_value == "T") ? 1.0 : 0.0;
-        break;
-    default:
-        break;
+    if (m_value_dtype != NULL) {
+        switch (m_dtype) {
+        case __TSTRING:
+            if (m_value.length() > 2)
+                result = todouble(m_value.substr(1, m_value.length() - 2));
+            break;
+        case __TLOGICAL:
+            result = (m_value == "T") ? 1.0 : 0.0;
+            break;
+        default:
+            result = todouble(m_value);
+            break;
+        }
     }
 
     // Return string
@@ -464,20 +613,19 @@ int GFitsHeaderCard::integer(void)
     int result = 0;
 
     // Type dependent conversion
-    switch (m_value_type) {
-    case CT_STRING:
-        if (m_value.length() > 2)
-            result = atoi(m_value.substr(1, m_value.length() - 2).c_str());
-        break;
-    case CT_INT:
-    case CT_FLOAT:
-        result = atoi(m_value.c_str());
-        break;
-    case CT_BOOL:
-        result = (m_value == "T") ? 1 : 0;
-        break;
-    default:
-        break;
+    if (m_value_dtype != NULL) {
+        switch (m_dtype) {
+        case __TSTRING:
+            if (m_value.length() > 2)
+                result = toint(m_value.substr(1, m_value.length() - 2));
+            break;
+        case __TLOGICAL:
+            result = (m_value == "T") ? 1 : 0;
+            break;
+        default:
+            result = toint(m_value);
+            break;
+        }
     }
 
     // Return string
@@ -502,9 +650,10 @@ void GFitsHeaderCard::init_members(void)
     m_value.clear();
     m_unit.clear();
     m_comment.clear();
-    m_value_type     = CT_UNKNOWN;
+    m_value_dtype    = NULL;
+    m_dtype          = 0;
     m_value_decimals = 10;
-    m_comment_write  = 0;
+    m_comment_write  = false;
 
     // Return
     return;
@@ -518,14 +667,16 @@ void GFitsHeaderCard::init_members(void)
  ***************************************************************************/
 void GFitsHeaderCard::copy_members(const GFitsHeaderCard& card)
 {
-    // Copy membres
+    // Copy members
     m_keyname        = card.m_keyname;
     m_value          = card.m_value;
-    m_value_type     = card.m_value_type;
     m_value_decimals = card.m_value_decimals;
     m_unit           = card.m_unit;
     m_comment        = card.m_comment;
     m_comment_write  = card.m_comment_write;
+
+    // Copy native data types
+    copy_dtype(card);
 
     // Return
     return;
@@ -537,79 +688,229 @@ void GFitsHeaderCard::copy_members(const GFitsHeaderCard& card)
  ***************************************************************************/
 void GFitsHeaderCard::free_members(void)
 {
+    // Free members
+    free_dtype();
+
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Determine card value type
- *
- * @param[in] value Value string for which the type should be determined
- *
- * Method that determines the type of the card value. The following types are
- * defined:
- * CT_UNKNOWN=0 (inknown type)
- * CT_INVALID=1 (invalid type)
- * CT_STRING=2 (string)
- * CT_INT=3 (integer)
- * CT_FLOAT=4 (floating point)
- * CT_BOOL=5 (boolean)
- * CT_COMMENT=6 (comment)
- * CT_HISTORY=7 (history)
- * The type is determined by analyzing the card value. It is stored in the
- * private variable 'm_value_type'.
+ * @brief Copy dtype
  ***************************************************************************/
-int GFitsHeaderCard::get_value_type(const std::string& value)
+void GFitsHeaderCard::copy_dtype(const GFitsHeaderCard& card)
 {
-    // Get index of last string element
-    int last = m_value.length() - 1;
-
-    // If value is empty then we either have a COMMENT or HISTORY card or
-    // we don't know the type
-    if (last < 0) {
-        if (m_keyname == "COMMENT")
-            return CT_COMMENT;
-        if (m_keyname == "HISTORY")
-            return CT_HISTORY;
-        return CT_UNKNOWN;
-    }
-
-    // If value is enclosed in parentheses we have a string
-    if (m_value[0] == '\x27' && m_value[last] == '\x27')
-        return CT_STRING;
-
-    // If value has only one digit and is either 'F' or 'T' we have a
-    // Boolean
-    if (last == 0 && (m_value[0] == 'F' || m_value[0] == 'T'))
-        return CT_BOOL;
-
-    // If value is composed only of numeric or '+' or '-' characters we
-    // have an integer. If in addition we have '.' or 'e' or 'E' we (may)
-    // have a float.
-    int found_int   = 0;
-    int found_float = 0;
-    for (int i = 0; i <= last; ++i) {
-        if ((m_value[i] >= '0' && m_value[i] <= '9') || m_value[i] == '+' ||
-             m_value[i] == '-')
-            found_int = 1;
-        else if (m_value[i] == '.' || m_value[i] == 'e' || m_value[i] == 'E')
-            found_float = 1;
-        else
-            return CT_INVALID;
-    }
-
-    // If we are still alive we should have now either a float or an integer
-    if (found_int) {
-        if (found_float) {
-            return CT_FLOAT;
+    // Copy data type
+    if (card.m_value_dtype != NULL) {
+        m_dtype = card.m_dtype;
+        switch (m_dtype) {
+        case __TLOGICAL:
+            m_value_dtype = new bool(*((bool*)card.m_value_dtype));
+            break;
+        case __TSTRING:
+            m_value_dtype = new std::string(*((std::string*)card.m_value_dtype));
+            break;
+        case __TUSHORT:
+            m_value_dtype = new unsigned short(*((unsigned short*)card.m_value_dtype));
+            break;
+        case __TSHORT:
+            m_value_dtype = new short(*((short*)card.m_value_dtype));
+            break;
+        case __TUINT:
+            m_value_dtype = new unsigned int(*((unsigned int*)card.m_value_dtype));
+            break;
+        case __TINT:
+            m_value_dtype = new int(*((int*)card.m_value_dtype));
+            break;
+        case __TULONG:
+            m_value_dtype = new unsigned long(*((unsigned long*)card.m_value_dtype));
+            break;
+        case __TLONG:
+            m_value_dtype = new long(*((long*)card.m_value_dtype));
+            break;
+        case __TLONGLONG:
+            m_value_dtype = new long long(*((long long*)card.m_value_dtype));
+            break;
+        case __TFLOAT:
+            m_value_dtype = new float(*((float*)card.m_value_dtype));
+            break;
+        case __TDOUBLE:
+            m_value_dtype = new double(*((double*)card.m_value_dtype));
+            break;
+        default:
+            std::cout << "GFitsHeaderCard::copy_dtype: invalid data type code "
+                      << m_dtype << " encountered." << std::endl;
+            break;
         }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Free dtype
+ ***************************************************************************/
+void GFitsHeaderCard::free_dtype(void)
+{
+    // Free data type
+    if (m_value_dtype != NULL) {
+        switch (m_dtype) {
+        case __TLOGICAL:
+            delete (bool*)m_value_dtype;
+            break;
+        case __TSTRING:
+            delete (std::string*)m_value_dtype;
+            break;
+        case __TUSHORT:
+            delete (unsigned short*)m_value_dtype;
+            break;
+        case __TSHORT:
+            delete (short*)m_value_dtype;
+            break;
+        case __TUINT:
+            delete (unsigned int*)m_value_dtype;
+            break;
+        case __TINT:
+            delete (int*)m_value_dtype;
+            break;
+        case __TULONG:
+            delete (unsigned long*)m_value_dtype;
+            break;
+        case __TLONG:
+            delete (long*)m_value_dtype;
+            break;
+        case __TLONGLONG:
+            delete (long long*)m_value_dtype;
+            break;
+        case __TFLOAT:
+            delete (float*)m_value_dtype;
+            break;
+        case __TDOUBLE:
+            delete (double*)m_value_dtype;
+            break;
+        default:
+            std::cout << "GFitsHeaderCard::free_dtype: invalid data type code "
+                      << m_dtype << " encountered." << std::endl;
+            break;
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set native data type from card string
+ *
+ * @param[in] value Card string.
+ *
+ * The native data type is determined from the card string. This method sets
+ * the members m_dtype and m_value_type. The card type is determined by
+ * analyzing the card value.
+ *
+ * @todo Implement syntax checking for integer or float values.
+ ***************************************************************************/
+void GFitsHeaderCard::set_dtype(const std::string& value)
+{
+    // Free data type
+    free_dtype();
+
+    // Main loop to allow fall through
+    do {
+
+        // Get index of last string element
+        int last = m_value.length() - 1;
+
+        // If value is empty then we either have a COMMENT or HISTORY card or
+        // we don't know the type
+        if (last < 0) {
+            if (m_keyname == "COMMENT") {
+                continue;
+            }
+            else if (m_keyname == "HISTORY") {
+                continue;
+            }
+            else {
+                // TODO: If we reach this point we have an unrecognised keyname
+                continue;
+            }
+        }
+
+        // If value is enclosed in parentheses then we have a string
+        if (m_value[0] == '\x27' && m_value[last] == '\x27') {
+            this->value(value);
+            continue;
+        }
+
+        // If value has only one digit and is either 'F' or 'T' we have a
+        // Boolean
+        if (last == 0 && (m_value[0] == 'F' || m_value[0] == 'T')) {
+            this->value((m_value[0] == 'F'));
+            continue;
+        }
+
+        // Conversion
+        double             value_dbl = todouble(m_value);
+        long long          value_ll  = tolonglong(m_value);
+        unsigned long long value_ull = toulonglong(m_value);
+
+        // Check if we have an integer
+        if ((value_dbl >= 0 && value_dbl == value_ull) ||
+            (value_dbl <  0 && value_dbl == value_ll)) {
+
+            // Consider positive integers as unsigned
+            if (value_dbl >= 0) {
+                if (value_ull > ULONG_MAX) {
+                    m_dtype       = __TLONGLONG;
+                    m_value_dtype = new long long(value_ll);
+                }
+                else if (value_ull > USHRT_MAX) {
+                    m_dtype       = __TULONG;
+                    m_value_dtype = new unsigned long(value_ull);
+                }
+                else {
+                    m_dtype       = __TUSHORT;
+                    m_value_dtype = new unsigned short(value_ull);
+                }
+            }
+
+            // ... otherwise consider signed
+            else {
+                if (value_ll > LONG_MAX || value_ll < LONG_MIN) {
+                    m_dtype       = __TLONGLONG;
+                    m_value_dtype = new long long(value_ll);
+                }
+                else if (value_ll > SHRT_MAX || value_ll < SHRT_MIN) {
+                    m_dtype       = __TLONG;
+                    m_value_dtype = new long(value_ll);
+                }
+                else {
+                    m_dtype       = __TSHORT;
+                    m_value_dtype = new short(value_ll);
+                }
+            }
+        } // endif: handled integers
+
+        // ... otherwise handle floats
         else {
-            return CT_INT;
+            if (value_dbl > FLT_MAX || value_dbl < FLT_MIN) {
+                m_dtype       = __TDOUBLE;
+                m_value_dtype = new double(value_dbl);
+            }
+            else {
+                m_dtype       = __TFLOAT;
+                m_value_dtype = new float(value_dbl);
+            }
         }
-    }
-    else
-        return CT_INVALID;
+
+    } while(0);
+
+    // Return
+    return;
 }
 
 
@@ -642,7 +943,7 @@ void GFitsHeaderCard::read(void* vptr, int keynum)
     m_comment.assign(comment);
 
     // Determine card type
-    m_value_type = get_value_type(m_value);
+    set_dtype(m_value);
 
     // Return
     return;
@@ -682,7 +983,7 @@ void GFitsHeaderCard::read(void* vptr, const std::string& keyname)
     m_comment.assign(comment);
 
     // Determine card type
-    m_value_type = get_value_type(m_value);
+    set_dtype(m_value);
 
     // Return
     return;
@@ -705,40 +1006,56 @@ void GFitsHeaderCard::write(void* vptr)
     if (status != 0)
         throw GException::fits_error(G_READ_NUM, status);
 
-    // Write keyword
-    switch (m_value_type) {
-    case CT_UNKNOWN:
-        break;
-    case CT_INVALID:
-        break;
-    case CT_STRING:
-        status = __ffukys(FPTR(vptr), (char*)m_keyname.c_str(),
-                          (char*)string().c_str(), (char*)m_comment.c_str(), 
-                          &status);
-        break;
-    case CT_INT:
-        status = __ffukyj(FPTR(vptr), (char*)m_keyname.c_str(), integer(),
-                          (char*)m_comment.c_str(), &status);
-        break;
-    case CT_FLOAT:
-        status = __ffukyd(FPTR(vptr), (char*)m_keyname.c_str(), real(),
-                          decimals(), (char*)m_comment.c_str(), &status);
-        break;
-    case CT_BOOL:
-        status = __ffukyl(FPTR(vptr), (char*)m_keyname.c_str(), integer(),
-                          (char*)m_comment.c_str(), &status);
-        break;
-    case CT_COMMENT:
+    // If card is comment then write comment
+    if (m_keyname == "COMMENT") {
         if (m_comment_write)
             status = __ffpcom(FPTR(vptr), (char*)m_comment.c_str(), &status);
-        break;
-    case CT_HISTORY:
+    }
+
+    // If card is history then write history
+    else if (m_keyname == "HISTORY") {
         if (m_comment_write)
             status = __ffphis(FPTR(vptr), (char*)m_comment.c_str(), &status);
-        break;
-    default:
-        break;
     }
+    
+    // If card holds a native data type then write it
+    else if (m_value_dtype != NULL) {
+        switch (m_dtype) {
+        case __TLOGICAL:
+            int value = (*((bool*)m_value_dtype)) ? 1 : 0;
+            status = __ffukyl(FPTR(vptr), (char*)m_keyname.c_str(), value,
+                              (char*)m_comment.c_str(), &status);
+            break;
+        case __TSTRING:
+            status = __ffukys(FPTR(vptr), (char*)m_keyname.c_str(),
+                              (char*)((std::string*)m_value_dtype)->c_str(),
+                              (char*)m_comment.c_str(), &status);
+            break;
+        case __TFLOAT:
+            status = __ffukye(FPTR(vptr), (char*)m_keyname.c_str(),
+                              *((float*)m_value_dtype), decimals(),
+                              (char*)m_comment.c_str(), &status);
+            break;
+        case __TDOUBLE:
+            status = __ffukyd(FPTR(vptr), (char*)m_keyname.c_str(),
+                              *((double*)m_value_dtype), decimals(),
+                              (char*)m_comment.c_str(), &status);
+            break;
+        default:
+            status = __ffuky(FPTR(vptr), m_dtype, (char*)m_keyname.c_str(),
+                             m_value_dtype, (char*)m_comment.c_str(), &status);
+            break;
+        }
+    } // endif: had native data type
+
+    // ... capture all other stuff
+    else {
+        std::cout << "*** ERROR in GFitsHeaderCard::write: the code should"
+                  << " never arrive at this point. keyname=" << m_keyname
+                  << " " << "dtype=" << m_dtype << std::endl;
+    }
+
+    // Throw exception in case of a FITS error
     if (status != 0)
         throw GException::fits_error(G_WRITE, status);
 
@@ -770,7 +1087,7 @@ std::ostream& operator<< (std::ostream& os, const GFitsHeaderCard& card)
         keyname.append(" ");
 
     // Setup buffer
-    if (card.m_value_type != CT_COMMENT && card.m_value_type != CT_HISTORY) {
+    if (card.m_keyname != "COMMENT" && card.m_keyname != "HISTORY") {
       if (card.m_unit.length() > 0) {
         sprintf(buffer, "%8s =%21s / [%s] %s",
                 keyname.c_str(),
@@ -795,35 +1112,63 @@ std::ostream& operator<< (std::ostream& os, const GFitsHeaderCard& card)
     os << buffer;
 
     // Attach card type
-    switch (card.m_value_type) {
-    case CT_UNKNOWN:
-        os << " <type unknown>" << std::endl;
-        break;
-    case CT_INVALID:
-        os << " <invalid type>" << std::endl;
-        break;
-    case CT_STRING:
-        os << " <string>" << std::endl;
-        break;
-    case CT_INT:
-        os << " <int>" << std::endl;
-        break;
-    case CT_FLOAT:
-        os << " <float>" << std::endl;
-        break;
-    case CT_BOOL:
-        os << " <boolean>" << std::endl;
-        break;
-    case CT_COMMENT:
-        os << " <comment>" << std::endl;
-        break;
-    case CT_HISTORY:
-        os << " <history>" << std::endl;
-        break;
-    default:
-        os << std::endl;
-        break;
+    if (card.m_value_dtype != NULL) {
+        switch (card.m_dtype) {
+        case __TBIT:
+            os << " <bit>" << std::endl;
+            break;
+        case __TBYTE:
+            os << " <byte>" << std::endl;
+            break;
+        case __TSBYTE:
+            os << " <signed byte>" << std::endl;
+            break;
+        case __TLOGICAL:
+            os << " <bool>" << std::endl;
+            break;
+        case __TSTRING:
+            os << " <string>" << std::endl;
+            break;
+        case __TUSHORT:
+            os << " <unsigned short>" << std::endl;
+            break;
+        case __TSHORT:
+            os << " <short>" << std::endl;
+            break;
+        case __TUINT:
+            os << " <unsigned int>" << std::endl;
+            break;
+        case __TINT:
+            os << " <int>" << std::endl;
+            break;
+        case __TULONG:
+            os << " <unsigned long>" << std::endl;
+            break;
+        case __TLONG:
+            os << " <long>" << std::endl;
+            break;
+        case __TLONGLONG:
+            os << " <long long>" << std::endl;
+            break;
+        case __TFLOAT:
+            os << " <float>" << std::endl;
+            break;
+        case __TDOUBLE:
+            os << " <double>" << std::endl;
+            break;
+        case __TCOMPLEX:
+            os << " <complex>" << std::endl;
+            break;
+        case __TDBLCOMPLEX:
+            os << " <double complex>" << std::endl;
+            break;
+        default:
+            os << " <unsupported>" << std::endl;
+            break;
+        }
     }
+    else
+        os << " <non native>" << std::endl;
 
     // Return output stream
     return os;
