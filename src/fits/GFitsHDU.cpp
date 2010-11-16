@@ -400,7 +400,7 @@ void GFitsHDU::card(const std::string& keyname, const std::string& value,
 {
     // Update card if header exists
     if (m_header != NULL)
-        m_header->update(GFitsHeaderCard(keyname,  value, comment));
+        m_header->update(GFitsHeaderCard(keyname, value, comment));
 
     // Return
     return;
@@ -419,7 +419,7 @@ void GFitsHDU::card(const std::string& keyname, const double& value,
 {
     // Update card if header exists
     if (m_header != NULL)
-        m_header->update(GFitsHeaderCard(keyname,  value, comment));
+        m_header->update(GFitsHeaderCard(keyname, value, comment));
 
     // Return
     return;

@@ -20,6 +20,8 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
+#include "GFits.hpp"
+#include "GFitsHDU.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableBitCol.hpp"
 #include "GFitsTableBoolCol.hpp"
