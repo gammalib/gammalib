@@ -3559,9 +3559,9 @@ void test_bintable_bit(void)
             sum      += val;
             sum_int  += int(val);
             if (val)
-                sum_str += ":1";
+                sum_str += ":T";
             else
-                sum_str += ":0";
+                sum_str += ":F";
         }
         std::cout << ".";
 
@@ -3626,9 +3626,9 @@ void test_bintable_bit(void)
                 sum10     += val;
                 sum10_int += int(val);
                 if (val)
-                    sum10_str += ":1";
+                    sum10_str += ":T";
                 else
-                    sum10_str += ":0";
+                    sum10_str += ":F";
             }
         }
         std::cout << ".";
