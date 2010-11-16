@@ -52,13 +52,14 @@ public:
 
     // Base class Methods
     void        name(const std::string& name);
-    std::string name(void);
-    int         colnum(void);
-    int         type(void);
-    int         repeat(void);
-    int         width(void);
-    int         number(void);
-    int         length(void);
+    std::string name(void) const;
+    int         colnum(void) const;
+    int         type(void) const;
+    int         repeat(void) const;
+    int         width(void) const;
+    int         number(void) const;
+    int         length(void) const;
+    int         anynul(void) const;
 
 protected:
     // Protected data area
