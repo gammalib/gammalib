@@ -370,13 +370,10 @@ void GGti::write(GFits* file, const std::string& extname)
     GFitsBinTable table = GFitsBinTable(m_num);
     table.append_column(cstart);
     table.append_column(cstop);
-
-    // Create GTI HDU
-    GFitsHDU hdu(table);
-    hdu.extname(extname);
+    table.extname(extname);
 
     // Write to FITS file
-    file->append(hdu);
+    file->append(table);
     
     // Return
     return;
