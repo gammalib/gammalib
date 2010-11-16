@@ -349,7 +349,10 @@ void GGti::read(GFitsHDU* hdu)
  * GTI exists already it is overwritten if clobber=true.
  *
  * @todo Method assumes that times are in MET.
+ *
  * @todo Write header keywords.
+ *
+ * @todo Implement clobber method for overwriting of existing GTIs.
  ***************************************************************************/
 void GGti::write(GFits* file, const std::string& extname)
 {
