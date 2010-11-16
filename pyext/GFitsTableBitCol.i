@@ -40,8 +40,8 @@ public:
     double         real(const int& row, const int& col = 0);
     int            integer(const int& row, const int& col = 0);
     unsigned char* data(void) { return m_data; }
-    void           nullval(const unsigned char* value);
-    unsigned char* nullval(void) { return m_nulval; }
+    void           nulval(const unsigned char* value);
+    unsigned char* nulval(void) { return m_nulval; }
 };
 
 

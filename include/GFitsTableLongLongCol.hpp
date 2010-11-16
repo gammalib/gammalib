@@ -53,8 +53,8 @@ public:
     double      real(const int& row, const int& col = 0);
     int         integer(const int& row, const int& col = 0);
     long long*  data(void) { return m_data; }
-    void        nullval(const long long* value);
-    long long*  nullval(void) { return m_nulval; }
+    void        nulval(const long long* value);
+    long long*  nulval(void) { return m_nulval; }
 
 private:
     // Private methods

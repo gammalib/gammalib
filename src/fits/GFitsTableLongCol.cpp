@@ -243,20 +243,17 @@ int GFitsTableLongCol::integer(const int& row, const int& inx)
 
 
 /***********************************************************************//**
- * @brief Set NULL value
+ * @brief Set nul value
  *
- * @param[in] value Pointer on NULL value
+ * @param[in] value Nul value.
  *
- * Allows the specification of the FITS table NULL value. If value=NULL the
- * data will not be screened for NULL values.
- *
- * @todo To correctly reflect the NULL value in the data, the column should
+ * @todo To correctly reflect the nul value in the data, the column should
  * be reloaded. However, the column may have been changed, so in principle
  * saving is needed. However, we may not want to store the data, hence saving
  * is also not desired. We thus have to develop a method to update the
- * column information for a new NULL value in place ...
+ * column information for a new nul value in place ...
  ***************************************************************************/
-void GFitsTableLongCol::nullval(const long* value)
+void GFitsTableLongCol::nulval(const long* value)
 {
     // Allocate nul value
     alloc_nulval(value);

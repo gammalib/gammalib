@@ -56,8 +56,8 @@ public:
     double      real(const int& row, const int& col = 0);
     int         integer(const int& row, const int& col = 0);
     bool*       data(void) { return m_data; }
-    void        nullval(const bool* value);
-    bool*       nullval(void) { return m_nulval; }
+    void        nulval(const bool* value);
+    bool*       nulval(void) { return m_nulval; }
 
 private:
     // Private methods

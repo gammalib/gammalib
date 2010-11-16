@@ -244,7 +244,7 @@ int GFitsTableStringCol::integer(const int& row, const int& inx)
 /***********************************************************************//**
  * @brief Set nul value
  *
- * @param[in] value Nul value string
+ * @param[in] value Nul value string.
  *
  * Allows the specification of the FITS table nul string. The default nul
  * strings is an empty string which results in NULL entries in case that

@@ -40,8 +40,8 @@ public:
     double      real(const int& row, const int& col = 0);
     int         integer(const int& row, const int& col = 0);
     long*       data(void) { return m_data; }
-    void        nullval(const long* value);
-    long*       nullval(void) { return m_nulval; }
+    void        nulval(const long* value);
+    long*       nulval(void) { return m_nulval; }
 };
 
 
