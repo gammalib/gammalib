@@ -25,6 +25,7 @@
 #include "GLATObservation.hpp"
 #include "GLATResponse.hpp"
 #include "GFits.hpp"
+#include "GFitsTable.hpp"
 
 
 /***********************************************************************//**
@@ -61,9 +62,9 @@ protected:
     void           copy_members(const GLATEventList& list);
     void           free_members(void);
     GLATEventList* clone(void) const;
-    void           load_ft1(GFitsHDU* hdu);
-    void           load_events(GFitsHDU* hdu);
-    void           load_ds_keys(GFitsHDU* hdu);
+    void           load_ft1(GFitsTable* hdu);
+    void           load_events(GFitsTable* hdu);
+    void           load_ds_keys(GFitsTable* hdu);
 
     // Protected data area
     int              m_num;            //!< Number of events

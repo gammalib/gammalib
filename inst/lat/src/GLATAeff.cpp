@@ -25,6 +25,7 @@
 #include "GException.hpp"
 #include "GLATResponse.hpp"
 #include "GLATPointing.hpp"
+#include "GFitsBinTable.hpp"
 #include "GFitsImageDbl.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -128,12 +129,12 @@ void GLATResponse::aeff_init(void)
     file.open(m_caldb + "/" + filename);
 
     // Get pointer to effective area HDU
-    GFitsHDU* hdu = file.hdu("EFFECTIVE AREA");
+    GFitsTable* hdu = (GFitsTable*)file.hdu("EFFECTIVE AREA");
     if (hdu == NULL)
         throw GException::fits_hdu_not_found(G_INIT_AEFF, "EFFECTIVE AREA");
 
     // Get the energy and cos(theta) bins
-    m_aeff_bins.load(hdu);
+    m_aeff_bins.read(hdu);
 
     // Allocate memory for effective area
     int size = m_aeff_bins.num_energy() * m_aeff_bins.num_ctheta();
@@ -170,20 +171,19 @@ void GLATResponse::aeff_init(void)
 void GLATResponse::aeff_append(GFits& file) const
 {
     // Get Aeff boundary table
-    GFitsHDU hdu_bounds;
-    m_aeff_bins.save(&hdu_bounds);
-    hdu_bounds.extname("ABOUNDS");
+    GFitsBinTable* hdu_bounds = new GFitsBinTable;
+    hdu_bounds->extname("ABOUNDS");
+    m_aeff_bins.write(hdu_bounds);
 
     // Build effective area image
-    int naxes[] = {m_aeff_bins.num_energy(), m_aeff_bins.num_ctheta()};
-    GFitsImageDbl image_aeff(2, naxes, m_aeff);
+    int            naxes[]  = {m_aeff_bins.num_energy(), m_aeff_bins.num_ctheta()};
+    GFitsImageDbl* hdu_aeff = new GFitsImageDbl(2, naxes, m_aeff);
 
     // Construct effective area HDU
-    GFitsHDU hdu_aeff(image_aeff);
-    hdu_aeff.extname("AEFF");
-    hdu_aeff.header()->update(GFitsHeaderCard("CTYPE1", "Energy", "Energy binning"));
-    hdu_aeff.header()->update(GFitsHeaderCard("CTYPE2", "cos(theta)", "cos(theta) binning"));
-    hdu_aeff.header()->update(GFitsHeaderCard("BUNIT", "cm2", "Pixel unit"));
+    hdu_aeff->extname("AEFF");
+    hdu_aeff->header()->update(GFitsHeaderCard("CTYPE1", "Energy", "Energy binning"));
+    hdu_aeff->header()->update(GFitsHeaderCard("CTYPE2", "cos(theta)", "cos(theta) binning"));
+    hdu_aeff->header()->update(GFitsHeaderCard("BUNIT", "cm2", "Pixel unit"));
 
     // Append HDUs to FITS file
     file.append(hdu_bounds);

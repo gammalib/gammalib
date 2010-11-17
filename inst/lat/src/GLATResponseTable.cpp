@@ -16,7 +16,6 @@
 #include <math.h>
 #include "GException.hpp"
 #include "GLATResponseTable.hpp"
-#include "GFitsHDU.hpp"
 #include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -114,14 +113,14 @@ GLATResponseTable& GLATResponseTable::operator= (const GLATResponseTable& table)
 
 /*==========================================================================
  =                                                                         =
- =                      GLATResponseTable public methods                   =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Load response table from FITS HDU
+ * @brief Read response table from FITS HDU
  *
- * @param[in] hdu Pointer to HDU from which the response table should be loaded
+ * @param[in] hdu Pointer to response table.
  *
  * The response table definition is assumed to be stored in 4 vector columns
  * with the names
@@ -130,13 +129,13 @@ GLATResponseTable& GLATResponseTable::operator= (const GLATResponseTable& table)
  * CTHETA_LO (cos theta bins lower boundary)
  * CTHETA_HI (cos theta bins upper boundary)
  ***************************************************************************/
-void GLATResponseTable::load(const GFitsHDU* hdu)
+void GLATResponseTable::read(const GFitsTable* hdu)
 {
     // Get pointers to table columns
-    GFitsTableCol* energy_lo = hdu->column("ENERG_LO");
-    GFitsTableCol* energy_hi = hdu->column("ENERG_HI");
-    GFitsTableCol* ctheta_lo = hdu->column("CTHETA_LO");
-    GFitsTableCol* ctheta_hi = hdu->column("CTHETA_HI");
+    GFitsTableCol* energy_lo = ((GFitsTable*)hdu)->column("ENERG_LO");
+    GFitsTableCol* energy_hi = ((GFitsTable*)hdu)->column("ENERG_HI");
+    GFitsTableCol* ctheta_lo = ((GFitsTable*)hdu)->column("CTHETA_LO");
+    GFitsTableCol* ctheta_hi = ((GFitsTable*)hdu)->column("CTHETA_HI");
 
     // Check on existence of columns
     if (energy_lo == NULL || energy_hi == NULL ||
@@ -194,14 +193,14 @@ void GLATResponseTable::load(const GFitsHDU* hdu)
 
 
 /***********************************************************************//**
- * @brief Save response table into FITS HDU
+ * @brief Write response table into FITS table
  *
- * @param[in] hdu HDU into which the response table should be saved.
+ * @param[in] hdu Fits table HDU.
  ***************************************************************************/
-void GLATResponseTable::save(GFitsHDU* hdu) const
+void GLATResponseTable::write(GFitsTable* hdu) const
 {
     // Allocate boundary table with one row
-    GFitsBinTable table(1);
+//    GFitsBinTable table(1);
 
     // Allocate floating point vector columns
     GFitsTableFloatCol col_energy_lo = GFitsTableFloatCol("ENERG_LO",  1, m_energy_num);
@@ -220,13 +219,10 @@ void GLATResponseTable::save(GFitsHDU* hdu) const
     }
 
     // Append columns to boundary table
-    table.append_column(col_energy_lo);
-    table.append_column(col_energy_hi);
-    table.append_column(col_ctheta_lo);
-    table.append_column(col_ctheta_hi);
-
-    // Set HDU
-    *hdu = GFitsHDU(table);
+    hdu->append_column(col_energy_lo);
+    hdu->append_column(col_energy_hi);
+    hdu->append_column(col_ctheta_lo);
+    hdu->append_column(col_ctheta_hi);
 
     // Return
     return;

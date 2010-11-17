@@ -21,8 +21,7 @@
 #include "GTools.hpp"
 #include "GException.hpp"
 #include "GLATResponse.hpp"
-#include "GLATPointing.hpp"
-#include "GFitsImageDbl.hpp"
+#include "GFitsBinTable.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_INIT_EDISP                             "GLATResponse::init_edisp()"
@@ -81,12 +80,12 @@ void GLATResponse::edisp_init(void)
     file.open(m_caldb + "/" + filename);
 
     // Get pointer towards energy dispersion HDU
-    GFitsHDU* hdu = file.hdu("ENERGY DISPERSION");
+    GFitsTable* hdu = file.table("ENERGY DISPERSION");
     if (hdu == NULL)
         throw GException::fits_hdu_not_found(G_INIT_EDISP, "ENERGY DISPERSION");
 
     // Get the energy and cos(theta) bins
-    m_edisp_bins.load(hdu);
+    m_edisp_bins.read(hdu);
 
     // Get the data
     GVector dnorm  = get_fits_vector(hdu, "DNORM");
@@ -115,9 +114,9 @@ void GLATResponse::edisp_init(void)
 void GLATResponse::edisp_append(GFits& file) const
 {
     // Get Edisp boundary table
-    GFitsHDU hdu_bounds;
-    m_edisp_bins.save(&hdu_bounds);
-    hdu_bounds.extname("EBOUNDS");
+    GFitsBinTable* hdu_bounds = new GFitsBinTable;
+    hdu_bounds->extname("EBOUNDS");
+    m_edisp_bins.write(hdu_bounds);
 
     // Append HDUs to FITS file
     file.append(hdu_bounds);

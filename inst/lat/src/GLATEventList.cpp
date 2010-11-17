@@ -23,11 +23,11 @@
 #include <iostream>
 #include "GException.hpp"
 #include "GLATEventList.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GFitsTableDoubleCol.hpp"
 #include "GFitsTableLongCol.hpp"
 #include "GFitsTableShortCol.hpp"
-#include "GFitsTableStringCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -168,7 +168,7 @@ void GLATEventList::load(const std::string& ft1name)
     file.open(ft1name);
 
     // Get HDU
-    GFitsHDU* hdu = file.hdu("EVENTS");
+    GFitsTable* hdu = file.table("EVENTS");
 
     // Load columns
     load_ft1(hdu);
@@ -350,9 +350,12 @@ GLATEventList* GLATEventList::clone(void) const
 /***********************************************************************//**
  * @brief Load LAT events from FITS HDU.
  *
- * @param[in] hdu Pointer to FITS HDU from which events are loaded.
+ * @param[in] hdu Pointer to event table.
+ *
+ * Load the event list from an FT1 file into memory. This method loads the
+ * events and also reads the data selection keywords.
  ***************************************************************************/
-void GLATEventList::load_ft1(GFitsHDU* hdu)
+void GLATEventList::load_ft1(GFitsTable* hdu)
 {
     // Free and initialise base class members
     this->GEvents::free_members();
@@ -380,11 +383,11 @@ void GLATEventList::load_ft1(GFitsHDU* hdu)
 /***********************************************************************//**
  * @brief Load LAT events from FITS HDU.
  *
- * @param[in] hdu Pointer to FITS HDU from which events are loaded.
+ * @param[in] hdu Pointer to event table.
  *
  * Note that this method does not handle memory deallocation.
  ***************************************************************************/
-void GLATEventList::load_events(GFitsHDU* hdu)
+void GLATEventList::load_events(GFitsTable* hdu)
 {
     // Allocate space for keyword name
     char keyword[10];
@@ -393,7 +396,7 @@ void GLATEventList::load_events(GFitsHDU* hdu)
     if (hdu != NULL) {
 
         // Extract number of events in FT1 file
-        m_num = hdu->card("NAXIS2")->integer();
+        m_num = hdu->integer("NAXIS2");
 
         // If there are events then load them
         if (m_num > 0) {
@@ -440,7 +443,7 @@ void GLATEventList::load_events(GFitsHDU* hdu)
             }
 
             // Extract number of diffuse response labels
-            m_num_difrsp = hdu->card("NDIFRSP")->integer();
+            m_num_difrsp = hdu->integer("NDIFRSP");
 
             // Allocate diffuse response components
             if (m_num_difrsp > 0) {
@@ -495,17 +498,17 @@ void GLATEventList::load_events(GFitsHDU* hdu)
 /***********************************************************************//**
  * @brief Load Data Selection keywords from FITS HDU.
  *
- * @param[in] hdu Pointer to FITS HDU from which DS keywords are loaded.
+ * @param[in] hdu Pointer to event table.
  *
  * Note that this method does not handle memory deallocation.
  ***************************************************************************/
-void GLATEventList::load_ds_keys(GFitsHDU* hdu)
+void GLATEventList::load_ds_keys(GFitsTable* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
 
         // Get number of data selection keys
-        m_ds_num = hdu->card("NDSKEYS")->integer();
+        m_ds_num = hdu->integer("NDSKEYS");
 
         // Get data selection keys
         if (m_ds_num > 0) {

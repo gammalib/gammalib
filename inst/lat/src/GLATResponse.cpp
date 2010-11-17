@@ -423,12 +423,12 @@ GLATResponse* GLATResponse::clone(void) const
  * @param[in] colname Column name from which data should be loaded
  * @param[in] row Table row from which data should be loaded
  ***************************************************************************/
-GVector GLATResponse::get_fits_vector(const GFitsHDU* hdu, 
+GVector GLATResponse::get_fits_vector(const GFitsTable* hdu, 
                                       const std::string& colname, 
                                       int row)
 {
     // Get pointer to
-    GFitsTableCol* ptr = hdu->column(colname);
+    GFitsTableCol* ptr = ((GFitsTable*)hdu)->column(colname);
     if (ptr == NULL)
         throw GException::fits_column_not_found(G_GET_FITS_VECTOR, colname);
 

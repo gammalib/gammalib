@@ -23,6 +23,8 @@
 #include <iostream>
 #include "GException.hpp"
 #include "GLATEventCube.hpp"
+#include "GFitsImage.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsImageFlt.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -156,8 +158,8 @@ void GLATEventCube::load(const std::string& filename)
     file.open(filename);
 
     // Get HDUs
-    GFitsHDU* hdu_cntmap  = file.hdu("Primary");
-    GFitsHDU* hdu_ebounds = file.hdu("EBOUNDS");
+    GFitsImage* hdu_cntmap  = file.image("Primary");
+    GFitsTable* hdu_ebounds = file.table("EBOUNDS");
 
     // Load counts map
     load_cntmap(hdu_cntmap);
@@ -349,7 +351,7 @@ GLATEventCube* GLATEventCube::clone(void) const
  *
  * Assumes that 'm_counts' and 'm_dirs' are free.
  ***************************************************************************/
-void GLATEventCube::load_cntmap(GFitsHDU* hdu)
+void GLATEventCube::load_cntmap(GFitsImage* hdu)
 {
     // Main loop
     do {
@@ -359,7 +361,7 @@ void GLATEventCube::load_cntmap(GFitsHDU* hdu)
             continue;
 
         // Get counts map dimension. Fall through if zero.
-        m_dim = hdu->card("NAXIS")->integer();
+        m_dim = hdu->integer("NAXIS");
         if (m_dim <= 0) {
             m_dim = 0;
             continue;
@@ -370,7 +372,7 @@ void GLATEventCube::load_cntmap(GFitsHDU* hdu)
         char keyword[10];
         for (int i = 0; i < m_dim; ++i) {
             sprintf(keyword, "NAXIS%d", i+1);
-            m_naxis[i] = hdu->card(std::string(keyword))->integer();
+            m_naxis[i] = hdu->integer(std::string(keyword));
         }
 
         // Set number of pixels
@@ -389,15 +391,12 @@ void GLATEventCube::load_cntmap(GFitsHDU* hdu)
             continue;
         }
 
-        // Get image pointer
-        GFitsImageFlt* ptr = (GFitsImageFlt*)hdu->data();
-
         // Allocate event cube bins
         m_counts = new double[m_elements];
 
         // Copy pixels into counts map
         for (int i = 0; i < m_elements; ++i)
-            m_counts[i] = (ptr->pixels())[i];
+            m_counts[i] = hdu->pixel(i);
 
         // Allocate sky directions
         m_dirs = new GLATInstDir[m_pixels];
@@ -419,7 +418,7 @@ void GLATEventCube::load_cntmap(GFitsHDU* hdu)
  *
  * Assumes that the energy array 'm_energies' is free.
  ***************************************************************************/
-void GLATEventCube::load_ebds(GFitsHDU* hdu)
+void GLATEventCube::load_ebds(GFitsTable* hdu)
 {
     // Main loop
     do {

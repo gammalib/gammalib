@@ -25,6 +25,7 @@
 #include "GException.hpp"
 #include "GLATResponse.hpp"
 #include "GLATPointing.hpp"
+#include "GFitsBinTable.hpp"
 #include "GFitsImageDbl.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -227,12 +228,12 @@ void GLATResponse::psf_init(void)
     file.open(m_caldb + "/" + filename);
 
     // Get pointer to PSF HDU
-    GFitsHDU* hdu = file.hdu("RPSF");
+    GFitsTable* hdu = (GFitsTable*)file.hdu("RPSF");
     if (hdu == NULL)
         throw GException::fits_hdu_not_found(G_INIT_PSF, "RPSF");
 
     // Get the energy and cos(theta) bins
-    m_psf_bins.load(hdu);
+    m_psf_bins.read(hdu);
 
     // Get the PSF characterisation data
     GVector v_ncore = get_fits_vector(hdu, "NCORE");
@@ -358,30 +359,27 @@ void GLATResponse::psf_init(void)
 void GLATResponse::psf_append(GFits& file) const
 {
     // Get PSF boundary table
-    GFitsHDU hdu_bounds;
-    m_psf_bins.save(&hdu_bounds);
-    hdu_bounds.extname("PBOUNDS");
+    GFitsBinTable* hdu_bounds = new GFitsBinTable;
+    hdu_bounds->extname("PBOUNDS");
+    m_psf_bins.write(hdu_bounds);
 
     // Build PSF tables and images
     int naxes2[] = {m_psf_bins.num_energy(), m_psf_bins.num_ctheta()};
     int naxes3[] = {angle_num, m_psf_bins.num_energy(), m_psf_bins.num_ctheta()};
-    GFitsImageDbl image_norm(2, naxes2, m_norm);
-    GFitsImageDbl image_sigma(2, naxes2, m_sigma);
-    GFitsImageDbl image_psf(3, naxes3, m_psf);
+    GFitsImageDbl* image_norm  = new GFitsImageDbl(2, naxes2, m_norm);
+    GFitsImageDbl* image_sigma = new GFitsImageDbl(2, naxes2, m_sigma);
+    GFitsImageDbl* image_psf   = new GFitsImageDbl(3, naxes3, m_psf);
 
     // Construct PSF HDUs
-    GFitsHDU hdu_norm(image_norm);
-    GFitsHDU hdu_sigma(image_sigma);
-    GFitsHDU hdu_psf(image_psf);
-    hdu_norm.extname("PNORM");
-    hdu_sigma.extname("PSIGMA");
-    hdu_psf.extname("PSF");
+    image_norm->extname("PNORM");
+    image_sigma->extname("PSIGMA");
+    image_psf->extname("PSF");
 
     // Append HDUs to FITS file
     file.append(hdu_bounds);
-    file.append(hdu_norm);
-    file.append(hdu_sigma);
-    file.append(hdu_psf);
+    file.append(image_norm);
+    file.append(image_sigma);
+    file.append(image_psf);
 
     // Return
     return;

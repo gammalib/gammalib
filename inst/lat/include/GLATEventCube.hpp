@@ -30,7 +30,8 @@
 #include "GLATInstDir.hpp"
 #include "GLATPointing.hpp"
 #include "GLATResponse.hpp"
-#include "GFitsHDU.hpp"
+#include "GFitsImage.hpp"
+#include "GFitsTable.hpp"
 
 
 /***********************************************************************//**
@@ -70,8 +71,8 @@ protected:
     void           copy_members(const GLATEventCube& cube);
     void           free_members(void);
     GLATEventCube* clone(void) const;
-    void           load_cntmap(GFitsHDU* hdu);
-    void           load_ebds(GFitsHDU* hdu);
+    void           load_cntmap(GFitsImage* hdu);
+    void           load_ebds(GFitsTable* hdu);
 
     // Protected data area
     GLATEventBin     m_bin;            //!< Actual energy bin

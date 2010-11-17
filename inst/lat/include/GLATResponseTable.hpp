@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GLATResponseTable.hpp  -  GLAST LAT Response table class        *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,7 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GNodeArray.hpp"
-#include "GFitsHDU.hpp"
+#include "GFitsTable.hpp"
 
 
 /***********************************************************************//**
@@ -41,8 +41,8 @@ public:
     GLATResponseTable& operator= (const GLATResponseTable & table);
 
     // Methods
-    void   load(const GFitsHDU* hdu);
-    void   save(GFitsHDU* hdu) const;
+    void   read(const GFitsTable* hdu);
+    void   write(GFitsTable* hdu) const;
     int    index(const int& ie, const int& ic) const;
     double interpolate(const double& logE, const double& ctheta, 
                        const double* array);

@@ -33,7 +33,7 @@
 #include "GVector.hpp"
 #include "GLATResponseTable.hpp"
 #include "GFits.hpp"
-#include "GFitsHDU.hpp"
+#include "GFitsTable.hpp"
 
 
 /***********************************************************************//**
@@ -115,7 +115,7 @@ private:
     void          copy_members(const GLATResponse& rsp);
     void          free_members(void);
     GLATResponse* clone(void) const;
-    GVector       get_fits_vector(const GFitsHDU* hdu, const std::string& colname, int row = 0);
+    GVector       get_fits_vector(const GFitsTable* hdu, const std::string& colname, int row = 0);
 
     // Private Aeff data
     GLATResponseTable m_aeff_bins;        //!< Aeff energy and cos theta binning
