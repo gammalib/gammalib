@@ -25,6 +25,10 @@
 #define G_OPEN_IMAGE                                "GFitsImage::open(void*)"
 #define G_LOAD_IMAGE           "GFitsImage::load_image(int,void*,void*,int*)"
 #define G_SAVE_IMAGE                      "GFitsImage::save_image(int,void*)"
+#define G_OFFSET_1D                                "GFitsImage::offset(int&)"
+#define G_OFFSET_2D                           "GFitsImage::offset(int&,int&)"
+#define G_OFFSET_3D                      "GFitsImage::offset(int&,int&,int&)"
+#define G_OFFSET_4D                 "GFitsImage::offset(int&,int&,int&,int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -169,6 +173,16 @@ GFitsImage& GFitsImage::operator= (const GFitsImage& image)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Return size of pixel array
+ ***************************************************************************/
+int GFitsImage::size(void) const
+{
+    // Return number of pixels
+    return m_num_pixels;
+}
+
+
+/***********************************************************************//**
  * @brief Return number of Bits per pixel (negative=floating point)
  ***************************************************************************/
 int GFitsImage::bitpix(void) const
@@ -215,12 +229,13 @@ int GFitsImage::naxes(int axis) const
 /***********************************************************************//**
  * @brief Return number of pixels
  ***************************************************************************/
+/*
 int GFitsImage::num_pixels(void) const
 {
     // Return number of pixels
     return m_num_pixels;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Return number of nul values envountered during loading
@@ -252,6 +267,16 @@ void GFitsImage::nulval(const void* value)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return nul value
+ ***************************************************************************/
+void* GFitsImage::nulval(void)
+{
+    // Return
+    return (ptr_nulval());
 }
 
 
@@ -588,12 +613,12 @@ void GFitsImage::save_image(int datatype, const void* pixels)
  * that pixels existed already before they will be deleted before fetching
  * new ones.
  * There are two possibilities to fetch the pixels:
- * (1) In case that a FITS file is attached to the image the pixel array
- * will be loaded from the file.
- * (2) In case that no FITS file is attached a new pixel array will be
- * allocated that is initalised to 0.
+ * (1) In case that a FITS file is attached to the image, the pixel array
+ * will be loaded from the FITS file using the load_image() method.
+ * (2) In case that no FITS file is attached, a new pixel array will be
+ * allocated that is initalised to zero.
  ***************************************************************************/
-void GFitsImageDouble::fetch_data(void)
+void GFitsImage::fetch_data(void)
 {
     // Fetch only if there are pixels in image
     if (m_num_pixels > 0) {
@@ -611,24 +636,135 @@ void GFitsImageDouble::fetch_data(void)
     // Return
     return;
 }
+
+
 /***********************************************************************//**
  * @brief Return pixel offset
  *
  * @param[in] ix Pixel index (starting from 0).
  *
  * @exception GException::out_of_range
- *            Image axis not valid.
+ *            Pixel index is outside valid range.
  ***************************************************************************/
 int GFitsImage::offset(const int& ix) const
 {
     // Check if axis is within the range
     #if defined(G_RANGE_CHECK)
     if (ix < 0 || ix >= m_num_pixels)
-        throw GException::out_of_range(G_NAXES, ix, 0, m_num_pixels-1);
+        throw GException::out_of_range(G_OFFSET_1D, ix, 0, m_num_pixels-1);
     #endif
 
     // Return index
     return ix;
+}
+
+
+/***********************************************************************//**
+ * @brief Return 2D pixel offset
+ *
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ *
+ * @exception GException::fits_wrong_image_operator
+ *            Pixel array has less than 2 dimensions.
+ * @exception GException::out_of_range
+ *            Image axis not valid.
+ *
+ * Computes of offset in the pixel array of a 2D coordinate. This method is
+ * only applicable to pixels arrays that have at least 2 dimenions.
+ ***************************************************************************/
+int GFitsImage::offset(const int& ix, const int& iy) const
+{
+    // Operator is only valid for 2D images
+    if (m_naxis < 2)
+        throw GException::fits_wrong_image_operator(G_OFFSET_2D, m_naxis, 2);
+
+    // Check if axis is within the range
+    #if defined(G_RANGE_CHECK)
+    if (ix < 0 || ix >= m_naxes[0])
+        throw GException::out_of_range(G_OFFSET_2D, ix, 0, m_naxes[0]-1);
+    if (iy < 0 || iy >= m_naxes[1])
+        throw GException::out_of_range(G_OFFSET_2D, iy, 0, m_naxes[1]-1);
+    #endif
+
+    // Return offset
+    return (ix + iy * m_naxes[0]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return 3D pixel offset
+ *
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ * @param[in] iz Pixel index in third dimension (starting from 0).
+ *
+ * @exception GException::fits_wrong_image_operator
+ *            Pixel array has less than 3 dimensions.
+ * @exception GException::out_of_range
+ *            Image axis not valid.
+ *
+ * Computes of offset in the pixel array of a 3D coordinate. This method is
+ * only applicable to pixels arrays that have at least 3 dimenions.
+ ***************************************************************************/
+int GFitsImage::offset(const int& ix, const int& iy, const int& iz) const
+{
+    // Operator is only valid for 3D images
+    if (m_naxis < 3)
+        throw GException::fits_wrong_image_operator(G_OFFSET_3D, m_naxis, 3);
+
+    // Check if axis is within the range
+    #if defined(G_RANGE_CHECK)
+    if (ix < 0 || ix >= m_naxes[0])
+        throw GException::out_of_range(G_OFFSET_3D, ix, 0, m_naxes[0]-1);
+    if (iy < 0 || iy >= m_naxes[1])
+        throw GException::out_of_range(G_OFFSET_3D, iy, 0, m_naxes[1]-1);
+    if (iz < 0 || iz >= m_naxes[2])
+        throw GException::out_of_range(G_OFFSET_3D, iz, 0, m_naxes[2]-1);
+    #endif
+
+    // Return offset
+    return (ix + m_naxes[0] * (iy + iz * m_naxes[1]));
+}
+
+
+/***********************************************************************//**
+ * @brief Return 4D pixel offset
+ *
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ * @param[in] iz Pixel index in third dimension (starting from 0).
+ * @param[in] iz Pixel index in forth dimension (starting from 0).
+ *
+ * @exception GException::fits_wrong_image_operator
+ *            Pixel array has less than 4 dimensions.
+ * @exception GException::out_of_range
+ *            Image axis not valid.
+ *
+ * Computes of offset in the pixel array of a 4D coordinate. This method is
+ * only applicable to pixels arrays that have at least 4 dimenions.
+ ***************************************************************************/
+int GFitsImage::offset(const int& ix, const int& iy, const int& iz,
+                       const int& it) const
+{
+    // Operator is only valid for 4D images
+    if (m_naxis < 4)
+        throw GException::fits_wrong_image_operator(G_OFFSET_4D, m_naxis, 4);
+
+    // Check if axis is within the range
+    #if defined(G_RANGE_CHECK)
+    if (ix < 0 || ix >= m_naxes[0])
+        throw GException::out_of_range(G_OFFSET_4D, ix, 0, m_naxes[0]-1);
+    if (iy < 0 || iy >= m_naxes[1])
+        throw GException::out_of_range(G_OFFSET_4D, iy, 0, m_naxes[1]-1);
+    if (iz < 0 || iz >= m_naxes[2])
+        throw GException::out_of_range(G_OFFSET_4D, iz, 0, m_naxes[2]-1);
+    if (it < 0 || it >= m_naxes[3])
+        throw GException::out_of_range(G_OFFSET_4D, it, 0, m_naxes[3]-1);
+    #endif
+
+    // Return offset
+    return (ix + m_naxes[0] * (iy + m_naxes[1] * (iz + it *  m_naxes[2])));
 }
 
 

@@ -47,26 +47,26 @@ public:
 
     // Pure virtual methods
     virtual void*       pixels(void) = 0;
-    virtual double      pixel(const int& ix) = 0;
-    virtual double      pixel(const int& ix, const int& iy) = 0;
+    virtual double      pixel(const int& ix) const = 0;
+    virtual double      pixel(const int& ix, const int& iy) const = 0;
+    virtual double      pixel(const int& ix, const int& iy, const int& iz) const = 0;
+    virtual double      pixel(const int& ix, const int& iy, const int& iz, const int& it) const = 0;
     virtual GFitsImage* clone(void) const = 0;
 
     // Implemented pure virtual methods
     HDUType exttype(void) const { return HT_IMAGE; }
 
     // Base class methods
-    int  bitpix(void) const;
-    int  naxis(void) const;
-    int  naxes(int axis) const;
-    int  num_pixels(void) const;
-    int  anynul(void) const;
-    void nulval(const void* value);
+    int   size(void) const;
+    int   bitpix(void) const;
+    int   naxis(void) const;
+    int   naxes(int axis) const;
+    int   anynul(void) const;
+    void  nulval(const void* value);
+    void* nulval(void);
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GFitsImage& image);
-    void free_members(void);
     void init_image_header(void);
     void data_open(void* vptr);
     void data_save(void);
@@ -78,15 +78,18 @@ protected:
     void save_image(int datatype, const void* pixels);
     void fetch_data(void);
     int  offset(const int& ix) const;
+    int  offset(const int& ix, const int& iy) const;
+    int  offset(const int& ix, const int& iy, const int& iz) const;
+    int  offset(const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Pure virtual protected methods
     virtual void  alloc_data(void) = 0;
     virtual void  init_data(void) = 0;
     virtual void  release_data(void) = 0;
     virtual void  alloc_nulval(const void* value) = 0;
-    virtual int   type(void) const = 0;
     virtual void* ptr_data(void) = 0;
     virtual void* ptr_nulval(void) = 0;
+    virtual int   type(void) const = 0;
 
     // Protected data area
     int   m_bitpix;      //!< Number of Bits/pixel
@@ -94,6 +97,11 @@ protected:
     long* m_naxes;       //!< Number of pixels in each dimension
     int   m_num_pixels;  //!< Number of image pixels
     int   m_anynul;      //!< Number of NULLs encountered
+
+    // Private methods
+    void init_members(void);
+    void copy_members(const GFitsImage& image);
+    void free_members(void);
 };
 
 #endif /* GFITSIMAGE_HPP */

@@ -35,14 +35,20 @@ public:
 
     // Pure virtual methods
     virtual void*       pixels(void) = 0;
+    virtual double      pixel(const int& ix) const = 0;
+    virtual double      pixel(const int& ix, const int& iy) const = 0;
+    virtual double      pixel(const int& ix, const int& iy, const int& iz) const = 0;
+    virtual double      pixel(const int& ix, const int& iy, const int& iz, const int& it) const = 0;
     virtual GFitsImage* clone(void) const = 0;
 
     // Implemented pure virtual methods
     HDUType exttype(void) const { return HT_IMAGE; }
 
     // Methods
-    virtual int bitpix(void) const;
-    virtual int naxis(void) const;
-    virtual int naxes(int axis) const;
-    virtual int num_pixels(void) const;
+    int  size(void) const;
+    int  bitpix(void) const;
+    int  naxis(void) const;
+    int  naxes(int axis) const;
+    int  anynul(void) const;
+    void nulval(const void* value);
 };
