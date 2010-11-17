@@ -21,7 +21,6 @@
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFits.hpp"
-#include "GFitsHDU.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableBitCol.hpp"
 #include "GFitsTableBoolCol.hpp"
@@ -35,12 +34,12 @@
 #include "GFitsTableDoubleCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPEN                                      "GFitsTable::open(void*)"
-#define G_SAVE                                           "GFitsTable::save()"
 #define G_APPEND_COLUMN           "GFitsTable::append_column(GFitsTableCol*)"
 #define G_INSERT_COLUMN      "GFitsTable::insert_column(int, GFitsTableCol*)"
 #define G_COLUMN1                          "GFitsTable::column(std::string&)"
 #define G_COLUMN2                                  "GFitsTable::column(int&)"
+#define G_OPEN_DATA                            "GFitsTable::open_data(void*)"
+#define G_SAVE_DATA                                 "GFitsTable::save_data()"
 #define G_GET_TFORM                             "GFitsTable::get_tform(int&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -57,16 +56,11 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  *
  * Construct an instance of GFitsTable with zero rows. 
- * Use the methods
- *   GFitsTable::append_column and GFitsTable::insert_column
- * to add columns and
- *   GFitsTable::append_rows and GFitsTable::insert_rows
- * to add rows to this table.
  ***************************************************************************/
-GFitsTable::GFitsTable(void) : GFitsData()
+GFitsTable::GFitsTable(void) : GFitsHDU()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -77,16 +71,13 @@ GFitsTable::GFitsTable(void) : GFitsData()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Table constructor
  *
- * @param[in] nrows Number of rows in table
+ * @param[in] nrows Number of rows in table.
  *
  * Construct an instance of GFitsTable with a given number of rows.
- * Use the methods
- *   GFitsTable::append_column and GFitsTable::insert_column
- * to add columns to this table.
  ***************************************************************************/
-GFitsTable::GFitsTable(int nrows) : GFitsData()
+GFitsTable::GFitsTable(int nrows) : GFitsHDU()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -102,9 +93,9 @@ GFitsTable::GFitsTable(int nrows) : GFitsData()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] table Table which will be used to construct GFitsTable instance
+ * @param[in] table Table from which to construct instance.
  ***************************************************************************/
-GFitsTable::GFitsTable(const GFitsTable& table) : GFitsData(table)
+GFitsTable::GFitsTable(const GFitsTable& table) : GFitsHDU(table)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -147,7 +138,7 @@ GFitsTable& GFitsTable::operator= (const GFitsTable& table)
     if (this != &table) {
 
         // Copy base class members
-        this->GFitsData::operator=(table);
+        this->GFitsHDU::operator=(table);
 
         // Free members
         free_members();
@@ -492,13 +483,13 @@ void GFitsTable::free_members(void)
  * Columns are not loaded but column descriptors are allocated.
  * The column data will only be loaded once it needs to be accessed.
  ***************************************************************************/
-void GFitsTable::open(void* vptr)
+void GFitsTable::data_open(void* vptr)
 {
     // Move to HDU
     int status = 0;
     status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
     if (status != 0)
-        throw GException::fits_hdu_not_found(G_OPEN, (FPTR(vptr)->HDUposition)+1,
+        throw GException::fits_hdu_not_found(G_OPEN_DATA, (FPTR(vptr)->HDUposition)+1,
                                              status);
 
     // Save FITS file pointer
@@ -508,14 +499,14 @@ void GFitsTable::open(void* vptr)
     long nrows  = 0;
     status      = __ffgnrw(FPTR(m_fitsfile), &nrows, &status);
     if (status != 0)
-        throw GException::fits_error(G_OPEN, status);
+        throw GException::fits_error(G_OPEN_DATA, status);
     else
         m_rows = (int)nrows;
 
     // Determine number of columns in table
     status = __ffgncl(FPTR(m_fitsfile), &m_cols, &status);
     if (status != 0)
-        throw GException::fits_error(G_OPEN, status);
+        throw GException::fits_error(G_OPEN_DATA, status);
 
     // Allocate and initialise memory for column pointers. Note that this
     // initialisation is needed to allow for a clean free_members() call
@@ -537,14 +528,14 @@ void GFitsTable::open(void* vptr)
         sprintf(keyname, "TTYPE%d", i+1);
         status = __ffgkey(FPTR(m_fitsfile), keyname, value, NULL, &status);
         if (status != 0)
-            throw GException::fits_error(G_OPEN, status);
+            throw GException::fits_error(G_OPEN_DATA, status);
         value[strlen(value)-1] = '\0';
 
         // Get column definition
         status = __ffgtcl(FPTR(m_fitsfile), i+1, &typecode, &repeat, &width,
                           &status);
         if (status != 0)
-            throw GException::fits_error(G_OPEN, status);
+            throw GException::fits_error(G_OPEN_DATA, status);
 
         // Check for unsigned columns
         unsigned long offset;
@@ -561,7 +552,7 @@ void GFitsTable::open(void* vptr)
                 std::ostringstream message;
                 message << ", but column " << value << " has typecode " << typecode
                         << " and unexpected associated TZERO=" << offset << ".";
-                throw GException::fits_error(G_OPEN, 0, message.str());
+                throw GException::fits_error(G_OPEN_DATA, 0, message.str());
             }
         }
         else
@@ -602,7 +593,7 @@ void GFitsTable::open(void* vptr)
         default:
             std::ostringstream colname;
             colname << value;
-            throw GException::fits_unknown_coltype(G_OPEN, colname.str(), typecode);
+            throw GException::fits_unknown_coltype(G_OPEN_DATA, colname.str(), typecode);
             break;
         }
 
@@ -654,14 +645,21 @@ void GFitsTable::open(void* vptr)
  *
  * @todo Implementation not yet completed. Row adding and deletion is still
  * missing.
+ *
+ * @todo This method should also update the header. Even easier, this method
+ * should save the header into the file using the m_header.save() method.
+ * Only this assures coherence between the files !!!! If this has been
+ * implemented (also in the GFitsImage method) we should delete the
+ * m_header.save() call in GFitsHDU::save.
  ***************************************************************************/
-void GFitsTable::save(void)
+void GFitsTable::data_save(void)
 {
 //cout << "GFitsTable::save entry" << endl;
     // Move to HDU
     int status = 0;
-    status     = __ffmahd(FPTR(m_fitsfile), (FPTR(m_fitsfile)->HDUposition)+1,
-                          NULL, &status);
+//    status     = __ffmahd(FPTR(m_fitsfile), (FPTR(m_fitsfile)->HDUposition)+1,
+//                          NULL, &status);
+    status     = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, NULL, &status);
 
     // If HDU does not yet exist in file then create it now
     if (status == 107) {
@@ -699,7 +697,7 @@ void GFitsTable::save(void)
         status = __ffcrtb(FPTR(m_fitsfile), m_type, m_rows, tfields, ttype, tform,
                           tunit, NULL, &status);
         if (status != 0)
-            throw GException::fits_error(G_SAVE, status);
+            throw GException::fits_error(G_SAVE_DATA, status);
 
         // De-allocate column definition arrays
         if (m_cols > 0) {
@@ -725,13 +723,13 @@ void GFitsTable::save(void)
 
     }
     else if (status != 0)
-        throw GException::fits_error(G_SAVE, status);
+        throw GException::fits_error(G_SAVE_DATA, status);
 
     // Determine number of columns in table
     int num_cols = 0;
     status = __ffgncl(FPTR(m_fitsfile), &num_cols, &status);
     if (status != 0)
-        throw GException::fits_error(G_SAVE, status);
+        throw GException::fits_error(G_SAVE_DATA, status);
 
     // If we have no columns in the table then delete all columns from
     // FITS table
@@ -750,7 +748,7 @@ void GFitsTable::save(void)
                 if (length == 0)
                     length = m_columns[i]->length();
                 else if (m_columns[i]->length() != length) {
-                    throw GException::fits_bad_col_length(G_SAVE,
+                    throw GException::fits_bad_col_length(G_SAVE_DATA,
                                                           m_columns[i]->length(),
                                                           length);
                 }
@@ -781,7 +779,7 @@ void GFitsTable::save(void)
                     status = __fficol(FPTR(m_fitsfile), num_cols, get_ttype(i),
                                       get_tform(i), &status);
                     if (status != 0)
-                        throw GException::fits_error(G_SAVE, status);
+                        throw GException::fits_error(G_SAVE_DATA, status);
 
                     // Connect all column to FITS table by copying over the
                     // FITS file pointer.
@@ -822,6 +820,8 @@ void GFitsTable::save(void)
 
     } // endelse: FITS table has been updated
 
+    // Now update the header
+
 //cout << "GFitsTable::save exit" << endl;
     // Return
     return;
@@ -831,7 +831,7 @@ void GFitsTable::save(void)
 /***********************************************************************//**
  * @brief Close table
  ***************************************************************************/
-void GFitsTable::close(void)
+void GFitsTable::data_close(void)
 {
     // Free members
     free_members();
@@ -845,23 +845,26 @@ void GFitsTable::close(void)
 
 
 /***********************************************************************//**
- * @brief Connect table to FITS file
+ * @brief Connect table data to FITS file
  *
- * @param[in] vptr FITS file void pointer.
+ * @param[in] vptr FITS file pointer.
  *
- * The connection of the table is done by connecting all columns.
+ * Connects the table columns to the file specified by the FITS file pointer.
+ * This method does nothing if the file pointer in not valid.
  ***************************************************************************/
-void GFitsTable::connect(void* vptr)
+void GFitsTable::data_connect(void* vptr)
 {
-    // Connect binary table
-    FPTR_COPY(m_fitsfile, vptr);
-
-    // Then connect all columns
-    if (m_columns != NULL) {
-        for (int i = 0; i < m_cols; ++i) {
-            if (m_columns[i] != NULL) m_columns[i]->connect(vptr);
+    // Continue only if file pointer is valid
+    if (vptr != NULL) {
+    
+        // Connect all columns
+        if (m_columns != NULL) {
+            for (int i = 0; i < m_cols; ++i) {
+                if (m_columns[i] != NULL) m_columns[i]->connect(vptr);
+            }
         }
-    }
+
+    } // endif: file pointer was valid
 
     // Return
     return;

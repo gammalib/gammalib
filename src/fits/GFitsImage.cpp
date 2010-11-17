@@ -499,8 +499,6 @@ void GFitsImage::save_image(int datatype, const void* pixels)
     // Move to HDU. We use here an explicit cfitsio moveto function since we
     // want to recover the error code ...
     int status = 0;
-std::cout << "GFitsImage::save_image: " << (FPTR(m_fitsfile)->HDUposition) << " "
-          << m_hdunum << std::endl;
     status     = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, NULL, &status);
 
     // If HDU does not yet exist in file then create it now
