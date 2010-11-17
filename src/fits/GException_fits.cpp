@@ -171,7 +171,7 @@ GException::fits_hdu_not_found::fits_hdu_not_found(std::string origin,
                                                    int         status)
 {
     m_origin  = origin;
-    m_message = "HDU '" + extname + "' not found in FITS file";
+    m_message = "HDU \"" + extname + "\" not found in FITS file";
     if (status != 0)
         m_message += " (status=" + str(status) + ")";
 }
@@ -189,7 +189,7 @@ GException::fits_hdu_not_found::fits_hdu_not_found(std::string origin,
                                                    int         status)
 {
     m_origin  = origin;
-    m_message = "HDU number '" + str(extno) + "' not found in FITS file";
+    m_message = "HDU number " + str(extno) + " not found in FITS file";
     if (status != 0)
         m_message += " (status=" + str(status) + ")";
 }
