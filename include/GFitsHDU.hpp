@@ -88,9 +88,6 @@ public:
 
 protected:
     // Protected methods
-    void    init_members(void);
-    void    copy_members(const GFitsHDU& hdu);
-    void    free_members(void);
     void    connect(void* fptr);
     void    move_to_hdu(void);
     HDUType get_hdu_type(void) const;
@@ -108,6 +105,12 @@ protected:
     int          m_hdunum;      //!< HDU number (starting from 0)
     std::string  m_name;        //!< HDU name (extname)
     GFitsHeader  m_header;      //!< HDU header
+
+private:
+    // Private methods
+    void    init_members(void);
+    void    copy_members(const GFitsHDU& hdu);
+    void    free_members(void);
 };
 
 #endif /* GFITSHDU_HPP */

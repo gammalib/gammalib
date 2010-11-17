@@ -26,8 +26,6 @@
 #include "GFitsCfitsio.hpp"
 #include "GFitsHDU.hpp"
 #include "GFitsHeaderCard.hpp"
-#include "GFitsImageFlt.hpp"
-#include "GFitsImageDbl.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OPEN                                          "GFitsHDU::open(int)"
