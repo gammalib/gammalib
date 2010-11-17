@@ -9,6 +9,7 @@ INCLUDES = -I$(top_srcdir)/include \
 sources = GFitsHeaderCard.cpp \
           GFitsHeader.cpp \
           GFitsImage.cpp \
+          GFitsImageDouble.cpp \
           GFitsByteImage.cpp \
           GFitsImageFlt.cpp \
           GFitsImageDbl.cpp \
@@ -16,14 +17,14 @@ sources = GFitsHeaderCard.cpp \
           GFitsAsciiTable.cpp \
           GFitsBinTable.cpp \
           GFitsTableCol.cpp \
-	  GFitsTableBitCol.cpp \
+          GFitsTableBitCol.cpp \
           GFitsTableBoolCol.cpp \
           GFitsTableStringCol.cpp \
           GFitsTableUShortCol.cpp \
           GFitsTableShortCol.cpp \
           GFitsTableULongCol.cpp \
           GFitsTableLongCol.cpp \
-	  GFitsTableLongLongCol.cpp \
+          GFitsTableLongLongCol.cpp \
           GFitsTableFloatCol.cpp \
           GFitsTableDoubleCol.cpp \
           GFitsHDU.cpp \

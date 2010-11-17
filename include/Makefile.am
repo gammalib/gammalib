@@ -48,6 +48,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GFitsHeaderCard.hpp \
                      GFitsHeader.hpp \
                      GFitsImage.hpp \
+                     GFitsImageDouble.hpp \
                      GFitsByteImage.hpp \
                      GFitsImageFlt.hpp \
                      GFitsImageDbl.hpp \

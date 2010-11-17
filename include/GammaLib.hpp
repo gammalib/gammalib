@@ -41,6 +41,7 @@
 #include "GFitsHeader.hpp"
 #include "GFitsHeaderCard.hpp"
 #include "GFitsImage.hpp"
+#include "GFitsImageDouble.hpp"
 #include "GFitsByteImage.hpp"
 #include "GFitsImageFlt.hpp"
 #include "GFitsImageDbl.hpp"
