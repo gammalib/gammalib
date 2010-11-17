@@ -21,7 +21,6 @@
 #include "GFitsImageDouble.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPERATOR2                  "GFitsImageDouble::operator() (int,int)"
 
 /* __ Macros _____________________________________________________________ */
 #define G_BITPIX -64                //!< Defines the number of bits per pixel
@@ -161,7 +160,7 @@ GFitsImageDouble& GFitsImageDouble::operator= (const GFitsImageDouble& image)
 /***********************************************************************//**
  * @brief Image pixel access operator
  *
- * @param[in] ix Pixel index
+ * @param[in] ix Pixel index (starting from 0).
  *
  * Provides access to an image pixel. No range checking is performed.
  * Use the at(ix) method if range checking is required.
@@ -177,9 +176,83 @@ double& GFitsImageDouble::operator() (const int& ix)
 
 
 /***********************************************************************//**
+ * @brief 2D image pixel access operator
+ *
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ *
+ * Provides access to a pixel of a 2D image. No range checking or image
+ * dimension verification is performed. Use the at(ix,iy) method if range
+ * checking and image dimension verification is required.
+ ***************************************************************************/
+double& GFitsImageDouble::operator() (const int& ix, const int& iy)
+{
+    // If image pixels are not available then allocate them now
+    if (m_pixels == NULL) fetch_data();
+
+    // Calculate pixel offset
+    int offset = ix + iy * m_naxes[0];
+
+    // Return image pixel
+    return m_pixels[offset];
+}
+
+
+/***********************************************************************//**
+ * @brief 3D image pixel access operator
+ *
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ * @param[in] iz Pixel index in third dimension (starting from 0).
+ *
+ * Provides access to a pixel of a 3D image. No range checking or image
+ * dimension verification is performed. Use the at(ix,iy) method if range
+ * checking and image dimension verification is required.
+ ***************************************************************************/
+double& GFitsImageDouble::operator() (const int& ix, const int& iy,
+                                      const int& iz)
+{
+    // If image pixels are not available then allocate them now
+    if (m_pixels == NULL) fetch_data();
+
+    // Calculate pixel offset
+    int offset = ix + m_naxes[0] * (iy + iz * m_naxes[1]);
+
+    // Return image pixel
+    return m_pixels[offset];
+}
+
+
+/***********************************************************************//**
+ * @brief 4D image pixel access operator
+ *
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ * @param[in] iz Pixel index in third dimension (starting from 0).
+ * @param[in] it Pixel index in forth dimension (starting from 0).
+ *
+ * Provides access to a pixel of a 4D image. No range checking or image
+ * dimension verification is performed. Use the at(ix,iy) method if range
+ * checking and image dimension verification is required.
+ ***************************************************************************/
+double& GFitsImageDouble::operator() (const int& ix, const int& iy,
+                                      const int& iz, const int& it)
+{
+    // If image pixels are not available then allocate them now
+    if (m_pixels == NULL) fetch_data();
+
+    // Calculate pixel offset
+    int offset = ix + m_naxes[0] * (iy + m_naxes[1] * (iz + it *  m_naxes[2]));
+
+    // Return image pixel
+    return m_pixels[offset];
+}
+
+
+/***********************************************************************//**
  * @brief Image pixel access operator (const variant)
  *
- * @param[in] ix Pixel index
+ * @param[in] ix Pixel index (starting from 0).
  *
  * Provides access to an image pixel. No range checking is performed.
  * Use the at(ix) method if range checking is required.
@@ -195,87 +268,22 @@ const double& GFitsImageDouble::operator() (const int& ix) const
 
 
 /***********************************************************************//**
- * @brief 2D image pixel access operator
- *
- * @param[in] ix Pixel index in first dimension
- * @param[in] iy Pixel index in second dimension
- *
- * @exception GException::fits_wrong_image_operator
- *            Image is not a 2D image
- *
- * Provides access to a pixel of a 2D image. No range checking is performed.
- * Use the at(ix,iy) method if range checking is required.
- ***************************************************************************/
-double& GFitsImageDouble::operator() (const int& ix, const int& iy)
-{
-    // Operator is only valid for 2D images
-    if (m_naxis != 2)
-        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 2);
-
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
-
-    // Calculate pixel offset
-    int offset = ix + iy * m_naxes[0];
-
-    // Return image pixel
-    return m_pixels[offset];
-}
-
-
-/***********************************************************************//**
  * @brief 2D image pixel access operator (const variant)
  *
- * @param[in] ix Pixel index in first dimension
- * @param[in] iy Pixel index in second dimension
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
  *
- * @exception GException::fits_wrong_image_operator
- *            Image is not a 2D image
- *
- * Provides access to a pixel of a 2D image. No range checking is performed.
- * Use the at(ix,iy) method if range checking is required.
+ * Provides access to a pixel of a 2D image. No range checking or image
+ * dimension verification is performed. Use the at(ix,iy) method if range
+ * checking and image dimension verification is required.
  ***************************************************************************/
 const double& GFitsImageDouble::operator() (const int& ix, const int& iy) const
 {
-    // Operator is only valid for 2D images
-    if (m_naxis != 2)
-        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 2);
-
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) ((GFitsImageDouble*)this)->fetch_data();
 
     // Calculate pixel offset
     int offset = ix + iy * m_naxes[0];
-
-    // Return image pixel
-    return m_pixels[offset];
-}
-
-
-/***********************************************************************//**
- * @brief 3D image pixel access operator
- *
- * @param[in] ix Pixel index in first dimension
- * @param[in] iy Pixel index in second dimension
- * @param[in] iz Pixel index in third dimension
- *
- * @exception GException::fits_wrong_image_operator
- *            Image is not a 3D image
- *
- * Provides access to a pixel of a 3D image. No range checking is performed.
- * Use the at(ix,iy,iz) method if range checking is required.
- ***************************************************************************/
-double& GFitsImageDouble::operator() (const int& ix, const int& iy, const int& iz)
-{
-    // Operator is only valid for 3D images
-    if (m_naxis != 3)
-        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 3);
-
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
-
-    // Calculate pixel offset
-    int offset = ix + m_naxes[0] * (iy + iz * m_naxes[1]);
 
     // Return image pixel
     return m_pixels[offset];
@@ -285,22 +293,17 @@ double& GFitsImageDouble::operator() (const int& ix, const int& iy, const int& i
 /***********************************************************************//**
  * @brief 3D image pixel access operator (const variant)
  *
- * @param[in] ix Pixel index in first dimension
- * @param[in] iy Pixel index in second dimension
- * @param[in] iz Pixel index in third dimension
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ * @param[in] iz Pixel index in third dimension (starting from 0).
  *
- * @exception GException::fits_wrong_image_operator
- *            Image is not a 3D image
- *
- * Provides access to a pixel of a 3D image. No range checking is performed.
- * Use the at(ix,iy,iz) method if range checking is required.
+ * Provides access to a pixel of a 3D image. No range checking or image
+ * dimension verification is performed. Use the at(ix,iy) method if range
+ * checking and image dimension verification is required.
  ***************************************************************************/
-const double& GFitsImageDouble::operator() (const int& ix, const int& iy, const int& iz) const
+const double& GFitsImageDouble::operator() (const int& ix, const int& iy,
+                                            const int& iz) const
 {
-    // Operator is only valid for 3D images
-    if (m_naxis != 3)
-        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 3);
-
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) ((GFitsImageDouble*)this)->fetch_data();
 
@@ -313,56 +316,20 @@ const double& GFitsImageDouble::operator() (const int& ix, const int& iy, const 
 
 
 /***********************************************************************//**
- * @brief 4D image pixel access operator
- *
- * @param[in] ix Pixel index in first dimension
- * @param[in] iy Pixel index in second dimension
- * @param[in] iz Pixel index in third dimension
- * @param[in] it Pixel index in forth dimension
- *
- * @exception GException::fits_wrong_image_operator
- *            Image is not a 4D image
- *
- * Provides access to a pixel of a 4D image. No range checking is performed.
- * Use the at(ix,iy,iz,it) method if range checking is required.
- ***************************************************************************/
-double& GFitsImageDouble::operator() (const int& ix, const int& iy, const int& iz, const int& it)
-{
-    // Operator is only valid for 4D images
-    if (m_naxis != 4)
-        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 4);
-
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
-
-    // Calculate pixel offset
-    int offset = ix + m_naxes[0] * (iy + m_naxes[1] * (iz + it *  m_naxes[2]));
-
-    // Return image pixel
-    return m_pixels[offset];
-}
-
-
-/***********************************************************************//**
  * @brief 4D image pixel access operator (const variant)
  *
- * @param[in] ix Pixel index in first dimension
- * @param[in] iy Pixel index in second dimension
- * @param[in] iz Pixel index in third dimension
- * @param[in] it Pixel index in forth dimension
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ * @param[in] iz Pixel index in third dimension (starting from 0).
+ * @param[in] it Pixel index in forth dimension (starting from 0).
  *
- * @exception GException::fits_wrong_image_operator
- *            Image is not a 4D image
- *
- * Provides access to a pixel of a 4D image. No range checking is performed.
- * Use the at(ix,iy,iz,it) method if range checking is required.
+ * Provides access to a pixel of a 4D image. No range checking or image
+ * dimension verification is performed. Use the at(ix,iy) method if range
+ * checking and image dimension verification is required.
  ***************************************************************************/
-const double& GFitsImageDouble::operator() (const int& ix, const int& iy, const int& iz, const int& it) const
+const double& GFitsImageDouble::operator() (const int& ix, const int& iy,
+                                            const int& iz, const int& it) const
 {
-    // Operator is only valid for 4D images
-    if (m_naxis != 4)
-        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 4);
-
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) ((GFitsImageDouble*)this)->fetch_data();
 
@@ -383,7 +350,7 @@ const double& GFitsImageDouble::operator() (const int& ix, const int& iy, const 
 /***********************************************************************//**
  * @brief Image pixel access operator
  *
- * @param[in] ix Pixel index.
+ * @param[in] ix Pixel index (starting from 0).
  *
  * Provides access to a pixel of an image including range checking. Note that
  * this method does not necessarily restrict do 1D images but generally
@@ -395,18 +362,74 @@ double& GFitsImageDouble::at(const int& ix)
     if (m_pixels == NULL) fetch_data();
 
     // Return image pixel
-    return m_pixels[offset(ix)];
+    return (m_pixels[offset(ix)]);
+}
+
+
+/***********************************************************************//**
+ * @brief 2D image pixel access operator
+ *
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ *
+ * Provides access to a pixel of an image including range checking.
+ ***************************************************************************/
+double& GFitsImageDouble::at(const int& ix, const int& iy)
+{
+    // If image pixels are not available then allocate them now
+    if (m_pixels == NULL) fetch_data();
+
+    // Return image pixel
+    return (m_pixels[offset(ix,iy)]);
+}
+
+
+/***********************************************************************//**
+ * @brief 3D image pixel access operator
+ *
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ * @param[in] iz Pixel index in third dimension (starting from 0).
+ *
+ * Provides access to a pixel of an image including range checking.
+ ***************************************************************************/
+double& GFitsImageDouble::at(const int& ix, const int& iy, const int& iz)
+{
+    // If image pixels are not available then allocate them now
+    if (m_pixels == NULL) fetch_data();
+
+    // Return image pixel
+    return (m_pixels[offset(ix,iy,iz)]);
+}
+
+
+/***********************************************************************//**
+ * @brief 4D image pixel access operator
+ *
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ * @param[in] iz Pixel index in third dimension (starting from 0).
+ * @param[in] it Pixel index in forth dimension (starting from 0).
+ *
+ * Provides access to a pixel of an image including range checking.
+ ***************************************************************************/
+double& GFitsImageDouble::at(const int& ix, const int& iy, const int& iz,
+                             const int& it)
+{
+    // If image pixels are not available then allocate them now
+    if (m_pixels == NULL) fetch_data();
+
+    // Return image pixel
+    return (m_pixels[offset(ix,iy,iz,it)]);
 }
 
 
 /***********************************************************************//**
  * @brief Image pixel access operator (const variant)
  *
- * @param[in] ix Pixel index in first dimension.
- * @param[in] iy Pixel index in second dimension.
+ * @param[in] ix Pixel index (starting from 0).
  *
- * Provides access to a pixel of a 1D image. No range checking is performed.
- * Use the at(ix) method if range checking is required.
+ * Provides access to a pixel of an image including range checking.
  ***************************************************************************/
 const double& GFitsImageDouble::at(const int& ix) const
 {
@@ -414,9 +437,134 @@ const double& GFitsImageDouble::at(const int& ix) const
     if (m_pixels == NULL) ((GFitsImageDouble*)this)->fetch_data();
 
     // Return image pixel
-    return m_pixels[offset(ix)];
+    return (m_pixels[offset(ix)]);
 }
 
+
+/***********************************************************************//**
+ * @brief 2D image pixel access operator (const variant)
+ *
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ *
+ * Provides access to a pixel of an image including range checking.
+ ***************************************************************************/
+const double& GFitsImageDouble::at(const int& ix, const int& iy) const
+{
+    // If image pixels are not available then allocate them now
+    if (m_pixels == NULL) ((GFitsImageDouble*)this)->fetch_data();
+
+    // Return image pixel
+    return (m_pixels[offset(ix,iy)]);
+}
+
+
+/***********************************************************************//**
+ * @brief 3D image pixel access operator (const variant)
+ *
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ * @param[in] iz Pixel index in third dimension (starting from 0).
+ *
+ * Provides access to a pixel of an image including range checking.
+ ***************************************************************************/
+const double& GFitsImageDouble::at(const int& ix, const int& iy,
+                                   const int& iz) const
+{
+    // If image pixels are not available then allocate them now
+    if (m_pixels == NULL) ((GFitsImageDouble*)this)->fetch_data();
+
+    // Return image pixel
+    return (m_pixels[offset(ix,iy,iz)]);
+}
+
+
+/***********************************************************************//**
+ * @brief 4D image pixel access operator (const variant)
+ *
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ * @param[in] iz Pixel index in third dimension (starting from 0).
+ * @param[in] it Pixel index in forth dimension (starting from 0).
+ *
+ * Provides access to a pixel of an image including range checking.
+ ***************************************************************************/
+const double& GFitsImageDouble::at(const int& ix, const int& iy,
+                                   const int& iz, const int& it) const
+{
+    // If image pixels are not available then allocate them now
+    if (m_pixels == NULL) ((GFitsImageDouble*)this)->fetch_data();
+
+    // Return image pixel
+    return (m_pixels[offset(ix,iy,iz,it)]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of image pixel
+ *
+ * @param[in] ix Pixel index (starting from 0).
+ *
+ * Returns the value of an image pixel as double precision floating point
+ * value. This method performs range checking.
+ ***************************************************************************/
+double GFitsImageDouble::pixel(const int& ix) const
+{
+    // Return pixel value
+    return (double(this->at(ix)));
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of image pixel (2D version)
+ *
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ *
+ * Returns the value of an image pixel as double precision floating point
+ * value. This method performs range checking.
+ ***************************************************************************/
+double GFitsImageDouble::pixel(const int& ix, const int& iy) const
+{
+    // Return pixel value
+    return (double(this->at(ix,iy)));
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of image pixel (3D version)
+ *
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ * @param[in] iz Pixel index in third dimension (starting from 0).
+ *
+ * Returns the value of an image pixel as double precision floating point
+ * value. This method performs range checking.
+ ***************************************************************************/
+double GFitsImageDouble::pixel(const int& ix, const int& iy, const int& iz) const
+{
+    // Return pixel value
+    return (double(this->at(ix,iy,iz)));
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of image pixel (4D version)
+ *
+ * @param[in] ix Pixel index in first dimension (starting from 0).
+ * @param[in] iy Pixel index in second dimension (starting from 0).
+ * @param[in] iz Pixel index in third dimension (starting from 0).
+ * @param[in] it Pixel index in forth dimension (starting from 0).
+ *
+ * Returns the value of an image pixel as double precision floating point
+ * value. This method performs range checking.
+ ***************************************************************************/
+double GFitsImageDouble::pixel(const int& ix, const int& iy, const int& iz,
+                               const int& it) const
+{
+    // Return pixel value
+    return (double(this->at(ix,iy,iz,it)));
+}
 
 
 /***********************************************************************//**
@@ -586,6 +734,16 @@ void GFitsImageDouble::alloc_nulval(const void* value)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return image type
+ ***************************************************************************/
+int GFitsImageDouble::type(void) const
+{
+    // Return type
+    return __TDOUBLE;
 }
 
 

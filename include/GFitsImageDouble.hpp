@@ -40,21 +40,28 @@ public:
     // Operators
     GFitsImageDouble& operator= (const GFitsImageDouble& image);
     double&           operator() (const int& ix);
-    const double&     operator() (const int& ix) const;
     double&           operator() (const int& ix, const int& iy);
-    const double&     operator() (const int& ix, const int& iy) const;
     double&           operator() (const int& ix, const int& iy, const int& iz);
-    const double&     operator() (const int& ix, const int& iy, const int& iz) const;
     double&           operator() (const int& ix, const int& iy, const int& iz, const int& it);
+    const double&     operator() (const int& ix) const;
+    const double&     operator() (const int& ix, const int& iy) const;
+    const double&     operator() (const int& ix, const int& iy, const int& iz) const;
     const double&     operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Methods
     double&           at(const int& ix);
+    double&           at(const int& ix, const int& iy);
+    double&           at(const int& ix, const int& iy, const int& iz);
+    double&           at(const int& ix, const int& iy, const int& iz, const int& it);
     const double&     at(const int& ix) const;
-
+    const double&     at(const int& ix, const int& iy) const;
+    const double&     at(const int& ix, const int& iy, const int& iz) const;
+    const double&     at(const int& ix, const int& iy, const int& iz, const int& it) const;
+    double            pixel(const int& ix) const;
+    double            pixel(const int& ix, const int& iy) const;
+    double            pixel(const int& ix, const int& iy, const int& iz) const;
+    double            pixel(const int& ix, const int& iy, const int& iz, const int& it) const;
     void*             pixels(void);
-    double            pixel(const int& ix) { return double((*(this))(ix)); }
-    double            pixel(const int& ix, const int& iy) { return double((*(this))(ix, iy)); }
     GFitsImageDouble* clone(void) const;
 
 private:
@@ -68,7 +75,7 @@ private:
     void  alloc_nulval(const void* value);
     void* ptr_data(void) { return m_pixels; }
     void* ptr_nulval(void) { return m_nulval; }
-    int   type(void) const { return __TDOUBLE; }
+    int   type(void) const;
 
     // Private data area
     double* m_pixels;      //!< Pixels
