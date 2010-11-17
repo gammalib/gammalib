@@ -21,7 +21,9 @@
 #include "GFitsImageFlt.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPERATOR2                     "GFitsImageFlt::operator() (int,int)"
+#define G_OPERATOR2                   "GFitsImageFlt::operator() (int&,int&)"
+#define G_OPERATOR3              "GFitsImageFlt::operator() (int&,int&,int&)"
+#define G_OPERATOR4         "GFitsImageFlt::operator() (int&,int&,int&,int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -176,18 +178,11 @@ GFitsImageFlt& GFitsImageFlt::operator= (const GFitsImageFlt& image)
  *
  * @param[in] ix Pixel index
  *
- * @exception GException::fits_wrong_image_operator
- *            Image is not a 1D image
- *
  * Provides access to a pixel of a 1D image. No range checking is performed.
  * Use the at(ix) method if range checking is required.
  ***************************************************************************/
 float& GFitsImageFlt::operator() (const int& ix)
 {
-    // Operator is only valid for 1D images
-    //if (m_naxis != 1)
-    //    throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 1);
-
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) fetch_pixels();
 
@@ -201,18 +196,11 @@ float& GFitsImageFlt::operator() (const int& ix)
  *
  * @param[in] ix Pixel index
  *
- * @exception GException::fits_wrong_image_operator
- *            Image is not a 1D image
- *
  * Provides access to a pixel of a 1D image. No range checking is performed.
  * Use the at(ix) method if range checking is required.
  ***************************************************************************/
 const float& GFitsImageFlt::operator() (const int& ix) const
 {
-    // Operator is only valid for 1D images
-    if (m_naxis != 1)
-        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 1);
-
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) ((GFitsImageFlt*)this)->fetch_pixels();
 
@@ -296,7 +284,7 @@ float& GFitsImageFlt::operator() (const int& ix, const int& iy, const int& iz)
 {
     // Operator is only valid for 3D images
     if (m_naxis != 3)
-        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 3);
+        throw GException::fits_wrong_image_operator(G_OPERATOR3, m_naxis, 3);
 
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) fetch_pixels();
@@ -326,7 +314,7 @@ const float& GFitsImageFlt::operator() (const int& ix, const int& iy, const int&
 {
     // Operator is only valid for 3D images
     if (m_naxis != 3)
-        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 3);
+        throw GException::fits_wrong_image_operator(G_OPERATOR3, m_naxis, 3);
 
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) ((GFitsImageFlt*)this)->fetch_pixels();
@@ -357,7 +345,7 @@ float& GFitsImageFlt::operator() (const int& ix, const int& iy, const int& iz, c
 {
     // Operator is only valid for 4D images
     if (m_naxis != 4)
-        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 4);
+        throw GException::fits_wrong_image_operator(G_OPERATOR4, m_naxis, 4);
 
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) fetch_pixels();
@@ -388,7 +376,7 @@ const float& GFitsImageFlt::operator() (const int& ix, const int& iy, const int&
 {
     // Operator is only valid for 4D images
     if (m_naxis != 4)
-        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 4);
+        throw GException::fits_wrong_image_operator(G_OPERATOR4, m_naxis, 4);
 
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) ((GFitsImageFlt*)this)->fetch_pixels();

@@ -557,11 +557,82 @@ void GFitsByteImage::fetch_pixels(void)
 
 
 /***********************************************************************//**
- * @brief Return data type
+ * @brief Allocate data
+ ***************************************************************************/
+void GFitsByteImage::alloc_data(void)
+{
+    // Release any existing data
+    release_data();
+
+    // Allocate new data
+    if (m_num_pixels > 0)
+        m_pixels = new unsigned char[m_num_pixels];
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Initialise data
+ ***************************************************************************/
+void GFitsByteImage::init_data(void)
+{
+    // Initialise data if they exist
+    if (m_pixels != NULL) {
+        for (int i = 0; i < m_num_pixels; ++i)
+            m_pixels[i] = 0;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Release data
+ ***************************************************************************/
+void GFitsByteImage::release_data(void)
+{
+    // Free any existing memory
+    if (m_pixels != NULL) delete [] m_pixels;
+
+    // Mark pointer as free
+    m_pixels = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Allocates nul value
+ ***************************************************************************/
+void GFitsByteImage::alloc_nulval(const void* value)
+{
+    // Free any existing memory
+    if (m_nulval != NULL) delete m_nulval;
+
+    // Mark pointer as free
+    m_nulval = NULL;
+
+    // If we have valid value, allocate and set nul value
+    if (value != NULL) {
+        m_nulval  = new unsigned char;
+        *m_nulval = *((char*)value);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return image type
  ***************************************************************************/
 int GFitsByteImage::type(void) const
 {
-    // Return
+    // Return type
     return __TBYTE;
 }
 

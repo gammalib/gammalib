@@ -54,8 +54,10 @@ public:
     void           link(float* pixels);
     void           nulval(const float* value);
     void*          pixels(void);
-    double         pixel(const int& ix) { return double((*(this))(ix)); }
-    double         pixel(const int& ix, const int& iy) { return double((*(this))(ix, iy)); }
+    double         pixel(const int& ix) const { return double((*(this))(ix)); }
+    double         pixel(const int& ix, const int& iy) const { return double((*(this))(ix, iy)); }
+    double         pixel(const int& ix, const int& iy, const int& iz) const { return double((*(this))(ix, iy, iz)); }
+    double         pixel(const int& ix, const int& iy, const int& iz, const int& it) const { return double((*(this))(ix, iy, iz, it)); }
     GFitsImageFlt* clone(void) const;
 
 private:

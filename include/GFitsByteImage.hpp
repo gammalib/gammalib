@@ -51,8 +51,10 @@ public:
     // Methods
     void            nulval(const unsigned char* value);
     void*           pixels(void);
-    double          pixel(const int& ix) { return double((*(this))(ix)); }
-    double          pixel(const int& ix, const int& iy) { return double((*(this))(ix, iy)); }
+    double          pixel(const int& ix) const { return double((*(this))(ix)); }
+    double          pixel(const int& ix, const int& iy) const { return double((*(this))(ix, iy)); }
+    double          pixel(const int& ix, const int& iy, const int& iz) const { return double((*(this))(ix, iy, iz)); }
+    double          pixel(const int& ix, const int& iy, const int& iz, const int& it) const { return double((*(this))(ix, iy, iz, it)); }
     GFitsByteImage* clone(void) const;
 
 private:
@@ -64,12 +66,12 @@ private:
     int  type(void) const; 
 
     // Stuff to allow for compilation (new GFitsImage interface)
-    void  alloc_data(void) { return; }
-    void  init_data(void) { return; }
-    void  release_data(void) { return; }
-    void  alloc_nulval(const void* value) { return; }
-    void* ptr_data(void) { void* p; return p; }
-    void* ptr_nulval(void) { void* p; return p; }
+    void  alloc_data(void);
+    void  init_data(void);
+    void  release_data(void);
+    void  alloc_nulval(const void* value);
+    void* ptr_data(void) { return m_pixels; }
+    void* ptr_nulval(void) { return m_nulval; }
 
     // Private data area
     unsigned char* m_pixels;      //!< Image pixels
