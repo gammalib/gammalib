@@ -367,10 +367,10 @@ void GGti::write(GFits* file, const std::string& extname)
     }
 
     // Create GTI table
-    GFitsBinTable table = GFitsBinTable(m_num);
-    table.append_column(cstart);
-    table.append_column(cstop);
-    table.extname(extname);
+    GFitsBinTable* table = new GFitsBinTable(m_num);
+    table->append_column(cstart);
+    table->append_column(cstop);
+    table->extname(extname);
 
     // Write to FITS file
     file->append(table);

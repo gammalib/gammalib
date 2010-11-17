@@ -476,7 +476,7 @@ void GSkymap::save(const std::string& filename, bool clobber)
         // Create FITS file and save it to disk
         if (hdu != NULL) {
             GFits fits;
-            fits.append(*hdu);
+            fits.append(hdu);
             fits.saveto(filename, clobber);
         }
 
@@ -555,7 +555,7 @@ void GSkymap::write(GFits* file)
 
         // Append HDU to FITS file
         if (hdu != NULL)
-            file->append(*hdu);
+            file->append(hdu);
 
     } // endif: we had data to save
 
