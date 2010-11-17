@@ -47,6 +47,8 @@ public:
 
     // Pure virtual methods
     virtual void*       pixels(void) = 0;
+    virtual double      pixel(const int& ix) = 0;
+    virtual double      pixel(const int& ix, const int& iy) = 0;
     virtual GFitsImage* clone(void) const = 0;
 
     // Implemented pure virtual methods

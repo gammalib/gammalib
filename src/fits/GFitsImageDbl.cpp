@@ -192,8 +192,8 @@ GFitsImageDbl& GFitsImageDbl::operator= (const GFitsImageDbl& image)
 double& GFitsImageDbl::operator() (const int& ix)
 {
     // Operator is only valid for 1D images
-    if (m_naxis != 1)
-        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 1);
+    //if (m_naxis != 1)
+    //    throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 1);
 
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) fetch_pixels();

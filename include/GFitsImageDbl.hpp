@@ -56,6 +56,8 @@ public:
     void           link(double* pixels);
     void           nulval(const double* value);
     void*          pixels(void);
+    double         pixel(const int& ix) { return double((*(this))(ix)); }
+    double         pixel(const int& ix, const int& iy) { return double((*(this))(ix, iy)); }
     GFitsImageDbl* clone(void) const;
 
 private:

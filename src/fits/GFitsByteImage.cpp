@@ -184,8 +184,8 @@ unsigned char& GFitsByteImage::operator() (const int& ix)
 const unsigned char& GFitsByteImage::operator() (const int& ix) const
 {
     // Operator is only valid for 1D images
-    if (m_naxis != 1)
-        throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 1);
+    //if (m_naxis != 1)
+    //    throw GException::fits_wrong_image_operator(G_OPERATOR2, m_naxis, 1);
 
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) ((GFitsByteImage*)this)->fetch_pixels();
