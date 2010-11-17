@@ -8,8 +8,8 @@ INCLUDES = -I$(top_srcdir)/include \
 # Define sources for this directory
 sources = GFitsHeaderCard.cpp \
           GFitsHeader.cpp \
-          GFitsData.cpp \
           GFitsImage.cpp \
+          GFitsByteImage.cpp \
           GFitsImageFlt.cpp \
           GFitsImageDbl.cpp \
           GFitsTable.cpp \

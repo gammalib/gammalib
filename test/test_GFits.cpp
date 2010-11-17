@@ -49,20 +49,36 @@ void test_create(void)
     std::cout << "Test GFits: Create FITS file: ";
 
     // Remove FITS file
+    system("rm -rf test_empty.fits");
+    system("rm -rf test_empty_image.fits");
     system("rm -rf test.fits");
+    system("rm -rf test_create_bintable.fits");
 
-    // Create FITS file with empty double precision image
+    // Create empty FITS file
     try {
-        GFits fits;
-        fits.open("test.fits");
-        GFitsImageDbl image;
-        GFitsHDU hdu(image);
-        fits.append(hdu);
+        GFits fits("test_empty.fits");
         fits.save();
     }
     catch (std::exception &e) {
         std::cout << std::endl
-                  << "TEST ERROR: Unable to create FITS file."
+                  << "TEST ERROR: Unable to create empty FITS file."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Create FITS file with empty double precision image
+    try {
+        GFits fits;
+        fits.open("test_empty_image.fits");
+        GFitsImageDbl image;
+        fits.append(&image);
+        fits.save();
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to create FITS file with empty image."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -73,7 +89,7 @@ void test_create(void)
     double sum = 0.0;
     try {
         GFits fits;
-        fits.open("test.fits");
+        fits.open("test_empty_image.fits");
         int naxis       = 2;
         int nx          = 10;
         int ny          = 20;
@@ -85,9 +101,8 @@ void test_create(void)
                 sum += image(ix,iy);
             }
         }
-        GFitsHDU hdu(image);
-        fits.append(hdu);
-        fits.save();
+        fits.append(&image);
+        fits.saveto("test.fits");
     }
     catch (std::exception &e) {
         std::cout << std::endl
@@ -102,8 +117,8 @@ void test_create(void)
     try {
         GFits fits;
         fits.open("test.fits");
-        GFitsHDU*      hdu   = fits.hdu(1);
-        GFitsImageDbl* image = (GFitsImageDbl*)hdu->data();
+        GFitsHDU*      hdu   = fits.hdu(0);
+        GFitsImageDbl* image = (GFitsImageDbl*)fits.hdu(1);
         int nx = image->naxes(0);
         int ny = image->naxes(1);
         double total = 0.0;
@@ -128,7 +143,7 @@ void test_create(void)
     }
     std::cout << ".";
 
-    // Attach binary table
+    // Attach binary table (save variant)
     try {
         // Re-open FITS file
         GFits fits;
@@ -148,9 +163,8 @@ void test_create(void)
         table.append_column(first);
         table.append_column(second);
 
-        // Create HDU and append to FILE file
-        GFitsHDU hdu(table);
-        fits.append(hdu);
+        // Append table to FILE file
+        fits.append(&table);
 
         // Save FITS file
         fits.save();
@@ -164,8 +178,43 @@ void test_create(void)
     }
     std::cout << ".";
 
+    // Crate binary table (saveto variant)
+    try {
+        // Allocate FITS file
+        GFits fits;
 
+        // Create binary Table with 10 rows
+        int nrows = 10;
+        GFitsBinTable       table  = GFitsBinTable(nrows);
+        GFitsTableDoubleCol first  = GFitsTableDoubleCol("First", nrows);
+        GFitsTableDoubleCol second = GFitsTableDoubleCol("Second", nrows);
+        first(0)  =  1.0;
+        first(1)  =  2.0;
+        first(2)  =  3.0;
+        second(0) = -99.0;
+        table.append_column(first);
+        table.append_column(second);
+
+        // Append table to FILE file
+        fits.append(&table);
+
+        // Save FITS file
+        fits.saveto("test_create_bintable.fits");
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to attach binary table."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Final ok
     std::cout << ". ok." << std::endl;
+
+    // Return
+    return;
 }
 
 
@@ -451,9 +500,8 @@ void test_bintable_double(void)
         table.append_column(col_dbl);
         table.insert_column(1, col_dbl10);
 
-        // Create HDU and append to FILE file
-        GFitsHDU hdu(table);
-        fits.append(hdu);
+        // Append to FILE file
+        fits.append(&table);
 
         // Save FITS file
         fits.save();
@@ -497,7 +545,7 @@ void test_bintable_double(void)
 
         // Get column
         GFitsTableDoubleCol* col_dbl =
-                    (GFitsTableDoubleCol*)fits.hdu(1)->column("DOUBLE");
+            (GFitsTableDoubleCol*)((GFitsTable*)fits.hdu(1))->column("DOUBLE");
 
         // Check double precision table (operator access)
         tot_dbl = 0.0;
@@ -553,7 +601,7 @@ void test_bintable_double(void)
 
         // Get column
         GFitsTableDoubleCol* col_dbl10 =
-                    (GFitsTableDoubleCol*)fits.hdu(1)->column("DOUBLE10");
+            (GFitsTableDoubleCol*)((GFitsTable*)fits.hdu(1))->column("DOUBLE10");
 
         // Check double precision table (operator access)
         tot_dbl = 0.0;
@@ -810,8 +858,7 @@ void test_bintable_float(void)
         table.insert_column(0, col_flt);
 
         // Create HDU and append to FILE file
-        GFitsHDU hdu(table);
-        fits.append(hdu);
+        fits.append(&table);
 
         // Save FITS file
         fits.save();
@@ -854,7 +901,7 @@ void test_bintable_float(void)
 
         // Get column
         GFitsTableFloatCol* col_flt =
-                    (GFitsTableFloatCol*)fits.hdu(1)->column("FLOAT");
+            (GFitsTableFloatCol*)((GFitsTable*)fits.hdu(1))->column("FLOAT");
 
         // Check single precision table (operator access)
         tot_flt = 0.0;
@@ -910,7 +957,7 @@ void test_bintable_float(void)
 
         // Get column
         GFitsTableFloatCol* col_flt10 =
-                    (GFitsTableFloatCol*)fits.hdu(1)->column("FLOAT10");
+            (GFitsTableFloatCol*)((GFitsTable*)fits.hdu(1))->column("FLOAT10");
 
         // Check single precision table (operator access)
         tot_flt = 0.0;
@@ -1168,9 +1215,8 @@ void test_bintable_short(void)
         table.append_column(col_sht);
         table.insert_column(0, col_sht10);
 
-        // Create HDU and append to FILE file
-        GFitsHDU hdu(table);
-        fits.append(hdu);
+        // Append to file
+        fits.append(&table);
 
         // Save FITS file
         fits.save();
@@ -1216,7 +1262,7 @@ void test_bintable_short(void)
 
         // Get column
         GFitsTableShortCol* col_sht =
-                    (GFitsTableShortCol*)fits.hdu(1)->column("SHORT");
+            (GFitsTableShortCol*)((GFitsTable*)fits.hdu(1))->column("SHORT");
 
         // Check short table (operator access)
         tot_sht = 0;
@@ -1272,7 +1318,7 @@ void test_bintable_short(void)
 
         // Get column
         GFitsTableShortCol* col_sht10 =
-                    (GFitsTableShortCol*)fits.hdu(1)->column("SHORT10");
+            (GFitsTableShortCol*)((GFitsTable*)fits.hdu(1))->column("SHORT10");
 
         // Check short table (operator access)
         tot_sht = 0;
@@ -1529,9 +1575,8 @@ void test_bintable_ushort(void)
         table.append_column(col_sht);
         table.insert_column(0, col_sht10);
 
-        // Create HDU and append to FILE file
-        GFitsHDU hdu(table);
-        fits.append(hdu);
+        // Append to file
+        fits.append(&table);
 
         // Save FITS file
         fits.save();
@@ -1577,7 +1622,7 @@ void test_bintable_ushort(void)
 
         // Get column
         GFitsTableUShortCol* col_sht =
-                    (GFitsTableUShortCol*)fits.hdu(1)->column("USHORT");
+            (GFitsTableUShortCol*)((GFitsTable*)fits.hdu(1))->column("USHORT");
 
         // Check table (operator access)
         tot_sht = 0;
@@ -1633,7 +1678,7 @@ void test_bintable_ushort(void)
 
         // Get column
         GFitsTableUShortCol* col_sht10 =
-                    (GFitsTableUShortCol*)fits.hdu(1)->column("USHORT10");
+            (GFitsTableUShortCol*)((GFitsTable*)fits.hdu(1))->column("USHORT10");
 
         // Check table (operator access)
         tot_sht = 0;
@@ -1890,9 +1935,8 @@ void test_bintable_long(void)
         table.append_column(col_lng);
         table.insert_column(99, col_lng10);
 
-        // Create HDU and append to FILE file
-        GFitsHDU hdu(table);
-        fits.append(hdu);
+        // Append to file
+        fits.append(&table);
 
         // Save FITS file
         fits.save();
@@ -1937,7 +1981,7 @@ void test_bintable_long(void)
 
         // Get column
         GFitsTableLongCol* col_lng =
-                    (GFitsTableLongCol*)fits.hdu(1)->column("LONG");
+            (GFitsTableLongCol*)((GFitsTable*)fits.hdu(1))->column("LONG");
 
         // Check long table (operator access)
         tot_lng = 0;
@@ -1993,7 +2037,7 @@ void test_bintable_long(void)
 
         // Get column
         GFitsTableLongCol* col_lng10 =
-                    (GFitsTableLongCol*)fits.hdu(1)->column("LONG10");
+            (GFitsTableLongCol*)((GFitsTable*)fits.hdu(1))->column("LONG10");
 
         // Check long table (operator access)
         tot_lng = 0;
@@ -2250,9 +2294,8 @@ void test_bintable_longlong(void)
         table.append_column(col_lng);
         table.insert_column(99, col_lng10);
 
-        // Create HDU and append to FILE file
-        GFitsHDU hdu(table);
-        fits.append(hdu);
+        // Append to file
+        fits.append(&table);
 
         // Save FITS file
         fits.save();
@@ -2297,7 +2340,7 @@ void test_bintable_longlong(void)
 
         // Get column
         GFitsTableLongLongCol* col_lng =
-                    (GFitsTableLongLongCol*)fits.hdu(1)->column("LONGLONG");
+            (GFitsTableLongLongCol*)((GFitsTable*)fits.hdu(1))->column("LONGLONG");
 
         // Check table (operator access)
         tot_lng = 0;
@@ -2353,7 +2396,7 @@ void test_bintable_longlong(void)
 
         // Get column
         GFitsTableLongLongCol* col_lng10 =
-                    (GFitsTableLongLongCol*)fits.hdu(1)->column("LONGLONG10");
+            (GFitsTableLongLongCol*)((GFitsTable*)fits.hdu(1))->column("LONGLONG10");
 
         // Check table (operator access)
         tot_lng = 0;
@@ -2610,9 +2653,8 @@ void test_bintable_ulong(void)
         table.append_column(col_lng);
         table.insert_column(99, col_lng10);
 
-        // Create HDU and append to FILE file
-        GFitsHDU hdu(table);
-        fits.append(hdu);
+        // Append to file
+        fits.append(&table);
 
         // Save FITS file
         fits.save();
@@ -2657,7 +2699,7 @@ void test_bintable_ulong(void)
 
         // Get column
         GFitsTableULongCol* col_lng =
-                    (GFitsTableULongCol*)fits.hdu(1)->column("ULONG");
+            (GFitsTableULongCol*)((GFitsTable*)fits.hdu(1))->column("ULONG");
 
         // Check table (operator access)
         tot_lng = 0;
@@ -2713,7 +2755,7 @@ void test_bintable_ulong(void)
 
         // Get column
         GFitsTableULongCol* col_lng10 =
-                    (GFitsTableULongCol*)fits.hdu(1)->column("ULONG10");
+            (GFitsTableULongCol*)((GFitsTable*)fits.hdu(1))->column("ULONG10");
 
         // Check table (operator access)
         tot_lng = 0;
@@ -2969,9 +3011,8 @@ void test_bintable_string(void)
         table.append_column(col_str);
         table.append_column(col_str10);
 
-        // Create HDU and append to FILE file
-        GFitsHDU hdu(table);
-        fits.append(hdu);
+        // Append to file
+        fits.append(&table);
 
         // Save FITS file
         fits.save();
@@ -3015,7 +3056,7 @@ void test_bintable_string(void)
 
         // Get column
         GFitsTableStringCol* col_str =
-                         (GFitsTableStringCol*)fits.hdu(1)->column("STRING");
+            (GFitsTableStringCol*)((GFitsTable*)fits.hdu(1))->column("STRING");
 
         // Check string table (operator access)
         tot_str.clear();
@@ -3071,7 +3112,7 @@ void test_bintable_string(void)
 
         // Get column
         GFitsTableStringCol* col_str10 =
-                         (GFitsTableStringCol*)fits.hdu(1)->column("STRING10");
+            (GFitsTableStringCol*)((GFitsTable*)fits.hdu(1))->column("STRING10");
 
         // Check table (operator access)
         tot_str.clear();
@@ -3333,9 +3374,8 @@ void test_bintable_logical(void)
         table.append_column(col);
         table.insert_column(0, col10);
 
-        // Create HDU and append to FILE file
-        GFitsHDU hdu(table);
-        fits.append(hdu);
+        // Append to file
+        fits.append(&table);
 
         // Save FITS file
         fits.save();
@@ -3381,7 +3421,7 @@ void test_bintable_logical(void)
 
         // Get column
         GFitsTableBoolCol* col =
-                    (GFitsTableBoolCol*)fits.hdu(1)->column("LOGICAL");
+            (GFitsTableBoolCol*)((GFitsTable*)fits.hdu(1))->column("LOGICAL");
 
         // Check table (operator access)
         tot_int = 0;
@@ -3437,7 +3477,7 @@ void test_bintable_logical(void)
 
         // Get column
         GFitsTableBoolCol* col10 =
-                    (GFitsTableBoolCol*)fits.hdu(1)->column("LOGICAL10");
+            (GFitsTableBoolCol*)((GFitsTable*)fits.hdu(1))->column("LOGICAL10");
 
         // Check table (operator access)
         tot_int = 0;
@@ -3698,9 +3738,8 @@ void test_bintable_bit(void)
         table.append_column(col);
         table.insert_column(0, col10);
 
-        // Create HDU and append to FILE file
-        GFitsHDU hdu(table);
-        fits.append(hdu);
+        // Append to file
+        fits.append(&table);
 
         // Save FITS file
         fits.save();
@@ -3745,7 +3784,8 @@ void test_bintable_bit(void)
         //
 
         // Get column
-        GFitsTableBitCol* col = (GFitsTableBitCol*)fits.hdu(1)->column("BIT");
+        GFitsTableBitCol* col =
+            (GFitsTableBitCol*)((GFitsTable*)fits.hdu(1))->column("BIT");
 
         // Check table (operator access)
         tot_int = 0;
@@ -3801,7 +3841,7 @@ void test_bintable_bit(void)
 
         // Get column
         GFitsTableBitCol* col10 =
-                    (GFitsTableBitCol*)fits.hdu(1)->column("BIT10");
+            (GFitsTableBitCol*)((GFitsTable*)fits.hdu(1))->column("BIT10");
 
         // Check table (operator access)
         tot_int = 0;

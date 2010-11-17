@@ -21,7 +21,9 @@
 #include <config.h>
 #endif
 #include <stdlib.h>
-#include "test_GSky.hpp"
+#include "GammaLib.hpp"
+#include <iostream>                           // cout, cerr
+#include <stdexcept>                          // std::exception
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -214,7 +216,7 @@ void test_GSkymap_healpix_io(void)
     try {
         for (int pix = 0; pix < refmap.npix(); ++pix)
             refmap(pix) = pix+1;
-        refmap.save(file1, 1);
+        refmap.save(file1, true);
     }
     catch (std::exception &e) {
         std::cout << std::endl 

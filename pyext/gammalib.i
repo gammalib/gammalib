@@ -34,7 +34,6 @@
 #include "GFitsHDU.i"
 #include "GFitsHeader.i"
 #include "GFitsHeaderCard.i"
-#include "GFitsData.i"
 #include "GFitsImage.i"
 #include "GFitsImageDbl.i"
 #include "GFitsTable.i"
