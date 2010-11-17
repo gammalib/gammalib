@@ -16,23 +16,32 @@
 #include <config.h>
 #endif
 #include <iostream>
+#include <stdio.h>
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFits.hpp"
+#include "GFitsByteImage.hpp"
+#include "GFitsImageDbl.hpp"
+#include "GFitsImageFlt.hpp"
+#include "GFitsAsciiTable.hpp"
+#include "GFitsBinTable.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OPEN                                    "GFits::open(std::string&)"
+#define G_SAVE                                                "GFits::save()"
 #define G_SAVETO                           "GFits::saveto(std::string&,bool)"
 #define G_HDU1                                     "GFits::hdu(std::string&)"
 #define G_HDU2                                              "GFits::hdu(int)"
 #define G_FREE_MEM                                    "GFits::free_members()"
+#define G_NEW_IMAGE                                      "GFits::new_image()"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+#define DEBUG 0
 
 
 /*==========================================================================
@@ -166,7 +175,7 @@ void GFits::clear(void)
 int GFits::size(void) const
 {
     // Return number of HDUs
-    return m_num_hdu;
+    return m_hdu.size();
 }
 
 
@@ -180,6 +189,8 @@ int GFits::size(void) const
  *            Close file before opening a new one using GFits::close().
  * @exception GException::fits_open_error 
  *            Unable to open the specified file.
+ * @exception GException::fits_hdu_not_found
+ *            Requested HDU not found.
  * @exception GException::fits_error
  *            Unable to determine number of HDUs in the FITS file.
  *
@@ -194,12 +205,15 @@ int GFits::size(void) const
  ***************************************************************************/
 void GFits::open(const std::string& filename)
 {
+    // Remove any HDUs
+    m_hdu.clear();
+
     // Don't allow opening if another file is already open
     if (m_fitsfile != NULL)
         throw GException::fits_already_opened(G_OPEN, m_filename);
 
     // Initialise FITS file as readwrite
-    m_readwrite = 1;
+    m_readwrite = true;
 
     // Try opening FITS file with readwrite access
     int status = 0;
@@ -209,13 +223,14 @@ void GFits::open(const std::string& filename)
     if (status == 104 || status == 112) {
         status      = 0;
         status      = __ffopen(FHANDLE(m_fitsfile), filename.c_str(), 0, &status);
-        m_readwrite = 0;
+        m_readwrite = false;
     }
 
     // If failed then create FITS file now
     if (status == 104) {
-        status = 0;
-        status = __ffinit(FHANDLE(m_fitsfile), filename.c_str(), &status);
+        status      = 0;
+        status      = __ffinit(FHANDLE(m_fitsfile), filename.c_str(), &status);
+        m_readwrite = true;
     }
 
     // Throw any other error
@@ -226,17 +241,146 @@ void GFits::open(const std::string& filename)
     m_filename = filename;
 
     // Determine number of HDUs
-    status = __ffthdu(FPTR(m_fitsfile), &m_num_hdu, &status);
+    int num_hdu = 0;
+    status = __ffthdu(FPTR(m_fitsfile), &num_hdu, &status);
     if (status != 0)
         throw GException::fits_error(G_OPEN, status);
 
-    // Allocate HDUs
-    if (m_hdu != NULL) delete [] m_hdu;
-    if (m_num_hdu > 0) m_hdu = new GFitsHDU[m_num_hdu];
+    // Open and append all HDUs
+    for (int i = 0; i < num_hdu; ++i) {
 
-    // Open all HDUs
-    for (int i = 0; i < m_num_hdu; ++i)
-        m_hdu[i].open(m_fitsfile, i+1);
+        // Move to HDU
+        status = __ffmahd(FPTR(m_fitsfile), i+1, NULL, &status);
+        if (status != 0)
+            throw GException::fits_hdu_not_found(G_OPEN, i+1, status);
+
+        // Get HDU type
+        int type;
+        status = __ffghdt(FPTR(m_fitsfile), &type, &status);
+        if (status != 0)
+            throw GException::fits_error(G_OPEN, status);
+
+        // Perform type dependent HDU allocation
+        GFitsHDU* hdu = NULL;
+        switch (type) {
+        case GFitsHDU::HT_IMAGE:
+            hdu = new_image();
+            break;
+        case GFitsHDU::HT_ASCII_TABLE:
+            hdu = new GFitsAsciiTable;
+            break;
+        case GFitsHDU::HT_BIN_TABLE:
+            hdu = new GFitsBinTable;
+            break;
+        default:
+            std::string msg = "Unknown HDU type \""+str(type)+"\"";
+            throw GException::fits_invalid_type(G_OPEN, msg);
+            break;
+        }
+
+        // Open HDU
+        hdu->open(FPTR(m_fitsfile), i);
+
+        // Append HDU
+        m_hdu.push_back(hdu);
+
+    } // endfor: looped over all HDUs
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Saves FITS file
+ *
+ * Saves all HDUs to the FITS file by looping over the HDU's save() method.
+ * Saving does not mean that the FITS file is closed. Call the close()
+ * method if explicit closing is needed (de-allocation also closes the file).
+ * In the special case that no first HDU exists an empty primary image is
+ * created.
+ ***************************************************************************/
+void GFits::save(void)
+{
+    // Debug header
+    #if DEBUG
+    std::cout << "GFits::save (size=" << size() << ") -->" << std::endl;
+    #endif
+
+    // If no HDUs exist then save an empty primary image.
+    if (size() == 0) {
+        int status = 0;
+        status     = __ffmahd(FPTR(m_fitsfile), 1, NULL, &status);
+        status     = __ffcrim(FPTR(m_fitsfile), 8, 0, NULL, &status);
+        if (status != 0)
+            throw GException::fits_error(G_SAVE, status);
+    }
+
+    // ... otherwise save all HDUs
+    else {
+        for (int i = 0; i < size(); ++i) {
+            m_hdu[i]->extno(i);
+            m_hdu[i]->save();
+        }
+    }
+
+    // Debug trailer
+    #if DEBUG
+    std::cout << "<-- GFits::save" << std::endl;
+    #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Saves to specified FITS file
+ *
+ * @param[in] filename Name of file into which should be saved.
+ * @param[in] clobber Overwrite existing FITS file (true/false).
+ *
+ * @exception GException::fits_file_exist
+ *            File specified by "filename" exists already.
+ *            To overwrite an existing file set "clobber=true".
+ * @exception GException::fits_error
+ *            Unable to delete exiting FITS file.
+ * @exception GException::fits_open_error
+ *            Unable to create new FITS file.
+ *
+ * @todo This method fails if a corrupted FITS file with the same name
+ * exists so far. Better
+ ***************************************************************************/
+void GFits::saveto(const std::string& filename, bool clobber)
+{
+    // Debug header
+    #if DEBUG
+    std::cout << "GFits::saveto(\"" << filename << "\", " << clobber << ")"
+              << " (size=" << size() << ") -->" << std::endl;
+    #endif
+
+    // If overwriting has been specified then remove any existing file now
+    if (clobber)
+        remove(filename.c_str());
+
+    // Create or open FITS file
+    GFits new_fits;
+    new_fits.open(filename);
+
+    // Copy headers in new FITS file
+    for (int i = 0; i < size(); ++i)
+        new_fits.append(m_hdu[i]);
+
+    // Save new FITS file
+    new_fits.save();
+
+    // Close new FITS file
+    new_fits.close();
+
+    // Debug trailer
+    #if DEBUG
+    std::cout << "<-- GFits::saveto" << std::endl;
+    #endif
 
     // Return
     return;
@@ -263,146 +407,86 @@ void GFits::close(void)
 
 
 /***********************************************************************//**
- * @brief Saves FITS file
- *
- * Saves all HDUs to the FITS file by looping over the GFitsHDU::save()
- * method.
- ***************************************************************************/
-void GFits::save(void)
-{
-    // Save all HDUs
-    for (int i = 0; i < m_num_hdu; ++i)
-        m_hdu[i].save();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Saves to specified FITS file
- *
- * @param[in] filename Name of file into which should be saved.
- * @param[in] clobber Overwrite existing FITS file.
- *
- * @exception GException::fits_file_exist
- *            File specified by 'filename' exists already.
- *            To overwrite an existing file set 'clobber=1'.
- * @exception GException::fits_error
- *            Unable to delete exiting FITS file.
- * @exception GException::fits_open_error
- *            Unable to create new FITS file.
- ***************************************************************************/
-void GFits::saveto(const std::string& filename, bool clobber)
-{
-    // Check if specified FITS file exists. If yes, saving will only be
-    // allowed if clobber is true. If this is the case the specified file
-    // will be deleted.
-    __fitsfile* tmp = NULL;
-    int status      = 0;
-    status          = __ffopen(&tmp, filename.c_str(), 1, &status);
-    if (status == 0) {
-
-        // If overwriting was not allowed the throw an exception
-        if (clobber == false)
-            throw GException::fits_file_exist(G_SAVETO, filename, status);
-
-        // Delete existing file
-        status = __ffdelt(tmp, &status);
-        if (status != 0)
-            throw GException::fits_error(G_SAVETO, status);
-
-    }
-
-    // If error differs from 'file does not exist' then throw exception
-    else if (status != 104)
-        throw GException::fits_error(G_SAVETO, status);
-
-    // If file does not exist this is okay
-    else
-        status = 0;
-
-    // Create a new FITS file now
-    GFits new_fits;
-    new_fits.open(filename);
-
-    // Copy headers in new FITS file
-    for (int i = 0; i < m_num_hdu; ++i)
-        new_fits.append(m_hdu[i]);
-
-    // Save new FITS file
-    new_fits.save();
-
-    // Close new FITS file
-    new_fits.close();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Append HDU to FITS file
  *
- * @param[in] hdu FITS HDU that should be appended
+ * @param[in] hdu Pointer to HDU.
  *
  * Append HDU to the next free position in a FITS file. In case that no HDU
  * exists so far in the FITS file and if the HDU to append is NOT an image,
  * an empty primary image will be inserted as first HDU in the FITS file.
  * This guarantees the compatibility with the FITS standard.
  ***************************************************************************/
-void GFits::append(const GFitsHDU& hdu)
+void GFits::append(GFitsHDU* hdu)
 {
-    // Determine number of HDUs to add. If there are no HDUs so far and if
-    // the HDU to append is not an image then we have to add a primary
-    // image first. In this case we add 2 new HDUs.
-    int n_add = (m_num_hdu == 0 && hdu.m_type != 0) ? 2 : 1;
+    // Debug header
+    #if DEBUG
+    std::cout << "GFits::append(";
+    switch (hdu->exttype()) {
+    case GFitsHDU::HT_IMAGE:
+        std::cout << "GFitsImage";
+        break;
+    case GFitsHDU::HT_ASCII_TABLE:
+        std::cout << "GFitsAsciiTable";
+        break;
+    case GFitsHDU::HT_BIN_TABLE:
+        std::cout << "GFitsBinTable";
+        break;
+    default:
+        std::cout << "<unknown header type>";
+        break;
+    }
+    std::cout << ") (size=" << size() << ") -->" << std::endl;
+    #endif
 
-    // Create memory to hold HDUs
-    GFitsHDU* tmp = new GFitsHDU[m_num_hdu+n_add];
-    if (tmp != NULL) {
+    // Determine next free HDU number
+    int n_hdu = size();
 
-        // Copy over existing HDUs and remove old ones
-        if (m_hdu != NULL) {
-            for (int i = 0; i < m_num_hdu; ++i)
-                tmp[i] = m_hdu[i];
-            delete [] m_hdu;
-        }
+    // Add primary image if required
+    if (n_hdu == 0 && hdu->exttype() != GFitsHDU::HT_IMAGE) {
 
-        // Connect the new memory to the card pointer
-        m_hdu = tmp;
+        // Allocate primary image
+        GFitsHDU* primary = new_primary();
 
-        // Add primary image if required
-        if (n_add == 2) {
-
-            // Append empty primary image
-            m_hdu[m_num_hdu].primary();
-
-            // Set FITS file pointer for new HDU
-            if (m_fitsfile != NULL) {
-                __fitsfile fptr  = *(FPTR(m_fitsfile));
-                fptr.HDUposition = m_num_hdu;
-                m_hdu[m_num_hdu].connect(&fptr);
-            }
-
-            // Increment number of HDUs
-            m_num_hdu++;
-        }
-
-        // Append new HDU to list
-        m_hdu[m_num_hdu] = hdu;
-
-        // Set FITS file pointer for new HDU
+        // If FITS file exists then connect primary image to FITS file
         if (m_fitsfile != NULL) {
             __fitsfile fptr  = *(FPTR(m_fitsfile));
-            fptr.HDUposition = m_num_hdu;
-            m_hdu[m_num_hdu].connect(&fptr);
+            fptr.HDUposition = n_hdu;
+            primary->connect(&fptr);
         }
 
-        // Increment number of HDUs
-        m_num_hdu++;
+        // Debug information
+        #if DEBUG
+        std::cout << "Append primary image to HDU." << std::endl;
+        #endif
 
+        // Push back primary image
+        m_hdu.push_back(primary);
+
+        // Increment HDU number
+        n_hdu++;
     }
+
+    // If FITS file exists then connect HDU to FITS file
+    if (m_fitsfile != NULL) {
+        __fitsfile fptr  = *(FPTR(m_fitsfile));
+        fptr.HDUposition = n_hdu;
+        hdu->connect(&fptr);
+    }
+    else
+        hdu->extno(n_hdu);
+
+    // Debug information
+    #if DEBUG
+    std::cout << "Append HDU (extno=" << n_hdu << ")." << std::endl;
+    #endif
+
+    // Push back HDU
+    m_hdu.push_back(hdu);
+
+    // Debug trailer
+    #if DEBUG
+    std::cout << "<-- GFits::append" << std::endl;
+    #endif
 
     // Return
     return;
@@ -412,11 +496,10 @@ void GFits::append(const GFitsHDU& hdu)
 /***********************************************************************//**
  * @brief Get pointer to HDU
  *
- * @param[in] extname Name of HDU extension which should be returned
+ * @param[in] extname Name of HDU extension.
  *
  * @exception GException::fits_hdu_not_found
- *            HDU with specified extension name has not been found in FITS
- *            file.
+ *            No HDU with specified name has been found.
  ***************************************************************************/
 GFitsHDU* GFits::hdu(const std::string& extname) const
 {
@@ -425,13 +508,13 @@ GFitsHDU* GFits::hdu(const std::string& extname) const
 
     // Return primary HDU if requested ...
     if (toupper(extname) == "PRIMARY")
-        ptr = m_hdu;
+        ptr = m_hdu[0];
 
     // ... otherwise search for specified extension
     else {
-        for (int i = 0; i < m_num_hdu; ++i) {
-            if (m_hdu[i].extname() == extname) {
-                ptr = &(m_hdu[i]);
+        for (int i = 0; i < size(); ++i) {
+            if (m_hdu[i]->extname() == extname) {
+                ptr = m_hdu[i];
                 break;
             }
         }
@@ -449,20 +532,21 @@ GFitsHDU* GFits::hdu(const std::string& extname) const
 /***********************************************************************//**
  * @brief Get pointer to HDU
  *
- * @param extno[in] Extension number (starting from 0)
+ * @param[in] extno Extension number (starting from 0)
  *
  * @exception GException::fits_hdu_not_found
- *            HDU with specified extension number has not been found in FITS
- *            file.
+ *            No HDU with specified extension number has been found.
  ***************************************************************************/
 GFitsHDU* GFits::hdu(int extno) const
 {
     // Verify that extension number is in valid range
-    if (extno < 0 || extno >= m_num_hdu)
-        throw GException::out_of_range("GFits::hdu(int)", extno, 0, m_num_hdu-1);
+    #if defined(G_RANGE_CHECK)
+    if (extno < 0 || extno >= size())
+        throw GException::out_of_range("GFits::hdu(int)", extno, 0, size()-1);
+    #endif
 
     // Get HDU pointer
-    GFitsHDU* ptr = &(m_hdu[extno]);
+    GFitsHDU* ptr = m_hdu[extno];
 
     // Throw an error if HDU has not been found
     if (ptr == NULL) {
@@ -489,11 +573,10 @@ GFitsHDU* GFits::hdu(int extno) const
 void GFits::init_members(void)
 {
     // Initialise GFits members
+    m_hdu.clear();
     m_filename.clear();
     m_fitsfile  = NULL;
-    m_readwrite = 0;
-    m_num_hdu   = 0;
-    m_hdu       = NULL;
+    m_readwrite = false;
 
     // Return
     return;
@@ -516,15 +599,12 @@ void GFits::copy_members(const GFits& fits)
     // Reset FITS file attributes
     m_filename.clear();
     m_fitsfile  = NULL;
-    m_readwrite = 0;
+    m_readwrite = false;
 
     // Copy HDUs
-    if (fits.m_hdu != NULL && fits.m_num_hdu > 0) {
-        m_num_hdu = fits.m_num_hdu;
-        m_hdu     = new GFitsHDU[fits.m_num_hdu];
-        for (int i = 0; i < fits.m_num_hdu; ++i)
-            m_hdu[i] = fits.m_hdu[i];
-    }
+    m_hdu.clear();
+    for (int i = 0; i < fits.m_hdu.size(); ++i)
+        m_hdu.push_back((fits.m_hdu[i]->clone()));
 
     // Return
     return;
@@ -544,13 +624,13 @@ void GFits::free_members(void)
     if (m_fitsfile != NULL) {
 
         // If there are no HDUs then delete the file (don't worry about error)
-        if (m_num_hdu == 0) {
-            int status = 0;
-            __ffdelt(FPTR(m_fitsfile), &status);
-        }
+        //if (size() == 0) {
+        //    int status = 0;
+        //    __ffdelt(FPTR(m_fitsfile), &status);
+        //}
 
         // ... otherwise close the file
-        else {
+        //else {
             int status = 0;
             status     = __ffclos(FPTR(m_fitsfile), &status);
             if (status == 252) {
@@ -560,20 +640,99 @@ void GFits::free_members(void)
             }
             else if (status != 0)
                 throw GException::fits_error(G_FREE_MEM, status);
-        }
+        //}
     }
-
-    // Reset FITS file pointer
-    m_fitsfile = NULL;
-
-    // Free memory
-    if (m_hdu != NULL) delete [] m_hdu;
-
-    // Properly mark as free
-    m_hdu = NULL;
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Allocate new FITS image and return memory pointer
+ *
+ * Depending on the number of bits per pixel, a FITS image is allocated
+ * and the pointer is returned. The following FITS image classes are
+ * handled:
+ * GFitsByteImage (bitpix=8)
+ * GFitsShtImage (bitpix=16)
+ * GFitsLngImage (bitpix=32)
+ * GFitsLlgImage (bitpix=64)
+ * GFitsFltImage (bitpix=-32)
+ * GFitsDblImage (bitpix=-64)
+ * The information about the number of bits per pixels is extracted from
+ * the actual HDU.
+ *
+ * @todo Many image classes need still to be implemented.
+ ***************************************************************************/
+GFitsImage* GFits::new_image(void)
+{
+    // Initialise return value
+    GFitsImage* image = NULL;
+
+    // Get number of bits per pixel
+    int status =   0;
+    int bitpix = -64;
+    status     = __ffgipr(FPTR(m_fitsfile), 0, &bitpix, NULL, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_NEW_IMAGE, status);
+
+    // Allocate bitpix dependent image
+    switch (bitpix) {
+    case 8:
+        image = new GFitsByteImage;
+        break;
+    case 16:
+        image = new GFitsImageDbl;  // TO BE REPLACED BY CORRECT CLASS
+        break;
+    case 32:
+        image = new GFitsImageDbl;  // TO BE REPLACED BY CORRECT CLASS
+        break;
+    case 64:
+        image = new GFitsImageDbl;  // TO BE REPLACED BY CORRECT CLASS
+        break;
+    case -32:
+        image = new GFitsImageFlt;
+        break;
+    case -64:
+        image = new GFitsImageDbl;
+        break;
+    default:
+        throw GException::fits_bad_bitpix(G_NEW_IMAGE, bitpix);
+        break;
+    }
+
+    // Return image pointer
+    return image;
+}
+
+
+/***********************************************************************//**
+ * @brief Return minimal primary HDU
+ *
+ * Creates a primary HDU in memory and open it using the GFitsHDU::open()
+ * method.
+ ***************************************************************************/
+GFitsImage* GFits::new_primary(void)
+{
+    // Allocate an empty image
+    GFitsImage* image = new GFitsByteImage;
+
+    // Create primary image in memory
+    int status = 0;
+    __fitsfile* fptr;
+    status = __ffinit(&fptr, "mem://", &status);
+    status = __ffcrim(fptr, 8, 0, NULL, &status);
+
+    // Open HDU
+    image->open(fptr,0);
+
+    // Initialise FITS file pointer
+    FPTR(image->m_fitsfile)->HDUposition = 0;
+    FPTR(image->m_fitsfile)->Fptr        = NULL;
+
+    // Return image
+    return image;
 }
 
 
@@ -599,9 +758,9 @@ std::ostream& operator<< (std::ostream& os, const GFits& fits)
         os << "read/write" << std::endl;
     else
         os << "read only" << std::endl;
-    os << " Number of HDUs ............: " << fits.m_num_hdu << std::endl;
-    for (int i = 0; i < fits.m_num_hdu; ++i)
-        os << fits.m_hdu[i];
+    os << " Number of HDUs ............: " << fits.size() << std::endl;
+    for (int i = 0; i < fits.size(); ++i)
+        os << std::endl << *fits.m_hdu[i];
 
     // Return output stream
     return os;
