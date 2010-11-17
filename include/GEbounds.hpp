@@ -22,7 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include "GFits.hpp"
-#include "GFitsHDU.hpp"
+#include "GFitsBinTable.hpp"
 #include "GEnergy.hpp"
 
 
@@ -43,7 +43,7 @@ public:
     // Constructors and destructors
     GEbounds(void);
     GEbounds(const GEbounds& ebds);
-    ~GEbounds(void);
+    virtual ~GEbounds(void);
 
     // Operators
     GEbounds& operator= (const GEbounds& ebds);
@@ -58,7 +58,7 @@ public:
                  const std::string& extname = "EBOUNDS");
 	void    save(const std::string& filename, bool clobber,
                  const std::string& extname = "EBOUNDS");
-    void    read(GFitsHDU* hdu);
+    void    read(GFitsBinTable* hdu);
     void    write(GFits* file, const std::string& extname = "EBOUNDS");
     int     index(const GEnergy& eng) const;
     int     size(void) const { return m_num; }

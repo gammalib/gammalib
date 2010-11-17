@@ -26,7 +26,7 @@
  *
  * @brief Abstract SWIG interface for the FITS table classes.
  ***************************************************************************/
-class GFitsTable : public GFitsData {
+class GFitsTable : public GFitsHDU {
 public:
     // Constructors and destructors
     GFitsTable(void);
@@ -34,18 +34,18 @@ public:
     GFitsTable(const GFitsTable& table);
     virtual ~GFitsTable(void);
 
-    // Methods
-    void           append_column(GFitsTableCol& column);
-    void           insert_column(int colnum, GFitsTableCol& column);
-    void           append_rows(const int& nrows);
-    void           insert_rows(const int& rownum, const int& nrows);
-    GFitsTableCol* column(const std::string& colname);
-    GFitsTableCol* column(const int& colnum);
-    int            nrows(void) const;
-    int            ncols(void) const;
+    // Pure virtual methods
+    virtual GFitsTable* clone(void) const = 0;
 
-protected:
-    GFitsTable* clone(void) const = 0;
+    // Implemented Methods
+    virtual void           append_column(GFitsTableCol& column);
+    virtual void           insert_column(int colnum, GFitsTableCol& column);
+    virtual void           append_rows(const int& nrows);
+    virtual void           insert_rows(const int& rownum, const int& nrows);
+    virtual GFitsTableCol* column(const std::string& colname);
+    virtual GFitsTableCol* column(const int& colnum);
+    virtual int            nrows(void) const;
+    virtual int            ncols(void) const;
 };
 
 

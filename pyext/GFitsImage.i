@@ -25,12 +25,24 @@
  *
  * @brief Abstract SWIG interface for the FITS image classes.
  ***************************************************************************/
-class GFitsImage : public GFitsData {
+class GFitsImage : public GFitsHDU {
 public:
-    int bitpix(void) const;
-    int naxis(void) const;
-    int naxes(int axis) const;
-    int num_pixels(void) const;
-protected:
+    // Constructors and destructors
+    GFitsImage(void);
+    GFitsImage(int bitpix, int naxis, const int* naxes);
+    GFitsImage(const GFitsImage& image);
+    virtual ~GFitsImage(void);
+
+    // Pure virtual methods
+    virtual void*       pixels(void) = 0;
     virtual GFitsImage* clone(void) const = 0;
+
+    // Implemented pure virtual methods
+    HDUType exttype(void) const { return HT_IMAGE; }
+
+    // Methods
+    virtual int bitpix(void) const;
+    virtual int naxis(void) const;
+    virtual int naxes(int axis) const;
+    virtual int num_pixels(void) const;
 };

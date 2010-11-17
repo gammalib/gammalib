@@ -45,6 +45,9 @@ public:
     void             clear(void);
     int              size(void) const;
     void             update(const GFitsHeaderCard& card);
+    void             open(void* vptr);
+    void             save(void* vptr);
+    void             close(void);
     GFitsHeaderCard* card(const std::string& keyname);
     GFitsHeaderCard* card(const int& cardno);
     std::string      string(const std::string& keyname);

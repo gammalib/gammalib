@@ -31,13 +31,16 @@ class GFitsImageDbl : public GFitsImage {
 public:
     // Constructors and destructors
     GFitsImageDbl(void);
+    GFitsImageDbl(int naxis, const int* naxes);
+    GFitsImageDbl(int naxis, const int* naxes, const double* pixels);
     GFitsImageDbl(const GFitsImageDbl& image);
     virtual ~GFitsImageDbl(void);
 
     // Methods
-    void    link(double* pixels);
-    void    set_nullval(const double* value);
-    double* pixels(void);
+    void           link(double* pixels);
+    void           nulval(const double* value);
+    void*          pixels(void);
+    GFitsImageDbl* clone(void) const;
 };
 
 

@@ -46,7 +46,7 @@ public:
     void      close(void);
     void      save(void);
     void      saveto(const std::string& filename, bool clobber = false);
-    void      append(const GFitsHDU& hdu);
+    void      append(GFitsHDU* hdu);
     GFitsHDU* hdu(const std::string& extname) const;
     GFitsHDU* hdu(int extno) const;
 };
