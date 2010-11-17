@@ -210,12 +210,23 @@ public:
         fits_hdu_not_found(std::string origin, int extno, int status = 0);
     };
 
+    // FITS HDU not an image
+    class fits_hdu_not_image : public GExceptionHandler {
+    public:
+        fits_hdu_not_image(std::string origin, std::string extname, int type);
+    };
+
+    // FITS HDU not a table
+    class fits_hdu_not_table : public GExceptionHandler {
+    public:
+        fits_hdu_not_table(std::string origin, std::string extname, int type);
+    };
+
     // FITS unknown HDU type
     class fits_unknown_HDU_type : public GExceptionHandler {
     public:
         fits_unknown_HDU_type(std::string origin, int type);
     };
-
     // FITS HDU is not a table
     class fits_HDU_not_a_table : public GExceptionHandler {
     public:

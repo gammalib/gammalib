@@ -196,6 +196,38 @@ GException::fits_hdu_not_found::fits_hdu_not_found(std::string origin,
 
 
 /***********************************************************************//**
+ * @brief FITS error: HDU not an image
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] extname Extension name.
+ * @param[in] type Specified HDU type.
+ ***************************************************************************/
+GException::fits_hdu_not_image::fits_hdu_not_image(std::string origin,
+                                                   std::string extname,
+                                                   int         type)
+{
+    m_origin  = origin;
+    m_message = "HDU \""+extname+"\" is not an image (type="+str(type)+")";
+}
+
+
+/***********************************************************************//**
+ * @brief FITS error: HDU not a table
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] extname Extension name.
+ * @param[in] type Specified HDU type.
+ ***************************************************************************/
+GException::fits_hdu_not_table::fits_hdu_not_table(std::string origin,
+                                                   std::string extname,
+                                                   int         type)
+{
+    m_origin  = origin;
+    m_message = "HDU \""+extname+"\" is not a table (type="+str(type)+")";
+}
+
+
+/***********************************************************************//**
  * @brief FITS error: HDU of unknown type found
  *
  * @param[in] origin Method that throws the error.
@@ -205,7 +237,7 @@ GException::fits_unknown_HDU_type::fits_unknown_HDU_type(std::string origin,
                                                          int         type)
 {
     m_origin  = origin;
-    m_message = "HDU type '" + str(type) + "' is not known";
+    m_message = "HDU type (type="+str(type)+") is not defined";
 }
 
 
