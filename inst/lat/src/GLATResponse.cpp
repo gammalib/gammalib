@@ -26,13 +26,12 @@
 #include "GLATResponse.hpp"
 #include "GLATPointing.hpp"
 #include "GFits.hpp"
-#include "GFitsHDU.hpp"
-#include "GFitsImageDbl.hpp"
+#include "GFitsTable.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_LOAD            "load(const std::string&, const std::string&)"
-#define G_GET_FITS_VECTOR "GLATResponse::get_fits_vector(GFitsHDU*,std::string&,int)"
+#define G_LOAD                 "load(const std::string&, const std::string&)"
+#define G_GET_FITS_VECTOR "GLATResponse::get_fits_vector(GFitsTable*,std::string&,int)"
 
 /* __ Macros _____________________________________________________________ */
 

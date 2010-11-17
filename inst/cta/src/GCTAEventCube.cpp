@@ -30,7 +30,6 @@
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsImage.hpp"
-#include "GFitsImageDbl.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_POINTER                               "GCTAEventCube::pointer(int)"
