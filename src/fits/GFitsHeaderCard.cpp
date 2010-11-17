@@ -1117,60 +1117,60 @@ std::ostream& operator<< (std::ostream& os, const GFitsHeaderCard& card)
     if (card.m_value_dtype != NULL) {
         switch (card.m_dtype) {
         case __TBIT:
-            os << " <bit>" << std::endl;
+            os << " <bit>";
             break;
         case __TBYTE:
-            os << " <byte>" << std::endl;
+            os << " <byte>";
             break;
         case __TSBYTE:
-            os << " <signed byte>" << std::endl;
+            os << " <signed byte>";
             break;
         case __TLOGICAL:
-            os << " <bool>" << std::endl;
+            os << " <bool>";
             break;
         case __TSTRING:
-            os << " <string>" << std::endl;
+            os << " <string>";
             break;
         case __TUSHORT:
-            os << " <unsigned short>" << std::endl;
+            os << " <unsigned short>";
             break;
         case __TSHORT:
-            os << " <short>" << std::endl;
+            os << " <short>";
             break;
         case __TUINT:
-            os << " <unsigned int>" << std::endl;
+            os << " <unsigned int>";
             break;
         case __TINT:
-            os << " <int>" << std::endl;
+            os << " <int>";
             break;
         case __TULONG:
-            os << " <unsigned long>" << std::endl;
+            os << " <unsigned long>";
             break;
         case __TLONG:
-            os << " <long>" << std::endl;
+            os << " <long>";
             break;
         case __TLONGLONG:
-            os << " <long long>" << std::endl;
+            os << " <long long>";
             break;
         case __TFLOAT:
-            os << " <float>" << std::endl;
+            os << " <float>";
             break;
         case __TDOUBLE:
-            os << " <double>" << std::endl;
+            os << " <double>";
             break;
         case __TCOMPLEX:
-            os << " <complex>" << std::endl;
+            os << " <complex>";
             break;
         case __TDBLCOMPLEX:
-            os << " <double complex>" << std::endl;
+            os << " <double complex>";
             break;
         default:
-            os << " <unsupported>" << std::endl;
+            os << " <unsupported>";
             break;
         }
     }
     else
-        os << " <non native>" << std::endl;
+        os << " <non native>";
 
     // Return output stream
     return os;
