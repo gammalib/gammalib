@@ -23,7 +23,7 @@
 #include "GEventList.hpp"
 #include "GCTAEventAtom.hpp"
 #include "GCTAObservation.hpp"
-#include "GFitsHDU.hpp"
+#include "GFitsTable.hpp"
 
 
 /***********************************************************************//**
@@ -60,7 +60,7 @@ protected:
     void           copy_members(const GCTAEventList& list);
     void           free_members(void);
     GCTAEventList* clone(void) const;
-    void           load_events(GFitsHDU* hdu);
+    void           load_events(GFitsTable* hdu);
 
     // Protected data area
     int              m_num;            //!< Number of events

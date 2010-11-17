@@ -25,6 +25,8 @@
 #include "GCTAEventList.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponse.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsTableBitCol.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GFitsTableDoubleCol.hpp"
@@ -173,14 +175,11 @@ void GCTAEventList::load(const std::string& filename)
     // Clear object
     clear();
 
-    // Declarse FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(filename);
+    GFits file(filename);
 
     // Get HDU
-    GFitsHDU* hdu = file.hdu("EVENTS");
+    GFitsTable* hdu = file.table("EVENTS");
 
     // Load columns
     load_events(hdu);
@@ -305,7 +304,7 @@ GCTAEventList* GCTAEventList::clone(void) const
 /***********************************************************************//**
  * @brief Load CTA events from FITS HDU.
  *
- * @param[in] hdu Pointer to FITS HDU from which events are loaded.
+ * @param[in] hdu Pointer to FITS table.
  *
  * This method loads the CTA event list from a FITS file into memory. Only
  * quantities that are relevant for science analysis will be loaded. This
@@ -313,7 +312,7 @@ GCTAEventList* GCTAEventList::clone(void) const
  * file. For this purpose specific code should be written that accesses the
  * data directly through the GFits class.
  ***************************************************************************/
-void GCTAEventList::load_events(GFitsHDU* hdu)
+void GCTAEventList::load_events(GFitsTable* hdu)
 {
     // Allocate space for keyword name
     char keyword[10];
@@ -322,7 +321,7 @@ void GCTAEventList::load_events(GFitsHDU* hdu)
     if (hdu != NULL) {
 
         // Extract number of events in FITS file
-        m_num = hdu->card("NAXIS2")->integer();
+        m_num = hdu->integer("NAXIS2");
 
         // If there are events then load them
         if (m_num > 0) {
@@ -354,7 +353,7 @@ void GCTAEventList::load_events(GFitsHDU* hdu)
             GFitsTableFloatCol*  ptr_hil_msw_err = (GFitsTableFloatCol*)hdu->column("HIL_MSW_ERR");
             GFitsTableFloatCol*  ptr_hil_msl     = (GFitsTableFloatCol*)hdu->column("HIL_MSL");
             GFitsTableFloatCol*  ptr_hil_msl_err = (GFitsTableFloatCol*)hdu->column("HIL_MSL_ERR");
-
+            
             // Copy data from columns into GCTAEventAtom objects
             GCTAEventAtom* ptr = (GCTAEventAtom*)m_events;
             for (int i = 0; i < m_num; ++i) {

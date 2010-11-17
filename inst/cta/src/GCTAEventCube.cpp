@@ -23,8 +23,13 @@
 #include <iostream>
 #include "GCTAException.hpp"
 #include "GCTAEventCube.hpp"
+#include "GCTAEventBin.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponse.hpp"
+#include "GSkymap.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
+#include "GFitsImage.hpp"
 #include "GFitsImageDbl.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -157,7 +162,7 @@ void GCTAEventCube::clear(void)
 /***********************************************************************//**
  * @brief Load CTA counts map from FITS file.
  *
- * @param[in] filename Counts map FITS filename to be loaded.
+ * @param[in] filename FITS file name of counts map.
  *
  * It is assumed that the counts map resides in the primary extension of the
  * FITS file, the energy boundaries reside in the EBOUNDS extension and the
@@ -170,16 +175,13 @@ void GCTAEventCube::load(const std::string& filename)
     // Clear object
     clear();
 
-    // Allocate FITS file
-    GFits file;
-
     // Open counts map FITS file
-    file.open(filename);
+    GFits file(filename);
 
     // Get HDUs
-    GFitsHDU* hdu_cntmap  = file.hdu("Primary");
-    GFitsHDU* hdu_ebounds = file.hdu("EBOUNDS");
-    GFitsHDU* hdu_gti     = file.hdu("GTI");
+    GFitsImage* hdu_cntmap  = file.image("Primary");
+    GFitsTable* hdu_ebounds = file.table("EBOUNDS");
+    GFitsTable* hdu_gti     = file.table("GTI");
 
     // Load counts map
     read_cntmap(hdu_cntmap);
@@ -211,6 +213,7 @@ void GCTAEventCube::load(const std::string& filename)
  * The method returns a NULL pointer if the index is out of the valid range.
  *
  * @todo Static pointers could be set by init_members().
+ *
  * @todo Should we really return a NULL pointer in case that the index
  *       is not valid? Should we not better throw an exception? 
  ***************************************************************************/
@@ -397,7 +400,7 @@ GCTAEventCube* GCTAEventCube::clone(void) const
 /***********************************************************************//**
  * @brief Read CTA counts map from HDU.
  *
- * @param[in] hdu Pointer to FITS HDU from which events are loaded.
+ * @param[in] hdu Pointer to image HDU.
  *
  * This method reads a CTA counts map from a FITS HDU. The counts map is
  * stored in a GSkymap object, and a pointer is set up to access the pixels
@@ -406,7 +409,7 @@ GCTAEventCube* GCTAEventCube::clone(void) const
  * while the counts map is stored in the order (ix,iy,ebin), i.e. the x
  * axis is the most rapidely varying axis.
  ***************************************************************************/
-void GCTAEventCube::read_cntmap(GFitsHDU* hdu)
+void GCTAEventCube::read_cntmap(GFitsImage* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
@@ -438,11 +441,11 @@ void GCTAEventCube::read_cntmap(GFitsHDU* hdu)
 /***********************************************************************//**
  * @brief Read energy boundaries from HDU.
  *
- * @param[in] hdu Pointer to FITS HDU from which energy boundaries are loaded.
+ * @param[in] hdu Pointer to energy boundaries table.
  *
  * Read the energy boundaries from the HDU.
  ***************************************************************************/
-void GCTAEventCube::read_ebds(GFitsHDU* hdu)
+void GCTAEventCube::read_ebds(GFitsTable* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
@@ -463,11 +466,11 @@ void GCTAEventCube::read_ebds(GFitsHDU* hdu)
 /***********************************************************************//**
  * @brief Read GTIs from HDU.
  *
- * @param[in] hdu Pointer to FITS HDU from which GTIs are loaded.
+ * @param[in] hdu Pointer to GTI table.
  *
  * Reads the Good Time Intervals from the GTI extension.
  ***************************************************************************/
-void GCTAEventCube::read_gti(GFitsHDU* hdu)
+void GCTAEventCube::read_gti(GFitsTable* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {

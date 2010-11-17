@@ -30,7 +30,8 @@
 #include "GTime.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTAPointing.hpp"
-#include "GFitsHDU.hpp"
+#include "GFitsTable.hpp"
+#include "GFitsImage.hpp"
 
 
 /***********************************************************************//**
@@ -77,9 +78,9 @@ protected:
     void           copy_members(const GCTAEventCube& cube);
     void           free_members(void);
     GCTAEventCube* clone(void) const;
-    void           read_cntmap(GFitsHDU* hdu);
-    void           read_ebds(GFitsHDU* hdu);
-    void           read_gti(GFitsHDU* hdu);
+    void           read_cntmap(GFitsImage* hdu);
+    void           read_ebds(GFitsTable* hdu);
+    void           read_gti(GFitsTable* hdu);
     void           set_directions(void);
     void           set_energies(void);
     void           set_time(void);
