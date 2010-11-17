@@ -21,10 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GFitsHeader.hpp"
-#include "GFitsData.hpp"
-#include "GFitsImage.hpp"
-#include "GFitsAsciiTable.hpp"
-#include "GFitsBinTable.hpp"
+#include "GFitsHeaderCard.hpp"
 
 
 /***********************************************************************//**
@@ -36,6 +33,7 @@
  * and a data area. The header is composed of cards and is implemented by
  * the GFitsHeader class. The data are is either an image or a table and
  * is implemented by the abstract GFitsData base class.
+ * The class holds a copy of the original FITS
  *
  * @todo Implement GFitsHDU* select(const std::string& expr) that applies
  * to a table HDU for row selection.
@@ -51,51 +49,65 @@ class GFitsHDU {
 public:
     // Constructors and destructors
     GFitsHDU(void);
-    GFitsHDU(const GFitsImage& image);
-    GFitsHDU(const GFitsAsciiTable& table);
-    GFitsHDU(const GFitsBinTable& table);
     GFitsHDU(const GFitsHDU& hdu);
     virtual ~GFitsHDU(void);
 
     // Operators
     GFitsHDU& operator= (const GFitsHDU& hdu);
 
-    // Methods
-    std::string      extname(void) const;
-    void             extname(const std::string& extname);
-    int              extno(void) const;
-    int              exttype(void) const;
-    GFitsHeader*     header(void) const;
-    GFitsData*       data(void) const;
-    GFitsHeaderCard* card(const std::string& keyname) const;
-    GFitsHeaderCard* card(const int& cardno) const;
-    void             card(const std::string& keyname, const std::string& value,
-                          const std::string& comment);
-    void             card(const std::string& keyname, const double& value,
-                          const std::string& comment);
-    void             card(const std::string& keyname, const int& value,
-                          const std::string& comment);
-    GFitsTableCol*   column(const std::string& colname) const;
-    GFitsTableCol*   column(const int& colnum) const;
-    void             primary(void);
+    // Public enumerators
+    enum HDUType {
+        HT_IMAGE = 0,
+        HT_ASCII_TABLE = 1,
+        HT_BIN_TABLE = 2
+    };
 
-private:
-    // Private methods
-    void        init_members(void);
-    void        copy_members(const GFitsHDU& hdu);
-    void        free_members(void);
-    void        connect(void* fptr);
-    GFitsImage* new_image(void);
-    void        open(void* vptr, int hdunum);
-    void        save(void);
+    // Pure virtual methods
+    virtual HDUType   exttype(void) const = 0;
+    virtual GFitsHDU* clone(void) const = 0;
 
-    // Private data area
-    void*        m_fitsfile;    //!< FITS file pointer
+    // Implemented methods
+    virtual std::string      extname(void) const { return m_name; }
+    virtual void             extname(const std::string& extname);
+    virtual int              extno(void) const { return m_hdunum; }
+    virtual void             extno(int num) { m_hdunum=num; }
+    virtual GFitsHeader*     header(void) { return &m_header; }
+    virtual GFitsHeaderCard* card(const std::string& keyname);
+    virtual GFitsHeaderCard* card(const int& cardno);
+    virtual int              cards(void) const { return m_header.size(); }
+    virtual std::string      string(const std::string& keyname) const;
+    virtual double           real(const std::string& keyname) const;
+    virtual int              integer(const std::string& keyname) const;
+    virtual void             card(const std::string& keyname, const std::string& value,
+                                  const std::string& comment);
+    virtual void             card(const std::string& keyname, const double& value,
+                                  const std::string& comment);
+    virtual void             card(const std::string& keyname, const int& value,
+                                  const std::string& comment);
+    virtual GFitsHDU*        primary(void);
+
+protected:
+    // Protected methods
+    void    init_members(void);
+    void    copy_members(const GFitsHDU& hdu);
+    void    free_members(void);
+    void    connect(void* fptr);
+    void    move_to_hdu(void);
+    HDUType get_hdu_type(void) const;
+    void    open(void* vptr, int hdunum);
+    void    save(void);
+
+    // Pure virtual protected methods
+    virtual void data_open(void* vptr) = 0;
+    virtual void data_save(void) = 0;
+    virtual void data_close(void) = 0;
+    virtual void data_connect(void* vptr) = 0;
+
+    // Protected data area
+    void*        m_fitsfile;    //!< FITS file pointer pointing on actual HDU
     int          m_hdunum;      //!< HDU number (starting from 0)
     std::string  m_name;        //!< HDU name (extname)
-    int          m_type;        //!< HDU type
-    GFitsHeader* m_header;      //!< HDU header
-    GFitsData*   m_data;        //!< HDU data
+    GFitsHeader  m_header;      //!< HDU header
 };
 
 #endif /* GFITSHDU_HPP */
