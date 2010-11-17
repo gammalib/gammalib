@@ -20,7 +20,9 @@
 #define GFITS_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <vector>
 #include "GFitsHDU.hpp"
+#include "GFitsImage.hpp"
 
 
 /***********************************************************************//**
@@ -52,25 +54,26 @@ public:
     void      clear(void);
     int       size(void) const;
     void      open(const std::string& filename);
-    void      close(void);
     void      save(void);
     void      saveto(const std::string& filename, bool clobber = false);
-    void      append(const GFitsHDU& hdu);
+    void      close(void);
+    void      append(GFitsHDU* hdu);
     GFitsHDU* hdu(const std::string& extname) const;
     GFitsHDU* hdu(int extno) const;
 
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GFits& fits);
-    void free_members(void);
+    void        init_members(void);
+    void        copy_members(const GFits& fits);
+    void        free_members(void);
+    GFitsImage* new_image(void);
+    GFitsImage* new_primary(void);
 
     // Private data area
-    std::string  m_filename;    //!< FITS file name
-    void*        m_fitsfile;    //!< FITS file pointer
-    int          m_readwrite;   //!< FITS file is read/write (1=true, 0=false)
-    int          m_num_hdu;     //!< Number of HDUs in file
-    GFitsHDU*    m_hdu;         //!< Pointers to HDUs
+    std::vector<GFitsHDU*> m_hdu;        //!< Pointers to HDUs
+    std::string            m_filename;   //!< FITS file name
+    void*                  m_fitsfile;   //!< FITS file pointer
+    bool                   m_readwrite;  //!< FITS file is readwrite (true/false)
 };
 
 #endif /* GFITS_HPP */

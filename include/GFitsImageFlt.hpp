@@ -20,7 +20,6 @@
 #define GFITSIMAGEFLT_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsData.hpp"
 #include "GFitsImage.hpp"
 
 
@@ -52,20 +51,18 @@ public:
     const float&   operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Methods
-    void   link(float* pixels);
-    void   set_nullval(const float* value);
-    float* pixels(void);
+    void           link(float* pixels);
+    void           nulval(const float* value);
+    void*          pixels(void);
+    GFitsImageFlt* clone(void) const;
 
 private:
     // Private methods
-    void           init_members(void);
-    void           copy_members(const GFitsImageFlt& image);
-    void           free_members(void);
-    void           fetch_pixels(void);
-    void           open(void* vptr);
-    void           save(void);
-    void           close(void);
-    GFitsImageFlt* clone(void) const;
+    void init_members(void);
+    void copy_members(const GFitsImageFlt& image);
+    void free_members(void);
+    void fetch_pixels(void);
+    int  type(void) const; 
 
     // Private data area
     int    m_linked;        // Pixels are linked (don't delete them!)

@@ -22,8 +22,6 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OPERATOR2                     "GFitsImageDbl::operator() (int,int)"
-#define G_OPEN                                   "GFitsImageDbl::open(void*)"
-#define G_SAVE                                        "GFitsImageDbl::save()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -47,9 +45,6 @@ GFitsImageDbl::GFitsImageDbl(void) : GFitsImage()
     // Initialise class members for clean destruction
     init_members();
 
-    // Set bitpix
-    m_bitpix = -64;
-
     // Return
     return;
 }
@@ -65,14 +60,19 @@ GFitsImageDbl::GFitsImageDbl(void) : GFitsImage()
  * the number of pixels in each dimension. Note that this constructor does
  * not allocate any memory for the actual image.
  ***************************************************************************/
-GFitsImageDbl::GFitsImageDbl(int naxis, const int* naxes) : GFitsImage(naxis, naxes)
+GFitsImageDbl::GFitsImageDbl(int naxis, const int* naxes) :
+               GFitsImage(-64, naxis, naxes)
 {
     // Initialise class members for clean destruction
     init_members();
 
-    // Set bitpix
-    m_bitpix = -64;
-
+    // Allocate and initialise pixels
+    if (m_num_pixels > 0) {
+        m_pixels = new double[m_num_pixels];
+        for (int i = 0; i < m_num_pixels; ++i)
+            m_pixels[i] = 0.0;
+    }
+    
     // Return
     return;
 }
@@ -94,8 +94,8 @@ GFitsImageDbl::GFitsImageDbl(int naxis, const int* naxes) : GFitsImage(naxis, na
  *   GFitsImageDbl::link(double* pixels)
  * may be prefered to avoid duplication of the pixel data.
  ***************************************************************************/
-GFitsImageDbl::GFitsImageDbl(int naxis, const int* naxes, const double* pixels) 
-                                                   : GFitsImage(naxis, naxes)
+GFitsImageDbl::GFitsImageDbl(int naxis, const int* naxes, const double* pixels) :
+               GFitsImage(-64, naxis, naxes)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -106,9 +106,6 @@ GFitsImageDbl::GFitsImageDbl(int naxis, const int* naxes, const double* pixels)
         for (int i = 0; i < m_num_pixels; ++i)
             m_pixels[i] = pixels[i];
     }
-
-    // Set bitpix
-    m_bitpix = -64;
 
     // Return
     return;
@@ -456,7 +453,7 @@ void GFitsImageDbl::link(double* pixels)
  * NOTE: FOR THE MOMENT THE IMAGE IS NOT RE-LOADED IF THE NULL VALUE IS
  * CHANGED !!!!
  ***************************************************************************/
-void GFitsImageDbl::set_nullval(const double* value)
+void GFitsImageDbl::nulval(const double* value)
 {
     // If NULL value is empty then reset the NULL value
     if (value == NULL) {
@@ -486,13 +483,26 @@ void GFitsImageDbl::set_nullval(const double* value)
 /***********************************************************************//**
  * @brief Return pointer to image pixel
  ***************************************************************************/
-double* GFitsImageDbl::pixels(void)
+void* GFitsImageDbl::pixels(void)
 {
     // If image pixels are not available then allocate them now
     if (m_pixels == NULL) fetch_pixels();
 
     // Return
     return m_pixels;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone FITS image
+ *
+ * Cloning provides a copy of the FITS file. Cloning is used to allocate
+ * derived classes into a base class pointer.
+ ***************************************************************************/
+GFitsImageDbl* GFitsImageDbl::clone(void) const
+{
+    // Clone this image
+    return new GFitsImageDbl(*this);
 }
 
 
@@ -624,80 +634,12 @@ void GFitsImageDbl::fetch_pixels(void)
 
 
 /***********************************************************************//**
- * @brief Open FITS image
- *
- * @param fptr FITS file void pointer.
- *
- * Open FITS image in FITS file. Opening means connecting the FITS file
- * pointer to the image and reading the image and axes dimensions.
+ * @brief Return data type
  ***************************************************************************/
-void GFitsImageDbl::open(void* vptr)
+int GFitsImageDbl::type(void) const
 {
-    // Initialise base class members
-    GFitsImage::init_members();
-
-    // Initialise class members
-    init_members();
-
-    // Open image
-    open_image(vptr);
-
     // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Save FITS image
- *
- * Saves the image into the FITS file.
- ***************************************************************************/
-void GFitsImageDbl::save(void)
-{
-    // Save a double precision image
-    save_image(__TDOUBLE, m_pixels);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Close FITS image
- *
- * Closing a FITS image resets the object into its initial state. Closing
- * does NOT save the image into the FITS file. Use the save method for this
- * purpose.
- ***************************************************************************/
-void GFitsImageDbl::close(void)
-{
-    // Free members
-    free_members();
-
-    // Initialise members
-    init_members();
-
-    // Free base class members
-    GFitsImage::free_members();
-
-    // Initialise base class members
-    GFitsImage::init_members();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone FITS image
- *
- * Cloning provides a copy of the FITS file. Cloning is used to allocate
- * derived classes into a base class pointer.
- ***************************************************************************/
-GFitsImageDbl* GFitsImageDbl::clone(void) const
-{
-    // Clone this image
-    return new GFitsImageDbl(*this);
+    return __TDOUBLE;
 }
 
 

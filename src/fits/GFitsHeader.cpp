@@ -151,6 +151,109 @@ int GFitsHeader::size(void) const
 
 
 /***********************************************************************//**
+ * @brief Open Header
+ *
+ * @param[in] vptr FITS file void pointer.
+ *
+ * @exception GException::fits_error
+ *            FITS error occured.
+ *
+ * Loads all header cards into memory. Any header cards that existed before
+ * will be dropped.
+ ***************************************************************************/
+void GFitsHeader::open(void* vptr)
+{
+    // Move to HDU
+    int status = 0;
+    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_OPEN, status);
+
+    // Determine number of cards in header
+    status = __ffghsp(FPTR(vptr), &m_num_cards, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_OPEN, status);
+
+    // Drop any old cards
+    if (m_card != NULL) delete [] m_card;
+
+    // Allocate memory for new cards
+    m_card = new GFitsHeaderCard[m_num_cards];
+
+    // Read all cards
+    for (int i = 0; i < m_num_cards; ++i)
+        m_card[i].read(FPTR(vptr), i+1);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save Header to FITS file
+ *
+ * @param[in] fptr FITS file void pointer.
+ *
+ * @exception GException::fits_error
+ *            FITS error occured.
+ *
+ * Saves all header cards into HDU. This method does not write the following
+ * mandatory keywords to the HDU (those will be written by methods handling
+ * the data of the HDU):
+ * 'SIMPLE'
+ * 'BITPIX'
+ * 'NAXIS', 'NAXIS1', 'NAXIS2', etc.
+ * 'EXTEND'
+ * 'PCOUNT'
+ * 'GCOUNT'
+ ***************************************************************************/
+void GFitsHeader::save(void* vptr)
+{
+    // Move to HDU
+    int status = 0;
+    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
+    if (status != 0)
+        throw GException::fits_error(G_SAVE, status);
+
+    // Save all cards
+    for (int i = 0; i < m_num_cards; ++i) {
+        if (m_card[i].keyname() != "SIMPLE" &&
+            m_card[i].keyname() != "XTENSION" &&
+            m_card[i].keyname() != "BITPIX" &&
+            m_card[i].keyname() != "EXTEND" &&
+            m_card[i].keyname() != "PCOUNT" &&
+            m_card[i].keyname() != "GCOUNT" &&
+            m_card[i].keyname().find("NAXIS") == std::string::npos) {
+            m_card[i].write(FPTR(vptr));
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Close Header
+ *
+ * Drops all header cards. Note that closing does not save the cards to the
+ * FITS file. Use the save method in case that cards should be save to the
+ * FITS file.
+ ***************************************************************************/
+void GFitsHeader::close(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Update card in header or append card to header
  *
  * @param card FITS header card that should be updated
@@ -470,109 +573,6 @@ GFitsHeaderCard* GFitsHeader::card_ptr(const std::string& keyname)
 }
 
 
-/***********************************************************************//**
- * @brief Open Header
- *
- * @param[in] vptr FITS file void pointer.
- *
- * @exception GException::fits_error
- *            FITS error occured.
- *
- * Loads all header cards into memory. Any header cards that existed before
- * will be dropped.
- ***************************************************************************/
-void GFitsHeader::open(void* vptr)
-{
-    // Move to HDU
-    int status = 0;
-    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
-    if (status != 0)
-        throw GException::fits_error(G_OPEN, status);
-
-    // Determine number of cards in header
-    status = __ffghsp(FPTR(vptr), &m_num_cards, NULL, &status);
-    if (status != 0)
-        throw GException::fits_error(G_OPEN, status);
-
-    // Drop any old cards
-    if (m_card != NULL) delete [] m_card;
-
-    // Allocate memory for new cards
-    m_card = new GFitsHeaderCard[m_num_cards];
-
-    // Read all cards
-    for (int i = 0; i < m_num_cards; ++i)
-        m_card[i].read(FPTR(vptr), i+1);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Save Header to FITS file
- *
- * @param[in] fptr FITS file void pointer.
- *
- * @exception GException::fits_error
- *            FITS error occured.
- *
- * Saves all header cards into HDU. This method does not write the following
- * mandatory keywords to the HDU (those will be writted by methods handling
- * the data of the HDU):
- * 'SIMPLE'
- * 'BITPIX'
- * 'NAXIS', 'NAXIS1', 'NAXIS2', etc.
- * 'EXTEND'
- * 'PCOUNT'
- * 'GCOUNT'
- ***************************************************************************/
-void GFitsHeader::save(void* vptr)
-{
-    // Move to HDU
-    int status = 0;
-    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
-    if (status != 0)
-        throw GException::fits_error(G_SAVE, status);
-
-    // Save all cards
-    for (int i = 0; i < m_num_cards; ++i) {
-        if (m_card[i].keyname() != "SIMPLE" &&
-            m_card[i].keyname() != "XTENSION" &&
-            m_card[i].keyname() != "BITPIX" &&
-            m_card[i].keyname() != "EXTEND" &&
-            m_card[i].keyname() != "PCOUNT" &&
-            m_card[i].keyname() != "GCOUNT" &&
-            m_card[i].keyname().find("NAXIS") == std::string::npos) {
-            m_card[i].write(FPTR(vptr));
-        }
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Close Header
- *
- * Drops all header cards. Note that closing does not save the cards to the
- * FITS file. Use the save method in case that cards should be save to the
- * FITS file.
- ***************************************************************************/
-void GFitsHeader::close(void)
-{
-    // Free members
-    free_members();
-
-    // Initialise members
-    init_members();
-
-    // Return
-    return;
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                            GFitsHeader friends                          =
@@ -588,9 +588,9 @@ void GFitsHeader::close(void)
 std::ostream& operator<< (std::ostream& os, const GFitsHeader& header)
 {
     // Put header in stream
-    os << "=== GFitsHeader (" << header.m_num_cards << " cards) ===" << std::endl;
+    os << "=== GFitsHeader (" << header.m_num_cards << " cards) ===";
     for (int i = 0; i < header.m_num_cards; ++i)
-        os << " " << header.m_card[i];
+        os << std::endl << " " << header.m_card[i];
 
     // Return output stream
     return os;

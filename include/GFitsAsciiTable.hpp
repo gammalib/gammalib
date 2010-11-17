@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GFitsAsciiTable.hpp  - FITS ASCII table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008 by Jurgen Knodlseder                                *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,6 @@
 #define GFITSASCIITABLE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsData.hpp"
 #include "GFitsTable.hpp"
 
 
@@ -31,18 +30,18 @@
  ***************************************************************************/
 class GFitsAsciiTable : public GFitsTable {
 
-    // Friend classes
-    friend class GFitsHDU;
-
 public:
     // Constructors and destructors
-    GFitsAsciiTable();
+    GFitsAsciiTable(void);
     GFitsAsciiTable(int nrows);
     GFitsAsciiTable(const GFitsAsciiTable& table);
-    virtual ~GFitsAsciiTable();
+    virtual ~GFitsAsciiTable(void);
 
     // Operators
     GFitsAsciiTable& operator= (const GFitsAsciiTable& table);
+
+    // Implemented pure virtual methods
+    HDUType exttype(void) const { return HT_ASCII_TABLE; }
 
     // Methods
 

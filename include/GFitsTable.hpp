@@ -20,7 +20,7 @@
 #define GFITSTABLE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsData.hpp"
+#include "GFitsHDU.hpp"
 #include "GFitsTableCol.hpp"
 
 
@@ -32,13 +32,10 @@
  *
  * @brief Abstract interface for FITS table
  *
- * This class implements a FITS table. A FITS table is a collection of
- * columns with an identical number of rows.
+ * This class defines the abstract interface for a FITS table. A FITS table
+ * is a collection of columns with an identical number of rows.
  ***************************************************************************/
-class GFitsTable : public GFitsData {
-
-    // Friend classes
-    friend class GFitsHDU;
+class GFitsTable : public GFitsHDU {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GFitsTable& table);
@@ -53,35 +50,40 @@ public:
     // Operators
     GFitsTable& operator= (const GFitsTable& table);
 
-    // Methods
-    void           append_column(GFitsTableCol& column);
-    void           insert_column(int colnum, GFitsTableCol& column);
-    void           append_rows(const int& nrows);
-    void           insert_rows(const int& rownum, const int& nrows);
-    GFitsTableCol* column(const std::string& colname);
-    GFitsTableCol* column(const int& colnum);
-    int            nrows(void) const;
-    int            ncols(void) const;
+    // Pure virtual methods
+    virtual GFitsTable* clone(void) const = 0;
+
+    // Implemented Methods
+    virtual void           append_column(GFitsTableCol& column);
+    virtual void           insert_column(int colnum, GFitsTableCol& column);
+    virtual void           append_rows(const int& nrows);
+    virtual void           insert_rows(const int& rownum, const int& nrows);
+    virtual GFitsTableCol* column(const std::string& colname);
+    virtual GFitsTableCol* column(const int& colnum);
+    virtual int            nrows(void) const;
+    virtual int            ncols(void) const;
 
 protected:
     // Protected methods
-    void        init_members(void);
-    void        copy_members(const GFitsTable& table);
-    void        free_members(void);
-    void        open(void* vptr);
-    void        save(void);
-    void        close(void);
-    void        connect(void* vptr);
-    GFitsTable* clone(void) const = 0;
-    char*       get_ttype(const int& colnum) const;
-    char*       get_tform(const int& colnum) const;
-    char*       get_tunit(const int& colnum) const;
+    void  init_members(void);
+    void  copy_members(const GFitsTable& table);
+    void  free_members(void);
+    void  data_open(void* vptr);
+    void  data_save(void);
+    void  data_close(void);
+    void  data_connect(void* vptr);
+    char* get_ttype(const int& colnum) const;
+    char* get_tform(const int& colnum) const;
+    char* get_tunit(const int& colnum) const;
 
     // Protected data area
     int             m_type;       //!< Table type (1=ASCII, 2=Binary)
     int             m_rows;       //!< Number of rows in table
     int             m_cols;       //!< Number of columns in table
     GFitsTableCol** m_columns;    //!< Array of table columns
+
+private:
+    // Private methods
 };
 
 #endif /* GFITSTABLE_HPP */

@@ -20,7 +20,7 @@
 #define GFITSIMAGE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsData.hpp"
+#include "GFitsHDU.hpp"
 
 
 /***********************************************************************//**
@@ -28,12 +28,9 @@
  *
  * @brief Abstract interface for the FITS image classes.
  *
- * Implements an abstract interface for FITS images.
+ * This class defines the abstract interface for a FITS image.
  ***************************************************************************/
-class GFitsImage : public GFitsData {
-
-    // Friend classes
-    friend class GFitsHDU;
+class GFitsImage : public GFitsHDU {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GFitsImage& image);
@@ -41,36 +38,45 @@ class GFitsImage : public GFitsData {
 public:
     // Constructors and destructors
     GFitsImage(void);
-    GFitsImage(int naxis, const int* naxes);
+    GFitsImage(int bitpix, int naxis, const int* naxes);
     GFitsImage(const GFitsImage& image);
     virtual ~GFitsImage(void);
 
     // Operators
     GFitsImage& operator= (const GFitsImage& image);
 
+    // Pure virtual methods
+    virtual void*       pixels(void) = 0;
+    virtual GFitsImage* clone(void) const = 0;
+
+    // Implemented pure virtual methods
+    HDUType exttype(void) const { return HT_IMAGE; }
+
     // Methods
-    int bitpix(void) const;
-    int naxis(void) const;
-    int naxes(int axis) const;
-    int num_pixels(void) const;
+    virtual int bitpix(void) const;
+    virtual int naxis(void) const;
+    virtual int naxes(int axis) const;
+    virtual int num_pixels(void) const;
 
 protected:
-    // Private methods
+    // Protected methods
     void init_members(void);
     void copy_members(const GFitsImage& image);
     void free_members(void);
+    void init_image_header(void);
+    void data_open(void* vptr);
+    void data_save(void);
+    void data_close(void);
+    void data_connect(void* vptr);
     void open_image(void* vptr);
     void load_image(int datatype, const void* pixels, const void* nulval,
                     int* anynul);
     void save_image(int datatype, const void* pixels);
 
-    // Pure virtual methods
-    virtual void        open(void* vptr) = 0;
-    virtual void        save(void) = 0;
-    virtual void        close(void) = 0;
-    virtual GFitsImage* clone(void) const = 0;
+    // Pure virtual protected methods
+    virtual int type(void) const = 0;
 
-    // Private data area
+    // Protected data area
     int   m_bitpix;      //!< Number of Bits/pixel
     int   m_naxis;       //!< Image dimension
     long* m_naxes;       //!< Number of pixels in each dimension

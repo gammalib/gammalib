@@ -40,9 +40,12 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
+ *
+ * Construct instance of an empty image. No header cards are present in an
+ * empty image.
  ***************************************************************************/
-GFitsImage::GFitsImage(void) : GFitsData()
+GFitsImage::GFitsImage(void) : GFitsHDU()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -55,19 +58,23 @@ GFitsImage::GFitsImage(void) : GFitsData()
 /***********************************************************************//**
  * @brief Constructor
  *
- * @param naxis Image dimensions (0,1,2,3,4).
- * @param naxes Number of pixels in each dimension.
+ * @param[in] bitpix Number of Bits per pixel (negative is floating point).
+ * @param[in] naxis Image dimensions (0,1,2,3,4).
+ * @param[in] naxes Number of pixels in each dimension.
  *
  * Construct instance of GFitsImage by specifying the image dimension and
- * the number of pixels in each dimension. Note that this constructor does
- * not allocate any memory for the actual image.
+ * the number of pixels in each dimension. This method also adds the relevant
+ * header cards.
  ***************************************************************************/
-GFitsImage::GFitsImage(int naxis, const int* naxes) : GFitsData()
+GFitsImage::GFitsImage(int bitpix, int naxis, const int* naxes) : GFitsHDU()
 {
     // Initialise class members for clean destruction
     init_members();
 
-    // Store number of axis and bitpix
+    // Store number of Bits per pixel
+    m_bitpix = bitpix;
+
+    // Store number of axes
     m_naxis = naxis;
 
     // Copy number of pixels in each dimension and calculate the total
@@ -81,6 +88,9 @@ GFitsImage::GFitsImage(int naxis, const int* naxes) : GFitsData()
         }
     }
 
+    // Initialise header
+    init_image_header();
+
     // Return
     return;
 }
@@ -89,9 +99,9 @@ GFitsImage::GFitsImage(int naxis, const int* naxes) : GFitsData()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param image FITS image which should be used for construction.
+ * @param[in] image FITS image which should be used for construction.
  ***************************************************************************/
-GFitsImage::GFitsImage(const GFitsImage& image) : GFitsData(image)
+GFitsImage::GFitsImage(const GFitsImage& image) : GFitsHDU(image)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -119,7 +129,7 @@ GFitsImage::~GFitsImage(void)
 
 /*==========================================================================
  =                                                                         =
- =                                 Operators                               =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -134,7 +144,7 @@ GFitsImage& GFitsImage::operator= (const GFitsImage& image)
     if (this != &image) {
 
         // Copy base class members
-        this->GFitsData::operator=(image);
+        this->GFitsHDU::operator=(image);
 
         // Free members
         free_members();
@@ -169,7 +179,7 @@ int GFitsImage::bitpix(void) const
 
 
 /***********************************************************************//**
- * @brief Return image dimension
+ * @brief Return dimension of image
  ***************************************************************************/
 int GFitsImage::naxis(void) const
 {
@@ -179,16 +189,20 @@ int GFitsImage::naxis(void) const
 
 
 /***********************************************************************//**
- * @brief Return axis dimension
+ * @brief Return dimension of an image axis
  *
- * @param[in] axis Axis for which the dimension should be returned 
- *            (starting from 0)
+ * @param[in] axis Image axis (starting from 0).
+ *
+ * @exception GException::out_of_range
+ *            Image axis not valid.
  ***************************************************************************/
 int GFitsImage::naxes(int axis) const
 {
     // Check if axis is within the range
+    #if defined(G_RANGE_CHECK)
     if (axis < 0 || axis >= m_naxis)
         throw GException::out_of_range(G_NAXES, axis, 0, m_naxis-1);
+    #endif
 
     // Get axis dimension
     int dim = m_naxes[axis];
@@ -210,7 +224,7 @@ int GFitsImage::num_pixels(void) const
 
 /*==========================================================================
  =                                                                         =
- =                            Private methods                              =
+ =                            Protected methods                            =
  =                                                                         =
  ==========================================================================*/
 
@@ -272,6 +286,112 @@ void GFitsImage::free_members(void)
 
 
 /***********************************************************************//**
+ * @brief Initialise image header
+ *
+ * Initialises the image header by setting the default header cards. This
+ * method requires the members m_bitpix, m_naxis, and m_naxes to be set
+ * previously.
+ ***************************************************************************/
+void GFitsImage::init_image_header(void)
+{
+    // Set image header keywords
+    m_header.update(GFitsHeaderCard("XTENSION", "IMAGE   ",
+                                    "IMAGE extension"));
+    m_header.update(GFitsHeaderCard("BITPIX", bitpix(),
+                                    "number of bits per data pixel"));
+    m_header.update(GFitsHeaderCard("NAXIS", naxis(),
+                                    "number of data axes"));
+    for (int i = 0; i < naxis(); ++i) {
+        std::ostringstream s_key;
+        std::ostringstream s_comment;
+        s_key     << "NAXIS" << (i+1);
+        s_comment << "length of data axis " << (i+1);
+        m_header.update(GFitsHeaderCard(s_key.str(), naxes(i),
+                                        s_comment.str()));
+    }
+    m_header.update(GFitsHeaderCard("PCOUNT", 0,
+                                    "required keyword; must = 0"));
+    m_header.update(GFitsHeaderCard("GCOUNT", 1,
+                                    "required keyword; must = 1"));
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Open FITS image
+ *
+ * @param fptr FITS file pointer
+ *
+ * Open FITS image in FITS file. Opening means connecting the FITS file
+ * pointer to the image and reading the image and axes dimensions.
+ ***************************************************************************/
+void GFitsImage::data_open(void* vptr)
+{
+    // Open image
+    open_image(vptr);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save FITS image
+ *
+ * Saves the image into the FITS file.
+ ***************************************************************************/
+void GFitsImage::data_save(void)
+{
+    // Save image
+    save_image(type(), pixels());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Close FITS image
+ *
+ * Closing a FITS image resets the object into its initial state. Closing
+ * does NOT save the image into the FITS file. Use the save method for this
+ * purpose.
+ *
+ * @todo Not sure that this is efficient at this level since the pixel array
+ * will not be deallocated!!!
+ ***************************************************************************/
+void GFitsImage::data_close(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Connect FITS image
+ *
+ * @param vptr FITS file pointer
+ *
+ * Connects a FITS file pointer to an image. This method actually does
+ * nothing since any GFitsImage can directly access the FITS file pointer
+ * that is stored in the GFitsHDU base class.
+ ***************************************************************************/
+void GFitsImage::data_connect(void* vptr)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Open Image
  *
  * @param[in] fptr FITS file void pointer.
@@ -287,8 +407,9 @@ void GFitsImage::open_image(void* vptr)
     if (status != 0)
         throw GException::fits_error(G_OPEN_IMAGE, status);
 
-    // Save FITS file pointer
+    // Save the FITS file pointer and the HDU number
     FPTR_COPY(m_fitsfile, vptr);
+    m_hdunum = FPTR(vptr)->HDUposition;
 
     // Get the image dimensions
     status = __ffgidm(FPTR(m_fitsfile), &m_naxis, &status);
@@ -327,8 +448,8 @@ void GFitsImage::open_image(void* vptr)
  *
  * @param[in] datatype Datatype of pixels to be saved.
  * @param[in] pixels Pixel array to be saved.
- * @param[in] nulval Pixel null value.
- * @param[in] anynul ?
+ * @param[in] nulval Pointer to pixel nul value.
+ * @param[out] anynul Number of nul values encountered during loading.
  *
  * Load image pixels from FITS file.
  ***************************************************************************/
@@ -336,11 +457,7 @@ void GFitsImage::load_image(int datatype, const void* pixels,
                             const void* nulval, int* anynul)
 {
     // Move to HDU
-    int status = 0;
-    status     = __ffmahd(FPTR(m_fitsfile), (FPTR(m_fitsfile)->HDUposition)+1,
-                          NULL, &status);
-    if (status != 0)
-        throw GException::fits_error(G_LOAD_IMAGE, status);
+    move_to_hdu();
 
     // Load the image pixels (if there are some ...)
     if (m_naxis > 0) {
@@ -352,8 +469,9 @@ void GFitsImage::load_image(int datatype, const void* pixels,
             lpixel[i] = m_naxes[i];
             inc[i]    = 1;
         }
-        status = __ffgsv(FPTR(m_fitsfile), datatype, fpixel, lpixel, inc,
-                         (void*)nulval, (void*)pixels, anynul, &status);
+        int status = 0;
+        status     = __ffgsv(FPTR(m_fitsfile), datatype, fpixel, lpixel, inc,
+                             (void*)nulval, (void*)pixels, anynul, &status);
         delete [] fpixel;
         delete [] lpixel;
         delete [] inc;
@@ -378,10 +496,12 @@ void GFitsImage::load_image(int datatype, const void* pixels,
  ***************************************************************************/
 void GFitsImage::save_image(int datatype, const void* pixels)
 {
-    // Move to HDU
+    // Move to HDU. We use here an explicit cfitsio moveto function since we
+    // want to recover the error code ...
     int status = 0;
-    status     = __ffmahd(FPTR(m_fitsfile), (FPTR(m_fitsfile)->HDUposition)+1,
-                          NULL, &status);
+std::cout << "GFitsImage::save_image: " << (FPTR(m_fitsfile)->HDUposition) << " "
+          << m_hdunum << std::endl;
+    status     = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, NULL, &status);
 
     // If HDU does not yet exist in file then create it now
     if (status == 107) {

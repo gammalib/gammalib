@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GFitsBinTable.hpp  - FITS binary table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008 by Jurgen Knodlseder                                *
+ *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,6 @@
 #define GFITSBINTABLE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsData.hpp"
 #include "GFitsTable.hpp"
 
 
@@ -31,18 +30,18 @@
  ***************************************************************************/
 class GFitsBinTable : public GFitsTable {
 
-    // Friend classes
-    friend class GFitsHDU;
-
 public:
     // Constructors and destructors
-    GFitsBinTable();
+    GFitsBinTable(void);
     GFitsBinTable(int nrows);
     GFitsBinTable(const GFitsBinTable& table);
-    virtual ~GFitsBinTable();
+    virtual ~GFitsBinTable(void);
 
     // Operators
     GFitsBinTable& operator= (const GFitsBinTable& table);
+
+    // Implemented pure virtual methods
+    HDUType exttype(void) const { return HT_BIN_TABLE; }
 
     // Methods
 

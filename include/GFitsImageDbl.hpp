@@ -20,7 +20,6 @@
 #define GFITSIMAGEDBL_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GFitsData.hpp"
 #include "GFitsImage.hpp"
 
 
@@ -54,20 +53,18 @@ public:
                                const int& it) const;
 
     // Methods
-    void    link(double* pixels);
-    void    set_nullval(const double* value);
-    double* pixels(void);
+    void           link(double* pixels);
+    void           nulval(const double* value);
+    void*          pixels(void);
+    GFitsImageDbl* clone(void) const;
 
 private:
     // Private methods
-    void           init_members(void);
-    void           copy_members(const GFitsImageDbl& image);
-    void           free_members(void);
-    void           fetch_pixels(void);
-    void           open(void* vptr);
-    void           save(void);
-    void           close(void);
-    GFitsImageDbl* clone(void) const;
+    void init_members(void);
+    void copy_members(const GFitsImageDbl& image);
+    void free_members(void);
+    void fetch_pixels(void);
+    int  type(void) const; 
 
     // Private data area
     int     m_linked;        // Pixels are linked (don't delete them!)
