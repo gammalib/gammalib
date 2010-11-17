@@ -26,7 +26,7 @@
 #include "GLATResponse.hpp"
 #include "GLATPointing.hpp"
 #include "GFitsBinTable.hpp"
-#include "GFitsImageDbl.hpp"
+#include "GFitsImageDouble.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_INIT_AEFF                               "GLATResponse::init_aeff()"
@@ -176,8 +176,8 @@ void GLATResponse::aeff_append(GFits& file) const
     m_aeff_bins.write(hdu_bounds);
 
     // Build effective area image
-    int            naxes[]  = {m_aeff_bins.num_energy(), m_aeff_bins.num_ctheta()};
-    GFitsImageDbl* hdu_aeff = new GFitsImageDbl(2, naxes, m_aeff);
+    int               naxes[]  = {m_aeff_bins.num_energy(), m_aeff_bins.num_ctheta()};
+    GFitsImageDouble* hdu_aeff = new GFitsImageDouble(2, naxes, m_aeff);
 
     // Construct effective area HDU
     hdu_aeff->extname("AEFF");

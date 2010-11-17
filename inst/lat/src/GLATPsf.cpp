@@ -26,7 +26,7 @@
 #include "GLATResponse.hpp"
 #include "GLATPointing.hpp"
 #include "GFitsBinTable.hpp"
-#include "GFitsImageDbl.hpp"
+#include "GFitsImageDouble.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_INIT_PSF                                 "GLATResponse::init_psf()"
@@ -366,9 +366,9 @@ void GLATResponse::psf_append(GFits& file) const
     // Build PSF tables and images
     int naxes2[] = {m_psf_bins.num_energy(), m_psf_bins.num_ctheta()};
     int naxes3[] = {angle_num, m_psf_bins.num_energy(), m_psf_bins.num_ctheta()};
-    GFitsImageDbl* image_norm  = new GFitsImageDbl(2, naxes2, m_norm);
-    GFitsImageDbl* image_sigma = new GFitsImageDbl(2, naxes2, m_sigma);
-    GFitsImageDbl* image_psf   = new GFitsImageDbl(3, naxes3, m_psf);
+    GFitsImageDouble* image_norm  = new GFitsImageDouble(2, naxes2, m_norm);
+    GFitsImageDouble* image_sigma = new GFitsImageDouble(2, naxes2, m_sigma);
+    GFitsImageDouble* image_psf   = new GFitsImageDouble(3, naxes3, m_psf);
 
     // Construct PSF HDUs
     image_norm->extname("PNORM");
