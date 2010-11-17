@@ -44,7 +44,6 @@
 #include "GFitsImageDouble.hpp"
 #include "GFitsByteImage.hpp"
 #include "GFitsImageFlt.hpp"
-#include "GFitsImageDbl.hpp"
 #include "GFitsAsciiTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableCol.hpp"

@@ -28,7 +28,7 @@
 #include "GWcsHPX.hpp"
 #include "GFits.hpp"
 #include "GFitsTableDoubleCol.hpp"
-#include "GFitsImageDbl.hpp"
+#include "GFitsImageDouble.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT_HPX     "GSkymap::GSkymap(std::string,std::string,int," \
@@ -45,9 +45,9 @@
 #define G_OMEGA2                                  "GSkymap::omega(GSkyPixel)"
 #define G_SET_WCS "GSkymap::set_wcs(std::string,std::string,double,double," \
                                "double,double,double,double,GMatrix,GVector)"
-#define G_READ_HEALPIX                     "GSkymap::read_healpix(GFitsHDU*)"
-#define G_READ_WCS                             "GSkymap::read_wcs(GFitsHDU*)"
-#define G_ALLOC_WCS                           "GSkymap::alloc_wcs(GFitsHDU*)"
+#define G_READ_HEALPIX                   "GSkymap::read_healpix(GFitsTable*)"
+#define G_READ_WCS                           "GSkymap::read_wcs(GFitsImage*)"
+#define G_ALLOC_WCS                         "GSkymap::alloc_wcs(GFitsImage*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -436,7 +436,7 @@ void GSkymap::load(const std::string& filename)
             }
 
             // Load WCS map
-            read_wcs((const GFitsImageDbl*)hdu);
+            read_wcs((const GFitsImageDouble*)hdu);
             loaded = 1;
             break;
 
@@ -519,7 +519,7 @@ void GSkymap::read(const GFitsHDU* hdu)
 
             // Load only if HDU contains an image
             if (hdu->exttype() == 0) {
-                read_wcs((const GFitsImageDbl*)hdu);
+                read_wcs((const GFitsImageDouble*)hdu);
                 loaded = 1;
             }
 
@@ -983,7 +983,7 @@ GSkyPixel GSkymap::pix2xy(const int& pix) const
  * several HEALPix maps into a single column. Alternatively, multiple maps
  * may be stored in multiple columns.
  ***************************************************************************/
-void GSkymap::read_healpix(const GFitsBinTable* hdu)
+void GSkymap::read_healpix(const GFitsTable* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
@@ -1028,7 +1028,7 @@ void GSkymap::read_healpix(const GFitsBinTable* hdu)
         catch (GException::fits_key_not_found &e) {
             m_num_maps = 0;
             for (int icol = 0; icol < ncols; ++icol) {
-                GFitsTableCol* col = ((GFitsBinTable*)hdu)->column(icol);
+                GFitsTableCol* col = ((GFitsTable*)hdu)->column(icol);
                 if (col->number() % nentry == 0)
                     m_num_maps += col->number() / nentry;
             }
@@ -1047,7 +1047,7 @@ void GSkymap::read_healpix(const GFitsBinTable* hdu)
         for (int icol = 0; icol < ncols; ++icol) {
 
             // Get next column
-            GFitsTableCol* col = ((GFitsBinTable*)hdu)->column(icol);
+            GFitsTableCol* col = ((GFitsTable*)hdu)->column(icol);
 
             // Only consider columns that can fully hold maps
             if (col->number() % nentry == 0) {
@@ -1107,7 +1107,7 @@ void GSkymap::read_healpix(const GFitsBinTable* hdu)
  * @exception GException::skymap_bad_image_dim
  *            WCS image has invalid dimension (naxis=2 or 3).
  ***************************************************************************/
-void GSkymap::read_wcs(const GFitsImageDbl* hdu)
+void GSkymap::read_wcs(const GFitsImage* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
@@ -1151,7 +1151,7 @@ void GSkymap::read_wcs(const GFitsImageDbl* hdu)
             double* ptr = m_pixels;
             for (int iy = 0; iy < m_num_y; ++iy) {
                 for (int ix = 0; ix < m_num_x; ++ix, ++ptr)
-                    *ptr = (*hdu)(ix,iy);
+                    *ptr = hdu->pixel(ix,iy);
             }
         }
         else {
@@ -1159,7 +1159,7 @@ void GSkymap::read_wcs(const GFitsImageDbl* hdu)
             for (int iy = 0; iy < m_num_y; ++iy) {
                 for (int ix = 0; ix < m_num_x; ++ix) {
                     for (int imap = 0; imap < m_num_maps; ++imap, ++ptr)
-                         *ptr = (*hdu)(ix,iy,imap);
+                         *ptr = hdu->pixel(ix,iy,imap);
                 }
             }
         }
@@ -1183,7 +1183,7 @@ void GSkymap::read_wcs(const GFitsImageDbl* hdu)
  * @exception GException::wcs_invalid
  *            WCS projection of FITS file not supported by GammaLib.
  ***************************************************************************/
-void GSkymap::alloc_wcs(const GFitsImageDbl* hdu)
+void GSkymap::alloc_wcs(const GFitsImage* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
@@ -1276,12 +1276,12 @@ GFitsBinTable* GSkymap::create_healpix_hdu(void)
  * @brief Create FITS HDU containing WCS image
  *
  * Returns pointer to HDU that contains the WCS image. Deallocation of the
- * GFitsImageDbl object has to be done by the client.
+ * GFitsImageDouble object has to be done by the client.
  ***************************************************************************/
-GFitsImageDbl* GSkymap::create_wcs_hdu(void)
+GFitsImageDouble* GSkymap::create_wcs_hdu(void)
 {
     // Initialise result to NULL pointer
-    GFitsImageDbl* hdu = NULL;
+    GFitsImageDouble* hdu = NULL;
 
     // Compute size of Healpix data
     int size = m_num_pixels * m_num_maps;
@@ -1294,7 +1294,7 @@ GFitsImageDbl* GSkymap::create_wcs_hdu(void)
         int naxes[] = {m_num_x, m_num_y, m_num_maps};
 
         // Allocate image
-        hdu = new GFitsImageDbl(naxis, naxes);
+        hdu = new GFitsImageDouble(naxis, naxes);
 
         // Store data in image
         if (naxis == 2) {
@@ -1318,7 +1318,7 @@ GFitsImageDbl* GSkymap::create_wcs_hdu(void)
 
     // ... otherwise create an empty header
     else
-        hdu = new GFitsImageDbl;
+        hdu = new GFitsImageDouble;
 
     // Set extension name
     hdu->extname("IMAGE");

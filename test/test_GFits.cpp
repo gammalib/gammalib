@@ -72,7 +72,7 @@ void test_create(void)
     try {
         GFits fits;
         fits.open("test_empty_image.fits");
-        GFitsImageDbl image;
+        GFitsImageDouble image;
         fits.append(&image);
         fits.save();
     }
@@ -94,7 +94,7 @@ void test_create(void)
         int nx          = 10;
         int ny          = 20;
         int naxes[]     = {nx,ny};
-        GFitsImageDbl image(naxis, naxes);
+        GFitsImageDouble image(naxis, naxes);
         for (int ix = 0; ix < nx; ++ix) {
             for (int iy = 0; iy < ny; ++iy) {
                 image(ix,iy) = 0.01*ix + 0.01*iy;
@@ -117,8 +117,8 @@ void test_create(void)
     try {
         GFits fits;
         fits.open("test.fits");
-        GFitsHDU*      hdu   = fits.hdu(0);
-        GFitsImageDbl* image = (GFitsImageDbl*)fits.hdu(1);
+        GFitsHDU*         hdu   = fits.hdu(0);
+        GFitsImageDouble* image = (GFitsImageDouble*)fits.hdu(1);
         int nx = image->naxes(0);
         int ny = image->naxes(1);
         double total = 0.0;
@@ -219,19 +219,19 @@ void test_create(void)
 
 
 /***************************************************************************
- * @brief Test GFitsDblImage class
+ * @brief Test GFitsImageDouble class
  ***************************************************************************/
 void test_image_double(void)
 {
     // Dump header
-    std::cout << "Test GFitsDblImage: ";
+    std::cout << "Test GFitsImageDouble: ";
 
     // Test 1D Image
     try {
-        int naxis       = 1;
-        int nx          = 10;
-        int naxes[]     = {nx};
-        GFitsImageDbl image(naxis, naxes);
+        int naxis   = 1;
+        int nx      = 10;
+        int naxes[] = {nx};
+        GFitsImageDouble image(naxis, naxes);
         std::cout << ".";
 
         // Fill and read image
@@ -259,7 +259,7 @@ void test_image_double(void)
 
         // Bad 2D operator
         try {
-            double result = image(0,1);
+            double result = image.at(0,1);
         }
         catch (GException::fits_wrong_image_operator &e) {
             std::cout << ".";
@@ -274,7 +274,7 @@ void test_image_double(void)
 
         // Bad 3D operator
         try {
-            double result = image(0,1,2);
+            double result = image.at(0,1,2);
         }
         catch (GException::fits_wrong_image_operator &e) {
             std::cout << ".";
@@ -289,7 +289,7 @@ void test_image_double(void)
 
         // Bad 4D operator
         try {
-            double result = image(0,1,2,3);
+            double result = image.at(0,1,2,3);
         }
         catch (GException::fits_wrong_image_operator &e) {
             std::cout << ".";
@@ -305,7 +305,7 @@ void test_image_double(void)
     }
     catch (std::exception &e) {
         std::cout << std::endl
-                  << "TEST ERROR: Unable to test GFitsDblImage classes."
+                  << "TEST ERROR: Unable to test GFitsImageDouble classes."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;

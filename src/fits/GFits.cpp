@@ -21,7 +21,7 @@
 #include "GFitsCfitsio.hpp"
 #include "GFits.hpp"
 #include "GFitsByteImage.hpp"
-#include "GFitsImageDbl.hpp"
+#include "GFitsImageDouble.hpp"
 #include "GFitsImageFlt.hpp"
 #include "GFitsAsciiTable.hpp"
 #include "GFitsBinTable.hpp"
@@ -800,19 +800,19 @@ GFitsImage* GFits::new_image(void)
         image = new GFitsByteImage;
         break;
     case 16:
-        image = new GFitsImageDbl;  // TO BE REPLACED BY CORRECT CLASS
+        image = new GFitsImageDouble;  // TO BE REPLACED BY CORRECT CLASS
         break;
     case 32:
-        image = new GFitsImageDbl;  // TO BE REPLACED BY CORRECT CLASS
+        image = new GFitsImageDouble;  // TO BE REPLACED BY CORRECT CLASS
         break;
     case 64:
-        image = new GFitsImageDbl;  // TO BE REPLACED BY CORRECT CLASS
+        image = new GFitsImageDouble;  // TO BE REPLACED BY CORRECT CLASS
         break;
     case -32:
         image = new GFitsImageFlt;
         break;
     case -64:
-        image = new GFitsImageDbl;
+        image = new GFitsImageDouble;
         break;
     default:
         throw GException::fits_bad_bitpix(G_NEW_IMAGE, bitpix);

@@ -24,8 +24,10 @@
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
 #include "GFits.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
-#include "GFitsImageDbl.hpp"
+#include "GFitsImage.hpp"
+#include "GFitsImageDouble.hpp"
 #include "GMatrix.hpp"
 #include "GVector.hpp"
 
@@ -85,22 +87,22 @@ public:
 
 private:
     // Private methods
-    void           init_members(void);
-    void           alloc_pixels(void);
-    void           copy_members(const GSkymap& map);
-    void           free_members(void);
-    void           set_wcs(const std::string& wcs, const std::string& coords,
-                           const double& crval1, const double& crval2,
-                           const double& crpix1, const double& crpix2,
-                           const double& cdelt1, const double& cdelt2,
-                           const GMatrix& cd, const GVector& pv2);
-    int            xy2pix(const GSkyPixel& pix) const;
-    GSkyPixel      pix2xy(const int& pix) const;
-    void           read_healpix(const GFitsBinTable* hdu);
-    void           read_wcs(const GFitsImageDbl* hdu);
-    void           alloc_wcs(const GFitsImageDbl* hdu);
-    GFitsBinTable* create_healpix_hdu(void);
-    GFitsImageDbl* create_wcs_hdu(void);
+    void              init_members(void);
+    void              alloc_pixels(void);
+    void              copy_members(const GSkymap& map);
+    void              free_members(void);
+    void              set_wcs(const std::string& wcs, const std::string& coords,
+                              const double& crval1, const double& crval2,
+                              const double& crpix1, const double& crpix2,
+                              const double& cdelt1, const double& cdelt2,
+                              const GMatrix& cd, const GVector& pv2);
+    int               xy2pix(const GSkyPixel& pix) const;
+    GSkyPixel         pix2xy(const int& pix) const;
+    void              read_healpix(const GFitsTable* hdu);
+    void              read_wcs(const GFitsImage* hdu);
+    void              alloc_wcs(const GFitsImage* hdu);
+    GFitsBinTable*    create_healpix_hdu(void);
+    GFitsImageDouble* create_wcs_hdu(void);
 
     // Private data area
     int     m_num_pixels;   //!< Number of pixels (used for pixel allocation)

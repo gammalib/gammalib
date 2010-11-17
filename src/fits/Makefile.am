@@ -12,7 +12,6 @@ sources = GFitsHeaderCard.cpp \
           GFitsImageDouble.cpp \
           GFitsByteImage.cpp \
           GFitsImageFlt.cpp \
-          GFitsImageDbl.cpp \
           GFitsTable.cpp \
           GFitsAsciiTable.cpp \
           GFitsBinTable.cpp \
