@@ -22,7 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include "GFits.hpp"
-#include "GFitsBinTable.hpp"
+#include "GFitsTable.hpp"
 #include "GEnergy.hpp"
 
 
@@ -58,7 +58,7 @@ public:
                  const std::string& extname = "EBOUNDS");
 	void    save(const std::string& filename, bool clobber,
                  const std::string& extname = "EBOUNDS");
-    void    read(GFitsBinTable* hdu);
+    void    read(GFitsTable* hdu);
     void    write(GFits* file, const std::string& extname = "EBOUNDS");
     int     index(const GEnergy& eng) const;
     int     size(void) const { return m_num; }

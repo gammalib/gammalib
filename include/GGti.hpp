@@ -22,7 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include "GFits.hpp"
-#include "GFitsBinTable.hpp"
+#include "GFitsTable.hpp"
 #include "GTime.hpp"
 
 
@@ -60,7 +60,7 @@ public:
                 const std::string& extname = "GTI");
 	void   save(const std::string& filename, bool clobber,
                 const std::string& extname = "GTI");
-    void   read(GFitsBinTable* hdu);
+    void   read(GFitsTable* hdu);
     void   write(GFits* file, const std::string& extname = "GTI");
     int    size(void) const { return m_num; }
 	GTime  tstart(void) const { return m_tstart; }

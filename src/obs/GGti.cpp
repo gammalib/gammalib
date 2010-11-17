@@ -24,7 +24,7 @@
 #include "GException.hpp"
 #include "GGti.hpp"
 #include "GFits.hpp"
-#include "GFitsHDU.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableDoubleCol.hpp"
 
@@ -257,7 +257,7 @@ void GGti::load(const std::string& filename, const std::string& extname)
     file.open(filename);
 
     // Get GTI HDU
-    GFitsBinTable* hdu = (GFitsBinTable*)file.hdu(extname);
+    GFitsTable* hdu = file.table(extname);
 
     // Read GTI from HDU
     read(hdu);
@@ -308,7 +308,7 @@ void GGti::save(const std::string& filename, bool clobber,
  * @todo Method assumes that times are in MET.
  * @todo Read header keywords.
  ***************************************************************************/
-void GGti::read(GFitsBinTable* hdu)
+void GGti::read(GFitsTable* hdu)
 {
 	// Free members
 	free_members();

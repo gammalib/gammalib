@@ -25,7 +25,7 @@
 #include "GException.hpp"
 #include "GEbounds.hpp"
 #include "GFits.hpp"
-#include "GFitsHDU.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableDoubleCol.hpp"
 
@@ -282,7 +282,7 @@ void GEbounds::load(const std::string& filename, const std::string& extname)
     file.open(filename);
 
     // Get energy boundary HDU
-    GFitsBinTable* hdu = (GFitsBinTable*)file.hdu(extname);
+    GFitsTable* hdu = file.table(extname);
 
     // Read energy boundaries from HDU
     read(hdu);
@@ -331,7 +331,7 @@ void GEbounds::save(const std::string& filename, bool clobber,
  *       string parameter that allows external specification about how
  *       the energies should be interpreted.
  ***************************************************************************/
-void GEbounds::read(GFitsBinTable* hdu)
+void GEbounds::read(GFitsTable* hdu)
 {
     // Free members
     free_members();
