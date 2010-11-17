@@ -344,5 +344,5 @@ GException::fits_wrong_image_operator::fits_wrong_image_operator(std::string ori
 {
     m_origin  = origin;
     m_message = "Wrong image pixel access operator has been used (dimension=" +
-                str(naxis) + " <=> arguments=" + str(nargs) + ")";
+                str(naxis) + " < arguments=" + str(nargs) + ")";
 }
