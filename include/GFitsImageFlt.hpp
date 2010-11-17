@@ -66,6 +66,14 @@ private:
     void fetch_pixels(void);
     int  type(void) const; 
 
+    // Stuff to allow for compilation (new GFitsImage interface)
+    void  alloc_data(void) { return; }
+    void  init_data(void) { return; }
+    void  release_data(void) { return; }
+    void  alloc_nulval(const void* value) { return; }
+    void* ptr_data(void) { void* p; return p; }
+    void* ptr_nulval(void) { void* p; return p; }
+
     // Private data area
     int    m_linked;        // Pixels are linked (don't delete them!)
     float* m_pixels;        // Pixels
