@@ -33,15 +33,20 @@
 #define G_SAVETO                           "GFits::saveto(std::string&,bool)"
 #define G_HDU1                                     "GFits::hdu(std::string&)"
 #define G_HDU2                                              "GFits::hdu(int)"
+#define G_IMAGE1                                 "GFits::image(std::string&)"
+#define G_IMAGE2                                          "GFits::image(int)"
+#define G_TABLE1                                 "GFits::table(std::string&)"
+#define G_TABLE2                                          "GFits::table(int)"
 #define G_FREE_MEM                                    "GFits::free_members()"
 #define G_NEW_IMAGE                                      "GFits::new_image()"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define DELETE_EMPTY_FITS_FILES 0         //!< Do not write empty FITS files
 
 /* __ Debug definitions __________________________________________________ */
-#define DEBUG 0
+#define DEBUG 0                                    //!< Code debugging option
 
 
 /*==========================================================================
@@ -500,6 +505,8 @@ void GFits::append(GFitsHDU* hdu)
  *
  * @exception GException::fits_hdu_not_found
  *            No HDU with specified name has been found.
+ *
+ * Returns a pointer to the HDU with the specified extname.
  ***************************************************************************/
 GFitsHDU* GFits::hdu(const std::string& extname) const
 {
@@ -532,10 +539,13 @@ GFitsHDU* GFits::hdu(const std::string& extname) const
 /***********************************************************************//**
  * @brief Get pointer to HDU
  *
- * @param[in] extno Extension number (starting from 0)
+ * @param[in] extno Extension number (starting from 0).
  *
  * @exception GException::fits_hdu_not_found
  *            No HDU with specified extension number has been found.
+ *
+ * Returns a pointer to the HDU with the specified extension number extno.
+ * Performs extno range checking if G_RANGE_CHECK is defined.
  ***************************************************************************/
 GFitsHDU* GFits::hdu(int extno) const
 {
@@ -558,6 +568,108 @@ GFitsHDU* GFits::hdu(int extno) const
 
     // Return pointer
     return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Get pointer to image HDU
+ *
+ * @param[in] extname Name of HDU extension.
+ *
+ * @exception GException::fits_hdu_not_image
+ *            Requested HDU is not an image.
+ *
+ * Returns a pointer to the image HDU with extension name extname.
+ ***************************************************************************/
+GFitsImage* GFits::image(const std::string& extname) const
+{
+    // Get HDU pointer
+    GFitsHDU* ptr = hdu(extname);
+
+    // Throw an error if HDU is not an image
+    if (ptr->exttype() != GFitsHDU::HT_IMAGE)
+        throw GException::fits_hdu_not_image(G_IMAGE1, extname, ptr->exttype());
+
+    // Return pointer
+    return ((GFitsImage*)ptr);
+}
+
+
+/***********************************************************************//**
+ * @brief Get pointer to image HDU
+ *
+ * @param[in] extno Extension number (starting from 0).
+ *
+ * @exception GException::fits_hdu_not_image
+ *            Requested HDU is not an image.
+ *
+ * Returns a pointer to the image HDU with extension number extno.
+ ***************************************************************************/
+GFitsImage* GFits::image(int extno) const
+{
+    // Get HDU pointer
+    GFitsHDU* ptr = hdu(extno);
+
+    // Throw an error if HDU is not an image
+    if (ptr->exttype() != GFitsHDU::HT_IMAGE)
+        throw GException::fits_hdu_not_image(G_IMAGE2,
+                                             "(extno="+str(extno)+")",
+                                             ptr->exttype());
+
+    // Return pointer
+    return ((GFitsImage*)ptr);
+}
+
+
+/***********************************************************************//**
+ * @brief Get pointer to table HDU
+ *
+ * @param[in] extname Name of HDU extension.
+ *
+ * @exception GException::fits_hdu_not_table
+ *            Requested HDU is not a table.
+ *
+ * Returns a pointer to the table HDU with extension name extname.
+ ***************************************************************************/
+GFitsTable* GFits::table(const std::string& extname) const
+{
+    // Get HDU pointer
+    GFitsHDU* ptr = hdu(extname);
+
+    // Throw an error if HDU is not a table
+    if (ptr->exttype() != GFitsHDU::HT_ASCII_TABLE &&
+        ptr->exttype() != GFitsHDU::HT_BIN_TABLE)
+        throw GException::fits_hdu_not_table(G_TABLE1, extname, ptr->exttype());
+
+    // Return pointer
+    return ((GFitsTable*)ptr);
+}
+
+
+/***********************************************************************//**
+ * @brief Get pointer to table HDU
+ *
+ * @param[in] extno Extension number (starting from 0).
+ *
+ * @exception GException::fits_hdu_not_table
+ *            Requested HDU is not a table.
+ *
+ * Returns a pointer to the table HDU with extension number extno.
+ ***************************************************************************/
+GFitsTable* GFits::table(int extno) const
+{
+    // Get HDU pointer
+    GFitsHDU* ptr = hdu(extno);
+
+    // Throw an error if HDU is not a table
+    if (ptr->exttype() != GFitsHDU::HT_ASCII_TABLE &&
+        ptr->exttype() != GFitsHDU::HT_BIN_TABLE)
+        throw GException::fits_hdu_not_table(G_TABLE2,
+                                             "(extno="+str(extno)+")",
+                                             ptr->exttype());
+
+    // Return pointer
+    return ((GFitsTable*)ptr);
 }
 
 
@@ -614,34 +726,39 @@ void GFits::copy_members(const GFits& fits)
 /***********************************************************************//**
  * @brief Delete class members
  *
- * This method also closes a file. In case that there are no HDUs or in case
- * that the FITS file is not correct the result file will be deleted. This
- * prevents leaving corrupted files on disk.
+ * This method also closes a file. If DELETE_EMPTY_FITS_FILES=1, files
+ * without HDUs or corrupted files will be deleted. This prevents leaving
+ * corrupted files on disk (yet, corrupted files may be generated by another
+ * application, thus this is not 100% safe; better make the code solid
+ * against reading corrupted FITS files).
  ***************************************************************************/
 void GFits::free_members(void)
 {
     // If FITS file has been opened then close it now
     if (m_fitsfile != NULL) {
 
-        // If there are no HDUs then delete the file (don't worry about error)
-        //if (size() == 0) {
-        //    int status = 0;
-        //    __ffdelt(FPTR(m_fitsfile), &status);
-        //}
-
-        // ... otherwise close the file
-        //else {
+        // Compile option: If there are no HDUs then delete the file (don't
+        // worry about error)
+        #if DELETE_EMPTY_FITS_FILES
+        if (size() == 0) {
             int status = 0;
-            status     = __ffclos(FPTR(m_fitsfile), &status);
-            if (status == 252) {
-                int new_status = 0;
-                __ffdelt(FPTR(m_fitsfile), &new_status);
-                throw GException::fits_error(G_FREE_MEM, status);
-            }
-            else if (status != 0)
-                throw GException::fits_error(G_FREE_MEM, status);
-        //}
-    }
+            __ffdelt(FPTR(m_fitsfile), &status);
+            return;
+        }
+        #endif
+
+        // Close the file
+        int status = 0;
+        status     = __ffclos(FPTR(m_fitsfile), &status);
+        if (status == 252) {
+            int new_status = 0;
+            __ffdelt(FPTR(m_fitsfile), &new_status);
+            throw GException::fits_error(G_FREE_MEM, status);
+        }
+        else if (status != 0)
+            throw GException::fits_error(G_FREE_MEM, status);
+
+    } // endif: There was an open FITS file
 
     // Return
     return;

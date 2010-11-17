@@ -23,6 +23,7 @@
 #include <vector>
 #include "GFitsHDU.hpp"
 #include "GFitsImage.hpp"
+#include "GFitsTable.hpp"
 
 
 /***********************************************************************//**
@@ -51,15 +52,19 @@ public:
     GFits& operator= (const GFits& fits);
 
     // Methods
-    void      clear(void);
-    int       size(void) const;
-    void      open(const std::string& filename);
-    void      save(void);
-    void      saveto(const std::string& filename, bool clobber = false);
-    void      close(void);
-    void      append(GFitsHDU* hdu);
-    GFitsHDU* hdu(const std::string& extname) const;
-    GFitsHDU* hdu(int extno) const;
+    void        clear(void);
+    int         size(void) const;
+    void        open(const std::string& filename);
+    void        save(void);
+    void        saveto(const std::string& filename, bool clobber = false);
+    void        close(void);
+    void        append(GFitsHDU* hdu);
+    GFitsHDU*   hdu(const std::string& extname) const;
+    GFitsHDU*   hdu(int extno) const;
+    GFitsImage* image(const std::string& extname) const;
+    GFitsImage* image(int extno) const;
+    GFitsTable* table(const std::string& extname) const;
+    GFitsTable* table(int extno) const;
 
 private:
     // Private methods
