@@ -222,6 +222,39 @@ int GFitsImage::num_pixels(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Return number of nul values envountered during loading
+ ***************************************************************************/
+int GFitsImage::anynul(void) const
+{
+    // Return number of nul values
+    return m_anynul;
+}
+
+
+/***********************************************************************//**
+ * @brief Set nul value
+ *
+ * @param[in] value Nul value.
+ *
+ * @todo To correctly reflect the nul value in the data, the image should
+ * be reloaded. However, the image may have been changed, so in principle
+ * saving is needed. However, we may not want to store the image, hence saving
+ * is also not desired. We thus have to develop a method to update the
+ * image information for a new nul value in place ...
+ ***************************************************************************/
+void GFitsImage::nulval(const void* value)
+{
+    // Allocate nul value
+    alloc_nulval(value);
+
+    // Update column
+
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Protected methods                            =
@@ -238,6 +271,7 @@ void GFitsImage::init_members(void)
     m_naxis      = 0;
     m_naxes      = NULL;
     m_num_pixels = 0;
+    m_anynul     = 0;
 
     // Return
     return;
@@ -254,10 +288,11 @@ void GFitsImage::copy_members(const GFitsImage& image)
     // Copy attributes
     m_bitpix     = image.m_bitpix;
     m_naxis      = image.m_naxis;
-    m_naxes      = NULL;
     m_num_pixels = image.m_num_pixels;
+    m_anynul     = image.m_anynul;
 
     // Copy axes
+    m_naxes = NULL;
     if (image.m_naxes != NULL && m_naxis > 0) {
         m_naxes = new long[m_naxis];
         for (int i = 0; i < m_naxis; ++i)
@@ -542,6 +577,58 @@ void GFitsImage::save_image(int datatype, const void* pixels)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fetch image pixels
+ *
+ * Fetch the image pixels. This function is in general called if pixel
+ * values should be read or written yet no pixel array is allocated. In case
+ * that pixels existed already before they will be deleted before fetching
+ * new ones.
+ * There are two possibilities to fetch the pixels:
+ * (1) In case that a FITS file is attached to the image the pixel array
+ * will be loaded from the file.
+ * (2) In case that no FITS file is attached a new pixel array will be
+ * allocated that is initalised to 0.
+ ***************************************************************************/
+void GFitsImageDouble::fetch_data(void)
+{
+    // Fetch only if there are pixels in image
+    if (m_num_pixels > 0) {
+
+        // Allocate and initialise fresh memory
+        alloc_data();
+        init_data();
+
+        // If a FITS file is attached then load pixels from FITS file.
+        if (FPTR(m_fitsfile)->Fptr != NULL)
+            load_image(type(), ptr_data(), ptr_nulval(), &m_anynul);
+
+    } // endif: there were pixels available
+
+    // Return
+    return;
+}
+/***********************************************************************//**
+ * @brief Return pixel offset
+ *
+ * @param[in] ix Pixel index (starting from 0).
+ *
+ * @exception GException::out_of_range
+ *            Image axis not valid.
+ ***************************************************************************/
+int GFitsImage::offset(const int& ix) const
+{
+    // Check if axis is within the range
+    #if defined(G_RANGE_CHECK)
+    if (ix < 0 || ix >= m_num_pixels)
+        throw GException::out_of_range(G_NAXES, ix, 0, m_num_pixels-1);
+    #endif
+
+    // Return index
+    return ix;
 }
 
 

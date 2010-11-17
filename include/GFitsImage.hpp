@@ -54,11 +54,13 @@ public:
     // Implemented pure virtual methods
     HDUType exttype(void) const { return HT_IMAGE; }
 
-    // Methods
-    virtual int bitpix(void) const;
-    virtual int naxis(void) const;
-    virtual int naxes(int axis) const;
-    virtual int num_pixels(void) const;
+    // Base class methods
+    int  bitpix(void) const;
+    int  naxis(void) const;
+    int  naxes(int axis) const;
+    int  num_pixels(void) const;
+    int  anynul(void) const;
+    void nulval(const void* value);
 
 protected:
     // Protected methods
@@ -74,15 +76,24 @@ protected:
     void load_image(int datatype, const void* pixels, const void* nulval,
                     int* anynul);
     void save_image(int datatype, const void* pixels);
+    void fetch_data(void);
+    int  offset(const int& ix) const;
 
     // Pure virtual protected methods
-    virtual int type(void) const = 0;
+    virtual void  alloc_data(void) = 0;
+    virtual void  init_data(void) = 0;
+    virtual void  release_data(void) = 0;
+    virtual void  alloc_nulval(const void* value) = 0;
+    virtual int   type(void) const = 0;
+    virtual void* ptr_data(void) = 0;
+    virtual void* ptr_nulval(void) = 0;
 
     // Protected data area
     int   m_bitpix;      //!< Number of Bits/pixel
     int   m_naxis;       //!< Image dimension
     long* m_naxes;       //!< Number of pixels in each dimension
     int   m_num_pixels;  //!< Number of image pixels
+    int   m_anynul;      //!< Number of NULLs encountered
 };
 
 #endif /* GFITSIMAGE_HPP */
