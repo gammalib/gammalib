@@ -394,6 +394,53 @@ int GFitsTable::ncols(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print table information
+ ***************************************************************************/
+std::string GFitsTable::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GFitsTable ===\n");
+
+    // Append table type
+    result.append(parformat("Table type"));
+    switch (m_type) {
+    case GFitsHDU::HT_ASCII_TABLE:
+        result.append("ASCII table\n");
+        break;
+    case GFitsHDU::HT_BIN_TABLE:
+        result.append("Binary table\n");
+        break;
+    default:
+        result.append("Unknown\n");
+        break;
+    }
+
+    // Append table dimensions
+    result.append(parformat("Number of rows")+str(m_rows)+"\n");
+    result.append(parformat("Number of columns")+str(m_cols));
+
+    // Append table columns
+    if (m_columns != NULL) {
+        for (int i = 0; i < m_cols; ++i) {
+            result.append("\n");
+            if (m_columns[i] != NULL)
+                result.append(m_columns[i]->print());
+            else
+                result.append(" Column "+str(i)+" undefined");
+        }
+    }
+    else
+        result.append(" Table columns undefined");
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Protected methods                           =
@@ -492,38 +539,8 @@ void GFitsTable::data_open(void* vptr)
             status = 0;
 
         // Allocate column
-        switch (typecode) {
-        case __TBIT:
-            m_columns[i] = new GFitsTableBitCol();
-            break;
-        case __TLOGICAL:
-            m_columns[i] = new GFitsTableBoolCol();
-            break;
-        case __TSTRING:
-            m_columns[i] = new GFitsTableStringCol();
-            break;
-        case __TUSHORT:
-            m_columns[i] = new GFitsTableUShortCol();
-            break;
-        case __TSHORT:
-            m_columns[i] = new GFitsTableShortCol();
-            break;
-        case __TULONG:
-            m_columns[i] = new GFitsTableULongCol();
-            break;
-        case __TLONG:
-            m_columns[i] = new GFitsTableLongCol();
-            break;
-        case __TFLOAT:
-            m_columns[i] = new GFitsTableFloatCol();
-            break;
-        case __TLONGLONG:
-            m_columns[i] = new GFitsTableLongLongCol();
-            break;
-        case __TDOUBLE:
-            m_columns[i] = new GFitsTableDoubleCol();
-            break;
-        default:
+        m_columns[i] = alloc_column(typecode);
+        if (m_columns[i] == NULL) {
             std::ostringstream colname;
             colname << value;
             throw GException::fits_unknown_coltype(G_OPEN_DATA, colname.str(), typecode);
@@ -811,32 +828,8 @@ void GFitsTable::data_connect(void* vptr)
  ***************************************************************************/
 std::ostream& GFitsTable::data_dump(std::ostream& os) const
 {
-    // Put header in stream
-    os << "=== GFitsTable ===" << std::endl;
-    os << " Table type ................: ";
-    switch (m_type) {
-    case 1:
-        os << "ASCII table" << std::endl;
-        break;
-    case 2:
-        os << "Binary table" << std::endl;
-        break;
-    default:
-        os << "Unknown" << std::endl;
-        break;
-    }
-    os << " Number of rows ............: " << m_rows << std::endl;
-    os << " Number of columns .........: " << m_cols;
-    if (m_columns != NULL) {
-        for (int i = 0; i < m_cols; ++i) {
-            if (m_columns[i] != NULL)
-                os << std::endl << " " << *m_columns[i];
-            else
-                os << std::endl << " Column " << i << " undefined";
-        }
-    }
-    else
-        os << std::endl << " Table columns undefined";
+     // Write column in output stream
+    os << print();
 
     // Return output stream
     return os;
@@ -850,32 +843,8 @@ std::ostream& GFitsTable::data_dump(std::ostream& os) const
  ***************************************************************************/
 GLog& GFitsTable::data_dump(GLog& log) const
 {
-    // Put header in stream
-    log << "=== GFitsTable ===" << std::endl;
-    log << " Table type ................: ";
-    switch (m_type) {
-    case 1:
-        log << "ASCII table" << std::endl;
-        break;
-    case 2:
-        log << "Binary table" << std::endl;
-        break;
-    default:
-        log << "Unknown" << std::endl;
-        break;
-    }
-    log << " Number of rows ............: " << m_rows << std::endl;
-    log << " Number of columns .........: " << m_cols;
-    if (m_columns != NULL) {
-        for (int i = 0; i < m_cols; ++i) {
-            if (m_columns[i] != NULL)
-                log << std::endl << " " << *m_columns[i];
-            else
-                log << std::endl << " Column " << i << " undefined";
-        }
-    }
-    else
-        log << std::endl << " Table columns undefined";
+    // Write column in logger
+    log << print();
 
     // Return logger
     return log;
@@ -913,7 +882,7 @@ char* GFitsTable::get_ttype(const int& colnum) const
 /***********************************************************************//**
  * @brief Returns pointer to column format
  *
- * @param[in] colnum Column number for which format is to be returned
+ * @param[in] colnum Column number (starting from 0).
  *
  * @exception GException::fits_unknown_tabtype
  *            Table is neither ASCII nor Binary.
@@ -934,12 +903,12 @@ char* GFitsTable::get_tform(const int& colnum) const
         // Get table type specific format
         int size;
         switch (m_type) {
-        case 1:
+        case GFitsHDU::HT_ASCII_TABLE:
             size = m_columns[colnum]->ascii_format().length();
             ptr  = new char[size+1];
             strncpy(ptr, m_columns[colnum]->ascii_format().c_str(), size);
             break;
-        case 2:
+        case GFitsHDU::HT_BIN_TABLE:
             size = m_columns[colnum]->binary_format().length();
             ptr  = new char[size+1];
             strncpy(ptr, m_columns[colnum]->binary_format().c_str(), size);
@@ -959,7 +928,7 @@ char* GFitsTable::get_tform(const int& colnum) const
 /***********************************************************************//**
  * @brief Returns pointer to column unit
  *
- * @param[in] colnum Column number for which unit is to be returned
+ * @param[in] colnum Column number (starting from 0).
  *
  * This methods allocates memory for the character string that holds the
  * column unit. The client has to de-allocate this memory after usage.
@@ -1054,6 +1023,60 @@ void GFitsTable::free_members(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Allocates column
+ *
+ * @param[in] typecode cfitsio type code
+ *
+ * Allocates a table column depending on the cfitsio type code. If type code
+ * is not found then return a NULL pointer.
+ ***************************************************************************/
+GFitsTableCol* GFitsTable::alloc_column(int typecode) const
+{
+    // Initialise table column pointer
+    GFitsTableCol* ptr = NULL;
+
+    // Allocate column
+    switch (typecode) {
+    case __TBIT:
+        ptr = new GFitsTableBitCol;
+        break;
+    case __TLOGICAL:
+        ptr = new GFitsTableBoolCol;
+        break;
+    case __TSTRING:
+        ptr = new GFitsTableStringCol;
+        break;
+    case __TUSHORT:
+        ptr = new GFitsTableUShortCol;
+        break;
+    case __TSHORT:
+        ptr = new GFitsTableShortCol;
+        break;
+    case __TULONG:
+        ptr = new GFitsTableULongCol;
+        break;
+    case __TLONG:
+        ptr = new GFitsTableLongCol;
+        break;
+    case __TFLOAT:
+        ptr = new GFitsTableFloatCol;
+        break;
+    case __TLONGLONG:
+        ptr = new GFitsTableLongLongCol;
+        break;
+    case __TDOUBLE:
+        ptr = new GFitsTableDoubleCol;
+        break;
+    default:
+        break;
+    }
+
+    // Return
+    return ptr;
 }
 
 
