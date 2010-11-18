@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{CCD}}
 \newcommand{\doctype}{\mbox{Coding Conventions Document}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{12 Juin 2010}}
+\newcommand{\calendar}{\mbox{18 November 2010}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 \newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
@@ -259,6 +259,7 @@ Method & Usage & Implementation \\
 \hline
 \noalign{\smallskip}
 {\tt clear()} & Set object to initial empty state & All classes \\
+{\tt print()} & Print object into string & All classes (see section \ref{sec:output}) \\
 {\tt append()} & Append element to list of elements & Class containing elements \\
 {\tt size()} & Return number of elements in object & Class containing elements \\
 {\tt load()} & Load data from file (open, read, close) & When useful \\
@@ -294,6 +295,46 @@ Method arguments should be generally passed as {\tt const} and by reference.
 Numeric argument types should be typically {\tt int} and {\tt double}.
 Unless absolutely required, {\tt short int}, {\tt long}, and {\tt float} should be avoided.
 True/false checks should always be done using {\tt bool}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Output}
+\label{sec:output}
+
+Output stream and logging operators should be implemented for every class as friend
+operators.
+An example is:
+\begin{verbatim}
+#include <iostream>
+#include "GLog.hpp"
+class GFits {
+    friend std::ostream& operator<< (std::ostream& os, const GFits& fits);
+    friend GLog&         operator<< (GLog& log, const GFits& fits);
+    ...
+\end{verbatim}
+The usage of friend operators (instead of member operators) allows for correct handling
+of code such as
+\begin{verbatim}
+log << std::endl << "This is a text" << std::endl;
+\end{verbatim}
+To support these friend operators (and to support also the Python interface), each class
+should have a {\tt print()} method:
+\begin{verbatim}
+std::string print(void) const;
+\end{verbatim}
+Using the {\tt print()} method the output operators will take the following generic form:
+\begin{verbatim}
+std::ostream& operator<< (std::ostream& os, const GFits& fits)
+{
+    os << fits.print();
+    return os;
+}
+GLog& operator<< (GLog& log, const GFits& fits)
+{
+    log << fits.print();
+    return log;
+}
+\end{verbatim}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
