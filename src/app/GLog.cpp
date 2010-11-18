@@ -390,7 +390,7 @@ GLog& GLog::operator<<(std::ostream& (*fn)(std::ostream&))
     // Flush buffer
     flush(true);
 
-    // Return output stream
+    // Return logger
     return *this;
 }
 

@@ -564,21 +564,21 @@ std::ostream& operator<< (std::ostream& os, const GFitsHDU& hdu)
     os << " HDU type ..................: ";
     switch (hdu.exttype()) {
     case GFitsHDU::HT_IMAGE:
-        os << "Image" << std::endl;
+        os << "Image";
         break;
     case GFitsHDU::HT_ASCII_TABLE:
-        os << "ASCII table" << std::endl;
+        os << "ASCII table";
         break;
     case GFitsHDU::HT_BIN_TABLE:
-        os << "Binary table" << std::endl;
+        os << "Binary table";
         break;
     default:
-        os << "Unknown" << std::endl;
+        os << "Unknown";
         break;
     }
 
     // Put FITS header in stream
-    os << hdu.m_header;
+    os << std::endl << hdu.m_header;
 
     // Put FITS data in stream
     os << std::endl << hdu.data_dump(os);
@@ -603,24 +603,25 @@ GLog& operator<< (GLog& log, const GFitsHDU& hdu)
     log << " HDU type ..................: ";
     switch (hdu.exttype()) {
     case GFitsHDU::HT_IMAGE:
-        log << "Image" << std::endl;
+        log << "Image";
         break;
     case GFitsHDU::HT_ASCII_TABLE:
-        log << "ASCII table" << std::endl;
+        log << "ASCII table";
         break;
     case GFitsHDU::HT_BIN_TABLE:
-        log << "Binary table" << std::endl;
+        log << "Binary table";
         break;
     default:
-        log << "Unknown" << std::endl;
+        log << "Unknown";
         break;
     }
 
     // Put FITS header in logger
-    log << hdu.m_header;
+    log << std::endl << hdu.m_header;
 
     // Put FITS data in logger
-    log << std::endl << hdu.data_dump(log);
+    log << std::endl;
+    log = hdu.data_dump(log);
 
     // Return logger
     return log;

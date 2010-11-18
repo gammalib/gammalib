@@ -357,9 +357,9 @@ std::ostream& GFitsImage::data_dump(std::ostream& os) const
     // Put header in stream
     os << "=== GFitsImage ===" << std::endl;
     os << " Number of dimensions ......: " << naxis() << std::endl;
-    os << " Number of image pixels ....: " << size() << std::endl;
+    os << " Number of image pixels ....: " << size();
     for (int i = 0; i < naxis(); ++i)
-        os << " Number of bins in " << i << " .......: " << naxes(i) << std::endl;
+        os << std::endl << " Number of bins in " << i << " .......: " << naxes(i);
 
     // Return output stream
     return os;
@@ -376,9 +376,9 @@ GLog& GFitsImage::data_dump(GLog& log) const
     // Put header in stream
     log << "=== GFitsImage ===" << std::endl;
     log << " Number of dimensions ......: " << naxis() << std::endl;
-    log << " Number of image pixels ....: " << size() << std::endl;
+    log << " Number of image pixels ....: " << size();
     for (int i = 0; i < naxis(); ++i)
-        log << " Number of bins in " << i << " .......: " << naxes(i) << std::endl;
+        log << std::endl << " Number of bins in " << i << " .......: " << naxes(i);
 
     // Return logger
     return log;

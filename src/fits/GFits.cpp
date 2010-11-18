@@ -876,7 +876,7 @@ std::ostream& operator<< (std::ostream& os, const GFits& fits)
         os << "read/write" << std::endl;
     else
         os << "read only" << std::endl;
-    os << " Number of HDUs ............: " << fits.size() << std::endl;
+    os << " Number of HDUs ............: " << fits.size();
     for (int i = 0; i < fits.size(); ++i)
         os << std::endl << *fits.m_hdu[i];
 
@@ -901,7 +901,7 @@ GLog& operator<< (GLog& log, const GFits& fits)
         log << "read/write" << std::endl;
     else
         log << "read only" << std::endl;
-    log << " Number of HDUs ............: " << fits.size() << std::endl;
+    log << " Number of HDUs ............: " << fits.size();
     for (int i = 0; i < fits.size(); ++i)
         log << std::endl << *fits.m_hdu[i];
 
