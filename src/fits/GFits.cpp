@@ -372,9 +372,10 @@ void GFits::saveto(const std::string& filename, bool clobber)
     GFits new_fits;
     new_fits.open(filename);
 
-    // Copy headers in new FITS file
+    // Copy headers in new FITS file. We have to clone here, otherwise the
+    // pointers are just copied and nothing is saved.
     for (int i = 0; i < size(); ++i)
-        new_fits.append(m_hdu[i]);
+        new_fits.append(m_hdu[i]->clone());
 
     // Save new FITS file
     new_fits.save();
