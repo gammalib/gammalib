@@ -20,6 +20,7 @@
 #define GFITSTABLESHORTCOL_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GFitsTableCol.hpp"
 
 
@@ -31,9 +32,6 @@
  * This class implements a FITS table short integer column.
  ***************************************************************************/
 class GFitsTableShortCol : public GFitsTableCol {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GFitsTableShortCol& column);
 
 public:
     // Constructors and destructors

@@ -20,6 +20,7 @@
 #define GFITSTABLEDOUBLECOL_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GFitsTableCol.hpp"
 
 
@@ -31,9 +32,6 @@
  * This class implements a FITS table double column.
  ***************************************************************************/
 class GFitsTableDoubleCol : public GFitsTableCol {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GFitsTableDoubleCol& column);
 
 public:
     // Constructors and destructors

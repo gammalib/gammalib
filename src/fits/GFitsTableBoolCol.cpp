@@ -15,7 +15,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
+#include <string>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
@@ -193,7 +193,7 @@ std::string GFitsTableBoolCol::string(const int& row, const int& inx)
 
     // Convert bool into string
     std::string result = (m_data[offset(row,inx)]) ? "T" : "F";
-    
+
     // Return value
     return result;
 }
@@ -582,18 +582,3 @@ void GFitsTableBoolCol::free_buffer(void)
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] column Column to put in output stream.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GFitsTableBoolCol& column)
-{
-    // Dump column in output stream
-    column.dump_column(os, column.m_data);
-
-    // Return output stream
-    return os;
-}

@@ -20,6 +20,7 @@
 #define GFITSTABLEFLOATCOL_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GFitsTableCol.hpp"
 
 
@@ -31,9 +32,6 @@
  * This class implements a FITS table float column.
  ***************************************************************************/
 class GFitsTableFloatCol : public GFitsTableCol {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GFitsTableFloatCol& column);
 
 public:
     // Constructors and destructors

@@ -20,6 +20,7 @@
 #define GFITSTABLELONGCOL_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GFitsTableCol.hpp"
 
 
@@ -31,9 +32,6 @@
  * This class implements a FITS table long integer column.
  ***************************************************************************/
 class GFitsTableLongCol : public GFitsTableCol {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GFitsTableLongCol& column);
 
 public:
     // Constructors and destructors

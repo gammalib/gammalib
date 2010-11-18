@@ -15,7 +15,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
+#include <string>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
@@ -479,18 +479,3 @@ void GFitsTableLongLongCol::init_data(void)
  =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream
- * @param[in] column Column to put in output stream
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GFitsTableLongLongCol& column)
-{
-    // Dump column in output stream
-    column.dump_column(os, column.m_data);
-
-    // Return output stream
-    return os;
-}

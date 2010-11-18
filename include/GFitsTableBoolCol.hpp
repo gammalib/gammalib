@@ -20,6 +20,7 @@
 #define GFITSTABLEBOOLCOL_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GFitsTableCol.hpp"
 
 
@@ -34,9 +35,6 @@
  * compact storage scheme should be implemented.
  ***************************************************************************/
 class GFitsTableBoolCol : public GFitsTableCol {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GFitsTableBoolCol& column);
 
 public:
     // Constructors and destructors

@@ -15,7 +15,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
+#include <string>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
@@ -522,17 +522,10 @@ void GFitsTableBitCol::load_column(void)
     // Compute number of Bytes and Bits per row
     m_bytes_per_row = (m_number > 0) ? ((m_number-1) / 8) + 1 : 0;
     m_bits_per_row  = m_bytes_per_row * 8;
-    
+
     // Compute length of memory array
     m_size = m_bytes_per_row * m_length;
-/*
-std::cout << m_name
-          << " size=" << m_size
-          << " bits=" << m_bits
-          << " bytes_per_row=" << m_bytes_per_row
-          << " bits_per_row=" << m_bits_per_row << std::endl;
-*/
-    
+
     // Load only if the column has a positive size
     if (m_size > 0) {
 
@@ -629,7 +622,7 @@ void GFitsTableBitCol::get_bit(const int& row, const int& inx)
     if (row < 0 || row >= m_length)
         throw GException::out_of_range(G_GET_BIT, row, 0, m_length-1);
     #endif
-    
+
     // Check inx value
     #if defined(G_RANGE_CHECK)
     if (inx < 0 || inx >= m_number)
@@ -680,18 +673,3 @@ void GFitsTableBitCol::set_pending(void)
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] column Column to put in output stream.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GFitsTableBitCol& column)
-{
-    // Dump column in output stream
-    column.dump_column(os, column.m_data);
-
-    // Return output stream
-    return os;
-}

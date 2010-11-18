@@ -20,6 +20,7 @@
 #define GFITSTABLEBITCOL_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GFitsTableCol.hpp"
 
 
@@ -33,9 +34,6 @@
  * 8 Bits (using the cfitsio type TBYTE).
  ***************************************************************************/
 class GFitsTableBitCol : public GFitsTableCol {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GFitsTableBitCol& column);
 
 public:
     // Constructors and destructors

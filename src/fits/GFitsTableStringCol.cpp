@@ -15,8 +15,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
-#include <string.h>
+#include <string>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
@@ -328,7 +327,7 @@ void GFitsTableStringCol::copy_members(const GFitsTableStringCol& column)
     // Copy NULL value
     if (column.m_nulval != NULL) {
         m_nulval = new char[m_width+1];
-        strncpy(m_nulval, column.m_nulval, m_width);        
+        strncpy(m_nulval, column.m_nulval, m_width);
     }
 
     // Small memory option: release column if it was fetch above
@@ -622,18 +621,3 @@ void GFitsTableStringCol::free_buffer(void)
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] column Column to put in output stream.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GFitsTableStringCol& column)
-{
-    // Dump column in output stream
-    column.dump_column(os, column.m_data);
-
-    // Return output stream
-    return os;
-}

@@ -20,6 +20,8 @@
 #define GFITSTABLE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
+#include "GLog.hpp"
 #include "GFitsHDU.hpp"
 #include "GFitsTableCol.hpp"
 
@@ -39,6 +41,7 @@ class GFitsTable : public GFitsHDU {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GFitsTable& table);
+    friend GLog&         operator<< (GLog& log, const GFitsTable& table);
 
 public:
     // Constructors and destructors
@@ -65,16 +68,15 @@ public:
 
 protected:
     // Protected methods
-    void  init_members(void);
-    void  copy_members(const GFitsTable& table);
-    void  free_members(void);
-    void  data_open(void* vptr);
-    void  data_save(void);
-    void  data_close(void);
-    void  data_connect(void* vptr);
-    char* get_ttype(const int& colnum) const;
-    char* get_tform(const int& colnum) const;
-    char* get_tunit(const int& colnum) const;
+    void          data_open(void* vptr);
+    void          data_save(void);
+    void          data_close(void);
+    void          data_connect(void* vptr);
+    std::ostream& data_dump(std::ostream& os) const;
+    GLog&         data_dump(GLog& log) const;
+    char*         get_ttype(const int& colnum) const;
+    char*         get_tform(const int& colnum) const;
+    char*         get_tunit(const int& colnum) const;
 
     // Protected data area
     int             m_type;       //!< Table type (1=ASCII, 2=Binary)
@@ -84,6 +86,9 @@ protected:
 
 private:
     // Private methods
+    void  init_members(void);
+    void  copy_members(const GFitsTable& table);
+    void  free_members(void);
 };
 
 #endif /* GFITSTABLE_HPP */
