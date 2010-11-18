@@ -29,6 +29,9 @@
 #include <sys/stat.h>
 #include "GTools.hpp"
 
+/* __ Coding definitions _________________________________________________ */
+#define G_PARFORMAT_LENGTH 29
+
 
 /***********************************************************************//**
  * @brief Strip leading and trailing whitespace from string
@@ -52,7 +55,7 @@ std::string strip_chars(const std::string& arg, const std::string& chars)
 {
     // Initialise empty result string
     std::string result;
-    
+
     // Continue only if argument is not empty
     if (!arg.empty()) {
 
@@ -369,11 +372,11 @@ std::vector<std::string> split(const std::string& s, const std::string& sep)
 {
     // Allocate result string vector
     std::vector<std::string> result;
-    
+
     // Initialise counters
     size_t pos = 0;
     size_t len = s.size();
-    
+
     // Loop over string
     while (pos < len && pos != std::string::npos) {
         size_t index = s.find_first_of(sep, pos);
@@ -383,7 +386,7 @@ std::vector<std::string> split(const std::string& s, const std::string& sep)
         result.push_back(s.substr(pos, n));
         pos = (index != std::string::npos) ? index + 1 : std::string::npos;
     } // endwhile: there were still characters in the string
-    
+
     // Return result
     return result;
 }
@@ -416,17 +419,18 @@ std::string fill(const std::string& s, int n)
  *
  * @param[in] s String to be centred.
  * @param[in] n Requested total width.
+ * @param[in] c Fill character.
  *
  * Left justify string by adding whitespace to the right to achieve a length
  * of n characters.
  ***************************************************************************/
-std::string left(const std::string& s, int n)
+std::string left(const std::string& s, int n, char c)
 {
     // Compute number of characters to fill right
     int n_right  = n - s.length();
-    
+
     // Set result
-    std::string result = s + fill(" ", n_right);
+    std::string result = s + fill(std::string(1,c), n_right);
 
     // Return result
     return result;
@@ -442,13 +446,13 @@ std::string left(const std::string& s, int n)
  * Right justify string by adding whitespace to the left to achieve a length
  * of n characters.
  ***************************************************************************/
-std::string right(const std::string& s, int n)
+std::string right(const std::string& s, int n, char c)
 {
     // Compute number of characters to fill right
     int n_left  = n - s.length();
-    
+
     // Set result
-    std::string result = fill(" ", n_left) + s;
+    std::string result = fill(std::string(1,c), n_left) + s;
 
     // Return result
     return result;
@@ -464,14 +468,36 @@ std::string right(const std::string& s, int n)
  * Center string by adding whitespace to the left and the right to achieve a
  * length of n characters.
  ***************************************************************************/
-std::string center(const std::string& s, int n)
+std::string center(const std::string& s, int n, char c)
 {
     // Compute number of characters to fill left and right
     int n_right = (n-s.length()) / 2;
     int n_left  = n - s.length() - n_right;
-    
+
     // Set result
-    std::string result = fill(" ", n_left) + s + fill(" ", n_right);
+    std::string result = fill(std::string(1,c), n_left)+s+fill(" ", n_right);
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert string in parameter format
+ *
+ * @param[in] s String to be converted.
+ *
+ * Converts and string into the parameter format of type "s ......: " with a
+ * total length of G_PARFORMAT_LENGTH.
+ ***************************************************************************/
+std::string parformat(const std::string& s)
+{
+    // Compute number of characters to fill right. Do not clip the string if
+    // it is too long since we do not want to loose information.
+    int n_right  = G_PARFORMAT_LENGTH - s.length() - 3;
+
+    // Set result
+    std::string result = s + " " + fill(".", n_right) + ": ";
 
     // Return result
     return result;
