@@ -391,7 +391,7 @@ void GFitsHDU::connect(void* vptr)
 {
     // Continue only if file pointer is valid
     if (vptr != NULL) {
-    
+
         // Connect HDU by copying the file pointer
         FPTR_COPY(m_fitsfile, vptr);
 
@@ -552,10 +552,8 @@ void GFitsHDU::save(void)
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param[in] os Output stream into which the HDU will be dumped.
+ * @param[in] os Output stream.
  * @param[in] hdu HDU to be dumped.
- *
- * @todo Put FITS data in stream.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFitsHDU& hdu)
 {
@@ -583,7 +581,47 @@ std::ostream& operator<< (std::ostream& os, const GFitsHDU& hdu)
     os << hdu.m_header;
 
     // Put FITS data in stream
+    os << hdu.data_dump(os);
 
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] hdu HDU to be logged.
+  ***************************************************************************/
+GLog& operator<< (GLog& log, const GFitsHDU& hdu)
+{
+    // Put header in stream
+    log << "=== GFitsHDU ===" << std::endl;
+    log << " HDU number ................: " << hdu.m_hdunum << std::endl;
+    log << " HDU name ..................: " << hdu.m_name << std::endl;
+    log << " HDU type ..................: ";
+    switch (hdu.exttype()) {
+    case GFitsHDU::HT_IMAGE:
+        log << "Image" << std::endl;
+        break;
+    case GFitsHDU::HT_ASCII_TABLE:
+        log << "ASCII table" << std::endl;
+        break;
+    case GFitsHDU::HT_BIN_TABLE:
+        log << "Binary table" << std::endl;
+        break;
+    default:
+        log << "Unknown" << std::endl;
+        break;
+    }
+
+    // Put FITS header in stream
+    log << hdu.m_header;
+
+    // Put FITS data in stream
+    log << std::endl << hdu.data_dump(log);
+
+    // Return logger
+    return log;
 }

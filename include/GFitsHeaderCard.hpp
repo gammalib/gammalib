@@ -20,6 +20,8 @@
 #define GFITSHEADERCARD_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
+#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -40,6 +42,7 @@ class GFitsHeaderCard {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GFitsHeaderCard& card);
+    friend GLog&         operator<< (GLog& log, const GFitsHeaderCard& header);
 
 public:
     // Constructors & Destructors

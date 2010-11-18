@@ -1175,3 +1175,108 @@ std::ostream& operator<< (std::ostream& os, const GFitsHeaderCard& card)
     // Return output stream
     return os;
 }
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] card Header card.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GFitsHeaderCard& card)
+{
+    // Set buffer
+    char buffer[100];
+
+    // Setup left justified keyname
+    std::string keyname = card.m_keyname;
+    while (keyname.length() < 8)
+        keyname.append(" ");
+
+    // Setup buffer
+    if (card.m_keyname != "COMMENT" && card.m_keyname != "HISTORY") {
+      if (card.m_unit.length() > 0) {
+        sprintf(buffer, "%8s =%21s / [%s] %s",
+                keyname.c_str(),
+                card.m_value.c_str(),
+                card.m_unit.c_str(),
+                card.m_comment.c_str());
+      }
+      else {
+        sprintf(buffer, "%8s =%21s / %s",
+                keyname.c_str(),
+                card.m_value.c_str(),
+                card.m_comment.c_str());
+      }
+    }
+    else {
+      sprintf(buffer, "%8s %s",
+              keyname.c_str(),
+              card.m_comment.c_str());
+    }
+
+    // Put buffer in stream
+    log << buffer;
+
+    // Attach card type
+    if (card.m_value_dtype != NULL) {
+        switch (card.m_dtype) {
+        case __TBIT:
+            log << " <bit>";
+            break;
+        case __TBYTE:
+            log << " <byte>";
+            break;
+        case __TSBYTE:
+            log << " <signed byte>";
+            break;
+        case __TLOGICAL:
+            log << " <bool>";
+            break;
+        case __TSTRING:
+            log << " <string>";
+            break;
+        case __TUSHORT:
+            log << " <unsigned short>";
+            break;
+        case __TSHORT:
+            log << " <short>";
+            break;
+        case __TUINT:
+            log << " <unsigned int>";
+            break;
+        case __TINT:
+            log << " <int>";
+            log;
+        case __TULONG:
+            log << " <unsigned long>";
+            break;
+        case __TLONG:
+            log << " <long>";
+            break;
+        case __TLONGLONG:
+            log << " <long long>";
+            break;
+        case __TFLOAT:
+            log << " <float>";
+            break;
+        case __TDOUBLE:
+            log << " <double>";
+            break;
+        case __TCOMPLEX:
+            log << " <complex>";
+            break;
+        case __TDBLCOMPLEX:
+            log << " <double complex>";
+            break;
+        default:
+            log << " <unsupported>";
+            break;
+        }
+    }
+    else
+        log << " <non native>";
+
+    // Return logger
+    return log;
+}

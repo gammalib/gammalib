@@ -595,3 +595,21 @@ std::ostream& operator<< (std::ostream& os, const GFitsHeader& header)
     // Return output stream
     return os;
 }
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] header FITS header.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GFitsHeader& header)
+{
+    // Put header in logger
+    log << "=== GFitsHeader (" << header.m_num_cards << " cards) ===";
+    for (int i = 0; i < header.m_num_cards; ++i)
+        log << std::endl << " " << header.m_card[i];
+
+    // Return logger
+    return log;
+}

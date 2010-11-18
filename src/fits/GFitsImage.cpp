@@ -227,17 +227,6 @@ int GFitsImage::naxes(int axis) const
 
 
 /***********************************************************************//**
- * @brief Return number of pixels
- ***************************************************************************/
-/*
-int GFitsImage::num_pixels(void) const
-{
-    // Return number of pixels
-    return m_num_pixels;
-}
-*/
-
-/***********************************************************************//**
  * @brief Return number of nul values envountered during loading
  ***************************************************************************/
 int GFitsImage::anynul(void) const
@@ -287,102 +276,9 @@ void* GFitsImage::nulval(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Initialise class members
- ***************************************************************************/
-void GFitsImage::init_members(void)
-{
-    // Initialise members
-    m_bitpix     = 8;
-    m_naxis      = 0;
-    m_naxes      = NULL;
-    m_num_pixels = 0;
-    m_anynul     = 0;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Copy class members
- *
- * @param[in] image FITS image to copy
- ***************************************************************************/
-void GFitsImage::copy_members(const GFitsImage& image)
-{
-    // Copy attributes
-    m_bitpix     = image.m_bitpix;
-    m_naxis      = image.m_naxis;
-    m_num_pixels = image.m_num_pixels;
-    m_anynul     = image.m_anynul;
-
-    // Copy axes
-    m_naxes = NULL;
-    if (image.m_naxes != NULL && m_naxis > 0) {
-        m_naxes = new long[m_naxis];
-        for (int i = 0; i < m_naxis; ++i)
-            m_naxes[i] = image.m_naxes[i];
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Delete class members
- ***************************************************************************/
-void GFitsImage::free_members(void)
-{
-    // Free memory
-    if (m_naxes != NULL) delete [] m_naxes;
-
-    // Mark memory as free
-    m_naxes = NULL;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Initialise image header
- *
- * Initialises the image header by setting the default header cards. This
- * method requires the members m_bitpix, m_naxis, and m_naxes to be set
- * previously.
- ***************************************************************************/
-void GFitsImage::init_image_header(void)
-{
-    // Set image header keywords
-    m_header.update(GFitsHeaderCard("XTENSION", "IMAGE   ",
-                                    "IMAGE extension"));
-    m_header.update(GFitsHeaderCard("BITPIX", bitpix(),
-                                    "number of bits per data pixel"));
-    m_header.update(GFitsHeaderCard("NAXIS", naxis(),
-                                    "number of data axes"));
-    for (int i = 0; i < naxis(); ++i) {
-        std::ostringstream s_key;
-        std::ostringstream s_comment;
-        s_key     << "NAXIS" << (i+1);
-        s_comment << "length of data axis " << (i+1);
-        m_header.update(GFitsHeaderCard(s_key.str(), naxes(i),
-                                        s_comment.str()));
-    }
-    m_header.update(GFitsHeaderCard("PCOUNT", 0,
-                                    "required keyword; must = 0"));
-    m_header.update(GFitsHeaderCard("GCOUNT", 1,
-                                    "required keyword; must = 1"));
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Open FITS image
  *
- * @param fptr FITS file pointer
+ * @param[in] fptr FITS file pointer
  *
  * Open FITS image in FITS file. Opening means connecting the FITS file
  * pointer to the image and reading the image and axes dimensions.
@@ -438,7 +334,7 @@ void GFitsImage::data_close(void)
 /***********************************************************************//**
  * @brief Connect FITS image
  *
- * @param vptr FITS file pointer
+ * @param[in] vptr FITS file pointer
  *
  * Connects a FITS file pointer to an image. This method actually does
  * nothing since any GFitsImage can directly access the FITS file pointer
@@ -446,6 +342,78 @@ void GFitsImage::data_close(void)
  ***************************************************************************/
 void GFitsImage::data_connect(void* vptr)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write image in output stream
+ *
+ * @param[in] os Output stream.
+  ***************************************************************************/
+std::ostream& GFitsImage::data_dump(std::ostream& os) const
+{
+    // Put header in stream
+    os << "=== GFitsImage ===" << std::endl;
+    os << " Number of dimensions ......: " << naxis() << std::endl;
+    os << " Number of image pixels ....: " << size() << std::endl;
+    for (int i = 0; i < naxis(); ++i)
+        os << " Number of bins in " << i << " .......: " << naxes(i) << std::endl;
+
+    // Return output stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Write image in logger
+ *
+ * @param[in] log Logger.
+  ***************************************************************************/
+GLog& GFitsImage::data_dump(GLog& log) const
+{
+    // Put header in stream
+    log << "=== GFitsImage ===" << std::endl;
+    log << " Number of dimensions ......: " << naxis() << std::endl;
+    log << " Number of image pixels ....: " << size() << std::endl;
+    for (int i = 0; i < naxis(); ++i)
+        log << " Number of bins in " << i << " .......: " << naxes(i) << std::endl;
+
+    // Return logger
+    return log;
+}
+
+
+/***********************************************************************//**
+ * @brief Initialise image header
+ *
+ * Initialises the image header by setting the default header cards. This
+ * method requires the members m_bitpix, m_naxis, and m_naxes to be set
+ * previously.
+ ***************************************************************************/
+void GFitsImage::init_image_header(void)
+{
+    // Set image header keywords
+    m_header.update(GFitsHeaderCard("XTENSION", "IMAGE   ",
+                                    "IMAGE extension"));
+    m_header.update(GFitsHeaderCard("BITPIX", bitpix(),
+                                    "number of bits per data pixel"));
+    m_header.update(GFitsHeaderCard("NAXIS", naxis(),
+                                    "number of data axes"));
+    for (int i = 0; i < naxis(); ++i) {
+        std::ostringstream s_key;
+        std::ostringstream s_comment;
+        s_key     << "NAXIS" << (i+1);
+        s_comment << "length of data axis " << (i+1);
+        m_header.update(GFitsHeaderCard(s_key.str(), naxes(i),
+                                        s_comment.str()));
+    }
+    m_header.update(GFitsHeaderCard("PCOUNT", 0,
+                                    "required keyword; must = 0"));
+    m_header.update(GFitsHeaderCard("GCOUNT", 1,
+                                    "required keyword; must = 1"));
+
     // Return
     return;
 }
@@ -770,6 +738,71 @@ int GFitsImage::offset(const int& ix, const int& iy, const int& iz,
 
 /*==========================================================================
  =                                                                         =
+ =                             Private methods                             =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ ***************************************************************************/
+void GFitsImage::init_members(void)
+{
+    // Initialise members
+    m_bitpix     = 8;
+    m_naxis      = 0;
+    m_naxes      = NULL;
+    m_num_pixels = 0;
+    m_anynul     = 0;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] image FITS image to copy
+ ***************************************************************************/
+void GFitsImage::copy_members(const GFitsImage& image)
+{
+    // Copy attributes
+    m_bitpix     = image.m_bitpix;
+    m_naxis      = image.m_naxis;
+    m_num_pixels = image.m_num_pixels;
+    m_anynul     = image.m_anynul;
+
+    // Copy axes
+    m_naxes = NULL;
+    if (image.m_naxes != NULL && m_naxis > 0) {
+        m_naxes = new long[m_naxis];
+        for (int i = 0; i < m_naxis; ++i)
+            m_naxes[i] = image.m_naxes[i];
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ ***************************************************************************/
+void GFitsImage::free_members(void)
+{
+    // Free memory
+    if (m_naxes != NULL) delete [] m_naxes;
+
+    // Mark memory as free
+    m_naxes = NULL;
+
+    // Return
+    return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
  =                               Friends                                   =
  =                                                                         =
  ==========================================================================*/
@@ -777,18 +810,24 @@ int GFitsImage::offset(const int& ix, const int& iy, const int& iz,
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param os Output stream.
- * @param image FITS image.
+ * @param[in] os Output stream.
+ * @param[in] image FITS image.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFitsImage& image)
 {
-    // Put header in stream
-    os << "=== GFitsImage ===" << std::endl;
-    os << " Number of dimensions ......: " << image.m_naxis << std::endl;
-    os << " Number of image pixels ....: " << image.m_num_pixels << std::endl;
-    for (int i = 0; i < image.m_naxis; ++i)
-        os << " Number of bins in " << i << " .......: " << image.m_naxes[i] << std::endl;
-
     // Return output stream
-    return os;
+    return (image.data_dump(os));
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] image FITS image.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GFitsImage& image)
+{
+    // Return logger
+    return (image.data_dump(log));
 }

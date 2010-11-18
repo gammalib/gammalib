@@ -20,7 +20,10 @@
 #define GFITS_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include <vector>
+#include <iostream>
+#include "GLog.hpp"
 #include "GFitsHDU.hpp"
 #include "GFitsImage.hpp"
 #include "GFitsTable.hpp"
@@ -40,6 +43,7 @@ class GFits {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GFits& fits);
+    friend GLog&         operator<< (GLog& log, const GFits& fits);
 
 public:
     // Constructors and destructors

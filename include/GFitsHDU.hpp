@@ -20,6 +20,9 @@
 #define GFITSHDU_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
+#include <iostream>
+#include "GLog.hpp"
 #include "GFitsHeader.hpp"
 #include "GFitsHeaderCard.hpp"
 
@@ -45,6 +48,7 @@ class GFitsHDU {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GFitsHDU& hdu);
+    friend GLog&         operator<< (GLog& log, const GFitsHDU& hdu);
 
 public:
     // Constructors and destructors
@@ -95,10 +99,12 @@ protected:
     void    save(void);
 
     // Pure virtual protected methods
-    virtual void data_open(void* vptr) = 0;
-    virtual void data_save(void) = 0;
-    virtual void data_close(void) = 0;
-    virtual void data_connect(void* vptr) = 0;
+    virtual void          data_open(void* vptr) = 0;
+    virtual void          data_save(void) = 0;
+    virtual void          data_close(void) = 0;
+    virtual void          data_connect(void* vptr) = 0;
+    virtual std::ostream& data_dump(std::ostream& os) const = 0;
+    virtual GLog&         data_dump(GLog& log) const = 0;
 
     // Protected data area
     void*        m_fitsfile;    //!< FITS file pointer pointing on actual HDU

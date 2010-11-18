@@ -862,12 +862,12 @@ GFitsImage* GFits::new_primary(void)
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param os Output stream into which the FITS file will be dumped.
- * @param fits FITS file to dump.
+ * @param os Output stream.
+ * @param fits FITS file.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFits& fits)
 {
-    // Put header in stream
+    // Put file in stream
     os << "=== GFits ===" << std::endl;
     os << " Filename ..................: " << fits.m_filename << std::endl;
     os << " Mode ......................: ";
@@ -881,4 +881,29 @@ std::ostream& operator<< (std::ostream& os, const GFits& fits)
 
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param log Logger.
+ * @param fits FITS file.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GFits& fits)
+{
+    // Put file in logger
+    log << "=== GFits ===" << std::endl;
+    log << " Filename ..................: " << fits.m_filename << std::endl;
+    log << " Mode ......................: ";
+    if (fits.m_readwrite)
+        log << "read/write" << std::endl;
+    else
+        log << "read only" << std::endl;
+    log << " Number of HDUs ............: " << fits.size() << std::endl;
+    for (int i = 0; i < fits.size(); ++i)
+        log << std::endl << *fits.m_hdu[i];
+
+    // Return logger
+    return log;
 }

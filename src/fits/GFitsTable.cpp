@@ -396,76 +396,9 @@ int GFitsTable::ncols(void) const
 
 /*==========================================================================
  =                                                                         =
- =                              Private methods                            =
+ =                             Protected methods                           =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Initialise class members
- ***************************************************************************/
-void GFitsTable::init_members(void)
-{
-    // Initialise members
-    m_type    = -1;
-    m_rows    = 0;
-    m_cols    = 0;
-    m_columns = NULL;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Copy class members
- *
- * @param[in] table Table to copy
- ***************************************************************************/
-void GFitsTable::copy_members(const GFitsTable& table)
-{
-    // Copy attributes
-    m_type = table.m_type;
-    m_rows = table.m_rows;
-    m_cols = table.m_cols;
-
-    // Copy column definition
-    if (table.m_columns != NULL && m_cols > 0) {
-        m_columns = new GFitsTableCol*[m_cols];
-        for (int i = 0; i < m_cols; ++i) {
-            if (table.m_columns[i] != NULL)
-                m_columns[i] = table.m_columns[i]->clone();
-            else
-                m_columns[i] = NULL;
-        }
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Delete class members
- *
- * De-allocates all column pointers
- ***************************************************************************/
-void GFitsTable::free_members(void)
-{
-    // Free memory
-    if (m_columns != NULL) {
-        for (int i = 0; i < m_cols; ++i) {
-            if (m_columns[i] != NULL) delete m_columns[i];
-        }
-        delete [] m_columns;
-    }
-
-    // Mark memory as freed
-    m_columns = NULL;
-
-    // Return
-    return;
-}
-
 
 /***********************************************************************//**
  * @brief Open Table
@@ -557,7 +490,7 @@ void GFitsTable::data_open(void* vptr)
         }
         else
             status = 0;
-        
+
         // Allocate column
         switch (typecode) {
         case __TBIT:
@@ -856,7 +789,7 @@ void GFitsTable::data_connect(void* vptr)
 {
     // Continue only if file pointer is valid
     if (vptr != NULL) {
-    
+
         // Connect all columns
         if (m_columns != NULL) {
             for (int i = 0; i < m_cols; ++i) {
@@ -868,6 +801,172 @@ void GFitsTable::data_connect(void* vptr)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write table in output stream
+ *
+ * @param[in] os Output stream
+ ***************************************************************************/
+std::ostream& GFitsTable::data_dump(std::ostream& os) const
+{
+    // Put header in stream
+    os << "=== GFitsTable ===" << std::endl;
+    os << " Table type ................: ";
+    switch (m_type) {
+    case 1:
+        os << "ASCII table" << std::endl;
+        break;
+    case 2:
+        os << "Binary table" << std::endl;
+        break;
+    default:
+        os << "Unknown" << std::endl;
+        break;
+    }
+    os << " Number of rows ............: " << m_rows << std::endl;
+    os << " Number of columns .........: " << m_cols << std::endl;
+    if (m_columns != NULL) {
+        for (int i = 0; i < m_cols; ++i) {
+            if (m_columns[i] != NULL) {
+                switch (m_columns[i]->type()) {
+                case __TBIT:
+                    os << " " << *((GFitsTableBitCol*)m_columns[i]) 
+                       << std::endl;
+                    break;
+                case __TLOGICAL:
+                    os << " " << *((GFitsTableBoolCol*)m_columns[i]) 
+                       << std::endl;
+                    break;
+                case __TSTRING:
+                    os << " " << *((GFitsTableStringCol*)m_columns[i]) 
+                       << std::endl;
+                    break;
+                case __TUSHORT:
+                    os << " " << *((GFitsTableUShortCol*)m_columns[i]) 
+                       << std::endl;
+                    break;
+                case __TSHORT:
+                    os << " " << *((GFitsTableShortCol*)m_columns[i]) 
+                       << std::endl;
+                    break;
+                case __TULONG:
+                    os << " " << *((GFitsTableULongCol*)m_columns[i]) 
+                       << std::endl;
+                    break;
+                case __TLONG:
+                    os << " " << *((GFitsTableLongCol*)m_columns[i]) 
+                       << std::endl;
+                    break;
+                case __TFLOAT:
+                    os << " " << *((GFitsTableFloatCol*)m_columns[i]) 
+                       << std::endl;
+                    break;
+                case __TLONGLONG:
+                    os << " " << *((GFitsTableLongLongCol*)m_columns[i]) 
+                       << std::endl;
+                    break;
+                case __TDOUBLE:
+                    os << " " << *((GFitsTableDoubleCol*)m_columns[i]) 
+                       << std::endl;
+                    break;
+                default:
+                    break;
+                }
+            }
+            else
+                os << " column " << i << " undefined" << std::endl;
+        }
+    }
+    else
+        os << " table columns undefined" << std::endl;
+
+    // Return output stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Write table in logger
+ *
+ * @param[in] log Logger.
+ ***************************************************************************/
+GLog& GFitsTable::data_dump(GLog& log) const
+{
+    // Put header in stream
+    log << "=== GFitsTable ===" << std::endl;
+    log << " Table type ................: ";
+    switch (m_type) {
+    case 1:
+        log << "ASCII table" << std::endl;
+        break;
+    case 2:
+        log << "Binary table" << std::endl;
+        break;
+    default:
+        log << "Unknown" << std::endl;
+        break;
+    }
+    log << " Number of rows ............: " << m_rows << std::endl;
+    log << " Number of columns .........: " << m_cols << std::endl;
+    if (m_columns != NULL) {
+        for (int i = 0; i < m_cols; ++i) {
+            if (m_columns[i] != NULL) {
+                switch (m_columns[i]->type()) {
+                case __TBIT:
+                    log << " " << *((GFitsTableBitCol*)m_columns[i]) 
+                        << std::endl;
+                    break;
+                case __TLOGICAL:
+                    log << " " << *((GFitsTableBoolCol*)m_columns[i]) 
+                        << std::endl;
+                    break;
+                case __TSTRING:
+                    log << " " << *((GFitsTableStringCol*)m_columns[i]) 
+                        << std::endl;
+                    break;
+                case __TUSHORT:
+                    log << " " << *((GFitsTableUShortCol*)m_columns[i]) 
+                        << std::endl;
+                    break;
+                case __TSHORT:
+                    log << " " << *((GFitsTableShortCol*)m_columns[i]) 
+                        << std::endl;
+                    break;
+                case __TULONG:
+                    log << " " << *((GFitsTableULongCol*)m_columns[i]) 
+                        << std::endl;
+                    break;
+                case __TLONG:
+                    log << " " << *((GFitsTableLongCol*)m_columns[i]) 
+                        << std::endl;
+                    break;
+                case __TFLOAT:
+                    log << " " << *((GFitsTableFloatCol*)m_columns[i]) 
+                        << std::endl;
+                    break;
+                case __TLONGLONG:
+                    log << " " << *((GFitsTableLongLongCol*)m_columns[i]) 
+                        << std::endl;
+                    break;
+                case __TDOUBLE:
+                    log << " " << *((GFitsTableDoubleCol*)m_columns[i]) 
+                        << std::endl;
+                    break;
+                default:
+                    break;
+                }
+            }
+            else
+                log << " column " << i << " undefined" << std::endl;
+        }
+    }
+    else
+        log << " table columns undefined" << std::endl;
+
+    // Return logger
+    return log;
 }
 
 
@@ -975,89 +1074,104 @@ char* GFitsTable::get_tunit(const int& colnum) const
 
 /*==========================================================================
  =                                                                         =
- =                             GFitsTable friends                          =
+ =                              Private methods                            =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ ***************************************************************************/
+void GFitsTable::init_members(void)
+{
+    // Initialise members
+    m_type    = -1;
+    m_rows    = 0;
+    m_cols    = 0;
+    m_columns = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] table Table to copy
+ ***************************************************************************/
+void GFitsTable::copy_members(const GFitsTable& table)
+{
+    // Copy attributes
+    m_type = table.m_type;
+    m_rows = table.m_rows;
+    m_cols = table.m_cols;
+
+    // Copy column definition
+    if (table.m_columns != NULL && m_cols > 0) {
+        m_columns = new GFitsTableCol*[m_cols];
+        for (int i = 0; i < m_cols; ++i) {
+            if (table.m_columns[i] != NULL)
+                m_columns[i] = table.m_columns[i]->clone();
+            else
+                m_columns[i] = NULL;
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ *
+ * De-allocates all column pointers
+ ***************************************************************************/
+void GFitsTable::free_members(void)
+{
+    // Free memory
+    if (m_columns != NULL) {
+        for (int i = 0; i < m_cols; ++i) {
+            if (m_columns[i] != NULL) delete m_columns[i];
+        }
+        delete [] m_columns;
+    }
+
+    // Mark memory as freed
+    m_columns = NULL;
+
+    // Return
+    return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param[in] os Output stream
- * @param[in] table Table to put in output stream
+ * @param[in] os Output stream.
+ * @param[in] table FITS table.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFitsTable& table)
 {
-    // Put header in stream
-    os << "=== GFitsTable ===" << std::endl;
-    os << " Table type ................: ";
-    switch (table.m_type) {
-    case 1:
-        os << "ASCII table" << std::endl;
-        break;
-    case 2:
-        os << "Binary table" << std::endl;
-        break;
-    default:
-        os << "Unknown" << std::endl;
-        break;
-    }
-    os << " Number of rows ............: " << table.m_rows << std::endl;
-    os << " Number of columns .........: " << table.m_cols << std::endl;
-    if (table.m_columns != NULL) {
-        for (int i = 0; i < table.m_cols; ++i) {
-            if (table.m_columns[i] != NULL) {
-                switch (table.m_columns[i]->type()) {
-                case __TBIT:
-                    os << " " << *((GFitsTableBitCol*)table.m_columns[i]) 
-                       << std::endl;
-                    break;
-                case __TLOGICAL:
-                    os << " " << *((GFitsTableBoolCol*)table.m_columns[i]) 
-                       << std::endl;
-                    break;
-                case __TSTRING:
-                    os << " " << *((GFitsTableStringCol*)table.m_columns[i]) 
-                       << std::endl;
-                    break;
-                case __TUSHORT:
-                    os << " " << *((GFitsTableUShortCol*)table.m_columns[i]) 
-                       << std::endl;
-                    break;
-                case __TSHORT:
-                    os << " " << *((GFitsTableShortCol*)table.m_columns[i]) 
-                       << std::endl;
-                    break;
-                case __TULONG:
-                    os << " " << *((GFitsTableULongCol*)table.m_columns[i]) 
-                       << std::endl;
-                    break;
-                case __TLONG:
-                    os << " " << *((GFitsTableLongCol*)table.m_columns[i]) 
-                       << std::endl;
-                    break;
-                case __TFLOAT:
-                    os << " " << *((GFitsTableFloatCol*)table.m_columns[i]) 
-                       << std::endl;
-                    break;
-                case __TLONGLONG:
-                    os << " " << *((GFitsTableLongLongCol*)table.m_columns[i]) 
-                       << std::endl;
-                    break;
-                case __TDOUBLE:
-                    os << " " << *((GFitsTableDoubleCol*)table.m_columns[i]) 
-                       << std::endl;
-                    break;
-                default:
-                    break;
-                }
-            }
-            else
-                os << " column " << i << " undefined" << std::endl;
-        }
-    }
-    else
-        os << " table columns undefined" << std::endl;
-
     // Return output stream
-    return os;
+    return (table.data_dump(os));
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] table FITS table.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GFitsTable& table)
+{
+    // Return logger
+    return (table.data_dump(log));
 }
