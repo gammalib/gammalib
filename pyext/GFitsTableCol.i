@@ -30,8 +30,8 @@ class GFitsTableCol {
 public:
     // Constructors and destructors
     GFitsTableCol(void);
-    GFitsTableCol(const std::string& name, const int& length,
-                  const int& number,       const int& width);
+    explicit GFitsTableCol(const std::string& name, const int& length,
+                           const int& number,       const int& width);
     GFitsTableCol(const GFitsTableCol& column);
     virtual ~GFitsTableCol(void);
 
@@ -50,4 +50,15 @@ public:
     int         number(void) const;
     int         length(void) const;
     int         anynul(void) const;
+};
+
+
+/***********************************************************************//**
+ * @brief GFitsTableCol class extension
+ ***************************************************************************/
+%extend GFitsTableCol {
+    char *__str__() {
+        std::string result = self->print();
+        return ((char*)result.c_str());
+    }
 };

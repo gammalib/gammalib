@@ -30,7 +30,7 @@ class GFitsTable : public GFitsHDU {
 public:
     // Constructors and destructors
     GFitsTable(void);
-    GFitsTable(int nrows);
+    explicit GFitsTable(int nrows);
     GFitsTable(const GFitsTable& table);
     virtual ~GFitsTable(void);
 
@@ -38,14 +38,14 @@ public:
     virtual GFitsTable* clone(void) const = 0;
 
     // Implemented Methods
-    virtual void           append_column(GFitsTableCol& column);
-    virtual void           insert_column(int colnum, GFitsTableCol& column);
-    virtual void           append_rows(const int& nrows);
-    virtual void           insert_rows(const int& rownum, const int& nrows);
-    virtual GFitsTableCol* column(const std::string& colname);
-    virtual GFitsTableCol* column(const int& colnum);
-    virtual int            nrows(void) const;
-    virtual int            ncols(void) const;
+    void           append_column(GFitsTableCol& column);
+    void           insert_column(int colnum, GFitsTableCol& column);
+    void           append_rows(const int& nrows);
+    void           insert_rows(const int& rownum, const int& nrows);
+    GFitsTableCol* column(const std::string& colname);
+    GFitsTableCol* column(const int& colnum);
+    int            nrows(void) const;
+    int            ncols(void) const;
 };
 
 
@@ -54,12 +54,7 @@ public:
  ***************************************************************************/
 %extend GFitsTable {
     char *__str__() {
-        static char str_buffer[100001];
-        std::ostringstream buffer;
-        buffer << *self;
-	    std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 100001);
-	    str_buffer[100000] = '\0';
-	    return str_buffer;
+        std::string result = self->print();
+        return ((char*)result.c_str());
     }
 };
