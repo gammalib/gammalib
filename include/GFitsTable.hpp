@@ -46,7 +46,7 @@ class GFitsTable : public GFitsHDU {
 public:
     // Constructors and destructors
     GFitsTable(void);
-    GFitsTable(int nrows);
+    explicit GFitsTable(int nrows);
     GFitsTable(const GFitsTable& table);
     virtual ~GFitsTable(void);
 
@@ -57,14 +57,15 @@ public:
     virtual GFitsTable* clone(void) const = 0;
 
     // Implemented Methods
-    virtual void           append_column(GFitsTableCol& column);
-    virtual void           insert_column(int colnum, GFitsTableCol& column);
-    virtual void           append_rows(const int& nrows);
-    virtual void           insert_rows(const int& rownum, const int& nrows);
-    virtual GFitsTableCol* column(const std::string& colname);
-    virtual GFitsTableCol* column(const int& colnum);
-    virtual int            nrows(void) const;
-    virtual int            ncols(void) const;
+    void           append_column(GFitsTableCol& column);
+    void           insert_column(int colnum, GFitsTableCol& column);
+    void           append_rows(const int& nrows);
+    void           insert_rows(const int& rownum, const int& nrows);
+    GFitsTableCol* column(const std::string& colname);
+    GFitsTableCol* column(const int& colnum);
+    int            nrows(void) const;
+    int            ncols(void) const;
+    std::string    print(void) const;
 
 protected:
     // Protected methods
@@ -86,9 +87,10 @@ protected:
 
 private:
     // Private methods
-    void  init_members(void);
-    void  copy_members(const GFitsTable& table);
-    void  free_members(void);
+    void            init_members(void);
+    void            copy_members(const GFitsTable& table);
+    void            free_members(void);
+    GFitsTableCol*  alloc_column(int typecode) const;
 };
 
 #endif /* GFITSTABLE_HPP */
