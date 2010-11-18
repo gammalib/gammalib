@@ -68,9 +68,10 @@ std::string              toupper(const std::string& s);
 std::string              tolower(const std::string& s);
 std::vector<std::string> split(const std::string& s, const std::string& sep);
 std::string              fill(const std::string& s, int n);
-std::string              left(const std::string& s, int n);
-std::string              right(const std::string& s, int n);
-std::string              center(const std::string& s, int n);
+std::string              left(const std::string& s, int n, char c = ' ');
+std::string              right(const std::string& s, int n, char c = ' ');
+std::string              center(const std::string& s, int n, char c = ' ');
+std::string              parformat(const std::string& s);
 double                   modulo(double v1, double v2);
 bool                     file_exists(const std::string& filename);
 
