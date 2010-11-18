@@ -497,7 +497,7 @@ std::string parformat(const std::string& s)
     int n_right  = G_PARFORMAT_LENGTH - s.length() - 3;
 
     // Set result
-    std::string result = s + " " + fill(".", n_right) + ": ";
+    std::string result = " " + s + " " + fill(".", n_right) + ": ";
 
     // Return result
     return result;
