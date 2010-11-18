@@ -101,9 +101,9 @@ protected:
     virtual void          fetch_data(void);
     virtual void          load_column(void);
     virtual void          save_column(void);
-    //virtual void dump_column(std::ostream& os, void* data) const;
     virtual std::ostream& dump_column(std::ostream& os) const;
     virtual GLog&         dump_column(GLog& log) const;
+    virtual void          dump_buffer(char* buffer) const;
     virtual int           offset(const int& row, const int& inx) const;
 
 private:

@@ -414,94 +414,23 @@ void GFitsTableCol::save_column(void)
 
 
 /***********************************************************************//**
- * @brief Put column information in output stream
- *
- * @param[in] os Output stream.
- * @param[in] column Column to put in output stream.
- ***************************************************************************/
-/*
-void GFitsTableCol::dump_column(std::ostream& os, void* data) const
-{
-    // Put column name in stream
-    os << "'" << m_name << "'";
-
-    // Put FITS column number in stream
-    if (m_colnum > 0)
-        os << " [fits_colnum=" << m_colnum << "]";
-    else
-        os << " [not linked to FITS file]";
-
-    // Put column type in stream
-    os << " " << ascii_format();
-    os << " " << binary_format();
-
-    // Put data loading in stream
-    if (data == NULL)
-        os << " (not loaded)";
-    else
-        os << " (loaded in memory)";
-
-    // Set data area size
-    os << " size=" << m_size;
-
-    // Set vector length
-    os << " repeat=" << m_repeat;
-
-    // Set width
-    os <<  " width=" << m_width;
-
-    // Set number
-    os <<  " number=" << m_number;
-
-    // Set length
-    os << " length=" << m_length;
-
-    // Return
-    return;
-}
-*/
-
-/***********************************************************************//**
  * @brief Write column in output stream
  *
  * @param[in] os Output stream.
  * @param[in] column Column.
+ *
+ * @todo Use a stream buffer instead of a character buffer to circumvent
+ * any size limitations and return a std::string or a stream buffer.
  ***************************************************************************/
 std::ostream& GFitsTableCol::dump_column(std::ostream& os) const
 {
-    // Put column name in stream
-    os << "'" << m_name << "'";
+    char buffer[1024];
 
-    // Put FITS column number in stream
-    if (m_colnum > 0)
-        os << " [fits_colnum=" << m_colnum << "]";
-    else
-        os << " [not linked to FITS file]";
+    // Dump column into buffer
+    dump_buffer(buffer);
 
-    // Put column type in stream
-    os << " " << ascii_format();
-    os << " " << binary_format();
-
-    // Put data loading in stream
-    if (((GFitsTableCol*)this)->ptr_data() == NULL)
-        os << " (not loaded)";
-    else
-        os << " (loaded in memory)";
-
-    // Set data area size
-    os << " size=" << m_size;
-
-    // Set vector length
-    os << " repeat=" << m_repeat;
-
-    // Set width
-    os <<  " width=" << m_width;
-
-    // Set number
-    os <<  " number=" << m_number;
-
-    // Set length
-    os << " length=" << m_length;
+    // Write buffer into logger
+    os << buffer;
 
     // Return stream
     return os;
@@ -513,45 +442,68 @@ std::ostream& GFitsTableCol::dump_column(std::ostream& os) const
  *
  * @param[in] log Logger.
  * @param[in] column Column.
+ *
+ * @todo Use a stream buffer instead of a character buffer to circumvent
+ * any size limitations and return a std::string or a stream buffer.
  ***************************************************************************/
 GLog& GFitsTableCol::dump_column(GLog& log) const
 {
-    // Put column name in logger
-    log << "'" << m_name << "'";
+    // Allocate buffer
+    char buffer[1024];
 
-    // Put FITS column number in logger
-    if (m_colnum > 0)
-        log << " [fits_colnum=" << m_colnum << "]";
-    else
-        log << " [not linked to FITS file]";
+    // Dump column into buffer
+    dump_buffer(buffer);
 
-    // Put column type in stream
-    log << " " << ascii_format();
-    log << " " << binary_format();
-
-    // Put data loading in logger
-    if (((GFitsTableCol*)this)->ptr_data() == NULL)
-        log << " (not loaded)";
-    else
-        log << " (loaded in memory)";
-
-    // Set data area size
-    log << " size=" << m_size;
-
-    // Set vector length
-    log << " repeat=" << m_repeat;
-
-    // Set width
-    log <<  " width=" << m_width;
-
-    // Set number
-    log <<  " number=" << m_number;
-
-    // Set length
-    log << " length=" << m_length;
+    // Write buffer into logger
+    log << buffer;
 
     // Return logger
     return log;
+}
+
+
+/***********************************************************************//**
+ * @brief Write column into character buffer
+ *
+ * @param[in] buffer C string character buffer.
+ *
+ * Write column information in a formatted way into a C string buffer.
+ *
+ * @todo Use a stream buffer instead of a character buffer to circumvent
+ * any size limitations and return a std::string or a stream buffer.
+ ***************************************************************************/
+void GFitsTableCol::dump_buffer(char* buffer) const
+{
+    // Allocate buffers
+    char name[256];
+    char fmt[100];
+    char load[100];
+    char fits[256];
+
+    // Put column number and name in buffer
+    if (m_colnum > 0)
+        sprintf(name, "Column %5d ..............: %20s", m_colnum, m_name.c_str());
+    else
+        sprintf(name, "Column [not linked] .......: %20s", m_name.c_str());
+
+    // Put column format in buffer
+    sprintf(fmt, "[%5s,%5s]", binary_format().c_str(), ascii_format().c_str());
+
+    // Put loading information in buffer
+    if (((GFitsTableCol*)this)->ptr_data() == NULL)
+        sprintf(load, "[not loaded]      ");
+    else
+        sprintf(load, "[loaded in memory]");
+
+    // Put cfitsio information in buffer
+    sprintf(fits, "repeat=%d width=%d number=%d length=%d size=%d", m_repeat,
+            m_width, m_number, m_length, m_size);
+
+    // Assemble buffer
+    sprintf(buffer, "%s %s %s %s", name, fmt, load, fits);
+
+    // Return
+    return;
 }
 
 
