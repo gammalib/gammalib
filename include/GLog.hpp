@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <iostream>
 
 /* __ Forward declarations _______________________________________________ */
 
@@ -57,10 +58,11 @@ public:
     GLog(const std::string& filename, bool clobber = false);
     GLog(const GLog& log);
     ~GLog(void);
- 
+
     // Operators
     GLog& operator= (const GLog& log);
     void  operator()(const char *msgFormat, ...);
+    GLog& operator<<(const GLog& log);
     GLog& operator<<(const std::string& str);
     GLog& operator<<(const char* str);
     GLog& operator<<(const char& value);

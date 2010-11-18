@@ -169,7 +169,7 @@ void GLog::operator()(const char *msgFormat, ...)
     // Append message to string buffer
     m_buffer.append(buffer);
     m_buffer.append("\n");
-    
+
     // Flush buffer
     flush(true);
 
@@ -180,7 +180,22 @@ void GLog::operator()(const char *msgFormat, ...)
 
 
 /***********************************************************************//**
- * @brief Insert C++ string into output stream
+ * @brief Insert logger into logger
+ *
+ * @param[in] log Logger to be inserted.
+ ***************************************************************************/
+GLog& GLog::operator<<(const GLog& log)
+{
+    // Flush buffer
+    flush();
+
+    // Return logger
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert C++ string into logger
  *
  * @param[in] str C++ string to be inserted.
  ***************************************************************************/
@@ -198,7 +213,7 @@ GLog& GLog::operator<<(const std::string& str)
 
 
 /***********************************************************************//**
- * @brief Insert C string into output stream
+ * @brief Insert C string into logger
  *
  * @param[in] str C string to be inserted.
  ***************************************************************************/
@@ -216,7 +231,7 @@ GLog& GLog::operator<<(const char* str)
 
 
 /***********************************************************************//**
- * @brief Insert character value into output stream
+ * @brief Insert character value into logger
  *
  * @param[in] value Character value to be inserted.
  ***************************************************************************/
@@ -240,7 +255,7 @@ GLog& GLog::operator<<(const char& value)
 
 
 /***********************************************************************//**
- * @brief Insert unsigned character value into output stream
+ * @brief Insert unsigned character value into logger
  *
  * @param[in] value Unsigned character value to be inserted.
  ***************************************************************************/
@@ -264,7 +279,7 @@ GLog& GLog::operator<<(const unsigned char& value)
 
 
 /***********************************************************************//**
- * @brief Insert bool into output stream
+ * @brief Insert bool into logger
  *
  * @param[in] value Boolean to be inserted.
  ***************************************************************************/
@@ -285,7 +300,7 @@ GLog& GLog::operator<<(const bool& value)
 
 
 /***********************************************************************//**
- * @brief Insert integer into output stream
+ * @brief Insert integer into logger
  *
  * @param[in] value Integer to be inserted.
  ***************************************************************************/
@@ -309,7 +324,7 @@ GLog& GLog::operator<<(const int& value)
 
 
 /***********************************************************************//**
- * @brief Insert unsigned integer into output stream
+ * @brief Insert unsigned integer into logger
  *
  * @param[in] value Unsigned integer to be inserted.
  ***************************************************************************/
@@ -333,7 +348,7 @@ GLog& GLog::operator<<(const unsigned int& value)
 
 
 /***********************************************************************//**
- * @brief Insert double precision value into output stream
+ * @brief Insert double precision value into logger
  *
  * @param[in] value Double precision value to be inserted.
  ***************************************************************************/
@@ -585,7 +600,7 @@ void GLog::init_members(void)
     m_file       = NULL;
     m_name.clear();
     m_buffer.clear();
-  
+
     // Return
     return;
 }
@@ -608,7 +623,7 @@ void GLog::copy_members(const GLog& log)
     m_name       = log.m_name;
     m_buffer     = log.m_buffer;
     m_file       = log.m_file;
-    
+
     // Return
     return;
 }
