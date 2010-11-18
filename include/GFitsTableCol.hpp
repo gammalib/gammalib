@@ -20,6 +20,9 @@
 #define GFITSTABLECOL_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
+#include <string>
+#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -33,6 +36,10 @@ class GFitsTableCol {
 
     // Friend classes
     friend class GFitsTable;
+
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GFitsTableCol& column);
+    friend GLog&         operator<< (GLog& log, const GFitsTableCol& column);
 
 public:
     // Constructors and destructors
@@ -90,12 +97,14 @@ protected:
     virtual void*          ptr_nulval(void) = 0;
 
     // Protected methods
-    virtual void save(void);
-    virtual void fetch_data(void);
-    virtual void load_column(void);
-    virtual void save_column(void);
-    virtual void dump_column(std::ostream& os, void* data) const;
-    virtual int  offset(const int& row, const int& inx) const; 
+    virtual void          save(void);
+    virtual void          fetch_data(void);
+    virtual void          load_column(void);
+    virtual void          save_column(void);
+    //virtual void dump_column(std::ostream& os, void* data) const;
+    virtual std::ostream& dump_column(std::ostream& os) const;
+    virtual GLog&         dump_column(GLog& log) const;
+    virtual int           offset(const int& row, const int& inx) const;
 
 private:
     // Private methods

@@ -419,6 +419,7 @@ void GFitsTableCol::save_column(void)
  * @param[in] os Output stream.
  * @param[in] column Column to put in output stream.
  ***************************************************************************/
+/*
 void GFitsTableCol::dump_column(std::ostream& os, void* data) const
 {
     // Put column name in stream
@@ -458,6 +459,100 @@ void GFitsTableCol::dump_column(std::ostream& os, void* data) const
     // Return
     return;
 }
+*/
+
+/***********************************************************************//**
+ * @brief Write column in output stream
+ *
+ * @param[in] os Output stream.
+ * @param[in] column Column.
+ ***************************************************************************/
+std::ostream& GFitsTableCol::dump_column(std::ostream& os) const
+{
+    // Put column name in stream
+    os << "'" << m_name << "'";
+
+    // Put FITS column number in stream
+    if (m_colnum > 0)
+        os << " [fits_colnum=" << m_colnum << "]";
+    else
+        os << " [not linked to FITS file]";
+
+    // Put column type in stream
+    os << " " << ascii_format();
+    os << " " << binary_format();
+
+    // Put data loading in stream
+    if (((GFitsTableCol*)this)->ptr_data() == NULL)
+        os << " (not loaded)";
+    else
+        os << " (loaded in memory)";
+
+    // Set data area size
+    os << " size=" << m_size;
+
+    // Set vector length
+    os << " repeat=" << m_repeat;
+
+    // Set width
+    os <<  " width=" << m_width;
+
+    // Set number
+    os <<  " number=" << m_number;
+
+    // Set length
+    os << " length=" << m_length;
+
+    // Return stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Write column in logger
+ *
+ * @param[in] log Logger.
+ * @param[in] column Column.
+ ***************************************************************************/
+GLog& GFitsTableCol::dump_column(GLog& log) const
+{
+    // Put column name in logger
+    log << "'" << m_name << "'";
+
+    // Put FITS column number in logger
+    if (m_colnum > 0)
+        log << " [fits_colnum=" << m_colnum << "]";
+    else
+        log << " [not linked to FITS file]";
+
+    // Put column type in stream
+    log << " " << ascii_format();
+    log << " " << binary_format();
+
+    // Put data loading in logger
+    if (((GFitsTableCol*)this)->ptr_data() == NULL)
+        log << " (not loaded)";
+    else
+        log << " (loaded in memory)";
+
+    // Set data area size
+    log << " size=" << m_size;
+
+    // Set vector length
+    log << " repeat=" << m_repeat;
+
+    // Set width
+    log <<  " width=" << m_width;
+
+    // Set number
+    log <<  " number=" << m_number;
+
+    // Set length
+    log << " length=" << m_length;
+
+    // Return logger
+    return log;
+}
 
 
 /***********************************************************************//**
@@ -479,7 +574,7 @@ int GFitsTableCol::offset(const int& row, const int& inx) const
     if (row < 0 || row >= m_length)
         throw GException::out_of_range(G_OFFSET, row, 0, m_length-1);
     #endif
-    
+
     // Check inx value
     #if defined(G_RANGE_CHECK)
     if (inx < 0 || inx >= m_number)
@@ -509,7 +604,7 @@ void GFitsTableCol::init_members(void)
     m_fitsfile = new __fitsfile;
     FPTR(m_fitsfile)->HDUposition = 0;
     FPTR(m_fitsfile)->Fptr        = NULL;
-    
+
     // Initialise members
     m_name.clear();
     m_unit.clear();
@@ -588,3 +683,28 @@ void GFitsTableCol::connect(void* vptr)
  =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] column FITS table column.
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GFitsTableCol& column)
+{
+    // Return output stream
+    return (column.dump_column(os));
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] column FITS table column.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GFitsTableCol& column)
+{
+    // Return logger
+    return (column.dump_column(log));
+}
