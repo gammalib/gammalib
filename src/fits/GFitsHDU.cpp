@@ -557,7 +557,7 @@ void GFitsHDU::save(void)
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFitsHDU& hdu)
 {
-    // Put header in stream
+    // Put HDU information in stream
     os << "=== GFitsHDU ===" << std::endl;
     os << " HDU number ................: " << hdu.m_hdunum << std::endl;
     os << " HDU name ..................: " << hdu.m_name << std::endl;
@@ -581,7 +581,7 @@ std::ostream& operator<< (std::ostream& os, const GFitsHDU& hdu)
     os << hdu.m_header;
 
     // Put FITS data in stream
-    os << hdu.data_dump(os);
+    os << std::endl << hdu.data_dump(os);
 
     // Return output stream
     return os;
@@ -596,7 +596,7 @@ std::ostream& operator<< (std::ostream& os, const GFitsHDU& hdu)
   ***************************************************************************/
 GLog& operator<< (GLog& log, const GFitsHDU& hdu)
 {
-    // Put header in stream
+    // Put HDU information in logger
     log << "=== GFitsHDU ===" << std::endl;
     log << " HDU number ................: " << hdu.m_hdunum << std::endl;
     log << " HDU name ..................: " << hdu.m_name << std::endl;
@@ -616,10 +616,10 @@ GLog& operator<< (GLog& log, const GFitsHDU& hdu)
         break;
     }
 
-    // Put FITS header in stream
+    // Put FITS header in logger
     log << hdu.m_header;
 
-    // Put FITS data in stream
+    // Put FITS data in logger
     log << std::endl << hdu.data_dump(log);
 
     // Return logger
