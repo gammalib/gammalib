@@ -19,6 +19,7 @@
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFitsTableCol.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD_COLUMN                          "GFitsTableCol::load_column()"
@@ -266,6 +267,48 @@ int GFitsTableCol::anynul(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print column information
+ *
+ * @todo Format and cfitsio information is mainly for debugging. This could
+ * be vanish in a more stable version of the code, or it could be compiled
+ * in conditionally using a debug option.
+ ***************************************************************************/
+std::string GFitsTableCol::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append formatted column name
+    result.append(parformat(m_name));
+
+    // Append column number
+    if (m_colnum > 0)
+        result.append(right(str(m_colnum),4)+" ");
+    else
+        result.append(right("[-]",4)+" ");
+
+    // Append loading information
+    if (((GFitsTableCol*)this)->ptr_data() == NULL)
+        result.append("[not loaded] ");
+    else
+        result.append("[loaded]     ");
+
+    // Append format information
+    result.append("["+binary_format()+","+ascii_format()+"]");
+
+    // Append cfitsio information
+    result.append(" repeat="+str(m_repeat));
+    result.append(" width="+str(m_width));
+    result.append(" number="+str(m_number));
+    result.append(" length="+str(m_length));
+    result.append(" size="+str(m_size));
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Protected methods                            =
@@ -418,19 +461,11 @@ void GFitsTableCol::save_column(void)
  *
  * @param[in] os Output stream.
  * @param[in] column Column.
- *
- * @todo Use a stream buffer instead of a character buffer to circumvent
- * any size limitations and return a std::string or a stream buffer.
  ***************************************************************************/
 std::ostream& GFitsTableCol::dump_column(std::ostream& os) const
 {
-    char buffer[1024];
-
-    // Dump column into buffer
-    dump_buffer(buffer);
-
-    // Write buffer into logger
-    os << buffer;
+    // Write column in output stream
+    os << print();
 
     // Return stream
     return os;
@@ -442,68 +477,14 @@ std::ostream& GFitsTableCol::dump_column(std::ostream& os) const
  *
  * @param[in] log Logger.
  * @param[in] column Column.
- *
- * @todo Use a stream buffer instead of a character buffer to circumvent
- * any size limitations and return a std::string or a stream buffer.
  ***************************************************************************/
 GLog& GFitsTableCol::dump_column(GLog& log) const
 {
-    // Allocate buffer
-    char buffer[1024];
-
-    // Dump column into buffer
-    dump_buffer(buffer);
-
-    // Write buffer into logger
-    log << buffer;
+    // Write column in logger
+    log << print();
 
     // Return logger
     return log;
-}
-
-
-/***********************************************************************//**
- * @brief Write column into character buffer
- *
- * @param[in] buffer C string character buffer.
- *
- * Write column information in a formatted way into a C string buffer.
- *
- * @todo Use a stream buffer instead of a character buffer to circumvent
- * any size limitations and return a std::string or a stream buffer.
- ***************************************************************************/
-void GFitsTableCol::dump_buffer(char* buffer) const
-{
-    // Allocate buffers
-    char name[256];
-    char fmt[100];
-    char load[100];
-    char fits[256];
-
-    // Put column number and name in buffer
-    if (m_colnum > 0)
-        sprintf(name, "Column %5d ..............: %20s", m_colnum, m_name.c_str());
-    else
-        sprintf(name, "Column [not linked] .......: %20s", m_name.c_str());
-
-    // Put column format in buffer
-    sprintf(fmt, "[%5s,%5s]", binary_format().c_str(), ascii_format().c_str());
-
-    // Put loading information in buffer
-    if (((GFitsTableCol*)this)->ptr_data() == NULL)
-        sprintf(load, "[not loaded]      ");
-    else
-        sprintf(load, "[loaded in memory]");
-
-    // Put cfitsio information in buffer
-    sprintf(fits, "repeat=%d width=%d number=%d length=%d size=%d", m_repeat,
-            m_width, m_number, m_length, m_size);
-
-    // Assemble buffer
-    sprintf(buffer, "%s %s %s %s", name, fmt, load, fits);
-
-    // Return
-    return;
 }
 
 
