@@ -41,7 +41,11 @@ class GFitsImage : public GFitsHDU {
 public:
     // Constructors and destructors
     GFitsImage(void);
-    GFitsImage(int bitpix, int naxis, const int* naxes);
+    explicit GFitsImage(int bitpix, int nx);
+    explicit GFitsImage(int bitpix, int nx, int ny);
+    explicit GFitsImage(int bitpix, int nx, int ny, int nz);
+    explicit GFitsImage(int bitpix, int nx, int ny, int nz, int nt);
+    explicit GFitsImage(int bitpix, int naxis, const int* naxes);
     GFitsImage(const GFitsImage& image);
     virtual ~GFitsImage(void);
 
@@ -60,13 +64,14 @@ public:
     HDUType exttype(void) const { return HT_IMAGE; }
 
     // Base class methods
-    int   size(void) const;
-    int   bitpix(void) const;
-    int   naxis(void) const;
-    int   naxes(int axis) const;
-    int   anynul(void) const;
-    void  nulval(const void* value);
-    void* nulval(void);
+    int         size(void) const;
+    int         bitpix(void) const;
+    int         naxis(void) const;
+    int         naxes(int axis) const;
+    int         anynul(void) const;
+    void        nulval(const void* value);
+    void*       nulval(void);
+    std::string print(void) const;
 
 protected:
     // Protected methods

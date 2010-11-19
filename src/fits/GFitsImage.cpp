@@ -19,6 +19,7 @@
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFitsImage.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NAXES                                      "GFitsImage::naxes(int)"
@@ -53,6 +54,150 @@ GFitsImage::GFitsImage(void) : GFitsHDU()
 {
     // Initialise class members for clean destruction
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief 1D image constructor
+ *
+ * @param[in] bitpix Number of Bits per pixel (negative is floating point).
+ * @param[in] nx Number of pixels.
+ *
+ * Construct 1D instance of GFitsImage by specifying the number of pixels.
+ * This method also adds the relevant header cards.
+ ***************************************************************************/
+GFitsImage::GFitsImage(int bitpix, int nx) : GFitsHDU()
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Store number of Bits per pixel
+    m_bitpix = bitpix;
+
+    // Set number of axes
+    m_naxis = 1;
+
+    // Set image dimensions
+    m_naxes      = new long[m_naxis];
+    m_naxes[0]   = nx;
+    m_num_pixels = nx;
+
+    // Initialise header
+    init_image_header();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief 2D image constructor
+ *
+ * @param[in] bitpix Number of Bits per pixel (negative is floating point).
+ * @param[in] nx Number of pixels in first dimension.
+ * @param[in] ny Number of pixels in second dimension.
+ *
+ * Construct 2D instance of GFitsImage by specifying the number of pixels
+ * in each dimension. This method also adds the relevant header cards.
+ ***************************************************************************/
+GFitsImage::GFitsImage(int bitpix, int nx, int ny) : GFitsHDU()
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Store number of Bits per pixel
+    m_bitpix = bitpix;
+
+    // Set number of axes
+    m_naxis = 2;
+
+    // Set image dimensions
+    m_naxes      = new long[m_naxis];
+    m_naxes[0]   = nx;
+    m_naxes[1]   = ny;
+    m_num_pixels = nx * ny;
+
+    // Initialise header
+    init_image_header();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief 3D image constructor
+ *
+ * @param[in] bitpix Number of Bits per pixel (negative is floating point).
+ * @param[in] nx Number of pixels in first dimension.
+ * @param[in] ny Number of pixels in second dimension.
+ * @param[in] nz Number of pixels in third dimension.
+ *
+ * Construct 3D instance of GFitsImage by specifying the number of pixels
+ * in each dimension. This method also adds the relevant header cards.
+ ***************************************************************************/
+GFitsImage::GFitsImage(int bitpix, int nx, int ny, int nz) : GFitsHDU()
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Store number of Bits per pixel
+    m_bitpix = bitpix;
+
+    // Set number of axes
+    m_naxis = 3;
+
+    // Set image dimensions
+    m_naxes      = new long[m_naxis];
+    m_naxes[0]   = nx;
+    m_naxes[1]   = ny;
+    m_naxes[2]   = nz;
+    m_num_pixels = nx * ny * nz;
+
+    // Initialise header
+    init_image_header();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief 4D image constructor
+ *
+ * @param[in] bitpix Number of Bits per pixel (negative is floating point).
+ * @param[in] nx Number of pixels in first dimension.
+ * @param[in] ny Number of pixels in second dimension.
+ * @param[in] nz Number of pixels in third dimension.
+ * @param[in] nt Number of pixels in forth dimension.
+ *
+ * Construct 4D instance of GFitsImage by specifying the number of pixels
+ * in each dimension. This method also adds the relevant header cards.
+ ***************************************************************************/
+GFitsImage::GFitsImage(int bitpix, int nx, int ny, int nz, int nt) : GFitsHDU()
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Store number of Bits per pixel
+    m_bitpix = bitpix;
+
+    // Set number of axes
+    m_naxis = 4;
+
+    // Set image dimensions
+    m_naxes      = new long[m_naxis];
+    m_naxes[0]   = nx;
+    m_naxes[1]   = ny;
+    m_naxes[2]   = nz;
+    m_naxes[3]   = nt;
+    m_num_pixels = nx * ny * nz * nt;
+
+    // Initialise header
+    init_image_header();
 
     // Return
     return;
@@ -269,6 +414,33 @@ void* GFitsImage::nulval(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Print column information
+ *
+ * @todo Format and cfitsio information is mainly for debugging. This could
+ * be vanish in a more stable version of the code, or it could be compiled
+ * in conditionally using a debug option.
+ ***************************************************************************/
+std::string GFitsImage::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GFitsImage ===\n");
+
+    // Append image dimensions
+    result.append(parformat("Number of dimensions")+str(naxis())+"\n");
+    result.append(parformat("Number of image pixels")+str(size()));
+    for (int i = 0; i < naxis(); ++i)
+        result.append("\n"+parformat("Number of bins in "+str(i)) +
+                      str(naxes(i)));
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Protected methods                            =
@@ -354,12 +526,8 @@ void GFitsImage::data_connect(void* vptr)
   ***************************************************************************/
 std::ostream& GFitsImage::data_dump(std::ostream& os) const
 {
-    // Put header in stream
-    os << "=== GFitsImage ===" << std::endl;
-    os << " Number of dimensions ......: " << naxis() << std::endl;
-    os << " Number of image pixels ....: " << size();
-    for (int i = 0; i < naxis(); ++i)
-        os << std::endl << " Number of bins in " << i << " .......: " << naxes(i);
+     // Write column in output stream
+    os << print();
 
     // Return output stream
     return os;
@@ -373,12 +541,8 @@ std::ostream& GFitsImage::data_dump(std::ostream& os) const
   ***************************************************************************/
 GLog& GFitsImage::data_dump(GLog& log) const
 {
-    // Put header in stream
-    log << "=== GFitsImage ===" << std::endl;
-    log << " Number of dimensions ......: " << naxis() << std::endl;
-    log << " Number of image pixels ....: " << size();
-    for (int i = 0; i < naxis(); ++i)
-        log << std::endl << " Number of bins in " << i << " .......: " << naxes(i);
+    // Write column in logger
+    log << print();
 
     // Return logger
     return log;
