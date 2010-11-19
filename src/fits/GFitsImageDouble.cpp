@@ -605,6 +605,7 @@ GFitsImageDouble* GFitsImageDouble::clone(void) const
 void GFitsImageDouble::init_members(void)
 {
     // Initialise members
+    m_bitpix = G_BITPIX;
     m_pixels = NULL;
     m_nulval = NULL;
 
