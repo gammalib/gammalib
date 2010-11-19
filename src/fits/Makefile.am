@@ -9,9 +9,14 @@ INCLUDES = -I$(top_srcdir)/include \
 sources = GFitsHeaderCard.cpp \
           GFitsHeader.cpp \
           GFitsImage.cpp \
+          GFitsImageByte.cpp \
+          GFitsImageUShort.cpp \
+          GFitsImageShort.cpp \
+          GFitsImageULong.cpp \
+          GFitsImageLong.cpp \
+          GFitsImageLongLong.cpp \
+          GFitsImageFloat.cpp \
           GFitsImageDouble.cpp \
-          GFitsByteImage.cpp \
-          GFitsImageFlt.cpp \
           GFitsTable.cpp \
           GFitsAsciiTable.cpp \
           GFitsBinTable.cpp \

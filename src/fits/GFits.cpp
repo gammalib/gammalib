@@ -20,9 +20,14 @@
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFits.hpp"
-#include "GFitsByteImage.hpp"
+#include "GFitsImageByte.hpp"
+#include "GFitsImageUShort.hpp"
+#include "GFitsImageShort.hpp"
+#include "GFitsImageULong.hpp"
+#include "GFitsImageLong.hpp"
+#include "GFitsImageLongLong.hpp"
+#include "GFitsImageFloat.hpp"
 #include "GFitsImageDouble.hpp"
-#include "GFitsImageFlt.hpp"
 #include "GFitsAsciiTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GTools.hpp"
@@ -772,16 +777,18 @@ void GFits::free_members(void)
  * Depending on the number of bits per pixel, a FITS image is allocated
  * and the pointer is returned. The following FITS image classes are
  * handled:
- * GFitsByteImage (bitpix=8)
- * GFitsShtImage (bitpix=16)
- * GFitsLngImage (bitpix=32)
- * GFitsLlgImage (bitpix=64)
- * GFitsFltImage (bitpix=-32)
- * GFitsDblImage (bitpix=-64)
+ * GFitsImageByte     (bitpix=8)
+ * GFitsImageShort    (bitpix=16)
+ * GFitsImageLong     (bitpix=32)
+ * GFitsImageLongLong (bitpix=64)
+ * GFitsImageFloat    (bitpix=-32)
+ * GFitsImageDouble   (bitpix=-64)
  * The information about the number of bits per pixels is extracted from
  * the actual HDU.
  *
- * @todo Many image classes need still to be implemented.
+ * @todo Additional code is needed to detect unsigned integer images. This
+ * code may be insprired by the code used for table columns as the unsigned
+ * information is stored in the BZERO keyword.
  ***************************************************************************/
 GFitsImage* GFits::new_image(void)
 {
@@ -798,19 +805,19 @@ GFitsImage* GFits::new_image(void)
     // Allocate bitpix dependent image
     switch (bitpix) {
     case 8:
-        image = new GFitsByteImage;
+        image = new GFitsImageByte;
         break;
     case 16:
-        image = new GFitsImageDouble;  // TO BE REPLACED BY CORRECT CLASS
+        image = new GFitsImageShort;
         break;
     case 32:
-        image = new GFitsImageDouble;  // TO BE REPLACED BY CORRECT CLASS
+        image = new GFitsImageLong;
         break;
     case 64:
-        image = new GFitsImageDouble;  // TO BE REPLACED BY CORRECT CLASS
+        image = new GFitsImageLongLong;
         break;
     case -32:
-        image = new GFitsImageFlt;
+        image = new GFitsImageFloat;
         break;
     case -64:
         image = new GFitsImageDouble;
@@ -834,7 +841,7 @@ GFitsImage* GFits::new_image(void)
 GFitsImage* GFits::new_primary(void)
 {
     // Allocate an empty image
-    GFitsImage* image = new GFitsByteImage;
+    GFitsImage* image = new GFitsImageByte;
 
     // Create primary image in memory
     int status = 0;
