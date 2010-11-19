@@ -33,7 +33,11 @@ class GFitsImageLong : public GFitsImage {
 public:
     // Constructors and destructors
     GFitsImageLong(void);
-    GFitsImageLong(int naxis, const int* naxes, const long* pixels = NULL);
+    explicit GFitsImageLong(int nx, const long* pixels = NULL);
+    explicit GFitsImageLong(int nx, int ny, const long* pixels = NULL);
+    explicit GFitsImageLong(int nx, int ny, int nz, const long* pixels = NULL);
+    explicit GFitsImageLong(int nx, int ny, int nz, int nt, const long* pixels = NULL);
+    explicit GFitsImageLong(int naxis, const int* naxes, const long* pixels = NULL);
     GFitsImageLong(const GFitsImageLong& image);
     virtual ~GFitsImageLong(void);
 
@@ -72,6 +76,7 @@ private:
     void  alloc_data(void);
     void  init_data(void);
     void  release_data(void);
+    void  construct_data(const long* pixels);
     void  alloc_nulval(const void* value);
     void* ptr_data(void) { return m_pixels; }
     void* ptr_nulval(void) { return m_nulval; }

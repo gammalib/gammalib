@@ -33,7 +33,11 @@ class GFitsImageByte : public GFitsImage {
 public:
     // Constructors and destructors
     GFitsImageByte(void);
-    GFitsImageByte(int naxis, const int* naxes, const unsigned char* pixels = NULL);
+    explicit GFitsImageByte(int nx, const unsigned char* pixels = NULL);
+    explicit GFitsImageByte(int nx, int ny, const unsigned char* pixels = NULL);
+    explicit GFitsImageByte(int nx, int ny, int nz, const unsigned char* pixels = NULL);
+    explicit GFitsImageByte(int nx, int ny, int nz, int nt, const unsigned char* pixels = NULL);
+    explicit GFitsImageByte(int naxis, const int* naxes, const unsigned char* pixels = NULL);
     GFitsImageByte(const GFitsImageByte& image);
     virtual ~GFitsImageByte(void);
 
@@ -72,6 +76,7 @@ private:
     void  alloc_data(void);
     void  init_data(void);
     void  release_data(void);
+    void  construct_data(const unsigned char* pixels);
     void  alloc_nulval(const void* value);
     void* ptr_data(void) { return m_pixels; }
     void* ptr_nulval(void) { return m_nulval; }

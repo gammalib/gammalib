@@ -51,6 +51,102 @@ GFitsImageLongLong::GFitsImageLongLong(void) : GFitsImage()
 
 
 /***********************************************************************//**
+ * @brief 1D image constructor
+ *
+ * @param[in] nx Number of pixels.
+ * @param[in] pixels Optional pointer to image pixel array
+ *
+ * Construct 1D instance by specifying the number of pixels in the image.
+ ***************************************************************************/
+GFitsImageLongLong::GFitsImageLongLong(int nx, const long long* pixels) :
+                    GFitsImage(G_BITPIX, nx)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Construct data
+    construct_data(pixels);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief 2D image constructor
+ *
+ * @param[in] nx Number of pixels in first dimension.
+ * @param[in] ny Number of pixels in second dimension.
+ * @param[in] pixels Optional pointer to image pixel array
+ *
+ * Construct 2D image by specifying the number of pixels in each dimension.
+ ***************************************************************************/
+GFitsImageLongLong::GFitsImageLongLong(int nx, int ny, const long long* pixels) :
+                    GFitsImage(G_BITPIX, nx, ny)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Construct data
+    construct_data(pixels);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief 3D image constructor
+ *
+ * @param[in] nx Number of pixels in first dimension.
+ * @param[in] ny Number of pixels in second dimension.
+ * @param[in] nz Number of pixels in third dimension.
+ * @param[in] pixels Optional pointer to image pixel array
+ *
+ * Construct 3D image by specifying the number of pixels in each dimension.
+ ***************************************************************************/
+GFitsImageLongLong::GFitsImageLongLong(int nx, int ny, int nz,
+                                       const long long* pixels) :
+                    GFitsImage(G_BITPIX, nx, ny, nz)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Construct data
+    construct_data(pixels);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief 4D image constructor
+ *
+ * @param[in] nx Number of pixels in first dimension.
+ * @param[in] ny Number of pixels in second dimension.
+ * @param[in] nz Number of pixels in third dimension.
+ * @param[in] nt Number of pixels in forth dimension.
+ * @param[in] pixels Optional pointer to image pixel array
+ *
+ * Construct 4D image by specifying the number of pixels in each dimension.
+ ***************************************************************************/
+GFitsImageLongLong::GFitsImageLongLong(int nx, int ny, int nz, int nt,
+                                       const long long* pixels) :
+                    GFitsImage(G_BITPIX, nx, ny, nz, nt)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Construct data
+    construct_data(pixels);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Pixel array constructor
  *
  * @param[in] naxis Image dimension (0,1,2,3,4).
@@ -711,6 +807,40 @@ void GFitsImageLongLong::release_data(void)
 
     // Mark pointer as free
     m_pixels = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Construct data from array
+ *
+ * @param[in] pixels Optional pointer to pixel array.
+ *
+ * Initialise pixel data from an optional pixel array. If the pointer is
+ * NULL the image is simply initialised. This method supports all
+ * constructors.
+ ***************************************************************************/
+void GFitsImageLongLong::construct_data(const long long* pixels)
+{
+    // If there are pixels then allocate array
+    if (m_num_pixels > 0) {
+
+        // Allocate data
+        alloc_data();
+
+        // If no pixel array has been specified then simply initialise data
+        if (pixels == NULL)
+            init_data();
+
+        // ... otherwise copy pixels
+        else {
+            for (int i = 0; i < m_num_pixels; ++i)
+                m_pixels[i] = pixels[i];
+        }
+
+    } // endif: there are pixels in image
 
     // Return
     return;

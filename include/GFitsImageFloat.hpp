@@ -33,7 +33,11 @@ class GFitsImageFloat : public GFitsImage {
 public:
     // Constructors and destructors
     GFitsImageFloat(void);
-    GFitsImageFloat(int naxis, const int* naxes, const float* pixels = NULL);
+    explicit GFitsImageFloat(int nx, const float* pixels = NULL);
+    explicit GFitsImageFloat(int nx, int ny, const float* pixels = NULL);
+    explicit GFitsImageFloat(int nx, int ny, int nz, const float* pixels = NULL);
+    explicit GFitsImageFloat(int nx, int ny, int nz, int nt, const float* pixels = NULL);
+    explicit GFitsImageFloat(int naxis, const int* naxes, const float* pixels = NULL);
     GFitsImageFloat(const GFitsImageFloat& image);
     virtual ~GFitsImageFloat(void);
 
@@ -72,6 +76,7 @@ private:
     void  alloc_data(void);
     void  init_data(void);
     void  release_data(void);
+    void  construct_data(const float* pixels);
     void  alloc_nulval(const void* value);
     void* ptr_data(void) { return m_pixels; }
     void* ptr_nulval(void) { return m_nulval; }
