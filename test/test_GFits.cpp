@@ -243,8 +243,7 @@ void test_image_byte(void)
     try {
 
         // Test 1D image
-        int naxes[] = {256};
-        GFitsImageByte image(1, naxes, pixels);
+        GFitsImageByte image(256, pixels);
         for (int ix = 0, i = 0; ix < 256; ++ix, ++i) {
             if (!dequal(image(ix), pixels[i])) {
                 std::cout << std::endl
@@ -271,8 +270,7 @@ void test_image_byte(void)
         std::cout << ".";
 
         // Test 2D image
-        int naxes2[] = {16,16};
-        image = GFitsImageByte(2, naxes2, pixels);
+        image = GFitsImageByte(16, 16, pixels);
         for (int iy = 0, i = 0; iy < 16; ++iy) {
         for (int ix = 0; ix < 16; ++ix, ++i) {
             if (!dequal(image(ix,iy), pixels[i])) {
@@ -301,8 +299,7 @@ void test_image_byte(void)
         std::cout << ".";
 
         // Test 3D image
-        int naxes3[] = {16,4,4};
-        image = GFitsImageByte(3, naxes3, pixels);
+        image = GFitsImageByte(16, 4, 4, pixels);
         for (int iz = 0, i = 0; iz < 4; ++iz) {
         for (int iy = 0; iy < 4; ++iy) {
         for (int ix = 0; ix < 16; ++ix, ++i) {
@@ -333,8 +330,7 @@ void test_image_byte(void)
         std::cout << ".";
 
         // Test 4D image
-        int naxes4[] = {4,4,4,4};
-        image = GFitsImageByte(4, naxes4, pixels);
+        image = GFitsImageByte(4, 4, 4, 4, pixels);
         for (int it = 0, i = 0; it < 4; ++it) {
         for (int iz = 0; iz < 4; ++iz) {
         for (int iy = 0; iy < 4; ++iy) {
@@ -428,28 +424,27 @@ void test_image_byte(void)
 
 
 /***************************************************************************
- * @brief Test GFitsImageFloat class
+ * @brief Test GFitsImageUShort class
  ***************************************************************************/
-void test_image_float(void)
+void test_image_ushort(void)
 {
     // Dump header
-    std::cout << "Test GFitsImageFloat: ";
+    std::cout << "Test GFitsImageUShort: ";
 
     // Set filename
-    std::string filename = "test_image_float.fits";
+    std::string filename = "test_image_ushort.fits";
     remove(filename.c_str());
 
     // Create pixel array
-    float* pixels = new float[256];
+    unsigned short* pixels = new unsigned short[256];
     for (int i = 0; i < 256; ++i)
-        pixels[i] = float(i);
+        pixels[i] = (unsigned short)(i);
 
     // Test pixel access (1D to 4D)
     try {
 
         // Test 1D image
-        int naxes[] = {256};
-        GFitsImageFloat image(1, naxes, pixels);
+        GFitsImageUShort image(256, pixels);
         for (int ix = 0, i = 0; ix < 256; ++ix, ++i) {
             if (!dequal(image(ix), pixels[i])) {
                 std::cout << std::endl
@@ -476,8 +471,7 @@ void test_image_float(void)
         std::cout << ".";
 
         // Test 2D image
-        int naxes2[] = {16,16};
-        image = GFitsImageFloat(2, naxes2, pixels);
+        image = GFitsImageUShort(16, 16, pixels);
         for (int iy = 0, i = 0; iy < 16; ++iy) {
         for (int ix = 0; ix < 16; ++ix, ++i) {
             if (!dequal(image(ix,iy), pixels[i])) {
@@ -506,8 +500,7 @@ void test_image_float(void)
         std::cout << ".";
 
         // Test 3D image
-        int naxes3[] = {16,4,4};
-        image = GFitsImageFloat(3, naxes3, pixels);
+        image = GFitsImageUShort(16, 4, 4, pixels);
         for (int iz = 0, i = 0; iz < 4; ++iz) {
         for (int iy = 0; iy < 4; ++iy) {
         for (int ix = 0; ix < 16; ++ix, ++i) {
@@ -538,8 +531,1012 @@ void test_image_float(void)
         std::cout << ".";
 
         // Test 4D image
-        int naxes4[] = {4,4,4,4};
-        image = GFitsImageFloat(4, naxes4, pixels);
+        image = GFitsImageUShort(4, 4, 4, 4, pixels);
+        for (int it = 0, i = 0; it < 4; ++it) {
+        for (int iz = 0; iz < 4; ++iz) {
+        for (int iy = 0; iy < 4; ++iy) {
+        for (int ix = 0; ix < 4; ++ix, ++i) {
+            if (!dequal(image(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << image(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << image.at(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        }
+        }
+        std::cout << ".";
+
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to test pixel access operators."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test image I/O with 4D image
+    try{
+        // Create 4D image
+        int naxes[] = {4,4,4,4};
+        GFitsImageUShort image(4, naxes, pixels);
+
+        // Save image
+        GFits fits(filename);
+        fits.append(&image);
+        fits.save();
+
+        // Open FITS image
+        GFits infile(filename);
+        GFitsImage* ptr = infile.image(0);
+        std::cout << ".";
+
+        // Test 4D image
+        for (int it = 0, i = 0; it < 4; ++it) {
+        for (int iz = 0; iz < 4; ++iz) {
+        for (int iy = 0; iy < 4; ++iy) {
+        for (int ix = 0; ix < 4; ++ix, ++i) {
+            if (!dequal(ptr->pixel(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << ptr->pixel(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        }
+        }
+        std::cout << ".";
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to test pixel access operators."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Final ok
+    std::cout << ". ok." << std::endl;
+
+    // Return
+    return;
+}
+
+
+/***************************************************************************
+ * @brief Test GFitsImageShort class
+ ***************************************************************************/
+void test_image_short(void)
+{
+    // Dump header
+    std::cout << "Test GFitsImageShort: ";
+
+    // Set filename
+    std::string filename = "test_image_short.fits";
+    remove(filename.c_str());
+
+    // Create pixel array
+    short* pixels = new short[256];
+    for (int i = 0; i < 256; ++i)
+        pixels[i] = (short)(i);
+
+    // Test pixel access (1D to 4D)
+    try {
+
+        // Test 1D image
+        GFitsImageShort image(256, pixels);
+        for (int ix = 0, i = 0; ix < 256; ++ix, ++i) {
+            if (!dequal(image(ix), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (1D): Unexpected pixel content"
+                          << " (has " << image(ix) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (1D): Unexpected pixel content"
+                          << " (has " << image.at(ix) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (1D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        std::cout << ".";
+
+        // Test 2D image
+        image = GFitsImageShort(16, 16, pixels);
+        for (int iy = 0, i = 0; iy < 16; ++iy) {
+        for (int ix = 0; ix < 16; ++ix, ++i) {
+            if (!dequal(image(ix,iy), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (2D): Unexpected pixel content"
+                          << " (has " << image(ix,iy) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix,iy), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (2D): Unexpected pixel content"
+                          << " (has " << image.at(ix,iy) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix,iy), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (2D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix,iy) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        std::cout << ".";
+
+        // Test 3D image
+        image = GFitsImageShort(16, 4, 4, pixels);
+        for (int iz = 0, i = 0; iz < 4; ++iz) {
+        for (int iy = 0; iy < 4; ++iy) {
+        for (int ix = 0; ix < 16; ++ix, ++i) {
+            if (!dequal(image(ix,iy,iz), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (3D): Unexpected pixel content"
+                          << " (has " << image(ix,iy,iz) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix,iy,iz), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (3D): Unexpected pixel content"
+                          << " (has " << image.at(ix,iy,iz) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix,iy,iz), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (3D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix,iy,iz) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        }
+        std::cout << ".";
+
+        // Test 4D image
+        image = GFitsImageShort(4, 4, 4, 4, pixels);
+        for (int it = 0, i = 0; it < 4; ++it) {
+        for (int iz = 0; iz < 4; ++iz) {
+        for (int iy = 0; iy < 4; ++iy) {
+        for (int ix = 0; ix < 4; ++ix, ++i) {
+            if (!dequal(image(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << image(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << image.at(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        }
+        }
+        std::cout << ".";
+
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to test pixel access operators."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test image I/O with 4D image
+    try{
+        // Create 4D image
+        int naxes[] = {4,4,4,4};
+        GFitsImageShort image(4, naxes, pixels);
+
+        // Save image
+        GFits fits(filename);
+        fits.append(&image);
+        fits.save();
+
+        // Open FITS image
+        GFits infile(filename);
+        GFitsImage* ptr = infile.image(0);
+        std::cout << ".";
+
+        // Test 4D image
+        for (int it = 0, i = 0; it < 4; ++it) {
+        for (int iz = 0; iz < 4; ++iz) {
+        for (int iy = 0; iy < 4; ++iy) {
+        for (int ix = 0; ix < 4; ++ix, ++i) {
+            if (!dequal(ptr->pixel(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << ptr->pixel(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        }
+        }
+        std::cout << ".";
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to test pixel access operators."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Final ok
+    std::cout << ". ok." << std::endl;
+
+    // Return
+    return;
+}
+
+
+/***************************************************************************
+ * @brief Test GFitsImageULong class
+ ***************************************************************************/
+void test_image_ulong(void)
+{
+    // Dump header
+    std::cout << "Test GFitsImageULong: ";
+
+    // Set filename
+    std::string filename = "test_image_ulong.fits";
+    remove(filename.c_str());
+
+    // Create pixel array
+    unsigned long* pixels = new unsigned long[256];
+    for (int i = 0; i < 256; ++i)
+        pixels[i] = (unsigned long)(i);
+
+    // Test pixel access (1D to 4D)
+    try {
+
+        // Test 1D image
+        GFitsImageULong image(256, pixels);
+        for (int ix = 0, i = 0; ix < 256; ++ix, ++i) {
+            if (!dequal(image(ix), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (1D): Unexpected pixel content"
+                          << " (has " << image(ix) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (1D): Unexpected pixel content"
+                          << " (has " << image.at(ix) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (1D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        std::cout << ".";
+
+        // Test 2D image
+        image = GFitsImageULong(16, 16, pixels);
+        for (int iy = 0, i = 0; iy < 16; ++iy) {
+        for (int ix = 0; ix < 16; ++ix, ++i) {
+            if (!dequal(image(ix,iy), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (2D): Unexpected pixel content"
+                          << " (has " << image(ix,iy) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix,iy), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (2D): Unexpected pixel content"
+                          << " (has " << image.at(ix,iy) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix,iy), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (2D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix,iy) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        std::cout << ".";
+
+        // Test 3D image
+        image = GFitsImageULong(16, 4, 4, pixels);
+        for (int iz = 0, i = 0; iz < 4; ++iz) {
+        for (int iy = 0; iy < 4; ++iy) {
+        for (int ix = 0; ix < 16; ++ix, ++i) {
+            if (!dequal(image(ix,iy,iz), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (3D): Unexpected pixel content"
+                          << " (has " << image(ix,iy,iz) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix,iy,iz), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (3D): Unexpected pixel content"
+                          << " (has " << image.at(ix,iy,iz) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix,iy,iz), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (3D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix,iy,iz) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        }
+        std::cout << ".";
+
+        // Test 4D image
+        image = GFitsImageULong(4, 4, 4, 4, pixels);
+        for (int it = 0, i = 0; it < 4; ++it) {
+        for (int iz = 0; iz < 4; ++iz) {
+        for (int iy = 0; iy < 4; ++iy) {
+        for (int ix = 0; ix < 4; ++ix, ++i) {
+            if (!dequal(image(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << image(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << image.at(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        }
+        }
+        std::cout << ".";
+
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to test pixel access operators."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test image I/O with 4D image
+    try{
+        // Create 4D image
+        int naxes[] = {4,4,4,4};
+        GFitsImageULong image(4, naxes, pixels);
+
+        // Save image
+        GFits fits(filename);
+        fits.append(&image);
+        fits.save();
+
+        // Open FITS image
+        GFits infile(filename);
+        GFitsImage* ptr = infile.image(0);
+        std::cout << ".";
+
+        // Test 4D image
+        for (int it = 0, i = 0; it < 4; ++it) {
+        for (int iz = 0; iz < 4; ++iz) {
+        for (int iy = 0; iy < 4; ++iy) {
+        for (int ix = 0; ix < 4; ++ix, ++i) {
+            if (!dequal(ptr->pixel(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << ptr->pixel(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        }
+        }
+        std::cout << ".";
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to test pixel access operators."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Final ok
+    std::cout << ". ok." << std::endl;
+
+    // Return
+    return;
+}
+
+
+/***************************************************************************
+ * @brief Test GFitsImageLong class
+ ***************************************************************************/
+void test_image_long(void)
+{
+    // Dump header
+    std::cout << "Test GFitsImageLong: ";
+
+    // Set filename
+    std::string filename = "test_image_long.fits";
+    remove(filename.c_str());
+
+    // Create pixel array
+    long* pixels = new long[256];
+    for (int i = 0; i < 256; ++i)
+        pixels[i] = (long)(i);
+
+    // Test pixel access (1D to 4D)
+    try {
+
+        // Test 1D image
+        GFitsImageLong image(256, pixels);
+        for (int ix = 0, i = 0; ix < 256; ++ix, ++i) {
+            if (!dequal(image(ix), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (1D): Unexpected pixel content"
+                          << " (has " << image(ix) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (1D): Unexpected pixel content"
+                          << " (has " << image.at(ix) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (1D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        std::cout << ".";
+
+        // Test 2D image
+        image = GFitsImageLong(16, 16, pixels);
+        for (int iy = 0, i = 0; iy < 16; ++iy) {
+        for (int ix = 0; ix < 16; ++ix, ++i) {
+            if (!dequal(image(ix,iy), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (2D): Unexpected pixel content"
+                          << " (has " << image(ix,iy) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix,iy), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (2D): Unexpected pixel content"
+                          << " (has " << image.at(ix,iy) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix,iy), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (2D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix,iy) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        std::cout << ".";
+
+        // Test 3D image
+        image = GFitsImageLong(16, 4, 4, pixels);
+        for (int iz = 0, i = 0; iz < 4; ++iz) {
+        for (int iy = 0; iy < 4; ++iy) {
+        for (int ix = 0; ix < 16; ++ix, ++i) {
+            if (!dequal(image(ix,iy,iz), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (3D): Unexpected pixel content"
+                          << " (has " << image(ix,iy,iz) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix,iy,iz), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (3D): Unexpected pixel content"
+                          << " (has " << image.at(ix,iy,iz) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix,iy,iz), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (3D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix,iy,iz) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        }
+        std::cout << ".";
+
+        // Test 4D image
+        image = GFitsImageLong(4, 4, 4, 4, pixels);
+        for (int it = 0, i = 0; it < 4; ++it) {
+        for (int iz = 0; iz < 4; ++iz) {
+        for (int iy = 0; iy < 4; ++iy) {
+        for (int ix = 0; ix < 4; ++ix, ++i) {
+            if (!dequal(image(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << image(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << image.at(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        }
+        }
+        std::cout << ".";
+
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to test pixel access operators."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test image I/O with 4D image
+    try{
+        // Create 4D image
+        int naxes[] = {4,4,4,4};
+        GFitsImageLong image(4, naxes, pixels);
+
+        // Save image
+        GFits fits(filename);
+        fits.append(&image);
+        fits.save();
+
+        // Open FITS image
+        GFits infile(filename);
+        GFitsImage* ptr = infile.image(0);
+        std::cout << ".";
+
+        // Test 4D image
+        for (int it = 0, i = 0; it < 4; ++it) {
+        for (int iz = 0; iz < 4; ++iz) {
+        for (int iy = 0; iy < 4; ++iy) {
+        for (int ix = 0; ix < 4; ++ix, ++i) {
+            if (!dequal(ptr->pixel(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << ptr->pixel(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        }
+        }
+        std::cout << ".";
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to test pixel access operators."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Final ok
+    std::cout << ". ok." << std::endl;
+
+    // Return
+    return;
+}
+
+
+/***************************************************************************
+ * @brief Test GFitsImageLongLong class
+ ***************************************************************************/
+void test_image_longlong(void)
+{
+    // Dump header
+    std::cout << "Test GFitsImageLongLong: ";
+
+    // Set filename
+    std::string filename = "test_image_longlong.fits";
+    remove(filename.c_str());
+
+    // Create pixel array
+    long long* pixels = new long long[256];
+    for (int i = 0; i < 256; ++i)
+        pixels[i] = (long long)(i);
+
+    // Test pixel access (1D to 4D)
+    try {
+
+        // Test 1D image
+        GFitsImageLongLong image(256, pixels);
+        for (int ix = 0, i = 0; ix < 256; ++ix, ++i) {
+            if (!dequal(image(ix), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (1D): Unexpected pixel content"
+                          << " (has " << image(ix) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (1D): Unexpected pixel content"
+                          << " (has " << image.at(ix) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (1D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        std::cout << ".";
+
+        // Test 2D image
+        image = GFitsImageLongLong(16, 16, pixels);
+        for (int iy = 0, i = 0; iy < 16; ++iy) {
+        for (int ix = 0; ix < 16; ++ix, ++i) {
+            if (!dequal(image(ix,iy), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (2D): Unexpected pixel content"
+                          << " (has " << image(ix,iy) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix,iy), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (2D): Unexpected pixel content"
+                          << " (has " << image.at(ix,iy) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix,iy), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (2D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix,iy) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        std::cout << ".";
+
+        // Test 3D image
+        image = GFitsImageLongLong(16, 4, 4, pixels);
+        for (int iz = 0, i = 0; iz < 4; ++iz) {
+        for (int iy = 0; iy < 4; ++iy) {
+        for (int ix = 0; ix < 16; ++ix, ++i) {
+            if (!dequal(image(ix,iy,iz), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (3D): Unexpected pixel content"
+                          << " (has " << image(ix,iy,iz) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix,iy,iz), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (3D): Unexpected pixel content"
+                          << " (has " << image.at(ix,iy,iz) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix,iy,iz), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (3D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix,iy,iz) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        }
+        std::cout << ".";
+
+        // Test 4D image
+        image = GFitsImageLongLong(4, 4, 4, 4, pixels);
+        for (int it = 0, i = 0; it < 4; ++it) {
+        for (int iz = 0; iz < 4; ++iz) {
+        for (int iy = 0; iy < 4; ++iy) {
+        for (int ix = 0; ix < 4; ++ix, ++i) {
+            if (!dequal(image(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << image(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << image.at(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        }
+        }
+        std::cout << ".";
+
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to test pixel access operators."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test image I/O with 4D image
+    try{
+        // Create 4D image
+        int naxes[] = {4,4,4,4};
+        GFitsImageLongLong image(4, naxes, pixels);
+
+        // Save image
+        GFits fits(filename);
+        fits.append(&image);
+        fits.save();
+
+        // Open FITS image
+        GFits infile(filename);
+        GFitsImage* ptr = infile.image(0);
+        std::cout << ".";
+
+        // Test 4D image
+        for (int it = 0, i = 0; it < 4; ++it) {
+        for (int iz = 0; iz < 4; ++iz) {
+        for (int iy = 0; iy < 4; ++iy) {
+        for (int ix = 0; ix < 4; ++ix, ++i) {
+            if (!dequal(ptr->pixel(ix,iy,iz,it), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (4D): Unexpected pixel content"
+                          << " (has " << ptr->pixel(ix,iy,iz,it) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        }
+        }
+        std::cout << ".";
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to test pixel access operators."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Final ok
+    std::cout << ". ok." << std::endl;
+
+    // Return
+    return;
+}
+
+
+/***************************************************************************
+ * @brief Test GFitsImageFloat class
+ ***************************************************************************/
+void test_image_float(void)
+{
+    // Dump header
+    std::cout << "Test GFitsImageFloat: ";
+
+    // Set filename
+    std::string filename = "test_image_float.fits";
+    remove(filename.c_str());
+
+    // Create pixel array
+    float* pixels = new float[256];
+    for (int i = 0; i < 256; ++i)
+        pixels[i] = float(i);
+
+    // Test pixel access (1D to 4D)
+    try {
+
+        // Test 1D image
+        GFitsImageFloat image(256, pixels);
+        for (int ix = 0, i = 0; ix < 256; ++ix, ++i) {
+            if (!dequal(image(ix), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (1D): Unexpected pixel content"
+                          << " (has " << image(ix) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (1D): Unexpected pixel content"
+                          << " (has " << image.at(ix) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (1D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        std::cout << ".";
+
+        // Test 2D image
+        image = GFitsImageFloat(16, 16, pixels);
+        for (int iy = 0, i = 0; iy < 16; ++iy) {
+        for (int ix = 0; ix < 16; ++ix, ++i) {
+            if (!dequal(image(ix,iy), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (2D): Unexpected pixel content"
+                          << " (has " << image(ix,iy) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix,iy), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (2D): Unexpected pixel content"
+                          << " (has " << image.at(ix,iy) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix,iy), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (2D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix,iy) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        std::cout << ".";
+
+        // Test 3D image
+        image = GFitsImageFloat(16, 4, 4, pixels);
+        for (int iz = 0, i = 0; iz < 4; ++iz) {
+        for (int iy = 0; iy < 4; ++iy) {
+        for (int ix = 0; ix < 16; ++ix, ++i) {
+            if (!dequal(image(ix,iy,iz), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (3D): Unexpected pixel content"
+                          << " (has " << image(ix,iy,iz) << ", expected " << pixels[i]
+                          << " (operator access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.at(ix,iy,iz), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (3D): Unexpected pixel content"
+                          << " (has " << image.at(ix,iy,iz) << ", expected " << pixels[i]
+                          << " (at access)." << std::endl;
+                throw;
+            }
+            if (!dequal(image.pixel(ix,iy,iz), pixels[i])) {
+                std::cout << std::endl
+                          << "TEST ERROR (3D): Unexpected pixel content"
+                          << " (has " << image.pixel(ix,iy,iz) << ", expected " << pixels[i]
+                          << " (pixel access)." << std::endl;
+                throw;
+            }
+        }
+        }
+        }
+        std::cout << ".";
+
+        // Test 4D image
+        image = GFitsImageFloat(4, 4, 4, 4, pixels);
         for (int it = 0, i = 0; it < 4; ++it) {
         for (int iz = 0; iz < 4; ++iz) {
         for (int iy = 0; iy < 4; ++iy) {
@@ -653,8 +1650,7 @@ void test_image_double(void)
     try {
 
         // Test 1D image
-        int naxes[] = {256};
-        GFitsImageDouble image(1, naxes, pixels);
+        GFitsImageDouble image(256, pixels);
         for (int ix = 0, i = 0; ix < 256; ++ix, ++i) {
             if (!dequal(image(ix), pixels[i])) {
                 std::cout << std::endl
@@ -681,8 +1677,7 @@ void test_image_double(void)
         std::cout << ".";
 
         // Test 2D image
-        int naxes2[] = {16,16};
-        image = GFitsImageDouble(2, naxes2, pixels);
+        image = GFitsImageDouble(16, 16, pixels);
         for (int iy = 0, i = 0; iy < 16; ++iy) {
         for (int ix = 0; ix < 16; ++ix, ++i) {
             if (!dequal(image(ix,iy), pixels[i])) {
@@ -711,8 +1706,7 @@ void test_image_double(void)
         std::cout << ".";
 
         // Test 3D image
-        int naxes3[] = {16,4,4};
-        image = GFitsImageDouble(3, naxes3, pixels);
+        image = GFitsImageDouble(16, 4, 4, pixels);
         for (int iz = 0, i = 0; iz < 4; ++iz) {
         for (int iy = 0; iy < 4; ++iy) {
         for (int ix = 0; ix < 16; ++ix, ++i) {
@@ -743,8 +1737,7 @@ void test_image_double(void)
         std::cout << ".";
 
         // Test 4D image
-        int naxes4[] = {4,4,4,4};
-        image = GFitsImageDouble(4, naxes4, pixels);
+        image = GFitsImageDouble(4, 4, 4, 4, pixels);
         for (int it = 0, i = 0; it < 4; ++it) {
         for (int iz = 0; iz < 4; ++iz) {
         for (int iy = 0; iy < 4; ++iy) {
@@ -4448,6 +5441,11 @@ int main(void)
     // Execute the tests
     test_create();
     test_image_byte();
+    test_image_ushort();
+    test_image_short();
+    test_image_ulong();
+    test_image_long();
+    test_image_longlong();
     test_image_float();
     test_image_double();
     test_bintable_bit();
