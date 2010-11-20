@@ -18,7 +18,17 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFitsImage.hpp"
+#include "GFitsImageByte.hpp"
+#include "GFitsImageDouble.hpp"
+#include "GFitsImageFloat.hpp"
+#include "GFitsImageLong.hpp"
+#include "GFitsImageLongLong.hpp"
+#include "GFitsImageSByte.hpp"
+#include "GFitsImageShort.hpp"
+#include "GFitsImageULong.hpp"
+#include "GFitsImageUShort.hpp"
 %}
+
 /***********************************************************************//**
  * @brief Tuple to index conversion to provide pixel access.
  *
@@ -116,3 +126,64 @@ public:
         return ((char*)result.c_str());
     }
 };
+
+
+/***********************************************************************//**
+ * @brief Add cast functions
+ ***************************************************************************/
+%inline %{
+    GFitsImageByte* cast_byte(GFitsImage* img) {
+        if (img->type() != 11)
+            throw GException::fits_invalid_type("cast_byte(GFitsImage* img)",
+                                                "Expecting a byte image.");
+        return ((GFitsImageByte*)img);
+    }
+    GFitsImageDouble* cast_double(GFitsImage* img) {
+        if (img->type() != 82)
+            throw GException::fits_invalid_type("cast_double(GFitsImage* img)",
+                                                "Expecting a double precision image.");
+        return ((GFitsImageDouble*)img);
+    }
+    GFitsImageFloat* cast_float(GFitsImage* img) {
+        if (img->type() != 42)
+            throw GException::fits_invalid_type("cast_float(GFitsImage* img)",
+                                                "Expecting a single precision image.");
+        return ((GFitsImageFloat*)img);
+    }
+    GFitsImageLong* cast_long(GFitsImage* img) {
+        if (img->type() != 41)
+            throw GException::fits_invalid_type("cast_long(GFitsImage* img)",
+                                                "Expecting a long integer image.");
+        return ((GFitsImageLong*)img);
+    }
+    GFitsImageLongLong* cast_longlong(GFitsImage* img) {
+        if (img->type() != 81)
+            throw GException::fits_invalid_type("cast_longlong(GFitsImage* img)",
+                                                "Expecting a long long integer image.");
+        return ((GFitsImageLongLong*)img);
+    }
+    GFitsImageSByte* cast_sbyte(GFitsImage* img) {
+        if (img->type() != 12)
+            throw GException::fits_invalid_type("cast_sbyte(GFitsImage* img)",
+                                                "Expecting a signed byte image.");
+        return ((GFitsImageSByte*)img);
+    }
+    GFitsImageShort* cast_short(GFitsImage* img) {
+        if (img->type() != 21)
+            throw GException::fits_invalid_type("cast_short(GFitsImage* img)",
+                                                "Expecting a short integer image.");
+        return ((GFitsImageShort*)img);
+    }
+    GFitsImageULong* cast_ulong(GFitsImage* img) {
+        if (img->type() != 40)
+            throw GException::fits_invalid_type("cast_ulong(GFitsImage* img)",
+                                                "Expecting a unsigned long integer image.");
+        return ((GFitsImageULong*)img);
+    }
+    GFitsImageUShort* cast_ushort(GFitsImage* img) {
+        if (img->type() != 20)
+            throw GException::fits_invalid_type("cast_ushort(GFitsImage* img)",
+                                                "Expecting a unsigned short integer image.");
+        return ((GFitsImageUShort*)img);
+    }
+%}
