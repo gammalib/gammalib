@@ -91,6 +91,7 @@ public:
     virtual double      pixel(const int& ix, const int& iy) const = 0;
     virtual double      pixel(const int& ix, const int& iy, const int& iz) const = 0;
     virtual double      pixel(const int& ix, const int& iy, const int& iz, const int& it) const = 0;
+    virtual int         type(void) const = 0;
     virtual GFitsImage* clone(void) const = 0;
 
     // Implemented pure virtual methods
@@ -112,7 +113,7 @@ public:
  ***************************************************************************/
 %extend GFitsImage {
     char *__str__() {
-        std::string result = self->print();
+        static std::string result = self->print();
         return ((char*)result.c_str());
     }
 };
