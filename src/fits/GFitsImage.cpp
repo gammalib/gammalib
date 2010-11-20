@@ -429,12 +429,18 @@ std::string GFitsImage::print(void) const
     // Append header
     result.append("=== GFitsImage ===\n");
 
+    // Append HDU information
+    result.append(print_hdu());
+
     // Append image dimensions
     result.append(parformat("Number of dimensions")+str(naxis())+"\n");
     result.append(parformat("Number of image pixels")+str(size()));
     for (int i = 0; i < naxis(); ++i)
         result.append("\n"+parformat("Number of bins in "+str(i)) +
                       str(naxes(i)));
+
+    // Append header information
+    result.append(+"\n"+m_header.print());
 
     // Return result
     return result;
@@ -516,36 +522,6 @@ void GFitsImage::data_connect(void* vptr)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Write image in output stream
- *
- * @param[in] os Output stream.
-  ***************************************************************************/
-std::ostream& GFitsImage::data_dump(std::ostream& os) const
-{
-     // Write column in output stream
-    os << print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Write image in logger
- *
- * @param[in] log Logger.
-  ***************************************************************************/
-GLog& GFitsImage::data_dump(GLog& log) const
-{
-    // Write column in logger
-    log << print();
-
-    // Return logger
-    return log;
 }
 
 
@@ -979,8 +955,11 @@ void GFitsImage::free_members(void)
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFitsImage& image)
 {
+     // Write image in output stream
+    os << image.print();
+
     // Return output stream
-    return (image.data_dump(os));
+    return os;
 }
 
 
@@ -992,6 +971,9 @@ std::ostream& operator<< (std::ostream& os, const GFitsImage& image)
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GFitsImage& image)
 {
+    // Write image into logger
+    log << image.print();
+
     // Return logger
-    return (image.data_dump(log));
+    return log;
 }

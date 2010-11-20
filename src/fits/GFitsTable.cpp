@@ -405,6 +405,9 @@ std::string GFitsTable::print(void) const
     // Append header
     result.append("=== GFitsTable ===\n");
 
+    // Append HDU information
+    result.append(print_hdu());
+
     // Append table type
     result.append(parformat("Table type"));
     switch (m_type) {
@@ -421,7 +424,10 @@ std::string GFitsTable::print(void) const
 
     // Append table dimensions
     result.append(parformat("Number of rows")+str(m_rows)+"\n");
-    result.append(parformat("Number of columns")+str(m_cols));
+    result.append(parformat("Number of columns")+str(m_cols)+"\n");
+
+    // Append header information
+    result.append(m_header.print());
 
     // Append table columns
     if (m_columns != NULL) {
@@ -822,36 +828,6 @@ void GFitsTable::data_connect(void* vptr)
 
 
 /***********************************************************************//**
- * @brief Write table in output stream
- *
- * @param[in] os Output stream
- ***************************************************************************/
-std::ostream& GFitsTable::data_dump(std::ostream& os) const
-{
-     // Write column in output stream
-    os << print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Write table in logger
- *
- * @param[in] log Logger.
- ***************************************************************************/
-GLog& GFitsTable::data_dump(GLog& log) const
-{
-    // Write column in logger
-    log << print();
-
-    // Return logger
-    return log;
-}
-
-
-/***********************************************************************//**
  * @brief Returns pointer to column type
  *
  * @param[in] colnum Column number for which type is to be returned
@@ -1094,8 +1070,11 @@ GFitsTableCol* GFitsTable::alloc_column(int typecode) const
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFitsTable& table)
 {
+     // Write table in output stream
+    os << table.print();
+
     // Return output stream
-    return (table.data_dump(os));
+    return os;
 }
 
 
@@ -1107,6 +1086,9 @@ std::ostream& operator<< (std::ostream& os, const GFitsTable& table)
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GFitsTable& table)
 {
+    // Write table into logger
+    log << table.print();
+
     // Return logger
-    return (table.data_dump(log));
+    return log;
 }

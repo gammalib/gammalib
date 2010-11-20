@@ -69,15 +69,13 @@ public:
 
 protected:
     // Protected methods
-    void          data_open(void* vptr);
-    void          data_save(void);
-    void          data_close(void);
-    void          data_connect(void* vptr);
-    std::ostream& data_dump(std::ostream& os) const;
-    GLog&         data_dump(GLog& log) const;
-    char*         get_ttype(const int& colnum) const;
-    char*         get_tform(const int& colnum) const;
-    char*         get_tunit(const int& colnum) const;
+    void  data_open(void* vptr);
+    void  data_save(void);
+    void  data_close(void);
+    void  data_connect(void* vptr);
+    char* get_ttype(const int& colnum) const;
+    char* get_tform(const int& colnum) const;
+    char* get_tunit(const int& colnum) const;
 
     // Protected data area
     int             m_type;       //!< Table type (1=ASCII, 2=Binary)

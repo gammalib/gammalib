@@ -19,6 +19,7 @@
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFitsHeader.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CARD                                      "GFitsHeader::card(int&)"
@@ -481,6 +482,28 @@ int GFitsHeader::num_cards(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print FITS file information
+ ***************************************************************************/
+std::string GFitsHeader::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GFitsHeader ("+str(m_num_cards)+" cards) ===");
+
+    // Append cards
+    for (int i = 0; i < m_num_cards; ++i) {
+        result.append("\n");
+        result.append(m_card[i].print());
+    }
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                              Private methods                            =
@@ -587,10 +610,8 @@ GFitsHeaderCard* GFitsHeader::card_ptr(const std::string& keyname)
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFitsHeader& header)
 {
-    // Put header in stream
-    os << "=== GFitsHeader (" << header.m_num_cards << " cards) ===";
-    for (int i = 0; i < header.m_num_cards; ++i)
-        os << std::endl << " " << header.m_card[i];
+     // Write header in output stream
+    os << header.print();
 
     // Return output stream
     return os;
@@ -605,10 +626,8 @@ std::ostream& operator<< (std::ostream& os, const GFitsHeader& header)
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GFitsHeader& header)
 {
-    // Put header in logger
-    log << "=== GFitsHeader (" << header.m_num_cards << " cards) ===";
-    for (int i = 0; i < header.m_num_cards; ++i)
-        log << std::endl << " " << header.m_card[i];
+    // Write header in logger
+    log << header.print();
 
     // Return logger
     return log;

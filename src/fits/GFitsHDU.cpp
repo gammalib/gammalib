@@ -26,6 +26,7 @@
 #include "GFitsCfitsio.hpp"
 #include "GFitsHDU.hpp"
 #include "GFitsHeaderCard.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OPEN                                          "GFitsHDU::open(int)"
@@ -555,6 +556,7 @@ void GFitsHDU::save(void)
  * @param[in] os Output stream.
  * @param[in] hdu HDU to be dumped.
  ***************************************************************************/
+/*
 std::ostream& operator<< (std::ostream& os, const GFitsHDU& hdu)
 {
     // Put HDU information in stream
@@ -586,7 +588,7 @@ std::ostream& operator<< (std::ostream& os, const GFitsHDU& hdu)
     // Return output stream
     return os;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Log operator
@@ -594,6 +596,7 @@ std::ostream& operator<< (std::ostream& os, const GFitsHDU& hdu)
  * @param[in] log Logger.
  * @param[in] hdu HDU to be logged.
   ***************************************************************************/
+/*
 GLog& operator<< (GLog& log, const GFitsHDU& hdu)
 {
     // Put HDU information in logger
@@ -625,4 +628,45 @@ GLog& operator<< (GLog& log, const GFitsHDU& hdu)
 
     // Return logger
     return log;
+}
+*/
+
+/***********************************************************************//**
+ * @brief Print basic HDU information
+ ***************************************************************************/
+std::string GFitsHDU::print_hdu(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append HDU information
+    result.append(parformat("HDU number")+str(m_hdunum)+"\n");
+    result.append(parformat("HDU name")+m_name+"\n");
+/*
+    result.append(parformat("HDU type"));
+    switch (hdu.exttype()) {
+    case GFitsHDU::HT_IMAGE:
+        result.append("Image");
+        break;
+    case GFitsHDU::HT_ASCII_TABLE:
+        result.append("ASCII table");
+        break;
+    case GFitsHDU::HT_BIN_TABLE:
+        lresult.append("Binary table");
+        break;
+    default:
+        result.append("Unknown");
+        break;
+    }
+*/
+    
+    // Put FITS header in logger
+//    log << std::endl << hdu.m_header;
+
+    // Put FITS data in logger
+//    log << std::endl;
+//    log = hdu.data_dump(log);
+
+    // Return result
+    return result;
 }

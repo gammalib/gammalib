@@ -84,6 +84,7 @@ public:
     std::string  string(void);
     double       real(void);
     int          integer(void);
+    std::string  print(void) const;
 
 private:
     // Private methods

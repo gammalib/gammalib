@@ -21,6 +21,7 @@
 #include "GFitsCfitsio.hpp"
 #include "GFits.hpp"
 #include "GFitsImageByte.hpp"
+#include "GFitsImageSByte.hpp"
 #include "GFitsImageUShort.hpp"
 #include "GFitsImageShort.hpp"
 #include "GFitsImageULong.hpp"
@@ -679,6 +680,35 @@ GFitsTable* GFits::table(int extno) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print FITS file information
+ ***************************************************************************/
+std::string GFits::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GFits ===\n");
+
+    // Append file information
+    result.append(parformat("Filename")+m_filename+"\n");
+    result.append(parformat("Mode"));
+    if (m_readwrite)
+        result.append("read/write\n");
+    else
+        result.append("read only\n");
+    result.append(parformat("Number of HDUs")+str(size()));
+    for (int i = 0; i < size(); ++i) {
+        result.append("\n");
+        result.append(m_hdu[i]->print());
+    }
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -802,16 +832,42 @@ GFitsImage* GFits::new_image(void)
     if (status != 0)
         throw GException::fits_error(G_NEW_IMAGE, status);
 
+    // Check for unsigned image
+    char      keyname[10];
+    long long bzero;
+    long long bscale;
+    sprintf(keyname, "BZERO");
+    if (__ffgky(FPTR(m_fitsfile), __TLONGLONG, keyname, &bzero, NULL, &status) != 0)
+        bzero = 0;
+    sprintf(keyname, "BSCALE");
+    if (__ffgky(FPTR(m_fitsfile), __TLONGLONG, keyname, &bscale, NULL, &status) != 0)
+        bscale = 0;
+    if (bitpix == 8 && bzero == -128 && bscale == 1)
+        bitpix = 9;
+    else if (bitpix == 16 && bzero == 32768u && bscale == 1)
+        bitpix = 17;
+    else if (bitpix == 32 && bzero == 2147483648u && bscale == 1)
+        bitpix = 33;
+
     // Allocate bitpix dependent image
     switch (bitpix) {
     case 8:
         image = new GFitsImageByte;
         break;
+    case 9:
+        image = new GFitsImageSByte;
+        break;
     case 16:
         image = new GFitsImageShort;
         break;
+    case 17:
+        image = new GFitsImageUShort;
+        break;
     case 32:
         image = new GFitsImageLong;
+        break;
+    case 33:
+        image = new GFitsImageULong;
         break;
     case 64:
         image = new GFitsImageLongLong;
@@ -875,17 +931,8 @@ GFitsImage* GFits::new_primary(void)
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFits& fits)
 {
-    // Put file in stream
-    os << "=== GFits ===" << std::endl;
-    os << " Filename ..................: " << fits.m_filename << std::endl;
-    os << " Mode ......................: ";
-    if (fits.m_readwrite)
-        os << "read/write" << std::endl;
-    else
-        os << "read only" << std::endl;
-    os << " Number of HDUs ............: " << fits.size();
-    for (int i = 0; i < fits.size(); ++i)
-        os << std::endl << *fits.m_hdu[i];
+     // Write column in output stream
+    os << fits.print();
 
     // Return output stream
     return os;
@@ -900,17 +947,8 @@ std::ostream& operator<< (std::ostream& os, const GFits& fits)
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GFits& fits)
 {
-    // Put file in logger
-    log << "=== GFits ===" << std::endl;
-    log << " Filename ..................: " << fits.m_filename << std::endl;
-    log << " Mode ......................: ";
-    if (fits.m_readwrite)
-        log << "read/write" << std::endl;
-    else
-        log << "read only" << std::endl;
-    log << " Number of HDUs ............: " << fits.size();
-    for (int i = 0; i < fits.size(); ++i)
-        log << std::endl << *fits.m_hdu[i];
+    // Write column in logger
+    log << fits.print();
 
     // Return logger
     return log;

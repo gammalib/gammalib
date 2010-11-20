@@ -634,6 +634,91 @@ int GFitsHeaderCard::integer(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Print FITS file information
+ ***************************************************************************/
+std::string GFitsHeaderCard::print(void) const
+{
+    // Initialise result string
+    std::string result;
+    
+    // Append keyname
+    result.append(left(m_keyname,8));
+
+    // Format values
+    if (m_keyname != "COMMENT" && m_keyname != "HISTORY") {
+        if (m_unit.length() > 0)
+            result.append(" ="+right(m_value,21)+" / ["+m_unit+"] "+m_comment);
+        else
+            result.append(" ="+right(m_value,21)+" / "+m_comment);
+    }
+    else
+        result.append(" "+m_comment);
+
+    // Attach card type
+    if (m_value_dtype != NULL) {
+        switch (m_dtype) {
+        case __TBIT:
+            result.append(" <bit>");
+            break;
+        case __TBYTE:
+            result.append(" <byte>");
+            break;
+        case __TSBYTE:
+            result.append(" <signed byte>");
+            break;
+        case __TLOGICAL:
+            result.append(" <bool>");
+            break;
+        case __TSTRING:
+            result.append(" <string>");
+            break;
+        case __TUSHORT:
+            result.append(" <unsigned short>");
+            break;
+        case __TSHORT:
+            result.append(" <short>");
+            break;
+        case __TUINT:
+            result.append(" <unsigned int>");
+            break;
+        case __TINT:
+            result.append(" <int>");
+            break;
+        case __TULONG:
+            result.append(" <unsigned long>");
+            break;
+        case __TLONG:
+            result.append(" <long>");
+            break;
+        case __TLONGLONG:
+            result.append(" <long long>");
+            break;
+        case __TFLOAT:
+            result.append(" <float>");
+            break;
+        case __TDOUBLE:
+            result.append(" <double>");
+            break;
+        case __TCOMPLEX:
+            result.append(" <complex>");
+            break;
+        case __TDBLCOMPLEX:
+            result.append(" <double complex>");
+            break;
+        default:
+            result.append(" <unsupported>");
+            break;
+        }
+    }
+    else
+        result.append(" <non native>");
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -1080,97 +1165,8 @@ void GFitsHeaderCard::write(void* vptr)
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GFitsHeaderCard& card)
 {
-    // Set buffer
-    char buffer[100];
-
-    // Setup left justified keyname
-    std::string keyname = card.m_keyname;
-    while (keyname.length() < 8)
-        keyname.append(" ");
-
-    // Setup buffer
-    if (card.m_keyname != "COMMENT" && card.m_keyname != "HISTORY") {
-      if (card.m_unit.length() > 0) {
-        sprintf(buffer, "%8s =%21s / [%s] %s",
-                keyname.c_str(),
-                card.m_value.c_str(),
-                card.m_unit.c_str(),
-                card.m_comment.c_str());
-      }
-      else {
-        sprintf(buffer, "%8s =%21s / %s",
-                keyname.c_str(),
-                card.m_value.c_str(),
-                card.m_comment.c_str());
-      }
-    }
-    else {
-      sprintf(buffer, "%8s %s",
-              keyname.c_str(),
-              card.m_comment.c_str());
-    }
-
-    // Put buffer in stream
-    os << buffer;
-
-    // Attach card type
-    if (card.m_value_dtype != NULL) {
-        switch (card.m_dtype) {
-        case __TBIT:
-            os << " <bit>";
-            break;
-        case __TBYTE:
-            os << " <byte>";
-            break;
-        case __TSBYTE:
-            os << " <signed byte>";
-            break;
-        case __TLOGICAL:
-            os << " <bool>";
-            break;
-        case __TSTRING:
-            os << " <string>";
-            break;
-        case __TUSHORT:
-            os << " <unsigned short>";
-            break;
-        case __TSHORT:
-            os << " <short>";
-            break;
-        case __TUINT:
-            os << " <unsigned int>";
-            break;
-        case __TINT:
-            os << " <int>";
-            break;
-        case __TULONG:
-            os << " <unsigned long>";
-            break;
-        case __TLONG:
-            os << " <long>";
-            break;
-        case __TLONGLONG:
-            os << " <long long>";
-            break;
-        case __TFLOAT:
-            os << " <float>";
-            break;
-        case __TDOUBLE:
-            os << " <double>";
-            break;
-        case __TCOMPLEX:
-            os << " <complex>";
-            break;
-        case __TDBLCOMPLEX:
-            os << " <double complex>";
-            break;
-        default:
-            os << " <unsupported>";
-            break;
-        }
-    }
-    else
-        os << " <non native>";
+     // Write card in output stream
+    os << card.print();
 
     // Return output stream
     return os;
@@ -1185,98 +1181,11 @@ std::ostream& operator<< (std::ostream& os, const GFitsHeaderCard& card)
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GFitsHeaderCard& card)
 {
-    // Set buffer
-    char buffer[100];
-
-    // Setup left justified keyname
-    std::string keyname = card.m_keyname;
-    while (keyname.length() < 8)
-        keyname.append(" ");
-
-    // Setup buffer
-    if (card.m_keyname != "COMMENT" && card.m_keyname != "HISTORY") {
-      if (card.m_unit.length() > 0) {
-        sprintf(buffer, "%8s =%21s / [%s] %s",
-                keyname.c_str(),
-                card.m_value.c_str(),
-                card.m_unit.c_str(),
-                card.m_comment.c_str());
-      }
-      else {
-        sprintf(buffer, "%8s =%21s / %s",
-                keyname.c_str(),
-                card.m_value.c_str(),
-                card.m_comment.c_str());
-      }
-    }
-    else {
-      sprintf(buffer, "%8s %s",
-              keyname.c_str(),
-              card.m_comment.c_str());
-    }
-
-    // Put buffer in stream
-    log << buffer;
-
-    // Attach card type
-    if (card.m_value_dtype != NULL) {
-        switch (card.m_dtype) {
-        case __TBIT:
-            log << " <bit>";
-            break;
-        case __TBYTE:
-            log << " <byte>";
-            break;
-        case __TSBYTE:
-            log << " <signed byte>";
-            break;
-        case __TLOGICAL:
-            log << " <bool>";
-            break;
-        case __TSTRING:
-            log << " <string>";
-            break;
-        case __TUSHORT:
-            log << " <unsigned short>";
-            break;
-        case __TSHORT:
-            log << " <short>";
-            break;
-        case __TUINT:
-            log << " <unsigned int>";
-            break;
-        case __TINT:
-            log << " <int>";
-            log;
-        case __TULONG:
-            log << " <unsigned long>";
-            break;
-        case __TLONG:
-            log << " <long>";
-            break;
-        case __TLONGLONG:
-            log << " <long long>";
-            break;
-        case __TFLOAT:
-            log << " <float>";
-            break;
-        case __TDOUBLE:
-            log << " <double>";
-            break;
-        case __TCOMPLEX:
-            log << " <complex>";
-            break;
-        case __TDBLCOMPLEX:
-            log << " <double complex>";
-            break;
-        default:
-            log << " <unsupported>";
-            break;
-        }
-    }
-    else
-        log << " <non native>";
+    // Write crad in logger
+    log << card.print();
 
     // Return logger
     return log;
 }
+
+

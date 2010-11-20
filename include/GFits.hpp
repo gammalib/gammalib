@@ -69,6 +69,7 @@ public:
     GFitsImage* image(int extno) const;
     GFitsTable* table(const std::string& extname) const;
     GFitsTable* table(int extno) const;
+    std::string print(void) const;
 
 private:
     // Private methods

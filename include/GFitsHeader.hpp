@@ -68,6 +68,7 @@ public:
     int              integer(const int& cardno);
     GFitsHeader*     clone(void) const;
     int              num_cards(void) const;
+    std::string      print(void) const;
 
 private:
     // Private methods

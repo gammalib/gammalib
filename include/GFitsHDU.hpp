@@ -21,8 +21,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
 #include "GFitsHeader.hpp"
 #include "GFitsHeaderCard.hpp"
 
@@ -46,10 +44,6 @@ class GFitsHDU {
     // Friend classes
     friend class GFits;
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GFitsHDU& hdu);
-    friend GLog&         operator<< (GLog& log, const GFitsHDU& hdu);
-
 public:
     // Constructors and destructors
     GFitsHDU(void);
@@ -67,44 +61,44 @@ public:
     };
 
     // Pure virtual methods
-    virtual HDUType   exttype(void) const = 0;
-    virtual GFitsHDU* clone(void) const = 0;
+    virtual HDUType     exttype(void) const = 0;
+    virtual std::string print(void) const = 0;
+    virtual GFitsHDU*   clone(void) const = 0;
 
     // Implemented methods
-    virtual std::string      extname(void) const { return m_name; }
-    virtual void             extname(const std::string& extname);
-    virtual int              extno(void) const { return m_hdunum; }
-    virtual void             extno(int num) { m_hdunum=num; }
-    virtual GFitsHeader*     header(void) { return &m_header; }
-    virtual GFitsHeaderCard* card(const std::string& keyname);
-    virtual GFitsHeaderCard* card(const int& cardno);
-    virtual int              cards(void) const { return m_header.size(); }
-    virtual std::string      string(const std::string& keyname) const;
-    virtual double           real(const std::string& keyname) const;
-    virtual int              integer(const std::string& keyname) const;
-    virtual void             card(const std::string& keyname, const std::string& value,
-                                  const std::string& comment);
-    virtual void             card(const std::string& keyname, const double& value,
-                                  const std::string& comment);
-    virtual void             card(const std::string& keyname, const int& value,
-                                  const std::string& comment);
-    virtual GFitsHDU*        primary(void);
+    std::string      extname(void) const { return m_name; }
+    void             extname(const std::string& extname);
+    int              extno(void) const { return m_hdunum; }
+    void             extno(int num) { m_hdunum=num; }
+    GFitsHeader*     header(void) { return &m_header; }
+    GFitsHeaderCard* card(const std::string& keyname);
+    GFitsHeaderCard* card(const int& cardno);
+    int              cards(void) const { return m_header.size(); }
+    std::string      string(const std::string& keyname) const;
+    double           real(const std::string& keyname) const;
+    int              integer(const std::string& keyname) const;
+    void             card(const std::string& keyname, const std::string& value,
+                          const std::string& comment);
+    void             card(const std::string& keyname, const double& value,
+                          const std::string& comment);
+    void             card(const std::string& keyname, const int& value,
+                          const std::string& comment);
+    GFitsHDU*        primary(void);
 
 protected:
     // Protected methods
-    void    connect(void* fptr);
-    void    move_to_hdu(void);
-    HDUType get_hdu_type(void) const;
-    void    open(void* vptr, int hdunum);
-    void    save(void);
+    void        connect(void* fptr);
+    void        move_to_hdu(void);
+    HDUType     get_hdu_type(void) const;
+    void        open(void* vptr, int hdunum);
+    void        save(void);
+    std::string print_hdu(void) const;
 
     // Pure virtual protected methods
-    virtual void          data_open(void* vptr) = 0;
-    virtual void          data_save(void) = 0;
-    virtual void          data_close(void) = 0;
-    virtual void          data_connect(void* vptr) = 0;
-    virtual std::ostream& data_dump(std::ostream& os) const = 0;
-    virtual GLog&         data_dump(GLog& log) const = 0;
+    virtual void data_open(void* vptr) = 0;
+    virtual void data_save(void) = 0;
+    virtual void data_close(void) = 0;
+    virtual void data_connect(void* vptr) = 0;
 
     // Protected data area
     void*        m_fitsfile;    //!< FITS file pointer pointing on actual HDU
@@ -114,9 +108,9 @@ protected:
 
 private:
     // Private methods
-    void    init_members(void);
-    void    copy_members(const GFitsHDU& hdu);
-    void    free_members(void);
+    void init_members(void);
+    void copy_members(const GFitsHDU& hdu);
+    void free_members(void);
 };
 
 #endif /* GFITSHDU_HPP */

@@ -40,30 +40,35 @@ public:
     virtual ~GFits(void);
 
     // Methods
-    void      clear(void);
-    int       size(void) const;
-    void      open(const std::string& filename);
-    void      close(void);
-    void      save(void);
-    void      saveto(const std::string& filename, bool clobber = false);
-    void      append(GFitsHDU* hdu);
-    GFitsHDU* hdu(const std::string& extname) const;
-    GFitsHDU* hdu(int extno) const;
+    void        clear(void);
+    int         size(void) const;
+    void        open(const std::string& filename);
+    void        close(void);
+    void        save(void);
+    void        saveto(const std::string& filename, bool clobber = false);
+    void        append(GFitsHDU* hdu);
+    GFitsHDU*   hdu(const std::string& extname) const;
+    GFitsHDU*   hdu(int extno) const;
+    GFitsImage* image(const std::string& extname) const;
+    GFitsImage* image(int extno) const;
+    GFitsTable* table(const std::string& extname) const;
+    GFitsTable* table(int extno) const;
 };
 
 
 /***********************************************************************//**
  * @brief GFits class SWIG extension
+ *
+ * Note: Print fails on 28373 char long string. For that reason we just put
+ * directly a std::cout here which also works (but only for printing) :-)
  ***************************************************************************/
 %extend GFits {
     char *__str__() {
-        static char str_buffer[100001];
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 100001);
-        str_buffer[100000] = '\0';
-        return str_buffer;
+        std::string result = self->print();
+        std::cout << result;
+        std::string empty = "";
+        return ((char*)empty.c_str());
+        //return ((char*)result.c_str());
     }
     GFits copy() {
         return (*self);

@@ -75,22 +75,20 @@ public:
 
 protected:
     // Protected methods
-    void          data_open(void* vptr);
-    void          data_save(void);
-    void          data_close(void);
-    void          data_connect(void* vptr);
-    std::ostream& data_dump(std::ostream& os) const;
-    GLog&         data_dump(GLog& log) const;
-    void          init_image_header(void);
-    void          open_image(void* vptr);
-    void          load_image(int datatype, const void* pixels,
-                             const void* nulval, int* anynul);
-    void          save_image(int datatype, const void* pixels);
-    void          fetch_data(void);
-    int           offset(const int& ix) const;
-    int           offset(const int& ix, const int& iy) const;
-    int           offset(const int& ix, const int& iy, const int& iz) const;
-    int           offset(const int& ix, const int& iy, const int& iz, const int& it) const;
+    void  data_open(void* vptr);
+    void  data_save(void);
+    void  data_close(void);
+    void  data_connect(void* vptr);
+    void  init_image_header(void);
+    void  open_image(void* vptr);
+    void  load_image(int datatype, const void* pixels,
+                     const void* nulval, int* anynul);
+    void  save_image(int datatype, const void* pixels);
+    void  fetch_data(void);
+    int   offset(const int& ix) const;
+    int   offset(const int& ix, const int& iy) const;
+    int   offset(const int& ix, const int& iy, const int& iz) const;
+    int   offset(const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Pure virtual protected methods
     virtual void  alloc_data(void) = 0;
