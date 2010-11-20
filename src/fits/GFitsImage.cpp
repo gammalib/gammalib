@@ -433,6 +433,7 @@ std::string GFitsImage::print(void) const
     result.append(print_hdu());
 
     // Append image dimensions
+    result.append(parformat("Image type")+typecode(type())+"\n");
     result.append(parformat("Number of dimensions")+str(naxis())+"\n");
     result.append(parformat("Number of image pixels")+str(size()));
     for (int i = 0; i < naxis(); ++i)
