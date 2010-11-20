@@ -843,30 +843,30 @@ GFitsImage* GFits::new_image(void)
     if (__ffgky(FPTR(m_fitsfile), __TLONGLONG, keyname, &bscale, NULL, &status) != 0)
         bscale = 0;
     if (bitpix == 8 && bzero == -128 && bscale == 1)
-        bitpix = 9;
+        bitpix = 10;
     else if (bitpix == 16 && bzero == 32768u && bscale == 1)
-        bitpix = 17;
+        bitpix = 20;
     else if (bitpix == 32 && bzero == 2147483648u && bscale == 1)
-        bitpix = 33;
+        bitpix = 40;
 
     // Allocate bitpix dependent image
     switch (bitpix) {
     case 8:
         image = new GFitsImageByte;
         break;
-    case 9:
+    case 10:
         image = new GFitsImageSByte;
         break;
     case 16:
         image = new GFitsImageShort;
         break;
-    case 17:
+    case 20:
         image = new GFitsImageUShort;
         break;
     case 32:
         image = new GFitsImageLong;
         break;
-    case 33:
+    case 40:
         image = new GFitsImageULong;
         break;
     case 64:
