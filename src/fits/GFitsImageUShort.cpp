@@ -23,7 +23,7 @@
 /* __ Method name definitions ____________________________________________ */
 
 /* __ Macros _____________________________________________________________ */
-#define G_BITPIX 16                 //!< Defines the number of bits per pixel
+#define G_BITPIX 20                 //!< Defines the number of bits per pixel
 
 /* __ Coding definitions _________________________________________________ */
 
