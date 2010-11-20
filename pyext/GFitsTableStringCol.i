@@ -49,26 +49,25 @@ public:
  * @brief GFitsTableStringCol class extension
  ***************************************************************************/
 %extend GFitsTableStringCol {
-    char *__str__() {
-        static char str_buffer[1001];
-        std::ostringstream buffer;
-        buffer << *self;
-	    std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 1001);
-	    str_buffer[1000] = '\0';
-	    return str_buffer;
+    std::string __getitem__(int GFitsTableColInx[]) {
+        if (GFitsTableColInx[0] == 1)
+            return (*self)(GFitsTableColInx[1]);
+        else if (GFitsTableColInx[0] == 2)
+            return (*self)(GFitsTableColInx[1], GFitsTableColInx[2]);
+        else {
+            PyErr_SetString(PyExc_ValueError,"Too many arguments in tuple");
+            return NULL;
+        }
     }
-    std::string get(const int& row) {
-        return (*self)(row);
-    }
-    std::string get(const int& row, const int& col) {
-        return (*self)(row, col);
-    }
-    void set(const int& row, const std::string& value) {
-        (*self)(row) = value;
-    }
-    void set(const int& row, const int& col, const std::string& value) {
-        (*self)(row, col) = value;
+    void __setitem__(int GFitsTableColInx[], std::string value) {
+        if (GFitsTableColInx[0] == 1)
+            (*self)(GFitsTableColInx[1]) = value;
+        else if (GFitsTableColInx[0] == 2)
+            (*self)(GFitsTableColInx[1], GFitsTableColInx[2]) = value;
+        else {
+            PyErr_SetString(PyExc_ValueError,"Too many arguments in tuple");
+            return;
+        }
     }
     GFitsTableStringCol copy() {
         return (*self);
