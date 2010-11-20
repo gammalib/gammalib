@@ -48,8 +48,9 @@ public:
     };
 
     // Pure virtual methods
-    virtual HDUType   exttype(void) const = 0;
-    virtual GFitsHDU* clone(void) const = 0;
+    virtual HDUType     exttype(void) const = 0;
+    virtual std::string print(void) const = 0;
+    virtual GFitsHDU*   clone(void) const = 0;
 
     // Implemented methods
     virtual std::string      extname(void) const { return m_name; }
@@ -76,3 +77,9 @@ public:
 /***********************************************************************//**
  * @brief GFitsHDU class SWIG extension
  ***************************************************************************/
+%extend GFitsHDU {
+    char *__str__() {
+        static std::string result = self->print();
+        return ((char*)result.c_str());
+    }
+};

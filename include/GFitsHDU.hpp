@@ -87,12 +87,13 @@ public:
 
 protected:
     // Protected methods
-    void        connect(void* fptr);
-    void        move_to_hdu(void);
-    HDUType     get_hdu_type(void) const;
-    void        open(void* vptr, int hdunum);
-    void        save(void);
-    std::string print_hdu(void) const;
+    void         connect(void* fptr);
+    void         move_to_hdu(void);
+    HDUType      get_hdu_type(void) const;
+    void         open(void* vptr, int hdunum);
+    void         save(void);
+    std::string  print_hdu(void) const;
+    std::string  typecode(int type) const;
 
     // Pure virtual protected methods
     virtual void data_open(void* vptr) = 0;
