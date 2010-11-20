@@ -23,6 +23,7 @@
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableBitCol.hpp"
+#include "GFitsTableByteCol.hpp"
 #include "GFitsTableBoolCol.hpp"
 #include "GFitsTableStringCol.hpp"
 #include "GFitsTableUShortCol.hpp"
@@ -32,6 +33,8 @@
 #include "GFitsTableLongLongCol.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GFitsTableDoubleCol.hpp"
+#include "GFitsTableCFloatCol.hpp"
+#include "GFitsTableCDoubleCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_APPEND_COLUMN           "GFitsTable::append_column(GFitsTableCol*)"
@@ -1020,6 +1023,9 @@ GFitsTableCol* GFitsTable::alloc_column(int typecode) const
     case __TBIT:
         ptr = new GFitsTableBitCol;
         break;
+    case __TBYTE:
+        ptr = new GFitsTableByteCol;
+        break;
     case __TLOGICAL:
         ptr = new GFitsTableBoolCol;
         break;
@@ -1046,6 +1052,12 @@ GFitsTableCol* GFitsTable::alloc_column(int typecode) const
         break;
     case __TDOUBLE:
         ptr = new GFitsTableDoubleCol;
+        break;
+    case __TCOMPLEX:
+        ptr = new GFitsTableCFloatCol;
+        break;
+    case __TDBLCOMPLEX:
+        ptr = new GFitsTableCDoubleCol;
         break;
     default:
         break;

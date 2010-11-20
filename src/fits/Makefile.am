@@ -24,6 +24,7 @@ sources = GFitsHeaderCard.cpp \
           GFitsTableCol.cpp \
           GFitsTableBitCol.cpp \
           GFitsTableBoolCol.cpp \
+          GFitsTableByteCol.cpp \
           GFitsTableStringCol.cpp \
           GFitsTableUShortCol.cpp \
           GFitsTableShortCol.cpp \
@@ -32,6 +33,8 @@ sources = GFitsHeaderCard.cpp \
           GFitsTableLongLongCol.cpp \
           GFitsTableFloatCol.cpp \
           GFitsTableDoubleCol.cpp \
+          GFitsTableCFloatCol.cpp \
+          GFitsTableCDoubleCol.cpp \
           GFitsHDU.cpp \
           GFits.cpp \
           GException_fits.cpp
