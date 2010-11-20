@@ -25,7 +25,6 @@
 #include "GLATEventCube.hpp"
 #include "GFitsImage.hpp"
 #include "GFitsTable.hpp"
-#include "GFitsImageFlt.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_POINTER                               "GLATEventCube::pointer(int)"
