@@ -28,9 +28,8 @@
  * globally defined after inclusing of this file, hence GFitsImage.i has
  * to be included before all image class swig files.
  ***************************************************************************/
-/* The following function and typemap provides image pixel access */
 %{
-static int convert_array(PyObject *input, int *ptr) {
+static int image_pixel_tuple(PyObject *input, int *ptr) {
     if (PySequence_Check(input)) {
         int size = PyObject_Length(input);
         if (size > 4) {
@@ -62,7 +61,7 @@ static int convert_array(PyObject *input, int *ptr) {
 }
 %}
 %typemap(in) int GFitsImageInx[ANY](int temp[5]) {
-   if (!convert_array($input,temp)) {
+   if (!image_pixel_tuple($input,temp)) {
       return NULL;
    }
    $1 = &temp[0];

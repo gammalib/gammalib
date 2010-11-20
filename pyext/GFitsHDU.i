@@ -49,7 +49,6 @@ public:
 
     // Pure virtual methods
     virtual HDUType     exttype(void) const = 0;
-    virtual std::string print(void) const = 0;
     virtual GFitsHDU*   clone(void) const = 0;
 
     // Implemented methods
