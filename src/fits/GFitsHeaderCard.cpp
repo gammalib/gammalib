@@ -934,7 +934,7 @@ void GFitsHeaderCard::set_dtype(const std::string& value)
         // If value has only one digit and is either 'F' or 'T' we have a
         // Boolean
         if (last == 0 && (m_value[0] == 'F' || m_value[0] == 'T')) {
-            this->value((m_value[0] == 'F'));
+            this->value((m_value[0] == 'T'));
             continue;
         }
 
