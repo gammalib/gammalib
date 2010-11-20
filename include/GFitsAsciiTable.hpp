@@ -27,6 +27,12 @@
  * @class GFitsAsciiTable
  *
  * @brief Interface for FITS binary table
+ *
+ * The following ASCII tables are supported: 
+ * TSTRING (A),
+ * TLONG (I),
+ * TDOUBLE (F,D)
+ * TFLOAT (E)
  ***************************************************************************/
 class GFitsAsciiTable : public GFitsTable {
 
