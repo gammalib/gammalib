@@ -54,6 +54,7 @@
 #include "GFitsBinTable.hpp"
 #include "GFitsTableCol.hpp"
 #include "GFitsTableBitCol.hpp"
+#include "GFitsTableByteCol.hpp"
 #include "GFitsTableBoolCol.hpp"
 #include "GFitsTableStringCol.hpp"
 #include "GFitsTableUShortCol.hpp"
@@ -63,6 +64,8 @@
 #include "GFitsTableLongLongCol.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GFitsTableDoubleCol.hpp"
+#include "GFitsTableCFLoatCol.hpp"
+#include "GFitsTableCDoubleCol.hpp"
 
 /* __ XML module _________________________________________________________ */
 #include "GXml.hpp"

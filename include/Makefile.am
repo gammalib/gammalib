@@ -63,6 +63,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GFitsTableCol.hpp \
                      GFitsTableBitCol.hpp \
                      GFitsTableBoolCol.hpp \
+                     GFitsTableByteCol.hpp \
                      GFitsTableStringCol.hpp \
                      GFitsTableUShortCol.hpp \
                      GFitsTableShortCol.hpp \
@@ -71,6 +72,8 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GFitsTableLongLongCol.hpp \
                      GFitsTableFloatCol.hpp \
                      GFitsTableDoubleCol.hpp \
+                     GFitsTableCFloatCol.hpp \
+                     GFitsTableCDoubleCol.hpp \
                      GFitsHDU.hpp \
                      GFits.hpp \
                      GVector.hpp \
