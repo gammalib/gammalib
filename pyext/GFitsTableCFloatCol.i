@@ -49,17 +49,27 @@ public:
  * @brief GFitsTableCFloatCol class extension
  ***************************************************************************/
 %extend GFitsTableCFloatCol {
-    GFits::cfloat get(const int& row) {
-        return (*self)(row);
+/*
+    GFits::cfloat __getitem__(int GFitsTableColInx[]) {
+        if (GFitsTableColInx[0] == 1)
+            return (*self)(GFitsTableColInx[1]);
+        else if (GFitsTableColInx[0] == 2)
+            return (*self)(GFitsTableColInx[1], GFitsTableColInx[2]);
+        else {
+            PyErr_SetString(PyExc_ValueError,"Too many arguments in tuple");
+            return NULL;
+        }
     }
-    GFits::cfloat get(const int& row, const int& col) {
-        return (*self)(row, col);
-    }
-    void set(const int& row, const GFits::cfloat& value) {
-        (*self)(row) = value;
-    }
-    void set(const int& row, const int& col, const GFits::cfloat& value) {
-        (*self)(row, col) = value;
+*/
+    void __setitem__(int GFitsTableColInx[], GFits::cfloat value) {
+        if (GFitsTableColInx[0] == 1)
+            (*self)(GFitsTableColInx[1]) = value;
+        else if (GFitsTableColInx[0] == 2)
+            (*self)(GFitsTableColInx[1], GFitsTableColInx[2]) = value;
+        else {
+            PyErr_SetString(PyExc_ValueError,"Too many arguments in tuple");
+            return;
+        }
     }
     GFitsTableCFloatCol copy() {
         return (*self);
