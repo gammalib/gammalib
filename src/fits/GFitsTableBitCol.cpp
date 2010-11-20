@@ -400,7 +400,7 @@ std::string GFitsTableBitCol::ascii_format(void) const
     std::string format;
 
     // Set type code
-    format.append("X");
+    format.append("I");
 
     // Set width
     format.append(str(m_width));

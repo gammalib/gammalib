@@ -367,7 +367,7 @@ std::string GFitsTableUShortCol::ascii_format(void) const
     std::string format;
 
     // Set type code
-    format.append("U");
+    format.append("I");
 
     // Set width
     format.append(str(m_width));

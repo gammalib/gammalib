@@ -367,7 +367,7 @@ std::string GFitsTableULongCol::ascii_format(void) const
     std::string format;
 
     // Set type code
-    format.append("V");
+    format.append("I");
 
     // Set width
     format.append(str(m_width));
