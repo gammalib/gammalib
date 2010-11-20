@@ -71,6 +71,18 @@ public:
     GFitsTable* table(int extno) const;
     std::string print(void) const;
 
+    // Complex single precision type
+    typedef struct {
+        float re;
+        float im;
+    } cfloat;
+
+    // Complex double precision type
+    typedef struct {
+        float re;
+        float im;
+    } cdouble;
+
 private:
     // Private methods
     void        init_members(void);
