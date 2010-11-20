@@ -323,63 +323,6 @@ GFitsHDU* GFitsHDU::primary(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Initialise class members
- *
- * Sets all class members to well defined values.
- ***************************************************************************/
-void GFitsHDU::init_members(void)
-{
-    // Allocate and initialise FITS file pointer
-    m_fitsfile = new __fitsfile;
-    FPTR(m_fitsfile)->HDUposition = 0;
-    FPTR(m_fitsfile)->Fptr        = NULL;
-
-    // Initialise members
-    m_hdunum = 0;
-    m_name.clear();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Copy class members
- *
- * @param[in] hdu HDU to be copied.
- *
- * Assumes that all memory has been freed correctly before calling.
- ***************************************************************************/
-void GFitsHDU::copy_members(const GFitsHDU& hdu)
-{
-    // Copy members
-    FPTR_COPY(m_fitsfile, hdu.m_fitsfile);
-    m_hdunum = hdu.m_hdunum;
-    m_name   = hdu.m_name;
-    m_header = hdu.m_header;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Delete class members
- ***************************************************************************/
-void GFitsHDU::free_members(void)
-{
-    // Free memory
-    if (m_fitsfile != NULL) delete FPTR(m_fitsfile);
-
-    // Signal free pointers
-    m_fitsfile = NULL;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Connect HDU to FITS file
  *
  * @param[in] vptr FITS file pointer.
@@ -538,99 +481,6 @@ void GFitsHDU::save(void)
 }
 
 
-/*==========================================================================
- =                                                                         =
- =                             Private methods                             =
- =                                                                         =
- ==========================================================================*/
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] hdu HDU to be dumped.
- ***************************************************************************/
-/*
-std::ostream& operator<< (std::ostream& os, const GFitsHDU& hdu)
-{
-    // Put HDU information in stream
-    os << "=== GFitsHDU ===" << std::endl;
-    os << " HDU number ................: " << hdu.m_hdunum << std::endl;
-    os << " HDU name ..................: " << hdu.m_name << std::endl;
-    os << " HDU type ..................: ";
-    switch (hdu.exttype()) {
-    case GFitsHDU::HT_IMAGE:
-        os << "Image";
-        break;
-    case GFitsHDU::HT_ASCII_TABLE:
-        os << "ASCII table";
-        break;
-    case GFitsHDU::HT_BIN_TABLE:
-        os << "Binary table";
-        break;
-    default:
-        os << "Unknown";
-        break;
-    }
-
-    // Put FITS header in stream
-    os << std::endl << hdu.m_header;
-
-    // Put FITS data in stream
-    os << std::endl << hdu.data_dump(os);
-
-    // Return output stream
-    return os;
-}
-*/
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] hdu HDU to be logged.
-  ***************************************************************************/
-/*
-GLog& operator<< (GLog& log, const GFitsHDU& hdu)
-{
-    // Put HDU information in logger
-    log << "=== GFitsHDU ===" << std::endl;
-    log << " HDU number ................: " << hdu.m_hdunum << std::endl;
-    log << " HDU name ..................: " << hdu.m_name << std::endl;
-    log << " HDU type ..................: ";
-    switch (hdu.exttype()) {
-    case GFitsHDU::HT_IMAGE:
-        log << "Image";
-        break;
-    case GFitsHDU::HT_ASCII_TABLE:
-        log << "ASCII table";
-        break;
-    case GFitsHDU::HT_BIN_TABLE:
-        log << "Binary table";
-        break;
-    default:
-        log << "Unknown";
-        break;
-    }
-
-    // Put FITS header in logger
-    log << std::endl << hdu.m_header;
-
-    // Put FITS data in logger
-    log << std::endl;
-    log = hdu.data_dump(log);
-
-    // Return logger
-    return log;
-}
-*/
-
 /***********************************************************************//**
  * @brief Print basic HDU information
  ***************************************************************************/
@@ -642,31 +492,135 @@ std::string GFitsHDU::print_hdu(void) const
     // Append HDU information
     result.append(parformat("HDU number")+str(m_hdunum)+"\n");
     result.append(parformat("HDU name")+m_name+"\n");
-/*
-    result.append(parformat("HDU type"));
-    switch (hdu.exttype()) {
-    case GFitsHDU::HT_IMAGE:
-        result.append("Image");
-        break;
-    case GFitsHDU::HT_ASCII_TABLE:
-        result.append("ASCII table");
-        break;
-    case GFitsHDU::HT_BIN_TABLE:
-        lresult.append("Binary table");
-        break;
-    default:
-        result.append("Unknown");
-        break;
-    }
-*/
-    
-    // Put FITS header in logger
-//    log << std::endl << hdu.m_header;
-
-    // Put FITS data in logger
-//    log << std::endl;
-//    log = hdu.data_dump(log);
 
     // Return result
     return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Return typecode as string
+ *
+ * @param[in] type Type code.
+ ***************************************************************************/
+std::string GFitsHDU::typecode(int type) const
+{
+    // Allocate string
+    std::string result;
+
+    // Set typecode
+    switch (type) {
+    case __TBIT:
+        result = "bit";
+        break;
+    case __TBYTE:
+        result = "unsigned byte";
+        break;
+    case __TSBYTE:
+        result = "signed byte";
+        break;
+    case __TLOGICAL:
+        result = "boolean";
+        break;
+    case __TSTRING:
+        result = "string";
+        break;
+    case __TUSHORT:
+        result = "unsigned short integer";
+        break;
+    case __TSHORT:
+        result = "short integer";
+        break;
+    case __TULONG:
+        result = "unsigned long integer";
+        break;
+    case __TLONG:
+        result = "long integer";
+        break;
+    case __TFLOAT:
+        result = "single precision floating point";
+        break;
+    case __TLONGLONG:
+        result = "long long integer";
+        break;
+    case __TDOUBLE:
+        result = "double precision floating point";
+        break;
+    default:
+        result = "unsupported format";
+        break;
+    }
+
+    // Return result
+    return result;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                             Private methods                             =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ *
+ * Sets all class members to well defined values.
+ ***************************************************************************/
+void GFitsHDU::init_members(void)
+{
+    // Allocate and initialise FITS file pointer
+    m_fitsfile = new __fitsfile;
+    FPTR(m_fitsfile)->HDUposition = 0;
+    FPTR(m_fitsfile)->Fptr        = NULL;
+
+    // Initialise members
+    m_hdunum = 0;
+    m_name.clear();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] hdu HDU to be copied.
+ *
+ * Assumes that all memory has been freed correctly before calling.
+ ***************************************************************************/
+void GFitsHDU::copy_members(const GFitsHDU& hdu)
+{
+    // Copy members
+    FPTR_COPY(m_fitsfile, hdu.m_fitsfile);
+    m_hdunum = hdu.m_hdunum;
+    m_name   = hdu.m_name;
+    m_header = hdu.m_header;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ ***************************************************************************/
+void GFitsHDU::free_members(void)
+{
+    // Free memory
+    if (m_fitsfile != NULL) delete FPTR(m_fitsfile);
+
+    // Signal free pointers
+    m_fitsfile = NULL;
+
+    // Return
+    return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                                 Friends                                 =
+ =                                                                         =
+ ==========================================================================*/
