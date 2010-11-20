@@ -54,7 +54,7 @@ public:
  ***************************************************************************/
 %extend GFitsTable {
     char *__str__() {
-        std::string result = self->print();
+        static std::string result = self->print();
         return ((char*)result.c_str());
     }
 };

@@ -58,17 +58,11 @@ public:
 
 /***********************************************************************//**
  * @brief GFits class SWIG extension
- *
- * Note: Print fails on 28373 char long string. For that reason we just put
- * directly a std::cout here which also works (but only for printing) :-)
  ***************************************************************************/
 %extend GFits {
     char *__str__() {
-        std::string result = self->print();
-        std::cout << result;
-        std::string empty = "";
-        return ((char*)empty.c_str());
-        //return ((char*)result.c_str());
+        static std::string result = self->print();
+        return ((char*)result.c_str());
     }
     GFits copy() {
         return (*self);
