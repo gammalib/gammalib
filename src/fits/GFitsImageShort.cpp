@@ -677,6 +677,16 @@ void* GFitsImageShort::pixels(void)
 
 
 /***********************************************************************//**
+ * @brief Return image type
+ ***************************************************************************/
+int GFitsImageShort::type(void) const
+{
+    // Return type
+    return __TSHORT;
+}
+
+
+/***********************************************************************//**
  * @brief Clone FITS image
  *
  * Cloning provides a copy of the FITS file. Cloning is used to allocate
@@ -865,16 +875,6 @@ void GFitsImageShort::alloc_nulval(const void* value)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return image type
- ***************************************************************************/
-int GFitsImageShort::type(void) const
-{
-    // Return type
-    return __TSHORT;
 }
 
 

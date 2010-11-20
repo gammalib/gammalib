@@ -677,6 +677,16 @@ void* GFitsImageDouble::pixels(void)
 
 
 /***********************************************************************//**
+ * @brief Return image type
+ ***************************************************************************/
+int GFitsImageDouble::type(void) const
+{
+    // Return type
+    return __TDOUBLE;
+}
+
+
+/***********************************************************************//**
  * @brief Clone FITS image
  *
  * Cloning provides a copy of the FITS file. Cloning is used to allocate
@@ -865,16 +875,6 @@ void GFitsImageDouble::alloc_nulval(const void* value)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return image type
- ***************************************************************************/
-int GFitsImageDouble::type(void) const
-{
-    // Return type
-    return __TDOUBLE;
 }
 
 

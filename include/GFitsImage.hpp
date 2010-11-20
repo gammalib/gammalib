@@ -58,6 +58,7 @@ public:
     virtual double      pixel(const int& ix, const int& iy) const = 0;
     virtual double      pixel(const int& ix, const int& iy, const int& iz) const = 0;
     virtual double      pixel(const int& ix, const int& iy, const int& iz, const int& it) const = 0;
+    virtual int         type(void) const = 0;
     virtual GFitsImage* clone(void) const = 0;
 
     // Implemented pure virtual methods
@@ -97,7 +98,6 @@ protected:
     virtual void  alloc_nulval(const void* value) = 0;
     virtual void* ptr_data(void) = 0;
     virtual void* ptr_nulval(void) = 0;
-    virtual int   type(void) const = 0;
 
     // Protected data area
     int   m_bitpix;      //!< Number of Bits/pixel

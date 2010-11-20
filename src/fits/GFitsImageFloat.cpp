@@ -677,6 +677,16 @@ void* GFitsImageFloat::pixels(void)
 
 
 /***********************************************************************//**
+ * @brief Return image type
+ ***************************************************************************/
+int GFitsImageFloat::type(void) const
+{
+    // Return type
+    return __TFLOAT;
+}
+
+
+/***********************************************************************//**
  * @brief Clone FITS image
  *
  * Cloning provides a copy of the FITS file. Cloning is used to allocate
@@ -865,16 +875,6 @@ void GFitsImageFloat::alloc_nulval(const void* value)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return image type
- ***************************************************************************/
-int GFitsImageFloat::type(void) const
-{
-    // Return type
-    return __TFLOAT;
 }
 
 
