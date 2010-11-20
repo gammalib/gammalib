@@ -370,10 +370,10 @@ std::string GFitsTableDoubleCol::ascii_format(void) const
     std::string format;
 
     // Set type code
-    format.append("D");
+    format.append("D20.10");
 
     // Set width
-    format.append(str(m_width));
+    //format.append(str(m_width));
 
     // Return format
     return format;

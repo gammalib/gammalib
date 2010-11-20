@@ -370,10 +370,10 @@ std::string GFitsTableFloatCol::ascii_format(void) const
     std::string format;
 
     // Set type code
-    format.append("F");
+    format.append("F10.2");
 
     // Set width
-    format.append(str(m_width));
+    //format.append(str(m_width));
 
     // Return format
     return format;
