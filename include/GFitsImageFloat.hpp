@@ -66,6 +66,7 @@ public:
     double           pixel(const int& ix, const int& iy, const int& iz) const;
     double           pixel(const int& ix, const int& iy, const int& iz, const int& it) const;
     void*            pixels(void);
+    int              type(void) const;
     GFitsImageFloat* clone(void) const;
 
 private:
@@ -80,7 +81,6 @@ private:
     void  alloc_nulval(const void* value);
     void* ptr_data(void) { return m_pixels; }
     void* ptr_nulval(void) { return m_nulval; }
-    int   type(void) const;
 
     // Private data area
     float* m_pixels;      //!< Pixels

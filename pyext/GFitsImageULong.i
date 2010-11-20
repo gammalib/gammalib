@@ -43,6 +43,7 @@ public:
     double           pixel(const int& ix, const int& iy, const int& iz) const;
     double           pixel(const int& ix, const int& iy, const int& iz, const int& it) const;
     void*            pixels(void);
+    int              type(void) const;
     GFitsImageULong* clone(void) const;
 };
 
