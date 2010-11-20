@@ -36,6 +36,7 @@
 #include "GFitsHeaderCard.i"
 #include "GFitsImage.i"
 #include "GFitsImageByte.i"
+#include "GFitsImageSByte.i"
 #include "GFitsImageUShort.i"
 #include "GFitsImageShort.i"
 #include "GFitsImageULong.i"

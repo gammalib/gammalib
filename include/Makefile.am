@@ -49,6 +49,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GFitsHeader.hpp \
                      GFitsImage.hpp \
                      GFitsImageByte.hpp \
+                     GFitsImageSByte.hpp \
                      GFitsImageUShort.hpp \
                      GFitsImageShort.hpp \
                      GFitsImageULong.hpp \

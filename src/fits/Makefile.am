@@ -10,6 +10,7 @@ sources = GFitsHeaderCard.cpp \
           GFitsHeader.cpp \
           GFitsImage.cpp \
           GFitsImageByte.cpp \
+          GFitsImageSByte.cpp \
           GFitsImageUShort.cpp \
           GFitsImageShort.cpp \
           GFitsImageULong.cpp \
