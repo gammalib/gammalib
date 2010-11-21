@@ -11,107 +11,231 @@ def test_fits():
     """
     Test GFits interface.
     """
+    # Dump testing
+    print "Test GFits."
+
+    # Set filenames
+    file1 = "test_python_fits_v1.fits"
+    file2 = "test_python_fits_v2.fits"
+
     # Remove test files
     try:
-        os.remove("test_python.fits")
-        os.remove("test_python_2.fits")
+        os.remove(file1)
+        os.remove(file2)
     except:
         pass
 
     # Create FITS file
-    fits = GFits("test_python.fits")
+    fits = GFits(file1)
 
-    # Print number of HDUs
-    print "Number of HDUs ..: " + str(fits.num_hdus())
-
-    # Allocate HDU "Testing"
-    hdu = GFitsHDU()
-    hdu.extname("Testing")
-    print "HDU name ........: " + hdu.extname()
-    print "HDU number ......: " + str(hdu.extno())
-    print "HDU type ........: " + str(hdu.exttype())
+    # Create images
+    nx   = 10
+    ny   = 10
+    img1 = GFitsImageByte(nx,ny)
+    img2 = GFitsImageDouble(nx,ny)
+    img3 = GFitsImageFloat(nx,ny)
+    img4 = GFitsImageLong(nx,ny)
+    img5 = GFitsImageLongLong(nx,ny)
+    img6 = GFitsImageSByte(nx,ny)
+    img7 = GFitsImageShort(nx,ny)
+    img8 = GFitsImageULong(nx,ny)
+    img9 = GFitsImageUShort(nx,ny)
+    for x in range(nx):
+        for y in range(ny):
+            img1[x,y] = x+y*nx
+            img2[x,y] = x+y*nx
+            img3[x,y] = x+y*nx
+            img4[x,y] = x+y*nx
+            img5[x,y] = x+y*nx
+            img6[x,y] = x+y*nx
+            img7[x,y] = x+y*nx
+            img8[x,y] = x+y*nx
+            img9[x,y] = x+y*nx
+    img1.extname("Byte")
+    img2.extname("Double")
+    img3.extname("Float")
+    img4.extname("Long")
+    img5.extname("LongLong")
+    img6.extname("SByte")
+    img7.extname("Short")
+    img8.extname("ULong")
+    img9.extname("UShort")
+    
+    # Append images to FITS file
+    fits.append(img1)
+    fits.append(img2)
+    fits.append(img3)
+    fits.append(img4)
+    fits.append(img5)
+    fits.append(img6)
+    fits.append(img7)
+    fits.append(img8)
+    fits.append(img9)
 
     # Set header keywords
-    hdr = hdu.header()
-    hdr.update(GFitsHeaderCard("test", "test-value", "this is for testing"))
-    hdr.update(GFitsHeaderCard("real", 3.1415, "a real value"))
-    hdr.update(GFitsHeaderCard("int", 41, "an integer value"))
+    img_byte = fits.image(0)
+    img_byte.card("test", "test-value", "this is for testing")
+    img_byte.card("real", 3.1415, "a real value")
+    img_byte.card("int", 41, "an integer value")
 
-
-    # Append HDU to FITS file
-    fits.append_hdu(hdu)
-
-    # Set double image
-    img1 = GFitsDblImage(100)
-    img2 = GFitsDblImage(10, 20)
-    img3 = GFitsDblImage(10, 10, 10)
-    img4 = GFitsDblImage(5, 9, 20, 20)
-    print img1
-    print img2
-    print img3
-    print img4
-    print img1.bitpix()
-    print img3.naxis()
-    print img2.naxes(0),  img2.naxes(1)
-    print img4.num_pixels()
-    fits.append_hdu(GFitsHDU(img1))
-    fits.append_hdu(GFitsHDU(img2))
-    fits.append_hdu(GFitsHDU(img3))
-    fits.append_hdu(GFitsHDU(img4))
+    # Create table columns
+    nrows = 10
+    col1  = GFitsTableBitCol("BIT", nrows)
+    col2  = GFitsTableBoolCol("BOOLEAN", nrows)
+    col3  = GFitsTableByteCol("BYTE", nrows)
+    col4  = GFitsTableDoubleCol("DOUBLE", nrows)
+    col5  = GFitsTableFloatCol("FLOAT", nrows)
+    col6  = GFitsTableLongCol("LONG", nrows)
+    col7  = GFitsTableLongLongCol("LONGLONG", nrows)
+    col8  = GFitsTableShortCol("SHORT", nrows)
+    col9  = GFitsTableStringCol("STRING", nrows, 20)
+    col10 = GFitsTableULongCol("ULONG", nrows)
+    col11 = GFitsTableUShortCol("USHORT", nrows)
+    for i in range(nrows):
+        col1[i] = i % 2
+        col2[i] = i % 2
+        col3[i] = i
+        col4[i] = i*0.01
+        col5[i] = i*0.01
+        col6[i] = i*100
+        col7[i] = i*10000
+        col8[i] = i*100
+        col9[i] = str(i*100)
+        col10[i] = i*100
+        col11[i] = i*100
 
     # Set ASCII table
-    tbl1 = GFitsAsciiTable(10)
-    col1 = GFitsTableDblCol("DOUBLE", 10)
-    col2 = GFitsTableFltCol("FLOAT", 10)
-    col3 = GFitsTableLngCol("LONG", 10)
-    col4 = GFitsTableShtCol("SHORT", 10)
-    col5 = GFitsTableStrCol("STRING", 10, 20)
-    col6 = GFitsTableLogCol("LOGICAL", 10)
-    for i in range(10):
-        col1.set(i, i*0.01)
-        col2.set(i, i*0.01)
-        col3.set(i, i*100)
-        col4.set(i, i*100)
-        col5.set(i, str(i*100))
-        col6.set(i, i % 2)
-    tbl1.append_column(col1)
-    #tbl1.append_column(col2) # FLOAT: datatype conversion overflow (status=412)
-    #tbl1.append_column(col3) # LONG: unknown TFORM datatype code (status=262)
-    #tbl1.append_column(col4) # SHORT: datatype conversion overflow (status=412)
-    tbl1.append_column(col5)
-    #tbl1.append_column(col6) # LOGICAL: unknown TFORM datatype code (status=262)
-    fits.append_hdu(GFitsHDU(tbl1))
+    tbl_ascii = GFitsAsciiTable()
+    tbl_ascii.append_column(col1) # Need to implement ?/!
+    #tbl_ascii.append_column(col2) # Need to implement ?/!
+    tbl_ascii.append_column(col3)
+    tbl_ascii.append_column(col4)
+    tbl_ascii.append_column(col5)
+    tbl_ascii.append_column(col6)
+    tbl_ascii.append_column(col7)
+    tbl_ascii.append_column(col8)
+    tbl_ascii.append_column(col9)
+    tbl_ascii.append_column(col10)
+    tbl_ascii.append_column(col11)
+    tbl_ascii.extname("ASCII table")
+    fits.append(tbl_ascii)
 
     # Set binary table
-    tbl2 = GFitsBinTable(10)
-    col1 = GFitsTableDblCol("DOUBLE", 10)
-    col2 = GFitsTableFltCol("FLOAT", 10)
-    col3 = GFitsTableLngCol("LONG", 10)
-    col4 = GFitsTableShtCol("SHORT", 10)
-    col5 = GFitsTableStrCol("STRING", 10, 20)
-    col6 = GFitsTableLogCol("LOGICAL", 10)
-    for i in range(10):
-        col1.set(i, i*0.01)
-        col2.set(i, i*0.01)
-        col3.set(i, i*100)
-        col4.set(i, i*100)
-        col5.set(i, str(i*100))
-        col6.set(i, i % 2)
-    tbl2.append_column(col1)
-    tbl2.append_column(col2)
-    tbl2.append_column(col3)
-    tbl2.append_column(col4)
-    tbl2.append_column(col5)
-    tbl2.append_column(col6)
-    fits.append_hdu(GFitsHDU(tbl2))
-
-    #print fits
+    tbl_bin = GFitsBinTable()
+    tbl_bin.append_column(col1)
+    tbl_bin.append_column(col2)
+    tbl_bin.append_column(col3)
+    tbl_bin.append_column(col4)
+    tbl_bin.append_column(col5)
+    tbl_bin.append_column(col6)
+    tbl_bin.append_column(col7)
+    tbl_bin.append_column(col8)
+    tbl_bin.append_column(col9)
+    tbl_bin.append_column(col10)
+    tbl_bin.append_column(col11)
+    tbl_bin.extname("Binary table")
+    fits.append(tbl_bin)
 
     # Save FITS file
     fits.save()
 
+    # Close FITS file
+    fits.close()
+
+    # Re-open FITS file
+    fits = GFits(file1)
+
+    # Get double precision image, take square root of pixel and save in
+    # another file
+    img_double = cast_double(fits.image("Double"))
+    for x in range(nx):
+        for y in range(ny):
+            img_double[x,y] = sqrt(img_double[x,y])
+    #img_byte = cast_byte(fits.image("Double"))
+
     # Save into another FITS file
-    fits.saveto("test_python_2.fits")
+    fits.saveto(file2)
+
+    # Close FITS file
+    fits.close()
+
+    # Success
+    return 1
+
+
+#==============#
+# Test GSkymap #
+#==============#
+def test_skymap():
+    """
+    Test GSkymap interface.
+    """
+    # Dump testing
+    print "Test GSkymap."
+
+    # Set filenames
+    file1 = "test_python_skymap_hpx_v1.fits"
+    file2 = "test_python_skymap_hpx_v2.fits"
+
+    # Remove test files
+    try:
+        os.remove(file1)
+        os.remove(file2)
+    except:
+        pass
+    
+    # Create HEALPix skymap
+    pixels = GSkymap("HPX", "GAL", 4, "RING", 2)
+    for i, pixel in enumerate(pixels):
+        pixels[i]   = i+1.0
+        pixels[i:1] = i+1.0 + 1000.0
+    pixels.save(file1)
+    
+    # Load HEALPix skymap
+    pixels = GSkymap(file1)
+
+    # Dump skymap
+    #print pixels
+
+    # Control pix2dir / dir2pix
+    for i in range(pixels.npix()):
+        dir  = pixels.pix2dir(i)
+        ipix = pixels.dir2pix(dir)
+        if (i != ipix):
+            print "GSkymap Trouble with pixel "+str(i)+" ("+str(ipix)+ \
+                  "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
+
+    # Control SkyDir coordinate transformation for all pixels
+    for i in range(pixels.npix()):
+        dir     = pixels.pix2dir(i)
+        dir_new = GSkyDir()
+        dir_new.lb(dir.l(),dir.b())
+        dra  = abs(dir.ra()  - dir_new.ra())
+        if (dra >= 5.0):
+            dra -= 2.0*pi
+        ddec = abs(dir.dec() - dir_new.dec())
+        if (dra > 1.0e-9 or ddec > 1.0e-9):
+            print "GSkyDir Trouble with pixel "+str(i)+" ("+str(dra)+ \
+                  ","+str(ddec)+")"
+    
+    # Save HEALPix skymap
+    try:
+        pixels.save(file2, True)
+        pixels.save(file2)
+        print "*** TEST ERROR: FITS file overwritten!"
+        return 0
+    except RuntimeError:
+        pass
+    pixels.save(file2, True)
+
+    # Load again HEALPix skymap
+    pixels = GSkymap(file1)
+
+    # Dump skymap
+    #print pixels
+    
+    # Success
+    return 1
 
 
 #=================#
@@ -188,64 +312,6 @@ def test_lat_observation():
     #print obs.ft2()
 
 
-#==============#
-# Test GSkymap #
-#==============#
-def test_skymap():
-    """
-    Test GSkymap interface.
-    """
-    # Create HEALPix skymap
-    pixels = GSkymap("HPX", "GAL", 4, "RING", 2)
-    for i, pixel in enumerate(pixels):
-        pixels[i]   = i+1.0
-        pixels[i:1] = i+1.0 + 1000.0
-    pixels.save("test_python_skymap_hpx_v1.fits", True)
-    
-    # Load HEALPix skymap
-    pixels = GSkymap()
-    pixels.load("data/lat/ltcube.fits.gz ")
-
-    # Dump skymap
-    #print pixels
-
-    # Control pix2dir / dir2pix
-    for i in range(pixels.npix()):
-        dir  = pixels.pix2dir(i)
-        ipix = pixels.dir2pix(dir)
-        if (i != ipix):
-            print "GSkymap Trouble with pixel "+str(i)+" ("+str(ipix)+ \
-                  "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
-
-    # Control SkyDir coordinate transformation for all pixels
-    for i in range(pixels.npix()):
-        dir     = pixels.pix2dir(i)
-        dir_new = GSkyDir()
-        dir_new.lb(dir.l(),dir.b())
-        dra  = abs(dir.ra()  - dir_new.ra())
-        if (dra >= 5.0):
-            dra -= 2.0*pi
-        ddec = abs(dir.dec() - dir_new.dec())
-        if (dra > 1.0e-9 or ddec > 1.0e-9):
-            print "GSkyDir Trouble with pixel "+str(i)+" ("+str(dra)+ \
-                  ","+str(ddec)+")"
-    
-    # Save HEALPix skymap
-    try:
-        pixels.save("test_python_skymap_hpx_v2.fits", True)
-        pixels.save("test_python_skymap_hpx_v2.fits")
-        print "ERROR: FITS file overwritten!"
-    except RuntimeError:
-        pass
-    pixels.save("test_python_skymap_hpx_v2.fits", True)
-
-    # Load again HEALPix skymap
-    pixels = GSkymap("data/lat/ltcube.fits.gz ")
-
-    # Dump skymap
-    #print pixels
-
-
 #===================#
 # Test optimisation #
 #===================#
@@ -288,10 +354,29 @@ if __name__ == '__main__':
     """
     Perform testing.
     """
-#    test_fits()
+    # Dump result
+    print "======================================="
+    print "Start python interface testing"
+    print "======================================="
+
+    # Initialise success counter
+    success = 0
+    
+    # Perform tests
+    try:
+        success += test_fits()
+    except Exception, e:
+        print e
+    try:
+        success += test_skymap()
+    except Exception, e:
+        print e
 #    test_node_array()
 #    test_lat_response()
 #    test_lat_observation()
-#    test_skymap()
-    test_optimise()
-    
+#    test_optimise()
+
+    # Dump result
+    print "======================================="
+    print str(success)+" out of 2 tests succeeded."
+    print "======================================="
