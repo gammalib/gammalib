@@ -22,6 +22,11 @@ if WITH_INST_LAT
   test_LAT_LDADD = $(top_srcdir)/src/libgamma.la
 endif
 
+# Optional python bindings
+if ENABLE_PYTHON_BINDING
+  TEST_PYTHON_IF = test_python.py
+endif
+
 # Include directories
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/src \
@@ -29,7 +34,7 @@ INCLUDES = -I$(top_srcdir)/include \
            $(INCL_CTA) \
            $(INCL_LAT)
 
-# Test programs
+# Test programs (those will be compiled)
 check_PROGRAMS = test_GVector \
                  test_GMatrix \
                  test_GSymMatrix \
@@ -45,7 +50,7 @@ check_PROGRAMS = test_GVector \
 # Set test environment (needed for linking with cfitsio)
 TESTS_ENVIRONMENT = LD_LIBRARY_PATH=/usr/local/lib
 
-# Tests
+# Tests (these are the tests to be executed)
 TESTS = test_GVector \
         test_GMatrix \
         test_GSymMatrix \
@@ -56,7 +61,8 @@ TESTS = test_GVector \
         test_GApplication \
         test_GModel \
         test_GSky \
-        $(INST_CTA) $(INST_LAT)
+        $(INST_CTA) $(INST_LAT) \
+        $(TEST_PYTHON_IF)
 
 # Standard test sources and links
 test_GVector_SOURCES = test_GVector.cpp
