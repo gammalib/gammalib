@@ -161,13 +161,13 @@ public:
     // FITS file open error
     class fits_open_error : public GExceptionHandler {
     public:
-        fits_open_error(std::string origin, std::string filename, int status = 0);
+        fits_open_error(std::string origin, std::string filename, int status);
     };
 
     // FITS file exists already
     class fits_file_exist : public GExceptionHandler {
     public:
-        fits_file_exist(std::string origin, std::string filename, int status);
+        fits_file_exist(std::string origin, std::string filename, int status = 0);
     };
 
     // FITS file has already been opened
