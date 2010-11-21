@@ -161,7 +161,7 @@ public:
     // FITS file open error
     class fits_open_error : public GExceptionHandler {
     public:
-        fits_open_error(std::string origin, std::string filename, int status);
+        fits_open_error(std::string origin, std::string filename, int status = 0);
     };
 
     // FITS file exists already
