@@ -223,8 +223,9 @@ void GFits::open(const std::string& filename)
     if (m_fitsfile != NULL)
         throw GException::fits_already_opened(G_OPEN, m_filename);
 
-    // Initialise FITS file as readwrite
+    // Initialise FITS file as readwrite and non created
     m_readwrite = true;
+    m_created   = false;
 
     // Try opening FITS file with readwrite access
     int status = 0;
@@ -242,6 +243,7 @@ void GFits::open(const std::string& filename)
         status      = 0;
         status      = __ffinit(FHANDLE(m_fitsfile), filename.c_str(), &status);
         m_readwrite = true;
+        m_created   = true;
     }
 
     // Throw any other error
@@ -305,18 +307,29 @@ void GFits::open(const std::string& filename)
 /***********************************************************************//**
  * @brief Saves FITS file
  *
+ * @param[in] clobber Overwrite existing FITS file (true/false).
+ *
+ * @exception GException::fits_file_exist
+ *            Attemting to overwrite an existing file without having specified
+ *            clobber=true.
+ *
  * Saves all HDUs to the FITS file by looping over the HDU's save() method.
  * Saving does not mean that the FITS file is closed. Call the close()
  * method if explicit closing is needed (de-allocation also closes the file).
  * In the special case that no first HDU exists an empty primary image is
  * created.
  ***************************************************************************/
-void GFits::save(void)
+void GFits::save(bool clobber)
 {
     // Debug header
     #if DEBUG
     std::cout << "GFits::save (size=" << size() << ") -->" << std::endl;
     #endif
+
+    // If we attempt to save an existing file without overwriting permission
+    // then throw an error
+    if (!m_created && !clobber)
+        throw GException::fits_file_exist(G_SAVE, m_filename);
 
     // If no HDUs exist then save an empty primary image.
     if (size() == 0) {
@@ -348,19 +361,12 @@ void GFits::save(void)
 /***********************************************************************//**
  * @brief Saves to specified FITS file
  *
- * @param[in] filename Name of file into which should be saved.
+ * @param[in] filename Filename.
  * @param[in] clobber Overwrite existing FITS file (true/false).
  *
  * @exception GException::fits_file_exist
- *            File specified by "filename" exists already.
- *            To overwrite an existing file set "clobber=true".
- * @exception GException::fits_error
- *            Unable to delete exiting FITS file.
- * @exception GException::fits_open_error
- *            Unable to create new FITS file.
- *
- * @todo This method fails if a corrupted FITS file with the same name
- * exists so far. Better
+ *            Specified file exists already. Overwriting requires
+ *            clobber=true.
  ***************************************************************************/
 void GFits::saveto(const std::string& filename, bool clobber)
 {
@@ -370,9 +376,13 @@ void GFits::saveto(const std::string& filename, bool clobber)
               << " (size=" << size() << ") -->" << std::endl;
     #endif
 
-    // If overwriting has been specified then remove any existing file now
+    // If overwriting has been specified then remove any existing file ...
     if (clobber)
         remove(filename.c_str());
+
+    // ... otherwise, if file exists then throw an exception
+    else if (file_exists(filename))
+        throw GException::fits_file_exist(G_SAVETO, filename);
 
     // Create or open FITS file
     GFits new_fits;
@@ -693,6 +703,11 @@ std::string GFits::print(void) const
 
     // Append file information
     result.append(parformat("Filename")+m_filename+"\n");
+    result.append(parformat("History"));
+    if (m_created)
+        result.append(" new file\n");
+    else
+        result.append(" existing file\n");
     result.append(parformat("Mode"));
     if (m_readwrite)
         result.append("read/write\n");
@@ -724,7 +739,8 @@ void GFits::init_members(void)
     m_hdu.clear();
     m_filename.clear();
     m_fitsfile  = NULL;
-    m_readwrite = false;
+    m_readwrite = true;
+    m_created   = true;
 
     // Return
     return;
@@ -747,7 +763,8 @@ void GFits::copy_members(const GFits& fits)
     // Reset FITS file attributes
     m_filename.clear();
     m_fitsfile  = NULL;
-    m_readwrite = false;
+    m_readwrite = true;
+    m_created   = true;
 
     // Copy HDUs
     m_hdu.clear();
