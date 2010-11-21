@@ -59,7 +59,7 @@ public:
     void        clear(void);
     int         size(void) const;
     void        open(const std::string& filename);
-    void        save(void);
+    void        save(bool clobber = false);
     void        saveto(const std::string& filename, bool clobber = false);
     void        close(void);
     void        append(GFitsHDU* hdu);
@@ -96,6 +96,7 @@ private:
     std::string            m_filename;   //!< FITS file name
     void*                  m_fitsfile;   //!< FITS file pointer
     bool                   m_readwrite;  //!< FITS file is readwrite (true/false)
+    bool                   m_created;    //!< FITS file has been created (true/false)
 };
 
 #endif /* GFITS_HPP */
