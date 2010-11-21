@@ -171,7 +171,7 @@ void test_create(void)
         fits.append(&table);
 
         // Save FITS file
-        fits.save();
+        fits.save(true);
     }
     catch (std::exception &e) {
         std::cout << std::endl
@@ -182,7 +182,7 @@ void test_create(void)
     }
     std::cout << ".";
 
-    // Crate binary table (saveto variant)
+    // Create binary table (saveto variant)
     try {
         // Allocate FITS file
         GFits fits;
