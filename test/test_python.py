@@ -106,7 +106,7 @@ def test_fits():
 
     # Set ASCII table
     tbl_ascii = GFitsAsciiTable()
-    tbl_ascii.append_column(col1) # Need to implement ?/!
+    #tbl_ascii.append_column(col1) # Need to implement ?/!
     #tbl_ascii.append_column(col2) # Need to implement ?/!
     tbl_ascii.append_column(col3)
     tbl_ascii.append_column(col4)
@@ -158,9 +158,6 @@ def test_fits():
 
     # Close FITS file
     fits.close()
-
-    # Success
-    return 1
 
 
 #==============#
@@ -218,14 +215,14 @@ def test_skymap():
             print "GSkyDir Trouble with pixel "+str(i)+" ("+str(dra)+ \
                   ","+str(ddec)+")"
     
-    # Save HEALPix skymap
+    # Save HEALPix skymap twice. The second saving should fail.
     try:
         pixels.save(file2, True)
         pixels.save(file2)
-        print "*** TEST ERROR: FITS file overwritten!"
-        return 0
     except RuntimeError:
         pass
+    else:
+        raise RuntimeError("*** TEST ERROR: FITS file overwritten!")
     pixels.save(file2, True)
 
     # Load again HEALPix skymap
@@ -233,9 +230,6 @@ def test_skymap():
 
     # Dump skymap
     #print pixels
-    
-    # Success
-    return 1
 
 
 #=================#
@@ -355,28 +349,19 @@ if __name__ == '__main__':
     Perform testing.
     """
     # Dump result
-    print "======================================="
-    print "Start python interface testing"
-    print "======================================="
+    print
+    print "****************************"
+    print "* Python interface testing *"
+    print "****************************"
 
     # Initialise success counter
+    tests   = 0
     success = 0
     
     # Perform tests
-    try:
-        success += test_fits()
-    except Exception, e:
-        print e
-    try:
-        success += test_skymap()
-    except Exception, e:
-        print e
+    test_fits()
+    test_skymap()
 #    test_node_array()
 #    test_lat_response()
 #    test_lat_observation()
 #    test_optimise()
-
-    # Dump result
-    print "======================================="
-    print str(success)+" out of 2 tests succeeded."
-    print "======================================="
