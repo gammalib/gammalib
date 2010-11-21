@@ -64,7 +64,7 @@
 #include "GFitsTableLongLongCol.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GFitsTableDoubleCol.hpp"
-#include "GFitsTableCFLoatCol.hpp"
+#include "GFitsTableCFloatCol.hpp"
 #include "GFitsTableCDoubleCol.hpp"
 
 /* __ XML module _________________________________________________________ */
