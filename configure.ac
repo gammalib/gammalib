@@ -341,12 +341,14 @@ AC_CONFIG_FILES([Makefile
                  src/obs/Makefile
                  src/model/Makefile
                  src/app/Makefile
-                 inst/Makefile
                  include/Makefile
                  test/Makefile
                  pyext/Makefile
                  pyext/setup.py
                  gammalib.pc])
+if test "x$with_inst" = "xyes"; then
+  AC_CONFIG_FILES([inst/Makefile])
+fi
 if test "x$with_cta" = "xyes"; then
   AC_CONFIG_FILES([inst/cta/Makefile])
 fi
