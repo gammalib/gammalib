@@ -4,7 +4,7 @@
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/src \
            -I$(top_srcdir)/src/support \
-            -I$(top_srcdir)/inst/lat/include
+           -I$(top_srcdir)/inst/lat/include
 
 # Define sources for this directory
 sources = src/GLATObservation.cpp \
@@ -34,16 +34,10 @@ pkginclude_HEADERS = include/GLATObservation.hpp \
                      include/GLATResponseTable.hpp \
                      include/GLATLib.hpp
 
+# Set sub directories
+SUBDIRS = . pyext
+
 # Build libtool library
 noinst_LTLIBRARIES = liblat.la
 liblat_la_SOURCES = $(sources)
 liblat_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
-
-# Programs to run for make check
-#check_PROGRAMS = test_LAT
-
-# Tests
-#TESTS = test_LAT
-
-#test_LAT_SOURCES = test/test_LAT.cpp
-#test_LAT_LDADD = ../../src/libgamma.la

@@ -31,6 +31,9 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAResponse.hpp \
                      include/GCTALib.hpp
 
+# Set sub directories
+SUBDIRS = . pyext
+
 # Build libtool library
 noinst_LTLIBRARIES = libcta.la
 libcta_la_SOURCES = $(sources)
