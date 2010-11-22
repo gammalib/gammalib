@@ -23,9 +23,15 @@ if WITH_INST_LAT
 endif
 
 # Optional python bindings
+# TODO: The build directory is hard wired for the moment. This has to be changed!!!
+if HAVE_SWIG
+if HAVE_PYTHON
 if ENABLE_PYTHON_BINDING
-  TEST_PYTHON_IF = test_python.py
-endif
+  TEST_PYTHON_SCRIPT = test_python.py
+  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext/build/lib.linux-i686-2.5:$PYTHONPATH
+endif # ENABLE_PYTHON_BINDING
+endif # HAVE_PYTHON
+endif # HAVE_SWIG
 
 # Include directories
 INCLUDES = -I$(top_srcdir)/include \
@@ -48,7 +54,8 @@ check_PROGRAMS = test_GVector \
                  $(INST_CTA) $(INST_LAT)
 
 # Set test environment (needed for linking with cfitsio)
-TESTS_ENVIRONMENT = LD_LIBRARY_PATH=/usr/local/lib
+# TODO: The cfitsio directory is harwdired. This has to be changed!!!
+TESTS_ENVIRONMENT = LD_LIBRARY_PATH=/usr/local/lib $(TEST_PYTHON_ENV)
 
 # Tests (these are the tests to be executed)
 TESTS = test_GVector \
@@ -62,7 +69,7 @@ TESTS = test_GVector \
         test_GModel \
         test_GSky \
         $(INST_CTA) $(INST_LAT) \
-        $(TEST_PYTHON_IF)
+        $(TEST_PYTHON_SCRIPT)
 
 # Standard test sources and links
 test_GVector_SOURCES = test_GVector.cpp
