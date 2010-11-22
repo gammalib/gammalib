@@ -51,22 +51,14 @@ public:
     unsigned char __getitem__(int GFitsTableColInx[]) {
         if (GFitsTableColInx[0] == 1)
             return (*self)(GFitsTableColInx[1]);
-        else if (GFitsTableColInx[0] == 2)
+        else
             return (*self)(GFitsTableColInx[1], GFitsTableColInx[2]);
-        else {
-            PyErr_SetString(PyExc_ValueError,"Too many arguments in tuple");
-            return NULL;
-        }
     }
     void __setitem__(int GFitsTableColInx[], unsigned char value) {
         if (GFitsTableColInx[0] == 1)
             (*self)(GFitsTableColInx[1]) = value;
-        else if (GFitsTableColInx[0] == 2)
+        else
             (*self)(GFitsTableColInx[1], GFitsTableColInx[2]) = value;
-        else {
-            PyErr_SetString(PyExc_ValueError,"Too many arguments in tuple");
-            return;
-        }
     }
     GFitsTableByteCol copy() {
         return (*self);

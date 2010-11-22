@@ -47,29 +47,24 @@ public:
 
 /***********************************************************************//**
  * @brief GFitsTableCFloatCol class extension
+ *
+ * @todo Implement __getitem__ method. This probably means that a real
+ * cfloat class is needed.
  ***************************************************************************/
 %extend GFitsTableCFloatCol {
 /*
     GFits::cfloat __getitem__(int GFitsTableColInx[]) {
         if (GFitsTableColInx[0] == 1)
             return (*self)(GFitsTableColInx[1]);
-        else if (GFitsTableColInx[0] == 2)
+        else
             return (*self)(GFitsTableColInx[1], GFitsTableColInx[2]);
-        else {
-            PyErr_SetString(PyExc_ValueError,"Too many arguments in tuple");
-            return NULL;
-        }
     }
 */
     void __setitem__(int GFitsTableColInx[], GFits::cfloat value) {
         if (GFitsTableColInx[0] == 1)
             (*self)(GFitsTableColInx[1]) = value;
-        else if (GFitsTableColInx[0] == 2)
+        else
             (*self)(GFitsTableColInx[1], GFitsTableColInx[2]) = value;
-        else {
-            PyErr_SetString(PyExc_ValueError,"Too many arguments in tuple");
-            return;
-        }
     }
     GFitsTableCFloatCol copy() {
         return (*self);
