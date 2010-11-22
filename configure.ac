@@ -293,13 +293,24 @@ fi
 dnl =========================================
 dnl Checks for instrument specific interfaces
 dnl =========================================
+# Checks for the existence of instrument specific interfaces
+AC_CHECK_FILE([inst/Makefile.am],
+              [with_inst=yes],
+              [with_inst=no])
+AM_CONDITIONAL([WITH_INST], [test "x$with_inst" = "xyes"])
+
 # Checks for CTA interface
 AC_ARG_WITH([cta],
             [AS_HELP_STRING([--with-cta],
                             [compile in CTA specific interface])],
             [],
             [with_cta=yes])
-AM_CONDITIONAL(WITH_INST_CTA, test "x$with_cta" = "xyes")
+if test "x$with_cta" = "xyes"; then
+  AC_CHECK_FILE([inst/cta/Makefile.am],
+                [with_cta=yes],
+                [with_cta=no])
+  AM_CONDITIONAL(WITH_INST_CTA, test "x$with_cta" = "xyes")
+fi
 
 # Checks for LAT interface
 AC_ARG_WITH([lat],
@@ -307,11 +318,12 @@ AC_ARG_WITH([lat],
                             [compile in LAT specific interface])],
             [],
             [with_lat=yes])
-AM_CONDITIONAL(WITH_INST_LAT, test "x$with_lat" = "xyes")
-
-
-
-#AC_SUBST(LIB)
+if test "x$with_lat" = "xyes"; then
+  AC_CHECK_FILE([inst/lat/Makefile.am],
+                [with_lat=yes],
+                [with_lat=no])
+  AM_CONDITIONAL(WITH_INST_LAT, test "x$with_lat" = "xyes")
+fi
 
 
 dnl ======================================
@@ -335,10 +347,10 @@ AC_CONFIG_FILES([Makefile
                  pyext/Makefile
                  pyext/setup.py
                  gammalib.pc])
-if test "x$with_cta" = "xyes"; then
-    AC_CONFIG_FILES([inst/cta/Makefile])
-fi
-if test "x$with_lat" = "xyes"; then
-    AC_CONFIG_FILES([inst/lat/Makefile])
-fi
+AM_COND_IF([WITH_INST],
+           [AC_CONFIG_FILES([inst/Makefile])
+            AM_COND_IF([WITH_INST_CTA],
+                       [AC_CONFIG_FILES([inst/cta/Makefile])])
+            AM_COND_IF([WITH_INST_LAT],
+                       [AC_CONFIG_FILES([inst/lat/Makefile])])])
 AC_OUTPUT
