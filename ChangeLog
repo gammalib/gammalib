@@ -1,3 +1,11 @@
+2010-11-23  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+        * Version 0.4.2 released
+        ========================
+
+        Tag sources with GammaLib-00-04-02
+        Enhance FITS interface
+
 2010-11-15  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.4.1 released
