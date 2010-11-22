@@ -115,7 +115,7 @@
 #include "GModelTemporalConst.i"
 
 /* __ CTA ________________________________________________________________ */
-#include "GCTAObservation.i"
+//#include "GCTAObservation.i"
 
 
 
