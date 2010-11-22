@@ -2,10 +2,10 @@
 
 # Detect configuration
 if WITH_INST_CTA
-  INST_CTA = cta
+INST_CTA = cta
 endif
 if WITH_INST_LAT
-  INST_LAT = lat
+INST_LAT = lat
 endif
 
 # Set sub directories
