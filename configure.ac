@@ -221,6 +221,74 @@ if test "x$with_readline" = "xyes"; then
 fi
 AM_CONDITIONAL(WITH_READLINE, test "x$with_readline" = "xyes")
 
+# Older readline.h's declared readline() without any arguments and outside of 'extern "C"', which freaks out C++
+if test "$with_readline" != no; then
+  AC_LANG_PUSH(C++)
+  AC_MSG_CHECKING([if readline.h needs extern "C"])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <stdio.h>
+#include <readline/readline.h>
+                                     ]],[[
+  char*x=readline("test"); 
+  return (x?0:1);
+                                     ]])],
+                    [AC_MSG_RESULT(no)], 
+                    [AC_DEFINE(READLINE_H_NEEDS_EXTERN_C, 1, [Define to 1 if readline/readline.h needs extern "C"]) 
+                     AC_MSG_RESULT(yes)])
+  AC_LANG_POP(C++)
+fi
+
+# Slightly newer but still broken readline.h's use extern "C" but don't declare arguments as const
+if test "$with_readline" != no; then
+  AC_LANG_PUSH(C++)
+  AC_MSG_CHECKING([if readline.h lacks 'const' in its declarations])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <stdio.h>
+#if READLINE_H_NEEDS_EXTERN_C
+extern "C" {
+#endif
+#include <readline/readline.h>
+#if READLINE_H_NEEDS_EXTERN_C
+} // terminate extern "C"
+#endif
+                                     ]],[[
+  const char* prompt = "abc";
+  char*x = readline(prompt);
+                                     ]])],
+                     [AC_MSG_RESULT(no)],
+                     [AC_DEFINE(READLINE_H_USES_NO_CONST, 1, [Define to 1 if readline/readline.h doesn't properly declare arguments to be const])
+                      AC_MSG_RESULT(yes)])
+  AC_LANG_POP(C++)
+fi
+
+# Some other broken readline.h's use extern "C" and declare arguments for most everything, except for the callback functions
+if test "$with_readline" != no; then
+  AC_LANG_PUSH(C++)
+  AC_MSG_CHECKING([if readline.h lacks types in its declaration of callbacks])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <stdio.h>
+#if READLINE_H_NEEDS_EXTERN_C
+extern "C" {
+#endif
+#include <readline/readline.h>
+#if READLINE_H_NEEDS_EXTERN_C
+} // terminate extern "C"
+#endif
+
+#ifdef READLINE_H_USES_NO_CONST
+char* dummy_completion(char*, int) { return 0; }
+#else
+char* dummy_completion(const char*, int) { return 0; }
+#endif
+                                     ]],[[
+  rl_completion_entry_function = dummy_completion;
+                                     ]])],
+                     [AC_MSG_RESULT(no)],
+                     [AC_DEFINE(READLINE_H_LACKS_TYPES_FOR_CALLBACKS, 1, [Define to 1 if readline/readline.h lacks proper declarations for callbacks])
+                      AC_MSG_RESULT(yes)])
+  AC_LANG_POP(C++)
+fi
+
 
 dnl =========================================
 dnl Checks for instrument specific interfaces
