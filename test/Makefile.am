@@ -23,12 +23,11 @@ if WITH_INST_LAT
 endif
 
 # Optional python bindings
-# TODO: The build directory is hard wired for the moment. This has to be changed!!!
 if HAVE_SWIG
 if HAVE_PYTHON
 if ENABLE_PYTHON_BINDING
   TEST_PYTHON_SCRIPT = test_python.py
-  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext/build/lib.linux-i686-2.5:$PYTHONPATH
+  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext/build:$PYTHONPATH
 endif # ENABLE_PYTHON_BINDING
 endif # HAVE_PYTHON
 endif # HAVE_SWIG
