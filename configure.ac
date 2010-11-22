@@ -112,12 +112,44 @@ AM_CONDITIONAL(WITH_INST_LAT, test "x$with_lat" = "xyes")
 #     fi
 #    ], -lncurses)])
 
-dnl ====================
-dnl Checks for libraries
-dnl ====================
-# Checks for cfitsio
-AC_SEARCH_LIBS(ffpss, cfitsio,
-    AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available]), ,[-lm])
+
+dnl ==========================
+dnl Checks for cfitsio library
+dnl ==========================
+#AC_SEARCH_LIBS(ffpss, cfitsio,
+#    AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available]), ,[-lm])
+# Check if we want to use cfitsio
+CFITSIO="yes"
+AC_ARG_WITH([cfitsio],
+	        AC_HELP_STRING([--with-cfitsio],
+		                   [Use CFITSIO]),
+	        [CFITSIO=$withval])
+AC_ARG_WITH([cfitsio-lib-dir],
+	        AC_HELP_STRING([--with-cfitsio-lib-dir],
+		                   [CFITSIO library directory [[/usr/(local/)lib[64]]]]),
+	        [cfitsio_lib_dir=$withval])
+if test "x$CFITSIO" = "xyes"; then
+    AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available])
+fi
+
+# If cfitsio is requested then add cfitsio library path to LDFLAGS
+if test "x$CFITSIO" = "xyes"; then
+  if test "x$cfitsio_lib_dir" != "x"; then
+    test -f $cfitsio_lib_dir/libcfitsio.a -o -f $cfitsio_lib_dir/libcfitsio.so -o -f $cfitsio_lib_dir/libcfitsio.dylib && CFITSIO_LIBDIR=$cfitsio_lib_dir
+  else
+    for i in /usr/local/lib /usr/local/lib64 /usr/lib /usr/lib64 ; do
+      test -f $i/libcfitsio.a -o -f $i/libcfitsio.so -o -f $i/libcfitsio.dylib && CFITSIO_LIBDIR=$i
+    done
+  fi
+  if test -z "$CFITSIO_LIBDIR"; then
+    if test "x$cfitsio_lib_dir" != "x";then
+      AC_MSG_ERROR(Cannot find CFITSIO library under $cfitsio_lib_dir)
+    else
+      AC_MSG_ERROR(Cannot find CFITSIO library.  Use --with-cfitsio-lib-dir= to specify non-default path.)
+    fi
+  fi
+  LDFLAGS="$LDFLAGS -L$CFITSIO_LIBDIR"
+fi
 
 
 dnl =======================
