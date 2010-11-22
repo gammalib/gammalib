@@ -3,8 +3,13 @@
 # Include M4 macros
 ACLOCAL_AMFLAGS = -I m4
 
+# Detect configuration
+if WITH_INST
+INST_DIR = inst
+endif
+
 # Subdirectories
-SUBDIRS = include inst src test pyext
+SUBDIRS = include $(INST_DIR) src test pyext
 
 # Extra files to be distributed in the tar file
 EXTRA_DIST = autogen.sh \
