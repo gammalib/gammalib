@@ -42,114 +42,10 @@ dnl AC_ARG_PROGRAM
 AC_PROG_MAKE_SET
 
 
-dnl ===================
-dnl Checks for programs
-dnl ===================
-AC_PROG_CXX
-AC_PROG_INSTALL
-AC_PROG_LIBTOOL
-
-# Checks for SWIG
-AC_PATH_PROG([SWIG], [swig])
-AM_CONDITIONAL(HAVE_SWIG, test "$SWIG")
-
-# Checks for Python
-AM_PATH_PYTHON([2.2],
-	       [],
-	       [AC_MSG_WARN([Python not found. Python is required to build python binding. Python can be obtained from http://www.python.org])])
-AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
-
-AC_ARG_ENABLE([python-binding],
-	      AS_HELP_STRING([--enable-python-binding],
-			     [build python binding (default=yes)]),
-			     [ac_enable_python_binding=no],
-			     [ac_enable_python_binding=yes])
-if test "x$ac_enable_python_binding" = "xyes"
-then
-    if test ! "$SWIG" -a ! "$PYTHON"
-    then
-	AC_MSG_WARN([Python binding for gammalib cannot be built. Ensure that SWIG and Python packages are available.])
-    fi
-else
-    AC_MSG_NOTICE([Python binding for gammalib will not be built.])
-    AC_MSG_NOTICE([Enable Python binding module building with --enable-python-binding])
-fi
-AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes")
-
-# Checks for CTA interface
-AC_ARG_WITH([cta],
-            [AS_HELP_STRING([--with-cta],
-                            [compile in CTA specific interface])],
-            [],
-            [with_cta=yes])
-AM_CONDITIONAL(WITH_INST_CTA, test "x$with_cta" = "xyes")
-
-# Checks for LAT interface
-AC_ARG_WITH([lat],
-            [AS_HELP_STRING([--with-lat],
-                            [compile in LAT specific interface])],
-            [],
-            [with_lat=yes])
-AM_CONDITIONAL(WITH_INST_LAT, test "x$with_lat" = "xyes")
-
-# Checks for readline
-#AC_ARG_WITH([readline],
-#            [AS_HELP_STRING([--with-readline],
-#            [support fancy command line editing @<:@default=check@:>@])],
-#            [],
-#            [with_readline=check])
-#	  
-#LIBREADLINE=
-#AS_IF([test "x$with_readline" != xno],
-#  [AC_CHECK_LIB([readline], [main],
-#    [AC_SUBST([LIBREADLINE], ["-lreadline -lncurses"])
-#     AC_DEFINE([HAVE_LIBREADLINE], [1],
-#               [Define if you have libreadline])
-#    ],
-#    [if test "x$with_readline" != xcheck; then
-#       AC_MSG_FAILURE(
-#         [--with-readline was given, but test for readline failed])
-#     fi
-#    ], -lncurses)])
-
-
-dnl ==========================
-dnl Checks for cfitsio library
-dnl ==========================
-#AC_SEARCH_LIBS(ffpss, cfitsio,
-#    AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available]), ,[-lm])
-# Check if we want to use cfitsio
-CFITSIO="yes"
-AC_ARG_WITH([cfitsio],
-	        AC_HELP_STRING([--with-cfitsio],
-		                   [Use CFITSIO]),
-	        [CFITSIO=$withval])
-AC_ARG_WITH([cfitsio-lib-dir],
-	        AC_HELP_STRING([--with-cfitsio-lib-dir],
-		                   [CFITSIO library directory [[/usr/(local/)lib[64]]]]),
-	        [cfitsio_lib_dir=$withval])
-if test "x$CFITSIO" = "xyes"; then
-    AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available])
-fi
-
-# If cfitsio is requested then add cfitsio library path to LDFLAGS
-if test "x$CFITSIO" = "xyes"; then
-  if test "x$cfitsio_lib_dir" != "x"; then
-    test -f $cfitsio_lib_dir/libcfitsio.a -o -f $cfitsio_lib_dir/libcfitsio.so -o -f $cfitsio_lib_dir/libcfitsio.dylib && CFITSIO_LIBDIR=$cfitsio_lib_dir
-  else
-    for i in /usr/local/lib /usr/local/lib64 /usr/lib /usr/lib64 ; do
-      test -f $i/libcfitsio.a -o -f $i/libcfitsio.so -o -f $i/libcfitsio.dylib && CFITSIO_LIBDIR=$i
-    done
-  fi
-  if test -z "$CFITSIO_LIBDIR"; then
-    if test "x$cfitsio_lib_dir" != "x";then
-      AC_MSG_ERROR(Cannot find CFITSIO library under $cfitsio_lib_dir)
-    else
-      AC_MSG_ERROR(Cannot find CFITSIO library.  Use --with-cfitsio-lib-dir= to specify non-default path.)
-    fi
-  fi
-  LDFLAGS="$LDFLAGS -L$CFITSIO_LIBDIR"
-fi
+dnl =========================
+dnl Check for system services
+dnl =========================
+AC_CANONICAL_HOST
 
 
 dnl =======================
@@ -173,15 +69,27 @@ dnl Checks for library functions
 dnl ============================
 
 
-dnl =========================
-dnl Check for system services
-dnl =========================
-AC_CANONICAL_HOST
+dnl ===================
+dnl Checks for programs
+dnl ===================
+AC_PROG_CXX
+AC_PROG_INSTALL
+AC_PROG_LIBTOOL
+
+# Checks for SWIG (HAVE_SWIG)
+AC_PATH_PROG([SWIG], [swig])
+AM_CONDITIONAL(HAVE_SWIG, test "$SWIG")
+
+# Checks for Python (HAVE_PYTHON)
+AM_PATH_PYTHON([2.2],
+               [],
+               [AC_MSG_WARN([Python not found. Python is required to build python binding. Python can be obtained from http://www.python.org])])
+AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
 
 
-dnl =====================
-dnl Range checking option
-dnl =====================
+dnl =====================================
+dnl Range checking option (G_RANGE_CHECK)
+dnl =====================================
 RANGE_CHECK="yes"
 AC_ARG_ENABLE(range_check,
              [  --enable-range-check    performs index range checking (default=yes)],
@@ -191,9 +99,9 @@ if test "x$RANGE_CHECK" = "xyes"; then
 fi
 
 
-dnl ===================
-dnl Small memory option
-dnl ===================
+dnl ====================================
+dnl Small memory option (G_SMALL_MEMORY)
+dnl ====================================
 SMALL_MEMORY="yes"
 AC_ARG_ENABLE(small_memory,
              [  --enable-small-memory   optimizes code for small memory (default=yes)],
@@ -203,8 +111,143 @@ if test "x$SMALL_MEMORY" = "xyes"; then
 fi
 
 
+dnl =============================================================================
+dnl Checks for python bindings. This is only set if SWIG and Python ar available.
+dnl =============================================================================
+AC_ARG_ENABLE([python-binding],
+              AS_HELP_STRING([--enable-python-binding],
+                             [build python binding (default=yes)]),
+              [ac_enable_python_binding=no],
+              [ac_enable_python_binding=yes])
+if test "x$ac_enable_python_binding" = "xyes"; then
+  if test ! "$SWIG" -a ! "$PYTHON"; then
+    AC_MSG_WARN([Python binding for gammalib cannot be built. Ensure that SWIG and Python packages are available.])
+  fi
+else
+  AC_MSG_NOTICE([Python binding for gammalib will not be built.])
+  AC_MSG_NOTICE([Enable Python binding module building with --enable-python-binding])
+fi
+AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes")
+
+
+dnl ==========================
+dnl Checks for cfitsio library
+dnl ==========================
+#AC_SEARCH_LIBS(ffpss, cfitsio,
+#               AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available]), ,[-lm])
+# Check if we want to use cfitsio
+AC_ARG_WITH([cfitsio],
+            [AS_HELP_STRING([--with-cfitsio],
+                            [Use CFITSIO library (needed to support FITS files)])],
+            [],
+            [with_cfitsio=yes])
+AC_ARG_WITH([cfitsio-lib-dir],
+            AC_HELP_STRING([--with-cfitsio-lib-dir],
+                           [CFITSIO library directory [[/usr/(local/)lib(64)]]]),
+            [cfitsio_lib_dir=$withval])
+
+# If cfitsio is requested then add cfitsio library path to LDFLAGS
+if test "x$with_cfitsio" = "xyes"; then
+  if test "x$cfitsio_lib_dir" != "x"; then
+    test -f $cfitsio_lib_dir/libcfitsio.a -o -f $cfitsio_lib_dir/libcfitsio.so -o -f $cfitsio_lib_dir/libcfitsio.dylib && LIBDIR_CFITSIO=$cfitsio_lib_dir
+  else
+    for i in /usr/local/lib /usr/local/lib64 /usr/lib /usr/lib64 ; do
+      test -f $i/libcfitsio.a -o -f $i/libcfitsio.so -o -f $i/libcfitsio.dylib && LIBDIR_CFITSIO=$i
+    done
+  fi
+  if test -z "$LIBDIR_CFITSIO"; then
+    if test "x$cfitsio_lib_dir" != "x";then
+      AC_MSG_ERROR(Cannot find CFITSIO library under $cfitsio_lib_dir)
+    else
+      AC_MSG_ERROR(Cannot find CFITSIO library. Use --with-cfitsio-lib-dir= to specify non-default path.)
+    fi
+  fi
+  LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
+  AC_SUBST(LIBDIR_CFITSIO)
+fi
+
+# Check for cfitsio library
+if test "x$with_cfitsio" = "xyes"; then
+  AC_CHECK_LIB([cfitsio], [ffpss],
+               [LIBS="${LIBS} -lcfitsio -lm"
+                AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])],
+               [AC_MSG_FAILURE([--with-cfitsio was given, but test for cfitsio failed])],
+               [-lm])
+fi
+AM_CONDITIONAL(WITH_CFITSIO, test "x$with_cfitsio" = "xyes")
+
+
+dnl ===========================
+dnl Checks for readline library
+dnl ===========================
+# Checks for readline
+AC_ARG_WITH([readline],
+            [AS_HELP_STRING([--with-readline],
+            [support fancy command line editing @<:@default=check@:>@])],
+            [],
+            [with_readline=yes])
+AC_ARG_WITH([readline-lib-dir],
+            AC_HELP_STRING([--with-readline-lib-dir],
+                           [readline library directory [[/usr/(local/)lib(64)]]]),
+            [readline_lib_dir=$withval])
+
+# If readline is requested then add readline library path to LDFLAGS
+if test "x$with_readline" = "xyes"; then
+  if test "x$readline_lib_dir" != "x"; then
+    test -f $readline_lib_dir/libreadline.a -o -f $readline_lib_dir/libreadline.so -o -f $readline_lib_dir/libreadline.dylib && LIBDIR_READLINE=$readline_lib_dir
+  else
+    for i in /usr/local/lib /usr/local/lib64 /usr/lib /usr/lib64 ; do
+      test -f $i/libreadline.a -o -f $i/libreadline.so -o -f $i/libreadline.dylib && LIBDIR_READLINE=$i
+    done
+  fi
+  if test -z "$LIBDIR_READLINE"; then
+    if test "x$readline_lib_dir" != "x";then
+      AC_MSG_ERROR(Cannot find readline library under $readline_lib_dir)
+    else
+      AC_MSG_ERROR(Cannot find readline library. Use --with-readline-lib-dir= to specify non-default path.)
+    fi
+  fi
+  LDFLAGS="$LDFLAGS -L$LIBDIR_READLINE"
+  AC_SUBST(LIBDIR_READLINE)
+fi
+
+# Check for readline library
+if test "x$with_readline" = "xyes"; then
+  AC_CHECK_LIB([readline], [main],
+               [LIBS="${LIBS} -lreadline -lncurses"
+                AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])],
+               [AC_MSG_FAILURE([--with-readline was given, but test for readline failed])],
+               [-lncurses])
+fi
+AM_CONDITIONAL(WITH_READLINE, test "x$with_readline" = "xyes")
+
+
+dnl =========================================
+dnl Checks for instrument specific interfaces
+dnl =========================================
+# Checks for CTA interface
+AC_ARG_WITH([cta],
+            [AS_HELP_STRING([--with-cta],
+                            [compile in CTA specific interface])],
+            [],
+            [with_cta=yes])
+AM_CONDITIONAL(WITH_INST_CTA, test "x$with_cta" = "xyes")
+
+# Checks for LAT interface
+AC_ARG_WITH([lat],
+            [AS_HELP_STRING([--with-lat],
+                            [compile in LAT specific interface])],
+            [],
+            [with_lat=yes])
+AM_CONDITIONAL(WITH_INST_LAT, test "x$with_lat" = "xyes")
+
+
+
+#AC_SUBST(LIB)
+
+
 dnl ======================================
-dnl Set list of output files to be creates
+dnl Set list of output files to be created
 dnl ======================================
 AC_CONFIG_FILES([Makefile
                  src/Makefile

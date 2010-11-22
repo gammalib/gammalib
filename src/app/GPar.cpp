@@ -20,9 +20,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#ifdef HAVE_LIBREADLINE
-//#include <readline/readline.h>
-//#endif
+#ifdef HAVE_LIBREADLINE
+#include <stdio.h>             //!< Needed for declaration of FILE in readline
+#include <readline/readline.h>
+#endif
 #include "GPar.hpp"
 #include "GTools.hpp"
 #include "GException.hpp"
@@ -599,25 +600,25 @@ void GPar::query(void)
         std::cout << prompt;
 
         // Get value
-/*
         #ifdef HAVE_LIBREADLINE
-        char* line = readline (prompt.c_str());
+        std::string value;
+        char* line = readline(prompt.c_str());
         if (line != NULL) {
             value = std::string(line);
             delete line;
         }
-        #endif
-*/
+        #else
         char line[1000];
         std::cin.getline(line, 1000);
         std::string value = std::string(line);
+        #endif
 
         // Update value if value is not the default
         if (value.length() > 0) {
             m_value  = value;
             m_update = true;
         }
-        
+
         // Don't query parameter again
         if (m_mode == "q")  m_mode = "h";
         if (m_mode == "ql") m_mode = "hl";
