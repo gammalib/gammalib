@@ -347,10 +347,10 @@ AC_CONFIG_FILES([Makefile
                  pyext/Makefile
                  pyext/setup.py
                  gammalib.pc])
-AM_COND_IF([WITH_INST],
-           [AC_CONFIG_FILES([inst/Makefile])
-            AM_COND_IF([WITH_INST_CTA],
-                       [AC_CONFIG_FILES([inst/cta/Makefile])])
-            AM_COND_IF([WITH_INST_LAT],
-                       [AC_CONFIG_FILES([inst/lat/Makefile])])])
+if test "x$with_cta" = "xyes"; then
+  AC_CONFIG_FILES([inst/cta/Makefile])
+fi
+if test "x$with_lat" = "xyes"; then
+  AC_CONFIG_FILES([inst/lat/Makefile])
+fi
 AC_OUTPUT
