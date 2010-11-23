@@ -309,8 +309,8 @@ if test "x$with_cta" = "xyes"; then
   AC_CHECK_FILE([inst/cta/Makefile.am],
                 [with_cta=yes],
                 [with_cta=no])
-  AM_CONDITIONAL(WITH_INST_CTA, test "x$with_cta" = "xyes")
 fi
+AM_CONDITIONAL(WITH_INST_CTA, test "x$with_cta" = "xyes")
 
 # Checks for LAT interface
 AC_ARG_WITH([lat],
@@ -322,8 +322,8 @@ if test "x$with_lat" = "xyes"; then
   AC_CHECK_FILE([inst/lat/Makefile.am],
                 [with_lat=yes],
                 [with_lat=no])
-  AM_CONDITIONAL(WITH_INST_LAT, test "x$with_lat" = "xyes")
 fi
+AM_CONDITIONAL(WITH_INST_LAT, test "x$with_lat" = "xyes")
 
 
 dnl ======================================
@@ -351,12 +351,12 @@ if test "x$with_inst" = "xyes"; then
 fi
 if test "x$with_cta" = "xyes"; then
   AC_CONFIG_FILES([inst/cta/Makefile])
-  AC_CONFIG_FILES([inst/cta/pyext/Makefile])
-  AC_CONFIG_FILES([inst/cta/pyext/setup.py])
+#  AC_CONFIG_FILES([inst/cta/pyext/Makefile])
+#  AC_CONFIG_FILES([inst/cta/pyext/setup.py])
 fi
 if test "x$with_lat" = "xyes"; then
   AC_CONFIG_FILES([inst/lat/Makefile])
-  AC_CONFIG_FILES([inst/lat/pyext/Makefile])
-  AC_CONFIG_FILES([inst/lat/pyext/setup.py])
+#  AC_CONFIG_FILES([inst/lat/pyext/Makefile])
+#  AC_CONFIG_FILES([inst/lat/pyext/setup.py])
 fi
 AC_OUTPUT
