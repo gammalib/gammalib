@@ -114,8 +114,13 @@
 #include "GModelTemporal.i"
 #include "GModelTemporalConst.i"
 
-/* __ CTA ________________________________________________________________ */
-//#include "GCTAObservation.i"
+/* __ Instrument specific ________________________________________________ */
+#ifdef WITH_INST_CTA
+#include "ctalib.i"
+#endif
+#ifdef WITH_INST_LAT
+#include "latlib.i"
+#endif
 
 
 
