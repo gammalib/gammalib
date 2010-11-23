@@ -34,9 +34,6 @@ pkginclude_HEADERS = include/GLATObservation.hpp \
                      include/GLATResponseTable.hpp \
                      include/GLATLib.hpp
 
-# Set sub directories
-SUBDIRS = . pyext
-
 # Build libtool library
 noinst_LTLIBRARIES = liblat.la
 liblat_la_SOURCES = $(sources)
