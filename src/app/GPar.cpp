@@ -597,7 +597,6 @@ void GPar::query(void)
         else if (m_max.length() > 0)
             prompt += " ("+m_max+")";
         prompt += " ["+m_value+"] ";
-        std::cout << prompt;
 
         // Get value
         #ifdef HAVE_LIBREADLINE
@@ -608,6 +607,7 @@ void GPar::query(void)
             delete line;
         }
         #else
+        std::cout << prompt;
         char line[1000];
         std::cin.getline(line, 1000);
         std::string value = std::string(line);
