@@ -76,11 +76,11 @@ dnl =================================
 dnl Checks for debugging or profiling
 dnl =================================
 AC_MSG_CHECKING(whether to enable debugging)
-enable_debug="no"
-AC_ARG_ENABLE(debug,
+AC_ARG_ENABLE([debug],
               AS_HELP_STRING([--enable-debug],
                              [turn on debugging (default=no)]),
-              [enable_debug="$enableval"])
+              [enable_debug="$enableval"],
+              [enable_debug="no"])
 if test "x$enable_debug" = "xyes"; then
   CFLAGS="$CFLAGS -g"
   CXXFLAGS="$CXXFLAGS -g"
@@ -91,11 +91,11 @@ else
   AC_MSG_RESULT(no)
 fi
 AC_MSG_CHECKING(whether to enable profiling)
-enable_profiling="no"
-AC_ARG_ENABLE([debug],
+AC_ARG_ENABLE([profiling],
               AS_HELP_STRING([--enable-profiling],
                              [turn on profiling (default=no)]),
-              [enable_profiling="$enableval"])
+              [enable_profiling="$enableval"],
+              [enable_profiling="no"])
 if test "x$enable_profiling" = "xyes"; then
   CFLAGS="$CFLAGS -pg"
   CXXFLAGS="$CXXFLAGS -pg"
@@ -115,26 +115,34 @@ dnl ============================
 dnl =====================================
 dnl Range checking option (G_RANGE_CHECK)
 dnl =====================================
-RANGE_CHECK="yes"
-AC_ARG_ENABLE(range_check,
+AC_MSG_CHECKING(whether to enable range checking)
+AC_ARG_ENABLE([range_check],
               AS_HELP_STRING([--enable-range-check],
                              [performs index range checking (default=yes)]),
-             [ RANGE_CHECK="$enableval" ])
+             [RANGE_CHECK="$enableval"],
+             [RANGE_CHECK="yes"])
 if test "x$RANGE_CHECK" = "xyes"; then
-        AC_DEFINE([G_RANGE_CHECK], [1], [Define if range checking should be performed])
+  AC_DEFINE([G_RANGE_CHECK], [1], [Define if range checking should be performed])
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
 fi
 
 
 dnl ====================================
 dnl Small memory option (G_SMALL_MEMORY)
 dnl ====================================
-SMALL_MEMORY="yes"
-AC_ARG_ENABLE(small_memory,
+AC_MSG_CHECKING(whether to enable small memory option)
+AC_ARG_ENABLE([small_memory],
               AS_HELP_STRING([--enable-small-memory],
                              [optimizes code for small memory (default=yes)]),
-             [ SMALL_MEMORY="$enableval" ])
+             [SMALL_MEMORY="$enableval"],
+             [SMALL_MEMORY="yes"])
 if test "x$SMALL_MEMORY" = "xyes"; then
-        AC_DEFINE([G_SMALL_MEMORY], [1], [Define if small memory optimization is selected])
+  AC_DEFINE([G_SMALL_MEMORY], [1], [Define if small memory optimization is selected])
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
 fi
 
 
