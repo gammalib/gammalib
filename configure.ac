@@ -119,6 +119,7 @@ RANGE_CHECK="yes"
 AC_ARG_ENABLE(range_check,
               AS_HELP_STRING([--enable-range-check],
                              [performs index range checking (default=yes)]),
+             [ RANGE_CHECK="$enableval" ])
 if test "x$RANGE_CHECK" = "xyes"; then
         AC_DEFINE([G_RANGE_CHECK], [1], [Define if range checking should be performed])
 fi
