@@ -76,8 +76,10 @@ dnl =================================
 dnl Checks for debugging or profiling
 dnl =================================
 AC_MSG_CHECKING(whether to enable debugging)
+enable_debug="no"
 AC_ARG_ENABLE(debug,
-              [  --enable-debug          turn on debugging (default=no)],
+              AS_HELP_STRING([--enable-debug],
+                             [turn on debugging (default=no)]),
               [enable_debug="$enableval"])
 if test "x$enable_debug" = "xyes"; then
   CFLAGS="$CFLAGS -g"
@@ -89,8 +91,10 @@ else
   AC_MSG_RESULT(no)
 fi
 AC_MSG_CHECKING(whether to enable profiling)
-AC_ARG_ENABLE(debug,
-              [  --enable-profiling      turn on profiling (default=no)],
+enable_profiling="no"
+AC_ARG_ENABLE([debug],
+              AS_HELP_STRING([--enable-profiling],
+                             [turn on profiling (default=no)]),
               [enable_profiling="$enableval"])
 if test "x$enable_profiling" = "xyes"; then
   CFLAGS="$CFLAGS -pg"
@@ -113,8 +117,8 @@ dnl Range checking option (G_RANGE_CHECK)
 dnl =====================================
 RANGE_CHECK="yes"
 AC_ARG_ENABLE(range_check,
-             [  --enable-range-check    performs index range checking (default=yes)],
-             [ RANGE_CHECK="$enableval" ])
+              AS_HELP_STRING([--enable-range-check],
+                             [performs index range checking (default=yes)]),
 if test "x$RANGE_CHECK" = "xyes"; then
         AC_DEFINE([G_RANGE_CHECK], [1], [Define if range checking should be performed])
 fi
@@ -125,7 +129,8 @@ dnl Small memory option (G_SMALL_MEMORY)
 dnl ====================================
 SMALL_MEMORY="yes"
 AC_ARG_ENABLE(small_memory,
-             [  --enable-small-memory   optimizes code for small memory (default=yes)],
+              AS_HELP_STRING([--enable-small-memory],
+                             [optimizes code for small memory (default=yes)]),
              [ SMALL_MEMORY="$enableval" ])
 if test "x$SMALL_MEMORY" = "xyes"; then
         AC_DEFINE([G_SMALL_MEMORY], [1], [Define if small memory optimization is selected])
