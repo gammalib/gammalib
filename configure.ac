@@ -9,20 +9,7 @@ AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
 
 
-# ==========
-# Set prefix
-# ==========
-AC_PREFIX_DEFAULT([/usr/local/gamma])
-if test "x$prefix" = xNONE; then
-  AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], ["/usr/local/gamma"], 
-		     [Location where library is installed])
-else
-  AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], "${prefix}", 
-  		     [Location where library is installed])
-fi
-
-
-dnl ========================================= 
+dnl =========================================
 dnl Library versioning (current:revision:age)
 dnl See the libtool manual for an explanation
 dnl
@@ -33,6 +20,19 @@ dnl gammalib-0.4     libgamma 0:0:0
 dnl =========================================
 GAMMALIB_LT_VERSION="0:0:0"
 AC_SUBST(GAMMALIB_LT_VERSION)
+
+
+dnl ==========
+dnl Set prefix
+dnl ==========
+AC_PREFIX_DEFAULT([/usr/local/gamma])
+if test "x$prefix" = xNONE; then
+  AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], ["/usr/local/gamma"],
+                     [Location where library is installed])
+else
+  AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], "${prefix}",
+                     [Location where library is installed])
+fi
 
 
 dnl ===========================
@@ -64,11 +64,6 @@ dnl AC_C_INLINE
 dnl gl_VISIBILITY
 
 
-dnl ============================
-dnl Checks for library functions
-dnl ============================
-
-
 dnl ===================
 dnl Checks for programs
 dnl ===================
@@ -76,15 +71,41 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 
-# Checks for SWIG (HAVE_SWIG)
-AC_PATH_PROG([SWIG], [swig])
-AM_CONDITIONAL(HAVE_SWIG, test "$SWIG")
 
-# Checks for Python (HAVE_PYTHON)
-AM_PATH_PYTHON([2.2],
-               [],
-               [AC_MSG_WARN([Python not found. Python is required to build python binding. Python can be obtained from http://www.python.org])])
-AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
+dnl =================================
+dnl Checks for debugging or profiling
+dnl =================================
+AC_MSG_CHECKING(whether to enable debugging)
+AC_ARG_ENABLE(debug,
+              [  --enable-debug          turn on debugging (default=no)],
+              [enable_debug="$enableval"])
+if test "x$enable_debug" = "xyes"; then
+  CFLAGS="$CFLAGS -g"
+  CXXFLAGS="$CXXFLAGS -g"
+  FFLAGS="$FFLAGS -g"
+  AC_DEFINE([G_DEBUG], [1], [Define if debugging is turned on])
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
+AC_MSG_CHECKING(whether to enable profiling)
+AC_ARG_ENABLE(debug,
+              [  --enable-profiling      turn on profiling (default=no)],
+              [enable_profiling="$enableval"])
+if test "x$enable_profiling" = "xyes"; then
+  CFLAGS="$CFLAGS -pg"
+  CXXFLAGS="$CXXFLAGS -pg"
+  FFLAGS="$FFLAGS -pg"
+  AC_DEFINE([G_PROFILE], [1], [Define if profiling is turned on])
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
+
+
+dnl ============================
+dnl Checks for library functions
+dnl ============================
 
 
 dnl =====================================
@@ -114,6 +135,17 @@ fi
 dnl =============================================================================
 dnl Checks for python bindings. This is only set if SWIG and Python ar available.
 dnl =============================================================================
+# Checks for SWIG (HAVE_SWIG)
+AC_PATH_PROG([SWIG], [swig])
+AM_CONDITIONAL(HAVE_SWIG, test "$SWIG")
+
+# Checks for Python (HAVE_PYTHON)
+AM_PATH_PYTHON([2.2],
+               [],
+               [AC_MSG_WARN([Python not found. Python is required to build python binding. Python can be obtained from http://www.python.org])])
+AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
+
+# Python bindings
 AC_ARG_ENABLE([python-binding],
               AS_HELP_STRING([--enable-python-binding],
                              [build python binding (default=yes)]),
