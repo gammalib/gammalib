@@ -20,8 +20,8 @@
 #include "GLATObservation.hpp"
 %}
 %include stl.i
-%feature("notabstract") GLATObservation;
-%import GObservation.i
+//%feature("notabstract") GLATObservation;
+//%import GObservation.i
 
 /***********************************************************************//**
  * @class GLATObservation
@@ -34,5 +34,18 @@ public:
     GLATObservation();
     GLATObservation(const GLATObservation& obs);
     virtual ~GLATObservation();
+
+    // Implement pure virtual methods
+    GLATObservation* clone(void) const;
+    void             response(const std::string& irfname, std::string caldb = "");
+    GResponse*       response(const GTime& time) const;
+    GPointing*       pointing(const GTime& time) const;
+    std::string      instrument(void) const;
+
+    // Other methods
+    void load_unbinned(const std::string& ft1name, const std::string& ft2name,
+                       const std::string& ltcube_name);
+    void load_binned(const std::string& cntmap_name, const std::string& expmap_name,
+                     const std::string& ltcube_name);
 };
 

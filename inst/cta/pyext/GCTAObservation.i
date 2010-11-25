@@ -33,10 +33,16 @@ public:
     GCTAObservation(const GCTAObservation& obs);
     virtual ~GCTAObservation(void);
 
-    // Methods
-    void   response(const std::string& irfname, std::string caldb = "");
-    void   load_unbinned(const std::string& filename);
-    void   load_binned(const std::string& filename);
+    // Implement pure virtual methods
+    GCTAObservation* clone(void) const;
+    void             response(const std::string& irfname, std::string caldb = "");
+    GResponse*       response(const GTime& time) const;
+    GPointing*       pointing(const GTime& time) const;
+    std::string      instrument(void) const;
+
+    // Other methods
+    void load_unbinned(const std::string& filename);
+    void load_binned(const std::string& filename);
 };
 
 
