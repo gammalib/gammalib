@@ -47,19 +47,17 @@ public:
     GLATObservation& operator= (const GLATObservation& obs);
 
     // Implement pure virtual methods
+    GLATObservation* clone(void) const;
     void             response(const std::string& irfname, std::string caldb = "");
     GResponse*       response(const GTime& time) const;
     GPointing*       pointing(const GTime& time) const;
     std::string      instrument(void) const;
-    GLATObservation* clone(void) const;
 
     // Other methods
-    void   load_unbinned(const std::string& ft1name,
-                         const std::string& ft2name,
-                         const std::string& ltcube_name);
-    void   load_binned(const std::string& cntmap_name,
-                       const std::string& expmap_name,
+    void load_unbinned(const std::string& ft1name, const std::string& ft2name,
                        const std::string& ltcube_name);
+    void load_binned(const std::string& cntmap_name, const std::string& expmap_name,
+                     const std::string& ltcube_name);
 
 protected:
     // Protected methods

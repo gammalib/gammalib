@@ -129,6 +129,15 @@ GLATObservation& GLATObservation::operator= (const GLATObservation& obs)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clone object
+***************************************************************************/
+GLATObservation* GLATObservation::clone(void) const
+{
+    return new GLATObservation(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Load LAT response
  *
  * @param[in] irfname Name of instrument response function.
@@ -192,15 +201,6 @@ std::string GLATObservation::instrument(void) const
 
 
 /***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GLATObservation* GLATObservation::clone(void) const
-{
-    return new GLATObservation(*this);
-}
-
-
-/***********************************************************************//**
  * @brief Load data for unbinned analysis
  *
  * @param[in] ft1name FT1 FITS filename.
@@ -237,7 +237,7 @@ void GLATObservation::load_unbinned(const std::string& ft1name,
     // Link observations to events. This has to be done after loading since
     // loading initialises the GLATEventList object, hence resets the pointer
     // to the observation.
-    events->obs(this);
+    //events->obs(this);
 
     // Return
     return;
@@ -287,7 +287,7 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
     // Link observations to events. This has to be done after loading since
     // loading initialises the GLATEventList object, hence resets the pointer
     // to the observation.
-    events->obs(this);
+    //events->obs(this);
 
     // Return
     return;
@@ -334,10 +334,12 @@ void GLATObservation::copy_members(const GLATObservation& obs)
     // Update the back pointer to link observation the actual observation
     // to the events. This has to be done here since the events that were
     // copied do not yet know to which observation they belong.
+    /*
     if (m_events->islist())
         ((GLATEventList*)m_events)->obs(this);
     else
         ((GLATEventCube*)m_events)->obs(this);
+    */
 
     // Return
     return;

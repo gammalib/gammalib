@@ -21,7 +21,10 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GObservation.hpp"
-#include "GIntegrand.hpp"
+#include "GCTAResponse.hpp"
+#include "GCTAPointing.hpp"
+#include "GTime.hpp"
+#include "GModel.hpp"
 
 
 /***********************************************************************//**
@@ -43,23 +46,31 @@ public:
     // Operators
     GCTAObservation& operator= (const GCTAObservation& obs);
 
-    // Methods
-    void   response(const std::string& irfname, std::string caldb = "");
-    void   load_unbinned(const std::string& filename);
-    void   load_binned(const std::string& filename);
+    // Implement pure virtual methods
+    GCTAObservation* clone(void) const;
+    void             response(const std::string& irfname, std::string caldb = "");
+    GResponse*       response(const GTime& time) const;
+    GPointing*       pointing(const GTime& time) const;
+    std::string      instrument(void) const;
+
+    // Other methods
+    void load_unbinned(const std::string& filename);
+    void load_binned(const std::string& filename);
 
 protected:
     // Protected methods
-    void             init_members(void);
-    void             copy_members(const GCTAObservation& obs);
-    void             free_members(void);
-    GCTAObservation* clone(void) const;
+    void init_members(void);
+    void copy_members(const GCTAObservation& obs);
+    void free_members(void);
 
     // Npred integration methods
     double npred_temp(const GModel& model) const;
     double npred_grad_temp(const GModel& model, int ipar) const;
 
     // Protected data area
+    GCTAResponse* m_response;     //!< Pointer to instrument response functions
+    GCTAPointing* m_pointing;     //!< Pointer to pointing direction
+
 };
 
 #endif /* GCTAOBSERVATION_HPP */

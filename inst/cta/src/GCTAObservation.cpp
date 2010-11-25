@@ -22,14 +22,15 @@
 #endif
 #include <iostream>
 #include "GCTAException.hpp"
-#include "GException.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAEventList.hpp"
 #include "GCTAEventCube.hpp"
 #include "GCTARoi.hpp"
+#include "GException.hpp"
 #include "GFits.hpp"
 #include "GModelSpatialPtsrc.hpp"
 #include "GIntegral.hpp"
+#include "GIntegrand.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -139,6 +140,15 @@ GCTAObservation& GCTAObservation::operator= (const GCTAObservation& obs)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clone object
+***************************************************************************/
+GCTAObservation* GCTAObservation::clone(void) const
+{
+    return new GCTAObservation(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Set CTA response function
  *
  * @param[in] irfname Name of CTA response function.
@@ -163,6 +173,48 @@ void GCTAObservation::response(const std::string& irfname, std::string caldb)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to CTA response function
+ *
+ * @param[in] time Time.
+ *
+ * Returns pointer to response function for a given time. As the response is
+ * supposed not to vary during an observation, the time argument needs not to
+ * be considered.
+ ***************************************************************************/
+GResponse* GCTAObservation::response(const GTime& time) const
+{
+    // Return response pointer
+    return m_response;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to CTA pointing direction
+ *
+ * @param[in] time Time.
+ *
+ * Returns pointer to pointing direction for a given time. As the pointing
+ * direction is supposed not to vary during an observation, the time argument
+ * needs not to be considered.
+ ***************************************************************************/
+GPointing* GCTAObservation::pointing(const GTime& time) const
+{
+    // Return response pointer
+    return m_pointing;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns instrument name
+ ***************************************************************************/
+std::string GCTAObservation::instrument(void) const
+{
+    // Return instument name
+    return ("CTA");
 }
 
 
@@ -195,7 +247,7 @@ void GCTAObservation::load_unbinned(const std::string& filename)
     // Link observations to events. This has to be done after loading since
     // loading initialises the GCTAEventList object, hence resets the pointer
     // to the observation.
-    events->obs(this);
+    //events->obs(this);
 
     // Return
     return;
@@ -226,7 +278,7 @@ void GCTAObservation::load_binned(const std::string& filename)
     // Link observations to events. This has to be done after loading since
     // loading initialises the GCTAEventCube object, hence resets the pointer
     // to the observation.
-    events->obs(this);
+    //events->obs(this);
 
     // Return
     return;
@@ -244,10 +296,9 @@ void GCTAObservation::load_binned(const std::string& filename)
  ***************************************************************************/
 void GCTAObservation::init_members(void)
 {
-    // Set instrument name
-    m_instrument = "CTA";
-
     // Initialise members
+    m_response = NULL;
+    m_pointing = NULL;
 
     // Return
     return;
@@ -268,14 +319,18 @@ void GCTAObservation::init_members(void)
 void GCTAObservation::copy_members(const GCTAObservation& obs)
 {
     // Copy members
+    if (obs.m_response != NULL) m_response = obs.m_response->clone();
+    if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
 
     // Update the back pointer to link observation the actual observation
     // to the events. This has to be done here since the events that were
     // copied do not yet know to which observation they belong.
+    /*
     if (m_events->islist())
         ((GCTAEventList*)m_events)->obs(this);
     else
         ((GCTAEventCube*)m_events)->obs(this);
+    */
 
     // Return
     return;
@@ -287,17 +342,16 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
  ***************************************************************************/
 void GCTAObservation::free_members(void)
 {
+    // Free memory
+    if (m_response != NULL) delete m_response;
+    if (m_pointing != NULL) delete m_pointing;
+
+    // Mark memory as free
+    m_response = NULL;
+    m_pointing = NULL;
+
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GCTAObservation* GCTAObservation::clone(void) const
-{
-    return new GCTAObservation(*this);
 }
 
 
@@ -323,7 +377,7 @@ double GCTAObservation::npred_temp(const GModel& model) const
 
     // Determine ontime
     double ontime = m_gti.ontime();
-    
+
     // Integrate only if ontime is positive
     if (ontime > 0.0) {
 
@@ -360,7 +414,7 @@ double GCTAObservation::npred_grad_temp(const GModel& model, int ipar) const
 
     // Determine ontime
     double ontime = m_gti.ontime();
-    
+
     // Integrate only if ontime is positive
     if (ontime > 0.0) {
 
@@ -392,7 +446,7 @@ std::ostream& operator<< (std::ostream& os, const GCTAObservation& obs)
     os.precision(3);
     os << "=== GCTAObservation ===" << std::endl;
     os << " Name ......................: " << obs.m_obsname << std::endl;
-    os << " Instrument ................: " << obs.m_instrument << std::endl;
+    os << " Instrument ................: " << obs.instrument() << std::endl;
     os << " Time range ................: " << std::fixed
        << obs.m_gti.tstart().mjd() << " - "
        << obs.m_gti.tstop().mjd() << " days" << std::endl;
@@ -409,7 +463,7 @@ std::ostream& operator<< (std::ostream& os, const GCTAObservation& obs)
 
     // Add response to stream if it exists
     if (obs.m_response != NULL)
-        os << *((GCTAResponse*)obs.m_response) << std::endl;
+        os << *(obs.m_response) << std::endl;
 
     // Add events to stream
     if (obs.m_events != NULL) {
