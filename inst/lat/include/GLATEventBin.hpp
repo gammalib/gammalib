@@ -53,6 +53,7 @@ public:
 
     // Methods
     double              model(GModels& models, GVector* gradient = NULL) const;
+    double              size(void) const;
     const GLATInstDir*  dir(void) const { return m_dir; }
     const GLATPointing* pnt(void) const { return m_pnt; }
     const GLATResponse* rsp(void) const { return m_rsp; }

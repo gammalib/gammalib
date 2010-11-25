@@ -63,6 +63,7 @@ public:
 
     // Methods
     double              model(GModels& models, GVector* gradient = NULL) const;
+    double              size(void) const;
     const GCTAInstDir*  dir(void) const { return m_dir; }
     const GCTAPointing* pnt(void) const { return m_pnt; }
     const GCTAResponse* rsp(void) const { return m_rsp; }
