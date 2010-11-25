@@ -309,7 +309,7 @@ double GModel::eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
  *
  * @todo Implement method (dummy method always returns true)
  ***************************************************************************/
-bool GModel::isvalid(const std::string& name)
+bool GModel::isvalid(const std::string& name) const
 {
     // Return
     return true;
