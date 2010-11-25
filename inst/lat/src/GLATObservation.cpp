@@ -134,12 +134,69 @@ GLATObservation& GLATObservation::operator= (const GLATObservation& obs)
  * @param[in] irfname Name of instrument response function.
  * @param[in] caldb Optional path to calibration database.
  *
- * @todo Method not yet implemented
+ * @todo Response not yet loaded.
  ***************************************************************************/
 void GLATObservation::response(const std::string& irfname, std::string caldb)
 {
+    // Delete old response function
+    if (m_response != NULL) delete m_response;
+
+    // Allocate new LAT response function
+    m_response = new GLATResponse;
+
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to LAT response function
+ *
+ * @param[in] time Time.
+ *
+ * Returns pointer to response function for a given time. As the response is
+ * supposed not to vary during an observation, the time argument needs not to
+ * be considered.
+ ***************************************************************************/
+GResponse* GLATObservation::response(const GTime& time) const
+{
+    // Return response pointer
+    return m_response;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to LAT pointing direction
+ *
+ * @param[in] time Time.
+ *
+ * Returns pointer to pointing direction for a given time. As the pointing
+ * direction is supposed not to vary during an observation, the time argument
+ * needs not to be considered.
+ ***************************************************************************/
+GPointing* GLATObservation::pointing(const GTime& time) const
+{
+    // Return response pointer
+    return m_pointing;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns instrument name
+ ***************************************************************************/
+std::string GLATObservation::instrument(void) const
+{
+    // Return instument name
+    return ("LAT");
+}
+
+
+/***********************************************************************//**
+ * @brief Clone class
+***************************************************************************/
+GLATObservation* GLATObservation::clone(void) const
+{
+    return new GLATObservation(*this);
 }
 
 
@@ -248,10 +305,9 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
  ***************************************************************************/
 void GLATObservation::init_members(void)
 {
-    // Set instrument name
-    m_instrument = "LAT";
-
     // Initialise members
+    m_response = NULL;
+    m_pointing = NULL;
 
     // Return
     return;
@@ -272,6 +328,8 @@ void GLATObservation::init_members(void)
 void GLATObservation::copy_members(const GLATObservation& obs)
 {
     // Copy members
+    if (obs.m_response != NULL) m_response = obs.m_response->clone();
+    if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
 
     // Update the back pointer to link observation the actual observation
     // to the events. This has to be done here since the events that were
@@ -291,17 +349,16 @@ void GLATObservation::copy_members(const GLATObservation& obs)
  ***************************************************************************/
 void GLATObservation::free_members(void)
 {
+    // Free memory
+    if (m_response != NULL) delete m_response;
+    if (m_pointing != NULL) delete m_pointing;
+
+    // Mark memory as free
+    m_response = NULL;
+    m_pointing = NULL;
+
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GLATObservation* GLATObservation::clone(void) const
-{
-    return new GLATObservation(*this);
 }
 
 
@@ -325,7 +382,7 @@ std::ostream& operator<< (std::ostream& os, const GLATObservation& obs)
     os.precision(3);
     os << "=== GLATObservation ===" << std::endl;
     os << " Name ......................: " << obs.m_obsname << std::endl;
-    os << " Instrument ................: " << obs.m_instrument << std::endl;
+    os << " Instrument ................: " << obs.instrument() << std::endl;
     os << " Time range ................: " << std::fixed
        << obs.m_gti.tstart().mjd() << " - "
        << obs.m_gti.tstop().mjd() << " days" << std::endl;
@@ -341,8 +398,8 @@ std::ostream& operator<< (std::ostream& os, const GLATObservation& obs)
     os << obs.m_gti << std::endl;
 
     // Add response to stream if it exists
-//    if (obs.m_response != NULL)
-//        os << *((GLATResponse*)obs.m_response) << std::endl;
+    //if (obs.m_response != NULL)
+    //    os << *(obs.m_response) << std::endl;
 
     // Add events to stream
     if (obs.m_events != NULL) {
