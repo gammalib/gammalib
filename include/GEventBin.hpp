@@ -65,6 +65,9 @@ public:
     virtual const GInstDir* dir(void) const = 0;
     virtual GEventBin*      clone(void) const = 0;
 
+    // Virtual methods
+    virtual double error(void) const;
+
     // Implemented methods
     bool           isatom(void) const { return false; }
     bool           isbin(void) const { return true; }

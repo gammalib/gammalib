@@ -71,6 +71,7 @@ public:
     virtual bool            isatom(void) const = 0;
     virtual bool            isbin(void) const = 0;
     virtual double          counts(void) const = 0;
+    virtual double          error(void) const = 0;
     virtual double          size(void) const = 0;
     virtual const GInstDir* dir(void) const = 0;
     virtual const GEnergy*  energy(void) const = 0;

@@ -60,6 +60,7 @@ public:
     bool           isatom(void) const { return true; }
     bool           isbin(void) const { return false; }
     double         counts(void) const { return 1.0; }
+    double         error(void) const { return 0.0; }
     double         size(void) const { return 1.0; }
     const GEnergy* energy(void) const { return &m_energy; }
     const GTime*   time(void) const { return &m_time; }
