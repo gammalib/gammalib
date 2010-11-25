@@ -178,6 +178,21 @@ double GLATEventBin::model(GModels& models, GVector* gradient) const
 }
 
 
+/***********************************************************************//**
+ * @brief Return size of event bin
+ *
+ * @todo Dummy, needs to be implemented.
+ ***************************************************************************/
+double GLATEventBin::size(void) const
+{
+    // Compute bin size
+    double size = 1.0; //*omega() * ewidth()->MeV() * *ontime();
+
+    // Return bin size
+    return size;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Private methods                              =
