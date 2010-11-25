@@ -125,6 +125,22 @@ GEventBin& GEventBin::operator= (const GEventBin& bin)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Return error in number of counts
+ *
+ * Returns \f$\sqrt(counts)\f$ as the uncertainty in the number of counts
+ * in the bin. If counts <= 0 then zero is returned.
+ ***************************************************************************/
+double GEventBin::error(void) const
+{
+    // Compute uncertainty
+    double error = sqrt(counts());
+
+    // Return error
+    return error;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                              Private methods                            =
