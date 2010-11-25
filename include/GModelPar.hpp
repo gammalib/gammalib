@@ -42,8 +42,8 @@ public:
     // Constructors and destructors
     GModelPar(void);
     GModelPar(const GModelPar& par);
-    ~GModelPar();
- 
+    virtual ~GModelPar(void);
+
     // Operators
     GModelPar& operator= (const GModelPar& par);
 
@@ -52,6 +52,7 @@ public:
     std::string unit(void) const { return m_unit; }
     double      real_value(void) const { return m_value*m_scale; }
     double      real_error(void) const { return m_error*m_scale; }
+    double      real_gradient(void) const { return m_gradient*m_scale; }
     double      real_min(void) const { return m_min*m_scale; }
     double      real_max(void) const { return m_max*m_scale; }
     double      value(void) const { return m_value; }
@@ -79,7 +80,7 @@ public:
     void        fix(void) { m_free=false; return; }
     void        read(const GXmlElement& xml);
     void        write(GXmlElement& xml) const;
-  
+
 protected:
     // Protected methods
     void init_members(void);
