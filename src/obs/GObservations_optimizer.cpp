@@ -623,20 +623,20 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
             }
         }
 
-        // Update Poissonian statistics (excluding factorial term for faster
-        // computation)
-        m_value -= data * log(model) - model;
-
-        // Skip bin now if there are no non-zero derivatives
-        if (ndev < 1)
-            continue;
-
         // Update gradient vector and curvature matrix. To avoid
         // unneccessary computations we distinguish the case where
         // data>0 and data=0. The second case requires much less
         // computation since it does not contribute to the covariance
         // matrix ...
         if (data > 0.0) {
+
+            // Update Poissonian statistics (excluding factorial term for
+            // faster computation)
+            m_value -= data * log(model) - model;
+
+            // Skip bin now if there are no non-zero derivatives
+            if (ndev < 1)
+                continue;
 
             // Pre computation
             double fb = data / model;
@@ -661,15 +661,27 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
 
                 // Add column to matrix
                 m_covar->add_col(values, inx, ndev, jpar);
+
             } // endfor: looped over columns
         } // endif: data was > 0
 
         // ... handle now data=0
         else {
+
+            // Update Poissonian statistics (excluding factorial term for
+            // faster computation)
+            m_value += model;
+
+            // Skip bin now if there are no non-zero derivatives
+            if (ndev < 1)
+                continue;
+
+            // Update gradient
             register int* ipar = inx;
             for (register int idev = 0; idev < ndev; ++idev, ++ipar)
                 (*m_gradient)(*ipar) += (*m_wrk_grad)(*ipar);
-        }
+
+        } // endif: data was 0
 
     } // endfor: iterated over all events
 
