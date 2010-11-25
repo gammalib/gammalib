@@ -28,7 +28,7 @@
 #include "GIntegral.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MODEL           "GObservation::model(GModels&, GInstDir&, GEnergy&, GTime&, GVector*) const"
+#define G_MODEL           "GObservation::model(GModels&, GPointing&, GInstDir&, GEnergy&, GTime&, GVector*) const"
 #define G_NPRED_KERN      "GObservation::npred_kern(GModel&, GSkyDir&, GEnergy&, GTime&, GPointing&)"
 #define G_NPRED_SPEC      "GObservation::npred_spec(GModel&, GTime&)"
 #define G_NPRED_TEMP      "GObservation::npred_temp(GModel&, int)"
@@ -51,7 +51,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GObservation::GObservation(void)
 {
@@ -66,7 +66,9 @@ GObservation::GObservation(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] obs Observation from which the instance should be built.
+ * @param[in] obs Observation.
+ *
+ * Instantiate the class by copying from an existing observation.
  ***************************************************************************/
 GObservation::GObservation(const GObservation& obs)
 {
@@ -103,7 +105,9 @@ GObservation::~GObservation(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] obs Observation which should be assigned.
+ * @param[in] obs Observation.
+ *
+ * Assign one observation to another.
  ***************************************************************************/
 GObservation& GObservation::operator= (const GObservation& obs)
 {
@@ -136,16 +140,18 @@ GObservation& GObservation::operator= (const GObservation& obs)
  * @brief Return model value and (optionally) gradient
  *
  * @param[in] models Model descriptor.
- * @param[in] obsDir Instrument direction.
- * @param[in] obsEng Observed energy.
+ * @param[in] obsDir Measured instrument direction.
+ * @param[in] obsEng Measured energy.
  * @param[in] obsTime Measured arrival time.
- * @param[in] pnt Instrument pointing direction.
  * @param[out] gradient Pointer to gradient vector (NULL=not computed).
  *
  * @exception GException::gradient_par_mismatch
  *            Dimension of gradient vector mismatches number of parameters.
  *
- * Implements generic model and gradient evaluation for an observation.
+ * Implements generic model and gradient evaluation for an observation. The
+ * model gives the probability for an event to occur with a given instrument
+ * direction, at a given energy and at a given time. The gradient is the
+ * parameter derivative of this probability.
  *
  * @todo We actually circumvent the const correctness for the eval_gradients()
  * method, yet I don't know why this method is not const. This should be
@@ -153,34 +159,34 @@ GObservation& GObservation::operator= (const GObservation& obs)
  ***************************************************************************/
 double GObservation::model(const GModels& models, const GInstDir& obsDir,
                            const GEnergy& obsEng, const GTime& obsTime,
-                           const GPointing& pnt, GVector* gradient) const
+                           GVector* gradient) const
 {
     // Verify that gradients vector has the same dimension than the
     // model has parameters
     #if defined(G_RANGE_CHECK)
     if (models.npars() != gradient->size())
-        throw GException::gradient_par_mismatch(G_MODEL, gradient->size(), 
+        throw GException::gradient_par_mismatch(G_MODEL, gradient->size(),
                                                 models.npars());
     #endif
 
     // Initialise model value
     double model = 0.0;
 
+    // Get current pointing and response function
+    GPointing* pnt = pointing(obsTime);
+    GResponse* rsp = response(obsTime);
+
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
 
+        // Get model pointer (enforce const correctness)
+        GModel* ptr = (GModel*)models(i);
+
         // Check if model applies to specific instrument
-        if (models(i)->isvalid(m_instrument)) {
+        if (ptr->isvalid(instrument())) {
 
-            // Compute model value
-            double value = ((GModel*)models(i))->eval_gradients(obsDir, obsEng, obsTime,
-                                                                *m_response, pnt);
-
-            // Multiply by bin size
-            //value *= *omega() * ewidth()->MeV() * *ontime();
-
-            // Add to model
-            model += value;
+            // Compute value and add to model
+            model += ptr->eval_gradients(obsDir, obsEng, obsTime, *rsp, *pnt);
 
         } // endif: model was applicable
 
@@ -204,6 +210,8 @@ double GObservation::model(const GModels& models, const GInstDir& obsDir,
  *
  * @param[in] models Models.
  * @param[out] gradient Model parameter gradients.
+ *
+ * Returns the total number of predicted counts within the analysis region.
  ***************************************************************************/
 double GObservation::npred(const GModels& models, GVector* gradient) const
 {
@@ -219,7 +227,7 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
 
         // Handle only components that are relevant for the actual
         // instrument
-        if (model->isvalid(m_instrument)) {
+        if (model->isvalid(instrument())) {
 
             // Determine Npred for model
             npred += npred_temp(*model);
@@ -253,19 +261,15 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * @todo Implement clear() methods for GEbounds and GGti
  ***************************************************************************/
 void GObservation::init_members(void)
 {
     // Initialise members
     m_obsname.clear();
-    m_instrument.clear();
     m_ebounds.clear();
     m_gti.clear();
-    m_roi      = NULL;
-    m_events   = NULL;
-    m_response = NULL;
+    m_roi    = NULL;
+    m_events = NULL;
 
     // Return
     return;
@@ -275,20 +279,20 @@ void GObservation::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] obs GObservation members which should be copied.
+ * @param[in] obs Observation.
+ *
+ * Copy members from an observation.
  ***************************************************************************/
 void GObservation::copy_members(const GObservation& obs)
 {
     // Copy attributes
-    m_obsname    = obs.m_obsname;
-    m_instrument = obs.m_instrument;
-    m_ebounds    = obs.m_ebounds;
-    m_gti        = obs.m_gti;
+    m_obsname = obs.m_obsname;
+    m_ebounds = obs.m_ebounds;
+    m_gti     = obs.m_gti;
 
     // Clone members that exist
-    m_roi      = (obs.m_roi      != NULL) ? obs.m_roi->clone()      : NULL;
-    m_events   = (obs.m_events   != NULL) ? obs.m_events->clone()   : NULL;
-    m_response = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;
+    m_roi    = (obs.m_roi      != NULL) ? obs.m_roi->clone()      : NULL;
+    m_events = (obs.m_events   != NULL) ? obs.m_events->clone()   : NULL;
 
     // Return
     return;
@@ -301,14 +305,12 @@ void GObservation::copy_members(const GObservation& obs)
 void GObservation::free_members(void)
 {
     // Free memory
-    if (m_response != NULL) delete m_response;
-    if (m_events   != NULL) delete m_events;
-    if (m_roi      != NULL) delete m_roi;
+    if (m_events != NULL) delete m_events;
+    if (m_roi    != NULL) delete m_roi;
 
     // Signal free pointers
-    m_events   = NULL;
-    m_response = NULL;
-    m_roi      = NULL;
+    m_events = NULL;
+    m_roi    = NULL;
 
     // Return
     return;
@@ -320,168 +322,6 @@ void GObservation::free_members(void)
  =                        Npred integration methods                        =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Computes the Npred kernel for a specific direction, energy and time
- *
- * @param[in] model Gamma-ray source model.
- * @param[in] srcDir Photon arrival direction.
- * @param[in] srcEng Photon energy.
- * @param[in] srcTime Photon arrival time.
- * @param[in] pnt Instrument pointing direction.
- *
- * @exception GException::roi_invalid
- *            No valid ROI found for observation.
- *
- * Computes the integrand (or integral kernel) for the Npred computation.
- * This method is called by npred_spat() which performs the spatial
- * integration of the kernel.
- ***************************************************************************/
-double GObservation::npred_kern(const GModel& model, const GSkyDir& srcDir,
-                                const GEnergy& srcEng, const GTime& srcTime,
-                                const GPointing& pnt) const
-{
-    // Make sure that ROI has been set
-    if (m_roi == NULL)
-        throw GException::roi_invalid(G_NPRED_KERN,
-                          "No ROI has been defined for observation.");
-
-    // Compute integrated IRF
-    double nirf = m_response->nirf(srcDir, srcEng, srcTime, pnt,
-                                   *m_roi, m_ebounds, m_gti);
-
-    // Compute source model
-    GModel* ptr    = (GModel*)&model; // bypass const-correctness
-    double  source = ptr->value(srcDir, srcEng, srcTime);
-
-    // Return
-    return (source * nirf);
-}
-
-
-/***********************************************************************//**
- * @brief Spatially integrates the Npred kernel
- *
- * @param[in] model Gamma-ray source model.
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing direction.
- *
- * Integrates the Npred kernel over the sky region of interest. In case that
- * the sky model is a point-source no integration is performed and the
- * kernel value is directly returned.
- *
- * @todo Implement integration over skymap.
- ***************************************************************************/
-double GObservation::npred_spat(const GModel& model, const GEnergy& srcEng,
-                                const GTime& srcTime,
-                                const GPointing& pnt) const
-{
-    // Initialise result
-    double result = 0.0;
-    
-    // Continue only if the gamma-ray source model has a spatial component
-    if (model.spatial() != NULL) {
-    
-        // Case A: Model is a point source
-        if (model.spatial()->isptsource()) {
-        
-            // Build sky direction from point source parameters
-            GSkyDir srcDir;
-            srcDir.radec_deg(((GModelSpatialPtsrc*)model.spatial())->ra(),
-                             ((GModelSpatialPtsrc*)model.spatial())->dec());
-
-            // Get function value at that position
-            result = npred_kern(model, srcDir, srcEng, srcTime, pnt);
-
-        } // endif: Model was a point source
-
-        // Case B: Model is not a point source
-        else {
-
-            // Dump warning that integration is not yet implemented
-            std::cout << "WARNING: GObservation::npred_spat:"
-                      << " Sky integration not implemented." << std::endl;
-
-        } // endelse: Model was not a point source
-    
-    } // endif: Gamma-ray source model had a spatial component
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Integrates spatially integrated Npred kernel spectrally
- *
- * @param[in] model Gamma-ray source model.
- * @param[in] srcTime True photon arrival time.
- *
- * @todo Implement correct time dependent extraction of telescope pointing.
- ***************************************************************************/
-double GObservation::npred_spec(const GModel& model, const GTime& srcTime) const
-{
-    // Set integration energy interval in MeV
-    double emin = m_ebounds.emin().MeV();
-    double emax = m_ebounds.emax().MeV();
-
-    // Throw exception if energy range is not valid
-    if (emax <= emin)
-        throw GException::erange_invalid(G_NPRED_SPEC, emin, emax);
-
-    // Get telescope pointing for a given time
-    GPointing* pnt; // DUMMY
-
-    // Setup integration function
-    GObservation::npred_kern_spat integrand(this, model, srcTime, pnt);
-    GIntegral                     integral(&integrand);
-
-
-    // Do Romberg integration
-    #if G_LN_ENERGY_INT
-    emin = log(emin);
-    emax = log(emax);
-    #endif
-    double result = integral.romb(emin, emax);
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Integration kernel for npred_spec() method
- *
- * @param[in] x Function value.
- *
- * This method implements the integration kernel needed for the npred_spec()
- * method. Upon the defintion of the G_LN_ENERGY_INT declaration the energy
- * integration is done logarithmically (G_LN_ENERGY_INT=1) or not.
- ***************************************************************************/
-double GObservation::npred_kern_spat::eval(double x)
-{
-    #if G_LN_ENERGY_INT
-    // Variable substitution
-    x = exp(x);
-    #endif
-    
-    // Set energy in MeV
-    GEnergy eng;
-    eng.MeV(x);
-    
-    // Get function value
-    double value = m_parent->npred_spat(*m_model, eng, *m_time, *m_pnt);
-    
-    #if G_LN_ENERGY_INT
-    // Correct for variable substitution
-    value *= x;
-    #endif
-    
-    // Return value
-    return value;
-}
-
 
 /***********************************************************************//**
  * @brief Temporally integrates spatially and spectrally integrated Npred kernel
@@ -529,6 +369,166 @@ double GObservation::npred_temp(const GModel& model) const
 
 
 /***********************************************************************//**
+ * @brief Integrates spatially integrated Npred kernel spectrally
+ *
+ * @param[in] model Gamma-ray source model.
+ * @param[in] srcTime True photon arrival time.
+ ***************************************************************************/
+double GObservation::npred_spec(const GModel& model,
+                                const GTime& srcTime) const
+{
+    // Set integration energy interval in MeV
+    double emin = m_ebounds.emin().MeV();
+    double emax = m_ebounds.emax().MeV();
+
+    // Throw exception if energy range is not valid
+    if (emax <= emin)
+        throw GException::erange_invalid(G_NPRED_SPEC, emin, emax);
+
+    // Setup integration function
+    GObservation::npred_kern_spat integrand(this, model, srcTime);
+    GIntegral                     integral(&integrand);
+
+
+    // Do Romberg integration
+    #if G_LN_ENERGY_INT
+    emin = log(emin);
+    emax = log(emax);
+    #endif
+    double result = integral.romb(emin, emax);
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Spatially integrates the Npred kernel
+ *
+ * @param[in] model Gamma-ray source model.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ *
+ * Integrates the Npred kernel over the sky region of interest. In case that
+ * the sky model is a point-source no integration is performed and the
+ * kernel value is directly returned.
+ *
+ * @todo Implement integration over skymap.
+ ***************************************************************************/
+double GObservation::npred_spat(const GModel& model,
+                                const GEnergy& srcEng,
+                                const GTime& srcTime) const
+{
+    // Initialise result
+    double result = 0.0;
+
+    // Continue only if the gamma-ray source model has a spatial component
+    if (model.spatial() != NULL) {
+
+        // Case A: Model is a point source
+        if (model.spatial()->isptsource()) {
+
+            // Build sky direction from point source parameters
+            GSkyDir srcDir;
+            srcDir.radec_deg(((GModelSpatialPtsrc*)model.spatial())->ra(),
+                             ((GModelSpatialPtsrc*)model.spatial())->dec());
+
+            // Get function value at that position
+            result = npred_kern(model, srcDir, srcEng, srcTime);
+
+        } // endif: Model was a point source
+
+        // Case B: Model is not a point source
+        else {
+
+            // Dump warning that integration is not yet implemented
+            std::cout << "WARNING: GObservation::npred_spat:"
+                      << " Sky integration not implemented." << std::endl;
+
+        } // endelse: Model was not a point source
+
+    } // endif: Gamma-ray source model had a spatial component
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Computes the Npred kernel
+ *
+ * @param[in] model Gamma-ray source model.
+ * @param[in] srcDir True photon arrival direction.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ *
+ * @exception GException::roi_invalid
+ *            No valid ROI found for observation.
+ *
+ * Computes the integrand (or integral kernel) for the Npred computation.
+ * This method is called by npred_spat() which performs the spatial
+ * integration of the kernel.
+ ***************************************************************************/
+double GObservation::npred_kern(const GModel& model,
+                                const GSkyDir& srcDir,
+                                const GEnergy& srcEng,
+                                const GTime& srcTime) const
+{
+    // Make sure that ROI has been set
+    if (m_roi == NULL)
+        throw GException::roi_invalid(G_NPRED_KERN,
+                          "No ROI has been defined for observation.");
+
+    // Get current pointing and response
+    GPointing* pnt = pointing(srcTime);
+    GResponse* rsp = response(srcTime);
+
+    // Compute integrated IRF
+    double nirf = rsp->nirf(srcDir, srcEng, srcTime, *pnt, *m_roi, m_ebounds, m_gti);
+
+    // Compute source model
+    GModel* ptr    = (GModel*)&model; // bypass const-correctness
+    double  source = ptr->value(srcDir, srcEng, srcTime);
+
+    // Return
+    return (source * nirf);
+}
+
+
+/***********************************************************************//**
+ * @brief Integration kernel for npred_spec() method
+ *
+ * @param[in] x Function value.
+ *
+ * This method implements the integration kernel needed for the npred_spec()
+ * method. Upon the defintion of the G_LN_ENERGY_INT declaration the energy
+ * integration is done logarithmically (G_LN_ENERGY_INT=1) or not.
+ ***************************************************************************/
+double GObservation::npred_kern_spat::eval(double x)
+{
+    #if G_LN_ENERGY_INT
+    // Variable substitution
+    x = exp(x);
+    #endif
+
+    // Set energy in MeV
+    GEnergy eng;
+    eng.MeV(x);
+
+    // Get function value
+    double value = m_parent->npred_spat(*m_model, eng, *m_time);
+
+    #if G_LN_ENERGY_INT
+    // Correct for variable substitution
+    value *= x;
+    #endif
+
+    // Return value
+    return value;
+}
+
+
+/***********************************************************************//**
  * @brief Integration kernel for npred_temp() method
  *
  * @param[in] x Function value.
@@ -554,173 +554,7 @@ double GObservation::npred_kern_spec::eval(double x)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Returns the Npred gradient for a given model parameter
- *
- * @param[in] model Gamma-ray source model.
- * @param[in] ipar Parameter index for which gradient should be returned.
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing direction.
- *
- * @exception GException::roi_invalid
- *            No valid ROI found for observation.
- ***************************************************************************/
-double GObservation::npred_grad_kern(const GModel& model, int ipar,
-                                     const GSkyDir& srcDir,
-                                     const GEnergy& srcEng,
-                                     const GTime& srcTime,
-                                     const GPointing& pnt) const
-{
-    // Make sure that ROI has been set
-    if (m_roi == NULL)
-        throw GException::roi_invalid(G_NPRED_GRAD_KERN,
-                          "No ROI has been defined for observation.");
-
-    // Compute integrated IRF
-    double nirf = m_response->nirf(srcDir, srcEng, srcTime, pnt,
-                                   *m_roi, m_ebounds, m_gti);
-
-    // Get model gradients
-    GModel* ptr       = (GModel*)&model; // bypass const-correctness
-    GVector gradients = ptr->gradients(srcDir, srcEng, srcTime);
-
-    // Extract requested model gradient
-    double grad = gradients(ipar);
-
-    // Return
-    return (grad * nirf);
-}
-
-
-/***********************************************************************//**
- * @brief Integrates the Npred gradient kernel spatially
- *
- * @param[in] model Gamma-ray source model.
- * @param[in] ipar Parameter index for which gradient should be returned.
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing direction.
- *
- * @todo Implement integration over skymap.
- ***************************************************************************/
-double GObservation::npred_grad_spat(const GModel& model, int ipar,
-                                     const GEnergy& srcEng,
-                                     const GTime& srcTime,
-                                     const GPointing& pnt) const
-{
-    // Initialise result
-    double result = 0.0;
-    
-    // Continue only if the gamma-ray source model has a spatial component
-    if (model.spatial() != NULL) {
-    
-        // Case A: Model is a point source
-        if (model.spatial()->isptsource()) {
-        
-            // Build sky direction from point source parameters
-            GSkyDir srcDir;
-            srcDir.radec_deg(((GModelSpatialPtsrc*)model.spatial())->ra(),
-                             ((GModelSpatialPtsrc*)model.spatial())->dec());
-
-            // Get function value at that position
-            result = npred_grad_kern(model, ipar, srcDir, srcEng, srcTime, pnt);
-
-        } // endif: Model was a point source
-
-        // Case B: Model is not a point source
-        else {
-
-            // Dump warning that integration is not yet implemented
-            std::cout << "WARNING: GObservation::npred_grad_spat:"
-                      << " Sky integration not implemented." << std::endl;
-
-        } // endelse: Model was not a point source
-    
-    } // endif: Gamma-ray source model had a spatial component
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Spectrally integrate spatially integrated Npred gradient kernel
- *
- * @param[in] model Gamma-ray source model.
- * @param[in] ipar Parameter index for which gradient should be returned.
- * @param[in] srcTime True photon arrival time.
- *
- * @todo Throw exception if integration energy range is not valid.
- * @todo Implement correct time dependent extraction of telescope
- *       pointing.
- ***************************************************************************/
-double GObservation::npred_grad_spec(const GModel& model, int ipar,
-                                     const GTime& srcTime) const
-{
-    // Set integration energy interval in TeV
-    double emin = m_ebounds.emin().MeV();
-    double emax = m_ebounds.emax().MeV();
-
-    // Throw exception if energy range is not valid
-    if (emax <= emin)
-        throw GException::erange_invalid(G_NPRED_GRAD_SPEC, emin, emax);
-
-    // Set telescope pointing for given time
-    GPointing *pnt; // DUMMY
-
-    // Setup integration function
-    GObservation::npred_grad_kern_spat integrand(this, model, ipar, srcTime, pnt);
-    GIntegral integral(&integrand);
-
-    // Do Romberg integration
-    #if G_LN_ENERGY_INT
-    emin = log(emin);
-    emax = log(emax);
-    #endif
-    double result = integral.romb(emin, emax);
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Integration kernel for npred_grad_spec() method
- *
- * @param[in] x Function value.
- *
- * This method implements the integration kernel needed for the
- * npred_grad_spec() method. Upon the defintion of the G_LN_ENERGY_INT
- * declaration the energy integration is done logarithmically
- * (G_LN_ENERGY_INT=1) or not.
- ***************************************************************************/
-double GObservation::npred_grad_kern_spat::eval(double x)
-{
-    #if G_LN_ENERGY_INT
-    // Variable substitution
-    x = exp(x);
-    #endif
-    
-    // Set energy in MeV
-    GEnergy eng;
-    eng.MeV(x);
-    
-    // Get function value
-    double value = m_parent->npred_grad_spat(*m_model, m_ipar, eng, *m_time, *m_pnt);
-    
-    #if G_LN_ENERGY_INT
-    // Correct for variable substitution
-    value *= x;
-    #endif
-    
-    // Return value
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Temporally integrate spatially/spectrally integrated Npred gradient kernel
+ * @brief Temporally integrate spatially/spectrally integrated Npred kernel
  *
  * @param[in] model Gamma-ray source model.
  * @param[in] ipar Parameter index for which gradient should be returned.
@@ -752,7 +586,7 @@ double GObservation::npred_grad_temp(const GModel& model, int ipar) const
 
         // Setup integration function
         GObservation::npred_grad_kern_spec integrand(this, model, ipar);
-        GIntegral integral(&integrand);
+        GIntegral                          integral(&integrand);
 
         // Do Romberg integration
         result += integral.romb(tstart, tstop);
@@ -761,6 +595,168 @@ double GObservation::npred_grad_temp(const GModel& model, int ipar) const
 
     // Return result
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Spectrally integrate spatially integrated Npred gradient kernel
+ *
+ * @param[in] model Gamma-ray source model.
+ * @param[in] ipar Parameter index for which gradient should be returned.
+ * @param[in] srcTime True photon arrival time.
+ *
+ * @todo Throw exception if integration energy range is not valid.
+ ***************************************************************************/
+double GObservation::npred_grad_spec(const GModel& model, int ipar,
+                                     const GTime& srcTime) const
+{
+    // Set integration energy interval in TeV
+    double emin = m_ebounds.emin().MeV();
+    double emax = m_ebounds.emax().MeV();
+
+    // Throw exception if energy range is not valid
+    if (emax <= emin)
+        throw GException::erange_invalid(G_NPRED_GRAD_SPEC, emin, emax);
+
+    // Setup integration function
+    GObservation::npred_grad_kern_spat integrand(this, model, ipar, srcTime);
+    GIntegral                          integral(&integrand);
+
+    // Do Romberg integration
+    #if G_LN_ENERGY_INT
+    emin = log(emin);
+    emax = log(emax);
+    #endif
+    double result = integral.romb(emin, emax);
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Integrates the Npred gradient kernel spatially
+ *
+ * @param[in] model Gamma-ray source model.
+ * @param[in] ipar Parameter index for which gradient should be returned.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Instrument pointing direction.
+ *
+ * @todo Implement integration over skymap.
+ ***************************************************************************/
+double GObservation::npred_grad_spat(const GModel& model, int ipar,
+                                     const GEnergy& srcEng,
+                                     const GTime& srcTime) const
+{
+    // Initialise result
+    double result = 0.0;
+
+    // Continue only if the gamma-ray source model has a spatial component
+    if (model.spatial() != NULL) {
+
+        // Case A: Model is a point source
+        if (model.spatial()->isptsource()) {
+
+            // Build sky direction from point source parameters
+            GSkyDir srcDir;
+            srcDir.radec_deg(((GModelSpatialPtsrc*)model.spatial())->ra(),
+                             ((GModelSpatialPtsrc*)model.spatial())->dec());
+
+            // Get function value at that position
+            result = npred_grad_kern(model, ipar, srcDir, srcEng, srcTime);
+
+        } // endif: Model was a point source
+
+        // Case B: Model is not a point source
+        else {
+
+            // Dump warning that integration is not yet implemented
+            std::cout << "WARNING: GObservation::npred_grad_spat:"
+                      << " Sky integration not implemented." << std::endl;
+
+        } // endelse: Model was not a point source
+
+    } // endif: Gamma-ray source model had a spatial component
+
+    // Return result
+    return result;
+}
+
+
+
+/***********************************************************************//**
+ * @brief Returns the Npred gradient for a given model parameter
+ *
+ * @param[in] model Gamma-ray source model.
+ * @param[in] ipar Parameter index for which gradient should be returned.
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ *
+ * @exception GException::roi_invalid
+ *            No valid ROI found for observation.
+ ***************************************************************************/
+double GObservation::npred_grad_kern(const GModel& model, int ipar,
+                                     const GSkyDir& srcDir,
+                                     const GEnergy& srcEng,
+                                     const GTime& srcTime) const
+{
+    // Make sure that ROI has been set
+    if (m_roi == NULL)
+        throw GException::roi_invalid(G_NPRED_GRAD_KERN,
+                          "No ROI has been defined for observation.");
+
+    // Get current pointing and response
+    GPointing* pnt = pointing(srcTime);
+    GResponse* rsp = response(srcTime);
+
+    // Compute integrated IRF
+    double nirf = rsp->nirf(srcDir, srcEng, srcTime, *pnt, *m_roi, m_ebounds, m_gti);
+
+    // Get model gradients
+    GModel* ptr       = (GModel*)&model; // bypass const-correctness
+    GVector gradients = ptr->gradients(srcDir, srcEng, srcTime);
+
+    // Extract requested model gradient
+    double grad = gradients(ipar);
+
+    // Return
+    return (grad * nirf);
+}
+
+
+/***********************************************************************//**
+ * @brief Integration kernel for npred_grad_spec() method
+ *
+ * @param[in] x Function value.
+ *
+ * This method implements the integration kernel needed for the
+ * npred_grad_spec() method. Upon the defintion of the G_LN_ENERGY_INT
+ * declaration the energy integration is done logarithmically
+ * (G_LN_ENERGY_INT=1) or not.
+ ***************************************************************************/
+double GObservation::npred_grad_kern_spat::eval(double x)
+{
+    #if G_LN_ENERGY_INT
+    // Variable substitution
+    x = exp(x);
+    #endif
+
+    // Set energy in MeV
+    GEnergy eng;
+    eng.MeV(x);
+
+    // Get function value
+    double value = m_parent->npred_grad_spat(*m_model, m_ipar, eng, *m_time);
+
+    #if G_LN_ENERGY_INT
+    // Correct for variable substitution
+    value *= x;
+    #endif
+
+    // Return value
+    return value;
 }
 
 
@@ -801,7 +797,7 @@ std::ostream& operator<< (std::ostream& os, const GObservation& obs)
     os.precision(3);
     os << "=== GObservation ===" << std::endl;
     os << " Name ......................: " << obs.m_obsname << std::endl;
-    os << " Instrument ................: " << obs.m_instrument << std::endl;
+    os << " Instrument ................: " << obs.instrument() << std::endl;
     os << " Time range ................: " << std::fixed
        << obs.m_gti.tstart().mjd() << " - "
        << obs.m_gti.tstop().mjd() << " days" << std::endl;
@@ -818,7 +814,7 @@ std::ostream& operator<< (std::ostream& os, const GObservation& obs)
 
     // Add GTIs to stream
     os << obs.m_gti << std::endl;
-    
+
     // Return output stream
     return os;
 }

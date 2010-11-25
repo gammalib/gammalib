@@ -38,10 +38,18 @@
  *
  * @brief Abstract interface for the observation classes.
  *
- * The class implements support methods to compute Npred values and
- * parameter gradients. These support methods can be overloaded by derived
- * classes that implement instrument specific observations in order to
- * optimize the execution speed for model fitting.
+ * This class provides an abstract interface for an observation. The
+ * observation collects information about the instrument, holds the measured
+ * events, and provides information about the analysis definiton.
+ * The method model() returns the probability for an event to be measured
+ * with a given instrument direction, a given energy and at a given time,
+ * given a source model and an instrument pointing direction.
+ * The method npred() returns the total number of expected events within the
+ * analysis region for a given source model and a given instrument pointing
+ * direction.
+ * The methods a defined as virtual and can be overloaded by derived classes
+ * that implement instrument specific observations in order to optimize the
+ * execution speed for data analysis.
  ***************************************************************************/
 class GObservation {
 
@@ -61,22 +69,25 @@ public:
     virtual GObservation& operator= (const GObservation& obs);
 
     // Pure virtual methods
-    virtual void   response(const std::string& irfname, std::string caldb = "") = 0;
+    virtual void          response(const std::string& irfname, std::string caldb = "") = 0;
+    virtual GResponse*    response(const GTime& time) const = 0;
+    virtual GPointing*    pointing(const GTime& time) const = 0;
+    virtual std::string   instrument(void) const = 0;
+    virtual GObservation* clone(void) const = 0;
+
 
     // Virtual methods
-    virtual double model(const GModels& models, const GInstDir& obsDir,
+    virtual double model(const GModels& models,const GInstDir& obsDir,
                          const GEnergy& obsEng, const GTime& obsTime,
-                         const GPointing& pnt, GVector* gradient = NULL) const;
+                         GVector* gradient = NULL) const;
     virtual double npred(const GModels& models, GVector* gradient = NULL) const;
 
     // Implemented methods
     void        obsname(const std::string& obsname) { m_obsname=obsname; return; }
-    void        instrument(const std::string& instrument) { m_instrument=instrument; return; }
     void        roi(const GRoi& roi) { m_roi=roi.clone(); return; }
     void        ebounds(const GEbounds& ebounds) { m_ebounds=ebounds; return; }
     void        gti(const GGti& gti) { m_gti=gti; return; }
     std::string obsname(void) const { return m_obsname; }
-    std::string instrument(void) const { return m_instrument; }
     GTime       tstart(void) const { return m_gti.tstart(); }
     GTime       tstop(void) const { return  m_gti.tstop(); }
     GEnergy     emin(void) const { return m_ebounds.emin(); }
@@ -85,49 +96,43 @@ public:
     GEbounds*   ebounds(void) { return &m_ebounds; }
     GGti*       gti(void) { return &m_gti; }
     GEvents*    events(void) const { return m_events; }
-    GResponse*  response(void) const { return m_response; }
 
 protected:
     // Protected methods
     void                  init_members(void);
     void                  copy_members(const GObservation& obs);
     void                  free_members(void);
-    virtual GObservation* clone(void) const = 0;
 
     // Npred integration methods
-    virtual double npred_kern(const GModel& model, const GSkyDir& srcDir,
-                              const GEnergy& srcEng, const GTime& srcTime,
-                              const GPointing& pnt) const;
-    virtual double npred_spat(const GModel& model,
-                              const GEnergy& srcEng, const GTime& srcTime,
-                              const GPointing& pnt) const;
-    virtual double npred_spec(const GModel& model, const GTime& srcTime) const;
     virtual double npred_temp(const GModel& model) const;
+    virtual double npred_spec(const GModel& model, const GTime& srcTime) const;
+    virtual double npred_spat(const GModel& model, const GEnergy& srcEng,
+                              const GTime& srcTime) const;
+    virtual double npred_kern(const GModel& model, const GSkyDir& srcDir,
+                              const GEnergy& srcEng, const GTime& srcTime) const;
 
     // Npred gradient integration methods
-    virtual double npred_grad_kern(const GModel& model, int ipar,
-                                   const GSkyDir& srcDir, const GEnergy& srcEng,
-                                   const GTime& srcTime, const GPointing& pnt) const;
-    virtual double npred_grad_spat(const GModel& model, int ipar,
-                                   const GEnergy& srcEng, const GTime& srcTime,
-                                   const GPointing& pnt) const;
+    virtual double npred_grad_temp(const GModel& model, int ipar) const;
     virtual double npred_grad_spec(const GModel& model, int ipar,
                                    const GTime& srcTime) const;
-    virtual double npred_grad_temp(const GModel& model, int ipar) const;
+    virtual double npred_grad_spat(const GModel& model, int ipar,
+                                   const GEnergy& srcEng, const GTime& srcTime) const;
+    virtual double npred_grad_kern(const GModel& model, int ipar,
+                                   const GSkyDir& srcDir, const GEnergy& srcEng,
+                                   const GTime& srcTime) const;
 
     // Npred kernel classes
     class npred_kern_spat : public GIntegrand {
     public:
         npred_kern_spat(const GObservation* parent, const GModel& model,
-                        const GTime& srcTime, const GPointing* pnt) :
-                        m_parent(parent), m_model(&model), m_time(&srcTime),
-                        m_pnt(pnt) { return; }
+                        const GTime& srcTime) :
+                        m_parent(parent), m_model(&model), m_time(&srcTime)
+                        { return; }
         double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to model
         const GTime*        m_time;   //!< Pointer to time
-        const GPointing*    m_pnt;    //!< Pointer to telescope pointing
     };
     class npred_kern_spec : public GIntegrand {
     public:
@@ -143,23 +148,22 @@ protected:
     class npred_grad_kern_spat : public GIntegrand {
     public:
         npred_grad_kern_spat(const GObservation* parent, const GModel& model,
-                             int ipar, const GTime& srcTime,
-                             const GPointing* pnt) :
+                             int ipar, const GTime& srcTime) :
                              m_parent(parent), m_model(&model), m_ipar(ipar),
-                             m_time(&srcTime), m_pnt(pnt) { return; }
+                             m_time(&srcTime) { return; }
         double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to model
         int                 m_ipar;   //!< Parameter index
         const GTime*        m_time;   //!< Pointer to time
-        const GPointing*    m_pnt;    //!< Pointer to pointing
     };
     class npred_grad_kern_spec : public GIntegrand {
     public:
         npred_grad_kern_spec(const GObservation* parent, const GModel& model,
-                             int ipar) : m_parent(parent), m_model(&model),
-                             m_ipar(ipar) { return; }
+                             int ipar) :
+                             m_parent(parent), m_model(&model), m_ipar(ipar)
+                             { return; }
         double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
@@ -169,12 +173,11 @@ protected:
 
     // Protected data area
     std::string m_obsname;      //!< Name of observation
-    std::string m_instrument;   //!< Instrument name
+    //std::string m_instrument;   //!< Instrument name
     GEbounds    m_ebounds;      //!< Energy boundaries used for analysis
     GGti        m_gti;          //!< Good time intervals used for analysis
     GRoi*       m_roi;          //!< Pointer to region of interest used for analysis
     GEvents*    m_events;       //!< Pointer to events
-    GResponse*  m_response;     //!< Pointer to instrument response functions
 
 private:
 };
