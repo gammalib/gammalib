@@ -200,61 +200,48 @@ void GCTAEventCube::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Get pointer to element
+ * @brief Returns pointer to an event
  *
- * @param[in] index Event index for which pointer will be returned.
+ * @param[in] index Event index (starting from 0).
+ *
+ * @exception GException::out_of_range
+ *            Event index not in valid range.
  *
  * This method provides the event attributes to the event bin. The event bin
  * is in fact physically stored in the event cube, and only a single event
  * bin is indeed allocated. This method sets up the pointers in the event
  * bin so that a client can easily access the information of individual bins
  * as if they were stored in an array.
- * The method returns a NULL pointer if the index is out of the valid range.
  *
- * @todo Static pointers could be set by init_members().
- *
- * @todo Should we really return a NULL pointer in case that the index
- *       is not valid? Should we not better throw an exception? 
+ * @todo Remove m_obs pointer.
  ***************************************************************************/
 GCTAEventBin* GCTAEventCube::pointer(int index)
 {
-//    #if defined(G_RANGE_CHECK)
-//    if (index < 0 || index >= m_elements)
-//        throw GException::out_of_range(G_POINTER, index, 0, m_elements-1);
-//    #endif
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= m_elements)
+        throw GException::out_of_range(G_POINTER, index, 0, m_elements-1);
+    #endif
 
-    // Preset pointer with NULL
-    GCTAEventBin* ptr = NULL;
+    // Get pixel and energy bin indices. Note that in GSkymap that holds
+    // the counts, the energy axis is the most rapidely varying axis.
+    int ipix = index / ebins();
+    int ieng = index % ebins();
 
-    // Set pointer if index is in range
-    if (index >=0 && index < m_elements) {
-
-        // Set pointer to static element
-        ptr = (GCTAEventBin*)&m_bin;
-
-        // Get pixel and energy bin indices. Note that in GSkymap that holds
-        // the counts, the energy axis is the most rapidely varying axis.
-        int ipix = index / ebins();
-        int ieng = index % ebins();
-
-        // Set GEventBin pointers
-        ptr->m_counts = &(m_counts[index]);
-        ptr->m_time   = &m_time;
-        ptr->m_energy = &(m_energies[ieng]);
-
-        // Set GCTAEventBin pointers
-        ptr->m_dir    = &(m_dirs[ipix]);
-        ptr->m_pnt    = &m_pnt;
-        ptr->m_rsp    = (m_obs != NULL) ?
+    // Set pointers
+    m_bin.m_counts = &(m_counts[index]);    //!< GEventBin member
+    //m_bin.m_time   = &m_time;             //!< Static pointer
+    m_bin.m_energy = &(m_energies[ieng]);   //!< GEventBin member
+    m_bin.m_dir    = &(m_dirs[ipix]);
+    //m_bin.m_pnt    = &m_pnt;              //!< Static pointer
+    m_bin.m_rsp    = (m_obs != NULL) ?
                         (GCTAResponse*)((GObservation*)m_obs)->response() : NULL;
-        ptr->m_omega  = &(m_omega[ipix]);
-        ptr->m_ewidth = &(m_ewidth[ieng]);
-        ptr->m_ontime = &m_ontime;
+    m_bin.m_omega  = &(m_omega[ipix]);
+    m_bin.m_ewidth = &(m_ewidth[ieng]);
+    //m_bin.m_ontime = &m_ontime;           //!< Static pointer
 
-    } // endif: valid index
-
-    // Return pointer
-    return ptr;
+    // Return pointer to static element
+    return &m_bin;
 }
 
 
@@ -306,6 +293,11 @@ void GCTAEventCube::init_members(void)
     m_pnt.clear();
     m_ebds.clear();
     m_gti.clear();
+
+    // Set static event pointers
+    m_bin.m_time   = &m_time;
+    m_bin.m_pnt    = &m_pnt;
+    m_bin.m_ontime = &m_ontime;
 
     // Return
     return;
