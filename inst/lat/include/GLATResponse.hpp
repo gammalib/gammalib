@@ -39,7 +39,7 @@
 /***********************************************************************//**
  * @class GLATResponse
  *
- * @brief Interface for the GLAST LAT instrument response function.
+ * @brief Interface for the Fermi LAT instrument response function.
  ***************************************************************************/
 class GLATResponse : public GResponse {
 
@@ -75,6 +75,7 @@ public:
     void   load(const std::string& rspname);
     bool   hasedisp(void) const { return false; }
     bool   hastdisp(void) const { return false; }
+    GLATResponse* clone(void) const;
 
     // Other Methods
     double        aeff(const double& logE, const double& ctheta);
@@ -114,7 +115,6 @@ private:
     void          init_members(void);
     void          copy_members(const GLATResponse& rsp);
     void          free_members(void);
-    GLATResponse* clone(void) const;
     GVector       get_fits_vector(const GFitsTable* hdu, const std::string& colname, int row = 0);
 
     // Private Aeff data

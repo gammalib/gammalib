@@ -149,7 +149,7 @@ double GCTAResponse::live(const GSkyDir& srcDir, const GEnergy& srcEng,
 {
     // Dummy
     double live = 0.8;
-    
+
     // Return effective area
     return live;
 }
@@ -172,7 +172,7 @@ double GCTAResponse::aeff(const GSkyDir& srcDir, const GEnergy& srcEng,
 {
     // Get log(E)
     double logE = log10(srcEng.TeV());
-    
+
     // Interpolate effective area using node array and convert to cm^2
     GNodeArray* nodes = (GNodeArray*)&m_nodes; // circumvent const correctness
     double aeff = nodes->interpolate(logE, m_aeff) * 10000.0;
@@ -239,7 +239,7 @@ double GCTAResponse::edisp(const GEnergy& obsEng,
 {
     // Dirac energy dispersion
     double edisp = (obsEng == srcEng) ? 1.0 : 0.0;
-    
+
     // Return energy dispersion
     return edisp;
 }
@@ -263,7 +263,7 @@ double GCTAResponse::tdisp(const GTime& obsTime,
 {
     // Dirac time dispersion
     double tdisp = (obsTime == srcTime) ? 1.0 : 0.0;
-    
+
     // Return time dispersion
     return tdisp;
 }
@@ -284,7 +284,7 @@ double GCTAResponse::npsf(const GSkyDir& srcDir, const GEnergy& srcEng,
 {
     // Get pointer to CTA ROI (bypass const correctness)
     GCTARoi* ctaroi = (GCTARoi*)&roi;
-    
+
     // Extract relevant parameters from arguments
     double radroi = ctaroi->radius() * deg2rad;
     double psf    = ctaroi->centre().dist(srcDir);
@@ -315,7 +315,7 @@ double GCTAResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
 {
     // Dummy
     double nedisp = 1.0;
-    
+
     // Return integral
     return nedisp;
 }
@@ -338,7 +338,7 @@ double GCTAResponse::ntdisp(const GSkyDir& srcDir, const GEnergy& srcEng,
 {
     // Dummy
     double ntdisp = 1.0;
-    
+
     // Return integral
     return ntdisp;
 }
@@ -357,7 +357,7 @@ void GCTAResponse::load(const std::string& irfname)
     // Initialise response members
     free_members();
     init_members();
-    
+
     // Build filename
     std::string filename = m_caldb + "/" + irfname + ".dat";
 
@@ -369,6 +369,15 @@ void GCTAResponse::load(const std::string& irfname)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone response class
+***************************************************************************/
+GCTAResponse* GCTAResponse::clone(void) const
+{
+    return new GCTAResponse(*this);
 }
 
 
@@ -393,7 +402,7 @@ double GCTAResponse::psf(const double& theta, const double& sigma) const
     // Compute Psf value
     double sigma2 = sigma * sigma;
     double value  = exp(-0.5 * theta * theta / sigma2) / (twopi * sigma2);
-    
+
     // Return PSF value
     return value;
 }
@@ -443,10 +452,10 @@ double GCTAResponse::npsf(const double& psf, const double& radroi,
 {
     // Declare result
     double value;
-    
+
     // Get maximum PSF radius
     double rmax = 5.0*sigma;
-    
+
     // If PSF is sufficiently enclosed by ROI, skip the numerical integration
     // and assume that the integral is 1.0
     if (psf+rmax < radroi)
@@ -520,13 +529,13 @@ double GCTAResponse::npsf_kern_azsym(const double& rad,
 {
     // Declare arclength
     double arclength;
-    
+
     // Handle special case of identical PSF and ROI centres
     if (psf == 0.0) {
         if (rad > roi) arclength = 0.0;   // PSF radius outside ROI
         else           arclength = twopi; // PSF radius inside ROI
     }
-    
+
     // ... PSF and ROI centres are not identical
     else {
 
@@ -535,7 +544,7 @@ double GCTAResponse::npsf_kern_azsym(const double& rad,
             if (psf > roi) arclength = 0.0;   // PSF centre outside ROI
             else           arclength = twopi; // PSF centre inside ROI
         }
-        
+
         // Handle general case
         else {
             double dist = roi - psf;
@@ -550,9 +559,9 @@ double GCTAResponse::npsf_kern_azsym(const double& rad,
                 arclength = acos(cosang);
             }
         }
-    
+
     } // endelse: PSF and ROI centres were not identical
-    
+
     // Return arclength
     return arclength;
 }
@@ -593,7 +602,7 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
     m_aeff  = rsp.m_aeff;
     m_r68   = rsp.m_r68;
     m_r80   = rsp.m_r80;
-    
+
     // Return
     return;
 }
@@ -606,15 +615,6 @@ void GCTAResponse::free_members(void)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone response class
-***************************************************************************/
-GCTAResponse* GCTAResponse::clone(void) const
-{
-    return new GCTAResponse(*this);
 }
 
 
@@ -650,7 +650,7 @@ void GCTAResponse::read_performance_table(const std::string& filename)
             if (strip_whitespace(*it).length() == 0)
                 elements.erase(it);
         }
-        
+
         // Skip header
         if (elements[0].find("log(E)") != std::string::npos)
             continue;
@@ -666,7 +666,7 @@ void GCTAResponse::read_performance_table(const std::string& filename)
         m_r80.push_back(todouble(elements[3]));
 
     } // endwhile: looped over lines
-    
+
     // If we have nodes then setup node array
     int num = m_logE.size();
     if (num > 0) {

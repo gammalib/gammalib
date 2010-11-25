@@ -122,6 +122,14 @@ GLATPointing& GLATPointing::operator= (const GLATPointing& pnt)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Clone class
+***************************************************************************/
+GLATPointing* GLATPointing::clone(void) const
+{
+    return new GLATPointing(*this);
+}
+
 
 /*==========================================================================
  =                                                                         =
@@ -158,15 +166,6 @@ void GLATPointing::free_members(void)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GLATPointing* GLATPointing::clone(void) const
-{
-    return new GLATPointing(*this);
 }
 
 

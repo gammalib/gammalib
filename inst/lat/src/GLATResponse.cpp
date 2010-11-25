@@ -172,7 +172,7 @@ double GLATResponse::tdisp(const GTime& obsTime,
 {
     // Dirac time dispersion
     double tdisp = (obsTime == srcTime) ? 1.0 : 0.0;
-    
+
     // Return time dispersion
     return tdisp;
 }
@@ -195,7 +195,7 @@ double GLATResponse::npsf(const GSkyDir& srcDir, const GEnergy& srcEng,
 {
     // Dummy
     double npsf = 1.0;
-    
+
     // Return integral
     return npsf;
 }
@@ -218,7 +218,7 @@ double GLATResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
 {
     // Dummy
     double nedisp = 1.0;
-    
+
     // Return integral
     return nedisp;
 }
@@ -241,7 +241,7 @@ double GLATResponse::ntdisp(const GSkyDir& srcDir, const GEnergy& srcEng,
 {
     // Dummy
     double ntdisp = 1.0;
-    
+
     // Return integral
     return ntdisp;
 }
@@ -266,7 +266,7 @@ void GLATResponse::load(const std::string& rspname)
 {
     // Separate response type
     std::vector<std::string> array = split(rspname, "::");
-    
+
     // Set response name and type
     if (array.size() == 3) {
         m_rspname = array[0];
@@ -310,16 +310,16 @@ void GLATResponse::save(const std::string& rspname) const
 {
     // Allocate FITS file
     GFits file;
-    
+
     // Open FITS file
     file.open(rspname);
-    
+
     // Save effective area
     aeff_append(file);
-    
+
     // Append PSF HDUs
     psf_append(file);
-    
+
     // Save energy dispersions
     edisp_append(file);
 
@@ -328,6 +328,15 @@ void GLATResponse::save(const std::string& rspname) const
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone response class
+***************************************************************************/
+GLATResponse* GLATResponse::clone(void) const
+{
+    return new GLATResponse(*this);
 }
 
 
@@ -347,7 +356,7 @@ void GLATResponse::init_members(void)
 
     // Initialise PSF members
     psf_init_members();
-    
+
     // Initialize energy dispersion members
     edisp_init_members();
 
@@ -370,13 +379,13 @@ void GLATResponse::copy_members(const GLATResponse& rsp)
 {
     // Copy effective area members
     aeff_copy_members(rsp);
-    
+
     // Copy PSF members
     psf_copy_members(rsp);
 
     // Copy energy dispersion members
     edisp_copy_members(rsp);
-    
+
     // Copy remaining members
     m_caldb = rsp.m_caldb;
 
@@ -395,23 +404,14 @@ void GLATResponse::free_members(void)
 
     // Free PSF  members
     psf_free_members();
-    
+
     // Free energy dispersion members
     edisp_free_members();
-    
+
     // Free remaining members
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone response class
-***************************************************************************/
-GLATResponse* GLATResponse::clone(void) const
-{
-    return new GLATResponse(*this);
 }
 
 

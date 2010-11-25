@@ -46,14 +46,14 @@ public:
     GCTAPointing& operator= (const GCTAPointing& pnt);
 
     // Methods
-    void clear(void);
+    void          clear(void);
+    GCTAPointing* clone(void) const;
 
 protected:
     // Protected methods
     void          init_members(void);
     void          copy_members(const GCTAPointing& pnt);
     void          free_members(void);
-    GCTAPointing* clone(void) const;
 };
 
 #endif /* GCTAPOINTING_HPP */

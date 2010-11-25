@@ -77,6 +77,7 @@ public:
     void   load(const std::string& irfname);
     bool   hasedisp(void) const { return false; }
     bool   hastdisp(void) const { return false; }
+    GCTAResponse* clone(void) const;
 
     // Other Methods
     double psf(const double& theta, const double& sigma) const;
@@ -85,12 +86,11 @@ public:
 
 private:
     // Private methods
-    void          init_members(void);
-    void          copy_members(const GCTAResponse& rsp);
-    void          free_members(void);
-    GCTAResponse* clone(void) const;
-    void          read_performance_table(const std::string& filename);
-    
+    void init_members(void);
+    void copy_members(const GCTAResponse& rsp);
+    void free_members(void);
+    void read_performance_table(const std::string& filename);
+
     // Integration
     double npsf_kern_azsym(const double& rad,
                            const double& roi, const double& cosroi,
@@ -115,7 +115,6 @@ private:
         double              m_sigma;   //!< Width of PSF in radians
     };
 
-    
     // Private data members
     GNodeArray          m_nodes; //!< log(E) nodes for interpolation
     std::vector<double> m_logE;  //!< log(E) = log10(E/TeV) - bin centre

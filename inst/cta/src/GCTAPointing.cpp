@@ -141,6 +141,15 @@ void GCTAPointing::clear(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Clone class
+***************************************************************************/
+GCTAPointing* GCTAPointing::clone(void) const
+{
+    return new GCTAPointing(*this);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -179,15 +188,6 @@ void GCTAPointing::free_members(void)
 }
 
 
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GCTAPointing* GCTAPointing::clone(void) const
-{
-    return new GCTAPointing(*this);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                                 Friends                                 =
@@ -204,7 +204,7 @@ std::ostream& operator<< (std::ostream& os, const GCTAPointing& pnt)
 {
     // Put pointing in output stream
     os << "Pointing(" << ")";
-        
+
     // Return output stream
     return os;
 }

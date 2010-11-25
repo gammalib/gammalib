@@ -42,13 +42,13 @@ public:
     GLATPointing& operator= (const GLATPointing& pnt);
 
     // Methods
+    GLATPointing* clone(void) const;
 
 protected:
     // Protected methods
     void          init_members(void);
     void          copy_members(const GLATPointing& pnt);
     void          free_members(void);
-    GLATPointing* clone(void) const;
 };
 
 #endif /* GLATPOINTING_HPP */
