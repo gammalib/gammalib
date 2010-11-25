@@ -142,6 +142,7 @@ GCTAEventBin& GCTAEventBin::operator= (const GCTAEventBin& bin)
  *
  * Implements generic model and gradient evaluation for the CTA instrument.
  ***************************************************************************/
+/*
 double GCTAEventBin::model(GModels& models, GVector* gradient) const
 {
     // Make sure that response pointer exists
@@ -190,7 +191,7 @@ double GCTAEventBin::model(GModels& models, GVector* gradient) const
     // Return
     return model;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Return size of event bin
@@ -202,6 +203,15 @@ double GCTAEventBin::size(void) const
 
     // Return bin size
     return size;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone class
+***************************************************************************/
+GCTAEventBin* GCTAEventBin::clone(void) const
+{
+    return new GCTAEventBin(*this);
 }
 
 
@@ -218,8 +228,6 @@ void GCTAEventBin::init_members(void)
 {
     // Initialise CTA specific attributes
     m_dir    = NULL;
-    m_pnt    = NULL;
-    m_rsp    = NULL;
     m_omega  = NULL;
     m_ewidth = NULL;
     m_ontime = NULL;
@@ -238,8 +246,6 @@ void GCTAEventBin::copy_members(const GCTAEventBin& bin)
 {
     // Copy CTA specific attributes
     m_dir    = bin.m_dir;
-    m_pnt    = bin.m_pnt;
-    m_rsp    = bin.m_rsp;
     m_omega  = bin.m_omega;
     m_ewidth = bin.m_ewidth;
     m_ontime = bin.m_ontime;
@@ -251,20 +257,14 @@ void GCTAEventBin::copy_members(const GCTAEventBin& bin)
 
 /***********************************************************************//**
  * @brief Delete class members
+ *
+ * This class does not allocate any memory but simply holds pointers. Hence
+ * nothing has to be deallocated.
  ***************************************************************************/
 void GCTAEventBin::free_members(void)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GCTAEventBin* GCTAEventBin::clone(void) const
-{
-    return new GCTAEventBin(*this);
 }
 
 

@@ -53,10 +53,8 @@ public:
     virtual GEventAtom& operator= (const GEventAtom& atom);
 
     // Pure virtual methods
-    virtual double           model(GModels& models, GVector* gradient = NULL) const = 0;
-    virtual const GInstDir*  dir(void) const = 0;
-    virtual const GPointing* pnt(void) const = 0;
-    virtual const GResponse* rsp(void) const = 0;
+    virtual const GInstDir* dir(void) const = 0;
+    virtual GEventAtom*     clone(void) const = 0;
 
     // Implemented methods
     bool           isatom(void) const { return true; }
@@ -65,19 +63,18 @@ public:
     double         size(void) const { return 1.0; }
     const GEnergy* energy(void) const { return &m_energy; }
     const GTime*   time(void) const { return &m_time; }
-    
-protected:
-    // Protected methods
-    void                init_members(void);
-    void                copy_members(const GEventAtom& atom);
-    void                free_members(void);
-    virtual GEventAtom* clone(void) const = 0;
 
+protected:
     // Protected data area
     GTime      m_time;         //!< Event time
-	GEnergy    m_energy;       //!< Event energy
+    GEnergy    m_energy;       //!< Event energy
 
 private:
+    // Private methods
+    void init_members(void);
+    void copy_members(const GEventAtom& atom);
+    void free_members(void);
+
 };
 
 #endif /* GEVENTATOM_HPP */

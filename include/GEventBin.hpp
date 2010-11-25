@@ -61,32 +61,29 @@ public:
     virtual GEventBin& operator= (const GEventBin& bin);
 
     // Pure virtual methods
-    virtual double           model(GModels& models, GVector* gradient = NULL) const = 0;
-    virtual double           size(void) const = 0;
-    virtual const GInstDir*  dir(void) const = 0;
-    virtual const GPointing* pnt(void) const = 0;
-    virtual const GResponse* rsp(void) const = 0;
-    
-    // Implemented methods
-    bool             isatom(void) const { return false; }
-    bool             isbin(void) const { return true; }
-    double           counts(void) const { return *m_counts; }
-    const GEnergy*   energy(void) const { return m_energy; }
-    const GTime*     time(void) const { return m_time; }
-    
-protected:
-    // Protected methods
-    void               init_members(void);
-    void               copy_members(const GEventBin& bin);
-    void               free_members(void);
-    virtual GEventBin* clone(void) const = 0;
+    virtual double          size(void) const = 0;
+    virtual const GInstDir* dir(void) const = 0;
+    virtual GEventBin*      clone(void) const = 0;
 
+    // Implemented methods
+    bool           isatom(void) const { return false; }
+    bool           isbin(void) const { return true; }
+    double         counts(void) const { return *m_counts; }
+    const GEnergy* energy(void) const { return m_energy; }
+    const GTime*   time(void) const { return m_time; }
+
+protected:
     // Protected data area
-    double*    m_counts;      //!< Pointer to number of counts
-    GTime*     m_time;        //!< Pointer to bin time
-    GEnergy*   m_energy;      //!< Pointer to bin energy
+    double*  m_counts;      //!< Pointer to number of counts
+    GTime*   m_time;        //!< Pointer to bin time
+    GEnergy* m_energy;      //!< Pointer to bin energy
 
 private:
+    // Provate methods
+    void init_members(void);
+    void copy_members(const GEventBin& bin);
+    void free_members(void);
+
 };
 
 #endif /* GEVENTBIN_HPP */

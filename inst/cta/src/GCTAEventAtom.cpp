@@ -128,6 +128,16 @@ GCTAEventAtom& GCTAEventAtom::operator= (const GCTAEventAtom& atom)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clone class
+***************************************************************************/
+GCTAEventAtom* GCTAEventAtom::clone(void) const
+{
+    return new GCTAEventAtom(*this);
+}
+
+
+
+/***********************************************************************//**
  * @brief Return model value and gradient
  *
  * @param[in] models Model descriptor.
@@ -140,6 +150,7 @@ GCTAEventAtom& GCTAEventAtom::operator= (const GCTAEventAtom& atom)
  *
  * Implements generic model and gradient evaluation for the CTA instrument.
  ***************************************************************************/
+/*
 double GCTAEventAtom::model(GModels& models, GVector* gradient) const
 {
     // Make sure that response pointer exists
@@ -182,7 +193,7 @@ double GCTAEventAtom::model(GModels& models, GVector* gradient) const
     // Return
     return model;
 }
-
+*/
 
 /*==========================================================================
  =                                                                         =
@@ -193,18 +204,16 @@ double GCTAEventAtom::model(GModels& models, GVector* gradient) const
 /***********************************************************************//**
  * @brief Initialise class members
  *
- * @todo Need to implement GCTAInstDir:clear() and GCTAPointing:clear()
+ * @todo Need to implement GCTAInstDir:clear()
  ***************************************************************************/
 void GCTAEventAtom::init_members(void)
 {
     // Initialise CTA data format attributes
     //m_dir.clear();
-    //m_pnt.clear();
-    m_rsp         = NULL;
     m_event_id    = 0;
     m_flags       = 0;
     m_multip      = 0;
-    m_telmask     = 0; 
+    m_telmask     = 0;
     m_dir_err     = 0.0;
     m_detx        = 0.0;
     m_dety        = 0.0;
@@ -237,8 +246,6 @@ void GCTAEventAtom::copy_members(const GCTAEventAtom& atom)
 {
     // Copy CTA data format attributes
     m_dir         = atom.m_dir;
-    m_pnt         = atom.m_pnt;
-    m_rsp         = atom.m_rsp;
     m_event_id    = atom.m_event_id;
     m_flags       = atom.m_flags;
     m_multip      = atom.m_multip;
@@ -276,15 +283,6 @@ void GCTAEventAtom::free_members(void)
 }
 
 
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GCTAEventAtom* GCTAEventAtom::clone(void) const
-{
-    return new GCTAEventAtom(*this);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                                Friends                                  =
@@ -304,8 +302,8 @@ std::ostream& operator<< (std::ostream& os, const GCTAEventAtom& atom)
     os << std::fixed;
     os << "Time=" << atom.m_time;
     os << " Energy=" << atom.m_energy;
-    os << atom.m_dir; 
-        
+    os << atom.m_dir;
+
     // Return output stream
     return os;
 }

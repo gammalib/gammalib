@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GEvent.hpp  -  Event abstract base class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -42,12 +42,13 @@
  * whether an event is either an atom or a bin.
  * The counts() method returns the number of event atoms in a event bin.
  * For an event atom, this method returns by definition 1.
- * The model() method returns either the probability for an event atom
- * to occur (unbinned analysis) or the expected number of counts for an
- * event bin (binned analysis).
+ * The size() method returns the size of an event bin (which is the
+ * quantity that has to be multiplied my the probability for an event to
+ * occur to predict the number of events in a bin). For event atoms this
+ * quantity is by definition 1.
  * Attributes of an event atom or bin can be accessed through the dir(),
- * energy(), time(), pnt(), rsp() methods that all return const pointers
- * to the relevant information.
+ * energy(), and time() methods that all return const pointers to the
+ * relevant information.
  *
  * This method does not hold any data members. Data members are stored in
  * the derived classes.
@@ -67,25 +68,23 @@ public:
     virtual GEvent& operator= (const GEvent& event);
 
     // Virtual methods
-    virtual bool             isatom(void) const = 0;
-    virtual bool             isbin(void) const = 0;
-    virtual double           counts(void) const = 0;
-    virtual double           model(GModels& models, GVector* gradient = NULL) const = 0;
-    virtual double           size(void) const = 0;
-    virtual const GInstDir*  dir(void) const = 0;
-    virtual const GEnergy*   energy(void) const = 0;
-    virtual const GTime*     time(void) const = 0;
-    virtual const GPointing* pnt(void) const = 0;
-    virtual const GResponse* rsp(void) const = 0;
-    
+    virtual bool            isatom(void) const = 0;
+    virtual bool            isbin(void) const = 0;
+    virtual double          counts(void) const = 0;
+    virtual double          size(void) const = 0;
+    virtual const GInstDir* dir(void) const = 0;
+    virtual const GEnergy*  energy(void) const = 0;
+    virtual const GTime*    time(void) const = 0;
+    virtual GEvent*         clone(void) const = 0;
+
 protected:
-    // Protected methods
-    void            init_members(void);
-    void            copy_members(const GEvent& event);
-    void            free_members(void);
-    virtual GEvent* clone(void) const = 0;
 
 private:
+    // Private methods
+    void init_members(void);
+    void copy_members(const GEvent& event);
+    void free_members(void);
+
 };
 
 #endif /* GEVENT_HPP */

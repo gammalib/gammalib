@@ -62,26 +62,21 @@ public:
     GCTAEventBin& operator= (const GCTAEventBin& bin);
 
     // Methods
-    double              model(GModels& models, GVector* gradient = NULL) const;
-    double              size(void) const;
-    const GCTAInstDir*  dir(void) const { return m_dir; }
-    const GCTAPointing* pnt(void) const { return m_pnt; }
-    const GCTAResponse* rsp(void) const { return m_rsp; }
-    const double*       omega(void) const { return m_omega; }
-    const GEnergy*      ewidth(void) const { return m_ewidth; }
-    const double*       ontime(void) const { return m_ontime; }
-    
+    double             size(void) const;
+    const GCTAInstDir* dir(void) const { return m_dir; }
+    const double*      omega(void) const { return m_omega; }
+    const GEnergy*     ewidth(void) const { return m_ewidth; }
+    const double*      ontime(void) const { return m_ontime; }
+    GCTAEventBin*      clone(void) const;
+
 protected:
     // Protected methods
-    void          init_members(void);
-    void          copy_members(const GCTAEventBin& bin);
-    void          free_members(void);
-    GCTAEventBin* clone(void) const;
+    void init_members(void);
+    void copy_members(const GCTAEventBin& bin);
+    void free_members(void);
 
     // CTA specific event attributes
     GCTAInstDir*  m_dir;     //!< Pointer to event direction
-    GCTAPointing* m_pnt;     //!< Pointer to instrument pointing
-    GCTAResponse* m_rsp;     //!< Pointer to instrument response function
     double*       m_omega;   //!< Pointer to solid angle of pixel (sr)
     GEnergy*      m_ewidth;  //!< Pointer to energy width of bin
     double*       m_ontime;  //!< Pointer to ontime of bin (seconds)
