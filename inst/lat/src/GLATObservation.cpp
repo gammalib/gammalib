@@ -302,12 +302,15 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
 
 /***********************************************************************//**
  * @brief Initialise class members
+ *
+ * @todo We allocate void response and pointing instances so make sure they
+ * exist (analysis methods depend on the existence of these members).
  ***************************************************************************/
 void GLATObservation::init_members(void)
 {
     // Initialise members
-    m_response = NULL;
-    m_pointing = NULL;
+    m_response = new GLATResponse;
+    m_pointing = new GLATPointing;
 
     // Return
     return;

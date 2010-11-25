@@ -293,12 +293,15 @@ void GCTAObservation::load_binned(const std::string& filename)
 
 /***********************************************************************//**
  * @brief Initialise class members
+ *
+ * @todo We allocate void response and pointing instances so make sure they
+ * exist (analysis methods depend on the existence of these members).
  ***************************************************************************/
 void GCTAObservation::init_members(void)
 {
     // Initialise members
-    m_response = NULL;
-    m_pointing = NULL;
+    m_response = new GCTAResponse;
+    m_pointing = new GCTAPointing;
 
     // Return
     return;
