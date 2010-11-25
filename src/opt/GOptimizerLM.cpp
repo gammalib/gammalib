@@ -350,8 +350,14 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
 /***********************************************************************//**
  * @brief Perform one LM iteration
  *
- * @param[in] fct Poiner to optimization function.
- * @param[in] par Pointer to parameters to be optimised.
+ * @param[in] fct Optimizer function.
+ * @param[in] par Function parameters.
+ *
+ * This method performs one LM iteration. Note that the method only acts on
+ * the parameter value, i.e. it does not worry about the true scale of the
+ * parameter. It calls the eval() method of the optimizer function which
+ * is assumed to return the gradient and curvature matrix with respect to the
+ * parameter values (and not the scaled true values).
  ***************************************************************************/
 void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
 {
@@ -411,14 +417,13 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
         // Derive new parameter vector
         for (int ipar = 0; ipar < npars; ++ipar) {
 
-            // Get actual parameter value, limits and scale
+            // Get actual parameter value and limits
             double p     = pars->par(ipar)->value();
             double p_min = pars->par(ipar)->min();
             double p_max = pars->par(ipar)->max();
-            double scale = pars->par(ipar)->scale();
 
             // Compute new parameter value
-            p += (*grad)(ipar) * scale * step;
+            p += (*grad)(ipar) * step;
 
             // Constrain parameter to within the valid range
             if (pars->par(ipar)->hasmin() && p < p_min) {
@@ -436,7 +441,7 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
                 p = p_max;
             }
 
-            // Set parameter value
+            // Set new parameter value
             pars->par(ipar)->value(p);
 
         } // endfor: computed new parameter vector
