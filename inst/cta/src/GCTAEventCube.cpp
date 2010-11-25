@@ -137,7 +137,7 @@ GCTAEventCube& GCTAEventCube::operator= (const GCTAEventCube& cube)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear object.
+ * @brief Clear object
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
@@ -159,7 +159,16 @@ void GCTAEventCube::clear(void)
 
 
 /***********************************************************************//**
- * @brief Load CTA counts map from FITS file.
+ * @brief Clone object
+***************************************************************************/
+GCTAEventCube* GCTAEventCube::clone(void) const
+{
+    return new GCTAEventCube(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Load CTA counts map from FITS file
  *
  * @param[in] filename FITS file name of counts map.
  *
@@ -212,8 +221,6 @@ void GCTAEventCube::load(const std::string& filename)
  * bin is indeed allocated. This method sets up the pointers in the event
  * bin so that a client can easily access the information of individual bins
  * as if they were stored in an array.
- *
- * @todo Remove m_obs pointer.
  ***************************************************************************/
 GCTAEventBin* GCTAEventCube::pointer(int index)
 {
@@ -230,17 +237,14 @@ GCTAEventBin* GCTAEventCube::pointer(int index)
 
     // Set pointers
     m_bin.m_counts = &(m_counts[index]);    //!< GEventBin member
-    //m_bin.m_time   = &m_time;             //!< Static pointer
     m_bin.m_energy = &(m_energies[ieng]);   //!< GEventBin member
+    m_bin.m_time   = &m_time;
     m_bin.m_dir    = &(m_dirs[ipix]);
-    //m_bin.m_pnt    = &m_pnt;              //!< Static pointer
-    m_bin.m_rsp    = (m_obs != NULL) ?
-                        (GCTAResponse*)((GObservation*)m_obs)->response() : NULL;
     m_bin.m_omega  = &(m_omega[ipix]);
     m_bin.m_ewidth = &(m_ewidth[ieng]);
-    //m_bin.m_ontime = &m_ontime;           //!< Static pointer
+    m_bin.m_ontime = &m_ontime;
 
-    // Return pointer to static element
+    // Return pointer
     return &m_bin;
 }
 
@@ -287,17 +291,10 @@ void GCTAEventCube::init_members(void)
     m_omega    = NULL;
     m_energies = NULL;
     m_ewidth   = NULL;
-    m_obs      = NULL;
     m_time.clear();
     m_ontime   = 0.0;
-    m_pnt.clear();
     m_ebds.clear();
     m_gti.clear();
-
-    // Set static event pointers
-    m_bin.m_time   = &m_time;
-    m_bin.m_pnt    = &m_pnt;
-    m_bin.m_ontime = &m_ontime;
 
     // Return
     return;
@@ -316,10 +313,8 @@ void GCTAEventCube::copy_members(const GCTAEventCube& cube)
     m_map    = cube.m_map;
     m_time   = cube.m_time;
     m_ontime = cube.m_ontime;
-    m_pnt    = cube.m_pnt;
     m_ebds   = cube.m_ebds;
     m_gti    = cube.m_gti;
-    m_obs    = cube.m_obs;
 
     // Set counter to copied skymap pixels
     m_counts = m_map.pixels();
@@ -376,15 +371,6 @@ void GCTAEventCube::free_members(void)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GCTAEventCube* GCTAEventCube::clone(void) const
-{
-    return new GCTAEventCube(*this);
 }
 
 
@@ -607,11 +593,6 @@ std::ostream& operator<< (std::ostream& os, const GCTAEventCube& cube)
     os << " Number of pixels ..........: " << cube.npix() << std::endl;
     os << " Number of energy bins .....: " << cube.ebins() << std::endl;
     os << " Number of events ..........: " << cube.number() << std::endl;
-    os << " Observation back pointer ..: " << cube.m_obs << std::endl;
-    if (cube.m_obs != NULL) {
-        os << " Response pointer ..........: "
-           << (GCTAResponse*)((GObservation*)cube.m_obs)->response() << std::endl;
-    }
 
     // Return output stream
     return os;

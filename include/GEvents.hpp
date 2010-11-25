@@ -51,13 +51,15 @@ public:
     // Operators
     virtual GEvents& operator= (const GEvents& events);
 
-    // Virtual methods
-    virtual void    load(const std::string& filename) = 0;
-    virtual GEvent* pointer(int index) = 0;
-    virtual int     number(void) const = 0;
-    virtual int     size(void) const = 0;
-    virtual bool    islist(void) const = 0;
-    virtual bool    iscube(void) const = 0;
+    // Pure virtual methods
+    virtual void     clear(void) = 0;
+    virtual GEvents* clone(void) const = 0;
+    virtual void     load(const std::string& filename) = 0;
+    virtual GEvent*  pointer(int index) = 0;
+    virtual int      number(void) const = 0;
+    virtual int      size(void) const = 0;
+    virtual bool     islist(void) const = 0;
+    virtual bool     iscube(void) const = 0;
 
     // Event iterator
     class iterator {
@@ -82,10 +84,9 @@ public:
 
 protected:
     // Protected methods
-    void             init_members(void);
-    void             copy_members(const GEvents& events);
-    void             free_members(void);
-    virtual GEvents* clone(void) const = 0;
+    void init_members(void);
+    void copy_members(const GEvents& events);
+    void free_members(void);
 };
 
 #endif /* GEVENTS_HPP */

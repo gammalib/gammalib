@@ -31,7 +31,7 @@
  ***************************************************************************/
 class GEventCube : public GEvents {
 
-	// Friend classes
+    // Friend classes
     friend class GData;
     friend class GObservation;
 
@@ -47,24 +47,25 @@ public:
     // Operators
     virtual GEventCube& operator= (const GEventCube& cube);
 
-    // Virtual methods
-	virtual void    load(const std::string& filename) = 0;
-    virtual GEvent* pointer(int index) = 0;
-    virtual int     number(void) const = 0;
+    // Pure virtual methods
+    virtual void        clear(void) = 0;
+    virtual GEventCube* clone(void) const = 0;
+    virtual void        load(const std::string& filename) = 0;
+    virtual GEvent*     pointer(int index) = 0;
+    virtual int         number(void) const = 0;
 
-    // Implemented methods
+    // Implemented pure virtual methods
     int  size(void) const { return m_elements; }
-	int  dim(void) const { return m_dim; }
+    int  dim(void) const { return m_dim; }
     int  naxis(int axis) const;
     bool islist(void) const { return false; }
     bool iscube(void) const { return true; }
 
 protected:
     // Protected methods
-    void                init_members(void);
-    void                copy_members(const GEventCube& cube);
-    void                free_members(void);
-    virtual GEventCube* clone(void) const = 0;
+    void init_members(void);
+    void copy_members(const GEventCube& cube);
+    void free_members(void);
 
     // Protected data area
     int  m_elements;         //!< Number of cube elements

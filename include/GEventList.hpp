@@ -33,7 +33,7 @@
  ***************************************************************************/
 class GEventList : public GEvents {
 
-	// Friend classes
+    // Friend classes
     friend class GData;
     friend class GObservation;
 
@@ -49,22 +49,23 @@ public:
     // Operators
     virtual GEventList& operator= (const GEventList& list);
 
-    // Virtual methods
-	virtual void        load(const std::string& filename) = 0;
+    // Pure virtual methods
+    virtual void        clear(void) = 0;
+    virtual GEventList* clone(void) const = 0;
+    virtual void        load(const std::string& filename) = 0;
     virtual GEventAtom* pointer(int index) = 0;
     virtual int         number(void) const = 0;
     virtual int         size(void) const = 0;
 
-    // Implemented methods
+    // Implemented pure virtul methods
     bool islist(void) const { return true; }
     bool iscube(void) const { return false; }
 
 protected:
     // Protected methods
-    void                init_members(void);
-    void                copy_members(const GEventList& list);
-    void                free_members(void);
-    virtual GEventList* clone(void) const = 0;
+    void init_members(void);
+    void copy_members(const GEventList& list);
+    void free_members(void);
 };
 
 #endif /* GEVENTLIST_HPP */

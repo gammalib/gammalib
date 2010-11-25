@@ -60,47 +60,45 @@ public:
     // Operators
     GCTAEventCube& operator= (const GCTAEventCube& cube);
 
-    // Methods
-    void             clear(void);
-    void             load(const std::string& filename);
-    GCTAEventBin*    pointer(int index);
-    int              number(void) const;
-    int              nx(void) const { return m_map.nx(); }
-    int              ny(void) const { return m_map.ny(); }
-    int              npix(void) const { return m_map.npix(); }
-    int              ebins(void) const { return m_map.nmaps(); }
-    void             obs(GCTAObservation* ptr) { m_obs=ptr; return; }
-    GCTAObservation* obs(void) const { return m_obs; }
+    // Implemented pure virtul methods
+    void           clear(void);
+    GCTAEventCube* clone(void) const;
+    void           load(const std::string& filename);
+    GCTAEventBin*  pointer(int index);
+    int            number(void) const;
+
+    // Other methods
+    int nx(void) const { return m_map.nx(); }
+    int ny(void) const { return m_map.ny(); }
+    int npix(void) const { return m_map.npix(); }
+    int ebins(void) const { return m_map.nmaps(); }
 
 protected:
     // Protected methods
-    void           init_members(void);
-    void           copy_members(const GCTAEventCube& cube);
-    void           free_members(void);
-    GCTAEventCube* clone(void) const;
-    void           read_cntmap(GFitsImage* hdu);
-    void           read_ebds(GFitsTable* hdu);
-    void           read_gti(GFitsTable* hdu);
-    void           set_directions(void);
-    void           set_energies(void);
-    void           set_time(void);
+    void         init_members(void);
+    void         copy_members(const GCTAEventCube& cube);
+    void         free_members(void);
+    void         read_cntmap(GFitsImage* hdu);
+    void         read_ebds(GFitsTable* hdu);
+    void         read_gti(GFitsTable* hdu);
+    void         set_directions(void);
+    void         set_energies(void);
+    void         set_time(void);
 
     // Protected fundamental data
-    GSkymap          m_map;            //!< Counts map stored as sky map
-    GEbounds         m_ebds;           //!< Energy boundaries
-    GGti             m_gti;            //!< Good Time Intervals
+    GSkymap      m_map;            //!< Counts map stored as sky map
+    GEbounds     m_ebds;           //!< Energy boundaries
+    GGti         m_gti;            //!< Good Time Intervals
 
     // Protected derived data
-    GCTAEventBin     m_bin;            //!< Actual event bin
-    double*          m_counts;         //!< Pointer to skymap pixels
-    GCTAInstDir*     m_dirs;           //!< Array of event directions
-    double*          m_omega;          //!< Array of solid angles (sr)
-    GEnergy*         m_energies;       //!< Array of log mean energies
-    GEnergy*         m_ewidth;         //!< Array of energy bin widths
-    GTime            m_time;           //!< Event cube mean time
-    double           m_ontime;         //!< Event cube ontime (sec)
-    GCTAPointing     m_pnt;            //!< CTA pointing
-    GCTAObservation* m_obs;            //!< Points back to CTA observation
+    GCTAEventBin m_bin;            //!< Actual event bin
+    double*      m_counts;         //!< Pointer to skymap pixels
+    GCTAInstDir* m_dirs;           //!< Array of event directions
+    double*      m_omega;          //!< Array of solid angles (sr)
+    GEnergy*     m_energies;       //!< Array of log mean energies
+    GEnergy*     m_ewidth;         //!< Array of energy bin widths
+    GTime        m_time;           //!< Event cube mean time
+    double       m_ontime;         //!< Event cube ontime (sec)
 };
 
 #endif /* GCTAEVENTCUBE_HPP */

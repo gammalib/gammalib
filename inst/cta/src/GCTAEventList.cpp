@@ -35,6 +35,7 @@
 #include "GFitsTableStringCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_POINTER                               "GCTAEventList::pointer(int)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -140,7 +141,7 @@ GCTAEventList& GCTAEventList::operator= (const GCTAEventList& list)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear object.
+ * @brief Clear object
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
@@ -158,6 +159,15 @@ void GCTAEventList::clear(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+***************************************************************************/
+GCTAEventList* GCTAEventList::clone(void) const
+{
+    return new GCTAEventList(*this);
 }
 
 
@@ -193,35 +203,25 @@ void GCTAEventList::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Get pointer to element
+ * @brief Returns pointer to an event
  *
- * @param[in] index Event index for which pointer will be returned.
+ * @param[in] index Event index (starting from 0).
  *
- * A valid pointer is only returned if index is in the valid range.
- * Otherwise a NULL pointer is returned.
+ * @exception GException::out_of_range
+ *            Event index not in valid range.
  *
- * @todo Should we really return a NULL pointer in case that the list or
- *       the index is not valid? Should we not better throw an exception?
+ * This method returns a pointer on an event atom.
  ***************************************************************************/
 GCTAEventAtom* GCTAEventList::pointer(int index)
 {
-    // Preset pointer with NULL
-    GCTAEventAtom* ptr = NULL;
-
-    // Set pointer if index is in range
-    if (m_events != NULL && index >=0 && index < m_num) {
-
-        // Point to the requested event atom
-        ptr = (GCTAEventAtom*)m_events + index;
-
-        // Set instrument response function.
-        ptr->m_rsp = (m_obs != NULL) ?
-                     (GCTAResponse*)((GObservation*)m_obs)->response() : NULL;
-
-    } // endif: valid index
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= m_num)
+        throw GException::out_of_range(G_POINTER, index, 0, m_num-1);
+    #endif
 
     // Return pointer
-    return ptr;
+    return ((GCTAEventAtom*)m_events + index);
 }
 
 
@@ -239,7 +239,7 @@ void GCTAEventList::init_members(void)
     // Initialise base class members
     m_num    = 0;
     m_events = NULL;
-    m_obs    = NULL;
+    //m_obs    = NULL;
 
     // Return
     return;
@@ -255,7 +255,6 @@ void GCTAEventList::copy_members(const GCTAEventList& list)
 {
     // Copy attributes
     m_num = list.m_num;
-    m_obs = list.m_obs;
 
     // If there are events then copy them
     if (m_num > 0 && list.m_events != NULL) {
@@ -289,15 +288,6 @@ void GCTAEventList::free_members(void)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GCTAEventList* GCTAEventList::clone(void) const
-{
-    return new GCTAEventList(*this);
 }
 
 
@@ -353,7 +343,7 @@ void GCTAEventList::load_events(GFitsTable* hdu)
             GFitsTableFloatCol*  ptr_hil_msw_err = (GFitsTableFloatCol*)hdu->column("HIL_MSW_ERR");
             GFitsTableFloatCol*  ptr_hil_msl     = (GFitsTableFloatCol*)hdu->column("HIL_MSL");
             GFitsTableFloatCol*  ptr_hil_msl_err = (GFitsTableFloatCol*)hdu->column("HIL_MSL_ERR");
-            
+
             // Copy data from columns into GCTAEventAtom objects
             GCTAEventAtom* ptr = (GCTAEventAtom*)m_events;
             for (int i = 0; i < m_num; ++i) {

@@ -45,27 +45,24 @@ public:
     // Operators
     GCTAEventList& operator= (const GCTAEventList& list);
 
-    // Methods
-    void             clear(void);
-    void             load(const std::string& filename);
-    GCTAEventAtom*   pointer(int index);
-    int              number(void) const { return m_num; }
-    int              size(void) const { return m_num; }
-    void             obs(GCTAObservation* ptr) { m_obs=ptr; return; }
-    GCTAObservation* obs(void) const { return m_obs; }
+    // Implemented pure virtual methods
+    void           clear(void);
+    GCTAEventList* clone(void) const;
+    void           load(const std::string& filename);
+    GCTAEventAtom* pointer(int index);
+    int            number(void) const { return m_num; }
+    int            size(void) const { return m_num; }
 
 protected:
     // Protected methods
     void           init_members(void);
     void           copy_members(const GCTAEventList& list);
     void           free_members(void);
-    GCTAEventList* clone(void) const;
     void           load_events(GFitsTable* hdu);
 
     // Protected data area
-    int              m_num;            //!< Number of events
-    GCTAEventAtom*   m_events;         //!< Pointer to events
-    GCTAObservation* m_obs;            //!< Points back to CTA observation
+    int            m_num;            //!< Number of events
+    GCTAEventAtom* m_events;         //!< Pointer to events
 };
 
 #endif /* GCTAEVENTLIST_HPP */
