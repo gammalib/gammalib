@@ -21,18 +21,20 @@
 #include <config.h>
 #endif
 #include <iostream>
+#include <cmath>
 #include "GException.hpp"
 #include "GObservation.hpp"
 #include "GModelSpatialPtsrc.hpp"
 #include "GIntegral.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_NPRED_KERN "GObservation::npred_kern(GModel&,GSkyDir&,GEnergy&,GTime&,GPointing&)"
-#define G_NPRED_SPEC              "GObservation::npred_spec(GModel&, GTime&)"
-#define G_NPRED_TEMP                  "GObservation::npred_temp(GModel&,int)"
-#define G_NPRED_GRAD_KERN "GObservation::npred_grad_kern(GModel&,int,GSkyDir&,GEnergy&,GTime&,GPointing&)"
-#define G_NPRED_GRAD_SPEC "GObservation::npred_grad_spec(GModel&,int,GTime&)"
-#define G_NPRED_GRAD_TEMP        "GObservation::npred_grad_temp(GModel&,int)"
+#define G_MODEL           "GObservation::model(GModels&, GInstDir&, GEnergy&, GTime&, GVector*) const"
+#define G_NPRED_KERN      "GObservation::npred_kern(GModel&, GSkyDir&, GEnergy&, GTime&, GPointing&)"
+#define G_NPRED_SPEC      "GObservation::npred_spec(GModel&, GTime&)"
+#define G_NPRED_TEMP      "GObservation::npred_temp(GModel&, int)"
+#define G_NPRED_GRAD_KERN "GObservation::npred_grad_kern(GModel&, int, GSkyDir&, GEnergy&, GTime&, GPointing&)"
+#define G_NPRED_GRAD_SPEC "GObservation::npred_grad_spec(GModel&, int, GTime&)"
+#define G_NPRED_GRAD_TEMP "GObservation::npred_grad_temp(GModel&, int)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -131,10 +133,77 @@ GObservation& GObservation::operator= (const GObservation& obs)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Return model value and (optionally) gradient
+ *
+ * @param[in] models Model descriptor.
+ * @param[in] obsDir Instrument direction.
+ * @param[in] obsEng Observed energy.
+ * @param[in] obsTime Measured arrival time.
+ * @param[in] pnt Instrument pointing direction.
+ * @param[out] gradient Pointer to gradient vector (NULL=not computed).
+ *
+ * @exception GException::gradient_par_mismatch
+ *            Dimension of gradient vector mismatches number of parameters.
+ *
+ * Implements generic model and gradient evaluation for an observation.
+ *
+ * @todo We actually circumvent the const correctness for the eval_gradients()
+ * method, yet I don't know why this method is not const. This should be
+ * checked, and better put this method const.
+ ***************************************************************************/
+double GObservation::model(const GModels& models, const GInstDir& obsDir,
+                           const GEnergy& obsEng, const GTime& obsTime,
+                           const GPointing& pnt, GVector* gradient) const
+{
+    // Verify that gradients vector has the same dimension than the
+    // model has parameters
+    #if defined(G_RANGE_CHECK)
+    if (models.npars() != gradient->size())
+        throw GException::gradient_par_mismatch(G_MODEL, gradient->size(), 
+                                                models.npars());
+    #endif
+
+    // Initialise model value
+    double model = 0.0;
+
+    // Loop over models
+    for (int i = 0; i < models.size(); ++i) {
+
+        // Check if model applies to specific instrument
+        if (models(i)->isvalid(m_instrument)) {
+
+            // Compute model value
+            double value = ((GModel*)models(i))->eval_gradients(obsDir, obsEng, obsTime,
+                                                                *m_response, pnt);
+
+            // Multiply by bin size
+            //value *= *omega() * ewidth()->MeV() * *ontime();
+
+            // Add to model
+            model += value;
+
+        } // endif: model was applicable
+
+    } // endfor: looped over models
+
+    // Optionally set gradient vector
+    if (gradient != NULL) {
+        for (int i = 0; i < gradient->size(); ++i) {
+            double grad    = models.par(i)->gradient();
+            (*gradient)(i) = (std::isinf(grad)) ? 0.0 : grad;
+        }
+    }
+
+    // Return
+    return model;
+}
+
+
+/***********************************************************************//**
  * @brief Return total number of predicted counts for all models.
  *
  * @param[in] models Models.
- * @param[in] gradient Model parameter gradients.
+ * @param[out] gradient Model parameter gradients.
  ***************************************************************************/
 double GObservation::npred(const GModels& models, GVector* gradient) const
 {
