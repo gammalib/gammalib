@@ -136,65 +136,6 @@ GCTAEventAtom* GCTAEventAtom::clone(void) const
 }
 
 
-
-/***********************************************************************//**
- * @brief Return model value and gradient
- *
- * @param[in] models Model descriptor.
- * @param[out] gradient Pointer to gradient vector.
- *
- * @exception GCTAException::no_response
- *            Response function has not been set.
- * @exception GException::gradient_par_mismatch
- *            Gradient dimension mismatches number of parameters.
- *
- * Implements generic model and gradient evaluation for the CTA instrument.
- ***************************************************************************/
-/*
-double GCTAEventAtom::model(GModels& models, GVector* gradient) const
-{
-    // Make sure that response pointer exists
-    if (rsp() == NULL)
-        throw GCTAException::no_response(G_MODEL);
-
-    // Verify that number of model parameter is identical to the dimension
-    // of the gradient vector
-    #if defined(G_RANGE_CHECK)
-    if (models.npars() != gradient->size())
-        throw GException::gradient_par_mismatch(G_MODEL, gradient->size(), 
-                                                models.npars());
-    #endif
-
-    // Initialise model
-    double model = 0.0;
-
-    // Loop over models
-    for (int i = 0; i < models.size(); ++i) {
-
-        // Check if model applies to CTA
-        if (models(i)->isvalid("CTA")) {
-
-            // Add model
-            model += models(i)->eval_gradients(*dir(), *energy(), *time(),
-                                               *rsp(), *pnt());
-
-        } // endif: model was applicable
-
-    } // endfor: looped over models
-
-    // Optionally set gradient vector
-    if (gradient != NULL) {
-        for (int i = 0; i < gradient->size(); ++i) {
-            double grad    = models.par(i)->gradient();
-            (*gradient)(i) = (std::isinf(grad)) ? 0.0 : grad;
-        }
-    }
-
-    // Return
-    return model;
-}
-*/
-
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
