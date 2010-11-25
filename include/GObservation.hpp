@@ -64,6 +64,9 @@ public:
     virtual void   response(const std::string& irfname, std::string caldb = "") = 0;
 
     // Virtual methods
+    virtual double model(const GModels& models, const GInstDir& obsDir,
+                         const GEnergy& obsEng, const GTime& obsTime,
+                         const GPointing& pnt, GVector* gradient = NULL) const;
     virtual double npred(const GModels& models, GVector* gradient = NULL) const;
 
     // Implemented methods
