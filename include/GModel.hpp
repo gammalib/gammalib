@@ -88,7 +88,7 @@ public:
     double     eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
                               const GTime& obsTime, const GResponse& rsp,
                               const GPointing& pnt);
-    bool       isvalid(const std::string& name);
+    bool       isvalid(const std::string& name) const;
 
     // Inline methods
     std::string           name(void) const { return m_name; }
