@@ -164,215 +164,6 @@ GObservations::optimizer& GObservations::optimizer::operator= (const optimizer& 
  * total number of events that is predicted by the model.
  * Note that binned and unbinned observations may be combined.
  ***************************************************************************/
-/*
-void GObservations::optimizer::eval(const GOptimizerPars& pars) 
-{
-    // Timing measurement
-    #if G_EVAL_TIMING
-    clock_t t_start = clock();
-    #endif
-
-    // Allocate pointers for temporary memory
-    int*    inx    = NULL;
-    double* values = NULL;
-
-    // Single loop for common exit point
-    do {
-        // Get number of parameters
-        int npars = pars.npars();
-
-        // Fall through if we have no free parameters
-        if (npars < 1)
-            continue;
-
-        // Free old memory
-        if (m_gradient != NULL) delete m_gradient;
-        if (m_covar    != NULL) delete m_covar;
-
-        // Initialise value, gradient vector and curvature matrix
-        m_value    = 0.0;
-        m_npred    = 0.0;
-        m_gradient = new GVector(npars);
-        m_covar    = new GSparseMatrix(npars,npars);
-
-        // Allocate some working arrays
-        GVector grad(npars);
-        m_covar->stack_init(npars,10000);
-        inx    = new int[npars];
-        values = new double[npars];
-
-        // Collect predicted number of events for unbinned observations
-        for (int i = 0; i < m_this->m_num; ++i) {
-            if (m_this->m_obs[i]->events()->islist()) {
-                m_npred += m_this->m_obs[i]->npred((GModels&)pars, &grad);
-                for (int k = 0; k < npars; ++k)
-                    (*m_gradient)(k) += grad(k);
-                #if G_EVAL_DEBUG
-                std::cout << "Npred=" << m_npred << " Grad="
-                          << *m_gradient << std::endl;
-                #endif
-            }
-        }
-        m_value += m_npred;
-
-        // Iterate over all data bins
-        GObservations::iterator end = m_this->end();
-        for (GObservations::iterator bin = m_this->begin(); bin != end; ++bin) {
-
-            // Get number of counts in bin
-            double data = bin->counts();
-
-            // Get model and derivative
-            double model = bin->model((GModels&)pars, &grad);
-
-            // Skip bin if model is too small (avoids -Inf or NaN gradients)
-            if (model <= m_minmod)
-                continue;
-
-            // Create index array of non-zero derivatives
-            int ndev = 0;
-            for (int i = 0; i < npars; ++i) {
-                if (grad(i) != 0.0 && !std::isinf(grad(i))) {
-                    inx[ndev] = i;
-                    ndev++;
-                }
-            }
-
-            // Case A: binned analysis
-            if (bin->isbin()) {
-
-                // Update Poissonian statistics (excluding factorial
-                // term for faster computation)
-                m_value -= data * log(model) - model;
-
-                // Skip bin now if there are no non-zero derivatives
-                if (ndev < 1)
-                    continue;
-
-                // Update gradient vector and curvature matrix. To avoid
-                // unneccessary computations we distinguish the case where
-                // data>0 and data=0. The second case requires much less
-                // computation since it does not contribute to the covariance
-                // matrix ...
-                if (data > 0.0) {
-
-                    // Pre computation
-                    double fb = data / model;
-                    double fc = (1.0 - fb);
-                    double fa = fb / model;
-
-                    // Loop over columns
-                    for (int jdev = 0; jdev < ndev; ++jdev) {
-
-                        // Initialise computation
-                        register int jpar    = inx[jdev];
-                        double       g       = grad(jpar);
-                        double       fa_i    = fa * g;
-
-                        // Update gradient
-                        (*m_gradient)(jpar) += fc * g;
-
-                        // Loop over rows
-                        register int* ipar = inx;
-                        for (register int idev = 0; idev < ndev; ++idev, ++ipar)
-                            values[idev] = fa_i * grad(*ipar);
-
-                        // Add column to matrix
-                        m_covar->add_col(values, inx, ndev, jpar);
-                    } // endfor: looped over columns
-                } // endif: data was > 0
-
-                // ... handle now data=0
-                else {
-                    register int* ipar = inx;
-                    for (register int idev = 0; idev < ndev; ++idev, ++ipar)
-                        (*m_gradient)(*ipar) += grad(*ipar);
-                }
-
-            } // endif: analysis was binned
-
-            // Case B: unbinned analysis
-            else {
-
-                // Update Poissonian statistics (excluding factorial term
-                // for faster computation)
-                m_value -= log(model);
-
-                // Skip bin now if there are no non-zero derivatives
-                if (ndev < 1)
-                    continue;
-
-                // Update gradient vector and curvature matrix.
-                double fb = 1.0 / model;
-                double fa = fb / model;
-                for (int jdev = 0; jdev < ndev; ++jdev) {
-
-                    // Initialise computation
-                    register int jpar    = inx[jdev];
-                    double       g       = grad(jpar);
-                    double       fa_i    = fa * g;
-
-                    // Update gradient.
-                    (*m_gradient)(jpar) -= fb * g;
-
-                    // Loop over rows
-                    register int* ipar = inx;
-                    for (register int idev = 0; idev < ndev; ++idev, ++ipar)
-                        values[idev] = fa_i * grad(*ipar);
-
-                    // Add column to matrix
-                    m_covar->add_col(values, inx, ndev, jpar);
-
-                } // endfor: looped over columns
-
-            } // endelse: analysis was unbinned
-
-        } // endfor: iterated over all data bins
-
-        // Release stack
-        m_covar->stack_destroy();
-
-    } while(0); // endwhile: main loop
-
-    // Free temporary memory
-    if (values != NULL) delete [] values;
-    if (inx    != NULL) delete [] inx;
-
-    // Optionally dump gradient and covariance matrix
-    #if G_EVAL_DEBUG
-    std::cout << *m_gradient << std::endl;
-    std::cout << *m_covar << std::endl;
-    #endif
-
-    // Timing measurement
-    #if G_EVAL_TIMING
-    double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
-    std::cout << "GObservations::optimizer::eval: CPU usage = "
-              << t_elapse << " sec" << std::endl;
-    #endif
-
-    // Return
-    return;
-}
-*/
-
-/***********************************************************************//**
- * @brief Evaluate log-likelihood function
- *
- * @param[in] pars Optimizer parameters.
- *
- * This method evaluates the log-likelihood function for parameter
- * optimisation. It handles both binned and unbinned data. 
- * For binned data the function to optimize is given by
- * \f$L=-\sum_i n_i \log e_i - e_i\f$
- * where the sum is taken over all data space bins, \f$n_i\f$ is the
- * observed number of counts and \f$e_i\f$ is the model.
- * For unbinned data the function to optimize is given by
- * \f$L=-\sum_i \log e_i + {\rm Npred}\f$
- * where the sum is taken over all events and \f${\rm Npred}\f$ is the
- * total number of events that is predicted by the model.
- * Note that binned and unbinned observations may be combined.
- ***************************************************************************/
 void GObservations::optimizer::eval(const GOptimizerPars& pars) 
 {
     // Timing measurement
@@ -418,7 +209,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
 
                 // Update the log-likelihood
                 poisson_unbinned(*(m_this->m_obs[i]), pars);
-                
+
             } // endif: unbinned analysis
 
             // ... or binned analysis
@@ -426,7 +217,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
 
                 // Update the log-likelihood
                 poisson_binned(*(m_this->m_obs[i]), pars);
-            
+
             } // endelse: binned analysis
 
         }
@@ -466,9 +257,6 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
  *
  * Evaluate log-likelihood function, gradient and curvature matrix for one
  * observation using unbinned analysis and Poisson statistics.
- *
- * @todo We still use the pointing information from the event. This has to
- * be removed later ...
  ***************************************************************************/
 void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
                                                 const GOptimizerPars& pars) 
@@ -494,7 +282,7 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
         // Get model and derivative
         double model = obs.model((GModels&)pars, *(event->dir()),
                                  *(event->energy()), *(event->time()),
-                                 *(event->pnt()), m_wrk_grad);
+                                 m_wrk_grad);
 
         // Skip bin if model is too small (avoids -Inf or NaN gradients)
         if (model <= m_minmod)
@@ -573,10 +361,6 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
  *
  * Evaluate log-likelihood function, gradient and curvature matrix for one
  * observation using binned analysis and Poisson statistics.
- *
- * @todo We still use the pointing information from the event. This has to
- * be removed later ...
- * @todo Need to implement methods that get binsize.
  ***************************************************************************/
 void GObservations::optimizer::poisson_binned(const GObservation& obs,
                                               const GOptimizerPars& pars) 
@@ -605,9 +389,9 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
         // Get model and derivative
         double model = obs.model((GModels&)pars, *(bin->dir()),
                                  *(bin->energy()), *(bin->time()),
-                                 *(bin->pnt()), m_wrk_grad);
+                                 m_wrk_grad);
 
-        // Multiply by bin size        
+        // Multiply by bin size
         model *= bin->size();
 
         // Skip bin if model is too small (avoids -Inf or NaN gradients)
