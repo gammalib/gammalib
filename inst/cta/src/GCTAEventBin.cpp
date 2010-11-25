@@ -192,6 +192,19 @@ double GCTAEventBin::model(GModels& models, GVector* gradient) const
 }
 
 
+/***********************************************************************//**
+ * @brief Return size of event bin
+ ***************************************************************************/
+double GCTAEventBin::size(void) const
+{
+    // Compute bin size
+    double size = *omega() * ewidth()->MeV() * *ontime();
+
+    // Return bin size
+    return size;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Private methods                              =
