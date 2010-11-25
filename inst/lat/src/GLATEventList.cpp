@@ -30,6 +30,7 @@
 #include "GFitsTableShortCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_POINTER                               "GLATEventList::pointer(int)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -45,7 +46,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GLATEventList::GLATEventList(void) : GEventList()
 {
@@ -130,7 +131,7 @@ GLATEventList& GLATEventList::operator= (const GLATEventList& list)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear object.
+ * @brief Clear object
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
@@ -152,7 +153,16 @@ void GLATEventList::clear(void)
 
 
 /***********************************************************************//**
- * @brief Load LAT events from FT1 file.
+ * @brief Clone object
+***************************************************************************/
+GLATEventList* GLATEventList::clone(void) const
+{
+    return new GLATEventList(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Load LAT events from FT1 file
  *
  * @param[in] ft1name FT1 FITS filename from which events are loaded.
  ***************************************************************************/
@@ -182,38 +192,25 @@ void GLATEventList::load(const std::string& ft1name)
 
 
 /***********************************************************************//**
- * @brief Get pointer to element
+ * @brief Returns pointer to an event
  *
  * @param[in] index Event index for which pointer will be returned.
  *
- * A valid pointer is only returned if index is in the valid range. Otherwise
- * a NULL pointer is returned.
+ * @exception GException::out_of_range
+ *            Event index not in valid range.
  *
- * @todo Needs assignment of pointing and response function pointers.
- * @todo Should we really return a NULL pointer in case that the list or
- *       the index is not valid? Should we not better throw an exception?
+ * This method returns a pointer on an event atom.
  ***************************************************************************/
 GLATEventAtom* GLATEventList::pointer(int index)
 {
-    // Preset pointer with NULL
-    GLATEventAtom* ptr = NULL;
-
-    // Set pointer if index is in range
-    if (m_events != NULL && index >=0 && index < m_num) {
-
-        // Point to the requested event atom
-        ptr = &(((GLATEventAtom*)m_events)[index]);
-
-        // Set instrument pointing
-        ptr->m_pnt = NULL; // DUMMY
-
-        // Set instrument response function
-        ptr->m_rsp = NULL; // DUMMY
-
-    } // endif: valid index
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= m_num)
+        throw GException::out_of_range(G_POINTER, index, 0, m_num-1);
+    #endif
 
     // Return pointer
-    return ptr;
+    return ((GLATEventAtom*)m_events + index);
 }
 
 
@@ -231,7 +228,6 @@ void GLATEventList::init_members(void)
     // Initialise members
     m_num    = 0;
     m_events = NULL;
-    m_obs    = NULL;
 
     // Initialise diffuse models
     m_num_difrsp   = 0;
@@ -258,7 +254,6 @@ void GLATEventList::copy_members(const GLATEventList& list)
 {
     // Copy attributes
     m_num        = list.m_num;
-    m_obs        = list.m_obs;
     m_num_difrsp = list.m_num_difrsp;
     m_ds_num     = list.m_ds_num;
 
@@ -335,15 +330,6 @@ void GLATEventList::free_members(void)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GLATEventList* GLATEventList::clone(void) const
-{
-    return new GLATEventList(*this);
 }
 
 

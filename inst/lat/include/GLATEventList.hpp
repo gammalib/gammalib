@@ -47,40 +47,39 @@ public:
     // Operators
     GLATEventList& operator= (const GLATEventList& list);
 
-    // Methods
-    void             clear(void);
-    void             load(const std::string& filename);
-    GLATEventAtom*   pointer(int index);
-    int              number(void) const { return m_num; }
-    int              size(void) const { return m_num; }
-    void             obs(GLATObservation* ptr) { m_obs=ptr; return; }
-    GLATObservation* obs(void) const { return m_obs; }
+    // Implemented pure virtul methods
+    void           clear(void);
+    GLATEventList* clone(void) const;
+    void           load(const std::string& filename);
+    GLATEventAtom* pointer(int index);
+    int            number(void) const { return m_num; }
+    int            size(void) const { return m_num; }
+
+    // Other methods
 
 protected:
     // Protected methods
-    void           init_members(void);
-    void           copy_members(const GLATEventList& list);
-    void           free_members(void);
-    GLATEventList* clone(void) const;
-    void           load_ft1(GFitsTable* hdu);
-    void           load_events(GFitsTable* hdu);
-    void           load_ds_keys(GFitsTable* hdu);
+    void init_members(void);
+    void copy_members(const GLATEventList& list);
+    void free_members(void);
+    void load_ft1(GFitsTable* hdu);
+    void load_events(GFitsTable* hdu);
+    void load_ds_keys(GFitsTable* hdu);
 
     // Protected data area
-    int              m_num;            //!< Number of events
-    GLATEventAtom*   m_events;         //!< Pointer to events
-    GLATObservation* m_obs;            //!< Points back to LAT observation
+    int            m_num;            //!< Number of events
+    GLATEventAtom* m_events;         //!< Pointer to events
 
     // Diffuse response information
-    int              m_num_difrsp;     //!< Number of diffuse response models
-    std::string*     m_difrsp_label;   //!< Diffuse response model labels
+    int            m_num_difrsp;     //!< Number of diffuse response models
+    std::string*   m_difrsp_label;   //!< Diffuse response model labels
 
     // Data selection information
-    int              m_ds_num;         //!< Number of data selection keys
-    std::string*     m_ds_type;        //!< Data selection types
-    std::string*     m_ds_unit;        //!< Data selection units
-    std::string*     m_ds_value;       //!< Data selection values
-    std::string*     m_ds_reference;   //!< Data selection references
+    int            m_ds_num;         //!< Number of data selection keys
+    std::string*   m_ds_type;        //!< Data selection types
+    std::string*   m_ds_unit;        //!< Data selection units
+    std::string*   m_ds_value;       //!< Data selection values
+    std::string*   m_ds_reference;   //!< Data selection references
 
 private:
 };

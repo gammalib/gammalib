@@ -128,6 +128,28 @@ GLATEventCube& GLATEventCube::operator= (const GLATEventCube& cube)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear object.
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GLATEventCube::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GEventCube::free_members();
+    this->GEvents::free_members();
+
+    // Initialise members
+    this->GEvents::init_members();
+    this->GEventCube::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load LAT counts map from FITS file.
  *
  * @param[in] filename Counts map FITS filename to be loaded.
@@ -138,23 +160,11 @@ GLATEventCube& GLATEventCube::operator= (const GLATEventCube& cube)
  ***************************************************************************/
 void GLATEventCube::load(const std::string& filename)
 {
-    // Free and initialise base class members
-    this->GEvents::free_members();
-    this->GEvents::init_members();
-
-    // Free and initialise base class members
-    this->GEventCube::free_members();
-    this->GEventCube::init_members();
-
-    // Free and initialise class members
-    free_members();
-    init_members();
-
-    // Allocate FITS file
-    GFits file;
+    // Clear object
+    clear();
 
     // Open counts map FITS file
-    file.open(filename);
+    GFits file(filename);
 
     // Get HDUs
     GFitsImage* hdu_cntmap  = file.image("Primary");
@@ -179,12 +189,21 @@ void GLATEventCube::load(const std::string& filename)
  *
  * @param[in] index Event index for which pointer will be returned.
  *
- * This method provides the event attributes to the event bin. It 
+ * @exception GException::out_of_range
+ *            Event index not in valid range.
  *
- * @todo Implement conversion routine from event cube index to direction.
+ * This method provides the event attributes to the event bin. The event bin
+ * is in fact physically stored in the event cube, and only a single event
+ * bin is indeed allocated. This method sets up the pointers in the event
+ * bin so that a client can easily access the information of individual bins
+ * as if they were stored in an array.
+ *
+ * @todo Implement instrument direction, and pixel parameters (solid angle,
+ * energy width, ontime).
  ***************************************************************************/
 GLATEventBin* GLATEventCube::pointer(int index)
 {
+    // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= m_elements)
         throw GException::out_of_range(G_POINTER, index, 0, m_elements-1);
@@ -194,15 +213,16 @@ GLATEventBin* GLATEventCube::pointer(int index)
     int ieng = index / m_pixels;
 
     // Setup bin attributes
-    m_bin.m_counts = &(m_counts[index]);
+    m_bin.m_counts = &(m_counts[index]);    //!< GEventBin member
+    m_bin.m_energy = &(m_energies[ieng]);   //!< GEventBin member
     m_bin.m_time   = &m_time;
-    //m_bin.m_dir    = ;
-    m_bin.m_energy = &(m_energies[ieng]);
-    m_bin.m_pnt    = &m_pnt;
-    m_bin.m_rsp    = &m_rsp;
+    //m_bin.m_dir    = &(m_dirs[ipix]);
+    //m_bin.m_omega  = &(m_omega[ipix]);
+    //m_bin.m_ewidth = &(m_ewidth[ieng]);
+    //m_bin.m_ontime = &m_ontime;
 
     // Return pointer
-    return (GLATEventBin*)&(m_bin);
+    return &m_bin;
 }
 
 
@@ -247,7 +267,6 @@ void GLATEventCube::init_members(void)
     m_time.met(0.0);
     m_dirs     = NULL;
     m_ebds     = GEbounds();
-    m_obs      = NULL;
 
     // Return
     return;
@@ -269,7 +288,6 @@ void GLATEventCube::copy_members(const GLATEventCube& cube)
     m_ebins  = cube.m_ebins;
     m_time   = cube.m_time;
     m_ebds   = cube.m_ebds;
-    m_obs    = cube.m_obs;
 
     // Copy cube
     if (m_elements > 0 && cube.m_counts != NULL) {
