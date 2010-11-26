@@ -61,6 +61,9 @@ public:
     // Operators
     GCTAEventBin& operator= (const GCTAEventBin& bin);
 
+    // Methods overloading virtual base class methods
+    double error(void) const;
+
     // Methods
     double             size(void) const;
     const GCTAInstDir* dir(void) const { return m_dir; }
