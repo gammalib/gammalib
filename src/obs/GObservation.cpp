@@ -26,6 +26,7 @@
 #include "GObservation.hpp"
 #include "GModelSpatialPtsrc.hpp"
 #include "GIntegral.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MODEL           "GObservation::model(GModels&, GPointing&, GInstDir&, GEnergy&, GTime&, GVector*) const"
@@ -253,6 +254,34 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
 }
 
 
+/***********************************************************************//**
+ * @brief Set optimizer statistics for observation
+ *
+ * @param[in] statistics Optimizer statistics.
+ *
+ * Set the optimizer statistics for this observation.
+ *
+ * @todo Throw an exception if an invalid statistics has been specified.
+ ***************************************************************************/
+void GObservation::statistics(const std::string& statistics)
+{
+    // Check for Poisson statistics
+    if (toupper(statistics) == "POISSON")
+        m_statistics = "Poisson";
+
+    // Check for Gaussian statistics
+    else if (toupper(statistics) == "GAUSSIAN")
+        m_statistics = "Gaussian";
+
+    // Otherwise default to Poisson statistics
+    else
+        m_statistics = "Poisson";
+
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -268,8 +297,9 @@ void GObservation::init_members(void)
     m_obsname.clear();
     m_ebounds.clear();
     m_gti.clear();
-    m_roi    = NULL;
-    m_events = NULL;
+    m_roi        = NULL;
+    m_events     = NULL;
+    m_statistics = "Poisson";
 
     // Return
     return;
@@ -286,9 +316,10 @@ void GObservation::init_members(void)
 void GObservation::copy_members(const GObservation& obs)
 {
     // Copy attributes
-    m_obsname = obs.m_obsname;
-    m_ebounds = obs.m_ebounds;
-    m_gti     = obs.m_gti;
+    m_obsname    = obs.m_obsname;
+    m_ebounds    = obs.m_ebounds;
+    m_gti        = obs.m_gti;
+    m_statistics = obs.m_statistics;
 
     // Clone members that exist
     m_roi    = (obs.m_roi      != NULL) ? obs.m_roi->clone()      : NULL;
@@ -804,6 +835,7 @@ std::ostream& operator<< (std::ostream& os, const GObservation& obs)
     os << " Energy range ..............: " << std::fixed
        << obs.m_ebounds.emin().MeV() << " - "
        << obs.m_ebounds.emax().MeV() << " MeV" << std::endl;
+    os << " Optimizer statistics ......: " << obs.m_statistics << std::endl;
 
     // Add event list to stream
     if (obs.m_events != NULL)

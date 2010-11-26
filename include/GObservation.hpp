@@ -75,7 +75,6 @@ public:
     virtual std::string   instrument(void) const = 0;
     virtual GObservation* clone(void) const = 0;
 
-
     // Virtual methods
     virtual double model(const GModels& models,const GInstDir& obsDir,
                          const GEnergy& obsEng, const GTime& obsTime,
@@ -87,6 +86,7 @@ public:
     void        roi(const GRoi& roi) { m_roi=roi.clone(); return; }
     void        ebounds(const GEbounds& ebounds) { m_ebounds=ebounds; return; }
     void        gti(const GGti& gti) { m_gti=gti; return; }
+    void        statistics(const std::string& statistics);
     std::string obsname(void) const { return m_obsname; }
     GTime       tstart(void) const { return m_gti.tstart(); }
     GTime       tstop(void) const { return  m_gti.tstop(); }
@@ -96,6 +96,7 @@ public:
     GEbounds*   ebounds(void) { return &m_ebounds; }
     GGti*       gti(void) { return &m_gti; }
     GEvents*    events(void) const { return m_events; }
+    std::string statistics(void) const { return m_statistics; }
 
 protected:
     // Protected methods
@@ -173,11 +174,11 @@ protected:
 
     // Protected data area
     std::string m_obsname;      //!< Name of observation
-    //std::string m_instrument;   //!< Instrument name
     GEbounds    m_ebounds;      //!< Energy boundaries used for analysis
     GGti        m_gti;          //!< Good time intervals used for analysis
     GRoi*       m_roi;          //!< Pointer to region of interest used for analysis
     GEvents*    m_events;       //!< Pointer to events
+    std::string m_statistics;   //!< Optimizer statistics (default=poisson)
 
 private:
 };
