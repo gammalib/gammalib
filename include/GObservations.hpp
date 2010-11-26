@@ -122,6 +122,7 @@ public:
         void           eval(const GOptimizerPars& pars);
         void           poisson_unbinned(const GObservation& obs, const GOptimizerPars& pars);
         void           poisson_binned(const GObservation& obs, const GOptimizerPars& pars);
+        void           gaussian_binned(const GObservation& obs, const GOptimizerPars& pars);
         double*        value(void) { return &m_value; }
         double         npred(void) const { return m_npred; }
         GVector*       gradient(void) { return m_gradient; }
@@ -133,6 +134,7 @@ public:
         double         m_value;       //!< Function value
         double         m_npred;       //!< Total number of predicted events
         double         m_minmod;      //!< Minimum model value
+        double         m_minerr;      //!< Minimum error value
         GVector*       m_gradient;    //!< Pointer to gradient vector
         GSparseMatrix* m_covar;       //!< Pointer to covariance matrix
         GObservations* m_this;        //!< Pointer to GObservations object

@@ -216,7 +216,10 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
             else {
 
                 // Update the log-likelihood
-                poisson_binned(*(m_this->m_obs[i]), pars);
+                if (m_this->m_obs[i]->statistics() == "Gaussian")
+                    gaussian_binned(*(m_this->m_obs[i]), pars);
+                else
+                    poisson_binned(*(m_this->m_obs[i]), pars);
 
             } // endelse: binned analysis
 
@@ -491,6 +494,123 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
 }
 
 
+/***********************************************************************//**
+ * @brief Evaluate log-likelihood function for Gaussian statistics and
+ * binned analysis
+ *
+ * @param[in] obs Observation.
+ * @param[in] pars Optimizer parameters.
+ *
+ * Evaluate log-likelihood function, gradient and curvature matrix for one
+ * observation using binned analysis and Gaussian statistics.
+ ***************************************************************************/
+void GObservations::optimizer::gaussian_binned(const GObservation& obs,
+                                               const GOptimizerPars& pars) 
+{
+    // Timing measurement
+    #if G_EVAL_TIMING
+    clock_t t_start = clock();
+    #endif
+
+    // Get number of parameters
+    int npars = pars.npars();
+
+    // Allocate some working arrays
+    int*    inx    = new int[npars];
+    double* values = new double[npars];
+
+    // Iterate over all bins
+    for (int i = 0; i < obs.events()->size(); ++i) {
+
+        // Get pointer to bin
+        GEvent* bin = obs.events()->pointer(i);
+
+        // Get number of counts in bin
+        double data = bin->counts();
+
+        // Get statistical uncertainty
+        double sigma = bin->error();
+
+        // Get model and derivative
+        double model = obs.model((GModels&)pars, *(bin->dir()),
+                                 *(bin->energy()), *(bin->time()),
+                                 m_wrk_grad);
+
+        // Multiply by bin size
+        model *= bin->size();
+
+        // Skip bin if model is too small (avoids -Inf or NaN gradients)
+        if (model <= m_minmod)
+            continue;
+
+        // Skip bin if statistical uncertainty is too small
+        if (sigma <= m_minerr)
+            continue;
+
+        // Create index array of non-zero derivatives
+        int ndev = 0;
+        for (int i = 0; i < npars; ++i) {
+            if ((*m_wrk_grad)(i) != 0.0 && !std::isinf((*m_wrk_grad)(i))) {
+                inx[ndev] = i;
+                ndev++;
+            }
+        }
+
+        // Set weight
+        double weight = 1.0 / (sigma * sigma);
+
+        // Update Gaussian statistics
+        double fa = data - model;
+        m_value  += 0.5 * (fa * fa * weight);
+            
+        // Skip bin now if there are no non-zero derivatives
+        if (ndev < 1)
+            continue;
+
+        // Loop over columns
+        for (int jdev = 0; jdev < ndev; ++jdev) {
+
+            // Initialise computation
+            register int jpar = inx[jdev];
+            double       fa_i = (*m_wrk_grad)(jpar) * weight;
+
+            // Update gradient
+            (*m_gradient)(jpar) -= fa * fa_i;
+
+            // Loop over rows
+            register int* ipar = inx;
+            for (register int idev = 0; idev < ndev; ++idev, ++ipar)
+                values[idev] = fa_i * (*m_wrk_grad)(*ipar);
+
+            // Add column to matrix
+            m_covar->add_col(values, inx, ndev, jpar);
+
+        } // endfor: looped over columns
+
+    } // endfor: iterated over all events
+
+    // Free temporary memory
+    if (values != NULL) delete [] values;
+    if (inx    != NULL) delete [] inx;
+
+    // Optionally dump gradient and covariance matrix
+    #if G_EVAL_DEBUG
+    std::cout << *m_gradient << std::endl;
+    std::cout << *m_covar << std::endl;
+    #endif
+
+    // Timing measurement
+    #if G_EVAL_TIMING
+    double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    std::cout << "GObservations::optimizer::gaussian_binned: CPU usage = "
+              << t_elapse << " sec" << std::endl;
+    #endif
+
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Private methods                              =
@@ -506,6 +626,7 @@ void GObservations::optimizer::init_members(void)
     m_value      = 0.0;
     m_npred      = 0.0;
     m_minmod     = 1.0e-100;
+    m_minerr     = 1.0e-100;
     m_gradient   = NULL;
     m_covar      = NULL;
     m_this       = NULL;
@@ -527,6 +648,7 @@ void GObservations::optimizer::copy_members(const optimizer& fct)
     m_value  = fct.m_value;
     m_npred  = fct.m_npred;
     m_minmod = fct.m_minmod;
+    m_minerr = fct.m_minerr;
 
     // Copy gradient if it exists
     if (fct.m_gradient != NULL)
