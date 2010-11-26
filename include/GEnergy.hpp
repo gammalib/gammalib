@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
+#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -37,6 +38,7 @@ class GEnergy {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GEnergy& eng);
+    friend GLog&         operator<< (GLog& log, const GEnergy& eng);
 
     // Operator friends
     friend GEnergy operator+ (const GEnergy &a, const GEnergy &b);
@@ -63,15 +65,16 @@ public:
     GEnergy& operator-= (const GEnergy& eng);
 
     // Methods
-    void   clear(void) { m_energy = 0.0; }
-    double keV(void) const;
-    double MeV(void) const;
-    double GeV(void) const;
-    double TeV(void) const;
-    void   keV(const double& eng);
-    void   MeV(const double& eng);
-    void   GeV(const double& eng);
-    void   TeV(const double& eng);
+    void        clear(void) { m_energy = 0.0; }
+    double      keV(void) const;
+    double      MeV(void) const;
+    double      GeV(void) const;
+    double      TeV(void) const;
+    void        keV(const double& eng);
+    void        MeV(const double& eng);
+    void        GeV(const double& eng);
+    void        TeV(const double& eng);
+    std::string print(void) const;
   
 protected:
     // Protected methods

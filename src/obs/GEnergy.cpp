@@ -21,6 +21,7 @@
 #include <config.h>
 #endif
 #include "GEnergy.hpp"
+#include "GTools.hpp"
 
 /* __ Constants __________________________________________________________ */
 
@@ -230,6 +231,29 @@ void GEnergy::TeV(const double& eng)
 }
 
 
+/***********************************************************************//**
+ * @brief Print energy
+ ***************************************************************************/
+std::string GEnergy::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append energy
+    if (GeV() > 1000.0)
+        result.append(str(TeV())+" TeV");
+    else if (MeV() > 1000.0)
+        result.append(str(GeV())+" GeV");
+    else if (keV() > 1000.0)
+        result.append(str(MeV())+" MeV");
+    else
+        result.append(str(keV())+" keV");
+
+    // Return
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -281,27 +305,32 @@ void GEnergy::free_members(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Put object in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the model will be dumped
- * @param[in] eng Object to be dumped
- *
- * Dump energy in output stream with automatic adaption of the units.
+ * @param[in] os Output stream.
+ * @param[in] eng Energy.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GEnergy& eng)
 {
-    // Put object in stream
-    if (eng.GeV() > 1000.0)
-        os << eng.TeV() << " TeV";
-    else if (eng.MeV() > 1000.0)
-        os << eng.GeV() << " GeV";
-    else if (eng.keV() > 1000.0)
-        os << eng.MeV() << " MeV";
-    else
-        os << eng.keV() << " keV";
+     // Write energy in output stream
+    os << eng.print();
 
     // Return output stream
     return os;
 }
 
 
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] eng Energy.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GEnergy& eng)
+{
+    // Write energy into logger
+    log << eng.print();
+
+    // Return logger
+    return log;
+}
