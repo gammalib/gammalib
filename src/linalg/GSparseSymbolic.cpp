@@ -1091,16 +1091,15 @@ int* GSparseSymbolic::cs_etree(const GSparseMatrix* A, int ata)
 }
 
 
-/***************************************************************************
- *                                  cs_fkeep                               *
- * ----------------------------------------------------------------------- *
- * Drop entries for which fkeep(A(i,j)) is false. Return the number of     *
- * non-zero elements if ok, otherwise return -1.                           *
- * ----------------------------------------------------------------------- *
- * Input:   A                    Sparse matrix                             *
- *          fkeep                Screening function                        *
- *          other                Other function                            *
- * Output:  result               0..n-1 if ok, -1 in case of error         *
+/***********************************************************************//**
+ * @brief cs_fkeep
+ *
+ * @param[in] A Sparse matrix.
+ * @param[in] fkeep Screening function.
+ * @param[in] other Other function.
+ *
+ * Drop entries for which fkeep(A(i,j)) is false. Return the number of
+ * non-zero elements if ok, otherwise return -1.
  ***************************************************************************/
 int GSparseSymbolic::cs_fkeep(GSparseMatrix* A, 
                               int(*fkeep)(int, int, double, void*), 
