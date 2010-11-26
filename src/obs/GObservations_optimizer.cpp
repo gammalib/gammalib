@@ -394,12 +394,15 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
                                  *(bin->energy()), *(bin->time()),
                                  m_wrk_grad);
 
-        // Multiply by bin size
+        // Multiply model by bin size
         model *= bin->size();
 
         // Skip bin if model is too small (avoids -Inf or NaN gradients)
         if (model <= m_minmod)
             continue;
+
+        // Multiply gradient by bin size
+        *m_wrk_grad *= bin->size();
 
         // Create index array of non-zero derivatives
         int ndev = 0;
@@ -531,21 +534,24 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
         // Get statistical uncertainty
         double sigma = bin->error();
 
+        // Skip bin if statistical uncertainty is too small
+        if (sigma <= m_minerr)
+            continue;
+
         // Get model and derivative
         double model = obs.model((GModels&)pars, *(bin->dir()),
                                  *(bin->energy()), *(bin->time()),
                                  m_wrk_grad);
 
-        // Multiply by bin size
+        // Multiply model by bin size
         model *= bin->size();
 
         // Skip bin if model is too small (avoids -Inf or NaN gradients)
         if (model <= m_minmod)
             continue;
 
-        // Skip bin if statistical uncertainty is too small
-        if (sigma <= m_minerr)
-            continue;
+        // Multiply gradient by bin size
+        *m_wrk_grad *= bin->size();
 
         // Create index array of non-zero derivatives
         int ndev = 0;
