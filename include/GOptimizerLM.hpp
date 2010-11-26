@@ -75,11 +75,12 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GOptimizerLM& opt);
-    void free_members(void);
-    void optimize(GOptimizerFunction* fct, GOptimizerPars* pars);
-    void iteration(GOptimizerFunction* fct, GOptimizerPars* pars);
+    void   init_members(void);
+    void   copy_members(const GOptimizerLM& opt);
+    void   free_members(void);
+    void   optimize(GOptimizerFunction* fct, GOptimizerPars* pars);
+    void   iteration(GOptimizerFunction* fct, GOptimizerPars* pars);
+    double step_size(GVector* grad, GOptimizerPars* pars);
 
     // Protected data area
     double m_lambda_start;      //!< Initial start value
@@ -88,6 +89,8 @@ protected:
     double m_eps;               //!< Absolute precision
     int    m_max_iter;          //!< Maximum number of iterations
     int    m_max_stall;         //!< Maximum number of stalls
+    bool   m_step_adjust;       //!< Adjust step size to boundaries
+    bool*  m_hit_boundary;      //!< Bookkeeping array for boundary hits
     double m_lambda;            //!< Actual lambda
     double m_value;             //!< Actual function value
     int    m_status;            //!< Fit status

@@ -198,6 +198,7 @@ void GOptimizerLM::init_members(void)
     m_eps          = 1.0e-6;
     m_max_iter     = 100;
     m_max_stall    = 10;
+    m_step_adjust  = true;
 
     // Initialise optimizer values
     m_lambda = m_lambda_start;
@@ -227,6 +228,7 @@ void GOptimizerLM::copy_members(const GOptimizerLM& opt)
     m_eps          = opt.m_eps;
     m_max_iter     = opt.m_max_iter;
     m_max_stall    = opt.m_max_stall;
+    m_step_adjust  = opt.m_step_adjust;
     m_lambda       = opt.m_lambda;
     m_value        = opt.m_value;
     m_status       = opt.m_status;
@@ -243,6 +245,7 @@ void GOptimizerLM::copy_members(const GOptimizerLM& opt)
  ***************************************************************************/
 void GOptimizerLM::free_members(void)
 {
+
     // Return
     return;
 }
@@ -251,14 +254,17 @@ void GOptimizerLM::free_members(void)
 /***********************************************************************//**
  * @brief Perform LM optimization
  *
- * @param[in] fct Poiner to optimization function.
- * @param[in] par Pointer to parameters to be optimised.
- *
- * @todo Implemenet logger to allow for optimizer logging in applications.
- * So far only use std::cout (definition enabled).
+ * @param[in] fct Optimization function.
+ * @param[in] pars Function parameters.
  ***************************************************************************/
 void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
 {
+    // Allocate temporary memory
+    int npars = pars->npars();
+    m_hit_boundary = new bool[npars];
+    for (int i = 0; i < npars; ++i)
+        m_hit_boundary[i] = false;
+    
     // Single loop for common exit point
     do {
 
@@ -342,6 +348,9 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
 
     } while (0); // endwhile: main loop
 
+    // Free working memory
+    if (m_hit_boundary != NULL) delete [] m_hit_boundary;
+
     // Return
     return;
 }
@@ -351,7 +360,7 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
  * @brief Perform one LM iteration
  *
  * @param[in] fct Optimizer function.
- * @param[in] par Function parameters.
+ * @param[in] pars Function parameters.
  *
  * This method performs one LM iteration. Note that the method only acts on
  * the parameter value, i.e. it does not worry about the true scale of the
@@ -411,9 +420,9 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
             throw;
         }
 
-        // Derive new parameter vector
-        double step = 1.0; // NOTE: STEP SIZE ADJUSTMENT TBW
-
+        // Get LM step size
+        double step = step_size(grad, pars);
+     
         // Derive new parameter vector
         for (int ipar = 0; ipar < npars; ++ipar) {
 
@@ -428,14 +437,16 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
             // Constrain parameter to within the valid range
             if (pars->par(ipar)->hasmin() && p < p_min) {
                 if (m_logger != NULL) {
-                    *m_logger << "Parameter " << ipar << " hits minimum: ";
+                    *m_logger << "... parameter \"" << pars->par(ipar)->name();
+                    *m_logger << "\" hits minimum: ";
                     *m_logger << p << " < " << p_min << std::endl;
                 }
                 p = p_min;
             }
             if (pars->par(ipar)->hasmax() && p > p_max) {
                 if (m_logger != NULL) {
-                    *m_logger << "Parameter " << ipar << " hits maximum: ";
+                    *m_logger << "... parameter \"" << pars->par(ipar)->name();
+                    *m_logger << "\" hits maximum: ";
                     *m_logger << p << " > " << p_max << std::endl;
                 }
                 p = p_max;
@@ -503,6 +514,101 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
 }
 
 
+/***********************************************************************//**
+ * @brief Return LM step size
+ *
+ * @param[in] grad Function gradient.
+ * @param[in] pars Function parameters.
+ *
+ * Determine the size of the LM step. By default a step size of 1 is taken.
+ * If m_step_adjust=true then the step size will be estimated so that the
+ * next parameter vector should stay within the parameter boundaries
+ * (provided that boundaries exist).
+ ***************************************************************************/
+double GOptimizerLM::step_size(GVector* grad, GOptimizerPars* pars)
+{
+    // Initialise step size
+    double step = 1.0;
+
+    // Check if we should reduce the step size
+    if (m_step_adjust) {
+
+        // Initialise the parameter index that constrains most the fit
+        int ipar_bnd = -1;
+
+        // Loop over all parameters
+        for (int ipar = 0; ipar < pars->npars(); ++ipar) {
+
+            // Get parameter attributes
+            double p     = pars->par(ipar)->value();
+            double p_min = pars->par(ipar)->min();
+            double p_max = pars->par(ipar)->max();
+            double delta = (*grad)(ipar);
+
+            // Check if a parameter minimum requires a reduced step size
+            if (pars->par(ipar)->hasmin()) {
+                double step_min = (delta < 0.0) ? (p_min - p)/delta : 1.0;
+                if (step_min > 0.0) {
+                    if (step_min < step) {
+                        if (!m_hit_boundary[ipar]) {
+                            ipar_bnd = ipar;
+                            step     = step_min;
+                        }
+                    }
+                    else if (m_hit_boundary[ipar]) {
+                        m_hit_boundary[ipar] = false;
+                        if (m_logger != NULL) {
+                            *m_logger << "... parameter \"";
+                            *m_logger << pars->par(ipar)->name();
+                            *m_logger << "\" does not drive optimization step anymore.";
+                            *m_logger << std::endl;
+                        }
+                    }
+                }
+            }
+
+            // Check if a parameter maximum requires a reduced step size
+            if (pars->par(ipar)->hasmax()) {
+                double step_max = (delta > 0.0) ? (p_max - p)/delta : 1.0;
+                if (step_max > 0.0) {
+                    if (step_max < step) {
+                        if (!m_hit_boundary[ipar]) {
+                            ipar_bnd = ipar;
+                            step     = step_max;
+                        }
+                    }
+                    else if (m_hit_boundary[ipar]) {
+                        m_hit_boundary[ipar] = false;
+                        if (m_logger != NULL) {
+                            *m_logger << "... parameter \"";
+                            *m_logger << pars->par(ipar)->name();
+                            *m_logger << "\" does not drive optimization step anymore.";
+                            *m_logger << std::endl;
+                        }
+                    }
+                }
+            }
+
+        } // endfor: looped over all parameters
+
+        // Signal if a parameter is driving the optimization step
+        if (ipar_bnd != -1) {
+            m_hit_boundary[ipar_bnd] = true;
+            if (m_logger != NULL) {
+                *m_logger << "... parameter \"";
+                *m_logger << pars->par(ipar_bnd)->name();
+                *m_logger << "\" drives optimization step (step=";
+                *m_logger << step << ")" << std::endl;
+            }
+        }
+
+    } // endif: automatic step size adjustment requested
+
+    // Return step size
+    return step;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                                Friends                                  =
@@ -519,7 +625,7 @@ std::ostream& operator<< (std::ostream& os, const GOptimizerLM& opt)
 {
     // Put optimizer in stream
     os << "=== GOptimizerLM ===" << std::endl;
-    os << " Optimised function value ..: " << opt.m_value << std::endl;
+    os << " Optimized function value ..: " << opt.m_value << std::endl;
     os << " Absolute precision ........: " << opt.m_eps << std::endl;
     os << " Optimization status .......: " << opt.m_status << std::endl;
     os << " Number of iterations ......: " << opt.m_iter << std::endl;
@@ -540,7 +646,7 @@ GLog& operator<< (GLog& log, const GOptimizerLM& opt)
 {
     // Write optimizer into logger
     log << "=== GOptimizerLM ===" << std::endl;
-    log << " Optimised function value ..: " << opt.m_value << std::endl;
+    log << " Optimized function value ..: " << opt.m_value << std::endl;
     log << " Absolute precision ........: " << opt.m_eps << std::endl;
     log << " Optimization status .......: " << opt.m_status << std::endl;
     log << " Number of iterations ......: " << opt.m_iter << std::endl;
