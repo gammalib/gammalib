@@ -737,7 +737,7 @@ std::ostream& operator<< (std::ostream& os, const GOptimizerLM& opt)
     os << " Optimized function value ..: " << opt.m_value << std::endl;
     os << " Absolute precision ........: " << opt.m_eps << std::endl;
     os << " Optimization status .......: " << opt.m_status << std::endl;
-    os << " Number of iterations ......: " << opt.m_iter << std::endl;
+    os << " Number of iterations ......: " << opt.m_iter+1 << std::endl;
     os << " Lambda ....................: " << opt.m_lambda;
 
     // Return output stream
@@ -758,7 +758,7 @@ GLog& operator<< (GLog& log, const GOptimizerLM& opt)
     log << " Optimized function value ..: " << opt.m_value << std::endl;
     log << " Absolute precision ........: " << opt.m_eps << std::endl;
     log << " Optimization status .......: " << opt.m_status << std::endl;
-    log << " Number of iterations ......: " << opt.m_iter << std::endl;
+    log << " Number of iterations ......: " << opt.m_iter+1 << std::endl;
     log << " Lambda ....................: " << opt.m_lambda;
 
     // Return logger
