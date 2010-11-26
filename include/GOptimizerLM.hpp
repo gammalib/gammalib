@@ -30,6 +30,7 @@
 #define G_LM_STALLED              1
 #define G_LM_SINGULAR             2
 #define G_LM_NOT_POSTIVE_DEFINITE 3
+#define G_LM_BAD_ERRORS           4
 
 /***********************************************************************//**
  * @class GOptimizerLM
@@ -80,6 +81,7 @@ protected:
     void   free_members(void);
     void   optimize(GOptimizerFunction* fct, GOptimizerPars* pars);
     void   iteration(GOptimizerFunction* fct, GOptimizerPars* pars);
+    void   errors(GOptimizerFunction* fct, GOptimizerPars* pars);
     double step_size(GVector* grad, GOptimizerPars* pars);
 
     // Protected data area

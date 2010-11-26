@@ -259,94 +259,92 @@ void GOptimizerLM::free_members(void)
  ***************************************************************************/
 void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
 {
-    // Allocate temporary memory
+    // Initialise optimization parameters
     int npars = pars->npars();
+    m_lambda  = m_lambda_start;
+    m_status  = 0;
+
+    // Allocate temporary memory
     m_hit_boundary = new bool[npars];
     for (int i = 0; i < npars; ++i)
         m_hit_boundary[i] = false;
     
-    // Single loop for common exit point
-    do {
+    // Initial evaluation
+    fct->eval(*pars);
 
-        // Initialise optimization parameters
-        m_lambda = m_lambda_start;
-        m_status = 0;
+    // Save parameters
+    m_value = *(fct->value());
 
-        // Initial evaluation
-        fct->eval(*pars);
+    // Save initial statistics and lambda values
+    double value_old  = m_value;
+    double lambda_old = m_lambda;
+    int    lambda_inc = 0;
 
-        // Save parameters
-        m_value = *(fct->value());
+    // Optionally write initial iteration into logger
+    if (m_logger != NULL) {
+        *m_logger << "Initial iteration: ";
+        *m_logger << "func=" << m_value << ", ";
+        *m_logger << "Lambda=" << m_lambda << std::endl;
+    }
+    #if G_DEBUG_OPT
+    std::cout << "Initial iteration: func=" << m_value << ", Lambda="
+              << m_lambda << std::endl;
+    #endif
 
-        // Save initial statistics and lambda values
-        double value_old  = m_value;
-        double lambda_old = m_lambda;
-        int    lambda_inc = 0;
+    // Iterative fitting
+    for (m_iter = 0; m_iter < m_max_iter; ++m_iter) {
 
-        // Optionally write initial iteration into logger
+        // Perform one iteration
+        iteration(fct, pars);
+
+        // Compute function improvement (>0 means decrease)
+        double delta = value_old - m_value;
+
+        // Optionally write iteration results into logger
         if (m_logger != NULL) {
-            *m_logger << "Initial iteration: ";
+            *m_logger << "Iteration " << m_iter+1 << ": ";
             *m_logger << "func=" << m_value << ", ";
-            *m_logger << "Lambda=" << m_lambda << std::endl;
+            *m_logger << "Lambda=" << m_lambda << ", ";
+            *m_logger << "delta=" << delta << std::endl;
         }
         #if G_DEBUG_OPT
-        std::cout << "Initial iteration: func=" << m_value << ", Lambda="
-                  << m_lambda << std::endl;
+        std::cout << "Iteration " << m_iter+1 << ": func=" 
+                  << m_value << ", Lambda=" << m_lambda
+                  << ", delta=" << delta << std::endl;
         #endif
 
-        // Iterative fitting
-        for (m_iter = 0; m_iter < m_max_iter; ++m_iter) {
+        // Reset lambda increment if we had success
+        if (m_lambda < lambda_old)
+            lambda_inc = 0;
 
-            // Perform one iteration
-            iteration(fct, pars);
+        // If function increased while lambda did not increase then stop
+        // iterations
+        if ((m_lambda <= lambda_old) && (delta < 0.0))
+            break;
 
-            // Compute function improvement (>0 means decrease)
-            double delta = value_old - m_value;
+        // Stop if convergence was reached
+        if ((m_lambda <= lambda_old) && (delta < m_eps))
+            break;
 
-            // Optionally write iteration results into logger
-            if (m_logger != NULL) {
-                *m_logger << "Iteration " << m_iter+1 << ": ";
-                *m_logger << "func=" << m_value << ", ";
-                *m_logger << "Lambda=" << m_lambda << ", ";
-                *m_logger << "delta=" << delta << std::endl;
-            }
-            #if G_DEBUG_OPT
-            std::cout << "Iteration " << m_iter+1 << ": func=" 
-                      << m_value << ", Lambda=" << m_lambda
-                      << ", delta=" << delta << std::endl;
-            #endif
+        // Monitor the number of subsequent increases of lambda and stop if
+        // the number of increases exceeds threshold
+        lambda_inc = (m_lambda > lambda_old) ? lambda_inc + 1 : 0;
+        if (lambda_inc > m_max_stall) {
+            m_status = G_LM_STALLED;
+            break;
+        }
 
-            // Reset lambda increment if we had success
-            if (m_lambda < lambda_old)
-                lambda_inc = 0;
+        // Bookkeeping of actual result (we always store the last lambda to
+        // detect turn arounds in the lambda tendency; however we always keep
+        // the best function value)
+        lambda_old = m_lambda;
+        if (delta > 0.0)
+            value_old = m_value;
 
-            // If function increased while lambda did not increase then stop
-            // iterations
-            if ((m_lambda <= lambda_old) && (delta < 0.0))
-                break;
+    } // endfor: iterations
 
-            // Stop if convergence was reached
-            if ((m_lambda <= lambda_old) && (delta < m_eps))
-                break;
-
-            // Monitor the number of subsequent increases of lambda and stop if
-            // the number of increases exceeds threshold
-            lambda_inc = (m_lambda > lambda_old) ? lambda_inc + 1 : 0;
-            if (lambda_inc > m_max_stall) {
-                m_status = G_LM_STALLED;
-                break;
-            }
-
-            // Bookkeeping of actual result (we always store the last lambda to
-            // detect turn arounds in the lambda tendency; however we always keep
-            // the best function value)
-            lambda_old = m_lambda;
-            if (delta > 0.0)
-                value_old = m_value;
-
-        } // endfor: iterations
-
-    } while (0); // endwhile: main loop
+    // Compute parameter uncertainties
+    errors(fct, pars);
 
     // Free working memory
     if (m_hit_boundary != NULL) delete [] m_hit_boundary;
@@ -606,6 +604,117 @@ double GOptimizerLM::step_size(GVector* grad, GOptimizerPars* pars)
 
     // Return step size
     return step;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute parameter uncertainties
+ *
+ * @param[in] fct Optimizer function.
+ * @param[in] pars Function parameters.
+ *
+ * Compute parameter uncertainties from the diagonal elements of the
+ * covariance matrix.
+ ***************************************************************************/
+void GOptimizerLM::errors(GOptimizerFunction* fct, GOptimizerPars* pars)
+{
+    // Get number of parameters
+    int npars = pars->npars();
+
+    // Perform final parameter evaluation
+    fct->eval(*pars);
+
+    // Fetch sparse matrix pointer. We have to do this after the eval()
+    // method since eval() will allocate new memory for the covariance
+    // matrix!
+    GSparseMatrix* covar = fct->covar();
+
+    // Save best fitting value
+    m_value = *(fct->value());
+
+    // Save covariance matrix
+    GSparseMatrix save_covar = GSparseMatrix(*covar);
+
+    // Signal no diagonal element loading
+    bool diag_loaded = false;
+
+    // Loop over error computation (maximum 2 turns)
+    for (int i = 0; i < 2; ++i) {
+
+        // Solve: covar * X = unit
+        try {
+            covar->cholesky_decompose(1);
+            GVector unit(npars);
+            for (int ipar = 0; ipar < npars; ++ipar) {
+                unit(ipar) = 1.0;
+                GVector x  = covar->cholesky_solver(unit,1);
+                if (x(ipar) >= 0.0)
+                    pars->par(ipar)->error(sqrt(x(ipar)));
+                else {
+                    pars->par(ipar)->error(0.0);
+                    m_status = G_LM_BAD_ERRORS;
+                }
+                unit(ipar) = 0.0;
+            }
+        }
+        catch (GException::matrix_zero &e) {
+            m_status = G_LM_SINGULAR;
+            if (m_logger != NULL) {
+                *m_logger << "GOptimizerLM::terminate: "
+                          << "All curvature matrix elements are zero."
+                          << std::endl;
+            }
+            break;
+        }
+        catch (GException::matrix_not_pos_definite &e) {
+
+            // Load diagonal if this has not yet been tried
+            if (!diag_loaded) {
+
+                // Flag errors as inaccurate
+                m_status = G_LM_BAD_ERRORS;
+                if (m_logger != NULL) {
+                    *m_logger << "Non-Positive definite curvature matrix encountered."
+                              << std::endl;
+                    *m_logger << "Load diagonal elements with 1e-10."
+                              << " Fit errors may be inaccurate."
+                              << std::endl;
+                }
+
+                // Try now with diagonal loaded matrix
+                *covar = save_covar;
+                for (int ipar = 0; ipar < npars; ++ipar)
+                    (*covar)(ipar,ipar) += 1.0e-10;
+
+                // Signal loading
+                diag_loaded = true;
+
+                // Try again
+                continue;
+
+            } // endif: diagonal has not yet been loaded
+
+            // ... otherwise signal an error
+            else {
+                m_status = G_LM_NOT_POSTIVE_DEFINITE;
+                if (m_logger != NULL) {
+                    *m_logger << "Non-Positive definite curvature matrix encountered,"
+                              << " even after diagonal loading." << std::endl;
+                }
+                break;
+            }
+        }
+        catch (std::exception &e) {
+            throw;
+        }
+
+        // If no error occured then break now
+        break;
+
+    } // endfor: looped over error computation
+
+    // Return
+    return;
 }
 
 
