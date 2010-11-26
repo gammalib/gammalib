@@ -22,9 +22,10 @@
 #endif
 #include <cmath>
 #include "GObservations.hpp"
-#include "GEventList.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_EVAL             "GObservations::optimizer::eval(GOptimizerPars&) "
 
 /* __ Macros _____________________________________________________________ */
 
@@ -152,17 +153,14 @@ GObservations::optimizer& GObservations::optimizer::operator= (const optimizer& 
  *
  * @param[in] pars Optimizer parameters.
  *
- * This method evaluates the log-likelihood function for parameter
- * optimisation. It handles both binned and unbinned data. 
- * For binned data the function to optimize is given by
- * \f$L=-\sum_i n_i \log e_i - e_i\f$
- * where the sum is taken over all data space bins, \f$n_i\f$ is the
- * observed number of counts and \f$e_i\f$ is the model.
- * For unbinned data the function to optimize is given by
- * \f$L=-\sum_i \log e_i + {\rm Npred}\f$
- * where the sum is taken over all events and \f${\rm Npred}\f$ is the
- * total number of events that is predicted by the model.
- * Note that binned and unbinned observations may be combined.
+ * @exception GException::invalid_statistics
+ *            Invalid optimization statistics encountered.
+ *
+ * This method evaluates the -(log-likelihood) function for parameter
+ * optimisation. It handles both binned and unbinned data and supportes
+ * Poisson and Gaussian statistics. 
+ * Note that different statistics and different analysis methods
+ * (binned/unbinned) may be combined.
  ***************************************************************************/
 void GObservations::optimizer::eval(const GOptimizerPars& pars) 
 {
@@ -196,34 +194,54 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         // Loop over all observations
         for (int i = 0; i < m_this->m_num; ++i) {
 
+            // Extract statistics for this observation
+            std::string statistics = m_this->m_obs[i]->statistics();
+
             // Unbinned analysis
             if (m_this->m_obs[i]->events()->islist()) {
 
-                // Update the Npred value
-                m_npred     += m_this->m_obs[i]->npred((GModels&)pars, m_wrk_grad);
-                *m_gradient += *m_wrk_grad;
-                #if G_EVAL_DEBUG
-                std::cout << "Npred=" << m_npred << " Grad="
-                          << *m_gradient << std::endl;
-                #endif
+                // Poisson statistics
+                if (toupper(statistics) == "POISSON") {
 
-                // Update the log-likelihood
-                poisson_unbinned(*(m_this->m_obs[i]), pars);
+                    // Update the Npred value
+                    m_npred     += m_this->m_obs[i]->npred((GModels&)pars, m_wrk_grad);
+                    *m_gradient += *m_wrk_grad;
+                    #if G_EVAL_DEBUG
+                    std::cout << "Npred=" << m_npred << " Grad="
+                          << *m_gradient << std::endl;
+                    #endif
+
+                    // Update the log-likelihood
+                    poisson_unbinned(*(m_this->m_obs[i]), pars);
+
+                } // endif: Poisson statistics
+
+                // ... otherwise throw an exception
+                else
+                    throw GException::invalid_statistics(G_EVAL, statistics,
+                          "Unbinned optimization requires Poisson statistics.");
 
             } // endif: unbinned analysis
 
             // ... or binned analysis
             else {
 
-                // Update the log-likelihood
-                if (m_this->m_obs[i]->statistics() == "Gaussian")
-                    gaussian_binned(*(m_this->m_obs[i]), pars);
-                else
+                // Poisson statistics
+                if (toupper(statistics) == "POISSON")
                     poisson_binned(*(m_this->m_obs[i]), pars);
+
+                // ... or Gaussian statistics
+                else if (toupper(statistics) == "GAUSSIAN")
+                    gaussian_binned(*(m_this->m_obs[i]), pars);
+
+                // ... or unsupported
+                else
+                    throw GException::invalid_statistics(G_EVAL, statistics,
+                          "Binned optimization requires Poisson or Gaussian statistics.");
 
             } // endelse: binned analysis
 
-        }
+        } // endfor: looped over observations
 
         // Add the Npred value to the log-likelihood
         m_value += m_npred;
@@ -258,8 +276,16 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
  * @param[in] obs Observation.
  * @param[in] pars Optimizer parameters.
  *
- * Evaluate log-likelihood function, gradient and curvature matrix for one
- * observation using unbinned analysis and Poisson statistics.
+ * This method evaluates the -(log-likelihood) function for parameter
+ * optimisation using unbinned analysis and Poisson statistics.
+ * The -(log-likelihood) function is given by
+ * \f$L=-\sum_i \log e_i + {\rm Npred}\f$
+ * where the sum is taken over all events and \f${\rm Npred}\f$ is the
+ * total number of events that is predicted by the model.
+ * This method also computes the parameter gradients
+ * \f$\deltaL/dp\f$
+ * and the curvature matrix
+ * \f$\delta^2L/dp_1 dp_2\f$.
  ***************************************************************************/
 void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
                                                 const GOptimizerPars& pars) 
@@ -362,8 +388,17 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
  * @param[in] obs Observation.
  * @param[in] pars Optimizer parameters.
  *
- * Evaluate log-likelihood function, gradient and curvature matrix for one
- * observation using binned analysis and Poisson statistics.
+ * This method evaluates the -(log-likelihood) function for parameter
+ * optimisation using binned analysis and Poisson statistics.
+ * The -(log-likelihood) function is given by
+ * \f$L=-\sum_i n_i \log e_i - e_i\f$
+ * where the sum is taken over all data space bins, \f$n_i\f$ is the
+ * observed number of counts and \f$e_i\f$ is the model.
+ * This method also computes the parameter gradients
+ * \f$\deltaL/dp\f$
+ * and the curvature matrix
+ * \f$\delta^2L/dp_1 dp_2\f$
+ * and also updates the total number of predicted events m_npred.
  ***************************************************************************/
 void GObservations::optimizer::poisson_binned(const GObservation& obs,
                                               const GOptimizerPars& pars) 
@@ -400,6 +435,9 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
         // Skip bin if model is too small (avoids -Inf or NaN gradients)
         if (model <= m_minmod)
             continue;
+
+        // Update Npred
+        m_npred += model;
 
         // Multiply gradient by bin size
         *m_wrk_grad *= bin->size();
@@ -504,8 +542,18 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
  * @param[in] obs Observation.
  * @param[in] pars Optimizer parameters.
  *
- * Evaluate log-likelihood function, gradient and curvature matrix for one
- * observation using binned analysis and Gaussian statistics.
+ * This method evaluates the -(log-likelihood) function for parameter
+ * optimisation using binned analysis and Poisson statistics.
+ * The -(log-likelihood) function is given by
+ * \f$L = 1/2 \sum_i (n_i - e_i)^2 \sigma_i^{-2}\f$
+ * where the sum is taken over all data space bins, \f$n_i\f$ is the
+ * observed number of counts, \f$e_i\f$ is the model and \f$\sigma_i\f$
+ * is the statistical uncertainty.
+ * This method also computes the parameter gradients
+ * \f$\deltaL/dp\f$
+ * and the curvature matrix
+ * \f$\delta^2L/dp_1 dp_2\f$
+ * and also updates the total number of predicted events m_npred.
  ***************************************************************************/
 void GObservations::optimizer::gaussian_binned(const GObservation& obs,
                                                const GOptimizerPars& pars) 
@@ -549,6 +597,9 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
         // Skip bin if model is too small (avoids -Inf or NaN gradients)
         if (model <= m_minmod)
             continue;
+
+        // Update Npred
+        m_npred += model;
 
         // Multiply gradient by bin size
         *m_wrk_grad *= bin->size();
