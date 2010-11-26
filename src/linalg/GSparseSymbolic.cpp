@@ -1106,40 +1106,45 @@ int GSparseSymbolic::cs_fkeep(GSparseMatrix* A,
                               int(*fkeep)(int, int, double, void*), 
                               void* other)
 {
-  // Return error if some of the input pointers is invalid
-  if (!A || !fkeep) return (-1);
+    // Return error if some of the input pointers is invalid
+    if (!A || !fkeep) return (-1);
   
-  // Declare 
-  int j, p, nz = 0;
+    // Declare 
+    int j, p, nz = 0;
 
-  // Assign matrix attributes
-  int     n  = A->m_cols;
-  int*    Ap = A->m_colstart;
-  int*    Ai = A->m_rowinx; 
-  double* Ax = A->m_data;
+    // Assign matrix attributes
+    int     n  = A->m_cols;
+    int*    Ap = A->m_colstart;
+    int*    Ai = A->m_rowinx; 
+    double* Ax = A->m_data;
 
-  // Loop over all columns
-  for (j = 0; j < n; j++) {
-	p     = Ap[j];                       // get current location of col j
-	Ap[j] = nz;                          // record new location of col j
-	for ( ; p < Ap[j+1] ; p++) {
-      if (fkeep(Ai[p], j, Ax ? Ax[p] : 1, other)) {
-		if (Ax) Ax[nz] = Ax[p];          // keep A(i,j)
-		Ai[nz++] = Ai[p] ;
-	  }
-	}
-  }
+    // Operate only if we have some data
+    if (Ap != NULL && Ai != NULL && Ax != NULL) {
+
+        // Loop over all columns
+        for (j = 0; j < n; j++) {
+            p     = Ap[j];                       // get current location of col j
+            Ap[j] = nz;                          // record new location of col j
+            for ( ; p < Ap[j+1] ; p++) {
+                if (fkeep(Ai[p], j, Ax ? Ax[p] : 1, other)) {
+                    if (Ax) Ax[nz] = Ax[p];          // keep A(i,j)
+                    Ai[nz++] = Ai[p] ;
+                }
+            }
+        }
   
-  // Finalise A
-  Ap[n]         = nz;
-  A->m_elements = nz;
+        // Finalise A
+        Ap[n]         = nz;
+        A->m_elements = nz;
+
+    } // endif: we had data
   
-  // Remove extra space from A
+    // Remove extra space from A
 //  cs_sprealloc(A, 0);
-  A->free_elements(nz, (A->m_elements-nz));
+    A->free_elements(nz, (A->m_elements-nz));
 
-  // Return number of non-zero elements
-  return nz;
+    // Return number of non-zero elements
+    return nz;
 }
 
 
