@@ -149,6 +149,27 @@ GCTAEventBin* GCTAEventBin::clone(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Return error in number of counts
+ *
+ * Returns \f$\sqrt(counts+delta)\f$ as the uncertainty in the number of
+ * counts in the bin. Adding delta avoids uncertainties of 0 which will
+ * lead in the optimisation step to the exlusion of the corresponding bin.
+ * In the actual implementation delta=1e-50.
+ *
+ * @todo The choice of delta has been made somewhat arbitrary, mainly
+ * because the optimizer routines filter error^2 below 1e-100.
+ ***************************************************************************/
+double GCTAEventBin::error(void) const
+{
+    // Compute uncertainty
+    double error = sqrt(counts()+1.0e-50);
+
+    // Return error
+    return error;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Private methods                              =
