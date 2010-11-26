@@ -393,6 +393,11 @@ public:
         erange_invalid(std::string origin, double emin, 
                        double emax, std::string message = "");
     };
+    class invalid_statistics : public GExceptionHandler {
+    public:
+        invalid_statistics(std::string origin, std::string statistics,
+                           std::string message = "");
+    };
 
 
     // XML exceptions

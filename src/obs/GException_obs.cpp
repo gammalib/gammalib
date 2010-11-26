@@ -122,3 +122,20 @@ GException::erange_invalid::erange_invalid(std::string origin, double emin,
     m_message = "Invalid energy range (Emin="+str(emin)+" MeV, Emax="+
                 str(emax)+" MeV. "+message;
 }
+
+
+/***********************************************************************//**
+ * @brief Invalid optimization statistics
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] statistics Encountered statistics.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::invalid_statistics::invalid_statistics(std::string origin,
+                                                   std::string statistics,
+                                                   std::string message)
+{
+    m_origin  = origin;
+    m_message = "Invalid optimization statistics \""+statistics+
+                "\" encountered. "+message;
+}
