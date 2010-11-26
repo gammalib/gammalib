@@ -82,7 +82,7 @@ public:
     virtual double npred(const GModels& models, GVector* gradient = NULL) const;
 
     // Implemented methods
-    void        obsname(const std::string& obsname) { m_obsname=obsname; return; }
+    void        obsname(const std::string& obsname);
     void        roi(const GRoi& roi) { m_roi=roi.clone(); return; }
     void        ebounds(const GEbounds& ebounds) { m_ebounds=ebounds; return; }
     void        gti(const GGti& gti) { m_gti=gti; return; }

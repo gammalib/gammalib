@@ -26,7 +26,6 @@
 #include "GObservation.hpp"
 #include "GModelSpatialPtsrc.hpp"
 #include "GIntegral.hpp"
-#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MODEL           "GObservation::model(GModels&, GPointing&, GInstDir&, GEnergy&, GTime&, GVector*) const"
@@ -255,27 +254,33 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
 
 
 /***********************************************************************//**
- * @brief Set optimizer statistics for observation
+ * @brief Set observation name
+ *
+ * @param[in] obsname Observation name.
+ *
+ * Set the name of this observation.
+ ***************************************************************************/
+void GObservation::obsname(const std::string& obsname)
+{
+    // Set name
+    m_obsname = obsname;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set optimizer statistics
  *
  * @param[in] statistics Optimizer statistics.
  *
  * Set the optimizer statistics for this observation.
- *
- * @todo Throw an exception if an invalid statistics has been specified.
  ***************************************************************************/
 void GObservation::statistics(const std::string& statistics)
 {
-    // Check for Poisson statistics
-    if (toupper(statistics) == "POISSON")
-        m_statistics = "Poisson";
-
-    // Check for Gaussian statistics
-    else if (toupper(statistics) == "GAUSSIAN")
-        m_statistics = "Gaussian";
-
-    // Otherwise default to Poisson statistics
-    else
-        m_statistics = "Poisson";
+    // Set statistics
+    m_statistics = statistics;
 
     // Return
     return;
