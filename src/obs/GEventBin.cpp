@@ -20,9 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
-#include <iomanip>
-#include "GException.hpp"
 #include "GEventBin.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -41,7 +38,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GEventBin::GEventBin(void) : GEvent()
 {
@@ -56,7 +53,7 @@ GEventBin::GEventBin(void) : GEvent()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] atom Event bin from which the instance should be built.
+ * @param[in] atom Event bin.
  ***************************************************************************/
 GEventBin::GEventBin(const GEventBin& bin) : GEvent(bin)
 {
@@ -93,7 +90,7 @@ GEventBin::~GEventBin(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] bin Event bin to be assigned.
+ * @param[in] bin Event bin.
  ***************************************************************************/
 GEventBin& GEventBin::operator= (const GEventBin& bin)
 {
@@ -152,11 +149,6 @@ double GEventBin::error(void) const
  ***************************************************************************/
 void GEventBin::init_members(void)
 {
-    // Initialise attributes
-    m_counts = NULL;
-    m_time   = NULL;
-    m_energy = NULL;
-
     // Return
     return;
 }
@@ -165,15 +157,10 @@ void GEventBin::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] bin GEventBin members which should be copied.
+ * @param[in] bin Event bin.
  ***************************************************************************/
 void GEventBin::copy_members(const GEventBin& bin)
 {
-    // Copy attributes
-    m_counts = bin.m_counts;
-    m_time   = bin.m_time;
-    m_energy = bin.m_energy;
-
     // Return
     return;
 }

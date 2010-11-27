@@ -25,7 +25,6 @@
 #include "GLATEventAtom.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MODEL                    "GLATEventAtom::model(GModels&, GVector*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -41,7 +40,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GLATEventAtom::GLATEventAtom(void) : GEventAtom()
 {
@@ -56,7 +55,7 @@ GLATEventAtom::GLATEventAtom(void) : GEventAtom()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] atom Event atom from which the instance should be built.
+ * @param[in] atom Event atom.
  ***************************************************************************/
 GLATEventAtom::GLATEventAtom(const GLATEventAtom& atom) : GEventAtom(atom)
 {
@@ -93,7 +92,7 @@ GLATEventAtom::~GLATEventAtom(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] atom Event atom which should be assigned.
+ * @param[in] atom Event atom.
  ***************************************************************************/
 GLATEventAtom& GLATEventAtom::operator= (const GLATEventAtom& atom)
 {
@@ -126,53 +125,33 @@ GLATEventAtom& GLATEventAtom::operator= (const GLATEventAtom& atom)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return model value and gradient
+ * @brief Clear instance
  *
- * @param[in] models Model descriptor.
- * @param[out] gradient Pointer to gradient vector (NULL=not computed).
- *
- * @exception GException::gradient_par_mismatch
- *            Dimension of gradient vector mismatches number of parameters.
- *
- * Implements generic model and gradient evaluation for the LAT instrument.
- *
- * @todo Requires implementation of all model types (not only factorized
- *       point sources which are currently the only type that is
- *       supported)
+ * This method properly resets the instance to an initial state.
  ***************************************************************************/
-double GLATEventAtom::model(GModels& models, GVector* gradient) const
+void GLATEventAtom::clear(void)
 {
-    // Verify that gradients vector has the same dimension than the
-    // model has parameters
-    #if defined(G_RANGE_CHECK)
-    if (models.npars() != gradient->size())
-        throw GException::gradient_par_mismatch(G_MODEL, gradient->size(), 
-                                                models.npars());
-    #endif
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GEventAtom::free_members();
+    this->GEvent::free_members();
 
-    // Initialise model
-    double model = 0.0;
-    
-    // Loop over models
-    for (int i = 0; i < models.size(); ++i) {
-    
-        // Check if model is a LAT model and if it should be used for this
-        // event
-        // TO BE IMPLEMENTED
-        
-        // Add model
-        model += models(i)->eval_gradients(*dir(), *energy(), *time(), *rsp(), *pnt());
-        
-    }
-
-    // Set gradient vector
-    if (gradient != NULL) {
-        for (int i = 0; i < gradient->size(); ++i)
-            (*gradient)(i) = models.par(i)->gradient();
-    }
+    // Initialise members
+    this->GEvent::init_members();
+    this->GEventAtom::init_members();
+    init_members();
 
     // Return
-    return model;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+***************************************************************************/
+GLATEventAtom* GLATEventAtom::clone(void) const
+{
+    return new GLATEventAtom(*this);
 }
 
 
@@ -187,12 +166,10 @@ double GLATEventAtom::model(GModels& models, GVector* gradient) const
  ***************************************************************************/
 void GLATEventAtom::init_members(void)
 {
-    // Initialise LAT attributes
-    m_dir = GLATInstDir();
-    m_pnt = NULL;
-    m_rsp = NULL;
-
-    // Initialise LAT data format attributes
+    // Initialise members
+    m_dir.clear();
+    m_time.clear();
+    m_energy.clear();
     m_theta               = 0.0;
     m_phi                 = 0.0;
     m_zenith_angle        = 0.0;
@@ -207,9 +184,7 @@ void GLATEventAtom::init_members(void)
     m_conversion_type     = 0;
     m_livetime            = 0.0;
     m_difrsp              = NULL;
-
-    // Initialise other attributes
-    m_num_difrsp = 0;
+    m_num_difrsp          = 0;
 
     // Return
     return;
@@ -219,16 +194,14 @@ void GLATEventAtom::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] atom GLATEventAtom members which should be copied.
+ * @param[in] atom Event atom.
  ***************************************************************************/
 void GLATEventAtom::copy_members(const GLATEventAtom& atom)
 {
-    // Copy LAT attributes
-    m_dir = atom.m_dir;
-    m_pnt = atom.m_pnt;
-    m_rsp = atom.m_rsp;
-
-    // Copy LAT data format attributes
+    // Copy members
+    m_dir                 = atom.m_dir;
+    m_time                = atom.m_time;
+    m_energy              = atom.m_energy;
     m_theta               = atom.m_theta;
     m_phi                 = atom.m_phi;
     m_zenith_angle        = atom.m_zenith_angle;
@@ -276,15 +249,6 @@ void GLATEventAtom::free_members(void)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GLATEventAtom* GLATEventAtom::clone(void) const
-{
-    return new GLATEventAtom(*this);
 }
 
 

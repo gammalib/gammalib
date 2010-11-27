@@ -20,13 +20,11 @@
 #define GLATEVENTBIN_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <ostream>
+#include <iostream>
 #include "GEventBin.hpp"
-#include "GModels.hpp"
-#include "GVector.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
 #include "GLATInstDir.hpp"
-#include "GLATPointing.hpp"
-#include "GLATResponse.hpp"
 
 
 /***********************************************************************//**
@@ -51,24 +49,35 @@ public:
     // Operators
     GLATEventBin& operator= (const GLATEventBin& bin);
 
-    // Methods
-    double              model(GModels& models, GVector* gradient = NULL) const;
-    double              size(void) const;
-    const GLATInstDir*  dir(void) const { return m_dir; }
-    const GLATPointing* pnt(void) const { return m_pnt; }
-    const GLATResponse* rsp(void) const { return m_rsp; }
+    // Event access methods
+    const GEnergy&     energy(void) const { return *m_energy; }
+    const GLATInstDir& dir(void) const { return *m_dir; }
+    const GTime&       time(void) const { return *m_time; }
+    double             counts(void) const { return *m_counts; }
+    double             error(void) const;
+
+    // Other methods
+    void           clear(void);
+    GLATEventBin*  clone(void) const;
+    double         size(void) const;
+    const double&  omega(void) const { return *m_omega; }
+    const GEnergy& ewidth(void) const { return *m_ewidth; }
+    const double&  ontime(void) const { return *m_ontime; }
 
 protected:
     // Protected methods
-    void          init_members(void);
-    void          copy_members(const GLATEventBin& bin);
-    void          free_members(void);
-    GLATEventBin* clone(void) const;
+    void init_members(void);
+    void copy_members(const GLATEventBin& bin);
+    void free_members(void);
 
-    // LAT specific event attributes
-    GLATInstDir*  m_dir;     //!< Pointer to event direction
-    GLATPointing* m_pnt;     //!< Pointer to instrument pointing
-    GLATResponse* m_rsp;     //!< Pointer to instrument response function
+    // Protected members
+    GEnergy*     m_energy;      //!< Pointer to bin energy
+    GLATInstDir* m_dir;         //!< Pointer to bin direction
+    GTime*       m_time;        //!< Pointer to bin time
+    double*      m_counts;      //!< Pointer to number of counts
+    double*      m_omega;       //!< Pointer to solid angle of pixel (sr)
+    GEnergy*     m_ewidth;      //!< Pointer to energy width of bin
+    double*      m_ontime;      //!< Pointer to ontime of bin (seconds)
 
 };
 

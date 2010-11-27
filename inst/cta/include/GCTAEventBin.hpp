@@ -20,29 +20,27 @@
 #define GCTAEVENTBIN_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <ostream>
+#include <iostream>
+#include "GLog.hpp"
 #include "GEventBin.hpp"
-#include "GModels.hpp"
-#include "GVector.hpp"
 #include "GEnergy.hpp"
+#include "GTime.hpp"
 #include "GCTAInstDir.hpp"
-#include "GCTAPointing.hpp"
-#include "GCTAResponse.hpp"
 
 
 /***********************************************************************//**
  * @class GCTAEventBin
  *
- * @brief GCTAEventBin class interface defintion.
+ * @brief GCTAEventBin class interface defintion
  *
- * The CTA event bin class holds all information that is relevant for the
- * analysis of an event cube bin. It derives from the abstract GEventBin
- * base class that holds pointers to the actual number of counts, to the
- * mean time and to the mean energy of the specific bin. These pointers
- * are set by the GCTAEventCube class that is the container class for
- * CTA events. Note that the counts are in fact stored in GCTAEventCube.
- * GCTAEventBin just provides an interface to access event information bin
- * by bin.
+ * This class implements a CTA event bin. The event bin is a collection of
+ * pointers that points to the relevant information in memory. The class
+ * itself does not allocate any memory, it just is a vector to collect
+ * all relevant event information in a single place. This avoids duplication
+ * of information.
+ *
+ * Setting up the pointers is done by the corresponding event bin container
+ * class (GCTAEventCube).
  ***************************************************************************/
 class GCTAEventBin : public GEventBin {
 
@@ -61,16 +59,20 @@ public:
     // Operators
     GCTAEventBin& operator= (const GCTAEventBin& bin);
 
-    // Methods overloading virtual base class methods
-    double error(void) const;
+    // Event access methods
+    const GEnergy&     energy(void) const { return *m_energy; }
+    const GCTAInstDir& dir(void) const { return *m_dir; }
+    const GTime&       time(void) const { return *m_time; }
+    double             counts(void) const { return *m_counts; }
+    double             error(void) const;
 
-    // Methods
-    double             size(void) const;
-    const GCTAInstDir* dir(void) const { return m_dir; }
-    const double*      omega(void) const { return m_omega; }
-    const GEnergy*     ewidth(void) const { return m_ewidth; }
-    const double*      ontime(void) const { return m_ontime; }
-    GCTAEventBin*      clone(void) const;
+    // Other methods
+    void           clear(void);
+    GCTAEventBin*  clone(void) const;
+    double         size(void) const;
+    const double&  omega(void) const { return *m_omega; }
+    const GEnergy& ewidth(void) const { return *m_ewidth; }
+    const double&  ontime(void) const { return *m_ontime; }
 
 protected:
     // Protected methods
@@ -78,12 +80,14 @@ protected:
     void copy_members(const GCTAEventBin& bin);
     void free_members(void);
 
-    // CTA specific event attributes
-    GCTAInstDir*  m_dir;     //!< Pointer to event direction
-    double*       m_omega;   //!< Pointer to solid angle of pixel (sr)
-    GEnergy*      m_ewidth;  //!< Pointer to energy width of bin
-    double*       m_ontime;  //!< Pointer to ontime of bin (seconds)
-
+    // Protected members
+    GEnergy*     m_energy;      //!< Pointer to bin energy
+    GCTAInstDir* m_dir;         //!< Pointer to bin direction
+    GTime*       m_time;        //!< Pointer to bin time
+    double*      m_counts;      //!< Pointer to number of counts
+    double*      m_omega;       //!< Pointer to solid angle of pixel (sr)
+    GEnergy*     m_ewidth;      //!< Pointer to energy width of bin
+    double*      m_ontime;      //!< Pointer to ontime of bin (seconds)
 };
 
 #endif /* GCTAEVENTBIN_HPP */

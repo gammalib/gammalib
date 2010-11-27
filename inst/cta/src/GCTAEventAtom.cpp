@@ -27,7 +27,6 @@
 #include "GCTAEventAtom.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MODEL                    "GCTAEventAtom::model(GModels&, GVector*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -43,9 +42,9 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
-GCTAEventAtom::GCTAEventAtom() : GEventAtom()
+GCTAEventAtom::GCTAEventAtom(void) : GEventAtom()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -76,7 +75,7 @@ GCTAEventAtom::GCTAEventAtom(const GCTAEventAtom& atom) : GEventAtom(atom)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GCTAEventAtom::~GCTAEventAtom()
+GCTAEventAtom::~GCTAEventAtom(void)
 {
     // Free members
     free_members();
@@ -128,7 +127,29 @@ GCTAEventAtom& GCTAEventAtom::operator= (const GCTAEventAtom& atom)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clone class
+ * @brief Clear instance
+ *
+ * This method properly resets the instance to an initial state.
+ ***************************************************************************/
+void GCTAEventAtom::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GEventAtom::free_members();
+    this->GEvent::free_members();
+
+    // Initialise members
+    this->GEvent::init_members();
+    this->GEventAtom::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
 ***************************************************************************/
 GCTAEventAtom* GCTAEventAtom::clone(void) const
 {
@@ -144,13 +165,13 @@ GCTAEventAtom* GCTAEventAtom::clone(void) const
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * @todo Need to implement GCTAInstDir:clear()
  ***************************************************************************/
 void GCTAEventAtom::init_members(void)
 {
-    // Initialise CTA data format attributes
-    //m_dir.clear();
+    // Initialise members
+    m_dir.clear();
+    m_time.clear();
+    m_energy.clear();
     m_event_id    = 0;
     m_flags       = 0;
     m_multip      = 0;
@@ -181,12 +202,14 @@ void GCTAEventAtom::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] atom GCTAEventAtom members which should be copied.
+ * @param[in] atom Event atom.
  ***************************************************************************/
 void GCTAEventAtom::copy_members(const GCTAEventAtom& atom)
 {
-    // Copy CTA data format attributes
+    // Copy members
     m_dir         = atom.m_dir;
+    m_time        = atom.m_time;
+    m_energy      = atom.m_energy;
     m_event_id    = atom.m_event_id;
     m_flags       = atom.m_flags;
     m_multip      = atom.m_multip;
@@ -233,8 +256,8 @@ void GCTAEventAtom::free_members(void)
 /***********************************************************************//**
  * @brief Put atom into output stream
  *
- * @param[in] os Output stream into which the atom will be dumped
- * @param[in] atom Atom to be dumped
+ * @param[in] os Output stream.
+ * @param[in] atom Event atom.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GCTAEventAtom& atom)
 {

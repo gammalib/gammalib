@@ -21,20 +21,20 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
+#include "GLog.hpp"
 #include "GEventAtom.hpp"
-#include "GModels.hpp"
-#include "GVector.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GCTAInstDir.hpp"
-#include "GCTAPointing.hpp"
-#include "GCTAResponse.hpp"
 
 
 /***********************************************************************//**
  * @class GCTAEventAtom
  *
- * @brief GCTAEventAtom class interface defintion.
+ * @brief GCTAEventAtom class interface defintion
+ *
+ * This class implement a CTA event atom. It collects all the relevant event
+ * information needed for CTA unbinned analysis.
  ***************************************************************************/
 class GCTAEventAtom : public GEventAtom {
 
@@ -53,9 +53,14 @@ public:
     // Operators
     GCTAEventAtom& operator= (const GCTAEventAtom& atom);
 
-    // Methods
-    const GCTAInstDir* dir(void) const { return &m_dir; }
-    GCTAEventAtom*     clone(void) const;
+    // Event access methods
+    const GEnergy&     energy(void) const { return m_energy; }
+    const GCTAInstDir& dir(void) const { return m_dir; }
+    const GTime&       time(void) const { return m_time; }
+
+    // Other methods
+    void           clear(void);
+    GCTAEventAtom* clone(void) const;
 
 protected:
     // Protected methods
@@ -65,6 +70,8 @@ protected:
 
     // Protected members
     GCTAInstDir m_dir;            //!< Event direction
+    GEnergy     m_energy;         //!< Event energy
+    GTime       m_time;           //!< Event time
     long        m_event_id;       //!< Event identifier
     char        m_flags;          //!< Flags
     int         m_multip;         //!< Multiplicity

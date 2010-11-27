@@ -22,12 +22,9 @@
 #endif
 #include <iostream>
 #include <cmath>
-#include "GException.hpp"
-#include "GCTAException.hpp"
 #include "GCTAEventBin.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MODEL                     "GCTAEventBin::model(GModels&, GVector*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -58,7 +55,7 @@ GCTAEventBin::GCTAEventBin(void) : GEventBin()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] bin Event bin from which the instance should be built.
+ * @param[in] bin Event bin.
  ***************************************************************************/
 GCTAEventBin::GCTAEventBin(const GCTAEventBin& bin) : GEventBin(bin)
 {
@@ -95,7 +92,7 @@ GCTAEventBin::~GCTAEventBin(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] bin Event bin which should be assigned.
+ * @param[in] bin Event bin.
  ***************************************************************************/
 GCTAEventBin& GCTAEventBin::operator= (const GCTAEventBin& bin)
 {
@@ -128,24 +125,48 @@ GCTAEventBin& GCTAEventBin::operator= (const GCTAEventBin& bin)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return size of event bin
+ * @brief Clear instance
+ *
+ * This method properly resets the instance to an initial state.
  ***************************************************************************/
-double GCTAEventBin::size(void) const
+void GCTAEventBin::clear(void)
 {
-    // Compute bin size
-    double size = *omega() * ewidth()->MeV() * *ontime();
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GEventBin::free_members();
+    this->GEvent::free_members();
 
-    // Return bin size
-    return size;
+    // Initialise members
+    this->GEvent::init_members();
+    this->GEventBin::init_members();
+    init_members();
+
+    // Return
+    return;
 }
 
 
 /***********************************************************************//**
- * @brief Clone class
+ * @brief Clone instance
 ***************************************************************************/
 GCTAEventBin* GCTAEventBin::clone(void) const
 {
     return new GCTAEventBin(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Return size of event bin
+ *
+ * The size of an event bin is given in units of (sr MeV s).
+ ***************************************************************************/
+double GCTAEventBin::size(void) const
+{
+    // Compute bin size
+    double size = omega() * ewidth().MeV() * ontime();
+
+    // Return bin size
+    return size;
 }
 
 
@@ -181,8 +202,11 @@ double GCTAEventBin::error(void) const
  ***************************************************************************/
 void GCTAEventBin::init_members(void)
 {
-    // Initialise CTA specific attributes
+    // Initialise members
+    m_energy = NULL;
     m_dir    = NULL;
+    m_time   = NULL;
+    m_counts = NULL;
     m_omega  = NULL;
     m_ewidth = NULL;
     m_ontime = NULL;
@@ -195,12 +219,15 @@ void GCTAEventBin::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] bin GCTAEventBin members which should be copied.
+ * @param[in] bin Event bin.
  ***************************************************************************/
 void GCTAEventBin::copy_members(const GCTAEventBin& bin)
 {
-    // Copy CTA specific attributes
+    // Copy members
+    m_energy = bin.m_energy;
     m_dir    = bin.m_dir;
+    m_time   = bin.m_time;
+    m_counts = bin.m_counts;
     m_omega  = bin.m_omega;
     m_ewidth = bin.m_ewidth;
     m_ontime = bin.m_ontime;
@@ -212,9 +239,6 @@ void GCTAEventBin::copy_members(const GCTAEventBin& bin)
 
 /***********************************************************************//**
  * @brief Delete class members
- *
- * This class does not allocate any memory but simply holds pointers. Hence
- * nothing has to be deallocated.
  ***************************************************************************/
 void GCTAEventBin::free_members(void)
 {
@@ -232,8 +256,8 @@ void GCTAEventBin::free_members(void)
 /***********************************************************************//**
  * @brief Put bin into output stream
  *
- * @param[in] os Output stream into which the bin will be dumped
- * @param[in] bin Bin to be dumped
+ * @param[in] os Output stream.
+ * @param[in] bin Event bin.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GCTAEventBin& bin)
 {

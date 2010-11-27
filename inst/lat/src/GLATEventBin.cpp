@@ -21,11 +21,10 @@
 #include <config.h>
 #endif
 #include <iostream>
-#include "GException.hpp"
+#include <cmath>
 #include "GLATEventBin.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MODEL                     "GLATEventBin::model(GModels&, GVector*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -126,70 +125,70 @@ GLATEventBin& GLATEventBin::operator= (const GLATEventBin& bin)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return model value and (optionally) gradient
+ * @brief Clear instance
  *
- * @param[in] models Model descriptor.
- * @param[out] gradient Pointer to gradient vector (NULL=not computed).
- *
- * @exception GException::gradient_par_mismatch
- *            Dimension of gradient vector mismatches number of parameters.
- *
- * Implements generic model and gradient evaluation for the LAT instrument.
- *
- * @todo Requires multiplication of model with solid angle, duration, and
- *       energy binsize. Current method not correct.
- * @todo Requires implementation of all model types (not only factorized
- *       point sources which are currently the only type that is
- *       supported)
+ * This method properly resets the instance to an initial state.
  ***************************************************************************/
-double GLATEventBin::model(GModels& models, GVector* gradient) const
+void GLATEventBin::clear(void)
 {
-    // Verify that gradients vector has the same dimension than the
-    // model has parameters
-    #if defined(G_RANGE_CHECK)
-    if (models.npars() != gradient->size())
-        throw GException::gradient_par_mismatch(G_MODEL, gradient->size(), 
-                                                models.npars());
-    #endif
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GEventBin::free_members();
+    this->GEvent::free_members();
 
-    // Initialise model
-    double model = 0.0;
-
-    // Loop over models
-    for (int i = 0; i < models.size(); ++i) {
-
-        // Check if model is a LAT model and if it should be used for this
-        // event
-        // TO BE IMPLEMENTED
-
-        // Add model
-        model += models(i)->eval_gradients(*dir(), *energy(), *time(), *rsp(), *pnt());
-
-    }
-
-    // Set gradient vector
-    if (gradient != NULL) {
-        for (int i = 0; i < gradient->size(); ++i)
-            (*gradient)(i) = models.par(i)->gradient();
-    }
+    // Initialise members
+    this->GEvent::init_members();
+    this->GEventBin::init_members();
+    init_members();
 
     // Return
-    return model;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+***************************************************************************/
+GLATEventBin* GLATEventBin::clone(void) const
+{
+    return new GLATEventBin(*this);
 }
 
 
 /***********************************************************************//**
  * @brief Return size of event bin
  *
- * @todo Dummy, needs to be implemented.
+ * @todo Not yet implemented.
  ***************************************************************************/
 double GLATEventBin::size(void) const
 {
     // Compute bin size
-    double size = 1.0; //*omega() * ewidth()->MeV() * *ontime();
+    //double size = omega() * ewidth().MeV() * ontime();
+    double size = 1.0;
 
     // Return bin size
     return size;
+}
+
+
+/***********************************************************************//**
+ * @brief Return error in number of counts
+ *
+ * Returns \f$\sqrt(counts+delta)\f$ as the uncertainty in the number of
+ * counts in the bin. Adding delta avoids uncertainties of 0 which will
+ * lead in the optimisation step to the exlusion of the corresponding bin.
+ * In the actual implementation delta=1e-50.
+ *
+ * @todo The choice of delta has been made somewhat arbitrary, mainly
+ * because the optimizer routines filter error^2 below 1e-100.
+ ***************************************************************************/
+double GLATEventBin::error(void) const
+{
+    // Compute uncertainty
+    double error = sqrt(counts()+1.0e-50);
+
+    // Return error
+    return error;
 }
 
 
@@ -204,10 +203,14 @@ double GLATEventBin::size(void) const
  ***************************************************************************/
 void GLATEventBin::init_members(void)
 {
-    // Initialise attributes
-    m_dir = NULL;
-    m_pnt = NULL;
-    m_rsp = NULL;
+    // Initialise members
+    m_energy = NULL;
+    m_dir    = NULL;
+    m_time   = NULL;
+    m_counts = NULL;
+    m_omega  = NULL;
+    m_ewidth = NULL;
+    m_ontime = NULL;
 
     // Return
     return;
@@ -217,14 +220,18 @@ void GLATEventBin::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] bin GLATEventBin members which should be copied.
+ * @param[in] bin Event bin.
  ***************************************************************************/
 void GLATEventBin::copy_members(const GLATEventBin& bin)
 {
-    // Copy attributes
-    m_dir = bin.m_dir;
-    m_pnt = bin.m_pnt;
-    m_rsp = bin.m_rsp;
+    // Copy members
+    m_energy = bin.m_energy;
+    m_dir    = bin.m_dir;
+    m_time   = bin.m_time;
+    m_counts = bin.m_counts;
+    m_omega  = bin.m_omega;
+    m_ewidth = bin.m_ewidth;
+    m_ontime = bin.m_ontime;
 
     // Return
     return;
@@ -238,15 +245,6 @@ void GLATEventBin::free_members(void)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GLATEventBin* GLATEventBin::clone(void) const
-{
-    return new GLATEventBin(*this);
 }
 
 

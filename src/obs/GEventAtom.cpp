@@ -20,9 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
-#include <iomanip>
-#include "GException.hpp"
 #include "GEventAtom.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -41,7 +38,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GEventAtom::GEventAtom(void) : GEvent()
 {
@@ -56,7 +53,7 @@ GEventAtom::GEventAtom(void) : GEvent()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] atom Event atom from which the instance should be built.
+ * @param[in] atom Event atom.
  ***************************************************************************/
 GEventAtom::GEventAtom(const GEventAtom& atom) : GEvent(atom)
 {
@@ -93,7 +90,7 @@ GEventAtom::~GEventAtom(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] atom Event atom to be assigned.
+ * @param[in] atom Event atom.
  ***************************************************************************/
 GEventAtom& GEventAtom::operator= (const GEventAtom& atom)
 {
@@ -136,10 +133,6 @@ GEventAtom& GEventAtom::operator= (const GEventAtom& atom)
  ***************************************************************************/
 void GEventAtom::init_members(void)
 {
-    // Initialise attributes
-    m_time.mjd(0.0);
-    m_energy.MeV(0.0);
-
     // Return
     return;
 }
@@ -148,14 +141,10 @@ void GEventAtom::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] atom GEventAtom members which should be copied.
+ * @param[in] atom Event atom.
  ***************************************************************************/
 void GEventAtom::copy_members(const GEventAtom& atom)
 {
-    // Copy attributes
-    m_time   = atom.m_time;
-    m_energy = atom.m_energy;
-
     // Return
     return;
 }
