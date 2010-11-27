@@ -5,6 +5,14 @@
 # we use builddir/src for the generated include files to get found
 
 # Optional instrument specific tests
+if WITH_INST_MWL
+  INST_MWL = test_MWL
+  INCL_MWL = -I$(top_srcdir)/inst/mwl/include
+  test_MWL_SOURCES = $(top_srcdir)/inst/mwl/test/test_MWL.cpp
+  test_MWL_LDFLAGS = @LDFLAGS@
+  test_MWL_CPPFLAGS = @CPPFLAGS@
+  test_MWL_LDADD = $(top_srcdir)/src/libgamma.la
+endif
 if WITH_INST_CTA
   INST_CTA = test_CTA
   INCL_CTA = -I$(top_srcdir)/inst/cta/include
@@ -32,6 +40,7 @@ endif
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/src \
            -I$(top_srcdir)/src/support \
+	   $(INCL_MWL) \
            $(INCL_CTA) \
            $(INCL_LAT)
 
@@ -46,7 +55,7 @@ check_PROGRAMS = test_GVector \
                  test_GApplication \
                  test_GModel \
                  test_GSky \
-                 $(INST_CTA) $(INST_LAT)
+                 $(INST_MWL) $(INST_CTA) $(INST_LAT)
 
 # Set test environment (needed for linking with cfitsio and readline)
 TESTS_ENVIRONMENT = LD_LIBRARY_PATH=$(top_builddir)/src/.libs:$(LIBDIR_CFITSIO):$(LIBDIR_READLINE) \
@@ -63,7 +72,7 @@ TESTS = test_GVector \
         test_GApplication \
         test_GModel \
         test_GSky \
-        $(INST_CTA) $(INST_LAT) \
+	$(INST_MWL) $(INST_CTA) $(INST_LAT) \
         $(TEST_PYTHON_SCRIPT)
 
 # Standard test sources and links

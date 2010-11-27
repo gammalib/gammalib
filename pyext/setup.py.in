@@ -6,6 +6,10 @@ include_dirs = ['@top_srcdir@/include']
 data_files   = glob.glob('@top_srcdir@/pyext/*.i')
 
 # Add instrument specific include directories and data files
+if '@WITH_INST_MWL_TRUE@' != '#':
+    print "Include multi-wavelength interface in gammalib Python bindings."
+    include_dirs.append('@top_srcdir@/inst/mwl/include')
+    data_files.extend(glob.glob('@top_srcdir@/inst/mwl/pyext/*.i'))
 if '@WITH_INST_CTA_TRUE@' != '#':
     print "Include CTA instrument interface in gammalib Python bindings."
     include_dirs.append('@top_srcdir@/inst/cta/include')

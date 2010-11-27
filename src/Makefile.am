@@ -24,6 +24,9 @@ SUBDIRS = support \
 sources =
 
 # Optional instrument specific libraries
+if WITH_INST_MWL
+  INST_MWL = ../inst/mwl/libmwl.la
+endif
 if WITH_INST_CTA
   INST_CTA = ../inst/cta/libcta.la
 endif
@@ -44,6 +47,7 @@ libgamma_la_LIBADD = support/libsupport.la \
                      obs/libobs.la \
                      model/libmodel.la \
                      app/libapp.la \
+                     $(INST_MWL) \
                      $(INST_CTA) \
                      $(INST_LAT)
 libgamma_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)

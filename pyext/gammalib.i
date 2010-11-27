@@ -115,6 +115,9 @@
 #include "GModelTemporalConst.i"
 
 /* __ Instrument specific ________________________________________________ */
+#ifdef WITH_INST_MWL
+#include "mwllib.i"
+#endif
 #ifdef WITH_INST_CTA
 #include "ctalib.i"
 #endif
