@@ -39,8 +39,9 @@
  * dir(), and time() methods.
  *
  * The counts() and error() methods return the number of events within an
- * event bin and the uncertainty in this number, which is typically the
- * square root of the number of events.
+ * event bin and the uncertainty in this number, which by default is
+ * given by the square root of the number of events (this is the default
+ * implementation provided by this class).
  *
  * The size() method returns the size of an event bin, which is the
  * quantity that has to be multiplied by the probability for an event to
@@ -70,7 +71,7 @@ public:
     virtual const GEnergy&  energy(void) const = 0;
     virtual const GTime&    time(void) const = 0;
     virtual double          counts(void) const = 0;
-    virtual double          error(void) const = 0;
+    virtual double          error(void) const;
 
     // Other methods
     virtual void       clear(void) = 0;
