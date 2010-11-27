@@ -23,6 +23,8 @@
 #include <cmath>
 #include "GObservations.hpp"
 #include "GTools.hpp"
+#include "GEvent.hpp"
+#include "GEventBin.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_EVAL             "GObservations::optimizer::eval(GOptimizerPars&) "
@@ -309,8 +311,8 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
         GEvent* event = obs.events()->pointer(i);
 
         // Get model and derivative
-        double model = obs.model((GModels&)pars, *(event->dir()),
-                                 *(event->energy()), *(event->time()),
+        double model = obs.model((GModels&)pars,
+                                 event->dir(), event->energy(), event->time(),
                                  m_wrk_grad);
 
         // Skip bin if model is too small (avoids -Inf or NaN gradients)
@@ -419,14 +421,14 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
     for (int i = 0; i < obs.events()->size(); ++i) {
 
         // Get pointer to bin
-        GEvent* bin = obs.events()->pointer(i);
+        GEventBin* bin = (GEventBin*)obs.events()->pointer(i);
 
         // Get number of counts in bin
         double data = bin->counts();
 
         // Get model and derivative
-        double model = obs.model((GModels&)pars, *(bin->dir()),
-                                 *(bin->energy()), *(bin->time()),
+        double model = obs.model((GModels&)pars,
+                                 bin->dir(), bin->energy(), bin->time(),
                                  m_wrk_grad);
 
         // Multiply model by bin size
@@ -574,7 +576,7 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
     for (int i = 0; i < obs.events()->size(); ++i) {
 
         // Get pointer to bin
-        GEvent* bin = obs.events()->pointer(i);
+        GEventBin* bin = (GEventBin*)obs.events()->pointer(i);
 
         // Get number of counts in bin
         double data = bin->counts();
@@ -587,8 +589,8 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
             continue;
 
         // Get model and derivative
-        double model = obs.model((GModels&)pars, *(bin->dir()),
-                                 *(bin->energy()), *(bin->time()),
+        double model = obs.model((GModels&)pars,
+                                 bin->dir(), bin->energy(), bin->time(),
                                  m_wrk_grad);
 
         // Multiply model by bin size
