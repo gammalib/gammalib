@@ -46,13 +46,13 @@ public:
     virtual GInstDir& operator= (const GInstDir& dir);
 
     // Pure virtual methods
+    virtual GInstDir* clone(void) const = 0;
 
 protected:
     // Protected methods
-    void              init_members(void);
-    void              copy_members(const GInstDir& dir);
-    void              free_members(void);
-    virtual GInstDir* clone(void) const = 0;
+    void init_members(void);
+    void copy_members(const GInstDir& dir);
+    void free_members(void);
 };
 
 #endif /* GINSTDIR_HPP */
