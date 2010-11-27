@@ -285,9 +285,9 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
  * where the sum is taken over all events and \f${\rm Npred}\f$ is the
  * total number of events that is predicted by the model.
  * This method also computes the parameter gradients
- * \f$\deltaL/dp\f$
+ * \f$\delta L/dp\f$
  * and the curvature matrix
- * \f$\delta^2L/dp_1 dp_2\f$.
+ * \f$\delta^2 L/dp_1 dp_2\f$.
  ***************************************************************************/
 void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
                                                 const GOptimizerPars& pars) 
@@ -397,9 +397,9 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
  * where the sum is taken over all data space bins, \f$n_i\f$ is the
  * observed number of counts and \f$e_i\f$ is the model.
  * This method also computes the parameter gradients
- * \f$\deltaL/dp\f$
+ * \f$\delta L/dp\f$
  * and the curvature matrix
- * \f$\delta^2L/dp_1 dp_2\f$
+ * \f$\delta^2 L/dp_1 dp_2\f$
  * and also updates the total number of predicted events m_npred.
  ***************************************************************************/
 void GObservations::optimizer::poisson_binned(const GObservation& obs,
@@ -552,9 +552,9 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
  * observed number of counts, \f$e_i\f$ is the model and \f$\sigma_i\f$
  * is the statistical uncertainty.
  * This method also computes the parameter gradients
- * \f$\deltaL/dp\f$
+ * \f$\delta L/dp\f$
  * and the curvature matrix
- * \f$\delta^2L/dp_1 dp_2\f$
+ * \f$\delta^2 L/dp_1 dp_2\f$
  * and also updates the total number of predicted events m_npred.
  ***************************************************************************/
 void GObservations::optimizer::gaussian_binned(const GObservation& obs,
