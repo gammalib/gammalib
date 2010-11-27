@@ -21,13 +21,9 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GEvent.hpp"
-#include "GModels.hpp"
-#include "GVector.hpp"
+#include "GInstDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GInstDir.hpp"
-#include "GPointing.hpp"
-#include "GResponse.hpp"
 
 
 /***********************************************************************//**
@@ -36,15 +32,24 @@
  * @brief Abstract interface for the event bin class.
  *
  * An event bin is a collection of event atoms with similar properties.
- * It has three generic attributes (m_counts, m_time and m_energy) that can
- * be accessed through the counts(), energy() and time() methods. The
- * counts() method returns a double precision value, while the energy() and
- * time() methods return const pointers.
+ * Event bins are used for binned analysis.
  *
- * The event bin class does not actually allocate memory for event bins
- * but handles pointers that point the information that is relevant for
- * analysis. Filling of the information is handled by the pointer() method of
- * the corresponding event cube.
+ * Each event has 3 attributes: energy, instrument direction and time.
+ * These attributes can be accessed and changed through the energy(),
+ * dir(), and time() methods.
+ *
+ * The counts() and error() methods return the number of events within an
+ * event bin and the uncertainty in this number, which is typically the
+ * square root of the number of events.
+ *
+ * The size() method returns the size of an event bin, which is the
+ * quantity that has to be multiplied by the probability for an event to
+ * occur to predict the number of events in a bin). The size is the solid
+ * angle of the event bin times the energy width times the ontime interval
+ * covered by the events.
+ *
+ * The GEventBin class does not hold any data members. Data members are
+ * stored in the derived classes.
  ***************************************************************************/
 class GEventBin : public GEvent {
 
@@ -60,33 +65,25 @@ public:
     // Operators
     virtual GEventBin& operator= (const GEventBin& bin);
 
-    // Pure virtual methods
-    virtual double          size(void) const = 0;
-    virtual const GInstDir* dir(void) const = 0;
-    virtual GEventBin*      clone(void) const = 0;
+    // Event access methods
+    virtual const GInstDir& dir(void) const = 0;
+    virtual const GEnergy&  energy(void) const = 0;
+    virtual const GTime&    time(void) const = 0;
+    virtual double          counts(void) const = 0;
+    virtual double          error(void) const = 0;
 
-    // Virtual methods
-    virtual double error(void) const;
-
-    // Implemented methods
-    bool           isatom(void) const { return false; }
-    bool           isbin(void) const { return true; }
-    double         counts(void) const { return *m_counts; }
-    const GEnergy* energy(void) const { return m_energy; }
-    const GTime*   time(void) const { return m_time; }
+    // Other methods
+    virtual void       clear(void) = 0;
+    virtual double     size(void) const = 0;
+    virtual GEventBin* clone(void) const = 0;
+    bool               isatom(void) const { return false; }
+    bool               isbin(void) const { return true; }
 
 protected:
-    // Protected data area
-    double*  m_counts;      //!< Pointer to number of counts
-    GTime*   m_time;        //!< Pointer to bin time
-    GEnergy* m_energy;      //!< Pointer to bin energy
-
-private:
-    // Provate methods
+    // Protected methods
     void init_members(void);
     void copy_members(const GEventBin& bin);
     void free_members(void);
-
 };
 
 #endif /* GEVENTBIN_HPP */

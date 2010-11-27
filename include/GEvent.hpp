@@ -20,13 +20,9 @@
 #define GEVENT_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GModels.hpp"
-#include "GVector.hpp"
 #include "GInstDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GPointing.hpp"
-#include "GResponse.hpp"
 
 
 /***********************************************************************//**
@@ -34,29 +30,35 @@
  *
  * @brief Abstract interface for the event classes.
  *
- * This class provides an abstract interface to a event. A event can be
+ * This class provides an abstract interface to an event. An event can be
  * either a physical event occuring in the instrument (called an event
  * atom) or a collection of events with similar properties (called an
  * event bin). While event atoms are used for unbinned analysis, event bins
  * are used for binned analysis. The methods isatom() and isbin() inform
- * whether an event is either an atom or a bin.
- * The counts() method returns the number of event atoms in a event bin.
- * For an event atom, this method returns by definition 1.
- * The size() method returns the size of an event bin (which is the
- * quantity that has to be multiplied my the probability for an event to
- * occur to predict the number of events in a bin). For event atoms this
- * quantity is by definition 1.
- * Attributes of an event atom or bin can be accessed through the dir(),
- * energy(), and time() methods that all return const pointers to the
- * relevant information.
+ * whether an event is an atom or a bin.
  *
- * This method does not hold any data members. Data members are stored in
- * the derived classes.
+ * Each event has 3 attributes: energy, instrument direction and time.
+ * These attributes can be accessed and changed through the energy(),
+ * dir(), and time() methods.
+ * 
+ * The counts() and error() methods return the number of counts and the
+ * error in this number for each event. For event atoms the number of
+ * counts is 1 and the error is 0. The event bins, the number of counts
+ * is the number of events within a bin, and error is the uncertainty in
+ * this number (typically the square root of the number, yet also other
+ * schemes may be implemented).
+ *
+ * The size() method returns the size of an event bin, which is the
+ * quantity that has to be multiplied by the probability for an event to
+ * occur to predict the number of events in a bin. For event atoms this
+ * quantity is by definition 1. For event bins, the size is the solid
+ * angle of the event bin times the energy width times the ontime interval
+ * covered by the events.
+ *
+ * The GEvent class does not hold any data members. Data members are stored
+ * in the derived classes.
  ***************************************************************************/
 class GEvent {
-
-    // Friend classes
-    friend class GEvents;
 
 public:
     // Constructors and destructors
@@ -67,25 +69,25 @@ public:
     // Operators
     virtual GEvent& operator= (const GEvent& event);
 
-    // Virtual methods
-    virtual bool            isatom(void) const = 0;
-    virtual bool            isbin(void) const = 0;
+    // Event access methods
+    virtual const GInstDir& dir(void) const = 0;
+    virtual const GEnergy&  energy(void) const = 0;
+    virtual const GTime&    time(void) const = 0;
     virtual double          counts(void) const = 0;
     virtual double          error(void) const = 0;
-    virtual double          size(void) const = 0;
-    virtual const GInstDir* dir(void) const = 0;
-    virtual const GEnergy*  energy(void) const = 0;
-    virtual const GTime*    time(void) const = 0;
-    virtual GEvent*         clone(void) const = 0;
+
+    // Other methods
+    virtual void    clear(void) = 0;
+    virtual GEvent* clone(void) const = 0;
+    virtual double  size(void) const = 0;
+    virtual bool    isatom(void) const = 0;
+    virtual bool    isbin(void) const = 0;
 
 protected:
-
-private:
-    // Private methods
+    // Protected methods
     void init_members(void);
     void copy_members(const GEvent& event);
     void free_members(void);
-
 };
 
 #endif /* GEVENT_HPP */
