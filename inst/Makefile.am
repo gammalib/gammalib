@@ -9,5 +9,5 @@ INST_LAT = lat
 endif
 
 # Set sub directories
-SUBDIRS = $(INST_CTA) $(INST_LAT)
+SUBDIRS = mwl $(INST_CTA) $(INST_LAT)
 

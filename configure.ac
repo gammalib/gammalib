@@ -339,6 +339,9 @@ fi
 dnl =========================================
 dnl Checks for instrument specific interfaces
 dnl =========================================
+#
+AM_CONDITIONAL(WITH_INST_MWL, test "xyes" = "xyes")
+
 # Checks for the existence of instrument specific interfaces
 AC_CHECK_FILE([inst/Makefile.am],
               [with_inst=yes],
@@ -387,22 +390,17 @@ AC_CONFIG_FILES([Makefile
                  src/obs/Makefile
                  src/model/Makefile
                  src/app/Makefile
+                 inst/Makefile
+                 inst/mwl/Makefile
                  include/Makefile
                  test/Makefile
                  pyext/Makefile
                  pyext/setup.py
                  gammalib.pc])
-if test "x$with_inst" = "xyes"; then
-  AC_CONFIG_FILES([inst/Makefile])
-fi
 if test "x$with_cta" = "xyes"; then
   AC_CONFIG_FILES([inst/cta/Makefile])
-#  AC_CONFIG_FILES([inst/cta/pyext/Makefile])
-#  AC_CONFIG_FILES([inst/cta/pyext/setup.py])
 fi
 if test "x$with_lat" = "xyes"; then
   AC_CONFIG_FILES([inst/lat/Makefile])
-#  AC_CONFIG_FILES([inst/lat/pyext/Makefile])
-#  AC_CONFIG_FILES([inst/lat/pyext/setup.py])
 fi
 AC_OUTPUT
