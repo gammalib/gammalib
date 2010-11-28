@@ -40,7 +40,7 @@ public:
     // Constructors and destructors
     GCTAPointing(void);
     GCTAPointing(const GCTAPointing& pnt);
-    ~GCTAPointing(void);
+    virtual ~GCTAPointing(void);
 
     // Operators
     GCTAPointing& operator= (const GCTAPointing& pnt);
@@ -51,9 +51,9 @@ public:
 
 protected:
     // Protected methods
-    void          init_members(void);
-    void          copy_members(const GCTAPointing& pnt);
-    void          free_members(void);
+    void init_members(void);
+    void copy_members(const GCTAPointing& pnt);
+    void free_members(void);
 };
 
 #endif /* GCTAPOINTING_HPP */

@@ -42,13 +42,13 @@ public:
     virtual GPointing& operator= (const GPointing& pnt);
 
     // Pure virtual methods
+    virtual GPointing* clone(void) const = 0;
 
 protected:
     // Protected methods
-    void    init_members(void);
-    void    copy_members(const GPointing& pnt);
-    void    free_members(void);
-    virtual GPointing* clone(void) const = 0;
+    void init_members(void);
+    void copy_members(const GPointing& pnt);
+    void free_members(void);
 };
 
 #endif /* GPOINTING_HPP */

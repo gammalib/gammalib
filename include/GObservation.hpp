@@ -20,6 +20,7 @@
 #define GOBSERVATION_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include "GEvents.hpp"
 #include "GResponse.hpp"
 #include "GRoi.hpp"
@@ -69,11 +70,12 @@ public:
     virtual GObservation& operator= (const GObservation& obs);
 
     // Pure virtual methods
+    //virtual void          clear(void) = 0;
+    virtual GObservation* clone(void) const = 0;
     virtual void          response(const std::string& irfname, std::string caldb = "") = 0;
     virtual GResponse*    response(const GTime& time) const = 0;
     virtual GPointing*    pointing(const GTime& time) const = 0;
     virtual std::string   instrument(void) const = 0;
-    virtual GObservation* clone(void) const = 0;
 
     // Virtual methods
     virtual double model(const GModels& models,const GInstDir& obsDir,
@@ -100,9 +102,9 @@ public:
 
 protected:
     // Protected methods
-    void                  init_members(void);
-    void                  copy_members(const GObservation& obs);
-    void                  free_members(void);
+    void init_members(void);
+    void copy_members(const GObservation& obs);
+    void free_members(void);
 
     // Npred integration methods
     virtual double npred_temp(const GModel& model) const;
@@ -179,8 +181,6 @@ protected:
     GRoi*       m_roi;          //!< Pointer to region of interest used for analysis
     GEvents*    m_events;       //!< Pointer to events
     std::string m_statistics;   //!< Optimizer statistics (default=poisson)
-
-private:
 };
 
 #endif /* GOBSERVATION_HPP */

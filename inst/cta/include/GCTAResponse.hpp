@@ -49,14 +49,14 @@ public:
     // Constructors and destructors
     GCTAResponse(void);
     GCTAResponse(const GCTAResponse& rsp);
-    ~GCTAResponse(void);
+    virtual ~GCTAResponse(void);
 
     // Operators
     GCTAResponse& operator= (const GCTAResponse & rsp);
 
-    // Implemented pure virtual methods
-    double live(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                const GTime& srcTime, const GPointing& pnt) const;
+    // Reponse function computation methods
+    double live(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                const GPointing& pnt) const;
     double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                 const GPointing& pnt) const;
     double psf(const GInstDir& obsDir,
@@ -68,16 +68,18 @@ public:
     double tdisp(const GTime& obsTime,
                  const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                  const GPointing& pnt) const;
-    double npsf(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                const GTime& srcTime, const GPointing& pnt, const GRoi& roi) const;
-    double nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                  const GTime& srcTime, const GPointing& pnt, const GEbounds& ebds) const;
-    double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                  const GTime& srcTime, const GPointing& pnt, const GGti& gti) const;
-    void   load(const std::string& irfname);
-    bool   hasedisp(void) const { return false; }
-    bool   hastdisp(void) const { return false; }
+    double npsf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                const GPointing& pnt, const GRoi& roi) const;
+    double nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                  const GPointing& pnt, const GEbounds& ebds) const;
+    double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                  const GPointing& pnt, const GGti& gti) const;
+
+    // Implemented pure virtual base class methods
     GCTAResponse* clone(void) const;
+    void          load(const std::string& irfname);
+    bool          hasedisp(void) const { return false; }
+    bool          hastdisp(void) const { return false; }
 
     // Other Methods
     double psf(const double& theta, const double& sigma) const;

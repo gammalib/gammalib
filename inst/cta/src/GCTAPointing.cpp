@@ -21,7 +21,6 @@
 #include <config.h>
 #endif
 #include <iostream>
-//#include "GCTAException.hpp"
 #include "GCTAPointing.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -126,14 +125,16 @@ GCTAPointing& GCTAPointing::operator= (const GCTAPointing& pnt)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear pointing
+ * @brief Clear instance
  ***************************************************************************/
 void GCTAPointing::clear(void)
 {
     // Free members
     free_members();
+    this->GPointing::free_members();
 
     // Initialise private members
+    this->GPointing::init_members();
     init_members();
 
     // Return
@@ -142,7 +143,7 @@ void GCTAPointing::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone class
+ * @brief Clone instance
 ***************************************************************************/
 GCTAPointing* GCTAPointing::clone(void) const
 {

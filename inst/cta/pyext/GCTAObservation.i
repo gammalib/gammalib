@@ -19,6 +19,8 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GCTAObservation.hpp"
 %}
+/* Force class to be non abstract */
+//%feature("notabstract") GCTAObservation;
 
 
 /***********************************************************************//**
@@ -33,11 +35,12 @@ public:
     GCTAObservation(const GCTAObservation& obs);
     virtual ~GCTAObservation(void);
 
-    // Implement pure virtual methods
+    // Pure virtual base class methods
+    //void             clear(void) = 0;
     GCTAObservation* clone(void) const;
     void             response(const std::string& irfname, std::string caldb = "");
-    GResponse*       response(const GTime& time) const;
-    GPointing*       pointing(const GTime& time) const;
+    GCTAResponse*    response(const GTime& time) const;
+    GCTAPointing*    pointing(const GTime& time) const;
     std::string      instrument(void) const;
 
     // Other methods

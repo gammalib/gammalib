@@ -59,7 +59,7 @@ public:
     const GInstDir& dir(void) const { return m_dir; }
     const GTime&    time(void) const { return m_time; }
     double          counts(void) const { return m_flux; }
-    double          error(void) const { return m_flux_err; }
+    double          error(void) const;
 
     // Other methods
     void        clear(void);
@@ -81,8 +81,8 @@ protected:
     GTime       m_time;      //!< Time of spectral point (not used)
     GEnergy     m_eng;       //!< Energy of spectral point
     GEnergy     m_eng_err;   //!< Uncertainty in energy
-    double      m_flux;      //!< Flux of spectral point
-    double      m_flux_err;  //!< Uncertainty in flux
+    double      m_flux;      //!< Flux of spectral point (ph/cm2/s/MeV)
+    double      m_flux_err;  //!< Uncertainty in flux (ph/cm2/s/MeV)
 
 };
 
