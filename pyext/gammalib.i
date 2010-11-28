@@ -100,8 +100,8 @@
 //#include "GRoi.i"
 //#include "GEbounds.i"
 //#include "GInstDir.i"
-//#include "GPointing.i"
-//#include "GResponse.i"
+#include "GPointing.i"
+#include "GResponse.i"
 
 /* __ Model handling _____________________________________________________ */
 #include "GModels.i"
