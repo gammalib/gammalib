@@ -185,7 +185,7 @@ void GCTAObservation::response(const std::string& irfname, std::string caldb)
  * supposed not to vary during an observation, the time argument needs not to
  * be considered.
  ***************************************************************************/
-GResponse* GCTAObservation::response(const GTime& time) const
+GCTAResponse* GCTAObservation::response(const GTime& time) const
 {
     // Return response pointer
     return m_response;
@@ -201,7 +201,7 @@ GResponse* GCTAObservation::response(const GTime& time) const
  * direction is supposed not to vary during an observation, the time argument
  * needs not to be considered.
  ***************************************************************************/
-GPointing* GCTAObservation::pointing(const GTime& time) const
+GCTAPointing* GCTAObservation::pointing(const GTime& time) const
 {
     // Return response pointer
     return m_pointing;
@@ -244,11 +244,6 @@ void GCTAObservation::load_unbinned(const std::string& filename)
     //m_tstart.met(m_gti.tstart());
     //m_tstop.met(m_gti.tstop());
 
-    // Link observations to events. This has to be done after loading since
-    // loading initialises the GCTAEventList object, hence resets the pointer
-    // to the observation.
-    //events->obs(this);
-
     // Return
     return;
 }
@@ -274,11 +269,6 @@ void GCTAObservation::load_binned(const std::string& filename)
     // Copy energy boundaries and GTIs from event cube
     m_ebounds = ((GCTAEventCube*)m_events)->m_ebds;
     m_gti     = ((GCTAEventCube*)m_events)->m_gti;
-
-    // Link observations to events. This has to be done after loading since
-    // loading initialises the GCTAEventCube object, hence resets the pointer
-    // to the observation.
-    //events->obs(this);
 
     // Return
     return;
@@ -324,16 +314,6 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     // Copy members
     if (obs.m_response != NULL) m_response = obs.m_response->clone();
     if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
-
-    // Update the back pointer to link observation the actual observation
-    // to the events. This has to be done here since the events that were
-    // copied do not yet know to which observation they belong.
-    /*
-    if (m_events->islist())
-        ((GCTAEventList*)m_events)->obs(this);
-    else
-        ((GCTAEventCube*)m_events)->obs(this);
-    */
 
     // Return
     return;

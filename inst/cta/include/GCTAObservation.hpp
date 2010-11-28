@@ -20,8 +20,9 @@
 #define GCTAOBSERVATION_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GObservation.hpp"
 #include "GCTAResponse.hpp"
+#include <iostream>
+#include "GObservation.hpp"
 #include "GCTAPointing.hpp"
 #include "GTime.hpp"
 #include "GModel.hpp"
@@ -46,11 +47,11 @@ public:
     // Operators
     GCTAObservation& operator= (const GCTAObservation& obs);
 
-    // Implement pure virtual methods
+    // Pure virtual base class methods
     GCTAObservation* clone(void) const;
     void             response(const std::string& irfname, std::string caldb = "");
-    GResponse*       response(const GTime& time) const;
-    GPointing*       pointing(const GTime& time) const;
+    GCTAResponse*    response(const GTime& time) const;
+    GCTAPointing*    pointing(const GTime& time) const;
     std::string      instrument(void) const;
 
     // Other methods
