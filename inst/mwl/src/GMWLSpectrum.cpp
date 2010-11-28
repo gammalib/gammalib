@@ -32,6 +32,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_POINTER                                "GMWLSpectrum::pointer(int)"
 #define G_LOAD_FITS              "GMWLSpectrum::load_fits(std::string&, int)"
+#define G_READ_FITS                    "GMWLSpectrum::read_fits(GFitsTable*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -353,9 +354,23 @@ std::string GMWLSpectrum::print(void) const
 
     // Append spectral points
     for (int i = 0; i < size(); ++i) {
-        result.append("\n"+parformat("Datum "+str(i)));
-        result.append(((GMWLSpectrum*)this)->pointer(i)->print());
-    }
+
+        // Build energy string
+        std::string energy = m_data[i].m_eng.print();
+        if (m_data[i].m_eng_err.MeV() > 0.0)
+            energy += " +/- "+m_data[i].m_eng_err.print();
+
+        // Build flux string
+        std::string flux = str(m_data[i].m_flux);
+        if (m_data[i].m_flux_err > 0.0)
+            flux += " +/- "+str(m_data[i].m_flux_err);
+        flux += " ph/cm2/s/MeV";
+
+        // Append to string
+        result.append("\n"+parformat(energy));
+        result.append(flux);
+
+    } // endfor: looped over spectral points
 
     // Return result
     return result;
@@ -414,16 +429,20 @@ void GMWLSpectrum::free_members(void)
  * @exception GMWLException::bad_file_format
  *            Table has invalid format
  *
- * Reads spectrum from FITS table. Three different formats are supported:
+ * Read spectrum from FITS table. The table is expected to be in one of the
+ * three following formats:
  * 2 columns: energy, flux
  * 3 columns: energy, flux, e_flux
- * >3 columns:  energy, e_energy, flux, e_flux, ...
+ * 4 columns or more:  energy, e_energy, flux, e_flux, ...
  *
- * @todo Finish implementation
+ * @todo Investigate whether we can exploit UCDs for identifying the correct
+ * columns or for determining the units.
  ***************************************************************************/
-#define G_READ_FITS                    "GMWLSpectrum::read_fits(GFitsTable*)"
 void GMWLSpectrum::read_fits(const GFitsTable* table)
 {
+    // Reset spectrum
+    m_data.clear();
+
     // Initialise column pointers columns
     GFitsTableCol* c_energy     = NULL;
     GFitsTableCol* c_energy_err = NULL;
@@ -452,11 +471,19 @@ void GMWLSpectrum::read_fits(const GFitsTable* table)
                               table->extname()+"\".");
     }
 
+    // Read spectral points and add to spectrum
+    for (int i = 0; i < table->nrows(); ++i) {
+        GMWLDatum datum;
+        if (c_energy     != NULL) datum.m_eng.MeV(c_energy->real(i));
+        if (c_energy_err != NULL) datum.m_eng_err.MeV(c_energy_err->real(i));
+        if (c_flux       != NULL) datum.m_flux = c_flux->real(i);
+        if (c_flux_err   != NULL) datum.m_flux_err = c_flux_err->real(i);
+        m_data.push_back(datum);
+    }
+
     // Return
     return;
 }
-
-
 
 
 /*==========================================================================
