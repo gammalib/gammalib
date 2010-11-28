@@ -157,10 +157,28 @@ void GMWLDatum::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ ***************************************************************************/
 GMWLDatum* GMWLDatum::clone(void) const
 {
     return new GMWLDatum(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns flux error
+ *
+ * Returns flux error value in units of ph/cm2/s/MeV. If the flux error is
+ * 0 it is assumed that no flux error information is available, and in that
+ * case the flux error is assumed to 10% of the flux value. This is mainly
+ * needed for the optimizer methods to work.
+ ***************************************************************************/
+double GMWLDatum::error(void) const
+{
+    // Set flux error
+    double error = (m_flux_err == 0.0) ? 0.1*m_flux : m_flux_err;
+
+    // Return error
+    return error;
 }
 
 
