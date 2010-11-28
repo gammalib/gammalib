@@ -29,6 +29,7 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
+const std::string crab_model    = "../inst/mwl/test/data/crab.xml";
 const std::string lat_crab_fits = "../inst/mwl/test/data/crab.fits";
 
 
@@ -104,37 +105,49 @@ void test_optimizer(void)
 {
     // Write header
     std::cout << "Test optimizer: ";
-/*
-    // Number of observations in data
-    int nobs = 1;
 
     // Declare observations
     GObservations   obs;
-    GCTAObservation run;
+    GModels         models;
 
-    // Load binned CTA observation
+    // Load multi-wavelength observations
     try {
-        run.load_binned(cta_cntmap);
-        run.response(cta_irf,cta_caldb);
-        obs.append(run);
+        GMWLObservation lat(lat_crab_fits);
+        obs.append(lat);
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to load CTA run."
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to append MWL observation(s) to container."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
     std::cout << ".";
 
-    // Setup GModels for optimizing
-    GModels models = crab_plaw();
-    obs.models(models);
+    // Setup model
+    try {
+        models.load(crab_model);
+        obs.models(models);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to setup model from XML file for fitting."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
 
     // Perform LM optimization
-    GOptimizerLM opt;
     try {
+        GLog log;
+        log.cout(false);
+        GOptimizerLM opt(log);
         opt.max_iter(1000);
         obs.optimize(opt);
+        //std::cout << obs << std::endl;
+        std::cout << std::endl << opt << std::endl;
+        std::cout << *(obs.models()) << std::endl;
     }
     catch (std::exception &e) {
         std::cout << std::endl 
@@ -144,9 +157,7 @@ void test_optimizer(void)
         throw;
     }
     std::cout << ".";
-    std::cout << opt;
-    std::cout << obs << std::endl;
-*/
+
     // Plot final test success
     std::cout << " ok." << std::endl;
 
