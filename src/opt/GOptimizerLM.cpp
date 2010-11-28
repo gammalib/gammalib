@@ -259,92 +259,105 @@ void GOptimizerLM::free_members(void)
  ***************************************************************************/
 void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
 {
-    // Initialise optimization parameters
-    int npars = pars->npars();
-    m_lambda  = m_lambda_start;
-    m_status  = 0;
+    // Single loop for common exit point
+    do {
 
-    // Allocate temporary memory
-    m_hit_boundary = new bool[npars];
-    for (int i = 0; i < npars; ++i)
-        m_hit_boundary[i] = false;
+        // Fall through if pointers are not valid
+        if (fct == NULL || pars == NULL)
+            continue;
+
+        // Fall through if there are no parameters to optimize
+        int npars = pars->npars();
+        if (npars < 1)
+            continue;
+
+        // Initialise optimization parameters
+        m_lambda  = m_lambda_start;
+        m_status  = 0;
+
+        // Allocate temporary memory for boundary hit bookkeeping
+        m_hit_boundary = new bool[npars];
+        for (int i = 0; i < npars; ++i)
+            m_hit_boundary[i] = false;
     
-    // Initial evaluation
-    fct->eval(*pars);
+        // Initial evaluation
+        fct->eval(*pars);
 
-    // Save parameters
-    m_value = *(fct->value());
+        // Save parameters
+        m_value = *(fct->value());
 
-    // Save initial statistics and lambda values
-    double value_old  = m_value;
-    double lambda_old = m_lambda;
-    int    lambda_inc = 0;
+        // Save initial statistics and lambda values
+        double value_old  = m_value;
+        double lambda_old = m_lambda;
+        int    lambda_inc = 0;
 
-    // Optionally write initial iteration into logger
-    if (m_logger != NULL) {
-        *m_logger << "Initial iteration: ";
-        *m_logger << "func=" << m_value << ", ";
-        *m_logger << "Lambda=" << m_lambda << std::endl;
-    }
-    #if G_DEBUG_OPT
-    std::cout << "Initial iteration: func=" << m_value << ", Lambda="
-              << m_lambda << std::endl;
-    #endif
-
-    // Iterative fitting
-    for (m_iter = 0; m_iter < m_max_iter; ++m_iter) {
-
-        // Perform one iteration
-        iteration(fct, pars);
-
-        // Compute function improvement (>0 means decrease)
-        double delta = value_old - m_value;
-
-        // Optionally write iteration results into logger
+        // Optionally write initial iteration into logger
         if (m_logger != NULL) {
-            *m_logger << "Iteration " << m_iter+1 << ": ";
+            *m_logger << "Initial iteration: ";
             *m_logger << "func=" << m_value << ", ";
-            *m_logger << "Lambda=" << m_lambda << ", ";
-            *m_logger << "delta=" << delta << std::endl;
+            *m_logger << "Lambda=" << m_lambda << std::endl;
         }
         #if G_DEBUG_OPT
-        std::cout << "Iteration " << m_iter+1 << ": func=" 
-                  << m_value << ", Lambda=" << m_lambda
-                  << ", delta=" << delta << std::endl;
+        std::cout << "Initial iteration: func=" << m_value << ", Lambda="
+                  << m_lambda << std::endl;
         #endif
 
-        // Reset lambda increment if we had success
-        if (m_lambda < lambda_old)
-            lambda_inc = 0;
+        // Iterative fitting
+        for (m_iter = 1; m_iter <= m_max_iter; ++m_iter) {
 
-        // If function increased while lambda did not increase then stop
-        // iterations
-        if ((m_lambda <= lambda_old) && (delta < 0.0))
-            break;
+            // Perform one iteration
+            iteration(fct, pars);
 
-        // Stop if convergence was reached
-        if ((m_lambda <= lambda_old) && (delta < m_eps))
-            break;
+            // Compute function improvement (>0 means decrease)
+            double delta = value_old - m_value;
 
-        // Monitor the number of subsequent increases of lambda and stop if
-        // the number of increases exceeds threshold
-        lambda_inc = (m_lambda > lambda_old) ? lambda_inc + 1 : 0;
-        if (lambda_inc > m_max_stall) {
-            m_status = G_LM_STALLED;
-            break;
-        }
+            // Optionally write iteration results into logger
+            if (m_logger != NULL) {
+                *m_logger << "Iteration " << m_iter << ": ";
+                *m_logger << "func=" << m_value << ", ";
+                *m_logger << "Lambda=" << m_lambda << ", ";
+                *m_logger << "delta=" << delta << std::endl;
+            }
+            #if G_DEBUG_OPT
+            std::cout << "Iteration " << m_iter << ": func=" 
+                      << m_value << ", Lambda=" << m_lambda
+                      << ", delta=" << delta << std::endl;
+            #endif
 
-        // Bookkeeping of actual result (we always store the last lambda to
-        // detect turn arounds in the lambda tendency; however we always keep
-        // the best function value)
-        lambda_old = m_lambda;
-        if (delta > 0.0)
-            value_old = m_value;
+            // Reset lambda increment if we had success
+            if (m_lambda < lambda_old)
+                lambda_inc = 0;
 
-    } // endfor: iterations
+            // If function increased while lambda did not increase then stop
+            // iterations
+            if ((m_lambda <= lambda_old) && (delta < 0.0))
+                break;
 
-    // Compute parameter uncertainties
-    errors(fct, pars);
+            // Stop if convergence was reached
+            if ((m_lambda <= lambda_old) && (delta < m_eps))
+                break;
+
+            // Monitor the number of subsequent increases of lambda and stop if
+            // the number of increases exceeds threshold
+            lambda_inc = (m_lambda > lambda_old) ? lambda_inc + 1 : 0;
+            if (lambda_inc > m_max_stall) {
+                m_status = G_LM_STALLED;
+                break;
+            }
+
+            // Bookkeeping of actual result (we always store the last lambda to
+            // detect turn arounds in the lambda tendency; however we always keep
+            // the best function value)
+            lambda_old = m_lambda;
+            if (delta > 0.0)
+                value_old = m_value;
+
+        } // endfor: iterations
+
+        // Compute parameter uncertainties
+        errors(fct, pars);
+
+    } while (0); // endwhile: main loop
 
     // Free working memory
     if (m_hit_boundary != NULL) delete [] m_hit_boundary;
@@ -370,8 +383,17 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
 {
     // Single loop for common exit point
     do {
+
+        // Fall through if pointers are not valid
+        if (fct == NULL || pars == NULL)
+            continue;
+
+        // Fall through if there are no parameters to optimize
+        int npars = pars->npars();
+        if (npars < 1)
+            continue;
+
         // Initialise iteration parameters
-        int            npars = pars->npars();
         GVector*       grad  = fct->gradient();
         GSparseMatrix* covar = fct->covar();
 
@@ -737,7 +759,7 @@ std::ostream& operator<< (std::ostream& os, const GOptimizerLM& opt)
     os << " Optimized function value ..: " << opt.m_value << std::endl;
     os << " Absolute precision ........: " << opt.m_eps << std::endl;
     os << " Optimization status .......: " << opt.m_status << std::endl;
-    os << " Number of iterations ......: " << opt.m_iter+1 << std::endl;
+    os << " Number of iterations ......: " << opt.m_iter << std::endl;
     os << " Lambda ....................: " << opt.m_lambda;
 
     // Return output stream
@@ -758,7 +780,7 @@ GLog& operator<< (GLog& log, const GOptimizerLM& opt)
     log << " Optimized function value ..: " << opt.m_value << std::endl;
     log << " Absolute precision ........: " << opt.m_eps << std::endl;
     log << " Optimization status .......: " << opt.m_status << std::endl;
-    log << " Number of iterations ......: " << opt.m_iter+1 << std::endl;
+    log << " Number of iterations ......: " << opt.m_iter << std::endl;
     log << " Lambda ....................: " << opt.m_lambda;
 
     // Return logger
