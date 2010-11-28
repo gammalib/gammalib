@@ -49,8 +49,8 @@ public:
     // Implement pure virtual methods
     GLATObservation* clone(void) const;
     void             response(const std::string& irfname, std::string caldb = "");
-    GResponse*       response(const GTime& time) const;
-    GPointing*       pointing(const GTime& time) const;
+    GLATResponse*    response(const GTime& time) const;
+    GLATPointing*    pointing(const GTime& time) const;
     std::string      instrument(void) const;
 
     // Other methods

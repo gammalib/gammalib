@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GLATObservation.i  -  LAT Observation class SWIG interface       *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -38,8 +38,8 @@ public:
     // Implement pure virtual methods
     GLATObservation* clone(void) const;
     void             response(const std::string& irfname, std::string caldb = "");
-    GResponse*       response(const GTime& time) const;
-    GPointing*       pointing(const GTime& time) const;
+    GLATResponse*    response(const GTime& time) const;
+    GLATPointing*    pointing(const GTime& time) const;
     std::string      instrument(void) const;
 
     // Other methods

@@ -167,7 +167,7 @@ void GLATObservation::response(const std::string& irfname, std::string caldb)
  * supposed not to vary during an observation, the time argument needs not to
  * be considered.
  ***************************************************************************/
-GResponse* GLATObservation::response(const GTime& time) const
+GLATResponse* GLATObservation::response(const GTime& time) const
 {
     // Return response pointer
     return m_response;
@@ -183,7 +183,7 @@ GResponse* GLATObservation::response(const GTime& time) const
  * direction is supposed not to vary during an observation, the time argument
  * needs not to be considered.
  ***************************************************************************/
-GPointing* GLATObservation::pointing(const GTime& time) const
+GLATPointing* GLATObservation::pointing(const GTime& time) const
 {
     // Return response pointer
     return m_pointing;
