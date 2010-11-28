@@ -25,8 +25,8 @@
 #include "GObservation.hpp"
 #include "GTime.hpp"
 #include "GModel.hpp"
-#include "GResponse.hpp"
-#include "GPointing.hpp"
+#include "GMWLResponse.hpp"
+#include "GMWLPointing.hpp"
 
 
 /***********************************************************************//**
@@ -58,8 +58,8 @@ public:
     void             clear(void);
     GMWLObservation* clone(void) const;
     void             response(const std::string& rspname, std::string caldb = "");
-    GResponse*       response(const GTime& time) const;
-    GPointing*       pointing(const GTime& time) const;
+    GMWLResponse*    response(const GTime& time) const;
+    GMWLPointing*    pointing(const GTime& time) const;
     std::string      instrument(void) const { return m_instrument; }
 
     // Other methods
@@ -73,8 +73,9 @@ protected:
     void free_members(void);
 
     // Protected members
-    std::string m_instrument;     //!< Instrument name
-
+    std::string   m_instrument;   //!< Instrument name
+    GMWLResponse* m_response;     //!< Pointer to response functions
+    GMWLPointing* m_pointing;     //!< Pointer to pointing direction
 };
 
 #endif /* GMWLOBSERVATION_HPP */

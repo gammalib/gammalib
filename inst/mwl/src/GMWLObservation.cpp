@@ -202,13 +202,11 @@ void GMWLObservation::response(const std::string& rspname, std::string caldb)
  * @brief Returns pointer to response function (dummy)
  *
  * @param[in] time Time.
- *
- * Returns NULL pointer.
  ***************************************************************************/
-GResponse* GMWLObservation::response(const GTime& time) const
+GMWLResponse* GMWLObservation::response(const GTime& time) const
 {
-    // Return NULL pointer
-    return NULL;
+    // Return response pointer
+    return m_response;
 }
 
 
@@ -216,13 +214,11 @@ GResponse* GMWLObservation::response(const GTime& time) const
  * @brief Returns pointer to pointing (dummy)
  *
  * @param[in] time Time.
- *
- * Returns NULL pointer.
  ***************************************************************************/
-GPointing* GMWLObservation::pointing(const GTime& time) const
+GMWLPointing* GMWLObservation::pointing(const GTime& time) const
 {
-    // Return NULL pointer
-    return NULL;
+    // Return pointing pointer
+    return m_pointing;
 }
 
 
@@ -296,6 +292,8 @@ void GMWLObservation::init_members(void)
 {
     // Initialise members
     m_instrument.clear();
+    m_response = new GMWLResponse;
+    m_pointing = new GMWLPointing;
 
     // Overwrite base class statistics
     m_statistics = "Gaussian";
@@ -314,6 +312,8 @@ void GMWLObservation::copy_members(const GMWLObservation& obs)
 {
     // Copy members
     m_instrument = obs.m_instrument;
+    if (obs.m_response != NULL) m_response = obs.m_response->clone();
+    if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
 
     // Return
     return;
