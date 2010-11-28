@@ -11,14 +11,18 @@ sources = src/GMWLException.cpp \
           src/GMWLObservation.cpp \
           src/GMWLSpectrum.cpp \
           src/GMWLDatum.cpp \
-	  src/GMWLInstDir.cpp
+          src/GMWLInstDir.cpp \
+          src/GMWLPointing.cpp \
+          src/GMWLResponse.cpp
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GMWLException.hpp \
                      include/GMWLObservation.hpp \
                      include/GMWLSpectrum.hpp \
                      include/GMWLDatum.hpp \
-		     include/GMWLInstDir.hpp
+                     include/GMWLInstDir.hpp \
+                     include/GMWLPointing.hpp \
+                     include/GMWLResponse.hpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libmwl.la
