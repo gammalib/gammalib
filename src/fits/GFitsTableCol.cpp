@@ -170,7 +170,22 @@ void GFitsTableCol::name(const std::string& name)
 
 
 /***********************************************************************//**
- * @brief Get column name
+ * @brief Set column unit
+ *
+ * @param[in] unit Unit of the column.
+ ***************************************************************************/
+void GFitsTableCol::unit(const std::string& unit)
+{
+    // Set name
+    m_unit = unit;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns column name
  ***************************************************************************/
 std::string GFitsTableCol::name(void) const
 {
@@ -180,7 +195,17 @@ std::string GFitsTableCol::name(void) const
 
 
 /***********************************************************************//**
- * @brief Get number of column in FITS file (starting from 1)
+ * @brief Returns column unit
+ ***************************************************************************/
+std::string GFitsTableCol::unit(void) const
+{
+    // Return column length
+    return m_unit;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns number of column in FITS file (starting from 1)
  ***************************************************************************/
 int GFitsTableCol::colnum(void) const
 {
@@ -190,7 +215,7 @@ int GFitsTableCol::colnum(void) const
 
 
 /***********************************************************************//**
- * @brief Get CFITSIO column type
+ * @brief Returns CFITSIO column type
  *
  * Returns one of the following:
  *   1 (TBIT)
@@ -218,7 +243,7 @@ int GFitsTableCol::type(void) const
 
 
 /***********************************************************************//**
- * @brief Get column repeat value (only used for binary tables)
+ * @brief Returns column repeat value (only used for binary tables)
  ***************************************************************************/
 int GFitsTableCol::repeat(void) const
 {
@@ -228,7 +253,7 @@ int GFitsTableCol::repeat(void) const
 
 
 /***********************************************************************//**
- * @brief Get width of one element in column
+ * @brief Returns width of one element in column
  ***************************************************************************/
 int GFitsTableCol::width(void) const
 {
@@ -238,7 +263,7 @@ int GFitsTableCol::width(void) const
 
 
 /***********************************************************************//**
- * @brief Get number of elements in a column
+ * @brief Returns number of elements in a column
  ***************************************************************************/
 int GFitsTableCol::number(void) const
 {
@@ -248,7 +273,7 @@ int GFitsTableCol::number(void) const
 
 
 /***********************************************************************//**
- * @brief Get column length
+ * @brief Returns column length
  ***************************************************************************/
 int GFitsTableCol::length(void) const
 {
@@ -258,7 +283,7 @@ int GFitsTableCol::length(void) const
 
 
 /***********************************************************************//**
- * @brief Get number of NULLs encountered
+ * @brief Returns number of NULLs encountered
  ***************************************************************************/
 int GFitsTableCol::anynul(void) const
 {

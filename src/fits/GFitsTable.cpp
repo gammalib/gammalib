@@ -547,6 +547,18 @@ void GFitsTable::data_open(void* vptr)
         else
             status = 0;
 
+        // Get column unit (optional, leave blank if not found)
+        char unit[80];
+        sprintf(keyname, "TUNIT%d", i+1);
+        status = __ffgkey(FPTR(m_fitsfile), keyname, unit, NULL, &status);
+        if (status != 0) {
+            status = 0;
+            unit[0] = '\0';
+            unit[1] = '\0';
+        }
+        else
+            unit[strlen(unit)-1] = '\0';
+
         // Allocate column
         m_columns[i] = alloc_column(typecode);
         if (m_columns[i] == NULL) {
@@ -558,6 +570,7 @@ void GFitsTable::data_open(void* vptr)
 
         // Store column definition
         m_columns[i]->name(strip_whitespace(&(value[1])));
+        m_columns[i]->unit(strip_whitespace(&(unit[1])));
         m_columns[i]->m_colnum = i+1;
         m_columns[i]->m_type   = typecode;
         m_columns[i]->m_repeat = repeat;
