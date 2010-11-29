@@ -61,3 +61,21 @@ GMWLException::bad_file_format::bad_file_format(std::string origin,
     m_message = "File has invalid format. "+message;
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Invalid or unsupported unit encountered
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] unit Unit string.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GMWLException::invalid_unit::invalid_unit(std::string origin,
+                                          std::string unit,
+                                          std::string message)
+{
+    m_origin  = origin;
+    m_message = "Invalid or unsupported unit \""+unit+"\" encountered. " +
+                message;
+    return;
+}

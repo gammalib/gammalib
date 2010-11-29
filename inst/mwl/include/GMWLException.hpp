@@ -60,6 +60,11 @@ public:
     public:
         bad_file_format(std::string origin, std::string message = "");
     };
+    class invalid_unit : public GMWLExceptionHandler {
+    public:
+        invalid_unit(std::string origin, std::string unit,
+                     std::string message = "");
+    };
 };
 
 #endif /* GMWLEXCEPTION_HPP */
