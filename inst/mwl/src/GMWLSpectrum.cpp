@@ -25,14 +25,17 @@
 #include "GTools.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
+#include "GEnergy.hpp"
 #include "GException.hpp"
 #include "GMWLException.hpp"
 #include "GMWLSpectrum.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_POINTER                                "GMWLSpectrum::pointer(int)"
-#define G_LOAD_FITS              "GMWLSpectrum::load_fits(std::string&, int)"
+#define G_LOAD_FITS               "GMWLSpectrum::load_fits(std::string&,int)"
 #define G_READ_FITS                    "GMWLSpectrum::read_fits(GFitsTable*)"
+#define G_CONV_ENERGY       "GMWLSpectrum::conv_energy(double&,std::string&)"
+#define G_CONV_FLUX  "GMWLSpectrum::conv_flux(GEnergy&,double&,std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -66,7 +69,7 @@ GMWLSpectrum::GMWLSpectrum(void) : GEventCube()
 /***********************************************************************//**
  * @brief File constructor
  *
- * @param[in] filename Filename.
+ * @param[in] filename File name.
  *
  * Creates instance from file.
  ***************************************************************************/
@@ -205,14 +208,14 @@ int GMWLSpectrum::size(void) const
 /***********************************************************************//**
  * @brief Load spectrum
  *
- * @param[in] filename File name
+ * @param[in] filename File name.
  *
  * This method loads a spectrum from a variety of file types. The method
  * analyses the format of the file that is presented and choses then the
  * appropriate method to load the specific format. The following file
  * formats are supported: FITS, TBW ...
  *
- * @todo Not yet implemented.
+ * @todo So far only FITS file support is implemented.
  ***************************************************************************/
 void GMWLSpectrum::load(const std::string& filename)
 {
@@ -263,37 +266,6 @@ void GMWLSpectrum::load_fits(const std::string& filename, int extno)
 
     // Get table pointer
     GFitsTable* table = file.table(extno);
-
-    // Read spectrum from table
-    read_fits(table);
-
-    // Close FITS file
-    file.close();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Load spectrum from FITS file
- *
- * @param[in] filename File name.
- * @param[in] extname Extension name.
- *
- * Loads the spectrum from a FITS table with a given extension name.
- ***************************************************************************/
-void GMWLSpectrum::load_fits(const std::string& filename,
-                             const std::string& extname)
-{
-    // Clear object
-    clear();
-
-    // Open FITS file
-    GFits file(filename);
-
-    // Get table pointer
-    GFitsTable* table = file.table(extname);
 
     // Read spectrum from table
     read_fits(table);
@@ -474,15 +446,103 @@ void GMWLSpectrum::read_fits(const GFitsTable* table)
     // Read spectral points and add to spectrum
     for (int i = 0; i < table->nrows(); ++i) {
         GMWLDatum datum;
-        if (c_energy     != NULL) datum.m_eng.MeV(c_energy->real(i));
-        if (c_energy_err != NULL) datum.m_eng_err.MeV(c_energy_err->real(i));
-        if (c_flux       != NULL) datum.m_flux = c_flux->real(i);
-        if (c_flux_err   != NULL) datum.m_flux_err = c_flux_err->real(i);
+        if (c_energy     != NULL) 
+            datum.m_eng = conv_energy(c_energy->real(i), c_energy->unit());
+        if (c_energy_err != NULL)
+            datum.m_eng_err = conv_energy(c_energy_err->real(i), c_energy->unit());
+        if (c_flux       != NULL)
+            datum.m_flux = conv_flux(datum.m_eng, c_flux->real(i), c_flux->unit());
+        if (c_flux_err   != NULL)
+            datum.m_flux_err = conv_flux(datum.m_eng, c_flux_err->real(i), c_flux_err->unit());
         m_data.push_back(datum);
     }
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert value into energy
+ *
+ * @param[in] energy Energy value.
+ * @param[in] unit Unit of value.
+ *
+ * @exception GMWLException::invalid_unit
+ *            Invalid unit string encountered
+ *
+ * Converts an energy value into a GEnergy object based on the specified
+ * units. The following units are supported (case insensitive):
+ * erg, keV, MeV, GeV, and TeV.
+ ***************************************************************************/
+GEnergy GMWLSpectrum::conv_energy(const double& energy, const std::string& unit)
+{
+    // Initialise energy
+    GEnergy result;
+
+    // Convert unit string to upper base without any leading/trailing
+    // whitespace
+    std::string str_unit = strip_whitespace(toupper(unit));
+
+    // High-energy units
+    if (str_unit == "KEV")
+        result.keV(energy);
+    else if (str_unit == "MEV")
+        result.MeV(energy);
+    else if (str_unit == "GEV")
+        result.GeV(energy);
+    else if (str_unit == "TEV")
+        result.TeV(energy);
+
+    // Other units
+    else if (str_unit == "ERG")
+        result.erg(energy);
+    
+    // ... otherwise throw exception
+    else
+        throw GMWLException::invalid_unit(G_CONV_ENERGY, unit);
+
+    // Return energy
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert value into flux
+ *
+ * @param[in] energy Energy at which flux is given.
+ * @param[in] flux Flux value.
+ * @param[in] unit Unit of value.
+ *
+ * @exception GMWLException::invalid_unit
+ *            Invalid unit string encountered
+ *
+ * Converts a flux value into units of ph/cm2/s/MeV based on the specified
+ * units. The following units are supported (case insensitive):
+ * ph/cm2/s/MeV, ph/s/cm2/MeV, erg/cm2/s and erg/s/cm2.
+ ***************************************************************************/
+double GMWLSpectrum::conv_flux(const GEnergy& energy, const double& flux,
+                               const std::string& unit)
+{
+    // Initialise energy
+    double result;
+
+    // Convert unit string to upper base without any leading/trailing
+    // whitespace
+    std::string str_unit = strip_whitespace(toupper(unit));
+
+    // High-energy units
+    if (str_unit == "PH/CM2/S/MEV" || str_unit == "PH/S/CM2/MEV")
+        result = flux;
+    else if (str_unit == "ERG/CM2/S" || str_unit == "ERG/S/CM2")
+        result = (erg2MeV*flux) / (energy.MeV()*energy.MeV());
+
+    // ... otherwise throw exception
+    else
+        throw GMWLException::invalid_unit(G_CONV_FLUX, unit);
+
+    // Return energy
+    return result;
 }
 
 

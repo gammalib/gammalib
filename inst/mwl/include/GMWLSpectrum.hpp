@@ -69,10 +69,12 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GMWLSpectrum& spec);
-    void free_members(void);
-    void read_fits(const GFitsTable* table);
+    void    init_members(void);
+    void    copy_members(const GMWLSpectrum& spec);
+    void    free_members(void);
+    void    read_fits(const GFitsTable* table);
+    GEnergy conv_energy(const double& energy, const std::string& unit);
+    double  conv_flux(const GEnergy& energy, const double& flux, const std::string& unit);
 
     // Protected members
     std::vector<GMWLDatum> m_data;  //!< Spectral data
