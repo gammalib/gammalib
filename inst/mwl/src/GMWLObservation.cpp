@@ -226,6 +226,7 @@ GMWLPointing* GMWLObservation::pointing(const GTime& time) const
  * @brief Load observation
  *
  * @param[in] filename File name.
+ * @param[in] extname FITS extension name.
  *
  * @todo Extract energy boundaries from spectrum.
  *
