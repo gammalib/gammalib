@@ -244,8 +244,9 @@ void GMWLObservation::load(const std::string& filename)
     // Load spectrum
     spec->load(filename);
 
-    // Set observation name
+    // Set attributes
     obsname("Multi-wavelength observation");
+    instrument(spec->instrument());
 
     // Extract energy boundaries from spectrum
 
