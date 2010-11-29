@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="no"?>
+<source_library title="source library">
+	<source name="Crab synchroton" type="PointSource">
+		<spectrum type="PowerLaw">
+			<parameter scale="1e-03" name="Prefactor" min="1e-07" max="1000.0" value="1.0" free="1"/>
+			<parameter scale="1.0" name="Index" min="-5.0" max="+5.0" value="-2.1" free="1"/>
+			<parameter scale="1.0" name="Scale" min="1e-07" max="1e20" value="1.0" free="0"/>
+		</spectrum>
+		<spatialModel type="SkyDirFunction">
+			<parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
+			<parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
+		</spatialModel>
+	</source>
+</source_library>
