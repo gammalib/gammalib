@@ -47,13 +47,13 @@ public:
     virtual GRoi& operator= (const GRoi& roi);
 
     // Pure virtual methods
+    virtual GRoi* clone(void) const = 0;
 
 protected:
     // Protected methods
-    void    init_members(void);
-    void    copy_members(const GRoi& roi);
-    void    free_members(void);
-    virtual GRoi* clone(void) const = 0;
+    void init_members(void);
+    void copy_members(const GRoi& roi);
+    void free_members(void);
 };
 
 #endif /* GROI_HPP */
