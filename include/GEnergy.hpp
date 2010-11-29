@@ -66,10 +66,12 @@ public:
 
     // Methods
     void        clear(void) { m_energy = 0.0; }
+    double      erg(void) const;
     double      keV(void) const;
     double      MeV(void) const;
     double      GeV(void) const;
     double      TeV(void) const;
+    void        erg(const double& eng);
     void        keV(const double& eng);
     void        MeV(const double& eng);
     void        GeV(const double& eng);

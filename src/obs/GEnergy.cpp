@@ -123,6 +123,19 @@ GEnergy& GEnergy::operator= (const GEnergy& eng)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Return energy in erg
+ ***************************************************************************/
+double GEnergy::erg(void) const
+{
+    // Compute energy
+    double energy = m_energy * MeV2erg;
+    
+    // Return energy
+    return energy; 
+}
+
+
+/***********************************************************************//**
  * @brief Return energy in keV
  ***************************************************************************/
 double GEnergy::keV(void) const
@@ -168,6 +181,21 @@ double GEnergy::TeV(void) const
     
     // Return energy
     return energy; 
+}
+
+
+/***********************************************************************//**
+ * @brief Set energy in erg
+ *
+ * @param[in] energy Energy in erg.
+ ***************************************************************************/
+void GEnergy::erg(const double& eng)
+{
+    // Set energy
+    m_energy = eng * erg2MeV;
+    
+    // Return
+    return;
 }
 
 
