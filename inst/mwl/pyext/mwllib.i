@@ -14,6 +14,8 @@
 
 /* __ MWL ________________________________________________________________ */
 #include "GMWLObservation.i"
+#include "GMWLSpectrum.i"
+#include "GMWLDatum.i"
 
 
 
