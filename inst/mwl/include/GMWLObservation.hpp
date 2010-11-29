@@ -64,6 +64,7 @@ public:
 
     // Other methods
     void        load(const std::string& filename);
+    void        instrument(const std::string& instrument) { m_instrument=instrument; }
     std::string print(void) const;
 
 protected:
