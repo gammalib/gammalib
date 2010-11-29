@@ -31,17 +31,23 @@ public:
     // Constructors and destructors
     GModels(void);
     GModels(const GModels& models);
+    GModels(const std::string& filename);
     ~GModels(void);
  
     // Methods
+    void   clear(void);
+    int    size(void) const { return m_elements; }
     void   append(const GModel& model);
+    void   load(const std::string& filename);
+    void   save(const std::string& filename) const;
+    void   read(const GXml& xml);
+    void   write(GXml& xml) const;
     double eval(const GInstDir& obsDir, const GEnergy& obsEng,
                 const GTime& obsTime, const GResponse& rsp,
                 const GPointing& pnt);
     double eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
                           const GTime& obsTime, const GResponse& rsp,
                           const GPointing& pnt);
-    int    size(void) const { return m_elements; }
 };
 
 
