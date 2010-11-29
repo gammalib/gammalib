@@ -339,19 +339,29 @@ fi
 dnl =========================================
 dnl Checks for instrument specific interfaces
 dnl =========================================
-#
-AM_CONDITIONAL(WITH_INST_MWL, test "xyes" = "xyes")
-
 # Checks for the existence of instrument specific interfaces
 AC_CHECK_FILE([inst/Makefile.am],
               [with_inst=yes],
               [with_inst=no])
 AM_CONDITIONAL([WITH_INST], [test "x$with_inst" = "xyes"])
 
+# Checks for MWL interface
+AC_ARG_WITH([mwl],
+            [AS_HELP_STRING([--with-mwl],
+                            [compile in multi-wavelength interface [default=yes]])],
+            [],
+            [with_mwl=yes])
+if test "x$with_mwl" = "xyes"; then
+  AC_CHECK_FILE([inst/mwl/Makefile.am],
+                [with_mwl=yes],
+                [with_mwl=no])
+fi
+AM_CONDITIONAL(WITH_INST_MWL, test "x$with_mwl" = "xyes")
+
 # Checks for CTA interface
 AC_ARG_WITH([cta],
             [AS_HELP_STRING([--with-cta],
-                            [compile in CTA specific interface])],
+                            [compile in CTA specific interface [default=yes]])],
             [],
             [with_cta=yes])
 if test "x$with_cta" = "xyes"; then
@@ -364,7 +374,7 @@ AM_CONDITIONAL(WITH_INST_CTA, test "x$with_cta" = "xyes")
 # Checks for LAT interface
 AC_ARG_WITH([lat],
             [AS_HELP_STRING([--with-lat],
-                            [compile in LAT specific interface])],
+                            [compile in LAT specific interface [default=yes]])],
             [],
             [with_lat=yes])
 if test "x$with_lat" = "xyes"; then
@@ -390,13 +400,17 @@ AC_CONFIG_FILES([Makefile
                  src/obs/Makefile
                  src/model/Makefile
                  src/app/Makefile
-                 inst/Makefile
-                 inst/mwl/Makefile
                  include/Makefile
                  test/Makefile
                  pyext/Makefile
                  pyext/setup.py
                  gammalib.pc])
+if test "x$with_inst" = "xyes"; then
+  AC_CONFIG_FILES([inst/Makefile])
+fi
+if test "x$with_mwl" = "xyes"; then
+  AC_CONFIG_FILES([inst/mwl/Makefile])
+fi
 if test "x$with_cta" = "xyes"; then
   AC_CONFIG_FILES([inst/cta/Makefile])
 fi
