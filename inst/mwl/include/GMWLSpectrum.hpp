@@ -63,6 +63,8 @@ public:
 
     // Other methods
     int         size(void) const;
+    std::string telescope() const { return m_telescope; }
+    std::string instrument() const { return m_instrument; }
     std::string print(void) const;
     void        load_fits(const std::string& filename, int extno = 0);
     void        load_fits(const std::string& filename, const std::string& extname);
@@ -77,7 +79,9 @@ protected:
     double  conv_flux(const GEnergy& energy, const double& flux, const std::string& unit);
 
     // Protected members
-    std::vector<GMWLDatum> m_data;  //!< Spectral data
+    std::string            m_telescope;   //!< Telescope name
+    std::string            m_instrument;  //!< Instrument name
+    std::vector<GMWLDatum> m_data;        //!< Spectral data
 };
 
 #endif /* GMWLSPECTRUM_HPP */

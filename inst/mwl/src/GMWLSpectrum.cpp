@@ -270,6 +270,22 @@ void GMWLSpectrum::load_fits(const std::string& filename, int extno)
     // Read spectrum from table
     read_fits(table);
 
+    // Get telescope name
+    try {
+        m_telescope = table->string("TELESCOP");
+    }
+    catch (GException::fits_key_not_found &e) {
+        m_telescope = "unknown";
+    }
+
+    // Get instrument name
+    try {
+        m_instrument = table->string("INSTRUME");
+    }
+    catch (GException::fits_key_not_found &e) {
+        m_instrument = "unknown";
+    }
+
     // Close FITS file
     file.close();
 
@@ -321,7 +337,9 @@ std::string GMWLSpectrum::print(void) const
     std::string result;
 
     // Append header
-    result.append("=== GMWLObservation ===\n");
+    result.append("=== GMWLSpectrum ===\n");
+    result.append(parformat("Telescope")+m_telescope);
+    result.append(parformat("Instrument")+m_instrument);
     result.append(parformat("Number of points")+str(size()));
 
     // Append spectral points
@@ -361,6 +379,8 @@ std::string GMWLSpectrum::print(void) const
 void GMWLSpectrum::init_members(void)
 {
     // Initialise members
+    m_telescope.clear();
+    m_instrument.clear();
     m_data.clear();
 
     // Return
@@ -376,7 +396,9 @@ void GMWLSpectrum::init_members(void)
 void GMWLSpectrum::copy_members(const GMWLSpectrum& spec)
 {
     // Copy members
-    m_data = spec.m_data;
+    m_telescope  = spec.m_telescope;
+    m_instrument = spec.m_instrument;
+    m_data       = spec.m_data;
 
     // Return
     return;
