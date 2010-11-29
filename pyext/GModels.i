@@ -42,6 +42,8 @@ public:
     void   save(const std::string& filename) const;
     void   read(const GXml& xml);
     void   write(GXml& xml) const;
+    double value(const GSkyDir& srcDir, const GEnergy& srcEng,
+                 const GTime& srcTime);
     double eval(const GInstDir& obsDir, const GEnergy& obsEng,
                 const GTime& obsTime, const GResponse& rsp,
                 const GPointing& pnt);

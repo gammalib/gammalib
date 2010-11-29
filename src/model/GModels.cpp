@@ -399,6 +399,31 @@ void GModels::write(GXml& xml) const
 
 
 /***********************************************************************//**
+ * @brief Returns value of source model
+ *
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ *
+ * This method evaluates the factorized source model at a given set of
+ * parameters.
+ ***************************************************************************/
+double GModels::value(const GSkyDir& srcDir, const GEnergy& srcEng,
+                      const GTime& srcTime)
+{
+    // Initialise value
+    double value = 0.0;
+
+    // Evaluate function for all models
+    for (int i = 0; i < m_elements; ++i)
+        value += m_model[i].value(srcDir, srcEng, srcTime);
+
+    // Return
+    return value;
+}
+
+
+/***********************************************************************//**
  * @brief Evaluate function
  *
  * @param[in] obsDir Observed photon direction.
