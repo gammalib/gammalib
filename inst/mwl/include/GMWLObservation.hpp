@@ -48,6 +48,7 @@ public:
     // Constructors and destructors
     GMWLObservation(void);
     GMWLObservation(const std::string& filename);
+    GMWLObservation(const std::string& filename, const std::string& extname);
     GMWLObservation(const GMWLObservation& obs);
     virtual ~GMWLObservation(void);
 
@@ -64,6 +65,7 @@ public:
 
     // Other methods
     void        load(const std::string& filename);
+    void        load(const std::string& filename, const std::string& extname);
     void        instrument(const std::string& instrument) { m_instrument=instrument; }
     std::string print(void) const;
 

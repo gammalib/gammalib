@@ -163,8 +163,12 @@ void test_optimizer(void)
     // Load multi-wavelength observations
     try {
         obs.clear();
-        GMWLObservation comptel(crab_fits+"[COMPTEL]");
+        GMWLObservation comptel(crab_fits, "COMPTEL");
+        GMWLObservation lat(crab_fits, "LAT");
+        GMWLObservation hess(crab_fits, "HESS");
         obs.append(comptel);
+        obs.append(lat);
+        obs.append(hess);
     }
     catch (std::exception &e) {
         std::cout << std::endl
@@ -197,8 +201,8 @@ void test_optimizer(void)
         GOptimizerLM opt(log);
         opt.max_iter(1000);
         obs.optimize(opt);
-        //std::cout << obs << std::endl;
-        std::cout << std::endl << opt << std::endl;
+        std::cout << std::endl << obs << std::endl;
+        std::cout << opt << std::endl;
         std::cout << *(obs.models()) << std::endl;
     }
     catch (std::exception &e) {

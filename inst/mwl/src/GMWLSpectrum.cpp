@@ -26,6 +26,7 @@
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GEnergy.hpp"
+#include "GEbounds.hpp"
 #include "GException.hpp"
 #include "GMWLException.hpp"
 #include "GMWLSpectrum.hpp"
@@ -206,6 +207,37 @@ int GMWLSpectrum::size(void) const
 
 
 /***********************************************************************//**
+ * @brief Return energy boundaries of spectrum
+ ***************************************************************************/
+GEbounds GMWLSpectrum::ebounds(void) const
+{
+    // Initialise energy boundaries
+    GEbounds ebounds;
+
+    // Continue only if we have data
+    if (m_data.size() > 0) {
+
+        // Extract energy boundaries from spectrum
+        GEnergy emin = m_data[0].energy();
+        GEnergy emax = m_data[0].energy();
+        for (int i = 0; i < m_data.size(); ++i) {
+            if (m_data[i].energy() < emin)
+                emin = m_data[i].energy();
+            if (m_data[i].energy() > emax)
+                emax = m_data[i].energy();
+        }
+
+        // Set energy boundaries
+        ebounds.append(emin, emax);
+
+    } // endif: we had data
+
+    // Return
+    return ebounds;
+}
+
+
+/***********************************************************************//**
  * @brief Load spectrum
  *
  * @param[in] filename File name.
@@ -221,6 +253,36 @@ void GMWLSpectrum::load(const std::string& filename)
 {
     // Load from FITS file
     load_fits(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load spectrum
+ *
+ * @param[in] filename File name.
+ * @param[in] extname FITS extension name.
+ *
+ * This method loads a spectrum from a FITS table.
+ ***************************************************************************/
+void GMWLSpectrum::load(const std::string& filename, const std::string& extname)
+{
+    // Clear object
+    clear();
+
+    // Open FITS file
+    GFits file(filename);
+
+    // Get table pointer
+    GFitsTable* table = file.table(extname);
+
+    // Read spectrum from table
+    read_fits(table);
+
+    // Close FITS file
+    file.close();
 
     // Return
     return;
@@ -269,22 +331,6 @@ void GMWLSpectrum::load_fits(const std::string& filename, int extno)
 
     // Read spectrum from table
     read_fits(table);
-
-    // Get telescope name
-    try {
-        m_telescope = table->string("TELESCOP");
-    }
-    catch (GException::fits_key_not_found &e) {
-        m_telescope = "unknown";
-    }
-
-    // Get instrument name
-    try {
-        m_instrument = table->string("INSTRUME");
-    }
-    catch (GException::fits_key_not_found &e) {
-        m_instrument = "unknown";
-    }
 
     // Close FITS file
     file.close();
@@ -338,8 +384,8 @@ std::string GMWLSpectrum::print(void) const
 
     // Append header
     result.append("=== GMWLSpectrum ===\n");
-    result.append(parformat("Telescope")+m_telescope);
-    result.append(parformat("Instrument")+m_instrument);
+    result.append(parformat("Telescope")+m_telescope+"\n");
+    result.append(parformat("Instrument")+m_instrument+"\n");
     result.append(parformat("Number of points")+str(size()));
 
     // Append spectral points
@@ -477,6 +523,22 @@ void GMWLSpectrum::read_fits(const GFitsTable* table)
         if (c_flux_err   != NULL)
             datum.m_flux_err = conv_flux(datum.m_eng, c_flux_err->real(i), c_flux_err->unit());
         m_data.push_back(datum);
+    }
+
+    // Get telescope name
+    try {
+        m_telescope = table->string("TELESCOP");
+    }
+    catch (GException::fits_key_not_found &e) {
+        m_telescope = "unknown";
+    }
+
+    // Get instrument name
+    try {
+        m_instrument = table->string("INSTRUME");
+    }
+    catch (GException::fits_key_not_found &e) {
+        m_instrument = "unknown";
     }
 
     // Return

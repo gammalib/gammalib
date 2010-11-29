@@ -63,11 +63,12 @@ public:
 
     // Other methods
     int         size(void) const;
-    std::string telescope() const { return m_telescope; }
-    std::string instrument() const { return m_instrument; }
-    std::string print(void) const;
+    std::string telescope(void) const { return m_telescope; }
+    std::string instrument(void) const { return m_instrument; }
+    GEbounds    ebounds(void) const;
+    void        load(const std::string& filename, const std::string& extname);
     void        load_fits(const std::string& filename, int extno = 0);
-    void        load_fits(const std::string& filename, const std::string& extname);
+    std::string print(void) const;
 
 protected:
     // Protected methods

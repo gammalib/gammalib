@@ -59,7 +59,7 @@ GMWLObservation::GMWLObservation(void) : GObservation()
 /***********************************************************************//**
  * @brief File constructor
  *
- * @param[in] filename Filename.
+ * @param[in] filename File name.
  *
  * Creates instance from file.
  ***************************************************************************/
@@ -70,6 +70,28 @@ GMWLObservation::GMWLObservation(const std::string& filename) : GObservation()
 
     // Load observation
     load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief File constructor
+ *
+ * @param[in] filename File name.
+ * @param[in] extname FITS file extension name.
+ *
+ * Creates instance from file.
+ ***************************************************************************/
+GMWLObservation::GMWLObservation(const std::string& filename,
+                                 const std::string& extname) : GObservation()
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Load observation
+    load(filename, extname);
 
     // Return
     return;
@@ -226,9 +248,6 @@ GMWLPointing* GMWLObservation::pointing(const GTime& time) const
  * @brief Load observation
  *
  * @param[in] filename File name.
- * @param[in] extname FITS extension name.
- *
- * @todo Extract energy boundaries from spectrum.
  *
  * @todo Set good time intervals covering observation interval.
  ***************************************************************************/
@@ -247,10 +266,42 @@ void GMWLObservation::load(const std::string& filename)
     // Set attributes
     obsname("Multi-wavelength observation");
     instrument(spec->instrument());
+    //roi(spec->roi());
+    ebounds(spec->ebounds());
+    //gti(spec->gti());
 
-    // Extract energy boundaries from spectrum
+    // Return
+    return;
+}
 
-    // Set good time intervals
+
+/***********************************************************************//**
+ * @brief Load observation
+ *
+ * @param[in] filename File name.
+ * @param[in] extname FITS extension name.
+ *
+ * @todo Set good time intervals covering observation interval.
+ ***************************************************************************/
+void GMWLObservation::load(const std::string& filename,
+                           const std::string& extname)
+{
+    // Clear observation
+    clear();
+
+    // Allocate spectrum
+    GMWLSpectrum* spec = new GMWLSpectrum;
+    m_events = spec;
+
+    // Load spectrum
+    spec->load(filename, extname);
+
+    // Set attributes
+    obsname("Multi-wavelength observation");
+    instrument(spec->instrument());
+    //roi(spec->roi());
+    ebounds(spec->ebounds());
+    //gti(spec->gti());
 
     // Return
     return;
