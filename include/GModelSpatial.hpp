@@ -50,7 +50,7 @@ public:
     virtual void           clear(void) = 0;
     virtual GModelSpatial* clone(void) const = 0;
     virtual int            size(void) const = 0;
-    virtual std::string    name(void) const = 0;
+    virtual std::string    type(void) const = 0;
     virtual GModelPar*     par(int index) const = 0;
     virtual double         eval(const GSkyDir& srcDir) = 0;
     virtual double         eval_gradients(const GSkyDir& srcDir) = 0;

@@ -63,7 +63,7 @@ public:
     void                   clear(void);
     GModelSpectralExpPlaw* clone(void) const;
     int                    size(void) const { return m_npars; }
-    std::string            name(void) const { return "ExpCutoff"; }
+    std::string            type(void) const { return "ExpCutoff"; }
     GModelPar*             par(int index) const;
     double                 eval(const GEnergy& srcEng);
     double                 eval_gradients(const GEnergy& srcEng);
