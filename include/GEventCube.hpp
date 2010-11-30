@@ -51,7 +51,7 @@ public:
     virtual void        clear(void) = 0;
     virtual GEventCube* clone(void) const = 0;
     virtual void        load(const std::string& filename) = 0;
-    virtual GEvent*     pointer(int index) = 0;
+    virtual GEventBin*  pointer(int index) = 0;
     virtual int         number(void) const = 0;
 
     // Implemented pure virtual methods
