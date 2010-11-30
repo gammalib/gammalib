@@ -31,30 +31,29 @@ public:
     // Constructors and destructors
     GModel(void);
     GModel(const GModelSpatial& spatial, const GModelSpectral& spectral);
+    GModel(const GXmlElement& spatial, const GXmlElement& spectral);
     GModel(const GModel& model);
     ~GModel(void);
 
     // Methods
-    GModelPar* par(int index) const;
-    double     value(const GSkyDir& srcDir, const GEnergy& srcEng,
-                     const GTime& srcTime);
-    GVector    gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GTime& srcTime);
-    double     eval(const GInstDir& obsDir, const GEnergy& obsEng,
-                    const GTime& obsTime, const GResponse& rsp,
-                    const GPointing& pnt);
-    double     eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
-                              const GTime& obsTime, const GResponse& rsp,
-                              const GPointing& pnt);
-    bool       isvalid(const std::string& name);
-
-    // Inline methods
+    int                   size(void) const { return m_npars; }
     std::string           name(void) const { return m_name; }
     void                  name(const std::string& name) { m_name=name; return; }
-    int                   npars(void) const { return m_npars; }
     const GModelSpatial*  spatial(void) const { return m_spatial; }
     const GModelSpectral* spectral(void) const { return m_spectral; }
     const GModelTemporal* temporal(void) const { return m_temporal; }
+    GModelPar*            par(int index) const;
+    double                value(const GSkyDir& srcDir, const GEnergy& srcEng,
+                                const GTime& srcTime);
+    GVector               gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
+                                    const GTime& srcTime);
+    double                eval(const GInstDir& obsDir, const GEnergy& obsEng,
+                               const GTime& obsTime, const GResponse& rsp,
+                               const GPointing& pnt);
+    double                eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
+                                         const GTime& obsTime, const GResponse& rsp,
+                                         const GPointing& pnt);
+    bool                  isvalid(const std::string& name) const;
 };
 
 

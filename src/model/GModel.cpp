@@ -246,9 +246,9 @@ GVector GModel::gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
 
     // Set vector of gradients
     GVector gradients;
-    if (npars() > 0) {
-        gradients = GVector(npars());
-        for (int i = 0; i < npars(); ++i)
+    if (size() > 0) {
+        gradients = GVector(size());
+        for (int i = 0; i < size(); ++i)
             gradients(i) = m_par[i]->gradient();
     }
 
