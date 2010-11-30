@@ -126,6 +126,7 @@
 #include "GModelSpatialPtsrc.hpp"
 #include "GModelSpectral.hpp"
 #include "GModelSpectralPlaw.hpp"
+#include "GModelSpectralExpPlaw.hpp"
 #include "GModelTemporal.hpp"
 #include "GModelTemporalConst.hpp"
 

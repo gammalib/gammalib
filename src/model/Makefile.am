@@ -13,6 +13,7 @@ sources = GModels.cpp \
 	  GModelSpatialPtsrc.cpp \
 	  GModelSpectral.cpp \
 	  GModelSpectralPlaw.cpp \
+          GModelSpectralExpPlaw.cpp \
 	  GModelTemporal.cpp \
 	  GModelTemporalConst.cpp \
           GException_model.cpp

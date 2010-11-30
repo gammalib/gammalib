@@ -25,6 +25,7 @@
 #include "GModelTemporalConst.hpp"
 #include "GModelSpatialPtsrc.hpp"
 #include "GModelSpectralPlaw.hpp"
+#include "GModelSpectralExpPlaw.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_PAR                                              "GModel::par(int)"
@@ -493,6 +494,10 @@ GModelSpectral* GModel::xml_spectral(const GXmlElement& spectral) const
     // Type=PowerLaw2
     else if (type == "PowerLaw2")
         throw GException::model_invalid_spectral(G_XML_SPECTRAL, type);
+
+    // Type=ExpCutoff
+    else if (type == "ExpCutoff")
+        ptr = new GModelSpectralExpPlaw(spectral);
 
     // Unknown spectral model type
     else
