@@ -20,6 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
 #include "GException.hpp"
 #include "GModels.hpp"
 #include "GModel.hpp"
@@ -469,6 +470,37 @@ double GModels::eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
 }
 
 
+/***********************************************************************//**
+ * @brief Print models
+ *
+ * @todo Implement spatial and temporal name() methods.
+ ***************************************************************************/
+std::string GModels::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GModels ===\n");
+    result.append(parformat("Number of models")+str(size())+"\n");
+    result.append(parformat("Number of parameters")+str(m_npars));
+
+    // Append models
+    for (int k = 0; k < size(); ++k) {
+        result.append("\n"+parformat("Model name")+(*this)(k)->name());
+        result.append("\n"+parformat("Model type"));
+        //result.append((*this)(k)->temporal()->name()+" ");
+        result.append((*this)(k)->spectral()->name()+" ");
+        //result.append((*this)(k)->spatial()->name());
+        for (int j = 0; j < (*this)(k)->size(); ++j)
+            result.append("\n"+(*this)(k)->par(j)->print());
+    }
+    
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                         GModels private methods                         =
@@ -563,11 +595,11 @@ void GModels::set_pointers(void)
 
             // Determine the number of parameters of each type
             int n_spatial  = (m_model[k].m_spatial  != NULL) 
-                             ? m_model[k].m_spatial->npars() : 0;
+                             ? m_model[k].m_spatial->size() : 0;
             int n_spectral = (m_model[k].m_spectral != NULL) 
                              ? m_model[k].m_spectral->size() : 0;
             int n_temporal = (m_model[k].m_temporal != NULL) 
-                             ? m_model[k].m_temporal->npars() : 0;
+                             ? m_model[k].m_temporal->size() : 0;
 
             // Gather spatial parameter pointers
             for (int i = 0; i < n_spatial; ++i)
@@ -597,31 +629,15 @@ void GModels::set_pointers(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Put models in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the model will be dumped
- * @param[in] model Model to be dumped
+ * @param[in] os Output stream.
+ * @param[in] models Models.
  ***************************************************************************/
-std::ostream& operator<<(std::ostream& os, const GModels& models)
+std::ostream& operator<< (std::ostream& os, const GModels& models)
 {
-    // Allocate filler
-    std::string filler = " ..............";
-
-    // Put model in stream
-    os << "=== GModels ===" << std::endl;
-    os << " Number of models ..........: " << models.m_elements << std::endl;
-    os << " Number of parameters ......: " << models.m_npars;
-    int i = 0;
-    for (int k = 0; k < models.m_elements; ++k) {
-        os << std::endl << " Model name ................: " << models.m_model[k].name();
-        for (int j = 0; j < models.m_model[k].npars(); ++j, ++i) {
-            os << std::endl;
-            if (i == 10) filler = " .............";
-            if (i == 100) filler = " ............";
-            if (i == 1000) filler = " ...........";
-            os << "  Parameter " << i << filler << ": " << *(models.m_par[i]);
-        }
-    }
+     // Write models in output stream
+    os << models.print();
 
     // Return output stream
     return os;
@@ -629,31 +645,15 @@ std::ostream& operator<<(std::ostream& os, const GModels& models)
 
 
 /***********************************************************************//**
- * @brief Write models in logger
+ * @brief Log operator
  *
  * @param[in] log Logger.
- * @param[in] model Model to be written.
+ * @param[in] models Models.
  ***************************************************************************/
-GLog& operator<<(GLog& log, const GModels& models)
+GLog& operator<< (GLog& log, const GModels& models)
 {
-    // Allocate filler
-    std::string filler = " ..............";
-
-    // Put model in stream
-    log << "=== GModels ===" << std::endl;
-    log << " Number of models ..........: " << models.m_elements << std::endl;
-    log << " Number of parameters ......: " << models.m_npars;
-    int i = 0;
-    for (int k = 0; k < models.m_elements; ++k) {
-        log << std::endl << " Model name ................: " << models.m_model[k].name();
-        for (int j = 0; j < models.m_model[k].npars(); ++j, ++i) {
-            log << std::endl;
-            if (i == 10) filler = " .............";
-            if (i == 100) filler = " ............";
-            if (i == 1000) filler = " ...........";
-            log << "  Parameter " << i << filler << ": " << *(models.m_par[i]);
-        }
-    }
+    // Write models into logger
+    log << models.print();
 
     // Return logger
     return log;
