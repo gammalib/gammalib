@@ -20,8 +20,10 @@
 #define GMODELTEMPORALCONST_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GModelTemporal.hpp"
+#include <iostream>
+#include "GLog.hpp"
 #include "GModelPar.hpp"
+#include "GModelTemporal.hpp"
 #include "GTime.hpp"
 
 
@@ -40,6 +42,7 @@ class GModelTemporalConst  : public GModelTemporal {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GModelTemporalConst& model);
+    friend GLog&         operator<< (GLog& log, const GModelTemporalConst& model);
 
 public:
     // Constructors and destructors
@@ -50,18 +53,21 @@ public:
     // Operators
     GModelTemporalConst& operator= (const GModelTemporalConst& model);
 
-    // Methods
-    int        npars(void) const { return m_npars; }
-    GModelPar* par(int index) const;
-    double     eval(const GTime& srcTime);
-    double     eval_gradients(const GTime& srcTime);
+    // Implemented virtual methods
+    void                 clear(void);
+    GModelTemporalConst* clone(void) const;
+    int                  size(void) const { return m_npars; }
+    std::string          name(void) const { return "Constant"; }
+    GModelPar*           par(int index) const;
+    double               eval(const GTime& srcTime);
+    double               eval_gradients(const GTime& srcTime);
+    std::string          print(void) const;
 
 protected:
     // Protected methods
-    void                 init_members(void);
-    void                 copy_members(const GModelTemporalConst& model);
-    void                 free_members(void);
-    GModelTemporalConst* clone(void) const;
+    void init_members(void);
+    void copy_members(const GModelTemporalConst& model);
+    void free_members(void);
 
     // Data area
     int        m_npars;           //!< Number of parameters

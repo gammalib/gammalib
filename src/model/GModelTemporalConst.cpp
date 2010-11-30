@@ -20,6 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
 #include "GException.hpp"
 #include "GModelTemporalConst.hpp"
 
@@ -40,7 +41,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GModelTemporalConst::GModelTemporalConst(void) : GModelTemporal()
 {
@@ -126,6 +127,24 @@ GModelTemporalConst& GModelTemporalConst::operator= (const GModelTemporalConst& 
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear instance
+***************************************************************************/
+void GModelTemporalConst::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GModelTemporal::free_members();
+
+    // Initialise members
+    this->GModelTemporal::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Get pointer to model parameter
  *
  * @param[in] index Parameter index.
@@ -141,6 +160,15 @@ GModelPar* GModelTemporalConst::par(int index) const
 
     // Return parameter pointer
     return m_par[index];
+}
+
+
+/***********************************************************************//**
+ * @brief Clone class
+***************************************************************************/
+GModelTemporalConst* GModelTemporalConst::clone(void) const
+{
+    return new GModelTemporalConst(*this);
 }
 
 
@@ -174,6 +202,27 @@ double GModelTemporalConst::eval_gradients(const GTime& srcTime)
 
     // Return
     return 1.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Print constant information
+ ***************************************************************************/
+std::string GModelTemporalConst::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GModelTemporalConst ===\n");
+    result.append(parformat("Number of parameters")+str(size()));
+    for (int i = 0; i < size(); ++i) {
+        result.append("\n"+parformat("Parameter "+str(i+1)));
+        result.append(m_par[i]->print());
+    }
+
+    // Return result
+    return result;
 }
 
 
@@ -230,15 +279,6 @@ void GModelTemporalConst::free_members(void)
 }
 
 
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GModelTemporalConst* GModelTemporalConst::clone(void) const
-{
-    return new GModelTemporalConst(*this);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                        GModelTemporalConst friends                       =
@@ -246,22 +286,32 @@ GModelTemporalConst* GModelTemporalConst::clone(void) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Put model in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the model will be dumped
- * @param[in] model Model to be dumped
+ * @param[in] os Output stream.
+ * @param[in] model Model.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GModelTemporalConst& model)
 {
-    // Put observation in stream
-    os << "=== GModelTemporalConst ===" << std::endl;
-    os << " Number of parameters ......: " << model.m_npars << std::endl;
-    for (int i = 0; i < model.m_npars; ++i) {
-        if (i > 0)
-            os << std::endl;
-        os << " Parameter .................: " << *(model.m_par[i]);
-    }
+     // Write spectrum in output stream
+    os << model.print();
 
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] model Model.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GModelTemporalConst& model)
+{
+    // Write spectrum into logger
+    log << model.print();
+
+    // Return logger
+    return log;
 }

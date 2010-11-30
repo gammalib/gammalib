@@ -33,10 +33,17 @@ public:
     GModelSpatial(const GModelSpatial& model);
     virtual ~GModelSpatial();
 
-    // Virtual methods
-    virtual int        npars(void) const = 0;
-    virtual GModelPar* par(int index) const = 0;
-    virtual double     eval(const GSkyDir& srcDir) = 0;
-    virtual double     eval_gradients(const GSkyDir& srcDir) = 0;
-    virtual bool       isptsource(void) const { return false; }
+    // Pure virtual methods
+    virtual void           clear(void) = 0;
+    virtual GModelSpatial* clone(void) const = 0;
+    virtual int            size(void) const = 0;
+    virtual std::string    name(void) const = 0;
+    virtual GModelPar*     par(int index) const = 0;
+    virtual double         eval(const GSkyDir& srcDir) = 0;
+    virtual double         eval_gradients(const GSkyDir& srcDir) = 0;
+    virtual void           read(const GXmlElement& xml) = 0;
+    virtual void           write(GXmlElement& xml) const = 0;
+
+    // Other methods
+    virtual bool isptsource(void) const { return false; }
 };

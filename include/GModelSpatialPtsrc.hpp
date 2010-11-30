@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
+#include "GLog.hpp"
 #include "GModelSpatial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
@@ -39,6 +40,7 @@ class GModelSpatialPtsrc  : public GModelSpatial {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GModelSpatialPtsrc& model);
+    friend GLog&         operator<< (GLog& log, const GModelSpatialPtsrc& model);
 
 public:
     // Constructors and destructors
@@ -51,23 +53,28 @@ public:
     // Operators
     GModelSpatialPtsrc& operator= (const GModelSpatialPtsrc& model);
 
-    // Methods
-    int        npars(void) const { return m_npars; }
-    GModelPar* par(int index) const;
-    double     eval(const GSkyDir& srcDir);
-    double     eval_gradients(const GSkyDir& srcDir);
-    bool       isptsource(void) const { return true; }
-    double     ra(void) const { return m_ra.real_value(); }
-    double     dec(void) const { return m_dec.real_value(); }
-    void       read(const GXmlElement& xml);
-    void       write(GXmlElement& xml) const;
+    // Implemented virtual methods
+    void                clear(void);
+    GModelSpatialPtsrc* clone(void) const;
+    int                 size(void) const { return m_npars; }
+    std::string         name(void) const { return "PointSource"; }
+    GModelPar*          par(int index) const;
+    double              eval(const GSkyDir& srcDir);
+    double              eval_gradients(const GSkyDir& srcDir);
+    void                read(const GXmlElement& xml);
+    void                write(GXmlElement& xml) const;
+    std::string         print(void) const;
+
+    // Other methods
+    bool   isptsource(void) const { return true; }
+    double ra(void) const { return m_ra.real_value(); }
+    double dec(void) const { return m_dec.real_value(); }
 
 protected:
     // Protected methods
-    void                init_members(void);
-    void                copy_members(const GModelSpatialPtsrc& model);
-    void                free_members(void);
-    GModelSpatialPtsrc* clone(void) const;
+    void init_members(void);
+    void copy_members(const GModelSpatialPtsrc& model);
+    void free_members(void);
 
     // Data area
     int        m_npars;           //!< Number of parameters

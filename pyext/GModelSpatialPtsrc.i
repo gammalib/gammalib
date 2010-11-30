@@ -31,17 +31,26 @@ public:
     // Constructors and destructors
     explicit GModelSpatialPtsrc(void);
     explicit GModelSpatialPtsrc(const GSkyDir& dir);
+    explicit GModelSpatialPtsrc(const GXmlElement& xml);
     GModelSpatialPtsrc(const GModelSpatialPtsrc& model);
     ~GModelSpatialPtsrc(void);
 
-    // Methods
-    int        npars(void) const { return m_npars; }
-    GModelPar* par(int index) const;
-    double     eval(const GSkyDir& srcDir);
-    double     eval_gradients(const GSkyDir& srcDir);
-    bool       isptsource(void) const { return true; }
-    double     ra(void) const { return m_ra.real_value(); }
-    double     dec(void) const { return m_dec.real_value(); }
+    // Implemented virtual methods
+    void                clear(void);
+    GModelSpatialPtsrc* clone(void) const;
+    int                 size(void) const { return m_npars; }
+    std::string         name(void) const { return "PointSource"; }
+    GModelPar*          par(int index) const;
+    double              eval(const GSkyDir& srcDir);
+    double              eval_gradients(const GSkyDir& srcDir);
+    void                read(const GXmlElement& xml);
+    void                write(GXmlElement& xml) const;
+    std::string         print(void) const;
+
+    // Other methods
+    bool   isptsource(void) const { return true; }
+    double ra(void) const { return m_ra.real_value(); }
+    double dec(void) const { return m_dec.real_value(); }
 };
 
 
@@ -50,13 +59,8 @@ public:
  ***************************************************************************/
 %extend GModelSpatialPtsrc {
     char *__str__() {
-        static char str_buffer[1001];
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 1001);
-        str_buffer[1000] = '\0';
-        return str_buffer;
+        static std::string result = self->print();
+        return ((char*)result.c_str());
     }
     GModelSpatialPtsrc copy() {
         return (*self);

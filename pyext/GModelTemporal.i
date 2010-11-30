@@ -34,8 +34,11 @@ public:
     virtual ~GModelTemporal(void);
 
     // Virtual methods
-    virtual int        npars(void) const = 0;
-    virtual GModelPar* par(int index) const = 0;
-    virtual double     eval(const GTime& srcTime) = 0;
-    virtual double     eval_gradients(const GTime& srcTime) = 0;
+    virtual void            clear(void) = 0;
+    virtual GModelTemporal* clone(void) const = 0;
+    virtual int             size(void) const = 0;
+    virtual std::string     name(void) const = 0;
+    virtual GModelPar*      par(int index) const = 0;
+    virtual double          eval(const GTime& srcTime) = 0;
+    virtual double          eval_gradients(const GTime& srcTime) = 0;
 };

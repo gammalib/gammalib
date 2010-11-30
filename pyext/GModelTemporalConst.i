@@ -33,11 +33,14 @@ public:
     GModelTemporalConst(const GModelTemporalConst& model);
     virtual ~GModelTemporalConst(void);
 
-    // Methods
-    int        npars(void) const { return m_npars; }
-    GModelPar* par(int index) const;
-    double     eval(const GTime& srcTime);
-    double     eval_gradients(const GTime& srcTime);
+    // Implemented virtual methods
+    void                 clear(void);
+    GModelTemporalConst* clone(void) const;
+    int                  size(void) const { return m_npars; }
+    std::string          name(void) const { return "Constant"; }
+    GModelPar*           par(int index) const;
+    double               eval(const GTime& srcTime);
+    double               eval_gradients(const GTime& srcTime);
 };
 
 
@@ -46,13 +49,8 @@ public:
  ***************************************************************************/
 %extend GModelTemporalConst {
     char *__str__() {
-        static char str_buffer[1001];
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 1001);
-        str_buffer[1000] = '\0';
-        return str_buffer;
+        static std::string result = self->print();
+        return ((char*)result.c_str());
     }
     GModelTemporalConst copy() {
         return (*self);

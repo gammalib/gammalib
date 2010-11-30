@@ -33,9 +33,6 @@
  ***************************************************************************/
 class GModelTemporal {
 
-    // Friend classes
-    friend class GModel;
-
 public:
     // Constructors and destructors
     GModelTemporal(void);
@@ -46,17 +43,20 @@ public:
     virtual GModelTemporal& operator= (const GModelTemporal& model);
 
     // Virtual methods
-    virtual int        npars(void) const = 0;
-    virtual GModelPar* par(int index) const = 0;
-    virtual double     eval(const GTime& srcTime) = 0;
-    virtual double     eval_gradients(const GTime& srcTime) = 0;
+    virtual void            clear(void) = 0;
+    virtual GModelTemporal* clone(void) const = 0;
+    virtual int             size(void) const = 0;
+    virtual std::string     name(void) const = 0;
+    virtual GModelPar*      par(int index) const = 0;
+    virtual double          eval(const GTime& srcTime) = 0;
+    virtual double          eval_gradients(const GTime& srcTime) = 0;
+    virtual std::string     print(void) const = 0;
 
 protected:
     // Protected methods
-    void                    init_members(void);
-    void                    copy_members(const GModelTemporal& model);
-    void                    free_members(void);
-    virtual GModelTemporal* clone(void) const = 0;
+    void init_members(void);
+    void copy_members(const GModelTemporal& model);
+    void free_members(void);
 };
 
 #endif /* GMODELTEMPORAL_HPP */
