@@ -80,6 +80,7 @@ public:
     void        fix(void) { m_free=false; return; }
     void        read(const GXmlElement& xml);
     void        write(GXmlElement& xml) const;
+    std::string print(void) const;
 
 protected:
     // Protected methods

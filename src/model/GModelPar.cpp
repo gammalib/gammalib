@@ -315,6 +315,49 @@ void GModelPar::write(GXmlElement& xml) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print powerlaw information
+ ***************************************************************************/
+std::string GModelPar::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append parameter name
+    result.append(parformat(name()));
+
+    // Append real value
+    result.append(str(real_value()));
+
+    // For free parameters, append statistical uncertainty
+    if (m_free)
+        result.append(" +/- "+str(real_error()));
+
+    // Append parameter limites if they exist
+    if (m_hasmin && m_hasmax)
+        result.append(" ["+str(real_min()) + ","+str(real_max())+"]");
+    else if (m_hasmin)
+        result.append(" ["+str(real_min()) + ",infty[");
+    else if (m_hasmax)
+        result.append(" ]-infty,"+str(real_max())+"]");
+
+    // Append parameter unit
+    result.append(" "+m_unit);
+
+    // Signal if parameter was free or fixed
+    if (m_free)
+        result.append(" (free,");
+    else
+        result.append(" (fixed,");
+
+    // Append parameter scale
+    result.append("scale="+str(m_scale)+")");
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                        GModelPar private methods                        =
@@ -387,33 +430,15 @@ void GModelPar::free_members(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Put parameter in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the parameter will be dumped.
- * @param[in] par Parameter to be dumped.
+ * @param[in] os Output stream.
+ * @param[in] par Parameter.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GModelPar& par)
 {
-    // Put parameter in stream
-    os << std::scientific;
-    os << par.m_name << ": ";
-    os << par.real_value();
-    if (par.m_free) {
-        os << " +/- ";
-        os << par.real_error();
-    }
-    if (par.m_hasmin && par.m_hasmax)
-        os << " [" << par.real_min() << "," << par.real_max() << "]";
-    else if (par.m_hasmin)
-        os << " [" << par.real_min() << ",infty[";
-    else if (par.m_hasmax)
-        os << " ]-infty," << par.real_max() << "]";
-    os << " " << par.m_unit;
-    if (par.m_free)
-        os << " (free,";
-    else
-        os << " (fixed,";
-    os << "scale=" << par.m_scale << ")";
+     // Write spectrum in output stream
+    os << par.print();
 
     // Return output stream
     return os;
@@ -421,44 +446,15 @@ std::ostream& operator<< (std::ostream& os, const GModelPar& par)
 
 
 /***********************************************************************//**
- * @brief Write parameter in logger
+ * @brief Log operator
  *
  * @param[in] log Logger.
- * @param[in] par Parameter to be written.
+ * @param[in] par Parameter.
  ***************************************************************************/
-GLog& operator<<(GLog& log, const GModelPar& par)
+GLog& operator<< (GLog& log, const GModelPar& par)
 {
-    // Write parameter name
-    log << par.m_name << ": ";
-
-    // Write value
-    log << par.real_value();
-
-    // For free parameters, write statistical uncertainty
-    if (par.m_free) {
-        log << " +/- ";
-        log << par.real_error();
-    }
-
-    // Write parameter limites if they exist
-    if (par.m_hasmin && par.m_hasmax)
-        log << " [" << par.real_min() << "," << par.real_max() << "]";
-    else if (par.m_hasmin)
-        log << " [" << par.real_min() << ",infty[";
-    else if (par.m_hasmax)
-        log << " ]-infty," << par.real_max() << "]";
-
-    // Write parameter unit
-    log << " " << par.m_unit;
-
-    // Signal if parameter was free or fixed
-    if (par.m_free)
-        log << " (free,";
-    else
-        log << " (fixed,";
-
-    // Write parameter scale
-    log << "scale=" << par.m_scale << ")";
+    // Write spectrum into logger
+    log << par.print();
 
     // Return logger
     return log;
