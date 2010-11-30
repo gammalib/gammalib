@@ -25,10 +25,6 @@
 #include "GModel.hpp"
 #include "GXml.hpp"
 #include "GXmlElement.hpp"
-#include "GModelSpatial.hpp"
-#include "GModelSpatialPtsrc.hpp"
-#include "GModelSpectral.hpp"
-#include "GModelSpectralPlaw.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                                  "GModels::operator() (int)"
