@@ -397,7 +397,7 @@ void GModel::set_pointers(void)
 
     // Determine the number of parameters
     int n_spatial  = (m_spatial  != NULL) ? m_spatial->npars() : 0;
-    int n_spectral = (m_spectral != NULL) ? m_spectral->npars() : 0;
+    int n_spectral = (m_spectral != NULL) ? m_spectral->size() : 0;
     int n_temporal = (m_temporal != NULL) ? m_temporal->npars() : 0;
     m_npars        = n_spatial + n_spectral + n_temporal;
 
@@ -727,7 +727,7 @@ std::ostream& operator<< (std::ostream& os, const GModel& model)
 {
     // Determine number of parameters per type
    int n_spatial  = model.m_spatial->npars();
-   int n_spectral = model.m_spectral->npars();
+   int n_spectral = model.m_spectral->size();
    int n_temporal = model.m_temporal->npars();
 
     // Put model in stream

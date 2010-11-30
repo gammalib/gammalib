@@ -569,7 +569,7 @@ void GModels::set_pointers(void)
             int n_spatial  = (m_model[k].m_spatial  != NULL) 
                              ? m_model[k].m_spatial->npars() : 0;
             int n_spectral = (m_model[k].m_spectral != NULL) 
-                             ? m_model[k].m_spectral->npars() : 0;
+                             ? m_model[k].m_spectral->size() : 0;
             int n_temporal = (m_model[k].m_temporal != NULL) 
                              ? m_model[k].m_temporal->npars() : 0;
 
