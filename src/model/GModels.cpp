@@ -472,8 +472,6 @@ double GModels::eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
 
 /***********************************************************************//**
  * @brief Print models
- *
- * @todo Implement spatial and temporal name() methods.
  ***************************************************************************/
 std::string GModels::print(void) const
 {
@@ -489,9 +487,9 @@ std::string GModels::print(void) const
     for (int k = 0; k < size(); ++k) {
         result.append("\n"+parformat("Model name")+(*this)(k)->name());
         result.append("\n"+parformat("Model type"));
-        //result.append((*this)(k)->temporal()->name()+" ");
-        result.append((*this)(k)->spectral()->name()+" ");
-        //result.append((*this)(k)->spatial()->name());
+        result.append((*this)(k)->temporal()->type()+" ");
+        result.append((*this)(k)->spectral()->type()+" ");
+        result.append((*this)(k)->spatial()->type());
         for (int j = 0; j < (*this)(k)->size(); ++j)
             result.append("\n"+(*this)(k)->par(j)->print());
     }
@@ -503,7 +501,7 @@ std::string GModels::print(void) const
 
 /*==========================================================================
  =                                                                         =
- =                         GModels private methods                         =
+ =                              Private methods                            =
  =                                                                         =
  ==========================================================================*/
 
@@ -624,7 +622,7 @@ void GModels::set_pointers(void)
 
 /*==========================================================================
  =                                                                         =
- =                              GModels friends                            =
+ =                                  Friends                                =
  =                                                                         =
  ==========================================================================*/
 
