@@ -174,6 +174,33 @@ GModelSpectralPlaw& GModelSpectralPlaw::operator= (const GModelSpectralPlaw& mod
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear instance
+***************************************************************************/
+void GModelSpectralPlaw::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GModelSpectral::free_members();
+
+    // Initialise members
+    this->GModelSpectral::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+***************************************************************************/
+GModelSpectralPlaw* GModelSpectralPlaw::clone(void) const
+{
+    return new GModelSpectralPlaw(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Returns pointer to a model parameter
  *
  * @param[in] index Parameter index.
@@ -434,6 +461,27 @@ void GModelSpectralPlaw::write(GXmlElement& xml) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print powerlaw information
+ ***************************************************************************/
+std::string GModelSpectralPlaw::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GModelSpectralPlaw ===\n");
+    result.append(parformat("Number of parameters")+str(size()));
+    for (int i = 0; i < size(); ++i) {
+        result.append("\n"+parformat("Parameter "+str(i+1)));
+        result.append(m_par[i]->print());
+    }
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -502,15 +550,6 @@ void GModelSpectralPlaw::free_members(void)
 }
 
 
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GModelSpectralPlaw* GModelSpectralPlaw::clone(void) const
-{
-    return new GModelSpectralPlaw(*this);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                                 Friends                                 =
@@ -518,22 +557,32 @@ GModelSpectralPlaw* GModelSpectralPlaw::clone(void) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Put model in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the model will be dumped
- * @param[in] model Model to be dumped
+ * @param[in] os Output stream.
+ * @param[in] model Model.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GModelSpectralPlaw& model)
 {
-    // Put observation in stream
-    os << "=== GModelSpectralPlaw ===" << std::endl;
-    os << " Number of parameters ......: " << model.m_npars << std::endl;
-    for (int i = 0; i < model.m_npars; ++i) {
-        if (i > 0)
-            os << std::endl;
-        os << " Parameter .................: " << *(model.m_par[i]);
-    }
+     // Write spectrum in output stream
+    os << model.print();
 
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] model Model.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GModelSpectralPlaw& model)
+{
+    // Write spectrum into logger
+    log << model.print();
+
+    // Return logger
+    return log;
 }

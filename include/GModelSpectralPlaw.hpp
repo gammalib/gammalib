@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
+#include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
 #include "GEnergy.hpp"
@@ -30,14 +31,21 @@
 /***********************************************************************//**
  * @class GModelSpectralPlaw
  *
- * @brief Powerlaw interface definition.
+ * @brief Spectral power law interface definition.
  *
- * This class implements the spectral component of the gamma-ray data model.
+ * This class implements a power law as the spectral component of the
+ * gamma-ray data model. The power law is defined as
+ * \f[I(E)=norm (E/pivot)^{index}\f]
+ * where
+ * \f$norm\f$ is the normalization or prefactor,
+ * \f$pivot\f$ is the pivot energy, and
+ * \f$index\f$ is the spectral index.
  ***************************************************************************/
 class GModelSpectralPlaw  : public GModelSpectral {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GModelSpectralPlaw& model);
+    friend GLog&         operator<< (GLog& log, const GModelSpectralPlaw& model);
 
 public:
     // Constructors and destructors
@@ -50,27 +58,31 @@ public:
     // Operators
     GModelSpectralPlaw& operator= (const GModelSpectralPlaw& model);
 
-    // Methods
-    int        npars(void) const { return m_npars; }
-    GModelPar* par(int index) const;
+    // Implemented pure virtual methods
+    void                clear(void);
+    GModelSpectralPlaw* clone(void) const;
+    int                 size(void) const { return m_npars; }
+    GModelPar*          par(int index) const;
+    double              eval(const GEnergy& srcEng);
+    double              eval_gradients(const GEnergy& srcEng);
+    void                read(const GXmlElement& xml);
+    void                write(GXmlElement& xml) const;
+    std::string         print(void) const;
+
+    // Other methods
     GModelPar* par_norm(void) { return &m_norm; }
     GModelPar* par_index(void) { return &m_index; }
     GModelPar* par_pivot(void) { return &m_pivot; }
-    double     eval(const GEnergy& srcEng);
-    double     eval_gradients(const GEnergy& srcEng);
     void       autoscale(void);
     double     norm(void) const { return m_norm.real_value(); }
     double     index(void) const { return m_index.real_value(); }
     double     pivot(void) const { return m_pivot.real_value(); }
-    void       read(const GXmlElement& xml);
-    void       write(GXmlElement& xml) const;
 
 protected:
     // Protected methods
-    void                init_members(void);
-    void                copy_members(const GModelSpectralPlaw& model);
-    void                free_members(void);
-    GModelSpectralPlaw* clone(void) const;
+    void init_members(void);
+    void copy_members(const GModelSpectralPlaw& model);
+    void free_members(void);
 
     // Data area
     int        m_npars;           //!< Number of parameters

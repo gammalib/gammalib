@@ -47,20 +47,22 @@ public:
     // Operators
     virtual GModelSpectral& operator= (const GModelSpectral& model);
 
-    // Virtual methods
-    virtual int        npars(void) const = 0;
-    virtual GModelPar* par(int index) const = 0;
-    virtual double     eval(const GEnergy& srcEng) = 0;
-    virtual double     eval_gradients(const GEnergy& srcEng) = 0;
-    virtual void       read(const GXmlElement& xml) = 0;
-    virtual void       write(GXmlElement& xml) const = 0;
+    // Pure virtual methods
+    virtual void            clear(void) = 0;
+    virtual GModelSpectral* clone(void) const = 0;
+    virtual int             size(void) const = 0;
+    virtual GModelPar*      par(int index) const = 0;
+    virtual double          eval(const GEnergy& srcEng) = 0;
+    virtual double          eval_gradients(const GEnergy& srcEng) = 0;
+    virtual void            read(const GXmlElement& xml) = 0;
+    virtual void            write(GXmlElement& xml) const = 0;
+    virtual std::string     print(void) const = 0;
 
 protected:
     // Protected methods
-    void                    init_members(void);
-    void                    copy_members(const GModelSpectral& model);
-    void                    free_members(void);
-    virtual GModelSpectral* clone(void) const = 0;
+    void init_members(void);
+    void copy_members(const GModelSpectral& model);
+    void free_members(void);
 };
 
 #endif /* GMODELSPECTRAL_HPP */
