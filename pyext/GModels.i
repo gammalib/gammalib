@@ -58,13 +58,8 @@ public:
  ***************************************************************************/
 %extend GModels {
     char *__str__() {
-        static char str_buffer[10001];
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 10001);
-        str_buffer[10000] = '\0';
-        return str_buffer;
+        static std::string result = self->print();
+        return ((char*)result.c_str());
     }
     GModel* __getitem__(int index) {
     if (index >= 0 && index < self->size())

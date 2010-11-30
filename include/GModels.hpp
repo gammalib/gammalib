@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
+#include "GLog.hpp"
 #include "GOptimizerPars.hpp"
 #include "GModel.hpp"
 #include "GInstDir.hpp"
@@ -29,7 +30,6 @@
 #include "GResponse.hpp"
 #include "GPointing.hpp"
 #include "GXml.hpp"
-#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -60,21 +60,22 @@ public:
     GModels&      operator= (const GModels& models);
 
     // Methods
-    void   clear(void);
-    int    size(void) const { return m_elements; }
-    void   append(const GModel& model);
-    void   load(const std::string& filename);
-    void   save(const std::string& filename) const;
-    void   read(const GXml& xml);
-    void   write(GXml& xml) const;
-    double value(const GSkyDir& srcDir, const GEnergy& srcEng,
-                 const GTime& srcTime);
-    double eval(const GInstDir& obsDir, const GEnergy& obsEng,
-                const GTime& obsTime, const GResponse& rsp,
-                const GPointing& pnt);
-    double eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
+    void        clear(void);
+    int         size(void) const { return m_elements; }
+    void        append(const GModel& model);
+    void        load(const std::string& filename);
+    void        save(const std::string& filename) const;
+    void        read(const GXml& xml);
+    void        write(GXml& xml) const;
+    double      value(const GSkyDir& srcDir, const GEnergy& srcEng,
+                      const GTime& srcTime);
+    double      eval(const GInstDir& obsDir, const GEnergy& obsEng,
+                     const GTime& obsTime, const GResponse& rsp,
+                     const GPointing& pnt);
+    double      eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
                           const GTime& obsTime, const GResponse& rsp,
                           const GPointing& pnt);
+    std::string print(void) const;
 
 protected:
     // Protected methods
