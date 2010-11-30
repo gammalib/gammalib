@@ -324,7 +324,7 @@ std::string GModelPar::print(void) const
     std::string result;
 
     // Append parameter name
-    result.append(parformat(name()));
+    result.append(parformat(" "+name()));
 
     // Append real value
     result.append(str(real_value()));
