@@ -121,7 +121,7 @@ if __name__ == '__main__':
     extract_data("data/crab_mwl.fits")
 
     # Fit spectrum
-    fit_spectrum("data/crab_mwl.fits", "data/crab_mwl.xml")
+    fit_spectrum("data/crab_mwl.fits", "data/crab_mwl2.xml")
 
     # Show spectrum
     plt.show()
