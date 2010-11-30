@@ -234,7 +234,7 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
 
             // Determine Npred gradients (perform computation only for free
             // parameters)
-            for (int k = 0; k < model->npars(); ++k) {
+            for (int k = 0; k < model->size(); ++k) {
                 if (model->par(k)->isfree()) {
                     double grad = npred_grad_temp(*model, k);
                     (*gradient)(igrad+k) = grad;
@@ -244,7 +244,7 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
         } // endif: model component was valid for instrument
 
         // Increment parameter counter for gradient
-        igrad += model->npars();
+        igrad += model->size();
 
     } // endfor: Looped over models
 

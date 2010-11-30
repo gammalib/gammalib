@@ -579,7 +579,7 @@ void GModels::set_pointers(void)
     // Determine total number of parameters
     m_npars = 0;
     for (int k = 0; k < m_elements; ++k)
-        m_npars += m_model[k].npars();
+        m_npars += m_model[k].size();
 
     // Continue only if there are parameters
     if (m_npars > 0) {
