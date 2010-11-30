@@ -51,6 +51,7 @@ public:
     virtual void            clear(void) = 0;
     virtual GModelSpectral* clone(void) const = 0;
     virtual int             size(void) const = 0;
+    virtual std::string     name(void) const;
     virtual GModelPar*      par(int index) const = 0;
     virtual double          eval(const GEnergy& srcEng) = 0;
     virtual double          eval_gradients(const GEnergy& srcEng) = 0;

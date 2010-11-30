@@ -39,6 +39,7 @@ public:
     void                clear(void);
     GModelSpectralPlaw* clone(void) const;
     int                 size(void) const { return m_npars; }
+    std::string         name(void) const { return "PowerLaw"; }
     GModelPar*          par(int index) const;
     double              eval(const GEnergy& srcEng);
     double              eval_gradients(const GEnergy& srcEng);
