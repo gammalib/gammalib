@@ -31,17 +31,24 @@ public:
     // Constructors and destructors
     GModelSpectralPlaw(void);
     explicit GModelSpectralPlaw(const double& norm, const double& index);
+    explicit GModelSpectralPlaw(const GXmlElement& xml);
     GModelSpectralPlaw(const GModelSpectralPlaw& model);
     virtual ~GModelSpectralPlaw(void);
 
-    // Methods
-    int        npars(void) const { return m_npars; }
-    GModelPar* par(int index) const;
+    // Implemented pure virtual methods
+    void                clear(void);
+    GModelSpectralPlaw* clone(void) const;
+    int                 size(void) const { return m_npars; }
+    GModelPar*          par(int index) const;
+    double              eval(const GEnergy& srcEng);
+    double              eval_gradients(const GEnergy& srcEng);
+    void                read(const GXmlElement& xml);
+    void                write(GXmlElement& xml) const;
+
+    // Other methods
     GModelPar* par_norm(void) { return &m_norm; }
     GModelPar* par_index(void) { return &m_index; }
     GModelPar* par_pivot(void) { return &m_pivot; }
-    double     eval(const GEnergy& srcEng);
-    double     eval_gradients(const GEnergy& srcEng);
     void       autoscale(void);
     double     norm(void) const { return m_norm.real_value(); }
     double     index(void) const { return m_index.real_value(); }
@@ -54,13 +61,8 @@ public:
  ***************************************************************************/
 %extend GModelSpectralPlaw {
     char *__str__() {
-        static char str_buffer[1001];
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 1001);
-        str_buffer[1000] = '\0';
-        return str_buffer;
+        static std::string result = self->print();
+        return ((char*)result.c_str());
     }
     GModelSpectralPlaw copy() {
         return (*self);

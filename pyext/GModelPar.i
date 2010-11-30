@@ -38,6 +38,7 @@ public:
     std::string unit(void) const { return m_unit; }
     double      real_value(void) const { return m_value*m_scale; }
     double      real_error(void) const { return m_error*m_scale; }
+    double      real_gradient(void) const { return m_gradient*m_scale; }
     double      real_min(void) const { return m_min*m_scale; }
     double      real_max(void) const { return m_max*m_scale; }
     double      value(void) const { return m_value; }
@@ -63,6 +64,8 @@ public:
     void        remove_range(void) { m_hasmin=false; m_hasmax=false; return; }
     void        free(void) { m_free=true; return; }
     void        fix(void) { m_free=false; return; }
+    void        read(const GXmlElement& xml);
+    void        write(GXmlElement& xml) const;
 };
 
 
@@ -71,13 +74,8 @@ public:
  ***************************************************************************/
 %extend GModelPar {
     char *__str__() {
-        static char str_buffer[1001];
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 1001);
-        str_buffer[1000] = '\0';
-        return str_buffer;
+        static std::string result = self->print();
+        return ((char*)result.c_str());
     }
     GModelPar copy() {
         return (*self);
