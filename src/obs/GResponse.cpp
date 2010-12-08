@@ -15,11 +15,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <iostream>
 #include <string>
 #include <unistd.h>           // access() function
-#include "GException.hpp"
 #include "GResponse.hpp"
+#include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                              "GResponse::caldb(std::string&)"
@@ -39,7 +38,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GResponse::GResponse(void)
 {
@@ -121,15 +120,15 @@ GResponse& GResponse::operator= (const GResponse& rsp)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return value of instrument response function.
+ * @brief Return value of point source instrument response function.
  *
- * @param[in] obsDir Pointer to observed photon direction.
+ * @param[in] obsDir Observed photon direction.
  * @param[in] obsEng Observed energy of photon.
  * @param[in] obsTime Observed photon arrival time.
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Pointer to instrument pointing information.
+ * @param[in] pnt Instrument pointing information.
  *
  * This method implements the default and complete instrument response
  * function (IRF). It may be overwritted by a specific method in the derived
@@ -140,7 +139,7 @@ double GResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
                       const GSkyDir&  srcDir, const GEnergy& srcEng,
                       const GTime& srcTime, const GPointing& pnt) const
 {
-    // Get IRF components
+    // Get point source IRF components
     double irf  =  live(srcDir,  srcEng, srcTime, pnt);
     irf        *=  aeff(srcDir,  srcEng, srcTime, pnt);
     irf        *=   psf(obsDir,  srcDir, srcEng, srcTime, pnt);
@@ -153,12 +152,39 @@ double GResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
 
 
 /***********************************************************************//**
+ * @brief Return value of diffuse instrument response function.
+ *
+ * @param[in] event Observed event.
+ * @param[in] model Source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Instrument pointing information.
+ *
+ * This method implements the default and complete diffuse instrument
+ * response function (IRF). It may be overwritted by a specific method in the
+ * derived class that drops response terms that are not used.
+ *
+ * @todo Not yet implemented
+ ***************************************************************************/
+double GResponse::diffrsp(const GEvent& event, const GModel& model,
+                          const GEnergy& srcEng, const GTime& srcTime,
+                          const GPointing& pnt) const
+{
+    // Get diffuse IRF components
+    double irf = 1.0;
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
  * @brief Return integral of instrument response function.
  *
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Pointer to instrument pointing information.
+ * @param[in] pnt Instrument pointing information.
  * @param[in] roi Region of interest of data selection.
  * @param[in] ebds Energy boundaries of data selection.
  * @param[in] gti Good Time Intervals of data selection.
@@ -185,12 +211,13 @@ double GResponse::nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
 
 
 /***********************************************************************//**
- * @brief Return energy dispersion integral for the case of no energy dispersion
+ * @brief Return energy dispersion integral for the case of no energy
+ *        dispersion
  *
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Pointer to instrument pointing information.
+ * @param[in] pnt Instrument pointing information.
  * @param[in] ebds Energy boundaries of data selection.
  ***************************************************************************/
 double GResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
@@ -211,7 +238,7 @@ double GResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Pointer to instrument pointing information.
+ * @param[in] pnt Instrument pointing information.
  * @param[in] gti Good Time Intervals of data selection.
  ***************************************************************************/
 double GResponse::ntdisp(const GSkyDir& srcDir, const GEnergy& srcEng,
@@ -300,3 +327,34 @@ void GResponse::free_members(void)
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] rsp Response.
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GResponse& rsp)
+{
+     // Write response in output stream
+    os << rsp.print();
+
+    // Return output stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] rsp Response.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GResponse& rsp)
+{
+    // Write response into logger
+    log << rsp.print();
+
+    // Return logger
+    return log;
+}

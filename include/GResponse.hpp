@@ -20,6 +20,10 @@
 #define GRESPONSE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
+#include <iostream>
+#include "GLog.hpp"
+#include "GEvent.hpp"
 #include "GPointing.hpp"
 #include "GInstDir.hpp"
 #include "GRoi.hpp"
@@ -28,6 +32,9 @@
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GModel;
 
 
 /***********************************************************************//**
@@ -42,6 +49,10 @@
  ***************************************************************************/
 class GResponse {
 
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GResponse& rsp);
+    friend GLog&         operator<< (GLog& log, const GResponse& rsp);
+
 public:
     // Constructors and destructors
     GResponse(void);
@@ -51,10 +62,21 @@ public:
     // Operators
     virtual GResponse& operator= (const GResponse& rsp);
 
+    // Pure virtual methods
+    virtual void        clear(void) = 0;
+    virtual GResponse*  clone(void) const = 0;
+    virtual void        load(const std::string& irfname) = 0;
+    virtual bool        hasedisp(void) const = 0;
+    virtual bool        hastdisp(void) const = 0;
+    virtual std::string print(void) const = 0;
+
     // Reponse function computation methods
     virtual double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                        const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                        const GPointing& pnt) const;
+    virtual double diffrsp(const GEvent& event, const GModel& model,
+                           const GEnergy& srcEng, const GTime& srcTime,
+                           const GPointing& pnt) const;
     virtual double live(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                         const GPointing& pnt) const = 0;
     virtual double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
@@ -77,12 +99,6 @@ public:
                           const GPointing& pnt, const GEbounds& ebds) const;
     virtual double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                           const GPointing& pnt, const GGti& gti) const;
-
-    // Pure virtual methods
-    virtual GResponse* clone(void) const = 0;
-    virtual void       load(const std::string& irfname) = 0;
-    virtual bool       hasedisp(void) const = 0;
-    virtual bool       hastdisp(void) const = 0;
 
     // Other methods
     virtual void        caldb(const std::string& caldb);
