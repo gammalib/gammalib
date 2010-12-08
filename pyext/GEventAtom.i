@@ -52,30 +52,33 @@ public:
     GEventAtom(const GEventAtom& atom);
     virtual ~GEventAtom(void);
 
-    // Event access methods
+    // Pure virtual methods
+    virtual void            clear(void) = 0;
+    virtual GEvent*         clone(void) const = 0;
+    virtual double          size(void) const { return 1.0; }
     virtual const GInstDir& dir(void) const = 0;
     virtual const GEnergy&  energy(void) const = 0;
     virtual const GTime&    time(void) const = 0;
-    double                  counts(void) const { return 1.0; }
-    double                  error(void) const { return 0.0; }
+    virtual double          counts(void) const { return 1.0; }
+    virtual double          error(void) const { return 0.0; }
 
     // Other methods
-    virtual void        clear(void) = 0;
-    virtual double      size(void) const { return 1.0; }
-    virtual GEventAtom* clone(void) const = 0;
-    virtual bool        isatom(void) const { return true; }
-    virtual bool        isbin(void) const { return false; }
+    bool isatom(void) const { return true; }
+    bool isbin(void) const { return false; }
 };
 
 
 /***********************************************************************//**
  * @brief GEventAtom class extension
+ *
+ * The GEventAtom method allow for type conversion.
  ***************************************************************************/
 %extend GEventAtom {
-    /*
-    char *__str__() {
-        static std::string result = self->print();
-        return ((char*)result.c_str());
+    GEventAtom(const GEvent& event) {
+        if (!events.isatom())
+            throw GException::bad_type("GEventAtom(GEvent&)",
+                                       "GEvent not an event atom");            
+        GEventAtom* atom = new GEventAtom((GEventAtom&)event);
+        return atom;
     }
-    */
 };

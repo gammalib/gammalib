@@ -54,30 +54,33 @@ public:
     GEventBin(const GEventBin& bin);
     virtual ~GEventBin(void);
 
-    // Event access methods
+    // Pure virtual methods
+    virtual void            clear(void) = 0;
+    virtual GEvent*         clone(void) const = 0;
+    virtual double          size(void) const = 0;
     virtual const GInstDir& dir(void) const = 0;
     virtual const GEnergy&  energy(void) const = 0;
     virtual const GTime&    time(void) const = 0;
     virtual double          counts(void) const = 0;
-    virtual double          error(void) const;
+    virtual double          error(void) const = 0;
 
     // Other methods
-    virtual void       clear(void) = 0;
-    virtual double     size(void) const = 0;
-    virtual GEventBin* clone(void) const = 0;
-    bool               isatom(void) const { return false; }
-    bool               isbin(void) const { return true; }
+    bool isatom(void) const { return false; }
+    bool isbin(void) const { return true; }
 };
 
 
 /***********************************************************************//**
  * @brief GEventBin class extension
+ *
+ * The GEventBin method allow for type conversion.
  ***************************************************************************/
 %extend GEventBin {
-    /*
-    char *__str__() {
-        static std::string result = self->print();
-        return ((char*)result.c_str());
+    GEventBin(const GEvent& event) {
+        if (!event.isbin())
+            throw GException::bad_type("GEventBin(GEvent&)",
+                                       "GEvent not an event bin");            
+        GEventBin* bin = new GEventBin((GEventBin&)event);
+        return bin;
     }
-    */
 };
