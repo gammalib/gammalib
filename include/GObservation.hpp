@@ -20,7 +20,9 @@
 #define GOBSERVATION_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include <iostream>
+#include "GLog.hpp"
 #include "GEvents.hpp"
 #include "GResponse.hpp"
 #include "GRoi.hpp"
@@ -30,8 +32,6 @@
 #include "GTime.hpp"
 #include "GEnergy.hpp"
 #include "GIntegrand.hpp"
-
-/* __ Typedefs ___________________________________________________________ */
 
 
 /***********************************************************************//**
@@ -59,6 +59,7 @@ class GObservation {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GObservation& obs);
+    friend GLog&         operator<< (GLog& log, const GObservation& obs);
 
 public:
     // Constructors and destructors
@@ -70,16 +71,16 @@ public:
     virtual GObservation& operator= (const GObservation& obs);
 
     // Pure virtual methods
-    //virtual void          clear(void) = 0;
+    virtual void          clear(void) = 0;
     virtual GObservation* clone(void) const = 0;
     virtual void          response(const std::string& irfname, std::string caldb = "") = 0;
     virtual GResponse*    response(const GTime& time) const = 0;
     virtual GPointing*    pointing(const GTime& time) const = 0;
     virtual std::string   instrument(void) const = 0;
+    virtual std::string   print(void) const = 0;
 
     // Virtual methods
-    virtual double model(const GModels& models,const GInstDir& obsDir,
-                         const GEnergy& obsEng, const GTime& obsTime,
+    virtual double model(const GModels& models, const GEvent& event,
                          GVector* gradient = NULL) const;
     virtual double npred(const GModels& models, GVector* gradient = NULL) const;
 

@@ -20,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include <cmath>
 #include "GException.hpp"
 #include "GObservation.hpp"
@@ -29,12 +28,14 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MODEL           "GObservation::model(GModels&, GPointing&, GInstDir&, GEnergy&, GTime&, GVector*) const"
-#define G_NPRED_KERN      "GObservation::npred_kern(GModel&, GSkyDir&, GEnergy&, GTime&, GPointing&)"
-#define G_NPRED_SPEC      "GObservation::npred_spec(GModel&, GTime&)"
 #define G_NPRED_TEMP      "GObservation::npred_temp(GModel&, int)"
-#define G_NPRED_GRAD_KERN "GObservation::npred_grad_kern(GModel&, int, GSkyDir&, GEnergy&, GTime&, GPointing&)"
-#define G_NPRED_GRAD_SPEC "GObservation::npred_grad_spec(GModel&, int, GTime&)"
+#define G_NPRED_SPEC      "GObservation::npred_spec(GModel&, GTime&)"
+#define G_NPRED_SPAT      "GObservation::npred_spat(GModel&, int, GEnergy&, GTime&)"
+#define G_NPRED_KERN      "GObservation::npred_kern(GModel&, GSkyDir&, GEnergy&, GTime&, GPointing&)"
 #define G_NPRED_GRAD_TEMP "GObservation::npred_grad_temp(GModel&, int)"
+#define G_NPRED_GRAD_SPEC "GObservation::npred_grad_spec(GModel&, int, GTime&)"
+#define G_NPRED_GRAD_SPAT "GObservation::npred_grad_spat(GModel&, int, GEnergy&, GTime&)"
+#define G_NPRED_GRAD_KERN "GObservation::npred_grad_kern(GModel&, int, GSkyDir&, GEnergy&, GTime&, GPointing&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -140,9 +141,7 @@ GObservation& GObservation::operator= (const GObservation& obs)
  * @brief Return model value and (optionally) gradient
  *
  * @param[in] models Model descriptor.
- * @param[in] obsDir Measured instrument direction.
- * @param[in] obsEng Measured energy.
- * @param[in] obsTime Measured arrival time.
+ * @param[in] event Observed event.
  * @param[out] gradient Pointer to gradient vector (NULL=not computed).
  *
  * @exception GException::gradient_par_mismatch
@@ -157,8 +156,7 @@ GObservation& GObservation::operator= (const GObservation& obs)
  * method, yet I don't know why this method is not const. This should be
  * checked, and better put this method const.
  ***************************************************************************/
-double GObservation::model(const GModels& models, const GInstDir& obsDir,
-                           const GEnergy& obsEng, const GTime& obsTime,
+double GObservation::model(const GModels& models, const GEvent& event,
                            GVector* gradient) const
 {
     // Verify that gradients vector has the same dimension than the
@@ -172,10 +170,6 @@ double GObservation::model(const GModels& models, const GInstDir& obsDir,
     // Initialise model value
     double model = 0.0;
 
-    // Get current pointing and response function
-    GPointing* pnt = pointing(obsTime);
-    GResponse* rsp = response(obsTime);
-
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
 
@@ -186,7 +180,7 @@ double GObservation::model(const GModels& models, const GInstDir& obsDir,
         if (ptr->isvalid(instrument())) {
 
             // Compute value and add to model
-            model += ptr->eval_gradients(obsDir, obsEng, obsTime, *rsp, *pnt);
+            model += ptr->eval_gradients(event, *this);
 
         } // endif: model was applicable
 
@@ -235,7 +229,7 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
             // Determine Npred gradients (perform computation only for free
             // parameters)
             for (int k = 0; k < model->size(); ++k) {
-                if (model->par(k)->isfree()) {
+                if ((*model)(k).isfree()) {
                     double grad = npred_grad_temp(*model, k);
                     (*gradient)(igrad+k) = grad;
                 }
@@ -367,7 +361,6 @@ void GObservation::free_members(void)
  * @exception GException::gti_invalid
  *            Good Time Interval is invalid.
  *
- *
  * Note that MET is used for the time integration interval. This, however,
  * is no specialisation since npred_grad_kern_spec::eval() converts the
  * argument back in a GTime object by assuming that the argument is in MET,
@@ -409,6 +402,9 @@ double GObservation::npred_temp(const GModel& model) const
  *
  * @param[in] model Gamma-ray source model.
  * @param[in] srcTime True photon arrival time.
+ *
+ * @exception GException::erange_invalid
+ *            Energy range is invalid.
  ***************************************************************************/
 double GObservation::npred_spec(const GModel& model,
                                 const GTime& srcTime) const
@@ -449,6 +445,9 @@ double GObservation::npred_spec(const GModel& model,
  * the sky model is a point-source no integration is performed and the
  * kernel value is directly returned.
  *
+ * @exception GException::feature_not_implemented
+ *            Sky integration requested but not yet implemented
+ *
  * @todo Implement integration over skymap.
  ***************************************************************************/
 double GObservation::npred_spat(const GModel& model,
@@ -464,10 +463,8 @@ double GObservation::npred_spat(const GModel& model,
         // Case A: Model is a point source
         if (model.spatial()->isptsource()) {
 
-            // Build sky direction from point source parameters
-            GSkyDir srcDir;
-            srcDir.radec_deg(((GModelSpatialPtsrc*)model.spatial())->ra(),
-                             ((GModelSpatialPtsrc*)model.spatial())->dec());
+            // Get point source direction
+            GSkyDir srcDir = ((GModelSpatialPtsrc*)model.spatial())->dir();
 
             // Get function value at that position
             result = npred_kern(model, srcDir, srcEng, srcTime);
@@ -478,8 +475,8 @@ double GObservation::npred_spat(const GModel& model,
         else {
 
             // Dump warning that integration is not yet implemented
-            std::cout << "WARNING: GObservation::npred_spat:"
-                      << " Sky integration not implemented." << std::endl;
+            throw GException::feature_not_implemented(G_NPRED_SPAT,
+                  "Integration over skymap not yet implemented.");
 
         } // endelse: Model was not a point source
 
@@ -641,7 +638,8 @@ double GObservation::npred_grad_temp(const GModel& model, int ipar) const
  * @param[in] ipar Parameter index for which gradient should be returned.
  * @param[in] srcTime True photon arrival time.
  *
- * @todo Throw exception if integration energy range is not valid.
+ * @exception GException::erange_invalid
+ *            Energy range is invalid.
  ***************************************************************************/
 double GObservation::npred_grad_spec(const GModel& model, int ipar,
                                      const GTime& srcTime) const
@@ -679,6 +677,9 @@ double GObservation::npred_grad_spec(const GModel& model, int ipar,
  * @param[in] srcTime True photon arrival time.
  * @param[in] pnt Instrument pointing direction.
  *
+ * @exception GException::feature_not_implemented
+ *            Sky integration requested but not yet implemented
+ *
  * @todo Implement integration over skymap.
  ***************************************************************************/
 double GObservation::npred_grad_spat(const GModel& model, int ipar,
@@ -708,8 +709,8 @@ double GObservation::npred_grad_spat(const GModel& model, int ipar,
         else {
 
             // Dump warning that integration is not yet implemented
-            std::cout << "WARNING: GObservation::npred_grad_spat:"
-                      << " Sky integration not implemented." << std::endl;
+            throw GException::feature_not_implemented(G_NPRED_GRAD_SPAT,
+                  "Integration over skymap not yet implemented.");
 
         } // endelse: Model was not a point source
 
@@ -824,34 +825,30 @@ double GObservation::npred_grad_kern_spec::eval(double x)
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param[in] os Output stream into which the data will be dumped
- * @param[in] obs Observation to be dumped
+ * @param[in] os Output stream.
+ * @param[in] obs Observation.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GObservation& obs)
 {
-    // Put observation in stream
-    os.precision(3);
-    os << "=== GObservation ===" << std::endl;
-    os << " Name ......................: " << obs.m_obsname << std::endl;
-    os << " Instrument ................: " << obs.instrument() << std::endl;
-    os << " Time range ................: " << std::fixed
-       << obs.m_gti.tstart().mjd() << " - "
-       << obs.m_gti.tstop().mjd() << " days" << std::endl;
-    os << " Energy range ..............: " << std::fixed
-       << obs.m_ebounds.emin().MeV() << " - "
-       << obs.m_ebounds.emax().MeV() << " MeV" << std::endl;
-    os << " Optimizer statistics ......: " << obs.m_statistics << std::endl;
-
-    // Add event list to stream
-    if (obs.m_events != NULL)
-        os << *(obs.m_events) << std::endl;
-
-    // Add energy intervals to stream
-    os << obs.m_ebounds << std::endl;
-
-    // Add GTIs to stream
-    os << obs.m_gti << std::endl;
+     // Write observation in output stream
+    os << obs.print();
 
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] obs Observation.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GObservation& obs)
+{
+    // Write observation into logger
+    log << obs.print();
+
+    // Return logger
+    return log;
 }
