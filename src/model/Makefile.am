@@ -11,9 +11,14 @@ sources = GModels.cpp \
 	  GModelPar.cpp \
 	  GModelSpatial.cpp \
 	  GModelSpatialPtsrc.cpp \
+          GModelSpatialConst.cpp \
+          GModelSpatialCube.cpp \
 	  GModelSpectral.cpp \
 	  GModelSpectralPlaw.cpp \
+          GModelSpectralPlaw2.cpp \
           GModelSpectralExpPlaw.cpp \
+          GModelSpectralFunc.cpp \
+          GModelSpectralConst.cpp \
 	  GModelTemporal.cpp \
 	  GModelTemporalConst.cpp \
           GException_model.cpp
