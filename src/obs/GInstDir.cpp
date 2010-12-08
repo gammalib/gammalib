@@ -20,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include "GTools.hpp"
 #include "GInstDir.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -40,7 +39,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GInstDir::GInstDir(void)
 {
@@ -55,8 +54,7 @@ GInstDir::GInstDir(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] dir Instrument direction from which class should be
- *                instantiated.
+ * @param[in] dir Instrument direction.
  ***************************************************************************/
 GInstDir::GInstDir(const GInstDir& dir)
 {
@@ -165,3 +163,34 @@ void GInstDir::free_members(void)
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] dir Instrument direction.
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GInstDir& dir)
+{
+     // Write instrument direction in output stream
+    os << dir.print();
+
+    // Return output stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] obs Observation.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GInstDir& dir)
+{
+    // Write instrument direction into logger
+    log << dir.print();
+
+    // Return logger
+    return log;
+}

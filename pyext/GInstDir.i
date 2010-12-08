@@ -41,6 +41,7 @@ public:
     virtual ~GInstDir(void);
 
     // Pure virtual methods
+    virtual void      clear(void) = 0;
     virtual GInstDir* clone(void) const = 0;
 };
 
@@ -49,10 +50,8 @@ public:
  * @brief GInstDir class extension
  ***************************************************************************/
 %extend GInstDir {
-    /*
     char *__str__() {
         static std::string result = self->print();
         return ((char*)result.c_str());
     }
-    */
 };

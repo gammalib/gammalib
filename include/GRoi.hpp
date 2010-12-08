@@ -20,6 +20,9 @@
 #define GROI_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
+#include <iostream>
+#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -37,6 +40,10 @@ class GRoi {
   // Friend classes
   friend class GObservation;
 
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GRoi& dir);
+    friend GLog&         operator<< (GLog& log, const GRoi& dir);
+
 public:
     // Constructors and destructors
     GRoi(void);
@@ -47,7 +54,9 @@ public:
     virtual GRoi& operator= (const GRoi& roi);
 
     // Pure virtual methods
-    virtual GRoi* clone(void) const = 0;
+    virtual void        clear(void) = 0;
+    virtual GRoi*       clone(void) const = 0;
+    virtual std::string print(void) const = 0;
 
 protected:
     // Protected methods

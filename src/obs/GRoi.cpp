@@ -20,8 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <iostream>
-//#include "GException.hpp"
 #include "GRoi.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -41,7 +39,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GRoi::GRoi(void)
 {
@@ -166,3 +164,34 @@ void GRoi::free_members(void)
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] roi Region of interest.
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GRoi& roi)
+{
+     // Write region of interest in output stream
+    os << roi.print();
+
+    // Return output stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] roi Region of interest.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GRoi& roi)
+{
+    // Write region of interest into logger
+    log << roi.print();
+
+    // Return logger
+    return log;
+}

@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GRoi.i  -  Region of interest class python I/F             *
+ *            GRoi.i  -  Region of interest abstract base class            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
@@ -39,6 +39,7 @@ public:
     virtual ~GRoi(void);
 
     // Pure virtual methods
+    virtual void  clear(void) = 0;
     virtual GRoi* clone(void) const = 0;
 };
 
@@ -47,10 +48,8 @@ public:
  * @brief GRoi class extension
  ***************************************************************************/
 %extend GRoi {
-    /*
     char *__str__() {
         static std::string result = self->print();
         return ((char*)result.c_str());
     }
-    */
 };

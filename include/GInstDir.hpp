@@ -20,6 +20,9 @@
 #define GINSTDIR_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
+#include <iostream>
+#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -36,6 +39,10 @@
  ***************************************************************************/
 class GInstDir {
 
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GInstDir& dir);
+    friend GLog&         operator<< (GLog& log, const GInstDir& dir);
+
 public:
     // Constructors and destructors
     GInstDir(void);
@@ -46,7 +53,9 @@ public:
     virtual GInstDir& operator= (const GInstDir& dir);
 
     // Pure virtual methods
-    virtual GInstDir* clone(void) const = 0;
+    virtual void        clear(void) = 0;
+    virtual GInstDir*   clone(void) const = 0;
+    virtual std::string print(void) const = 0;
 
 protected:
     // Protected methods
