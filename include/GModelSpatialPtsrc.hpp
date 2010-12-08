@@ -44,7 +44,7 @@ class GModelSpatialPtsrc  : public GModelSpatial {
 
 public:
     // Constructors and destructors
-    explicit GModelSpatialPtsrc(void);
+    GModelSpatialPtsrc(void);
     explicit GModelSpatialPtsrc(const GSkyDir& dir);
     explicit GModelSpatialPtsrc(const GXmlElement& xml);
     GModelSpatialPtsrc(const GModelSpatialPtsrc& model);
@@ -53,22 +53,23 @@ public:
     // Operators
     GModelSpatialPtsrc& operator= (const GModelSpatialPtsrc& model);
 
-    // Implemented virtual methods
+    // Implemented pure virtual methods
     void                clear(void);
     GModelSpatialPtsrc* clone(void) const;
     int                 size(void) const { return m_npars; }
     std::string         type(void) const { return "PointSource"; }
-    GModelPar*          par(int index) const;
     double              eval(const GSkyDir& srcDir);
     double              eval_gradients(const GSkyDir& srcDir);
     void                read(const GXmlElement& xml);
     void                write(GXmlElement& xml) const;
     std::string         print(void) const;
+    bool                isptsource(void) const { return true; }
 
     // Other methods
-    bool   isptsource(void) const { return true; }
-    double ra(void) const { return m_ra.real_value(); }
-    double dec(void) const { return m_dec.real_value(); }
+    double  ra(void) const { return m_ra.real_value(); }
+    double  dec(void) const { return m_dec.real_value(); }
+    GSkyDir dir(void) const;
+    void    dir(const GSkyDir& dir);
 
 protected:
     // Protected methods
@@ -76,7 +77,10 @@ protected:
     void copy_members(const GModelSpatialPtsrc& model);
     void free_members(void);
 
-    // Data area
+    // Implemented pure virtual methods
+    GModelPar** par(void) { return m_par; }
+
+    // Protected members
     int        m_npars;           //!< Number of parameters
     GModelPar* m_par[2];          //!< Pointers to parameters
     GModelPar  m_ra;              //!< Right Ascension (deg)

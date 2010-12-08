@@ -24,8 +24,11 @@
 #include "GTools.hpp"
 #include "GModelSpatialPtsrc.hpp"
 
+/* __ Constants __________________________________________________________ */
+const double tolerance =  0.000027777778;    // angular tolerance is 1 arcsec
+
 /* __ Method name definitions ____________________________________________ */
-#define G_PAR                                  "GModelSpatialPtsrc::par(int)"
+#define G_ACCESS                                   "GModel::operator() (int)"
 #define G_READ                       "GModelSpatialPtsrc::read(GXmlElement&)"
 #define G_WRITE                     "GModelSpatialPtsrc::write(GXmlElement&)"
 
@@ -65,9 +68,8 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(const GSkyDir& dir) : GModelSpatial()
     // Initialise private members for clean destruction
     init_members();
 
-    // Assign Right Ascension and Declination
-    m_ra.value(dir.ra_deg());
-    m_dec.value(dir.dec_deg());
+    // Assign direction
+    this->dir(dir);
 
     // Return
     return;
@@ -184,30 +186,11 @@ void GModelSpatialPtsrc::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone class
+ * @brief Clone instance
 ***************************************************************************/
 GModelSpatialPtsrc* GModelSpatialPtsrc::clone(void) const
 {
     return new GModelSpatialPtsrc(*this);
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to a model parameter
- *
- * @param[in] index Parameter index.
- *
- * @exception GException::out_of_range
- *            Parameter index is out of valid range
- ***************************************************************************/
-GModelPar* GModelSpatialPtsrc::par(int index) const
-{
-    // If index is outside boundary then throw an error
-    if (index < 0 || index >= m_npars)
-        throw GException::out_of_range(G_PAR, index, 0, m_npars-1);
-
-    // Return parameter pointer
-    return m_par[index];
 }
 
 
@@ -217,15 +200,14 @@ GModelPar* GModelSpatialPtsrc::par(int index) const
  * @param[in] srcDir True photon arrival direction.
  *
  * Evaluates the spatial part for a point source model. It implements a delta
- * function with respect to the coordinates of the source.
- *
- * @todo Implement delta function (just returns 1.0 for the moment).
+ * function with respect to the coordinates of the source. For numerical
+ * reasons a certain tolerance is accepted (typically 0.1 arcsec, i.e. well
+ * below the angular resolution of gamma-ray telescopes).
  ***************************************************************************/
 double GModelSpatialPtsrc::eval(const GSkyDir& srcDir)
 {
     // Set value dependent on source distance
-    //double value = (srcDir.dist(ra(), dec()) < 1.0e-6) ? 1.0 : 0.0;
-    double value = 1.0;
+    double value = (srcDir.dist_deg(dir()) < tolerance) ? 1.0 : 0.0;
 
     // Return value
     return value;
@@ -239,17 +221,17 @@ double GModelSpatialPtsrc::eval(const GSkyDir& srcDir)
  *
  * Evaluates the spatial part for a point source model and the gradient.
  * It implements a delta function with respect to the coordinates of the
- * source and returns 0 gradients.
+ * source.  For numerical reasons a certain tolerance is accepted (typically
+ * 0.1 arcsec, i.e. well below the angular resolution of gamma-ray
+ * telescopes).
+ * Parameter gradients are set to 0.
  *
- * @todo Implement delta function (just returns 1.0 for the moment).
- * @todo Correctly set parameter gradients (actual version sets gradients to
- * 0).
+ * @todo Correctly set parameter gradients.
  ***************************************************************************/
 double GModelSpatialPtsrc::eval_gradients(const GSkyDir& srcDir)
 {
     // Set value dependent on source distance
-    //double value = (srcDir.dist(ra(), dec()) < 1.0e-6) ? 1.0 : 0.0;
-    double value = 1.0;
+    double value = (srcDir.dist_deg(dir()) < tolerance) ? 1.0 : 0.0;
 
     // Set gradients to 0
     m_ra.gradient(0.0);
@@ -376,7 +358,7 @@ void GModelSpatialPtsrc::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print powerlaw information
+ * @brief Print point source information
  ***************************************************************************/
 std::string GModelSpatialPtsrc::print(void) const
 {
@@ -396,9 +378,39 @@ std::string GModelSpatialPtsrc::print(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Return position of point source
+ ***************************************************************************/
+GSkyDir GModelSpatialPtsrc::dir(void) const
+{
+    // Allocate sky direction
+    GSkyDir srcDir;
+
+    // Set sky direction
+    srcDir.radec_deg(ra(), dec());
+
+    // Return direction
+    return srcDir;
+}
+
+
+/***********************************************************************//**
+ * @brief Set position of point source
+ ***************************************************************************/
+void GModelSpatialPtsrc::dir(const GSkyDir& dir)
+{
+    // Assign Right Ascension and Declination
+    m_ra.value(dir.ra_deg());
+    m_dec.value(dir.dec_deg());
+
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
- =                    GModelSpatialPtsrc private methods                   =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -417,12 +429,14 @@ void GModelSpatialPtsrc::init_members(void)
     m_ra.name("RA");
     m_ra.unit("deg");
     m_ra.fix();
+    m_ra.scale(1.0);
 
     // Initialise Declination
     m_dec = GModelPar();
     m_dec.name("DEC");
     m_dec.unit("deg");
     m_dec.fix();
+    m_dec.scale(1.0);
 
     // Return
     return;
@@ -458,10 +472,9 @@ void GModelSpatialPtsrc::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                        GModelSpatialPtsrc friends                       =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
-
 
 /***********************************************************************//**
  * @brief Output operator
