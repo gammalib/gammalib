@@ -20,6 +20,7 @@
 #define GEVENTCUBE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GEvents.hpp"
 #include "GEventBin.hpp"
 
@@ -30,13 +31,6 @@
  * @brief GEventCube container class interface defintion.
  ***************************************************************************/
 class GEventCube : public GEvents {
-
-    // Friend classes
-    friend class GData;
-    friend class GObservation;
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GEventCube& cube);
 
 public:
     // Constructors and destructors
@@ -53,8 +47,9 @@ public:
     virtual void        load(const std::string& filename) = 0;
     virtual GEventBin*  pointer(int index) = 0;
     virtual int         number(void) const = 0;
+    virtual std::string print(void) const = 0;
 
-    // Implemented pure virtual methods
+    // Implemented pure virtual base class methods
     int  size(void) const { return m_elements; }
     int  dim(void) const { return m_dim; }
     int  naxis(int axis) const;

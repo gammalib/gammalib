@@ -26,6 +26,9 @@
 #include "GTime.hpp"
 #include "GLATInstDir.hpp"
 
+/* __ Forward declarations _______________________________________________ */
+class GLATEventCube;
+
 
 /***********************************************************************//**
  * @class GLATEventBin
@@ -37,9 +40,6 @@ class GLATEventBin : public GEventBin {
     // Friend classes
     friend class GLATEventCube;
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATEventBin& bin);
-
 public:
     // Constructors and destructors
     GLATEventBin(void);
@@ -49,20 +49,25 @@ public:
     // Operators
     GLATEventBin& operator= (const GLATEventBin& bin);
 
-    // Event access methods
-    const GEnergy&     energy(void) const { return *m_energy; }
+    // Implemented pure virtual base class methods
+    void               clear(void);
+    GLATEventBin*      clone(void) const;
+    double             size(void) const;
     const GLATInstDir& dir(void) const { return *m_dir; }
+    const GEnergy&     energy(void) const { return *m_energy; }
     const GTime&       time(void) const { return *m_time; }
     double             counts(void) const { return *m_counts; }
     double             error(void) const;
+    std::string        print(void) const;
 
     // Other methods
-    void           clear(void);
-    GLATEventBin*  clone(void) const;
-    double         size(void) const;
     const double&  omega(void) const { return *m_omega; }
     const GEnergy& ewidth(void) const { return *m_ewidth; }
     const double&  ontime(void) const { return *m_ontime; }
+    const int&     index(void) const { return m_index; }
+    const int&     ipix(void) const { return m_ipix; }
+    const int&     ieng(void) const { return m_ieng; }
+    GLATEventCube* cube(void) const { return m_cube; }
 
 protected:
     // Protected methods
@@ -71,14 +76,17 @@ protected:
     void free_members(void);
 
     // Protected members
-    GEnergy*     m_energy;      //!< Pointer to bin energy
-    GLATInstDir* m_dir;         //!< Pointer to bin direction
-    GTime*       m_time;        //!< Pointer to bin time
-    double*      m_counts;      //!< Pointer to number of counts
-    double*      m_omega;       //!< Pointer to solid angle of pixel (sr)
-    GEnergy*     m_ewidth;      //!< Pointer to energy width of bin
-    double*      m_ontime;      //!< Pointer to ontime of bin (seconds)
-
+    GLATEventCube* m_cube;        //!< Event cube back pointer
+    int            m_index;       //!< Actual skymap index
+    int            m_ipix;        //!< Actual spatial index
+    int            m_ieng;        //!< Actual energy index
+    GEnergy*       m_energy;      //!< Pointer to bin energy
+    GLATInstDir*   m_dir;         //!< Pointer to bin direction
+    GTime*         m_time;        //!< Pointer to bin time
+    double*        m_counts;      //!< Pointer to number of counts
+    double*        m_omega;       //!< Pointer to solid angle of pixel (sr)
+    GEnergy*       m_ewidth;      //!< Pointer to energy width of bin
+    double*        m_ontime;      //!< Pointer to ontime of bin (seconds)
 };
 
 #endif /* GLATEVENTBIN_HPP */

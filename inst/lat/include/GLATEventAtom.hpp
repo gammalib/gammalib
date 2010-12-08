@@ -37,9 +37,6 @@ class GLATEventAtom : public GEventAtom {
     // Friend classes
     friend class GLATEventList;
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATEventAtom& atom);
-
 public:
     // Constructors and destructors
     GLATEventAtom(void);
@@ -49,14 +46,13 @@ public:
     // Operators
     GLATEventAtom& operator= (const GLATEventAtom& atom);
 
-    // Event access methods
-    const GEnergy&     energy(void) const { return m_energy; }
+    // Implemented pure virtual base class methods
+    void               clear(void);
+    GLATEventAtom*     clone(void) const;
     const GLATInstDir& dir(void) const { return m_dir; }
+    const GEnergy&     energy(void) const { return m_energy; }
     const GTime&       time(void) const { return m_time; }
-
-    // Other methods
-    void           clear(void);
-    GLATEventAtom* clone(void) const;
+    std::string        print(void) const;
 
 protected:
     // Protected methods

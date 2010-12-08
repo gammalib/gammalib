@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GEventCube.cpp
@@ -21,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include "GException.hpp"
 #include "GEventCube.hpp"
 
@@ -42,7 +40,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GEventCube::GEventCube(void) : GEvents()
 {
@@ -214,29 +212,3 @@ void GEventCube::free_members(void)
  =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream into which the event cube will be dumped
- * @param[in] cube Event cube to be dumped
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GEventCube& cube)
-{
-    // Put event cube in stream
-    os << "=== GEventCube ===" << std::endl;
-    if (cube.m_naxis != NULL) {
-        os << " Cube is undefined" << std::endl;
-    }
-    else {
-        os << " Number of cube elements ...: " << cube.size() << std::endl;
-        os << " Cube dimension ............: " << cube.dim() << std::endl;
-        for (int axis = 0; axis < cube.m_dim; ++axis) {
-            os << " Axis " << axis+1 << " dimension ..........: "
-               << cube.naxis(axis) << std::endl;
-        }
-    }
-
-    // Return output stream
-    return os;
-}

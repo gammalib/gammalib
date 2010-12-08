@@ -20,10 +20,9 @@
 #define GEVENTLIST_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GEvents.hpp"
 #include "GEventAtom.hpp"
-#include "GFits.hpp"
-#include "GModels.hpp"
 
 
 /***********************************************************************//**
@@ -33,18 +32,11 @@
  ***************************************************************************/
 class GEventList : public GEvents {
 
-    // Friend classes
-    friend class GData;
-    friend class GObservation;
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GEventList& list);
-
 public:
     // Constructors and destructors
-    GEventList();
+    GEventList(void);
     GEventList(const GEventList& list);
-    virtual ~GEventList();
+    virtual ~GEventList(void);
 
     // Operators
     virtual GEventList& operator= (const GEventList& list);
@@ -52,12 +44,13 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GEventList* clone(void) const = 0;
+    virtual int         size(void) const = 0;
     virtual void        load(const std::string& filename) = 0;
     virtual GEventAtom* pointer(int index) = 0;
     virtual int         number(void) const = 0;
-    virtual int         size(void) const = 0;
+    virtual std::string print(void) const = 0;
 
-    // Implemented pure virtul methods
+    // Implemented pure virtual base class methods
     bool islist(void) const { return true; }
     bool iscube(void) const { return false; }
 

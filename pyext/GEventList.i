@@ -49,12 +49,22 @@ public:
 
 /***********************************************************************//**
  * @brief GEventList class extension
+ *
+ * The GEventList method allow for type conversion.
+ * The __getitem__ method makes the event list iteratable.
  ***************************************************************************/
 %extend GEventList {
-    /*
-    char *__str__() {
-        static std::string result = self->print();
-        return ((char*)result.c_str());
+    GEventList(const GEvents& events) {
+        if (!events.islist())
+            throw GException::bad_type("GEventList(GEvents&)",
+                                       "GEvents not an event list");            
+        GEventList* list = new GEventList((GEventList&)events);
+        return list;
     }
-    */
+    GEventAtom* __getitem__(int index) {
+    if (index >= 0 && index < self->size())
+        return self->pointer(index);
+    else
+        throw GException::out_of_range("__getitem__(int)", index, self->size());
+    }
 };

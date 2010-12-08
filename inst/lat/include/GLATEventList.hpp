@@ -20,6 +20,7 @@
 #define GLATEVENTLIST_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GEventList.hpp"
 #include "GLATEventAtom.hpp"
 #include "GLATObservation.hpp"
@@ -35,9 +36,6 @@
  ***************************************************************************/
 class GLATEventList : public GEventList {
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATEventList& list);
-
 public:
     // Constructors and destructors
     GLATEventList(void);
@@ -47,13 +45,14 @@ public:
     // Operators
     GLATEventList& operator= (const GLATEventList& list);
 
-    // Implemented pure virtul methods
+    // Implemented pure virtual base class methods
     void           clear(void);
     GLATEventList* clone(void) const;
+    int            size(void) const { return m_num; }
     void           load(const std::string& filename);
     GLATEventAtom* pointer(int index);
     int            number(void) const { return m_num; }
-    int            size(void) const { return m_num; }
+    std::string    print(void) const;
 
     // Other methods
 

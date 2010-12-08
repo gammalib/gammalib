@@ -20,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include "GException.hpp"
 #include "GEvents.hpp"
 
@@ -40,7 +39,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GEvents::GEvents(void)
 {
@@ -256,16 +255,30 @@ void GEvents::free_members(void)
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param[in] os Output stream into which the events will be dumped
- * @param[in] events Events to be dumped
+ * @param[in] os Output stream.
+ * @param[in] events Events.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GEvents& events)
 {
-    // Put header in stream
-    os << "=== GEvents ===" << std::endl;
-    os << " Number of elements ........: " << events.size() << std::endl;
-    os << " Number of events ..........: " << events.number();
+     // Write events in output stream
+    os << events.print();
 
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] events Events.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GEvents& events)
+{
+    // Write events into logger
+    log << events.print();
+
+    // Return logger
+    return log;
 }

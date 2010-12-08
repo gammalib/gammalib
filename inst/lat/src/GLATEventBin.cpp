@@ -20,9 +20,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
+#include <string>
 #include <cmath>
 #include "GLATEventBin.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -40,7 +41,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GLATEventBin::GLATEventBin(void) : GEventBin()
 {
@@ -55,7 +56,7 @@ GLATEventBin::GLATEventBin(void) : GEventBin()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] bin Event bin from which the instance should be built.
+ * @param[in] bin Event bin.
  ***************************************************************************/
 GLATEventBin::GLATEventBin(const GLATEventBin& bin) : GEventBin(bin)
 {
@@ -158,13 +159,17 @@ GLATEventBin* GLATEventBin::clone(void) const
 /***********************************************************************//**
  * @brief Return size of event bin
  *
- * @todo Not yet implemented.
+ * The size of the event bin (units sr MeV s) is given by
+ * \f[size = \Omega \times \Delta E \times \Delta T\f]
+ * where
+ * \f$\Omega\f$ is the size of the spatial bin in sr,
+ * \f$\Delta E\f$ is the size of the energy bin in MeV, and
+ * \f$\Delta T\f$ is the ontime of the observation in seconds. 
  ***************************************************************************/
 double GLATEventBin::size(void) const
 {
     // Compute bin size
-    //double size = omega() * ewidth().MeV() * ontime();
-    double size = 1.0;
+    double size = omega() * ewidth().MeV() * ontime();
 
     // Return bin size
     return size;
@@ -192,6 +197,22 @@ double GLATEventBin::error(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print event information
+ ***************************************************************************/
+std::string GLATEventBin::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append number of counts
+    result.append(str(counts()));
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Private methods                              =
@@ -204,6 +225,10 @@ double GLATEventBin::error(void) const
 void GLATEventBin::init_members(void)
 {
     // Initialise members
+    m_cube   = NULL;
+    m_index  = 0;
+    m_ipix   = 0;
+    m_ieng   = 0;
     m_energy = NULL;
     m_dir    = NULL;
     m_time   = NULL;
@@ -225,6 +250,10 @@ void GLATEventBin::init_members(void)
 void GLATEventBin::copy_members(const GLATEventBin& bin)
 {
     // Copy members
+    m_cube   = bin.m_cube;
+    m_index  = bin.m_index;
+    m_ipix   = bin.m_ipix;
+    m_ieng   = bin.m_ieng;
     m_energy = bin.m_energy;
     m_dir    = bin.m_dir;
     m_time   = bin.m_time;
@@ -253,18 +282,3 @@ void GLATEventBin::free_members(void)
  =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Put bin into output stream
- *
- * @param[in] os Output stream into which the bin will be dumped
- * @param[in] bin Bin to be dumped
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GLATEventBin& bin)
-{
-    // Put bin in output stream
-    os << bin.m_counts << " ";
-
-    // Return output stream
-    return os;
-}

@@ -20,9 +20,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
-#include "GException.hpp"
 #include "GLATEventList.hpp"
+#include "GException.hpp"
+#include "GTools.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GFitsTableDoubleCol.hpp"
@@ -211,6 +211,41 @@ GLATEventAtom* GLATEventList::pointer(int index)
 
     // Return pointer
     return ((GLATEventAtom*)m_events + index);
+}
+
+
+/***********************************************************************//**
+ * @brief Print event list information
+ ***************************************************************************/
+std::string GLATEventList::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GLATEventList ===\n");
+    result.append(parformat("Number of events")+str(number())+"\n");
+
+    // Append DS keywords
+    result.append(parformat("Number of DS keywords")+str(m_ds_num));
+    for (int i = 0; i < m_ds_num; ++i) {
+        result.append("\n"+parformat(" Data selection"));
+        result.append("Type="+m_ds_type[i]);
+        if (m_ds_unit[i].length() > 0)
+            result.append(" Unit="+m_ds_unit[i]);
+        if (m_ds_reference[i].length() > 0)
+            result.append(" Reference="+m_ds_reference[i]);
+    }
+
+    // Append diffuse keywords
+    result.append("\n"+parformat("Number of diffuse models")+str(m_num_difrsp));
+    for (int i = 0; i < m_num_difrsp; ++i) {
+        result.append("\n"+parformat(" Diffuse component"));
+        result.append(m_difrsp_label[i]);
+    }
+
+    // Return result
+    return result;
 }
 
 
@@ -562,35 +597,6 @@ void GLATEventList::load_ds_keys(GFitsTable* hdu)
 
 /*==========================================================================
  =                                                                         =
- =                         GLATEventList friends                           =
+ =                               Friends                                   =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Put LAT event list in output stream
- *
- * @param[in] os Output stream into which the event list will be dumped
- * @param[in] list Event list to be dumped
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GLATEventList& list)
-{
-    // Put LAT event list in output stream
-    os << "=== GLATEventList ===" << std::endl;
-    os << " Number of DS keywords .....: " << list.m_ds_num << std::endl;
-    for (int i = 0; i < list.m_ds_num; ++i) {
-        os << "  Data selection ...........: Type=" << list.m_ds_type[i];
-        os << " Value=" << list.m_ds_value[i];
-        if (list.m_ds_unit[i] != "")
-            os << " Unit=" << list.m_ds_unit[i];
-        if (list.m_ds_reference[i] != "")
-            os << " Reference=" << list.m_ds_reference[i];
-        os << std::endl;
-    }
-    os << " Number of diffuse models ..: " << list.m_num_difrsp << std::endl;
-    for (int i = 0; i < list.m_num_difrsp; ++i)
-        os << "  Diffuse response component: " << list.m_difrsp_label[i] << std::endl;
-    os << " Number of events in list ..: " << list.number();
-
-    // Return output stream
-    return os;
-}

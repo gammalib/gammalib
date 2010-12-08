@@ -20,18 +20,21 @@
 #define GLATEVENTCUBE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
+#include <vector>
 #include "GEventCube.hpp"
-#include "GLATEventBin.hpp"
 #include "GLATObservation.hpp"
+#include "GLATInstDir.hpp"
+#include "GLATEventBin.hpp"
 #include "GEbounds.hpp"
-#include "GFits.hpp"
+#include "GGti.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GLATInstDir.hpp"
-#include "GLATPointing.hpp"
-#include "GLATResponse.hpp"
+#include "GFits.hpp"
 #include "GFitsImage.hpp"
 #include "GFitsTable.hpp"
+#include "GSkymap.hpp"
+#include "GNodeArray.hpp"
 
 
 /***********************************************************************//**
@@ -40,12 +43,6 @@
  * @brief GLATEventCube class interface defintion.
  ***************************************************************************/
 class GLATEventCube : public GEventCube {
-
-    // Friend classes
-    friend class GLATObservation;
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATEventCube& cube);
 
 public:
     // Constructors and destructors
@@ -56,38 +53,56 @@ public:
     // Operators
     GLATEventCube& operator= (const GLATEventCube& cube);
 
-    // Implemented pure virtul methods
+    // Implemented pure virtual base class methods
     void           clear(void);
     GLATEventCube* clone(void) const;
     void           load(const std::string& filename);
     GLATEventBin*  pointer(int index);
     int            number(void) const;
+    std::string    print(void) const;
 
     // Other methods
-    int ebins(void) const { return m_ebins; }
-    int pixels(void) const { return m_pixels; }
+    GEbounds&   ebds(void) { return m_ebds; }
+    GGti&       gti(void) { return m_gti; }
+    GTime&      time(void) { return m_time; }
+    double      ontime(void) { return m_ontime; }
+    int         nx(void) const { return m_map.nx(); }
+    int         ny(void) const { return m_map.ny(); }
+    int         npix(void) const { return m_map.npix(); }
+    int         ebins(void) const { return m_map.nmaps(); }
+    int         ndiffrsp(void) const { return m_srcmap.size(); }
+    std::string diffname(const int& index) const;
+    GSkymap*    diffrsp(const int& index) const;
+    GNodeArray* enodes(void) { return &m_enodes; }
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GLATEventCube& cube);
     void free_members(void);
-    void load_cntmap(GFitsImage* hdu);
-    void load_ebds(GFitsTable* hdu);
+    void read_cntmap(GFitsImage* hdu);
+    void read_srcmap(GFitsImage* hdu);
+    void read_ebds(GFitsTable* hdu);
+    void read_gti(GFitsTable* hdu);
+    void set_directions(void);
+    void set_energies(void);
+    void set_time(void);
 
     // Protected data area
-    GLATEventBin m_bin;            //!< Actual energy bin
-    int          m_nx;             //!< Number of pixels in x
-    int          m_ny;             //!< Number of pixels in y
-    int          m_pixels;         //!< Number of pixels in x and y
-    int          m_ebins;          //!< Number of energy bins
-    double*      m_counts;         //!< Pointer to counts array
-    GEnergy*     m_energies;       //!< Pointer to energies
-    GTime        m_time;           //!< Event cube mean time
-    GLATInstDir* m_dirs;           //!< Pointer to event directions
-    GEbounds     m_ebds;           //!< Energy boundaries
-
-private:
+    GLATEventBin             m_bin;          //!< Actual energy bin
+    GSkymap                  m_map;          //!< Counts map stored as sky map
+    GEbounds                 m_ebds;         //!< Energy boundaries
+    GGti                     m_gti;          //!< Good Time Intervals
+    GTime                    m_time;         //!< Event cube mean time
+    double                   m_ontime;       //!< Event cube ontime (sec)
+    double*                  m_counts;       //!< Pointer to skymap pixels
+    GLATInstDir*             m_dirs;         //!< Array of event directions
+    double*                  m_omega;        //!< Array of solid angles (sr)
+    GEnergy*                 m_energies;     //!< Array of log mean energies
+    GEnergy*                 m_ewidth;       //!< Array of energy bin widths
+    std::vector<GSkymap*>    m_srcmap;       //!< Pointers to source maps
+    std::vector<std::string> m_srcmap_names; //!< Source map names
+    GNodeArray               m_enodes;       //!< Energy nodes
 };
 
 #endif /* GLATEVENTCUBE_HPP */

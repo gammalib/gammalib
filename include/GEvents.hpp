@@ -20,8 +20,10 @@
 #define GEVENTS_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
+#include <iostream>
+#include "GLog.hpp"
 #include "GEvent.hpp"
-#include "GFits.hpp"
 
 
 /***********************************************************************//**
@@ -35,12 +37,9 @@
  ***************************************************************************/
 class GEvents {
 
-    // Friend classes
-    friend class GObservations;
-    friend class GObservation;
-
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GEvents& events);
+    friend GLog&         operator<< (GLog& log, const GEvents& events);
 
 public:
     // Constructors and destructors
@@ -52,14 +51,15 @@ public:
     virtual GEvents& operator= (const GEvents& events);
 
     // Pure virtual methods
-    virtual void     clear(void) = 0;
-    virtual GEvents* clone(void) const = 0;
-    virtual void     load(const std::string& filename) = 0;
-    virtual GEvent*  pointer(int index) = 0;
-    virtual int      number(void) const = 0;
-    virtual int      size(void) const = 0;
-    virtual bool     islist(void) const = 0;
-    virtual bool     iscube(void) const = 0;
+    virtual void        clear(void) = 0;
+    virtual GEvents*    clone(void) const = 0;
+    virtual int         size(void) const = 0;
+    virtual void        load(const std::string& filename) = 0;
+    virtual GEvent*     pointer(int index) = 0;
+    virtual int         number(void) const = 0;
+    virtual bool        islist(void) const = 0;
+    virtual bool        iscube(void) const = 0;
+    virtual std::string print(void) const = 0;
 
     // Event iterator
     class iterator {

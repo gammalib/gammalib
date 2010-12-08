@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GEvents.i  -  Event container class python I/F             *
+ *                  GEvents.i  -  Events container class                   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
@@ -53,10 +53,8 @@ public:
  * @brief GEvents class extension
  ***************************************************************************/
 %extend GEvents {
-    /*
     char *__str__() {
         static std::string result = self->print();
         return ((char*)result.c_str());
     }
-    */
 };

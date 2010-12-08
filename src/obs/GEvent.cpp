@@ -41,7 +41,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GEvent::GEvent(void)
 {
@@ -56,7 +56,7 @@ GEvent::GEvent(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] event Event from which the instance should be built.
+ * @param[in] event Event.
  ***************************************************************************/
 GEvent::GEvent(const GEvent& event)
 {
@@ -93,7 +93,7 @@ GEvent::~GEvent(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] event Event which should be assigned.
+ * @param[in] event Event.
  ***************************************************************************/
 GEvent& GEvent::operator= (const GEvent& event)
 {
@@ -165,3 +165,34 @@ void GEvent::free_members(void)
  =                                  Friends                                =
  =                                                                         =
  ==========================================================================*/
+ 
+ /***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] event Event.
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GEvent& event)
+{
+     // Write event in output stream
+    os << event.print();
+
+    // Return output stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] event Event.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GEvent& event)
+{
+    // Write event into logger
+    log << event.print();
+
+    // Return logger
+    return log;
+}

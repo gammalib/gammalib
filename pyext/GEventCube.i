@@ -51,12 +51,22 @@ public:
 
 /***********************************************************************//**
  * @brief GEventCube class extension
+ *
+ * The GEventCube method allow for type conversion.
+ * The __getitem__ method makes the event cube iteratable.
  ***************************************************************************/
 %extend GEventCube {
-    /*
-    char *__str__() {
-        static std::string result = self->print();
-        return ((char*)result.c_str());
+    GEventCube(const GEvents& events) {
+        if (!events.iscube())
+            throw GException::bad_type("GEventCube(GEvents&)",
+                                       "GEvents not an event cube");            
+        GEventCube* cube = new GEventCube((GEventCube&)events);
+        return cube;
     }
-    */
+    GEventBin* __getitem__(int index) {
+    if (index >= 0 && index < self->size())
+        return self->pointer(index);
+    else
+        throw GException::out_of_range("__getitem__(int)", index, self->size());
+    }
 };

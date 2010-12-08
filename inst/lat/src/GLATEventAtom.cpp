@@ -20,9 +20,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
-#include "GException.hpp"
+#include <string>
 #include "GLATEventAtom.hpp"
+#include "GLATException.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -155,6 +156,26 @@ GLATEventAtom* GLATEventAtom::clone(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print event information
+ *
+ * @todo Implement and use GTime::print method.
+ ***************************************************************************/
+std::string GLATEventAtom::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append number of counts
+    result.append("Dir="+m_dir.print());
+    result.append(" Energy="+m_energy.print());
+    result.append(" Time="+str(m_time.met()));
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Private methods                              =
@@ -257,20 +278,3 @@ void GLATEventAtom::free_members(void)
  =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Put atom into output stream
- *
- * @param[in] os Output stream into which the bin will be dumped
- * @param[in] bin Bin to be dumped
- *
- * @todo Needs to be implemented
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GLATEventAtom& atom)
-{
-    // Put atom in output stream
-    os << "..." << " ";
-        
-    // Return output stream
-    return os;
-}

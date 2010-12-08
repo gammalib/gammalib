@@ -20,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include "GException.hpp"
 #include "GEventList.hpp"
 
@@ -35,14 +34,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                    GEventList constructors/destructors                  =
+ =                       Constructors/destructors                          =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Voic constructor
  ***************************************************************************/
-GEventList::GEventList() : GEvents()
+GEventList::GEventList(void) : GEvents()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -73,7 +72,7 @@ GEventList::GEventList(const GEventList& list) : GEvents(list)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GEventList::~GEventList()
+GEventList::~GEventList(void)
 {
     // Free members
     free_members();
@@ -85,7 +84,7 @@ GEventList::~GEventList()
 
 /*==========================================================================
  =                                                                         =
- =                           GEventList operators                          =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -167,19 +166,3 @@ void GEventList::free_members(void)
  =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream into which the event list will be dumped
- * @param[in] list Event list to be dumped
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GEventList& list)
-{
-    // Put header in stream
-    os << "=== GEventList ===" << std::endl;
-    os << " Number of events in list ..: " << list.number();
-        
-    // Return output stream
-    return os;
-}
