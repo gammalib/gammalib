@@ -44,7 +44,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GModels::GModels(void) : GOptimizerPars()
 {
@@ -59,7 +59,7 @@ GModels::GModels(void) : GOptimizerPars()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] models Models from which the instance should be built.
+ * @param[in] models Models.
  ***************************************************************************/
 GModels::GModels(const GModels& models) : GOptimizerPars(models)
 {
@@ -77,7 +77,7 @@ GModels::GModels(const GModels& models) : GOptimizerPars(models)
 /***********************************************************************//**
  * @brief Load constructor
  *
- * @param[in] filename XML file from which object should be constructed.
+ * @param[in] filename XML file.
  ***************************************************************************/
 GModels::GModels(const std::string& filename)
 {
@@ -114,9 +114,9 @@ GModels::~GModels(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return pointer to model
+ * @brief Returns pointer to model
  *
- * @param[in] index Index of model to be accessed [0,...,size()-1].
+ * @param[in] index Model index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
@@ -125,19 +125,19 @@ GModel* GModels::operator() (int index)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= m_npars)
+    if (index < 0 || index >= m_elements)
         throw GException::out_of_range(G_ACCESS, index, 0, m_elements-1);
     #endif
 
-    // Return pointer
+    // Return reference
     return &(m_model[index]);
 }
 
 
 /***********************************************************************//**
- * @brief Return pointer to model
+ * @brief Returns pointer to model
  *
- * @param[in] index Index of model to be accessed [0,...,size()-1].
+ * @param[in] index Model index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
@@ -146,7 +146,7 @@ const GModel* GModels::operator() (int index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= m_npars)
+    if (index < 0 || index >= m_elements)
         throw GException::out_of_range(G_ACCESS, index, 0, m_elements-1);
     #endif
 
@@ -207,6 +207,15 @@ void GModels::clear(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+ ***************************************************************************/
+GModels* GModels::clone(void) const
+{
+    return new GModels(*this);
 }
 
 
@@ -423,22 +432,17 @@ double GModels::value(const GSkyDir& srcDir, const GEnergy& srcEng,
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed photon energy.
- * @param[in] obsTime Observed photon arrival time.
- * @param[in] rsp Instrument response function.
- * @param[in] pnt Instrument pointing direction.
+ * @param[in] event Observed event.
+ * @param[in] obs Observation.
  ***************************************************************************/
-double GModels::eval(const GInstDir& obsDir, const GEnergy& obsEng,
-                     const GTime& obsTime, const GResponse& rsp,
-                     const GPointing& pnt)
+double GModels::eval(const GEvent& event, const GObservation& obs)
 {
     // Initialise function value
     double value = 0.0;
 
     // Evaluate function for all models
     for (int i = 0; i < m_elements; ++i)
-        value += m_model[i].eval(obsDir, obsEng, obsTime, rsp, pnt);
+        value += m_model[i].eval(event, obs);
 
     // Return
     return value;
@@ -448,22 +452,17 @@ double GModels::eval(const GInstDir& obsDir, const GEnergy& obsEng,
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed photon energy.
- * @param[in] obsTime Observed photon arrival time.
- * @param[in] rsp Instrument response function.
- * @param[in] pnt Instrument pointing direction.
+ * @param[in] event Observed event.
+ * @param[in] obs Observation.
  ***************************************************************************/
-double GModels::eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
-                               const GTime& obsTime, const GResponse& rsp,
-                               const GPointing& pnt)
+double GModels::eval_gradients(const GEvent& event, const GObservation& obs)
 {
     // Initialise function value
     double value = 0.0;
 
     // Evaluate function and gradients for all models
     for (int i = 0; i < m_elements; ++i)
-        value += m_model[i].eval_gradients(obsDir, obsEng, obsTime, rsp, pnt);
+        value += m_model[i].eval_gradients(event, obs);
 
     // Return
     return value;
@@ -485,13 +484,14 @@ std::string GModels::print(void) const
 
     // Append models
     for (int k = 0; k < size(); ++k) {
+        const GModel* ptr = (*this)(k);
         result.append("\n"+parformat("Model name")+(*this)(k)->name());
         result.append("\n"+parformat("Model type"));
-        result.append((*this)(k)->temporal()->type()+" ");
-        result.append((*this)(k)->spectral()->type()+" ");
-        result.append((*this)(k)->spatial()->type());
-        for (int j = 0; j < (*this)(k)->size(); ++j)
-            result.append("\n"+(*this)(k)->par(j)->print());
+        result.append(ptr->temporal()->type()+" ");
+        result.append(ptr->spectral()->type()+" ");
+        result.append(ptr->spatial()->type());
+        for (int j = 0; j < ptr->size(); ++j)
+            result.append("\n"+(*ptr)(j).print());
     }
     
     // Return result
@@ -567,6 +567,10 @@ void GModels::free_members(void)
 
 /***********************************************************************//**
  * @brief Set parameter pointers
+ *
+ * Gathers all parameter pointers from the models into a linear array of
+ * GModelPar pointers. This allows the optimizer to see all parameters in a
+ * linear array.
  ***************************************************************************/
 void GModels::set_pointers(void)
 {
@@ -592,24 +596,24 @@ void GModels::set_pointers(void)
         for (int k = 0; k < m_elements; ++k) {
 
             // Determine the number of parameters of each type
-            int n_spatial  = (m_model[k].m_spatial  != NULL) 
-                             ? m_model[k].m_spatial->size() : 0;
-            int n_spectral = (m_model[k].m_spectral != NULL) 
-                             ? m_model[k].m_spectral->size() : 0;
-            int n_temporal = (m_model[k].m_temporal != NULL) 
-                             ? m_model[k].m_temporal->size() : 0;
+            int n_spatial  = (m_model[k].spatial()  != NULL) 
+                             ? m_model[k].spatial()->size() : 0;
+            int n_spectral = (m_model[k].spectral() != NULL) 
+                             ? m_model[k].spectral()->size() : 0;
+            int n_temporal = (m_model[k].temporal() != NULL) 
+                             ? m_model[k].temporal()->size() : 0;
 
             // Gather spatial parameter pointers
             for (int i = 0; i < n_spatial; ++i)
-                *ptr++ = m_model[k].m_spatial->par(i);
+                *ptr++ = &((*(m_model[k].spatial()))(i));
 
             // Gather spectral parameters
             for (int i = 0; i < n_spectral; ++i)
-                *ptr++ = m_model[k].m_spectral->par(i);
+                *ptr++ = &((*(m_model[k].spectral()))(i));
 
             // Gather temporal parameters
             for (int i = 0; i < n_temporal; ++i)
-                *ptr++ = m_model[k].m_temporal->par(i);
+                *ptr++ = &((*(m_model[k].temporal()))(i));
 
         } // endfor: looped over all models
 

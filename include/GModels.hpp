@@ -24,12 +24,14 @@
 #include "GLog.hpp"
 #include "GOptimizerPars.hpp"
 #include "GModel.hpp"
-#include "GInstDir.hpp"
+#include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GResponse.hpp"
-#include "GPointing.hpp"
 #include "GXml.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEvent;
+class GObservation;
 
 
 /***********************************************************************//**
@@ -51,8 +53,8 @@ public:
     // Constructors and destructors
     GModels(void);
     GModels(const GModels& models);
-    GModels(const std::string& filename);
-    ~GModels(void);
+    explicit GModels(const std::string& filename);
+    virtual ~GModels(void);
 
     // Operators
     GModel*       operator() (int index);
@@ -61,6 +63,7 @@ public:
 
     // Methods
     void        clear(void);
+    GModels*    clone(void) const;
     int         size(void) const { return m_elements; }
     void        append(const GModel& model);
     void        load(const std::string& filename);
@@ -69,12 +72,8 @@ public:
     void        write(GXml& xml) const;
     double      value(const GSkyDir& srcDir, const GEnergy& srcEng,
                       const GTime& srcTime);
-    double      eval(const GInstDir& obsDir, const GEnergy& obsEng,
-                     const GTime& obsTime, const GResponse& rsp,
-                     const GPointing& pnt);
-    double      eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
-                          const GTime& obsTime, const GResponse& rsp,
-                          const GPointing& pnt);
+    double      eval(const GEvent& event, const GObservation& obs);
+    double      eval_gradients(const GEvent& event, const GObservation& obs);
     std::string print(void) const;
 
 protected:

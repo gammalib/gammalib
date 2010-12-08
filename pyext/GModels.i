@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GModels.i  -  Model container class SWIG interface           *
+ *                   GModels.i  -  Model container class                   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -24,15 +24,15 @@
 /***********************************************************************//**
  * @class GModels
  *
- * @brief GModels class SWIG interface defintion.
+ * @brief GModels class Python bindings.
  ***************************************************************************/
 class GModels : public GOptimizerPars {
 public:
     // Constructors and destructors
     GModels(void);
     GModels(const GModels& models);
-    GModels(const std::string& filename);
-    ~GModels(void);
+    explicit GModels(const std::string& filename);
+    virtual ~GModels(void);
  
     // Methods
     void   clear(void);
@@ -44,12 +44,8 @@ public:
     void   write(GXml& xml) const;
     double value(const GSkyDir& srcDir, const GEnergy& srcEng,
                  const GTime& srcTime);
-    double eval(const GInstDir& obsDir, const GEnergy& obsEng,
-                const GTime& obsTime, const GResponse& rsp,
-                const GPointing& pnt);
-    double eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
-                          const GTime& obsTime, const GResponse& rsp,
-                          const GPointing& pnt);
+    double eval(const GEvent& event, const GObservation& obs);
+    double eval_gradients(const GEvent& event, const GObservation& obs);
 };
 
 
@@ -65,8 +61,13 @@ public:
     if (index >= 0 && index < self->size())
         return (*self)(index);
     else
-        throw GException::out_of_range("__getitem__(int)", index, 
-                                       self->size());
+        throw GException::out_of_range("__getitem__(int)", index, self->size());
+    }
+    void __setitem__(int index, const GModel& val) {
+        if (index>=0 && index < self->size())
+            *(*self)(index) = val;
+        else
+            throw GException::out_of_range("__setitem__(int)", index, self->size());
     }
     GModels copy() {
         return (*self);
