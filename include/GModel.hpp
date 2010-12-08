@@ -21,18 +21,20 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
+#include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GModelSpatial.hpp"
 #include "GModelSpectral.hpp"
 #include "GModelTemporal.hpp"
 #include "GSkyDir.hpp"
-#include "GInstDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GResponse.hpp"
-#include "GPointing.hpp"
 #include "GVector.hpp"
 #include "GXmlElement.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEvent;
+class GObservation;
 
 
 /***********************************************************************//**
@@ -40,7 +42,7 @@
  *
  * @brief GModel class interface defintion.
  *
- * This class implements a source model that is factoried in a spatial,
+ * This class implements a source model that is factorised in a spatial,
  * a spectral and a temporal component.
  * The class has two methods for model evaluation. The eval() method
  * evaluates the model for a given observed photon direction, photon energy
@@ -64,37 +66,38 @@ class GModel {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GModel& model);
+    friend GLog&         operator<< (GLog& log, const GModel& model);
 
 public:
     // Constructors and destructors
     GModel(void);
     GModel(const GModel& model);
-    GModel(const GModelSpatial& spatial, const GModelSpectral& spectral);
-    GModel(const GXmlElement& spatial, const GXmlElement& spectral);
-    ~GModel(void);
+    explicit GModel(const GModelSpatial& spatial, const GModelSpectral& spectral);
+    explicit GModel(const GXmlElement& spatial, const GXmlElement& spectral);
+    virtual ~GModel(void);
 
     // Operators
-    GModel& operator= (const GModel& model);
+    GModelPar&       operator() (int index);
+    const GModelPar& operator() (int index) const;
+    GModel&          operator= (const GModel& model);
 
     // Methods
-    int                   size(void) const { return m_npars; }
-    std::string           name(void) const { return m_name; }
-    void                  name(const std::string& name) { m_name=name; return; }
-    const GModelSpatial*  spatial(void) const { return m_spatial; }
-    const GModelSpectral* spectral(void) const { return m_spectral; }
-    const GModelTemporal* temporal(void) const { return m_temporal; }
-    GModelPar*            par(int index) const;
-    double                value(const GSkyDir& srcDir, const GEnergy& srcEng,
-                                const GTime& srcTime);
-    GVector               gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
-                                    const GTime& srcTime);
-    double                eval(const GInstDir& obsDir, const GEnergy& obsEng,
-                               const GTime& obsTime, const GResponse& rsp,
-                               const GPointing& pnt);
-    double                eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
-                                         const GTime& obsTime, const GResponse& rsp,
-                                         const GPointing& pnt);
-    bool                  isvalid(const std::string& name) const;
+    void            clear(void);
+    GModel*         clone(void) const;
+    int             size(void) const { return m_npars; }
+    std::string     name(void) const { return m_name; }
+    void            name(const std::string& name) { m_name=name; return; }
+    GModelSpatial*  spatial(void) const { return m_spatial; }
+    GModelSpectral* spectral(void) const { return m_spectral; }
+    GModelTemporal* temporal(void) const { return m_temporal; }
+    double          value(const GSkyDir& srcDir, const GEnergy& srcEng,
+                          const GTime& srcTime);
+    GVector         gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
+                              const GTime& srcTime);
+    double          eval(const GEvent& event, const GObservation& obs);
+    double          eval_gradients(const GEvent& event, const GObservation& obs);
+    bool            isvalid(const std::string& name) const;
+    std::string     print(void) const;
 
 protected:
     // Protected methods
@@ -104,17 +107,12 @@ protected:
     void            set_pointers(void);
     GModelSpatial*  xml_spatial(const GXmlElement& spatial) const;
     GModelSpectral* xml_spectral(const GXmlElement& spectral) const;
-    double          fct(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                        const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                        const GResponse& rsp, const GPointing& pnt, bool grad = false);
-    double          spatial(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                            const GEnergy& srcEng, const GTime& srcTime,
-                            const GResponse& rsp, const GPointing& pnt, bool grad = false);
-    double          spectral(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                             const GTime& srcTime,
-                             const GResponse& rsp, const GPointing& pnt, bool grad = false);
-    double          temporal(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                             const GResponse& rsp, const GPointing& pnt, bool grad = false);
+    double          spatial(const GEvent& event, const GEnergy& srcEng, const GTime& srcTime,
+                            const GObservation& obs, bool grad = false);
+    double          spectral(const GEvent& event, const GTime& srcTime,
+                             const GObservation& obs, bool grad = false);
+    double          temporal(const GEvent& event,
+                             const GObservation& obs, bool grad = false);
 
     // Proteced data members
     std::string     m_name;          //!< Model name

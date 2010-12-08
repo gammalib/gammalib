@@ -20,15 +20,25 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
 #include "GException.hpp"
 #include "GModel.hpp"
 #include "GModelTemporalConst.hpp"
 #include "GModelSpatialPtsrc.hpp"
+#include "GModelSpatialConst.hpp"
+#include "GModelSpatialCube.hpp"
 #include "GModelSpectralPlaw.hpp"
+#include "GModelSpectralPlaw2.hpp"
 #include "GModelSpectralExpPlaw.hpp"
+#include "GModelSpectralFunc.hpp"
+#include "GModelSpectralConst.hpp"
+#include "GEvent.hpp"
+#include "GPointing.hpp"
+#include "GResponse.hpp"
+#include "GObservation.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_PAR                                              "GModel::par(int)"
+#define G_ACCESS                                   "GModel::operator() (int)"
 #define G_XML_SPATIAL                     "GModel::xml_spatial(GXmlElement&)"
 #define G_XML_SPECTRAL                   "GModel::xml_spectral(GXmlElement&)"
 
@@ -46,7 +56,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GModel::GModel(void)
 {
@@ -133,7 +143,7 @@ GModel::GModel(const GXmlElement& spatial, const GXmlElement& spectral)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModel::~GModel()
+GModel::~GModel(void)
 {
     // Free members
     free_members();
@@ -148,6 +158,48 @@ GModel::~GModel()
  =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Returns reference to model parameter
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ ***************************************************************************/
+GModelPar& GModel::operator() (int index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= m_npars)
+        throw GException::out_of_range(G_ACCESS, index, 0, m_npars-1);
+    #endif
+
+    // Return pointer
+    return *(m_par[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model parameter (const version)
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ ***************************************************************************/
+const GModelPar& GModel::operator() (int index) const
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= m_npars)
+        throw GException::out_of_range(G_ACCESS, index, 0, m_npars-1);
+    #endif
+
+    // Return pointer
+    return *(m_par[index]);
+}
+
 
 /***********************************************************************//**
  * @brief Assignment operator
@@ -182,21 +234,29 @@ GModel& GModel::operator= (const GModel& model)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Returns pointer to a model parameter
+ * @brief Clear instance
  *
- * @param[in] index Parameter index.
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
+ * This method properly resets the instance to an initial state.
  ***************************************************************************/
-GModelPar* GModel::par(int index) const
+void GModel::clear(void)
 {
-    // If index is outside boundary then throw an error
-    if (index < 0 || index >= m_npars)
-        throw GException::out_of_range(G_PAR, index, 0, m_npars-1);
+    // Free class members
+    free_members();
 
-    // Return parameter pointer
-    return m_par[index];
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+ ***************************************************************************/
+GModel* GModel::clone(void) const
+{
+    return new GModel(*this);
 }
 
 
@@ -207,8 +267,8 @@ GModelPar* GModel::par(int index) const
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
  *
- * This method evaluates the factorized source model at a given set of
- * parameters.
+ * This method evaluates the factorized source model for a given true photon
+ * arrival direction, true photon energy and true photon arrival time.
  ***************************************************************************/
 double GModel::value(const GSkyDir& srcDir, const GEnergy& srcEng,
                      const GTime& srcTime)
@@ -234,7 +294,8 @@ double GModel::value(const GSkyDir& srcDir, const GEnergy& srcEng,
  * @param[in] srcTime True photon arrival time.
  *
  * This method returns the parameter gradients of the factorized source model
- * at a given set of parameters.
+ * for a given true photon arrival direction, true photon energy and true
+ * photon arrival time.
  ***************************************************************************/
 GVector GModel::gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
                           const GTime& srcTime)
@@ -258,22 +319,18 @@ GVector GModel::gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
 
 
 /***********************************************************************//**
- * @brief Evaluate function
+ * @brief Evaluate model
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed photon energy.
- * @param[in] obsTime Observed photon arrival time.
- * @param[in] rsp Instrument response function.
- * @param[in] pnt Instrument pointing direction.
+ * @param[in] event Observed event.
+ * @param[in] obs Observation.
  *
- * This method evaluates the source model.
+ * This method evaluates the source model for a given event within a given
+ * observation.
  ***************************************************************************/
-double GModel::eval(const GInstDir& obsDir, const GEnergy& obsEng,
-                    const GTime& obsTime, const GResponse& rsp,
-                    const GPointing& pnt)
+double GModel::eval(const GEvent& event, const GObservation& obs)
 {
     // Evaluate function
-    double value = temporal(obsDir, obsEng, obsTime, rsp, pnt, false);
+    double value = temporal(event, obs, false);
 
     // Return
     return value;
@@ -281,22 +338,18 @@ double GModel::eval(const GInstDir& obsDir, const GEnergy& obsEng,
 
 
 /***********************************************************************//**
- * @brief Evaluate function and gradients
+ * @brief Evaluate model and parameter gradients
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed photon energy.
- * @param[in] obsTime Observed photon arrival time.
- * @param[in] rsp Instrument response function.
- * @param[in] pnt Instrument pointing direction.
+ * @param[in] event Observed event.
+ * @param[in] obs Observation.
  *
- * This method evaluates the source model and sets the model gradients.
+ * This method evaluates the source model and model gradients for a given
+ * event within a given observation.
  ***************************************************************************/
-double GModel::eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
-                              const GTime& obsTime, const GResponse& rsp,
-                              const GPointing& pnt)
+double GModel::eval_gradients(const GEvent& event, const GObservation& obs)
 {
     // Evaluate function
-    double value = temporal(obsDir, obsEng, obsTime, rsp, pnt, true);
+    double value = temporal(event, obs, true);
 
     // Return
     return value;
@@ -317,9 +370,48 @@ bool GModel::isvalid(const std::string& name) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print model information
+ ***************************************************************************/
+std::string GModel::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Determine number of parameters per type
+   int n_spatial  = (m_spatial  != NULL) ? m_spatial->size() : 0;
+   int n_spectral = (m_spectral != NULL) ? m_spectral->size() : 0;
+   int n_temporal = (m_temporal != NULL) ? m_temporal->size() : 0;
+
+    // Append header
+    result.append("=== GModel ===\n");
+    result.append(parformat("Name")+name()+"\n");
+    result.append(parformat("Number of parameters")+str(size())+"\n");
+    result.append(parformat("Number of spatial par's")+str(n_spatial));
+    int i;
+    for (i = 0; i < n_spatial; ++i) {
+        result.append("\n"+parformat("Parameter"));
+        result.append((*this)(i).print());
+    }
+    result.append(parformat("Number of spectral par's")+str(n_spectral));
+    for (; i < n_spatial+n_spectral; ++i) {
+        result.append("\n"+parformat("Parameter"));
+        result.append((*this)(i).print());
+    }
+    result.append(parformat("Number of temporal par's")+str(n_temporal));
+    for (; i < n_spatial+n_spectral+n_temporal; ++i) {
+        result.append("\n"+parformat("Parameter"));
+        result.append((*this)(i).print());
+    }
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
- =                          GModel private methods                         =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -389,6 +481,8 @@ void GModel::free_members(void)
 
 /***********************************************************************//**
  * @brief Set parameter pointers
+ *
+ * Gathers all parameter pointers from the model.
  ***************************************************************************/
 void GModel::set_pointers(void)
 {
@@ -413,15 +507,15 @@ void GModel::set_pointers(void)
 
         // Gather spatial parameter pointers
         for (int i = 0; i < n_spatial; ++i)
-            *ptr++ = m_spatial->par(i);
+            *ptr++ = &((*m_spatial)(i));
 
         // Gather spectral parameters
         for (int i = 0; i < n_spectral; ++i)
-            *ptr++ = m_spectral->par(i);
+            *ptr++ = &((*m_spectral)(i));
 
         // Gather temporal parameters
         for (int i = 0; i < n_temporal; ++i)
-            *ptr++ = m_temporal->par(i);
+            *ptr++ = &((*m_temporal)(i));
 
     }
 
@@ -456,11 +550,11 @@ GModelSpatial* GModel::xml_spatial(const GXmlElement& spatial) const
 
     // Type=MapCubeFunction
     else if (type == "MapCubeFunction")
-        throw GException::model_invalid_spatial(G_XML_SPATIAL, type);
+        ptr = new GModelSpatialCube(spatial);
 
     // Type=ConstantValue
     else if (type == "ConstantValue")
-        throw GException::model_invalid_spatial(G_XML_SPATIAL, type);
+        ptr = new GModelSpatialConst(spatial);
 
     // Unknown spatial model type
     else
@@ -493,11 +587,19 @@ GModelSpectral* GModel::xml_spectral(const GXmlElement& spectral) const
 
     // Type=PowerLaw2
     else if (type == "PowerLaw2")
-        throw GException::model_invalid_spectral(G_XML_SPECTRAL, type);
+        ptr = new GModelSpectralPlaw2(spectral);
 
     // Type=ExpCutoff
     else if (type == "ExpCutoff")
         ptr = new GModelSpectralExpPlaw(spectral);
+
+    // Type=FileFunction
+    else if (type == "FileFunction")
+        ptr = new GModelSpectralFunc(spectral);
+
+    // Type=ConstantValue
+    else if (type == "ConstantValue")
+        ptr = new GModelSpectralConst(spectral);
 
     // Unknown spectral model type
     else
@@ -509,122 +611,82 @@ GModelSpectral* GModel::xml_spectral(const GXmlElement& spectral) const
 
 
 /***********************************************************************//**
- * @brief Evaluate function
+ * @brief Returns spatial model component
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed photon energy.
- * @param[in] obsTime Observed photon arrival time.
- * @param[in] srcDir True photon direction.
+ * @param[in] event Observed event.
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
  * @param[in] rsp Instrument response function.
  * @param[in] pnt Instrument pointing direction.
  * @parem[in] grad Compute also model gradients (default=false).
  *
- * This method evaluates the factorized source model at a given set of
- * parameters and multipies it with the corresponding value of the IRF.
- * Optionally, the parameter gradients are also evaluated and multiplied
- * with the corresponding IRF value. The result of this method needs to be
- * integrated over srcDir, srcEng, and srcTime to get the probability of
- * measuring an event.
+ * This method computes the spatial model component for a given true photon
+ * energy and arrival time. It distinguishes the case of a point source from
+ * that of a diffuse model and calls the respective methods() of the
+ * response class to compute the spatial response.
  ***************************************************************************/
-double GModel::fct(const GInstDir& obsDir, const GEnergy& obsEng,
-                   const GTime& obsTime, const GSkyDir& srcDir,
-                   const GEnergy& srcEng, const GTime& srcTime,
-                   const GResponse& rsp, const GPointing& pnt, bool grad)
-{
-    // Initialise value
-    double value = 0.0;
-
-    // Compute IRF
-    double irf = (&rsp)->irf(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, pnt);
-
-    // Compute source model
-    double source = 1.0;
-
-    // Evaluate model in all components
-    if (grad) {
-
-        // Evaluate source model
-        if (m_spatial  != NULL) source *= m_spatial->eval_gradients(srcDir);
-        if (m_spectral != NULL) source *= m_spectral->eval_gradients(srcEng);
-        if (m_temporal != NULL) source *= m_temporal->eval_gradients(srcTime);
-
-        // Set value
-        value = source * irf;
-
-        // Set gradients
-        for (int i = 0; i < m_npars; ++i)
-            m_par[i]->gradient(m_par[i]->gradient() * irf);
-
-    }
-    else {
-
-        // Evaluate source model
-        if (m_spatial  != NULL) source *= m_spatial->eval(srcDir);
-        if (m_spectral != NULL) source *= m_spectral->eval(srcEng);
-        if (m_temporal != NULL) source *= m_temporal->eval(srcTime);
-
-        // Set value
-        value = source * irf;
-    }
-
-    // Return
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Perform integration over spatial component
- *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed photon energy.
- * @param[in] obsTime Observed photon arrival time.
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
- * @param[in] rsp Instrument response function.
- * @param[in] pnt Instrument pointing direction.
- * @parem[in] grad Compute also model gradients (default=false).
- *
- * This method integrates the source model over the spatial component. If
- * the model does not explicitely depend on the sky direction (e.g. because
- * the model is a point source) no spatial integration is needed.
- *
- * @todo Needs implementation of spatial integration. Spatial integration
- * gets the integration region from the spatial model.
- ***************************************************************************/
-double GModel::spatial(const GInstDir& obsDir, const GEnergy& obsEng,
-                       const GTime& obsTime,
+double GModel::spatial(const GEvent& event,
                        const GEnergy& srcEng, const GTime& srcTime,
-                       const GResponse& rsp, const GPointing& pnt, bool grad)
+                       const GObservation& obs, bool grad)
 {
     // Initialise result
     double value = 0.0;
 
-    // Continue only if the gamma-ray source model has a spatial component
+    // Continue only if the model has a spatial component
     if (m_spatial != NULL) {
 
-        // Case A: Model is a point source
+        // Get current pointing and response function
+        GPointing* pnt = obs.pointing(event.time());
+        GResponse* rsp = obs.response(event.time());
+
+        // Allocate IRF value
+        double irf;
+
+        // If the spatial model is a point source then extract the point
+        // source location from the spatial model and compute the point
+        // source IRF for that location.
         if (m_spatial->isptsource()) {
 
-            // Build sky direction from point source parameters
-            GSkyDir srcDir;
-            srcDir.radec_deg(((GModelSpatialPtsrc*)m_spatial)->ra(),
-                             ((GModelSpatialPtsrc*)m_spatial)->dec());
+            // Get point source location
+            GSkyDir srcDir = ((GModelSpatialPtsrc*)m_spatial)->dir();
 
-            // Get function value at that position
-            value = fct(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, rsp, pnt, grad);
+            // Compute IRF
+            irf = rsp->irf(event.dir(), event.energy(), event.time(),
+                           srcDir, srcEng, srcTime, *pnt);
 
         } // endif: Model was a point source
 
-        // Case B: Model is not a point source
+        // ... otherwise compute the diffuse instrument response function.
+        else
+            irf = rsp->diffrsp(event, *this, srcEng, srcTime, *pnt);
+
+        // Compute source model
+        double source = 1.0;
+
+        // Evaluate model in all components
+        if (grad) {
+
+            // Evaluate source model
+            if (m_spectral != NULL) source *= m_spectral->eval_gradients(srcEng);
+            if (m_temporal != NULL) source *= m_temporal->eval_gradients(srcTime);
+
+            // Set value
+            value = source * irf;
+
+            // Set gradients
+            for (int i = 0; i < m_npars; ++i)
+                m_par[i]->gradient(m_par[i]->gradient() * irf);
+
+        }
         else {
 
-            // Dump warning that integration is not yet implemented
-            std::cout << "WARNING: GModel::spatial:"
-                      << " Sky integration not implemented." << std::endl;
+            // Evaluate source model
+            if (m_spectral != NULL) source *= m_spectral->eval(srcEng);
+            if (m_temporal != NULL) source *= m_temporal->eval(srcTime);
 
-        } // endelse: Model was not a point source
+            // Set value
+            value = source * irf;
+        }
 
     } // endif: Gamma-ray source model had a spatial component
 
@@ -636,12 +698,9 @@ double GModel::spatial(const GInstDir& obsDir, const GEnergy& obsEng,
 /***********************************************************************//**
  * @brief Perform integration over spectral component
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed photon energy.
- * @param[in] obsTime Observed photon arrival time.
+ * @param[in] event Observed event.
  * @param[in] srcTime True photon arrival time.
- * @param[in] rsp Instrument response function.
- * @param[in] pnt Instrument pointing direction.
+ * @param[in] obs Observation.
  * @parem[in] grad Compute also model gradients (default=false).
  *
  * This method integrates the source model over the spectral component. If
@@ -649,17 +708,17 @@ double GModel::spatial(const GInstDir& obsDir, const GEnergy& obsEng,
  * integration is needed and the observed photon energy is identical to the
  * true photon energy.
  *
- * @todo Needs implementation of spectral integration.
+ * @todo Needs implementation of spectral integration to handle energy
+ *       dispersion.
  ***************************************************************************/
-double GModel::spectral(const GInstDir& obsDir, const GEnergy& obsEng,
-                        const GTime& obsTime, const GTime& srcTime,
-                        const GResponse& rsp, const GPointing& pnt, bool grad)
+double GModel::spectral(const GEvent& event, const GTime& srcTime,
+                        const GObservation& obs, bool grad)
 {
     // Initialise result
     double value = 0.0;
 
     // Determine if energy integration is needed
-    bool integrate = rsp.hasedisp();
+    bool integrate = obs.response(event.time())->hasedisp();
 
     // Case A: Integraion
     if (integrate) {
@@ -668,7 +727,7 @@ double GModel::spectral(const GInstDir& obsDir, const GEnergy& obsEng,
 
     // Case B: No integration (assume no energy dispersion)
     else
-        value = spatial(obsDir, obsEng, obsTime, obsEng, srcTime, rsp, pnt, grad);
+        value = spatial(event, event.energy(), srcTime, obs, grad);
 
     // Return value
     return value;
@@ -678,11 +737,8 @@ double GModel::spectral(const GInstDir& obsDir, const GEnergy& obsEng,
 /***********************************************************************//**
  * @brief Perform integration over temporal component
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed photon energy.
- * @param[in] obsTime Observed photon arrival time.
- * @param[in] rsp Instrument response function.
- * @param[in] pnt Instrument pointing direction.
+ * @param[in] event Observed event.
+ * @param[in] obs Observation.
  * @parem[in] grad Compute also model gradients (default=false).
  *
  * This method integrates the source model over the temporal component. If
@@ -690,17 +746,16 @@ double GModel::spectral(const GInstDir& obsDir, const GEnergy& obsEng,
  * is needed and the observed photon arrival time is identical to the true
  * photon arrival time.
  *
- * @todo Needs implementation of temporal integration.
+ * @todo Needs implementation of temporal integration to handle time
+ *       dispersion.
  ***************************************************************************/
-double GModel::temporal(const GInstDir& obsDir, const GEnergy& obsEng,
-                        const GTime& obsTime,
-                        const GResponse& rsp, const GPointing& pnt, bool grad)
+double GModel::temporal(const GEvent& event, const GObservation& obs, bool grad)
 {
     // Initialise result
     double value = 0.0;
 
     // Determine if time integration is needed
-    bool integrate = rsp.hastdisp();
+    bool integrate = obs.response(event.time())->hastdisp();
 
     // Case A: Integraion
     if (integrate) {
@@ -709,7 +764,7 @@ double GModel::temporal(const GInstDir& obsDir, const GEnergy& obsEng,
 
     // Case B: No integration (assume no time dispersion)
     else
-        value = spectral(obsDir, obsEng, obsTime, obsTime, rsp, pnt, grad);
+        value = spectral(event, event.time(), obs, grad);
 
     // Return value
     return value;
@@ -718,44 +773,37 @@ double GModel::temporal(const GInstDir& obsDir, const GEnergy& obsEng,
 
 /*==========================================================================
  =                                                                         =
- =                               GModel friends                            =
+ =                                  Friends                                =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Put model in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the model will be dumped
- * @param[in] model Model to be dumped
+ * @param[in] os Output stream.
+ * @param[in] model Model.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GModel& model)
 {
-    // Determine number of parameters per type
-   int n_spatial  = model.m_spatial->size();
-   int n_spectral = model.m_spectral->size();
-   int n_temporal = model.m_temporal->size();
-
-    // Put model in stream
-    os << "=== GModel ===" << std::endl;
-    os << " Name ......................: " << model.m_name << std::endl;
-    os << " Number of parameters ......: " << model.m_npars << std::endl;
-    os << " Number of spatial par's ...: " << n_spatial;
-    int i;
-    for (i = 0; i < n_spatial; ++i) {
-        os << std::endl;
-        os << " Parameter .................: " << *(model.m_par[i]);
-    }
-    os << std::endl << " Number of spectral par's ..: " << n_spatial;
-    for (; i < n_spatial+n_spectral; ++i) {
-        os << std::endl;
-        os << " Parameter .................: " << *(model.m_par[i]);
-    }
-    os << std::endl << " Number of temporal par's ..: " << n_temporal;
-    for (; i < n_spatial+n_spectral+n_temporal; ++i) {
-        os << std::endl;
-        os << " Parameter .................: " << *(model.m_par[i]);
-    }    
+     // Write spectrum in output stream
+    os << model.print();
 
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] model Model.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GModel& model)
+{
+    // Write spectrum into logger
+    log << model.print();
+
+    // Return logger
+    return log;
 }

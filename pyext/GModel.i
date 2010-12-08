@@ -31,29 +31,26 @@ public:
     // Constructors and destructors
     GModel(void);
     GModel(const GModelSpatial& spatial, const GModelSpectral& spectral);
-    GModel(const GXmlElement& spatial, const GXmlElement& spectral);
-    GModel(const GModel& model);
-    ~GModel(void);
+    explicit GModel(const GXmlElement& spatial, const GXmlElement& spectral);
+    explicit GModel(const GModel& model);
+    virtual ~GModel(void);
 
     // Methods
-    int                   size(void) const { return m_npars; }
-    std::string           name(void) const { return m_name; }
-    void                  name(const std::string& name) { m_name=name; return; }
-    const GModelSpatial*  spatial(void) const { return m_spatial; }
-    const GModelSpectral* spectral(void) const { return m_spectral; }
-    const GModelTemporal* temporal(void) const { return m_temporal; }
-    GModelPar*            par(int index) const;
-    double                value(const GSkyDir& srcDir, const GEnergy& srcEng,
-                                const GTime& srcTime);
-    GVector               gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
-                                    const GTime& srcTime);
-    double                eval(const GInstDir& obsDir, const GEnergy& obsEng,
-                               const GTime& obsTime, const GResponse& rsp,
-                               const GPointing& pnt);
-    double                eval_gradients(const GInstDir& obsDir, const GEnergy& obsEng,
-                                         const GTime& obsTime, const GResponse& rsp,
-                                         const GPointing& pnt);
-    bool                  isvalid(const std::string& name) const;
+    void            clear(void);
+    GModel*         clone(void) const;
+    int             size(void) const { return m_npars; }
+    std::string     name(void) const { return m_name; }
+    void            name(const std::string& name) { m_name=name; return; }
+    GModelSpatial*  spatial(void) const { return m_spatial; }
+    GModelSpectral* spectral(void) const { return m_spectral; }
+    GModelTemporal* temporal(void) const { return m_temporal; }
+    double          value(const GSkyDir& srcDir, const GEnergy& srcEng,
+                          const GTime& srcTime);
+    GVector         gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
+                              const GTime& srcTime);
+    double          eval(const GEvent& event, const GObservation& obs);
+    double          eval_gradients(const GEvent& event, const GObservation& obs);
+    bool            isvalid(const std::string& name) const;
 };
 
 
@@ -62,13 +59,20 @@ public:
  ***************************************************************************/
 %extend GModel {
     char *__str__() {
-        static char str_buffer[10001];
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 10001);
-        str_buffer[10000] = '\0';
-        return str_buffer;
+        static std::string result = self->print();
+        return ((char*)result.c_str());
+    }
+    GModelPar __getitem__(int index) {
+    if (index >= 0 && index < self->size())
+        return (*self)(index);
+    else
+        throw GException::out_of_range("__getitem__(int)", index, self->size());
+    }
+    void __setitem__(int index, const GModelPar& val) {
+        if (index>=0 && index < self->size())
+            (*self)(index) = val;
+        else
+            throw GException::out_of_range("__setitem__(int)", index, self->size());
     }
     GModel copy() {
         return (*self);
