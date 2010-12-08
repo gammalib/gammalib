@@ -29,9 +29,14 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelPar.hpp \
                      GModelSpatial.hpp \
                      GModelSpatialPtsrc.hpp \
+                     GModelSpatialConst.hpp \
+                     GModelSpatialCube.hpp \
                      GModelSpectral.hpp \
                      GModelSpectralPlaw.hpp \
+                     GModelSpectralPlaw2.hpp \
                      GModelSpectralExpPlaw.hpp \
+                     GModelSpectralFunc.hpp \
+                     GModelSpectralConst.hpp \
                      GModelTemporal.hpp \
                      GModelTemporalConst.hpp \
                      GApplication.hpp \

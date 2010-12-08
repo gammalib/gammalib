@@ -87,6 +87,7 @@ def fit_spectrum(filename, xmlname):
     x = np.power(10., np.arange(-1., 8., 0.1))
     y = []
     d = GSkyDir()
+    d.radec_deg(83.6331, 22.0145)
     e = GEnergy()
     t = GTime()
     for energy in x:
@@ -121,7 +122,8 @@ if __name__ == '__main__':
     extract_data("data/crab_mwl.fits")
 
     # Fit spectrum
-    fit_spectrum("data/crab_mwl.fits", "data/crab_mwl2.xml")
+#    fit_spectrum("data/crab_mwl.fits", "data/crab_mwl2.xml")
+    fit_spectrum("data/crab_mwl.fits", "data/crab_mwl3.xml")
 
     # Show spectrum
     plt.show()

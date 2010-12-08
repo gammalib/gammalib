@@ -64,7 +64,7 @@
 
 /* __ Application module _________________________________________________ */
 #include "GApplication.i"
-//#include "GLog.i"
+#include "GLog.i"
 #include "GPars.i"
 #include "GPar.i"
 
@@ -113,6 +113,7 @@
 #include "GModelSpatialPtsrc.i"
 #include "GModelSpectral.i"
 #include "GModelSpectralPlaw.i"
+#include "GModelSpectralExpPlaw.i"
 #include "GModelTemporal.i"
 #include "GModelTemporalConst.i"
 

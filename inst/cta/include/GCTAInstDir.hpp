@@ -20,7 +20,7 @@
 #define GCTAINSTDIR_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
+#include <string>
 #include "GInstDir.hpp"
 #include "GSkyDir.hpp"
 
@@ -35,9 +35,6 @@
  ***************************************************************************/
 class GCTAInstDir : public GInstDir {
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GCTAInstDir& dir);
-
 public:
     // Constructors and destructors
     GCTAInstDir(void);
@@ -48,36 +45,39 @@ public:
     // Operators
     GCTAInstDir& operator= (const GCTAInstDir& dir);
 
-    // Methods
-    void    clear(void);
-    void    skydir(const GSkyDir& dir) { m_dir=dir; }
-    void    radec(const double& ra, const double& dec) { m_dir.radec(ra,dec); }
-    void    radec_deg(const double& ra, const double& dec) { m_dir.radec_deg(ra,dec); }
-    void    lb(const double& l, const double& b) { m_dir.lb(l,b); }
-    void    lb_deg(const double& l, const double& b) { m_dir.lb_deg(l,b); }
-    GSkyDir skydir(void) const { return m_dir; }
-    double  l(void) const { return m_dir.l(); }
-    double  l_deg(void) const { return m_dir.l_deg(); }
-    double  b(void) const { return m_dir.b(); }
-    double  b_deg(void) const { return m_dir.b_deg(); }
-    double  ra(void) const { return m_dir.ra(); }
-    double  ra_deg(void) const { return m_dir.ra_deg(); }
-    double  dec(void) const { return m_dir.dec(); }
-    double  dec_deg(void) const { return m_dir.dec_deg(); }
-    double  dist(const GSkyDir& dir) const { return m_dir.dist(dir); }
-    double  dist_deg(const GSkyDir& dir) const { return m_dir.dist_deg(dir); }
-    double  dist(const GCTAInstDir& dir) const;
-    double  dist_deg(const GCTAInstDir& dir) const;
+    // Implemented pure virtual base class methods
+    void         clear(void);
+    GCTAInstDir* clone(void) const;
+    std::string  print(void) const;
+
+    // Other methods
+    void         skydir(const GSkyDir& dir) { m_dir=dir; }
+    void         radec(const double& ra, const double& dec) { m_dir.radec(ra,dec); }
+    void         radec_deg(const double& ra, const double& dec) { m_dir.radec_deg(ra,dec); }
+    void         lb(const double& l, const double& b) { m_dir.lb(l,b); }
+    void         lb_deg(const double& l, const double& b) { m_dir.lb_deg(l,b); }
+    GSkyDir      skydir(void) const { return m_dir; }
+    double       l(void) const { return m_dir.l(); }
+    double       l_deg(void) const { return m_dir.l_deg(); }
+    double       b(void) const { return m_dir.b(); }
+    double       b_deg(void) const { return m_dir.b_deg(); }
+    double       ra(void) const { return m_dir.ra(); }
+    double       ra_deg(void) const { return m_dir.ra_deg(); }
+    double       dec(void) const { return m_dir.dec(); }
+    double       dec_deg(void) const { return m_dir.dec_deg(); }
+    double       dist(const GSkyDir& dir) const { return m_dir.dist(dir); }
+    double       dist_deg(const GSkyDir& dir) const { return m_dir.dist_deg(dir); }
+    double       dist(const GCTAInstDir& dir) const;
+    double       dist_deg(const GCTAInstDir& dir) const;
 
 protected:
     // Protected methods
-    void                 init_members(void);
-    void                 copy_members(const GCTAInstDir& dir);
-    void                 free_members(void);
-    virtual GCTAInstDir* clone(void) const;
+    void init_members(void);
+    void copy_members(const GCTAInstDir& dir);
+    void free_members(void);
     
     // Data members
-    GSkyDir m_dir;  //!< Incident direction of event
+    GSkyDir m_dir;  //!< Observed incident direction of event
 };
 
 #endif /* GCTAINSTDIR_HPP */

@@ -31,6 +31,7 @@ public:
 
     // Constructors and destructors
     GOptimizerLM(void);
+    GOptimizerLM(GLog& log);
     GOptimizerLM(const GOptimizerLM& opt);
     virtual ~GOptimizerLM(void);
 

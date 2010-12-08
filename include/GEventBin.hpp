@@ -20,6 +20,7 @@
 #define GEVENTBIN_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GEvent.hpp"
 #include "GInstDir.hpp"
 #include "GEnergy.hpp"
@@ -66,19 +67,20 @@ public:
     // Operators
     virtual GEventBin& operator= (const GEventBin& bin);
 
-    // Event access methods
+    // Pure virtual methods
+    virtual void            clear(void) = 0;
+    virtual GEvent*         clone(void) const = 0;
+    virtual double          size(void) const = 0;
     virtual const GInstDir& dir(void) const = 0;
     virtual const GEnergy&  energy(void) const = 0;
     virtual const GTime&    time(void) const = 0;
     virtual double          counts(void) const = 0;
-    virtual double          error(void) const;
+    virtual double          error(void) const = 0;
+    virtual std::string     print(void) const = 0;
 
     // Other methods
-    virtual void       clear(void) = 0;
-    virtual double     size(void) const = 0;
-    virtual GEventBin* clone(void) const = 0;
-    bool               isatom(void) const { return false; }
-    bool               isbin(void) const { return true; }
+    bool isatom(void) const { return false; }
+    bool isbin(void) const { return true; }
 
 protected:
     // Protected methods

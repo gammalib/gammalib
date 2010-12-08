@@ -52,7 +52,7 @@ GModels crab_plaw(void)
         dir.radec_deg(117.0, -33.0);  // Adapt to source position in file
         point_source = GModelSpatialPtsrc(dir);
         power_law    = GModelSpectralPlaw(1.0e-7, -2.1);
-        power_law.par(0)->min(1.0e-12);
+        power_law(0).min(1.0e-12);
         crab         = GModel(point_source, power_law);
         crab.name("Crab");
         models.append(crab);

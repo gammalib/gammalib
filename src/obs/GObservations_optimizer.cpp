@@ -34,8 +34,9 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_EVAL_TIMING 0 //!< Perform optimizer timing (0=no, 1=yes)
-#define G_EVAL_DEBUG  0 //!< Perform optimizer debugging (0=no, 1=yes)
+#define G_EVAL_TIMING   0 //!< Perform optimizer timing (0=no, 1=yes)
+#define G_EVAL_DEBUG    0 //!< Perform optimizer debugging (0=no, 1=yes)
+#define G_OPT_DEBUG     0 //!< Perform optimizer debugging (0=no, 1=yes)
 
 /* __ Prototypes _________________________________________________________ */
 
@@ -47,7 +48,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
 ***************************************************************************/
 GObservations::optimizer::optimizer(void) : GOptimizerFunction()
 {
@@ -99,7 +100,7 @@ GObservations::optimizer::optimizer(const optimizer& fct) : GOptimizerFunction(f
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GObservations::optimizer::~optimizer()
+GObservations::optimizer::~optimizer(void)
 {
     // Free members
     free_members();
@@ -118,7 +119,7 @@ GObservations::optimizer::~optimizer()
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] obs Instance to be assigned
+ * @param[in] obs Instance to be assigned.
  ***************************************************************************/
 GObservations::optimizer& GObservations::optimizer::operator= (const optimizer& fct)
 {
@@ -209,12 +210,16 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                     m_npred     += m_this->m_obs[i]->npred((GModels&)pars, m_wrk_grad);
                     *m_gradient += *m_wrk_grad;
                     #if G_EVAL_DEBUG
-                    std::cout << "Npred=" << m_npred << " Grad="
-                          << *m_gradient << std::endl;
+                    std::cout << "Unbinned Poisson";
+                    std::cout << " Npred=" << m_npred;
+                    std::cout << " Grad="<< *m_gradient << std::endl;
                     #endif
 
                     // Update the log-likelihood
                     poisson_unbinned(*(m_this->m_obs[i]), pars);
+
+                    // Add the Npred value to the log-likelihood
+                    m_value += m_npred;
 
                 } // endif: Poisson statistics
 
@@ -229,12 +234,20 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
             else {
 
                 // Poisson statistics
-                if (toupper(statistics) == "POISSON")
+                if (toupper(statistics) == "POISSON") {
+                    #if G_EVAL_DEBUG
+                    std::cout << "Binned Poisson" << std::endl;
+                    #endif
                     poisson_binned(*(m_this->m_obs[i]), pars);
+                }
 
                 // ... or Gaussian statistics
-                else if (toupper(statistics) == "GAUSSIAN")
+                else if (toupper(statistics) == "GAUSSIAN") {
+                    #if G_EVAL_DEBUG
+                    std::cout << "Binned Gaussian" << std::endl;
+                    #endif
                     gaussian_binned(*(m_this->m_obs[i]), pars);
+                }
 
                 // ... or unsupported
                 else
@@ -244,9 +257,6 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
             } // endelse: binned analysis
 
         } // endfor: looped over observations
-
-        // Add the Npred value to the log-likelihood
-        m_value += m_npred;
 
         // Release stack
         m_covar->stack_destroy();
@@ -311,9 +321,7 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
         GEvent* event = obs.events()->pointer(i);
 
         // Get model and derivative
-        double model = obs.model((GModels&)pars,
-                                 event->dir(), event->energy(), event->time(),
-                                 m_wrk_grad);
+        double model = obs.model((GModels&)pars, *event, m_wrk_grad);
 
         // Skip bin if model is too small (avoids -Inf or NaN gradients)
         if (model <= m_minmod)
@@ -410,6 +418,17 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
     clock_t t_start = clock();
     #endif
 
+    // Initialise statistics
+    #if G_OPT_DEBUG
+    int    n_bins        = 0;
+    int    n_used        = 0;
+    int    n_small_model = 0;
+    int    n_zero_data   = 0;
+    double sum_data      = 0.0;
+    double sum_model     = 0.0;
+    double init_value    = m_value;
+    #endif
+
     // Get number of parameters
     int npars = pars.npars();
 
@@ -420,6 +439,11 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
     // Iterate over all bins
     for (int i = 0; i < obs.events()->size(); ++i) {
 
+        // Update number of bins
+        #if G_OPT_DEBUG
+        n_bins++;
+        #endif
+
         // Get pointer to bin
         GEventBin* bin = (GEventBin*)obs.events()->pointer(i);
 
@@ -427,16 +451,25 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
         double data = bin->counts();
 
         // Get model and derivative
-        double model = obs.model((GModels&)pars,
-                                 bin->dir(), bin->energy(), bin->time(),
-                                 m_wrk_grad);
+        double model = obs.model((GModels&)pars, *bin, m_wrk_grad);
 
         // Multiply model by bin size
         model *= bin->size();
 
         // Skip bin if model is too small (avoids -Inf or NaN gradients)
-        if (model <= m_minmod)
+        if (model <= m_minmod) {
+            #if G_OPT_DEBUG
+            n_small_model++;
+            #endif
             continue;
+        }
+
+        // Update statistics
+        #if G_OPT_DEBUG
+        n_used++;
+        sum_data  += data;
+        sum_model += model;
+        #endif
 
         // Update Npred
         m_npred += model;
@@ -498,6 +531,11 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
         // ... handle now data=0
         else {
 
+            // Update statistics
+            #if G_OPT_DEBUG
+            n_zero_data++;
+            #endif
+            
             // Update Poissonian statistics (excluding factorial term for
             // faster computation)
             m_value += model;
@@ -518,6 +556,18 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
     // Free temporary memory
     if (values != NULL) delete [] values;
     if (inx    != NULL) delete [] inx;
+
+    // Dump statistics
+    #if G_OPT_DEBUG
+    std::cout << "Number of bins: " << n_bins << std::endl;
+    std::cout << "Number of bins used for computation: " << n_used << std::endl;
+    std::cout << "Number of bins excluded due to small model: " << n_small_model << std::endl;
+    std::cout << "Number of bins with zero data: " << n_zero_data << std::endl;
+    std::cout << "Sum of data: " << sum_data << std::endl;
+    std::cout << "Sum of model: " << sum_model << std::endl;
+    std::cout << "Initial statistics: " << init_value << std::endl;
+    std::cout << "Statistics: " << m_value-init_value << std::endl;
+    #endif
 
     // Optionally dump gradient and covariance matrix
     #if G_EVAL_DEBUG
@@ -589,9 +639,7 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
             continue;
 
         // Get model and derivative
-        double model = obs.model((GModels&)pars,
-                                 bin->dir(), bin->energy(), bin->time(),
-                                 m_wrk_grad);
+        double model = obs.model((GModels&)pars, *bin, m_wrk_grad);
 
         // Multiply model by bin size
         model *= bin->size();

@@ -19,7 +19,8 @@ sources = src/GLATObservation.cpp \
           src/GLATResponseTable.cpp \
           src/GLATAeff.cpp \
           src/GLATPsf.cpp \
-          src/GLATEdisp.cpp
+          src/GLATEdisp.cpp \
+          src/GLATException.cpp
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GLATObservation.hpp \
@@ -32,7 +33,8 @@ pkginclude_HEADERS = include/GLATObservation.hpp \
                      include/GLATRoi.hpp \
                      include/GLATResponse.hpp \
                      include/GLATResponseTable.hpp \
-                     include/GLATLib.hpp
+                     include/GLATLib.hpp \
+                     include/GLATException.hpp
 
 # Build libtool library
 noinst_LTLIBRARIES = liblat.la

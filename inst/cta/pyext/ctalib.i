@@ -16,9 +16,11 @@
 %module ctalib
 
 /* __ CTA ________________________________________________________________ */
+#include "GCTAObservation.i"
 #include "GCTAPointing.i"
 #include "GCTAResponse.i"
-#include "GCTAObservation.i"
+#include "GCTAInstDir.i"
+#include "GCTARoi.i"
 
 
 

@@ -20,8 +20,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GTools.hpp"
 #include "GLATInstDir.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -40,9 +40,9 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
-GLATInstDir::GLATInstDir(void)
+GLATInstDir::GLATInstDir(void) : GInstDir()
 {
     // Initialise class members
     init_members();
@@ -53,12 +53,31 @@ GLATInstDir::GLATInstDir(void)
 
 
 /***********************************************************************//**
+ * @brief GSkyDir constructor
+ *
+ * @param[in] dir Sky direction.
+ *
+ * Construct LAT instrument direction from sky direction.
+ ***************************************************************************/
+GLATInstDir::GLATInstDir(const GSkyDir& dir) : GInstDir()
+{
+    // Initialise class members
+    init_members();
+    
+    // Assign sky direction
+    m_dir = dir;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] dir Instrument direction from which class should be
- *                instantiated.
+ * @param[in] dir Instrument direction.
  ***************************************************************************/
-GLATInstDir::GLATInstDir(const GLATInstDir& dir)
+GLATInstDir::GLATInstDir(const GLATInstDir& dir) : GInstDir(dir)
 {
     // Initialise class members
     init_members();
@@ -93,12 +112,15 @@ GLATInstDir::~GLATInstDir(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] dir Instrument direction to be assigned.
+ * @param[in] dir Instrument direction.
  ***************************************************************************/
 GLATInstDir& GLATInstDir::operator= (const GLATInstDir& dir)
 {
     // Execute only if object is not identical
     if (this != &dir) {
+
+        // Copy base class members
+        this->GInstDir::operator=(dir);
 
         // Free members
         free_members();
@@ -123,14 +145,16 @@ GLATInstDir& GLATInstDir::operator= (const GLATInstDir& dir)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear sky direction
+ * @brief Clear instance
  ***************************************************************************/
 void GLATInstDir::clear(void)
 {
     // Free members
     free_members();
+    this->GInstDir::free_members();
 
     // Initialise private members
+    this->GInstDir::init_members();
     init_members();
 
     // Return
@@ -139,9 +163,18 @@ void GLATInstDir::clear(void)
 
 
 /***********************************************************************//**
+ * @brief Clone instance
+ ***************************************************************************/
+GLATInstDir* GLATInstDir::clone(void) const
+{
+    return new GLATInstDir(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Compute angular distance between instrument directions in radians
  *
- * @param[in] dir Instrument direction to which distance is to be computed.
+ * @param[in] dir Instrument direction.
  ***************************************************************************/
 double GLATInstDir::dist(GLATInstDir& dir) const
 {
@@ -162,12 +195,28 @@ double GLATInstDir::dist(GLATInstDir& dir) const
 /***********************************************************************//**
  * @brief Compute angular distance between instrument directions in degrees
  *
- * @param[in] dir Instrument direction to which distance is to be computed.
+ * @param[in] dir Instrument direction.
  ***************************************************************************/
 double GLATInstDir::dist_deg(GLATInstDir& dir) const
 {
     // Return distance in degrees
     return (dist(dir) * rad2deg);
+}
+
+
+/***********************************************************************//**
+ * @brief Print instrument direction information
+ ***************************************************************************/
+std::string GLATInstDir::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append instrument direction
+    result.append("RA="+str(ra_deg())+", DEC="+str(dec_deg()));
+
+    // Return result
+    return result;
 }
 
 
@@ -193,7 +242,7 @@ void GLATInstDir::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] dir Instrument direction from which members should be copied
+ * @param[in] dir Instrument direction.
  ***************************************************************************/
 void GLATInstDir::copy_members(const GLATInstDir& dir)
 {
@@ -215,32 +264,8 @@ void GLATInstDir::free_members(void)
 }
 
 
-/***********************************************************************//**
- * @brief Clone instance
- ***************************************************************************/
-GLATInstDir* GLATInstDir::clone(void) const
-{
-    return new GLATInstDir(*this);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream
- * @param[in] column Instrument direction to put in output stream
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GLATInstDir& dir)
-{
-    // Output sky direction
-    os << dir.m_dir;
-
-    // Return output stream
-    return os;
-}

@@ -20,6 +20,9 @@
 #define GEVENT_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
+#include <iostream>
+#include "GLog.hpp"
 #include "GInstDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
@@ -60,6 +63,10 @@
  ***************************************************************************/
 class GEvent {
 
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GEvent& event);
+    friend GLog&         operator<< (GLog& log, const GEvent& event);
+
 public:
     // Constructors and destructors
     GEvent(void);
@@ -69,19 +76,18 @@ public:
     // Operators
     virtual GEvent& operator= (const GEvent& event);
 
-    // Event access methods
+    // Pure virtual methods
+    virtual void            clear(void) = 0;
+    virtual GEvent*         clone(void) const = 0;
+    virtual double          size(void) const = 0;
     virtual const GInstDir& dir(void) const = 0;
     virtual const GEnergy&  energy(void) const = 0;
     virtual const GTime&    time(void) const = 0;
     virtual double          counts(void) const = 0;
     virtual double          error(void) const = 0;
-
-    // Other methods
-    virtual void    clear(void) = 0;
-    virtual GEvent* clone(void) const = 0;
-    virtual double  size(void) const = 0;
-    virtual bool    isatom(void) const = 0;
-    virtual bool    isbin(void) const = 0;
+    virtual bool            isatom(void) const = 0;
+    virtual bool            isbin(void) const = 0;
+    virtual std::string     print(void) const = 0;
 
 protected:
     // Protected methods

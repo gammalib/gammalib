@@ -20,6 +20,7 @@
 #define GEVENTATOM_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GEvent.hpp"
 #include "GInstDir.hpp"
 #include "GEnergy.hpp"
@@ -64,19 +65,20 @@ public:
     // Operators
     virtual GEventAtom& operator= (const GEventAtom& atom);
 
-    // Event access methods
+    // Pure virtual methods
+    virtual void            clear(void) = 0;
+    virtual GEvent*         clone(void) const = 0;
+    virtual double          size(void) const { return 1.0; }
     virtual const GInstDir& dir(void) const = 0;
     virtual const GEnergy&  energy(void) const = 0;
     virtual const GTime&    time(void) const = 0;
-    double                  counts(void) const { return 1.0; }
-    double                  error(void) const { return 0.0; }
+    virtual double          counts(void) const { return 1.0; }
+    virtual double          error(void) const { return 0.0; }
+    virtual std::string     print(void) const = 0;
 
     // Other methods
-    virtual void        clear(void) = 0;
-    virtual double      size(void) const { return 1.0; }
-    virtual GEventAtom* clone(void) const = 0;
-    virtual bool        isatom(void) const { return true; }
-    virtual bool        isbin(void) const { return false; }
+    bool isatom(void) const { return true; }
+    bool isbin(void) const { return false; }
 
 protected:
     // Protected methods

@@ -17,7 +17,11 @@
 
 /* __ LAT ________________________________________________________________ */
 #include "GLATObservation.i"
-//#include "GLATResponse.i"
+#include "GLATEventCube.i"
+#include "GLATEventBin.i"
+#include "GLATResponse.i"
+#include "GLATInstDir.i"
+#include "GLATRoi.i"
 
 
 
