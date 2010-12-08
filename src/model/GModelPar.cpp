@@ -25,10 +25,10 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_VALUE                             "GModelPar::value(const double&)"
-#define G_MIN                                 "GModelPar::min(const double&)"
-#define G_MAX                                 "GModelPar::max(const double&)"
-#define G_RANGE               "GModelPar::range(const double&,const double&)"
+#define G_VALUE                                   "GModelPar::value(double&)"
+#define G_MIN                                       "GModelPar::min(double&)"
+#define G_MAX                                       "GModelPar::max(double&)"
+#define G_RANGE                          "GModelPar::range(double&, double&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -44,7 +44,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GModelPar::GModelPar(void)
 {
@@ -77,7 +77,7 @@ GModelPar::GModelPar(const GModelPar& par)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelPar::~GModelPar()
+GModelPar::~GModelPar(void)
 {
     // Free members
     free_members();
@@ -89,7 +89,7 @@ GModelPar::~GModelPar()
 
 /*==========================================================================
  =                                                                         =
- =                           GModelPar operators                           =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -121,7 +121,7 @@ GModelPar& GModelPar::operator= (const GModelPar& par)
 
 /*==========================================================================
  =                                                                         =
- =                         GModelPar public methods                        =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -360,7 +360,7 @@ std::string GModelPar::print(void) const
 
 /*==========================================================================
  =                                                                         =
- =                        GModelPar private methods                        =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -425,7 +425,7 @@ void GModelPar::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                             GModelPar friends                           =
+ =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
 
