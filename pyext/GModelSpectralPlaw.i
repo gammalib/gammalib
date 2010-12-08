@@ -40,20 +40,16 @@ public:
     GModelSpectralPlaw* clone(void) const;
     int                 size(void) const { return m_npars; }
     std::string         type(void) const { return "PowerLaw"; }
-    GModelPar*          par(int index) const;
     double              eval(const GEnergy& srcEng);
     double              eval_gradients(const GEnergy& srcEng);
     void                read(const GXmlElement& xml);
     void                write(GXmlElement& xml) const;
 
     // Other methods
-    GModelPar* par_norm(void) { return &m_norm; }
-    GModelPar* par_index(void) { return &m_index; }
-    GModelPar* par_pivot(void) { return &m_pivot; }
-    void       autoscale(void);
-    double     norm(void) const { return m_norm.real_value(); }
-    double     index(void) const { return m_index.real_value(); }
-    double     pivot(void) const { return m_pivot.real_value(); }
+    void   autoscale(void);
+    double norm(void) const { return m_norm.real_value(); }
+    double index(void) const { return m_index.real_value(); }
+    double pivot(void) const { return m_pivot.real_value(); }
 };
 
 

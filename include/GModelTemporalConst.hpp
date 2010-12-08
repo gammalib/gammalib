@@ -37,9 +37,6 @@
  ***************************************************************************/
 class GModelTemporalConst  : public GModelTemporal {
 
-    // Friend classes
-    friend class GModel;
-
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GModelTemporalConst& model);
     friend GLog&         operator<< (GLog& log, const GModelTemporalConst& model);
@@ -58,9 +55,10 @@ public:
     GModelTemporalConst* clone(void) const;
     int                  size(void) const { return m_npars; }
     std::string          type(void) const { return "Constant"; }
-    GModelPar*           par(int index) const;
     double               eval(const GTime& srcTime);
     double               eval_gradients(const GTime& srcTime);
+    void                 read(const GXmlElement& xml);
+    void                 write(GXmlElement& xml) const;
     std::string          print(void) const;
 
 protected:
@@ -69,7 +67,10 @@ protected:
     void copy_members(const GModelTemporalConst& model);
     void free_members(void);
 
-    // Data area
+    // Implemented pure virtual methods
+    GModelPar** par(void) { return m_par; }
+
+    // Protected members
     int        m_npars;           //!< Number of parameters
     GModelPar* m_par[1];          //!< Pointers to parameters
     GModelPar  m_norm;            //!< Constant

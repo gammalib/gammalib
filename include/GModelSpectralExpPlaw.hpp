@@ -50,7 +50,7 @@ class GModelSpectralExpPlaw  : public GModelSpectral {
 
 public:
     // Constructors and destructors
-    explicit GModelSpectralExpPlaw(void);
+    GModelSpectralExpPlaw(void);
     explicit GModelSpectralExpPlaw(const double& norm, const double& index, const double& ecut);
     explicit GModelSpectralExpPlaw(const GXmlElement& xml);
     GModelSpectralExpPlaw(const GModelSpectralExpPlaw& model);
@@ -64,7 +64,6 @@ public:
     GModelSpectralExpPlaw* clone(void) const;
     int                    size(void) const { return m_npars; }
     std::string            type(void) const { return "ExpCutoff"; }
-    GModelPar*             par(int index) const;
     double                 eval(const GEnergy& srcEng);
     double                 eval_gradients(const GEnergy& srcEng);
     void                   read(const GXmlElement& xml);
@@ -72,15 +71,11 @@ public:
     std::string            print(void) const;
 
     // Other methods
-    GModelPar* par_norm(void) { return &m_norm; }
-    GModelPar* par_index(void) { return &m_index; }
-    GModelPar* par_ecut(void) { return &m_ecut; }
-    GModelPar* par_pivot(void) { return &m_pivot; }
-    void       autoscale(void);
-    double     norm(void) const { return m_norm.real_value(); }
-    double     index(void) const { return m_index.real_value(); }
-    double     ecut(void) const { return m_ecut.real_value(); }
-    double     pivot(void) const { return m_pivot.real_value(); }
+    void   autoscale(void);
+    double norm(void) const { return m_norm.real_value(); }
+    double index(void) const { return m_index.real_value(); }
+    double ecut(void) const { return m_ecut.real_value(); }
+    double pivot(void) const { return m_pivot.real_value(); }
 
 protected:
     // Protected methods
@@ -88,7 +83,10 @@ protected:
     void copy_members(const GModelSpectralExpPlaw& model);
     void free_members(void);
 
-    // Data area
+    // Implemented pure virtual methods
+    GModelPar** par(void) { return m_par; }
+
+    // Protected members
     int        m_npars;           //!< Number of parameters
     GModelPar* m_par[4];          //!< Pointers to parameters
     GModelPar  m_norm;            //!< Normalization factor

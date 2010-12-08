@@ -201,25 +201,6 @@ GModelSpectralPlaw* GModelSpectralPlaw::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Returns pointer to a model parameter
- *
- * @param[in] index Parameter index.
- *
- * @exception GException::out_of_range
- *            Parameter index is out of valid range
- ***************************************************************************/
-GModelPar* GModelSpectralPlaw::par(int index) const
-{
-    // If index is outside boundary then throw an error
-    if (index < 0 || index >= m_npars)
-        throw GException::out_of_range(G_PAR, index, 0, m_npars-1);
-
-    // Return parameter pointer
-    return m_par[index];
-}
-
-
-/***********************************************************************//**
  * @brief Evaluate function
  *
  * @param[in] srcEng True energy of photon.
@@ -338,8 +319,8 @@ void GModelSpectralPlaw::autoscale(void)
  *            Invalid model parameter names found in XML element.
  *
  * Read the spectral power law information from an XML element. The XML
- * element is required to have 3 parameters with names 'Prefactor', 'Index',
- * and 'Scale'.
+ * element is required to have 3 parameters with names "Prefactor", "Index",
+ * and "Scale".
  ***************************************************************************/
 void GModelSpectralPlaw::read(const GXmlElement& xml)
 {
@@ -378,7 +359,7 @@ void GModelSpectralPlaw::read(const GXmlElement& xml)
     // Verify that all parameters were found
     if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1)
         throw GException::model_invalid_parnames(G_READ, xml,
-                          "Require \"Prefactor\", \"Index\" and \"Scale\".");
+              "Require \"Prefactor\", \"Index\" and \"Scale\" parameters.");
 
     // Return
     return;
@@ -391,15 +372,15 @@ void GModelSpectralPlaw::read(const GXmlElement& xml)
  * @param[in] xml XML element into which model information is written.
  *
  * @exception GException::model_invalid_spectral
- *            Existing XML element is not of type 'PowerLaw'
+ *            Existing XML element is not of type "PowerLaw"
  * @exception GException::model_invalid_parnum
  *            Invalid number of model parameters or nodes found in XML element.
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
  * Write the spectral power law information into an XML element. The XML
- * element has to be of type 'PowerLaw' and will have 3 parameter leafs
- * named 'Prefactor', 'Index', and 'Scale'.
+ * element has to be of type "PowerLaw" and will have 3 parameter leafs
+ * named "Prefactor", "Index", and "Scale".
  ***************************************************************************/
 void GModelSpectralPlaw::write(GXmlElement& xml) const
 {
@@ -410,7 +391,7 @@ void GModelSpectralPlaw::write(GXmlElement& xml) const
     // Verify model type
     if (xml.attribute("type") != "PowerLaw")
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spatial model is not of type \"PowerLaw\".");
+              "Spectral model is not of type \"PowerLaw\".");
 
     // If XML element has 0 nodes then append 3 parameter nodes
     if (xml.elements() == 0) {
@@ -454,7 +435,7 @@ void GModelSpectralPlaw::write(GXmlElement& xml) const
     // Check of all required parameters are present
     if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1)
         throw GException::model_invalid_parnames(G_WRITE, xml,
-                          "Require \"Prefactor\", \"Index\" and \"Scale\".");
+              "Require \"Prefactor\", \"Index\" and \"Scale\" parameters.");
 
     // Return
     return;
@@ -504,17 +485,22 @@ void GModelSpectralPlaw::init_members(void)
     m_norm.name("Prefactor");
     m_norm.unit("ph/cm2/s/MeV");
     m_norm.value(1.0);
+    m_norm.scale(1.0);
+    m_norm.free();
 
     // Initialise powerlaw index
     m_index = GModelPar();
     m_index.name("Index");
     m_index.value(-2.0);
+    m_index.scale(1.0);
+    m_index.free();
 
     // Initialise pivot energy
     m_pivot = GModelPar();
     m_pivot.name("PivotEnergy");
     m_pivot.unit("MeV");
     m_pivot.value(100.0);
+    m_pivot.scale(1.0);
     m_pivot.fix();
 
     // Return

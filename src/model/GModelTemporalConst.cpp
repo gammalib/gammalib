@@ -25,7 +25,6 @@
 #include "GModelTemporalConst.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_PAR                           "GModelTemporalConst::par(int) const"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -145,26 +144,7 @@ void GModelTemporalConst::clear(void)
 
 
 /***********************************************************************//**
- * @brief Get pointer to model parameter
- *
- * @param[in] index Parameter index.
- *
- * @exception GException::out_of_range
- *            Parameter index is out of valid range
- ***************************************************************************/
-GModelPar* GModelTemporalConst::par(int index) const
-{
-    // If index is outside boundary then throw an error
-    if (index < 0 || index >= m_npars)
-        throw GException::out_of_range(G_PAR, index, 0, m_npars-1);
-
-    // Return parameter pointer
-    return m_par[index];
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
+ * @brief Clone instance
 ***************************************************************************/
 GModelTemporalConst* GModelTemporalConst::clone(void) const
 {
@@ -206,6 +186,34 @@ double GModelTemporalConst::eval_gradients(const GTime& srcTime)
 
 
 /***********************************************************************//**
+ * @brief Read model from XML element
+ *
+ * @param[in] xml XML element containing power law model information.
+ *
+ * @todo Not yet implemented.
+ ***************************************************************************/
+void GModelTemporalConst::read(const GXmlElement& xml)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write model into XML element
+ *
+ * @param[in] xml XML element into which model information is written.
+ *
+ * @todo Not yet implemented.
+ ***************************************************************************/
+void GModelTemporalConst::write(GXmlElement& xml) const
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print constant information
  ***************************************************************************/
 std::string GModelTemporalConst::print(void) const
@@ -228,7 +236,7 @@ std::string GModelTemporalConst::print(void) const
 
 /*==========================================================================
  =                                                                         =
- =                   GModelTemporalConst private methods                   =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -281,7 +289,7 @@ void GModelTemporalConst::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                        GModelTemporalConst friends                       =
+ =                                  Friends                                =
  =                                                                         =
  ==========================================================================*/
 

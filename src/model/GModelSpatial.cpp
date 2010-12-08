@@ -24,6 +24,7 @@
 #include "GModelSpatial.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ACCESS                            "GModelSpatial::operator() (int)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -87,6 +88,48 @@ GModelSpatial::~GModelSpatial(void)
  =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Returns model parameter
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ ***************************************************************************/
+GModelPar& GModelSpatial::operator() (int index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_ACCESS, index, 0, size()-1);
+    #endif
+
+    // Return pointer
+    return *(par()[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns model parameter (const version)
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ ***************************************************************************/
+const GModelPar& GModelSpatial::operator() (int index) const
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_ACCESS, index, 0, size()-1);
+    #endif
+
+    // Return pointer
+    return *((((GModelSpatial*)this)->par())[index]);
+}
+
 
 /***********************************************************************//**
  * @brief Assignment operator

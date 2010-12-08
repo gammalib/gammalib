@@ -38,9 +38,10 @@ public:
     GModelTemporalConst* clone(void) const;
     int                  size(void) const { return m_npars; }
     std::string          type(void) const { return "Constant"; }
-    GModelPar*           par(int index) const;
     double               eval(const GTime& srcTime);
     double               eval_gradients(const GTime& srcTime);
+    void                 read(const GXmlElement& xml);
+    void                 write(GXmlElement& xml) const;
 };
 
 

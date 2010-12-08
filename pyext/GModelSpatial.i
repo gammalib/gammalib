@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GModelSpatial.i  -  Spatial model class SWIG interface         *
+ *           GModelSpatial.i  -  Spatial model abstract base class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -29,21 +29,37 @@
 class GModelSpatial {
 public:
     // Constructors and destructors
-    explicit GModelSpatial(void);
+    GModelSpatial(void);
     GModelSpatial(const GModelSpatial& model);
-    virtual ~GModelSpatial();
+    virtual ~GModelSpatial(void);
 
     // Pure virtual methods
     virtual void           clear(void) = 0;
     virtual GModelSpatial* clone(void) const = 0;
     virtual int            size(void) const = 0;
     virtual std::string    type(void) const = 0;
-    virtual GModelPar*     par(int index) const = 0;
     virtual double         eval(const GSkyDir& srcDir) = 0;
     virtual double         eval_gradients(const GSkyDir& srcDir) = 0;
     virtual void           read(const GXmlElement& xml) = 0;
     virtual void           write(GXmlElement& xml) const = 0;
+    virtual bool           isptsource(void) const = 0;
+};
 
-    // Other methods
-    virtual bool isptsource(void) const { return false; }
+
+/***********************************************************************//**
+ * @brief GModelSpatial class extension
+ ***************************************************************************/
+%extend GModelSpatial {
+    GModelPar __getitem__(int index) {
+    if (index >= 0 && index < self->size())
+        return (*self)(index);
+    else
+        throw GException::out_of_range("__getitem__(int)", index, self->size());
+    }
+    void __setitem__(int index, const GModelPar& val) {
+        if (index>=0 && index < self->size())
+            (*self)(index) = val;
+        else
+            throw GException::out_of_range("__setitem__(int)", index, self->size());
+    }
 };

@@ -40,16 +40,19 @@ public:
     virtual ~GModelTemporal(void);
 
     // Operators
-    virtual GModelTemporal& operator= (const GModelTemporal& model);
+    virtual GModelPar&       operator() (int index);
+    virtual const GModelPar& operator() (int index) const;
+    virtual GModelTemporal&  operator= (const GModelTemporal& model);
 
     // Virtual methods
     virtual void            clear(void) = 0;
     virtual GModelTemporal* clone(void) const = 0;
     virtual int             size(void) const = 0;
     virtual std::string     type(void) const = 0;
-    virtual GModelPar*      par(int index) const = 0;
     virtual double          eval(const GTime& srcTime) = 0;
     virtual double          eval_gradients(const GTime& srcTime) = 0;
+    virtual void            read(const GXmlElement& xml) = 0;
+    virtual void            write(GXmlElement& xml) const = 0;
     virtual std::string     print(void) const = 0;
 
 protected:
@@ -57,6 +60,9 @@ protected:
     void init_members(void);
     void copy_members(const GModelTemporal& model);
     void free_members(void);
+
+    // Pure virtual methods
+    virtual GModelPar** par(void) = 0;
 };
 
 #endif /* GMODELTEMPORAL_HPP */

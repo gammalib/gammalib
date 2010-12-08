@@ -31,16 +31,34 @@ public:
     // Constructors and destructors
     GModelSpectral(void);
     GModelSpectral(const GModelSpectral& model);
-    virtual ~GModelSpectral();
+    virtual ~GModelSpectral(void);
 
     // Pure virtual methods
     virtual void            clear(void) = 0;
     virtual GModelSpectral* clone(void) const = 0;
     virtual int             size(void) const = 0;
     virtual std::string     type(void) const = 0;
-    virtual GModelPar*      par(int index) const = 0;
     virtual double          eval(const GEnergy& srcEng) = 0;
     virtual double          eval_gradients(const GEnergy& srcEng) = 0;
     virtual void            read(const GXmlElement& xml) = 0;
     virtual void            write(GXmlElement& xml) const = 0;
+};
+
+
+/***********************************************************************//**
+ * @brief GModelSpectral class extension
+ ***************************************************************************/
+%extend GModelSpectral {
+    GModelPar __getitem__(int index) {
+    if (index >= 0 && index < self->size())
+        return (*self)(index);
+    else
+        throw GException::out_of_range("__getitem__(int)", index, self->size());
+    }
+    void __setitem__(int index, const GModelPar& val) {
+        if (index>=0 && index < self->size())
+            (*self)(index) = val;
+        else
+            throw GException::out_of_range("__setitem__(int)", index, self->size());
+    }
 };
