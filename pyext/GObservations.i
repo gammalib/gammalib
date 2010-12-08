@@ -34,12 +34,14 @@ public:
     virtual ~GObservations(void);
 
     // Methods
-    void     append(GObservation &obs);
+    void     clear(void);
     int      size(void) const { return m_num; }
+    void     append(GObservation &obs);
     void     models(const GModels& models) { m_models=models; return; }
+    void     models(const std::string& filename);
     GModels* models(void) { return &m_models; }
     void     optimize(GOptimizer& opt);
-
+    double   npred(void) const { return m_npred; }
 };
 
 
@@ -48,19 +50,22 @@ public:
  ***************************************************************************/
 %extend GObservations {
     char *__str__() {
-        static char str_buffer[10001];
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 10001);
-        str_buffer[10000] = '\0';
-        return str_buffer;
+        static std::string result = self->print();
+        return ((char*)result.c_str());
     }
     GObservation& __getitem__(int index) {
-        if (index >= 0 && index < self->size())
-            return (*self)(index);
+    if (index >= 0 && index < self->size())
+        return (*self)(index);
+    else
+        throw GException::out_of_range("__getitem__(int)", index, self->size());
+    }
+    void __setitem__(int index, const GObservation& val) {
+        if (index>=0 && index < self->size())
+            (*self)(index) = val;
         else
-            throw GException::out_of_range("__getitem__(int)", index, 
-                                           self->size());
+            throw GException::out_of_range("__setitem__(int)", index, self->size());
+    }
+    GObservations copy() {
+        return (*self);
     }
 };

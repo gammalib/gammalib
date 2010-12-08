@@ -20,7 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
+#include "GTools.hpp"
 #include "GException.hpp"
 #include "GObservations.hpp"
 
@@ -214,6 +214,21 @@ void GObservations::append(GObservation& obs)
 
 
 /***********************************************************************//**
+ * @brief Load models from XML file
+ *
+ * @param[in] filename XML filename. 
+ ***************************************************************************/
+void GObservations::models(const std::string& filename)
+{
+    // Load models
+    m_models.load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Optimize model parameters using optimizer
  *
  * @param[in] opt Optimiser to be used for 
@@ -231,6 +246,33 @@ void GObservations::optimize(GOptimizer& opt)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Print observations information
+ ***************************************************************************/
+std::string GObservations::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GObservations ===\n");
+    result.append(parformat("Number of observations")+str(size())+"\n");
+    result.append(parformat("Number of predicted events")+str(npred()));
+
+    // Append observations
+    for (int i = 0; i < size(); ++i) {
+        result.append("\n");
+        result.append((*this)(i).print());
+    }
+
+    // Append models
+    result.append("\n"+((GObservations*)this)->models()->print());
+
+    // Return result
+    return result;
 }
 
 
@@ -365,26 +407,34 @@ void GObservations::free_members(void)
  =                                                                         =
  ==========================================================================*/
 
+
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param[in] os Output stream into which the data will be dumped
- * @param[in] data Data to be dumped
+ * @param[in] os Output stream.
+ * @param[in] obs Observations.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GObservations& obs)
 {
-    // Put header in stream
-    os << "=== GObservations ===" << std::endl;
-    os << " Number of observations ....: " << obs.m_num << std::endl;
-
-    // Put observations in stream
-    for (int i = 0; i < obs.m_num; ++i)
-        os << *(obs.m_obs[i]);
-
-    // Add models to stream
-    os << " Number of predicted events : " << obs.m_npred << std::endl;
-    os << obs.m_models;
+     // Write observations in output stream
+    os << obs.print();
 
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] obs Observations.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GObservations& obs)
+{
+    // Write observations into logger
+    log << obs.print();
+
+    // Return logger
+    return log;
 }

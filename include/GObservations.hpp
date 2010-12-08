@@ -20,7 +20,9 @@
 #define GOBSERVATIONS_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include <iostream>
+#include "GLog.hpp"
 #include "GObservation.hpp"
 #include "GEvent.hpp"
 #include "GOptimizer.hpp"
@@ -54,6 +56,7 @@ class GObservations {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GObservations& obs);
+    friend GLog&         operator<< (GLog& log, const GObservations& obs);
 
 public:
     // Constructors and destructors
@@ -67,13 +70,15 @@ public:
     const GObservation& operator() (int index) const;
 
     // Methods
-    void     clear(void);
-    void     append(GObservation& obs);
-    int      size(void) const { return m_num; }
-    void     models(const GModels& models) { m_models=models; return; }
-    GModels* models(void) { return &m_models; }
-    void     optimize(GOptimizer& opt);
-    double   npred(void) const { return m_npred; }
+    void        clear(void);
+    int         size(void) const { return m_num; }
+    void        append(GObservation& obs);
+    void        models(const GModels& models) { m_models=models; return; }
+    void        models(const std::string& filename);
+    GModels*    models(void) { return &m_models; }
+    void        optimize(GOptimizer& opt);
+    double      npred(void) const { return m_npred; }
+    std::string print(void) const;
 
     // Event iterator
     class iterator {
