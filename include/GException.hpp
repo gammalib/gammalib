@@ -53,11 +53,26 @@ protected:
 class GException : public GExceptionHandler {
 public:
 
+    // Feature not implemented
+    class feature_not_implemented : public GExceptionHandler {
+    public:
+        feature_not_implemented(std::string origin,
+                                std::string message = "");
+    };
+
+    // Bad type
+    class bad_type : public GExceptionHandler {
+    public:
+        bad_type(std::string origin, std::string message = "");
+    };
+
     // Memory allocation exception class
     class mem_alloc : public GExceptionHandler {
     public:
         mem_alloc(std::string origin, unsigned num);
     };
+
+    // Not enough nodes
     class not_enough_nodes : public GExceptionHandler {
     public:
         not_enough_nodes(std::string origin, int num);

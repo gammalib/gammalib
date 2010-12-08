@@ -26,8 +26,43 @@
  ***************************************************************************/
 const char* GExceptionHandler::what() const throw()
 {
-    std::string message = "*** ERROR in " + m_origin + ": " + m_message;
+    static std::string message = "*** ERROR in " + m_origin + ": " + m_message;
     return message.c_str();
+}
+
+
+/***********************************************************************//**
+ * @brief Feature not implement
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional message.
+ ***************************************************************************/
+GException::feature_not_implemented::feature_not_implemented(std::string origin,
+                                                             std::string message)
+{
+    m_origin   = origin;
+    if (message.length() > 0)
+        m_message = message;
+    else
+        m_message = "Feature not implemented.";
+    m_message += " In case that you need this feature for your application"
+                 " please submit a feature request on"
+                 " https://sourceforge.net/projects/gammalib/,"
+                 " join this error message and provide a detailed"
+                 " description of your needs.";
+}
+
+
+/***********************************************************************//**
+ * @brief Bad type
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional message.
+ ***************************************************************************/
+GException::bad_type::bad_type(std::string origin, std::string message)
+{
+    m_origin   = origin;
+    m_message = "Invalud type conversion. " + message;
 }
 
 
