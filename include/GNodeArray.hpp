@@ -52,23 +52,25 @@ public:
     // Constructors and destructors
     GNodeArray(void);
     GNodeArray(const GNodeArray& array);
-    ~GNodeArray(void);
+    virtual ~GNodeArray(void);
 
     // Operators
     GNodeArray& operator= (const GNodeArray & array);
 
     // Methods
-    void   nodes(const int& num, const double* array);
-    void   nodes(const GVector& vector);
-    void   nodes(const std::vector<double>& vector);
-    void   append(const double& node);
-    double interpolate(const double& value, const std::vector<double>& vector);
-    void   set_value(const double& value);
-    int    size(void) { return m_node.size(); }
-    int    inx_left(void) { return m_inx_left; }
-    int    inx_right(void) { return m_inx_right; }
-    double wgt_left(void) { return m_wgt_left; }
-    double wgt_right(void) { return m_wgt_right; }
+    void        clear(void);
+    GNodeArray* clone(void) const;
+    int         size(void) { return m_node.size(); }
+    void        nodes(const int& num, const double* array);
+    void        nodes(const GVector& vector);
+    void        nodes(const std::vector<double>& vector);
+    void        append(const double& node);
+    double      interpolate(const double& value, const std::vector<double>& vector);
+    void        set_value(const double& value);
+    int         inx_left(void) { return m_inx_left; }
+    int         inx_right(void) { return m_inx_right; }
+    double      wgt_left(void) { return m_wgt_left; }
+    double      wgt_right(void) { return m_wgt_right; }
 
 private:
     // Methods
@@ -78,7 +80,7 @@ private:
     void setup(void);
     
     // Data
-    std::vector<double> m_node;          //!< Number of nodes
+    std::vector<double> m_node;          //!< Array of nodes
     std::vector<double> m_step;          //!< Distance to next node
     bool                m_is_linear;     //!< Nodes form a linear array
     double              m_linear_slope;  //!< Slope for linear array
