@@ -76,6 +76,7 @@ public:
     void          load(const std::string& irfname) { return; }
     bool          hasedisp(void) const { return false; }
     bool          hastdisp(void) const { return false; }
+    std::string   print(void) const;
 
 protected:
     // Protected methods

@@ -20,6 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
 #include "GMWLResponse.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -146,6 +147,24 @@ void GMWLResponse::clear(void)
 GMWLResponse* GMWLResponse::clone(void) const
 {
     return new GMWLResponse(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Print response information
+ ***************************************************************************/
+std::string GMWLResponse::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GMWLResponse ===\n");
+    result.append(parformat("Calibration database")+m_caldb+"\n");
+    result.append(parformat("Response functions")+m_rspname);
+
+    // Return result
+    return result;
 }
 
 

@@ -55,7 +55,7 @@ GCTAInstDir::GCTAInstDir(void) : GInstDir()
 /***********************************************************************//**
  * @brief GSkyDir constructor
  *
- * @param[in] dir Sky direction from which object is to be constructed.
+ * @param[in] dir Sky direction.
  *
  * Construct CTA instrument direction from sky direction.
  ***************************************************************************/
@@ -75,8 +75,7 @@ GCTAInstDir::GCTAInstDir(const GSkyDir& dir) : GInstDir()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] dir Instrument direction from which class should be
- *                instantiated.
+ * @param[in] dir Instrument direction.
  ***************************************************************************/
 GCTAInstDir::GCTAInstDir(const GCTAInstDir& dir) : GInstDir(dir)
 {
@@ -113,7 +112,7 @@ GCTAInstDir::~GCTAInstDir(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] dir Instrument direction to be assigned.
+ * @param[in] dir Instrument direction.
  ***************************************************************************/
 GCTAInstDir& GCTAInstDir::operator= (const GCTAInstDir& dir)
 {
@@ -146,14 +145,16 @@ GCTAInstDir& GCTAInstDir::operator= (const GCTAInstDir& dir)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear sky direction
+ * @brief Clear instance
  ***************************************************************************/
 void GCTAInstDir::clear(void)
 {
     // Free members
     free_members();
+    this->GInstDir::free_members();
 
     // Initialise private members
+    this->GInstDir::init_members();
     init_members();
 
     // Return
@@ -162,9 +163,18 @@ void GCTAInstDir::clear(void)
 
 
 /***********************************************************************//**
+ * @brief Clone instance
+ ***************************************************************************/
+GCTAInstDir* GCTAInstDir::clone(void) const
+{
+    return new GCTAInstDir(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Compute angular distance between instrument directions in radians
  *
- * @param[in] dir Instrument direction to which distance is to be computed.
+ * @param[in] dir Instrument direction.
  ***************************************************************************/
 double GCTAInstDir::dist(const GCTAInstDir& dir) const
 {
@@ -185,12 +195,28 @@ double GCTAInstDir::dist(const GCTAInstDir& dir) const
 /***********************************************************************//**
  * @brief Compute angular distance between instrument directions in degrees
  *
- * @param[in] dir Instrument direction to which distance is to be computed.
+ * @param[in] dir Instrument direction.
  ***************************************************************************/
 double GCTAInstDir::dist_deg(const GCTAInstDir& dir) const
 {
     // Return distance in degrees
     return (dist(dir) * rad2deg);
+}
+
+
+/***********************************************************************//**
+ * @brief Print instrument direction information
+ ***************************************************************************/
+std::string GCTAInstDir::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append instrument direction
+    result.append("RA="+str(ra_deg())+", DEC="+str(dec_deg()));
+
+    // Return result
+    return result;
 }
 
 
@@ -216,7 +242,7 @@ void GCTAInstDir::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] dir Instrument direction from which members should be copied
+ * @param[in] dir Instrument direction.
  ***************************************************************************/
 void GCTAInstDir::copy_members(const GCTAInstDir& dir)
 {
@@ -238,32 +264,8 @@ void GCTAInstDir::free_members(void)
 }
 
 
-/***********************************************************************//**
- * @brief Clone instance
- ***************************************************************************/
-GCTAInstDir* GCTAInstDir::clone(void) const
-{
-    return new GCTAInstDir(*this);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream
- * @param[in] column Instrument direction to put in output stream
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GCTAInstDir& dir)
-{
-    // Output sky direction
-    os << dir.m_dir;
-
-    // Return output stream
-    return os;
-}

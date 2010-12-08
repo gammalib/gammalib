@@ -373,11 +373,54 @@ void GCTAResponse::load(const std::string& irfname)
 
 
 /***********************************************************************//**
- * @brief Clone response class
+ * @brief Clear instance
+***************************************************************************/
+void GCTAResponse::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GResponse::free_members();
+
+    // Initialise members
+    this->GResponse::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
 ***************************************************************************/
 GCTAResponse* GCTAResponse::clone(void) const
 {
     return new GCTAResponse(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Print CTA response information
+ ***************************************************************************/
+std::string GCTAResponse::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GCTAResponse ===\n");
+    result.append(parformat("Calibration database")+m_caldb+"\n");
+    result.append(parformat("Response name")+m_rspname+"\n");
+    result.append(parformat("Response definiton"));
+    for (int i = 0; i < m_logE.size(); ++i) {
+        result.append("\n"+parformat("logE="+str(m_logE.at(i))));
+        result.append("Aeff="+str(m_aeff.at(i))+" m2");
+        result.append(", r68="+str(m_r68.at(i))+" deg");
+        result.append(", r80="+str(m_r68.at(i))+" deg");
+    }
+
+    // Return result
+    return result;
 }
 
 
@@ -687,29 +730,3 @@ void GCTAResponse::read_performance_table(const std::string& filename)
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Put object in output stream
- *
- * @param[in] os Output stream into which the model will be dumped
- * @param[in] GCTAResponse Object to be dumped
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GCTAResponse& rsp)
-{
-    // Put object in stream
-    os << "=== GCTAResponse ===" << std::endl;
-    os << " Calibration database ......: " << rsp.m_caldb << std::endl;
-    os << " Name of instrument response: " << rsp.m_rspname << std::endl;
-    os << " Response definiton ........: ";
-    for (int i = 0; i < rsp.m_logE.size(); ++i) {
-        os << std::endl
-           << "  logE=" << rsp.m_logE.at(i)
-           << ": Aeff=" << rsp.m_aeff.at(i)
-           << " m2, r68=" << rsp.m_r68.at(i)
-           << " deg, r80=" << rsp.m_r80.at(i)
-           << " deg";
-    }
-
-    // Return output stream
-    return os;
-}

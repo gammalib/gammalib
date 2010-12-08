@@ -20,6 +20,10 @@
 #define GLATRESPONSE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include "GLATResponseTable.hpp"
+#include "GEvent.hpp"
+#include "GLATEventAtom.hpp"
+#include "GLATEventBin.hpp"
 #include "GResponse.hpp"
 #include "GPointing.hpp"
 #include "GInstDir.hpp"
@@ -31,7 +35,7 @@
 #include "GTime.hpp"
 #include "GNodeArray.hpp"
 #include "GVector.hpp"
-#include "GLATResponseTable.hpp"
+#include "GModel.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 
@@ -47,12 +51,23 @@ public:
     // Constructors and destructors
     GLATResponse(void);
     GLATResponse(const GLATResponse& rsp);
-    ~GLATResponse(void);
+    virtual ~GLATResponse(void);
 
     // Operators
     GLATResponse& operator= (const GLATResponse & rsp);
 
-    // Implemented pure virtual methods
+    // Implement pure virtual base class methods
+    void          clear(void);
+    GLATResponse* clone(void) const;
+    void          load(const std::string& rspname);
+    bool          hasedisp(void) const { return false; }
+    bool          hastdisp(void) const { return false; }
+    std::string   print(void) const;
+    
+    // Implemented response computation methods
+    double diffrsp(const GEvent& event, const GModel& model,
+                   const GEnergy& srcEng, const GTime& srcTime,
+                   const GPointing& pnt) const;
     double live(const GSkyDir&  srcDir, const GEnergy& srcEng,
                 const GTime& srcTime, const GPointing& pnt) const;
     double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
@@ -72,18 +87,14 @@ public:
                   const GTime& srcTime, const GPointing& pnt, const GEbounds& ebds) const;
     double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
                   const GTime& srcTime, const GPointing& pnt, const GGti& gti) const;
-    void   load(const std::string& rspname);
-    bool   hasedisp(void) const { return false; }
-    bool   hastdisp(void) const { return false; }
-    GLATResponse* clone(void) const;
 
     // Other Methods
-    double        aeff(const double& logE, const double& ctheta);
-    void          aeff_ctheta_min(const double& ctheta);
-    double        aeff_ctheta_min(void) const;
-    double        psf(const double& delta, const double& logE, const double& ctheta);
-    GVector       psf(const GVector& delta, const double& logE, const double& ctheta);
-    void          save(const std::string& rspname) const;
+    double  aeff(const double& logE, const double& ctheta);
+    void    aeff_ctheta_min(const double& ctheta);
+    double  aeff_ctheta_min(void) const;
+    double  psf(const double& delta, const double& logE, const double& ctheta);
+    GVector psf(const GVector& delta, const double& logE, const double& ctheta);
+    void    save(const std::string& rspname) const;
 
 private:
     // Private Effective Area methods
@@ -112,10 +123,16 @@ private:
     void    edisp_free_members(void);
 
     // Other private methods
-    void          init_members(void);
-    void          copy_members(const GLATResponse& rsp);
-    void          free_members(void);
-    GVector       get_fits_vector(const GFitsTable* hdu, const std::string& colname, int row = 0);
+    void    init_members(void);
+    void    copy_members(const GLATResponse& rsp);
+    void    free_members(void);
+    GVector get_fits_vector(const GFitsTable* hdu, const std::string& colname, int row = 0);
+    double  diffrsp_atom(const GLATEventAtom& event, const GModel& model,
+                         const GEnergy& srcEng, const GTime& srcTime,
+                         const GPointing& pnt) const;
+    double  diffrsp_bin(const GLATEventBin& event, const GModel& model,
+                        const GEnergy& srcEng, const GTime& srcTime,
+                        const GPointing& pnt) const;
 
     // Private Aeff data
     GLATResponseTable m_aeff_bins;        //!< Aeff energy and cos theta binning

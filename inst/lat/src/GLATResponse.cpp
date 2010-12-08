@@ -21,17 +21,23 @@
 #include <config.h>
 #endif
 #include <iostream>
-#include "GException.hpp"
+//#include "GException.hpp"
+#include "GLATException.hpp"
 #include "GVector.hpp"
 #include "GLATResponse.hpp"
 #include "GLATPointing.hpp"
+#include "GLATEventBin.hpp"
+#include "GLATEventCube.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_LOAD                 "load(const std::string&, const std::string&)"
-#define G_GET_FITS_VECTOR "GLATResponse::get_fits_vector(GFitsTable*,std::string&,int)"
+#define G_LOAD                             "load(std::string&, std::string&)"
+#define G_GET_FITS_VECTOR        "GLATResponse::get_fits_vector(GFitsTable*,"\
+                                                        " std::string&, int)"
+#define G_DIFFRSP_BIN     "GLATResponse::diffrsp_bin(GLATEventBin&, GModel&,"\
+                                             " GEnergy&, GTime&, GPointing&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -49,7 +55,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GLATResponse::GLATResponse(void) : GResponse()
 {
@@ -134,14 +140,42 @@ GLATResponse& GLATResponse::operator= (const GLATResponse& rsp)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return livetime fraction (units: s s-1).
+ * @brief Return value of diffuse instrument response function
+ *        (units: )
+ *
+ * @param[in] event Observed event.
+ * @param[in] model Source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Instrument pointing information.
+ *
+ * This method returns the diffuse instrument response for a given event and
+ * source model. It handles both event atoms and event bins.
+ ***************************************************************************/
+double GLATResponse::diffrsp(const GEvent& event, const GModel& model,
+                             const GEnergy& srcEng, const GTime& srcTime,
+                             const GPointing& pnt) const
+{
+    // Get IRF value
+    double irf = (event.isatom())
+                 ? diffrsp_atom((GLATEventAtom&)event, model, srcEng, srcTime, pnt)
+                 : diffrsp_bin((GLATEventBin&)event, model, srcEng, srcTime, pnt);
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return livetime fraction
+ *        (units: s s-1)
  *
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] pnt Pointer to instrument pointing information.
  *
- * Dummy livetime fraction of 0.8.
+ * @todo Dummy livetime fraction of 0.8.
  ***************************************************************************/
 double GLATResponse::live(const GSkyDir& srcDir, const GEnergy& srcEng,
                           const GTime& srcTime, const GPointing& pnt) const
@@ -155,7 +189,8 @@ double GLATResponse::live(const GSkyDir& srcDir, const GEnergy& srcEng,
 
 
 /***********************************************************************//**
- * @brief Return time dispersion (units: s^-1).
+ * @brief Return time dispersion
+ *        (units: s-1)
  *
  * @param[in] obsTime Observed photon arrival time.
  * @param[in] srcDir True photon direction.
@@ -248,7 +283,34 @@ double GLATResponse::ntdisp(const GSkyDir& srcDir, const GEnergy& srcEng,
 
 
 /***********************************************************************//**
- * @brief Load a specified LAT response function.
+ * @brief Clear instance
+***************************************************************************/
+void GLATResponse::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GResponse::free_members();
+
+    // Initialise members
+    this->GResponse::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+***************************************************************************/
+GLATResponse* GLATResponse::clone(void) const
+{
+    return new GLATResponse(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Load LAT response function
  *
  * @param[in] rspname Name of response (name::front,name::back)
  *
@@ -259,6 +321,7 @@ double GLATResponse::ntdisp(const GSkyDir& srcDir, const GEnergy& srcEng,
  * performs some pre-calculations for faster response determination.
  *
  * @todo Implement LAT specific exceptions.
+ *
  * @todo It seems that the split() method has a bug in that it returns an
  *       empty string in place of the separator.
  ***************************************************************************/
@@ -302,9 +365,9 @@ void GLATResponse::load(const std::string& rspname)
 
 
 /***********************************************************************//**
- * @brief Save response
+ * @brief Save LAT response
  *
- * @param[in] rspname Filename into which the response will be saved
+ * @param[in] rspname Response file name.
  ***************************************************************************/
 void GLATResponse::save(const std::string& rspname) const
 {
@@ -332,11 +395,20 @@ void GLATResponse::save(const std::string& rspname) const
 
 
 /***********************************************************************//**
- * @brief Clone response class
-***************************************************************************/
-GLATResponse* GLATResponse::clone(void) const
+ * @brief Print LAT response information
+ ***************************************************************************/
+std::string GLATResponse::print(void) const
 {
-    return new GLATResponse(*this);
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GLATResponse ===\n");
+    result.append(parformat("Calibration database")+m_caldb+"\n");
+    result.append(parformat("Response name")+m_rspname);
+
+    // Return result
+    return result;
 }
 
 
@@ -373,7 +445,7 @@ void GLATResponse::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] rsp Response to be copied
+ * @param[in] rsp Response.
  ***************************************************************************/
 void GLATResponse::copy_members(const GLATResponse& rsp)
 {
@@ -418,9 +490,11 @@ void GLATResponse::free_members(void)
 /***********************************************************************//**
  * @brief Load floating point data from vector column into vector
  *
- * @param[in] hdu Pointer to HDU from which data should be loaded
- * @param[in] colname Column name from which data should be loaded
- * @param[in] row Table row from which data should be loaded
+ * @param[in] hdu FITS table pointer.
+ * @param[in] colname Table column name.
+ * @param[in] row Table row (staring from 0).
+ *
+ * Loads the content of a FITS table vector column element into a vector.
  ***************************************************************************/
 GVector GLATResponse::get_fits_vector(const GFitsTable* hdu, 
                                       const std::string& colname, 
@@ -441,6 +515,78 @@ GVector GLATResponse::get_fits_vector(const GFitsTable* hdu,
 
     // Return vector
     return data;
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of diffuse instrument response function for event atom
+ *
+ * @param[in] event Observed event atom.
+ * @param[in] model Source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Instrument pointing information.
+ ***************************************************************************/
+double GLATResponse::diffrsp_atom(const GLATEventAtom& event, const GModel& model,
+                                  const GEnergy& srcEng, const GTime& srcTime,
+                                  const GPointing& pnt) const
+{
+    // Initialise IRF with "no response"
+    double irf = 0.0;
+
+    // Determine index for diffuse response
+    //int inx = event.diffinx(model.name());
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of diffuse instrument response function for event bin
+ *        
+ * @param[in] event Observed event bin.
+ * @param[in] model Source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Instrument pointing information.
+ *
+ * @exception GLATException::diffuse_not_found
+ *            Diffuse model not found.
+ ***************************************************************************/
+double GLATResponse::diffrsp_bin(const GLATEventBin& event, const GModel& model,
+                                 const GEnergy& srcEng, const GTime& srcTime,
+                                 const GPointing& pnt) const
+{
+    // Get pointer to event cube
+    GLATEventCube* cube = event.cube();
+
+    // Search for diffuse response in event cube
+    int idiff = -1;
+    for (int i = 0; i < cube->ndiffrsp(); ++i) {
+        if (cube->diffname(i) == model.name()) {
+            idiff = i;
+            break;
+        }
+    }
+
+    // If diffuse response has not been found then throw an exception
+    if (idiff == -1)
+        throw GLATException::diffuse_not_found(G_DIFFRSP_BIN, model.name());
+
+    // Get srcmap indices and weighting factors
+    GNodeArray* nodes = cube->enodes();
+    nodes->set_value(log10(srcEng.MeV()));
+
+    // Compute diffuse response
+    GSkymap* map    = cube->diffrsp(idiff);
+    int      index  = event.ipix() * map->nmaps();
+    double*  pixels = map->pixels() + index;
+    double   irf    = nodes->wgt_left()  * pixels[nodes->inx_left()] +
+                      nodes->wgt_right() * pixels[nodes->inx_right()];
+
+    // Return IRF value
+    return irf;
 }
 
 

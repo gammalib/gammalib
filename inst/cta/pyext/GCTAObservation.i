@@ -19,8 +19,6 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GCTAObservation.hpp"
 %}
-/* Force class to be non abstract */
-//%feature("notabstract") GCTAObservation;
 
 
 /***********************************************************************//**
@@ -36,7 +34,7 @@ public:
     virtual ~GCTAObservation(void);
 
     // Pure virtual base class methods
-    //void             clear(void) = 0;
+    void             clear(void);
     GCTAObservation* clone(void) const;
     void             response(const std::string& irfname, std::string caldb = "");
     GCTAResponse*    response(const GTime& time) const;
@@ -53,15 +51,6 @@ public:
  * @brief GCTAObservation class extension
  ***************************************************************************/
 %extend GCTAObservation {
-    char *__str__() {
-        static char str_buffer[10001];
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 10001);
-        str_buffer[10000] = '\0';
-        return str_buffer;
-    }
     GCTAObservation copy() {
         return (*self);
     }

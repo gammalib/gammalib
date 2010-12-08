@@ -20,10 +20,9 @@
 #define GCTAOBSERVATION_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GCTAResponse.hpp"
-#include <iostream>
 #include "GObservation.hpp"
 #include "GCTAPointing.hpp"
+#include "GCTAResponse.hpp"
 #include "GTime.hpp"
 #include "GModel.hpp"
 
@@ -35,9 +34,6 @@
  ***************************************************************************/
 class GCTAObservation : public GObservation {
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GCTAObservation& obs);
-
 public:
     // Constructors and destructors
     GCTAObservation(void);
@@ -47,12 +43,14 @@ public:
     // Operators
     GCTAObservation& operator= (const GCTAObservation& obs);
 
-    // Pure virtual base class methods
+    // Implemented pure virtual base class methods
+    void             clear(void);
     GCTAObservation* clone(void) const;
     void             response(const std::string& irfname, std::string caldb = "");
     GCTAResponse*    response(const GTime& time) const;
     GCTAPointing*    pointing(const GTime& time) const;
     std::string      instrument(void) const;
+    std::string      print(void) const;
 
     // Other methods
     void load_unbinned(const std::string& filename);
@@ -68,10 +66,9 @@ protected:
     double npred_temp(const GModel& model) const;
     double npred_grad_temp(const GModel& model, int ipar) const;
 
-    // Protected data area
+    // Protected members
     GCTAResponse* m_response;     //!< Pointer to instrument response functions
     GCTAPointing* m_pointing;     //!< Pointer to pointing direction
-
 };
 
 #endif /* GCTAOBSERVATION_HPP */

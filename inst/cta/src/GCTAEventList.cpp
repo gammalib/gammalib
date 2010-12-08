@@ -20,11 +20,11 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
-#include "GCTAException.hpp"
 #include "GCTAEventList.hpp"
+#include "GCTAException.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponse.hpp"
+#include "GTools.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableBitCol.hpp"
@@ -51,7 +51,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  *
  * Creates empty instance of GCTAEventList.
  ***************************************************************************/
@@ -68,7 +68,7 @@ GCTAEventList::GCTAEventList(void) : GEventList()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] list Event list from which the instance should be built.
+ * @param[in] list Event list.
  *
  * Creates instance of GCTAEventList by copying information from another
  * instance.
@@ -225,6 +225,23 @@ GCTAEventAtom* GCTAEventList::pointer(int index)
 }
 
 
+/***********************************************************************//**
+ * @brief Print event list information
+ ***************************************************************************/
+std::string GCTAEventList::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GCTAEventList ===\n");
+    result.append(parformat("Number of events")+str(number()));
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -239,7 +256,6 @@ void GCTAEventList::init_members(void)
     // Initialise base class members
     m_num    = 0;
     m_events = NULL;
-    //m_obs    = NULL;
 
     // Return
     return;
@@ -387,19 +403,3 @@ void GCTAEventList::load_events(GFitsTable* hdu)
  =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Put LAT event list in output stream
- *
- * @param[in] os Output stream into which the event list will be dumped
- * @param[in] list Event list to be dumped
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GCTAEventList& list)
-{
-    // Put LAT event list in output stream
-    os << "=== GCTAEventList ===" << std::endl;
-    os << " Number of events in list ..: " << list.number();
-
-    // Return output stream
-    return os;
-}

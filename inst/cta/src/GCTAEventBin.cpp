@@ -20,9 +20,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
+#include <string>
 #include <cmath>
 #include "GCTAEventBin.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -158,7 +159,12 @@ GCTAEventBin* GCTAEventBin::clone(void) const
 /***********************************************************************//**
  * @brief Return size of event bin
  *
- * The size of an event bin is given in units of (sr MeV s).
+ * The size of the event bin (units sr MeV s) is given by
+ * \f[size = \Omega \times \Delta E \times \Delta T\f]
+ * where
+ * \f$\Omega\f$ is the size of the spatial bin in sr,
+ * \f$\Delta E\f$ is the size of the energy bin in MeV, and
+ * \f$\Delta T\f$ is the ontime of the observation in seconds. 
  ***************************************************************************/
 double GCTAEventBin::size(void) const
 {
@@ -188,6 +194,22 @@ double GCTAEventBin::error(void) const
 
     // Return error
     return error;
+}
+
+
+/***********************************************************************//**
+ * @brief Print event information
+ ***************************************************************************/
+std::string GCTAEventBin::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append number of counts
+    result.append(str(counts()));
+
+    // Return result
+    return result;
 }
 
 
@@ -252,18 +274,3 @@ void GCTAEventBin::free_members(void)
  =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Put bin into output stream
- *
- * @param[in] os Output stream.
- * @param[in] bin Event bin.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GCTAEventBin& bin)
-{
-    // Put bin in output stream
-    os << bin.m_counts << " ";
-
-    // Return output stream
-    return os;
-}

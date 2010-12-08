@@ -20,8 +20,6 @@
 #include "GLATObservation.hpp"
 %}
 %include stl.i
-//%feature("notabstract") GLATObservation;
-//%import GObservation.i
 
 /***********************************************************************//**
  * @class GLATObservation
@@ -36,6 +34,7 @@ public:
     virtual ~GLATObservation();
 
     // Implement pure virtual methods
+    void             clear(void);
     GLATObservation* clone(void) const;
     void             response(const std::string& irfname, std::string caldb = "");
     GLATResponse*    response(const GTime& time) const;
@@ -49,3 +48,20 @@ public:
                      const std::string& ltcube_name);
 };
 
+
+/***********************************************************************//**
+ * @brief GLATObservation class extension
+ ***************************************************************************/
+%extend GLATObservation {
+    GLATObservation(const GObservation& obs) {
+        GLATObservation* lat = new GLATObservation((GLATObservation&)obs);
+        return lat;
+    }
+    char *__str__() {
+        static std::string result = self->print();
+        return ((char*)result.c_str());
+    }
+    GLATObservation copy() {
+        return (*self);
+    }
+};

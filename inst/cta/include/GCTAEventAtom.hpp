@@ -20,8 +20,7 @@
 #define GCTAEVENTATOM_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GLog.hpp"
+#include <string>
 #include "GEventAtom.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
@@ -41,9 +40,6 @@ class GCTAEventAtom : public GEventAtom {
     // Friend classes
     friend class GCTAEventList;
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GCTAEventAtom& atom);
-
 public:
     // Constructors and destructors
     GCTAEventAtom(void);
@@ -53,14 +49,13 @@ public:
     // Operators
     GCTAEventAtom& operator= (const GCTAEventAtom& atom);
 
-    // Event access methods
-    const GEnergy&     energy(void) const { return m_energy; }
+    // Implemented pure virtual base class methods
+    void               clear(void);
+    GCTAEventAtom*     clone(void) const;
     const GCTAInstDir& dir(void) const { return m_dir; }
+    const GEnergy&     energy(void) const { return m_energy; }
     const GTime&       time(void) const { return m_time; }
-
-    // Other methods
-    void           clear(void);
-    GCTAEventAtom* clone(void) const;
+    std::string        print(void) const;
 
 protected:
     // Protected methods

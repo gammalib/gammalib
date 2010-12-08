@@ -124,14 +124,16 @@ GMWLInstDir& GMWLInstDir::operator= (const GMWLInstDir& dir)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear sky direction
+ * @brief Clear instance
  ***************************************************************************/
 void GMWLInstDir::clear(void)
 {
     // Free members
     free_members();
+    this->GInstDir::free_members();
 
     // Initialise private members
+    this->GInstDir::init_members();
     init_members();
 
     // Return
@@ -145,6 +147,22 @@ void GMWLInstDir::clear(void)
 GMWLInstDir* GMWLInstDir::clone(void) const
 {
     return new GMWLInstDir(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Print instrument direction information
+ ***************************************************************************/
+std::string GMWLInstDir::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("GMWLInstDir(dummy)");
+
+    // Return result
+    return result;
 }
 
 

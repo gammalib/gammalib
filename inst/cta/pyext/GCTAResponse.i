@@ -56,6 +56,7 @@ public:
                   const GPointing& pnt, const GGti& gti) const;
 
     // Implemented pure virtual base class methods
+    void          clear(void);
     GCTAResponse* clone(void) const;
     void          load(const std::string& irfname);
     bool          hasedisp(void) const { return false; }
@@ -65,4 +66,14 @@ public:
     double psf(const double& theta, const double& sigma) const;
     double psf_sigma(const GEnergy& srcEng) const;
     double npsf(const double& psf, const double& radroi, const double& sigma) const;
+};
+
+
+/***********************************************************************//**
+ * @brief GCTAResponse class extension
+ ***************************************************************************/
+%extend GCTAResponse {
+    GCTAResponse copy() {
+        return (*self);
+    }
 };

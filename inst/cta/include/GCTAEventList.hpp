@@ -20,6 +20,7 @@
 #define GCTAEVENTLIST_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GEventList.hpp"
 #include "GCTAEventAtom.hpp"
 #include "GCTAObservation.hpp"
@@ -33,9 +34,6 @@
  ***************************************************************************/
 class GCTAEventList : public GEventList {
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GCTAEventList& list);
-
 public:
     // Constructors and destructors
     GCTAEventList(void);
@@ -45,20 +43,21 @@ public:
     // Operators
     GCTAEventList& operator= (const GCTAEventList& list);
 
-    // Implemented pure virtual methods
+    // Implemented pure virtual base class methods
     void           clear(void);
     GCTAEventList* clone(void) const;
+    int            size(void) const { return m_num; }
     void           load(const std::string& filename);
     GCTAEventAtom* pointer(int index);
     int            number(void) const { return m_num; }
-    int            size(void) const { return m_num; }
+    std::string    print(void) const;
 
 protected:
     // Protected methods
-    void           init_members(void);
-    void           copy_members(const GCTAEventList& list);
-    void           free_members(void);
-    void           load_events(GFitsTable* hdu);
+    void init_members(void);
+    void copy_members(const GCTAEventList& list);
+    void free_members(void);
+    void load_events(GFitsTable* hdu);
 
     // Protected data area
     int            m_num;            //!< Number of events

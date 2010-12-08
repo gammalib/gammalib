@@ -38,7 +38,7 @@
 class GMWLSpectrum : public GEventCube {
 
     // Friend classes
-    friend class GMWLObservation;
+    //friend class GMWLObservation;
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GMWLSpectrum& spec);

@@ -20,8 +20,7 @@
 #define GCTAEVENTBIN_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GLog.hpp"
+#include <string>
 #include "GEventBin.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
@@ -47,9 +46,6 @@ class GCTAEventBin : public GEventBin {
     // Friend classes
     friend class GCTAEventCube;
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GCTAEventBin& bin);
-
 public:
     // Constructors and destructors
     GCTAEventBin(void);
@@ -59,17 +55,18 @@ public:
     // Operators
     GCTAEventBin& operator= (const GCTAEventBin& bin);
 
-    // Event access methods
-    const GEnergy&     energy(void) const { return *m_energy; }
+    // Implemented pure virtual base class methods
+    void               clear(void);
+    GCTAEventBin*      clone(void) const;
+    double             size(void) const;
     const GCTAInstDir& dir(void) const { return *m_dir; }
+    const GEnergy&     energy(void) const { return *m_energy; }
     const GTime&       time(void) const { return *m_time; }
     double             counts(void) const { return *m_counts; }
     double             error(void) const;
+    std::string        print(void) const;
 
     // Other methods
-    void           clear(void);
-    GCTAEventBin*  clone(void) const;
-    double         size(void) const;
     const double&  omega(void) const { return *m_omega; }
     const GEnergy& ewidth(void) const { return *m_ewidth; }
     const double&  ontime(void) const { return *m_ontime; }

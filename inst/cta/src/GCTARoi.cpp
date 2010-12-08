@@ -20,9 +20,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
-//#include "GCTAException.hpp"
 #include "GCTARoi.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -41,7 +40,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GCTARoi::GCTARoi(void) : GRoi()
 {
@@ -56,7 +55,7 @@ GCTARoi::GCTARoi(void) : GRoi()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] roi Region of interest from which the instance should be built.
+ * @param[in] roi Region of interest.
  ***************************************************************************/
 GCTARoi::GCTARoi(const GCTARoi& roi) : GRoi(roi)
 {
@@ -93,7 +92,7 @@ GCTARoi::~GCTARoi(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] roi Region of interest which should be assigned.
+ * @param[in] roi Region of interest.
  ***************************************************************************/
 GCTARoi& GCTARoi::operator= (const GCTARoi& roi)
 {
@@ -126,18 +125,47 @@ GCTARoi& GCTARoi::operator= (const GCTARoi& roi)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear region of interest
+ * @brief Clear instance
  ***************************************************************************/
 void GCTARoi::clear(void)
 {
     // Free members
     free_members();
+    this->GRoi::free_members();
 
     // Initialise private members
+    this->GRoi::init_members();
     init_members();
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+***************************************************************************/
+GCTARoi* GCTARoi::clone(void) const
+{
+    return new GCTARoi(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Print ROI information
+ ***************************************************************************/
+std::string GCTARoi::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GCTARoi ===\n");
+    result.append(parformat("ROI centre")+m_centre.print()+"\n");
+    result.append(parformat("ROI radius")+str(m_radius)+" deg");
+
+    // Return result
+    return result;
 }
 
 
@@ -187,32 +215,8 @@ void GCTARoi::free_members(void)
 }
 
 
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GCTARoi* GCTARoi::clone(void) const
-{
-    return new GCTARoi(*this);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Put ROI into output stream
- *
- * @param[in] os Output stream into which the atom will be dumped
- * @param[in] roi ROI to be dumped
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GCTARoi& roi)
-{
-    // Put ROI in output stream
-    os << "ROI(" << roi.centre() << "," << roi.radius() << ")";
-        
-    // Return output stream
-    return os;
-}

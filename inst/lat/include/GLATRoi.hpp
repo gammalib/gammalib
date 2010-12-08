@@ -20,7 +20,9 @@
 #define GLATROI_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include <iostream>
+#include "GLog.hpp"
 #include "GRoi.hpp"
 #include "GLATInstDir.hpp"
 
@@ -38,18 +40,23 @@ class GLATRoi : public GRoi {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GLATRoi& roi);
+    friend GLog&         operator<< (GLog& log, const GLATRoi& roi);
 
 public:
     // Constructors and destructors
     GLATRoi(void);
     GLATRoi(const GLATRoi& roi);
-    ~GLATRoi(void);
+    virtual ~GLATRoi(void);
 
     // Operators
     GLATRoi& operator= (const GLATRoi& roi);
 
-    // Methods
+    // Implemented pure virtual base class methods
     void        clear(void);
+    GLATRoi*    clone(void) const;
+    std::string print(void) const;
+
+    // Other methods
     GLATInstDir centre(void) const { return m_centre; }
     double      radius(void) const { return m_radius; }
     void        centre(const GLATInstDir& centre) { m_centre=centre; return; }
@@ -57,10 +64,9 @@ public:
 
 protected:
     // Protected methods
-    void     init_members(void);
-    void     copy_members(const GLATRoi& roi);
-    void     free_members(void);
-    GLATRoi* clone(void) const;
+    void init_members(void);
+    void copy_members(const GLATRoi& roi);
+    void free_members(void);
     
     // Protected members
     GLATInstDir m_centre;   //!< Centre of ROI in instrument coordinates

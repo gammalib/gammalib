@@ -40,6 +40,7 @@ public:
     virtual ~GMWLObservation(void);
 
     // Implement pure virtual methods
+    void             clear(void);
     GMWLObservation* clone(void) const;
     void             response(const std::string& irfname, std::string caldb = "");
     GResponse*       response(const GTime& time) const { return NULL; }

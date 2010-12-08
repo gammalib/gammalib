@@ -20,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include "GCTAException.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAEventList.hpp"
@@ -28,6 +27,7 @@
 #include "GCTARoi.hpp"
 #include "GException.hpp"
 #include "GFits.hpp"
+#include "GTools.hpp"
 #include "GModelSpatialPtsrc.hpp"
 #include "GIntegral.hpp"
 #include "GIntegrand.hpp"
@@ -140,7 +140,25 @@ GCTAObservation& GCTAObservation::operator= (const GCTAObservation& obs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clone object
+ * @brief Clear instance
+ ***************************************************************************/
+void GCTAObservation::clear(void)
+{
+    // Free members
+    free_members();
+    this->GObservation::free_members();
+
+    // Initialise members
+    this->GObservation::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
 ***************************************************************************/
 GCTAObservation* GCTAObservation::clone(void) const
 {
@@ -215,6 +233,57 @@ std::string GCTAObservation::instrument(void) const
 {
     // Return instument name
     return ("CTA");
+}
+
+
+/***********************************************************************//**
+ * @brief Print CTA observation information
+ ***************************************************************************/
+std::string GCTAObservation::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GCTAObservation ===\n");
+    result.append(parformat("Name")+obsname()+"\n");
+    result.append(parformat("Instrument")+instrument()+"\n");
+    result.append(parformat("Statistics")+statistics()+"\n");
+
+    // Append time range
+    result.append(parformat("Time range"));
+    result.append(str(m_gti.tstart().mjd()));
+    result.append(" - ");
+    result.append(str(m_gti.tstop().mjd()));
+    result.append(" days\n");
+
+    // Append energy range
+    result.append(parformat("Energy range"));
+    result.append(m_ebounds.emin().print());
+    result.append(" - ");
+    result.append(m_ebounds.emax().print());
+
+    // Append ROI
+    if (m_roi != NULL)
+        result.append("\n"+m_roi->print());
+    else
+        result.append("\n"+parformat("Region of interest")+"undefined");
+
+    // Append GTIs
+    //result.append("\n"+m_gti->print());
+
+    // Append response
+    if (m_response != NULL)
+        result.append("\n"+m_response->print());
+    else
+        result.append("\n"+parformat("CTA response")+" undefined");
+
+    // Append events
+    if (m_events != NULL)
+        result.append("\n"+m_events->print());
+
+    // Return result
+    return result;
 }
 
 
@@ -416,46 +485,3 @@ double GCTAObservation::npred_grad_temp(const GModel& model, int ipar) const
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Put CTA observation in output stream
- *
- * @param[in] os Output stream into which the data will be dumped
- * @param[in] obs Observation to be dumped
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GCTAObservation& obs)
-{
-    // Put observation in stream
-    os.precision(3);
-    os << "=== GCTAObservation ===" << std::endl;
-    os << " Name ......................: " << obs.m_obsname << std::endl;
-    os << " Instrument ................: " << obs.instrument() << std::endl;
-    os << " Time range ................: " << std::fixed
-       << obs.m_gti.tstart().mjd() << " - "
-       << obs.m_gti.tstop().mjd() << " days" << std::endl;
-    os << " Energy range ..............: " << std::fixed
-       << obs.m_ebounds.emin().MeV() << " - "
-       << obs.m_ebounds.emax().MeV() << " MeV" << std::endl;
-
-    // Add ROI to stream if it exists
-    if (obs.m_roi != NULL)
-        os << " Region of interest ........: " << *((GCTARoi*)obs.m_roi) << std::endl;
-
-    // Add GTIs to stream
-    os << obs.m_gti << std::endl;
-
-    // Add response to stream if it exists
-    if (obs.m_response != NULL)
-        os << *(obs.m_response) << std::endl;
-
-    // Add events to stream
-    if (obs.m_events != NULL) {
-        if (obs.m_events->islist())
-            os << *((GCTAEventList*)obs.m_events) << std::endl;
-        else
-            os << *((GCTAEventCube*)obs.m_events) << std::endl;
-    }
-
-    // Return output stream
-    return os;
-}

@@ -20,13 +20,15 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
+#include <cmath> //isinf
 #include "GException.hpp"
 #include "GLATObservation.hpp"
 #include "GLATEventList.hpp"
 #include "GLATEventCube.hpp"
 #include "GLATRoi.hpp"
 #include "GFits.hpp"
+#include "GTools.hpp"
+#include "GEnergy.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -44,7 +46,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GLATObservation::GLATObservation(void) : GObservation()
 {
@@ -129,7 +131,25 @@ GLATObservation& GLATObservation::operator= (const GLATObservation& obs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clone object
+ * @brief Clear instance
+ ***************************************************************************/
+void GLATObservation::clear(void)
+{
+    // Free members
+    free_members();
+    this->GObservation::free_members();
+
+    // Initialise members
+    this->GObservation::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
 ***************************************************************************/
 GLATObservation* GLATObservation::clone(void) const
 {
@@ -152,6 +172,12 @@ void GLATObservation::response(const std::string& irfname, std::string caldb)
 
     // Allocate new LAT response function
     m_response = new GLATResponse;
+
+    // Set calibration database
+    m_response->caldb(caldb);
+
+    // Load instrument response function
+    m_response->load(irfname);
 
     // Return
     return;
@@ -201,6 +227,57 @@ std::string GLATObservation::instrument(void) const
 
 
 /***********************************************************************//**
+ * @brief Print LAT observation information
+ ***************************************************************************/
+std::string GLATObservation::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GLATObservation ===\n");
+    result.append(parformat("Name")+obsname()+"\n");
+    result.append(parformat("Instrument")+instrument()+"\n");
+    result.append(parformat("Statistics")+statistics()+"\n");
+
+    // Append time range
+    result.append(parformat("Time range"));
+    result.append(str(m_gti.tstart().mjd()));
+    result.append(" - ");
+    result.append(str(m_gti.tstop().mjd()));
+    result.append(" days\n");
+
+    // Append energy range
+    result.append(parformat("Energy range"));
+    result.append(m_ebounds.emin().print());
+    result.append(" - ");
+    result.append(m_ebounds.emax().print());
+
+    // Append ROI
+    if (m_roi != NULL)
+        result.append("\n"+m_roi->print());
+    else
+        result.append("\n"+parformat("Region of interest")+"undefined");
+
+    // Append GTIs
+    //result.append("\n"+m_gti->print());
+
+    // Append response
+    if (m_response != NULL)
+        result.append("\n"+m_response->print());
+    else
+        result.append("\n"+parformat("LAT response")+"undefined");
+
+    // Append events
+    if (m_events != NULL)
+        result.append("\n"+m_events->print());
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Load data for unbinned analysis
  *
  * @param[in] ft1name FT1 FITS filename.
@@ -209,6 +286,7 @@ std::string GLATObservation::instrument(void) const
  *
  * @todo So far nothing is done with the ft2 file and the ltcube file.
  *       Loading of the relevant information needs to be implemented.
+ *
  * @todo Implement proper GTI loading method that provides correct time
  *       conversion
  ***************************************************************************/
@@ -216,13 +294,8 @@ void GLATObservation::load_unbinned(const std::string& ft1name,
                                     const std::string& ft2name,
                                     const std::string& ltcube_name)
 {
-    // Free and initialise base class members
-    this->GObservation::free_members();
-    this->GObservation::init_members();
-
-    // Free and initialise class members
-    free_members();
-    init_members();
+    // Clear instance
+    clear();
 
     // Allocate LAT events
     GLATEventList* events = new GLATEventList;
@@ -233,11 +306,6 @@ void GLATObservation::load_unbinned(const std::string& ft1name,
 
     // Load GTIs from FT1 file
     m_gti.load(ft1name);
-
-    // Link observations to events. This has to be done after loading since
-    // loading initialises the GLATEventList object, hence resets the pointer
-    // to the observation.
-    //events->obs(this);
 
     // Return
     return;
@@ -253,20 +321,18 @@ void GLATObservation::load_unbinned(const std::string& ft1name,
  *
  * @todo So far nothing is done with the expmap and the ltcube files.
  *       Approriate loading needs to be implemented.
+ *
  * @todo Implement proper GTI loading method that provides correct time
- *       conversion
+ *       conversion.
+ *
+ * @todo Avoid copying over of information from event cube????
  ***************************************************************************/
 void GLATObservation::load_binned(const std::string& cntmap_name,
                                   const std::string& expmap_name,
                                   const std::string& ltcube_name)
 {
-    // Free and initialise base class members
-    this->GObservation::free_members();
-    this->GObservation::init_members();
-
-    // Free and initialise class members
-    free_members();
-    init_members();
+    // Clear instance
+    clear();
 
     // Allocate LAT events
     GLATEventCube* events = new GLATEventCube;
@@ -276,18 +342,13 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
     events->load(cntmap_name);
 
     // Copy over energy boundaries from events cube
-    m_ebounds = events->m_ebds;
+    m_ebounds = events->ebds();
 
-    // Load GTIs from counts map file
-    m_gti.load(cntmap_name);
+    // Copy over GTIs from events cube
+    m_gti = events->gti();
 
     // Set mean time
-    events->m_time = 0.5 * (m_gti.tstart() + m_gti.tstop());
-
-    // Link observations to events. This has to be done after loading since
-    // loading initialises the GLATEventList object, hence resets the pointer
-    // to the observation.
-    //events->obs(this);
+    events->time() = 0.5 * (gti()->tstart() + gti()->tstop());
 
     // Return
     return;
@@ -334,16 +395,6 @@ void GLATObservation::copy_members(const GLATObservation& obs)
     if (obs.m_response != NULL) m_response = obs.m_response->clone();
     if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
 
-    // Update the back pointer to link observation the actual observation
-    // to the events. This has to be done here since the events that were
-    // copied do not yet know to which observation they belong.
-    /*
-    if (m_events->islist())
-        ((GLATEventList*)m_events)->obs(this);
-    else
-        ((GLATEventCube*)m_events)->obs(this);
-    */
-
     // Return
     return;
 }
@@ -372,48 +423,3 @@ void GLATObservation::free_members(void)
  =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Put LAT observation in output stream
- *
- * @param[in] os Output stream into which the data will be dumped
- * @param[in] obs Observation to be dumped
- *
- * @todo Implement GLATResponse operator<<
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GLATObservation& obs)
-{
-    // Put observation in stream
-    os.precision(3);
-    os << "=== GLATObservation ===" << std::endl;
-    os << " Name ......................: " << obs.m_obsname << std::endl;
-    os << " Instrument ................: " << obs.instrument() << std::endl;
-    os << " Time range ................: " << std::fixed
-       << obs.m_gti.tstart().mjd() << " - "
-       << obs.m_gti.tstop().mjd() << " days" << std::endl;
-    os << " Energy range ..............: " << std::fixed
-       << obs.m_ebounds.emin().MeV() << " - "
-       << obs.m_ebounds.emax().MeV() << " MeV" << std::endl;
-
-    // Add ROI to stream if it exists
-    if (obs.m_roi != NULL)
-        os << " Region of interest ........: " << *((GLATRoi*)obs.m_roi) << std::endl;
-
-    // Add GTIs to stream
-    os << obs.m_gti << std::endl;
-
-    // Add response to stream if it exists
-    //if (obs.m_response != NULL)
-    //    os << *(obs.m_response) << std::endl;
-
-    // Add events to stream
-    if (obs.m_events != NULL) {
-        if (obs.m_events->islist())
-            os << *((GLATEventList*)obs.m_events) << std::endl;
-        else
-            os << *((GLATEventCube*)obs.m_events) << std::endl;
-    }
-
-    // Return output stream
-    return os;
-}

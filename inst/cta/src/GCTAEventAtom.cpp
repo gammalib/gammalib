@@ -20,11 +20,11 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
+#include <string>
 #include <cmath>
-#include "GException.hpp"
-#include "GCTAException.hpp"
 #include "GCTAEventAtom.hpp"
+#include "GCTAException.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -57,7 +57,7 @@ GCTAEventAtom::GCTAEventAtom(void) : GEventAtom()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] atom Event atom from which the instance should be built.
+ * @param[in] atom Event atom.
  ***************************************************************************/
 GCTAEventAtom::GCTAEventAtom(const GCTAEventAtom& atom) : GEventAtom(atom)
 {
@@ -94,7 +94,7 @@ GCTAEventAtom::~GCTAEventAtom(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] atom Event atom which should be assigned.
+ * @param[in] atom Event atom.
  ***************************************************************************/
 GCTAEventAtom& GCTAEventAtom::operator= (const GCTAEventAtom& atom)
 {
@@ -154,6 +154,26 @@ void GCTAEventAtom::clear(void)
 GCTAEventAtom* GCTAEventAtom::clone(void) const
 {
     return new GCTAEventAtom(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Print event information
+ *
+ * @todo Implement and use GTime::print method.
+ ***************************************************************************/
+std::string GCTAEventAtom::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append number of counts
+    result.append("Dir="+m_dir.print());
+    result.append(" Energy="+m_energy.print());
+    result.append(" Time="+str(m_time.met()));
+
+    // Return result
+    return result;
 }
 
 
@@ -252,22 +272,3 @@ void GCTAEventAtom::free_members(void)
  =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Put atom into output stream
- *
- * @param[in] os Output stream.
- * @param[in] atom Event atom.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GCTAEventAtom& atom)
-{
-    // Put bin in output stream
-    os.precision(3);
-    os << std::fixed;
-    os << "Time=" << atom.m_time;
-    os << " Energy=" << atom.m_energy;
-    os << atom.m_dir;
-
-    // Return output stream
-    return os;
-}

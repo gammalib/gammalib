@@ -20,7 +20,7 @@
 #define GCTAROI_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
+#include <string>
 #include "GRoi.hpp"
 #include "GCTAInstDir.hpp"
 
@@ -36,9 +36,6 @@
  ***************************************************************************/
 class GCTARoi : public GRoi {
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GCTARoi& roi);
-
 public:
     // Constructors and destructors
     GCTARoi(void);
@@ -48,8 +45,12 @@ public:
     // Operators
     GCTARoi& operator= (const GCTARoi& roi);
 
-    // Methods
-    void        clear(void);
+    // Implemented pure virtual base class methods
+    void         clear(void);
+    GCTARoi*     clone(void) const;
+    std::string  print(void) const;
+
+    // Other methods
     GCTAInstDir centre(void) const { return m_centre; }
     double      radius(void) const { return m_radius; }
     void        centre(const GCTAInstDir& centre) { m_centre=centre; return; }
@@ -57,10 +58,9 @@ public:
 
 protected:
     // Protected methods
-    void     init_members(void);
-    void     copy_members(const GCTARoi& roi);
-    void     free_members(void);
-    GCTARoi* clone(void) const;
+    void init_members(void);
+    void copy_members(const GCTARoi& roi);
+    void free_members(void);
     
     // Protected members
     GCTAInstDir m_centre;   //!< Centre of ROI in instrument coordinates

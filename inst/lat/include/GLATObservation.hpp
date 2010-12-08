@@ -20,11 +20,13 @@
 #define GLATOBSERVATION_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GObservation.hpp"
 #include "GLATResponse.hpp"
 #include "GLATPointing.hpp"
 #include "GTime.hpp"
 #include "GModel.hpp"
+#include "GModels.hpp"
 
 
 /***********************************************************************//**
@@ -34,24 +36,23 @@
  ***************************************************************************/
 class GLATObservation : public GObservation {
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATObservation& obs);
-
 public:
     // Constructors and destructors
-    GLATObservation();
+    GLATObservation(void);
     GLATObservation(const GLATObservation& obs);
-    virtual ~GLATObservation();
+    virtual ~GLATObservation(void);
 
     // Operators
     GLATObservation& operator= (const GLATObservation& obs);
 
-    // Implement pure virtual methods
+    // Implemented pure virtual base class methods
+    void             clear(void);
     GLATObservation* clone(void) const;
     void             response(const std::string& irfname, std::string caldb = "");
     GLATResponse*    response(const GTime& time) const;
     GLATPointing*    pointing(const GTime& time) const;
     std::string      instrument(void) const;
+    std::string      print(void) const;
 
     // Other methods
     void load_unbinned(const std::string& ft1name, const std::string& ft2name,
@@ -65,7 +66,7 @@ protected:
     void copy_members(const GLATObservation& obs);
     void free_members(void);
 
-    // Protected data area
+    // Protected members
     GLATResponse* m_response;     //!< Pointer to instrument response functions
     GLATPointing* m_pointing;     //!< Pointer to pointing direction
 };

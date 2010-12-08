@@ -20,7 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
+#include "GTools.hpp"
 #include "GCTAException.hpp"
 #include "GCTAEventCube.hpp"
 #include "GCTAEventBin.hpp"
@@ -197,7 +197,7 @@ void GCTAEventCube::load(const std::string& filename)
     // Load energy boundaries
     read_ebds(hdu_ebounds);
 
-    // Load energy boundaries
+    // Load GTIs
     read_gti(hdu_gti);
 
     // Close FITS file
@@ -268,6 +268,26 @@ int GCTAEventCube::number(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print event cube information
+ ***************************************************************************/
+std::string GCTAEventCube::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GCTAEventCube ===\n");
+    result.append(parformat("Number of elements")+str(size())+"\n");
+    result.append(parformat("Number of pixels")+str(npix())+"\n");
+    result.append(parformat("Number of energy bins")+str(ebins())+"\n");
+    result.append(parformat("Number of events")+str(number())+"\n");
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -277,14 +297,13 @@ int GCTAEventCube::number(void) const
 /***********************************************************************//**
  * @brief Initialise class members
  *
- * @todo Implement GSkymap.clear(), GCTAEventBin.clear() methods
+ * @todo Implement GSkymap.clear() method
  ***************************************************************************/
 void GCTAEventCube::init_members(void)
 {
     // Initialise members
-    //m_bin.clear();
+    m_bin.clear();
     //m_map.clear();
-    m_bin      = GCTAEventBin();
     m_map      = GSkymap();
     m_counts   = NULL;
     m_dirs     = NULL;
@@ -578,22 +597,3 @@ void GCTAEventCube::set_time(void)
  =                         GCTAEventCube friends                           =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Put CTA event cube in output stream
- *
- * @param[in] os Output stream into which the event cube will be dumped
- * @param[in] cube Event cube to be dumped
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GCTAEventCube& cube)
-{
-    // Put CTA event list in output stream
-    os << "=== GCTAEventCube ===" << std::endl;
-    os << " Number of elements ........: " << cube.size() << std::endl;
-    os << " Number of pixels ..........: " << cube.npix() << std::endl;
-    os << " Number of energy bins .....: " << cube.ebins() << std::endl;
-    os << " Number of events ..........: " << cube.number() << std::endl;
-
-    // Return output stream
-    return os;
-}

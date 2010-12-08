@@ -20,6 +20,7 @@
 #define GCTAEVENTCUBE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GEventCube.hpp"
 #include "GCTAEventBin.hpp"
 #include "GCTAObservation.hpp"
@@ -48,9 +49,6 @@ class GCTAEventCube : public GEventCube {
     // Friend classes
     friend class GCTAObservation;
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GCTAEventCube& cube);
-
 public:
     // Constructors and destructors
     GCTAEventCube(void);
@@ -60,12 +58,13 @@ public:
     // Operators
     GCTAEventCube& operator= (const GCTAEventCube& cube);
 
-    // Implemented pure virtul methods
+    // Implemented pure virtual base class methods
     void           clear(void);
     GCTAEventCube* clone(void) const;
     void           load(const std::string& filename);
     GCTAEventBin*  pointer(int index);
     int            number(void) const;
+    std::string    print(void) const;
 
     // Other methods
     int nx(void) const { return m_map.nx(); }

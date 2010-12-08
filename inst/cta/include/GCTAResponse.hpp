@@ -76,10 +76,12 @@ public:
                   const GPointing& pnt, const GGti& gti) const;
 
     // Implemented pure virtual base class methods
+    void          clear(void);
     GCTAResponse* clone(void) const;
     void          load(const std::string& irfname);
     bool          hasedisp(void) const { return false; }
     bool          hastdisp(void) const { return false; }
+    std::string   print(void) const;
 
     // Other Methods
     double psf(const double& theta, const double& sigma) const;

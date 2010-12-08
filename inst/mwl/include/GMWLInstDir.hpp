@@ -20,6 +20,7 @@
 #define GMWLINSTDIR_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GInstDir.hpp"
 
 
@@ -46,6 +47,7 @@ public:
     // Methods
     void         clear(void);
     GMWLInstDir* clone(void) const;
+    std::string  print(void) const;
 
 protected:
     // Protected methods

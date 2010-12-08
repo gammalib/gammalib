@@ -1,5 +1,5 @@
 /***************************************************************************
- *       GLATResponse.i  -  GLAST LAT Response class SWIG definition       *
+ *       GLATResponse.i  -  Fermi LAT Response class SWIG definition       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,6 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GLATResponse.hpp"
 %}
-%include stl.i
 
 
 /***********************************************************************//**
@@ -34,7 +33,17 @@ public:
     GLATResponse(const GLATResponse& rsp);
     ~GLATResponse(void);
 
-    // Implemented pure virtual methods
+    // Implement pure virtual base class methods
+    void          clear(void);
+    GLATResponse* clone(void) const;
+    void          load(const std::string& rspname);
+    bool          hasedisp(void) const { return false; }
+    bool          hastdisp(void) const { return false; }
+    
+    // Implemented response computation methods
+    double diffrsp(const GEvent& event, const GModel& model,
+                   const GEnergy& srcEng, const GTime& srcTime,
+                   const GPointing& pnt) const;
     double live(const GSkyDir&  srcDir, const GEnergy& srcEng,
                 const GTime& srcTime, const GPointing& pnt) const;
     double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
@@ -54,10 +63,6 @@ public:
                   const GTime& srcTime, const GPointing& pnt, const GEbounds& ebds) const;
     double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
                   const GTime& srcTime, const GPointing& pnt, const GGti& gti) const;
-    void   load(const std::string& rspname);
-    bool   hasedisp(void) const { return false; }
-    bool   hastdisp(void) const { return false; }
-    GLATResponse* clone(void) const;
 
     // Other Methods
     double        aeff(const double& logE, const double& ctheta);
@@ -66,4 +71,14 @@ public:
     double        psf(const double& delta, const double& logE, const double& ctheta);
     GVector       psf(const GVector& delta, const double& logE, const double& ctheta);
     void          save(const std::string& rspname) const;
+};
+
+
+/***********************************************************************//**
+ * @brief GLATResponse class extension
+ ***************************************************************************/
+%extend GLATResponse {
+    GLATResponse copy() {
+        return (*self);
+    }
 };
