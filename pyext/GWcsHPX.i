@@ -37,9 +37,10 @@ public:
     virtual ~GWcsHPX(void);
 
     // Implemented pure virtual methods
-    void clear(void);
-    void read(const GFitsHDU* hdu);
-    void write(GFitsHDU* hdu) const;
+    void     clear(void);
+    GWcsHPX* clone(void) const;
+    void     read(const GFitsHDU* hdu);
+    void     write(GFitsHDU* hdu) const;
 
     // Overloaded base class methods
     double      omega(const int& pix) const;
@@ -58,15 +59,6 @@ public:
  * @brief GWcsHPX class extension
  ***************************************************************************/
 %extend GWcsHPX {
-    char *__str__() {
-        static char str_buffer[1001];
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 1001);
-        str_buffer[1000] = '\0';
-        return str_buffer;
-    }
     GWcsHPX copy() {
         return (*self);
     }
