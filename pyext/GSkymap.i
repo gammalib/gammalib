@@ -119,18 +119,22 @@ public:
         else
             return (*self)(GSkymapInx[1], GSkymapInx[2]);
     }
+    /*
     double __getitem__(const GSkyPixel& pixel) {
         return (*self)(pixel);
     }
+    */
     void __setitem__(int GSkymapInx[], double value) {
         if (GSkymapInx[0] == 1)
             (*self)(GSkymapInx[1]) = value;
         else
             (*self)(GSkymapInx[1], GSkymapInx[2]) = value;
     }
+    /*
     void __setitem__(const GSkyPixel& pixel, double value) {
         (*self)(pixel) = value;
     }
+    */
     GSkymap copy() {
         return (*self);
     }
