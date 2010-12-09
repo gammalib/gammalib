@@ -147,11 +147,11 @@ def test_fits():
 
     # Get double precision image, take square root of pixel and save in
     # another file
-    img_double = cast_double(fits.image("Double"))
+    img_double = GFitsImageDouble(fits.image("Double"))
     for x in range(nx):
         for y in range(ny):
             img_double[x,y] = sqrt(img_double[x,y])
-    #img_byte = cast_byte(fits.image("Double"))
+    #img_byte = GFitsImageByte(fits.image("Double"))
 
     # Save into another FITS file
     fits.saveto(file2)
@@ -173,34 +173,34 @@ def test_skymap():
     # Set filenames
     file1 = "test_python_skymap_hpx_v1.fits"
     file2 = "test_python_skymap_hpx_v2.fits"
+    file3 = "test_python_skymap_car.fits"
 
     # Remove test files
     try:
         os.remove(file1)
         os.remove(file2)
+        os.remove(file3)
     except:
         pass
-    
+
     # Create HEALPix skymap
     pixels = GSkymap("HPX", "GAL", 4, "RING", 2)
     for i, pixel in enumerate(pixels):
         pixels[i]   = i+1.0
-        pixels[i:1] = i+1.0 + 1000.0
+        pixels[i,1] = i+1.0 + 1000.0
     pixels.save(file1)
     
     # Load HEALPix skymap
     pixels = GSkymap(file1)
-
-    # Dump skymap
-    #print pixels
 
     # Control pix2dir / dir2pix
     for i in range(pixels.npix()):
         dir  = pixels.pix2dir(i)
         ipix = pixels.dir2pix(dir)
         if (i != ipix):
-            print "GSkymap Trouble with pixel "+str(i)+" ("+str(ipix)+ \
+            msg = "HEALPix GSkymap trouble with pixel "+str(i)+" ("+str(ipix)+ \
                   "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
+            raise RuntimeError("*** TEST ERROR: "+msg)
 
     # Control SkyDir coordinate transformation for all pixels
     for i in range(pixels.npix()):
@@ -212,8 +212,9 @@ def test_skymap():
             dra -= 2.0*pi
         ddec = abs(dir.dec() - dir_new.dec())
         if (dra > 1.0e-9 or ddec > 1.0e-9):
-            print "GSkyDir Trouble with pixel "+str(i)+" ("+str(dra)+ \
+            msg = "GSkyDir Trouble with pixel "+str(i)+" ("+str(dra)+ \
                   ","+str(ddec)+")"
+            raise RuntimeError("*** TEST ERROR: "+msg)
     
     # Save HEALPix skymap twice. The second saving should fail.
     try:
@@ -227,6 +228,28 @@ def test_skymap():
 
     # Load again HEALPix skymap
     pixels = GSkymap(file1)
+
+    # Create CAR skymap
+    pixels = GSkymap("CAR", "CEL", 83.6331, 22.0145, -0.1, 0.1, 100, 100, 20)
+    for map in range(pixels.nmaps()):
+        for i in range(pixels.npix()):
+            pixels[i,map] = i+map*pixels.npix()
+    pixels.save(file3)
+
+    # Control pix2dir / dir2pix
+    for i in range(pixels.npix()):
+        dir  = pixels.pix2dir(i)
+        ipix = pixels.dir2pix(dir)
+        if (i != ipix):
+            msg = "CAR GSkymap trouble with pixel "+str(i)+" ("+str(ipix)+ \
+                  "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
+            raise RuntimeError("*** TEST ERROR: "+msg)
+
+    # SkyPixel access
+    #for i in range(pixels.npix()):
+    #    dir = pixels.pix2dir(i)
+    #    pix = pixels.dir2xy(dir)
+    #    print pixels[pix]
 
     # Dump skymap
     #print pixels
