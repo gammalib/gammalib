@@ -52,6 +52,12 @@ public:
  * @brief GFitsImageDouble class extension
  ***************************************************************************/
 %extend GFitsImageDouble {
+    GFitsImageDouble(const GFitsImage& image) {
+        if (image.type() != 82)
+            throw GException::fits_invalid_type("GFitsImageDouble(GFitsImage&)",
+                                                "Expecting double precision image.");
+        return (GFitsImageDouble*)&image;
+    }
     double __getitem__(int GFitsImageInx[]) {
         if (GFitsImageInx[0] == 1)
             return self->at(GFitsImageInx[1]);

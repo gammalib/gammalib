@@ -52,6 +52,12 @@ public:
  * @brief GFitsImageUShort class extension
  ***************************************************************************/
 %extend GFitsImageUShort {
+    GFitsImageUShort(const GFitsImage& image) {
+        if (image.type() != 20)
+            throw GException::fits_invalid_type("GFitsImageUShort(GFitsImage&)",
+                                                "Expecting unsigned short integer image.");
+        return (GFitsImageUShort*)&image;
+    }
     unsigned short __getitem__(int GFitsImageInx[]) {
         if (GFitsImageInx[0] == 1)
             return self->at(GFitsImageInx[1]);

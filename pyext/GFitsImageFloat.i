@@ -52,6 +52,12 @@ public:
  * @brief GFitsImageFloat class extension
  ***************************************************************************/
 %extend GFitsImageFloat {
+    GFitsImageFloat(const GFitsImage& image) {
+        if (image.type() != 42)
+            throw GException::fits_invalid_type("GFitsImageFloat(GFitsImage&)",
+                                                "Expecting single precision image.");
+        return (GFitsImageFloat*)&image;
+    }
     float __getitem__(int GFitsImageInx[]) {
         if (GFitsImageInx[0] == 1)
             return self->at(GFitsImageInx[1]);

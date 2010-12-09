@@ -52,6 +52,12 @@ public:
  * @brief GFitsImageShort class extension
  ***************************************************************************/
 %extend GFitsImageShort {
+    GFitsImageShort(const GFitsImage& image) {
+        if (image.type() != 21)
+            throw GException::fits_invalid_type("GFitsImageShort(GFitsImage&)",
+                                                "Expecting short integer image.");
+        return (GFitsImageShort*)&image;
+    }
     short __getitem__(int GFitsImageInx[]) {
         if (GFitsImageInx[0] == 1)
             return self->at(GFitsImageInx[1]);

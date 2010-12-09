@@ -52,6 +52,12 @@ public:
  * @brief GFitsImageByte class extension
  ***************************************************************************/
 %extend GFitsImageByte {
+    GFitsImageByte(const GFitsImage& image) {
+        if (image.type() != 11)
+            throw GException::fits_invalid_type("GFitsImageByte(GFitsImage&)",
+                                                "Expecting byte image.");
+        return (GFitsImageByte*)&image;
+    }
     unsigned char __getitem__(int GFitsImageInx[]) {
         if (GFitsImageInx[0] == 1)
             return self->at(GFitsImageInx[1]);
