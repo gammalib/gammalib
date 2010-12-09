@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
@@ -17,6 +16,7 @@
 #include <config.h>
 #endif
 #include "GSkyPixel.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -31,14 +31,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                     GSkyPixel constructors/destructors                  =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GSkyPixel::GSkyPixel()
+GSkyPixel::GSkyPixel(void)
 {
     // Initialise members
     init_members();
@@ -68,7 +68,7 @@ GSkyPixel::GSkyPixel(double x, double y)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] pixel Sky pixel from which class should be instantiated.
+ * @param[in] pixel Sky pixel.
  ***************************************************************************/
 GSkyPixel::GSkyPixel(const GSkyPixel& pixel)
 {
@@ -86,7 +86,7 @@ GSkyPixel::GSkyPixel(const GSkyPixel& pixel)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GSkyPixel::~GSkyPixel()
+GSkyPixel::~GSkyPixel(void)
 {
     // Free members
     free_members();
@@ -98,14 +98,14 @@ GSkyPixel::~GSkyPixel()
 
 /*==========================================================================
  =                                                                         =
- =                            GSkyPixel operators                          =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] pixel Sky pixel to be assigned.
+ * @param[in] pixel Sky pixel.
  ***************************************************************************/
 GSkyPixel& GSkyPixel::operator= (const GSkyPixel& pixel)
 {
@@ -130,14 +130,14 @@ GSkyPixel& GSkyPixel::operator= (const GSkyPixel& pixel)
 
 /*==========================================================================
  =                                                                         =
- =                         GSkyPixel public methods                        =
+ =                              Public methods                             =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Set x value of sky pixel
  *
- * @param[in] x X value to set.
+ * @param[in] x X value.
  ***************************************************************************/
 void GSkyPixel::x(const double& x)
 {
@@ -149,7 +149,7 @@ void GSkyPixel::x(const double& x)
 /***********************************************************************//**
  * @brief Set y value of sky pixel
  *
- * @param[in] y Y value to set.
+ * @param[in] y Y value.
  ***************************************************************************/
 void GSkyPixel::y(const double& y)
 {
@@ -178,9 +178,28 @@ double GSkyPixel::y(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print pixel
+ ***************************************************************************/
+std::string GSkyPixel::print(void) const
+{
+    // Initialise result string
+    std::string result = "(";
+
+    // Append pixel
+    result.append(str(x()));
+    result.append(",");
+    result.append(str(y()));
+    result.append(")");
+    
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
- =                         GSkyPixel private methods                       =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -201,7 +220,7 @@ void GSkyPixel::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] pixel Sky pixel from which members should be copied.
+ * @param[in] pixel Sky pixel.
  ***************************************************************************/
 void GSkyPixel::copy_members(const GSkyPixel& pixel)
 {
@@ -219,10 +238,6 @@ void GSkyPixel::copy_members(const GSkyPixel& pixel)
  ***************************************************************************/
 void GSkyPixel::free_members(void)
 {
-    // Free memory
-
-    // Signal free pointers
-
     // Return
     return;
 }
@@ -230,21 +245,38 @@ void GSkyPixel::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                             GSkyPixel friends                           =
+ =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
+
 
 /***********************************************************************//**
  * @brief Output operator
  *
  * @param[in] os Output stream.
- * @param[in] pixel Sky pixel to put in output stream.
+ * @param[in] pixel Sky pixel.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GSkyPixel& pixel)
 {
-    // Put pixel in output stream
-    os << "(" << pixel.x() << "," << pixel.y() << ")";
-    
+     // Write pixel in output stream
+    os << pixel.print();
+
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] pixel Sky pixel.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GSkyPixel& pixel)
+{
+    // Write pixel into logger
+    log << pixel.print();
+
+    // Return logger
+    return log;
 }

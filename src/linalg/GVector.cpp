@@ -21,6 +21,7 @@
 #include <config.h>
 #endif
 #include "GVector.hpp"
+#include "GTools.hpp"
 
 
 /* __ Method name definitions ____________________________________________ */
@@ -31,12 +32,12 @@
 
 /*==========================================================================
  =                                                                         =
- =                      GVector constructors/destructors                   =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Void vector constructor (contains no elements)
+ * @brief Void vector constructor
  ***************************************************************************/
 GVector::GVector(void)
 {
@@ -188,7 +189,7 @@ GVector::~GVector(void)
 
 /*==========================================================================
  =                                                                         =
- =                            GVector operators                            =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -262,7 +263,7 @@ const double& GVector::operator() (int inx) const
 
 /*==========================================================================
  =                                                                         =
- =                          GVector public methods                         =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -299,9 +300,32 @@ int GVector::non_zeros(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print vector information
+ ***************************************************************************/
+std::string GVector::print(void) const
+{
+    // Initialise result string
+    std::string result = "(";
+
+    // Put all elements in stream
+    for (int i = 0; i < m_num; ++i) {
+        result += str((*this)(i));
+        if (i != m_num-1)
+            result += ", ";
+    }
+
+    // Append )
+    result += ")";
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
- =                          GVector private methods                        =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -379,7 +403,7 @@ void GVector::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                              GVector friends                            =
+ =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -387,22 +411,12 @@ void GVector::free_members(void)
  * @brief Output operator
  *
  * @param[in] os Output stream.
- * @param[in] v Vector to put in output stream.
+ * @param[in] v Vector.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GVector& v)
 {
-    // Prepend (
-    os << "(";
-
-    // Put all elements in stream
-    for (int i = 0; i < v.m_num; ++i) {
-        os << v(i);
-        if (i != v.m_num-1)
-            os << ", ";
-    }
-
-    // Append )
-    os << ")";
+     // Write vector in output stream
+    os << v.print();
 
     // Return output stream
     return os;
@@ -410,25 +424,15 @@ std::ostream& operator<< (std::ostream& os, const GVector& v)
 
 
 /***********************************************************************//**
- * @brief Write vector into logger
+ * @brief Log operator
  *
  * @param[in] log Logger.
- * @param[in] v Vector to write into logger.
+ * @param[in] v Vector.
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GVector& v)
 {
-    // Prepend (
-    log << "(";
-
-    // Put all vector elements in logger
-    for (int i = 0; i < v.m_num; ++i) {
-        log << v(i);
-        if (i != v.m_num-1)
-            log << ", ";
-    }
-
-    // Append )
-    log << ")";
+    // Write vector into logger
+    log << v.print();
 
     // Return logger
     return log;

@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <math.h>
+#include <string>
 #include <iostream>
 #include <stdlib.h>
 #include "GException.hpp"
@@ -92,7 +93,7 @@ public:
     explicit GVector(const double& a, const double& b);
     explicit GVector(const double& a, const double& b, const double& c);
     GVector(const GVector& v);
-   ~GVector(void);
+    virtual ~GVector(void);
 
     // Vector element access operators
     double& operator() (int inx);
@@ -110,9 +111,10 @@ public:
     GVector  operator- () const;
 
     // Vector methods
-    void clear(void);
-    int  size(void) const;
-    int  non_zeros(void) const;
+    void        clear(void);
+    int         size(void) const;
+    int         non_zeros(void) const;
+    std::string print(void) const;
 
 private:
     // Private methods

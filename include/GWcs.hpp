@@ -20,6 +20,9 @@
 #define GWCS_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
+#include <iostream>
+#include "GLog.hpp"
 #include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
@@ -34,8 +37,16 @@
  ***************************************************************************/
 class GWcs {
 
-  // Friend classes
-  friend class GSkymap;
+    // Friend classes
+    friend class GSkymap;
+
+    // Operator friends
+    friend bool operator== (const GWcs &a, const GWcs &b);
+    friend bool operator!= (const GWcs &a, const GWcs &b);
+
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GWcs& wcs);
+    friend GLog&         operator<< (GLog& log, const GWcs& wcs);
 
 public:
     // Constructors and destructors
@@ -51,9 +62,11 @@ public:
     virtual GWcs& operator= (const GWcs& wcs);
 
     // Pure virtual methods (not implemented)
-    virtual void clear(void) = 0;
-    virtual void read(const GFitsHDU* hdu) = 0;
-    virtual void write(GFitsHDU* hdu) const = 0;
+    virtual void        clear(void) = 0;
+    virtual GWcs*       clone(void) const = 0;
+    virtual void        read(const GFitsHDU* hdu) = 0;
+    virtual void        write(GFitsHDU* hdu) const = 0;
+    virtual std::string print(void) const = 0;
 
     // Virtual methods
     virtual std::string type(void) const;
@@ -68,10 +81,9 @@ public:
 
 protected:
     // Protected methods
-    void          init_members(void);
-    void          copy_members(const GWcs& wcs);
-    void          free_members(void);
-    virtual GWcs* clone(void) const = 0;
+    void init_members(void);
+    void copy_members(const GWcs& wcs);
+    void free_members(void);
 
     // Typdefs
     typedef void (GWcs::*_wcspf)(GVector* coord) const;
@@ -90,7 +102,7 @@ protected:
     void        wcs_write(GFitsHDU* hdu) const;
     std::string wcs_crval1(void) const;
     std::string wcs_crval2(void) const;
-    void        wcs_dump(std::ostream& os) const;
+    std::string wcs_dump(void) const;
 
     // Protected data area (astr structure)
     std::string m_type;     //!< WCS type

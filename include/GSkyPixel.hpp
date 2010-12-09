@@ -20,7 +20,9 @@
 #define GSKYPIXEL_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include <iostream>
+#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -32,6 +34,7 @@ class GSkyPixel {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GSkyPixel& pixel);
+    friend GLog&         operator<< (GLog& log, const GSkyPixel& pixel);
 
 public:
     // Constructors and destructors
@@ -44,10 +47,11 @@ public:
     GSkyPixel& operator= (const GSkyPixel& pixel);
     
     // Methods
-    void   x(const double& x);
-    void   y(const double& y);
-    double x(void) const;
-    double y(void) const;
+    void        x(const double& x);
+    void        y(const double& y);
+    double      x(void) const;
+    double      y(void) const;
+    std::string print(void) const;
 
 private:
     // Private methods

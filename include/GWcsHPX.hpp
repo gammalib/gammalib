@@ -33,9 +33,6 @@
  ***************************************************************************/
 class GWcsHPX : public GWcs {
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GWcsHPX& wcs);
-
 public:
     // Constructors and destructors
     GWcsHPX(void);
@@ -48,10 +45,12 @@ public:
     // Operators
     GWcsHPX& operator= (const GWcsHPX& wcs);
 
-    // Implemented pure virtual methods
-    void clear(void);
-    void read(const GFitsHDU* hdu);
-    void write(GFitsHDU* hdu) const;
+    // Implemented pure virtual base class methods
+    void        clear(void);
+    GWcsHPX*    clone(void) const;
+    void        read(const GFitsHDU* hdu);
+    void        write(GFitsHDU* hdu) const;
+    std::string print(void) const;
 
     // Overloaded base class methods
     double      omega(const int& pix) const;
@@ -69,7 +68,6 @@ private:
     void         init_members(void);
     void         copy_members(const GWcsHPX& wcs);
     void         free_members(void);
-    GWcsHPX*     clone(void) const;
     int          nside2order(int nside);
     void         pix2xy(const int& ipix, int* x, int* y);
     int          xy2pix(int x, int y) const;

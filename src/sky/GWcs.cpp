@@ -58,7 +58,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GWcs::GWcs(void)
 {
@@ -107,7 +107,7 @@ GWcs::GWcs(const std::string& coords,
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param wcs GWcs instance which should be used for construction
+ * @param wcs World Coordinate System.
  ***************************************************************************/
 GWcs::GWcs(const GWcs& wcs)
 {
@@ -137,14 +137,14 @@ GWcs::~GWcs(void)
 
 /*==========================================================================
  =                                                                         =
- =                            GWcs operators                               =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] wcs GWcs instance to be assigned
+ * @param[in] wcs World Coordinate System.
  ***************************************************************************/
 GWcs& GWcs::operator= (const GWcs& wcs)
 {
@@ -169,7 +169,7 @@ GWcs& GWcs::operator= (const GWcs& wcs)
 
 /*==========================================================================
  =                                                                         =
- =                           GWcs public methods                           =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -445,7 +445,7 @@ GSkyPixel GWcs::dir2xy(GSkyDir dir) const
 
 /*==========================================================================
  =                                                                         =
- =                          GWcs protected methods                         =
+ =                            Protected methods                            =
  =                                                                         =
  ==========================================================================*/
 
@@ -971,31 +971,40 @@ std::string GWcs::wcs_crval2(void) const
 
 
 /***********************************************************************//**
- * @brief Dump WCS information into output stream
- *
- * @param[in] os Output stream into which WCS is dumped.
+ * @brief Print WCS information
  ***************************************************************************/
-void GWcs::wcs_dump(std::ostream& os) const
+std::string GWcs::wcs_dump(void) const
 {
-    // Put information into stream
-    os << " Coordinate system .........: " << coordsys() << std::endl;
-    os << " Reference coordinate ......: " << m_crval << " deg" << std::endl;
-    os << " Reference pixel ...........: " << m_crpix << std::endl;
-    os << " Increment at reference ....: " << m_cdelt << " deg" << std::endl;
-    os << " Coordinate of North Pole ..: " << m_npole << " deg" << std::endl;
-    os << " CD matrix .................: " << m_cd(0,0) << " "
-       << m_cd(0,1) << std::endl;
-    os << "                              " << m_cd(1,0) << " "
-       << m_cd(1,1) << std::endl;
-    os << " Inverse CD matrix .........: " << m_invcd(0,0) << " "
-       << m_invcd(0,1) << std::endl;
-    os << "                              " << m_invcd(1,0) << " "
-       << m_invcd(1,1) << std::endl;
-    os << " Coordinate of native pole .: " << m_native_pole*rad2deg 
-       << " deg" << std::endl;
+    // Initialise result string
+    std::string result;
+
+    // Append information
+    GVector native = m_native_pole*rad2deg; 
+    result.append(parformat("Coordinate system")+coordsys()+"\n");
+    result.append(parformat("Reference coordinate")+m_crval.print()+" deg\n");
+    result.append(parformat("Reference pixel")+m_crpix.print()+"\n");
+    result.append(parformat("Increment at reference")+m_cdelt.print()+" deg\n");
+    result.append(parformat("Coordinate of North Pole")+m_npole.print()+" deg\n");
+
+    // Append CD matrix
+    result.append(parformat("CD matrix"));
+    result.append("["+str(m_cd(0,0)));
+    result.append(" "+str(m_cd(0,1)));
+    result.append("]["+str(m_cd(1,0)));
+    result.append(" "+str(m_cd(1,1))+"]\n");
+
+    // Append inverse CD matrix
+    result.append(parformat("Inverse CD matrix"));
+    result.append("["+str(m_invcd(0,0)));
+    result.append(" "+str(m_invcd(0,1)));
+    result.append("]["+str(m_invcd(1,0)));
+    result.append(" "+str(m_invcd(1,1))+"]\n");
+
+    // Append coordinate of native pole
+    result.append(parformat("Coordinate of native pole")+native.print());
 
     // Return
-    return;
+    return result;
 }
 
 
@@ -1087,6 +1096,73 @@ void GWcs::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                               GWcs friends                              =
+ =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Equality operator
+ *
+ * @param[in] a First WCS.
+ * @param[in] b Second WCS.
+ ***************************************************************************/
+bool operator== (const GWcs &a, const GWcs &b)
+{
+    // Set result
+    bool result = ((a.m_type     == b.m_type) &&
+                   (a.m_coordsys == b.m_coordsys) &&
+                   (a.m_reverse  == b.m_reverse) &&
+                   (a.m_crval    == b.m_crval) &&
+                   (a.m_crpix    == b.m_crpix) &&
+                   (a.m_cdelt    == b.m_cdelt) &&
+                   (a.m_npole    == b.m_npole) &&
+                   (a.m_cd       == b.m_cd));
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Non-equality operator
+ *
+ * @param[in] a First WCS.
+ * @param[in] b Second WCS.
+ ***************************************************************************/
+bool operator!= (const GWcs &a, const GWcs &b)
+{
+    // Return result
+    return !(a == b);
+}
+
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] wcs WCS.
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GWcs& wcs)
+{
+     // Write WCS in output stream
+    os << wcs.print();
+
+    // Return output stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] wcs WCS.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GWcs& wcs)
+{
+    // Write WCS into logger
+    log << wcs.print();
+
+    // Return logger
+    return log;
+}

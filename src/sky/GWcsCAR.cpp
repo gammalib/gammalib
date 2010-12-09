@@ -183,7 +183,7 @@ GWcsCAR& GWcsCAR::operator= (const GWcsCAR& wcs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear object
+ * @brief Clear instance
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
@@ -199,6 +199,15 @@ void GWcsCAR::clear(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+ ***************************************************************************/
+GWcsCAR* GWcsCAR::clone(void) const
+{
+    return new GWcsCAR(*this);
 }
 
 
@@ -288,9 +297,26 @@ double GWcsCAR::omega(const GSkyPixel& pix) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print WCS information
+ ***************************************************************************/
+std::string GWcsCAR::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GWcsCAR ===\n");
+    result.append(wcs_dump());
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
- =                          GWcsCAR private methods                        =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -336,15 +362,6 @@ void GWcsCAR::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
- ***************************************************************************/
-GWcsCAR* GWcsCAR::clone(void) const
-{
-    return new GWcsCAR(*this);
-}
-
-
-/***********************************************************************//**
  * @brief Projects from standard to native coordinates
  *
  * @param[in,out] coord Pointer to coordinate vector.
@@ -381,24 +398,6 @@ void GWcsCAR::nat2std(GVector *coord) const
 
 /*==========================================================================
  =                                                                         =
- =                              GWcsCAR friends                            =
+ =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] wcs Healpix WCS definition to put in output stream
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GWcsCAR& wcs)
-{
-    // Put header in stream
-    os << "=== GWcsCAR ===" << std::endl;
-
-    // Add WCS information
-    wcs.wcs_dump(os);
-
-    // Return output stream
-    return os;
-}

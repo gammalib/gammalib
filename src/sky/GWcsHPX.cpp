@@ -20,7 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
+//#include <iostream>
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
@@ -228,6 +228,14 @@ void GWcsHPX::clear(void)
     return;
 }
 
+
+/***********************************************************************//**
+ * @brief Clone instance
+ ***************************************************************************/
+GWcsHPX* GWcsHPX::clone(void) const
+{
+    return new GWcsHPX(*this);
+}
 
 
 /***********************************************************************//**
@@ -495,6 +503,30 @@ void GWcsHPX::ordering(const std::string& ordering)
 }
 
 
+/***********************************************************************//**
+ * @brief Print WCS information
+ ***************************************************************************/
+std::string GWcsHPX::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GWcsHPX ===\n");
+    result.append(parformat("Coordinate system")+coordsys()+"\n");
+    result.append(parformat("Nside (# of divisions)")+str(m_nside)+"\n");
+    result.append(parformat("Npface (pixels per face)")+str(m_npface)+"\n");
+    result.append(parformat("Ncap (# of cap pixels)")+str(m_ncap)+"\n");
+    result.append(parformat("Npix (# of pixels)")+str(m_num_pixels)+"\n");
+    result.append(parformat("Order")+str(m_order)+"\n");
+    result.append(parformat("Solid angle per pixel")+str(m_omega)+" sr\n");
+    result.append(parformat("Ordering")+ordering());
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -563,15 +595,6 @@ void GWcsHPX::free_members(void)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone instance
- ***************************************************************************/
-GWcsHPX* GWcsHPX::clone(void) const
-{
-    return new GWcsHPX(*this);
 }
 
 
@@ -884,27 +907,3 @@ unsigned int GWcsHPX::isqrt(unsigned int arg)
  =                                  Friends                                =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] wcs Healpix WCS definition to put in output stream
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GWcsHPX& wcs)
-{
-    // Put header in stream
-    os << "=== GWcsHPX ===" << std::endl;
-    os << " Nside (number of divisions): " << wcs.m_nside << std::endl;
-    os << " Npface (pixels per face) ..: " << wcs.m_npface << std::endl;
-    os << " Ncap (number of cap pixels): " << wcs.m_ncap << std::endl;
-    os << " Npix (number of pixels) ...: " << wcs.m_num_pixels << std::endl;
-    os << " Order .....................: " << wcs.m_order << std::endl;
-    os << " Solid angle ...............: " << std::scientific << wcs.m_omega
-       << std::fixed << " sr" << std::endl;
-    os << " Ordering ..................: " << wcs.ordering() << std::endl;
-    os << " Coordinate system .........: " << wcs.coordsys();
-
-    // Return output stream
-    return os;
-}

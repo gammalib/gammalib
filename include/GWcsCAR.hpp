@@ -51,10 +51,12 @@ public:
     // Operators
     GWcsCAR& operator= (const GWcsCAR& wcs);
 
-    // Implemented pure virtual methods
-    void clear(void);
-    void read(const GFitsHDU* hdu);
-    void write(GFitsHDU* hdu) const;
+    // Implemented pure virtual base class methods
+    void        clear(void);
+    GWcsCAR*    clone(void) const;
+    void        read(const GFitsHDU* hdu);
+    void        write(GFitsHDU* hdu) const;
+    std::string print(void) const;
 
     // Overloaded base class methods
     double omega(const GSkyPixel& pix) const;
@@ -64,7 +66,6 @@ private:
     void     init_members(void);
     void     copy_members(const GWcsCAR& wcs);
     void     free_members(void);
-    GWcsCAR* clone(void) const;
     void     std2nat(GVector *coord) const;
     void     nat2std(GVector *coord) const;
 };
