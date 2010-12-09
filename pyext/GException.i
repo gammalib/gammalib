@@ -8,7 +8,6 @@
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
- *                                                                         *
  ***************************************************************************/
 %module GException
 
@@ -28,11 +27,11 @@
     catch (const GException::empty& e) {
         SWIG_exception(SWIG_ValueError, e.what());
     }
-    catch (const GException::fits_invalid_type& e) {
-        SWIG_exception(SWIG_ValueError, e.what());
-    }
     catch (const GException::out_of_range& e) {
         SWIG_exception(SWIG_IndexError, e.what());
+    }
+    catch (const GException::fits_invalid_type& e) {
+        SWIG_exception(SWIG_ValueError, e.what());
     }
     catch (const std::exception& e) {
         SWIG_exception(SWIG_RuntimeError, e.what());
