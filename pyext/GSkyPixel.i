@@ -19,7 +19,6 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GSkyPixel.hpp"
 %}
-%include stl.i
 
 
 /***********************************************************************//**
@@ -48,12 +47,7 @@ public:
  ***************************************************************************/
 %extend GSkyPixel {
     char *__str__() {
-        static char str_buffer[1001];
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 1001);
-        str_buffer[1000] = '\0';
-        return str_buffer;
+        static std::string result = self->print();
+        return ((char*)result.c_str());
     }
 };
