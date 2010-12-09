@@ -20,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GSkymap.hpp"
@@ -62,12 +61,12 @@
 
 /*==========================================================================
  =                                                                         =
- =                      GSkymap constructors/destructors                   =
+ =                          Constructors/destructors                       =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GSkymap::GSkymap(void)
 {
@@ -82,7 +81,7 @@ GSkymap::GSkymap(void)
 /***********************************************************************//**
  * @brief FITS file constructor
  *
- * @param[in] filename FITS file from which sky map should be instantiated.
+ * @param[in] filename FITS file name.
  ***************************************************************************/
 GSkymap::GSkymap(const std::string& filename)
 {
@@ -207,7 +206,7 @@ GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] map Sky map from which class should be instantiated.
+ * @param[in] map Sky map.
  ***************************************************************************/
 GSkymap::GSkymap(const GSkymap& map)
 {
@@ -237,7 +236,7 @@ GSkymap::~GSkymap(void)
 
 /*==========================================================================
  =                                                                         =
- =                             GSkymap operators                           =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -249,6 +248,8 @@ GSkymap::~GSkymap(void)
  *
  * Access sky map pixel by its index, where the most quickly varying axis is
  * the x axis of the map.
+ *
+ * @todo Implement proper skymap exception (actual is for matrix elements)
  ***************************************************************************/
 double& GSkymap::operator() (const int& pixel, const int map)
 {
@@ -261,18 +262,20 @@ double& GSkymap::operator() (const int& pixel, const int map)
     #endif
 
     // Return reference to pixel value
-    return m_pixels[pixel*m_num_maps+map];
+    return m_pixels[pixel+m_num_pixels*map];
 }
 
 
 /***********************************************************************//**
- * @brief 1D pixel access operator
+ * @brief 1D pixel access operator (const variant)
  *
  * @param[in] pixel Pixel index (0,1,...,m_num_pixels).
  * @param[in] map Map index (0,1,...,m_num_maps).
  *
  * Access sky map pixel by its index, where the most quickly varying axis is
  * the x axis of the map.
+ *
+ * @todo Implement proper skymap exception (actual is for matrix elements)
  ***************************************************************************/
 const double& GSkymap::operator() (const int& pixel, const int map) const
 {
@@ -285,7 +288,7 @@ const double& GSkymap::operator() (const int& pixel, const int map) const
     #endif
 
     // Return reference to pixel value
-    return m_pixels[pixel*m_num_maps+map];
+    return m_pixels[pixel+m_num_pixels*map];
 }
 
 
@@ -297,6 +300,8 @@ const double& GSkymap::operator() (const int& pixel, const int map) const
  *
  * Access sky map pixel by its 2D index (x,y) that is implemented by the
  * GSkyPixel class.
+ *
+ * @todo Implement proper skymap exception (actual is for matrix elements)
  ***************************************************************************/
 double& GSkymap::operator() (const GSkyPixel& pixel, const int map)
 {
@@ -312,7 +317,7 @@ double& GSkymap::operator() (const GSkyPixel& pixel, const int map)
     #endif
 
     // Return reference to pixel value
-    return m_pixels[index*m_num_maps+map];
+    return m_pixels[index+m_num_pixels*map];
 }
 
 
@@ -324,6 +329,8 @@ double& GSkymap::operator() (const GSkyPixel& pixel, const int map)
  *
  * Access sky map pixel by its 2D index (x,y) that is implemented by the
  * GSkyPixel class.
+ *
+ * @todo Implement proper skymap exception (actual is for matrix elements)
  ***************************************************************************/
 const double& GSkymap::operator() (const GSkyPixel& pixel, const int map) const
 {
@@ -339,14 +346,14 @@ const double& GSkymap::operator() (const GSkyPixel& pixel, const int map) const
     #endif
 
     // Return reference to pixel value
-    return m_pixels[index*m_num_maps+map];
+    return m_pixels[index+m_num_pixels*map];
 }
 
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] map GSkymap instance to be assigned
+ * @param[in] map Sky map.
  ***************************************************************************/
 GSkymap& GSkymap::operator= (const GSkymap& map)
 {
@@ -371,14 +378,42 @@ GSkymap& GSkymap::operator= (const GSkymap& map)
 
 /*==========================================================================
  =                                                                         =
- =                          GSkymap public methods                         =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+ /***********************************************************************//**
+ * @brief Clear instance.
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GSkymap::clear(void)
+{
+    // Free class members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+ ***************************************************************************/
+GSkymap* GSkymap::clone(void) const
+{
+    return new GSkymap(*this);
+}
+
+
 
 /***********************************************************************//**
  * @brief Load skymap from FITS file.
  *
- * @param[in] filename FITS file from which the skymap will be loaded.
+ * @param[in] filename FITS file name..
  *
  * Loads HEALPix and non HEALPix skymaps. First searches for HEALPix map in
  * FITS file by scanning all HDUs for PIXTYPE=HEALPIX. If no HEALPix map has
@@ -398,7 +433,7 @@ void GSkymap::load(const std::string& filename)
 
     // Initialize pointer to HDU and load flag
     GFitsHDU* hdu    = NULL;
-    int       loaded = 0;
+    bool      loaded = false;
 
     // First search for HEALPix extension. We can skip the first extension
     // since this is always an image and a HEALPix map is stored in a
@@ -412,7 +447,7 @@ void GSkymap::load(const std::string& filename)
         try {
             if (hdu->string("PIXTYPE") == "HEALPIX") {
                 read_healpix((const GFitsBinTable*)hdu);
-                loaded = 1;
+                loaded = true;
                 break;
             }
         }
@@ -423,7 +458,7 @@ void GSkymap::load(const std::string& filename)
 
     // If we have not found a HEALPIX map then search now for image.
     // Skip empty images
-    if (loaded == 0) {
+    if (!loaded) {
         for (int extno = 0; extno < num; ++extno) {
 
             // Get pointer to HDU
@@ -437,7 +472,7 @@ void GSkymap::load(const std::string& filename)
 
             // Load WCS map
             read_wcs((const GFitsImageDouble*)hdu);
-            loaded = 1;
+            loaded = true;
             break;
 
         } // endfor: looped over HDUs
@@ -454,10 +489,12 @@ void GSkymap::load(const std::string& filename)
 /***********************************************************************//**
  * @brief Save skymap into FITS file.
  *
- * @param[in] filename FITS file into which the skymap will be saved.
- * @param[in] clobber Overwrite existing file.
+ * @param[in] filename FITS file name.
+ * @param[in] clobber Overwrite existing file? (true=yes)
+ *
+ * The method does nothing if the skymap holds no valid WCS.
  ***************************************************************************/
-void GSkymap::save(const std::string& filename, bool clobber)
+void GSkymap::save(const std::string& filename, bool clobber) const
 {
     // Continue only if we have data to save
     if (m_wcs != NULL) {
@@ -480,6 +517,9 @@ void GSkymap::save(const std::string& filename, bool clobber)
             fits.saveto(filename, clobber);
         }
 
+        // Delete HDU
+        if (hdu != NULL) delete hdu;
+
     } // endif: we had data to save
 
     // Return
@@ -490,7 +530,9 @@ void GSkymap::save(const std::string& filename, bool clobber)
 /***********************************************************************//**
  * @brief Read skymap from FITS HDU
  *
- * @param[in] hdu FITS HDU from which skymap should be read.
+ * @param[in] hdu FITS HDU.
+ *
+ * The method returns an empty skymap of the HDU pointer was not valid.
  ***************************************************************************/
 void GSkymap::read(const GFitsHDU* hdu)
 {
@@ -502,25 +544,25 @@ void GSkymap::read(const GFitsHDU* hdu)
     if (hdu != NULL) {
 
         // Initialize load flag
-        int loaded = 0;
+        bool loaded = false;
 
         // Try load as HEALPix map
         try {
             if (hdu->string("PIXTYPE") == "HEALPIX") {
                 read_healpix((const GFitsBinTable*)hdu);
-                loaded = 1;
+                loaded = true;
             }
         }
         catch (GException::fits_key_not_found &e) {
         }
 
         // ... otherwise try loading as non HEALPix map
-        if (loaded == 0) {
+        if (!loaded) {
 
             // Load only if HDU contains an image
             if (hdu->exttype() == 0) {
                 read_wcs((const GFitsImageDouble*)hdu);
-                loaded = 1;
+                loaded = true;
             }
 
         } // endif
@@ -535,9 +577,9 @@ void GSkymap::read(const GFitsHDU* hdu)
 /***********************************************************************//**
  * @brief Write skymap into FITS file
  *
- * @param[in] file FITS file into which skymap should be written.
+ * @param[in] file FITS file pointer.
  ***************************************************************************/
-void GSkymap::write(GFits* file)
+void GSkymap::write(GFits* file) const
 {
     // Continue only if we have data to save
     if (m_wcs != NULL) {
@@ -553,7 +595,8 @@ void GSkymap::write(GFits* file)
         else
             hdu = create_wcs_hdu();
 
-        // Append HDU to FITS file
+        // Append HDU to FITS file. The FITS class will later handle the
+        // proper deallocation of the HDU
         if (hdu != NULL)
             file->append(hdu);
 
@@ -770,9 +813,37 @@ int GSkymap::nmaps(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print models
+ ***************************************************************************/
+std::string GSkymap::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GSkymap ===\n");
+    result.append(parformat("Number of pixels")+str(m_num_pixels)+"\n");
+    result.append(parformat("Number of maps")+str(m_num_maps));
+    if (m_wcs != NULL && m_wcs->type() != "HPX") {
+        result.append("\n"+parformat("X axis dimension")+str(m_num_x));
+        result.append("\n"+parformat("Y axis dimension")+str(m_num_y));
+    }
+
+    // Append WCS information
+    if (m_wcs != NULL)
+        result.append("\n"+m_wcs->print());
+    else
+        result.append("\n"+parformat("WCS")+"not defined");
+    
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
- =                          GSkymap private methods                        =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -1061,11 +1132,10 @@ void GSkymap::read_healpix(const GFitsTable* hdu)
                 for (int i = 0; i < num; ++i) {
 
                     // Load map
-                    double *ptr = m_pixels + imap;
+                    double *ptr = m_pixels + m_num_pixels*imap;
                     for (int row = 0; row < col->length(); ++row) {
-                        for (int inx = inx_start; inx < inx_end;
-                             ++inx, ptr+=m_num_maps)
-                                *ptr = col->real(row,inx);
+                        for (int inx = inx_start; inx < inx_end; ++inx)
+                            *ptr++ = col->real(row,inx);
                     }
                     #if defined(G_READ_HEALPIX_DEBUG)
                     std::cout << "Load map=" << imap << " index="
@@ -1150,16 +1220,16 @@ void GSkymap::read_wcs(const GFitsImage* hdu)
         if (hdu->naxis() == 2) {
             double* ptr = m_pixels;
             for (int iy = 0; iy < m_num_y; ++iy) {
-                for (int ix = 0; ix < m_num_x; ++ix, ++ptr)
-                    *ptr = hdu->pixel(ix,iy);
+                for (int ix = 0; ix < m_num_x; ++ix)
+                    *ptr++ = hdu->pixel(ix,iy);
             }
         }
         else {
             double* ptr = m_pixels;
-            for (int iy = 0; iy < m_num_y; ++iy) {
-                for (int ix = 0; ix < m_num_x; ++ix) {
-                    for (int imap = 0; imap < m_num_maps; ++imap, ++ptr)
-                         *ptr = hdu->pixel(ix,iy,imap);
+            for (int imap = 0; imap < m_num_maps; ++imap) {
+                for (int iy = 0; iy < m_num_y; ++iy) {
+                    for (int ix = 0; ix < m_num_x; ++ix)
+                         *ptr++ = hdu->pixel(ix,iy,imap);
                 }
             }
         }
@@ -1220,10 +1290,10 @@ void GSkymap::alloc_wcs(const GFitsImage* hdu)
 /***********************************************************************//**
  * @brief Create FITS HDU containing Healpix data
  *
- * Returns pointer to HDU that contains the Healpix data. Deallocation of the
- * GFitsBinTable has to be done by the client.
+ * This method allocates a binary table HDU that contains the Healpix data.
+ * Deallocation of the table has to be done by the client.
  ***************************************************************************/
-GFitsBinTable* GSkymap::create_healpix_hdu(void)
+GFitsBinTable* GSkymap::create_healpix_hdu(void) const
 {
     // Initialise result to NULL pointer
     GFitsBinTable* hdu = NULL;
@@ -1243,9 +1313,9 @@ GFitsBinTable* GSkymap::create_healpix_hdu(void)
 
         // Fill data into column
         double* ptr = m_pixels;
-        for (int row = 0; row < rows; ++row) {
-            for (int inx = 0; inx < number; ++inx, ++ptr)
-                column(row,inx) = *ptr;
+        for (int inx = 0; inx < number; ++inx) {
+            for (int row = 0; row < rows; ++row)
+                column(row,inx) = *ptr++;
         }
 
         // Create HDU that contains Healpix map in a binary table
@@ -1275,10 +1345,12 @@ GFitsBinTable* GSkymap::create_healpix_hdu(void)
 /***********************************************************************//**
  * @brief Create FITS HDU containing WCS image
  *
- * Returns pointer to HDU that contains the WCS image. Deallocation of the
- * GFitsImageDouble object has to be done by the client.
+ * This method allocates an image HDU that contains the WCS image data.
+ * Deallocation of the image has to be done by the client.
+ *
+ * @todo Set additional keywords.
  ***************************************************************************/
-GFitsImageDouble* GSkymap::create_wcs_hdu(void)
+GFitsImageDouble* GSkymap::create_wcs_hdu(void) const
 {
     // Initialise result to NULL pointer
     GFitsImageDouble* hdu = NULL;
@@ -1300,16 +1372,16 @@ GFitsImageDouble* GSkymap::create_wcs_hdu(void)
         if (naxis == 2) {
             double* ptr = m_pixels;
             for (int iy = 0; iy < m_num_y; ++iy) {
-                for (int ix = 0; ix < m_num_x; ++ix, ++ptr)
-                    (*hdu)(ix,iy) = *ptr;
+                for (int ix = 0; ix < m_num_x; ++ix)
+                    (*hdu)(ix,iy) = *ptr++;
             }
         }
         else {
             double* ptr = m_pixels;
-            for (int iy = 0; iy < m_num_y; ++iy) {
-                for (int ix = 0; ix < m_num_x; ++ix) {
-                    for (int imap = 0; imap < m_num_maps; ++imap, ++ptr)
-                        (*hdu)(ix,iy,imap) = *ptr;
+            for (int imap = 0; imap < m_num_maps; ++imap) {
+                for (int iy = 0; iy < m_num_y; ++iy) {
+                    for (int ix = 0; ix < m_num_x; ++ix)
+                        (*hdu)(ix,iy,imap) = *ptr++;
                 }
             }
         }
@@ -1336,7 +1408,7 @@ GFitsImageDouble* GSkymap::create_wcs_hdu(void)
 
 /*==========================================================================
  =                                                                         =
- =                              GSkymap friends                            =
+ =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -1344,34 +1416,29 @@ GFitsImageDouble* GSkymap::create_wcs_hdu(void)
  * @brief Output operator
  *
  * @param[in] os Output stream.
- * @param[in] map Sky map to put in output stream.
+ * @param[in] map Sky map.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GSkymap& map)
 {
-    // Put header in stream
-    os << "=== GSkymap ===" << std::endl;
-    os << " Number of pixels ..........: " << map.m_num_pixels << std::endl;
-    os << " Number of maps ............: " << map.m_num_maps << std::endl;
-    os << " X axis dimension ..........: " << map.m_num_x << std::endl;
-    os << " Y axis dimension ..........: " << map.m_num_y << std::endl;
-
-    // Put WCS information in stream
-    if (map.m_wcs != NULL) {
-        if (map.m_wcs->type() == "CAR")
-            os << *((GWcsCAR*)map.m_wcs);
-        else if (map.m_wcs->type() == "HPX")
-            os << *((GWcsHPX*)map.m_wcs);
-        else
-            os << " WCS projection ............: UNKNOWN";
-    }
+     // Write map in output stream
+    os << map.print();
 
     // Return output stream
     return os;
 }
 
 
-/*==========================================================================
- =                                                                         =
- =                      Other functions used by GSkymap                    =
- =                                                                         =
- ==========================================================================*/
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] map Sky map.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GSkymap& map)
+{
+    // Write map into logger
+    log << map.print();
+
+    // Return logger
+    return log;
+}

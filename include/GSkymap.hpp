@@ -20,6 +20,9 @@
 #define GSKYMAP_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
+#include <iostream>
+#include "GLog.hpp"
 #include "GWcs.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
@@ -36,20 +39,34 @@
  * @class GSkymap
  *
  * @brief GSkymap class interface defintion
+ *
+ * This class implements a set of skymaps. Skymaps may either be present in
+ * the HEALPix format or in any (supported) WCS format. Skymap pixels are
+ * stored in a double precision array indexed by (x,y,map), with the x
+ * axis being the most rapidely varying axis. 
+ * 
+ * Skymap pixels may be either accessed via 1D operators (i,map), where i 
+ * runs over the (x,y) direction of the map, or via 2D operators (pixel,map),
+ * where pixel implements a 2D (x,y) pixel direction. The first operator is
+ * the preferred access method for HEALPix maps while the second operator is
+ * the preferred access method for WCS maps. Conversion methods between the
+ * index or sky pixel and the true physical sky direction are provided by the
+ * pix2dir() and dir2pix() methods.
  ***************************************************************************/
 class GSkymap {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GSkymap& map);
+    friend GLog&         operator<<(GLog& log, const GSkymap& map);
 
 public:
     // Constructors and destructors
     GSkymap(void);
-    GSkymap(const std::string& filename);
-    GSkymap(const std::string& wcs, const std::string& coords,
+    explicit GSkymap(const std::string& filename);
+    explicit GSkymap(const std::string& wcs, const std::string& coords,
             const int& nside, const std::string& order,
             const int nmaps = 1);
-    GSkymap(const std::string& wcs, const std::string& coords,
+    explicit GSkymap(const std::string& wcs, const std::string& coords,
             double const& x, double const& y,
             double const& dx, double const& dy,
             const int& nx, const int& ny, const int nmaps = 1);
@@ -74,16 +91,19 @@ public:
     double        omega(const GSkyPixel& pix) const;
 
     // Methods
-    void      load(const std::string& filename);
-    void      save(const std::string& filename, bool clobber = false);
-    void      read(const GFitsHDU* hdu);
-    void      write(GFits* file);
-    int       npix(void) const;
-    int       nx(void) const;
-    int       ny(void) const;
-    int       nmaps(void) const;
-    GWcs*     wcs(void) { return m_wcs; }
-    double*   pixels(void) { return m_pixels; }
+    void        clear(void);
+    GSkymap*    clone(void) const;
+    void        load(const std::string& filename);
+    void        save(const std::string& filename, bool clobber = false) const;
+    void        read(const GFitsHDU* hdu);
+    void        write(GFits* file) const;
+    int         npix(void) const;
+    int         nx(void) const;
+    int         ny(void) const;
+    int         nmaps(void) const;
+    GWcs*       wcs(void) const { return m_wcs; }
+    double*     pixels(void) const { return m_pixels; }
+    std::string print(void) const;
 
 private:
     // Private methods
@@ -101,8 +121,8 @@ private:
     void              read_healpix(const GFitsTable* hdu);
     void              read_wcs(const GFitsImage* hdu);
     void              alloc_wcs(const GFitsImage* hdu);
-    GFitsBinTable*    create_healpix_hdu(void);
-    GFitsImageDouble* create_wcs_hdu(void);
+    GFitsBinTable*    create_healpix_hdu(void) const;
+    GFitsImageDouble* create_wcs_hdu(void) const;
 
     // Private data area
     int     m_num_pixels;   //!< Number of pixels (used for pixel allocation)
