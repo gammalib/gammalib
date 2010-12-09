@@ -12,7 +12,6 @@
  ***************************************************************************/
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GException.hpp"
 #include "GVector.hpp"
 %}
 
@@ -23,23 +22,24 @@
 class GVector {
 public:
 
-  // Constructors and destructors
-  explicit GVector(int num);
-  GVector(const GVector& v);
- ~GVector();
+    // Constructors and destructors
+    explicit GVector(int num);
+    GVector(const GVector& v);
+    virtual ~GVector(void);
 
-  // Vector operators
-  GVector& operator+= (const GVector& v);
-  GVector& operator-= (const GVector& v);
-  GVector& operator+= (const double& v);
-  GVector& operator-= (const double& v);
-  GVector& operator*= (const double& v);
-  GVector& operator/= (const double& v);
-  GVector  operator- () const;
+    // Vector operators
+    GVector& operator+= (const GVector& v);
+    GVector& operator-= (const GVector& v);
+    GVector& operator+= (const double& v);
+    GVector& operator-= (const double& v);
+    GVector& operator*= (const double& v);
+    GVector& operator/= (const double& v);
+    GVector  operator- () const;
 
-  // Vector functions
-  int size() const;       // Return dimension of vector
-  int non_zeros() const;  // Returns # of non zeros in vector
+    // Vector functions
+    void clear(void);
+    int  size() const;
+    int  non_zeros() const;
 };
 
 
@@ -47,118 +47,113 @@ public:
  *                      GVector class SWIG extension                       *
  ***************************************************************************/
 %extend GVector {
-  char *__str__() {
-    static char str_buffer[100001];
-    std::ostringstream buffer;
-    buffer << *self;
-	std::string str = buffer.str();
-    strncpy(str_buffer, (char*)str.c_str(), 100001);
-	str_buffer[100000] = '\0';
-	return str_buffer;
-  }
-  double __getitem__(int index) {
-	if (index >= 0 && index < (int)self->size())
-	  return (*self)(index);
-    else
-	  throw GException::out_of_range("__getitem__(int)", index, (int)self->size());
-  }
-  void __setitem__(int index, const double val) {
-	if (index>=0 && index < (int)self->size())
-	  (*self)(index) = val;
-    else
-      throw GException::out_of_range("__setitem__(int)", index, (int)self->size());
-  }
-  GVector __add__(const GVector &a) {
-    return (*self) + a;
-  }
-  GVector __add__(const double &a) {
-    return (*self) + a;
-  }
-  GVector __sub__(const GVector &a) {
-    return (*self) - a;
-  }
-  GVector __sub__(const double &a) {
-    return (*self) - a;
-  }
-  double __mul__(const GVector &a) {
-    return (*self) * a;
-  }
-  GVector __mul__(const double &a) {
-    return (*self) * a;
-  }
-  GVector __div__(const double &a) {
-    return (*self) / a;
-  }
-  int __is__(const GVector &a) {
-    return (*self) == a;
-  }
-  GVector copy() {
-    return (*self);
-  }
-  GVector cross(const GVector &a) {
-    return cross(*self, a);
-  }
-  double norm() {
-    return norm(*self);
-  }
-  double min() {
-    return min(*self);
-  }
-  double max() {
-    return max(*self);
-  }
-  double sum() {
-    return sum(*self);
-  }
-  GVector acos() {
-    return acos(*self);
-  }
-  GVector acosh() {
-    return acosh(*self);
-  }
-  GVector asin() {
-    return asin(*self);
-  }
-  GVector asinh() {
-    return asinh(*self);
-  }
-  GVector atan() {
-    return atan(*self);
-  }
-  GVector atanh() {
-    return atanh(*self);
-  }
-  GVector cos() {
-    return cos(*self);
-  }
-  GVector cosh() {
-    return cosh(*self);
-  }
-  GVector exp() {
-    return exp(*self);
-  }
-  GVector abs() {
-    return fabs(*self);
-  }
-  GVector log() {
-    return log(*self);
-  }
-  GVector log10() {
-    return log10(*self);
-  }
-  GVector sin() {
-    return sin(*self);
-  }
-  GVector sinh() {
-    return sinh(*self);
-  }
-  GVector sqrt() {
-    return sqrt(*self);
-  }
-  GVector tan() {
-    return tan(*self);
-  }
-  GVector tanh() {
-    return tanh(*self);
-  }
+    char *__str__() {
+        static std::string result = self->print();
+        return ((char*)result.c_str());
+    }
+    double __getitem__(int index) {
+        if (index >= 0 && index < (int)self->size())
+            return (*self)(index);
+        else
+            throw GException::out_of_range("__getitem__(int)", index, (int)self->size());
+    }
+    void __setitem__(int index, const double val) {
+        if (index>=0 && index < (int)self->size())
+            (*self)(index) = val;
+        else
+            throw GException::out_of_range("__setitem__(int)", index, (int)self->size());
+    }
+    GVector __add__(const GVector &a) {
+        return (*self) + a;
+    }
+    GVector __add__(const double &a) {
+        return (*self) + a;
+    }
+    GVector __sub__(const GVector &a) {
+        return (*self) - a;
+    }
+    GVector __sub__(const double &a) {
+        return (*self) - a;
+    }
+    double __mul__(const GVector &a) {
+        return (*self) * a;
+    }
+    GVector __mul__(const double &a) {
+        return (*self) * a;
+    }
+    GVector __div__(const double &a) {
+        return (*self) / a;
+    }
+    int __is__(const GVector &a) {
+            return (*self) == a;
+    }
+    GVector copy() {
+        return (*self);
+    }
+    GVector cross(const GVector &a) {
+        return cross(*self, a);
+    }
+    double norm() {
+        return norm(*self);
+    }
+    double min() {
+        return min(*self);
+    }
+    double max() {
+        return max(*self);
+    }
+    double sum() {
+        return sum(*self);
+    }
+    GVector acos() {
+        return acos(*self);
+    }
+    GVector acosh() {
+        return acosh(*self);
+    }
+    GVector asin() {
+        return asin(*self);
+    }
+    GVector asinh() {
+        return asinh(*self);
+    }
+    GVector atan() {
+        return atan(*self);
+    }
+    GVector atanh() {
+        return atanh(*self);
+    }
+    GVector cos() {
+        return cos(*self);
+    }
+    GVector cosh() {
+        return cosh(*self);
+    }
+    GVector exp() {
+        return exp(*self);
+    }
+    GVector abs() {
+        return fabs(*self);
+    }
+    GVector log() {
+        return log(*self);
+    }
+    GVector log10() {
+        return log10(*self);
+    }
+    GVector sin() {
+        return sin(*self);
+    }
+    GVector sinh() {
+        return sinh(*self);
+    }
+    GVector sqrt() {
+        return sqrt(*self);
+    }
+    GVector tan() {
+        return tan(*self);
+    }
+    GVector tanh() {
+        return tanh(*self);
+    }
 };

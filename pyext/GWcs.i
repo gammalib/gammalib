@@ -42,9 +42,10 @@ public:
     virtual ~GWcs(void);
 
     // Pure virtual methods (not implemented)
-    virtual void clear(void) = 0;
-    virtual void read(const GFitsHDU* hdu) = 0;
-    virtual void write(GFitsHDU* hdu) const = 0;
+    virtual void  clear(void) = 0;
+    virtual GWcs* clone(void) const = 0;
+    virtual void  read(const GFitsHDU* hdu) = 0;
+    virtual void  write(GFitsHDU* hdu) const = 0;
 
     // Virtual methods
     virtual std::string type(void) const;
@@ -56,4 +57,20 @@ public:
     virtual int         dir2pix(GSkyDir dir) const;
     virtual GSkyDir     xy2dir(const GSkyPixel& pix);
     virtual GSkyPixel   dir2xy(GSkyDir dir) const;
+};
+
+
+
+
+/***********************************************************************//**
+ * @brief GWcs class extension
+ ***************************************************************************/
+%extend GWcs {
+    char *__str__() {
+        static std::string result = self->print();
+        return ((char*)result.c_str());
+    }
+    bool __is__(const GWcs &a) {
+            return (*self) == a;
+    }
 };
