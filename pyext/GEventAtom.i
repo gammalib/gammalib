@@ -78,7 +78,7 @@ public:
         if (!events.isatom())
             throw GException::bad_type("GEventAtom(GEvent&)",
                                        "GEvent not an event atom");            
-        GEventAtom* atom = new GEventAtom((GEventAtom&)event);
+        GEventAtom* atom = (GEventAtom*)&event;
         return atom;
     }
 };

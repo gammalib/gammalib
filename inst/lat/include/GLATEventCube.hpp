@@ -95,7 +95,6 @@ protected:
     GGti                     m_gti;          //!< Good Time Intervals
     GTime                    m_time;         //!< Event cube mean time
     double                   m_ontime;       //!< Event cube ontime (sec)
-    double*                  m_counts;       //!< Pointer to skymap pixels
     GLATInstDir*             m_dirs;         //!< Array of event directions
     double*                  m_omega;        //!< Array of solid angles (sr)
     GEnergy*                 m_energies;     //!< Array of log mean energies

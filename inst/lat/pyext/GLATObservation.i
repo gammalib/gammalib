@@ -54,7 +54,7 @@ public:
  ***************************************************************************/
 %extend GLATObservation {
     GLATObservation(const GObservation& obs) {
-        GLATObservation* lat = new GLATObservation((GLATObservation&)obs);
+        GLATObservation* lat = (GLATObservation*)&obs;
         return lat;
     }
     char *__str__() {

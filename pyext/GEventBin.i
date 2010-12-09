@@ -80,7 +80,7 @@ public:
         if (!event.isbin())
             throw GException::bad_type("GEventBin(GEvent&)",
                                        "GEvent not an event bin");            
-        GEventBin* bin = new GEventBin((GEventBin&)event);
+        GEventBin* bin = (GEventBin*)&event;
         return bin;
     }
 };

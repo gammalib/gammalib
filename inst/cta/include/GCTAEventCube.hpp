@@ -91,7 +91,7 @@ protected:
 
     // Protected derived data
     GCTAEventBin m_bin;            //!< Actual event bin
-    double*      m_counts;         //!< Pointer to skymap pixels
+    //double*      m_counts;         //!< Pointer to skymap pixels
     GCTAInstDir* m_dirs;           //!< Array of event directions
     double*      m_omega;          //!< Array of solid angles (sr)
     GEnergy*     m_energies;       //!< Array of log mean energies

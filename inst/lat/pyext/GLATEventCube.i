@@ -60,7 +60,7 @@ public:
 /***********************************************************************//**
  * @brief GLATEventCube class extension
  *
- * The GLATEventCube methods allow for type conversion.
+ * The GLATEventCube methods perform type conversion.
  * The __getitem__ method makes the event cube iteratable.
  ***************************************************************************/
 %extend GLATEventCube {
@@ -68,11 +68,11 @@ public:
         if (!events.iscube())
             throw GException::bad_type("GLATEventCube(GEvents&)",
                                        "GEvents not an event cube");            
-        GLATEventCube* cube = new GLATEventCube((GLATEventCube&)events);
+        GLATEventCube* cube = (GLATEventCube*)&events;
         return cube;
     }
     GLATEventCube(const GEventCube& events) {
-        GLATEventCube* cube = new GLATEventCube((GLATEventCube&)events);
+        GLATEventCube* cube = (GLATEventCube*)&events;
         return cube;
     }
     GLATEventBin* __getitem__(int index) {

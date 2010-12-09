@@ -66,11 +66,11 @@ public:
         if (!event.isbin())
             throw GException::bad_type("GLATEventBin(GEvent&)",
                                        "GEvent not an event bin");            
-        GLATEventBin* bin = new GLATEventBin((GLATEventBin&)event);
+        GLATEventBin* bin = (GLATEventBin*)&event;
         return bin;
     }
     GLATEventBin(const GEventBin& event) {
-        GLATEventBin* bin = new GLATEventBin((GLATEventBin&)event);
+        GLATEventBin* bin = (GLATEventBin*)&event;
         return bin;
     }
     GLATEventBin copy() {

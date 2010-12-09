@@ -50,7 +50,7 @@ public:
 /***********************************************************************//**
  * @brief GEventList class extension
  *
- * The GEventList method allow for type conversion.
+ * The GEventList method performs type conversion.
  * The __getitem__ method makes the event list iteratable.
  ***************************************************************************/
 %extend GEventList {
@@ -58,7 +58,7 @@ public:
         if (!events.islist())
             throw GException::bad_type("GEventList(GEvents&)",
                                        "GEvents not an event list");            
-        GEventList* list = new GEventList((GEventList&)events);
+        GEventList* list = (GEventList*)&events;
         return list;
     }
     GEventAtom* __getitem__(int index) {
