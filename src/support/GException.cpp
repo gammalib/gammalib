@@ -26,7 +26,7 @@
  ***************************************************************************/
 const char* GExceptionHandler::what() const throw()
 {
-    static std::string message = "*** ERROR in " + m_origin + ": " + m_message;
+    std::string message = "*** ERROR in " + m_origin + ": " + m_message;
     return message.c_str();
 }
 
