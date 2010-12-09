@@ -64,7 +64,7 @@ GLATEventCube::GLATEventCube(void) : GEventCube()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] cube Event cube from which the instance should be built.
+ * @param[in] cube Event cube.
  ***************************************************************************/
 GLATEventCube::GLATEventCube(const GLATEventCube& cube) : GEventCube(cube)
 {
@@ -101,7 +101,7 @@ GLATEventCube::~GLATEventCube(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] cube Event cube to be assigned.
+ * @param[in] cube Event cube.
  ***************************************************************************/
 GLATEventCube& GLATEventCube::operator= (const GLATEventCube& cube)
 {
@@ -235,15 +235,14 @@ GLATEventBin* GLATEventCube::pointer(int index)
         throw GException::out_of_range(G_POINTER, index, 0, m_elements-1);
     #endif
 
-    // Get pixel and energy bin indices. Note that in GSkymap that holds
-    // the counts, the energy axis is the most rapidely varying axis.
+    // Get pixel and energy bin indices.
     m_bin.m_index = index;
-    m_bin.m_ipix  = index / ebins();
-    m_bin.m_ieng  = index % ebins();
+    m_bin.m_ipix  = index % npix();
+    m_bin.m_ieng  = index / npix();
 
     // Set pointers
     m_bin.m_cube   = this;
-    m_bin.m_counts = &(m_counts[index]);
+    m_bin.m_counts = &(m_map.pixels()[index]);
     m_bin.m_energy = &(m_energies[m_bin.m_ieng]);
     m_bin.m_time   = &m_time;
     m_bin.m_dir    = &(m_dirs[m_bin.m_ipix]);
@@ -265,9 +264,10 @@ int GLATEventCube::number(void) const
     double number = 0.0;
 
     // Sum event cube
-    if (m_elements > 0 && m_counts != NULL) {
+    double* pixels = m_map.pixels();
+    if (m_elements > 0 && pixels != NULL) {
         for (int i = 0; i < m_elements; ++i)
-            number += m_counts[i];
+            number += pixels[i];
     }
 
     // Return
@@ -285,6 +285,7 @@ std::string GLATEventCube::print(void) const
 
     // Append header
     result.append("=== GLATEventCube ===\n");
+    result.append(m_map.wcs()->print()+"\n");
     result.append(parformat("Number of elements")+str(size())+"\n");
     result.append(parformat("Number of pixels"));
     result.append(str(m_map.nx())+" x "+str(m_map.ny())+"\n");
@@ -361,16 +362,12 @@ GSkymap* GLATEventCube::diffrsp(const int& index) const
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * @todo Implement GSkymap.clear() method
  ***************************************************************************/
 void GLATEventCube::init_members(void)
 {
     // Initialise members
     m_bin.clear();
-    //m_map.clear();
-    m_map      = GSkymap();
-    m_counts   = NULL;
+    m_map.clear();
     m_dirs     = NULL;
     m_omega    = NULL;
     m_energies = NULL;
@@ -405,9 +402,6 @@ void GLATEventCube::copy_members(const GLATEventCube& cube)
     m_srcmap       = cube.m_srcmap;
     m_srcmap_names = cube.m_srcmap_names;
     m_enodes       = cube.m_enodes;
-
-    // Set counter to copied skymap pixels
-    m_counts = m_map.pixels();
 
     // Copy sky directions and solid angles
     if (cube.npix() > 0) {
@@ -472,9 +466,7 @@ void GLATEventCube::free_members(void)
  * This method reads a LAT counts map from a FITS image. The counts map is
  * stored in a GSkymap object, and a pointer is set up to access the pixels
  * individually. Recall that skymap pixels are stored in the order
- * (ebin,ix,iy), i.e. the energy axis is the most rapidely varying axis,
- * while the counts map is stored in the order (ix,iy,ebin), i.e. the x
- * axis is the most rapidely varying axis.
+ * (ix,iy,ebin).
  ***************************************************************************/
 void GLATEventCube::read_cntmap(GFitsImage* hdu)
 {
@@ -495,9 +487,6 @@ void GLATEventCube::read_cntmap(GFitsImage* hdu)
             m_elements *= m_naxis[2];
         }
 
-        // Set pixel pointer
-        m_counts = m_map.pixels();
-
         // Set sky directions
         set_directions();
 
@@ -517,12 +506,7 @@ void GLATEventCube::read_cntmap(GFitsImage* hdu)
  *            Source map not compatible with sky map
  *
  * This method reads a LAT source map from a FITS image. The source map is
- * stored in a GSkymap object. Recall that skymap pixels are stored in the
- * order (ebin,ix,iy), i.e. the energy axis is the most rapidely varying
- * axis.
- *
- * @todo Add WCS comparison method to check whether source map is consistent
- *       with counts map.
+ * stored in a GSkymap object.
  ***************************************************************************/
 void GLATEventCube::read_srcmap(GFitsImage* hdu)
 {
@@ -535,8 +519,12 @@ void GLATEventCube::read_srcmap(GFitsImage* hdu)
         // Read skymap
         map->read(hdu);
 
-        // Check that source map is consistent with counts map (to be replaced
-        // later by WCS comparison method)
+        // Check that source map WCS is consistent with counts map WCS
+        if (*(m_map.wcs()) != *(map->wcs()))
+            throw GLATException::wcs_incompatible(G_READ_SRCMAP, hdu->extname());
+
+        // Check that source map dimension is consistent with counts map
+        // dimension
         if (m_map.nx() != map->nx() ||
             m_map.ny() != map->ny())
             throw GLATException::wcs_incompatible(G_READ_SRCMAP, hdu->extname());

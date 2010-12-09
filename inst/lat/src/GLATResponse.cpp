@@ -580,10 +580,9 @@ double GLATResponse::diffrsp_bin(const GLATEventBin& event, const GModel& model,
 
     // Compute diffuse response
     GSkymap* map    = cube->diffrsp(idiff);
-    int      index  = event.ipix() * map->nmaps();
-    double*  pixels = map->pixels() + index;
-    double   irf    = nodes->wgt_left()  * pixels[nodes->inx_left()] +
-                      nodes->wgt_right() * pixels[nodes->inx_right()];
+    double*  pixels = map->pixels() + event.ipix();
+    double   irf    = nodes->wgt_left()  * pixels[nodes->inx_left()  * map->npix()] +
+                      nodes->wgt_right() * pixels[nodes->inx_right() * map->npix()];
 
     // Return IRF value
     return irf;

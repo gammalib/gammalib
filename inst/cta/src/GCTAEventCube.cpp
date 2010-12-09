@@ -52,7 +52,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GCTAEventCube::GCTAEventCube(void) : GEventCube()
 {
@@ -67,7 +67,7 @@ GCTAEventCube::GCTAEventCube(void) : GEventCube()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] cube Event cube from which the instance should be built.
+ * @param[in] cube Event cube.
  ***************************************************************************/
 GCTAEventCube::GCTAEventCube(const GCTAEventCube& cube) : GEventCube(cube)
 {
@@ -104,7 +104,7 @@ GCTAEventCube::~GCTAEventCube(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] cube Event cube to be assigned.
+ * @param[in] cube Event cube.
  ***************************************************************************/
 GCTAEventCube& GCTAEventCube::operator= (const GCTAEventCube& cube)
 {
@@ -137,7 +137,7 @@ GCTAEventCube& GCTAEventCube::operator= (const GCTAEventCube& cube)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear object
+ * @brief Clear instance
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
@@ -159,7 +159,7 @@ void GCTAEventCube::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
+ * @brief Clone instance
 ***************************************************************************/
 GCTAEventCube* GCTAEventCube::clone(void) const
 {
@@ -230,14 +230,13 @@ GCTAEventBin* GCTAEventCube::pointer(int index)
         throw GException::out_of_range(G_POINTER, index, 0, m_elements-1);
     #endif
 
-    // Get pixel and energy bin indices. Note that in GSkymap that holds
-    // the counts, the energy axis is the most rapidely varying axis.
-    int ipix = index / ebins();
-    int ieng = index % ebins();
+    // Get pixel and energy bin indices.
+    int ipix = index % npix();
+    int ieng = index / npix();
 
     // Set pointers
-    m_bin.m_counts = &(m_counts[index]);    //!< GEventBin member
-    m_bin.m_energy = &(m_energies[ieng]);   //!< GEventBin member
+    m_bin.m_counts = &(m_map.pixels()[index]);
+    m_bin.m_energy = &(m_energies[ieng]);
     m_bin.m_time   = &m_time;
     m_bin.m_dir    = &(m_dirs[ipix]);
     m_bin.m_omega  = &(m_omega[ipix]);
@@ -258,9 +257,10 @@ int GCTAEventCube::number(void) const
     double number = 0.0;
 
     // Sum event cube
-    if (m_elements > 0 && m_counts != NULL) {
+    double* pixels = m_map.pixels();
+    if (m_elements > 0 && pixels != NULL) {
         for (int i = 0; i < m_elements; ++i)
-            number += m_counts[i];
+            number += pixels[i];
     }
 
     // Return
@@ -296,16 +296,12 @@ std::string GCTAEventCube::print(void) const
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * @todo Implement GSkymap.clear() method
  ***************************************************************************/
 void GCTAEventCube::init_members(void)
 {
     // Initialise members
     m_bin.clear();
-    //m_map.clear();
-    m_map      = GSkymap();
-    m_counts   = NULL;
+    m_map.clear();
     m_dirs     = NULL;
     m_omega    = NULL;
     m_energies = NULL;
@@ -323,7 +319,7 @@ void GCTAEventCube::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] cube GCTAEventCube members which should be copied.
+ * @param[in] cube Event cube.
  ***************************************************************************/
 void GCTAEventCube::copy_members(const GCTAEventCube& cube)
 {
@@ -334,9 +330,6 @@ void GCTAEventCube::copy_members(const GCTAEventCube& cube)
     m_ontime = cube.m_ontime;
     m_ebds   = cube.m_ebds;
     m_gti    = cube.m_gti;
-
-    // Set counter to copied skymap pixels
-    m_counts = m_map.pixels();
 
     // Copy sky directions and solid angles
     if (cube.npix() > 0) {
@@ -399,11 +392,7 @@ void GCTAEventCube::free_members(void)
  * @param[in] hdu Pointer to image HDU.
  *
  * This method reads a CTA counts map from a FITS HDU. The counts map is
- * stored in a GSkymap object, and a pointer is set up to access the pixels
- * individually. Recall that skymap pixels are stored in the order
- * (ebin,ix,iy), i.e. the energy axis is the most rapidely varying axis,
- * while the counts map is stored in the order (ix,iy,ebin), i.e. the x
- * axis is the most rapidely varying axis.
+ * stored in a GSkymap object.
  ***************************************************************************/
 void GCTAEventCube::read_cntmap(GFitsImage* hdu)
 {
@@ -493,8 +482,7 @@ void GCTAEventCube::read_gti(GFitsTable* hdu)
  * This method computes the sky directions and solid angles for all event
  * cube pixels. Sky directions are stored in an array of GCTAInstDir objects
  * while solid angles are stored in units of sr in an array of double
- * precision variables. In addition, this method also sets the event cube
- * pixel pointer.
+ * precision variables.
  ***************************************************************************/
 void GCTAEventCube::set_directions(void)
 {
@@ -502,9 +490,6 @@ void GCTAEventCube::set_directions(void)
     if (npix() < 1)
         throw GCTAException::no_sky(G_SET_DIRECTIONS, "Every CTA event cube"
                                    " needs a definiton of the sky pixels.");
-
-    // Set pixel pointer
-    m_counts = m_map.pixels();
 
     // Delete old pixel directions and solid angles
     if (m_omega != NULL) delete [] m_omega;
@@ -594,6 +579,6 @@ void GCTAEventCube::set_time(void)
 
 /*==========================================================================
  =                                                                         =
- =                         GCTAEventCube friends                           =
+ =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
