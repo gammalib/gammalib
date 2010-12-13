@@ -1,0 +1,20 @@
+<source_library title="source library">
+  <source type="DiffuseSource" name="Extragal_diffuse">
+    <spectrum type="PowerLaw">
+      <parameter scale="1e-6" name="Prefactor" min="1e-07" max="1000.0" value="1.0" free="1"/>
+      <parameter scale="1.0" name="Index" min="-5.0" max="+5.0" value="-2.0" free="1"/>
+      <parameter scale="1.0" name="Scale" min="1e-07" max="1e20" value="100.0" free="0"/>
+    </spectrum>
+    <spatialModel type="ConstantValue">
+      <parameter scale="1" name="Value" min="0" max="10" value="1" free="0"/>
+    </spatialModel>
+  </source>
+  <source type="DiffuseSource" name="Galactic_diffuse">
+    <spectrum type="ConstantValue">
+      <parameter scale="1.0" name="Value" min="0.0" max="1000.0" value="1.0" free="1"/>
+    </spectrum>
+    <spatialModel type="MapCubeFunction" file="/project-data/glast/skymaps/galprop/gll_iem_v02.fit">
+      <parameter scale="1" name="Normalization" min="0.001" max="1000.0" value="1" free="0"/>
+    </spatialModel>
+  </source>
+</source_library>
