@@ -166,4 +166,6 @@ if __name__ == '__main__':
     #analyse_binned("data/source_model.xml")   # Original
     #analyse_binned("data/source_model2.xml")  # Powerlaw for extragal. diffuse
     analyse_binned("data/source_model3.xml")  # No Crab, Powerlaw for extragal. diffuse
+    #analyse_binned("data/source_model4.xml")  # No Crab, no extragal. diffuse
+    #analyse_binned("data/source_model5.xml")  # No Crab, no galactic diffuse
 
