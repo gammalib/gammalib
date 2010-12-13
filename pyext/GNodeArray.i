@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GNodeArray.i  -  Array of nodes class SWIG definition          *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -29,16 +29,38 @@
 class GNodeArray {
 public:
     // Constructors and destructors
-    GNodeArray();
+    GNodeArray(void);
     GNodeArray(const GNodeArray& array);
-    ~GNodeArray();
+    virtual ~GNodeArray(void);
 
     // Methods
-    void   nodes(const int& num, const double* array);
-    void   nodes(const GVector& vector);
-    void   set_value(const double& value);
-    int    inx_left(void);
-    int    inx_right(void);
-    double wgt_left(void);
-    double wgt_right(void);
+    void        clear(void);
+    GNodeArray* clone(void) const;
+    int         size(void) { return m_node.size(); }
+    void        nodes(const int& num, const double* array);
+    void        nodes(const GVector& vector);
+    void        nodes(const std::vector<double>& vector);
+    void        append(const double& node);
+    double      interpolate(const double& value, const std::vector<double>& vector);
+    void        set_value(const double& value);
+    int         inx_left(void) { return m_inx_left; }
+    int         inx_right(void) { return m_inx_right; }
+    double      wgt_left(void) { return m_wgt_left; }
+    double      wgt_right(void) { return m_wgt_right; }
+};
+
+
+/***********************************************************************//**
+ * @brief GNodeArray class extension
+ ***************************************************************************/
+%extend GNodeArray {
+    /*
+    char *__str__() {
+        static std::string result = self->print();
+        return ((char*)result.c_str());
+    }
+    */    
+    GNodeArray copy() {
+        return (*self);
+    }
 };
