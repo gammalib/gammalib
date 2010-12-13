@@ -283,11 +283,13 @@ double GWcsCAR::omega(const GSkyPixel& pix) const
     GSkyDir dir2 = ptr->xy2dir(GSkyPixel(pix.x()+0.5, pix.y()-0.5));
     GSkyDir dir3 = ptr->xy2dir(GSkyPixel(pix.x()+0.5, pix.y()+0.5));
     GSkyDir dir4 = ptr->xy2dir(GSkyPixel(pix.x()-0.5, pix.y()+0.5));
+    GSkyDir dir5 = ptr->xy2dir(GSkyPixel(pix.x(), pix.y()-0.5));
+    GSkyDir dir6 = ptr->xy2dir(GSkyPixel(pix.x(), pix.y()+0.5));
 
     // Compute distances between sky directions
     double a = dir1.dist(dir2);
     double b = dir3.dist(dir4);
-    double h = dir1.dist(dir4);
+    double h = dir5.dist(dir6);
 
     // Compute solid angle
     double omega = 0.5*(h*(a+b));
