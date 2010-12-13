@@ -506,7 +506,7 @@ void GLATEventCube::read_cntmap(GFitsImage* hdu)
  *            Source map not compatible with sky map
  *
  * This method reads a LAT source map from a FITS image. The source map is
- * stored in a GSkymap object.
+ * stored in a GSkymap object and is given in units of counts/pixel/MeV.
  ***************************************************************************/
 void GLATEventCube::read_srcmap(GFitsImage* hdu)
 {
