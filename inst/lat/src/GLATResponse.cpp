@@ -584,6 +584,10 @@ double GLATResponse::diffrsp_bin(const GLATEventBin& event, const GModel& model,
     double   irf    = nodes->wgt_left()  * pixels[nodes->inx_left()  * map->npix()] +
                       nodes->wgt_right() * pixels[nodes->inx_right() * map->npix()];
 
+    // Divide by solid angle and ontime since source maps are given in units of
+    // counts/pixel/MeV.
+    irf /= (event.omega() * event.ontime());
+
     // Return IRF value
     return irf;
 }
