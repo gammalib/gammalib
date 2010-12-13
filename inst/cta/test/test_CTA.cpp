@@ -33,41 +33,8 @@ const std::string cta_caldb  = "../inst/cta/test/irf";
 const std::string cta_irf    = "kb_E_50h_v3";
 const std::string cta_events = "../inst/cta/test/data/run_00006028_eventlist_reco.fits.gz";
 const std::string cta_cntmap = "../inst/cta/test/data/run_00006028_cntmap.fits.gz";
+const std::string cta_xml    = "../inst/cta/test/data/source1.xml";
 const double twopi           =  6.283185307179586476925286766559005768394;
-
-
-/***********************************************************************//**
- * @brief Setup Crab point source powerlaw model.
- ***************************************************************************/
-GModels crab_plaw(void)
-{
-    // Setup GModels for optimizing
-    GModelSpatialPtsrc point_source;
-    GModelSpectralPlaw power_law;
-    GModel             crab;
-    GModels            models;
-    try {
-        GSkyDir dir;
-        //dir.radec_deg(83.6331, +22.0145);
-        dir.radec_deg(117.0, -33.0);  // Adapt to source position in file
-        point_source = GModelSpatialPtsrc(dir);
-        power_law    = GModelSpectralPlaw(1.0e-7, -2.1);
-        power_law(0).min(1.0e-12);
-        crab         = GModel(point_source, power_law);
-        crab.name("Crab");
-        models.append(crab);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable setup GModels for optimizing." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-
-    // Return model
-    return models;
-}
 
 
 /***********************************************************************//**
@@ -266,7 +233,7 @@ void test_response_npsf(void)
 void test_response(void)
 {
     // Dump header
-    std::cout << "Test GCTAResponse: ";
+    std::cout << "Test CTA response: ";
 
     // Test CTA response loading
     try {
@@ -401,7 +368,7 @@ void test_unbinned_obs(void)
 void test_unbinned_optimizer(void)
 {
     // Write header
-    std::cout << "Test unbinned optimizer: ";
+    std::cout << "Test CTA unbinned optimizer: ";
 
     // Number of observations in data
     int nobs = 1;
@@ -448,9 +415,8 @@ void test_unbinned_optimizer(void)
     }
     std::cout << ".";
 
-    // Setup GModels for optimizing
-    GModels models = crab_plaw();
-    obs.models(models);
+    // Load models from XML file
+    obs.models(cta_xml);
 
     // Perform LM optimization
     GOptimizerLM opt;
@@ -466,7 +432,8 @@ void test_unbinned_optimizer(void)
         throw;
     }
     std::cout << ".";
-    std::cout << obs << std::endl;
+    std::cout << std::endl << opt << std::endl;
+    std::cout << *obs.models() << std::endl;
 
     // Plot final test success
     std::cout << " ok." << std::endl;
@@ -518,7 +485,7 @@ void test_binned_obs(void)
 void test_binned_optimizer(void)
 {
     // Write header
-    std::cout << "Test binned optimizer: ";
+    std::cout << "Test CTA binned optimizer: ";
 
     // Number of observations in data
     int nobs = 1;
@@ -541,9 +508,8 @@ void test_binned_optimizer(void)
     }
     std::cout << ".";
 
-    // Setup GModels for optimizing
-    GModels models = crab_plaw();
-    obs.models(models);
+    // Load models from XML file
+    obs.models(cta_xml);
 
     // Perform LM optimization
     GOptimizerLM opt;
@@ -559,8 +525,8 @@ void test_binned_optimizer(void)
         throw;
     }
     std::cout << ".";
-    std::cout << opt;
-    std::cout << obs << std::endl;
+    std::cout << std::endl << opt << std::endl;
+    std::cout << *obs.models() << std::endl;
 
     // Plot final test success
     std::cout << " ok." << std::endl;

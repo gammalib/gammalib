@@ -31,43 +31,14 @@
 /* __ Constants __________________________________________________________ */
 const std::string lat_caldb  = "../inst/lat/test/irf";
 const std::string lat_irf    = "Pass5_v0";
-const std::string lat_ft1    = "../inst/lat/test/data/ft1.fits.gz";
-const std::string lat_ft2    = "../inst/lat/test/data/ft2.fits.gz";
-const std::string lat_cntmap = "../inst/lat/test/data/cntmap.fits.gz";
-const std::string lat_srcmap = "../inst/lat/test/data/srcmap.fits.gz";
+const std::string lat_ft1    = "../inst/lat/test/data/ft1.fits";
+const std::string lat_ft2    = "../inst/lat/test/data/ft2.fits";
+const std::string lat_cntmap = "../inst/lat/test/data/cntmap.fits";
+const std::string lat_srcmap = "../inst/lat/test/data/srcmap.fits";
+const std::string lat_expmap = "../inst/lat/test/data/binned_expmap.fits";
+const std::string lat_ltcube = "../inst/lat/test/data/ltcube.fits";
+const std::string lat_xml    = "../inst/lat/test/data/source_model3.xml";
 const double      twopi      =  6.283185307179586476925286766559005768394;
-
-
-/***********************************************************************//**
- * @brief Setup Crab point source powerlaw model.
- ***************************************************************************/
-GModels crab_plaw(void)
-{
-    // Setup GModels for optimizing
-    GModelSpatialPtsrc point_source;
-    GModelSpectralPlaw power_law;
-    GModel             crab;
-    GModels            models;
-    try {
-        GSkyDir dir;
-        dir.radec_deg(83.6331, +22.0145);
-        point_source = GModelSpatialPtsrc(dir);
-        power_law    = GModelSpectralPlaw(1.0e-7, -2.1);
-        crab         = GModel(point_source, power_law);
-        crab.name("Crab");
-        models.append(crab);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable setup GModels for optimizing." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-
-    // Return model
-    return models;
-}
 
 
 /***********************************************************************//**
@@ -304,16 +275,12 @@ void test_binned_optimizer(void)
     // Write header
     std::cout << "Test binned optimizer: ";
 
-    // Number of observations in data
-    int nobs = 1;
-
     // Setup GObservations for optimizing
     GObservations   obs;
     GLATObservation run;
     try {
-        run.load_binned(lat_cntmap, "", "");
-        for (int i = 0; i < nobs; ++i)
-            obs.append(run);
+        run.load_binned(lat_srcmap, lat_expmap, lat_expmap);
+        obs.append(run);
     }
     catch (std::exception &e) {
         std::cout << std::endl
@@ -323,52 +290,14 @@ void test_binned_optimizer(void)
         throw;
     }
     std::cout << ".";
-//std::cout << obs << std::endl;
 
-    // Set model for observations
-    GModels models = crab_plaw();
-    obs.models(models);
-
-    // Setup parameters for optimizing
-    GOptimizerPars pars;
-    try {
-        pars = GOptimizerPars(models);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable setup GOptimizerPars for optimizing."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-//std::cout << pars << std::endl;
-
-    // Time simple GObservations iterator
-    double  t_elapse;
-    try {
-        clock_t t_start = clock();
-        int num = 0;
-        int sum = 0;
-        for (GObservations::iterator event = obs.begin(); event != obs.end(); ++event) {
-            num++;
-            sum += (int)event->counts();
-        }
-        t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to iterate GObservations."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << "." << std::endl;
-    std::cout << " - Reference time for GObservations::iterator: " << t_elapse << std::endl;
+    // Load models from XML file
+    obs.models(lat_xml);
 
     // Setup LM optimizer
     GOptimizerLM opt;
     try {
+        opt.max_iter(1000);
         obs.optimize(opt);
     }
     catch (std::exception &e) {
@@ -379,8 +308,8 @@ void test_binned_optimizer(void)
         throw;
     }
     std::cout << ".";
-//std::cout << opt << std::endl;
-std::cout << obs << std::endl;
+    std::cout << std::endl << opt << std::endl;
+    std::cout << *obs.models() << std::endl;
 
     // Plot final test success
     std::cout << " ok." << std::endl;
