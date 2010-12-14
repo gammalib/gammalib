@@ -49,7 +49,7 @@ void test_response(void)
     // Remove FITS file
     system("rm -rf test_rsp.fits");
 
-    std::cout << "Test GLATResponse: ";
+    std::cout << "Test response: ";
     try {
         // Load response
         GLATResponse rsp;
@@ -66,6 +66,128 @@ void test_response(void)
         throw;
     }
     std::cout << ". ok." << std::endl;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Livetime cube functions.
+ ***************************************************************************/
+double test_fct1(const double& ctheta)
+{
+    //std::cout << ctheta << " ";
+    return 1.0;
+}
+double test_fct2(const double& ctheta, const double& phi)
+{
+    std::cout << "(" << ctheta << "," << phi << ")" << " ";
+    return 1.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Test livetime cube handling.
+ ***************************************************************************/
+void test_ltcube(void)
+{
+    // Set filenames
+    const std::string file1 = "test_lat_ltcube.fits";
+
+    // Write header
+    std::cout << "Test livetime cube: ";
+
+    // Load livetime cube
+    try {
+        // Load livetime cube
+        GLATLtCube ltcube(lat_ltcube);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to load LAT livetime cube."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test operators
+    try {
+        // Load livetime cube
+        GLATLtCube ltcube(lat_ltcube);
+
+        // Initialise sky direction and energy
+        GSkyDir dir;
+        GEnergy energy;
+
+        // Test cos theta integration operator. The total ontime of the dataset is
+        // 604768.0 sec, hence the efficiency is 41%. This seems reasonable as the
+        // test function returns 1 for half of the sky.
+        double sum = ltcube(dir, energy, test_fct1);
+        if (fabs(sum-247712.0724) > 0.001) {
+            std::cout << std::endl
+                      << "TEST ERROR: Invalid livetime cube sum (expected 247712.0724,"
+                      << " found " << sum
+                      << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // Test cos theta and phi integration operator. We expect a sum of 0.0 since
+        // the actual file has no phi dependence
+        sum = ltcube(dir, energy, test_fct2);
+        if (fabs(sum-0.0) > 0.001) {
+            std::cout << std::endl
+                      << "TEST ERROR: Invalid livetime cube sum (expected 0.0,"
+                      << " found " << sum
+                      << std::endl;
+            throw;
+        }
+        std::cout << ".";
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to access LAT livetime cube."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Create livetime skymap
+    try {
+        // Allocate skymap
+        GSkymap map("HPX", "GAL", 64, "RING", 1);
+        
+        // Load livetime cube
+        GLATLtCube ltcube(lat_ltcube);
+
+        // Create livetime skymap
+        GEnergy energy;
+        for (int i = 0; i < map.npix(); ++i) {
+            GSkyDir dir = map.pix2dir(i);
+            map(i) = ltcube(dir, energy, test_fct1);
+        }
+
+        // Save skymap
+        map.save(file1, true);
+
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to build LAT livetime cube skymap."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Plot final test success
+    std::cout << " ok." << std::endl;
+
+    // Return
+    return;
 }
 
 
@@ -167,7 +289,7 @@ void test_unbinned_obs(void)
 void test_binned_obs(void)
 {
     // Write header
-    std::cout << "Test LAT binned observation handling: ";
+    std::cout << "Test binned observation handling: ";
 
     // Declare observations
     GObservations   obs;
@@ -333,6 +455,7 @@ int main(void)
 
     // Execute the tests
     test_response();
+    test_ltcube();
     test_unbinned_obs();
     test_binned_obs();
     test_binned_optimizer();
