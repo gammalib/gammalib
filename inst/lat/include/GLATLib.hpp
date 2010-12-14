@@ -26,5 +26,8 @@
 #include "GLATInstDir.hpp"
 #include "GLATPointing.hpp"
 #include "GLATResponse.hpp"
+#include "GLATLtCube.hpp"
+#include "GLATLtCubeMap.hpp"
+#include "GLATMeanPsf.hpp"
 
 #endif /* GLATLIB_HPP */

@@ -17,9 +17,12 @@ sources = src/GLATObservation.cpp \
           src/GLATRoi.cpp \
           src/GLATPointing.cpp \
           src/GLATResponseTable.cpp \
+          src/GLATLtCube.cpp \
+          src/GLATLtCubeMap.cpp \
           src/GLATAeff.cpp \
           src/GLATPsf.cpp \
           src/GLATEdisp.cpp \
+          src/GLATMeanPsf.cpp \
           src/GLATException.cpp
 
 # Define headers to be installed
@@ -33,6 +36,9 @@ pkginclude_HEADERS = include/GLATObservation.hpp \
                      include/GLATRoi.hpp \
                      include/GLATResponse.hpp \
                      include/GLATResponseTable.hpp \
+                     include/GLATLtCube.hpp \
+                     include/GLATLtCubeMap.hpp \
+                     include/GLATMeanPsf.hpp \
                      include/GLATLib.hpp \
                      include/GLATException.hpp
 
