@@ -22,6 +22,7 @@
 #include "GLATResponse.i"
 #include "GLATInstDir.i"
 #include "GLATRoi.i"
+#include "GLATLtCube.i"
 
 
 
