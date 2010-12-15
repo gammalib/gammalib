@@ -64,6 +64,7 @@ public:
     void           write(GFits* file) const;
     int            ncostheta(void) const { return m_num_ctheta; }
     int            nphi(void) const { return m_num_phi; }
+    bool           hasphi(void) const { return (m_num_phi != 0); }
     double         costheta(const int& index) const;
     double         phi(const int& index) const;
     double         costhetamin(void) const { return m_min_ctheta; }
