@@ -1090,19 +1090,13 @@ void GSkymap::read_healpix(const GFitsTable* hdu)
         std::cout << "nentry=" << nentry << std::endl;
         #endif
 
-        // Determine number of maps from NBRBINS keyword. If keyword was
-        // not found then determine the number of maps that fit into
-        // all columns. Only count columns that can full hold the map.
-        try {
-            m_num_maps = hdu->integer("NBRBINS");
-        }
-        catch (GException::fits_key_not_found &e) {
-            m_num_maps = 0;
-            for (int icol = 0; icol < ncols; ++icol) {
-                GFitsTableCol* col = ((GFitsTable*)hdu)->column(icol);
-                if (col->number() % nentry == 0)
-                    m_num_maps += col->number() / nentry;
-            }
+        // Determine number of maps from the number of maps that fit into
+        // all columns. Only count columns that can fully hold the map.
+        m_num_maps = 0;
+        for (int icol = 0; icol < ncols; ++icol) {
+            GFitsTableCol* col = ((GFitsTable*)hdu)->column(icol);
+            if (col->number() % nentry == 0)
+                m_num_maps += col->number() / nentry;
         }
         #if defined(G_READ_HEALPIX_DEBUG)
         std::cout << "m_num_maps=" << m_num_maps << std::endl;
