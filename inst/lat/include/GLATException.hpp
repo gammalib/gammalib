@@ -82,6 +82,11 @@ public:
         diffuse_not_found(std::string origin, std::string name,
                           std::string message = "");
     };
+    class inconsistent_response : public GLATExceptionHandler {
+    public:
+        inconsistent_response(std::string origin, int size, int expect,
+                              std::string message = "");
+    };
 };
 
 #endif /* GLATEXCEPTION_HPP */

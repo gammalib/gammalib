@@ -26,7 +26,7 @@
  ***************************************************************************/
 const char* GLATExceptionHandler::what() const throw()
 {
-    static std::string message = "*** ERROR in " + m_origin + ": " + m_message;
+    std::string message = "*** ERROR in " + m_origin + ": " + m_message;
     return message.c_str();
 }
 
@@ -138,5 +138,25 @@ GLATException::diffuse_not_found::diffuse_not_found(std::string origin,
     m_origin  = origin;
     m_message = "Diffuse model \""+name+"\" not found. " +
                 message;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Inconsistent response table
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] size Size.
+ * @param[in] expect Expected size.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GLATException::inconsistent_response::inconsistent_response(std::string origin,
+                                                            int         size,
+                                                            int         expect,
+                                                            std::string message)
+{
+    m_origin  = origin;
+    m_message = "Inconsistent response table found. Expected "+str(expect)+
+                " elements, found "+str(size)+". " + message;
     return;
 }
