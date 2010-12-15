@@ -258,7 +258,7 @@ double& GSkymap::operator() (const int& pixel, const int map)
     if (pixel < 0 || pixel >= m_num_pixels ||
         map   < 0 || map   >= m_num_maps)
         throw GException::out_of_range(G_OP_ACCESS, pixel, map,
-                                       m_num_pixels, m_num_maps);
+                                       m_num_pixels-1, m_num_maps-1);
     #endif
 
     // Return reference to pixel value
@@ -284,7 +284,7 @@ const double& GSkymap::operator() (const int& pixel, const int map) const
     if (pixel < 0 || pixel >= m_num_pixels ||
         map   < 0 || map   >= m_num_maps)
         throw GException::out_of_range(G_OP_ACCESS, pixel, map, 
-                                       m_num_pixels, m_num_maps);
+                                       m_num_pixels-1, m_num_maps-1);
     #endif
 
     // Return reference to pixel value
@@ -313,7 +313,7 @@ double& GSkymap::operator() (const GSkyPixel& pixel, const int map)
     if (index < 0 || index >= m_num_pixels ||
         map   < 0 || map   >= m_num_maps)
         throw GException::out_of_range(G_OP_ACCESS, index, map,
-                                       m_num_pixels, m_num_maps);
+                                       m_num_pixels-1, m_num_maps-1);
     #endif
 
     // Return reference to pixel value
@@ -342,7 +342,7 @@ const double& GSkymap::operator() (const GSkyPixel& pixel, const int map) const
     if (index < 0 || index >= m_num_pixels ||
         map   < 0 || map   >= m_num_maps)
         throw GException::out_of_range(G_OP_ACCESS, index, map,
-                                       m_num_pixels, m_num_maps);
+                                       m_num_pixels-1, m_num_maps-1);
     #endif
 
     // Return reference to pixel value
