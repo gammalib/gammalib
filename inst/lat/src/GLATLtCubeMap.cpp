@@ -163,7 +163,9 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, _ltcube_ctheta fct)
  * the zenith angle and of the azimuth angle.
  * This method assumes that \f$T_{\rm live}(\cos \theta, \phi)\f$ is
  * stored as a set of maps in a 2D array with \f$\cos \theta\f$ being the
- * most rapidely varying parameter.
+ * most rapidely varying parameter and with the first map starting at
+ * index m_num_ctheta (the first m_num_ctheta maps are the livetime cube
+ * maps without any \f$\phi\f$ dependence).
  ***************************************************************************/
 double GLATLtCubeMap::operator() (const GSkyDir& dir, _ltcube_ctheta_phi fct)
 {
@@ -173,8 +175,10 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, _ltcube_ctheta_phi fct)
     // Initialise sum
     double sum = 0.0;
 
-    // Loop over azimuth and zenith angles
-    for (int iphi = 0, i = 0; iphi < m_num_phi; ++iphi) {
+    // Loop over azimuth and zenith angles. Note that the map index starts
+    // with m_num_ctheta as the first m_num_ctheta maps correspond to an
+    // evaluation without any phi-dependence.
+    for (int iphi = 0, i = m_num_ctheta; iphi < m_num_phi; ++iphi) {
         double p = phi(iphi);
         for (int itheta = 0; itheta < m_num_ctheta; ++itheta, ++i)
             sum += m_map(pixel, i) * (*fct)(costheta(itheta), p);
@@ -222,6 +226,10 @@ GLATLtCubeMap* GLATLtCubeMap::clone(void) const
  * @brief Load lifetime cube from FITS file
  *
  * @param[in] hdu FITS HDU.
+ *
+ * @todo Verify consistency between the number of maps and the dimension
+ *       parameters extracted from the keywords. The number of maps should
+ *       be (m_num_phi+1)*m_num_ctheta.
  ***************************************************************************/
 void GLATLtCubeMap::read(const GFitsTable* hdu)
 {
