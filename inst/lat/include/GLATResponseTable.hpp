@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GLATResponseTable.hpp  -  GLAST LAT Response table class        *
+ *         GLATResponseTable.hpp  -  Fermi LAT Response table class        *
  * ----------------------------------------------------------------------- *
  *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponseTable.hpp
- * @brief GLATResponseTable class definition.
+ * @brief Fermi LAT response table class definition
  * @author J. Knodlseder
  */
 
@@ -20,6 +20,9 @@
 #define GLATRESPONSETABLE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
+#include <iostream>
+#include "GLog.hpp"
 #include "GNodeArray.hpp"
 #include "GFitsTable.hpp"
 
@@ -27,35 +30,46 @@
 /***********************************************************************//**
  * @class GLATResponseTable
  *
- * @brief Interface for the GLAST LAT instrument response table classe.
+ * @brief Interface for the Fermi LAT Response table class.
+ *
+ * A response table contains the binning information in energy and cos theta
+ * for a Fermi LAT response function.
  ***************************************************************************/
 class GLATResponseTable {
 
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GLATResponseTable& table);
+    friend GLog&         operator<< (GLog& log, const GLATResponseTable& table);
+
 public:
     // Constructors and destructors
-    GLATResponseTable();
+    GLATResponseTable(void);
     GLATResponseTable(const GLATResponseTable& table);
-    ~GLATResponseTable();
+    virtual ~GLATResponseTable(void);
 
     // Operators
     GLATResponseTable& operator= (const GLATResponseTable & table);
 
     // Methods
-    void   read(const GFitsTable* hdu);
-    void   write(GFitsTable* hdu) const;
-    int    index(const int& ie, const int& ic) const;
-    double interpolate(const double& logE, const double& ctheta, 
-                       const double* array);
-    double interpolate(const double& logE, const double& ctheta, 
-                       const double* array, const int& offset, 
-                       const int& size);
-    double energy(const int& ie) const;
-    int    num_energy(void) const { return m_energy_num; }
-    int    num_ctheta(void) const { return m_ctheta_num; }
-    double energy_lo(const int& inx) const { return m_energy_lo[inx]; }
-    double energy_hi(const int& inx) const { return m_energy_hi[inx]; }
-    double ctheta_lo(const int& inx) const { return m_ctheta_lo[inx]; }
-    double ctheta_hi(const int& inx) const { return m_ctheta_hi[inx]; }
+    void               clear(void);
+    GLATResponseTable* clone(void) const;
+    void               read(const GFitsTable* hdu);
+    void               write(GFitsTable* hdu) const;
+    int                index(const int& ie, const int& ic) const;
+    double             interpolate(const double& logE, const double& ctheta, 
+                                   const double* array);
+    double             interpolate(const double& logE, const double& ctheta, 
+                                   const double* array, const int& offset, 
+                                   const int& size);
+    double             energy(const int& ie) const;
+    int                size(void) const { return m_energy_num*m_ctheta_num; }
+    int                nenergies(void) const { return m_energy_num; }
+    int                ncostheta(void) const { return m_ctheta_num; }
+    double             energy_lo(const int& inx) const;
+    double             energy_hi(const int& inx) const;
+    double             costheta_lo(const int& inx) const;
+    double             costheta_hi(const int& inx) const;
+    std::string        print(void) const;
 
 private:
     // Methods

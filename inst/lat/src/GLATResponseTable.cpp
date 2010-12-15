@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GLATResponseTable.cpp  -  GLAST LAT Response table class        *
+ *         GLATResponseTable.cpp  -  Fermi LAT Response table class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -10,15 +10,29 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GLATResponseTable.cpp
+ * @brief Fermi LAT response table class implementation
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include <math.h>
-#include "GException.hpp"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GLATResponseTable.hpp"
+#include "GTools.hpp"
+#include "GException.hpp"
 #include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_READ                         "GLATResponseTable::read(GFitsTable*)"
+#define G_INDEX                        "GLATResponseTable::index(int&, int&)"
+#define G_ENERGY                            "GLATResponseTable::energy(int&)"
+#define G_ENERGY_LO                      "GLATResponseTable::energy_lo(int&)"
+#define G_ENERGY_HI                      "GLATResponseTable::energy_hi(int&)"
+#define G_COSTHETA_LO                  "GLATResponseTable::costheta_lo(int&)"
+#define G_COSTHETA_HI                  "GLATResponseTable::costheta_hi(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -31,16 +45,16 @@
 
 /*==========================================================================
  =                                                                         =
- =                GLATResponseTable constructors/destructors               =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GLATResponseTable::GLATResponseTable(void)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Return
@@ -51,11 +65,11 @@ GLATResponseTable::GLATResponseTable(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param table Response table to be copied
+ * @param table Response table.
  ***************************************************************************/
 GLATResponseTable::GLATResponseTable(const GLATResponseTable& table)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Copy members
@@ -81,14 +95,14 @@ GLATResponseTable::~GLATResponseTable(void)
 
 /*==========================================================================
  =                                                                         =
- =                       GLATResponseTable operators                       =
+ =                                 Operators                               =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param table Response table to be assigned
+ * @param table Response table.
  ***************************************************************************/
 GLATResponseTable& GLATResponseTable::operator= (const GLATResponseTable& table)
 {
@@ -118,12 +132,42 @@ GLATResponseTable& GLATResponseTable::operator= (const GLATResponseTable& table)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Read response table from FITS HDU
+ * @brief Clear instance
  *
- * @param[in] hdu Pointer to response table.
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GLATResponseTable::clear(void)
+{
+    // Free class members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+***************************************************************************/
+GLATResponseTable* GLATResponseTable::clone(void) const
+{
+    return new GLATResponseTable(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Read response table from FITS table HDU
+ *
+ * @param[in] hdu Response table HDU.
+ *
+ * @exception GException::fits_column_not_found
+ *            Response table column not found.
  *
  * The response table definition is assumed to be stored in 4 vector columns
- * with the names
+ * with names
  * ENERG_LO (energy bins lower boundary)
  * ENERG_HI (energy bins upper boundary)
  * CTHETA_LO (cos theta bins lower boundary)
@@ -131,6 +175,9 @@ GLATResponseTable& GLATResponseTable::operator= (const GLATResponseTable& table)
  ***************************************************************************/
 void GLATResponseTable::read(const GFitsTable* hdu)
 {
+    // Clear instance
+    clear();
+
     // Get pointers to table columns
     GFitsTableCol* energy_lo = ((GFitsTable*)hdu)->column("ENERG_LO");
     GFitsTableCol* energy_hi = ((GFitsTable*)hdu)->column("ENERG_HI");
@@ -138,12 +185,14 @@ void GLATResponseTable::read(const GFitsTable* hdu)
     GFitsTableCol* ctheta_hi = ((GFitsTable*)hdu)->column("CTHETA_HI");
 
     // Check on existence of columns
-    if (energy_lo == NULL || energy_hi == NULL ||
-        ctheta_lo == NULL || ctheta_hi == NULL)
-        return;
-
-    // Free any existing memory
-    free_members();
+    if (energy_lo == NULL)
+        throw GException::fits_column_not_found(G_READ, "ENERG_LO");
+    if (energy_hi == NULL)
+        throw GException::fits_column_not_found(G_READ, "ENERG_HI");
+    if (ctheta_lo == NULL)
+        throw GException::fits_column_not_found(G_READ, "CTHETA_LO");
+    if (ctheta_hi == NULL)
+        throw GException::fits_column_not_found(G_READ, "CTHETA_HI");
 
     // Extract number of bins
     m_energy_num = energy_lo->number();
@@ -169,7 +218,7 @@ void GLATResponseTable::read(const GFitsTable* hdu)
         m_ctheta_hi[i] = ctheta_hi->real(0,i);
     }
 
-    // Set energy nodes
+    // Set energy nodes (log10 of energy)
     if (m_energy_num > 0) {
         double *logE = new double[m_energy_num];
         for (int i = 0; i < m_energy_num; ++i)
@@ -199,9 +248,6 @@ void GLATResponseTable::read(const GFitsTable* hdu)
  ***************************************************************************/
 void GLATResponseTable::write(GFitsTable* hdu) const
 {
-    // Allocate boundary table with one row
-//    GFitsBinTable table(1);
-
     // Allocate floating point vector columns
     GFitsTableFloatCol col_energy_lo = GFitsTableFloatCol("ENERG_LO",  1, m_energy_num);
     GFitsTableFloatCol col_energy_hi = GFitsTableFloatCol("ENERG_HI",  1, m_energy_num);
@@ -234,17 +280,37 @@ void GLATResponseTable::write(GFitsTable* hdu) const
  *
  * @param[in] ie Energy bin (starting from 0)
  * @param[in] ic cos theta bin (starting from 0)
+ *
+ * @exception GException::out_of_range
+ *            Energy or cos theta bin index out of range
+ *
+ * Computes table index from energy and cos theta bin indices.
  ***************************************************************************/
 int GLATResponseTable::index(const int& ie, const int& ic) const
 {
-    return ic * m_energy_num + ie;
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (ie < 0 || ie >= m_energy_num ||
+        ic < 0 || ic >= m_ctheta_num)
+        throw GException::out_of_range(G_INDEX, ie, ic, 
+                                       m_energy_num-1, m_ctheta_num-1);
+    #endif
+
+    // Compute index
+    int index = ic * m_energy_num + ie;
+
+    // Return index
+    return index;
 }
 
 
 /***********************************************************************//**
- * @brief Return mean energy of bin
+ * @brief Return mean energy of bin (units: MeV)
  *
  * @param[in] ie Index of energy bin (starting from 0)
+ *
+ * @exception GException::out_of_range
+ *            Energy bin index out of range
  *
  * The mean energy is actually computed from the logarithmic average of 
  * lower and upper boundaries:
@@ -252,6 +318,12 @@ int GLATResponseTable::index(const int& ie, const int& ic) const
  ***************************************************************************/
 double GLATResponseTable::energy(const int& ie) const
 {
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (ie < 0 || ie >= m_energy_num)
+        throw GException::out_of_range(G_ENERGY, ie, 0, m_energy_num-1);
+    #endif
+
     // Determine mean energy of bin
     double mean   = 0.5 * (log10(m_energy_lo[ie]) + log10(m_energy_hi[ie]));
     double energy = pow(10.0, mean);
@@ -273,20 +345,20 @@ double GLATResponseTable::interpolate(const double& logE,
                                       const double* array)
 {
     // Flag no change of values
-    int change = 0;
+    bool change = false;
 
     // Set energy interpolation
     if (logE != m_last_energy) {
         m_energy.set_value(logE);
         m_last_energy = logE;
-        change        = 1;
+        change        = true;
     }
 
     // Set cos(theta) interpolation
     if (ctheta != m_last_ctheta) {
         m_ctheta.set_value(ctheta);
         m_last_ctheta = ctheta;
-        change        = 1;
+        change        = true;
     }
 
     // If change occured then update interpolation indices and weighting
@@ -336,20 +408,20 @@ double GLATResponseTable::interpolate(const double& logE,
                                       const int&    size)
 {
     // Flag no change of values
-    int change = 0;
+    bool change = false;
 
     // Set energy interpolation
     if (logE != m_last_energy) {
         m_energy.set_value(logE);
         m_last_energy = logE;
-        change        = 1;
+        change        = true;
     }
 
     // Set cos(theta) interpolation
     if (ctheta != m_last_ctheta) {
         m_ctheta.set_value(ctheta);
         m_last_ctheta = ctheta;
-        change        = 1;
+        change        = true;
     }
 
     // If change occured then update interpolation indices and weighting
@@ -383,9 +455,111 @@ double GLATResponseTable::interpolate(const double& logE,
 }
 
 
+/***********************************************************************//**
+ * @brief Return lower bin energy (units: MeV)
+ *
+ * @param[in] inx Index of energy bin (starting from 0)
+ *
+ * @exception GException::out_of_range
+ *            Energy bin index out of range
+ ***************************************************************************/
+double GLATResponseTable::energy_lo(const int& inx) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (inx < 0 || inx >= m_energy_num)
+        throw GException::out_of_range(G_ENERGY_LO, inx, 0, m_energy_num-1);
+    #endif
+
+    // Return mean energy
+    return m_energy_lo[inx];
+}
+
+
+/***********************************************************************//**
+ * @brief Return upper bin energy (units: MeV)
+ *
+ * @param[in] inx Index of energy bin (starting from 0)
+ *
+ * @exception GException::out_of_range
+ *            Energy bin index out of range
+ ***************************************************************************/
+double GLATResponseTable::energy_hi(const int& inx) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (inx < 0 || inx >= m_energy_num)
+        throw GException::out_of_range(G_ENERGY_HI, inx, 0, m_energy_num-1);
+    #endif
+
+    // Return mean energy
+    return m_energy_hi[inx];
+}
+
+
+/***********************************************************************//**
+ * @brief Return lower bin cos theta
+ *
+ * @param[in] inx Index of cos theta bin (starting from 0)
+ *
+ * @exception GException::out_of_range
+ *            Cos theta bin index out of range
+ ***************************************************************************/
+double GLATResponseTable::costheta_lo(const int& inx) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (inx < 0 || inx >= m_ctheta_num)
+        throw GException::out_of_range(G_COSTHETA_LO, inx, 0, m_ctheta_num-1);
+    #endif
+
+    // Return mean energy
+    return m_ctheta_lo[inx];
+}
+
+
+/***********************************************************************//**
+ * @brief Return upper bin cos theta
+ *
+ * @param[in] inx Index of cos theta bin (starting from 0)
+ *
+ * @exception GException::out_of_range
+ *            Cos theta bin index out of range
+ ***************************************************************************/
+double GLATResponseTable::costheta_hi(const int& inx) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (inx < 0 || inx >= m_ctheta_num)
+        throw GException::out_of_range(G_COSTHETA_HI, inx, 0, m_ctheta_num-1);
+    #endif
+
+    // Return mean energy
+    return m_ctheta_hi[inx];
+}
+
+
+/***********************************************************************//**
+ * @brief Print response table information
+ ***************************************************************************/
+std::string GLATResponseTable::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GLATResponseTable ===");
+    result.append("\n"+parformat("Number of energy bins")+str(nenergies()));
+    result.append("\n"+parformat("Number of cos theta bins")+str(ncostheta()));
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
- =                      GLATResponseTable private methods                  =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -412,7 +586,7 @@ void GLATResponseTable::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param table Response table to be copied
+ * @param[in] table Response table.
  ***************************************************************************/
 void GLATResponseTable::copy_members(const GLATResponseTable& table)
 {
@@ -468,4 +642,42 @@ void GLATResponseTable::free_members(void)
 
     // Return
     return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                                 Friends                                 =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] table Response table.
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GLATResponseTable& table)
+{
+     // Write response table in output stream
+    os << table.print();
+
+    // Return output stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] table Response table.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GLATResponseTable& table)
+{
+    // Write response table into logger
+    log << table.print();
+
+    // Return logger
+    return log;
 }
