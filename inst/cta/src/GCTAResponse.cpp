@@ -135,6 +135,69 @@ GCTAResponse& GCTAResponse::operator= (const GCTAResponse& rsp)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Return value of point source instrument response function.
+ *
+ * @param[in] obsDir Observed photon direction.
+ * @param[in] obsEng Observed energy of photon.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt LAT pointing information.
+ *
+ * This method implements the default and complete instrument response
+ * function (IRF).
+ ***************************************************************************/
+double GCTAResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
+                         const GTime& obsTime,
+                         const GSkyDir& srcDir, const GEnergy& srcEng,
+                         const GTime& srcTime, const GPointing& pnt) const
+{
+    // Get point source IRF components
+    double irf  =  live(srcDir,  srcEng, srcTime, pnt);
+    irf        *=  aeff(srcDir,  srcEng, srcTime, pnt);
+    irf        *=   psf(obsDir,  srcDir, srcEng, srcTime, pnt);
+    irf        *= edisp(obsEng,  srcDir, srcEng, srcTime, pnt);
+    irf        *= tdisp(obsTime, srcDir, srcEng, srcTime, pnt);
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return integral of instrument response function.
+ *
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Instrument pointing information.
+ * @param[in] roi Region of interest of data selection.
+ * @param[in] ebds Energy boundaries of data selection.
+ * @param[in] gti Good Time Intervals of data selection.
+ *
+ * This method implements the default and complete integral of the instrument
+ * response function (IRF). It may be overwritted by a specific method in the
+ * derived class that drops response terms that are not used.
+ ***************************************************************************/
+double GCTAResponse::nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
+                          const GTime& srcTime,  const GPointing& pnt,
+                          const GRoi& roi, const GEbounds& ebds,
+                          const GGti& gti) const
+{
+    // Get IRF components
+    double nirf  =   live(srcDir, srcEng, srcTime, pnt);
+    nirf        *=   aeff(srcDir, srcEng, srcTime, pnt);
+    nirf        *=   npsf(srcDir, srcEng, srcTime, pnt, roi);
+    nirf        *= nedisp(srcDir, srcEng, srcTime, pnt, ebds);
+    nirf        *= ntdisp(srcDir, srcEng, srcTime, pnt, gti);
+
+    // Return integrated IRF value
+    return nirf;
+}
+
+
+/***********************************************************************//**
  * @brief Return livetime fraction (units: s s-1).
  *
  * @param[in] srcDir True photon direction.
