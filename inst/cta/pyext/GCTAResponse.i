@@ -35,6 +35,12 @@ public:
     virtual ~GCTAResponse(void);
 
     // Reponse function computation methods
+    double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+               const GPointing& pnt) const;
+    double nirf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
+                const GGti& gti) const;
     double live(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                 const GPointing& pnt) const;
     double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,

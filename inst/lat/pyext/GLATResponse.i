@@ -41,13 +41,19 @@ public:
     bool          hastdisp(void) const { return false; }
     
     // Implemented response computation methods
+    double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+               const GPointing& pnt) const;
+    double nirf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
+                const GGti& gti) const;
     double diffrsp(const GEvent& event, const GModel& model,
                    const GEnergy& srcEng, const GTime& srcTime,
                    const GPointing& pnt) const;
     double live(const GSkyDir&  srcDir, const GEnergy& srcEng,
                 const GTime& srcTime, const GPointing& pnt) const;
-    double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                const GPointing& pnt) const;
+    //double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+    //            const GPointing& pnt) const;
     double psf(const GInstDir& obsDir,
                const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                const GPointing& pnt) const;
@@ -65,9 +71,9 @@ public:
                   const GTime& srcTime, const GPointing& pnt, const GGti& gti) const;
 
     // Other Methods
-    double        aeff(const double& logE, const double& ctheta);
-    void          aeff_ctheta_min(const double& ctheta);
-    double        aeff_ctheta_min(void) const;
+    //double        aeff(const double& logE, const double& ctheta);
+    //void          aeff_ctheta_min(const double& ctheta);
+    //double        aeff_ctheta_min(void) const;
     double        psf(const double& delta, const double& logE, const double& ctheta);
     GVector       psf(const GVector& delta, const double& logE, const double& ctheta);
     void          save(const std::string& rspname) const;
