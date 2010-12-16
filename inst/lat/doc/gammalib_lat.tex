@@ -1,0 +1,221 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% GammaLib LAT Specific Interface
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definitions for manual package
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\task}{\mbox{GammaLib}}
+\newcommand{\this}{\mbox{\tt \task}}
+\newcommand{\shorttype}{\mbox{LAT}}
+\newcommand{\doctype}{\mbox{LAT specific interface}}
+\newcommand{\version}{\mbox{draft}}
+\newcommand{\calendar}{\mbox{12 December 2010}}
+\newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
+\newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document definition
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}[12pt,a4]
+\usepackage{epsfig}
+\usepackage{manual}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Begin of document body
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\frontpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Science Tools
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Science Tools}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Binned analysis}
+
+The binned likelihood analysis is implemented by {\tt BinnedLikelihood.cxx}.
+Evaluation of the binned likelihood is done by the method
+{\tt BinnedLikelihood::value}
+using
+\begin{equation}
+\ln L = \sum_{e_i > 0} n_i \ln e_i - N_{\rm pred}
+\end{equation}
+where
+$n_i$ is the number of counts in bin $i$,
+$e_i$ is the model value for bin $i$,
+and
+$N_{\rm pred}$ is the total number of predicted counts.
+
+$e_i$ is computed by
+{\tt BinnedLikelihood::computeModelMap}
+by looping over all source models $m$ and by summing up the predicted number of
+counts for all pixels $i$:
+\begin{equation}
+e_i = \sum_m e_{i,m} .
+\end{equation}
+For a given bin and model, $e_{i,m}$ is computed by 
+{\tt BinnedLikelihood::pixelCounts} which implements the Trapezoid rule
+$\int_a^b f(x) dx \approx (b-a) \frac{f(a) + f(b)}{2}$
+to compute the predicted number of counts in a pixel by integrating the
+model prediction over the spectrum:
+\begin{equation}
+e_{i,m} = \frac{
+I(E_i^{\rm min}) s_{i,m}(E_i^{\rm min}) + I(E_i^{\rm max}) s_{i,m}(E_i^{\rm max})}{2} 
+( E_i^{\rm max} - E_i^{\rm min} )
+\end{equation}
+where
+$I(E)$ is the spectral function,
+$s_{i,m}(E_i^{\rm min})$ and $s_{i,m}(E_i^{\rm max})$ are the values of bin $i$ for
+source model $m$ at the minimum and maximum energy boundaries 
+$E_i^{\rm min}$ and $E_i^{\rm max}$ of the bin.
+
+$N_{\rm pred}$ is computed by
+{\tt BinnedLikelihood::computeModelMap}
+by looping over all source models and by summing up the predicted number of
+counts for a given model:
+\begin{equation}
+N_{\rm pred} = \sum_m N_{\rm pred}^{(m)} .
+\end{equation}
+The predicted number of counts for a given model is computed by
+{\tt BinnedLikelihood::NpredValue}
+which sums the prediction over all energy bins $E_k$:
+\begin{equation}
+N_{\rm pred}^{(m)} = \sum_k N_{\rm pred}^{(m)}(E_k) .
+\end{equation}
+For a given energy bin, $N_{\rm pred}^{(m)}(E_k)$ is computed by 
+{\tt Source::pixelCounts} which implements the Trapezoid rule
+$\int_a^b f(x) dx \approx (b-a) \frac{f(a) + f(b)}{2}$
+to compute the predicted number of counts in a pixel by integrating the
+model prediction over the spectrum:
+\begin{equation}
+N_{\rm pred}^{(m)}(E_k) = \frac{
+I(E_{\rm min}) S^{(m)}(E_k^{\rm min}) + I(E_{\rm max}) S^{(m)}(E_k^{\rm max})}{2} 
+( E_k^{\rm max} - E_k^{\rm min} )
+\end{equation}
+where
+$I(E)$ is the spectral function,
+$S^{(m)}(E_k^{\rm min})$ and $S^{(m)}(E_k^{\rm max})$ are the spatially integrated source
+model $i$ at the energies $E_k^{\rm min}$ and $E_k^{\rm max}$.
+$S^{(m)}(E_k)$ is computed by
+{\tt SourceMap::computeNpredArray}
+which sums the source model over all pixels:
+\begin{equation}
+S^{(m)}(E_k) = \sum_i s^{i,m}(E_k)
+\end{equation}
+where
+$s^{i,m}(E_k)$ are the {\tt srcmap} pixels of model $m$ at energy $E_k$.
+
+The $s^{i,m}$ are computed in the {\tt SourceMap::SourceMap} constructor.
+For a point source, the model is computed using
+\begin{equation}
+s^{i,m}(E_k) = P(\delta, E_k) \, A(E_k) \, \Omega_i \, C(E_k)
+\end{equation}
+where
+$P(\delta, E_k)$ is the point spread function for a given source position and
+a sky pixel at an angular separation of $\delta$ from that position,
+$A(E_k)$ is the exposure,
+$\Omega_i$ is the solid angle of the pixel $i$, and
+$C(E_k)$ is an (optional) correction factor (see {\tt applyPsfCorrections}).
+
+The point spread function for a source at a given location observed in a given
+observation is implemented by {\tt MeanPsf.cxx}.
+In the initialization step of {\tt MeanPsf} two arrays are set up:
+{\tt m\_exposure} (one value for each of the $M$ energy boundaries) and
+{\tt m\_psfValues} (matrix of $N \times M$ values, where $N=200$ and $M$ is
+the number of energy boundaries).
+The {\tt m\_exposure} array stores
+\begin{equation}
+A(E_k) = \sum_r v(\vec{p}, A(E_k, r), E_k)
+\end{equation}
+where 
+$\vec{p}$ is the location of the point source, and
+$r$ is running over the response matrices (e.g. {\tt FRONT} and {\tt BACK}).
+The {\tt m\_psfValues} array stores
+\begin{equation}
+P(\alpha, E_k) = \frac{1}{A(E_k)} \sum_r v(\vec{p}, P(\alpha, E_k, r) \times A(E_k, r), E_k)
+\end{equation}
+where
+$\alpha$ is the logarithmically spaced angular separation from the point
+source direction, an array running from $10^{-4}$ to $70$ in $200$ steps.
+
+The {\tt ExposureCube::value} method returns
+\begin{equation}
+v(\vec{p}, F, E) = \sum_{ij} f^{(1)}(E) X_{ij}^{(1)}(\vec{p}) F_{ij} + f^{(2)}(E) X_{ij}^{(2)}(\vec{p}) F_{ij}
+\end{equation}
+where 
+$f^{(1)}(E)$ and $f^{(2)}(E)$ are the energy dependent lifetime factors,
+$X_{ij}^{(1)}$ and $X_{ij}^{(2)}$ are the {\tt EXPOSURE} and the 
+{\tt WEIGHTED\_EXPOSURE} in the lifetime cube files,
+$F_{ij}$ is an abitrary function,
+$i$ and $j$ are indices that run over $\cos \theta$ and $\phi$,
+$\vec{p}$ is the incident photon direction, and
+$E$ is the energy.
+If no trigger rate and energy-dependent efficiency corrections are
+applied then $f_1=1$ and $f_2=0$, i.e. the weighting is only done
+over the {\tt EXPOSURE} cube:
+\begin{equation}
+v(\vec{p}, F) = \sum_{ij} f^{(1)}(E) X_{ij}^{(1)}(\vec{p}) F_{ij} .
+\end{equation}
+
+The binning of $X_{ij}$ is implemented by the {\tt healpix::CosineBinner} class which
+provides a floating point vector as a set of bins in $\cos \theta$ and $\phi$, the
+$\phi$ dependence being optional.
+Two $\cos \theta$ binning methods are available:
+$\cos \theta_i = 1 - \left( \frac{i+0.5}{N} \right)^2 (1 - \cos \theta_{\rm min})$
+(the default) and
+$\cos \theta_i = 1 - \frac{i+0.5}{N} (1 - \cos \theta_{\rm min})$.
+The $\phi$ binning is given by
+$\phi_j = \frac{\pi}{4} (j+0.5) / M$.
+Typically, $N=40$, $M=15$ and $\cos \theta_{\rm min} = 0$.
+
+The function $F_{ij}$ needs to implement an operator $F(\cos \theta)$ and the
+method $F.integral(\cos \theta, \phi)$.
+Typical examples of $F$ are the effective area $A_{\rm eff}$ and the PSF $PSF$.
+
+
+
+
+
+%% TODO
+
+For a diffuse source, the constructor makes use of
+{\tt WcsMap::diffuseMap} to allocate a diffuse map and
+{\tt WcsMap::convolvedMap} to convolve the map.
+The model pixels are then multiplied by the solid angle of the pixels
+(method {\tt Pixel::solidAngle}).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Solid angle}
+
+The solid angle $\Omega$ of a pixel is computed by the {\tt WcsMap::solidAngle} method
+using
+\begin{equation}
+\Omega = | \Delta l \Delta b |
+\end{equation}
+where
+\begin{eqnarray}
+\Delta l & = & \arccos \left( \sin b_{\rm left} \sin b_{\rm right} + \cos b_{\rm left} \cos b_{\rm right}
+                         \cos ( l_{\rm left} - l_{\rm right} \right) \\
+\Delta b & = & b_{\rm top} - b_{\rm bottom}
+\end{eqnarray}
+(both in radians) and
+$(l,b)_{\rm left} = (i_l-0.5,i_b)$,
+$(l,b)_{\rm right} = (i_l+0.5,i_b)$,
+$(l,b)_{\rm top} = (i_l,i_b-0.5)$, and
+$(l,b)_{\rm bottom} = (i_l,i_b+0.5)$,
+with $(i_l,i_b)$ being the pixel index in longitude and latitude, respectively.
+
+\end{document}
