@@ -121,6 +121,21 @@ GLATException::no_ltcube::no_ltcube(std::string origin, std::string message)
 
 
 /***********************************************************************//**
+ * @brief Invalid response found
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GLATException::invalid_response::invalid_response(std::string origin,
+                                                  std::string message)
+{
+    m_origin  = origin;
+    m_message = "Invalid response encountered. " + message;
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Incompatible source map
  *
  * @param[in] origin Name of method that has thrown the exception.

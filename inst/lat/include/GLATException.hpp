@@ -76,6 +76,10 @@ public:
     public:
         no_ltcube(std::string origin, std::string message = "");
     };
+    class invalid_response : public GLATExceptionHandler {
+    public:
+        invalid_response(std::string origin, std::string message = "");
+    };
     class wcs_incompatible : public GLATExceptionHandler {
     public:
         wcs_incompatible(std::string origin, std::string name,
