@@ -383,7 +383,8 @@ std::vector<std::string> split(const std::string& s, const std::string& sep)
         size_t n     = std::string::npos;
         if (index != std::string::npos)
             n = index-pos;
-        result.push_back(s.substr(pos, n));
+        if (n > 0)
+            result.push_back(s.substr(pos, n));
         pos = (index != std::string::npos) ? index + 1 : std::string::npos;
     } // endwhile: there were still characters in the string
 
