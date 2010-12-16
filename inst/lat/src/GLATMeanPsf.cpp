@@ -17,6 +17,7 @@
 #endif
 #include <cmath>
 #include "GLATMeanPsf.hpp"
+#include "GLATAeff.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -27,6 +28,8 @@
 /* __ Debug definitions __________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
+
+/* __ Typedefs ___________________________________________________________ */
 
 
 /*==========================================================================
@@ -42,6 +45,25 @@ GLATMeanPsf::GLATMeanPsf(void)
 {
     // Initialise class members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief PSF constructor
+ *
+ * @param[in] dir Sky direction.
+ * @param[in] obs LAT observation.
+ ***************************************************************************/
+GLATMeanPsf::GLATMeanPsf(const GSkyDir& dir, const GLATObservation& obs)
+{
+    // Initialise class members
+    init_members();
+
+    // Setup PSF
+    set_psf(dir, obs);
 
     // Return
     return;
@@ -261,23 +283,49 @@ void GLATMeanPsf::set_offsets(void)
 /***********************************************************************//**
  * @brief Compute mean PSF and exposure
  *
+ * @param[in] dir Source location.
  * @param[in] obs LAT observation.
+ *
+ * Computes the mean PSF and the energy dependent exposure for a source at
+ * a given sky location. For the moment the PSF is computed at the
+ * logarithmic mean energies of the energy bins that are extracted from the
+ * LAT observation.
+ *
+ * @todo Implement PSF computation
  ***************************************************************************/
-void GLATMeanPsf::set_psf(const GLATObservation& obs)
+void GLATMeanPsf::set_psf(const GSkyDir& dir, const GLATObservation& obs)
 {
-    // Clear PSF and exposure arrays
+    // Clear PSF, exposure and energy arrays
     m_psf.clear();
     m_exposure.clear();
+    m_energy.clear();
 
     // Allocate room for arrays
     m_psf.reserve(size());
     m_exposure.reserve(m_energy.size());
 
+    // Set energies
+    GEbounds* ebds = ((GLATObservation*)&obs)->ebounds();
+    if (ebds != NULL) {
+        m_energy.reserve(ebds->size());
+        for (int i = 0; i < ebds->size(); ++i)
+            m_energy.push_back(ebds->elogmean(i));
+    }
+
+    // Get pointer on response
+    GLATResponse* rsp    = obs.response();
+    GLATLtCube*   ltcube = obs.ltcube();
+
     // Loop over energies
     for (int ieng = 0; ieng < m_energy.size(); ++ieng) {
 
-        // Compute exposure
+        // Compute exposure by looping over the responses
         double exposure = 0.0;
+        for (int i = 0; i < rsp->size(); ++i) {
+            GLATAeff* aeff = rsp->aeff(i);
+            aeff->ltcube_energy(m_energy[ieng]);
+            exposure += (*ltcube)(dir, m_energy[ieng], *aeff);
+        }
 
         // Set exposure
         m_exposure.push_back(exposure);
