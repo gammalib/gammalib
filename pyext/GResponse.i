@@ -34,42 +34,21 @@ public:
     virtual ~GResponse(void);
 
     // Pure virtual methods
-    virtual void        clear(void) = 0;
-    virtual GResponse*  clone(void) const = 0;
-    virtual void        load(const std::string& irfname) = 0;
-    virtual bool        hasedisp(void) const = 0;
-    virtual bool        hastdisp(void) const = 0;
-
-    // Reponse function computation methods
-    virtual double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                       const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                       const GPointing& pnt) const = 0;
-    virtual double diffrsp(const GEvent& event, const GModel& model,
-                           const GEnergy& srcEng, const GTime& srcTime,
-                           const GPointing& pnt) const;
-    virtual double live(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                        const GPointing& pnt) const = 0;
-    //virtual double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-    //                    const GPointing& pnt) const = 0;
-    virtual double psf(const GInstDir& obsDir,
-                       const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                       const GPointing& pnt) const = 0;
-    virtual double edisp(const GEnergy& obsEng,
-                         const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                         const GPointing& pnt) const = 0;
-    virtual double tdisp(const GTime& obsTime,
-                         const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                         const GPointing& pnt) const = 0;
-    virtual double nirf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                        const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
-                        const GGti& gti) const = 0;
-    virtual double npsf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                        const GPointing& pnt, const GRoi& roi) const = 0;
-    virtual double nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                          const GPointing& pnt, const GEbounds& ebds) const;
-    virtual double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                          const GPointing& pnt, const GGti& gti) const;
-
+    virtual void       clear(void) = 0;
+    virtual GResponse* clone(void) const = 0;
+    virtual void       load(const std::string& irfname) = 0;
+    virtual bool       hasedisp(void) const = 0;
+    virtual bool       hastdisp(void) const = 0;
+    virtual double     irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                           const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                           const GPointing& pnt) const = 0;
+    virtual double     nirf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                            const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
+                            const GGti& gti) const = 0;
+    virtual double     diffrsp(const GEvent& event, const GModel& model,
+                               const GEnergy& srcEng, const GTime& srcTime,
+                               const GPointing& pnt) const;
+    
     // Other methods
     virtual void        caldb(const std::string& caldb);
     virtual std::string caldb(void) const { return m_caldb; }

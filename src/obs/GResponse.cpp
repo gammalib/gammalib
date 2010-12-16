@@ -222,6 +222,7 @@ double GResponse::nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
  * @param[in] pnt Instrument pointing information.
  * @param[in] ebds Energy boundaries of data selection.
  ***************************************************************************/
+/*
 double GResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
                          const GTime& srcTime, const GPointing& pnt,
                          const GEbounds& ebds) const
@@ -232,7 +233,7 @@ double GResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
     // Return integral
     return nedisp;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Return time dispersion integral for the case of no time dispersion
@@ -243,6 +244,7 @@ double GResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
  * @param[in] pnt Instrument pointing information.
  * @param[in] gti Good Time Intervals of data selection.
  ***************************************************************************/
+/*
 double GResponse::ntdisp(const GSkyDir& srcDir, const GEnergy& srcEng,
                          const GTime& srcTime, const GPointing& pnt,
                          const GGti& gti) const
@@ -253,7 +255,7 @@ double GResponse::ntdisp(const GSkyDir& srcDir, const GEnergy& srcEng,
     // Return integral
     return ntdisp;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Set the path to the calibration database.

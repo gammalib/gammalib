@@ -54,29 +54,28 @@ public:
                 const GTime& srcTime, const GPointing& pnt) const;
     //double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
     //            const GPointing& pnt) const;
-    double psf(const GInstDir& obsDir,
-               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-               const GPointing& pnt) const;
-    double edisp(const GEnergy& obsEng,
-                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                 const GPointing& pnt) const;
-    double tdisp(const GTime& obsTime,
-                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                 const GPointing& pnt) const;
+    //double psf(const GInstDir& obsDir,
+    //           const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+    //           const GPointing& pnt) const;
+    //double edisp(const GEnergy& obsEng,
+    //             const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+    //             const GPointing& pnt) const;
+    //double tdisp(const GTime& obsTime,
+    //             const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+    //             const GPointing& pnt) const;
     double npsf(const GSkyDir&  srcDir, const GEnergy& srcEng,
                 const GTime& srcTime, const GPointing& pnt, const GRoi& roi) const;
     double nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
                   const GTime& srcTime, const GPointing& pnt, const GEbounds& ebds) const;
-    double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                  const GTime& srcTime, const GPointing& pnt, const GGti& gti) const;
+    //double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
+    //              const GTime& srcTime, const GPointing& pnt, const GGti& gti) const;
 
     // Other Methods
-    //double        aeff(const double& logE, const double& ctheta);
-    //void          aeff_ctheta_min(const double& ctheta);
-    //double        aeff_ctheta_min(void) const;
-    double        psf(const double& delta, const double& logE, const double& ctheta);
-    GVector       psf(const GVector& delta, const double& logE, const double& ctheta);
-    void          save(const std::string& rspname) const;
+    int        size(void) const { return m_aeff.size(); }
+    GLATAeff*  aeff(const int& index) const;
+    GLATPsf*   psf(const int& index) const;
+    GLATEdisp* edisp(const int& index) const;
+    void       save(const std::string& rspname) const;
 };
 
 
