@@ -62,6 +62,9 @@ public:
     GLATAeff*    clone(void) const;
     void         load(const std::string filename);
     void         read(const GFits* file);
+    int          size(void) const { return nenergies()*ncostheta(); }
+    int          nenergies(void) const { return m_aeff_bins.nenergies(); }
+    int          ncostheta(void) const { return m_aeff_bins.ncostheta(); }
     double       costhetamin(void) const { return m_min_ctheta; }
     void         costhetamin(const double& ctheta);
     void         ltcube_energy(const GEnergy& energy);
@@ -78,7 +81,7 @@ private:
     void read_aeff(const GFitsTable* hdu);
     
     // Protected members
-    GLATResponseTable m_table;          //!< Aeff energy and cos theta binning
+    GLATResponseTable m_aeff_bins;      //!< Aeff energy and cos theta binning
     double*           m_aeff;           //!< Aeff array
     double            m_min_ctheta;     //!< Minimum valid cos(theta)
     double            m_ltcube_logE;    //!< log10 energy for ltcube methods

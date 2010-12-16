@@ -20,15 +20,11 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <iostream>
 #include "GLATAeff.hpp"
+#include "GLATException.hpp"
 #include "GTools.hpp"
 #include "GFitsTableCol.hpp"
 #include "GException.hpp"
-#include "GLATException.hpp"
-//#include "GLATResponse.hpp"
-//#include "GLATPointing.hpp"
-//#include "GFitsImageDouble.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                            "GLATAeff::read(const GFits* file)"
@@ -157,7 +153,7 @@ double GLATAeff::operator() (const double& logE, const double& ctheta)
 {
     // Get effective area value
     double aeff = (ctheta >= m_min_ctheta) 
-                  ? m_table.interpolate(logE, ctheta, m_aeff) : 0.0;
+                  ? m_aeff_bins.interpolate(logE, ctheta, m_aeff) : 0.0;
 
     // Return effective area value
     return aeff;
@@ -334,7 +330,8 @@ std::string GLATAeff::print(void) const
 
     // Append header
     result.append("=== GLATAeff ===");
-    result.append("\n"+m_table.print());
+    result.append("\n"+parformat("Number of energy bins")+str(nenergies()));
+    result.append("\n"+parformat("Number of cos theta bins")+str(ncostheta()));
 
     // Return result
     return result;
@@ -353,7 +350,7 @@ std::string GLATAeff::print(void) const
 void GLATAeff::init_members(void)
 {
     // Initialise members
-    m_table.clear();
+    m_aeff_bins.clear();
     m_aeff       = NULL;
     m_min_ctheta = 0.0;
 
@@ -370,12 +367,12 @@ void GLATAeff::init_members(void)
 void GLATAeff::copy_members(const GLATAeff& aeff)
 {
     // Copy attributes
-    m_table      = aeff.m_table;
+    m_aeff_bins  = aeff.m_aeff_bins;
     m_min_ctheta = aeff.m_min_ctheta;
 
     // Copy effective area array
     if (aeff.m_aeff != NULL) {
-        int size = m_table.size();
+        int size = m_aeff_bins.size();
         if (size > 0) {
             m_aeff = new double[size];
             for (int i = 0; i < size; ++i)
@@ -419,19 +416,20 @@ void GLATAeff::free_members(void)
 void GLATAeff::read_aeff(const GFitsTable* hdu)
 {
     // Get energy and cos theta bins in response table
-    m_table.read(hdu);
+    m_aeff_bins.read(hdu);
 
     // Set minimum cos(theta)
-    m_min_ctheta = m_table.costheta_lo(0);
+    m_min_ctheta = m_aeff_bins.costheta_lo(0);
 
     // Continue only if there are effective area bins
-    if (m_table.size() > 0) {
+    int size = m_aeff_bins.size();
+    if (size > 0) {
 
         // Free effective area memory
         if (m_aeff != NULL) delete [] m_aeff;
 
         // Allocate memory for effective area
-        m_aeff = new double[m_table.size()];
+        m_aeff = new double[size];
 
         // Get pointer to effective area column
         GFitsTableCol* ptr = ((GFitsTable*)hdu)->column("EFFAREA");
@@ -440,16 +438,54 @@ void GLATAeff::read_aeff(const GFitsTable* hdu)
 
         // Check consistency of effective area table
         int num = ptr->number();
-        if (num != m_table.size())
-            throw GLATException::inconsistent_response(G_READ_AEFF, num,
-                                                       m_table.size());
+        if (num != size)
+            throw GLATException::inconsistent_response(G_READ_AEFF, num, size);
 
         // Copy data and convert from m2 into cm2
-        for (int i = 0; i < num; ++i)
+        for (int i = 0; i < size; ++i)
             m_aeff[i] = ptr->real(0,i) * 1.0e4;
 
     } // endif: there were effective area bins
 
     // Return
     return;
+}
+
+
+
+/*==========================================================================
+ =                                                                         =
+ =                                 Friends                                 =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] aeff Effective area.
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GLATAeff& aeff)
+{
+     // Write effective area in output stream
+    os << aeff.print();
+
+    // Return output stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] aeff Effective area.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GLATAeff& aeff)
+{
+    // Write effective area into logger
+    log << aeff.print();
+
+    // Return logger
+    return log;
 }
