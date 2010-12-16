@@ -20,6 +20,7 @@
 #define GENERGY_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include <iostream>
 #include "GLog.hpp"
 
@@ -32,7 +33,10 @@
  * The GEnergy class stores an energy value in units of MeV and implements
  * methods that provide automatic conversion of the energy values in other
  * units. This makes instrument specific implementations more robust and
- * reduces the risk of unit errors.
+ * reduces the risk of unit errors. The method also holds on request the
+ * log10 of the energy in MeV, which is only recomputed when the energy
+ * value is changed. This considerably reduces the number of log10 operations
+ * in many applications and speeds up the performance.
  ***************************************************************************/
 class GEnergy {
 
@@ -57,7 +61,7 @@ public:
     // Constructors and destructors
     GEnergy(void);
     GEnergy(const GEnergy& eng);
-    ~GEnergy(void);
+    virtual ~GEnergy(void);
  
     // Operators
     GEnergy& operator= (const GEnergy& eng);
@@ -65,17 +69,19 @@ public:
     GEnergy& operator-= (const GEnergy& eng);
 
     // Methods
-    void        clear(void) { m_energy = 0.0; }
+    void        clear(void);
     double      erg(void) const;
     double      keV(void) const;
     double      MeV(void) const;
     double      GeV(void) const;
     double      TeV(void) const;
+    double      log10MeV(void) const;
     void        erg(const double& eng);
     void        keV(const double& eng);
     void        MeV(const double& eng);
     void        GeV(const double& eng);
     void        TeV(const double& eng);
+    void        log10MeV(const double& eng);
     std::string print(void) const;
   
 protected:
@@ -85,7 +91,9 @@ protected:
     void free_members(void);
 
     // Protected data members
-    double m_energy;          //!< Energy in MeV
+    double m_energy;        //!< Energy in MeV
+    double m_elog10;        //!< log10 of energy in MeV
+    bool   m_has_log10;     //!< log10 of energy is valid
 };
 
 /***************************************************************************
@@ -94,13 +102,15 @@ protected:
 inline
 GEnergy& GEnergy::operator+= (const GEnergy& eng)
 {
-    m_energy += eng.m_energy;
+    m_energy    += eng.m_energy;
+    m_has_log10  = false;
     return *this;
 }
 inline
 GEnergy& GEnergy::operator-= (const GEnergy& eng)
 {
-    m_energy += eng.m_energy;
+    m_energy     += eng.m_energy;
+    m_has_log10  = false;
     return *this;
 }
 inline

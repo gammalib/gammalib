@@ -20,6 +20,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cfloat>
+#include <cmath>
 #include "GEnergy.hpp"
 #include "GTools.hpp"
 
@@ -45,7 +47,7 @@
  ***************************************************************************/
 GEnergy::GEnergy(void)
 {
-    // Initialise private members for clean destruction
+    // Initialise private members
     init_members();
   
     // Return
@@ -56,11 +58,11 @@ GEnergy::GEnergy(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] eng Object from which the instance should be built.
+ * @param[in] eng Energy.
  ***************************************************************************/
 GEnergy::GEnergy(const GEnergy& eng)
 { 
-    // Initialise private members for clean destruction
+    // Initialise private members
     init_members();
 
     // Copy members
@@ -86,14 +88,14 @@ GEnergy::~GEnergy(void)
 
 /*==========================================================================
  =                                                                         =
- =                                Operators                                =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] eng Object which should be assigned.
+ * @param[in] eng Energy.
  ***************************************************************************/
 GEnergy& GEnergy::operator= (const GEnergy& eng)
 { 
@@ -121,6 +123,21 @@ GEnergy& GEnergy::operator= (const GEnergy& eng)
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear instance
+ ***************************************************************************/
+void GEnergy::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise private members
+    init_members();
+    
+    // Return
+    return; 
+}
 
 /***********************************************************************//**
  * @brief Return energy in erg
@@ -185,6 +202,29 @@ double GEnergy::TeV(void) const
 
 
 /***********************************************************************//**
+ * @brief Return log10 of energy in MeV
+ *
+ * Returns the log10 of the energy in MeV. The result is stored internally
+ * and not recomputed when the method is called again with the same energy
+ * value. This speeds up computation. In case that the energy is not positive
+ * the method returns DBL_MIN.
+ ***************************************************************************/
+double GEnergy::log10MeV(void) const
+{
+    // If required compute log10 of energy. Circumvent const correctness
+    // as we don't want to show to the client that members of the instance
+    // have been changed.
+    if (!m_has_log10) {
+        ((GEnergy*)this)->m_elog10    = (m_energy > 0.0) ? log10(m_energy) : DBL_MIN;
+        ((GEnergy*)this)->m_has_log10 = true;
+    }
+    
+    // Return log10 energy
+    return m_elog10; 
+}
+
+
+/***********************************************************************//**
  * @brief Set energy in erg
  *
  * @param[in] energy Energy in erg.
@@ -193,7 +233,10 @@ void GEnergy::erg(const double& eng)
 {
     // Set energy
     m_energy = eng * erg2MeV;
-    
+
+    // Signals that log10 of energy is not valid
+    m_has_log10 = false;
+
     // Return
     return;
 }
@@ -209,6 +252,9 @@ void GEnergy::keV(const double& eng)
     // Set energy
     m_energy = eng * 1.0e-3;
     
+    // Signals that log10 of energy is not valid
+    m_has_log10 = false;
+
     // Return
     return;
 }
@@ -224,6 +270,9 @@ void GEnergy::MeV(const double& eng)
     // Set energy
     m_energy = eng;
     
+    // Signals that log10 of energy is not valid
+    m_has_log10 = false;
+
     // Return
     return;
 }
@@ -239,6 +288,9 @@ void GEnergy::GeV(const double& eng)
     // Set energy
     m_energy = eng * 1.0e+3;
     
+    // Signals that log10 of energy is not valid
+    m_has_log10 = false;
+
     // Return
     return;
 }
@@ -253,6 +305,26 @@ void GEnergy::TeV(const double& eng)
 {
     // Set energy
     m_energy = eng * 1.0e+6;
+    
+    // Signals that log10 of energy is not valid
+    m_has_log10 = false;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set log10 of energy in MeV
+ *
+ * @param[in] energy log10 of energy in MeV.
+ ***************************************************************************/
+void GEnergy::log10MeV(const double& eng)
+{
+    // Set energy
+    m_elog10    = eng;
+    m_energy    = pow(10.0, eng);
+    m_has_log10 = true;
     
     // Return
     return;
@@ -294,7 +366,9 @@ std::string GEnergy::print(void) const
 void GEnergy::init_members(void)
 {
     // Initialise members
-    m_energy = 0.0;
+    m_energy    = 0.0;
+    m_elog10    = DBL_MIN;
+    m_has_log10 = false;
   
     // Return
     return;
@@ -304,12 +378,14 @@ void GEnergy::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] eng Object from which members which should be copied.
+ * @param[in] eng Energy.
  ***************************************************************************/
 void GEnergy::copy_members(const GEnergy& eng)
 {
     // Copy time
-    m_energy = eng.m_energy;
+    m_energy    = eng.m_energy;
+    m_elog10    = eng.m_elog10;
+    m_has_log10 = eng.m_has_log10;
     
     // Return
     return;
