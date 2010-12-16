@@ -29,16 +29,17 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string lat_caldb  = "../inst/lat/test/irf";
-const std::string lat_irf    = "Pass5_v0";
-const std::string lat_ft1    = "../inst/lat/test/data/ft1.fits";
-const std::string lat_ft2    = "../inst/lat/test/data/ft2.fits";
-const std::string lat_cntmap = "../inst/lat/test/data/cntmap.fits";
-const std::string lat_srcmap = "../inst/lat/test/data/srcmap.fits";
-const std::string lat_expmap = "../inst/lat/test/data/binned_expmap.fits";
-const std::string lat_ltcube = "../inst/lat/test/data/ltcube.fits";
-const std::string lat_xml    = "../inst/lat/test/data/source_model3.xml";
-const double      twopi      =  6.283185307179586476925286766559005768394;
+const std::string lat_caldb      = "../inst/lat/test/irf";
+const std::string lat_irf        = "Pass5_v0";
+const std::string lat_ft1        = "../inst/lat/test/data/ft1.fits";
+const std::string lat_ft2        = "../inst/lat/test/data/ft2.fits";
+const std::string lat_cntmap     = "../inst/lat/test/data/cntmap.fits";
+const std::string lat_srcmap     = "../inst/lat/test/data/srcmap.fits";
+const std::string lat_expmap     = "../inst/lat/test/data/binned_expmap.fits";
+const std::string lat_ltcube     = "../inst/lat/test/data/ltcube.fits";
+const std::string lat_ltcube_phi = "../inst/lat/test/data/ltcube_phi02.fits";
+const std::string lat_xml        = "../inst/lat/test/data/source_model3.xml";
+const double      twopi          =  6.283185307179586476925286766559005768394;
 
 
 /***********************************************************************//**
@@ -49,15 +50,21 @@ void test_response(void)
     // Remove FITS file
     system("rm -rf test_rsp.fits");
 
+    // Write header
     std::cout << "Test response: ";
+
+    // Try loading
     try {
-        // Load response
         GLATResponse rsp;
         rsp.caldb(lat_caldb);
+        std::cout << ".";
         rsp.load(lat_irf+"::front");
-
-        // Save response
-        rsp.save("test_rsp.fits");
+        std::cout << ".";
+        rsp.load(lat_irf+"::back");
+        std::cout << ".";
+        rsp.load(lat_irf);
+//std::cout << std::endl << rsp << std::endl;
+        std::cout << ".";
     }
     catch (std::exception &e) {
         std::cout << std::endl
@@ -65,7 +72,25 @@ void test_response(void)
         std::cout << e.what() << std::endl;
         throw;
     }
-    std::cout << ". ok." << std::endl;
+    std::cout << ".";
+
+    // Try saving
+    try {
+        GLATResponse rsp;
+        rsp.caldb(lat_caldb);
+        rsp.load(lat_irf);
+        rsp.save("test_rsp.fits");
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to save LAT response." << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Plot final test success
+    std::cout << " ok." << std::endl;
 
     // Return
     return;
@@ -82,7 +107,7 @@ double test_fct1(const double& ctheta)
 }
 double test_fct2(const double& ctheta, const double& phi)
 {
-    std::cout << "(" << ctheta << "," << phi << ")" << " ";
+    //std::cout << "(" << ctheta << "," << phi << ")" << " ";
     return 1.0;
 }
 
@@ -94,11 +119,12 @@ void test_ltcube(void)
 {
     // Set filenames
     const std::string file1 = "test_lat_ltcube.fits";
+    const std::string file2 = "test_lat_ltcube_phi.fits";
 
     // Write header
     std::cout << "Test livetime cube: ";
 
-    // Load livetime cube
+    // Load livetime cube (no phi dependence)
     try {
         // Load livetime cube
         GLATLtCube ltcube(lat_ltcube);
@@ -112,39 +138,42 @@ void test_ltcube(void)
     }
     std::cout << ".";
 
-    // Test operators
+    // Load livetime cube (no phi dependence)
     try {
         // Load livetime cube
-        GLATLtCube ltcube(lat_ltcube);
+        GLATLtCube ltcube(lat_ltcube_phi);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to load phi-dependent LAT livetime cube."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test operators (no phi dependence)
+    try {
+        // Load livetime cube
+        //GLATLtCube ltcube(lat_ltcube);
+        GLATLtCube ltcube(lat_ltcube_phi);
 
         // Initialise sky direction and energy
         GSkyDir dir;
         GEnergy energy;
 
         // Test cos theta integration operator. The total ontime of the dataset is
-        // 604768.0 sec, hence the efficiency is 41%. This seems reasonable as the
+        // 811432.0 sec, hence the efficiency is 42%. This seems reasonable as the
         // test function returns 1 for half of the sky.
         double sum = ltcube(dir, energy, test_fct1);
-        if (fabs(sum-247712.0724) > 0.001) {
+//        if (fabs(sum-247712.0724) > 0.001) {
+        if (fabs(sum-339334.6556) > 0.001) {
             std::cout << std::endl
-                      << "TEST ERROR: Invalid livetime cube sum (expected 247712.0724,"
-                      << " found " << sum
+                      << "TEST ERROR: Invalid livetime cube sum (expected 339334.6556,"
+                      << " encountered difference " << sum-339334.6556
                       << std::endl;
             throw;
         }
-        std::cout << ".";
-
-        // Test cos theta and phi integration operator. We expect a sum of 0.0 since
-        // the actual file has no phi dependence
-        sum = ltcube(dir, energy, test_fct2);
-        if (fabs(sum-0.0) > 0.001) {
-            std::cout << std::endl
-                      << "TEST ERROR: Invalid livetime cube sum (expected 0.0,"
-                      << " found " << sum
-                      << std::endl;
-            throw;
-        }
-        std::cout << ".";
     }
     catch (std::exception &e) {
         std::cout << std::endl
@@ -155,13 +184,44 @@ void test_ltcube(void)
     }
     std::cout << ".";
 
-    // Create livetime skymap
+    // Test operators (phi dependence)
+    try {
+        // Load livetime cube
+        GLATLtCube ltcube(lat_ltcube_phi);
+        //std::cout << ltcube << std::endl;
+
+        // Initialise sky direction and energy
+        GSkyDir dir;
+        GEnergy energy;
+
+        // Test cos theta and phi integration operator. The sum differs from above
+        // since the actual test dataset does not cover the same time interval
+        double sum = ltcube(dir, energy, test_fct2);
+        if (fabs(sum-339334.6641) > 0.001) {
+            std::cout << std::endl
+                      << "TEST ERROR: Invalid livetime cube sum (expected 339334.6641,"
+                      << " encountered difference " << sum-339334.6641
+                      << std::endl;
+            throw;
+        }
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to access phi-dependent LAT livetime cube."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Create livetime skymap (no phi dependence)
     try {
         // Allocate skymap
         GSkymap map("HPX", "GAL", 64, "RING", 1);
         
         // Load livetime cube
-        GLATLtCube ltcube(lat_ltcube);
+//        GLATLtCube ltcube(lat_ltcube);
+        GLATLtCube ltcube(lat_ltcube_phi);
 
         // Create livetime skymap
         GEnergy energy;
@@ -177,6 +237,34 @@ void test_ltcube(void)
     catch (std::exception &e) {
         std::cout << std::endl
                   << "TEST ERROR: Unable to build LAT livetime cube skymap."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Create livetime skymap (phi dependence)
+    try {
+        // Allocate skymap
+        GSkymap map("HPX", "GAL", 64, "RING", 1);
+        
+        // Load livetime cube
+        GLATLtCube ltcube(lat_ltcube_phi);
+
+        // Create livetime skymap
+        GEnergy energy;
+        for (int i = 0; i < map.npix(); ++i) {
+            GSkyDir dir = map.pix2dir(i);
+            map(i) = ltcube(dir, energy, test_fct2);
+        }
+
+        // Save skymap
+        map.save(file2, true);
+
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to build phi-dependent LAT livetime cube skymap."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -380,6 +468,27 @@ void test_binned_obs(void)
     }
     std::cout << ".";
 
+    // Test mean PSF
+    try {
+        // Load obervation
+        run.load_binned(lat_srcmap, lat_expmap, lat_ltcube);
+        run.response(lat_irf,lat_caldb);
+
+        // Initialise sky direction
+        GSkyDir dir;
+
+        // Set mean PSF
+        GLATMeanPsf psf(dir, run);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to setup mean LAT PSF."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
     // Plot final test success
     std::cout << " ok." << std::endl;
 
@@ -401,7 +510,7 @@ void test_binned_optimizer(void)
     GObservations   obs;
     GLATObservation run;
     try {
-        run.load_binned(lat_srcmap, lat_expmap, lat_expmap);
+        run.load_binned(lat_srcmap, lat_expmap, lat_ltcube);
         obs.append(run);
     }
     catch (std::exception &e) {
