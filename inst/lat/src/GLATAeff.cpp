@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GLATAeff.cpp  -  GLAST LAT Response class Aeff methods         *
+ *                 GLATAeff.cpp  -  Fermi LAT effective area               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATAeff.cpp
- * @brief GLATResponse class effective area implementation.
+ * @brief Fermi LAT effective area class definition.
  * @author J. Knodlseder
  */
 
@@ -20,16 +20,19 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
+//#include <iostream>
+#include "GLATAeff.hpp"
 #include "GTools.hpp"
+#include "GFitsTableCol.hpp"
 #include "GException.hpp"
-#include "GLATResponse.hpp"
-#include "GLATPointing.hpp"
-#include "GFitsBinTable.hpp"
-#include "GFitsImageDouble.hpp"
+#include "GLATException.hpp"
+//#include "GLATResponse.hpp"
+//#include "GLATPointing.hpp"
+//#include "GFitsImageDouble.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_INIT_AEFF                               "GLATResponse::init_aeff()"
+#define G_READ                            "GLATAeff::read(const GFits* file)"
+#define G_READ_AEFF                        "GLATAeff::read_aeff(GFitsTable*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -42,25 +45,104 @@
 
 /*==========================================================================
  =                                                                         =
- =                             Public methods                              =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return effective area (units: cm2).
- *
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Pointer to instrument pointing information.
- *
- * @todo Needs to be implemented.
+ * @brief Void constructor
  ***************************************************************************/
-double GLATResponse::aeff(const GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime, const GPointing& pnt) const
+GLATAeff::GLATAeff(void)
 {
-    // Return Aeff value
-    return 1.0;
+    // Initialise class members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief File constructor
+ *
+ * @param[in] filename FITS file name.
+ *
+ * Construct instance by loading the effective area information from FITS
+ * file.
+ ***************************************************************************/
+GLATAeff::GLATAeff(const std::string filename)
+{
+    // Initialise class members
+    init_members();
+
+    // Load effective area from file
+    load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] aeff Effective area.
+ ***************************************************************************/
+GLATAeff::GLATAeff(const GLATAeff& aeff)
+{
+    // Initialise class members
+    init_members();
+
+    // Copy members
+    copy_members(aeff);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Destructor
+ ***************************************************************************/
+GLATAeff::~GLATAeff(void)
+{
+    // Free members
+    free_members();
+
+    // Return
+    return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                               Operators                                 =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param[in] aeff Effective area.
+ ***************************************************************************/
+GLATAeff& GLATAeff::operator= (const GLATAeff& aeff)
+{
+    // Execute only if object is not identical
+    if (this != &aeff) {
+
+        // Free members
+        free_members();
+
+        // Initialise private members
+        init_members();
+
+        // Copy members
+        copy_members(aeff);
+
+    } // endif: object was not identical
+
+    // Return this object
+    return *this;
 }
 
 
@@ -71,14 +153,109 @@ double GLATResponse::aeff(const GSkyDir& srcDir, const GEnergy& srcEng,
  * @param[in] ctheta Cosine of the zenith angle with respect to the pointing 
  *            axis.
  ***************************************************************************/
-double GLATResponse::aeff(const double& logE, const double& ctheta)
+double GLATAeff::operator() (const double& logE, const double& ctheta)
 {
     // Get effective area value
-    double aeff = (ctheta >= m_aeff_ctheta_min) 
-                  ? m_aeff_bins.interpolate(logE, ctheta, m_aeff) : 0.0;
+    double aeff = (ctheta >= m_min_ctheta) 
+                  ? m_table.interpolate(logE, ctheta, m_aeff) : 0.0;
 
     // Return effective area value
     return aeff;
+}
+
+
+/***********************************************************************//**
+ * @brief Return effective area (units: cm2).
+ *
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Instrument pointing.
+ *
+ * @todo Not yet implemented.
+ ***************************************************************************/
+double GLATAeff::operator() (const GSkyDir& srcDir, const GEnergy& srcEng,
+                             const GTime& srcTime, const GLATPointing& pnt)
+{
+    // Return Aeff value
+    return 1.0;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                             Public methods                              =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GLATAeff::clear(void)
+{
+    // Free class members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+***************************************************************************/
+GLATAeff* GLATAeff::clone(void) const
+{
+    return new GLATAeff(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Load effective area from FITS file
+ *
+ * @param[in] filename FITS file.
+ ***************************************************************************/
+void GLATAeff::load(const std::string filename)
+{
+    // Open FITS file
+    GFits fits(filename);
+
+    // Read effective area from file
+    read(&fits);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read effective area from FITS file
+ *
+ * @param[in] fits FITS file pointer.
+ *
+ * @exception GException::fits_hdu_not_found
+ *            Effective area HDU not found in FITS file
+ ***************************************************************************/
+void GLATAeff::read(const GFits* fits)
+{
+    // Clear instance
+    clear();
+
+    // Get pointer to effective area HDU
+    GFitsTable* hdu_aeff = fits->table("EFFECTIVE AREA");
+    if (hdu_aeff == NULL)
+        throw GException::fits_hdu_not_found(G_READ, "EFFECTIVE AREA");
+
+    // Read effective area
+    read_aeff(hdu_aeff);
+
+    // Return
+    return;
 }
 
 
@@ -88,10 +265,10 @@ double GLATResponse::aeff(const double& logE, const double& ctheta)
  * @param[in] ctheta Cosine of the maximum zenith angle for which effective
  *                   areas will be returned (0 is returned for larger values)
  ***************************************************************************/
-void GLATResponse::aeff_ctheta_min(const double& ctheta)
+void GLATAeff::costhetamin(const double& ctheta)
 {
     // Set minimum cos(theta) value
-    m_aeff_ctheta_min = ctheta;
+    m_min_ctheta = ctheta;
 
     // Return
     return;
@@ -99,12 +276,68 @@ void GLATResponse::aeff_ctheta_min(const double& ctheta)
 
 
 /***********************************************************************//**
- * @brief Get minimum cos(theta) angle for effective area access
+ * @brief Set livetime cube energy
+ *
+ * @param[in] energy Livetime cube energy.
+ *
+ * The livetime cube energy is used by the ltcube_ctheta() and
+ * ltcube_ctheta_phi() methods that need an energy. Since we cannot pass
+ * the energy as a method parameter we save it as a member of the class
+ * so that it is avaible to the methods.
  ***************************************************************************/
-double GLATResponse::aeff_ctheta_min(void) const
+void GLATAeff::ltcube_energy(const GEnergy& energy)
 {
-    // Return minimum cos(theta) value
-    return m_aeff_ctheta_min;
+    // Set energy
+    m_ltcube_logE = log10(energy.MeV());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns the effective area as function of cos(theta) for the
+ *        livetime cube energy
+ *
+ * @param[in] costheta Cosine of zenith angle.
+ ***************************************************************************/
+double GLATAeff::ltcube_ctheta(const double& costheta)
+{
+    // Return
+    return (*this)(m_ltcube_logE, costheta);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns the effective area as function of cos(theta) for the
+ *        livetime cube energy
+ *
+ * @param[in] costheta Cosine of zenith angle.
+ * @param[in] phi Azimuth angle.
+ *
+ * @todo Not yet implemented.
+ ***************************************************************************/
+double GLATAeff::ltcube_ctheta_phi(const double& costheta, const double& phi)
+{
+    // Return
+    return (*this)(m_ltcube_logE, costheta);
+}
+
+
+/***********************************************************************//**
+ * @brief Print effective area information
+ ***************************************************************************/
+std::string GLATAeff::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GLATAeff ===");
+    result.append("\n"+m_table.print());
+
+    // Return result
+    return result;
 }
 
 
@@ -115,93 +348,14 @@ double GLATResponse::aeff_ctheta_min(void) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Initialise effective area
- *
- * The effective area is converted into units of cm2.
- ***************************************************************************/
-void GLATResponse::aeff_init(void)
-{
-    // Build filename
-    std::string filename = "aeff_"  + m_rspname + "_" + m_rsptype + ".fits";
-
-    // Open FITS file
-    GFits file;
-    file.open(m_caldb + "/" + filename);
-
-    // Get pointer to effective area HDU
-    GFitsTable* hdu = (GFitsTable*)file.hdu("EFFECTIVE AREA");
-    if (hdu == NULL)
-        throw GException::fits_hdu_not_found(G_INIT_AEFF, "EFFECTIVE AREA");
-
-    // Get the energy and cos(theta) bins
-    m_aeff_bins.read(hdu);
-
-    // Allocate memory for effective area
-    int size = m_aeff_bins.num_energy() * m_aeff_bins.num_ctheta();
-    if (size > 0)
-        m_aeff = new double[size];
-
-    // Get pointer to effective area column
-    GFitsTableCol* ptr = hdu->column("EFFAREA");
-    if (ptr == NULL)
-        throw GException::fits_column_not_found(G_INIT_AEFF, "EFFAREA");
-
-    // Copy data and convert from m2 into cm2
-    int num = ptr->number();
-    for (int i = 0; i < num; ++i)
-        m_aeff[i] = ptr->real(0,i) * 1.0e4;
-
-    // Set minimum cos(theta)
-    m_aeff_ctheta_min = m_aeff_bins.ctheta_lo(0);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Append Aeff HDUs tu FOTS file
- *
- * @param[in] file FITS file into which the Aeff HDUs will be appended
- *
- * Append 2 HDUs to the FITS file:
- * ABOUNDS (Aeff energy and zenith angle boundaries)
- * AEFF (Aeff array)
- ***************************************************************************/
-void GLATResponse::aeff_append(GFits& file) const
-{
-    // Get Aeff boundary table
-    GFitsBinTable* hdu_bounds = new GFitsBinTable;
-    hdu_bounds->extname("ABOUNDS");
-    m_aeff_bins.write(hdu_bounds);
-
-    // Build effective area image
-    int               naxes[]  = {m_aeff_bins.num_energy(), m_aeff_bins.num_ctheta()};
-    GFitsImageDouble* hdu_aeff = new GFitsImageDouble(2, naxes, m_aeff);
-
-    // Construct effective area HDU
-    hdu_aeff->extname("AEFF");
-    hdu_aeff->header()->update(GFitsHeaderCard("CTYPE1", "Energy", "Energy binning"));
-    hdu_aeff->header()->update(GFitsHeaderCard("CTYPE2", "cos(theta)", "cos(theta) binning"));
-    hdu_aeff->header()->update(GFitsHeaderCard("BUNIT", "cm2", "Pixel unit"));
-
-    // Append HDUs to FITS file
-    file.append(hdu_bounds);
-    file.append(hdu_aeff);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GLATResponse::aeff_init_members(void)
+void GLATAeff::init_members(void)
 {
-    // Initialise Aeff members
-    m_aeff_ctheta_min = 0.0;
-    m_aeff            = NULL;
+    // Initialise members
+    m_table.clear();
+    m_aeff       = NULL;
+    m_min_ctheta = 0.0;
 
     // Return
     return;
@@ -210,20 +364,22 @@ void GLATResponse::aeff_init_members(void)
 
 /***********************************************************************//**
  * @brief Copy class members
+ *
+ * @param[in] aeff Effective area.
  ***************************************************************************/
-void GLATResponse::aeff_copy_members(const GLATResponse& rsp)
+void GLATAeff::copy_members(const GLATAeff& aeff)
 {
     // Copy attributes
-    m_aeff_bins       = rsp.m_aeff_bins;
-    m_aeff_ctheta_min = rsp.m_aeff_ctheta_min;
+    m_table      = aeff.m_table;
+    m_min_ctheta = aeff.m_min_ctheta;
 
     // Copy effective area array
-    if (rsp.m_aeff != NULL) {
-        int size = m_aeff_bins.num_energy() * m_aeff_bins.num_ctheta();
+    if (aeff.m_aeff != NULL) {
+        int size = m_table.size();
         if (size > 0) {
             m_aeff = new double[size];
             for (int i = 0; i < size; ++i)
-                m_aeff[i] = rsp.m_aeff[i];
+                m_aeff[i] = aeff.m_aeff[i];
         }
     }
 
@@ -234,14 +390,65 @@ void GLATResponse::aeff_copy_members(const GLATResponse& rsp)
 
 /***********************************************************************//**
  * @brief Delete class members
-***************************************************************************/
-void GLATResponse::aeff_free_members(void)
+ ***************************************************************************/
+void GLATAeff::free_members(void)
 {
     // Free effective area memory
     if (m_aeff != NULL) delete [] m_aeff;
 
     // Signal that effective area memory is free
     m_aeff = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read effective area from FITS table
+ *
+ * @param[in] hdu FITS table pointer.
+ *
+ * @exception GException::fits_column_not_found
+ *            Effective area column not found
+ * @exception GLATException::inconsistent_response
+ *            Inconsistent response table encountered
+ *
+ * The effective area is converted into units of cm2.
+ ***************************************************************************/
+void GLATAeff::read_aeff(const GFitsTable* hdu)
+{
+    // Get energy and cos theta bins in response table
+    m_table.read(hdu);
+
+    // Set minimum cos(theta)
+    m_min_ctheta = m_table.costheta_lo(0);
+
+    // Continue only if there are effective area bins
+    if (m_table.size() > 0) {
+
+        // Free effective area memory
+        if (m_aeff != NULL) delete [] m_aeff;
+
+        // Allocate memory for effective area
+        m_aeff = new double[m_table.size()];
+
+        // Get pointer to effective area column
+        GFitsTableCol* ptr = ((GFitsTable*)hdu)->column("EFFAREA");
+        if (ptr == NULL)
+            throw GException::fits_column_not_found(G_READ_AEFF, "EFFAREA");
+
+        // Check consistency of effective area table
+        int num = ptr->number();
+        if (num != m_table.size())
+            throw GLATException::inconsistent_response(G_READ_AEFF, num,
+                                                       m_table.size());
+
+        // Copy data and convert from m2 into cm2
+        for (int i = 0; i < num; ++i)
+            m_aeff[i] = ptr->real(0,i) * 1.0e4;
+
+    } // endif: there were effective area bins
 
     // Return
     return;
