@@ -1126,22 +1126,450 @@ This class handles both event lists (\ref{GEventList}) and event cubes (\ref{GEv
 \subsection{{\tt GMatrix}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \subsection{{\tt GModel}}
 
+\paragraph{Class definition:}
+\begin{verbatim}
+/* Constructors */
+GModel(void);                                            // Creates empty model
+GModel(const GModel& model);                             // Creates copy of model
+GModel(const GModelSpatial& spatial,                     // Creates model from spatial and
+       const GModelSpectral& spectral);                  //   spectral components
+GModel(const GXmlElement& spatial,                       // Creates model from spatial and
+       const GXmlElement& spectral);                     //   spectral XML elements
+
+/* Operators */
+GModelPar&       operator() (int index);                 // Returns reference to parameter
+const GModelPar& operator() (int index) const;           // Returns reference to parameter
+GModel&          operator= (const GModel& model);        // Assign model
+
+/* Methods */
+void            clear(void);                             // Clear model
+GModel*         clone(void) const;                       // Clone model
+int             size(void) const;                        // Returns number of parameters
+std::string     name(void) const;                        // Returns model name
+void            name(const std::string& name);           // Set model name
+GModelSpatial*  spatial(void) const;                     // Returns spatial component
+GModelSpectral* spectral(void) const;                    // Returns spectral component
+GModelTemporal* temporal(void) const;                    // Returns temporal component
+double          value(const GSkyDir& srcDir,             // Returns model value
+                      const GEnergy& srcEng,
+                      const GTime& srcTime); 
+GVector         gradients(const GSkyDir& srcDir,         // Returns model gradient
+                          const GEnergy& srcEng,
+                          const GTime& srcTime); 
+double          eval(const GEvent& event,                // Evaluates model for an event
+                     const GObservation& obs);
+double          eval_gradients(const GEvent& event,      // Evaluates model and gradients
+                               const GObservation& obs); //   for an event
+bool            isvalid(const std::string& name) const;  // Model applies to instrument?
+std::string     print(void) const;                       // Print model
+\end{verbatim}
+
+\paragraph{Description:}
+The {\tt GModel} class implements the factorized source model
+\begin{equation}
+S(\vec{p}, E, t) = M(\vec{p}) \times P(E) \times V(t)
+\end{equation}
+where
+\begin{itemize}
+\item[] $M(\vec{p})$ is a map of the intensity distribution (in units of sr$^{-1}$),
+\item[] $P(E)$ is the source spectrum (in units of photons cm$^{-2}$ s$^{-1}$ MeV$^{-1}$), and
+\item[] $V(t)$ is a source modulation function (unitless),
+\item[] $\vec{p}$ is the true photon arrival direction,
+\item[] $E$ is the true photon energy, and
+\item[] $t$ is the true photon arrival time.
+\end{itemize}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \subsection{{\tt GModelPar}}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{{\tt GModelSpatial}}
+\paragraph{Class definition:}
+\begin{verbatim}
+/* Constructors */
+GModelPar(void);                                          // Creates empty parameter
+GModelPar(const GModelPar& par);                          // Creates copy of parameter
+
+/* Operators */
+GModelPar& operator= (const GModelPar& par);              // Assign parameter
+
+/* Methods */
+std::string name(void) const;                             // Returns name
+std::string unit(void) const;                             // Returns unit
+double      real_value(void) const;                       // Returns true value
+double      real_error(void) const;                       // Returns true error
+double      real_gradient(void) const;                    // Returns true gradient
+double      real_min(void) const;                         // Returns true minimum
+double      real_max(void) const;                         // Returns true maximum
+double      value(void) const;                            // Returns value
+double      error(void) const;                            // Returns error
+double      gradient(void) const;                         // Returns gradient
+double      min(void) const;                              // Returns minimum
+double      max(void) const;                              // Returns maximum
+double      scale(void) const;                            // Returns scale factor
+bool        isfree(void) const;                           // Signals that parameter is free
+bool        hasmin(void) const;                           // Signals that parameter has minimum
+bool        hasmax(void) const;                           // Signals that parameter has maximum
+void        name(const std::string& name);                // Set name
+void        unit(const std::string& unit);                // Set unit
+void        value(const double& value);                   // Set value
+void        error(const double& error);                   // Set error
+void        gradient(const double& gradient);             // Set gradient
+void        min(const double& min);                       // Set minimum
+void        max(const double& max);                       // Set maximum
+void        scale(const double& scale);                   // Set scale factor
+void        range(const double& min, const double& max);  // Set minimum and maximum
+void        remove_min(void);                             // Remove minimum
+void        remove_max(void);                             // Remove maximum
+void        remove_range(void);                           // Remove minimum and maximum
+void        free(void);                                   // Set parameter free
+void        fix(void);                                    // Fix parameter
+void        read(const GXmlElement& xml);                 // Read parameter from XML element
+void        write(GXmlElement& xml) const;                // Write parameter into XML element
+std::string print(void) const;                            // Print parameter
+\end{verbatim}
+
+\paragraph{Description:}
+This class implements a model parameter.
+The true parameter value is given by
+\begin{equation}
+{\tt true} = {\tt scale} \times {\tt value}
+\end{equation}
+and is accessed through the {\tt real\_} methods.
+The optimizer will only affect the {\tt value} part of the parameter.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{{\tt GModelSpectral}}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{{\tt GModelTemporal}}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \subsection{{\tt GModels}}
+
+\paragraph{Class definition:}
+\begin{verbatim}
+/* Constructors */
+GModels(void);                                       // Creates empty model container
+GModels(const GModels& models);                      // Creates copy of container
+GModels(const std::string& filename);                // Creates container from XML file
+
+/* Operators */
+GModel&       operator() (int index);                // Returns reference to model
+const GModel& operator() (int index) const;          // Returns reference to model
+GModels&      operator= (const GModels& models);     // Assign model container
+
+/* Methods */
+void        clear(void);                             // Clear models
+GModels*    clone(void) const;                       // Clone models
+int         size(void) const;                        // Returns number of models in container
+void        append(const GModel& model);             // Append model to container
+void        load(const std::string& filename);       // Load models from XML file
+void        save(const std::string& filename) const; // Save models into XML file
+void        read(const GXml& xml);                   // Read models from XML document
+void        write(GXml& xml) const;                  // Write models into XML document
+int         npars(void) const;                       // Returns total number of parameters
+int         nfree(void) const;                       // Returns total number of free parameters
+GModelPar*  par(int index) const;                    // Returns pointer to model parameter
+double      value(const GSkyDir& srcDir,             // Returns model value
+                  const GEnergy& srcEng,
+                  const GTime& srcTime);
+double      eval(const GEvent& event,                // Evaluates models for an event
+                 const GObservation& obs);
+double      eval_gradients(const GEvent& event,      // Evaluates models and parameter
+                           const GObservation& obs); //   gradients for an event
+std::string print(void) const;                       // Print model
+\end{verbatim}
+
+\paragraph{Description:}
+Container class for {\tt GModel} source models.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection{{\tt GModelSpatial} \small[abstract]}
+
+\paragraph{Class definition:}
+\begin{verbatim}
+/* Constructors */
+GModelSpatial(void);                                      // Creates empty component
+GModelSpatial(const GModelSpatial& model);                // Creates copy of component
+
+/* Operators */
+GModelPar&       operator() (int index);                  // Access model parameter
+const GModelPar& operator() (int index) const;            // Access model parameter
+GModelSpatial&   operator= (const GModelSpatial& model);  // Assign component
+
+/* Methods */
+void           clear(void);                               // Clear component
+GModelSpatial* clone(void) const;                         // Clone component
+int            size(void) const;                          // Returns number of model parameters
+std::string    type(void) const;                          // Returns type of component
+double         eval(const GSkyDir& srcDir);               // Evaluate component
+double         eval_gradients(const GSkyDir& srcDir);     // Evaluate component and gradients
+void           read(const GXmlElement& xml);              // Read component from XML element
+void           write(GXmlElement& xml) const;             // Write component into XML element
+bool           isptsource(void) const;                    // Signals if component is point source
+std::string    print(void) const;                         // Print component
+\end{verbatim}
+
+\paragraph{Description:}
+Implements the spatial component $M(\vec{p})$ of the factorized source model.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection{{\tt GModelSpatialPtsrc}}
+
+\paragraph{Class definition:}
+\begin{verbatim}
+/* Constructors */
+GModelSpatialPtsrc(void);                             // Creates empty point source
+GModelSpatialPtsrc(const GSkyDir& dir);               // Creates point source from sky direction
+GModelSpatialPtsrc(const GXmlElement& xml);           // Creates point source from XML element
+GModelSpatialPtsrc(const GModelSpatialPtsrc& model);  // Creates copy of point source
+
+/* Operators */
+GModelPar&          operator() (int index);                      // Access model parameter
+const GModelPar&    operator() (int index) const;                // Access model parameter
+GModelSpatialPtsrc& operator= (const GModelSpatialPtsrc& model); // Assign point source
+
+/* Methods */
+void                clear(void);                            // Clear point source
+GModelSpatialPtsrc* clone(void) const;                      // Clone point source
+int                 size(void) const;                       // Returns 2
+std::string         type(void) const;                       // Returns "PointSource"
+double              eval(const GSkyDir& srcDir);            // Evaluate point source
+double              eval_gradients(const GSkyDir& srcDir);  // Evaluate point source and gradients
+void                read(const GXmlElement& xml);           // Read point source from XML element
+void                write(GXmlElement& xml) const;          // Write point source into XML element
+bool                isptsource(void) const;                 // Returns true
+double              ra(void) const;                         // Returns Right Ascension (deg)
+double              dec(void) const;                        // Returns Declination (deg)
+GSkyDir             dir(void) const;                        // Returns position of point source
+void                dir(const GSkyDir& dir);                // Set position of point source
+std::string         print(void) const;                      // Print component
+\end{verbatim}
+
+\paragraph{Description:}
+Implements a point source model with parameters Right Ascension and Declination.
+
+The {\tt eval} method returns 1 if the specified position coincides with the position
+of the point source, 0 otherwise (coincidence is defined as the angular distance between
+the specified and the point source position being inferior to 0.1 arcseconds).
+
+The {\tt eval\_gradients} method sets both parameter gradients to 0.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection{{\tt GModelSpectral} \small[abstract]}
+
+\paragraph{Class definition:}
+\begin{verbatim}
+/* Constructors */
+GModelSpectral(void);                                      // Creates empty component
+GModelSpectral(const GModelSpectral& model);               // Creates copy of component
+
+/* Operators */
+GModelPar&       operator() (int index);                   // Access model parameter
+const GModelPar& operator() (int index) const;             // Access model parameter
+GModelSpectral&  operator= (const GModelSpectral& model);  // Assign component
+
+/* Methods */
+void            clear(void);                               // Clear component
+GModelSpectral* clone(void) const;                         // Clone component
+int             size(void) const;                          // Returns number of model parameters
+std::string     type(void) const;                          // Returns type of component
+double          eval(const GSkyDir& srcDir);               // Evaluate component
+double          eval_gradients(const GSkyDir& srcDir);     // Evaluate component and gradients
+void            read(const GXmlElement& xml);              // Read component from XML element
+void            write(GXmlElement& xml) const;             // Write component into XML element
+std::string     print(void) const;                         // Print component
+\end{verbatim}
+
+\paragraph{Description:}
+Implements the spectra component $P(E)$ of the factorized source model.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection{{\tt GModelSpectralPlaw}}
+
+\paragraph{Class definition:}
+\begin{verbatim}
+/* Constructors */
+GModelSpectralPlaw(void);                             // Creates empty power law
+GModelSpectralPlaw(const double& norm,);              // Creates power law from
+                   const double& index);              //   normalization and index
+GModelSpectralPlaw(const GXmlElement& xml);           // Creates power law from XML element
+GModelSpectralPlaw(const GModelSpectralPlaw& model);  // Creates copy of power law
+
+/* Operators */
+GModelPar&          operator() (int index);                      // Access model parameter
+const GModelPar&    operator() (int index) const;                // Access model parameter
+GModelSpectralPlaw& operator= (const GModelSpectralPlaw& model); // Assign power law
+
+/* Methods */
+void                clear(void);                            // Clear power law
+GModelSpectralPlaw* clone(void) const;                      // Clone power law
+int                 size(void) const;                       // Returns 3
+std::string         type(void) const;                       // Returns "PowerLaw"
+double              eval(const GEnergy& srcEng);            // Evaluate power law
+double              eval_gradients(const GEnergy& srcEng);  // Evaluate power law and gradients
+void                read(const GXmlElement& xml);           // Read power law from XML element
+void                write(GXmlElement& xml) const;          // Write power law into XML element
+void                autoscale(void);                        // Automatically scale normalization
+double              norm(void) const;                       // Returns normalization
+double              index(void) const;                      // Returns index
+double              pivot(void) const;                      // Returns pivot energy (MeV)
+std::string         print(void) const;                      // Print power law
+\end{verbatim}
+
+\paragraph{Description:}
+Implements power law spectral model
+\begin{equation}
+I(E) = {\tt norm} \, (E/{\tt pivot})^{{\tt index}}
+\end{equation}
+where
+${\tt norm}=n_s n_v$ is the normalization or prefactor (units ph/cm$^2$/s/MeV),
+${\tt index}=i_s i_v$ is the spectral index, and
+${\tt pivot}=p_s p_v$ is the pivot energy (units MeV).
+Note that each parameter is factorised into a scaling factor (indexed by $s$) and a 
+parameter value (indexed by $v$).
+This function is evaluated using the {\tt eval} method.
+
+The {\tt eval\_gradients} methods computes in addition the partial derivatives of 
+the parameter values:
+\begin{eqnarray}
+dI/dn_v &= & n_s (E/{\tt pivot})^{{\tt index}} \\
+dI/di_v & = & {\tt norm} (E/{\tt pivot})^{{\tt index}} i_s \ln(E/{\tt pivot}) \\
+dI/dp_v & = & {\tt norm} (E/{\tt pivot})^{{\tt index}} (-{\tt index}) / p_v
+\end{eqnarray}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection{{\tt GModelSpectralExpPlaw}}
+
+\paragraph{Class definition:}
+\begin{verbatim}
+/* Constructors */
+GModelSpectralExpPlaw(void);                               // Creates empty cutoff power law
+GModelSpectralExpPlaw(const double& norm,);                // Creates cutoff power law from
+                      const double& index,                 //   normalization, index and
+                      const double& ecut);                 //   exponential cutoff energy
+GModelSpectralExpPlaw(const GXmlElement& xml);             // Creates cutoff PL from XML element
+GModelSpectralExpPlaw(const GModelSpectralExpPlaw& model); // Creates copy of cutoff power law
+
+/* Operators */
+GModelPar&             operator() (int index);                         // Access model parameter
+const GModelPar&       operator() (int index) const;                   // Access model parameter
+GModelSpectralExpPlaw& operator= (const GModelSpectralExpPlaw& model); // Assign cutoff power law
+
+/* Methods */
+void                   clear(void);                            // Clear cutoff power law
+GModelSpectralExpPlaw* clone(void) const;                      // Clone cutoff power law
+int                    size(void) const;                       // Returns 4
+std::string            type(void) const;                       // Returns "ExpCutoff"
+double                 eval(const GEnergy& srcEng);            // Evaluate cutoff power law
+double                 eval_gradients(const GEnergy& srcEng);  // Evaluate cutoff PL and gradients
+void                   read(const GXmlElement& xml);           // Read cutoff PL from XML element
+void                   write(GXmlElement& xml) const;          // Write cutoff PL into XML element
+void                   autoscale(void);                        // Automatically scale normalization
+double                 norm(void) const;                       // Returns normalization
+double                 index(void) const;                      // Returns index
+double                 ecut(void) const;                       // Returns cutoff energy (MeV)
+double                 pivot(void) const;                      // Returns pivot energy (MeV)
+std::string            print(void) const;                      // Print cutoff power law
+\end{verbatim}
+
+\paragraph{Description:}
+Implements power law spectral model
+\begin{equation}
+I(E) = {\tt norm} \, (E/{\tt pivot})^{{\tt index}} \exp(-E/{\tt ecut})
+\end{equation}
+where
+${\tt norm}=n_s n_v$ is the normalization or prefactor (units ph/cm$^2$/s/MeV),
+${\tt index}=i_s i_v$ is the spectral index,
+${\tt ecut}=c_s c_v$ is the cutoff energy (units MeV), and
+${\tt pivot}=p_s p_v$ is the pivot energy (units MeV).
+Note that each parameter is factorised into a scaling factor (indexed by $s$) and a 
+parameter value (indexed by $v$).
+This function is evaluated using the {\tt eval} method.
+
+The {\tt eval\_gradients} methods computes in addition the partial derivatives of 
+the parameter values:
+\begin{eqnarray}
+dI/dn_v &= & n_s (E/{\tt pivot})^{{\tt index}}  \exp(-E/{\tt ecut}) \\
+dI/di_v & = & {\tt norm} (E/{\tt pivot})^{{\tt index}}  \exp(-E/{\tt ecut}) i_s \ln(E/{\tt pivot}) \\
+dI/dc_v & = & {\tt norm} (E/{\tt pivot})^{{\tt index}} \exp(-E/{\tt ecut}) (E/{\tt ecut}^2) c_s \\
+dI/dp_v & = & {\tt norm} (E/{\tt pivot})^{{\tt index}}  \exp(-E/{\tt ecut}) (-{\tt index}) / p_v
+\end{eqnarray}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection{{\tt GModelTemporal} \small[abstract]}
+
+\paragraph{Class definition:}
+\begin{verbatim}
+/* Constructors */
+GModelTemporal(void);                                      // Creates empty component
+GModelTemporal(const GModelTemporal& model);               // Creates copy of component
+
+/* Operators */
+GModelPar&       operator() (int index);                   // Access model parameter
+const GModelPar& operator() (int index) const;             // Access model parameter
+GModelTemporal&  operator= (const GModelTemporal& model);  // Assign component
+
+/* Methods */
+void            clear(void);                               // Clear component
+GModelTemporal* clone(void) const;                         // Clone component
+int             size(void) const;                          // Returns number of model parameters
+std::string     type(void) const;                          // Returns type of component
+double          eval(const GTime& srcTime);                // Evaluate component
+double          eval_gradients(const GTime& srcTime);      // Evaluate component and gradients
+void            read(const GXmlElement& xml);              // Read component from XML element
+void            write(GXmlElement& xml) const;             // Write component into XML element
+std::string     print(void) const;                         // Print component
+\end{verbatim}
+
+\paragraph{Description:}
+Implements the temporal component $V(t)$ of the factorized source model.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection{{\tt GModelTemporalConst}}
+
+\paragraph{Class definition:}
+\begin{verbatim}
+/* Constructors */
+GModelTemporalConst(void);                                         // Creates empty component
+GModelTemporalConst(const GModelTemporalConst& model);             // Creates copy of component
+
+/* Operators */
+GModelPar&           operator() (int index);                       // Access model parameter
+const GModelPar&     operator() (int index) const;                 // Access model parameter
+GModelTemporalConst& operator= (const GModelTemporalConst& model); // Assign component
+
+/* Methods */
+void                 clear(void);                           // Clear component
+GModelTemporalConst* clone(void) const;                     // Clone component
+int                  size(void) const;                      // Returns 1
+std::string          type(void) const;                      // Returns "Constant"
+double               eval(const GTime& srcTime);            // Evaluate component
+double               eval_gradients(const GTime& srcTime);  // Evaluate component and gradients
+void                 read(const GXmlElement& xml);          // Read component from XML element
+void                 write(GXmlElement& xml) const;         // Write component into XML element
+std::string          print(void) const;                     // Print component
+\end{verbatim}
+
+\paragraph{Description:}
+Implements a non-variable (constant) source.
+
+The {\tt eval} method returns 1, the {\tt eval\_gradients} methods sets the gradient to 0.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{{\tt GNodeArray}}
