@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include <iostream>
 #include "GLog.hpp"
 #include "GNodeArray.hpp"
@@ -33,7 +34,9 @@
  * @brief Interface for the Fermi LAT Response table class.
  *
  * A response table contains the binning information in energy and cos theta
- * for a Fermi LAT response function.
+ * for the Fermi LAT response function. From this binning information,
+ * response values can be obtained using a bilinear interpolation in
+ * log10 of energy and in cos theta.
  ***************************************************************************/
 class GLATResponseTable {
 
@@ -57,10 +60,10 @@ public:
     void               write(GFitsTable* hdu) const;
     int                index(const int& ie, const int& ic) const;
     double             interpolate(const double& logE, const double& ctheta, 
-                                   const double* array);
+                                   const std::vector<double>& array);
     double             interpolate(const double& logE, const double& ctheta, 
-                                   const double* array, const int& offset, 
-                                   const int& size);
+                                   const std::vector<double>& array,
+                                   const int& offset, const int& size);
     double             energy(const int& ie) const;
     int                size(void) const { return m_energy_num*m_ctheta_num; }
     int                nenergies(void) const { return m_energy_num; }

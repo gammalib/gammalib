@@ -336,13 +336,16 @@ double GLATResponseTable::energy(const int& ie) const
 /***********************************************************************//**
  * @brief Perform bi-linear interpolation of 2D array
  *
- * @param[in] logE Base 10 logarithm of the energy (MeV)
- * @param[in] ctheta cos(theta)
- * @param[in] array Array to be interpolated
+ * @param[in] logE Base 10 logarithm of the energy (MeV).
+ * @param[in] ctheta Cosine of zenith angle.
+ * @param[in] array Array to be interpolated.
+ *
+ * Bi-linear interpolation is performed in log10 of energy and in cos theta.
+ * The array is stored in a std::vector object.
  ***************************************************************************/
-double GLATResponseTable::interpolate(const double& logE,
-                                      const double& ctheta,
-                                      const double* array)
+double GLATResponseTable::interpolate(const double&              logE,
+                                      const double&              ctheta,
+                                      const std::vector<double>& array)
 {
     // Flag no change of values
     bool change = false;
@@ -395,17 +398,20 @@ double GLATResponseTable::interpolate(const double& logE,
 /***********************************************************************//**
  * @brief Perform bi-linear interpolation of 3D array
  *
- * @param[in] logE Base 10 logarithm of the energy (MeV)
- * @param[in] ctheta cos(theta)
- * @param[in] array Array to be interpolated
- * @param[in] offset Offset if 3D array in 1st dimension
- * @param[in] size Size of 3D array in 1st dimension
+ * @param[in] logE Base 10 logarithm of the energy (MeV).
+ * @param[in] ctheta Cosine of zenith angle.
+ * @param[in] array Array to be interpolated.
+ * @param[in] offset Offset if 3D array in 1st dimension.
+ * @param[in] size Size of 3D array in 1st dimension.
+ *
+ * Bi-linear interpolation is performed in log10 of energy and in cos theta.
+ * The array is stored in a std::vector object.
  ***************************************************************************/
-double GLATResponseTable::interpolate(const double& logE, 
-                                      const double& ctheta, 
-                                      const double* array,
-                                      const int&    offset,
-                                      const int&    size)
+double GLATResponseTable::interpolate(const double&              logE, 
+                                      const double&              ctheta, 
+                                      const std::vector<double>& array,
+                                      const int&                 offset,
+                                      const int&                 size)
 {
     // Flag no change of values
     bool change = false;
