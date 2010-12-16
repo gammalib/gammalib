@@ -18,8 +18,12 @@
 #include <cmath>
 #include "GLATMeanPsf.hpp"
 #include "GLATAeff.hpp"
+#include "GLATPsf.hpp"
+#include "GLATException.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_SET                  "GLATMeanPsf::set(GSkyDir&, GLATObservation&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -63,7 +67,7 @@ GLATMeanPsf::GLATMeanPsf(const GSkyDir& dir, const GLATObservation& obs)
     init_members();
 
     // Setup PSF
-    set_psf(dir, obs);
+    set(dir, obs);
 
     // Return
     return;
@@ -180,6 +184,91 @@ int GLATMeanPsf::size(void) const
 
 
 /***********************************************************************//**
+ * @brief Compute mean PSF and exposure
+ *
+ * @param[in] dir Source location.
+ * @param[in] obs LAT observation.
+ *
+ * @exception GLATException::no_response
+ *            Response has not been defined.
+ * @exception GLATException::no_ltcube
+ *            Livetime cube has not been defined.
+ * @exception GLATException::no_ebds
+ *            Energy binning has not been defined.
+ *
+ * Computes the mean PSF and the energy dependent exposure for a source at
+ * a given sky location. The PSF is computed for all bin boundaries of the
+ * observation, hence if there are N energy bins there will be N+1 energies
+ * at which the mean PSF is computed.
+ ***************************************************************************/
+void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
+{
+    // Clear PSF, exposure and energy arrays
+    m_psf.clear();
+    m_exposure.clear();
+    m_energy.clear();
+
+    // Get pointers on response, livetime cube and energy boundaries
+    GLATResponse* rsp = obs.response();
+    if (rsp == NULL)
+        throw GLATException::no_response(G_SET);
+
+    // Get pointer on livetime cube
+    GLATLtCube* ltcube = obs.ltcube();
+    if (ltcube == NULL)
+        throw GLATException::no_ltcube(G_SET);
+    
+    // Get pointer on energy boundaries
+    GEbounds* ebds = ((GLATObservation*)&obs)->ebounds();
+    if (ebds == NULL)
+        throw GLATException::no_ebds(G_SET);
+
+    // Allocate room for arrays
+    m_psf.reserve(size());
+    m_exposure.reserve(m_energy.size());
+
+    // Set energy nodes from the bin boundaries of the observations energy
+    // boundaries.
+    m_energy.reserve(ebds->size()+1);
+    m_energy.push_back(ebds->emin(0));
+    for (int i = 0; i < ebds->size(); ++i)
+        m_energy.push_back(ebds->emax(i));
+
+    // Loop over energies
+    for (int ieng = 0; ieng < m_energy.size(); ++ieng) {
+
+        // Compute exposure by looping over the responses
+        double exposure = 0.0;
+        for (int i = 0; i < rsp->size(); ++i)
+            exposure += (*ltcube)(dir, m_energy[ieng], *rsp->aeff(i));
+
+        // Set exposure
+        m_exposure.push_back(exposure);
+
+        // Loop over all offset angles
+        for (int ioffset = 0; ioffset < m_offset.size(); ++ioffset) {
+
+            // Compute point spread function by looping over the responses
+            double psf = 0.0;
+            for (int i = 0; i < rsp->size(); ++i)
+                psf += (*ltcube)(dir, m_energy[ieng], m_offset[ioffset],
+                                 *rsp->psf(i));
+
+            // Normalize PSF by exposure and clip when exposure drops to 0
+            psf = (exposure > 0) ? psf/exposure : 0.0;
+
+            // Set PSF value
+            m_psf.push_back(psf);
+
+        } // endfor: looped over offsets
+    } // endfor: looped over energies
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print lifetime cube information
  ***************************************************************************/
 std::string GLATMeanPsf::print(void) const
@@ -187,11 +276,27 @@ std::string GLATMeanPsf::print(void) const
     // Initialise result string
     std::string result;
 
+    // Compute exposure range
+    double min_exposure = 0.0;
+    double max_exposure = 0.0;
+    for (int i = 0; i < nenergies(); ++i) {
+        if (i == 0) {
+            min_exposure = m_exposure[i];
+            max_exposure = m_exposure[i];
+        }
+        else {
+            if (m_exposure[i] < min_exposure) min_exposure = m_exposure[i];
+            if (m_exposure[i] > max_exposure) max_exposure = m_exposure[i];
+        }
+    }
+    
     // Append header
     result.append("=== GLATMeanPsf ===");
-    //result.append("\n"+m_dir.print());
-    //result.append("\n"+m_weighted_exposure.print());
-    //result.append("\n"+m_gti.print());
+    result.append("\n"+parformat("Source direction"));
+    result.append("\n"+parformat("Offset angles")+str(noffsets()));
+    result.append("\n"+parformat("Energy values")+str(nenergies()));
+    result.append("\n"+parformat("Exposure range"));
+    result.append(str(min_exposure)+" - "+str(max_exposure)+" s cm2");
 
     // Return result
     return result;
@@ -274,73 +379,6 @@ void GLATMeanPsf::set_offsets(void)
     double step = log(offset_max/offset_min)/(offset_num - 1.0);
     for (int i = 0; i < offset_num; ++i)
         m_offset.push_back(offset_min*exp(i*step));
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Compute mean PSF and exposure
- *
- * @param[in] dir Source location.
- * @param[in] obs LAT observation.
- *
- * Computes the mean PSF and the energy dependent exposure for a source at
- * a given sky location. For the moment the PSF is computed at the
- * logarithmic mean energies of the energy bins that are extracted from the
- * LAT observation.
- *
- * @todo Implement PSF computation
- ***************************************************************************/
-void GLATMeanPsf::set_psf(const GSkyDir& dir, const GLATObservation& obs)
-{
-    // Clear PSF, exposure and energy arrays
-    m_psf.clear();
-    m_exposure.clear();
-    m_energy.clear();
-
-    // Allocate room for arrays
-    m_psf.reserve(size());
-    m_exposure.reserve(m_energy.size());
-
-    // Set energies
-    GEbounds* ebds = ((GLATObservation*)&obs)->ebounds();
-    if (ebds != NULL) {
-        m_energy.reserve(ebds->size());
-        for (int i = 0; i < ebds->size(); ++i)
-            m_energy.push_back(ebds->elogmean(i));
-    }
-
-    // Get pointer on response
-    GLATResponse* rsp    = obs.response();
-    GLATLtCube*   ltcube = obs.ltcube();
-
-    // Loop over energies
-    for (int ieng = 0; ieng < m_energy.size(); ++ieng) {
-
-        // Compute exposure by looping over the responses
-        double exposure = 0.0;
-        for (int i = 0; i < rsp->size(); ++i) {
-            GLATAeff* aeff = rsp->aeff(i);
-            aeff->ltcube_energy(m_energy[ieng]);
-            exposure += (*ltcube)(dir, m_energy[ieng], *aeff);
-        }
-
-        // Set exposure
-        m_exposure.push_back(exposure);
-
-        // Loop over all offsets
-        for (int ioffset = 0; ioffset < m_offset.size(); ++ioffset) {
-
-            // Initialise PSF
-            double psf = 0.0;
-
-            // Set PSF value
-            m_psf.push_back(psf);
-
-        } // endfor: looped over offsets
-    } // endfor: looped over energies
 
     // Return
     return;

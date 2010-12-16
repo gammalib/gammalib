@@ -59,6 +59,9 @@ public:
     void         clear(void);
     GLATMeanPsf* clone(void) const;
     int          size(void) const;
+    int          noffsets(void) const { return m_offset.size(); }
+    int          nenergies(void) const { return m_energy.size(); }
+    void         set(const GSkyDir& dir, const GLATObservation& obs);
     std::string  print(void) const;
 
 private:
@@ -67,7 +70,6 @@ private:
     void copy_members(const GLATMeanPsf& psf);
     void free_members(void);
     void set_offsets(void);
-    void set_psf(const GSkyDir& dir, const GLATObservation& obs);
     
     // Protected members
     GSkyDir              m_dir;        //!< Source direction for mean PSF
