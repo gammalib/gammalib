@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GLATPsf.cpp  -  GLAST LAT Response class Psf methods          *
+ *             GLATPsf.cpp  -  Fermi LAT point spread function             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATPsf.cpp
- * @brief GLATResponse class PSF implementation.
+ * @brief Fermi LAT point spread function class implementation.
  * @author J. Knodlseder
  */
 
@@ -20,16 +20,17 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
-#include "GTools.hpp"
-#include "GException.hpp"
+#include "GLATPsf.hpp"
 #include "GLATResponse.hpp"
 #include "GLATPointing.hpp"
+#include "GLATException.hpp"
+#include "GTools.hpp"
 #include "GFitsBinTable.hpp"
-#include "GFitsImageDouble.hpp"
+#include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_INIT_PSF                                 "GLATResponse::init_psf()"
+#define G_READ                             "GLATPsf::read(const GFits* file)"
+#define G_READ_PSF                           "GLATPsf::read_psf(GFitsTable*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -52,153 +53,240 @@ const double max_sep          = pihalf;  // Maximum angular separation (rad)
 
 /*==========================================================================
  =                                                                         =
+ =                        Constructors/destructors                         =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Void constructor
+ ***************************************************************************/
+GLATPsf::GLATPsf(void)
+{
+    // Initialise class members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief File constructor
+ *
+ * @param[in] filename FITS file name.
+ *
+ * Construct instance by loading the point spread function from FITS file.
+ ***************************************************************************/
+GLATPsf::GLATPsf(const std::string filename)
+{
+    // Initialise class members
+    init_members();
+
+    // Load energy dispersion from file
+    load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] psf Point spread function.
+ ***************************************************************************/
+GLATPsf::GLATPsf(const GLATPsf& psf)
+{
+    // Initialise class members
+    init_members();
+
+    // Copy members
+    copy_members(psf);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Destructor
+ ***************************************************************************/
+GLATPsf::~GLATPsf(void)
+{
+    // Free members
+    free_members();
+
+    // Return
+    return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                               Operators                                 =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param[in] psf Point spread function.
+ ***************************************************************************/
+GLATPsf& GLATPsf::operator= (const GLATPsf& psf)
+{
+    // Execute only if object is not identical
+    if (this != &psf) {
+
+        // Free members
+        free_members();
+
+        // Initialise private members
+        init_members();
+
+        // Copy members
+        copy_members(psf);
+
+    } // endif: object was not identical
+
+    // Return this object
+    return *this;
+}
+
+
+/*==========================================================================
+ =                                                                         =
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return point spread function (units: sr^-1).
+ * @brief Clear instance
  *
- * @param[in] obsDir Pointer to observed photon direction.
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Pointer to instrument pointing information.
- *
- * @todo Implement method.
+ * This method properly resets the object to an initial state.
  ***************************************************************************/
-double GLATResponse::psf(const GInstDir& obsDir,
-                         const GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GTime& srcTime, const GPointing& pnt) const
+void GLATPsf::clear(void)
 {
-    // Return PSF value
-    return 1.0;
+    // Free class members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
 }
 
 
 /***********************************************************************//**
- * @brief Return value of point spread function
- *
- * @param[in] delta Angular separation between true and observed photon 
- *            direction (radians).
- * @param[in] logE Logarithm of the true photon energy (MeV).
- * @param[in] ctheta Cosine of the zenith angle with respect to the pointing 
- *            axis.
- *
- * Returns the GLAST LAT PSF value for a given angular separation between
- * true and observed photon direction, true photon energy and cosine of
- * the zenith angle.
- ***************************************************************************/
-double GLATResponse::psf(const double& delta, const double& logE, 
-                         const double& ctheta)
+ * @brief Clone instance
+***************************************************************************/
+GLATPsf* GLATPsf::clone(void) const
 {
-    // Get sigma value
-    double sigma = m_psf_bins.interpolate(logE, ctheta, m_sigma);
-
-    // Get PSF scale
-    double scale = psf_scale_log(logE);
-
-    // Compute stretch factor
-    double stretch = sigma * scale;
-
-    // Compute maximum allowed angular separation
-    double delta_max = m_psf_angle_max * stretch;
-    if (delta_max >= max_sep)
-        delta_max = max_sep;
-
-    // If maximum angular separation is exceeded then return 0.0
-    double psf;
-    if (delta > delta_max)
-        psf = 0.0;
-
-    // ... otherwise interpolate PSF value
-    else {
-
-        // Get PSF value from table
-        double r    = delta / stretch;  // real angular distance in radians
-        m_psf_angle.set_value(r);       // interpolate array
-        int    inx1 = m_psf_angle.inx_left();
-        int    inx2 = m_psf_angle.inx_right();
-        double wgt1 = m_psf_angle.wgt_left();
-        double wgt2 = m_psf_angle.wgt_right();
-        psf = wgt1 * m_psf_bins.interpolate(logE, ctheta, m_psf, inx1, angle_num) +
-              wgt2 * m_psf_bins.interpolate(logE, ctheta, m_psf, inx2, angle_num);
-
-        // Get normalization value
-        double norm = m_psf_bins.interpolate(logE, ctheta, m_norm) /
-                      (stretch * stretch);
-
-        // Normalize PSF
-        psf *= norm;
-        
-    } // endelse: PSF normalization was required
-
-    // Return PSF value
-    return psf;
+    return new GLATPsf(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Return vector of point spread function values
+ * @brief Load point spread function from FITS file
  *
- * @param[in] delta Vector of angular separation between true and observed 
- *            photon direction (radians).
- * @param[in] logE Logarithm of the true photon energy (MeV).
- * @param[in] ctheta Cosine of the zenith angle with respect to the pointing 
- *            axis.
- *
- * Returns the GLAST LAT PSF value for a given angular separation between
- * true and observed photon direction, true photon energy and cosine of
- * the zenith angle.
+ * @param[in] filename FITS file.
  ***************************************************************************/
-GVector GLATResponse::psf(const GVector& delta, const double& logE, 
-                          const double& ctheta)
+void GLATPsf::load(const std::string filename)
 {
-    // Get sigma value
-    double sigma = m_psf_bins.interpolate(logE, ctheta, m_sigma);
+    // Open FITS file
+    GFits fits(filename);
 
-    // Get PSF scale
-    double scale = psf_scale_log(logE);
+    // Read point spread function from file
+    read(fits);
 
-    // Compute stretch factor
-    double stretch = sigma * scale;
+    // Return
+    return;
+}
 
-    // Get normalization value
-    double norm = m_psf_bins.interpolate(logE, ctheta, m_norm) /
-                  (stretch * stretch);
-    
-    // Compute maximum allowed angular separation
-    double delta_max = m_psf_angle_max * stretch;
-    if (delta_max >= max_sep)
-        delta_max = max_sep;
 
-    // Allocate result vector
-    GVector psf(delta.size());
-    
-    // Loop over all angular separations
-    for (int i = 0; i < delta.size(); ++i) {
+/***********************************************************************//**
+ * @brief Save point spread function into FITS file
+ *
+ * @param[in] filename FITS file.
+ * @param[in] clobber Overwrite existing file?.
+ ***************************************************************************/
+void GLATPsf::save(const std::string filename, bool clobber)
+{
+    // Open FITS file
+    GFits fits(filename);
 
-        // If maximum angular separation is exceeded then stop
-        if (delta(i) > delta_max)
-            break;
-        
-        // Get PSF value from table
-        double r    = delta(i) / stretch;      // real angular distance in radians
-        m_psf_angle.set_value(r);              // interpolate array
-        int    inx1 = m_psf_angle.inx_left();
-        int    inx2 = m_psf_angle.inx_right();
-        double wgt1 = m_psf_angle.wgt_left();
-        double wgt2 = m_psf_angle.wgt_right();
-        psf(i) = wgt1 * m_psf_bins.interpolate(logE, ctheta, m_psf, inx1, angle_num) +
-                 wgt2 * m_psf_bins.interpolate(logE, ctheta, m_psf, inx2, angle_num);
+    // Write point spread function into file
+    write(fits);
 
-        // Normalize PSF
-        psf(i) *= norm;
+    // Close FITS file
+    fits.save(clobber);
 
-    } // endfor: looped over angular separations
+    // Return
+    return;
+}
 
-    // Return PSF vector
-    return psf;
+
+/***********************************************************************//**
+ * @brief Read point spread function from FITS file
+ *
+ * @param[in] fits FITS file.
+ *
+ * @exception GException::fits_hdu_not_found
+ *            Effective area HDU not found in FITS file
+ *
+ * @todo Implement reading of scaling parameters
+ ***************************************************************************/
+void GLATPsf::read(const GFits& fits)
+{
+    // Clear instance
+    clear();
+
+    // Get pointer to effective area HDU
+    GFitsTable* hdu_rpsf  = fits.table("RPSF");
+    GFitsTable* hdu_scale = fits.table("PSF_SCALING_PARAMS");
+    if (hdu_rpsf == NULL)
+        throw GException::fits_hdu_not_found(G_READ, "RPSF");
+    if (hdu_scale == NULL)
+        throw GException::fits_hdu_not_found(G_READ, "PSF_SCALING_PARAMS");
+
+    // Read point spread function
+    read_psf(hdu_rpsf);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write point spread function into FITS file
+ *
+ * @param[in] fits FITS file.
+ ***************************************************************************/
+void GLATPsf::write(GFits& fits) const
+{
+    // Write energy dispersion
+    write_psf(fits);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Print point spread function information
+ ***************************************************************************/
+std::string GLATPsf::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GLATPsf ===");
+    result.append("\n"+parformat("Number of energy bins")+str(nenergies()));
+    result.append("\n"+parformat("Number of cos theta bins")+str(ncostheta()));
+
+    // Return result
+    return result;
 }
 
 
@@ -209,325 +297,18 @@ GVector GLATResponse::psf(const GVector& delta, const double& logE,
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Initialise PSF
- *
- * Initialise PSF for response calculation. Initialisation consists of 
- * building the PSF response vectors for a set of energy and zenith angle
- * values.
- *
- * The PSF is built using information found in the 'RPSF' table of the
- * calibration database.
- ***************************************************************************/
-void GLATResponse::psf_init(std::string section)
-{
-    // Build filename
-    std::string filename = "psf_"  + m_rspname + "_" + section + ".fits";
-
-    // Open FITS file
-    GFits file;
-    file.open(m_caldb + "/" + filename);
-
-    // Get pointer to PSF HDU
-    GFitsTable* hdu = (GFitsTable*)file.hdu("RPSF");
-    if (hdu == NULL)
-        throw GException::fits_hdu_not_found(G_INIT_PSF, "RPSF");
-
-    // Get the energy and cos(theta) bins
-    m_psf_bins.read(hdu);
-
-    // Get the PSF characterisation data
-    GVector v_ncore = get_fits_vector(hdu, "NCORE");
-    GVector v_sigma = get_fits_vector(hdu, "SIGMA");
-    GVector v_gcore = get_fits_vector(hdu, "GCORE");
-    GVector v_gtail = get_fits_vector(hdu, "GTAIL");
-
-    // Free old PSF memory
-    if (m_psf   != NULL) delete [] m_psf;
-    if (m_norm  != NULL) delete [] m_norm;
-    if (m_sigma != NULL) delete [] m_sigma;
-
-    // Allocate memory for PSF
-    int bin_size = m_psf_bins.size();
-    int psf_size = bin_size * angle_num;
-    if (psf_size > 0)
-        m_psf = new double[psf_size];
-    if (bin_size > 0) {
-        m_norm  = new double[bin_size];
-        m_sigma = new double[bin_size];
-    }
-
-    // Setup PSF vector axis
-    GVector xaxis(angle_num);
-    GVector u(angle_num);
-    double x = angle_min;
-    for (int i = 0; i < angle_num; ++i, x += angle_bin) {
-        xaxis(i) = x;
-        u(i)     = 0.5*x*x;
-    }
-
-    // Setup angle nodes
-    m_psf_angle.nodes(xaxis);
-
-    // Get maximum angle
-    m_psf_angle_max = xaxis(angle_num-1);
-
-    // Loop over all energy bins
-    for (int ie = 0; ie < m_psf_bins.nenergies(); ++ie) {
-
-        // Get mean energy of bin
-        double energy = m_psf_bins.energy(ie);
-
-        // Get scale at specified energy
-        double scale = psf_scale(energy);
-
-        // Loop over all cos theta bins
-        for (int ic = 0; ic < m_psf_bins.ncostheta(); ++ic) {
-
-            // Extract PSF parameters
-            int    inx   = m_psf_bins.index(ie,ic);
-            double ncore = v_ncore(inx);
-            double sigma = v_sigma(inx);
-            double gcore = v_gcore(inx);
-            double gtail = v_gtail(inx);
-
-            // Evaluate ntail
-            double denom = psf_base_value(10.0, gtail);
-            double ntail = (denom != 0.0) 
-                           ? ncore * psf_base_value(10.0, gcore) / denom : 0.0;
-
-            // Calculate PSF dependence
-            GVector psf = ncore * psf_base_vector(u, gcore) +
-                          ntail * psf_base_vector(u, gtail);
-
-            // Normalize PSF vector to identical amplitudes at smallest angular
-            // distance. This allows for accurate interpolation afterwards
-            double norm = 1.0 / psf(0);
-            psf *= norm;
-
-            // Evaluate angular separation
-            double  stretch = sigma * scale;
-            GVector delta   = xaxis * stretch;
-
-            // Calculate PSF normalization using trapezoid rule. Note that 
-            // normalization to unity would required to multiply the binsize
-            // 'angle_bin' with the 'stretch' factor. We would then have to 
-            // write:
-            //  sum *= 0.5 * twopi * stretch * angle_bin;
-            //  norm = 1.0 / sum
-            // However, to keep the normalization values rather independent
-            // of energy, we multiply the normalization factors by
-            // 'stretch^2'. In the PSF routines we then have to devide
-            // 'norm' by 'stretch^2'.
-            double sum = 0.0;
-            for (int i = 1; i < angle_num; ++i) {
-                if (delta(i) >= max_sep)
-                    psf(i) = 0.0;
-                else
-                    sum += (psf(i)*sin(delta(i)) + psf(i-1)*sin(delta(i-1)));
-            }
-            sum *= 0.5 * twopi * angle_bin;
-            norm = stretch / sum;
-
-            // Store PSF information
-            m_norm[inx]  = norm;
-            m_sigma[inx] = sigma;
-
-            // Store PSF vector
-            int ipsf = inx * angle_num;
-            for (int i = 0; i < angle_num; ++i, ++ipsf)
-                m_psf[ipsf] = psf(i);
-
-        } // endfor: looped over cos theta
-    } // endfor: looped over energies
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Append PSF HDUs to FITS file
- *
- * @param[in] file FITS file into which the PSF HDUs will be appended
- *
- * Append 4 HDUs to the FITS file:
- * PBOUNDS (PSF energy and zenith angle boundaries)
- * PNORM (PSF normalization array)
- * PSIGMA (PSF sigma array)
- * PSF (PSF vectors)
- ***************************************************************************/
-void GLATResponse::psf_append(GFits& file) const
-{
-    // Get PSF boundary table
-    GFitsBinTable* hdu_bounds = new GFitsBinTable;
-    hdu_bounds->extname("PBOUNDS");
-    m_psf_bins.write(hdu_bounds);
-
-    // Build PSF tables and images
-    int naxes2[] = {m_psf_bins.nenergies(), m_psf_bins.ncostheta()};
-    int naxes3[] = {angle_num, m_psf_bins.nenergies(), m_psf_bins.ncostheta()};
-    GFitsImageDouble* image_norm  = new GFitsImageDouble(2, naxes2, m_norm);
-    GFitsImageDouble* image_sigma = new GFitsImageDouble(2, naxes2, m_sigma);
-    GFitsImageDouble* image_psf   = new GFitsImageDouble(3, naxes3, m_psf);
-
-    // Construct PSF HDUs
-    image_norm->extname("PNORM");
-    image_sigma->extname("PSIGMA");
-    image_psf->extname("PSF");
-
-    // Append HDUs to FITS file
-    file.append(hdu_bounds);
-    file.append(image_norm);
-    file.append(image_sigma);
-    file.append(image_psf);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Returns PSF scale
- *
- * @param[in] energy Energy at which the PSF scale should be computed (MeV).
- *
- * The PSF size scales as
- *   \f$scale=\sqrt{c_0^2 + (c_1 \times t)^2}\f$
- * with
- *   \f$t = (0.01*E)^{-0.8}\f$
- * where E is the energy in MeV.
- * The coefficients \f$c_0\f$ and  \f$c_1\f$ dependend on the section:
- * Front: \f$c_0 = 3.77 \times 10^{-4}\f$, \f$c_1= 5.8 \times 10^{-2}\f$
- * Back:  \f$c_0 = 1.3  \times 10^{-3}\f$, \f$c_1= 9.6 \times 10^{-2}\f$
- ***************************************************************************/
-double GLATResponse::psf_scale(const double& energy) const
-{
-    int m_section = 0; //!< DUMMY
-
-    // Get section dependent coefficients
-    const double *c0;
-    const double *c1;
-    if (m_section == 0) {   // front
-        c0 = &scale_front_c0;
-        c1 = &scale_front_c1;
-    }
-    else {                  // back
-        c0 = &scale_back_c0;
-        c1 = &scale_back_c1;
-    }
-
-    // Angular resolution scales as a powerlaw with index -0.80
-    double t = pow(0.01*energy,-0.80);
-
-    // Get scaling
-    double c1t   = *c1 * t;
-    double scale = sqrt(*c0 * *c0 + c1t * c1t);
-
-    // Return scaling
-    return scale;
-}
-
-
-/***********************************************************************//**
- * @brief Returns PSF scale for logarithmic energy
- *
- * @param[in] logE Base 10 logarithmic energy at which the PSF scale should 
- *            be computed (MeV).
- *
- * The PSF size scales as
- *   \f$scale=\sqrt{c_0^2 + (c_1 \times t)^2}\f$
- * with
- *   \f$t = (0.01*(10^E))^{-0.8}\f$
- * where E is the energy in MeV.
- * The coefficients \f$c_0\f$ and  \f$c_1\f$ dependend on the section:
- * Front: \f$c_0 = 3.77 \times 10^{-4}\f$, \f$c_1= 5.8 \times 10^{-2}\f$
- * Back:  \f$c_0 = 1.3  \times 10^{-3}\f$, \f$c_1= 9.6 \times 10^{-2}\f$
- ***************************************************************************/
-double GLATResponse::psf_scale_log(const double& logE) const
-{
-    int m_section = 0; //!< DUMMY
-
-    // Get section dependent coefficients
-    const double *c0;
-    const double *c1;
-    if (m_section == 0) {   // front
-        c0 = &scale_front_c0;
-        c1 = &scale_front_c1;
-    }
-    else {                  // back
-        c0 = &scale_back_c0;
-        c1 = &scale_back_c1;
-    }
-
-    // Angular resolution scales as a powerlaw with index -0.80
-    double t = scale_factor_log * pow(scale_base_log, logE);
-
-    // Get scaling
-    double c1t   = *c1 * t;
-    double scale = sqrt(*c0 * *c0 + c1t * c1t);
-
-    // Return scaling
-    return scale;
-}
-
-
-/***********************************************************************//**
- * @brief Returns PSF basis function
- *
- * @param[in] u angular distance squared
- * @param[in] gamma Powerlaw index
- *
- * This method returns the PSF basis function for a single value.
- * The PSF basis functions is defined by
- *   \f$psf(u,\gamma) = (1.0 - 1.0/\gamma) (1.0 + u/\gamma)^{-\gamma}\f$
- * where
- *   \f$u\f$ is an angle^2 (typically the scaled angular distance squared)
- *   \f$\gamma\f$ is a powerlaw index
- ***************************************************************************/
-double GLATResponse::psf_base_value(const double& u, const double& gamma) const
-{
-    // Evaluate PSF basis function
-    double invgamma = 1.0/gamma;
-    double c0       = 1.0 - invgamma;
-    double c1       = 1.0 + u * invgamma;
-    double result   = c0 * pow(c1,-gamma);
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Returns PSF basis function
- *
- * @param[in] u Vector of angular distance squared
- * @param[in] gamma Powerlaw index
- *
- * See GLATResponse::psf_base_value for more information.
- ***************************************************************************/
-GVector GLATResponse::psf_base_vector(const GVector& u, const double& gamma) const
-{
-    // Evaluate PSF basis function
-    double  invgamma = 1.0/gamma;
-    double  c0       = 1.0 - invgamma;
-    GVector c1       = 1.0 + u * invgamma;
-    GVector result   = c0 * pow(c1,-gamma);
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GLATResponse::psf_init_members(void)
+void GLATPsf::init_members(void)
 {
-    // Initialise PSF members
-    m_psf_angle_max  = 0.0;
-    m_psf            = NULL;
-    m_norm           = NULL;
-    m_sigma          = NULL;
+    // Initialise members
+    m_rpsf_bins.clear();
+    m_ncore.clear();
+    m_sigma.clear();
+    m_gcore.clear();
+    m_gtail.clear();
+    m_scale.clear();
+    m_ltcube_logE = 0.0;
 
     // Return
     return;
@@ -536,39 +317,19 @@ void GLATResponse::psf_init_members(void)
 
 /***********************************************************************//**
  * @brief Copy class members
+ *
+ * @param[in] psf Point spread function.
  ***************************************************************************/
-void GLATResponse::psf_copy_members(const GLATResponse& rsp)
+void GLATPsf::copy_members(const GLATPsf& psf)
 {
-    // Copy attributes
-    m_psf_bins      = rsp.m_psf_bins;
-    m_psf_angle     = rsp.m_psf_angle;
-    m_psf_angle_max = rsp.m_psf_angle_max;
-
-    // Copy arrays
-    if (rsp.m_psf != NULL) {
-        int size = m_psf_bins.size() * angle_num;
-        if (size > 0) {
-            m_psf = new double[size];
-            for (int i = 0; i < size; ++i)
-                m_psf[i] = rsp.m_psf[i];
-        }
-    }
-    if (rsp.m_norm != NULL) {
-        int size = m_psf_bins.size();
-        if (size > 0) {
-            m_norm = new double[size];
-            for (int i = 0; i < size; ++i)
-                m_norm[i] = rsp.m_norm[i];
-        }
-    }
-    if (rsp.m_sigma != NULL) {
-        int size = m_psf_bins.size();
-        if (size > 0) {
-            m_sigma = new double[size];
-            for (int i = 0; i < size; ++i)
-                m_sigma[i] = rsp.m_sigma[i];
-        }
-    }
+    // Copy members
+    m_rpsf_bins   = psf.m_rpsf_bins;
+    m_ncore       = psf.m_ncore;
+    m_sigma       = psf.m_sigma;
+    m_gcore       = psf.m_gcore;
+    m_gtail       = psf.m_gtail;
+    m_scale       = psf.m_scale;
+    m_ltcube_logE = psf.m_ltcube_logE;
 
     // Return
     return;
@@ -577,21 +338,173 @@ void GLATResponse::psf_copy_members(const GLATResponse& rsp)
 
 /***********************************************************************//**
  * @brief Delete class members
-***************************************************************************/
-void GLATResponse::psf_free_members(void)
+ ***************************************************************************/
+void GLATPsf::free_members(void)
 {
-    // Free PSF memory
-    if (m_psf   != NULL) delete [] m_psf;
-    if (m_norm  != NULL) delete [] m_norm;
-    if (m_sigma != NULL) delete [] m_sigma;
+    // Return
+    return;
+}
 
-    // Signal that PSF memory is free
-    m_psf   = NULL;
-    m_norm  = NULL;
-    m_sigma = NULL;
+
+/***********************************************************************//**
+ * @brief Read point spread function from FITS table
+ *
+ * @param[in] hdu FITS table pointer.
+ *
+ * @exception GException::fits_column_not_found
+ *            Effective area column not found
+ * @exception GLATException::inconsistent_response
+ *            Inconsistent response table encountered
+ ***************************************************************************/
+void GLATPsf::read_psf(const GFitsTable* hdu)
+{
+    // Clear arrays
+    m_ncore.clear();
+    m_sigma.clear();
+    m_gcore.clear();
+    m_gtail.clear();
+
+    // Get energy and cos theta binning
+    m_rpsf_bins.read(hdu);
+
+    // Continue only if there are bins
+    int size = m_rpsf_bins.size();
+    if (size > 0) {
+
+        // Allocate arrays
+        m_ncore.reserve(size);
+        m_sigma.reserve(size);
+        m_gcore.reserve(size);
+        m_gtail.reserve(size);
+
+        // Get pointer to columns
+        GFitsTableCol* ncore = ((GFitsTable*)hdu)->column("NCORE");
+        GFitsTableCol* sigma = ((GFitsTable*)hdu)->column("SIGMA");
+        GFitsTableCol* gcore = ((GFitsTable*)hdu)->column("GCORE");
+        GFitsTableCol* gtail = ((GFitsTable*)hdu)->column("GTAIL");
+        if (ncore == NULL)
+            throw GException::fits_column_not_found(G_READ_PSF, "NCORE");
+        if (sigma == NULL)
+            throw GException::fits_column_not_found(G_READ_PSF, "SIGMA");
+        if (gcore == NULL)
+            throw GException::fits_column_not_found(G_READ_PSF, "GCORE");
+        if (gtail == NULL)
+            throw GException::fits_column_not_found(G_READ_PSF, "GTAIL");
+
+        // Check consistency of columns
+        if (ncore->number() != size)
+            throw GLATException::inconsistent_response(G_READ_PSF,
+                                                       ncore->number(), size);
+        if (sigma->number() != size)
+            throw GLATException::inconsistent_response(G_READ_PSF,
+                                                       sigma->number(), size);
+        if (gcore->number() != size)
+            throw GLATException::inconsistent_response(G_READ_PSF,
+                                                       gcore->number(), size);
+        if (gtail->number() != size)
+            throw GLATException::inconsistent_response(G_READ_PSF,
+                                                       gtail->number(), size);
+
+        // Copy data
+        for (int i = 0; i < size; ++i) {
+            m_ncore.push_back(ncore->real(0,i));
+            m_sigma.push_back(sigma->real(0,i));
+            m_gcore.push_back(gcore->real(0,i));
+            m_gtail.push_back(gtail->real(0,i));
+        }
+
+    } // endif: there were bins
 
     // Return
     return;
 }
 
 
+/***********************************************************************//**
+ * @brief Write point spread function into FITS file
+ *
+ * @param[in] file FITS file.
+ *
+ * This method does not write anything if the instance is empty.
+ ***************************************************************************/
+void GLATPsf::write_psf(GFits& file) const
+{
+    // Continue only if there are bins
+    int size = m_rpsf_bins.size();
+    if (size > 0) {
+
+        // Create new binary table
+        GFitsBinTable* hdu_rpsf = new GFitsBinTable;
+
+        // Set table attributes
+        hdu_rpsf->extname("RPSF");
+
+        // Write boundaries into table
+        m_rpsf_bins.write(hdu_rpsf);
+
+        // Allocate floating point vector columns
+        GFitsTableFloatCol col_ncore = GFitsTableFloatCol("NCORE",  1, size);
+        GFitsTableFloatCol col_sigma = GFitsTableFloatCol("SIGMA",  1, size);
+        GFitsTableFloatCol col_gcore = GFitsTableFloatCol("GCORE",  1, size);
+        GFitsTableFloatCol col_gtail = GFitsTableFloatCol("GTAIL",  1, size);
+
+        // Fill columns
+        for (int i = 0; i < size; ++i) {
+            col_ncore(0,i) = m_ncore[i];
+            col_sigma(0,i) = m_sigma[i];
+            col_gcore(0,i) = m_gcore[i];
+            col_gtail(0,i) = m_gtail[i];
+        }
+
+        // Append columns to table
+        hdu_rpsf->append_column(col_ncore);
+        hdu_rpsf->append_column(col_sigma);
+        hdu_rpsf->append_column(col_gcore);
+        hdu_rpsf->append_column(col_gtail);
+        
+        // Append HDU to FITS file
+        file.append(hdu_rpsf);
+
+    } // endif: there were data to write
+
+    // Return
+    return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                                 Friends                                 =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] psf Point spread function.
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GLATPsf& psf)
+{
+     // Write point spread function in output stream
+    os << psf.print();
+
+    // Return output stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] psf Point spread function.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GLATPsf& psf)
+{
+    // Write point spread function into logger
+    log << psf.print();
+
+    // Return logger
+    return log;
+}
