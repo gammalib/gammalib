@@ -72,6 +72,10 @@ public:
     public:
         no_gti(std::string origin, std::string message = "");
     };
+    class no_ltcube : public GLATExceptionHandler {
+    public:
+        no_ltcube(std::string origin, std::string message = "");
+    };
     class wcs_incompatible : public GLATExceptionHandler {
     public:
         wcs_incompatible(std::string origin, std::string name,
