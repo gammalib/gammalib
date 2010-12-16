@@ -134,6 +134,7 @@ GResponse& GResponse::operator= (const GResponse& rsp)
  * function (IRF). It may be overwritted by a specific method in the derived
  * class that drops response terms that are not used.
  ***************************************************************************/
+/*
 double GResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
                       const GTime& obsTime,
                       const GSkyDir&  srcDir, const GEnergy& srcEng,
@@ -149,7 +150,7 @@ double GResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
     // Return IRF value
     return irf;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Return value of diffuse instrument response function.
@@ -193,6 +194,7 @@ double GResponse::diffrsp(const GEvent& event, const GModel& model,
  * response function (IRF). It may be overwritted by a specific method in the
  * derived class that drops response terms that are not used.
  ***************************************************************************/
+/*
 double GResponse::nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
                        const GTime& srcTime,  const GPointing& pnt,
                        const GRoi& roi, const GEbounds& ebds,
@@ -208,7 +210,7 @@ double GResponse::nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
     // Return integrated IRF value
     return nirf;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Return energy dispersion integral for the case of no energy

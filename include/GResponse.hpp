@@ -73,14 +73,14 @@ public:
     // Reponse function computation methods
     virtual double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                        const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                       const GPointing& pnt) const;
+                       const GPointing& pnt) const = 0;
     virtual double diffrsp(const GEvent& event, const GModel& model,
                            const GEnergy& srcEng, const GTime& srcTime,
                            const GPointing& pnt) const;
     virtual double live(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                         const GPointing& pnt) const = 0;
-    virtual double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                        const GPointing& pnt) const = 0;
+    //virtual double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+    //                    const GPointing& pnt) const = 0;
     virtual double psf(const GInstDir& obsDir,
                        const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                        const GPointing& pnt) const = 0;
@@ -92,7 +92,7 @@ public:
                          const GPointing& pnt) const = 0;
     virtual double nirf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                         const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
-                        const GGti& gti) const;
+                        const GGti& gti) const = 0;
     virtual double npsf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                         const GPointing& pnt, const GRoi& roi) const = 0;
     virtual double nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
