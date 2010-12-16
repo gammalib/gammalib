@@ -24,6 +24,7 @@
 #include <iostream>
 #include "GLog.hpp"
 #include "GLATLtCubeMap.hpp"
+#include "GLATAeff.hpp"
 #include "GGti.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
@@ -54,6 +55,7 @@ public:
     GLATLtCube& operator= (const GLATLtCube& cube);
     double      operator() (const GSkyDir& dir, const GEnergy& energy, _ltcube_ctheta fct);
     double      operator() (const GSkyDir& dir, const GEnergy& energy, _ltcube_ctheta_phi fct);
+    double      operator() (const GSkyDir& dir, const GEnergy& energy, const GLATAeff& aeff);
 
     // Methods
     void        clear(void);

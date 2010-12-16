@@ -180,8 +180,64 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, _ltcube_ctheta_phi fct)
     // evaluation without any phi-dependence.
     for (int iphi = 0, i = m_num_ctheta; iphi < m_num_phi; ++iphi) {
         double p = phi(iphi);
-        for (int itheta = 0; itheta < m_num_ctheta; ++itheta, ++i)
+        for (int itheta = 0; itheta < m_num_ctheta; ++itheta, ++i) {
             sum += m_map(pixel, i) * (*fct)(costheta(itheta), p);
+        }
+    }
+
+    // Return sum
+    return sum;
+}
+
+
+/***********************************************************************//**
+ * @brief Sum effective area multiplied by livetime over zenith and
+ *        (optionally) azimuth angles
+ *
+ * @param[in] dir Sky direction.
+ * @param[in] aeff Effective area.
+ *
+ * Computes
+ * \f[\sum_{\cos \theta, \phi} T_{\rm live}(\cos \theta, \phi) 
+ *    A_{\rm eff}(\cos \theta, \phi)\f]
+ * where
+ * \f$T_{\rm live}(\cos \theta, \phi)\f$ is the livetime as a function of
+ * the cosine of the zenith and of the azimuth angle, and
+ * \f$A_{\rm eff}(\cos \theta, \phi)\f$ is the effective area that depends
+ * on the cosine of the zenith angle and of the azimuth angle.
+ * This method assumes that \f$T_{\rm live}(\cos \theta, \phi)\f$ is
+ * stored as a set of maps in a 2D array with \f$\cos \theta\f$ being the
+ * most rapidely varying parameter and with the first map starting at
+ * index m_num_ctheta (the first m_num_ctheta maps are the livetime cube
+ * maps without any \f$\phi\f$ dependence).
+ ***************************************************************************/
+double GLATLtCubeMap::operator() (const GSkyDir& dir, const GLATAeff& aeff)
+{
+    // Get map index
+    int pixel = m_map.dir2pix(dir);
+
+    // Initialise sum
+    double sum = 0.0;
+
+    // Circumvent const correctness
+    GLATAeff* fct = ((GLATAeff*)&aeff);
+
+    // If livetime cube and response have phi dependence then sum over
+    // zenith and azimuth. Note that the map index starts with m_num_ctheta
+    // as the first m_num_ctheta maps correspond to an evaluation without
+    // any phi-dependence.
+    if (hasphi() && aeff.hasphi()) {
+        for (int iphi = 0, i = m_num_ctheta; iphi < m_num_phi; ++iphi) {
+            double p = phi(iphi);
+            for (int itheta = 0; itheta < m_num_ctheta; ++itheta, ++i)
+                sum += m_map(pixel, i) * fct->ltcube_ctheta_phi(costheta(itheta), p);
+        }
+    }
+
+    // ... otherwise sum only over zenith angle
+    else {
+        for (int i = 0; i < m_num_ctheta; ++i)
+            sum += m_map(pixel, i) * fct->ltcube_ctheta(costheta(i));
     }
 
     // Return sum

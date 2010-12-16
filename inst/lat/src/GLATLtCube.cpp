@@ -224,6 +224,54 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
 }
 
 
+/***********************************************************************//**
+ * @brief Sum function multiplied by efficiency corrected livetime over
+ *        zenith and (optionally) azimuth angles
+ *
+ * @param[in] dir Sky direction.
+ * @param[in] energy Energy.
+ * @param[in] aeff Effective area.
+ *
+ * Computes
+ * \f[\sum_{\cos \theta, \phi} T_{\rm corr.~live}(\cos \theta, \phi)
+ *    A_{\rm eff}(\cos \theta, \phi)\f]
+ * where
+ * \f$T_{\rm corr.~live}(\cos \theta, \phi)\f$ is the efficiency corrected
+ * livetime as a function of the cosine of the zenith and of the azimuth
+ * angle, and
+ * \f$A_{\rm eff}(\cos \theta, \phi)\f$ is the effective area that depends
+ * on the cosine of the zenith angle and (optionally) of the azimuth angle.
+ *
+ * @todo Implement computation of efficiency factors
+ ***************************************************************************/
+double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
+                               const GLATAeff& aeff)
+{
+    // Compute exposure
+    double exposure = m_exposure(dir, aeff);
+
+    // Optionally compute livetime factors for trigger rate- and
+    // energy-dependent efficiency corrections
+    if (m_livetime_correct) {
+    
+        // Compute correction factors
+        double f1 = 1.0;
+        double f2 = 0.0;
+        //m_efficiencyFactor->getLivetimeFactors(energy, f1, f2);
+
+        // Compute correction
+        double correction = m_weighted_exposure(dir, aeff);
+
+        // Set exposure
+        exposure = f1 * exposure + f2 * correction;
+
+    } // endif: corrections requested
+
+    // Return exposure
+    return exposure;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
