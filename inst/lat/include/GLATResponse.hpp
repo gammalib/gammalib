@@ -20,10 +20,12 @@
 #define GLATRESPONSE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <vector>
+#include "GLATAeff.hpp"
 #include "GLATResponseTable.hpp"
-#include "GEvent.hpp"
 #include "GLATEventAtom.hpp"
 #include "GLATEventBin.hpp"
+#include "GEvent.hpp"
 #include "GResponse.hpp"
 #include "GPointing.hpp"
 #include "GInstDir.hpp"
@@ -65,13 +67,21 @@ public:
     std::string   print(void) const;
     
     // Implemented response computation methods
+    double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+               const GPointing& pnt) const;
+    double nirf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
+                const GGti& gti) const;
+
+
     double diffrsp(const GEvent& event, const GModel& model,
                    const GEnergy& srcEng, const GTime& srcTime,
                    const GPointing& pnt) const;
     double live(const GSkyDir&  srcDir, const GEnergy& srcEng,
                 const GTime& srcTime, const GPointing& pnt) const;
-    double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                const GPointing& pnt) const;
+    //double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+    //            const GPointing& pnt) const;
     double psf(const GInstDir& obsDir,
                const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                const GPointing& pnt) const;
@@ -89,23 +99,19 @@ public:
                   const GTime& srcTime, const GPointing& pnt, const GGti& gti) const;
 
     // Other Methods
-    double  aeff(const double& logE, const double& ctheta);
-    void    aeff_ctheta_min(const double& ctheta);
-    double  aeff_ctheta_min(void) const;
+    int       size(void) const { return m_aeff.size(); }
+    GLATAeff* aeff(const int& index) const;
+    void      save(const std::string& rspname) const;
+    
+    //double  aeff(const double& logE, const double& ctheta);
+    //void    aeff_ctheta_min(const double& ctheta);
+    //double  aeff_ctheta_min(void) const;
     double  psf(const double& delta, const double& logE, const double& ctheta);
     GVector psf(const GVector& delta, const double& logE, const double& ctheta);
-    void    save(const std::string& rspname) const;
 
 private:
-    // Private Effective Area methods
-    void    aeff_init(void);
-    void    aeff_append(GFits& file) const;
-    void    aeff_init_members(void);
-    void    aeff_copy_members(const GLATResponse& rsp);
-    void    aeff_free_members(void);
-
     // Private PSF methods
-    void    psf_init(void);
+    void    psf_init(std::string section);
     void    psf_append(GFits& file) const;
     double  psf_scale(const double& energy) const;
     double  psf_scale_log(const double& logE) const;
@@ -116,7 +122,7 @@ private:
     void    psf_free_members(void);
 
     // Private energy dissipation methods
-    void    edisp_init(void);
+    void    edisp_init(std::string section);
     void    edisp_append(GFits& file) const;
     void    edisp_init_members(void);
     void    edisp_copy_members(const GLATResponse& rsp);
@@ -134,11 +140,6 @@ private:
                         const GEnergy& srcEng, const GTime& srcTime,
                         const GPointing& pnt) const;
 
-    // Private Aeff data
-    GLATResponseTable m_aeff_bins;        //!< Aeff energy and cos theta binning
-    double*           m_aeff;             //!< Aeff array
-    double            m_aeff_ctheta_min;  //!< Minimum valid cos(theta)
-
     // Private PSF data
     GLATResponseTable m_psf_bins;        //!< PSF energy and cos theta binning
     GNodeArray        m_psf_angle;       //!< PSF vector binning
@@ -150,10 +151,12 @@ private:
     // Private Edisp data
     GLATResponseTable m_edisp_bins;      //!< Edisp energy and cos theta binning
 
-    // Other private data
-    std::string m_rsptype;   //!< Response type ('front','back')
-    int         m_section;   //!< PSF section (0=front, 1=back)
-
+    // Private members
+    bool                   m_hasfront;    //!< Front IRF loaded
+    bool                   m_hasback;     //!< Back IRG loaded
+    std::vector<GLATAeff*> m_aeff;        //!< Effective areas
+    std::vector<GLATAeff*> m_psf1;         //!< Point spread functions
+    std::vector<GLATAeff*> m_edisp;       //!< Energy dispersions
 };
 
 #endif /* GLATRESPONSE_HPP */
