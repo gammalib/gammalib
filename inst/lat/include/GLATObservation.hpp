@@ -24,6 +24,7 @@
 #include "GObservation.hpp"
 #include "GLATResponse.hpp"
 #include "GLATPointing.hpp"
+#include "GLATLtCube.hpp"
 #include "GTime.hpp"
 #include "GModel.hpp"
 #include "GModels.hpp"
@@ -60,6 +61,7 @@ public:
     void          load_binned(const std::string& cntmap_name, const std::string& expmap_name,
                               const std::string& ltcube_name);
     GLATResponse* response(void) const { return m_response; }
+    GLATLtCube*   ltcube(void) const { return m_ltcube; }
 
 protected:
     // Protected methods
@@ -70,6 +72,7 @@ protected:
     // Protected members
     GLATResponse* m_response;     //!< Pointer to instrument response functions
     GLATPointing* m_pointing;     //!< Pointer to pointing direction
+    GLATLtCube*   m_ltcube;       //!< Pointer to lifetime cube
 };
 
 #endif /* GLATOBSERVATION_HPP */
