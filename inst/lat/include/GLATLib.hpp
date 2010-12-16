@@ -26,9 +26,12 @@
 #include "GLATInstDir.hpp"
 #include "GLATPointing.hpp"
 #include "GLATResponse.hpp"
+#include "GLATResponseTable.hpp"
 #include "GLATAeff.hpp"
+#include "GLATPsf.hpp"
+#include "GLATEdisp.hpp"
+#include "GLATMeanPsf.hpp"
 #include "GLATLtCube.hpp"
 #include "GLATLtCubeMap.hpp"
-#include "GLATMeanPsf.hpp"
 
 #endif /* GLATLIB_HPP */
