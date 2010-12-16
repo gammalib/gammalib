@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include <iostream>
 #include "GLog.hpp"
 #include "GLATPointing.hpp"
@@ -70,9 +71,6 @@ public:
     int          ncostheta(void) const { return m_edisp_bins.ncostheta(); }
     //double       costhetamin(void) const { return m_min_ctheta; }
     //void         costhetamin(const double& ctheta);
-    //void         ltcube_energy(const GEnergy& energy);
-    //double       ltcube_ctheta(const double& costheta);
-    //double       ltcube_ctheta_phi(const double& costheta, const double& phi);
     bool         hasphi(void) const { return false; }
     std::string  print(void) const;
 
@@ -89,7 +87,6 @@ private:
     std::vector<double> m_norm;         //!< Energy dispersion normalization
     std::vector<double> m_ls1;          //!< Energy dispersion ...
     std::vector<double> m_scale;        //!< Energy dispersion scaling parameters
-    double              m_ltcube_logE;  //!< log10 energy for ltcube methods
 };
 
 #endif /* GLATEDISP_HPP */

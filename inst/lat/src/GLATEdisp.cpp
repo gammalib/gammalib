@@ -317,7 +317,6 @@ void GLATEdisp::init_members(void)
     m_norm.clear();
     m_ls1.clear();
     m_scale.clear();
-    m_ltcube_logE = 0.0;
 
     // Return
     return;
@@ -332,11 +331,11 @@ void GLATEdisp::init_members(void)
 void GLATEdisp::copy_members(const GLATEdisp& edisp)
 {
     // Copy members
-    m_edisp_bins  = edisp.m_edisp_bins;
-    m_norm        = edisp.m_norm;
-    m_ls1         = edisp.m_ls1;
-    m_scale       = edisp.m_scale;
-    m_ltcube_logE = edisp.m_ltcube_logE;
+    m_edisp_bins = edisp.m_edisp_bins;
+    m_norm       = edisp.m_norm;
+    m_ls1        = edisp.m_ls1;
+    m_scale      = edisp.m_scale;
+
     // Return
     return;
 }
