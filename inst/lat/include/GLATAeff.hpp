@@ -21,7 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-//#include <vector>
+#include <vector>
 #include <iostream>
 #include "GLog.hpp"
 #include "GLATPointing.hpp"
@@ -54,6 +54,7 @@ public:
     // Operators
     GLATAeff& operator= (const GLATAeff& aeff);
     double    operator() (const double& logE, const double& ctheta);
+    double    operator() (const double& logE, const double& ctheta, const double& phi);
     double    operator() (const GSkyDir& srcDir, const GEnergy& srcEng,
                           const GTime& srcTime, const GLATPointing& pnt);
 
@@ -61,15 +62,14 @@ public:
     void         clear(void);
     GLATAeff*    clone(void) const;
     void         load(const std::string filename);
+    void         save(const std::string filename, bool clobber = false);
     void         read(const GFits* file);
+    void         write(GFits& file) const;
     int          size(void) const { return nenergies()*ncostheta(); }
     int          nenergies(void) const { return m_aeff_bins.nenergies(); }
     int          ncostheta(void) const { return m_aeff_bins.ncostheta(); }
     double       costhetamin(void) const { return m_min_ctheta; }
     void         costhetamin(const double& ctheta);
-    void         ltcube_energy(const GEnergy& energy);
-    double       ltcube_ctheta(const double& costheta);
-    double       ltcube_ctheta_phi(const double& costheta, const double& phi);
     bool         hasphi(void) const { return false; }
     std::string  print(void) const;
 
@@ -79,12 +79,12 @@ private:
     void copy_members(const GLATAeff& aeff);
     void free_members(void);
     void read_aeff(const GFitsTable* hdu);
+    void write_aeff(GFits& file) const;
     
     // Protected members
-    GLATResponseTable m_aeff_bins;      //!< Aeff energy and cos theta binning
-    double*           m_aeff;           //!< Aeff array
-    double            m_min_ctheta;     //!< Minimum valid cos(theta)
-    double            m_ltcube_logE;    //!< log10 energy for ltcube methods
+    GLATResponseTable   m_aeff_bins;    //!< Aeff energy and cos theta binning
+    std::vector<double> m_aeff;         //!< Aeff array
+    double              m_min_ctheta;   //!< Minimum valid cos(theta)
 };
 
 #endif /* GLATAEFF_HPP */

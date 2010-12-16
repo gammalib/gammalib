@@ -23,7 +23,9 @@
 #include "GLATAeff.hpp"
 #include "GLATException.hpp"
 #include "GTools.hpp"
+#include "GFitsBinTable.hpp"
 #include "GFitsTableCol.hpp"
+#include "GFitsTableFloatCol.hpp"
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -145,11 +147,31 @@ GLATAeff& GLATAeff::operator= (const GLATAeff& aeff)
 /***********************************************************************//**
  * @brief Return effective area in units of cm2
  *
- * @param[in] logE Logarithm of the true photon energy (MeV).
- * @param[in] ctheta Cosine of the zenith angle with respect to the pointing 
- *            axis.
+ * @param[in] logE Log10 of the true photon energy (MeV).
+ * @param[in] ctheta Cosine of zenith angle.
  ***************************************************************************/
 double GLATAeff::operator() (const double& logE, const double& ctheta)
+{
+    // Get effective area value
+    double aeff = (ctheta >= m_min_ctheta) 
+                  ? m_aeff_bins.interpolate(logE, ctheta, m_aeff) : 0.0;
+
+    // Return effective area value
+    return aeff;
+}
+
+
+/***********************************************************************//**
+ * @brief Return effective area in units of cm2
+ *
+ * @param[in] logE Log10 of the true photon energy (MeV).
+ * @param[in] ctheta Cosine of zenith angle.
+ * @param[in] phi Azimuth angle.
+ *
+ * @todo Phi integration not yet implemented.
+ ***************************************************************************/
+double GLATAeff::operator() (const double& logE, const double& ctheta,
+                             const double& phi)
 {
     // Get effective area value
     double aeff = (ctheta >= m_min_ctheta) 
@@ -230,6 +252,28 @@ void GLATAeff::load(const std::string filename)
 
 
 /***********************************************************************//**
+ * @brief Save effective area into FITS file
+ *
+ * @param[in] filename FITS file.
+ * @param[in] clobber Overwrite existing file?.
+ ***************************************************************************/
+void GLATAeff::save(const std::string filename, bool clobber)
+{
+    // Open FITS file
+    GFits fits(filename);
+
+    // Write effective area into file
+    write(fits);
+
+    // Close FITS file
+    fits.save(clobber);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Read effective area from FITS file
  *
  * @param[in] fits FITS file pointer.
@@ -256,10 +300,26 @@ void GLATAeff::read(const GFits* fits)
 
 
 /***********************************************************************//**
+ * @brief Write effective area into FITS file
+ *
+ * @param[in] fits FITS file.
+ *
+ * @todo Write also phi and rate HDUs if they exist.
+ ***************************************************************************/
+void GLATAeff::write(GFits& fits) const
+{
+    // Write effective area
+    write_aeff(fits);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set minimum cos(theta) angle for effective area access
  *
- * @param[in] ctheta Cosine of the maximum zenith angle for which effective
- *                   areas will be returned (0 is returned for larger values)
+ * @param[in] ctheta Cosine of maximum zenith angle.
  ***************************************************************************/
 void GLATAeff::costhetamin(const double& ctheta)
 {
@@ -268,55 +328,6 @@ void GLATAeff::costhetamin(const double& ctheta)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Set livetime cube energy
- *
- * @param[in] energy Livetime cube energy.
- *
- * The livetime cube energy is used by the ltcube_ctheta() and
- * ltcube_ctheta_phi() methods that need an energy. Since we cannot pass
- * the energy as a method parameter we save it as a member of the class
- * so that it is avaible to the methods.
- ***************************************************************************/
-void GLATAeff::ltcube_energy(const GEnergy& energy)
-{
-    // Set energy
-    m_ltcube_logE = log10(energy.MeV());
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Returns the effective area as function of cos(theta) for the
- *        livetime cube energy
- *
- * @param[in] costheta Cosine of zenith angle.
- ***************************************************************************/
-double GLATAeff::ltcube_ctheta(const double& costheta)
-{
-    // Return
-    return (*this)(m_ltcube_logE, costheta);
-}
-
-
-/***********************************************************************//**
- * @brief Returns the effective area as function of cos(theta) for the
- *        livetime cube energy
- *
- * @param[in] costheta Cosine of zenith angle.
- * @param[in] phi Azimuth angle.
- *
- * @todo Not yet implemented.
- ***************************************************************************/
-double GLATAeff::ltcube_ctheta_phi(const double& costheta, const double& phi)
-{
-    // Return
-    return (*this)(m_ltcube_logE, costheta);
 }
 
 
@@ -351,7 +362,7 @@ void GLATAeff::init_members(void)
 {
     // Initialise members
     m_aeff_bins.clear();
-    m_aeff       = NULL;
+    m_aeff.clear();
     m_min_ctheta = 0.0;
 
     // Return
@@ -368,17 +379,8 @@ void GLATAeff::copy_members(const GLATAeff& aeff)
 {
     // Copy attributes
     m_aeff_bins  = aeff.m_aeff_bins;
+    m_aeff       = aeff.m_aeff;
     m_min_ctheta = aeff.m_min_ctheta;
-
-    // Copy effective area array
-    if (aeff.m_aeff != NULL) {
-        int size = m_aeff_bins.size();
-        if (size > 0) {
-            m_aeff = new double[size];
-            for (int i = 0; i < size; ++i)
-                m_aeff[i] = aeff.m_aeff[i];
-        }
-    }
 
     // Return
     return;
@@ -390,12 +392,6 @@ void GLATAeff::copy_members(const GLATAeff& aeff)
  ***************************************************************************/
 void GLATAeff::free_members(void)
 {
-    // Free effective area memory
-    if (m_aeff != NULL) delete [] m_aeff;
-
-    // Signal that effective area memory is free
-    m_aeff = NULL;
-
     // Return
     return;
 }
@@ -415,6 +411,9 @@ void GLATAeff::free_members(void)
  ***************************************************************************/
 void GLATAeff::read_aeff(const GFitsTable* hdu)
 {
+    // Clear array
+    m_aeff.clear();
+
     // Get energy and cos theta bins in response table
     m_aeff_bins.read(hdu);
 
@@ -425,11 +424,8 @@ void GLATAeff::read_aeff(const GFitsTable* hdu)
     int size = m_aeff_bins.size();
     if (size > 0) {
 
-        // Free effective area memory
-        if (m_aeff != NULL) delete [] m_aeff;
-
-        // Allocate memory for effective area
-        m_aeff = new double[size];
+        // Allocate arrays
+        m_aeff.reserve(size);
 
         // Get pointer to effective area column
         GFitsTableCol* ptr = ((GFitsTable*)hdu)->column("EFFAREA");
@@ -443,7 +439,7 @@ void GLATAeff::read_aeff(const GFitsTable* hdu)
 
         // Copy data and convert from m2 into cm2
         for (int i = 0; i < size; ++i)
-            m_aeff[i] = ptr->real(0,i) * 1.0e4;
+            m_aeff.push_back(ptr->real(0,i) * 1.0e4);
 
     } // endif: there were effective area bins
 
@@ -451,6 +447,47 @@ void GLATAeff::read_aeff(const GFitsTable* hdu)
     return;
 }
 
+
+/***********************************************************************//**
+ * @brief Write effective area into FITS file
+ *
+ * @param[in] file FITS file.
+ *
+ * This method does not write anything if the instance is empty.
+ ***************************************************************************/
+void GLATAeff::write_aeff(GFits& file) const
+{
+    // Continue only if there are bins
+    int size = m_aeff_bins.size();
+    if (size > 0) {
+
+        // Create new binary table
+        GFitsBinTable* hdu_aeff = new GFitsBinTable;
+
+        // Set table attributes
+        hdu_aeff->extname("EFFECTIVE AREA");
+
+        // Write boundaries into table
+        m_aeff_bins.write(hdu_aeff);
+
+        // Allocate floating point vector columns
+        GFitsTableFloatCol col_aeff = GFitsTableFloatCol("EFFAREA",  1, size);
+
+        // Fill columns
+        for (int i = 0; i < size; ++i)
+            col_aeff(0,i) = m_aeff[i];
+
+        // Append columns to table
+        hdu_aeff->append_column(col_aeff);
+        
+        // Append HDU to FITS file
+        file.append(hdu_aeff);
+
+    } // endif: there were data to write
+
+    // Return
+    return;
+}
 
 
 /*==========================================================================
