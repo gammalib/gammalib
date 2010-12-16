@@ -317,9 +317,9 @@ void GLATObservation::load_unbinned(const std::string& ft1name,
  *
  * @param[in] cntmap_name Counts map or Source map FITS filename
  * @param[in] expmap_name Binned explosure map FITS filename
- * @param[in] ltcube_name Lifetime cube FITS filename
+ * @param[in] ltcube_name Livetime cube FITS filename
  *
- * @todo So far nothing is done with the expmap and the ltcube files.
+ * @todo So far nothing is done with the expmap file.
  *       Approriate loading needs to be implemented.
  *
  * @todo Implement proper GTI loading method that provides correct time
@@ -350,6 +350,10 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
     // Set mean time
     events->time() = 0.5 * (gti()->tstart() + gti()->tstop());
 
+    // Optionally load livetime cube
+    if (ltcube_name.length() > 0)
+        m_ltcube->load(ltcube_name);
+
     // Return
     return;
 }
@@ -372,6 +376,7 @@ void GLATObservation::init_members(void)
     // Initialise members
     m_response = new GLATResponse;
     m_pointing = new GLATPointing;
+    m_ltcube   = new GLATLtCube;
 
     // Return
     return;
@@ -382,18 +387,13 @@ void GLATObservation::init_members(void)
  * @brief Copy class members
  *
  * @param[in] obs Observation to be copied
- *
- * @todo Try to avoid the back pointer if possible, or flesh out a way that
- * makes this more solid. The point is: when events are copied the back
- * pointer to the observation needs to be updated, yet when the copying is
- * done in the events class the class does not known about the observation.
- * Thus, back pointer update has to be done by the observation class.
  ***************************************************************************/
 void GLATObservation::copy_members(const GLATObservation& obs)
 {
     // Copy members
     if (obs.m_response != NULL) m_response = obs.m_response->clone();
     if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
+    if (obs.m_ltcube   != NULL) m_ltcube   = obs.m_ltcube->clone();
 
     // Return
     return;
@@ -408,10 +408,12 @@ void GLATObservation::free_members(void)
     // Free memory
     if (m_response != NULL) delete m_response;
     if (m_pointing != NULL) delete m_pointing;
+    if (m_ltcube   != NULL) delete m_ltcube;
 
     // Mark memory as free
     m_response = NULL;
     m_pointing = NULL;
+    m_ltcube   = NULL;
 
     // Return
     return;
