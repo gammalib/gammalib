@@ -30,7 +30,8 @@
 
 /* __ Constants __________________________________________________________ */
 const std::string lat_caldb      = "../inst/lat/test/irf";
-const std::string lat_irf        = "Pass5_v0";
+//const std::string lat_irf        = "Pass5_v0";
+const std::string lat_irf        = "P6_v3_diff";
 const std::string lat_ft1        = "../inst/lat/test/data/ft1.fits";
 const std::string lat_ft2        = "../inst/lat/test/data/ft2.fits";
 const std::string lat_cntmap     = "../inst/lat/test/data/cntmap.fits";
@@ -63,7 +64,7 @@ void test_response(void)
         rsp.load(lat_irf+"::back");
         std::cout << ".";
         rsp.load(lat_irf);
-//std::cout << std::endl << rsp << std::endl;
+std::cout << std::endl << rsp << std::endl;
         std::cout << ".";
     }
     catch (std::exception &e) {

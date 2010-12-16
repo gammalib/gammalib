@@ -13,33 +13,36 @@ sources = src/GLATObservation.cpp \
           src/GLATEventAtom.cpp \
           src/GLATEventBin.cpp \
           src/GLATResponse.cpp \
+	  src/GLATResponseTable.cpp \
+	  src/GLATAeff.cpp \
+	  src/GLATPsf.cpp \
+	  src/GLATEdisp.cpp \
+	  src/GLATMeanPsf.cpp \
           src/GLATInstDir.cpp \
           src/GLATRoi.cpp \
           src/GLATPointing.cpp \
-          src/GLATResponseTable.cpp \
           src/GLATLtCube.cpp \
           src/GLATLtCubeMap.cpp \
-          src/GLATAeff.cpp \
-          src/GLATPsf.cpp \
-          src/GLATEdisp.cpp \
-          src/GLATMeanPsf.cpp \
           src/GLATException.cpp
 
 # Define headers to be installed
-pkginclude_HEADERS = include/GLATObservation.hpp \
+pkginclude_HEADERS = include/GLATLib.hpp \
+                     include/GLATObservation.hpp \
                      include/GLATEventList.hpp \
                      include/GLATEventCube.hpp \
                      include/GLATEventAtom.hpp \
                      include/GLATEventBin.hpp \
-                     include/GLATPointing.hpp \
-                     include/GLATInstDir.hpp \
-                     include/GLATRoi.hpp \
                      include/GLATResponse.hpp \
                      include/GLATResponseTable.hpp \
-                     include/GLATLtCube.hpp \
-                     include/GLATLtCubeMap.hpp \
-                     include/GLATMeanPsf.hpp \
-                     include/GLATLib.hpp \
+		     include/GLATAeff.hpp \
+		     include/GLATPsf.hpp \
+		     include/GLATEdisp.hpp \
+		     include/GLATMeanPsf.hpp \
+		     include/GLATInstDir.hpp \
+		     include/GLATRoi.hpp \
+		     include/GLATPointing.hpp \
+		     include/GLATLtCube.hpp \
+		     include/GLATLtCubeMap.hpp \
                      include/GLATException.hpp
 
 # Build libtool library
