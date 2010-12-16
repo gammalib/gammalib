@@ -70,10 +70,10 @@ double GLATResponse::edisp(const GEnergy& obsEng,
 /***********************************************************************//**
  * @brief Initialise energy dispersion
  ***************************************************************************/
-void GLATResponse::edisp_init(void)
+void GLATResponse::edisp_init(std::string section)
 {
     // Build filename
-    std::string filename = "edisp_"  + m_rspname + "_" + m_rsptype + ".fits";
+    std::string filename = "edisp_"  + m_rspname + "_" + section + ".fits";
 
     // Open FITS file
     GFits file;

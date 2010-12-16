@@ -218,10 +218,10 @@ GVector GLATResponse::psf(const GVector& delta, const double& logE,
  * The PSF is built using information found in the 'RPSF' table of the
  * calibration database.
  ***************************************************************************/
-void GLATResponse::psf_init(void)
+void GLATResponse::psf_init(std::string section)
 {
     // Build filename
-    std::string filename = "psf_"  + m_rspname + "_" + m_rsptype + ".fits";
+    std::string filename = "psf_"  + m_rspname + "_" + section + ".fits";
 
     // Open FITS file
     GFits file;
@@ -247,7 +247,7 @@ void GLATResponse::psf_init(void)
     if (m_sigma != NULL) delete [] m_sigma;
 
     // Allocate memory for PSF
-    int bin_size = m_psf_bins.num_energy() * m_psf_bins.num_ctheta();
+    int bin_size = m_psf_bins.size();
     int psf_size = bin_size * angle_num;
     if (psf_size > 0)
         m_psf = new double[psf_size];
@@ -272,7 +272,7 @@ void GLATResponse::psf_init(void)
     m_psf_angle_max = xaxis(angle_num-1);
 
     // Loop over all energy bins
-    for (int ie = 0; ie < m_psf_bins.num_energy(); ++ie) {
+    for (int ie = 0; ie < m_psf_bins.nenergies(); ++ie) {
 
         // Get mean energy of bin
         double energy = m_psf_bins.energy(ie);
@@ -281,7 +281,7 @@ void GLATResponse::psf_init(void)
         double scale = psf_scale(energy);
 
         // Loop over all cos theta bins
-        for (int ic = 0; ic < m_psf_bins.num_ctheta(); ++ic) {
+        for (int ic = 0; ic < m_psf_bins.ncostheta(); ++ic) {
 
             // Extract PSF parameters
             int    inx   = m_psf_bins.index(ie,ic);
@@ -364,8 +364,8 @@ void GLATResponse::psf_append(GFits& file) const
     m_psf_bins.write(hdu_bounds);
 
     // Build PSF tables and images
-    int naxes2[] = {m_psf_bins.num_energy(), m_psf_bins.num_ctheta()};
-    int naxes3[] = {angle_num, m_psf_bins.num_energy(), m_psf_bins.num_ctheta()};
+    int naxes2[] = {m_psf_bins.nenergies(), m_psf_bins.ncostheta()};
+    int naxes3[] = {angle_num, m_psf_bins.nenergies(), m_psf_bins.ncostheta()};
     GFitsImageDouble* image_norm  = new GFitsImageDouble(2, naxes2, m_norm);
     GFitsImageDouble* image_sigma = new GFitsImageDouble(2, naxes2, m_sigma);
     GFitsImageDouble* image_psf   = new GFitsImageDouble(3, naxes3, m_psf);
@@ -402,6 +402,8 @@ void GLATResponse::psf_append(GFits& file) const
  ***************************************************************************/
 double GLATResponse::psf_scale(const double& energy) const
 {
+    int m_section = 0; //!< DUMMY
+
     // Get section dependent coefficients
     const double *c0;
     const double *c1;
@@ -443,6 +445,8 @@ double GLATResponse::psf_scale(const double& energy) const
  ***************************************************************************/
 double GLATResponse::psf_scale_log(const double& logE) const
 {
+    int m_section = 0; //!< DUMMY
+
     // Get section dependent coefficients
     const double *c0;
     const double *c1;
@@ -542,7 +546,7 @@ void GLATResponse::psf_copy_members(const GLATResponse& rsp)
 
     // Copy arrays
     if (rsp.m_psf != NULL) {
-        int size = m_psf_bins.num_energy() * m_psf_bins.num_ctheta() * angle_num;
+        int size = m_psf_bins.size() * angle_num;
         if (size > 0) {
             m_psf = new double[size];
             for (int i = 0; i < size; ++i)
@@ -550,7 +554,7 @@ void GLATResponse::psf_copy_members(const GLATResponse& rsp)
         }
     }
     if (rsp.m_norm != NULL) {
-        int size = m_psf_bins.num_energy() * m_psf_bins.num_ctheta();
+        int size = m_psf_bins.size();
         if (size > 0) {
             m_norm = new double[size];
             for (int i = 0; i < size; ++i)
@@ -558,7 +562,7 @@ void GLATResponse::psf_copy_members(const GLATResponse& rsp)
         }
     }
     if (rsp.m_sigma != NULL) {
-        int size = m_psf_bins.num_energy() * m_psf_bins.num_ctheta();
+        int size = m_psf_bins.size();
         if (size > 0) {
             m_sigma = new double[size];
             for (int i = 0; i < size; ++i)
