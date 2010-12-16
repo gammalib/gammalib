@@ -39,6 +39,7 @@
 /* __ Debug definitions __________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
+/*
 const double scale_factor_log = 39.810717;
 const double scale_base_log   = 0.15848932;
 const double scale_front_c0   = 3.77e-4;
@@ -49,7 +50,7 @@ const int    angle_num        = 5000;    // Number of angles for PSF
 const double angle_min        = 0.0001;  // Minimum angular separation (rad)
 const double angle_bin        = 0.01;    // Angular separation binning (rad)
 const double max_sep          = pihalf;  // Maximum angular separation (rad)
-
+*/
 
 /*==========================================================================
  =                                                                         =
