@@ -27,6 +27,7 @@
 #include "GSkymap.hpp"
 #include "GSkyDir.hpp"
 #include "GLATAeff.hpp"
+#include "GLATPsf.hpp"
 
 /* __ Typedefs ___________________________________________________________ */
 typedef double (*_ltcube_ctheta)(const double& costheta);
@@ -57,7 +58,10 @@ public:
     GLATLtCubeMap& operator= (const GLATLtCubeMap& cube);
     double         operator() (const GSkyDir& dir, _ltcube_ctheta fct);
     double         operator() (const GSkyDir& dir, _ltcube_ctheta_phi fct);
-    double         operator() (const GSkyDir& dir, const GLATAeff& aeff);
+    double         operator() (const GSkyDir& dir, const GEnergy& energy,
+                               const GLATAeff& aeff);
+    double         operator() (const GSkyDir& dir, const GEnergy& energy,
+                               const double& offset, const GLATPsf& psf);
 
     // Methods
     void           clear(void);

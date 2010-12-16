@@ -19,7 +19,6 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS_OP1                    "GLATLtCubeMap::operator() (double&)"
 #define G_COSTHETA                            "GLATLtCubeMap::costheta(int&)"
 #define G_PHI                                      "GLATLtCubeMap::phi(int&)"
 
@@ -194,24 +193,29 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, _ltcube_ctheta_phi fct)
  * @brief Sum effective area multiplied by livetime over zenith and
  *        (optionally) azimuth angles
  *
- * @param[in] dir Sky direction.
+ * @param[in] dir True sky direction.
+ * @param[in] energy True photon energy.
  * @param[in] aeff Effective area.
  *
  * Computes
  * \f[\sum_{\cos \theta, \phi} T_{\rm live}(\cos \theta, \phi) 
- *    A_{\rm eff}(\cos \theta, \phi)\f]
+ *    A_{\rm eff}(\log E, \cos \theta, \phi)\f]
  * where
  * \f$T_{\rm live}(\cos \theta, \phi)\f$ is the livetime as a function of
- * the cosine of the zenith and of the azimuth angle, and
- * \f$A_{\rm eff}(\cos \theta, \phi)\f$ is the effective area that depends
- * on the cosine of the zenith angle and of the azimuth angle.
+ * the cosine of the zenith and the azimuth angle, and
+ * \f$A_{\rm eff}(\log E, \cos \theta, \phi)\f$ is the effective area that
+ * depends on
+ * the log10 of the energy (in MeV),
+ * the cosine of the zenith angle, and
+ * the azimuth angle.
  * This method assumes that \f$T_{\rm live}(\cos \theta, \phi)\f$ is
  * stored as a set of maps in a 2D array with \f$\cos \theta\f$ being the
  * most rapidely varying parameter and with the first map starting at
  * index m_num_ctheta (the first m_num_ctheta maps are the livetime cube
  * maps without any \f$\phi\f$ dependence).
  ***************************************************************************/
-double GLATLtCubeMap::operator() (const GSkyDir& dir, const GLATAeff& aeff)
+double GLATLtCubeMap::operator() (const GSkyDir& dir, const GEnergy& energy,
+                                  const GLATAeff& aeff)
 {
     // Get map index
     int pixel = m_map.dir2pix(dir);
@@ -230,15 +234,56 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, const GLATAeff& aeff)
         for (int iphi = 0, i = m_num_ctheta; iphi < m_num_phi; ++iphi) {
             double p = phi(iphi);
             for (int itheta = 0; itheta < m_num_ctheta; ++itheta, ++i)
-                sum += m_map(pixel, i) * fct->ltcube_ctheta_phi(costheta(itheta), p);
+                sum += m_map(pixel, i) * (*fct)(energy.log10MeV(), costheta(i), p);
         }
     }
 
     // ... otherwise sum only over zenith angle
     else {
         for (int i = 0; i < m_num_ctheta; ++i)
-            sum += m_map(pixel, i) * fct->ltcube_ctheta(costheta(i));
+            sum += m_map(pixel, i) * (*fct)(energy.log10MeV(), costheta(i));
     }
+
+    // Return sum
+    return sum;
+}
+
+
+/***********************************************************************//**
+ * @brief Sum effective area multiplied by livetime over zenith angles
+ *
+ * @param[in] dir True sky direction.
+ * @param[in] energy True photon energy.
+ * @param[in] offset Offset from true direction (deg).
+ * @param[in] psf Point spread function.
+ *
+ * Computes
+ * \f[\sum_{\cos \theta} T_{\rm live}(\cos \theta) 
+ *    PSF(\log E, \delta, \cos \theta)\f]
+ * where
+ * \f$T_{\rm live}(\cos \theta)\f$ is the livetime as a function of the
+ * cosine of the zenith angle, and
+ * \f$PSF(\log E, \delta, \cos \theta)\f$ is the point spread function that
+ * depends on
+ * the log10 of the energy (in MeV),
+ * the offset angle from the true direction (in degrees), and
+ * the cosine of the zenith angle.
+ ***************************************************************************/
+double GLATLtCubeMap::operator() (const GSkyDir& dir, const GEnergy& energy,
+                                  const double& offset, const GLATPsf& psf)
+{
+    // Get map index
+    int pixel = m_map.dir2pix(dir);
+
+    // Initialise sum
+    double sum = 0.0;
+
+    // Circumvent const correctness
+    GLATPsf* fct = ((GLATPsf*)&psf);
+
+    // Sum over zenith angle
+    for (int i = 0; i < m_num_ctheta; ++i)
+        sum += m_map(pixel, i) * (*fct)(offset, energy.log10MeV(), costheta(i));
 
     // Return sum
     return sum;

@@ -225,8 +225,8 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
 
 
 /***********************************************************************//**
- * @brief Sum function multiplied by efficiency corrected livetime over
- *        zenith and (optionally) azimuth angles
+ * @brief Sum effective area multiplied by efficiency corrected livetime
+ *        over zenith and (optionally) azimuth angles
  *
  * @param[in] dir Sky direction.
  * @param[in] energy Energy.
@@ -248,7 +248,7 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
                                const GLATAeff& aeff)
 {
     // Compute exposure
-    double exposure = m_exposure(dir, aeff);
+    double exposure = m_exposure(dir, energy, aeff);
 
     // Optionally compute livetime factors for trigger rate- and
     // energy-dependent efficiency corrections
@@ -260,7 +260,59 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
         //m_efficiencyFactor->getLivetimeFactors(energy, f1, f2);
 
         // Compute correction
-        double correction = m_weighted_exposure(dir, aeff);
+        double correction = m_weighted_exposure(dir, energy, aeff);
+
+        // Set exposure
+        exposure = f1 * exposure + f2 * correction;
+
+    } // endif: corrections requested
+
+    // Return exposure
+    return exposure;
+}
+
+
+/***********************************************************************//**
+ * @brief Sum point spread function multiplied by efficiency corrected
+ *        livetime over zenith angles
+ *
+ * @param[in] dir Sky direction.
+ * @param[in] energy Energy.
+ * @param[in] offset Offset from true direction (deg).
+ * @param[in] psf Point spread function.
+ *
+ * Computes
+ * \f[\sum_{\cos \theta, \phi} T_{\rm corr.~live}(\cos \theta, \phi)
+ *    PSF(\log E, \delta, \cos \theta)\f]
+ * where
+ * \f$T_{\rm corr.~live}(\cos \theta, \phi)\f$ is the efficiency corrected
+ * livetime as a function of the cosine of the zenith and of the azimuth
+ * angle, and
+ * \f$PSF(\log E, \delta, \cos \theta)\f$ is the point spread function that
+ * depends on
+ * the log10 of the energy (in MeV),
+ * the offset angle from the true direction (in degrees), and
+ * the cosine of the zenith angle.
+ *
+ * @todo Implement computation of efficiency factors
+ ***************************************************************************/
+double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
+                               const double& offset, const GLATPsf& psf)
+{
+    // Compute exposure
+    double exposure = m_exposure(dir, energy, offset, psf);
+
+    // Optionally compute livetime factors for trigger rate- and
+    // energy-dependent efficiency corrections
+    if (m_livetime_correct) {
+    
+        // Compute correction factors
+        double f1 = 1.0;
+        double f2 = 0.0;
+        //m_efficiencyFactor->getLivetimeFactors(energy, f1, f2);
+
+        // Compute correction
+        double correction = m_weighted_exposure(dir, energy, offset, psf);
 
         // Set exposure
         exposure = f1 * exposure + f2 * correction;
