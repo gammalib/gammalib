@@ -27,8 +27,6 @@
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GLATObservation.hpp"
-//#include "GLATMeanPsfMap.hpp"
-//#include "GGti.hpp"
 
 
 /***********************************************************************//**
@@ -50,6 +48,7 @@ class GLATMeanPsf {
 public:
     // Constructors and destructors
     GLATMeanPsf(void);
+    GLATMeanPsf(const GSkyDir& dir, const GLATObservation& obs);
     GLATMeanPsf(const GLATMeanPsf& cube);
     virtual ~GLATMeanPsf(void);
 
@@ -68,7 +67,7 @@ private:
     void copy_members(const GLATMeanPsf& psf);
     void free_members(void);
     void set_offsets(void);
-    void set_psf(const GLATObservation& obs);
+    void set_psf(const GSkyDir& dir, const GLATObservation& obs);
     
     // Protected members
     GSkyDir              m_dir;        //!< Source direction for mean PSF
