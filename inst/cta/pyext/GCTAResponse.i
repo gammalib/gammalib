@@ -34,13 +34,29 @@ public:
     GCTAResponse(const GCTAResponse& rsp);
     virtual ~GCTAResponse(void);
 
-    // Reponse function computation methods
-    double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+    // Implement pure virtual base class methods
+    void          clear(void);
+    GCTAResponse* clone(void) const;
+    void          load(const std::string& rspname);
+    bool          hasedisp(void) const { return false; }
+    bool          hastdisp(void) const { return false; }
+    double        irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                      const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                      const GPointing& pnt) const;
+    double        irf(const GEvent& event, const GModel& model,
+                      const GEnergy& srcEng, const GTime& srcTime,
+                      const GPointing& pnt) const;
+    double        nirf(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                       const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
+                       const GGti& gti) const;
+
+    // Other Methods
+    double irf(const GCTAEventAtom& event, const GModel& model,
+               const GEnergy& srcEng, const GTime& srcTime,
                const GPointing& pnt) const;
-    double nirf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
-                const GGti& gti) const;
+    double irf(const GCTAEventBin& event, const GModel& model,
+               const GEnergy& srcEng, const GTime& srcTime,
+               const GPointing& pnt) const;
     double live(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                 const GPointing& pnt) const;
     double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
@@ -60,13 +76,6 @@ public:
                   const GPointing& pnt, const GEbounds& ebds) const;
     double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                   const GPointing& pnt, const GGti& gti) const;
-
-    // Implemented pure virtual base class methods
-    void          clear(void);
-    GCTAResponse* clone(void) const;
-    void          load(const std::string& irfname);
-    bool          hasedisp(void) const { return false; }
-    bool          hastdisp(void) const { return false; }
 
     // Other Methods
     double psf(const double& theta, const double& sigma) const;

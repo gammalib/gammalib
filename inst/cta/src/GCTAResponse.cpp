@@ -22,11 +22,12 @@
 #endif
 #include <vector>
 #include <string>
-#include "GCTAException.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTARoi.hpp"
+#include "GCTAException.hpp"
+#include "GModelSpatialPtsrc.hpp"
 #include "GTools.hpp"
 #include "GIntegral.hpp"
 #include "GIntegrand.hpp"
@@ -154,14 +155,112 @@ double GCTAResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
                          const GTime& srcTime, const GPointing& pnt) const
 {
     // Get point source IRF components
-    double irf  =  live(srcDir,  srcEng, srcTime, pnt);
-    irf        *=  aeff(srcDir,  srcEng, srcTime, pnt);
-    irf        *=   psf(obsDir,  srcDir, srcEng, srcTime, pnt);
-    irf        *= edisp(obsEng,  srcDir, srcEng, srcTime, pnt);
-    irf        *= tdisp(obsTime, srcDir, srcEng, srcTime, pnt);
+    double rsp  =  live(srcDir,  srcEng, srcTime, pnt);
+    rsp        *=  aeff(srcDir,  srcEng, srcTime, pnt);
+    rsp        *=   psf(obsDir,  srcDir, srcEng, srcTime, pnt);
+    rsp        *= edisp(obsEng,  srcDir, srcEng, srcTime, pnt);
+    rsp        *= tdisp(obsTime, srcDir, srcEng, srcTime, pnt);
 
     // Return IRF value
-    return irf;
+    return rsp;
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of point source instrument response function.
+ *
+ * @param[in] event Event.
+ * @param[in] model Source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt LAT pointing information.
+ *
+ * This method implements the default and complete instrument response
+ * function (IRF).
+ ***************************************************************************/
+double GCTAResponse::irf(const GEvent& event, const GModel& model,
+                         const GEnergy& srcEng, const GTime& srcTime,
+                         const GPointing& pnt) const
+{
+    // Get IRF value
+    double rsp;
+    if (event.isatom())
+        rsp = irf(static_cast<const GCTAEventAtom&>(event), model,
+                  srcEng, srcTime, pnt);
+    else
+        rsp = irf(static_cast<const GCTAEventBin&>(event), model,
+                  srcEng, srcTime, pnt);
+
+    // Return IRF value
+    return rsp;
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of model IRF for event atom
+ *
+ * @param[in] event Event atom.
+ * @param[in] model Source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Instrument pointing information.
+ *
+ * @todo Not yet implemented.
+ ***************************************************************************/
+double GCTAResponse::irf(const GCTAEventAtom& event, const GModel& model,
+                         const GEnergy& srcEng, const GTime& srcTime,
+                         const GPointing& pnt) const
+{
+    // Initialise response value
+    double rsp = 0.0;
+
+    // If model is a point source then return the point source IRF
+    if (model.spatial()->isptsource()) {
+
+        // Get point source location
+        GSkyDir srcDir = static_cast<GModelSpatialPtsrc*>(model.spatial())->dir();
+
+        // Compute IRF
+        rsp = irf(event.dir(), event.energy(), event.time(),
+                  srcDir, srcEng, srcTime, pnt);
+
+    } // endif: model was point source
+
+    // Return IRF value
+    return rsp;
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of model IRF for event bin
+ *        
+ * @param[in] event Event bin.
+ * @param[in] model Source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Instrument pointing information.
+ ***************************************************************************/
+double GCTAResponse::irf(const GCTAEventBin& event, const GModel& model,
+                         const GEnergy& srcEng, const GTime& srcTime,
+                         const GPointing& pnt) const
+{
+    // Initialise response value
+    double rsp = 0.0;
+
+    // If model is a point source then return the point source IRF
+    if (model.spatial()->isptsource()) {
+
+        // Get point source location
+        GSkyDir srcDir = static_cast<GModelSpatialPtsrc*>(model.spatial())->dir();
+
+        // Compute IRF
+        rsp = irf(event.dir(), event.energy(), event.time(),
+                  srcDir, srcEng, srcTime, pnt);
+
+    } // endif: model was point source
+
+    // Return IRF value
+    return rsp;
 }
 
 
