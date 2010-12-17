@@ -26,6 +26,7 @@
 #include "GNodeArray.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ACCESS                               "GNodeArray::operator() (int)"
 #define G_INTERPOLATE "GNodeArray::interpolate(std::vector<double>&, double&"
 
 /* __ Macros _____________________________________________________________ */
@@ -116,6 +117,48 @@ GNodeArray& GNodeArray::operator= (const GNodeArray& array)
 
     // Return this object
     return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Node access operator
+ *
+ * @param[in] index Node index (0,1,...).
+ *
+ * @exception GException::out_of_range
+ *            Node index is out of range.
+ ***************************************************************************/
+double& GNodeArray::operator() (int index)
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_ACCESS, index, size()-1);
+    #endif
+
+    // Return node
+    return m_node[index];
+}
+
+
+/***********************************************************************//**
+ * @brief Node access operator (const version)
+ *
+ * @param[in] index Node index (0,1,...).
+ *
+ * @exception GException::out_of_range
+ *            Node index is out of range.
+ ***************************************************************************/
+const double& GNodeArray::operator() (int index) const
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_ACCESS, index, size()-1);
+    #endif
+
+    // Return node
+    return m_node[index];
 }
 
 

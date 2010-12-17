@@ -55,12 +55,14 @@ public:
     virtual ~GNodeArray(void);
 
     // Operators
-    GNodeArray& operator= (const GNodeArray & array);
+    GNodeArray&   operator= (const GNodeArray & array);
+    double&       operator() (int index);
+    const double& operator() (int index) const;
 
     // Methods
     void        clear(void);
     GNodeArray* clone(void) const;
-    int         size(void) { return m_node.size(); }
+    int         size(void) const { return m_node.size(); }
     void        nodes(const int& num, const double* array);
     void        nodes(const GVector& vector);
     void        nodes(const std::vector<double>& vector);
