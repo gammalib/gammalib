@@ -616,9 +616,8 @@ GModelSpectral* GModel::xml_spectral(const GXmlElement& spectral) const
  * @param[in] event Observed event.
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
- * @param[in] rsp Instrument response function.
- * @param[in] pnt Instrument pointing direction.
- * @parem[in] grad Compute also model gradients (default=false).
+ * @param[in] obs Observation.
+ * @parem[in] grad Compute also model gradients? (default=false)
  *
  * This method computes the spatial model component for a given true photon
  * energy and arrival time.
@@ -634,11 +633,10 @@ double GModel::spatial(const GEvent& event,
     if (m_spatial != NULL) {
 
         // Get current pointing and response function
-        GPointing* pnt = obs.pointing(event.time());
         GResponse* rsp = obs.response(event.time());
 
         // Get IRF value
-        double irf = rsp->irf(event, *this, srcEng, srcTime, *pnt);
+        double irf = rsp->irf(event, *this, srcEng, srcTime, obs);
 
         // Compute source model
         double source = 1.0;
