@@ -120,151 +120,18 @@ GResponse& GResponse::operator= (const GResponse& rsp)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return value of point source instrument response function.
+ * @brief Set path to the calibration database
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing information.
- *
- * This method implements the default and complete instrument response
- * function (IRF). It may be overwritted by a specific method in the derived
- * class that drops response terms that are not used.
- ***************************************************************************/
-/*
-double GResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
-                      const GTime& obsTime,
-                      const GSkyDir&  srcDir, const GEnergy& srcEng,
-                      const GTime& srcTime, const GPointing& pnt) const
-{
-    // Get point source IRF components
-    double irf  =  live(srcDir,  srcEng, srcTime, pnt);
-    irf        *=  aeff(srcDir,  srcEng, srcTime, pnt);
-    irf        *=   psf(obsDir,  srcDir, srcEng, srcTime, pnt);
-    irf        *= edisp(obsEng,  srcDir, srcEng, srcTime, pnt);
-    irf        *= tdisp(obsTime, srcDir, srcEng, srcTime, pnt);
-
-    // Return IRF value
-    return irf;
-}
-*/
-
-/***********************************************************************//**
- * @brief Return value of diffuse instrument response function.
- *
- * @param[in] event Observed event.
- * @param[in] model Source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing information.
- *
- * This method implements the default and complete diffuse instrument
- * response function (IRF). It may be overwritted by a specific method in the
- * derived class that drops response terms that are not used.
- *
- * @todo Not yet implemented
- ***************************************************************************/
-double GResponse::diffrsp(const GEvent& event, const GModel& model,
-                          const GEnergy& srcEng, const GTime& srcTime,
-                          const GPointing& pnt) const
-{
-    // Get diffuse IRF components
-    double irf = 1.0;
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Return integral of instrument response function.
- *
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing information.
- * @param[in] roi Region of interest of data selection.
- * @param[in] ebds Energy boundaries of data selection.
- * @param[in] gti Good Time Intervals of data selection.
- *
- * This method implements the default and complete integral of the instrument
- * response function (IRF). It may be overwritted by a specific method in the
- * derived class that drops response terms that are not used.
- ***************************************************************************/
-/*
-double GResponse::nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                       const GTime& srcTime,  const GPointing& pnt,
-                       const GRoi& roi, const GEbounds& ebds,
-                       const GGti& gti) const
-{
-    // Get IRF components
-    double nirf  =   live(srcDir, srcEng, srcTime, pnt);
-    nirf        *=   aeff(srcDir, srcEng, srcTime, pnt);
-    nirf        *=   npsf(srcDir, srcEng, srcTime, pnt, roi);
-    nirf        *= nedisp(srcDir, srcEng, srcTime, pnt, ebds);
-    nirf        *= ntdisp(srcDir, srcEng, srcTime, pnt, gti);
-
-    // Return integrated IRF value
-    return nirf;
-}
-*/
-
-/***********************************************************************//**
- * @brief Return energy dispersion integral for the case of no energy
- *        dispersion
- *
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing information.
- * @param[in] ebds Energy boundaries of data selection.
- ***************************************************************************/
-/*
-double GResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GTime& srcTime, const GPointing& pnt,
-                         const GEbounds& ebds) const
-{
-    // Assign result
-    double nedisp = (ebds.isin(srcEng)) ? 1.0 : 0.0;
-    
-    // Return integral
-    return nedisp;
-}
-*/
-
-/***********************************************************************//**
- * @brief Return time dispersion integral for the case of no time dispersion
- *
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing information.
- * @param[in] gti Good Time Intervals of data selection.
- ***************************************************************************/
-/*
-double GResponse::ntdisp(const GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GTime& srcTime, const GPointing& pnt,
-                         const GGti& gti) const
-{
-    // Assign result
-    double ntdisp = (gti.isin(srcTime)) ? 1.0 : 0.0;
-    
-    // Return integral
-    return ntdisp;
-}
-*/
-
-/***********************************************************************//**
- * @brief Set the path to the calibration database.
- *
- * @param[in] caldb Absolute path to calibration database
+ * @param[in] caldb Path to calibration database
  *
  * This default method simply checks if the calibration database directory
  * exists. If the directory exists, the path will be stored. No checking is
  * implemented that checks for the consistency of the calibration database.
+ *
+ * @todo Implement a GCalDB class that handles any calibration database
+ *       issues. GCalDB may be an abstract class for which instrument
+ *       specific methods are implement to handle any instrument specific
+ *       IRF database issues. 
  ***************************************************************************/
 void GResponse::caldb(const std::string& caldb)
 {
@@ -303,7 +170,7 @@ void GResponse::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] rsp Response members which should be copied.
+ * @param[in] rsp Response.
  ***************************************************************************/
 void GResponse::copy_members(const GResponse& rsp)
 {
