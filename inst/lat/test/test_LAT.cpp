@@ -480,6 +480,7 @@ void test_binned_obs(void)
 
         // Set mean PSF
         GLATMeanPsf psf(dir, run);
+std::cout << std::endl << psf << std::endl;
     }
     catch (std::exception &e) {
         std::cout << std::endl
