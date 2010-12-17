@@ -621,9 +621,7 @@ GModelSpectral* GModel::xml_spectral(const GXmlElement& spectral) const
  * @parem[in] grad Compute also model gradients (default=false).
  *
  * This method computes the spatial model component for a given true photon
- * energy and arrival time. It distinguishes the case of a point source from
- * that of a diffuse model and calls the respective methods() of the
- * response class to compute the spatial response.
+ * energy and arrival time.
  ***************************************************************************/
 double GModel::spatial(const GEvent& event,
                        const GEnergy& srcEng, const GTime& srcTime,
@@ -639,26 +637,8 @@ double GModel::spatial(const GEvent& event,
         GPointing* pnt = obs.pointing(event.time());
         GResponse* rsp = obs.response(event.time());
 
-        // Allocate IRF value
-        double irf;
-
-        // If the spatial model is a point source then extract the point
-        // source location from the spatial model and compute the point
-        // source IRF for that location.
-        if (m_spatial->isptsource()) {
-
-            // Get point source location
-            GSkyDir srcDir = ((GModelSpatialPtsrc*)m_spatial)->dir();
-
-            // Compute IRF
-            irf = rsp->irf(event.dir(), event.energy(), event.time(),
-                           srcDir, srcEng, srcTime, *pnt);
-
-        } // endif: Model was a point source
-
-        // ... otherwise compute the diffuse instrument response function.
-        else
-            irf = rsp->diffrsp(event, *this, srcEng, srcTime, *pnt);
+        // Get IRF value
+        double irf = rsp->irf(event, *this, srcEng, srcTime, *pnt);
 
         // Compute source model
         double source = 1.0;
