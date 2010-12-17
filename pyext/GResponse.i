@@ -42,13 +42,13 @@ public:
     virtual double     irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                            const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                            const GPointing& pnt) const = 0;
+    virtual double     irf(const GEvent& event, const GModel& model,
+                           const GEnergy& srcEng, const GTime& srcTime,
+                           const GPointing& pnt) const = 0;
     virtual double     nirf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                             const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
                             const GGti& gti) const = 0;
-    virtual double     diffrsp(const GEvent& event, const GModel& model,
-                               const GEnergy& srcEng, const GTime& srcTime,
-                               const GPointing& pnt) const;
-    
+
     // Other methods
     virtual void        caldb(const std::string& caldb);
     virtual std::string caldb(void) const { return m_caldb; }
