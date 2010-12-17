@@ -513,11 +513,10 @@ double GObservation::npred_kern(const GModel& model,
                           "No ROI has been defined for observation.");
 
     // Get current pointing and response
-    GPointing* pnt = pointing(srcTime);
     GResponse* rsp = response(srcTime);
 
     // Compute integrated IRF
-    double nirf = rsp->nirf(srcDir, srcEng, srcTime, *pnt, *m_roi, m_ebounds, m_gti);
+    double nirf = rsp->nirf(srcDir, srcEng, srcTime, *this);
 
     // Compute source model
     GModel* ptr    = (GModel*)&model; // bypass const-correctness
@@ -745,11 +744,10 @@ double GObservation::npred_grad_kern(const GModel& model, int ipar,
                           "No ROI has been defined for observation.");
 
     // Get current pointing and response
-    GPointing* pnt = pointing(srcTime);
     GResponse* rsp = response(srcTime);
 
     // Compute integrated IRF
-    double nirf = rsp->nirf(srcDir, srcEng, srcTime, *pnt, *m_roi, m_ebounds, m_gti);
+    double nirf = rsp->nirf(srcDir, srcEng, srcTime, *this);
 
     // Get model gradients
     GModel* ptr       = (GModel*)&model; // bypass const-correctness
