@@ -28,6 +28,7 @@
 #include "GLATPsf.hpp"
 #include "GLATEdisp.hpp"
 #include "GEvent.hpp"
+#include "GModel.hpp"
 #include "GResponse.hpp"
 #include "GPointing.hpp"
 #include "GInstDir.hpp"
@@ -38,7 +39,6 @@
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GVector.hpp"
-#include "GModel.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 
@@ -68,12 +68,12 @@ public:
     double        irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                       const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                       const GPointing& pnt) const;
-    double        nirf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+    double        irf(const GEvent& event, const GModel& model,
+                      const GEnergy& srcEng, const GTime& srcTime,
+                      const GPointing& pnt) const;
+    double        nirf(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
                        const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
                        const GGti& gti) const;
-    double        diffrsp(const GEvent& event, const GModel& model,
-                          const GEnergy& srcEng, const GTime& srcTime,
-                          const GPointing& pnt) const;
     std::string   print(void) const;
 
     // Other Methods
@@ -82,7 +82,13 @@ public:
     GLATPsf*   psf(const int& index) const;
     GLATEdisp* edisp(const int& index) const;
     void       save(const std::string& rspname) const;
-    double     live(const GSkyDir&  srcDir, const GEnergy& srcEng,
+    double     irf(const GLATEventAtom& event, const GModel& model,
+                   const GEnergy& srcEng, const GTime& srcTime,
+                   const GPointing& pnt) const;
+    double     irf(const GLATEventBin& event, const GModel& model,
+                   const GEnergy& srcEng, const GTime& srcTime,
+                   const GPointing& pnt) const;
+    double     live(const GSkyDir& srcDir, const GEnergy& srcEng,
                     const GTime& srcTime, const GPointing& pnt) const;
     //double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
     //            const GPointing& pnt) const;
@@ -99,15 +105,9 @@ public:
 
 private:
     // Private methods
-    void    init_members(void);
-    void    copy_members(const GLATResponse& rsp);
-    void    free_members(void);
-    double  diffrsp_atom(const GLATEventAtom& event, const GModel& model,
-                         const GEnergy& srcEng, const GTime& srcTime,
-                         const GPointing& pnt) const;
-    double  diffrsp_bin(const GLATEventBin& event, const GModel& model,
-                        const GEnergy& srcEng, const GTime& srcTime,
-                        const GPointing& pnt) const;
+    void init_members(void);
+    void copy_members(const GLATResponse& rsp);
+    void free_members(void);
 
     // Private members
     bool                    m_hasfront;    //!< Front IRF loaded

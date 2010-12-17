@@ -20,13 +20,14 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <iostream>
 #include "GLATResponse.hpp"
 #include "GLATPointing.hpp"
+#include "GLATInstDir.hpp"
+#include "GLATEventAtom.hpp"
 #include "GLATEventBin.hpp"
 #include "GLATEventCube.hpp"
 #include "GLATException.hpp"
-#include "GException.hpp"
+#include "GModelSpatialPtsrc.hpp"
 #include "GVector.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
@@ -37,10 +38,8 @@
 #define G_AEFF                                     "GLATResponse::aeff(int&)"
 #define G_PSF                                       "GLATResponse::psf(int&)"
 #define G_EDISP                                   "GLATResponse::edisp(int&)"
-#define G_GET_FITS_VECTOR        "GLATResponse::get_fits_vector(GFitsTable*,"\
-                                                        " std::string&, int)"
-#define G_DIFFRSP_BIN     "GLATResponse::diffrsp_bin(GLATEventBin&, GModel&,"\
-                                             " GEnergy&, GTime&, GPointing&)"
+#define G_IRF_BIN       "GLATResponse::irf(GLATEventBin&, GModel&, GEnergy&,"\
+                                                        "GTime&, GPointing&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -170,7 +169,7 @@ GLATResponse* GLATResponse::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Return value of point source instrument response function.
+ * @brief Return value of point source instrument response function
  *
  * @param[in] obsDir Observed photon direction.
  * @param[in] obsEng Observed energy of photon.
@@ -201,6 +200,133 @@ double GLATResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
 
 
 /***********************************************************************//**
+ * @brief Return value of model instrument response function
+ *
+ * @param[in] event Event.
+ * @param[in] model Source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt LAT pointing information.
+ *
+ * This method returns the response of the instrument to a specific source
+ * model. The method handles both event atoms and event bins.
+ ***************************************************************************/
+double GLATResponse::irf(const GEvent& event, const GModel& model,
+                         const GEnergy& srcEng, const GTime& srcTime,
+                         const GPointing& pnt) const
+{
+    // Get IRF value
+    double rsp;
+    if (event.isatom())
+        rsp = irf(static_cast<const GLATEventAtom&>(event), model,
+                  srcEng, srcTime, pnt);
+    else
+        rsp = irf(static_cast<const GLATEventBin&>(event), model,
+                  srcEng, srcTime, pnt);
+
+    // Return IRF value
+    return rsp;
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of model IRF for event atom
+ *
+ * @param[in] event Event atom.
+ * @param[in] model Source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Instrument pointing information.
+ *
+ * @todo Not yet implemented.
+ ***************************************************************************/
+double GLATResponse::irf(const GLATEventAtom& event, const GModel& model,
+                         const GEnergy& srcEng, const GTime& srcTime,
+                         const GPointing& pnt) const
+{
+    // Initialise IRF with "no response"
+    double irf = 0.0;
+
+    // Determine index for diffuse response
+    //int inx = event.diffinx(model.name());
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of model IRF for event bin
+ *        
+ * @param[in] event Event bin.
+ * @param[in] model Source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] pnt Instrument pointing information.
+ *
+ * @exception GLATException::diffuse_not_found
+ *            Diffuse model not found.
+ ***************************************************************************/
+double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
+                         const GEnergy& srcEng, const GTime& srcTime,
+                         const GPointing& pnt) const
+{
+    // Initialise response value
+    double rsp = 0.0;
+
+    // If model is a point source then return the point source IRF
+    if (model.spatial()->isptsource()) {
+
+        // Get point source location
+        GSkyDir srcDir = static_cast<GModelSpatialPtsrc*>(model.spatial())->dir();
+
+        // Compute IRF
+        rsp = irf(event.dir(), event.energy(), event.time(),
+                  srcDir, srcEng, srcTime, pnt);
+
+    } // endif: model was point source
+
+    // ... otherwise compute the diffuse instrument response function.
+    else {
+
+        // Get pointer to event cube
+        GLATEventCube* cube = event.cube();
+
+        // Search for diffuse response in event cube
+        int idiff = -1;
+        for (int i = 0; i < cube->ndiffrsp(); ++i) {
+            if (cube->diffname(i) == model.name()) {
+                idiff = i;
+                break;
+            }
+        }
+
+        // If diffuse response has not been found then throw an exception
+        if (idiff == -1)
+            throw GLATException::diffuse_not_found(G_IRF_BIN, model.name());
+
+        // Get srcmap indices and weighting factors
+        GNodeArray* nodes = cube->enodes();
+        nodes->set_value(log10(srcEng.MeV()));
+
+        // Compute diffuse response
+        GSkymap* map    = cube->diffrsp(idiff);
+        double*  pixels = map->pixels() + event.ipix();
+        rsp             = nodes->wgt_left()  * pixels[nodes->inx_left()  * map->npix()] +
+                          nodes->wgt_right() * pixels[nodes->inx_right() * map->npix()];
+
+        // Divide by solid angle and ontime since source maps are given in units of
+        // counts/pixel/MeV.
+        rsp /= (event.omega() * event.ontime());
+
+    } // endelse: model was diffuse
+
+    // Return IRF value
+    return rsp;
+}
+
+
+/***********************************************************************//**
  * @brief Return integral of instrument response function.
  *
  * @param[in] srcDir True photon direction.
@@ -215,7 +341,7 @@ double GLATResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
  * response function (IRF). It may be overwritted by a specific method in the
  * derived class that drops response terms that are not used.
  ***************************************************************************/
-double GLATResponse::nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
+double GLATResponse::nirf(const GSkyDir& srcDir, const GEnergy& srcEng,
                           const GTime& srcTime,  const GPointing& pnt,
                           const GRoi& roi, const GEbounds& ebds,
                           const GGti& gti) const
@@ -229,33 +355,6 @@ double GLATResponse::nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
 
     // Return integrated IRF value
     return nirf;
-}
-
-
-/***********************************************************************//**
- * @brief Return value of diffuse instrument response function
- *        (units: )
- *
- * @param[in] event Observed event.
- * @param[in] model Source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt LAT pointing information.
- *
- * This method returns the diffuse instrument response for a given event and
- * source model. It handles both event atoms and event bins.
- ***************************************************************************/
-double GLATResponse::diffrsp(const GEvent& event, const GModel& model,
-                             const GEnergy& srcEng, const GTime& srcTime,
-                             const GPointing& pnt) const
-{
-    // Get IRF value
-    double irf = (event.isatom())
-                 ? diffrsp_atom((GLATEventAtom&)event, model, srcEng, srcTime, pnt)
-                 : diffrsp_bin((GLATEventBin&)event, model, srcEng, srcTime, pnt);
-
-    // Return IRF value
-    return irf;
 }
 
 
@@ -568,81 +667,6 @@ void GLATResponse::free_members(void)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return value of diffuse instrument response function for event atom
- *
- * @param[in] event Observed event atom.
- * @param[in] model Source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing information.
- ***************************************************************************/
-double GLATResponse::diffrsp_atom(const GLATEventAtom& event, const GModel& model,
-                                  const GEnergy& srcEng, const GTime& srcTime,
-                                  const GPointing& pnt) const
-{
-    // Initialise IRF with "no response"
-    double irf = 0.0;
-
-    // Determine index for diffuse response
-    //int inx = event.diffinx(model.name());
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Return value of diffuse instrument response function for event bin
- *        
- * @param[in] event Observed event bin.
- * @param[in] model Source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing information.
- *
- * @exception GLATException::diffuse_not_found
- *            Diffuse model not found.
- ***************************************************************************/
-double GLATResponse::diffrsp_bin(const GLATEventBin& event, const GModel& model,
-                                 const GEnergy& srcEng, const GTime& srcTime,
-                                 const GPointing& pnt) const
-{
-    // Get pointer to event cube
-    GLATEventCube* cube = event.cube();
-
-    // Search for diffuse response in event cube
-    int idiff = -1;
-    for (int i = 0; i < cube->ndiffrsp(); ++i) {
-        if (cube->diffname(i) == model.name()) {
-            idiff = i;
-            break;
-        }
-    }
-
-    // If diffuse response has not been found then throw an exception
-    if (idiff == -1)
-        throw GLATException::diffuse_not_found(G_DIFFRSP_BIN, model.name());
-
-    // Get srcmap indices and weighting factors
-    GNodeArray* nodes = cube->enodes();
-    nodes->set_value(log10(srcEng.MeV()));
-
-    // Compute diffuse response
-    GSkymap* map    = cube->diffrsp(idiff);
-    double*  pixels = map->pixels() + event.ipix();
-    double   irf    = nodes->wgt_left()  * pixels[nodes->inx_left()  * map->npix()] +
-                      nodes->wgt_right() * pixels[nodes->inx_right() * map->npix()];
-
-    // Divide by solid angle and ontime since source maps are given in units of
-    // counts/pixel/MeV.
-    irf /= (event.omega() * event.ontime());
-
-    // Return IRF value
-    return irf;
 }
 
 

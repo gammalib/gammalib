@@ -31,7 +31,7 @@ public:
     // Constructors and destructors
     GLATResponse(void);
     GLATResponse(const GLATResponse& rsp);
-    ~GLATResponse(void);
+    virtual ~GLATResponse(void);
 
     // Implement pure virtual base class methods
     void          clear(void);
@@ -39,19 +39,30 @@ public:
     void          load(const std::string& rspname);
     bool          hasedisp(void) const { return false; }
     bool          hastdisp(void) const { return false; }
-    
-    // Implemented response computation methods
-    double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-               const GPointing& pnt) const;
-    double nirf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
-                const GGti& gti) const;
-    double diffrsp(const GEvent& event, const GModel& model,
+    double        irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                      const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                      const GPointing& pnt) const;
+    double        irf(const GEvent& event, const GModel& model,
+                      const GEnergy& srcEng, const GTime& srcTime,
+                      const GPointing& pnt) const;
+    double        nirf(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                       const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
+                       const GGti& gti) const;
+
+    // Other Methods
+    int        size(void) const { return m_aeff.size(); }
+    GLATAeff*  aeff(const int& index) const;
+    GLATPsf*   psf(const int& index) const;
+    GLATEdisp* edisp(const int& index) const;
+    void       save(const std::string& rspname) const;
+    double     irf(const GLATEventAtom& event, const GModel& model,
                    const GEnergy& srcEng, const GTime& srcTime,
                    const GPointing& pnt) const;
-    double live(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                const GTime& srcTime, const GPointing& pnt) const;
+    double     irf(const GLATEventBin& event, const GModel& model,
+                   const GEnergy& srcEng, const GTime& srcTime,
+                   const GPointing& pnt) const;
+    double     live(const GSkyDir& srcDir, const GEnergy& srcEng,
+                    const GTime& srcTime, const GPointing& pnt) const;
     //double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
     //            const GPointing& pnt) const;
     //double psf(const GInstDir& obsDir,
@@ -60,22 +71,10 @@ public:
     //double edisp(const GEnergy& obsEng,
     //             const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
     //             const GPointing& pnt) const;
-    //double tdisp(const GTime& obsTime,
-    //             const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-    //             const GPointing& pnt) const;
-    double npsf(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                const GTime& srcTime, const GPointing& pnt, const GRoi& roi) const;
-    double nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                  const GTime& srcTime, const GPointing& pnt, const GEbounds& ebds) const;
-    //double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
-    //              const GTime& srcTime, const GPointing& pnt, const GGti& gti) const;
-
-    // Other Methods
-    int        size(void) const { return m_aeff.size(); }
-    GLATAeff*  aeff(const int& index) const;
-    GLATPsf*   psf(const int& index) const;
-    GLATEdisp* edisp(const int& index) const;
-    void       save(const std::string& rspname) const;
+    double     npsf(const GSkyDir&  srcDir, const GEnergy& srcEng,
+                    const GTime& srcTime, const GPointing& pnt, const GRoi& roi) const;
+    double     nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
+                      const GTime& srcTime, const GPointing& pnt, const GEbounds& ebds) const;
 };
 
 
