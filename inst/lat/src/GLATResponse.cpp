@@ -20,7 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
+//#include <iostream>
 #include "GLATResponse.hpp"
 #include "GLATPointing.hpp"
 #include "GLATEventBin.hpp"
@@ -568,37 +568,6 @@ void GLATResponse::free_members(void)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Load floating point data from vector column into vector
- *
- * @param[in] hdu FITS table pointer.
- * @param[in] colname Table column name.
- * @param[in] row Table row (staring from 0).
- *
- * Loads the content of a FITS table vector column element into a vector.
- ***************************************************************************/
-GVector GLATResponse::get_fits_vector(const GFitsTable* hdu, 
-                                      const std::string& colname, 
-                                      int row)
-{
-    // Get pointer to
-    GFitsTableCol* ptr = ((GFitsTable*)hdu)->column(colname);
-    if (ptr == NULL)
-        throw GException::fits_column_not_found(G_GET_FITS_VECTOR, colname);
-
-    // Determine number of entries
-    int num = ptr->number();
-
-    // Load data into vector
-    GVector data(num);
-    for (int i = 0; i < num; ++i)
-        data(i) = ptr->real(row,i);
-
-    // Return vector
-    return data;
 }
 
 

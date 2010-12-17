@@ -102,7 +102,6 @@ private:
     void    init_members(void);
     void    copy_members(const GLATResponse& rsp);
     void    free_members(void);
-    GVector get_fits_vector(const GFitsTable* hdu, const std::string& colname, int row = 0);
     double  diffrsp_atom(const GLATEventAtom& event, const GModel& model,
                          const GEnergy& srcEng, const GTime& srcTime,
                          const GPointing& pnt) const;
