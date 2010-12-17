@@ -30,7 +30,7 @@
  *
  * The Multi-wavelength response class is needed to evaluate the response
  * to a source model. Since the multi-wavelength instrument classes work
- * directly in photon space, the response is unity.
+ * directly in photon space, the response is by definition unity.
  ***************************************************************************/
 class GMWLResponse : public GResponse {
 
@@ -47,28 +47,12 @@ public:
     double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                const GPointing& pnt) const { return 1.0; }
-    double live(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                const GPointing& pnt) const { return 1.0; }
-    double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                const GPointing& pnt) const { return 1.0; }
-    double psf(const GInstDir& obsDir,
-               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-               const GPointing& pnt) const { return 1.0; } 
-    double edisp(const GEnergy& obsEng,
-                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                 const GPointing& pnt) const { return 1.0; }
-    double tdisp(const GTime& obsTime,
-                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                 const GPointing& pnt) const { return 1.0; }
-    double nirf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+    double irf(const GEvent& event, const GModel& model,
+               const GEnergy& srcEng, const GTime& srcTime,
+               const GPointing& pnt) const { return 1.0; }
+    double nirf(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
                 const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
                 const GGti& gti) const { return 1.0; }
-    double npsf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                const GPointing& pnt, const GRoi& roi) const { return 1.0; }
-    double nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                  const GPointing& pnt, const GEbounds& ebds) const { return 1.0; }
-    double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                  const GPointing& pnt, const GGti& gti) const { return 1.0; }
 
     // Pure virtual base class methods
     void          clear(void);
@@ -85,4 +69,4 @@ protected:
     void free_members(void);
 };
 
-#endif /* GCTARESPONSE_HPP */
+#endif /* GMWLRESPONSE_HPP */
