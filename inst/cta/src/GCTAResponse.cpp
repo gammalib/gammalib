@@ -144,7 +144,7 @@ GCTAResponse& GCTAResponse::operator= (const GCTAResponse& rsp)
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] pnt LAT pointing information.
+ * @param[in] obs Observations.
  *
  * This method implements the default and complete instrument response
  * function (IRF).
@@ -152,14 +152,17 @@ GCTAResponse& GCTAResponse::operator= (const GCTAResponse& rsp)
 double GCTAResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
                          const GTime& obsTime,
                          const GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GTime& srcTime, const GPointing& pnt) const
+                         const GTime& srcTime, const GObservation& obs) const
 {
+    // Get pointing
+    const GPointing *pnt = obs.pointing(srcTime);
+
     // Get point source IRF components
-    double rsp  =  live(srcDir,  srcEng, srcTime, pnt);
-    rsp        *=  aeff(srcDir,  srcEng, srcTime, pnt);
-    rsp        *=   psf(obsDir,  srcDir, srcEng, srcTime, pnt);
-    rsp        *= edisp(obsEng,  srcDir, srcEng, srcTime, pnt);
-    rsp        *= tdisp(obsTime, srcDir, srcEng, srcTime, pnt);
+    double rsp  =  live(srcDir,  srcEng, srcTime, *pnt);
+    rsp        *=  aeff(srcDir,  srcEng, srcTime, *pnt);
+    rsp        *=   psf(obsDir,  srcDir, srcEng, srcTime, *pnt);
+    rsp        *= edisp(obsEng,  srcDir, srcEng, srcTime, *pnt);
+    rsp        *= tdisp(obsTime, srcDir, srcEng, srcTime, *pnt);
 
     // Return IRF value
     return rsp;
@@ -173,23 +176,20 @@ double GCTAResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
  * @param[in] model Source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] pnt LAT pointing information.
- *
- * This method implements the default and complete instrument response
- * function (IRF).
+ * @param[in] obs Observation.
  ***************************************************************************/
 double GCTAResponse::irf(const GEvent& event, const GModel& model,
                          const GEnergy& srcEng, const GTime& srcTime,
-                         const GPointing& pnt) const
+                         const GObservation& obs) const
 {
     // Get IRF value
     double rsp;
     if (event.isatom())
         rsp = irf(static_cast<const GCTAEventAtom&>(event), model,
-                  srcEng, srcTime, pnt);
+                  srcEng, srcTime, obs);
     else
         rsp = irf(static_cast<const GCTAEventBin&>(event), model,
-                  srcEng, srcTime, pnt);
+                  srcEng, srcTime, obs);
 
     // Return IRF value
     return rsp;
@@ -203,13 +203,11 @@ double GCTAResponse::irf(const GEvent& event, const GModel& model,
  * @param[in] model Source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing information.
- *
- * @todo Not yet implemented.
+ * @param[in] obs Observation.
  ***************************************************************************/
 double GCTAResponse::irf(const GCTAEventAtom& event, const GModel& model,
                          const GEnergy& srcEng, const GTime& srcTime,
-                         const GPointing& pnt) const
+                         const GObservation& obs) const
 {
     // Initialise response value
     double rsp = 0.0;
@@ -222,7 +220,7 @@ double GCTAResponse::irf(const GCTAEventAtom& event, const GModel& model,
 
         // Compute IRF
         rsp = irf(event.dir(), event.energy(), event.time(),
-                  srcDir, srcEng, srcTime, pnt);
+                  srcDir, srcEng, srcTime, obs);
 
     } // endif: model was point source
 
@@ -238,11 +236,11 @@ double GCTAResponse::irf(const GCTAEventAtom& event, const GModel& model,
  * @param[in] model Source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing information.
+ * @param[in] obs Observation.
  ***************************************************************************/
 double GCTAResponse::irf(const GCTAEventBin& event, const GModel& model,
                          const GEnergy& srcEng, const GTime& srcTime,
-                         const GPointing& pnt) const
+                         const GObservation& obs) const
 {
     // Initialise response value
     double rsp = 0.0;
@@ -255,7 +253,7 @@ double GCTAResponse::irf(const GCTAEventBin& event, const GModel& model,
 
         // Compute IRF
         rsp = irf(event.dir(), event.energy(), event.time(),
-                  srcDir, srcEng, srcTime, pnt);
+                  srcDir, srcEng, srcTime, obs);
 
     } // endif: model was point source
 
@@ -270,7 +268,7 @@ double GCTAResponse::irf(const GCTAEventBin& event, const GModel& model,
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing information.
+ * @param[in] obs Observation.
  * @param[in] roi Region of interest of data selection.
  * @param[in] ebds Energy boundaries of data selection.
  * @param[in] gti Good Time Intervals of data selection.
@@ -280,16 +278,20 @@ double GCTAResponse::irf(const GCTAEventBin& event, const GModel& model,
  * derived class that drops response terms that are not used.
  ***************************************************************************/
 double GCTAResponse::nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime,  const GPointing& pnt,
-                          const GRoi& roi, const GEbounds& ebds,
-                          const GGti& gti) const
+                          const GTime& srcTime, const GObservation& obs) const
 {
+    // Get pointers
+    const GPointing *pnt  = obs.pointing(srcTime);
+    GRoi            *roi  = ((GObservation*)&obs)->roi();
+    GEbounds        *ebds = ((GObservation*)&obs)->ebounds();
+    GGti            *gti  = ((GObservation*)&obs)->gti();
+
     // Get IRF components
-    double nirf  =   live(srcDir, srcEng, srcTime, pnt);
-    nirf        *=   aeff(srcDir, srcEng, srcTime, pnt);
-    nirf        *=   npsf(srcDir, srcEng, srcTime, pnt, roi);
-    nirf        *= nedisp(srcDir, srcEng, srcTime, pnt, ebds);
-    nirf        *= ntdisp(srcDir, srcEng, srcTime, pnt, gti);
+    double nirf  =   live(srcDir, srcEng, srcTime, *pnt);
+    nirf        *=   aeff(srcDir, srcEng, srcTime, *pnt);
+    nirf        *=   npsf(srcDir, srcEng, srcTime, *pnt, *roi);
+    nirf        *= nedisp(srcDir, srcEng, srcTime, *pnt, *ebds);
+    nirf        *= ntdisp(srcDir, srcEng, srcTime, *pnt, *gti);
 
     // Return integrated IRF value
     return nirf;

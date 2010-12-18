@@ -42,21 +42,20 @@ public:
     bool          hastdisp(void) const { return false; }
     double        irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                       const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                      const GPointing& pnt) const;
+                      const GObservation& obs) const;
     double        irf(const GEvent& event, const GModel& model,
                       const GEnergy& srcEng, const GTime& srcTime,
-                      const GPointing& pnt) const;
+                      const GObservation& obs) const;
     double        nirf(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                       const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
-                       const GGti& gti) const;
+                       const GObservation& obs) const;
 
     // Other Methods
     double irf(const GCTAEventAtom& event, const GModel& model,
                const GEnergy& srcEng, const GTime& srcTime,
-               const GPointing& pnt) const;
+               const GObservation& obs) const;
     double irf(const GCTAEventBin& event, const GModel& model,
                const GEnergy& srcEng, const GTime& srcTime,
-               const GPointing& pnt) const;
+               const GObservation& obs) const;
     double live(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                 const GPointing& pnt) const;
     double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,

@@ -46,13 +46,12 @@ public:
     // Reponse function computation methods
     double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-               const GPointing& pnt) const { return 1.0; }
+               const GObservation& obs) const { return 1.0; }
     double irf(const GEvent& event, const GModel& model,
                const GEnergy& srcEng, const GTime& srcTime,
-               const GPointing& pnt) const { return 1.0; }
+               const GObservation& obs) const { return 1.0; }
     double nirf(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
-                const GGti& gti) const { return 1.0; }
+                const GObservation& obs) const { return 1.0; }
 
     // Pure virtual base class methods
     void          clear(void);

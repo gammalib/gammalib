@@ -1,5 +1,5 @@
 /***************************************************************************
- *       GLATResponse.i  -  Fermi LAT Response class SWIG definition       *
+ *               GLATResponse.i  -  Fermi LAT Response class               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.i
- * @brief GLATResponse class SWIG file.
+ * @brief Fermi LAT Response class python bindings
  * @author J. Knodlseder
  */
 %{
@@ -24,7 +24,7 @@
 /***********************************************************************//**
  * @class GLATResponse
  *
- * @brief SWIG interface for the GLAST LAT instrument response function.
+ * @brief Fermi LAT Response class python bindings
  ***************************************************************************/
 class GLATResponse : public GResponse {
 public:
@@ -39,15 +39,17 @@ public:
     void          load(const std::string& rspname);
     bool          hasedisp(void) const { return false; }
     bool          hastdisp(void) const { return false; }
-    double        irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                      const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                      const GPointing& pnt) const;
+    double        irf(const GInstDir& obsDir, const GEnergy& obsEng,
+                      const GTime& obsTime,
+                      const GSkyDir&  srcDir, const GEnergy& srcEng,
+                      const GTime& srcTime,
+                      const GObservation& obs) const;
     double        irf(const GEvent& event, const GModel& model,
                       const GEnergy& srcEng, const GTime& srcTime,
-                      const GPointing& pnt) const;
-    double        nirf(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                       const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
-                       const GGti& gti) const;
+                      const GObservation& obs) const;
+    double        nirf(const GSkyDir& srcDir, const GEnergy& srcEng,
+                       const GTime& srcTime,
+                       const GObservation& obs) const;
 
     // Other Methods
     int        size(void) const { return m_aeff.size(); }
@@ -57,24 +59,10 @@ public:
     void       save(const std::string& rspname) const;
     double     irf(const GLATEventAtom& event, const GModel& model,
                    const GEnergy& srcEng, const GTime& srcTime,
-                   const GPointing& pnt) const;
+                   const GObservation& obs) const;
     double     irf(const GLATEventBin& event, const GModel& model,
                    const GEnergy& srcEng, const GTime& srcTime,
-                   const GPointing& pnt) const;
-    double     live(const GSkyDir& srcDir, const GEnergy& srcEng,
-                    const GTime& srcTime, const GPointing& pnt) const;
-    //double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-    //            const GPointing& pnt) const;
-    //double psf(const GInstDir& obsDir,
-    //           const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-    //           const GPointing& pnt) const;
-    //double edisp(const GEnergy& obsEng,
-    //             const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-    //             const GPointing& pnt) const;
-    double     npsf(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                    const GTime& srcTime, const GPointing& pnt, const GRoi& roi) const;
-    double     nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                      const GTime& srcTime, const GPointing& pnt, const GEbounds& ebds) const;
+                   const GObservation& obs) const;
 };
 
 

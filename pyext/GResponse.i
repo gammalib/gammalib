@@ -39,15 +39,17 @@ public:
     virtual void       load(const std::string& irfname) = 0;
     virtual bool       hasedisp(void) const = 0;
     virtual bool       hastdisp(void) const = 0;
-    virtual double     irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                           const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                           const GPointing& pnt) const = 0;
+    virtual double     irf(const GInstDir& obsDir, const GEnergy& obsEng,
+                           const GTime& obsTime,
+                           const GSkyDir&  srcDir, const GEnergy& srcEng,
+                           const GTime& srcTime,
+                           const GObservation& obs) const = 0;
     virtual double     irf(const GEvent& event, const GModel& model,
                            const GEnergy& srcEng, const GTime& srcTime,
-                           const GPointing& pnt) const = 0;
-    virtual double     nirf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                            const GPointing& pnt, const GRoi& roi, const GEbounds& ebds,
-                            const GGti& gti) const = 0;
+                           const GObservation& obs) const = 0;
+    virtual double     nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
+                            const GTime& srcTime,
+                            const GObservation& obs) const = 0;
 
     // Other methods
     virtual void        caldb(const std::string& caldb);
