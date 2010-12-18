@@ -223,6 +223,7 @@ void GLATResponseTable::read(const GFitsTable* hdu)
         double *logE = new double[m_energy_num];
         for (int i = 0; i < m_energy_num; ++i)
             logE[i] = 0.5 * (log10(m_energy_lo[i]) + log10(m_energy_hi[i]));
+//ST method logE[i] = log10(sqrt(m_energy_lo[i]*m_energy_hi[i]));
         m_energy.nodes(m_energy_num, logE);
         delete [] logE;
     }
@@ -341,7 +342,8 @@ double GLATResponseTable::energy(const int& ie) const
  * @param[in] array Array to be interpolated.
  *
  * Bi-linear interpolation is performed in log10 of energy and in cos theta.
- * The array is stored in a std::vector object.
+ * The array is stored in a std::vector object with the logE axis varying
+ * more rapidely.
  ***************************************************************************/
 double GLATResponseTable::interpolate(const double&              logE,
                                       const double&              ctheta,
