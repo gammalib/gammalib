@@ -583,6 +583,14 @@ void GLATResponseTable::init_members(void)
     m_ctheta_hi   = NULL;
     m_last_energy = -1.0;
     m_last_ctheta = -1.0;
+    m_inx1        = 0;
+    m_inx2        = 0;
+    m_inx3        = 0;
+    m_inx4        = 0;
+    m_wgt1        = 0.0;
+    m_wgt2        = 0.0;
+    m_wgt3        = 0.0;
+    m_wgt4        = 0.0;
 
     // Return
     return;
@@ -603,6 +611,14 @@ void GLATResponseTable::copy_members(const GLATResponseTable& table)
     m_ctheta      = table.m_ctheta;
     m_last_energy = table.m_last_energy;
     m_last_ctheta = table.m_last_ctheta;
+    m_inx1        = table.m_inx1;
+    m_inx2        = table.m_inx2;
+    m_inx3        = table.m_inx3;
+    m_inx4        = table.m_inx4;
+    m_wgt1        = table.m_wgt1;
+    m_wgt2        = table.m_wgt2;
+    m_wgt3        = table.m_wgt3;
+    m_wgt4        = table.m_wgt4;
 
     // Copy energy bins
     if (m_energy_num > 0) {
