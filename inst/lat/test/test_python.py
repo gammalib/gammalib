@@ -20,7 +20,7 @@ def analyse_unbinned(xmlname):
     # Load LAT observation
     lat = GLATObservation()
     lat.load_unbinned("data/ft1.fits", "data/ft2.fits", "data/ltcube.fits");
-    lat.response("Pass5_v0_Diffuse","irf");
+    lat.response("P6_v3_diff","irf");
 
     # Setup ROI covered by data
     instDir = GLATInstDir()
@@ -63,7 +63,7 @@ def analyse_binned(xmlname):
     # Load LAT observation
     lat = GLATObservation()
     lat.load_binned("data/srcmap.fits", "data/binned_expmap.fits", "data/ltcube.fits");
-    lat.response("Pass5_v0_Diffuse","irf");
+    lat.response("P6_v3_diff","irf");
 
     # Append LAT observation to container
     obs.append(lat)
@@ -120,7 +120,7 @@ def plot_residuals(obs):
         error = [sqrt(c) for c in counts]
 
         # Plot spectrum
-        plt.loglog(energy, counts, 'ro')
+        plt.loglog(energy, counts, 'ro', label='data')
         #plt.errorbar(energy, counts, error, fmt=None, ecolor='r')
 
         # Extract models
@@ -134,8 +134,13 @@ def plot_residuals(obs):
                 model[index] = model[index] + prob * bin.size()
             for i in range(ebds.size()):
                 sum_model[i] = sum_model[i] + model[i]
-            plt.loglog(energy, model, styles[k])
-        plt.loglog(energy, sum_model, 'r-')
+            plt.loglog(energy, model, styles[k], label=m.name())
+        plt.loglog(energy, sum_model, 'r-', label='total')
+
+    # Put labels
+    plt.xlabel("Energy (MeV)")
+    plt.ylabel("Counts")
+    plt.legend(loc="lower right")
 
     # Show residuals
     plt.show()
@@ -164,7 +169,7 @@ if __name__ == '__main__':
     # Analyse data
     #analyse_unbinned("data/source_model.xml")
     #analyse_binned("data/source_model.xml")   # Original
-    #analyse_binned("data/source_model2.xml")  # Powerlaw for extragal. diffuse
+    analyse_binned("data/source_model2.xml")  # Powerlaw for extragal. diffuse
     #analyse_binned("data/source_model3.xml")  # No Crab, Powerlaw for extragal. diffuse
-    analyse_binned("data/source_model4.xml")  # No Crab, no extragal. diffuse
+    #analyse_binned("data/source_model4.xml")  # No Crab, no extragal. diffuse
     #analyse_binned("data/source_model5.xml")  # No Crab, no galactic diffuse
