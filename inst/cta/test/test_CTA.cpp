@@ -553,7 +553,7 @@ int main(void)
     test_unbinned_obs();
     test_binned_obs();
     test_unbinned_optimizer();
-    test_binned_optimizer();
+    //test_binned_optimizer();  //!< Disable since very slow ...
 
     // Return
     return 0;
