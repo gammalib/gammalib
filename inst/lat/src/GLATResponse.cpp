@@ -39,13 +39,14 @@
 #define G_PSF                                       "GLATResponse::psf(int&)"
 #define G_EDISP                                   "GLATResponse::edisp(int&)"
 #define G_IRF_BIN       "GLATResponse::irf(GLATEventBin&, GModel&, GEnergy&,"\
-                                                        "GTime&, GPointing&)"
+                                                     "GTime&, GObservation&)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+#define G_DEBUG_MEAN_PSF 0                    //!< Debug mean PSF computation
 
 /* __ Constants __________________________________________________________ */
 
@@ -72,7 +73,7 @@ GLATResponse::GLATResponse(void) : GResponse()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] rsp Response to be copied
+ * @param[in] rsp Response.
  ***************************************************************************/
 GLATResponse::GLATResponse(const GLATResponse& rsp) : GResponse(rsp)
 {
@@ -109,7 +110,7 @@ GLATResponse::~GLATResponse(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] rsp Response to be assigned
+ * @param[in] rsp Response.
  ***************************************************************************/
 GLATResponse& GLATResponse::operator= (const GLATResponse& rsp)
 {
@@ -177,25 +178,20 @@ GLATResponse* GLATResponse::clone(void) const
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] pnt LAT pointing information.
+ * @param[in] obs Observation.
  *
- * This method implements the default and complete instrument response
- * function (IRF).
+ * @todo Not yet implemented.
  ***************************************************************************/
 double GLATResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
                          const GTime& obsTime,
                          const GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GTime& srcTime, const GPointing& pnt) const
+                         const GTime& srcTime, const GObservation& obs) const
 {
-    // Get point source IRF components
-    double irf  =  live(srcDir,  srcEng, srcTime, pnt);
-    //irf        *=  aeff(srcDir,  srcEng, srcTime, pnt);
-    //irf        *=   psf(obsDir,  srcDir, srcEng, srcTime, pnt);
-    //irf        *= edisp(obsEng,  srcDir, srcEng, srcTime, pnt);
-    //irf        *= tdisp(obsTime, srcDir, srcEng, srcTime, pnt);
-
+    // Initialise
+    double rsp = 0.0;
+    
     // Return IRF value
-    return irf;
+    return rsp;
 }
 
 
@@ -206,23 +202,23 @@ double GLATResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
  * @param[in] model Source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] pnt LAT pointing information.
+ * @param[in] obs Observation.
  *
  * This method returns the response of the instrument to a specific source
  * model. The method handles both event atoms and event bins.
  ***************************************************************************/
 double GLATResponse::irf(const GEvent& event, const GModel& model,
                          const GEnergy& srcEng, const GTime& srcTime,
-                         const GPointing& pnt) const
+                         const GObservation& obs) const
 {
     // Get IRF value
     double rsp;
     if (event.isatom())
         rsp = irf(static_cast<const GLATEventAtom&>(event), model,
-                  srcEng, srcTime, pnt);
+                  srcEng, srcTime, obs);
     else
         rsp = irf(static_cast<const GLATEventBin&>(event), model,
-                  srcEng, srcTime, pnt);
+                  srcEng, srcTime, obs);
 
     // Return IRF value
     return rsp;
@@ -236,13 +232,13 @@ double GLATResponse::irf(const GEvent& event, const GModel& model,
  * @param[in] model Source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing information.
+ * @param[in] obs Observations.
  *
  * @todo Not yet implemented.
  ***************************************************************************/
 double GLATResponse::irf(const GLATEventAtom& event, const GModel& model,
                          const GEnergy& srcEng, const GTime& srcTime,
-                         const GPointing& pnt) const
+                         const GObservation& obs) const
 {
     // Initialise IRF with "no response"
     double irf = 0.0;
@@ -262,14 +258,21 @@ double GLATResponse::irf(const GLATEventAtom& event, const GModel& model,
  * @param[in] model Source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing information.
+ * @param[in] obs Observation.
  *
  * @exception GLATException::diffuse_not_found
  *            Diffuse model not found.
+ *
+ * @todo This method could be split into separate methods for point sources,
+ *       diffuse sources and isotropic sources.
+ *
+ * @todo Add isotropic source. This is simple since the PSF is constant here
+ *       (I guess it is 1, but need to check ...). So the response should
+ *       just be the exposure.
  ***************************************************************************/
 double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
                          const GEnergy& srcEng, const GTime& srcTime,
-                         const GPointing& pnt) const
+                         const GObservation& obs) const
 {
     // Initialise response value
     double rsp = 0.0;
@@ -277,17 +280,59 @@ double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
     // If model is a point source then return the point source IRF
     if (model.spatial()->isptsource()) {
 
-        // Get point source location
-        GSkyDir srcDir = static_cast<GModelSpatialPtsrc*>(model.spatial())->dir();
+        // Search for mean PSF
+        int ipsf = -1;
+        for (int i = 0; i < m_ptsrc.size(); ++i) {
+            if (m_ptsrc[i]->name() == model.name()) {
+                ipsf = i;
+                break;
+            }
+        }
 
-        // Compute IRF
-        rsp = irf(event.dir(), event.energy(), event.time(),
-                  srcDir, srcEng, srcTime, pnt);
+        // If mean PSF has not been found then create it now
+        if (ipsf == -1) {
+
+            // Get point source location
+            GSkyDir srcDir = static_cast<GModelSpatialPtsrc*>(model.spatial())->dir();
+
+            // Allocate new mean PSF
+            GLATMeanPsf* psf = new GLATMeanPsf(srcDir, static_cast<const GLATObservation&>(obs));
+
+            // Set source name
+            psf->name(model.name());
+
+            // Push mean PSF on stack
+            ((GLATResponse*)this)->m_ptsrc.push_back(psf);
+
+            // Set index of mean PSF
+            ipsf = m_ptsrc.size()-1;
+
+            // Debug option: dump mean PSF
+            #if G_DEBUG_MEAN_PSF 
+            std::cout << "Added new mean PSF \""+model.name() << "\"" << std::endl;
+            std::cout << *psf << std::endl;
+            #endif
+
+        } // endif: created new mean PSF
+
+        // Get PSF value
+        GSkyDir srcDir   = m_ptsrc[ipsf]->dir();
+        double  offset   = event.dir().dist_deg(srcDir);
+        double  psf      = m_ptsrc[ipsf]->psf(offset, srcEng.log10MeV());
+        double  exposure = m_ptsrc[ipsf]->exposure(srcEng.log10MeV());
+
+        // Compute response
+        rsp = psf * exposure / (event.ontime());
 
     } // endif: model was point source
 
+    // Debug option: print 
+    #if G_DEBUG_MEAN_PSF
+    double mean_psf = rsp;
+    #else
     // ... otherwise compute the diffuse instrument response function.
     else {
+    #endif
 
         // Get pointer to event cube
         GLATEventCube* cube = event.cube();
@@ -307,7 +352,7 @@ double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
 
         // Get srcmap indices and weighting factors
         GNodeArray* nodes = cube->enodes();
-        nodes->set_value(log10(srcEng.MeV()));
+        nodes->set_value(srcEng.log10MeV());
 
         // Compute diffuse response
         GSkymap* map    = cube->diffrsp(idiff);
@@ -319,7 +364,18 @@ double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
         // counts/pixel/MeV.
         rsp /= (event.omega() * event.ontime());
 
+        // Debug option:
+        #if G_DEBUG_MEAN_PSF
+        if (model.spatial()->isptsource()) {
+            std::cout << "Energy=" << srcEng.MeV();
+            std::cout << " MeanPsf=" << mean_psf;
+            std::cout << " DiffusePsf=" << rsp;
+            std::cout << " ratio(Mean/Diffuse)=" << mean_psf/rsp << std::endl;
+            rsp = mean_psf;
+        }
+        #else
     } // endelse: model was diffuse
+    #endif
 
     // Return IRF value
     return rsp;
@@ -332,97 +388,19 @@ double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing information.
- * @param[in] roi Region of interest of data selection.
- * @param[in] ebds Energy boundaries of data selection.
- * @param[in] gti Good Time Intervals of data selection.
+ * @param[in] obs Observation.
  *
- * This method implements the default and complete integral of the instrument
- * response function (IRF). It may be overwritted by a specific method in the
- * derived class that drops response terms that are not used.
+ * @todo Not yet implemented.
  ***************************************************************************/
 double GLATResponse::nirf(const GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime,  const GPointing& pnt,
-                          const GRoi& roi, const GEbounds& ebds,
-                          const GGti& gti) const
+                          const GTime& srcTime,
+                          const GObservation& obs) const
 {
-    // Get IRF components
-    double nirf  =   live(srcDir, srcEng, srcTime, pnt);
-    //nirf        *=   aeff(srcDir, srcEng, srcTime, pnt);
-    nirf        *=   npsf(srcDir, srcEng, srcTime, pnt, roi);
-    nirf        *= nedisp(srcDir, srcEng, srcTime, pnt, ebds);
-    //nirf        *= ntdisp(srcDir, srcEng, srcTime, pnt, gti);
+    // Initialise
+    double nirf = 0.0;
 
     // Return integrated IRF value
     return nirf;
-}
-
-
-/***********************************************************************//**
- * @brief Return livetime fraction
- *        (units: s s-1)
- *
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Pointer to instrument pointing information.
- *
- * @todo Dummy livetime fraction of 0.8.
- ***************************************************************************/
-double GLATResponse::live(const GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime, const GPointing& pnt) const
-{
-    // Dummy
-    double live = 0.8;
-    
-    // Return effective area
-    return live;
-}
-
-
-/***********************************************************************//**
- * @brief Return integral over PSF
- *
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Pointer to instrument pointing information.
- * @param[in] roi Region of interest of data selection.
- *
- * @todo Implement integration over ROI.
- ***************************************************************************/
-double GLATResponse::npsf(const GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime, const GPointing& pnt,
-                          const GRoi& roi) const
-{
-    // Dummy
-    double npsf = 1.0;
-
-    // Return integral
-    return npsf;
-}
-
-
-/***********************************************************************//**
- * @brief Return integral over energy dispersion
- *
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Pointer to instrument pointing information.
- * @param[in] ebds Energy boundaries of data selection.
- *
- * @todo Implement integration over energy range.
- ***************************************************************************/
-double GLATResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
-                            const GTime& srcTime, const GPointing& pnt,
-                            const GEbounds& ebds) const
-{
-    // Dummy
-    double nedisp = 1.0;
-
-    // Return integral
-    return nedisp;
 }
 
 
@@ -435,6 +413,12 @@ double GLATResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
  *            Invalid response type encountered.
  *
  * Loads the specified Fermi LAT response from the calibration database.
+ *
+ * @todo Add a more generic calibration database interface. For this we need
+ *       first to develop a clear vision about how the calibration database
+ *       is organized. Probably it is best to introduce a generic base class
+ *       for the calibration database and each instrument implements then
+ *       it's specific interface.
  ***************************************************************************/
 void GLATResponse::load(const std::string& rspname)
 {
@@ -475,7 +459,7 @@ void GLATResponse::load(const std::string& rspname)
     }
 
     // Load back IRF if requested
-    if (m_hasfront) {
+    if (m_hasback) {
         std::string aeffname  = m_caldb + "/aeff_"  + m_rspname + "_back.fits";
         std::string psfname   = m_caldb + "/psf_"   + m_rspname + "_back.fits";
         std::string edispname = m_caldb + "/edisp_" + m_rspname + "_back.fits";
@@ -501,6 +485,8 @@ void GLATResponse::load(const std::string& rspname)
  * aeff_<rspname>_[front/back].fits,
  * psf_<rspname>_[front/back].fits, and
  * edisp_<rspname>_[front/back].fits.
+ *
+ * @todo Not yet implemented.
  ***************************************************************************/
 void GLATResponse::save(const std::string& rspname) const
 {
@@ -530,7 +516,7 @@ void GLATResponse::save(const std::string& rspname) const
 /***********************************************************************//**
  * @brief Return pointer on effective area
  *
- * @param[in] index Response index (starting from 0)
+ * @param[in] index Response index (starting from 0).
  ***************************************************************************/
 GLATAeff* GLATResponse::aeff(const int& index) const
 {
@@ -548,7 +534,7 @@ GLATAeff* GLATResponse::aeff(const int& index) const
 /***********************************************************************//**
  * @brief Return pointer on point spread function
  *
- * @param[in] index Response index (starting from 0)
+ * @param[in] index Response index (starting from 0).
  ***************************************************************************/
 GLATPsf* GLATResponse::psf(const int& index) const
 {
@@ -566,7 +552,7 @@ GLATPsf* GLATResponse::psf(const int& index) const
 /***********************************************************************//**
  * @brief Return pointer on energy dispersion
  *
- * @param[in] index Response index (starting from 0)
+ * @param[in] index Response index (starting from 0).
  ***************************************************************************/
 GLATEdisp* GLATResponse::edisp(const int& index) const
 {
@@ -607,6 +593,8 @@ std::string GLATResponse::print(void) const
         result.append("\n"+m_psf[i]->print());
         result.append("\n"+m_edisp[i]->print());
     }
+    for (int i = 0; i < m_ptsrc.size(); ++i)
+        result.append("\n"+m_ptsrc[i]->print());
 
     // Return result
     return result;
@@ -621,6 +609,8 @@ std::string GLATResponse::print(void) const
 
 /***********************************************************************//**
  * @brief Initialise class members
+ *
+ * @todo Do we need the handoff stuff there???
  ***************************************************************************/
 void GLATResponse::init_members(void)
 {
@@ -630,6 +620,7 @@ void GLATResponse::init_members(void)
     m_aeff.clear();
     m_psf.clear();
     m_edisp.clear();
+    m_ptsrc.clear();
     
     // By default use HANDOFF response database.
     char* handoff = getenv("HANDOFF_IRF_DIR");
@@ -654,6 +645,7 @@ void GLATResponse::copy_members(const GLATResponse& rsp)
     m_aeff     = rsp.m_aeff;
     m_psf      = rsp.m_psf;
     m_edisp    = rsp.m_edisp;
+    m_ptsrc    = rsp.m_ptsrc;
 
     // Return
     return;
