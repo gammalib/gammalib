@@ -1,3 +1,13 @@
+2010-12-20  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+        * Version 0.4.3 released
+        ========================
+
+        Tag sources with GammaLib-00-04-03        
+        Add CSV Table interface
+        Add more source models
+        First working Fermi-LAT interface for binned analysis
+
 2010-11-23  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.4.2 released
