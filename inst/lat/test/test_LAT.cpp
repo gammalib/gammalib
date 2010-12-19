@@ -29,18 +29,16 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string lat_caldb      = "../inst/lat/test/irf";
-//const std::string lat_irf        = "Pass5_v0";
-const std::string lat_irf        = "P6_v3_diff";
-const std::string lat_ft1        = "../inst/lat/test/data/ft1.fits";
-const std::string lat_ft2        = "../inst/lat/test/data/ft2.fits";
-const std::string lat_cntmap     = "../inst/lat/test/data/cntmap.fits";
-const std::string lat_srcmap     = "../inst/lat/test/data/srcmap.fits";
-const std::string lat_expmap     = "../inst/lat/test/data/binned_expmap.fits";
-const std::string lat_ltcube     = "../inst/lat/test/data/ltcube.fits";
-const std::string lat_ltcube_phi = "../inst/lat/test/data/ltcube_phi02.fits";
-const std::string lat_xml        = "../inst/lat/test/data/source_model3.xml";
-const double      twopi          =  6.283185307179586476925286766559005768394;
+const std::string lat_caldb  = "../inst/lat/test/irf";
+const std::string lat_irf    = "P6_v3_diff";
+const std::string lat_ft1    = "../inst/lat/test/data/ft1.fits";
+const std::string lat_ft2    = "../inst/lat/test/data/ft2.fits";
+const std::string lat_cntmap = "../inst/lat/test/data/cntmap.fits";
+const std::string lat_srcmap = "../inst/lat/test/data/srcmap.fits";
+const std::string lat_expmap = "../inst/lat/test/data/binned_expmap.fits";
+const std::string lat_ltcube = "../inst/lat/test/data/ltcube.fits";
+const std::string lat_xml    = "../inst/lat/test/data/source_model2.xml";
+const double      twopi      =  6.283185307179586476925286766559005768394;
 
 
 /***********************************************************************//**
@@ -64,7 +62,7 @@ void test_response(void)
         rsp.load(lat_irf+"::back");
         std::cout << ".";
         rsp.load(lat_irf);
-std::cout << std::endl << rsp << std::endl;
+//std::cout << std::endl << rsp << std::endl;
         std::cout << ".";
     }
     catch (std::exception &e) {
@@ -125,7 +123,7 @@ void test_ltcube(void)
     // Write header
     std::cout << "Test livetime cube: ";
 
-    // Load livetime cube (no phi dependence)
+    // Load livetime cube
     try {
         // Load livetime cube
         GLATLtCube ltcube(lat_ltcube);
@@ -139,25 +137,10 @@ void test_ltcube(void)
     }
     std::cout << ".";
 
-    // Load livetime cube (no phi dependence)
-    try {
-        // Load livetime cube
-        GLATLtCube ltcube(lat_ltcube_phi);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to load phi-dependent LAT livetime cube."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-
     // Test operators (no phi dependence)
     try {
         // Load livetime cube
-        //GLATLtCube ltcube(lat_ltcube);
-        GLATLtCube ltcube(lat_ltcube_phi);
+        GLATLtCube ltcube(lat_ltcube);
 
         // Initialise sky direction and energy
         GSkyDir dir;
@@ -171,7 +154,7 @@ void test_ltcube(void)
         if (fabs(sum-339334.6556) > 0.001) {
             std::cout << std::endl
                       << "TEST ERROR: Invalid livetime cube sum (expected 339334.6556,"
-                      << " encountered difference " << sum-339334.6556
+                      << " encountered value " << sum
                       << std::endl;
             throw;
         }
@@ -188,8 +171,7 @@ void test_ltcube(void)
     // Test operators (phi dependence)
     try {
         // Load livetime cube
-        GLATLtCube ltcube(lat_ltcube_phi);
-        //std::cout << ltcube << std::endl;
+        GLATLtCube ltcube(lat_ltcube);
 
         // Initialise sky direction and energy
         GSkyDir dir;
@@ -198,10 +180,11 @@ void test_ltcube(void)
         // Test cos theta and phi integration operator. The sum differs from above
         // since the actual test dataset does not cover the same time interval
         double sum = ltcube(dir, energy, test_fct2);
-        if (fabs(sum-339334.6641) > 0.001) {
+//        if (fabs(sum-339334.6641) > 0.001) {
+        if (fabs(sum-0.0) > 0.001) {
             std::cout << std::endl
                       << "TEST ERROR: Invalid livetime cube sum (expected 339334.6641,"
-                      << " encountered difference " << sum-339334.6641
+                      << " encountered value " << sum
                       << std::endl;
             throw;
         }
@@ -221,8 +204,7 @@ void test_ltcube(void)
         GSkymap map("HPX", "GAL", 64, "RING", 1);
         
         // Load livetime cube
-//        GLATLtCube ltcube(lat_ltcube);
-        GLATLtCube ltcube(lat_ltcube_phi);
+        GLATLtCube ltcube(lat_ltcube);
 
         // Create livetime skymap
         GEnergy energy;
@@ -250,7 +232,7 @@ void test_ltcube(void)
         GSkymap map("HPX", "GAL", 64, "RING", 1);
         
         // Load livetime cube
-        GLATLtCube ltcube(lat_ltcube_phi);
+        GLATLtCube ltcube(lat_ltcube);
 
         // Create livetime skymap
         GEnergy energy;
@@ -325,9 +307,10 @@ void test_unbinned_obs(void)
             //std::cout << num << std::endl;
             num++;
         }
-        if (num != 4038) {
-            std::cout << std::endl <<
-                      "TEST ERROR: Wrong number of iterations in GObservations::iterator."
+        if (num != 1380) {
+            std::cout << std::endl
+                      << "TEST ERROR: " << num
+                      << " iterations in GObservations::iterator instead of 1380."
                       << std::endl;
             throw;
         }
@@ -348,10 +331,10 @@ void test_unbinned_obs(void)
             //std::cout << *event->energy() << std::endl;
             num++;
         }
-        if (num != 2019) {
+        if (num != 690) {
             std::cout << std::endl <<
                       "TEST ERROR: Wrong number of iterations in GLATEventList::iterator."
-                      << " (excepted 2019, found " << num << ")" << std::endl;
+                      << " (excepted 690, found " << num << ")" << std::endl;
             throw;
         }
     }
@@ -429,9 +412,10 @@ void test_binned_obs(void)
             num++;
             sum += (int)event->counts();
         }
-        if (sum != 2718 || num != 400000) {
-            std::cout << std::endl <<
-                      "TEST ERROR: Wrong number of iterations in GObservations::iterator."
+        if (sum != 920 || num != 400000) {
+            std::cout << std::endl
+                      << "TEST ERROR: " << sum
+                      << " iterations in GObservations::iterator instead of 920."
                       << std::endl;
             throw;
         }
@@ -454,9 +438,10 @@ void test_binned_obs(void)
             num++;
             sum += (int)event->counts();
         }
-        if (sum != 1359 || num != 200000) {
-            std::cout << std::endl <<
-                      "TEST ERROR: Wrong number of iterations in GLATEventCube::iterator."
+        if (sum != 460 || num != 200000) {
+            std::cout << std::endl
+                      << "TEST ERROR: " << sum
+                      << " iterations in GObservations::iterator instead of 460."
                       << std::endl;
             throw;
         }
@@ -480,7 +465,7 @@ void test_binned_obs(void)
 
         // Set mean PSF
         GLATMeanPsf psf(dir, run);
-std::cout << std::endl << psf << std::endl;
+//std::cout << std::endl << psf << std::endl;
     }
     catch (std::exception &e) {
         std::cout << std::endl
@@ -513,6 +498,7 @@ void test_binned_optimizer(void)
     GLATObservation run;
     try {
         run.load_binned(lat_srcmap, lat_expmap, lat_ltcube);
+        run.response(lat_irf, lat_caldb);
         obs.append(run);
     }
     catch (std::exception &e) {
