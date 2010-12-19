@@ -42,12 +42,14 @@ public:
     // Methods
     void   max_iter(const int& n) { m_max_iter=n; return; }
     void   max_stalls(const int& n) { m_max_stall=n; return; }
+    void   max_boundary_hits(const int& n) { m_max_stall=n; }
     void   lambda_start(const double& val) { m_lambda_start=val; return; }
     void   lambda_inc(const double& val) { m_lambda_inc=val; return; }
     void   lambda_dec(const double& val) { m_lambda_dec=val; return; }
     void   eps(const double& eps) { m_eps=eps; return; }
     int    max_iter(void) const { return m_max_iter; }
     int    max_stalls(void) const { return m_max_stall; }
+    int    max_boundary_hits(void) const { return m_max_hit; }
     int    status(void) const { return m_status; }
     int    iter(void) const { return m_iter; }
     double lambda_start(void) const { return m_lambda_start; }
@@ -64,13 +66,8 @@ public:
  ***************************************************************************/
 %extend GOptimizerLM {
     char *__str__() {
-        static char str_buffer[10001];
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 10001);
-        str_buffer[10000] = '\0';
-        return str_buffer;
+        static std::string result = self->print();
+        return ((char*)result.c_str());
     }
     GOptimizerLM copy() {
         return (*self);
