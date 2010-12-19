@@ -20,6 +20,7 @@
 #define GOPTIMIZERLM_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <vector>
 #include "GOptimizer.hpp"
 #include "GOptimizerFunction.hpp"
 #include "GModels.hpp"
@@ -57,22 +58,25 @@ public:
     GModels&        operator() (GOptimizerFunction& fct, GModels& m);
     
     // Methods
-    void   max_iter(const int& n) { m_max_iter=n; return; }
-    void   max_stalls(const int& n) { m_max_stall=n; return; }
-    void   lambda_start(const double& val) { m_lambda_start=val; return; }
-    void   lambda_inc(const double& val) { m_lambda_inc=val; return; }
-    void   lambda_dec(const double& val) { m_lambda_dec=val; return; }
-    void   eps(const double& eps) { m_eps=eps; return; }
-    int    max_iter(void) const { return m_max_iter; }
-    int    max_stalls(void) const { return m_max_stall; }
-    int    status(void) const { return m_status; }
-    int    iter(void) const { return m_iter; }
-    double lambda_start(void) const { return m_lambda_start; }
-    double lambda_inc(void) const { return m_lambda_inc; }
-    double lambda_dec(void) const { return m_lambda_dec; }
-    double lambda(void) const { return m_lambda; }
-    double eps(void) const { return m_eps; }
-    double value(void) const { return m_value; }
+    void        max_iter(const int& n) { m_max_iter=n; }
+    void        max_stalls(const int& n) { m_max_stall=n; }
+    void        max_boundary_hits(const int& n) { m_max_stall=n; }
+    void        lambda_start(const double& val) { m_lambda_start=val; }
+    void        lambda_inc(const double& val) { m_lambda_inc=val; }
+    void        lambda_dec(const double& val) { m_lambda_dec=val; }
+    void        eps(const double& eps) { m_eps=eps; }
+    int         max_iter(void) const { return m_max_iter; }
+    int         max_stalls(void) const { return m_max_stall; }
+    int         max_boundary_hits(void) const { return m_max_hit; }
+    int         status(void) const { return m_status; }
+    int         iter(void) const { return m_iter; }
+    double      lambda_start(void) const { return m_lambda_start; }
+    double      lambda_inc(void) const { return m_lambda_inc; }
+    double      lambda_dec(void) const { return m_lambda_dec; }
+    double      lambda(void) const { return m_lambda; }
+    double      eps(void) const { return m_eps; }
+    double      value(void) const { return m_value; }
+    std::string print(void) const;
 
 protected:
     // Protected methods
@@ -85,19 +89,25 @@ protected:
     double step_size(GVector* grad, GOptimizerPars* pars);
 
     // Protected data area
-    double m_lambda_start;      //!< Initial start value
-    double m_lambda_inc;        //!< Lambda increase
-    double m_lambda_dec;        //!< Lambda decrease
-    double m_eps;               //!< Absolute precision
-    int    m_max_iter;          //!< Maximum number of iterations
-    int    m_max_stall;         //!< Maximum number of stalls
-    bool   m_step_adjust;       //!< Adjust step size to boundaries
-    bool*  m_hit_boundary;      //!< Bookkeeping array for boundary hits
-    double m_lambda;            //!< Actual lambda
-    double m_value;             //!< Actual function value
-    int    m_status;            //!< Fit status
-    int    m_iter;              //!< Iteration
-    GLog*  m_logger;            //!< Pointer to optional logger
+    int               m_npars;           //!< Number of parameters
+    int               m_nfree;           //!< Number of free parameters
+    double            m_lambda_start;    //!< Initial start value
+    double            m_lambda_inc;      //!< Lambda increase
+    double            m_lambda_dec;      //!< Lambda decrease
+    double            m_eps;             //!< Absolute precision
+    int               m_max_iter;        //!< Maximum number of iterations
+    int               m_max_stall;       //!< Maximum number of stalls
+    int               m_max_hit;         //!< Maximum number of successive hits
+    bool              m_step_adjust;     //!< Adjust step size to boundaries
+    std::vector<bool> m_hit_boundary;    //!< Bookkeeping array for boundary hits
+    std::vector<int>  m_hit_minimum;     //!< Bookkeeping of successive minimum hits
+    std::vector<int>  m_hit_maximum;     //!< Bookkeeping of successive maximum hits
+    std::vector<bool> m_par_freeze;      //!< Bookkeeping of parameter freeze
+    double            m_lambda;          //!< Actual lambda
+    double            m_value;           //!< Actual function value
+    int               m_status;          //!< Fit status
+    int               m_iter;            //!< Iteration
+    GLog*             m_logger;          //!< Pointer to optional logger
 
 };
 
