@@ -19,11 +19,13 @@
 #include "GLATMeanPsf.hpp"
 #include "GLATAeff.hpp"
 #include "GLATPsf.hpp"
+#include "GLATObservation.hpp"
 #include "GLATException.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_SET                  "GLATMeanPsf::set(GSkyDir&, GLATObservation&)"
+#define G_EXPOSURE                              "GLATMeanPsf::exposure(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -223,24 +225,42 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     if (ebds == NULL)
         throw GLATException::no_ebds(G_SET);
 
+    // Store source direction
+    m_dir = dir;
+
+    // Limit computation to zenith angles < m_theta_max (typically 70
+    // degrees - this is the hardwired value in the ST). For this purpose
+    // set the costhetamin parameter of Aeff to m_theta_max. Store also the
+    // original values in a vector for later restoration.
+    std::vector<double> save_costhetamin;
+    for (int i = 0; i < rsp->size(); ++i) {
+        save_costhetamin.push_back(rsp->aeff(i)->costhetamin());
+        rsp->aeff(i)->costhetamin(cos(m_theta_max*deg2rad));
+    }
+    
     // Allocate room for arrays
     m_psf.reserve(size());
     m_exposure.reserve(m_energy.size());
 
     // Set energy nodes from the bin boundaries of the observations energy
-    // boundaries.
-    m_energy.reserve(ebds->size()+1);
-    m_energy.push_back(ebds->emin(0));
-    for (int i = 0; i < ebds->size(); ++i)
-        m_energy.push_back(ebds->emax(i));
+    // boundaries. Store the energy nodes locally as GEnergy objects and
+    // save them also in the class as log10 of energy in MeV.
+    std::vector<GEnergy> energy;
+    energy.reserve(ebds->size()+1);
+    energy.push_back(ebds->emin(0));
+    m_energy.append(ebds->emin(0).log10MeV());
+    for (int i = 0; i < ebds->size(); ++i) {
+        m_energy.append(ebds->emax(i).log10MeV());
+        energy.push_back(ebds->emax(i));
+    }
 
     // Loop over energies
-    for (int ieng = 0; ieng < m_energy.size(); ++ieng) {
+    for (int ieng = 0; ieng < energy.size(); ++ieng) {
 
         // Compute exposure by looping over the responses
         double exposure = 0.0;
         for (int i = 0; i < rsp->size(); ++i)
-            exposure += (*ltcube)(dir, m_energy[ieng], *rsp->aeff(i));
+            exposure += (*ltcube)(dir, energy[ieng], *rsp->aeff(i));
 
         // Set exposure
         m_exposure.push_back(exposure);
@@ -251,11 +271,11 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
             // Compute point spread function by looping over the responses
             double psf = 0.0;
             for (int i = 0; i < rsp->size(); ++i)
-                psf += (*ltcube)(dir, m_energy[ieng], m_offset[ioffset],
-                                 *rsp->psf(i));
+                psf += (*ltcube)(dir, energy[ieng], m_offset(ioffset),
+                                 *rsp->psf(i), *rsp->aeff(i));
 
             // Normalize PSF by exposure and clip when exposure drops to 0
-            psf = (exposure > 0) ? psf/exposure : 0.0;
+            psf = (exposure > 0.0) ? psf/exposure : 0.0;
 
             // Set PSF value
             m_psf.push_back(psf);
@@ -263,8 +283,108 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
         } // endfor: looped over offsets
     } // endfor: looped over energies
 
+    // Restore initial Aeff zenith angle restriction
+    for (int i = 0; i < rsp->size(); ++i)
+        rsp->aeff(i)->costhetamin(save_costhetamin[i]);
+
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return mean PSF value
+ *
+ * @param[in] offset Angular distance from true source direction (degrees).
+ * @param[in] logE log10 of energy in MeV.
+ ***************************************************************************/
+double GLATMeanPsf::psf(const double& offset, const double& logE)
+{
+    // Initialise response
+    double value = 0.0;
+
+    // Continue only if arguments are within valid range
+    if (offset < 70.0) {
+
+        // Flag no change of values
+        bool change = false;
+
+        // Set offset interpolation
+        if (offset != m_last_offset) {
+            m_offset.set_value(offset);
+            m_last_offset = offset;
+            change        = true;
+        }
+
+        // Set energy interpolation
+        if (logE != m_last_energy) {
+            m_energy.set_value(logE);
+            m_last_energy = logE;
+            change        = true;
+        }
+
+        // If change occured then update interpolation indices and weighting
+        // factors
+        if (change) {
+
+            // Set energy indices
+            int inx_energy_left  = m_energy.inx_left()  * noffsets();
+            int inx_energy_right = m_energy.inx_right() * noffsets();
+            
+            // Set array indices for bi-linear interpolation
+            m_inx1 = m_offset.inx_left()  + inx_energy_left;
+            m_inx2 = m_offset.inx_left()  + inx_energy_right;
+            m_inx3 = m_offset.inx_right() + inx_energy_left;
+            m_inx4 = m_offset.inx_right() + inx_energy_right;
+
+            // Set weighting factors for bi-linear interpolation
+            m_wgt1 = m_offset.wgt_left()  * m_energy.wgt_left();
+            m_wgt2 = m_offset.wgt_left()  * m_energy.wgt_right();
+            m_wgt3 = m_offset.wgt_right() * m_energy.wgt_left();
+            m_wgt4 = m_offset.wgt_right() * m_energy.wgt_right();
+
+        } // endif: logE or ctheta changed
+
+        // Perform bi-linear interpolation
+        value = m_wgt1 * m_psf[m_inx1] +
+                m_wgt2 * m_psf[m_inx2] +
+                m_wgt3 * m_psf[m_inx3] +
+                m_wgt4 * m_psf[m_inx4];
+    
+    } // endif: arguments were valid
+
+    // Return value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Return exposure value
+ *
+ * @param[in] logE log10 of energy in MeV.
+ ***************************************************************************/
+double GLATMeanPsf::exposure(const double& logE)
+{
+    // Initialise response
+    double value = 0.0;
+
+    // Continue only if arguments are within valid range
+    if (logE > 0.0) {
+
+        // Set energy interpolation
+        if (logE != m_last_energy) {
+            m_energy.set_value(logE);
+            m_last_energy = logE;
+        }
+
+        // Perform linear interpolation
+        value = m_energy.wgt_left()  * m_exposure[m_energy.inx_left()] +
+                m_energy.wgt_right() * m_exposure[m_energy.inx_right()];
+
+    } // endif: arguments were in valid range
+
+    // Return value
+    return value;
 }
 
 
@@ -292,11 +412,21 @@ std::string GLATMeanPsf::print(void) const
     
     // Append header
     result.append("=== GLATMeanPsf ===");
+    result.append("\n"+parformat("Source name")+name());
     result.append("\n"+parformat("Source direction"));
+    result.append(str(m_dir.ra_deg()));
+    result.append(", ");
+    result.append(str(m_dir.dec_deg()));
     result.append("\n"+parformat("Offset angles")+str(noffsets()));
     result.append("\n"+parformat("Energy values")+str(nenergies()));
     result.append("\n"+parformat("Exposure range"));
     result.append(str(min_exposure)+" - "+str(max_exposure)+" s cm2");
+    for (int i = 0; i < nenergies(); ++i) {
+        GEnergy energy;
+        energy.log10MeV(m_energy(i));
+        result.append("\n"+parformat(energy.print()));
+        result.append(str(m_exposure[i])+" s cm2");
+    }
 
     // Return result
     return result;
@@ -315,11 +445,23 @@ std::string GLATMeanPsf::print(void) const
 void GLATMeanPsf::init_members(void)
 {
     // Initialise members
+    m_name.clear();
     m_dir.clear();
     m_psf.clear();
     m_exposure.clear();
     m_energy.clear();
     m_offset.clear();
+    m_theta_max   = 70.0;  //!< Maximum zenith angle
+    m_last_energy = -1.0;
+    m_last_offset = -1.0;
+    m_inx1        = 0;
+    m_inx2        = 0;
+    m_inx3        = 0;
+    m_inx4        = 0;
+    m_wgt1        = 0.0;
+    m_wgt2        = 0.0;
+    m_wgt3        = 0.0;
+    m_wgt4        = 0.0;
 
     // Set offset array
     set_offsets();
@@ -337,11 +479,23 @@ void GLATMeanPsf::init_members(void)
 void GLATMeanPsf::copy_members(const GLATMeanPsf& psf)
 {
     // Copy members
-    m_dir      = psf.m_dir;
-    m_psf      = psf.m_psf;
-    m_exposure = psf.m_exposure;
-    m_energy   = psf.m_energy;
-    m_offset   = psf.m_offset;
+    m_name        = psf.m_name;
+    m_dir         = psf.m_dir;
+    m_psf         = psf.m_psf;
+    m_exposure    = psf.m_exposure;
+    m_energy      = psf.m_energy;
+    m_offset      = psf.m_offset;
+    m_theta_max   = psf.m_theta_max;
+    m_last_energy = psf.m_last_energy;
+    m_last_offset = psf.m_last_offset;
+    m_inx1        = psf.m_inx1;
+    m_inx2        = psf.m_inx2;
+    m_inx3        = psf.m_inx3;
+    m_inx4        = psf.m_inx4;
+    m_wgt1        = psf.m_wgt1;
+    m_wgt2        = psf.m_wgt2;
+    m_wgt3        = psf.m_wgt3;
+    m_wgt4        = psf.m_wgt4;
 
     // Return
     return;
@@ -373,12 +527,13 @@ void GLATMeanPsf::set_offsets(void)
 
     // Clear offset array
     m_offset.clear();
-    m_offset.reserve(offset_num);
+    //m_offset.reserve(offset_num);
 
     // Set array
     double step = log(offset_max/offset_min)/(offset_num - 1.0);
     for (int i = 0; i < offset_num; ++i)
-        m_offset.push_back(offset_min*exp(i*step));
+        m_offset.append(offset_min*exp(i*step));
+//        m_offset.push_back(offset_min*exp(i*step));
 
     // Return
     return;
