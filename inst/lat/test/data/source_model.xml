@@ -1,6 +1,6 @@
 <source_library title="source library">
   <source type="DiffuseSource" name="Extragal_diffuse">
-    <spectrum type="FileFunction" file="/project-data/glast/skymaps/isotropic/isotropic_iem_v02.txt">
+    <spectrum type="FileFunction" file="data/isotropic_iem_v02.txt">
       <parameter scale="1.0" name="Normalization" min="0.0" max="1000.0" value="1.0" free="1"/>
     </spectrum>
     <spatialModel type="ConstantValue">
