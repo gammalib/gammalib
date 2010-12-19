@@ -45,8 +45,7 @@ def analyse_unbinned(xmlname):
 
     # Perform optimization
     opt = GOptimizerLM()
-    opt.max_iter(1000)
-    #obs.optimize(opt)
+    obs.optimize(opt)
     print obs
 
 
@@ -75,10 +74,11 @@ def analyse_binned(xmlname):
     log = GLog()
     log.cout(True)
     opt = GOptimizerLM(log)
-    opt.max_iter(1000)
+    #opt.lambda_inc(10.0)
+    #opt.lambda_dec(0.1)
     obs.optimize(opt)
-    print opt
     print obs
+    print opt
     
     # Plot residuals
     plot_residuals(obs)
@@ -168,8 +168,8 @@ if __name__ == '__main__':
 
     # Analyse data
     #analyse_unbinned("data/source_model.xml")
-    #analyse_binned("data/source_model.xml")   # Original
-    analyse_binned("data/source_model2.xml")  # Powerlaw for extragal. diffuse
+    analyse_binned("data/source_model.xml")   # Original
+    #analyse_binned("data/source_model2.xml")  # Powerlaw for extragal. diffuse
     #analyse_binned("data/source_model3.xml")  # No Crab, Powerlaw for extragal. diffuse
     #analyse_binned("data/source_model4.xml")  # No Crab, no extragal. diffuse
     #analyse_binned("data/source_model5.xml")  # No Crab, no galactic diffuse
