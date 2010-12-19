@@ -2,6 +2,8 @@
 pkginclude_HEADERS = GammaLib.hpp \
                      GException.hpp \
                      GNodeArray.hpp \
+                     GTools.hpp \
+                     GCsv.hpp \
                      GSkyDir.hpp \
                      GSkyPixel.hpp \
                      GSkymap.hpp \
@@ -93,5 +95,4 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GOptimizer.hpp \
                      GOptimizerLM.hpp \
                      GOptimizerPars.hpp \
-                     GOptimizerFunction.hpp \
-                     GTools.hpp
+                     GOptimizerFunction.hpp

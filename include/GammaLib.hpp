@@ -24,6 +24,7 @@
 /* __ Common tools _______________________________________________________ */
 #include "GException.hpp"
 #include "GNodeArray.hpp"
+#include "GGCsv.hpp"
 
 /* __ Numerics module ____________________________________________________ */
 #include "GVector.hpp"
