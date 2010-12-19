@@ -458,6 +458,16 @@ public:
         model_invalid_parnames(std::string origin, GXmlElement xml,
                                std::string message = "");
     };
+    class not_enough_data : public GExceptionHandler {
+    public:
+        not_enough_data(std::string origin, std::string filename,
+                        int num, std::string message = "");
+    };
+    class not_enough_columns : public GExceptionHandler {
+    public:
+        not_enough_columns(std::string origin, std::string filename,
+                           int num, std::string message = "");
+    };
 
 
     // GCvs exceptions
