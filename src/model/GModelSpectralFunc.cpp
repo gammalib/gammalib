@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectralFunc.cpp  -  Spectral function model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralFunc.cpp
- * @brief GModelSpectralFunc class implementation.
+ * @brief Spectral function model class implementation
  * @author J. Knodlseder
  */
 
@@ -23,12 +23,14 @@
 #include <math.h>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GCsv.hpp"
 #include "GModelSpectralFunc.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_PAR                                  "GModelSpectralFunc::par(int)"
 #define G_READ                       "GModelSpectralFunc::read(GXmlElement&)"
 #define G_WRITE                     "GModelSpectralFunc::write(GXmlElement&)"
+#define G_LOAD_NODES           "GModelSpectralFunc::load_nodes(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -208,11 +210,13 @@ GModelSpectralFunc* GModelSpectralFunc::clone(void) const
  * \f[I(E)=norm f(E)\f]
  * where
  * \f$norm\f$ is the normalization of the function.
+ * Note that the node energies are stored as log10 of energy in units of
+ * MeV.
  ***************************************************************************/
 double GModelSpectralFunc::eval(const GEnergy& srcEng)
 {
     // Interpolate function
-    double func = m_nodes.interpolate(srcEng.MeV(), m_values);
+    double func = m_nodes.interpolate(srcEng.log10MeV(), m_values);
 
     // Compute function value
     double value  = norm() * func;
@@ -240,8 +244,8 @@ double GModelSpectralFunc::eval(const GEnergy& srcEng)
  ***************************************************************************/
 double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng)
 {
-    // Interpolate function (dummy so far)
-    double func = m_nodes.interpolate(srcEng.MeV(), m_values);
+    // Interpolate function
+    double func = m_nodes.interpolate(srcEng.log10MeV(), m_values);
 
     // Compute function value
     double value  = norm() * func;
@@ -363,6 +367,7 @@ std::string GModelSpectralFunc::print(void) const
     // Append header
     result.append("=== GModelSpectralFunc ===\n");
     result.append(parformat("Function file")+m_filename);
+    result.append(parformat("Number of nodes")+str(m_nodes.size()));
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i) {
         result.append("\n"+parformat("Parameter "+str(i+1)));
@@ -442,10 +447,17 @@ void GModelSpectralFunc::free_members(void)
  *
  * @param[in] filename File name.
  *
- * Node energies are stored in units of MeV.
- * At least 2 nodes are required.
+ * @exception GException::not_enough_data
+ *            File contains less than 2 nodes
+ * @exception GException::not_enough_columns
+ *            File contains less than 2 columns
  *
- * @todo Not yet implemented. 
+ * The file function is stored as a column separated value table (CSV) in an
+ * ASCII file with (at least) 2 columns. The first column specifies the
+ * energy in MeV while the second column specifies the intensity at this
+ * energy in units of ph/cm2/s/MeV.
+ * The node energies will be stored as log10 of the energy given in units
+ * of MeV. At least 2 nodes and 2 columns are required.
  ***************************************************************************/
 void GModelSpectralFunc::load_nodes(const std::string& filename)
 {
@@ -455,6 +467,25 @@ void GModelSpectralFunc::load_nodes(const std::string& filename)
 
     // Set filename
     m_filename = filename;
+
+    // Load file
+    GCsv csv = GCsv(filename);
+
+    // Check if there are at least 2 nodes
+    if (csv.nrows() < 2)
+        throw GException::not_enough_data(G_LOAD_NODES, filename,
+                                          csv.nrows());
+
+    // Check if there are at least 2 columns
+    if (csv.ncols() < 2)
+        throw GException::not_enough_columns(G_LOAD_NODES, filename,
+                                             csv.ncols());
+
+    // Setup nodes
+    for (int i = 0; i < csv.nrows(); ++i) {
+        m_nodes.append(log10(csv.real(i,0)));
+        m_values.push_back(csv.real(i,1));
+    }
 
     // Return
     return;
