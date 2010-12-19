@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GLATLtCubeMap.cpp  -  Fermi LAT lifetime cube map            *
+ *            GLATLtCubeMap.cpp  -  Fermi LAT livetime cube map            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
@@ -53,7 +53,7 @@ GLATLtCubeMap::GLATLtCubeMap(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param map Lifetime cube map.
+ * @param map Livetime cube map.
  ***************************************************************************/
 GLATLtCubeMap::GLATLtCubeMap(const GLATLtCubeMap& map)
 {
@@ -90,7 +90,7 @@ GLATLtCubeMap::~GLATLtCubeMap(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] map Lifetime cube map.
+ * @param[in] map Livetime cube map.
  ***************************************************************************/
 GLATLtCubeMap& GLATLtCubeMap::operator= (const GLATLtCubeMap& map)
 {
@@ -256,10 +256,11 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, const GEnergy& energy,
  * @param[in] energy True photon energy.
  * @param[in] offset Offset from true direction (deg).
  * @param[in] psf Point spread function.
+ * @param[in] aeff Effective area.
  *
  * Computes
  * \f[\sum_{\cos \theta} T_{\rm live}(\cos \theta) 
- *    PSF(\log E, \delta, \cos \theta)\f]
+ *    PSF(\log E, \delta, \cos \theta) A_{\rm eff}(\cos \theta, \phi)\f]
  * where
  * \f$T_{\rm live}(\cos \theta)\f$ is the livetime as a function of the
  * cosine of the zenith angle, and
@@ -267,10 +268,13 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, const GEnergy& energy,
  * depends on
  * the log10 of the energy (in MeV),
  * the offset angle from the true direction (in degrees), and
- * the cosine of the zenith angle.
+ * the cosine of the zenith angle, and
+ * \f$A_{\rm eff}(\cos \theta, \phi)\f$ is the effective area that depends
+ * on the cosine of the zenith angle and (optionally) of the azimuth angle.
  ***************************************************************************/
 double GLATLtCubeMap::operator() (const GSkyDir& dir, const GEnergy& energy,
-                                  const double& offset, const GLATPsf& psf)
+                                  const double& offset, const GLATPsf& psf,
+                                  const GLATAeff& aeff)
 {
     // Get map index
     int pixel = m_map.dir2pix(dir);
@@ -279,11 +283,31 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, const GEnergy& energy,
     double sum = 0.0;
 
     // Circumvent const correctness
-    GLATPsf* fct = ((GLATPsf*)&psf);
+    GLATPsf*  fpsf  = ((GLATPsf*)&psf);
+    GLATAeff* faeff = ((GLATAeff*)&aeff);
 
-    // Sum over zenith angle
-    for (int i = 0; i < m_num_ctheta; ++i)
-        sum += m_map(pixel, i) * (*fct)(offset, energy.log10MeV(), costheta(i));
+    // Get log10 of energy
+    double logE = energy.log10MeV();
+
+    // If livetime cube and response have phi dependence then sum over
+    // zenith and azimuth. Note that the map index starts with m_num_ctheta
+    // as the first m_num_ctheta maps correspond to an evaluation without
+    // any phi-dependence.
+    if (hasphi() && aeff.hasphi()) {
+        for (int iphi = 0, i = m_num_ctheta; iphi < m_num_phi; ++iphi) {
+            double p = phi(iphi);
+            for (int itheta = 0; itheta < m_num_ctheta; ++itheta, ++i)
+                sum += m_map(pixel, i) * (*faeff)(logE, costheta(i), p) *
+                       (*fpsf)(offset, logE, costheta(i));
+        }
+    }
+
+    // ... otherwise sum only over zenith angle
+    else {
+        for (int i = 0; i < m_num_ctheta; ++i)
+            sum += m_map(pixel, i) * (*faeff)(logE, costheta(i)) *
+                   (*fpsf)(offset, logE, costheta(i));
+    }
 
     // Return sum
     return sum;
@@ -324,13 +348,9 @@ GLATLtCubeMap* GLATLtCubeMap::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Load lifetime cube from FITS file
+ * @brief Load livetime cube from FITS file
  *
  * @param[in] hdu FITS HDU.
- *
- * @todo Verify consistency between the number of maps and the dimension
- *       parameters extracted from the keywords. The number of maps should
- *       be (m_num_phi+1)*m_num_ctheta.
  ***************************************************************************/
 void GLATLtCubeMap::read(const GFitsTable* hdu)
 {
@@ -355,7 +375,7 @@ void GLATLtCubeMap::read(const GFitsTable* hdu)
 
 
 /***********************************************************************//**
- * @brief Save lifetime cube map into FITS file
+ * @brief Save livetime cube map into FITS file
  *
  * @param[in] file FITS file.
  *
@@ -375,6 +395,16 @@ void GLATLtCubeMap::write(GFits* file) const
  *
  * @exception GException::out_of_range
  *            Bin index outside value range.
+ *
+ * The cos theta value is computed using
+ * \f[\cos \theta = 1 - \left( \frac{{\rm index} + 0.5}{\rm ncostheta}
+ *    \right)^N (1 - {\rm costhetamin})\f]
+ * where
+ * \f${\rm index}\f$ is the bin index,
+ * \f${\rm ncostheta}\f$ is the number of cos theta bins,
+ * \f$N\f$ is either 1 or 2, and
+ * \f${\rm costhetamin}\f$ is the minimum cos theta value.
+ * Default values for LAT are \f$N=2\f$ and \f${\rm costhetamin}=0\f$.
  ***************************************************************************/
 double GLATLtCubeMap::costheta(const int& index) const
 {
@@ -404,6 +434,12 @@ double GLATLtCubeMap::costheta(const int& index) const
  *
  * @exception GException::out_of_range
  *            Bin index outside value range.
+ *
+ * The phi value is computed using
+ * \f[\phi = \frac{{\rm index} + 0.5}{\rm nphi} \frac{\pi}{4}\f]
+ * where
+ * \f${\rm index}\f$ is the bin index, and
+ * \f${\rm nphi}\f$ is the number of phi bins.
  ***************************************************************************/
 double GLATLtCubeMap::phi(const int& index) const
 {
@@ -476,6 +512,8 @@ void GLATLtCubeMap::init_members(void)
     m_map.clear();
     m_num_ctheta = 0;
     m_num_phi    = 0;
+    m_min_ctheta = 0.0;
+    m_sqrt_bin   = true;
 
     // Return
     return;
@@ -485,7 +523,7 @@ void GLATLtCubeMap::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param map Lifetime cube map.
+ * @param map Livetime cube map.
  ***************************************************************************/
 void GLATLtCubeMap::copy_members(const GLATLtCubeMap& map)
 {
@@ -493,6 +531,8 @@ void GLATLtCubeMap::copy_members(const GLATLtCubeMap& map)
     m_map        = map.m_map;
     m_num_ctheta = map.m_num_ctheta;
     m_num_phi    = map.m_num_phi;
+    m_min_ctheta = map.m_min_ctheta;
+    m_sqrt_bin   = map.m_sqrt_bin;
 
     // Return
     return;
@@ -519,11 +559,11 @@ void GLATLtCubeMap::free_members(void)
  * @brief Output operator
  *
  * @param[in] os Output stream.
- * @param[in] map Lifetime cube map.
+ * @param[in] map Livetime cube map.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GLATLtCubeMap& map)
 {
-     // Write lifetime cube map in output stream
+     // Write livetime cube map in output stream
     os << map.print();
 
     // Return output stream
@@ -535,11 +575,11 @@ std::ostream& operator<< (std::ostream& os, const GLATLtCubeMap& map)
  * @brief Log operator
  *
  * @param[in] log Logger.
- * @param[in] map Lifetime cube map.
+ * @param[in] map Livetime cube map.
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GLATLtCubeMap& map)
 {
-    // Write lifetime cube map into logger
+    // Write livetime cube map into logger
     log << map.print();
 
     // Return logger

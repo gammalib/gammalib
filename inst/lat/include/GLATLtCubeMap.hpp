@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GLATLtCubeMap.hpp  -  Fermi LAT lifetime cube map            *
+ *            GLATLtCubeMap.hpp  -  Fermi LAT livetime cube map            *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATLtCubeMap.hpp
- * @brief GLATLtCubeMap class definition.
+ * @brief  Fermi LAT livetime cube map class definition.
  * @author J. Knodlseder
  */
 
@@ -37,9 +37,9 @@ typedef double (*_ltcube_ctheta_phi)(const double& costheta, const double& phi);
 /***********************************************************************//**
  * @class GLATLtCubeMap
  *
- * @brief Interface for the Fermi LAT lifetime cube map.
+ * @brief Interface for the Fermi LAT livetime cube map.
  *
- * A lifetime cube map holds a set of HEALPix skymaps that are a function
+ * A livetime cube map holds a set of HEALPix skymaps that are a function
  * of the cosine of the zenith angle and (optionally) of the azimuth angle.
  ***************************************************************************/
 class GLATLtCubeMap {
@@ -61,7 +61,8 @@ public:
     double         operator() (const GSkyDir& dir, const GEnergy& energy,
                                const GLATAeff& aeff);
     double         operator() (const GSkyDir& dir, const GEnergy& energy,
-                               const double& offset, const GLATPsf& psf);
+                               const double& offset, const GLATPsf& psf,
+                               const GLATAeff& aeff);
 
     // Methods
     void           clear(void);
