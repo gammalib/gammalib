@@ -1,5 +1,5 @@
 /***************************************************************************
- *                       GClass.hpp - <brief descriptor>                   *
+ *                       GClass.cpp - <brief descriptor>                   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-20xx by <author>                                    *
  * ----------------------------------------------------------------------- *
@@ -42,7 +42,7 @@
  ***************************************************************************/
 GClass::GClass(void)
 {
-    // Initialise private members for clean destruction
+    // Initialise private members
     init_members();
   
     // Return
@@ -53,11 +53,11 @@ GClass::GClass(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] c Object from which the instance should be built.
+ * @param[in] c Object.
  ***************************************************************************/
 GClass::GClass(const GClass& c)
 { 
-    // Initialise private members for clean destruction
+    // Initialise private
     init_members();
 
     // Copy members
@@ -90,7 +90,7 @@ GClass::~GClass(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] c Object which should be assigned.
+ * @param[in] c Object.
  ***************************************************************************/
 GClass& GClass::operator= (const GClass& c)
 { 
@@ -119,6 +119,50 @@ GClass& GClass::operator= (const GClass& c)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GClass::clear(void)
+{
+    // Free class members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+***************************************************************************/
+GClass* GClass::clone(void) const
+{
+    return new GClass(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Print class information
+ ***************************************************************************/
+std::string GClass::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GClass ===");
+    result.append("\n"+parformat("Name")+m_name);
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -141,12 +185,12 @@ void GClass::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] c Object from which members which should be copied.
+ * @param[in] c Object.
  ***************************************************************************/
 void GClass::copy_members(const GClass& c)
 {
     // Copy attributes
-    m_name  = c.m_name;
+    m_name = c.m_name;
     
     // Return
     return;
@@ -159,7 +203,7 @@ void GClass::copy_members(const GClass& c)
 void GClass::free_members(void)
 {
     // Free memory
-    //if (m_par      != NULL) delete [] m_par;
+    //if (m_par = NULL) delete [] m_par;
 
     // Signal free pointers
     //m_par      = NULL;
@@ -176,18 +220,32 @@ void GClass::free_members(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Put object in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the model will be dumped
- * @param[in] c Object to be dumped
+ * @param[in] os Output stream.
+ * @param[in] c Class.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GClass& c)
 {
-    // Put object in stream
-    os << "=== GClass ===" << std::endl;
+     // Write class in output stream
+    os << c.print();
 
     // Return output stream
     return os;
 }
 
 
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] c Class.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GClass& c)
+{
+    // Write class into logger
+    log << c.print();
+
+    // Return logger
+    return log;
+}

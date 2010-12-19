@@ -20,32 +20,35 @@
 #define GCLASS_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include <iostream>
+#include "GLog.hpp"
 
 
 /***********************************************************************//**
  * @class GClass
  *
- * @brief <brief descriptor> interface defintion.
+ * @brief <brief descriptor> interface defintion
  ***************************************************************************/
 class GClass {
 
-    // Friend classes
-    friend class GModels;
-    
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GClass& c);
+    friend GLog&         operator<< (GLog& log, const GClass& c);
 
 public:
     // Constructors and destructors
     GClass(void);
     GClass(const GClass& c);
-    ~GClass(void);
+    virtual ~GClass(void);
  
     // Operators
     GClass& operator= (const GClass& c);
 
     // Methods
+    void        clear(void);
+    GClass*     clone(void) const;
+    std::string print(void) const;
   
 protected:
     // Protected methods
