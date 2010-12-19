@@ -713,6 +713,10 @@ void GLATPsf::write_psf_v1(GFits& file) const
  * @param[in] offset Offset angle (deg).
  * @param[in] logE Log10 of the true photon energy (MeV).
  * @param[in] ctheta Cosine of zenith angle.
+ *
+ * @todo Some optimisation could be done as in many cases gcore==gtail,
+ *       and for this special case ntail=ncore, hence things become a little
+ *       simpler.
  ***************************************************************************/
 double GLATPsf::psf_v1(const double& offset, const double& logE,
                        const double& ctheta)
@@ -808,7 +812,8 @@ double GLATPsf::base_fct_v1(const double& u, const double& gamma)
 
 
 /***********************************************************************//**
- * @brief Return point spread base function integral (version 1)
+ * @brief Return approximation of point spread base function integral
+ *        (version 1)
  *
  * @param[in] u Function argument.
  * @param[in] gamma Index.
