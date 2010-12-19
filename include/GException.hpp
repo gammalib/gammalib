@@ -459,6 +459,15 @@ public:
                                std::string message = "");
     };
 
+
+    // GCvs exceptions
+    class cvs_bad_columns : public GExceptionHandler {
+    public:
+        cvs_bad_columns(std::string origin, std::string filename,
+                        int rows, int cols, int elements,
+                        std::string message = "");
+    };
+
 };
 
 #endif /* GEXCEPTION_HPP */
