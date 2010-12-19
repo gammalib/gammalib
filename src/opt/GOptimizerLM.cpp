@@ -20,8 +20,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GException.hpp"
 #include "GOptimizerLM.hpp"
+#include "GTools.hpp"
+#include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -180,6 +181,53 @@ GModels& GOptimizerLM::operator() (GOptimizerFunction& fct, GModels& m)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Print optimizer information
+ ***************************************************************************/
+std::string GOptimizerLM::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GOptimizerLM ===");
+    result.append("\n"+parformat("Optimized function value")+str(m_value));
+    result.append("\n"+parformat("Absolute precision")+str(m_eps));
+
+    // Append status
+    result.append("\n"+parformat("Optimization status"));
+    switch (m_status) {
+    case G_LM_CONVERGED:
+        result.append("converged");
+        break;
+    case G_LM_STALLED:
+        result.append("stalled");
+        break;
+    case G_LM_SINGULAR:
+        result.append("singular curvature matrix encountered");
+        break;
+    case G_LM_NOT_POSTIVE_DEFINITE:
+        result.append("curvature matrix not positive definite");
+        break;
+    case G_LM_BAD_ERRORS:
+        result.append("errors are inaccurate");
+        break;
+    default:
+        result.append("unknown");
+        break;
+    }
+
+    // Append further information
+    result.append("\n"+parformat("Number of parameters")+str(m_npars));
+    result.append("\n"+parformat("Number of free parameters")+str(m_nfree));
+    result.append("\n"+parformat("Number of iterations")+str(m_iter));
+    result.append("\n"+parformat("Lambda")+str(m_lambda));
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -192,13 +240,23 @@ GModels& GOptimizerLM::operator() (GOptimizerFunction& fct, GModels& m)
 void GOptimizerLM::init_members(void)
 {
     // Initialise optimizer parameters
+    m_npars        = 0;
+    m_nfree        = 0;
     m_lambda_start = 1.0e-3;
-    m_lambda_inc   = 10000.0;
-    m_lambda_dec   = 0.1;
+    //m_lambda_inc   = 10000.0; //!< This led to bad convergence in some cases
+    m_lambda_inc   = 2.0;
+    m_lambda_dec   = 0.5;
     m_eps          = 1.0e-6;
-    m_max_iter     = 100;
+    m_max_iter     = 1000;
     m_max_stall    = 10;
+    m_max_hit      = 3;         //!< Maximum number of successive boundary hits before freeze
     m_step_adjust  = true;
+
+    // Initialise bookkeeping arrays
+    m_hit_boundary.clear();
+    m_hit_minimum.clear();
+    m_hit_maximum.clear();
+    m_par_freeze.clear();
 
     // Initialise optimizer values
     m_lambda = m_lambda_start;
@@ -229,6 +287,10 @@ void GOptimizerLM::copy_members(const GOptimizerLM& opt)
     m_max_iter     = opt.m_max_iter;
     m_max_stall    = opt.m_max_stall;
     m_step_adjust  = opt.m_step_adjust;
+    m_hit_boundary = opt.m_hit_boundary;
+    m_hit_minimum  = opt.m_hit_minimum;
+    m_hit_maximum  = opt.m_hit_maximum;
+    m_par_freeze   = opt.m_par_freeze;
     m_lambda       = opt.m_lambda;
     m_value        = opt.m_value;
     m_status       = opt.m_status;
@@ -266,19 +328,32 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
         if (fct == NULL || pars == NULL)
             continue;
 
-        // Fall through if there are no parameters to optimize
-        int npars = pars->npars();
-        if (npars < 1)
+        // Set number of parameters. Fall through if there are no parameters
+        // to optimize
+        m_npars = pars->npars();
+        m_nfree = pars->nfree();
+        if (m_nfree < 1)
             continue;
 
         // Initialise optimization parameters
         m_lambda  = m_lambda_start;
-        m_status  = 0;
+        m_status  = G_LM_CONVERGED;
 
-        // Allocate temporary memory for boundary hit bookkeeping
-        m_hit_boundary = new bool[npars];
-        for (int i = 0; i < npars; ++i)
-            m_hit_boundary[i] = false;
+        // Initialise bookkeeping arrays
+        m_hit_boundary.clear();
+        m_hit_minimum.clear();
+        m_hit_maximum.clear();
+        m_par_freeze.clear();
+        m_hit_boundary.reserve(m_npars);
+        m_hit_minimum.reserve(m_npars);
+        m_hit_maximum.reserve(m_npars);
+        m_par_freeze.reserve(m_npars);
+        for (int i = 0; i < m_npars; ++i) {
+            m_hit_boundary.push_back(false);
+            m_hit_minimum.push_back(0);
+            m_hit_maximum.push_back(0);
+            m_par_freeze.push_back(false);
+        }
     
         // Initial evaluation
         fct->eval(*pars);
@@ -302,6 +377,9 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
                   << m_lambda << std::endl;
         #endif
 
+        // Initialise iteration flags
+        bool check_for_freeze = true;
+
         // Iterative fitting
         for (m_iter = 1; m_iter <= m_max_iter; ++m_iter) {
 
@@ -316,7 +394,10 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
                 *m_logger << "Iteration " << m_iter << ": ";
                 *m_logger << "func=" << m_value << ", ";
                 *m_logger << "Lambda=" << m_lambda << ", ";
-                *m_logger << "delta=" << delta << std::endl;
+                *m_logger << "delta=" << delta;
+                if (m_lambda > lambda_old)
+                    *m_logger << " (stalled)";
+                *m_logger << std::endl;
             }
             #if G_DEBUG_OPT
             std::cout << "Iteration " << m_iter << ": func=" 
@@ -330,24 +411,68 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
 
             // If function increased while lambda did not increase then stop
             // iterations
-            if ((m_lambda <= lambda_old) && (delta < 0.0))
-                break;
+            //if ((m_lambda <= lambda_old) && (delta < 0.0))
+            //    break;
 
-            // Stop if convergence was reached
-            if ((m_lambda <= lambda_old) && (delta < m_eps))
-                break;
+            // Stop if convergence was reached. Before stopping, check
+            // if some parameters were frozen, and if this was the case,
+            // free them now and continue. We do this only once, i.e.
+            // the next time a parameter is frozen and convergence is
+            // reached we really stop.
+            if ((m_lambda <= lambda_old) && (delta < m_eps)) {
 
-            // Monitor the number of subsequent increases of lambda and stop if
-            // the number of increases exceeds threshold
+                // Check for frozen parameters, and if some exist, free
+                // them and start over
+                if (check_for_freeze) {
+
+                    // Signal that we won't check frozen parameters
+                    // anymore
+                    check_for_freeze = false;
+
+                    // Free frozen parameters and determine how many
+                    // have been frozen
+                    int nfrozen = 0;
+                    for (int ipar = 0; ipar < m_npars; ++ipar) {
+                        if (m_par_freeze[ipar]) {
+                            nfrozen++;
+                            pars->par(ipar)->free();
+                            if (m_logger != NULL) {
+                                *m_logger << "  Free parameter \""
+                                          << pars->par(ipar)->name()
+                                          << "\" after convergence was" \
+                                             " reached with frozen" \
+                                             " parameter." << std::endl;
+                            }
+                        }
+                    }
+
+                    // If there were frozen parameters then start over
+                    // again (initialise optimizer)
+                    if (nfrozen > 0) {
+                        m_lambda   = m_lambda_start;
+                        value_old  = m_value;
+                        lambda_old = m_lambda;
+                        lambda_inc = 0;
+                        continue;
+                    }
+                }
+
+                // ... otherwise, convergence was reached and we can stop
+                // now
+                break;
+            }
+
+            // Monitor the number of subsequent increases of lambda and
+            // stop if the number of increases exceeds threshold
             lambda_inc = (m_lambda > lambda_old) ? lambda_inc + 1 : 0;
             if (lambda_inc > m_max_stall) {
                 m_status = G_LM_STALLED;
                 break;
             }
 
-            // Bookkeeping of actual result (we always store the last lambda to
-            // detect turn arounds in the lambda tendency; however we always keep
-            // the best function value)
+            // Bookkeeping of actual result (we always store the last
+            // lambda to detect turn arounds in the lambda tendency; however
+            // we always keep the best function value)
             lambda_old = m_lambda;
             if (delta > 0.0)
                 value_old = m_value;
@@ -358,9 +483,6 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
         errors(fct, pars);
 
     } while (0); // endwhile: main loop
-
-    // Free working memory
-    if (m_hit_boundary != NULL) delete [] m_hit_boundary;
 
     // Return
     return;
@@ -388,11 +510,6 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
         if (fct == NULL || pars == NULL)
             continue;
 
-        // Fall through if there are no parameters to optimize
-        int npars = pars->npars();
-        if (npars < 1)
-            continue;
-
         // Initialise iteration parameters
         GVector*       grad  = fct->gradient();
         GSparseMatrix* covar = fct->covar();
@@ -403,12 +520,12 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
         GSparseMatrix  save_covar = GSparseMatrix(*covar);
 
         // Save parameter values in vector
-        GVector save_pars(npars);
-        for (int ipar = 0; ipar < npars; ++ipar)
+        GVector save_pars(m_npars);
+        for (int ipar = 0; ipar < m_npars; ++ipar)
             save_pars(ipar) = pars->par(ipar)->value();
 
         // Setup matrix and vector for covariance computation
-        for (int ipar = 0; ipar < npars; ++ipar) {
+        for (int ipar = 0; ipar < m_npars; ++ipar) {
             (*covar)(ipar,ipar) *= (1.0 + m_lambda);
             (*grad)(ipar)        = -(*grad)(ipar);
         }
@@ -444,36 +561,73 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
         double step = step_size(grad, pars);
      
         // Derive new parameter vector
-        for (int ipar = 0; ipar < npars; ++ipar) {
+        for (int ipar = 0; ipar < m_npars; ++ipar) {
 
-            // Get actual parameter value and limits
-            double p     = pars->par(ipar)->value();
-            double p_min = pars->par(ipar)->min();
-            double p_max = pars->par(ipar)->max();
+            // Consider only free parameters
+            if (pars->par(ipar)->isfree()) {
 
-            // Compute new parameter value
-            p += (*grad)(ipar) * step;
+                // Get actual parameter value and limits
+                double p     = pars->par(ipar)->value();
+                double p_min = pars->par(ipar)->min();
+                double p_max = pars->par(ipar)->max();
 
-            // Constrain parameter to within the valid range
-            if (pars->par(ipar)->hasmin() && p < p_min) {
-                if (m_logger != NULL) {
-                    *m_logger << "... parameter \"" << pars->par(ipar)->name();
-                    *m_logger << "\" hits minimum: ";
-                    *m_logger << p << " < " << p_min << std::endl;
+                // Compute new parameter value
+                p += (*grad)(ipar) * step;
+
+                // Constrain parameter to within the valid range
+                if (pars->par(ipar)->hasmin() && p < p_min) {
+                    if (m_hit_minimum[ipar] >= m_max_hit) {
+                        if (m_logger != NULL) {
+                            *m_logger << "  Parameter \"" << pars->par(ipar)->name();
+                            *m_logger << "\" hits minimum " << p_min << " more than ";
+                            *m_logger << m_max_hit << " times.";
+                            *m_logger << " Fix parameter at minimum for now." << std::endl;
+                        }
+                        m_par_freeze[ipar] = true;
+                        pars->par(ipar)->fix();
+                    }
+                    else {
+                        if (m_logger != NULL) {
+                            *m_logger << "  Parameter \"" << pars->par(ipar)->name();
+                            *m_logger << "\" hits minimum: ";
+                            *m_logger << p << " < " << p_min;
+                            *m_logger << " (" << m_hit_minimum[ipar]+1 << ")" << std::endl;
+                        }
+                    }
+                    m_hit_minimum[ipar]++;
+                    p = p_min;
                 }
-                p = p_min;
-            }
-            if (pars->par(ipar)->hasmax() && p > p_max) {
-                if (m_logger != NULL) {
-                    *m_logger << "... parameter \"" << pars->par(ipar)->name();
-                    *m_logger << "\" hits maximum: ";
-                    *m_logger << p << " > " << p_max << std::endl;
+                else if (pars->par(ipar)->hasmax() && p > p_max) {
+                    if (m_hit_maximum[ipar] >= m_max_hit) {
+                        if (m_logger != NULL) {
+                            *m_logger << "  Parameter \"" << pars->par(ipar)->name();
+                            *m_logger << "\" hits maximum " << p_max << " more than ";
+                            *m_logger << m_max_hit << " times.";
+                            *m_logger << " Fix parameter at maximum for now." << std::endl;
+                        }
+                        m_par_freeze[ipar] = true;
+                        pars->par(ipar)->fix();
+                    }
+                    else {
+                        if (m_logger != NULL) {
+                            *m_logger << "  Parameter \"" << pars->par(ipar)->name();
+                            *m_logger << "\" hits maximum: ";
+                            *m_logger << p << " > " << p_max;
+                            *m_logger << " (" << m_hit_maximum[ipar]+1 << ")" << std::endl;
+                        }
+                    }
+                    m_hit_maximum[ipar]++;
+                    p = p_max;
                 }
-                p = p_max;
-            }
+                else {
+                    m_hit_minimum[ipar] = 0;
+                    m_hit_maximum[ipar] = 0;
+                }
 
-            // Set new parameter value
-            pars->par(ipar)->value(p);
+                // Set new parameter value
+                pars->par(ipar)->value(p);
+
+            } // endif: Parameter was free
 
         } // endfor: computed new parameter vector
 
@@ -489,7 +643,7 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
 
         // Determine how many parameters have changed
         int par_change = 0;
-        for (int ipar = 0; ipar < npars; ++ipar) {
+        for (int ipar = 0; ipar < m_npars; ++ipar) {
             if (pars->par(ipar)->value() != save_pars(ipar))
                 par_change++;
         }
@@ -522,7 +676,7 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
             m_value   = save_value;
             *grad     = save_grad;
             *covar    = save_covar;
-            for (int ipar = 0; ipar < npars; ++ipar)
+            for (int ipar = 0; ipar < m_npars; ++ipar)
                 pars->par(ipar)->value(save_pars(ipar));
         }
 
@@ -578,7 +732,7 @@ double GOptimizerLM::step_size(GVector* grad, GOptimizerPars* pars)
                     else if (m_hit_boundary[ipar]) {
                         m_hit_boundary[ipar] = false;
                         if (m_logger != NULL) {
-                            *m_logger << "... parameter \"";
+                            *m_logger << "  Parameter \"";
                             *m_logger << pars->par(ipar)->name();
                             *m_logger << "\" does not drive optimization step anymore.";
                             *m_logger << std::endl;
@@ -600,7 +754,7 @@ double GOptimizerLM::step_size(GVector* grad, GOptimizerPars* pars)
                     else if (m_hit_boundary[ipar]) {
                         m_hit_boundary[ipar] = false;
                         if (m_logger != NULL) {
-                            *m_logger << "... parameter \"";
+                            *m_logger << "  Parameter \"";
                             *m_logger << pars->par(ipar)->name();
                             *m_logger << "\" does not drive optimization step anymore.";
                             *m_logger << std::endl;
@@ -615,7 +769,7 @@ double GOptimizerLM::step_size(GVector* grad, GOptimizerPars* pars)
         if (ipar_bnd != -1) {
             m_hit_boundary[ipar_bnd] = true;
             if (m_logger != NULL) {
-                *m_logger << "... parameter \"";
+                *m_logger << "  Parameter \"";
                 *m_logger << pars->par(ipar_bnd)->name();
                 *m_logger << "\" drives optimization step (step=";
                 *m_logger << step << ")" << std::endl;
@@ -747,20 +901,15 @@ void GOptimizerLM::errors(GOptimizerFunction* fct, GOptimizerPars* pars)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Put optimizer in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the optimizer will be dumped.
- * @param[in] opt Object to be dumped.
+ * @param[in] os Output stream.
+ * @param[in] opt Optimizer.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GOptimizerLM& opt)
 {
-    // Put optimizer in stream
-    os << "=== GOptimizerLM ===" << std::endl;
-    os << " Optimized function value ..: " << opt.m_value << std::endl;
-    os << " Absolute precision ........: " << opt.m_eps << std::endl;
-    os << " Optimization status .......: " << opt.m_status << std::endl;
-    os << " Number of iterations ......: " << opt.m_iter << std::endl;
-    os << " Lambda ....................: " << opt.m_lambda;
+     // Write optimizer in output stream
+    os << opt.print();
 
     // Return output stream
     return os;
@@ -768,20 +917,15 @@ std::ostream& operator<< (std::ostream& os, const GOptimizerLM& opt)
 
 
 /***********************************************************************//**
- * @brief Write optimizer into logger
+ * @brief Log operator
  *
- * @param[in] log Logger
- * @param[in] opt Optimizer to be writted into logger.
+ * @param[in] log Logger.
+ * @param[in] opt Optimizer.
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GOptimizerLM& opt)
 {
     // Write optimizer into logger
-    log << "=== GOptimizerLM ===" << std::endl;
-    log << " Optimized function value ..: " << opt.m_value << std::endl;
-    log << " Absolute precision ........: " << opt.m_eps << std::endl;
-    log << " Optimization status .......: " << opt.m_status << std::endl;
-    log << " Number of iterations ......: " << opt.m_iter << std::endl;
-    log << " Lambda ....................: " << opt.m_lambda;
+    log << opt.print();
 
     // Return logger
     return log;
