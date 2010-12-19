@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectralFunc.hpp  -  Spectral function model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralFunc.hpp
- * @brief GModelSpectralFunc class interface definition.
+ * @brief Spectral function model class definition
  * @author J. Knodlseder
  */
 
@@ -36,8 +36,8 @@
  *
  * @brief Spectral function interface definition
  *
- * This class implements an abitrary function as the spectral component of
- * the gamma-ray data model. The function is defined as
+ * This class implements an arbitrary function as the spectral component of
+ * the model. The function is defined as
  * \f[I(E)=norm f(E)\f]
  * where
  * \f$norm\f$ is the normalization of the function.
