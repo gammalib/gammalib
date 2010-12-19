@@ -268,6 +268,12 @@ std::string GLATObservation::print(void) const
     else
         result.append("\n"+parformat("LAT response")+"undefined");
 
+    // Append livetime cube
+    if (m_ltcube != NULL)
+        result.append("\n"+m_ltcube->print());
+    else
+        result.append("\n"+parformat("LAT livetime cube")+"undefined");
+
     // Append events
     if (m_events != NULL)
         result.append("\n"+m_events->print());
