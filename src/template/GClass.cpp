@@ -21,6 +21,7 @@
 #include <config.h>
 #endif
 #include "GClass.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
