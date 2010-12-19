@@ -295,14 +295,16 @@ void GCsv::load(const std::string& filename, std::string sep)
         iline++;
 
         // Get line with leading and trailing whitespace removed
-        std::string sline = strip_whitespace(std::string(line));
+        std::string sline = strip_chars(strip_whitespace(std::string(line)),"\n");
 
-        // If line is empty or if it contains a single linefeed then skip the line
-        if (sline.length() == 0 || (sline.length() == 1 && sline[0] == '\n'))
+        // Skip line if empty
+        if (sline.length() == 0)
             continue;
 
         // Split line in elements
         std::vector<std::string> elements = split(sline, sep);
+        for (int i = 0; i < elements.size(); ++i)
+            elements[i] = strip_whitespace(elements[i]);
 
         // If this is the first valid line then simply store the elements
         if (m_data.size() == 0) {
