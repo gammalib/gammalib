@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GLATLtCube.hpp  -  Fermi LAT lifetime cube               *
+ *                GLATLtCube.hpp  -  Fermi LAT livetime cube               *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATLtCube.hpp
- * @brief GLATLtCube class definition.
+ * @brief Fermi LAT livetime cube class definition.
  * @author J. Knodlseder
  */
 
@@ -34,9 +34,9 @@
 /***********************************************************************//**
  * @class GLATLtCube
  *
- * @brief Interface for the Fermi LAT lifetime cube.
+ * @brief Interface for the Fermi LAT livetime cube.
  *
- * The livetime cube holds the lifetime as function and zenith and azimuth
+ * The livetime cube holds the livetime as function and zenith and azimuth
  * angles for a given observation. The azimuth dependence is optional. 
  ***************************************************************************/
 class GLATLtCube {
@@ -61,7 +61,8 @@ public:
     double      operator() (const GSkyDir& dir, const GEnergy& energy,
                             const GLATAeff& aeff);
     double      operator() (const GSkyDir& dir, const GEnergy& energy,
-                            const double& offset, const GLATPsf& psf);
+                            const double& offset, const GLATPsf& psf,
+                            const GLATAeff& aeff);
 
     // Methods
     void        clear(void);

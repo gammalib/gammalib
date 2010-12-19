@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GLATLtCube.cpp  -  Fermi LAT lifetime cube               *
+ *                GLATLtCube.cpp  -  Fermi LAT livetime cube               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
@@ -16,6 +16,7 @@
 #include <config.h>
 #endif
 #include "GLATLtCube.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -50,14 +51,14 @@ GLATLtCube::GLATLtCube(void)
 /***********************************************************************//**
  * @brief File constructor
  *
- * @param[in] filename Lifetime cube filename.
+ * @param[in] filename Livetime cube filename.
  ***************************************************************************/
 GLATLtCube::GLATLtCube(const std::string& filename)
 {
     // Initialise class members
     init_members();
 
-    // Load lifetime cube from file
+    // Load livetime cube from file
     load(filename);
 
     // Return
@@ -70,7 +71,7 @@ GLATLtCube::GLATLtCube(const std::string& filename)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] cube Lifetime cube.
+ * @param[in] cube Livetime cube.
  ***************************************************************************/
 GLATLtCube::GLATLtCube(const GLATLtCube& cube)
 {
@@ -107,7 +108,7 @@ GLATLtCube::~GLATLtCube(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] cube Lifetime cube.
+ * @param[in] cube Livetime cube.
  ***************************************************************************/
 GLATLtCube& GLATLtCube::operator= (const GLATLtCube& cube)
 {
@@ -280,27 +281,31 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
  * @param[in] energy Energy.
  * @param[in] offset Offset from true direction (deg).
  * @param[in] psf Point spread function.
+ * @param[in] aeff Effective area.
  *
  * Computes
  * \f[\sum_{\cos \theta, \phi} T_{\rm corr.~live}(\cos \theta, \phi)
- *    PSF(\log E, \delta, \cos \theta)\f]
+ *    PSF(\log E, \delta, \cos \theta) A_{\rm eff}(\cos \theta, \phi)\f]
  * where
  * \f$T_{\rm corr.~live}(\cos \theta, \phi)\f$ is the efficiency corrected
  * livetime as a function of the cosine of the zenith and of the azimuth
- * angle, and
+ * angle,
  * \f$PSF(\log E, \delta, \cos \theta)\f$ is the point spread function that
  * depends on
  * the log10 of the energy (in MeV),
  * the offset angle from the true direction (in degrees), and
- * the cosine of the zenith angle.
+ * the cosine of the zenith angle, and
+ * \f$A_{\rm eff}(\cos \theta, \phi)\f$ is the effective area that depends
+ * on the cosine of the zenith angle and (optionally) of the azimuth angle.
  *
  * @todo Implement computation of efficiency factors
  ***************************************************************************/
 double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
-                               const double& offset, const GLATPsf& psf)
+                               const double& offset, const GLATPsf& psf,
+                               const GLATAeff& aeff)
 {
     // Compute exposure
-    double exposure = m_exposure(dir, energy, offset, psf);
+    double exposure = m_exposure(dir, energy, offset, psf, aeff);
 
     // Optionally compute livetime factors for trigger rate- and
     // energy-dependent efficiency corrections
@@ -312,7 +317,7 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
         //m_efficiencyFactor->getLivetimeFactors(energy, f1, f2);
 
         // Compute correction
-        double correction = m_weighted_exposure(dir, energy, offset, psf);
+        double correction = m_weighted_exposure(dir, energy, offset, psf, aeff);
 
         // Set exposure
         exposure = f1 * exposure + f2 * correction;
@@ -358,11 +363,12 @@ GLATLtCube* GLATLtCube::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Load lifetime cube from FITS file
+ * @brief Load livetime cube from FITS file
  *
  * @param[in] filename FITS file name.
  *
- * @todo Loading of cos theta boundaries not yet implemented.
+ * @todo Loading of cos theta boundaries not yet implemented. This is not
+ *       critical since they are not really needed.
  ***************************************************************************/
 void GLATLtCube::load(const std::string& filename)
 {
@@ -398,7 +404,7 @@ void GLATLtCube::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Save lifetime cube into FITS file
+ * @brief Save livetime cube into FITS file
  *
  * @param[in] filename FITS file name.
  * @param[in] clobber Overwrite existing file?
@@ -413,7 +419,9 @@ void GLATLtCube::save(const std::string& filename, bool clobber) const
 
 
 /***********************************************************************//**
- * @brief Print lifetime cube information
+ * @brief Print livetime cube information
+ *
+ * @todo Implement GGti printing
  ***************************************************************************/
 std::string GLATLtCube::print(void) const
 {
@@ -422,6 +430,11 @@ std::string GLATLtCube::print(void) const
 
     // Append header
     result.append("=== GLATLtCube ===");
+    result.append("\n"+parformat("Livetime correction"));
+    if (m_livetime_correct)
+        result.append("yes");
+    else
+        result.append("no");
     result.append("\n"+m_exposure.print());
     result.append("\n"+m_weighted_exposure.print());
     //result.append("\n"+m_gti.print());
@@ -456,7 +469,7 @@ void GLATLtCube::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] cube Lifetime cube.
+ * @param[in] cube Livetime cube.
  ***************************************************************************/
 void GLATLtCube::copy_members(const GLATLtCube& cube)
 {
@@ -491,11 +504,11 @@ void GLATLtCube::free_members(void)
  * @brief Output operator
  *
  * @param[in] os Output stream.
- * @param[in] cube Lifetime cube.
+ * @param[in] cube Livetime cube.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GLATLtCube& cube)
 {
-     // Write lifetime cube in output stream
+     // Write livetime cube in output stream
     os << cube.print();
 
     // Return output stream
@@ -507,11 +520,11 @@ std::ostream& operator<< (std::ostream& os, const GLATLtCube& cube)
  * @brief Log operator
  *
  * @param[in] log Logger.
- * @param[in] cube Lifetime cube.
+ * @param[in] cube Livetime cube.
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GLATLtCube& cube)
 {
-    // Write lifetime cube into logger
+    // Write livetime cube into logger
     log << cube.print();
 
     // Return logger
