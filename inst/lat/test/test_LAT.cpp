@@ -37,7 +37,7 @@ const std::string lat_cntmap = "../inst/lat/test/data/cntmap.fits";
 const std::string lat_srcmap = "../inst/lat/test/data/srcmap.fits";
 const std::string lat_expmap = "../inst/lat/test/data/binned_expmap.fits";
 const std::string lat_ltcube = "../inst/lat/test/data/ltcube.fits";
-const std::string lat_xml    = "../inst/lat/test/data/source_model2.xml";
+const std::string lat_xml    = "../inst/lat/test/data/source_model1.xml";
 const double      twopi      =  6.283185307179586476925286766559005768394;
 
 
