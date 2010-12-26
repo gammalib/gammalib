@@ -1,5 +1,5 @@
 /***************************************************************************
- *       GResponse.i  -  Response abstract base class SWIG interface       *
+ *               GResponse.i  -  Abstract response base class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GResponse.i
- * @brief GResponse class SWIG file.
+ * @brief Abstract response base class python bindings
  * @author J. Knodlseder
  */
 %{
@@ -24,7 +24,7 @@
 /***********************************************************************//**
  * @class GResponse
  *
- * @brief Abstract SWIG interface for the instrument response function.
+ * @brief Abstract response base class python bindings
  ***************************************************************************/
 class GResponse {
 public:
@@ -36,24 +36,14 @@ public:
     // Pure virtual methods
     virtual void       clear(void) = 0;
     virtual GResponse* clone(void) const = 0;
-    virtual void       load(const std::string& irfname) = 0;
     virtual bool       hasedisp(void) const = 0;
     virtual bool       hastdisp(void) const = 0;
-    virtual double     irf(const GInstDir& obsDir, const GEnergy& obsEng,
-                           const GTime& obsTime,
-                           const GSkyDir&  srcDir, const GEnergy& srcEng,
-                           const GTime& srcTime,
-                           const GObservation& obs) const = 0;
     virtual double     irf(const GEvent& event, const GModel& model,
                            const GEnergy& srcEng, const GTime& srcTime,
                            const GObservation& obs) const = 0;
-    virtual double     nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                            const GTime& srcTime,
-                            const GObservation& obs) const = 0;
-
-    // Other methods
-    virtual void        caldb(const std::string& caldb);
-    virtual std::string caldb(void) const { return m_caldb; }
+    virtual double     npred(const GModel& model, const GEnergy& srcEng,
+                             const GTime& srcTime,
+                             const GObservation& obs) const = 0;
 };
 
 

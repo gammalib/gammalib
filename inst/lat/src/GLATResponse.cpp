@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.cpp
- * @brief GLATResponse class implementation.
+ * @brief Fermi LAT Response class implementation.
  * @author J. Knodlseder
  */
 
@@ -27,19 +27,23 @@
 #include "GLATEventBin.hpp"
 #include "GLATEventCube.hpp"
 #include "GLATException.hpp"
+#include "GException.hpp"
 #include "GModelSpatialPtsrc.hpp"
-#include "GVector.hpp"
 #include "GFits.hpp"
-#include "GFitsTable.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_LOAD                                           "load(std::string&)"
+#define G_CALDB                           "GLATResponse::caldb(std::string&)"
+#define G_LOAD                             "GLATResponse::load(std::string&)"
 #define G_AEFF                                     "GLATResponse::aeff(int&)"
 #define G_PSF                                       "GLATResponse::psf(int&)"
 #define G_EDISP                                   "GLATResponse::edisp(int&)"
+#define G_IRF_ATOM     "GLATResponse::irf(GLATEventAtom&, GModel&, GEnergy&,"\
+                                                     "GTime&, GObservation&)"
 #define G_IRF_BIN       "GLATResponse::irf(GLATEventBin&, GModel&, GEnergy&,"\
                                                      "GTime&, GObservation&)"
+#define G_NPRED              "GLATResponse::npred(GModel&, GEnergy&, GTime&,"\
+                                                            " GObservation&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -170,28 +174,33 @@ GLATResponse* GLATResponse::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Return value of point source instrument response function
+ * @brief Set path to the calibration database
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] obs Observation.
+ * @param[in] caldb Path to calibration database
  *
- * @todo Not yet implemented.
+ * @exception GException::caldb_not_found
+ *            Calibration database repository not found.
+ *
+ * This default method simply checks if the calibration database directory
+ * exists. If the directory exists, the path will be stored. No checking is
+ * implemented that checks for the consistency of the calibration database.
+ *
+ * @todo Implement a GCalDB class that handles any calibration database
+ *       issues. GCalDB may be an abstract class for which instrument
+ *       specific methods are implement to handle any instrument specific
+ *       IRF database issues. 
  ***************************************************************************/
-double GLATResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
-                         const GTime& obsTime,
-                         const GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GTime& srcTime, const GObservation& obs) const
+void GLATResponse::caldb(const std::string& caldb)
 {
-    // Initialise
-    double rsp = 0.0;
+    // Check if calibration database directory is accessible
+    if (access(caldb.c_str(), R_OK) != 0)
+        throw GException::caldb_not_found(G_CALDB, caldb);
     
-    // Return IRF value
-    return rsp;
+    // Store the path to the calibration database
+    m_caldb = caldb;
+
+    // Return
+    return;
 }
 
 
@@ -243,8 +252,8 @@ double GLATResponse::irf(const GLATEventAtom& event, const GModel& model,
     // Initialise IRF with "no response"
     double irf = 0.0;
 
-    // Determine index for diffuse response
-    //int inx = event.diffinx(model.name());
+    // Dump warning that integration is not yet implemented
+    throw GException::feature_not_implemented(G_IRF_ATOM);
 
     // Return IRF value
     return irf;
@@ -385,22 +394,25 @@ double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
 /***********************************************************************//**
  * @brief Return integral of instrument response function.
  *
- * @param[in] srcDir True photon direction.
+ * @param[in] model Source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
  *
  * @todo Not yet implemented.
  ***************************************************************************/
-double GLATResponse::nirf(const GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime,
-                          const GObservation& obs) const
+double GLATResponse::npred(const GModel& model, const GEnergy& srcEng,
+                           const GTime& srcTime,
+                           const GObservation& obs) const
 {
     // Initialise
-    double nirf = 0.0;
+    double npred = 0.0;
+
+    // Notify that method is not yet implemented
+    throw GException::feature_not_implemented(G_NPRED);
 
     // Return integrated IRF value
-    return nirf;
+    return npred;
 }
 
 
@@ -422,9 +434,14 @@ double GLATResponse::nirf(const GSkyDir& srcDir, const GEnergy& srcEng,
  ***************************************************************************/
 void GLATResponse::load(const std::string& rspname)
 {
-    // Free members (cannot call clear() here since this will overwrite the
-    // calibration database path m_caldb)
-    free_members();
+    // Save calibration database name
+    std::string caldb = m_caldb;
+
+    // Clear instance
+    clear();
+
+    // Restore calibration database name
+    m_caldb = caldb;
 
     // Determine response types to be loaded
     std::vector<std::string> array = split(rspname, "::");
@@ -615,6 +632,8 @@ std::string GLATResponse::print(void) const
 void GLATResponse::init_members(void)
 {
     // Initialise members
+    m_caldb.clear();
+    m_rspname.clear();
     m_hasfront = false;
     m_hasback  = false;
     m_aeff.clear();
@@ -640,6 +659,8 @@ void GLATResponse::init_members(void)
 void GLATResponse::copy_members(const GLATResponse& rsp)
 {
     // Copy members
+    m_caldb    = rsp.m_caldb;
+    m_rspname  = rsp.m_rspname;
     m_hasfront = rsp.m_hasfront;
     m_hasback  = rsp.m_hasback;
     m_aeff     = rsp.m_aeff;

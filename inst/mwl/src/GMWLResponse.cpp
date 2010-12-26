@@ -160,8 +160,8 @@ std::string GMWLResponse::print(void) const
 
     // Append header
     result.append("=== GMWLResponse ===\n");
-    result.append(parformat("Calibration database")+m_caldb+"\n");
-    result.append(parformat("Response functions")+m_rspname);
+    //result.append(parformat("Calibration database")+m_caldb+"\n");
+    //result.append(parformat("Response functions")+m_rspname);
 
     // Return result
     return result;

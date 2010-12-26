@@ -58,26 +58,33 @@ public:
     // Implement pure virtual base class methods
     void          clear(void);
     GCTAResponse* clone(void) const;
-    void          load(const std::string& rspname);
     bool          hasedisp(void) const { return false; }
     bool          hastdisp(void) const { return false; }
-    double        irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                      const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                      const GObservation& obs) const;
     double        irf(const GEvent& event, const GModel& model,
                       const GEnergy& srcEng, const GTime& srcTime,
                       const GObservation& obs) const;
-    double        nirf(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                       const GObservation& obs) const;
+    double        npred(const GModel& model, const GEnergy& srcEng,
+                        const GTime& srcTime,
+                        const GObservation& obs) const;
     std::string   print(void) const;
 
     // Other Methods
+    void        caldb(const std::string& caldb);
+    std::string caldb(void) const { return m_caldb; }
+    void        load(const std::string& rspname);
+
+    // Other response methods
+    double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+               const GObservation& obs) const;
     double irf(const GCTAEventAtom& event, const GModel& model,
                const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const;
     double irf(const GCTAEventBin& event, const GModel& model,
                const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const;
+    double npred(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                 const GObservation& obs) const;
     double live(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                 const GPointing& pnt) const;
     double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
@@ -97,8 +104,6 @@ public:
                   const GPointing& pnt, const GEbounds& ebds) const;
     double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                   const GPointing& pnt, const GGti& gti) const;
-
-    // Other Methods
     double psf(const double& theta, const double& sigma) const;
     double psf_sigma(const GEnergy& srcEng) const;
     double npsf(const double& psf, const double& radroi, const double& sigma) const;
@@ -135,11 +140,13 @@ private:
     };
 
     // Private data members
-    GNodeArray          m_nodes; //!< log(E) nodes for interpolation
-    std::vector<double> m_logE;  //!< log(E) = log10(E/TeV) - bin centre
-    std::vector<double> m_aeff;  //!< Effective area in square metres after all cuts
-    std::vector<double> m_r68;   //!< 68% containment radius of PSF post cuts in degrees
-    std::vector<double> m_r80;   //!< 80% containment radius of PSF post cuts in degrees
+    std::string         m_caldb;    //!< Name of or path to the calibration database
+    std::string         m_rspname;  //!< Name of the instrument response
+    GNodeArray          m_nodes;    //!< log(E) nodes for interpolation
+    std::vector<double> m_logE;     //!< log(E) = log10(E/TeV) - bin centre
+    std::vector<double> m_aeff;     //!< Effective area in square metres after all cuts
+    std::vector<double> m_r68;      //!< 68% containment radius of PSF post cuts in degrees
+    std::vector<double> m_r80;      //!< 80% containment radius of PSF post cuts in degrees
 
 };
 

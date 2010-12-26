@@ -36,33 +36,32 @@ public:
     // Implement pure virtual base class methods
     void          clear(void);
     GLATResponse* clone(void) const;
-    void          load(const std::string& rspname);
     bool          hasedisp(void) const { return false; }
     bool          hastdisp(void) const { return false; }
-    double        irf(const GInstDir& obsDir, const GEnergy& obsEng,
-                      const GTime& obsTime,
-                      const GSkyDir&  srcDir, const GEnergy& srcEng,
-                      const GTime& srcTime,
-                      const GObservation& obs) const;
     double        irf(const GEvent& event, const GModel& model,
                       const GEnergy& srcEng, const GTime& srcTime,
                       const GObservation& obs) const;
-    double        nirf(const GSkyDir& srcDir, const GEnergy& srcEng,
-                       const GTime& srcTime,
-                       const GObservation& obs) const;
+    double        npred(const GModel& model, const GEnergy& srcEng,
+                        const GTime& srcTime,
+                        const GObservation& obs) const;
 
     // Other Methods
-    int        size(void) const { return m_aeff.size(); }
-    GLATAeff*  aeff(const int& index) const;
-    GLATPsf*   psf(const int& index) const;
-    GLATEdisp* edisp(const int& index) const;
-    void       save(const std::string& rspname) const;
-    double     irf(const GLATEventAtom& event, const GModel& model,
-                   const GEnergy& srcEng, const GTime& srcTime,
-                   const GObservation& obs) const;
-    double     irf(const GLATEventBin& event, const GModel& model,
-                   const GEnergy& srcEng, const GTime& srcTime,
-                   const GObservation& obs) const;
+    void        caldb(const std::string& caldb);
+    std::string caldb(void) const { return m_caldb; }
+    void        load(const std::string& rspname);
+    int         size(void) const { return m_aeff.size(); }
+    GLATAeff*   aeff(const int& index) const;
+    GLATPsf*    psf(const int& index) const;
+    GLATEdisp*  edisp(const int& index) const;
+    void        save(const std::string& rspname) const;
+
+    // Reponse methods
+    double irf(const GLATEventAtom& event, const GModel& model,
+               const GEnergy& srcEng, const GTime& srcTime,
+               const GObservation& obs) const;
+    double irf(const GLATEventBin& event, const GModel& model,
+               const GEnergy& srcEng, const GTime& srcTime,
+               const GObservation& obs) const;
 };
 
 

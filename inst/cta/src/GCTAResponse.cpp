@@ -33,6 +33,13 @@
 #include "GIntegrand.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CALDB                           "GCTAResponse::caldb(std::string&)"
+#define G_IRF_ATOM     "GCTAResponse::irf(GCTAEventAtom&, GModel&, GEnergy&,"\
+                                                    " GTime&, GObservation&)"
+#define G_IRF_BIN       "GCTAResponse::irf(GCTAEventBin&, GModel&, GEnergy&,"\
+                                                    " GTime&, GObservation&)"
+#define G_NPRED              "GCTAResponse::npred(GModel&, GEnergy&, GTime&,"\
+                                                            " GObservation&)"
 #define G_READ           "GCTAResponse::read_performance_table(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -51,7 +58,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GCTAResponse::GCTAResponse(void) : GResponse()
 {
@@ -66,7 +73,7 @@ GCTAResponse::GCTAResponse(void) : GResponse()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] rsp Response to be copied
+ * @param[in] rsp Response.
  ***************************************************************************/
 GCTAResponse::GCTAResponse(const GCTAResponse& rsp) : GResponse(rsp)
 {
@@ -103,7 +110,7 @@ GCTAResponse::~GCTAResponse(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] rsp Response to be assigned
+ * @param[in] rsp Response.
  ***************************************************************************/
 GCTAResponse& GCTAResponse::operator= (const GCTAResponse& rsp)
 {
@@ -136,36 +143,93 @@ GCTAResponse& GCTAResponse::operator= (const GCTAResponse& rsp)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return value of point source instrument response function.
- *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] obs Observations.
- *
- * This method implements the default and complete instrument response
- * function (IRF).
- ***************************************************************************/
-double GCTAResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
-                         const GTime& obsTime,
-                         const GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GTime& srcTime, const GObservation& obs) const
+ * @brief Clear instance
+***************************************************************************/
+void GCTAResponse::clear(void)
 {
-    // Get pointing
-    const GPointing *pnt = obs.pointing(srcTime);
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GResponse::free_members();
 
-    // Get point source IRF components
-    double rsp  =  live(srcDir,  srcEng, srcTime, *pnt);
-    rsp        *=  aeff(srcDir,  srcEng, srcTime, *pnt);
-    rsp        *=   psf(obsDir,  srcDir, srcEng, srcTime, *pnt);
-    rsp        *= edisp(obsEng,  srcDir, srcEng, srcTime, *pnt);
-    rsp        *= tdisp(obsTime, srcDir, srcEng, srcTime, *pnt);
+    // Initialise members
+    this->GResponse::init_members();
+    init_members();
 
-    // Return IRF value
-    return rsp;
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+***************************************************************************/
+GCTAResponse* GCTAResponse::clone(void) const
+{
+    return new GCTAResponse(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Set path to the calibration database
+ *
+ * @param[in] caldb Path to calibration database
+ *
+ * @exception GException::caldb_not_found
+ *            Calibration database repository not found.
+ *
+ * This default method simply checks if the calibration database directory
+ * exists. If the directory exists, the path will be stored. No checking is
+ * implemented that checks for the consistency of the calibration database.
+ *
+ * @todo Implement a GCalDB class that handles any calibration database
+ *       issues. GCalDB may be an abstract class for which instrument
+ *       specific methods are implement to handle any instrument specific
+ *       IRF database issues. 
+ ***************************************************************************/
+void GCTAResponse::caldb(const std::string& caldb)
+{
+    // Check if calibration database directory is accessible
+    if (access(caldb.c_str(), R_OK) != 0)
+        throw GException::caldb_not_found(G_CALDB, caldb);
+    
+    // Store the path to the calibration database
+    m_caldb = caldb;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load CTA response.
+ *
+ * @param[in] irfname Name of CTA response (without any file extension).
+ *
+ * The actually dummy version of the CTA response loads a CTA performance
+ * table given in ASCII format into memory.
+ ***************************************************************************/
+void GCTAResponse::load(const std::string& irfname)
+{
+    // Save calibration database name
+    std::string caldb = m_caldb;
+
+    // Clear instance
+    clear();
+
+    // Restore calibration database name
+    m_caldb = caldb;
+
+    // Build filename
+    std::string filename = m_caldb + "/" + irfname + ".dat";
+
+    // Read performance table
+    read_performance_table(filename);
+
+    // Store response name
+    m_rspname = irfname;
+
+    // Return
+    return;
 }
 
 
@@ -204,6 +268,9 @@ double GCTAResponse::irf(const GEvent& event, const GModel& model,
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
+ *
+ * @exception GException::feature_not_implemented
+ *            Diffuse IRF not yet implemented.
  ***************************************************************************/
 double GCTAResponse::irf(const GCTAEventAtom& event, const GModel& model,
                          const GEnergy& srcEng, const GTime& srcTime,
@@ -224,6 +291,15 @@ double GCTAResponse::irf(const GCTAEventAtom& event, const GModel& model,
 
     } // endif: model was point source
 
+    // ... otherwise return diffuse IRF
+    else {
+
+        // Feature not yet implemented
+        throw GException::feature_not_implemented(G_IRF_ATOM,
+              "Diffuse IRF not yet implemented.");
+
+    } // endelse: model was not a point source
+
     // Return IRF value
     return rsp;
 }
@@ -237,6 +313,9 @@ double GCTAResponse::irf(const GCTAEventAtom& event, const GModel& model,
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
+ *
+ * @exception GException::feature_not_implemented
+ *            Diffuse IRF not yet implemented.
  ***************************************************************************/
 double GCTAResponse::irf(const GCTAEventBin& event, const GModel& model,
                          const GEnergy& srcEng, const GTime& srcTime,
@@ -257,7 +336,89 @@ double GCTAResponse::irf(const GCTAEventBin& event, const GModel& model,
 
     } // endif: model was point source
 
+    // ... otherwise return diffuse IRF
+    else {
+
+        // Feature not yet implemented
+        throw GException::feature_not_implemented(G_IRF_BIN,
+              "Diffuse IRF not yet implemented.");
+
+    } // endelse: model was not a point source
+
     // Return IRF value
+    return rsp;
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of point source instrument response function.
+ *
+ * @param[in] obsDir Observed photon direction.
+ * @param[in] obsEng Observed energy of photon.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] srcDir True photon direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] obs Observations.
+ ***************************************************************************/
+double GCTAResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
+                         const GTime& obsTime,
+                         const GSkyDir& srcDir, const GEnergy& srcEng,
+                         const GTime& srcTime, const GObservation& obs) const
+{
+    // Get pointing
+    const GPointing *pnt = obs.pointing(srcTime);
+
+    // Get point source IRF components
+    double rsp  =  live(srcDir,  srcEng, srcTime, *pnt);
+    rsp        *=  aeff(srcDir,  srcEng, srcTime, *pnt);
+    rsp        *=   psf(obsDir,  srcDir, srcEng, srcTime, *pnt);
+    rsp        *= edisp(obsEng,  srcDir, srcEng, srcTime, *pnt);
+    rsp        *= tdisp(obsTime, srcDir, srcEng, srcTime, *pnt);
+
+    // Return IRF value
+    return rsp;
+}
+
+
+/***********************************************************************//**
+ * @brief Return integral of instrument response function.
+ *
+ * @param[in] model Source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] obs Observation.
+ * @param[in] roi Region of interest of data selection.
+ * @param[in] ebds Energy boundaries of data selection.
+ * @param[in] gti Good Time Intervals of data selection.
+ ***************************************************************************/
+double GCTAResponse::npred(const GModel& model, const GEnergy& srcEng,
+                           const GTime& srcTime, const GObservation& obs) const
+{
+    // Initialise response value
+    double rsp = 0.0;
+
+    // If model is a point source then return the point source IRF
+    if (model.spatial()->isptsource()) {
+
+        // Get point source location
+        GSkyDir srcDir = static_cast<GModelSpatialPtsrc*>(model.spatial())->dir();
+
+        // Compute IRF
+        rsp = npred(srcDir, srcEng, srcTime, obs);
+
+    } // endif: model was point source
+
+    // ... otherwise return diffuse IRF
+    else {
+
+        // Feature not yet implemented
+        throw GException::feature_not_implemented(G_NPRED,
+              "Diffuse IRF not yet implemented.");
+
+    } // endelse: model was not a point source
+
+    // Return response value
     return rsp;
 }
 
@@ -272,13 +433,9 @@ double GCTAResponse::irf(const GCTAEventBin& event, const GModel& model,
  * @param[in] roi Region of interest of data selection.
  * @param[in] ebds Energy boundaries of data selection.
  * @param[in] gti Good Time Intervals of data selection.
- *
- * This method implements the default and complete integral of the instrument
- * response function (IRF). It may be overwritted by a specific method in the
- * derived class that drops response terms that are not used.
  ***************************************************************************/
-double GCTAResponse::nirf(const GSkyDir&  srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime, const GObservation& obs) const
+double GCTAResponse::npred(const GSkyDir&  srcDir, const GEnergy& srcEng,
+                           const GTime& srcTime, const GObservation& obs) const
 {
     // Get pointers
     const GPointing *pnt  = obs.pointing(srcTime);
@@ -509,61 +666,6 @@ double GCTAResponse::ntdisp(const GSkyDir& srcDir, const GEnergy& srcEng,
 
 
 /***********************************************************************//**
- * @brief Load CTA response.
- *
- * @param[in] irfname Name of CTA response (without any file extension).
- *
- * The actually dummy version of the CTA response loads a CTA performance
- * table given in ASCII format into memory.
- ***************************************************************************/
-void GCTAResponse::load(const std::string& irfname)
-{
-    // Initialise response members
-    free_members();
-    init_members();
-
-    // Build filename
-    std::string filename = m_caldb + "/" + irfname + ".dat";
-
-    // Read performance table
-    read_performance_table(filename);
-
-    // Store response name
-    m_rspname = irfname;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Clear instance
-***************************************************************************/
-void GCTAResponse::clear(void)
-{
-    // Free class members (base and derived classes, derived class first)
-    free_members();
-    this->GResponse::free_members();
-
-    // Initialise members
-    this->GResponse::init_members();
-    init_members();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
-GCTAResponse* GCTAResponse::clone(void) const
-{
-    return new GCTAResponse(*this);
-}
-
-
-/***********************************************************************//**
  * @brief Print CTA response information
  ***************************************************************************/
 std::string GCTAResponse::print(void) const
@@ -786,6 +888,8 @@ double GCTAResponse::npsf_kern_azsym(const double& rad,
 void GCTAResponse::init_members(void)
 {
     // Initialise members
+    m_caldb.clear();
+    m_rspname.clear();
     m_logE.clear();
     m_aeff.clear();
     m_r68.clear();
@@ -804,11 +908,13 @@ void GCTAResponse::init_members(void)
 void GCTAResponse::copy_members(const GCTAResponse& rsp)
 {
     // Copy attributes
-    m_nodes = rsp.m_nodes;
-    m_logE  = rsp.m_logE;
-    m_aeff  = rsp.m_aeff;
-    m_r68   = rsp.m_r68;
-    m_r80   = rsp.m_r80;
+    m_caldb   = rsp.m_caldb;
+    m_rspname = rsp.m_rspname;
+    m_nodes   = rsp.m_nodes;
+    m_logE    = rsp.m_logE;
+    m_aeff    = rsp.m_aeff;
+    m_r68     = rsp.m_r68;
+    m_r80     = rsp.m_r80;
 
     // Return
     return;

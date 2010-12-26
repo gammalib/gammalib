@@ -21,7 +21,6 @@
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CALDB                              "GResponse::caldb(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -53,7 +52,7 @@ GResponse::GResponse(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] rsp Response from which the instance should be built.
+ * @param[in] rsp Response.
  ***************************************************************************/
 GResponse::GResponse(const GResponse& rsp)
 {
@@ -90,7 +89,7 @@ GResponse::~GResponse(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] rsp Response which should be assigned.
+ * @param[in] rsp Response.
  ***************************************************************************/
 GResponse& GResponse::operator= (const GResponse& rsp)
 {
@@ -119,33 +118,6 @@ GResponse& GResponse::operator= (const GResponse& rsp)
  =                                                                         =
  ==========================================================================*/
 
-/***********************************************************************//**
- * @brief Set path to the calibration database
- *
- * @param[in] caldb Path to calibration database
- *
- * This default method simply checks if the calibration database directory
- * exists. If the directory exists, the path will be stored. No checking is
- * implemented that checks for the consistency of the calibration database.
- *
- * @todo Implement a GCalDB class that handles any calibration database
- *       issues. GCalDB may be an abstract class for which instrument
- *       specific methods are implement to handle any instrument specific
- *       IRF database issues. 
- ***************************************************************************/
-void GResponse::caldb(const std::string& caldb)
-{
-    // Check if calibration database directory is accessible
-    if (access(caldb.c_str(), R_OK) != 0)
-        throw GException::caldb_not_found(G_CALDB, caldb);
-    
-    // Store the path to the calibration database
-    m_caldb = caldb;
-
-    // Return
-    return;
-}
-
 
 /*==========================================================================
  =                                                                         =
@@ -158,10 +130,6 @@ void GResponse::caldb(const std::string& caldb)
  ***************************************************************************/
 void GResponse::init_members(void)
 {
-    // Initialise members
-    m_caldb.clear();
-    m_rspname.clear();
-
     // Return
     return;
 }
@@ -174,10 +142,6 @@ void GResponse::init_members(void)
  ***************************************************************************/
 void GResponse::copy_members(const GResponse& rsp)
 {
-    // Copy attributes
-    m_caldb   = rsp.m_caldb;
-    m_rspname = rsp.m_rspname;
-
     // Return
     return;
 }

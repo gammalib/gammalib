@@ -37,25 +37,32 @@ public:
     // Implement pure virtual base class methods
     void          clear(void);
     GCTAResponse* clone(void) const;
-    void          load(const std::string& rspname);
     bool          hasedisp(void) const { return false; }
     bool          hastdisp(void) const { return false; }
-    double        irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                      const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                      const GObservation& obs) const;
     double        irf(const GEvent& event, const GModel& model,
                       const GEnergy& srcEng, const GTime& srcTime,
                       const GObservation& obs) const;
-    double        nirf(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                       const GObservation& obs) const;
+    double        npred(const GModel& model, const GEnergy& srcEng,
+                        const GTime& srcTime,
+                        const GObservation& obs) const;
 
     // Other Methods
+    void        caldb(const std::string& caldb);
+    std::string caldb(void) const { return m_caldb; }
+    void        load(const std::string& rspname);
+
+    // Other response methods
+    double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+               const GObservation& obs) const;
     double irf(const GCTAEventAtom& event, const GModel& model,
                const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const;
     double irf(const GCTAEventBin& event, const GModel& model,
                const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const;
+    double npred(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                 const GObservation& obs) const;
     double live(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                 const GPointing& pnt) const;
     double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
@@ -75,8 +82,6 @@ public:
                   const GPointing& pnt, const GEbounds& ebds) const;
     double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                   const GPointing& pnt, const GGti& gti) const;
-
-    // Other Methods
     double psf(const double& theta, const double& sigma) const;
     double psf_sigma(const GEnergy& srcEng) const;
     double npsf(const double& psf, const double& radroi, const double& sigma) const;

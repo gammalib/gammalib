@@ -44,19 +44,16 @@ public:
     GMWLResponse& operator= (const GMWLResponse & rsp);
 
     // Reponse function computation methods
-    double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-               const GObservation& obs) const { return 1.0; }
     double irf(const GEvent& event, const GModel& model,
                const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const { return 1.0; }
-    double nirf(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                const GObservation& obs) const { return 1.0; }
+    double npred(const GModel& model, const GEnergy& srcEng,
+                 const GTime& srcTime,
+                 const GObservation& obs) const { return 1.0; }
 
     // Pure virtual base class methods
     void          clear(void);
     GMWLResponse* clone(void) const;
-    void          load(const std::string& irfname) { return; }
     bool          hasedisp(void) const { return false; }
     bool          hastdisp(void) const { return false; }
     std::string   print(void) const;
