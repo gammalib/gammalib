@@ -56,10 +56,6 @@ public:
         file_open_error(std::string origin, std::string filename,
                         std::string message = "");
     };
-    class no_response : public GLATExceptionHandler {
-    public:
-        no_response(std::string origin, std::string message = "");
-    };
     class no_sky : public GLATExceptionHandler {
     public:
         no_sky(std::string origin, std::string message = "");

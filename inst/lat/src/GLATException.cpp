@@ -49,22 +49,6 @@ GLATException::file_open_error::file_open_error(std::string origin,
 
 
 /***********************************************************************//**
- * @brief Instrument response not set.
- *
- * @param[in] origin Name of method that has thrown the exception.
- * @param[in] message Optional error message.
- ***************************************************************************/
-GLATException::no_response::no_response(std::string origin, std::string message)
-{
-    m_origin  = origin;
-    m_message = "Attempt to model LAT response, but no response function"
-                " has been found. Use GLATObservation::response() method"
-                " to set response function. "+message;
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief No sky pixels found.
  *
  * @param[in] origin Name of method that has thrown the exception.
