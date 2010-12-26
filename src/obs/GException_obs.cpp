@@ -25,6 +25,38 @@
 
 
 /***********************************************************************//**
+ * @brief No valid instrument response.
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::no_response::no_response(std::string origin, std::string message)
+{
+    m_origin  = origin;
+    m_message = "Instrument response not defined."
+                " Define instrument response before using this method."+
+                message;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief No valid region of interest.
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::no_roi::no_roi(std::string origin, std::string message)
+{
+    m_origin  = origin;
+    m_message = "Region of interest not defined."
+                " Define region of interest before using this method."+
+                message;
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Mismatch between gradient vector and number of model parameters
  *
  * @param[in] origin Method that throws the error.
@@ -53,7 +85,7 @@ GException::caldb_not_found::caldb_not_found(std::string origin,
                                              std::string message)
 {
     m_origin  = origin;
-    m_message = "Calibration database '"+caldb+"' not found. "+message;
+    m_message = "Calibration database \""+caldb+"\" not found. "+message;
     return;
 }
 
@@ -70,20 +102,6 @@ GException::rsp_invalid_type::rsp_invalid_type(std::string origin,
     m_origin  = origin;
     m_message = "Invalid response type '"+type+"' specified.";
 }
-
-
-/***********************************************************************//**
- * @brief Region of interest is not valid.
- *
- * @param[in] origin Method that throws the error.
- * @param[in] message Optional error message.
- ***************************************************************************/
-GException::roi_invalid::roi_invalid(std::string origin, std::string message)
-{
-    m_origin  = origin;
-    m_message = "Invalid Region of interest. "+message;
-}
-
 
 
 /***********************************************************************//**

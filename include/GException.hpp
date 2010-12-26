@@ -381,6 +381,14 @@ public:
 
 
     // Observation exceptions
+    class no_response : public GExceptionHandler {
+    public:
+        no_response(std::string origin, std::string message = "");
+    };
+    class no_roi : public GExceptionHandler {
+    public:
+        no_roi(std::string origin, std::string message = "");
+    };
     class gradient_par_mismatch : public GExceptionHandler {
     public:
         gradient_par_mismatch(std::string origin, int nsize, int npars);
@@ -393,10 +401,6 @@ public:
     class rsp_invalid_type : public GExceptionHandler {
     public:
         rsp_invalid_type(std::string origin, std::string type);
-    };
-    class roi_invalid : public GExceptionHandler {
-    public:
-        roi_invalid(std::string origin, std::string message = "");
     };
     class gti_invalid : public GExceptionHandler {
     public:
