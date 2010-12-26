@@ -243,13 +243,12 @@ void GOptimizerLM::init_members(void)
     m_npars        = 0;
     m_nfree        = 0;
     m_lambda_start = 1.0e-3;
-    //m_lambda_inc   = 10000.0; //!< This led to bad convergence in some cases
-    m_lambda_inc   = 2.0;
-    m_lambda_dec   = 0.5;
+    m_lambda_inc   = 10.0;
+    m_lambda_dec   = 0.1;
     m_eps          = 1.0e-6;
     m_max_iter     = 1000;
     m_max_stall    = 10;
-    m_max_hit      = 3;         //!< Maximum number of successive boundary hits before freeze
+    m_max_hit      = 3; //!< Maximum successive boundary hits before freeze
     m_step_adjust  = true;
 
     // Initialise bookkeeping arrays
