@@ -171,9 +171,6 @@ GCTAObservation* GCTAObservation::clone(void) const
  *
  * @param[in] irfname Name of CTA response function.
  * @param[in] caldb Optional name of calibration database.
- *
- * @todo Add a generic method in GResponse that searches for path to
- *       calibration database using environment variables.
  ***************************************************************************/
 void GCTAObservation::response(const std::string& irfname, std::string caldb)
 {
@@ -196,14 +193,8 @@ void GCTAObservation::response(const std::string& irfname, std::string caldb)
 
 /***********************************************************************//**
  * @brief Returns pointer to CTA response function
- *
- * @param[in] time Time.
- *
- * Returns pointer to response function for a given time. As the response is
- * supposed not to vary during an observation, the time argument needs not to
- * be considered.
  ***************************************************************************/
-GCTAResponse* GCTAObservation::response(const GTime& time) const
+GCTAResponse* GCTAObservation::response(void) const
 {
     // Return response pointer
     return m_response;
@@ -296,7 +287,8 @@ std::string GCTAObservation::print(void) const
  ***************************************************************************/
 void GCTAObservation::load_unbinned(const std::string& filename)
 {
-    // Delete old events
+    // Delete old events. We do not call clear() here since we want to
+    // preserve any existing response function.
     if (m_events != NULL) delete m_events;
 
     // Allocate events
@@ -325,7 +317,8 @@ void GCTAObservation::load_unbinned(const std::string& filename)
  ***************************************************************************/
 void GCTAObservation::load_binned(const std::string& filename)
 {
-    // Delete old events
+    // Delete old events. We do not call clear() here since we want to
+    // preserve any existing response function.
     if (m_events != NULL) delete m_events;
 
     // Allocate events
@@ -359,8 +352,8 @@ void GCTAObservation::load_binned(const std::string& filename)
 void GCTAObservation::init_members(void)
 {
     // Initialise members
-    m_response = new GCTAResponse;
-    m_pointing = new GCTAPointing;
+    m_response = NULL;
+    m_pointing = NULL;
 
     // Return
     return;
@@ -450,7 +443,8 @@ double GCTAObservation::npred_temp(const GModel& model) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Temporally integrate spatially & spectrally integrated Npred gradient kernel
+ * @brief Temporally integrate spatially & spectrally integrated Npred
+ *        gradient kernel
  *
  * @param[in] model Gamma-ray source model.
  * @param[in] ipar Parameter index for which gradient should be returned.

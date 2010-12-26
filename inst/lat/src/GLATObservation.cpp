@@ -20,7 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cmath> //isinf
+//#include <cmath> //isinf
 #include "GException.hpp"
 #include "GLATObservation.hpp"
 #include "GLATEventList.hpp"
@@ -61,7 +61,7 @@ GLATObservation::GLATObservation(void) : GObservation()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] obs Observation from which the instance should be built.
+ * @param[in] obs LAT observation.
  ***************************************************************************/
 GLATObservation::GLATObservation(const GLATObservation& obs) : GObservation(obs)
 {
@@ -98,7 +98,7 @@ GLATObservation::~GLATObservation(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] obs Observation which should be assigned.
+ * @param[in] obs LAT observation.
  ***************************************************************************/
 GLATObservation& GLATObservation::operator= (const GLATObservation& obs)
 {
@@ -186,14 +186,8 @@ void GLATObservation::response(const std::string& irfname, std::string caldb)
 
 /***********************************************************************//**
  * @brief Returns pointer to LAT response function
- *
- * @param[in] time Time.
- *
- * Returns pointer to response function for a given time. As the response is
- * supposed not to vary during an observation, the time argument needs not to
- * be considered.
  ***************************************************************************/
-GLATResponse* GLATObservation::response(const GTime& time) const
+GLATResponse* GLATObservation::response(void) const
 {
     // Return response pointer
     return m_response;
@@ -213,6 +207,16 @@ GLATPointing* GLATObservation::pointing(const GTime& time) const
 {
     // Return response pointer
     return m_pointing;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to LAT livetime cube
+ ***************************************************************************/
+GLATLtCube* GLATObservation::ltcube(void) const
+{
+    // Return livetime cube pointer
+    return m_ltcube;
 }
 
 
@@ -292,16 +296,15 @@ std::string GLATObservation::print(void) const
  *
  * @todo So far nothing is done with the ft2 file and the ltcube file.
  *       Loading of the relevant information needs to be implemented.
- *
- * @todo Implement proper GTI loading method that provides correct time
- *       conversion
  ***************************************************************************/
 void GLATObservation::load_unbinned(const std::string& ft1name,
                                     const std::string& ft2name,
                                     const std::string& ltcube_name)
 {
-    // Clear instance
-    clear();
+    // Delete old events. We do not call clear() here since we want to
+    // preserve any existing response function.
+    if (m_events != NULL) delete m_events;
+    m_events = NULL;
 
     // Allocate LAT events
     GLATEventList* events = new GLATEventList;
@@ -328,17 +331,18 @@ void GLATObservation::load_unbinned(const std::string& ft1name,
  * @todo So far nothing is done with the expmap file.
  *       Approriate loading needs to be implemented.
  *
- * @todo Implement proper GTI loading method that provides correct time
- *       conversion.
- *
  * @todo Avoid copying over of information from event cube????
  ***************************************************************************/
 void GLATObservation::load_binned(const std::string& cntmap_name,
                                   const std::string& expmap_name,
                                   const std::string& ltcube_name)
 {
-    // Clear instance
-    clear();
+    // Delete old events and livetime cube.  We do not call clear() here
+    // since we want to preserve any existing response function.
+    if (m_events != NULL) delete m_events;
+    if (m_ltcube != NULL) delete m_ltcube;
+    m_events = NULL;
+    m_ltcube = NULL;
 
     // Allocate LAT events
     GLATEventCube* events = new GLATEventCube;
@@ -356,9 +360,11 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
     // Set mean time
     events->time() = 0.5 * (gti()->tstart() + gti()->tstop());
 
-    // Optionally load livetime cube
-    if (ltcube_name.length() > 0)
+    // Optionally allocate and load livetime cube
+    if (ltcube_name.length() > 0) {
+        m_ltcube = new GLATLtCube;
         m_ltcube->load(ltcube_name);
+    }
 
     // Return
     return;
@@ -373,16 +379,13 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * @todo We allocate void response and pointing instances so make sure they
- * exist (analysis methods depend on the existence of these members).
  ***************************************************************************/
 void GLATObservation::init_members(void)
 {
     // Initialise members
-    m_response = new GLATResponse;
-    m_pointing = new GLATPointing;
-    m_ltcube   = new GLATLtCube;
+    m_response = NULL;
+    m_pointing = NULL;
+    m_ltcube   = NULL;
 
     // Return
     return;
@@ -392,7 +395,7 @@ void GLATObservation::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] obs Observation to be copied
+ * @param[in] obs LAT observation.
  ***************************************************************************/
 void GLATObservation::copy_members(const GLATObservation& obs)
 {
