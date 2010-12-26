@@ -206,26 +206,9 @@ GMWLObservation* GMWLObservation::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Set response function (dummy)
- *
- * @param[in] rspname Name of response function.
- * @param[in] caldb Optional name of calibration database.
- *
- * This method does nothing.
- ***************************************************************************/
-void GMWLObservation::response(const std::string& rspname, std::string caldb)
-{
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Returns pointer to response function (dummy)
- *
- * @param[in] time Time.
  ***************************************************************************/
-GMWLResponse* GMWLObservation::response(const GTime& time) const
+GMWLResponse* GMWLObservation::response(void) const
 {
     // Return response pointer
     return m_response;
@@ -378,6 +361,14 @@ void GMWLObservation::copy_members(const GMWLObservation& obs)
  ***************************************************************************/
 void GMWLObservation::free_members(void)
 {
+    // Free memory
+    if (m_response != NULL) delete m_response;
+    if (m_pointing != NULL) delete m_pointing;
+
+    // Mark memory as free
+    m_response = NULL;
+    m_pointing = NULL;
+
     // Return
     return;
 }

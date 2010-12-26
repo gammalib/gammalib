@@ -33,7 +33,7 @@
 /***********************************************************************//**
  * @class GLATObservation
  *
- * @brief Interface for the LAT observation classes.
+ * @brief Interface for the LAT observation class
  ***************************************************************************/
 class GLATObservation : public GObservation {
 
@@ -49,19 +49,18 @@ public:
     // Implemented pure virtual base class methods
     void             clear(void);
     GLATObservation* clone(void) const;
-    void             response(const std::string& irfname, std::string caldb = "");
-    GLATResponse*    response(const GTime& time) const;
+    GLATResponse*    response(void) const;
     GLATPointing*    pointing(const GTime& time) const;
     std::string      instrument(void) const;
     std::string      print(void) const;
 
     // Other methods
-    void          load_unbinned(const std::string& ft1name, const std::string& ft2name,
-                                const std::string& ltcube_name);
-    void          load_binned(const std::string& cntmap_name, const std::string& expmap_name,
+    void        load_unbinned(const std::string& ft1name, const std::string& ft2name,
                               const std::string& ltcube_name);
-    GLATResponse* response(void) const { return m_response; }
-    GLATLtCube*   ltcube(void) const { return m_ltcube; }
+    void        load_binned(const std::string& cntmap_name, const std::string& expmap_name,
+                            const std::string& ltcube_name);
+    void        response(const std::string& irfname, std::string caldb = "");    
+    GLATLtCube* ltcube(void) const;
 
 protected:
     // Protected methods

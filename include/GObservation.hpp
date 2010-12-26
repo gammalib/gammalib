@@ -25,6 +25,7 @@
 #include "GLog.hpp"
 #include "GEvents.hpp"
 #include "GResponse.hpp"
+#include "GPointing.hpp"
 #include "GRoi.hpp"
 #include "GEbounds.hpp"
 #include "GGti.hpp"
@@ -73,8 +74,7 @@ public:
     // Pure virtual methods
     virtual void          clear(void) = 0;
     virtual GObservation* clone(void) const = 0;
-    virtual void          response(const std::string& irfname, std::string caldb = "") = 0;
-    virtual GResponse*    response(const GTime& time) const = 0;
+    virtual GResponse*    response(void) const = 0;
     virtual GPointing*    pointing(const GTime& time) const = 0;
     virtual std::string   instrument(void) const = 0;
     virtual std::string   print(void) const = 0;
@@ -112,8 +112,6 @@ protected:
     virtual double npred_spec(const GModel& model, const GTime& srcTime) const;
     virtual double npred_spat(const GModel& model, const GEnergy& srcEng,
                               const GTime& srcTime) const;
-    virtual double npred_kern(const GModel& model, const GSkyDir& srcDir,
-                              const GEnergy& srcEng, const GTime& srcTime) const;
 
     // Npred gradient integration methods
     virtual double npred_grad_temp(const GModel& model, int ipar) const;
@@ -121,9 +119,6 @@ protected:
                                    const GTime& srcTime) const;
     virtual double npred_grad_spat(const GModel& model, int ipar,
                                    const GEnergy& srcEng, const GTime& srcTime) const;
-    virtual double npred_grad_kern(const GModel& model, int ipar,
-                                   const GSkyDir& srcDir, const GEnergy& srcEng,
-                                   const GTime& srcTime) const;
 
     // Npred kernel classes
     class npred_kern_spat : public GIntegrand {

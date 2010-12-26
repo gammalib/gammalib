@@ -40,8 +40,7 @@ public:
     // Pure virtual methods
     virtual void          clear(void) = 0;
     virtual GObservation* clone(void) const = 0;
-    virtual void          response(const std::string& irfname, std::string caldb = "") = 0;
-    virtual GResponse*    response(const GTime& time) const = 0;
+    virtual GResponse*    response(void) const = 0;
     virtual GPointing*    pointing(const GTime& time) const = 0;
     virtual std::string   instrument(void) const = 0;
 

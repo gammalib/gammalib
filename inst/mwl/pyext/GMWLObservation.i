@@ -42,9 +42,8 @@ public:
     // Implement pure virtual methods
     void             clear(void);
     GMWLObservation* clone(void) const;
-    void             response(const std::string& irfname, std::string caldb = "");
-    GResponse*       response(const GTime& time) const { return NULL; }
-    GPointing*       pointing(const GTime& time) const { return NULL; }
+    GMWLResponse*    response(void) const;
+    GMWLPointing*    pointing(const GTime& time) const;
     std::string      instrument(void) const { return m_instrument; }
 
     // Other methods

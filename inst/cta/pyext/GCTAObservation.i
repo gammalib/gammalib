@@ -36,14 +36,14 @@ public:
     // Pure virtual base class methods
     void             clear(void);
     GCTAObservation* clone(void) const;
-    void             response(const std::string& irfname, std::string caldb = "");
-    GCTAResponse*    response(const GTime& time) const;
+    GCTAResponse*    response(void) const;
     GCTAPointing*    pointing(const GTime& time) const;
     std::string      instrument(void) const;
 
     // Other methods
     void load_unbinned(const std::string& filename);
     void load_binned(const std::string& filename);
+    void response(const std::string& irfname, std::string caldb = "");
 };
 
 

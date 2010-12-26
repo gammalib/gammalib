@@ -58,16 +58,15 @@ public:
     // Implement pure virtual methods
     void             clear(void);
     GMWLObservation* clone(void) const;
-    void             response(const std::string& rspname, std::string caldb = "");
-    GMWLResponse*    response(const GTime& time) const;
+    GMWLResponse*    response(void) const;
     GMWLPointing*    pointing(const GTime& time) const;
     std::string      instrument(void) const { return m_instrument; }
+    std::string      print(void) const;
 
     // Other methods
-    void        load(const std::string& filename);
-    void        load(const std::string& filename, const std::string& extname);
-    void        instrument(const std::string& instrument) { m_instrument=instrument; }
-    std::string print(void) const;
+    void load(const std::string& filename);
+    void load(const std::string& filename, const std::string& extname);
+    void instrument(const std::string& instrument) { m_instrument=instrument; }
 
 protected:
     // Protected methods
