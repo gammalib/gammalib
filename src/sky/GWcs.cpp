@@ -354,19 +354,12 @@ int GWcs::dir2pix(GSkyDir dir) const
  *
  * @param[in] pix Sky pixel.
  *
- * @exception GException::wcs_no_proj_fct
- *            No WCS projection function has been declared.
- *
  * Note that pixel indices start from 0.
  ***************************************************************************/
 GSkyDir GWcs::xy2dir(const GSkyPixel& pix)
 {
     // Set constants
     const int __permutation[2] = {1,0};
-
-    // Throw an error if no projection function exists
-    if (this->m_std2nat == NULL)
-        throw GException::wcs_no_proj_fct(G_XY2DIR);
 
     // Determine offset
     GVector offset = GVector(pix.x(), pix.y());
@@ -380,7 +373,7 @@ GSkyDir GWcs::xy2dir(const GSkyPixel& pix)
 
     // Perform CAR map projection
     GVector native = xy;
-    (this->*m_nat2std)(&native);
+    nat2std(&native);
 
     // Get sky direction for native coordinates
     GSkyDir dir = wcs_native2dir(native);
@@ -401,9 +394,6 @@ GSkyDir GWcs::xy2dir(const GSkyPixel& pix)
  *
  * @param[in] dir Sky direction.
  *
- * @exception GException::wcs_no_proj_fct
- *            No WCS projection function has been declared.
- *
  * Note that pixel indices start from 0.
  ***************************************************************************/
 GSkyPixel GWcs::dir2xy(GSkyDir dir) const
@@ -411,16 +401,12 @@ GSkyPixel GWcs::dir2xy(GSkyDir dir) const
     // Set constants
     const int __permutation[2] = {1,0};
 
-    // Throw an error if no projection function exists
-    if (this->m_std2nat == NULL)
-        throw GException::wcs_no_proj_fct(G_DIR2XY);
-
     // Get native coordinates for sky direction in radians
     GVector native = wcs_dir2native(dir);
 
     // Perform CAR map projection
     GVector xy = native;
-    (this->*m_std2nat)(&xy);
+    std2nat(&xy);
 
     // Swap result if coordinates are reversed
     if (m_reverse)
@@ -1039,10 +1025,6 @@ void GWcs::init_members(void)
     m_rot         = GMatrix(3,3);
     m_trot        = GMatrix(3,3);
 
-    // Initialise projection function pointers
-    m_std2nat = NULL;
-    m_nat2std = NULL;
-
     // Return
     return;
 }
@@ -1074,10 +1056,6 @@ void GWcs::copy_members(const GWcs& wcs)
     m_native_pole = wcs.m_native_pole;
     m_rot         = wcs.m_rot;
     m_trot        = wcs.m_trot;
-
-    // Copy projection function pointers
-    m_std2nat = wcs.m_std2nat;
-    m_nat2std = wcs.m_nat2std;
 
     // Return
     return;

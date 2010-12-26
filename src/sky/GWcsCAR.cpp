@@ -95,7 +95,7 @@ GWcsCAR::GWcsCAR(const std::string& coords,
 /***********************************************************************//**
  * @brief Constructor from FITS HDU table
  *
- * @param[in] hdu Pointer to FITS HDU.
+ * @param[in] hdu FITS HDU.
  ***************************************************************************/
 GWcsCAR::GWcsCAR(const GFitsHDU* hdu) : GWcs()
 {
@@ -113,7 +113,7 @@ GWcsCAR::GWcsCAR(const GFitsHDU* hdu) : GWcs()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] wcs GWcsCAR instance which should be used for construction.
+ * @param[in] wcs World Coordinate System.
  ***************************************************************************/
 GWcsCAR::GWcsCAR(const GWcsCAR& wcs) : GWcs(wcs)
 {
@@ -150,7 +150,7 @@ GWcsCAR::~GWcsCAR(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] wcs GWcsHPX instance to be assigned.
+ * @param[in] wcs World Coordinate System.
  ***************************************************************************/
 GWcsCAR& GWcsCAR::operator= (const GWcsCAR& wcs)
 {
@@ -214,7 +214,7 @@ GWcsCAR* GWcsCAR::clone(void) const
 /***********************************************************************//**
  * @brief Read WCS definiton from FITS header
  *
- * @param[in] hdu FITS HDU containing the Healpix definition.
+ * @param[in] hdu FITS HDU.
  ***************************************************************************/
 void GWcsCAR::read(const GFitsHDU* hdu)
 {
@@ -237,7 +237,7 @@ void GWcsCAR::read(const GFitsHDU* hdu)
 /***********************************************************************//**
  * @brief Write Healpix definiton into FITS HDU
  *
- * @param[in] hdu FITS HDU to which the WCS definition will be written.
+ * @param[in] hdu FITS HDU.
  ***************************************************************************/
 void GWcsCAR::write(GFitsHDU* hdu) const
 {
@@ -330,10 +330,6 @@ void GWcsCAR::init_members(void)
     // Initialise members
     m_type = "CAR";
 
-    // Set projection function pointers
-    m_std2nat = (_wcspf)&GWcsCAR::std2nat;
-    m_nat2std = (_wcspf)&GWcsCAR::nat2std;
-
     // Return
     return;
 }
@@ -342,12 +338,10 @@ void GWcsCAR::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] wcs GWcsCAR instance from which members should be copied.
+ * @param[in] wcs World Coordinate System.
  ***************************************************************************/
 void GWcsCAR::copy_members(const GWcsCAR& wcs)
 {
-    // Copy attributes
-
     // Return
     return;
 }
@@ -397,6 +391,7 @@ void GWcsCAR::nat2std(GVector *coord) const
     // Return
     return;
 }
+
 
 /*==========================================================================
  =                                                                         =

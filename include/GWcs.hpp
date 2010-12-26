@@ -85,26 +85,25 @@ protected:
     void copy_members(const GWcs& wcs);
     void free_members(void);
 
-    // Typdefs
-    typedef void (GWcs::*_wcspf)(GVector* coord) const;
-
     // Protected methods (providing services to derived classes)
-    GVector     wcs_dir2native(GSkyDir dir) const;
-    GSkyDir     wcs_native2dir(GVector native) const;
-    void        wcs_init(const double& theta0);
-    GVector     wcs_getpole(const double& theta0);
-    GMatrix     wcs_get_rot(void);
-    void        wcs_set(const std::string& coords,
-                        const double& crval1, const double& crval2,
-                        const double& crpix1, const double& crpix2,
-                        const double& cdelt1, const double& cdelt2);
-    void        wcs_read(const GFitsHDU* hdu);
-    void        wcs_write(GFitsHDU* hdu) const;
-    std::string wcs_crval1(void) const;
-    std::string wcs_crval2(void) const;
-    std::string wcs_dump(void) const;
+    virtual void std2nat(GVector *coord) const = 0;
+    virtual void nat2std(GVector *coord) const = 0;
+    GVector      wcs_dir2native(GSkyDir dir) const;
+    GSkyDir      wcs_native2dir(GVector native) const;
+    void         wcs_init(const double& theta0);
+    GVector      wcs_getpole(const double& theta0);
+    GMatrix      wcs_get_rot(void);
+    void         wcs_set(const std::string& coords,
+                         const double& crval1, const double& crval2,
+                         const double& crpix1, const double& crpix2,
+                         const double& cdelt1, const double& cdelt2);
+    void         wcs_read(const GFitsHDU* hdu);
+    void         wcs_write(GFitsHDU* hdu) const;
+    std::string  wcs_crval1(void) const;
+    std::string  wcs_crval2(void) const;
+    std::string  wcs_dump(void) const;
 
-    // Protected data area (astr structure)
+    // Protected members (astr structure)
     std::string m_type;     //!< WCS type
     int         m_coordsys; //!< 0=celestial, 1=galactic
     int         m_reverse;  //!< Reverse axes (1=true)
@@ -115,7 +114,7 @@ protected:
     GMatrix     m_cd;       //!< Astrometry parameters (2x2 matrix, deg/pixel)
     GVector     m_pv2;      //!< Projection parameters (up to 21)
 
-    // Derived parameters
+    // Derived members
     double  m_theta0;       //!< Native latitude of the fiducial point
     GVector m_refval;       //!< Ordered value of reference point
     GVector m_refpix;       //!< Pixel of reference point (starting from 0)
@@ -123,8 +122,6 @@ protected:
     GVector m_native_pole;  //!< Coordinates of native pole
     GMatrix m_rot;          //!< Rotation matrix
     GMatrix m_trot;         //!< Transpose of rotation matrix
-    _wcspf  m_std2nat;      //!< Standard to native projection function
-    _wcspf  m_nat2std;      //!< Native to standard projection function
 };
 
 #endif /* GWCS_HPP */

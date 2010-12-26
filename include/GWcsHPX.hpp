@@ -68,6 +68,8 @@ private:
     void         init_members(void);
     void         copy_members(const GWcsHPX& wcs);
     void         free_members(void);
+    void         std2nat(GVector *coord) const { return; }
+    void         nat2std(GVector *coord) const { return; }
     int          nside2order(int nside);
     void         pix2xy(const int& ipix, int* x, int* y);
     int          xy2pix(int x, int y) const;
