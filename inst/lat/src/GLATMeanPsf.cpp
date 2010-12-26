@@ -191,7 +191,7 @@ int GLATMeanPsf::size(void) const
  * @param[in] dir Source location.
  * @param[in] obs LAT observation.
  *
- * @exception GLATException::no_response
+ * @exception GException::no_response
  *            Response has not been defined.
  * @exception GLATException::no_ltcube
  *            Livetime cube has not been defined.
@@ -213,7 +213,7 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     // Get pointers on response, livetime cube and energy boundaries
     GLATResponse* rsp = obs.response();
     if (rsp == NULL)
-        throw GLATException::no_response(G_SET);
+        throw GException::no_response(G_SET);
 
     // Get pointer on livetime cube
     GLATLtCube* ltcube = obs.ltcube();
