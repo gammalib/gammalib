@@ -41,6 +41,10 @@
 #define G_ACCESS                                   "GModel::operator() (int)"
 #define G_XML_SPATIAL                     "GModel::xml_spatial(GXmlElement&)"
 #define G_XML_SPECTRAL                   "GModel::xml_spectral(GXmlElement&)"
+#define G_SPATIAL                "GModel::spatial(GEvent&, GEnergy&, GTime&,"\
+                                                       " GObservation, bool)"
+#define G_SPECTRAL   "GModel::spectral(GEvent&, GTime&, GObservation&, bool)"
+#define G_TEMPORAL           "GModel::temporal(GEvent&, GObservation&, bool)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -619,6 +623,9 @@ GModelSpectral* GModel::xml_spectral(const GXmlElement& spectral) const
  * @param[in] obs Observation.
  * @parem[in] grad Compute also model gradients? (default=false)
  *
+ * @exception GException::no_response
+ *            Observation has no valid instrument response
+ *
  * This method computes the spatial model component for a given true photon
  * energy and arrival time.
  ***************************************************************************/
@@ -632,8 +639,10 @@ double GModel::spatial(const GEvent& event,
     // Continue only if the model has a spatial component
     if (m_spatial != NULL) {
 
-        // Get current pointing and response function
-        GResponse* rsp = obs.response(event.time());
+        // Get response function
+        GResponse* rsp = obs.response();
+        if (rsp == NULL)
+            throw GException::no_response(G_SPATIAL);
 
         // Get IRF value
         double irf = rsp->irf(event, *this, srcEng, srcTime, obs);
@@ -681,6 +690,9 @@ double GModel::spatial(const GEvent& event,
  * @param[in] obs Observation.
  * @parem[in] grad Compute also model gradients (default=false).
  *
+ * @exception GException::no_response
+ *            Observation has no valid instrument response
+ *
  * This method integrates the source model over the spectral component. If
  * the response function has no energy dispersion then no spectral
  * integration is needed and the observed photon energy is identical to the
@@ -695,8 +707,13 @@ double GModel::spectral(const GEvent& event, const GTime& srcTime,
     // Initialise result
     double value = 0.0;
 
+    // Get response function
+    GResponse* rsp = obs.response();
+    if (rsp == NULL)
+        throw GException::no_response(G_SPECTRAL);
+
     // Determine if energy integration is needed
-    bool integrate = obs.response(event.time())->hasedisp();
+    bool integrate = rsp->hasedisp();
 
     // Case A: Integraion
     if (integrate) {
@@ -719,6 +736,9 @@ double GModel::spectral(const GEvent& event, const GTime& srcTime,
  * @param[in] obs Observation.
  * @parem[in] grad Compute also model gradients (default=false).
  *
+ * @exception GException::no_response
+ *            Observation has no valid instrument response
+ *
  * This method integrates the source model over the temporal component. If
  * the response function has no time dispersion then no temporal integration
  * is needed and the observed photon arrival time is identical to the true
@@ -732,8 +752,13 @@ double GModel::temporal(const GEvent& event, const GObservation& obs, bool grad)
     // Initialise result
     double value = 0.0;
 
+    // Get response function
+    GResponse* rsp = obs.response();
+    if (rsp == NULL)
+        throw GException::no_response(G_TEMPORAL);
+
     // Determine if time integration is needed
-    bool integrate = obs.response(event.time())->hastdisp();
+    bool integrate = rsp->hastdisp();
 
     // Case A: Integraion
     if (integrate) {
