@@ -337,6 +337,9 @@ void GModels::read(const GXml& xml)
 
     } // endfor: looped over all sources
 
+    // Set parameter pointers
+    set_pointers();
+
     // Return
     return;
 }
@@ -388,6 +391,10 @@ void GModels::write(GXml& xml) const
             src->append(new GXmlElement("spatialModel"));
             lib->append(src);
         }
+
+        // Set source attributes
+        //src->attribute("type", m_model[i].name());
+        src->attribute("name", m_model[i].name());
 
         // Get pointers on spectrum and spatial model
         GXmlElement* spec = (GXmlElement*)src->element("spectrum", 0);
