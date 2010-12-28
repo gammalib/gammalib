@@ -60,4 +60,11 @@ public:
 //        static std::string result = self->print();
 //        return ((char*)result.c_str());
 //    }
+    GXmlElement(const GXmlNode& node) {
+        if (node.type() != GXmlNode::NT_ELEMENT)
+            throw GException::xml_bad_node_type("GXmlElement(GXmlNode&)",
+                                                "",
+                                                "Expecting GXmlElement node.");
+        return (GXmlElement*)&node;
+    }
 };

@@ -52,4 +52,11 @@ public:
 //        static std::string result = self->print();
 //        return ((char*)result.c_str());
 //    }
+    GXmlText(const GXmlNode& node) {
+        if (node.type() != GXmlNode::NT_TEXT)
+            throw GException::xml_bad_node_type("GXmlText(GXmlNode&)",
+                                                "",
+                                                "Expecting GXmlText node.");
+        return (GXmlText*)&node;
+    }
 };

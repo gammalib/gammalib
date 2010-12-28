@@ -54,4 +54,11 @@ public:
 //        static std::string result = self->print();
 //        return ((char*)result.c_str());
 //    }
+    GXmlComment(const GXmlNode& node) {
+        if (node.type() != GXmlNode::NT_COMMENT)
+            throw GException::xml_bad_node_type("GXmlComment(GXmlNode&)",
+                                                "",
+                                                "Expecting GXmlComment node.");
+        return (GXmlComment*)&node;
+    }
 };
