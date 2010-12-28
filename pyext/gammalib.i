@@ -63,6 +63,16 @@
 #include "GFitsTableCFloatCol.i"
 #include "GFitsTableCDoubleCol.i"
 
+/* __ XML module _________________________________________________________ */
+#include "GXml.i"
+#include "GXmlNode.i"
+#include "GXmlDocument.i"
+#include "GXmlText.i"
+#include "GXmlElement.i"
+#include "GXmlComment.i"
+#include "GXmlAttribute.i"
+#include "GXmlPI.i"
+
 /* __ Application module _________________________________________________ */
 #include "GApplication.i"
 #include "GLog.i"
