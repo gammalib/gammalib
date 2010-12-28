@@ -337,9 +337,6 @@ void GModels::read(const GXml& xml)
 
     } // endfor: looped over all sources
 
-    // Set parameter pointers
-    set_pointers();
-
     // Return
     return;
 }

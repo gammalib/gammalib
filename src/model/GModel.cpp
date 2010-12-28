@@ -394,18 +394,15 @@ std::string GModel::print(void) const
     result.append("\n"+parformat("Number of spatial par's")+str(n_spatial));
     int i;
     for (i = 0; i < n_spatial; ++i) {
-        result.append("\n"+parformat("Parameter"));
-        result.append((*this)(i).print());
+        result.append("\n"+(*this)(i).print());
     }
     result.append("\n"+parformat("Number of spectral par's")+str(n_spectral));
     for (; i < n_spatial+n_spectral; ++i) {
-        result.append("\n"+parformat("Parameter"));
-        result.append((*this)(i).print());
+        result.append("\n"+(*this)(i).print());
     }
     result.append("\n"+parformat("Number of temporal par's")+str(n_temporal));
     for (; i < n_spatial+n_spectral+n_temporal; ++i) {
-        result.append("\n"+parformat("Parameter"));
-        result.append((*this)(i).print());
+        result.append("\n"+(*this)(i).print());
     }
 
     // Return result
