@@ -388,21 +388,21 @@ std::string GModel::print(void) const
    int n_temporal = (m_temporal != NULL) ? m_temporal->size() : 0;
 
     // Append header
-    result.append("=== GModel ===\n");
-    result.append(parformat("Name")+name()+"\n");
-    result.append(parformat("Number of parameters")+str(size())+"\n");
-    result.append(parformat("Number of spatial par's")+str(n_spatial));
+    result.append("=== GModel ===");
+    result.append("\n"+parformat("Name")+name());
+    result.append("\n"+parformat("Number of parameters")+str(size()));
+    result.append("\n"+parformat("Number of spatial par's")+str(n_spatial));
     int i;
     for (i = 0; i < n_spatial; ++i) {
         result.append("\n"+parformat("Parameter"));
         result.append((*this)(i).print());
     }
-    result.append(parformat("Number of spectral par's")+str(n_spectral));
+    result.append("\n"+parformat("Number of spectral par's")+str(n_spectral));
     for (; i < n_spatial+n_spectral; ++i) {
         result.append("\n"+parformat("Parameter"));
         result.append((*this)(i).print());
     }
-    result.append(parformat("Number of temporal par's")+str(n_temporal));
+    result.append("\n"+parformat("Number of temporal par's")+str(n_temporal));
     for (; i < n_spatial+n_spectral+n_temporal; ++i) {
         result.append("\n"+parformat("Parameter"));
         result.append((*this)(i).print());
