@@ -390,7 +390,10 @@ void GModels::write(GXml& xml) const
         }
 
         // Set source attributes
-        //src->attribute("type", m_model[i].name());
+        if (m_model[i].spatial()->type() == "PointSource")
+            src->attribute("type", "PointSource");
+        else
+            src->attribute("type", "DiffuseSource");
         src->attribute("name", m_model[i].name());
 
         // Get pointers on spectrum and spatial model
