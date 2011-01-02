@@ -84,6 +84,7 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpectralPlaw2& model);
     void free_members(void);
+    void update(const GEnergy& srcEng);
 
     // Implemented pure virtual methods
     GModelPar** par(void) { return m_par; }
@@ -95,6 +96,21 @@ protected:
     GModelPar  m_index;           //!< Spectral index
     GModelPar  m_emin;            //!< Lower energy limit (MeV)
     GModelPar  m_emax;            //!< Upper energy limit (MeV)
+    double     m_log_emin;        //!< Log(emin)
+    double     m_log_emax;        //!< Log(emax)
+    double     m_pow_emin;        //!< emin^(index+1)
+    double     m_pow_emax;        //!< emax^(index+1)
+    double     m_norm;            //!< Power-law normalization (for pivot energy 1 MeV)
+    double     m_g_norm;          //!< Power-law normalization gradient
+    double     m_power;           //!< Power-law factor
+    double     m_last_integral;   //!< Last integral flux
+    double     m_last_index;      //!< Last spectral index (MeV)
+    double     m_last_emin;       //!< Last lower energy limit (MeV)
+    double     m_last_emax;       //!< Last upper energy limit (MeV)
+    GEnergy    m_last_energy;     //!< Last source energy
+    double     m_last_value;      //!< Last function value
+    double     m_last_g_integral; //!< Last integral flux gradient
+    double     m_last_g_index;    //!< Last spectral index gradient
 };
 
 #endif /* GMODELSPECTRALPLAW2_HPP */
