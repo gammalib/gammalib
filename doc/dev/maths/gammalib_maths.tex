@@ -1,0 +1,163 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% GammaLib Mathematical Implementation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definitions for manual package
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\task}{\mbox{GammaLib}}
+\newcommand{\this}{\mbox{\tt \task}}
+\newcommand{\shorttype}{\mbox{Maths}}
+\newcommand{\doctype}{\mbox{Mathematical Implementation}}
+\newcommand{\version}{\mbox{draft}}
+\newcommand{\calendar}{\mbox{2 January 2011}}
+\newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
+\newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document definition
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}[12pt,a4]
+\usepackage{epsfig}
+\usepackage{manual}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Begin of document body
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\frontpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Spectral models
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Spectral models}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{PowerLaw}
+
+The power law spectral model is defined by
+\begin{equation}
+I(E) = k \left( \frac{E}{p} \right)^{\gamma}
+\end{equation}
+where
+\begin{itemize}
+\item $k$ is the normalization of the power law (units: ph cm$^{-2}$ s$^{-1}$ MeV$^{-1}$),
+\item $p$ is the pivot energy (units: MeV), and
+\item $\gamma$ is the spectral index (which is usually negative).
+\end{itemize}
+
+Each of the 3 parameters is factorised into a scaling factor and a value, i.e.
+$k=k_s k_v$, $p=p_s p_v$, and $\gamma = \gamma_s \gamma_v$.
+The {\tt GModelSpectralPlaw::eval\_gradients} returns the gradients with
+respect to the parameter value of the factorisation.
+Note that for any parameter $a=a_s a_v$:
+\begin{equation}
+\frac{\delta I}{\delta a_v} = \frac{\delta I}{\delta a} \frac{\delta a}{\delta a_v} =
+  \frac{\delta I}{\delta a} a_s
+\end{equation}
+The parameter value gradients for the power law are given by
+\begin{eqnarray}
+\frac{\delta I}{\delta k_v} & = & 
+  k_s \left( \frac{E}{p} \right)^{\gamma} = \frac{I(E)}{k_v} \\
+\frac{\delta I}{\delta p_v} & = & 
+  -\frac{\gamma}{p_v} \, k \left( \frac{E}{p} \right)^{\gamma} =
+  -\frac{\gamma}{p_v} \, I(E) \\
+\frac{\delta I}{\delta \gamma_v} & = &
+  \gamma_s \ln \left( \frac{E}{p} \right) k \left( \frac{E}{p} \right)^{\gamma} =
+  \gamma_s \ln \left( \frac{E}{p} \right) I(E)
+\end{eqnarray}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{PowerLaw2}
+
+This flavour of the power law spectral model uses the integral flux $f$ within the
+energy range $E_{\rm min}$ and $E_{\rm max}$ as free parameter instead of
+the normalization $k$.
+The integral flux $f$ is given by
+\begin{equation}
+f = \int_{E_{\rm min}}^{E_{\rm max}} I(E) {\rm d}E
+\label{eq:fluxint}
+\end{equation}
+The power law model is then defined by
+\begin{equation}
+I(E) = \tilde{k} \, E^{\gamma}
+\end{equation}
+where
+\begin{equation}
+   \tilde{k} = \left \{
+   \begin{array}{l l}
+      \displaystyle
+      \frac{f}{\ln E_{\rm max} - \ln E_{\rm min}} 
+        & \mbox{if $\gamma = -1$} \\
+     \\
+     \displaystyle
+      \frac{f (1+\gamma)}{E_{\rm max}^{\gamma+1}-E_{\rm min}^{\gamma+1}} 
+        & \mbox{else}
+   \end{array}
+   \right .
+\end{equation}
+is obtained from Eq.~(\ref{eq:fluxint}).
+
+Each of the 4 parameters is factorised into a scaling factor and a value, e.g.
+$f=f_s f_v$ and $\gamma=\gamma_s \gamma_v$.
+It is assumed that $E_{\rm min}$ and $E_{\rm max}$ are fixed parameters,
+and {\tt GModelSpectralPlaw2::eval\_gradients} returns valid gradients only for 
+$f_v$ and $\gamma_v$.
+
+The flux value gradient $f_v$ is given by
+\begin{equation}
+\frac{\delta I}{\delta f_v} = 
+  \frac{\delta I}{\delta f} \frac{\delta f}{\delta f_v} = 
+  \frac{\delta I}{\delta f} f_s = 
+  \frac{\delta \tilde{k}}{\delta f} \, E^{\gamma} f_s = 
+  \frac{\tilde{k}}{f} \, E^{\gamma} f_s = 
+  \frac{I(E)}{f} f_s =
+  \frac{I(E)}{f_v}
+\end{equation}
+
+The index value gradient $\gamma_v$ is given by
+\begin{equation}
+\frac{\delta I}{\delta \gamma_v} =
+  \frac{\delta I}{\delta \gamma} \frac{\delta \gamma}{\delta \gamma_v} = 
+  \frac{\delta I}{\delta \gamma} \gamma_s = 
+  \left( \frac{\delta \tilde{k}}{\delta \gamma} \, E^{\gamma} + \tilde{k} \, E^{\gamma} \ln E \right)  \gamma_s =
+  \left( \frac{1}{\tilde{k}} \frac{\delta \tilde{k}}{\delta \gamma} + \ln E \right) \tilde{k} E^{\gamma} \gamma_s =
+  \left( \frac{1}{\tilde{k}} \frac{\delta \tilde{k}}{\delta \gamma} + \ln E \right) I(E) \gamma_s
+\end{equation}
+where
+\begin{equation}
+   \frac{\delta \tilde{k}}{\delta \gamma} = \left \{
+   \begin{array}{l l}
+     \displaystyle
+     0 & \mbox{if $\gamma = -1$} \\
+     \\
+     \\
+     \displaystyle
+      \frac{f \left( E_{\rm max}^{\gamma+1}-E_{\rm min}^{\gamma+1} \right) -
+              f (1+\gamma) \left( E_{\rm max}^{\gamma+1} \ln E_{\rm max} - 
+                                      E_{\rm min}^{\gamma+1} \ln E_{\rm min} \right)}
+              {\left( E_{\rm max}^{\gamma+1}-E_{\rm min}^{\gamma+1} \right)^2}
+         & \mbox{else}
+   \end{array}
+   \right .
+\end{equation}
+Note that for $\gamma \ne -1$
+\begin{equation}
+\frac{1}{\tilde{k}} \frac{\delta \tilde{k}}{\delta \gamma} =
+  \frac{1}{1+\gamma} -
+  \frac{\left( E_{\rm max}^{\gamma+1} \ln E_{\rm max} - 
+                    E_{\rm min}^{\gamma+1} \ln E_{\rm min} \right)}
+          {\left( E_{\rm max}^{\gamma+1}-E_{\rm min}^{\gamma+1} \right)}
+\end{equation}
+
+\end{document} 
