@@ -217,13 +217,11 @@ GModelSpectralPlaw2* GModelSpectralPlaw2::clone(void) const
  ***************************************************************************/
 double GModelSpectralPlaw2::eval(const GEnergy& srcEng)
 {
+    // Update precomputed values
+    update(srcEng);
+
     // Compute function value
-    double gamma = index() + 1.0;
-    double norm  = (gamma != 0.0)
-                 ? gamma / (pow(emax(), gamma) - pow(emin(), gamma))
-                 : 1.0   / (log(emax())        - log(emin()));
-    double power = pow(srcEng.MeV(), index());
-    double value = integral() * norm * power;
+    double value = integral() * m_norm * m_power;
 
     // Return
     return value;
@@ -251,9 +249,10 @@ double GModelSpectralPlaw2::eval(const GEnergy& srcEng)
  *
  * The partial derivatives of the parameter values are given by
  * \f[dI/df_v=I(E) / f_v\f]
- * \f[dI/di_v=I(E) \[1/(index+1) +
- *                  (\log(emax) emax^{index+1} - \log(emin) emin^{index+1})/
- *                  (emax^{index+1}-emin^{index+1}) + \log(E)\] i_s\f]
+ * \f[dI/di_v=I(E) \[\frac{1}{index+1} -
+ *                   \frac{\log(emax) emax^{index+1} - \log(emin) emin^{index+1}}
+ *                        {emax^{index+1} - emin^{index+1}}
+ *                 + \log(E)\] i_s\f]
  * for \f$index \ne -1\f$ and
  * \f[dI/df_v=I(E) / f_v\f]
  * \f[dI/di_v=I(E) \log(E) i_s\f]
@@ -263,54 +262,23 @@ double GModelSpectralPlaw2::eval(const GEnergy& srcEng)
  ***************************************************************************/
 double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng)
 {
-    // Initialise
-    double value      = 0.0;
+    // Initialise gradients
     double g_integral = 0.0;
     double g_index    = 0.0;
-    double gamma      = index() + 1.0;
-    double lnE        = log(srcEng.MeV());
-    double power      = pow(srcEng.MeV(), index());
-
-    // Case A: index != -1
-    if (gamma != 0.0) {
-
-        // Precomputation
-        double emax_g = pow(emax(), gamma);
-        double emin_g = pow(emin(), gamma);
-        double denom  = emax_g - emin_g;
-        double norm   = gamma / denom;
-
-        // Compute function value
-        value = integral() * norm * power;
-
-        // Compute partial derivatives of the parameter values
-        if (m_integral.isfree())
-            g_integral = value / m_integral.value();
-        if (m_index.isfree())
-            g_index = (1.0/gamma + 
-                       (log(emax())*emax_g - log(emin())*emin_g)/denom +
-                       lnE) * value * m_index.scale();
-
-    }
-
-    // Case B: index == -1
-    else {
     
-        // Precomputation
-        double lnemax = log(emax());
-        double lnemin = log(emin());
-        double norm   = 1.0 / (lnemax - lnemin);
+    // Update precomputed values
+    update(srcEng);
 
-        // Compute function value
-        value = integral() * norm * power;
+    // Compute function value
+    double value = integral() * m_norm * m_power;
 
-        // Compute partial derivatives of the parameter values
-        if (m_integral.isfree())
-            g_integral = value / m_integral.value();
-        if (m_index.isfree())
-            g_index = value * lnE * m_index.scale();
+    // Integral flux gradient
+    if (m_integral.isfree())
+         g_integral = value / m_integral.value();
 
-    }
+    // Index gradient
+    if (m_index.isfree())
+        g_index = value * (m_g_norm + ln10*srcEng.log10MeV()) * m_index.scale();
 
     // Set gradients
     m_integral.gradient(g_integral);
@@ -546,6 +514,22 @@ void GModelSpectralPlaw2::init_members(void)
     m_emax.range(0.001, 1.0e15);
     m_emax.fix();
 
+    // Initialise last parameters (for fast computation)
+    m_log_emin        = 0.0;
+    m_log_emax        = 0.0;
+    m_pow_emin        = 0.0;
+    m_pow_emax        = 0.0;
+    m_norm            = 0.0;
+    m_power           = 0.0;
+    m_last_integral   = 0.0;
+    m_last_index      = 1000.0;
+    m_last_emin       = 0.0;
+    m_last_emax       = 0.0;
+    m_last_energy.MeV(0.0);
+    m_last_value      = 0.0;
+    m_last_g_integral = 0.0;
+    m_last_g_index    = 0.0;
+
     // Return
     return;
 }
@@ -564,6 +548,22 @@ void GModelSpectralPlaw2::copy_members(const GModelSpectralPlaw2& model)
     m_emin     = model.m_emin;
     m_emax     = model.m_emax;
 
+    // Copy bookkeeping information
+    m_log_emin        = model.m_log_emin;
+    m_log_emax        = model.m_log_emax;
+    m_pow_emin        = model.m_pow_emin;
+    m_pow_emax        = model.m_pow_emax;
+    m_norm            = model.m_norm;
+    m_power           = model.m_power;
+    m_last_integral   = model.m_last_integral;
+    m_last_index      = model.m_last_index;
+    m_last_emin       = model.m_last_emin;
+    m_last_emax       = model.m_last_emax;
+    m_last_energy     = model.m_last_energy;
+    m_last_value      = model.m_last_value;
+    m_last_g_integral = model.m_last_g_integral;
+    m_last_g_index    = model.m_last_g_index;
+
     // Return
     return;
 }
@@ -574,6 +574,91 @@ void GModelSpectralPlaw2::copy_members(const GModelSpectralPlaw2& model)
  ***************************************************************************/
 void GModelSpectralPlaw2::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update precomputed values
+ *
+ * @param[in] srcEng Source energy
+ ***************************************************************************/
+void GModelSpectralPlaw2::update(const GEnergy& srcEng)
+{
+    // Compute index+1
+    double gamma = index() + 1.0;
+
+    // Change in spectral index?
+    if (index() != m_last_index) {
+
+        // Save actual spectral index
+        m_last_index = index();
+
+        // Change in energy boundaries?
+        if (emin() != m_last_emin || emax() != m_last_emax) {
+            m_log_emin  = log(emin());
+            m_last_emin = emin();
+            m_log_emax  = log(emax());
+            m_last_emax = emax();
+        }
+
+        // Compute normalization factors
+        if (gamma != 0.0) {
+            m_pow_emin  = pow(emin(), gamma);
+            m_pow_emax  = pow(emax(), gamma);
+            double d    = m_pow_emax - m_pow_emin;
+            m_norm      = gamma / d;
+            m_g_norm    = 1.0/gamma - 
+                          (m_pow_emax*m_log_emax - m_pow_emin*m_log_emin)/d;
+        }
+        else {
+            m_norm   = 1.0 / (m_log_emax - m_log_emin);
+            m_g_norm = 0.0;
+        }
+
+        // Update power law factor
+        m_power       = pow(srcEng.MeV(), index());
+        m_last_energy = srcEng;
+
+    } // endif: change in spectral index
+
+    // ... no change in spectral index
+    else {
+
+        // Change in energy boundaries?
+        if (emin() != m_last_emin || emax() != m_last_emax) {
+
+            // Update energy boundaries
+            m_log_emin  = log(emin());
+            m_last_emin = emin();
+            m_log_emax  = log(emax());
+            m_last_emax = emax();
+        
+            // Compute power law normalization
+            if (gamma != 0.0) {
+                m_pow_emin  = pow(emin(), gamma);
+                m_pow_emax  = pow(emax(), gamma);
+                double d    = m_pow_emax - m_pow_emin;
+                m_norm      = gamma / d;
+                m_g_norm    = 1.0/gamma - 
+                              (m_pow_emax*m_log_emax - m_pow_emin*m_log_emin)/d;
+            }
+            else {
+                m_norm = 1.0 / (m_log_emax - m_log_emin);
+                m_g_norm = 0.0;
+            }
+
+        } // endif: change in energy boundaries
+
+        // Change in energy?
+        if (srcEng != m_last_energy) {
+            m_power       = pow(srcEng.MeV(), index());
+            m_last_energy = srcEng;
+        }
+
+    } // endelse: no change in spectral index
+
     // Return
     return;
 }
