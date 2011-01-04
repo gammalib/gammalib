@@ -52,7 +52,9 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+#define G_DUMP_MEAN_PSF  1                    //!< Dump mean PSF allocation
 #define G_DEBUG_MEAN_PSF 0                    //!< Debug mean PSF computation
+#define G_FORCE_MEAN_PSF 0                    //!< Use mean PSF computation
 
 /* __ Constants __________________________________________________________ */
 
@@ -274,12 +276,12 @@ double GLATResponse::irf(const GLATEventAtom& event, const GModel& model,
  * @exception GLATException::diffuse_not_found
  *            Diffuse model not found.
  *
- * @todo This method could be split into separate methods for point sources,
- *       diffuse sources and isotropic sources.
- *
- * @todo Add isotropic source. This is simple since the PSF is constant here
- *       (I guess it is 1, but need to check ...). So the response should
- *       just be the exposure.
+ * This method first searches for a corresponding source map, and if found,
+ * computes the response from the source map. If no source map is present
+ * it checks if the source is a point source. If this is the case a mean
+ * PSF is allocated for the source and the response is computed from the
+ * mean PSF. Otherwise an GLATException::diffuse_not_found exception is
+ * thrown.
  ***************************************************************************/
 double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
                          const GEnergy& srcEng, const GTime& srcTime,
@@ -288,8 +290,44 @@ double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
     // Initialise response value
     double rsp = 0.0;
 
-    // If model is a point source then return the point source IRF
+    // Get pointer to event cube
+    GLATEventCube* cube = event.cube();
+
+    // Search for diffuse response in event cube
+    int idiff = -1;
+    for (int i = 0; i < cube->ndiffrsp(); ++i) {
+        if (cube->diffname(i) == model.name()) {
+            idiff = i;
+            break;
+        }
+    }
+
+    // If diffuse response has been found then get response from source map
+    if (idiff != -1) {
+
+        // Get srcmap indices and weighting factors
+        GNodeArray* nodes = cube->enodes();
+        nodes->set_value(srcEng.log10MeV());
+
+        // Compute diffuse response
+        GSkymap* map    = cube->diffrsp(idiff);
+        double*  pixels = map->pixels() + event.ipix();
+        rsp             = nodes->wgt_left()  * pixels[nodes->inx_left()  * map->npix()] +
+                          nodes->wgt_right() * pixels[nodes->inx_right() * map->npix()];
+
+        // Divide by solid angle and ontime since source maps are given in units of
+        // counts/pixel/MeV.
+        rsp /= (event.omega() * event.ontime());
+
+    } // endelse: diffuse response was present
+
+    // ... otherwise check if model is a point source. If this is true
+    // then return response from mean PSF
+    #if G_DEBUG_MEAN_PSF || G_FORCE_MEAN_PSF
     if (model.spatial()->isptsource()) {
+    #else
+    else if (model.spatial()->isptsource()) {
+    #endif
 
         // Search for mean PSF
         int ipsf = -1;
@@ -319,7 +357,7 @@ double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
             ipsf = m_ptsrc.size()-1;
 
             // Debug option: dump mean PSF
-            #if G_DEBUG_MEAN_PSF 
+            #if G_DUMP_MEAN_PSF 
             std::cout << "Added new mean PSF \""+model.name() << "\"" << std::endl;
             std::cout << *psf << std::endl;
             #endif
@@ -329,64 +367,36 @@ double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
         // Get PSF value
         GSkyDir srcDir   = m_ptsrc[ipsf]->dir();
         double  offset   = event.dir().dist_deg(srcDir);
-        double  psf      = m_ptsrc[ipsf]->psf(offset, srcEng.log10MeV());
-        double  exposure = m_ptsrc[ipsf]->exposure(srcEng.log10MeV());
+        //double  psf      = m_ptsrc[ipsf]->psf(offset, srcEng.log10MeV());
+        //double  exposure = m_ptsrc[ipsf]->exposure(srcEng.log10MeV());
+        double  psf      = (*m_ptsrc[ipsf])(offset, srcEng.log10MeV());
+
+        // Debug option: compare mean PSF to diffuse response
+        #if G_DEBUG_MEAN_PSF
+        double mean_psf = psf / (event.ontime());
+        std::cout << "Energy=" << srcEng.MeV();
+        std::cout << " MeanPsf=" << mean_psf;
+        std::cout << " DiffusePsf=" << rsp;
+        std::cout << " ratio(Mean/Diffuse)=" << mean_psf/rsp;
+        if (mean_psf/rsp < 0.99)
+            std::cout << " <<< (1%)";
+        else if (mean_psf/rsp > 1.01)
+            std::cout << " >>> (1%)";
+        std::cout << std::endl;
+        #endif
 
         // Compute response
-        rsp = psf * exposure / (event.ontime());
+        rsp = psf / (event.ontime());
 
     } // endif: model was point source
 
-    // Debug option: print 
-    #if G_DEBUG_MEAN_PSF
-    double mean_psf = rsp;
+    // ... otherwise throw an exception
+    #if G_DEBUG_MEAN_PSF || G_FORCE_MEAN_PSF
+    else if (idiff == -1)
     #else
-    // ... otherwise compute the diffuse instrument response function.
-    else {
+    else
     #endif
-
-        // Get pointer to event cube
-        GLATEventCube* cube = event.cube();
-
-        // Search for diffuse response in event cube
-        int idiff = -1;
-        for (int i = 0; i < cube->ndiffrsp(); ++i) {
-            if (cube->diffname(i) == model.name()) {
-                idiff = i;
-                break;
-            }
-        }
-
-        // If diffuse response has not been found then throw an exception
-        if (idiff == -1)
-            throw GLATException::diffuse_not_found(G_IRF_BIN, model.name());
-
-        // Get srcmap indices and weighting factors
-        GNodeArray* nodes = cube->enodes();
-        nodes->set_value(srcEng.log10MeV());
-
-        // Compute diffuse response
-        GSkymap* map    = cube->diffrsp(idiff);
-        double*  pixels = map->pixels() + event.ipix();
-        rsp             = nodes->wgt_left()  * pixels[nodes->inx_left()  * map->npix()] +
-                          nodes->wgt_right() * pixels[nodes->inx_right() * map->npix()];
-
-        // Divide by solid angle and ontime since source maps are given in units of
-        // counts/pixel/MeV.
-        rsp /= (event.omega() * event.ontime());
-
-        // Debug option:
-        #if G_DEBUG_MEAN_PSF
-        if (model.spatial()->isptsource()) {
-            std::cout << "Energy=" << srcEng.MeV();
-            std::cout << " MeanPsf=" << mean_psf;
-            std::cout << " DiffusePsf=" << rsp;
-            std::cout << " ratio(Mean/Diffuse)=" << mean_psf/rsp << std::endl;
-            rsp = mean_psf;
-        }
-        #else
-    } // endelse: model was diffuse
-    #endif
+        throw GLATException::diffuse_not_found(G_IRF_BIN, model.name());
 
     // Return IRF value
     return rsp;
