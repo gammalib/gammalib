@@ -307,7 +307,7 @@ double GWcs::omega(const GSkyPixel& pix) const
  * This method should be overloaded by the appropriate method of the derived
  * class. It thus should never get called.
  ***************************************************************************/
-GSkyDir GWcs::pix2dir(const int& pix)
+GSkyDir GWcs::pix2dir(const int& pix) const
 {
     // Set error message
     std::string message = "GWcs method not defined for " +
@@ -356,7 +356,7 @@ int GWcs::dir2pix(GSkyDir dir) const
  *
  * Note that pixel indices start from 0.
  ***************************************************************************/
-GSkyDir GWcs::xy2dir(const GSkyPixel& pix)
+GSkyDir GWcs::xy2dir(const GSkyPixel& pix) const
 {
     // Set constants
     const int __permutation[2] = {1,0};

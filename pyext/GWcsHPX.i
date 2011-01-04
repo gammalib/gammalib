@@ -44,7 +44,7 @@ public:
 
     // Overloaded base class methods
     double      omega(const int& pix) const;
-    GSkyDir     pix2dir(const int& pix);
+    GSkyDir     pix2dir(const int& pix) const;
     int         dir2pix(GSkyDir dir) const;
 
     // Class specific methods

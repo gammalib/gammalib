@@ -53,9 +53,9 @@ public:
     virtual void        coordsys(const std::string& coordsys);
     virtual double      omega(const int& pix) const;
     virtual double      omega(const GSkyPixel& pix) const;
-    virtual GSkyDir     pix2dir(const int& pix);
+    virtual GSkyDir     pix2dir(const int& pix) const;
     virtual int         dir2pix(GSkyDir dir) const;
-    virtual GSkyDir     xy2dir(const GSkyPixel& pix);
+    virtual GSkyDir     xy2dir(const GSkyPixel& pix) const;
     virtual GSkyPixel   dir2xy(GSkyDir dir) const;
 };
 

@@ -621,7 +621,7 @@ void GSkymap::write(GFits* file) const
  * implement 1D conversion methods while 2D schemes need only to implement
  * 2D conversion methods.
  ***************************************************************************/
-GSkyDir GSkymap::pix2dir(const int& pix)
+GSkyDir GSkymap::pix2dir(const int& pix) const
 {
     // Throw error if WCS is not valid
     if (m_wcs == NULL)
@@ -680,7 +680,7 @@ int GSkymap::dir2pix(GSkyDir dir) const
  * implement 1D conversion methods while 2D schemes need only to implement
  * 2D conversion methods.
  ***************************************************************************/
-GSkyDir GSkymap::xy2dir(const GSkyPixel& pix)
+GSkyDir GSkymap::xy2dir(const GSkyPixel& pix) const
 {
     // Throw error if WCS is not valid
     if (m_wcs == NULL)

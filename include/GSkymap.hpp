@@ -79,14 +79,14 @@ public:
     // 1D pixel methods
     double&       operator() (const int& pixel, const int map = 0);
     const double& operator() (const int& pixel, const int map = 0) const;
-    GSkyDir       pix2dir(const int& pix);
+    GSkyDir       pix2dir(const int& pix) const;
     int           dir2pix(GSkyDir dir) const;
     double        omega(const int& pix) const;
 
     // 2D pixel methods
     double&       operator() (const GSkyPixel& pixel, const int map = 0);
     const double& operator() (const GSkyPixel& pixel, const int map = 0) const;
-    GSkyDir       xy2dir(const GSkyPixel& pix);
+    GSkyDir       xy2dir(const GSkyPixel& pix) const;
     GSkyPixel     dir2xy(GSkyDir dir) const;
     double        omega(const GSkyPixel& pix) const;
 

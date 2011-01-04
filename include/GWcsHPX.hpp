@@ -54,7 +54,7 @@ public:
 
     // Overloaded base class methods
     double      omega(const int& pix) const;
-    GSkyDir     pix2dir(const int& pix);
+    GSkyDir     pix2dir(const int& pix) const;
     int         dir2pix(GSkyDir dir) const;
 
     // Class specific methods
@@ -71,13 +71,13 @@ private:
     void         std2nat(GVector *coord) const { return; }
     void         nat2std(GVector *coord) const { return; }
     int          nside2order(int nside);
-    void         pix2xy(const int& ipix, int* x, int* y);
+    void         pix2xy(const int& ipix, int* x, int* y) const;
     int          xy2pix(int x, int y) const;
-    void         pix2ang_ring(int ipix, double* theta, double* phi);
-    void         pix2ang_nest(int ipix, double* theta, double* phi);
+    void         pix2ang_ring(int ipix, double* theta, double* phi) const;
+    void         pix2ang_nest(int ipix, double* theta, double* phi) const;
     int          ang2pix_z_phi_ring(double z, double phi) const;
     int          ang2pix_z_phi_nest(double z, double phi) const;
-    unsigned int isqrt(unsigned int arg);
+    unsigned int isqrt(unsigned int arg) const;
 
     // Private data area
     int      m_nside;        //!< Number of divisions of each base pixel (1-8192)

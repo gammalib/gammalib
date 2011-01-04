@@ -354,7 +354,7 @@ double GWcsHPX::omega(const int& pix) const
  *
  * @param[in] pix Pixel number (0,1,...,m_num_pixels).
  ***************************************************************************/
-GSkyDir GWcsHPX::pix2dir(const int& pix)
+GSkyDir GWcsHPX::pix2dir(const int& pix) const
 {
     // Declare result
     GSkyDir result;
@@ -631,7 +631,7 @@ int GWcsHPX::nside2order(int nside)
  * @param[out] x Pointer to x coordinate.
  * @param[out] y Pointer to y coordinate.
  ***************************************************************************/
-void GWcsHPX::pix2xy(const int& ipix, int* x, int* y)
+void GWcsHPX::pix2xy(const int& ipix, int* x, int* y) const
 {
     // Set x coordinate
     int raw = (ipix & 0x5555) | ((ipix & 0x55550000) >> 15);
@@ -669,7 +669,7 @@ int GWcsHPX::xy2pix(int x, int y) const
  * @exception GException::out_of_range
  *            Pixel index is out of range.
  ***************************************************************************/
-void GWcsHPX::pix2ang_ring(int ipix, double* theta, double* phi)
+void GWcsHPX::pix2ang_ring(int ipix, double* theta, double* phi) const
 {
     // Check if ipix is in range
     if (ipix < 0 || ipix >= m_num_pixels)
@@ -718,7 +718,7 @@ void GWcsHPX::pix2ang_ring(int ipix, double* theta, double* phi)
  * @exception GException::out_of_range
  *            Pixel index is out of range.
  ***************************************************************************/
-void GWcsHPX::pix2ang_nest(int ipix, double* theta, double* phi)
+void GWcsHPX::pix2ang_nest(int ipix, double* theta, double* phi) const
 {
     // Check if ipix is in range
     if (ipix < 0 || ipix >= m_num_pixels)
@@ -895,7 +895,7 @@ int GWcsHPX::ang2pix_z_phi_nest(double z, double phi) const
  *
  * Returns the integer \a n, which fulfills \a n*n <= arg < (n+1)*(n+1).
  ***************************************************************************/
-unsigned int GWcsHPX::isqrt(unsigned int arg)
+unsigned int GWcsHPX::isqrt(unsigned int arg) const
 {
     // Return
     return unsigned(sqrt(arg+0.5));
