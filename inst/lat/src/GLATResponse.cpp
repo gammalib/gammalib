@@ -54,7 +54,6 @@
 /* __ Debug definitions __________________________________________________ */
 #define G_DUMP_MEAN_PSF  1                    //!< Dump mean PSF allocation
 #define G_DEBUG_MEAN_PSF 0                    //!< Debug mean PSF computation
-#define G_FORCE_MEAN_PSF 0                    //!< Use mean PSF computation
 
 /* __ Constants __________________________________________________________ */
 

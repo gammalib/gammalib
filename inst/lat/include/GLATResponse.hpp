@@ -74,6 +74,8 @@ public:
     GLATPsf*    psf(const int& index) const;
     GLATEdisp*  edisp(const int& index) const;
     void        save(const std::string& rspname) const;
+    bool        force_mean(void) { return m_force_mean; }
+    void        force_mean(const bool& value) { m_force_mean=value; }
 
     // Reponse methods
     double irf(const GLATEventAtom& event, const GModel& model,
