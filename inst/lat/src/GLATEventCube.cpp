@@ -354,6 +354,62 @@ GSkymap* GLATEventCube::diffrsp(const int& index) const
 }
 
 
+/***********************************************************************//**
+ * @brief Computes the maximum radius (in degrees) around a given source
+ *        direction that fits spatially into the event cube
+ *
+ * @param[in] srcDir Source direction.
+ *
+ * By computing the sky directions of the event cube boundaries, the maximum
+ * radius is computed that fits fully within the event cube. This method is
+ * used for PSF normalization.
+ ***************************************************************************/
+double GLATEventCube::maxrad(const GSkyDir& srcDir) const
+{
+    // Initialise radius
+    double radius = 180.0;
+
+    // Move along upper edge in longitude
+    int iy = 0;
+    for (int ix = 0; ix < nx(); ++ix) {
+        GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
+        double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
+        if (distance < radius)
+            radius = distance;
+    }
+
+    // Move along lower edge in longitude
+    iy = ny()-1;
+    for (int ix = 0; ix < nx(); ++ix) {
+        GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
+        double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
+        if (distance < radius)
+            radius = distance;
+    }
+
+    // Move along left edge in latitude
+    int ix = 0;
+    for (int iy = 0; iy < ny(); ++iy) {
+        GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
+        double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
+        if (distance < radius)
+            radius = distance;
+    }
+
+    // Move along right edge in latitude
+    ix = nx()-1;
+    for (int iy = 0; iy < ny(); ++iy) {
+        GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
+        double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
+        if (distance < radius)
+            radius = distance;
+    }
+
+    // Return radius
+    return radius;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =

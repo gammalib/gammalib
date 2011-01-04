@@ -65,6 +65,7 @@ public:
     GEbounds&   ebds(void) { return m_ebds; }
     GGti&       gti(void) { return m_gti; }
     GTime&      time(void) { return m_time; }
+    GSkymap&    map(void) { return m_map; }
     double      ontime(void) { return m_ontime; }
     int         nx(void) const { return m_map.nx(); }
     int         ny(void) const { return m_map.ny(); }
@@ -74,6 +75,7 @@ public:
     std::string diffname(const int& index) const;
     GSkymap*    diffrsp(const int& index) const;
     GNodeArray* enodes(void) { return &m_enodes; }
+    double      maxrad(const GSkyDir& dir) const;
 
 protected:
     // Protected methods
