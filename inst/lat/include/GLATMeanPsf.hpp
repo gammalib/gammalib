@@ -56,6 +56,7 @@ public:
 
     // Operators
     GLATMeanPsf& operator= (const GLATMeanPsf& cube);
+    double       operator() (const double& offset, const double& logE);
 
     // Methods
     void         clear(void);
@@ -75,16 +76,19 @@ public:
 
 private:
     // Methods
-    void init_members(void);
-    void copy_members(const GLATMeanPsf& psf);
-    void free_members(void);
-    void set_offsets(void);
+    void   init_members(void);
+    void   copy_members(const GLATMeanPsf& psf);
+    void   free_members(void);
+    void   set_offsets(void);
+    void   set_map_corrections(const GLATObservation& obs);
+    double integral(const double& radmax, const double& logE);
     
     // Protected members
     std::string          m_name;         //!< Source name for mean PSF
     GSkyDir              m_dir;          //!< Source direction for mean PSF
     std::vector<double>  m_psf;          //!< Mean PSF values
     std::vector<double>  m_exposure;     //!< Mean exposure
+    std::vector<double>  m_mapcorr;      //!< Map corrections
     GNodeArray           m_offset;       //!< Offsets of mean PSF
     GNodeArray           m_energy;       //!< log10(energy) of mean PSF
     double               m_theta_max;    //!< Maximum inclination angle (default 70 deg)
@@ -92,6 +96,8 @@ private:
     // Bi-linear interpolation data
     double               m_last_energy;  //!< Last requested logE value
     double               m_last_offset;  //!< Last requested offset value
+    int                  m_inx1_exp;     //!< Exposure index 1
+    int                  m_inx2_exp;     //!< Exposure index 2
     int                  m_inx1;         //!< Index 1
     int                  m_inx2;         //!< Index 2
     int                  m_inx3;         //!< Index 3
