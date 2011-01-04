@@ -90,14 +90,15 @@ private:
     void free_members(void);
 
     // Private members
-    std::string               m_caldb;    //!< Name of or path to the calibration database
-    std::string               m_rspname;  //!< Name of the instrument response
-    bool                      m_hasfront; //!< Front IRF loaded?
-    bool                      m_hasback;  //!< Back IRF loaded?
-    std::vector<GLATAeff*>    m_aeff;     //!< Effective areas
-    std::vector<GLATPsf*>     m_psf;      //!< Point spread functions
-    std::vector<GLATEdisp*>   m_edisp;    //!< Energy dispersions
-    std::vector<GLATMeanPsf*> m_ptsrc;    //!< Mean PSFs for point sources
+    std::string               m_caldb;      //!< Name of or path to the calibration database
+    std::string               m_rspname;    //!< Name of the instrument response
+    bool                      m_hasfront;   //!< Front IRF loaded?
+    bool                      m_hasback;    //!< Back IRF loaded?
+    bool                      m_force_mean; //!< Use mean PSF in any case
+    std::vector<GLATAeff*>    m_aeff;       //!< Effective areas
+    std::vector<GLATPsf*>     m_psf;        //!< Point spread functions
+    std::vector<GLATEdisp*>   m_edisp;      //!< Energy dispersions
+    std::vector<GLATMeanPsf*> m_ptsrc;      //!< Mean PSFs for point sources
 };
 
 #endif /* GLATRESPONSE_HPP */

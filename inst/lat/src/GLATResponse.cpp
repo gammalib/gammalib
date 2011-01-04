@@ -323,11 +323,7 @@ double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
 
     // ... otherwise check if model is a point source. If this is true
     // then return response from mean PSF
-    #if G_DEBUG_MEAN_PSF || G_FORCE_MEAN_PSF
-    if (model.spatial()->isptsource()) {
-    #else
-    else if (model.spatial()->isptsource()) {
-    #endif
+    if ((idiff == -1 || m_force_mean) && model.spatial()->isptsource()) {
 
         // Search for mean PSF
         int ipsf = -1;
@@ -391,11 +387,7 @@ double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
     } // endif: model was point source
 
     // ... otherwise throw an exception
-    #if G_DEBUG_MEAN_PSF || G_FORCE_MEAN_PSF
-    else if (idiff == -1)
-    #else
-    else
-    #endif
+    if ((idiff == -1) && !model.spatial()->isptsource())
         throw GLATException::diffuse_not_found(G_IRF_BIN, model.name());
 
     // Return IRF value
@@ -646,8 +638,9 @@ void GLATResponse::init_members(void)
     // Initialise members
     m_caldb.clear();
     m_rspname.clear();
-    m_hasfront = false;
-    m_hasback  = false;
+    m_hasfront   = false;
+    m_hasback    = false;
+    m_force_mean = false;
     m_aeff.clear();
     m_psf.clear();
     m_edisp.clear();
@@ -671,14 +664,15 @@ void GLATResponse::init_members(void)
 void GLATResponse::copy_members(const GLATResponse& rsp)
 {
     // Copy members
-    m_caldb    = rsp.m_caldb;
-    m_rspname  = rsp.m_rspname;
-    m_hasfront = rsp.m_hasfront;
-    m_hasback  = rsp.m_hasback;
-    m_aeff     = rsp.m_aeff;
-    m_psf      = rsp.m_psf;
-    m_edisp    = rsp.m_edisp;
-    m_ptsrc    = rsp.m_ptsrc;
+    m_caldb      = rsp.m_caldb;
+    m_rspname    = rsp.m_rspname;
+    m_hasfront   = rsp.m_hasfront;
+    m_hasback    = rsp.m_hasback;
+    m_force_mean = rsp.m_force_mean;
+    m_aeff       = rsp.m_aeff;
+    m_psf        = rsp.m_psf;
+    m_edisp      = rsp.m_edisp;
+    m_ptsrc      = rsp.m_ptsrc;
 
     // Return
     return;
