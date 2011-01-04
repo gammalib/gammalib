@@ -63,6 +63,7 @@ def analyse_binned(xmlname):
     lat = GLATObservation()
     lat.load_binned("data/srcmap.fits", "data/binned_expmap.fits", "data/ltcube.fits");
     lat.response("P6_v3_diff","irf");
+    lat.response().force_mean(True);
 
     # Append LAT observation to container
     obs.append(lat)
