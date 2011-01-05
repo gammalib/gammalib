@@ -281,6 +281,15 @@ double GLATResponse::irf(const GLATEventAtom& event, const GModel& model,
  * PSF is allocated for the source and the response is computed from the
  * mean PSF. Otherwise an GLATException::diffuse_not_found exception is
  * thrown.
+ *
+ * @todo Extract event cube from observation. We do not need the cube
+ *       pointer in the event anymore.
+ * @todo Implement more efficient method for response search (name search is
+ *       not very rapid).
+ * @todo Instead of calling "offset = event.dir().dist_deg(srcDir)" we can
+ *       precompute and store for each PSF the offsets. This should save
+ *       quite some time since the distance computation is time
+ *       consuming.
  ***************************************************************************/
 double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
                          const GEnergy& srcEng, const GTime& srcTime,
@@ -362,13 +371,10 @@ double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
         // Get PSF value
         GSkyDir srcDir   = m_ptsrc[ipsf]->dir();
         double  offset   = event.dir().dist_deg(srcDir);
-        //double  psf      = m_ptsrc[ipsf]->psf(offset, srcEng.log10MeV());
-        //double  exposure = m_ptsrc[ipsf]->exposure(srcEng.log10MeV());
-        double  psf      = (*m_ptsrc[ipsf])(offset, srcEng.log10MeV());
+        double  mean_psf = (*m_ptsrc[ipsf])(offset, srcEng.log10MeV()) / (event.ontime());
 
         // Debug option: compare mean PSF to diffuse response
         #if G_DEBUG_MEAN_PSF
-        double mean_psf = psf / (event.ontime());
         std::cout << "Energy=" << srcEng.MeV();
         std::cout << " MeanPsf=" << mean_psf;
         std::cout << " DiffusePsf=" << rsp;
@@ -380,8 +386,8 @@ double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
         std::cout << std::endl;
         #endif
 
-        // Compute response
-        rsp = psf / (event.ontime());
+        // Set response
+        rsp = mean_psf;
 
     } // endif: model was point source
 

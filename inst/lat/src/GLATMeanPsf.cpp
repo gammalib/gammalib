@@ -652,7 +652,7 @@ void GLATMeanPsf::free_members(void)
  * @brief Set array of offset values in degrees
  *
  * The array of offset values defines the points at with the mean PSF will
- * be evaluated and stored.
+ * be evaluated and stored. The array is logarithmically spaced.
  ***************************************************************************/
 void GLATMeanPsf::set_offsets(void)
 {
@@ -679,8 +679,12 @@ void GLATMeanPsf::set_offsets(void)
  *
  * @param[in] obs LAT observation.
  *
- * Sets up a vector of energy dependent corrections that assure that the
+ * Sets up a vector of energy dependent corrections that assures that the
  * integral over the PSF in a specific event cube is correctly normalised.
+ * For this purpose the PSF is integrated over a radius that fully lies
+ * within the event cube and devided by the PSF pixel sum within this radius.
+ * The map corrections are mainly important at high energies where the
+ * PSF size can become comparable to the pixel size.
  *
  * @todo We can also implement a method for event atoms, yet it is not clear
  *       whether we really need this.
