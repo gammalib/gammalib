@@ -1,9 +1,19 @@
+2011-01-06  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+        * Version 0.4.4 released
+        ========================
+
+        Tag sources with GammaLib-00-04-04
+        Clean up response interface
+        Correct some bugs and enhance some classes
+        Correct and validate Fermi-LAT interface for binned analysis
+
 2010-12-20  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.4.3 released
         ========================
 
-        Tag sources with GammaLib-00-04-03        
+        Tag sources with GammaLib-00-04-03
         Add CSV Table interface
         Add more source models
         First working Fermi-LAT interface for binned analysis
