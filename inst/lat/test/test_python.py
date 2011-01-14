@@ -168,8 +168,8 @@ if __name__ == '__main__':
     #extract_data("data/source_model.xml")
 
     # Analyse data
-    #analyse_unbinned("data/source_model.xml")
-    analyse_binned("data/source_model.xml")   # Original
+    analyse_unbinned("data/source_model.xml")
+    #analyse_binned("data/source_model.xml")   # Original
     #analyse_binned("data/source_model2.xml")  # Powerlaw for extragal. diffuse
     #analyse_binned("data/source_model3.xml")  # No Crab, Powerlaw for extragal. diffuse
     #analyse_binned("data/source_model4.xml")  # No Crab, no extragal. diffuse
