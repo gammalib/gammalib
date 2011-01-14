@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GModel.i  -  Model class SWIG interface                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -41,6 +41,7 @@ public:
     int             size(void) const { return m_npars; }
     std::string     name(void) const { return m_name; }
     void            name(const std::string& name) { m_name=name; return; }
+    void            instruments(const std::string& instruments);
     GModelSpatial*  spatial(void) const { return m_spatial; }
     GModelSpectral* spectral(void) const { return m_spectral; }
     GModelTemporal* temporal(void) const { return m_temporal; }

@@ -20,6 +20,7 @@
 #define GMODEL_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <vector>
 #include <iostream>
 #include "GLog.hpp"
 #include "GModelPar.hpp"
@@ -87,6 +88,7 @@ public:
     int             size(void) const { return m_npars; }
     std::string     name(void) const { return m_name; }
     void            name(const std::string& name) { m_name=name; return; }
+    void            instruments(const std::string& instruments);
     GModelSpatial*  spatial(void) const { return m_spatial; }
     GModelSpectral* spectral(void) const { return m_spectral; }
     GModelTemporal* temporal(void) const { return m_temporal; }
@@ -115,12 +117,13 @@ protected:
                              const GObservation& obs, bool grad = false);
 
     // Proteced data members
-    std::string     m_name;          //!< Model name
-    int             m_npars;         //!< Total number of model parameters
-    GModelPar**     m_par;           //!< Pointers to all model parameters
-    GModelSpatial*  m_spatial;       //!< Spatial model
-    GModelSpectral* m_spectral;      //!< Spectral model
-    GModelTemporal* m_temporal;      //!< Temporal model
+    std::string              m_name;          //!< Model name
+    std::vector<std::string> m_instruments;   //!< Instruments to which model applies
+    int                      m_npars;         //!< Total number of model parameters
+    GModelPar**              m_par;           //!< Pointers to all model parameters
+    GModelSpatial*           m_spatial;       //!< Spatial model
+    GModelSpectral*          m_spectral;      //!< Spectral model
+    GModelTemporal*          m_temporal;      //!< Temporal model
 };
 
 #endif /* GMODEL_HPP */
