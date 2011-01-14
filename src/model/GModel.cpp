@@ -265,6 +265,32 @@ GModel* GModel::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Set instruments to which model applies
+ *
+ * @param[in] instruments String of instruments.
+ *
+ * Sets the instruments to which the model applies from a comma separated
+ * list of strings. If the instrument string is empty the model is considered
+ * to apply to all instruments.
+ ***************************************************************************/
+void GModel::instruments(const std::string& instruments)
+{
+    // Clear instruments vector
+    m_instruments.clear();
+
+    // Extract instruments
+    std::vector<std::string> inst = split(instruments, ",");
+
+    // Attach all instruments
+    for (int i = 0; i < inst.size(); ++i)
+        m_instruments.push_back(toupper(strip_whitespace(inst[i])));
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Returns value of source model
  *
  * @param[in] srcDir True photon direction.
@@ -363,14 +389,38 @@ double GModel::eval_gradients(const GEvent& event, const GObservation& obs)
 /***********************************************************************//**
  * @brief Verifies if model is valid for a given instrument
  *
- * @param[in] name Instrument name for which validity is to be checked.
+ * @param[in] name Instrument name.
  *
- * @todo Implement method (dummy method always returns true)
+ * Checks if specified instrument name is in list of applicable instruments.
+ * If the list of applicable instruments is empty the model applies to all
+ * possible instruments.
  ***************************************************************************/
 bool GModel::isvalid(const std::string& name) const
 {
+    // Initialise validity
+    bool valid = true;
+
+    // Check if model applies to instrument
+    if (m_instruments.size() > 0) {
+
+        // Convert instrument name to upper case
+        std::string uname = toupper(name);
+
+        // Initialise validity flag
+        valid = false;
+
+        // Check if name is in list
+        for (int i = 0; i < m_instruments.size(); ++i) {
+            if (uname == m_instruments[i]) {
+                valid = true;
+                break;
+            }
+        }
+
+    }
+
     // Return
-    return true;
+    return valid;
 }
 
 
@@ -390,6 +440,16 @@ std::string GModel::print(void) const
     // Append header
     result.append("=== GModel ===");
     result.append("\n"+parformat("Name")+name());
+    result.append("\n"+parformat("Instruments"));
+    if (m_instruments.size() > 0) {
+        for (int i = 0; i < m_instruments.size(); ++i) {
+            if (i > 0)
+                result.append(", ");
+            result.append(m_instruments[i]);
+        }
+    }
+    else
+        result.append("all");
     result.append("\n"+parformat("Number of parameters")+str(size()));
     result.append("\n"+parformat("Number of spatial par's")+str(n_spatial));
     int i;
@@ -423,6 +483,7 @@ void GModel::init_members(void)
 {
     // Initialise members
     m_name.clear();
+    m_instruments.clear();
     m_npars    = 0;
     m_par      = NULL;
     m_spatial  = NULL;
@@ -442,8 +503,9 @@ void GModel::init_members(void)
 void GModel::copy_members(const GModel& model)
 {
     // Copy attributes
-    m_name  = model.m_name;
-    m_npars = model.m_npars;
+    m_name        = model.m_name;
+    m_instruments = model.m_instruments;
+    m_npars       = model.m_npars;
 
     // Clone spatial and spectral models
     m_spatial  = (model.m_spatial  != NULL) ? model.m_spatial->clone()  : NULL;
