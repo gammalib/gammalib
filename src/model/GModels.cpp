@@ -332,6 +332,9 @@ void GModels::read(const GXml& xml)
         // Set model name
         model.name(src->attribute("name"));
 
+        // Set instruments
+        model.instruments(src->attribute("instrument"));
+
         // Append model
         append(model);
 
@@ -497,6 +500,16 @@ std::string GModels::print(void) const
         result.append(ptr->temporal()->type()+" ");
         result.append(ptr->spectral()->type()+" ");
         result.append(ptr->spatial()->type());
+        result.append("\n"+parformat("Instruments"));
+        if (ptr->m_instruments.size() > 0) {
+            for (int i = 0; i < ptr->m_instruments.size(); ++i) {
+                if (i > 0)
+                    result.append(", ");
+                result.append(ptr->m_instruments[i]);
+            }
+        }
+        else
+            result.append("all");
         for (int j = 0; j < ptr->size(); ++j)
             result.append("\n"+(*ptr)(j).print());
     }
