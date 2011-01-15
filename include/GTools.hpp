@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.hpp  -  GammaLib tools                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -57,6 +57,7 @@ std::string              str(const unsigned long& value);
 std::string              str(const long long& value);
 std::string              str(const float& value);
 std::string              str(const double& value);
+char*                    tochar(const std::string& arg);
 short                    toshort(const std::string& arg);
 unsigned short           toushort(const std::string& arg);
 int                      toint(const std::string& arg);

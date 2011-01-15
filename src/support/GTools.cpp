@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTools.cpp  -  GammaLib tools                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -193,6 +193,30 @@ std::string str(const double& value)
     std::ostringstream s_value;
     s_value << value;
     return  s_value.str();
+}
+
+
+/***********************************************************************//**
+ * @brief Convert string to C string
+ *
+ * @param[in] arg String to be converted.
+ *
+ * Allocates a C string with the content of a C++ string.
+ ***************************************************************************/
+char* tochar(const std::string& arg)
+{
+    // Allocate C string
+    char* str = new char[arg.length()+1];
+
+    // Copy characters
+    for (size_t i = 0; i < arg.length(); ++i)
+        str[i] = arg[i];
+
+    // Set line end character
+    str[arg.length()] = '\0';
+
+    // Return C string
+    return str;
 }
 
 
