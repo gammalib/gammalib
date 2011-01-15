@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GMatrix.i  -  Matrix class SWIG file                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2009 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -13,6 +13,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GMatrix.hpp"
+#include "GTools.hpp"
 %}
 
 %feature("notabstract") GMatrix;
@@ -68,13 +69,10 @@ public:
  ***************************************************************************/
 %extend GMatrix {
     char *__str__() {
-        static char str_buffer[100001];
         std::ostringstream buffer;
         buffer << *self;
         std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 100001);
-        str_buffer[100000] = '\0';
-        return str_buffer;
+        return tochar(str);
     }
     double __getslice__(int row, int col) {
         if (row >=0 && row < (int)self->rows() && col >= 0 && col < (int)self->cols())

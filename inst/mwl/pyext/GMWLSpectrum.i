@@ -59,10 +59,6 @@ public:
  * @brief GMWLSpectrum class extension
  ***************************************************************************/
 %extend GMWLSpectrum {
-    char *__str__() {
-        static std::string result = self->print();
-        return ((char*)result.c_str());
-    }
     GMWLSpectrum copy() {
         return (*self);
     }

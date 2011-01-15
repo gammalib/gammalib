@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GObservations.i  -  Observations container class SWIG interface     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,6 +18,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GObservations.hpp"
+#include "GTools.hpp"
 %}
 
 
@@ -50,8 +51,7 @@ public:
  ***************************************************************************/
 %extend GObservations {
     char *__str__() {
-        static std::string result = self->print();
-        return ((char*)result.c_str());
+        return tochar(self->print());
     }
     GObservation& __getitem__(int index) {
     if (index >= 0 && index < self->size())

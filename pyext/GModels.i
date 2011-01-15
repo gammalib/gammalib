@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModels.i  -  Model container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,6 +18,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModels.hpp"
+#include "GTools.hpp"
 %}
 
 
@@ -54,8 +55,7 @@ public:
  ***************************************************************************/
 %extend GModels {
     char *__str__() {
-        static std::string result = self->print();
-        return ((char*)result.c_str());
+        return tochar(self->print());
     }
     GModel* __getitem__(int index) {
     if (index >= 0 && index < self->size())

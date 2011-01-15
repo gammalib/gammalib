@@ -18,6 +18,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModel.hpp"
+#include "GTools.hpp"
 %}
 
 
@@ -60,8 +61,7 @@ public:
  ***************************************************************************/
 %extend GModel {
     char *__str__() {
-        static std::string result = self->print();
-        return ((char*)result.c_str());
+        return tochar(self->print());
     }
     GModelPar __getitem__(int index) {
     if (index >= 0 && index < self->size())

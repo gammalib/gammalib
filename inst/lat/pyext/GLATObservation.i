@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GLATObservation.i  -  LAT Observation class SWIG interface       *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
+ *  copyright : (C) 2008-2011 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -57,10 +57,6 @@ public:
     GLATObservation(const GObservation& obs) {
         GLATObservation* lat = (GLATObservation*)&obs;
         return lat;
-    }
-    char *__str__() {
-        static std::string result = self->print();
-        return ((char*)result.c_str());
     }
     GLATObservation copy() {
         return (*self);

@@ -57,10 +57,6 @@ public:
  * @brief GMWLObservation class extension
  ***************************************************************************/
 %extend GMWLObservation {
-    char *__str__() {
-        static std::string result = self->print();
-        return ((char*)result.c_str());
-    }
     GMWLObservation copy() {
         return (*self);
     }

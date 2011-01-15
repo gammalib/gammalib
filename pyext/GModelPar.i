@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GModelPar.i  -  Model parameter class SWIG interface         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,6 +18,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModelPar.hpp"
+#include "GTools.hpp"
 %}
 
 
@@ -74,8 +75,7 @@ public:
  ***************************************************************************/
 %extend GModelPar {
     char *__str__() {
-        static std::string result = self->print();
-        return ((char*)result.c_str());
+        return tochar(self->print());
     }
     GModelPar copy() {
         return (*self);

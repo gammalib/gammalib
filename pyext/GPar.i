@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GPar.i - Application parameter class SWIG file            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,6 +18,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GPar.hpp"
+#include "GTools.hpp"
 %}
 //%include stl.i
 
@@ -63,13 +64,10 @@ public:
  ***************************************************************************/
 %extend GPar {
     char *__str__() {
-        static char str_buffer[100001];
         std::ostringstream buffer;
         buffer << *self;
         std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 100001);
-        str_buffer[100000] = '\0';
-        return str_buffer;
+        return tochar(str);
     }
     GPar copy() {
         return (*self);

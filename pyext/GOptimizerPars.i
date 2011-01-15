@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GOptimizerPars.i  -  Parameter container class SWIG interface      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,6 +18,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GOptimizerPars.hpp"
+#include "GTools.hpp"
 %}
 
 
@@ -45,13 +46,10 @@ public:
  ***************************************************************************/
 %extend GOptimizerPars {
     char *__str__() {
-        static char str_buffer[10001];
         std::ostringstream buffer;
         buffer << *self;
         std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 10001);
-        str_buffer[10000] = '\0';
-        return str_buffer;
+        return tochar(str);
     }
     GOptimizerPars copy() {
         return (*self);

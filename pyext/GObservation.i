@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GObservation.i  -  Observation abstract base class SWIG interface    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,6 +18,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GObservation.hpp"
+#include "GTools.hpp"
 %}
 
 
@@ -73,7 +74,6 @@ public:
  ***************************************************************************/
 %extend GObservation {
     char *__str__() {
-        static std::string result = self->print();
-        return ((char*)result.c_str());
+        return tochar(self->print());
     }
 };

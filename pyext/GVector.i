@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GVector.i - Vector class SWIG file                    *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -13,6 +13,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GVector.hpp"
+#include "GTools.hpp"
 %}
 
 
@@ -48,8 +49,7 @@ public:
  ***************************************************************************/
 %extend GVector {
     char *__str__() {
-        static std::string result = self->print();
-        return ((char*)result.c_str());
+        return tochar(self->print());
     }
     double __getitem__(int index) {
         if (index >= 0 && index < (int)self->size())
