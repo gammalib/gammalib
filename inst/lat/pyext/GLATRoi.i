@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATRoi.i  -  LAT region of interest class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -53,3 +53,13 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GLATRoi type casts
+ ***************************************************************************/
+%inline %{
+    GLATRoi* cast_GLATRoi(GRoi* roi) {
+        return dynamic_cast<GLATRoi*>(roi);
+    }
+%}

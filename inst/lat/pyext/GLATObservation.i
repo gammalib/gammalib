@@ -54,11 +54,23 @@ public:
  * @brief GLATObservation class extension
  ***************************************************************************/
 %extend GLATObservation {
+/*
     GLATObservation(const GObservation& obs) {
         GLATObservation* lat = (GLATObservation*)&obs;
         return lat;
     }
+*/
     GLATObservation copy() {
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GLATObservation type casts
+ ***************************************************************************/
+%inline %{
+    GLATObservation* cast_GLATObservation(GObservation* obs) {
+        return dynamic_cast<GLATObservation*>(obs);
+    }
+%}

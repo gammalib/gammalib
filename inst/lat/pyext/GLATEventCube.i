@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GLATEventCube.i  -  LAT event cube class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -62,10 +62,10 @@ public:
 /***********************************************************************//**
  * @brief GLATEventCube class extension
  *
- * The GLATEventCube methods perform type conversion.
  * The __getitem__ method makes the event cube iteratable.
  ***************************************************************************/
 %extend GLATEventCube {
+/*
     GLATEventCube(const GEvents& events) {
         if (!events.iscube())
             throw GException::bad_type("GLATEventCube(GEvents&)",
@@ -77,6 +77,7 @@ public:
         GLATEventCube* cube = (GLATEventCube*)&events;
         return cube;
     }
+*/
     GLATEventBin* __getitem__(int index) {
     if (index >= 0 && index < self->size())
         return self->pointer(index);
@@ -87,3 +88,19 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GLATEventCube type casts
+ ***************************************************************************/
+%inline %{
+    GLATEventCube* cast_GLATEventCube(GEvents* events) {
+        if (!events->iscube())
+            throw GException::bad_type("cast_GLATEventCube(GEvents*)",
+                                       "GEvents not an event cube");            
+        return dynamic_cast<GLATEventCube*>(events);
+    }
+    GLATEventCube* cast_GLATEventCube(GEventCube* events) {
+        return dynamic_cast<GLATEventCube*>(events);
+    }
+%}

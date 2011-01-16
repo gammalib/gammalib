@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GLATInstDir.i  -  LAT instrument direction class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -65,3 +65,13 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GLATInstDir type casts
+ ***************************************************************************/
+%inline %{
+    GLATInstDir* cast_GLATInstDir(GInstDir* dir) {
+        return dynamic_cast<GLATInstDir*>(dir);
+    }
+%}

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GLATEventBin.i  -  LAT event bin class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -62,6 +62,7 @@ public:
  * @brief GLATEventBin class extension
  ***************************************************************************/
 %extend GLATEventBin {
+/*
     GLATEventBin(const GEvent& event) {
         if (!event.isbin())
             throw GException::bad_type("GLATEventBin(GEvent&)",
@@ -73,7 +74,24 @@ public:
         GLATEventBin* bin = (GLATEventBin*)&event;
         return bin;
     }
+*/
     GLATEventBin copy() {
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GLATEventBin type casts
+ ***************************************************************************/
+%inline %{
+    GLATEventBin* cast_GLATEventBin(GEvent* event) {
+        if (!event->isbin())
+            throw GException::bad_type("cast_GLATEventBin(GEvent*)",
+                                       "GEvent not an event bin");            
+        return dynamic_cast<GLATEventBin*>(event);
+    }
+    GLATEventBin* cast_GLATEventBin(GEventBin* event) {
+        return dynamic_cast<GLATEventBin*>(event);
+    }
+%}

@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATResponse.i  -  Fermi LAT Response class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -75,3 +75,13 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GLATResponse type casts
+ ***************************************************************************/
+%inline %{
+    GLATResponse* cast_GLATResponse(GResponse* rsp) {
+        return dynamic_cast<GLATResponse*>(rsp);
+    }
+%}
