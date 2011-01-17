@@ -20,7 +20,7 @@ def analyse_unbinned(xmlname):
     # Load LAT observation
     lat = GLATObservation()
     lat.load_unbinned("data/ft1.fits", "data/ft2.fits", "data/ltcube.fits");
-    lat.response("P6_v3_diff","irf");
+    lat.response("P6_v3_diff", "/usr/local/gamma/share/caldb/lat");
 
     # Setup ROI covered by data
     instDir = GLATInstDir()
@@ -62,7 +62,7 @@ def analyse_binned(xmlname):
     # Load LAT observation
     lat = GLATObservation()
     lat.load_binned("data/srcmap.fits", "data/binned_expmap.fits", "data/ltcube.fits");
-    lat.response("P6_v3_diff","irf");
+    lat.response("P6_v3_diff", "/usr/local/gamma/share/caldb/lat");
     lat.response().force_mean(True);
 
     # Append LAT observation to container
@@ -75,12 +75,10 @@ def analyse_binned(xmlname):
     log = GLog()
     log.cout(True)
     opt = GOptimizerLM(log)
-    #opt.lambda_inc(10.0)
-    #opt.lambda_dec(0.1)
     obs.optimize(opt)
     print obs
     print opt
-    
+
     # Plot residuals
     plot_residuals(obs)
 
@@ -101,16 +99,16 @@ def plot_residuals(obs):
 
     # Loop over observations
     for run in obs:
-    
+
         # Get event cube
-        cube = GLATEventCube(run.events())
-    
+        cube = cast_GLATEventCube(run.events())
+
         # Create energy axis
         energy = []
         ebds   = cube.ebds()
         for i in range(ebds.size()):
             energy.append(ebds.elogmean(i).MeV())
-    
+
         # Create spectrum
         counts = [0.0 for i in range(ebds.size())]
         for bin in cube:
@@ -168,8 +166,8 @@ if __name__ == '__main__':
     #extract_data("data/source_model.xml")
 
     # Analyse data
-    analyse_unbinned("data/source_model.xml")
-    #analyse_binned("data/source_model.xml")   # Original
+    #analyse_unbinned("data/source_model.xml")
+    analyse_binned("data/source_model.xml")   # Original
     #analyse_binned("data/source_model2.xml")  # Powerlaw for extragal. diffuse
     #analyse_binned("data/source_model3.xml")  # No Crab, Powerlaw for extragal. diffuse
     #analyse_binned("data/source_model4.xml")  # No Crab, no extragal. diffuse
