@@ -115,6 +115,7 @@
 #include "GGti.i"
 #include "GPointing.i"
 #include "GResponse.i"
+#include "GPhoton.i"
 
 /* __ Model handling _____________________________________________________ */
 #include "GModels.i"
