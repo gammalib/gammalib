@@ -60,7 +60,7 @@ def test_fits():
     img7.extname("Short")
     img8.extname("ULong")
     img9.extname("UShort")
-    
+
     # Append images to FITS file
     fits.append(img1)
     fits.append(img2)
@@ -137,6 +137,7 @@ def test_fits():
     fits.append(tbl_bin)
 
     # Save FITS file
+    #print fits
     fits.save()
 
     # Close FITS file
@@ -147,17 +148,20 @@ def test_fits():
 
     # Get double precision image, take square root of pixel and save in
     # another file
-    img_double = GFitsImageDouble(fits.image("Double"))
+    img_double = cast_GFitsImageDouble(fits.image("Double"))
     for x in range(nx):
         for y in range(ny):
             img_double[x,y] = sqrt(img_double[x,y])
-    #img_byte = GFitsImageByte(fits.image("Double"))
+    #img_byte = cast_GFitsImageByte(fits.image("Double"))
 
     # Save into another FITS file
     fits.saveto(file2)
 
     # Close FITS file
     fits.close()
+
+    # Return
+    return
 
 
 #==============#
@@ -189,7 +193,7 @@ def test_skymap():
         pixels[i]   = i+1.0
         pixels[i,1] = i+1.0 + 1000.0
     pixels.save(file1)
-    
+
     # Load HEALPix skymap
     pixels = GSkymap(file1)
 
@@ -215,7 +219,7 @@ def test_skymap():
             msg = "GSkyDir Trouble with pixel "+str(i)+" ("+str(dra)+ \
                   ","+str(ddec)+")"
             raise RuntimeError("*** TEST ERROR: "+msg)
-    
+
     # Save HEALPix skymap twice. The second saving should fail.
     try:
         pixels.save(file2, True)
@@ -254,6 +258,9 @@ def test_skymap():
     # Dump skymap
     #print pixels
 
+    # Return
+    return
+
 
 #=================#
 # Test Node array #
@@ -287,6 +294,9 @@ def test_node_array():
         x_val.append(x)
         y_val.append(y)
 
+    # Return
+    return
+
 
 #===================#
 # Test LAT response #
@@ -313,6 +323,9 @@ def test_lat_response():
     # Save response
     rsp.save("test_rsp.fits")
 
+    # Return
+    return
+
 
 #======================#
 # Test LAT observation #
@@ -327,6 +340,9 @@ def test_lat_observation():
     #
     #print obs.ft1()
     #print obs.ft2()
+
+    # Return
+    return
 
 
 #===================#
@@ -363,6 +379,9 @@ def test_optimise():
     print opt
     print obs
 
+    # Return
+    return
+
 
 #==========================#
 # Main routine entry point #
@@ -380,11 +399,11 @@ if __name__ == '__main__':
     # Initialise success counter
     tests   = 0
     success = 0
-    
+
     # Perform tests
     test_fits()
     test_skymap()
-#    test_node_array()
+    test_node_array()
 #    test_lat_response()
 #    test_lat_observation()
 #    test_optimise()
