@@ -403,7 +403,7 @@ if __name__ == '__main__':
     # Perform tests
     test_fits()
     test_skymap()
-    test_node_array()
+#    test_node_array()
 #    test_lat_response()
 #    test_lat_observation()
 #    test_optimise()
