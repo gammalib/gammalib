@@ -24,6 +24,7 @@ sources = GEnergy.cpp \
           GResponse.cpp \
 	  GInstDir.cpp \
 	  GPointing.cpp \
+          GPhoton.cpp \
           GException_obs.cpp
 
 # Build libtool library
