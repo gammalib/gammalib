@@ -24,6 +24,7 @@
 #include <iostream>
 #include <unistd.h>
 #include "GLATLib.hpp"
+#include "GTools.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -34,13 +35,13 @@ const std::string datadir    = "../inst/lat/test/data";
 const std::string lat_caldb  = "../inst/lat/caldb";
 const std::string lat_irf    = "P6_v3_diff";
 const std::string lat_ft1    = datadir+"/ft1.fits";
-const std::string lat_ft2    = "../inst/lat/test/data/ft2.fits";
-const std::string lat_cntmap = "../inst/lat/test/data/cntmap.fits";
-const std::string lat_srcmap = "../inst/lat/test/data/srcmap.fits";
-const std::string lat_expmap = "../inst/lat/test/data/binned_expmap.fits";
-const std::string lat_ltcube = "../inst/lat/test/data/ltcube.fits";
-const std::string lat_xml    = "../inst/lat/test/data/source_model1.xml";
-const double      twopi      =  6.283185307179586476925286766559005768394;
+const std::string lat_ft2    = datadir+"/ft2.fits";
+const std::string lat_cntmap = datadir+"/cntmap.fits";
+const std::string lat_srcmap = datadir+"/srcmap.fits";
+const std::string lat_expmap = datadir+"/binned_expmap.fits";
+const std::string lat_ltcube = datadir+"/ltcube.fits";
+const std::string lat_xml    = datadir+"/source_model1.xml";
+//const double      twopi      =  6.283185307179586476925286766559005768394;
 
 
 /***********************************************************************//**

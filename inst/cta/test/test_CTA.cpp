@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      test_CTA.cpp  -  test CTA classes                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -22,19 +22,22 @@
 #endif
 #include <stdlib.h>
 #include <iostream>
+#include <unistd.h>
 #include "GCTALib.hpp"
+#include "GTools.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
+const std::string datadir    = "../inst/cta/test/data";
 const std::string cta_caldb  = "../inst/cta/caldb";
 const std::string cta_irf    = "kb_E_50h_v3";
-const std::string cta_events = "../inst/cta/test/data/run_00006028_eventlist_reco.fits.gz";
-const std::string cta_cntmap = "../inst/cta/test/data/run_00006028_cntmap.fits.gz";
-const std::string cta_xml    = "../inst/cta/test/data/source1.xml";
-const double twopi           =  6.283185307179586476925286766559005768394;
+const std::string cta_events = datadir+"/run_00006028_eventlist_reco.fits.gz";
+const std::string cta_cntmap = datadir+"/run_00006028_cntmap.fits.gz";
+const std::string cta_xml    = datadir+"/source1.xml";
+//const double twopi           =  6.283185307179586476925286766559005768394;
 
 
 /***********************************************************************//**
@@ -548,12 +551,22 @@ int main(void)
     std::cout << "* CTA instrument specific class testing *" << std::endl;
     std::cout << "*****************************************" << std::endl;
 
+    // Check if data directory exists
+    bool has_data = (access(datadir.c_str(), R_OK) == 0);
+
     // Execute the tests
     test_response();
-    test_unbinned_obs();
-    test_binned_obs();
-    test_unbinned_optimizer();
-    //test_binned_optimizer();  //!< Disable since very slow ...
+
+    // Execute tests requiring data
+    if (has_data) {
+        test_unbinned_obs();
+        test_binned_obs();
+        test_unbinned_optimizer();
+        //test_binned_optimizer();  //!< Disable since very slow ...
+    }
+    else {
+        std::cout << "Skipped several tests since no test data have been found." << std::endl;
+    }
 
     // Return
     return 0;
