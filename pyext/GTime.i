@@ -33,20 +33,6 @@
  * risk of unit errors.
  ***************************************************************************/
 class GTime {
-    // Operator friends
-    /*
-    friend GTime operator+ (const GTime &a, const GTime &b);
-    friend GTime operator- (const GTime &a, const GTime &b);
-    friend GTime operator* (const double &a, const GTime &b);
-    friend GTime operator* (const GTime &a, const double &b);
-    friend bool  operator== (const GTime &a, const GTime &b);
-    friend bool  operator!= (const GTime &a, const GTime &b);
-    friend bool  operator< (const GTime &a, const GTime &b);
-    friend bool  operator<= (const GTime &a, const GTime &b);
-    friend bool  operator> (const GTime &a, const GTime &b);
-    friend bool  operator>= (const GTime &a, const GTime &b);
-    */
-
 public:
     // Constructors and destructors
     GTime(void);
@@ -71,6 +57,36 @@ public:
         return tochar(self->print());
     }
     */
+    GTime __add__(const GTime& time) const {
+        return ((*self) + time);
+    }
+    GTime __sub__(const GTime& time) const {
+        return ((*self) - time);
+    }
+    GTime __mul__(const double& factor) const {
+        return ((*self) * factor);
+    }
+    GTime __div__(const double& factor) const {
+        return ((*self) * (1.0 / factor));
+    }
+    bool __eq__(const GTime& time) const {
+        return ((*self) == time);
+    }
+    bool __ne__(const GTime& time) const {
+        return ((*self) != time);
+    }
+    bool __lt__(const GTime& time) const {
+        return ((*self) < time);
+    }
+    bool __gt__(const GTime& time) const {
+        return ((*self) > time);
+    }
+    bool __lte__(const GTime& time) const {
+        return ((*self) <= time);
+    }
+    bool __gte__(const GTime& time) const {
+        return ((*self) >= time);
+    }
     GTime copy() {
         return (*self);
     }

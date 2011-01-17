@@ -35,17 +35,7 @@
 class GEnergy {
     // Operator friends
     /*
-    friend GEnergy operator+ (const GEnergy &a, const GEnergy &b);
-    friend GEnergy operator- (const GEnergy &a, const GEnergy &b);
-    friend GEnergy operator* (const double &a, const GEnergy &b);
-    friend GEnergy operator* (const GEnergy &a, const double &b);
     friend GEnergy operator/ (const GEnergy &a, const double &b);
-    friend bool    operator== (const GEnergy &a, const GEnergy &b);
-    friend bool    operator!= (const GEnergy &a, const GEnergy &b);
-    friend bool    operator< (const GEnergy &a, const GEnergy &b);
-    friend bool    operator<= (const GEnergy &a, const GEnergy &b);
-    friend bool    operator> (const GEnergy &a, const GEnergy &b);
-    friend bool    operator>= (const GEnergy &a, const GEnergy &b);
     */
 
 public:
@@ -79,6 +69,36 @@ public:
 %extend GEnergy {
     char *__str__() {
         return tochar(self->print());
+    }
+    GEnergy __add__(const GEnergy& eng) const {
+        return ((*self) + eng);
+    }
+    GEnergy __sub__(const GEnergy& eng) const {
+        return ((*self) - eng);
+    }
+    GEnergy __mul__(const double& factor) const {
+        return ((*self) * factor);
+    }
+    GEnergy __div__(const double& factor) const {
+        return ((*self) / factor);
+    }
+    bool __eq__(const GEnergy& eng) const {
+        return ((*self) == eng);
+    }
+    bool __ne__(const GEnergy& eng) const {
+        return ((*self) != eng);
+    }
+    bool __lt__(const GEnergy& eng) const {
+        return ((*self) < eng);
+    }
+    bool __gt__(const GEnergy& eng) const {
+        return ((*self) > eng);
+    }
+    bool __lte__(const GEnergy& eng) const {
+        return ((*self) <= eng);
+    }
+    bool __gte__(const GEnergy& eng) const {
+        return ((*self) >= eng);
     }
     GEnergy copy() {
         return (*self);
