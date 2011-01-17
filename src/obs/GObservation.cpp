@@ -173,8 +173,9 @@ double GObservation::model(const GModels& models, const GEvent& event,
                                                 models.npars());
     #endif
 
-    // Initialise model value
+    // Initialise model value and gradient index
     double model = 0.0;
+    int    igrad = 0;
 
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
@@ -188,17 +189,24 @@ double GObservation::model(const GModels& models, const GEvent& event,
             // Compute value and add to model
             model += ptr->eval_gradients(event, *this);
 
+            // Optionally set gradient vector
+            if (gradient != NULL) {
+                for (int k = 0; k < ptr->size(); ++k, ++igrad) {
+                    double grad        = (*ptr)(k).gradient();
+                    (*gradient)(igrad) = (std::isinf(grad)) ? 0.0 : grad;
+                }
+            }
+                
         } // endif: model was applicable
 
-    } // endfor: looped over models
-
-    // Optionally set gradient vector
-    if (gradient != NULL) {
-        for (int i = 0; i < gradient->size(); ++i) {
-            double grad    = models.par(i)->gradient();
-            (*gradient)(i) = (std::isinf(grad)) ? 0.0 : grad;
+        // ... otherwise set gradient vector to 0
+        else if (gradient != NULL) {
+            for (int k = 0; k < ptr->size(); ++k, ++igrad) {
+                (*gradient)(igrad) = 0.0;
+            }
         }
-    }
+
+    } // endfor: looped over models
 
     // Return
     return model;
