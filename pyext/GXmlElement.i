@@ -60,11 +60,18 @@ public:
 //    char *__str__() {
 //        return tochar(self->print());
 //    }
-    GXmlElement(const GXmlNode& node) {
-        if (node.type() != GXmlNode::NT_ELEMENT)
-            throw GException::xml_bad_node_type("GXmlElement(GXmlNode&)",
+};
+
+
+/***********************************************************************//**
+ * @brief GXmlElement type casts
+ ***************************************************************************/
+%inline %{
+    GXmlElement* cast_GXmlElement(GXmlNode* node) {
+        if (node->type() != GXmlNode::NT_ELEMENT)
+            throw GException::xml_bad_node_type("cast_GXmlElement(GXmlNode*)",
                                                 "",
                                                 "Expecting GXmlElement node.");
-        return (GXmlElement*)&node;
+        return dynamic_cast<GXmlElement*>(node);
     }
-};
+%};

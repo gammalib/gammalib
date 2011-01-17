@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GXmlText.i - XML text node class definition               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -52,11 +52,18 @@ public:
 //    char *__str__() {
 //        return tochar(self->print());
 //    }
-    GXmlText(const GXmlNode& node) {
-        if (node.type() != GXmlNode::NT_TEXT)
-            throw GException::xml_bad_node_type("GXmlText(GXmlNode&)",
+};
+
+
+/***********************************************************************//**
+ * @brief GXmlText type casts
+ ***************************************************************************/
+%inline %{
+    GXmlText* cast_GXmlText(GXmlNode* node) {
+        if (node->type() != GXmlNode::NT_TEXT)
+            throw GException::xml_bad_node_type("cast_GXmlText(GXmlNode*)",
                                                 "",
                                                 "Expecting GXmlText node.");
-        return (GXmlText*)&node;
+        return dynamic_cast<GXmlText*>(node);
     }
-};
+%};

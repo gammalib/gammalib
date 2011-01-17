@@ -52,11 +52,18 @@ public:
 //    char *__str__() {
 //        return tochar(self->print());
 //    }
-    GXmlPI(const GXmlNode& node) {
-        if (node.type() != GXmlNode::NT_PI)
-            throw GException::xml_bad_node_type("GXmlPI(GXmlNode&)",
+};
+
+
+/***********************************************************************//**
+ * @brief GXmlPI type casts
+ ***************************************************************************/
+%inline %{
+    GXmlPI* cast_GXmlPI(GXmlNode* node) {
+        if (node->type() != GXmlNode::NT_PI)
+            throw GException::xml_bad_node_type("cast_GXmlPI(GXmlNode*)",
                                                 "",
                                                 "Expecting GXmlPI node.");
-        return (GXmlPI*)&node;
+        return dynamic_cast<GXmlPI*>(node);
     }
-};
+%};

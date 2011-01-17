@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GEventAtom.i  -  Abstract event atom class python I/F           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -70,15 +70,19 @@ public:
 
 /***********************************************************************//**
  * @brief GEventAtom class extension
- *
- * The GEventAtom method allow for type conversion.
  ***************************************************************************/
 %extend GEventAtom {
-    GEventAtom(const GEvent& event) {
-        if (!events.isatom())
-            throw GException::bad_type("GEventAtom(GEvent&)",
-                                       "GEvent not an event atom");            
-        GEventAtom* atom = (GEventAtom*)&event;
-        return atom;
-    }
 };
+
+
+/***********************************************************************//**
+ * @brief GEventAtom type casts
+ ***************************************************************************/
+%inline %{
+    GEventAtom* cast_GEventAtom(GEvent* event) {
+        if (!event->isatom())
+            throw GException::fits_invalid_type("cast_GEventAtom(GEvent*)",
+                                                "GEvent is not an event atom.");
+        return dynamic_cast<GEventAtom*>(event);
+    }
+%};

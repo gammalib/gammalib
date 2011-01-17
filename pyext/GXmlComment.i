@@ -54,11 +54,18 @@ public:
 //    char *__str__() {
 //        return tochar(self->print());
 //    }
-    GXmlComment(const GXmlNode& node) {
-        if (node.type() != GXmlNode::NT_COMMENT)
-            throw GException::xml_bad_node_type("GXmlComment(GXmlNode&)",
+};
+
+
+/***********************************************************************//**
+ * @brief GXmlComment type casts
+ ***************************************************************************/
+%inline %{
+    GXmlComment* cast_GXmlComment(GXmlNode* node) {
+        if (node->type() != GXmlNode::NT_COMMENT)
+            throw GException::xml_bad_node_type("cast_GXmlComment(GXmlNode*)",
                                                 "",
                                                 "Expecting GXmlComment node.");
-        return (GXmlComment*)&node;
+        return dynamic_cast<GXmlComment*>(node);
     }
-};
+%};

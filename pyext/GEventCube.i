@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GEventCube.i  -  Abstract event cube container class python I/F     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -52,17 +52,9 @@ public:
 /***********************************************************************//**
  * @brief GEventCube class extension
  *
- * The GEventCube method performs type conversion.
  * The __getitem__ method makes the event cube iteratable.
  ***************************************************************************/
 %extend GEventCube {
-    GEventCube(const GEvents& events) {
-        if (!events.iscube())
-            throw GException::bad_type("GEventCube(GEvents&)",
-                                       "GEvents not an event cube");            
-        GEventCube* cube = (GEventCube*)&events;
-        return cube;
-    }
     GEventBin* __getitem__(int index) {
     if (index >= 0 && index < self->size())
         return self->pointer(index);
@@ -70,3 +62,16 @@ public:
         throw GException::out_of_range("__getitem__(int)", index, self->size());
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GEventCube type casts
+ ***************************************************************************/
+%inline %{
+    GEventCube* cast_GEventCube(GEvents* events) {
+        if (!events->iscube())
+            throw GException::fits_invalid_type("cast_GEventCube(GEvents*)",
+                                                "GEvents is not an event cube.");
+        return dynamic_cast<GEventCube*>(events);
+    }
+%};

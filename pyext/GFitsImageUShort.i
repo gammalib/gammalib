@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GFitsImageUShort.i  - FITS unsigned short image class SWIG interface   *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,6 +19,7 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFitsImageUShort.hpp"
 %}
+
 
 /***********************************************************************//**
  * @class GFitsImageUShort
@@ -52,12 +53,6 @@ public:
  * @brief GFitsImageUShort class extension
  ***************************************************************************/
 %extend GFitsImageUShort {
-    GFitsImageUShort(const GFitsImage& image) {
-        if (image.type() != 20)
-            throw GException::fits_invalid_type("GFitsImageUShort(GFitsImage&)",
-                                                "Expecting unsigned short integer image.");
-        return (GFitsImageUShort*)&image;
-    }
     unsigned short __getitem__(int GFitsImageInx[]) {
         if (GFitsImageInx[0] == 1)
             return self->at(GFitsImageInx[1]);
@@ -88,3 +83,16 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GFitsImageUShort type casts
+ ***************************************************************************/
+%inline %{
+    GFitsImageUShort* cast_GFitsImageUShort(GFitsImage* image) {
+        if (image->type() != 20)
+            throw GException::fits_invalid_type("cast_GFitsImageUShort(GFitsImage*)",
+                                                "Expecting unsigned short integer image.");
+        return dynamic_cast<GFitsImageUShort*>(image);
+    }
+%};

@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GFitsImageDouble.i  - FITS double precision image class SWIG interface *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,6 +19,7 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFitsImageDouble.hpp"
 %}
+
 
 /***********************************************************************//**
  * @class GFitsImageDouble
@@ -52,12 +53,6 @@ public:
  * @brief GFitsImageDouble class extension
  ***************************************************************************/
 %extend GFitsImageDouble {
-    GFitsImageDouble(const GFitsImage& image) {
-        if (image.type() != 82)
-            throw GException::fits_invalid_type("GFitsImageDouble(GFitsImage&)",
-                                                "Expecting double precision image.");
-        return (GFitsImageDouble*)&image;
-    }
     double __getitem__(int GFitsImageInx[]) {
         if (GFitsImageInx[0] == 1)
             return self->at(GFitsImageInx[1]);
@@ -88,3 +83,16 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GFitsImageDouble type casts
+ ***************************************************************************/
+%inline %{
+    GFitsImageDouble* cast_GFitsImageDouble(GFitsImage* image) {
+        if (image->type() != 82)
+            throw GException::fits_invalid_type("cast_GFitsImageDouble(GFitsImage*)",
+                                                "Expecting double precision image.");
+        return dynamic_cast<GFitsImageDouble*>(image);
+    }
+%};

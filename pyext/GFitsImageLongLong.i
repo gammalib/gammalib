@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GFitsImageLongLong.i  - FITS long long image class SWIG interface    *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,6 +19,7 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFitsImageLongLong.hpp"
 %}
+
 
 /***********************************************************************//**
  * @class GFitsImageLongLong
@@ -52,12 +53,6 @@ public:
  * @brief GFitsImageLongLong class extension
  ***************************************************************************/
 %extend GFitsImageLongLong {
-    GFitsImageLongLong(const GFitsImage& image) {
-        if (image.type() != 81)
-            throw GException::fits_invalid_type("GFitsImageLongLong(GFitsImage&)",
-                                                "Expecting long long integer image.");
-        return (GFitsImageLongLong*)&image;
-    }
     long long __getitem__(int GFitsImageInx[]) {
         if (GFitsImageInx[0] == 1)
             return self->at(GFitsImageInx[1]);
@@ -88,3 +83,16 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GFitsImageLongLong type casts
+ ***************************************************************************/
+%inline %{
+    GFitsImageLongLong* cast_GFitsImageLongLong(GFitsImage* image) {
+        if (image->type() != 81)
+            throw GException::fits_invalid_type("cast_GFitsImageLongLong(GFitsImage*)",
+                                                "Expecting long long integer image.");
+        return dynamic_cast<GFitsImageLongLong*>(image);
+    }
+%};

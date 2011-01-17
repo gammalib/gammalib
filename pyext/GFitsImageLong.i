@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GFitsImageLong.i  - FITS long integer image class SWIG interface     *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,6 +19,7 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFitsImageLong.hpp"
 %}
+
 
 /***********************************************************************//**
  * @class GFitsImageLong
@@ -52,12 +53,6 @@ public:
  * @brief GFitsImageLong class extension
  ***************************************************************************/
 %extend GFitsImageLong {
-    GFitsImageLong(const GFitsImage& image) {
-        if (image.type() != 41)
-            throw GException::fits_invalid_type("GFitsImageLong(GFitsImage&)",
-                                                "Expecting long integer image.");
-        return (GFitsImageLong*)&image;
-    }
     long __getitem__(int GFitsImageInx[]) {
         if (GFitsImageInx[0] == 1)
             return self->at(GFitsImageInx[1]);
@@ -88,3 +83,16 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GFitsImageLong type casts
+ ***************************************************************************/
+%inline %{
+    GFitsImageLong* cast_GFitsImageLong(GFitsImage* image) {
+        if (image->type() != 41)
+            throw GException::fits_invalid_type("cast_GFitsImageLong(GFitsImage*)",
+                                                "Expecting long integer image.");
+        return dynamic_cast<GFitsImageLong*>(image);
+    }
+%};

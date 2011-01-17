@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GFitsImageFloat.i  - FITS single precision image class SWIG interface  *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,6 +19,7 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFitsImageFloat.hpp"
 %}
+
 
 /***********************************************************************//**
  * @class GFitsImageFloat
@@ -52,12 +53,6 @@ public:
  * @brief GFitsImageFloat class extension
  ***************************************************************************/
 %extend GFitsImageFloat {
-    GFitsImageFloat(const GFitsImage& image) {
-        if (image.type() != 42)
-            throw GException::fits_invalid_type("GFitsImageFloat(GFitsImage&)",
-                                                "Expecting single precision image.");
-        return (GFitsImageFloat*)&image;
-    }
     float __getitem__(int GFitsImageInx[]) {
         if (GFitsImageInx[0] == 1)
             return self->at(GFitsImageInx[1]);
@@ -88,3 +83,16 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GFitsImageFloat type casts
+ ***************************************************************************/
+%inline %{
+    GFitsImageFloat* cast_GFitsImageFloat(GFitsImage* image) {
+        if (image->type() != 42)
+            throw GException::fits_invalid_type("cast_GFitsImageFloat(GFitsImage*)",
+                                                "Expecting single precision image.");
+        return dynamic_cast<GFitsImageFloat*>(image);
+    }
+%};

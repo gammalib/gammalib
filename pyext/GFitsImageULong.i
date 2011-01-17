@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GFitsImageULong.i  - FITS unsigned long image class SWIG interface    *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,6 +19,7 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFitsImageULong.hpp"
 %}
+
 
 /***********************************************************************//**
  * @class GFitsImageULong
@@ -52,12 +53,6 @@ public:
  * @brief GFitsImageULong class extension
  ***************************************************************************/
 %extend GFitsImageULong {
-    GFitsImageULong(const GFitsImage& image) {
-        if (image.type() != 40)
-            throw GException::fits_invalid_type("GFitsImageULong(GFitsImage&)",
-                                                "Expecting unsigned long integer image.");
-        return (GFitsImageULong*)&image;
-    }
     unsigned long __getitem__(int GFitsImageInx[]) {
         if (GFitsImageInx[0] == 1)
             return self->at(GFitsImageInx[1]);
@@ -88,3 +83,16 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GFitsImageULong type casts
+ ***************************************************************************/
+%inline %{
+    GFitsImageULong* cast_GFitsImageULong(GFitsImage* image) {
+        if (image->type() != 40)
+            throw GException::fits_invalid_type("cast_GFitsImageULong(GFitsImage*)",
+                                                "Expecting unsigned long integer image.");
+        return dynamic_cast<GFitsImageULong*>(image);
+    }
+%};

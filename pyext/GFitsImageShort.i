@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GFitsImageShort.i  - FITS short integer image class SWIG interface    *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,6 +19,7 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFitsImageShort.hpp"
 %}
+
 
 /***********************************************************************//**
  * @class GFitsImageShort
@@ -52,12 +53,6 @@ public:
  * @brief GFitsImageShort class extension
  ***************************************************************************/
 %extend GFitsImageShort {
-    GFitsImageShort(const GFitsImage& image) {
-        if (image.type() != 21)
-            throw GException::fits_invalid_type("GFitsImageShort(GFitsImage&)",
-                                                "Expecting short integer image.");
-        return (GFitsImageShort*)&image;
-    }
     short __getitem__(int GFitsImageInx[]) {
         if (GFitsImageInx[0] == 1)
             return self->at(GFitsImageInx[1]);
@@ -88,3 +83,16 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GFitsImageShort type casts
+ ***************************************************************************/
+%inline %{
+    GFitsImageShort* cast_GFitsImageShort(GFitsImage* image) {
+        if (image->type() != 21)
+            throw GException::fits_invalid_type("cast_GFitsImageShort(GFitsImage*)",
+                                                "Expecting short integer image.");
+        return dynamic_cast<GFitsImageShort*>(image);
+    }
+%};

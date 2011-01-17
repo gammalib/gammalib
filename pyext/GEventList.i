@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GEventList.i  -  Abstract event list container class python I/F     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -50,17 +50,9 @@ public:
 /***********************************************************************//**
  * @brief GEventList class extension
  *
- * The GEventList method performs type conversion.
  * The __getitem__ method makes the event list iteratable.
  ***************************************************************************/
 %extend GEventList {
-    GEventList(const GEvents& events) {
-        if (!events.islist())
-            throw GException::bad_type("GEventList(GEvents&)",
-                                       "GEvents not an event list");            
-        GEventList* list = (GEventList*)&events;
-        return list;
-    }
     GEventAtom* __getitem__(int index) {
     if (index >= 0 && index < self->size())
         return self->pointer(index);
@@ -68,3 +60,16 @@ public:
         throw GException::out_of_range("__getitem__(int)", index, self->size());
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GEventList type casts
+ ***************************************************************************/
+%inline %{
+    GEventList* cast_GEventList(GEvents* events) {
+        if (!events->islist())
+            throw GException::fits_invalid_type("cast_GEventList(GEvents*)",
+                                                "GEvents is not an event list.");
+        return dynamic_cast<GEventList*>(events);
+    }
+%};

@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GFitsImageSByte.i  - FITS signed Byte image class SWIG interface     *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,6 +19,7 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFitsImageSByte.hpp"
 %}
+
 
 /***********************************************************************//**
  * @class GFitsImageSByte
@@ -52,12 +53,6 @@ public:
  * @brief GFitsImageSByte class extension
  ***************************************************************************/
 %extend GFitsImageSByte {
-    GFitsImageSByte(const GFitsImage& image) {
-        if (image.type() != 12)
-            throw GException::fits_invalid_type("GFitsImageSByte(GFitsImage&)",
-                                                "Expecting signed byte image.");
-        return (GFitsImageSByte*)&image;
-    }
     char __getitem__(int GFitsImageInx[]) {
         if (GFitsImageInx[0] == 1)
             return self->at(GFitsImageInx[1]);
@@ -88,3 +83,16 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GFitsImageSByte type casts
+ ***************************************************************************/
+%inline %{
+    GFitsImageSByte* cast_GFitsImageSByte(GFitsImage* image) {
+        if (image->type() != 12)
+            throw GException::fits_invalid_type("cast_GFitsImageSByte(GFitsImage*)",
+                                                "Expecting signed byte image.");
+        return dynamic_cast<GFitsImageSByte*>(image);
+    }
+%};

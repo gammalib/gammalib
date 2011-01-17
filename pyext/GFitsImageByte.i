@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsImageByte.i  - FITS Byte image class SWIG interface         *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -52,12 +52,6 @@ public:
  * @brief GFitsImageByte class extension
  ***************************************************************************/
 %extend GFitsImageByte {
-    GFitsImageByte(const GFitsImage& image) {
-        if (image.type() != 11)
-            throw GException::fits_invalid_type("GFitsImageByte(GFitsImage&)",
-                                                "Expecting byte image.");
-        return (GFitsImageByte*)&image;
-    }
     unsigned char __getitem__(int GFitsImageInx[]) {
         if (GFitsImageInx[0] == 1)
             return self->at(GFitsImageInx[1]);
@@ -88,3 +82,16 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GFitsImageByte type casts
+ ***************************************************************************/
+%inline %{
+    GFitsImageByte* cast_GFitsImageByte(GFitsImage* image) {
+        if (image->type() != 11)
+            throw GException::fits_invalid_type("cast_GFitsImageByte(GFitsImage*)",
+                                                "Expecting byte image.");
+        return dynamic_cast<GFitsImageByte*>(image);
+    }
+%};
