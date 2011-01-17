@@ -29,7 +29,7 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string cta_caldb  = "../inst/cta/test/irf";
+const std::string cta_caldb  = "../inst/cta/caldb";
 const std::string cta_irf    = "kb_E_50h_v3";
 const std::string cta_events = "../inst/cta/test/data/run_00006028_eventlist_reco.fits.gz";
 const std::string cta_cntmap = "../inst/cta/test/data/run_00006028_cntmap.fits.gz";
