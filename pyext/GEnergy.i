@@ -33,11 +33,6 @@
  * reduces the risk of unit errors.
  ***************************************************************************/
 class GEnergy {
-    // Operator friends
-    /*
-    friend GEnergy operator/ (const GEnergy &a, const double &b);
-    */
-
 public:
     // Constructors and destructors
     GEnergy(void);
