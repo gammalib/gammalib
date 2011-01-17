@@ -22,6 +22,7 @@
 #endif
 #include <stdlib.h>
 #include <iostream>
+#include <unistd.h>
 #include "GLATLib.hpp"
 
 /* __ Namespaces _________________________________________________________ */
@@ -29,9 +30,10 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
+const std::string datadir    = "../inst/lat/test/data";
 const std::string lat_caldb  = "../inst/lat/caldb";
 const std::string lat_irf    = "P6_v3_diff";
-const std::string lat_ft1    = "../inst/lat/test/data/ft1.fits";
+const std::string lat_ft1    = datadir+"/ft1.fits";
 const std::string lat_ft2    = "../inst/lat/test/data/ft2.fits";
 const std::string lat_cntmap = "../inst/lat/test/data/cntmap.fits";
 const std::string lat_srcmap = "../inst/lat/test/data/srcmap.fits";
@@ -550,12 +552,22 @@ int main(void)
     std::cout << "* LAT instrument specific class testing *" << std::endl;
     std::cout << "*****************************************" << std::endl;
 
+    // Check if data directory exists
+    bool has_data = (access(datadir.c_str(), R_OK) == 0);
+
     // Execute the tests
     test_response();
-    test_ltcube();
-    test_unbinned_obs();
-    test_binned_obs();
-    test_binned_optimizer();
+
+    // Execute tests requiring data
+    if (has_data) {
+        test_ltcube();
+        test_unbinned_obs();
+        test_binned_obs();
+        test_binned_optimizer();
+    }
+    else {
+        std::cout << "Skipped several tests since no test data have been found." << std::endl;
+    }
 
     // Return
     return 0;
