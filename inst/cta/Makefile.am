@@ -31,7 +31,27 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAResponse.hpp \
                      include/GCTALib.hpp
 
+# Calibration files to distribute
+irfs = caldb/kb_A_50h_v3.dat \
+       caldb/kb_B_50h_v3.dat \
+       caldb/kb_C_50h_v3.dat \
+       caldb/kb_D_50h_v3.dat \
+       caldb/kb_E_50h_v3.dat \
+       caldb/kb_F_50h_v3.dat \
+       caldb/kb_G_50h_v3.dat \
+       caldb/kb_H_50h_v3.dat \
+       caldb/kb_I_50h_v3.dat \
+       caldb/kb_J_50h_v3.dat \
+       caldb/kb_K_50h_v3.dat \
+       caldb/kb_NA_50h_v3.dat \
+       caldb/kb_NB_50h_v3.dat
+
 # Build libtool library
 noinst_LTLIBRARIES = libcta.la
 libcta_la_SOURCES = $(sources)
 libcta_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+
+# Distribute calibration database files
+EXTRA_DIST = $(irfs)
+caldbdir = $(datadir)/caldb/cta
+caldb_DATA = $(irfs)
