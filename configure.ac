@@ -205,7 +205,7 @@ if test "x$with_cfitsio" = "xyes"; then
     if test "x$cfitsio_lib_dir" != "x";then
       AC_MSG_ERROR(Cannot find CFITSIO library under $cfitsio_lib_dir)
     else
-      AC_MSG_ERROR(Cannot find CFITSIO library. Use --with-cfitsio-lib-dir= to specify non-default path.)
+      AC_MSG_ERROR(Cannot find CFITSIO library. Use --with-cfitsio-lib-dir= to specify non-default path or --without-cfitsio to compile with CFITSIO library.)
     fi
   fi
   LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
