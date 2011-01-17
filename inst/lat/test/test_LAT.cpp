@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      test_LAT.cpp  -  test LAT classes                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -29,7 +29,7 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string lat_caldb  = "../inst/lat/test/irf";
+const std::string lat_caldb  = "../inst/lat/caldb";
 const std::string lat_irf    = "P6_v3_diff";
 const std::string lat_ft1    = "../inst/lat/test/data/ft1.fits";
 const std::string lat_ft2    = "../inst/lat/test/data/ft2.fits";
@@ -202,7 +202,7 @@ void test_ltcube(void)
     try {
         // Allocate skymap
         GSkymap map("HPX", "GAL", 64, "RING", 1);
-        
+
         // Load livetime cube
         GLATLtCube ltcube(lat_ltcube);
 
@@ -230,7 +230,7 @@ void test_ltcube(void)
     try {
         // Allocate skymap
         GSkymap map("HPX", "GAL", 64, "RING", 1);
-        
+
         // Load livetime cube
         GLATLtCube ltcube(lat_ltcube);
 
