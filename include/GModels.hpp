@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModels.hpp  -  Model container class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,6 +27,8 @@
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPhoton.hpp"
+#include "GRan.hpp"
 #include "GXml.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -74,6 +76,10 @@ public:
                       const GTime& srcTime);
     double      eval(const GEvent& event, const GObservation& obs);
     double      eval_gradients(const GEvent& event, const GObservation& obs);
+    GPhotons    mc(const double& area, const GSkyDir& dir, const double& radius,
+                   const GEnergy& emin, const GEnergy& emax,
+                   const GTime& tmin, const GTime& tmax,
+                   GRan& ran);
     std::string print(void) const;
 
 protected:
