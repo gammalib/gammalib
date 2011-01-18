@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GModel.hpp  -  Model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -32,6 +32,7 @@
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GPhoton.hpp"
+#include "GRan.hpp"
 #include "GVector.hpp"
 #include "GXmlElement.hpp"
 
@@ -102,7 +103,8 @@ public:
     double               eval_gradients(const GEvent& event, const GObservation& obs);
     std::vector<GPhoton> mc(const double& area, const GSkyDir& dir, const double& radius,
                             const GEnergy& emin, const GEnergy& emax,
-                            const GTime& tmin, const GTime& tmax);
+                            const GTime& tmin, const GTime& tmax,
+                            const GRan& ran);
     bool                 isvalid(const std::string& name) const;
     std::string          print(void) const;
 

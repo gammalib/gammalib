@@ -54,7 +54,8 @@ public:
     double               eval_gradients(const GEvent& event, const GObservation& obs);
     std::vector<GPhoton> mc(const double& area, const GSkyDir& dir, const double& radius,
                             const GEnergy& emin, const GEnergy& emax,
-                            const GTime& tmin, const GTime& tmax);
+                            const GTime& tmin, const GTime& tmax,
+                            const GRan& ran);
     bool                 isvalid(const std::string& name) const;
 };
 
