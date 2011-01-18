@@ -41,8 +41,9 @@ public:
     std::string          type(void) const { return "Constant"; }
     double               eval(const GTime& srcTime);
     double               eval_gradients(const GTime& srcTime);
-    std::vector<GTime>   mc(const double& rate,
-                            const GTime& tmin, const GTime& tmax);
+    GTimes               mc(const double& rate,
+                            const GTime& tmin, const GTime& tmax,
+                            GRan& ran);
     void                 read(const GXmlElement& xml);
     void                 write(GXmlElement& xml) const;
 

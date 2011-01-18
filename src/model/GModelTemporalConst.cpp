@@ -191,17 +191,17 @@ double GModelTemporalConst::eval_gradients(const GTime& srcTime)
  *
  * @param[in] rate Mean event rate (events per second).
  * @param[in] tmin Minimum event time.
- * @param[in] tmin Maximum event time.
+ * @param[in] tmax Maximum event time.
+ * @param[in] ran Random number generator.
  *
  * This method returns a vector of random event times assuming a constant
  * event rate that is specified by the rate parameter.
  ***************************************************************************/
-std::vector<GTime> GModelTemporalConst::mc(const double& rate,
-                                           const GTime&  tmin,
-                                           const GTime&  tmax)
+GTimes GModelTemporalConst::mc(const double& rate, const GTime&  tmin,
+                               const GTime&  tmax, GRan& ran)
 {
     // Allocates empty vector of times
-    std::vector<GTime> times;
+    GTimes times;
 
     // Compute event rate (in events per seconds)
     double lambda = rate * norm();
@@ -214,7 +214,7 @@ std::vector<GTime> GModelTemporalConst::mc(const double& rate,
     while (time <= tstop) {
 
         // Simulate next event time
-        time += m_ran.exp(lambda);
+        time += ran.exp(lambda);
 
         // Add time if it is not beyod the stop time
         if (time <= tstop) {

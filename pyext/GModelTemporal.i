@@ -34,19 +34,17 @@ public:
     virtual ~GModelTemporal(void);
 
     // Virtual methods
-    virtual void               clear(void) = 0;
-    virtual GModelTemporal*    clone(void) const = 0;
-    virtual int                size(void) const = 0;
-    virtual std::string        type(void) const = 0;
-    virtual double             eval(const GTime& srcTime) = 0;
-    virtual double             eval_gradients(const GTime& srcTime) = 0;
-    virtual std::vector<GTime> mc(const double& rate,
-                                  const GTime& tmin, const GTime& tmax) = 0;
-    virtual void               read(const GXmlElement& xml) = 0;
-    virtual void               write(GXmlElement& xml) const = 0;
-
-    // Implemented methods
-    virtual void mc_seed(unsigned long long int seed) { m_ran.seed(seed); }
+    virtual void            clear(void) = 0;
+    virtual GModelTemporal* clone(void) const = 0;
+    virtual int             size(void) const = 0;
+    virtual std::string     type(void) const = 0;
+    virtual double          eval(const GTime& srcTime) = 0;
+    virtual double          eval_gradients(const GTime& srcTime) = 0;
+    virtual GTimes          mc(const double& rate,
+                               const GTime& tmin, const GTime& tmax,
+                               GRan& ran) = 0;
+    virtual void            read(const GXmlElement& xml) = 0;
+    virtual void            write(GXmlElement& xml) const = 0;
 };
 
 
