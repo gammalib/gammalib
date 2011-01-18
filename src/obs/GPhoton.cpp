@@ -143,7 +143,7 @@ void GPhoton::clear(void)
 /***********************************************************************//**
  * @brief Print photon
  *
- * @todo Implement print() methods for GTime and GSkyDir
+ * @todo Implement print() method for GSkyDir
  ***************************************************************************/
 std::string GPhoton::print(void) const
 {
@@ -159,7 +159,7 @@ std::string GPhoton::print(void) const
 
     // Append energy and time
     result.append("\n"+parformat("Energy")+m_energy.print());
-    result.append("\n"+parformat("Arrival time (MJD)")+str(m_time.mjd()));
+    result.append("\n"+parformat("Arrival time (MET)")+m_time.print());
 
     // Return
     return result;
