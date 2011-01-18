@@ -20,6 +20,7 @@
 #define GTIME_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <vector>
 #include <string>
 #include <iostream>
 #include "GLog.hpp"
@@ -159,5 +160,11 @@ bool operator>= (const GTime &a, const GTime &b)
 {
     return (a.m_time >= b.m_time);
 }
+
+
+/***************************************************************************
+ *                                 Typedefs                                *
+ ***************************************************************************/
+typedef std::vector<GTime> GTimes;
 
 #endif /* GTIME_HPP */

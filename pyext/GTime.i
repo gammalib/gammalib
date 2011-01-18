@@ -93,12 +93,8 @@ public:
 };
 
 
-/***********************************************************************//**
- * @brief Define GTimes vector
+/***************************************************************************
+ *                                 Typedefs                                *
  ***************************************************************************/
-//#pragma SWIG nowarn=512
-//%warnfilter(512) GTimes;
-%include "std_vector.i"
-namespace std {
-    %template(GTimes) vector<GTime>;
-}
+typedef std::vector<GTime> GTimes;
+%template(GTimes) std::vector<GTime>;
