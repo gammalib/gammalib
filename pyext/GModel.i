@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GModel.i  -  Model class SWIG interface                 *
+ *                 GModel.i  -  Model class python interface               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModel.i
- * @brief GModel class SWIG interface.
+ * @brief GModel class python interface
  * @author J. Knodlseder
  */
 %{
@@ -25,7 +25,7 @@
 /***********************************************************************//**
  * @class GModel
  *
- * @brief GModel class SWIG interface defintion.
+ * @brief GModel class python interface defintion
  ***************************************************************************/
 class GModel {
 public:
@@ -37,22 +37,25 @@ public:
     virtual ~GModel(void);
 
     // Methods
-    void            clear(void);
-    GModel*         clone(void) const;
-    int             size(void) const { return m_npars; }
-    std::string     name(void) const { return m_name; }
-    void            name(const std::string& name) { m_name=name; return; }
-    void            instruments(const std::string& instruments);
-    GModelSpatial*  spatial(void) const { return m_spatial; }
-    GModelSpectral* spectral(void) const { return m_spectral; }
-    GModelTemporal* temporal(void) const { return m_temporal; }
-    double          value(const GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime);
-    GVector         gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
-                              const GTime& srcTime);
-    double          eval(const GEvent& event, const GObservation& obs);
-    double          eval_gradients(const GEvent& event, const GObservation& obs);
-    bool            isvalid(const std::string& name) const;
+    void                 clear(void);
+    GModel*              clone(void) const;
+    int                  size(void) const { return m_npars; }
+    std::string          name(void) const { return m_name; }
+    void                 name(const std::string& name) { m_name=name; return; }
+    void                 instruments(const std::string& instruments);
+    GModelSpatial*       spatial(void) const { return m_spatial; }
+    GModelSpectral*      spectral(void) const { return m_spectral; }
+    GModelTemporal*      temporal(void) const { return m_temporal; }
+    double               value(const GSkyDir& srcDir, const GEnergy& srcEng,
+                               const GTime& srcTime);
+    GVector              gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
+                                   const GTime& srcTime);
+    double               eval(const GEvent& event, const GObservation& obs);
+    double               eval_gradients(const GEvent& event, const GObservation& obs);
+    std::vector<GPhoton> mc(const double& area, const GSkyDir& dir, const double& radius,
+                            const GEnergy& emin, const GEnergy& emax,
+                            const GTime& tmin, const GTime& tmax);
+    bool                 isvalid(const std::string& name) const;
 };
 
 

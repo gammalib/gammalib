@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <vector>
+#include <string>
 #include <iostream>
 #include "GLog.hpp"
 #include "GModelPar.hpp"
@@ -30,6 +31,7 @@
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPhoton.hpp"
 #include "GVector.hpp"
 #include "GXmlElement.hpp"
 
@@ -83,23 +85,26 @@ public:
     GModel&          operator= (const GModel& model);
 
     // Methods
-    void            clear(void);
-    GModel*         clone(void) const;
-    int             size(void) const { return m_npars; }
-    std::string     name(void) const { return m_name; }
-    void            name(const std::string& name) { m_name=name; return; }
-    void            instruments(const std::string& instruments);
-    GModelSpatial*  spatial(void) const { return m_spatial; }
-    GModelSpectral* spectral(void) const { return m_spectral; }
-    GModelTemporal* temporal(void) const { return m_temporal; }
-    double          value(const GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime);
-    GVector         gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
-                              const GTime& srcTime);
-    double          eval(const GEvent& event, const GObservation& obs);
-    double          eval_gradients(const GEvent& event, const GObservation& obs);
-    bool            isvalid(const std::string& name) const;
-    std::string     print(void) const;
+    void                 clear(void);
+    GModel*              clone(void) const;
+    int                  size(void) const { return m_npars; }
+    std::string          name(void) const { return m_name; }
+    void                 name(const std::string& name) { m_name=name; return; }
+    void                 instruments(const std::string& instruments);
+    GModelSpatial*       spatial(void) const { return m_spatial; }
+    GModelSpectral*      spectral(void) const { return m_spectral; }
+    GModelTemporal*      temporal(void) const { return m_temporal; }
+    double               value(const GSkyDir& srcDir, const GEnergy& srcEng,
+                               const GTime& srcTime);
+    GVector              gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
+                                   const GTime& srcTime);
+    double               eval(const GEvent& event, const GObservation& obs);
+    double               eval_gradients(const GEvent& event, const GObservation& obs);
+    std::vector<GPhoton> mc(const double& area, const GSkyDir& dir, const double& radius,
+                            const GEnergy& emin, const GEnergy& emax,
+                            const GTime& tmin, const GTime& tmax);
+    bool                 isvalid(const std::string& name) const;
+    std::string          print(void) const;
 
 protected:
     // Protected methods
