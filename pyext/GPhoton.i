@@ -66,3 +66,14 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief Define GPhotons vector
+ ***************************************************************************/
+//#pragma SWIG nowarn=512
+//%warnfilter(512) GTimes;
+%include "std_vector.i"
+namespace std {
+    %template(GPhotons) vector<GPhoton>;
+}
