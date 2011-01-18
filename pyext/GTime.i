@@ -41,9 +41,11 @@ public:
  
     // Methods
     void   clear(void) { m_time = 0.0; }
+    double jd(void) const;
     double mjd(void) const;
-    void   mjd(const double& time);
     double met(void) const;
+    void   jd(const double& time);
+    void   mjd(const double& time);
     void   met(const double& time);
 };
 
@@ -52,11 +54,9 @@ public:
  * @brief GTime class extension
  ***************************************************************************/
 %extend GTime {
-    /*
     char *__str__() {
         return tochar(self->print());
     }
-    */
     GTime __add__(const GTime& time) const {
         return ((*self) + time);
     }
@@ -67,7 +67,7 @@ public:
         return ((*self) * factor);
     }
     GTime __div__(const double& factor) const {
-        return ((*self) * (1.0 / factor));
+        return ((*self) / factor);
     }
     bool __eq__(const GTime& time) const {
         return ((*self) == time);
