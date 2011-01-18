@@ -20,8 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <cfloat>
-//#include <cmath>
 #include "GPhoton.hpp"
 #include "GTools.hpp"
 
@@ -150,16 +148,15 @@ std::string GPhoton::print(void) const
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GPhoton ===");
-
-    // Append arrival direction
-    result.append("\n"+parformat("Arrival direction"));
-    result.append("RA="+str(m_dir.ra_deg())+", DEC="+str(m_dir.dec_deg()));
-
-    // Append energy and time
-    result.append("\n"+parformat("Energy")+m_energy.print());
-    result.append("\n"+parformat("Arrival time (MET)")+m_time.print());
+    // Build photon string
+    result.append("GPhoton(");
+    result.append("RA="+str(m_dir.ra_deg()));
+    result.append(", Dec="+str(m_dir.dec_deg()));
+    result.append(", E="+m_energy.print());
+    result.append(", MET="+m_time.print());
+    if (m_mc_id >= 0)
+        result.append(", MCid="+str(m_mc_id));
+    result.append(")");
 
     // Return
     return result;
@@ -181,6 +178,7 @@ void GPhoton::init_members(void)
     m_dir.clear();
     m_energy.clear();
     m_time.clear();
+    m_mc_id = -1;
   
     // Return
     return;
@@ -198,6 +196,7 @@ void GPhoton::copy_members(const GPhoton& ph)
     m_dir    = ph.m_dir;
     m_energy = ph.m_energy;
     m_time   = ph.m_time;
+    m_mc_id  = ph.m_mc_id;
     
     // Return
     return;
