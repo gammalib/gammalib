@@ -20,6 +20,7 @@
 #define GPHOTON_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <vector>
 #include <string>
 #include <iostream>
 #include "GLog.hpp"
@@ -61,9 +62,11 @@ public:
     GSkyDir&    dir(void) { return m_dir; }
     GEnergy&    energy(void) { return m_energy; }
     GTime&      time(void) { return m_time; }
+    int         mcid(void) { return m_mc_id; }
     void        dir(const GSkyDir& dir) { m_dir=dir; }
     void        energy(const GEnergy& energy) { m_energy=energy; }
     void        time(const GTime& time) { m_time=time; }
+    void        mcid(const int& mcid) { m_mc_id=mcid; }
     std::string print(void) const;
   
 protected:
@@ -73,9 +76,10 @@ protected:
     void free_members(void);
 
     // Protected data members
-    GSkyDir m_dir;           //!< Photon arrival direction
-    GEnergy m_energy;        //!< Photon energy
-    GTime   m_time;          //!< Photon arrival time
+    GSkyDir m_dir;      //!< Photon arrival direction
+    GEnergy m_energy;   //!< Photon energy
+    GTime   m_time;     //!< Photon arrival time
+    int     m_mc_id;    //!< Monte Carlo simulation origin
 };
 
 
@@ -94,5 +98,11 @@ bool operator!= (const GPhoton &a, const GPhoton &b)
     return (a.m_energy != b.m_energy ||  a.m_time != b.m_time ||
             a.m_dir.dist(b.m_dir) > 0.0);
 }
+
+
+/***************************************************************************
+ *                                 Typedefs                                *
+ ***************************************************************************/
+typedef std::vector<GPhoton> GPhotons;
 
 #endif /* GPHOTON_HPP */

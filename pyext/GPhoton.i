@@ -36,16 +36,16 @@ public:
     // Constructors and destructors
     GPhoton(void);
     GPhoton(const GPhoton& ph);
-    ~GPhoton(void);
+    virtual ~GPhoton(void);
  
     // Methods
-    void        clear(void);
-    GSkyDir&    dir(void) { return m_dir; }
-    GEnergy&    energy(void) { return m_energy; }
-    GTime&      time(void) { return m_time; }
-    void        dir(const GSkyDir& dir) { m_dir=dir; }
-    void        energy(const GEnergy& energy) { m_energy=energy; }
-    void        time(const GTime& time) { m_time=time; }
+    void     clear(void);
+    GSkyDir& dir(void) { return m_dir; }
+    GEnergy& energy(void) { return m_energy; }
+    GTime&   time(void) { return m_time; }
+    void     dir(const GSkyDir& dir) { m_dir=dir; }
+    void     energy(const GEnergy& energy) { m_energy=energy; }
+    void     time(const GTime& time) { m_time=time; }
 };
 
 
@@ -68,12 +68,8 @@ public:
 };
 
 
-/***********************************************************************//**
- * @brief Define GPhotons vector
+/***************************************************************************
+ *                                 Typedefs                                *
  ***************************************************************************/
-//#pragma SWIG nowarn=512
-//%warnfilter(512) GTimes;
-%include "std_vector.i"
-namespace std {
-    %template(GPhotons) vector<GPhoton>;
-}
+typedef std::vector<GPhoton> GPhotons;
+%template(GPhotons) std::vector<GPhoton>;
