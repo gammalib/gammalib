@@ -91,3 +91,14 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief Define GTimes vector
+ ***************************************************************************/
+//#pragma SWIG nowarn=512
+//%warnfilter(512) GTimes;
+%include "std_vector.i"
+namespace std {
+    %template(GTimes) vector<GTime>;
+}
