@@ -80,37 +80,11 @@ std::string strip_chars(const std::string& arg, const std::string& chars)
 
 
 /***********************************************************************//**
- * @brief Convert short integer value into string
+ * @brief Convert unsigned short integer value into string
  *
- * @param[in] value Short integer to be converted into string.
+ * @param[in] value Unsigned short integer to be converted into string.
  ***************************************************************************/
-std::string str(const short& value)
-{
-    std::ostringstream s_value;
-    s_value << value;
-    return  s_value.str();
-}
-
-
-/***********************************************************************//**
- * @brief Convert short unsigned integer value into string
- *
- * @param[in] value Short unsigned integer to be converted into string.
- ***************************************************************************/
-std::string str(const unsigned short& value)
-{
-    std::ostringstream s_value;
-    s_value << value;
-    return  s_value.str();
-}
-
-
-/***********************************************************************//**
- * @brief Convert integer value into string
- *
- * @param[in] value Integer to be converted into string.
- ***************************************************************************/
-std::string str(const int& value)
+std::string str(const unsigned short int& value)
 {
     std::ostringstream s_value;
     s_value << value;
@@ -132,11 +106,11 @@ std::string str(const unsigned int& value)
 
 
 /***********************************************************************//**
- * @brief Convert long integer value into string
+ * @brief Convert unsigned long integer value into string
  *
- * @param[in] value Long integer to be converted into string.
+ * @param[in] value Unsigned long integer to be converted into string.
  ***************************************************************************/
-std::string str(const long& value)
+std::string str(const unsigned long int& value)
 {
     std::ostringstream s_value;
     s_value << value;
@@ -145,11 +119,50 @@ std::string str(const long& value)
 
 
 /***********************************************************************//**
- * @brief Convert long unsigned integer value into string
+ * @brief Convert unsigned long long integer value into string
  *
- * @param[in] value Long unsigned integer to be converted into string.
+ * @param[in] value Unsigned long long integer to be converted into string.
  ***************************************************************************/
-std::string str(const unsigned long& value)
+std::string str(const unsigned long long int& value)
+{
+    std::ostringstream s_value;
+    s_value << value;
+    return  s_value.str();
+}
+
+
+/***********************************************************************//**
+ * @brief Convert short integer value into string
+ *
+ * @param[in] value Short integer to be converted into string.
+ ***************************************************************************/
+std::string str(const short int& value)
+{
+    std::ostringstream s_value;
+    s_value << value;
+    return  s_value.str();
+}
+
+
+/***********************************************************************//**
+ * @brief Convert integer value into string
+ *
+ * @param[in] value Integer to be converted into string.
+ ***************************************************************************/
+std::string str(const int& value)
+{
+    std::ostringstream s_value;
+    s_value << value;
+    return  s_value.str();
+}
+
+
+/***********************************************************************//**
+ * @brief Convert long integer value into string
+ *
+ * @param[in] value Long integer to be converted into string.
+ ***************************************************************************/
+std::string str(const long int& value)
 {
     std::ostringstream s_value;
     s_value << value;
@@ -162,7 +175,7 @@ std::string str(const unsigned long& value)
  *
  * @param[in] value Long long integer to be converted into string.
  ***************************************************************************/
-std::string str(const long long& value)
+std::string str(const long long int& value)
 {
     std::ostringstream s_value;
     s_value << value;
