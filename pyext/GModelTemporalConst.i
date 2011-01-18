@@ -1,5 +1,5 @@
 /***************************************************************************
- * GModelTemporalConst.i  -  Temporal constant model class SWIG interface  *
+ *   GModelTemporalConst.i  -  Temporal constant model class python I/F    *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelTemporalConst.i
- * @brief GModelTemporalConst class SWIG interface.
+ * @brief GModelTemporalConst class python interface
  * @author J. Knodlseder
  */
 %{
@@ -25,7 +25,7 @@
 /***********************************************************************//**
  * @class GModelTemporalConst
  *
- * @brief SWIG interface definition for the constant model class.
+ * @brief Python interface definition for the constant model class.
  ***************************************************************************/
 class GModelTemporalConst  : public GModelTemporal {
 public:
@@ -41,8 +41,13 @@ public:
     std::string          type(void) const { return "Constant"; }
     double               eval(const GTime& srcTime);
     double               eval_gradients(const GTime& srcTime);
+    std::vector<GTime>   mc(const double& rate,
+                            const GTime& tmin, const GTime& tmax);
     void                 read(const GXmlElement& xml);
     void                 write(GXmlElement& xml) const;
+
+    // Other methods
+    double norm(void) const { return m_norm.real_value(); }
 };
 
 

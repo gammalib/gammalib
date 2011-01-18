@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelTemporalConst.hpp  -  Temporal constant model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -30,10 +30,12 @@
 /***********************************************************************//**
  * @class GModelTemporalConst
  *
- * @brief Interface definition for the constant model class.
+ * @brief Interface definition for the constant model class
  *
  * This class implements the temporal component of the factorised model for
- * a model that is constant in time.
+ * a model that is constant in time. It has a single parameter norm that is
+ * used for scaling, and that normally is set to 1. The parameter is not
+ * supposed to be fitted.
  ***************************************************************************/
 class GModelTemporalConst  : public GModelTemporal {
 
@@ -57,9 +59,14 @@ public:
     std::string          type(void) const { return "Constant"; }
     double               eval(const GTime& srcTime);
     double               eval_gradients(const GTime& srcTime);
+    std::vector<GTime>   mc(const double& rate,
+                            const GTime& tmin, const GTime& tmax);
     void                 read(const GXmlElement& xml);
     void                 write(GXmlElement& xml) const;
     std::string          print(void) const;
+
+    // Other methods
+    double norm(void) const { return m_norm.real_value(); }
 
 protected:
     // Protected methods
@@ -71,9 +78,9 @@ protected:
     GModelPar** par(void) { return m_par; }
 
     // Protected members
-    int        m_npars;           //!< Number of parameters
-    GModelPar* m_par[1];          //!< Pointers to parameters
-    GModelPar  m_norm;            //!< Constant
+    int        m_npars;   //!< Number of parameters
+    GModelPar* m_par[1];  //!< Pointers to parameters
+    GModelPar  m_norm;    //!< Constant
 };
 
 #endif /* GMODELTEMPORALCONST_HPP */

@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelTemporalConst.cpp  -  Temporal constant model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -157,13 +157,13 @@ GModelTemporalConst* GModelTemporalConst::clone(void) const
  *
  * @param[in] srcTime True photon arrival time (not used).
  *
- * This method implements the temporal component of a constant model.
- * It returns a value of 1 in all cases.
+ * This method implements the temporal component of a constant model. It
+ * simply returns the normalization constant (which typically is set to 1).
  ***************************************************************************/
 double GModelTemporalConst::eval(const GTime& srcTime)
 {
     // Return
-    return 1.0;
+    return (norm());
 }
 
 
@@ -172,8 +172,9 @@ double GModelTemporalConst::eval(const GTime& srcTime)
  *
  * @param[in] srcTime True photon arrival time (not used).
  *
- * This method implements the temporal component of a constant model.
- * It returns a value of 1 and a gradient of 0 in all cases.
+ * This method implements the temporal component of a constant model. It
+ * simply returns the normalization constant (which typically is set to 1)
+ * and a gradient of 0 (as it is not expected to fit this parameter).
  ***************************************************************************/
 double GModelTemporalConst::eval_gradients(const GTime& srcTime)
 {
@@ -181,7 +182,51 @@ double GModelTemporalConst::eval_gradients(const GTime& srcTime)
     m_norm.gradient(0.0);
 
     // Return
-    return 1.0;
+    return (norm());
+}
+
+
+/***********************************************************************//**
+ * @brief Returns vector of random event times
+ *
+ * @param[in] rate Mean event rate (events per second).
+ * @param[in] tmin Minimum event time.
+ * @param[in] tmin Maximum event time.
+ *
+ * This method returns a vector of random event times assuming a constant
+ * event rate that is specified by the rate parameter.
+ ***************************************************************************/
+std::vector<GTime> GModelTemporalConst::mc(const double& rate,
+                                           const GTime&  tmin,
+                                           const GTime&  tmax)
+{
+    // Allocates empty vector of times
+    std::vector<GTime> times;
+
+    // Compute event rate (in events per seconds)
+    double lambda = rate * norm();
+
+    // Initialise start and stop times (using MET)
+    double time  = tmin.met();
+    double tstop = tmax.met();
+
+    // Generate events until maximum event time is exceeded
+    while (time <= tstop) {
+
+        // Simulate next event time
+        time += m_ran.exp(lambda);
+
+        // Add time if it is not beyod the stop time
+        if (time <= tstop) {
+            GTime event;
+            event.met(time);
+            times.push_back(event);
+        }
+
+    } // endwhile: loop until stop time is reached
+
+    // Return vector of times
+    return times;
 }
 
 
