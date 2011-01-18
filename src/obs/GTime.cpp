@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.cpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,10 +21,14 @@
 #include <config.h>
 #endif
 #include "GTime.hpp"
+#include "GTools.hpp"
 
 /* __ Constants __________________________________________________________ */
-const double sec_in_day = 86400.0;  // Seconds in day
-const double met_ref    = 51910.0;  // MJD of MET=0 
+const double sec_in_day = 86400.0;                     // Seconds in TT day
+//const double mjd_ref    = 51910.0;                     // MJD of MET=0
+//const double jd_ref     = 2451910.5;                   // JD seconds of MET=0
+const double mjd_ref    = 51910.0007428703703703703;   // MJD of Fermi MET=0
+const double jd_ref     = 2451910.5007428703703703703; // JD seconds of Fermi MET=0
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -124,12 +128,28 @@ GTime& GTime::operator= (const GTime& time)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Return time in JD (TT) (unit: days)
+ ***************************************************************************/
+double GTime::jd(void) const
+{
+    // Convert time from MET to JD
+    double jd = m_time / sec_in_day + jd_ref;
+    
+    // Return JD
+    return jd;
+}
+
+
+/***********************************************************************//**
  * @brief Return time in MJD (unit: days)
  ***************************************************************************/
 double GTime::mjd(void) const
 {
-    // Return time
-    return m_time;
+    // Convert time from MET to MJD
+    double mjd = m_time / sec_in_day + mjd_ref;
+    
+    // Return MJD
+    return mjd;
 }
 
 
@@ -138,23 +158,35 @@ double GTime::mjd(void) const
  ***************************************************************************/
 double GTime::met(void) const
 {
-    // Convert time from MJD to MET
-    double met = (m_time - met_ref) * sec_in_day;
-    
-    // Return MET
-    return met;
+    // Return time
+    return m_time;
 }
 
 
 /***********************************************************************//**
- * @brief Set time in MJD (unit: days)
+ * @brief Set time in JD (TT) (unit: days)
  *
- * @param[in] time Time in MJD.
+ * @param[in] time Time in JD (TT).
+ ***************************************************************************/
+void GTime::jd(const double& time)
+{
+    // Convert time from JD to MET
+    m_time = (time - jd_ref) * sec_in_day;
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set time in MJD (TT) (unit: days)
+ *
+ * @param[in] time Time in MJD (TT).
  ***************************************************************************/
 void GTime::mjd(const double& time)
 {
-    // Set time
-    m_time = time;
+    // Convert time from MJD to MET
+    m_time = (time - mjd_ref) * sec_in_day;
     
     // Return
     return;
@@ -169,12 +201,28 @@ void GTime::mjd(const double& time)
 void GTime::met(const double& time)
 {
     // Set time
-    m_time = time / sec_in_day + met_ref;
+    m_time = time;
     
     // Return
     return;
 }
- 
+
+
+/***********************************************************************//**
+ * @brief Print time
+ ***************************************************************************/
+std::string GTime::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append time
+    result.append(str(met())+" s");
+
+    // Return
+    return result;
+}
+
 
 /*==========================================================================
  =                                                                         =
@@ -227,16 +275,32 @@ void GTime::free_members(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Put object in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the model will be dumped
- * @param[in] time Object to be dumped
+ * @param[in] os Output stream.
+ * @param[in] time Time.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GTime& time)
 {
-    // Put object in stream
-    os << time.mjd();
+     // Write time in output stream
+    os << time.print();
 
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] time Time.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GTime& time)
+{
+    // Write time into logger
+    log << time.print();
+
+    // Return logger
+    return log;
 }
