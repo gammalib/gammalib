@@ -25,6 +25,7 @@
 #include "GException.hpp"
 #include "GNodeArray.hpp"
 #include "GCsv.hpp"
+#include "GRan.hpp"
 
 /* __ Numerics module ____________________________________________________ */
 #include "GVector.hpp"

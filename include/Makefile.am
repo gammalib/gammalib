@@ -4,6 +4,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GNodeArray.hpp \
                      GTools.hpp \
                      GCsv.hpp \
+                     GRan.hpp \
                      GSkyDir.hpp \
                      GSkyPixel.hpp \
                      GSkymap.hpp \

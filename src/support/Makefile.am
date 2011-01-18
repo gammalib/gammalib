@@ -9,7 +9,8 @@ INCLUDES = -I$(top_srcdir)/include \
 sources = GException.cpp \
           GTools.cpp \
           GNodeArray.cpp \
-          GCsv.cpp
+          GCsv.cpp \
+          GRan.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libsupport.la
