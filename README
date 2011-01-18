@@ -42,6 +42,15 @@ To report or search for bugs, please use the GammaLib Bug Tracker at
 https://sourceforge.net/tracker/?group_id=282143&atid=1196795.
 
 
+Known problems
+--------------
+
+SWIG 1.3.33
+  The definition of the GTimes vector using std_vector.i leads to warnings
+  during creation of the C++ python wrapper using swig. These warnings are
+  however not preventing compilation of the code
+
+
 Contact
 -------
 
