@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         gammalib - SWIG file                            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,6 +19,7 @@
 #include "GException.i"
 #include "GNodeArray.i"
 #include "GCsv.i"
+#include "GRan.i"
 
 /* __ Numerics module ____________________________________________________ */
 #include "GVector.i"
