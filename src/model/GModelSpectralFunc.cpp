@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectralFunc.cpp  -  Spectral function model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,7 +27,8 @@
 #include "GModelSpectralFunc.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_PAR                                  "GModelSpectralFunc::par(int)"
+#define G_FLUX                 "GModelSpectralFunc::flux(GEnergy&, GEnergy&)"
+#define G_MC              "GModelSpectralFunc::mc(GEnergy&, GEnergy&, GRan&)"
 #define G_READ                       "GModelSpectralFunc::read(GXmlElement&)"
 #define G_WRITE                     "GModelSpectralFunc::write(GXmlElement&)"
 #define G_LOAD_NODES           "GModelSpectralFunc::load_nodes(std::string&)"
@@ -258,6 +259,54 @@ double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng)
 
     // Return
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns model flux between [emin, emax] (units: ph/cm2/s)
+ *
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ *
+ * Computes
+ * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
+ * where
+ * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
+ * energy, respectively, and
+ * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ *
+ * @todo Implement method
+ ***************************************************************************/
+double GModelSpectralFunc::flux(const GEnergy& emin, const GEnergy& emax) const
+{
+    // Dump warning that method is not yet implemented
+    throw GException::feature_not_implemented(G_FLUX);
+
+    // Return
+    return 0.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns MC energy between [emin, emax]
+ *
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ * @param[in] ran Random number generator.
+ *
+ * @todo To be implemented
+ ***************************************************************************/
+GEnergy GModelSpectralFunc::mc(const GEnergy& emin, const GEnergy& emax,
+                               GRan& ran) const
+{
+    // Allocate energy
+    GEnergy energy;
+
+    // Dump warning that method is not yet implemented
+    throw GException::feature_not_implemented(G_MC);
+
+    // Return energy
+    return energy;
 }
 
 
