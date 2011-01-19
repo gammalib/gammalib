@@ -51,6 +51,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+#define G_DUMP_MC 0                                 //!< Dump MC information
 
 
 /*==========================================================================
@@ -399,17 +400,17 @@ double GModel::eval_gradients(const GEvent& event, const GObservation& obs)
  * @param[in] ran Random number generator. 
  *
  * This method returns a list of photons that has been derived by Monte Carlo
- * simulation from the model. The mean number of photons that will be return
- * by the method is determined from the source flux within the specified
- * energy limits \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ multiplied by the
- * illuminated surface area:
- * \f[N={\rm area} \times \int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
- * where
- * \f$I(E)\f$ is the product of spectral and temporal model components.
+ * simulation from the model. A simulation region is define by specification
+ * of a simulation cone (a circular region on the sky),
+ * of an energy range [emin, emax], and
+ * of a time interval [tmin, tmax].
+ * The simulation cone may eventually cover the entire sky (by setting
+ * the radius to 180 degrees), yet simulations will be more efficient if
+ * only the sky region will be simulated that is actually observed by the
+ * telescope.
  *
- * @todo Implement flux integration
- * @todo Implement photon arrival direction simulation
- * @todo Implement photon energy simulation
+ * @todo Check usage for diffuse models
+ * @todo Implement photon arrival direction simulation for diffuse models
  * @todo Implement unique model ID to assign as Monte Carlo ID
  ***************************************************************************/
 GPhotons GModel::mc(const double& area,
@@ -418,41 +419,84 @@ GPhotons GModel::mc(const double& area,
                     const GTime&   tmin, const GTime&   tmax,
                     GRan& ran)
 {
-    // Compute flux within [emin, emax] in model from spectral component
-    // (units: ph/cm2/s)
-    double flux = 1.0;
-
-    // Derive expecting counting rate within simulation surface (units: ph/s)
-    double rate = flux * area;
-
-    // Get photon arrival times from temporal model
-    GTimes times;
-    if (m_temporal != NULL) times = m_temporal->mc(rate, tmin, tmax, ran);
-
     // Allocate photons
     GPhotons photons;
-    if (times.size() > 0)
-        photons.reserve(times.size());
 
-    // Loop over photons
-    for (int i = 0; i < times.size(); ++i) {
+    // Continue only if model is valid)
+    if (valid_model()) {
 
-        // Allocate photon
-        GPhoton photon;
+        // Check if model will produce any photons in the specified
+        // simulation region. If the model is a point source we check if the
+        // source is located within the simulation code. If the model is a
+        // diffuse source we check if the source overlaps with the simulation
+        // code
+        bool use_model = true;
+        if (m_spatial->isptsource()) {
+            GModelSpatialPtsrc* src = dynamic_cast<GModelSpatialPtsrc*>(m_spatial);
+            if (dir.dist(src->dir()) > radius)
+                use_model = false;
+        }
+        else {
+            //TODO
+        }
 
-        // Set photon arrival time
-        photon.time(times[i]);
+        // Continue only if model overlaps with simulation region
+        if (use_model) {
 
-        // Set photon arrival direction
-        //TODO
+            // Compute flux within [emin, emax] in model from spectral
+            // component (units: ph/cm2/s)
+            double flux = m_spectral->flux(emin, emax);
 
-        // Set photon energy
-        //TODO
+            // Derive expecting counting rate within simulation surface
+            // (units: ph/s)
+            double rate = flux * area;
 
-        // Append photon
-        photons.push_back(photon);
+            // Debug option: dump rate
+            #if G_DUMP_MC
+            std::cout << "GModel::mc(\"" << name() << "\": ";
+            std::cout << "flux=" << flux << " ph/cm2/s, ";
+            std::cout << "rate=" << rate << " ph/s)" << std::endl;
+            #endif
 
-    } // endfor: looped over photons
+            // Get photon arrival times from temporal model
+            GTimes times = m_temporal->mc(rate, tmin, tmax, ran);
+
+            // Reserve space for photons
+            if (times.size() > 0)
+                photons.reserve(times.size());
+
+            // Loop over photons
+            for (int i = 0; i < times.size(); ++i) {
+
+                // Allocate photon
+                GPhoton photon;
+
+                // Set photon arrival time
+                photon.time(times[i]);
+
+                // If source is a point source we simply assign the actual
+                // source position to the photons
+                if (m_spatial->isptsource()) {
+                    GModelSpatialPtsrc* src = dynamic_cast<GModelSpatialPtsrc*>(m_spatial);
+                    photon.dir(src->dir());
+                }
+
+                // ... otherwise we simulate photons using the spatial
+                // component
+                else {
+                    //TODO
+                }
+
+                // Set photon energy
+                photon.energy(m_spectral->mc(emin, emax, ran));
+
+                // Append photon
+                photons.push_back(photon);
+
+            } // endfor: looped over photons
+
+        } // endif: model was used
+    } // endif: model was valid
 
     // Return photon list
     return photons;
@@ -903,6 +947,21 @@ double GModel::temporal(const GEvent& event, const GObservation& obs, bool grad)
 
     // Return value
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Verifies if model has all components
+ ***************************************************************************/
+bool GModel::valid_model(void) const
+{
+    // Set result
+    bool result = ((m_spatial != NULL)  &&
+                   (m_spectral != NULL) &&
+                   (m_temporal != NULL));
+
+    // Return result
+    return result;
 }
 
 
