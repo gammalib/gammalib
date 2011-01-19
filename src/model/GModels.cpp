@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GModels.cpp  -  Model container class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -476,6 +476,54 @@ double GModels::eval_gradients(const GEvent& event, const GObservation& obs)
 
     // Return
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Return simulated list of photons
+ *
+ * @param[in] area Simulation surface area (cm2).
+ * @param[in] dir Centre of simulation cone.
+ * @param[in] radius Radius of simulation cone (deg).
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ * @param[in] tmin Minimum photon arrival time.
+ * @param[in] tmax Maximum photon arrival time.
+ * @param[in] ran Random number generator. 
+ *
+ * This method returns a list of photons that has been derived by Monte Carlo
+ * simulation from the models.
+ *
+ * @todo Implement time ordering.
+ ***************************************************************************/
+GPhotons GModels::mc(const double& area,
+                     const GSkyDir& dir,  const double&  radius,
+                     const GEnergy& emin, const GEnergy& emax,
+                     const GTime&   tmin, const GTime&   tmax,
+                     GRan& ran)
+{
+    // Allocate photons
+    GPhotons photons;
+
+    // Simulate photons for all models
+    for (int i = 0; i < m_elements; ++i) {
+
+        // Get photons for actual model
+        GPhotons p = m_model[i].mc(area, dir, radius, emin, emax, tmin, tmax, ran);
+
+        // Reserve new space for photons
+        photons.reserve(photons.size() + p.size());
+        
+        // Add photons to list
+        for (int k = 0; k < p.size(); ++k) {
+            p[k].mcid(i);
+            photons.push_back(p[k]);
+        }
+
+    } // endfor: looped over models
+
+    // Return photon list
+    return photons;
 }
 
 
