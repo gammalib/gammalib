@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GModel.cpp  -  Model class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -383,6 +383,79 @@ double GModel::eval_gradients(const GEvent& event, const GObservation& obs)
 
     // Return
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Return simulated list of photons
+ *
+ * @param[in] area Simulation surface area (cm2).
+ * @param[in] dir Centre of simulation cone.
+ * @param[in] radius Radius of simulation cone (deg).
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ * @param[in] tmin Minimum photon arrival time.
+ * @param[in] tmax Maximum photon arrival time.
+ * @param[in] ran Random number generator. 
+ *
+ * This method returns a list of photons that has been derived by Monte Carlo
+ * simulation from the model. The mean number of photons that will be return
+ * by the method is determined from the source flux within the specified
+ * energy limits \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ multiplied by the
+ * illuminated surface area:
+ * \f[N={\rm area} \times \int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
+ * where
+ * \f$I(E)\f$ is the product of spectral and temporal model components.
+ *
+ * @todo Implement flux integration
+ * @todo Implement photon arrival direction simulation
+ * @todo Implement photon energy simulation
+ * @todo Implement unique model ID to assign as Monte Carlo ID
+ ***************************************************************************/
+GPhotons GModel::mc(const double& area,
+                    const GSkyDir& dir,  const double&  radius,
+                    const GEnergy& emin, const GEnergy& emax,
+                    const GTime&   tmin, const GTime&   tmax,
+                    GRan& ran)
+{
+    // Compute flux within [emin, emax] in model from spectral component
+    // (units: ph/cm2/s)
+    double flux = 1.0;
+
+    // Derive expecting counting rate within simulation surface (units: ph/s)
+    double rate = flux * area;
+
+    // Get photon arrival times from temporal model
+    GTimes times;
+    if (m_temporal != NULL) times = m_temporal->mc(rate, tmin, tmax, ran);
+
+    // Allocate photons
+    GPhotons photons;
+    if (times.size() > 0)
+        photons.reserve(times.size());
+
+    // Loop over photons
+    for (int i = 0; i < times.size(); ++i) {
+
+        // Allocate photon
+        GPhoton photon;
+
+        // Set photon arrival time
+        photon.time(times[i]);
+
+        // Set photon arrival direction
+        //TODO
+
+        // Set photon energy
+        //TODO
+
+        // Append photon
+        photons.push_back(photon);
+
+    } // endfor: looped over photons
+
+    // Return photon list
+    return photons;
 }
 
 
