@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectralConst.cpp  -  Spectral constant model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -26,6 +26,7 @@
 #include "GModelSpectralConst.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_MC             "GModelSpectralConst::mc(GEnergy&, GEnergy&, GRan&)"
 #define G_READ                      "GModelSpectralConst::read(GXmlElement&)"
 #define G_WRITE                    "GModelSpectralConst::write(GXmlElement&)"
 
@@ -225,6 +226,52 @@ double GModelSpectralConst::eval_gradients(const GEnergy& srcEng)
 
     // Return
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns model flux between [emin, emax] (units: ph/cm2/s)
+ *
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ *
+ * Computes
+ * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
+ * where
+ * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
+ * energy, respectively, and
+ * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ ***************************************************************************/
+double GModelSpectralConst::flux(const GEnergy& emin, const GEnergy& emax) const
+{
+    // Compute flux for a constant model
+    double flux = norm() * (emax.MeV() - emin.MeV());
+
+    // Return
+    return flux;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns MC energy between [emin, emax]
+ *
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ * @param[in] ran Random number generator.
+ *
+ * @todo To be implemented
+ ***************************************************************************/
+GEnergy GModelSpectralConst::mc(const GEnergy& emin, const GEnergy& emax,
+                                GRan& ran) const
+{
+    // Allocate energy
+    GEnergy energy;
+
+    // Dump warning that method is not yet implemented
+    throw GException::feature_not_implemented(G_MC);
+
+    // Return energy
+    return energy;
 }
 
 
