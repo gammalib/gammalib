@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GVector.cpp  -  test vector class                 *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -50,6 +50,7 @@ int main(void)
   }
   
   // Test 2: Allocate too large vector
+  /*
   try {
     cout << "Test 2: Allocate too large vector: " << endl;
     GVector test2(1000000000);
@@ -58,6 +59,7 @@ int main(void)
   catch (exception &e) {
     cout << e.what() << endl;
   }
+  */
 
   // Test 3: Assign values
   try {
