@@ -353,6 +353,7 @@ int main(void)
   }
 
   // Test 2: Allocate too large matrix
+  /*
   try {
     cout << "GSymMatrix - Test 2: Allocate too large matrix: ";
     GSymMatrix test2(100000000,100000000);
@@ -365,6 +366,7 @@ int main(void)
     cout << e.what() << endl;
 	throw;
   }
+  */
 
   // Test 3: Assign values
   try {

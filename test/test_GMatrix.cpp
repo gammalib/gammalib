@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GMatrix.cpp  -  test GMatrix class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2009 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -538,6 +538,7 @@ int main(void)
   }
 
   // Test 2: Allocate too large matrix
+  /*
   try {
     cout << "GMatrix - Test 2: Allocate too large matrix: ";
     GMatrix test2(100000,100000);
@@ -550,6 +551,7 @@ int main(void)
     cout << e.what() << endl;
 	throw;
   }
+  */
 
   // Test 3: Assign values
   try {
