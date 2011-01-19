@@ -122,6 +122,7 @@ protected:
                              const GObservation& obs, bool grad = false);
     double          temporal(const GEvent& event,
                              const GObservation& obs, bool grad = false);
+    bool            valid_model(void) const;
 
     // Proteced data members
     std::string              m_name;          //!< Model name
