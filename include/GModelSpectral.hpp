@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectral.hpp  -  Abstract spectral model base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,8 +20,10 @@
 #define GMODELSPECTRAL_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GModelPar.hpp"
 #include "GEnergy.hpp"
+#include "GRan.hpp"
 #include "GXmlElement.hpp"
 
 
@@ -53,6 +55,8 @@ public:
     virtual std::string     type(void) const = 0;
     virtual double          eval(const GEnergy& srcEng) = 0;
     virtual double          eval_gradients(const GEnergy& srcEng) = 0;
+    virtual double          flux(const GEnergy& emin, const GEnergy& emax) const = 0;
+    virtual GEnergy         mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const = 0;
     virtual void            read(const GXmlElement& xml) = 0;
     virtual void            write(GXmlElement& xml) const = 0;
     virtual std::string     print(void) const = 0;

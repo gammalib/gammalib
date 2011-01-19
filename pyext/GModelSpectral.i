@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelSpectral.i  -  Spectral model class SWIG interface        *
+ *        GModelSpectral.i  -  Spectral model class python interface       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectral.i
- * @brief GModelSpectral class SWIG interface.
+ * @brief GModelSpectral class python interface
  * @author J. Knodlseder
  */
 %{
@@ -24,7 +24,7 @@
 /***********************************************************************//**
  * @class GModelSpectral
  *
- * @brief Abstract SWIG interface definition for the spectral model class.
+ * @brief Abstract python interface definition for the spectral model class
  ***************************************************************************/
 class GModelSpectral {
 public:
@@ -40,6 +40,8 @@ public:
     virtual std::string     type(void) const = 0;
     virtual double          eval(const GEnergy& srcEng) = 0;
     virtual double          eval_gradients(const GEnergy& srcEng) = 0;
+    virtual double          flux(const GEnergy& emin, const GEnergy& emax) const = 0;
+    virtual GEnergy         mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const = 0;
     virtual void            read(const GXmlElement& xml) = 0;
     virtual void            write(GXmlElement& xml) const = 0;
 };

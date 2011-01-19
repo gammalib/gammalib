@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralExpPlaw.i
- * @brief GModelSpectralExpPlaw class SWIG interface.
+ * @brief GModelSpectralExpPlaw class python interface
  * @author J. Knodlseder
  */
 %{
@@ -44,6 +44,8 @@ public:
     std::string            type(void) const { return "ExpCutoff"; }
     double                 eval(const GEnergy& srcEng);
     double                 eval_gradients(const GEnergy& srcEng);
+    double                 flux(const GEnergy& emin, const GEnergy& emax) const;
+    GEnergy                mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
     void                   read(const GXmlElement& xml);
     void                   write(GXmlElement& xml) const;
 

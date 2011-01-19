@@ -1,5 +1,5 @@
 /***************************************************************************
- * GModelSpectralPlaw.i  -  Spectral power law model class SWIG interface  *
+ *   GModelSpectralPlaw.i  -  Spectral power law model class python I/F    *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralPlaw.i
- * @brief GModelSpectralPlaw class SWIG interface.
+ * @brief GModelSpectralPlaw class python interface
  * @author J. Knodlseder
  */
 %{
@@ -25,7 +25,7 @@
 /***********************************************************************//**
  * @class GModelSpectralPlaw
  *
- * @brief Powerlaw SWIG interface definition.
+ * @brief Powerlaw python interface definition
  ***************************************************************************/
 class GModelSpectralPlaw  : public GModelSpectral {
 public:
@@ -43,6 +43,8 @@ public:
     std::string         type(void) const { return "PowerLaw"; }
     double              eval(const GEnergy& srcEng);
     double              eval_gradients(const GEnergy& srcEng);
+    double              flux(const GEnergy& emin, const GEnergy& emax) const;
+    GEnergy             mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
     void                read(const GXmlElement& xml);
     void                write(GXmlElement& xml) const;
 
