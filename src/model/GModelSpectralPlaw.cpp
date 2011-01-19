@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectralPlaw.cpp  -  Spectral power law model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -26,7 +26,6 @@
 #include "GModelSpectralPlaw.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_PAR                                  "GModelSpectralPlaw::par(int)"
 #define G_READ                       "GModelSpectralPlaw::read(GXmlElement&)"
 #define G_WRITE                     "GModelSpectralPlaw::write(GXmlElement&)"
 
@@ -273,6 +272,76 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng)
 
     // Return
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns model flux between [emin, emax] (units: ph/cm2/s)
+ *
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ *
+ * Computes
+ * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
+ * where
+ * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
+ * energy, respectively, and
+ * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ ***************************************************************************/
+double GModelSpectralPlaw::flux(const GEnergy& emin, const GEnergy& emax) const
+{
+    // Compute flux
+    double flux = norm() * pow(pivot(), -index());
+    if (index() != -1.0) {
+        double exponent = index() + 1.0;
+        flux *= (pow(emax.MeV(), exponent) - pow(emin.MeV(), exponent)) / exponent;
+    }
+    else
+        flux *= (log(emax.MeV()) - log(emin.MeV()));
+
+    // Return flux
+    return flux;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns Monte Carlo energy between [emin, emax]
+ *
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ * @param[in] ran Random number generator.
+ *
+ * Returns Monte Carlo energy by randomly drawing from a power law.
+ ***************************************************************************/
+GEnergy GModelSpectralPlaw::mc(const GEnergy& emin, const GEnergy& emax,
+                               GRan& ran) const
+{
+    // Allocate energy
+    GEnergy energy;
+
+    // Case A: Index is not -1
+    if (index() != -1.0) {
+        double exponent = index() + 1.0;
+        double e_max    = pow(emax.MeV(), exponent);
+        double e_min    = pow(emin.MeV(), exponent);
+        double u        = ran.uniform();
+        double eng      = (u > 0.0) 
+                          ? exp(log(u * (e_max - e_min) + e_min) / exponent)
+                          : 0.0;
+        energy.MeV(eng);
+    }
+
+    // Case B: Index is -1
+    else {
+        double e_max = log(emax.MeV());
+        double e_min = log(emin.MeV());
+        double u     = ran.uniform();
+        double eng   = exp(u * (e_max - e_min) + e_min);
+        energy.MeV(eng);
+    }
+
+    // Return energy
+    return energy;
 }
 
 
