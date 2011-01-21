@@ -299,11 +299,7 @@ void GCTAObservation::load_unbinned(const std::string& filename)
     events->load(filename);
 
     // Load GTIs
-    //m_gti.load(filename);
-
-    // Set attributes
-    //m_tstart.met(m_gti.tstart());
-    //m_tstop.met(m_gti.tstop());
+    m_gti.load(filename);
 
     // Return
     return;
