@@ -39,13 +39,13 @@ public:
     virtual ~GPhoton(void);
  
     // Methods
-    void     clear(void);
-    GSkyDir& dir(void) { return m_dir; }
-    GEnergy& energy(void) { return m_energy; }
-    GTime&   time(void) { return m_time; }
-    void     dir(const GSkyDir& dir) { m_dir=dir; }
-    void     energy(const GEnergy& energy) { m_energy=energy; }
-    void     time(const GTime& time) { m_time=time; }
+    void           clear(void);
+    const GSkyDir& dir(void) const { return m_dir; }
+    const GEnergy& energy(void) const { return m_energy; }
+    const GTime&   time(void) const { return m_time; }
+    void           dir(const GSkyDir& dir) { m_dir=dir; }
+    void           energy(const GEnergy& energy) { m_energy=energy; }
+    void           time(const GTime& time) { m_time=time; }
 };
 
 

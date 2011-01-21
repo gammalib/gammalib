@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAEventAtom.hpp  -  CTA event atom class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -55,6 +55,9 @@ public:
     const GCTAInstDir& dir(void) const { return m_dir; }
     const GEnergy&     energy(void) const { return m_energy; }
     const GTime&       time(void) const { return m_time; }
+    void               dir(const GCTAInstDir& dir) { m_dir=dir; }
+    void               energy(const GEnergy& energy) { m_energy=energy; }
+    void               time(const GTime& time) { m_time=time; }
     std::string        print(void) const;
 
 protected:
