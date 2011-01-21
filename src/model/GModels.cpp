@@ -398,6 +398,9 @@ void GModels::write(GXml& xml) const
         else
             src->attribute("type", "DiffuseSource");
         src->attribute("name", m_model[i].name());
+        std::string instruments = m_model[i].instruments();
+        if (instruments.length() > 0)
+            src->attribute("instrument", instruments);
 
         // Get pointers on spectrum and spatial model
         GXmlElement* spec = (GXmlElement*)src->element("spectrum", 0);
