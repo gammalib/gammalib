@@ -273,6 +273,32 @@ double GRan::exp(const double& lambda)
 
 
 /***********************************************************************//**
+ * @brief Returns Chi2 deviates for 2 degrees of freedom
+ *
+ * @param[in] lambda Mean rate.
+ *
+ * Returns exponential deviates from the probability distribution
+ * \f[p(x) = \frac{1}{2\pi} x \exp( -\frac{1}{2} x^2 )\f]
+ * This method can be used to simulate the radom radial offset of a measured
+ * source position from the true source position, assuming an azimuthally
+ * symmetric 2D Gaussian probability distribution.
+ ***************************************************************************/
+double GRan::chisq2(void)
+{
+    // Allocate argument
+    double x;
+
+    // Get uniform deviate < 1
+    do {
+        x = uniform();
+    } while (x == 1.0);
+
+    // Return random value
+    return (sqrt(-2.0*log(1.0-x)));
+}
+
+
+/***********************************************************************//**
  * @brief Print class information
  ***************************************************************************/
 std::string GRan::print(void) const

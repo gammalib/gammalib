@@ -46,6 +46,7 @@ public:
     unsigned long long int int64(void);
     double                 uniform(void);
     double                 exp(const double& lambda);
+    double                 chisq2(void);
 };
 
 

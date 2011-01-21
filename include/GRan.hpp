@@ -57,7 +57,7 @@ public:
     unsigned long long int int64(void);
     double                 uniform(void);
     double                 exp(const double& lambda);
-    double                 chi2(void);
+    double                 chisq2(void);
     std::string            print(void) const;
   
 protected:
