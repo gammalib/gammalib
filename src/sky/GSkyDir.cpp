@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GSkyDir.cpp  -  Class that implements a sky direction          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,6 +24,8 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GSkyDir.hpp"
+#include "GMatrix.hpp"
+#include "GVector.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -225,6 +227,77 @@ void GSkyDir::lb_deg(const double& l, const double& b)
 
 
 /***********************************************************************//**
+ * @brief Set sky direction from 3D vector in celestial coordinates
+ *
+ * @param[in] vector 3D vector.
+ ***************************************************************************/
+void GSkyDir::celvector(const GVector& vector)
+{
+    // Set attributes
+    m_has_lb    = false;
+    m_has_radec = true;
+
+    // Convert vector into sky position
+    m_dec = asin(vector(2));
+    m_ra  = atan2(vector(1), vector(0));
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Rotate sky direction by zenith and azimuth angle
+ *
+ * @param[in] phi Azimuth angle (deg).
+ * @param[in] theta Zenith angle (deg).
+ *
+ * Rotate sky direction by a zenith and azimuth angle given in the system
+ * of the sky direction and aligned in celestial coordinates. 
+ * The azimuth angle is counted counter clockwise from celestial north
+ * (this is identical to the astronomical definition of a position angle).
+ ***************************************************************************/
+void GSkyDir::rotate(const double& phi, const double& theta)
+{
+    // If we have no equatorial coordinates then get them now
+    if (!m_has_radec && m_has_lb)
+        gal2equ();
+
+    // Allocate Euler and rotation matrices
+    GMatrix Ry;
+    GMatrix Rz;
+    GMatrix Rback;
+    GMatrix Rrot;
+
+    // Set up rotation matrix to rotate into and back from the native
+    // coordinate
+    Ry.eulery(m_dec*rad2deg - 90.0);
+    Rz.eulerz(-m_ra*rad2deg);
+    Rback = transpose(Ry * Rz);
+
+    // Set up rotation matrix for native coordinate vector
+    Ry.eulery(-theta);
+    Rz.eulerz(-phi);
+    Rrot = Rz * Ry;
+
+    // Set native coordinate vector (in z-direction by definition)
+    GVector native(0.0, 0.0, 1.0);
+
+    // Rotate native coordinate vector
+    GVector rotnative = Rrot * native;
+
+    // Rotate vector back into sky direction
+    GVector dir = Rback * rotnative;
+
+    // Set sky direction
+    celvector(dir);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Returns galactic longitude in radians
  ***************************************************************************/
 double GSkyDir::l(void) const
@@ -337,6 +410,27 @@ double GSkyDir::dec_deg(void) const
 
 
 /***********************************************************************//**
+ * @brief Returns sky direction as 3D vector in celestial coordinates
+ ***************************************************************************/
+GVector GSkyDir::celvector(void) const
+{
+    // If we have no equatorial coordinates then get them now
+    if (!m_has_radec && m_has_lb)
+        gal2equ();
+
+    // Compute 3D vector
+    double  cosra  = cos(m_ra);
+    double  sinra  = sin(m_ra);
+    double  cosdec = cos(m_dec);
+    double  sindec = sin(m_dec);
+    GVector vector(cosdec*cosra, cosdec*sinra, sindec);
+
+    // Return vector
+    return vector;
+}
+
+
+/***********************************************************************//**
  * @brief Compute angular distance between sky directions in radians
  *
  * @param[in] dir Sky direction to which distance is to be computed.
@@ -390,6 +484,27 @@ double GSkyDir::dist_deg(const GSkyDir& dir) const
 {
     // Return distance in degrees
     return (dist(dir) * rad2deg);
+}
+
+
+/***********************************************************************//**
+ * @brief Print vector information
+ ***************************************************************************/
+std::string GSkyDir::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Put coordinates in string
+    if (m_has_lb)
+        result = "(l,b)=("+str(m_l*rad2deg)+","+str(m_b*rad2deg)+")";
+    else if (m_has_radec)
+        result = "(RA,Dec)=("+str(m_ra*rad2deg)+","+str(m_dec*rad2deg)+")";
+    else
+        result = "(RA,Dec)=(not initialised)";
+
+    // Return result
+    return result;
 }
 
 
@@ -534,17 +649,32 @@ void GSkyDir::euler(const int& type, const double& xin, const double &yin,
 /***********************************************************************//**
  * @brief Output operator
  *
- * @param[in] os Output stream
- * @param[in] column Sky direction to put in output stream
+ * @param[in] os Output stream.
+ * @param[in] dir Sky direction.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GSkyDir& dir)
 {
-    // Create coordinate system dependent output
-    if (dir.m_has_lb)
-        os << "(l,b)=(" << dir.m_l*rad2deg << "," << dir.m_b*rad2deg << ")";
-    else if (dir.m_has_radec)
-        os << "(RA,Dec)=(" << dir.m_ra*rad2deg << "," << dir.m_dec*rad2deg << ")";
+     // Write sky direction in output stream
+    os << dir.print();
 
     // Return output stream
     return os;
 }
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] dir Sky direction.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GSkyDir& dir)
+{
+    // Write sky direction into logger
+    log << dir.print();
+
+    // Return logger
+    return log;
+}
+
+

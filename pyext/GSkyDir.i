@@ -35,21 +35,24 @@ public:
     virtual ~GSkyDir(void);
 
     // Methods
-    void   clear(void);
-    void   radec(const double& ra, const double& dec);
-    void   radec_deg(const double& ra, const double& dec);
-    void   lb(const double& l, const double& b);
-    void   lb_deg(const double& l, const double& b);
-    double l(void) const;
-    double l_deg(void) const;
-    double b(void) const;
-    double b_deg(void) const;
-    double ra(void) const;
-    double ra_deg(void) const;
-    double dec(void) const;
-    double dec_deg(void) const;
-    double dist(const GSkyDir& dir) const;
-    double dist_deg(const GSkyDir& dir) const;
+    void    clear(void);
+    void    radec(const double& ra, const double& dec);
+    void    radec_deg(const double& ra, const double& dec);
+    void    lb(const double& l, const double& b);
+    void    lb_deg(const double& l, const double& b);
+    void    celvector(const GVector& vector);
+    void    rotate(const double& phi, const double& theta);
+    double  l(void) const;
+    double  l_deg(void) const;
+    double  b(void) const;
+    double  b_deg(void) const;
+    double  ra(void) const;
+    double  ra_deg(void) const;
+    double  dec(void) const;
+    double  dec_deg(void) const;
+    GVector celvector(void) const;
+    double  dist(const GSkyDir& dir) const;
+    double  dist_deg(const GSkyDir& dir) const;
 };
 
 
@@ -58,10 +61,7 @@ public:
  ***************************************************************************/
 %extend GSkyDir {
     char *__str__() {
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        return tochar(str);
+        return tochar(self->print());
     }
     GSkyDir copy() {
         return (*self);
