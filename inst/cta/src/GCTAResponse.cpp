@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAResponse.cpp  -  CTA Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -65,6 +65,26 @@ GCTAResponse::GCTAResponse(void) : GResponse()
 {
     // Initialise class members for clean destruction
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief IRF constructor
+ ***************************************************************************/
+GCTAResponse::GCTAResponse(const std::string& rspname, const std::string& caldb)
+                                                                   : GResponse()
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Set calibration database
+    this->caldb(caldb);
+
+    // Load IRF
+    this->load(rspname);
 
     // Return
     return;
@@ -663,6 +683,59 @@ double GCTAResponse::ntdisp(const GSkyDir& srcDir, const GEnergy& srcEng,
 
     // Return integral
     return ntdisp;
+}
+
+
+/***********************************************************************//**
+ * @brief Simulate event from photon
+ *
+ * @param[in] area Simulation surface area.
+ * @param[in] photon Photon.
+ * @param[in] pnt Pointing.
+ * @param[in] ran Random number generator.
+ *
+ * Simulates a CTA event using the response function from an incident photon.
+ * If the event is not detected a NULL pointer is returned.
+ *
+ * @todo Implement energy dispersion.
+ ***************************************************************************/
+GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
+                                const GPointing& pnt, GRan& ran) const
+{
+    // Initialise event
+    GCTAEventAtom* event = NULL;
+
+    // Compute effective area for photon
+    double effective_area = aeff(photon.dir(), photon.energy(), photon.time(),
+                                 pnt);
+
+    // Continue only if event is detected
+    if (ran.uniform() <= effective_area/area) {
+
+        // Simulate offset from photon arrival direction
+        double theta = psf_sigma(photon.energy()) * ran.chisq2() * rad2deg;
+        double phi   = 360.0 * ran.uniform();
+
+        // Rotate sky direction by offset
+        GSkyDir sky_dir = photon.dir();
+        sky_dir.rotate(phi, theta);
+
+        // Set measured photon arrival direction
+        GCTAInstDir inst_dir;
+        inst_dir.skydir(sky_dir);
+
+        // Allocate event
+        event = new GCTAEventAtom;
+
+        // Set event attributes
+        event->dir(inst_dir);
+        event->energy(photon.energy());
+        event->time(photon.time());
+
+    } // endif: event was detected
+
+    // Return event
+    return event;
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAResponse.i  -  CTA Response class SWIG definition          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -31,20 +31,23 @@ class GCTAResponse : public GResponse {
 public:
     // Constructors and destructors
     GCTAResponse(void);
+    explicit GCTAResponse(const std::string& rspname, const std::string& caldb);
     GCTAResponse(const GCTAResponse& rsp);
     virtual ~GCTAResponse(void);
 
     // Implement pure virtual base class methods
-    void          clear(void);
-    GCTAResponse* clone(void) const;
-    bool          hasedisp(void) const { return false; }
-    bool          hastdisp(void) const { return false; }
-    double        irf(const GEvent& event, const GModel& model,
-                      const GEnergy& srcEng, const GTime& srcTime,
-                      const GObservation& obs) const;
-    double        npred(const GModel& model, const GEnergy& srcEng,
-                        const GTime& srcTime,
-                        const GObservation& obs) const;
+    void           clear(void);
+    GCTAResponse*  clone(void) const;
+    bool           hasedisp(void) const { return false; }
+    bool           hastdisp(void) const { return false; }
+    double         irf(const GEvent& event, const GModel& model,
+                       const GEnergy& srcEng, const GTime& srcTime,
+                       const GObservation& obs) const;
+    double         npred(const GModel& model, const GEnergy& srcEng,
+                         const GTime& srcTime,
+                         const GObservation& obs) const;
+    GCTAEventAtom* mc(const double& area, const GPhoton& photon,
+                      const GPointing& pnt, GRan& ran) const;
 
     // Other Methods
     void        caldb(const std::string& caldb);
