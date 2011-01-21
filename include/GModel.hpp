@@ -92,6 +92,7 @@ public:
     std::string     name(void) const { return m_name; }
     void            name(const std::string& name) { m_name=name; return; }
     void            instruments(const std::string& instruments);
+    std::string     instruments(void) const;
     GModelSpatial*  spatial(void) const { return m_spatial; }
     GModelSpectral* spectral(void) const { return m_spectral; }
     GModelTemporal* temporal(void) const { return m_temporal; }

@@ -292,6 +292,31 @@ void GModel::instruments(const std::string& instruments)
 
 
 /***********************************************************************//**
+ * @brief Returns instruments to which model applies
+ *
+ * @param[in] instruments String of instruments.
+ *
+ * Returns a comma separated list of instruments to which model applies. If
+ * no instruments exist then an empty list is returned.
+ ***************************************************************************/
+std::string GModel::instruments(void) const
+{
+    // Initialise string
+    std::string result;
+    
+    // Attach all instruments
+    for (int i = 0; i < m_instruments.size(); ++i) {
+        if (i > 0)
+            result += ",";
+        result += m_instruments[i];
+    }
+
+    // Return
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Returns value of source model
  *
  * @param[in] srcDir True photon direction.
