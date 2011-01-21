@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GMatrix.cpp  -  matrix class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,6 +23,7 @@
 #include "GException.hpp"
 #include "GVector.hpp"
 #include "GMatrix.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS1                                "GMatrix::operator(int,int)"
@@ -588,6 +589,114 @@ double GMatrix::fill(void) const
 
     // Return result
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Set Euler rotation matrix around x axis
+ *
+ * @param[in] angle Rotation angle (degrees)
+ ***************************************************************************/
+void GMatrix::eulerx(const double& angle)
+{
+    // Free members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Construct 3*3 matrix
+    constructor(3,3);
+
+    // Compute angles
+    double cosangle = cos(angle * deg2rad);
+    double sinangle = sin(angle * deg2rad);
+
+    // Set matrix elements
+    (*this)(0,0) =       1.0;
+    (*this)(0,1) =       0.0;
+    (*this)(0,2) =       0.0;
+    (*this)(1,0) =       0.0;
+    (*this)(1,1) =  cosangle;
+    (*this)(1,2) = -sinangle;
+    (*this)(2,0) =       0.0;
+    (*this)(2,1) =  sinangle;
+    (*this)(2,2) =  cosangle;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set Euler rotation matrix around y axis
+ *
+ * @param[in] angle Rotation angle (degrees)
+ ***************************************************************************/
+void GMatrix::eulery(const double& angle)
+{
+    // Free members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Construct 3*3 matrix
+    constructor(3,3);
+
+    // Compute angles
+    double cosangle = cos(angle * deg2rad);
+    double sinangle = sin(angle * deg2rad);
+
+    // Set matrix elements
+    (*this)(0,0) =  cosangle;
+    (*this)(0,1) =       0.0;
+    (*this)(0,2) =  sinangle;
+    (*this)(1,0) =       0.0;
+    (*this)(1,1) =       1.0;
+    (*this)(1,2) =       0.0;
+    (*this)(2,0) = -sinangle;
+    (*this)(2,1) =       0.0;
+    (*this)(2,2) =  cosangle;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set Euler rotation matrix around z axis
+ *
+ * @param[in] angle Rotation angle (degrees)
+ ***************************************************************************/
+void GMatrix::eulerz(const double& angle)
+{
+    // Free members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Construct 3*3 matrix
+    constructor(3,3);
+
+    // Compute angles
+    double cosangle = cos(angle * deg2rad);
+    double sinangle = sin(angle * deg2rad);
+
+    // Set matrix elements
+    (*this)(0,0) =  cosangle;
+    (*this)(0,1) = -sinangle;
+    (*this)(0,2) =       0.0;
+    (*this)(1,0) =  sinangle;
+    (*this)(1,1) =  cosangle;
+    (*this)(1,2) =       0.0;
+    (*this)(2,0) =       0.0;
+    (*this)(2,1) =       0.0;
+    (*this)(2,2) =       1.0;
+
+    // Return
+    return;
 }
 
 

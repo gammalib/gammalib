@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GSkyDir.hpp  -  Class that implements a sky direction          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,10 @@
 #define GSKYDIR_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include <iostream>
+#include "GLog.hpp"
+#include "GVector.hpp"
 
 
 /***********************************************************************//**
@@ -41,6 +44,7 @@ class GSkyDir {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GSkyDir& dir);
+    friend GLog&         operator<< (GLog& log, const GSkyDir& dir);
 
 public:
     // Constructors and destructors
@@ -52,21 +56,25 @@ public:
     GSkyDir& operator= (const GSkyDir& dir);
 
     // Methods
-    void   clear(void);
-    void   radec(const double& ra, const double& dec);
-    void   radec_deg(const double& ra, const double& dec);
-    void   lb(const double& l, const double& b);
-    void   lb_deg(const double& l, const double& b);
-    double l(void) const;
-    double l_deg(void) const;
-    double b(void) const;
-    double b_deg(void) const;
-    double ra(void) const;
-    double ra_deg(void) const;
-    double dec(void) const;
-    double dec_deg(void) const;
-    double dist(const GSkyDir& dir) const;
-    double dist_deg(const GSkyDir& dir) const;
+    void        clear(void);
+    void        radec(const double& ra, const double& dec);
+    void        radec_deg(const double& ra, const double& dec);
+    void        lb(const double& l, const double& b);
+    void        lb_deg(const double& l, const double& b);
+    void        celvector(const GVector& vector);
+    void        rotate(const double& phi, const double& theta);
+    double      l(void) const;
+    double      l_deg(void) const;
+    double      b(void) const;
+    double      b_deg(void) const;
+    double      ra(void) const;
+    double      ra_deg(void) const;
+    double      dec(void) const;
+    double      dec_deg(void) const;
+    GVector     celvector(void) const;
+    double      dist(const GSkyDir& dir) const;
+    double      dist_deg(const GSkyDir& dir) const;
+    std::string print(void) const;
 
 private:
     // Private methods

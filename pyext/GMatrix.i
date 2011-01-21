@@ -32,35 +32,34 @@ public:
     virtual ~GMatrix();
 
     // Operators
-    GMatrix       operator+ (const GMatrix& m) const;
-    GMatrix       operator- (const GMatrix& m) const;
-    GMatrix       operator* (const GMatrix& m) const;
-    GVector       operator* (const GVector& v) const;
-    //_USE_BASE int           operator== (const GMatrix& m) const;
-    //_USE_BASE int           operator!= (const GMatrix& m) const;
-    GMatrix       operator- () const;
-    GMatrix&      operator+= (const GMatrix& m);
-    GMatrix&      operator-= (const GMatrix& m);
-    GMatrix&      operator*= (const GMatrix& m);
-    GMatrix&      operator*= (const double& s);
-    GMatrix&      operator/= (const double& s);
+    GMatrix  operator+ (const GMatrix& m) const;
+    GMatrix  operator- (const GMatrix& m) const;
+    GMatrix  operator* (const GMatrix& m) const;
+    GVector  operator* (const GVector& v) const;
+    GMatrix  operator- () const;
+    GMatrix& operator+= (const GMatrix& m);
+    GMatrix& operator-= (const GMatrix& m);
+    GMatrix& operator*= (const GMatrix& m);
+    GMatrix& operator*= (const double& s);
+    GMatrix& operator/= (const double& s);
 
     // Methods
+    void    clear(void);
+    void    transpose(void);
+    void    invert(void);
     void    add_col(const GVector& v, int col);
-    //TBD void    cholesky_decompose(int compress = 1);
-    //TBD GVector cholesky_solver(const GVector& v, int compress = 1);
-    //TBD void    cholesky_invert(int compress = 1);
-    void    clear();
+    void    insert_col(const GVector& v, int col);
     GVector extract_row(int row) const;
     GVector extract_col(int col) const;
-    GMatrix extract_lower_triangle() const;
-    GMatrix extract_upper_triangle() const;
-    double  fill() const;
-    void    insert_col(const GVector& v, int col);
-    double  min() const;
-    double  max() const;
-    double  sum() const;
-    void    transpose();
+    GMatrix extract_lower_triangle(void) const;
+    GMatrix extract_upper_triangle(void) const;
+    double  fill(void) const;
+    double  min(void) const;
+    double  max(void) const;
+    double  sum(void) const;
+    void    eulerx(const double& angle);
+    void    eulery(const double& angle);
+    void    eulerz(const double& angle);
 };
 
 

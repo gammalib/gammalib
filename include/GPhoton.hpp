@@ -58,16 +58,16 @@ public:
     GPhoton& operator= (const GPhoton& ph);
 
     // Methods
-    void        clear(void);
-    GSkyDir&    dir(void) { return m_dir; }
-    GEnergy&    energy(void) { return m_energy; }
-    GTime&      time(void) { return m_time; }
-    int         mcid(void) { return m_mc_id; }
-    void        dir(const GSkyDir& dir) { m_dir=dir; }
-    void        energy(const GEnergy& energy) { m_energy=energy; }
-    void        time(const GTime& time) { m_time=time; }
-    void        mcid(const int& mcid) { m_mc_id=mcid; }
-    std::string print(void) const;
+    void           clear(void);
+    const GSkyDir& dir(void) const { return m_dir; }
+    const GEnergy& energy(void) const { return m_energy; }
+    const GTime&   time(void) const { return m_time; }
+    int            mcid(void) { return m_mc_id; }
+    void           dir(const GSkyDir& dir) { m_dir=dir; }
+    void           energy(const GEnergy& energy) { m_energy=energy; }
+    void           time(const GTime& time) { m_time=time; }
+    void           mcid(const int& mcid) { m_mc_id=mcid; }
+    std::string    print(void) const;
   
 protected:
     // Protected methods
