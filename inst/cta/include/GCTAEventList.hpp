@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAEventList.hpp  -  CTA Event list class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,10 +21,12 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include "GEventList.hpp"
 #include "GCTAEventAtom.hpp"
 #include "GCTAObservation.hpp"
 #include "GFitsTable.hpp"
+#include "GFitsBinTable.hpp"
 
 
 /***********************************************************************//**
@@ -46,22 +48,28 @@ public:
     // Implemented pure virtual base class methods
     void           clear(void);
     GCTAEventList* clone(void) const;
-    int            size(void) const { return m_num; }
+    int            size(void) const { return m_events.size(); }
     void           load(const std::string& filename);
+    void           save(const std::string& filename, bool clobber = false) const;
+    void           read(GFitsTable* hdu);
+    void           write(GFits* file) const;
     GCTAEventAtom* pointer(int index);
-    int            number(void) const { return m_num; }
+    int            number(void) const { return m_events.size(); }
     std::string    print(void) const;
+
+    // Implement other methods
+    void append(const GCTAEventAtom& event);
+    void reserve(const int& number);
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GCTAEventList& list);
     void free_members(void);
-    void load_events(GFitsTable* hdu);
+    void write_header(GFitsBinTable* hdu) const;
 
-    // Protected data area
-    int            m_num;            //!< Number of events
-    GCTAEventAtom* m_events;         //!< Pointer to events
+    // Protected members
+    std::vector<GCTAEventAtom> m_events;  //!< Events
 };
 
 #endif /* GCTAEVENTLIST_HPP */

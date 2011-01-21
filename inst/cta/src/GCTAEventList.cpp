@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAEventList.cpp  -  CTA event list class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -26,7 +26,6 @@
 #include "GCTAResponse.hpp"
 #include "GTools.hpp"
 #include "GFits.hpp"
-#include "GFitsTable.hpp"
 #include "GFitsTableBitCol.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GFitsTableDoubleCol.hpp"
@@ -52,8 +51,6 @@
 
 /***********************************************************************//**
  * @brief Void constructor
- *
- * Creates empty instance of GCTAEventList.
  ***************************************************************************/
 GCTAEventList::GCTAEventList(void) : GEventList()
 {
@@ -69,9 +66,6 @@ GCTAEventList::GCTAEventList(void) : GEventList()
  * @brief Copy constructor
  *
  * @param[in] list Event list.
- *
- * Creates instance of GCTAEventList by copying information from another
- * instance.
  ***************************************************************************/
 GCTAEventList::GCTAEventList(const GCTAEventList& list) : GEventList(list)
 {
@@ -108,7 +102,7 @@ GCTAEventList::~GCTAEventList(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] list Event list to be assigned.
+ * @param[in] list Event list.
  ***************************************************************************/
 GCTAEventList& GCTAEventList::operator= (const GCTAEventList& list)
 {
@@ -192,7 +186,7 @@ void GCTAEventList::load(const std::string& filename)
     GFitsTable* hdu = file.table("EVENTS");
 
     // Load columns
-    load_events(hdu);
+    read(hdu);
 
     // Close FITS file
     file.close();
@@ -203,59 +197,23 @@ void GCTAEventList::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Returns pointer to an event
+ * @brief Save CTA events into FITS file.
  *
- * @param[in] index Event index (starting from 0).
+ * @param[in] filename FITS filename.
+ * @param[in] clobber Overwrite existing FITS file (default=false).
  *
- * @exception GException::out_of_range
- *            Event index not in valid range.
- *
- * This method returns a pointer on an event atom.
+ * Write the CTA event list into FITS file.
  ***************************************************************************/
-GCTAEventAtom* GCTAEventList::pointer(int index)
+void GCTAEventList::save(const std::string& filename, bool clobber) const
 {
-    // Optionally check if the index is valid
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= m_num)
-        throw GException::out_of_range(G_POINTER, index, 0, m_num-1);
-    #endif
+    // Open/create FITS file
+    GFits fits(filename);
 
-    // Return pointer
-    return ((GCTAEventAtom*)m_events + index);
-}
-
-
-/***********************************************************************//**
- * @brief Print event list information
- ***************************************************************************/
-std::string GCTAEventList::print(void) const
-{
-    // Initialise result string
-    std::string result;
-
-    // Append header
-    result.append("=== GCTAEventList ===\n");
-    result.append(parformat("Number of events")+str(number()));
-
-    // Return result
-    return result;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                             Private methods                             =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Initialise class members
- ***************************************************************************/
-void GCTAEventList::init_members(void)
-{
-    // Initialise base class members
-    m_num    = 0;
-    m_events = NULL;
+    // Write CTA events into FITS file
+    write(&fits);
+    
+    // Save FITS file
+    fits.save(clobber);
 
     // Return
     return;
@@ -263,63 +221,19 @@ void GCTAEventList::init_members(void)
 
 
 /***********************************************************************//**
- * @brief Copy class members
- *
- * @param[in] list GCTAEventList members which should be copied.
- ***************************************************************************/
-void GCTAEventList::copy_members(const GCTAEventList& list)
-{
-    // Copy attributes
-    m_num = list.m_num;
-
-    // If there are events then copy them
-    if (m_num > 0 && list.m_events != NULL) {
-
-        // Allocate memory for events
-        m_events = new GCTAEventAtom[m_num];
-
-        // Copy events using the correct casts
-        GCTAEventAtom* dst = (GCTAEventAtom*)m_events;
-        GCTAEventAtom* src = (GCTAEventAtom*)list.m_events;
-        for (int i = 0; i < m_num; ++i)
-            *dst++ = *src++;
-
-    } // endif: there were events to copy
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Delete class members
- ***************************************************************************/
-void GCTAEventList::free_members(void)
-{
-    // Free memory.
-    if (m_events != NULL) delete [] m_events;
-
-    // Signal free pointers
-    m_events = NULL;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Load CTA events from FITS HDU.
+ * @brief Read CTA events from FITS HDU.
  *
  * @param[in] hdu Pointer to FITS table.
  *
- * This method loads the CTA event list from a FITS file into memory. Only
- * quantities that are relevant for science analysis will be loaded. This
- * method can therefore not be used to modify the contents of a CTA events
- * file. For this purpose specific code should be written that accesses the
- * data directly through the GFits class.
+ * This method read the CTA event list from a FITS table HDU into memory.
+ *
+ * @todo Implement agreed column format
  ***************************************************************************/
-void GCTAEventList::load_events(GFitsTable* hdu)
+void GCTAEventList::read(GFitsTable* hdu)
 {
+    // Clear existing events
+    m_events.clear();
+
     // Allocate space for keyword name
     char keyword[10];
 
@@ -327,13 +241,13 @@ void GCTAEventList::load_events(GFitsTable* hdu)
     if (hdu != NULL) {
 
         // Extract number of events in FITS file
-        m_num = hdu->integer("NAXIS2");
+        int num = hdu->integer("NAXIS2");
 
         // If there are events then load them
-        if (m_num > 0) {
+        if (num > 0) {
 
-            // Allocate data
-            m_events = new GCTAEventAtom[m_num];
+            // Reserve data
+            m_events.reserve(num);
 
             // Get column pointers
             GFitsTableULongCol*  ptr_eid         = (GFitsTableULongCol*)hdu->column("EVENT_ID");
@@ -353,7 +267,7 @@ void GCTAEventList::load_events(GFitsTable* hdu)
             GFitsTableFloatCol*  ptr_core_err    = (GFitsTableFloatCol*)hdu->column("CORE_ERR");
             GFitsTableFloatCol*  ptr_xmax        = (GFitsTableFloatCol*)hdu->column("XMAX");
             GFitsTableFloatCol*  ptr_xmax_err    = (GFitsTableFloatCol*)hdu->column("XMAX_ERR");
-            GFitsTableDoubleCol* ptr_energy      = (GFitsTableDoubleCol*)hdu->column("ENERGY");
+            GFitsTableFloatCol*  ptr_energy      = (GFitsTableFloatCol*)hdu->column("ENERGY");
             GFitsTableFloatCol*  ptr_energy_err  = (GFitsTableFloatCol*)hdu->column("ENERGY_ERR");
             GFitsTableFloatCol*  ptr_hil_msw     = (GFitsTableFloatCol*)hdu->column("HIL_MSW");
             GFitsTableFloatCol*  ptr_hil_msw_err = (GFitsTableFloatCol*)hdu->column("HIL_MSW_ERR");
@@ -361,36 +275,338 @@ void GCTAEventList::load_events(GFitsTable* hdu)
             GFitsTableFloatCol*  ptr_hil_msl_err = (GFitsTableFloatCol*)hdu->column("HIL_MSL_ERR");
 
             // Copy data from columns into GCTAEventAtom objects
-            GCTAEventAtom* ptr = (GCTAEventAtom*)m_events;
-            for (int i = 0; i < m_num; ++i) {
-                ptr[i].m_time.met((*ptr_time)(i));
-                ptr[i].m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
-                ptr[i].m_energy.TeV((*ptr_energy)(i));
-                ptr[i].m_event_id    = (*ptr_eid)(i);
-                ptr[i].m_multip      = (*ptr_multip)(i);
-                ptr[i].m_dir_err     = (*ptr_dir_err)(i);
-                ptr[i].m_detx        = (*ptr_detx)(i);
-                ptr[i].m_dety        = (*ptr_dety)(i);
-                ptr[i].m_alt_pnt     = (*ptr_alt_pnt)(i);
-                ptr[i].m_az_pnt      = (*ptr_az_pnt)(i);
-                ptr[i].m_alt         = (*ptr_alt)(i);
-                ptr[i].m_az          = (*ptr_az)(i);
-                ptr[i].m_corex       = (*ptr_corex)(i);
-                ptr[i].m_corey       = (*ptr_corey)(i);
-                ptr[i].m_core_err    = (*ptr_core_err)(i);
-                ptr[i].m_xmax        = (*ptr_xmax)(i);
-                ptr[i].m_xmax_err    = (*ptr_xmax_err)(i);
-                ptr[i].m_energy_err  = (*ptr_energy_err)(i);
-                ptr[i].m_hil_msw     = (*ptr_hil_msw)(i);
-                ptr[i].m_hil_msw_err = (*ptr_hil_msw_err)(i);
-                ptr[i].m_hil_msl     = (*ptr_hil_msl)(i);
-                ptr[i].m_hil_msl_err = (*ptr_hil_msl_err)(i);
+            GCTAEventAtom event;
+            for (int i = 0; i < num; ++i) {
+                event.m_time.met((*ptr_time)(i));
+                event.m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
+                event.m_energy.TeV((*ptr_energy)(i));
+                event.m_event_id    = (*ptr_eid)(i);
+                event.m_multip      = (*ptr_multip)(i);
+                event.m_dir_err     = (*ptr_dir_err)(i);
+                event.m_detx        = (*ptr_detx)(i);
+                event.m_dety        = (*ptr_dety)(i);
+                event.m_alt_pnt     = (*ptr_alt_pnt)(i);
+                event.m_az_pnt      = (*ptr_az_pnt)(i);
+                event.m_alt         = (*ptr_alt)(i);
+                event.m_az          = (*ptr_az)(i);
+                event.m_corex       = (*ptr_corex)(i);
+                event.m_corey       = (*ptr_corey)(i);
+                event.m_core_err    = (*ptr_core_err)(i);
+                event.m_xmax        = (*ptr_xmax)(i);
+                event.m_xmax_err    = (*ptr_xmax_err)(i);
+                event.m_energy_err  = (*ptr_energy_err)(i);
+                event.m_hil_msw     = (*ptr_hil_msw)(i);
+                event.m_hil_msw_err = (*ptr_hil_msw_err)(i);
+                event.m_hil_msl     = (*ptr_hil_msl)(i);
+                event.m_hil_msl_err = (*ptr_hil_msl_err)(i);
+                m_events.push_back(event);
             }
 
-        }
-        else
-            m_num = 0;
+        } // endif: there were events
 
+    } // endif: HDU was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write CTA events into FITS file.
+ *
+ * @param[in] file FITS file.
+ *
+ * Write the CTA event list into FITS file.
+ *
+ * @todo The TELMASK column is allocated with a dummy length of 100.
+ * @todo Implement agreed column format
+ ***************************************************************************/
+void GCTAEventList::write(GFits* file) const
+{
+    // Allocate FITS binary table HDU
+    GFitsBinTable* hdu = new GFitsBinTable;
+
+    // Set extension name
+    hdu->extname("EVENTS");
+
+    // Write header
+    write_header(hdu);
+
+    // If there are events then write them now
+    if (size() > 0) {
+
+        // Allocate columns
+        GFitsTableULongCol  col_eid         = GFitsTableULongCol("EVENT_ID", size());
+        GFitsTableDoubleCol col_time        = GFitsTableDoubleCol("TIME", size());
+        GFitsTableDoubleCol col_live        = GFitsTableDoubleCol("TLIVE", size());
+        GFitsTableShortCol  col_multip      = GFitsTableShortCol("MULTIP", size());
+        GFitsTableBitCol    col_telmask     = GFitsTableBitCol("TELMASK", size(), 100);
+        GFitsTableFloatCol  col_ra          = GFitsTableFloatCol("RA", size());
+        GFitsTableFloatCol  col_dec         = GFitsTableFloatCol("DEC", size());
+        GFitsTableFloatCol  col_direrr      = GFitsTableFloatCol("DIR_ERR", size());
+        GFitsTableFloatCol  col_detx        = GFitsTableFloatCol("DETX", size());
+        GFitsTableFloatCol  col_dety        = GFitsTableFloatCol("DETY", size());
+        GFitsTableFloatCol  col_alt         = GFitsTableFloatCol("ALT", size());
+        GFitsTableFloatCol  col_az          = GFitsTableFloatCol("AZ", size());
+        GFitsTableFloatCol  col_alt_pnt     = GFitsTableFloatCol("ALT_PNT", size());
+        GFitsTableFloatCol  col_az_pnt      = GFitsTableFloatCol("AZ_PNT", size());
+        GFitsTableFloatCol  col_corex       = GFitsTableFloatCol("COREX", size());
+        GFitsTableFloatCol  col_corey       = GFitsTableFloatCol("COREY", size());
+        GFitsTableFloatCol  col_core_err    = GFitsTableFloatCol("CORE_ERR", size());
+        GFitsTableFloatCol  col_xmax        = GFitsTableFloatCol("XMAX", size());
+        GFitsTableFloatCol  col_xmax_err    = GFitsTableFloatCol("XMAX_ERR", size());
+        GFitsTableFloatCol  col_energy      = GFitsTableFloatCol("ENERGY", size());
+        GFitsTableFloatCol  col_energy_err  = GFitsTableFloatCol("ENERGY_ERR", size());
+        GFitsTableFloatCol  col_hil_msw     = GFitsTableFloatCol("HIL_MSW", size());
+        GFitsTableFloatCol  col_hil_msw_err = GFitsTableFloatCol("HIL_MSW_ERR", size());
+        GFitsTableFloatCol  col_hil_msl     = GFitsTableFloatCol("HIL_MSL", size());
+        GFitsTableFloatCol  col_hil_msl_err = GFitsTableFloatCol("HIL_MSL_ERR", size());
+
+        // Fill columns
+        for (int i = 0; i < size(); ++i) {
+            col_eid(i)         = i;
+            col_time(i)        = m_events[i].time().met();
+            col_live(i)        = 0.0;
+            col_multip(i)      = 0;
+            //col_telmask
+            col_ra(i)          = m_events[i].dir().ra_deg();
+            col_dec(i)         = m_events[i].dir().dec_deg();
+            col_direrr(i)      = 0.0;
+            col_detx(i)        = 0.0;
+            col_dety(i)        = 0.0;
+            col_alt(i)         = 0.0;
+            col_az(i)          = 0.0;
+            col_alt_pnt(i)     = 0.0;
+            col_az_pnt(i)      = 0.0;
+            col_corex(i)       = 0.0;
+            col_corey(i)       = 0.0;
+            col_core_err(i)    = 0.0;
+            col_xmax(i)        = 0.0;
+            col_xmax_err(i)    = 0.0;
+            col_energy(i)      = m_events[i].energy().TeV();
+            col_energy_err(i)  = 0.0;
+            col_hil_msw(i)     = 0.0;
+            col_hil_msw_err(i) = 0.0;
+            col_hil_msl(i)     = 0.0;
+            col_hil_msl_err(i) = 0.0;
+        } // endfor: looped over rows
+
+        // Append columns to table
+        hdu->append_column(col_eid);
+        hdu->append_column(col_time);
+        hdu->append_column(col_live);
+        hdu->append_column(col_multip);
+        hdu->append_column(col_telmask);
+        hdu->append_column(col_ra);
+        hdu->append_column(col_dec);
+        hdu->append_column(col_direrr);
+        hdu->append_column(col_detx);
+        hdu->append_column(col_dety);
+        hdu->append_column(col_alt);
+        hdu->append_column(col_az);
+        hdu->append_column(col_alt_pnt);
+        hdu->append_column(col_az_pnt);
+        hdu->append_column(col_corex);
+        hdu->append_column(col_corey);
+        hdu->append_column(col_core_err);
+        hdu->append_column(col_xmax);
+        hdu->append_column(col_xmax_err);
+        hdu->append_column(col_energy);
+        hdu->append_column(col_energy_err);
+        hdu->append_column(col_hil_msw);
+        hdu->append_column(col_hil_msw_err);
+        hdu->append_column(col_hil_msl);
+        hdu->append_column(col_hil_msl_err);
+        
+    } // endif: there were events to write
+
+    // Append HDU to FITS file. The FITS class will later handle the
+    // proper deallocation of the HDU
+    file->append(hdu);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to an event
+ *
+ * @param[in] index Event index (starting from 0).
+ *
+ * @exception GException::out_of_range
+ *            Event index not in valid range.
+ *
+ * Returns a pointer to an event atom.
+ ***************************************************************************/
+GCTAEventAtom* GCTAEventList::pointer(int index)
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_POINTER, index, 0, size()-1);
+    #endif
+
+    // Return pointer
+    return (&(m_events[index]));
+}
+
+
+/***********************************************************************//**
+ * @brief Print event list information
+ ***************************************************************************/
+std::string GCTAEventList::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GCTAEventList ===\n");
+    result.append(parformat("Number of events")+str(size()));
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Append event to event list
+ *
+ * @param[in] event Event.
+ *
+ * Appends an event atom to the event list.
+ ***************************************************************************/
+void GCTAEventList::append(const GCTAEventAtom& event)
+{
+    // Append event
+    m_events.push_back(event);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Reserves space for events
+ *
+ * @param[in] number Number of events.
+ *
+ * Reserves space for number events in the event list.
+ ***************************************************************************/
+void GCTAEventList::reserve(const int& number)
+{
+    // Reserve space
+    m_events.reserve(number);
+
+    // Return
+    return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                             Private methods                             =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ ***************************************************************************/
+void GCTAEventList::init_members(void)
+{
+    // Initialise members
+    m_events.clear();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] list GCTAEventList members which should be copied.
+ ***************************************************************************/
+void GCTAEventList::copy_members(const GCTAEventList& list)
+{
+    // Copy member
+    m_events = list.m_events;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ ***************************************************************************/
+void GCTAEventList::free_members(void)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write CTA events file header
+ *
+ * @param[in] hdu FITS events table HDU.
+ ***************************************************************************/
+void GCTAEventList::write_header(GFitsBinTable* hdu) const
+{
+    // Continue only if HDU is valid
+    if (hdu != NULL) {
+
+        // Set observation information
+        hdu->card("CREATOR",  "GammaLib", "Program which created the file");
+        hdu->card("TELESCOP", "CTA",      "Telescope");
+        hdu->card("EXTNAME",  "EVENTS",   "Extension name");
+        hdu->card("OBS_ID",   0,          "Observation identifier");
+        hdu->card("DATE_OBS", "string",   "Observation start date");
+        hdu->card("TIME_OBS", "string",   "Observation start time");
+        hdu->card("DATE_END", "string",   "Observation end date");
+        hdu->card("TIME_END", "string",   "Observation end time");
+
+        // Set observation time information
+        hdu->card("TSTART",   0.0,     "[s] Mission time of start of observation");
+        hdu->card("TSTOP",    0.0,     "[s] Mission time of end of observation");
+        hdu->card("MJDREFI",  51910,   "[days] Integer part of mission time reference MJD");
+        hdu->card("MJDREFF",  7.428703703703703e-14, "[days] Fractional part of mission time reference MJD");
+        hdu->card("TIMEUNIT", "s",     "Time unit");
+        hdu->card("TIMESYS",  "TT",    "Time system");
+        hdu->card("TIMEREF",  "LOCAL", "Time reference");
+        hdu->card("TELAPSE",  0.0,     "[s] Mission elapsed time");
+        hdu->card("ONTIME",   0.0,     "[s] Total good time including deadtime");
+        hdu->card("LIVETIME", 0.0,     "[s] Total livetime");
+        hdu->card("DEADC",    0.0,     "Deadtime fraction");
+        hdu->card("TIMEDEL",  1.0,     "Time resolution");
+
+        // Set pointing information
+        hdu->card("OBJECT",   "string", "Observed object");
+        hdu->card("RA_OBJ",   0.0,      "[deg] Target Right Ascension");
+        hdu->card("DEC_OBJ",  0.0,      "[deg] Target Declination");
+        hdu->card("RA_PNT",   0.0,      "[deg] Pointing Right Ascension");
+        hdu->card("DEC_PNT",  0.0,      "[deg] Pointing Declination");
+        hdu->card("ALT_PNT",  0.0,      "[deg] Average altitude of pointing");
+        hdu->card("AZ_PNT",   0.0,      "[deg] Average azimuth of pointing");
+        hdu->card("RADECSYS", "FK5",    "Coordinate system");
+        hdu->card("EQUINOX",  2000.0,   "Epoch");
+        hdu->card("CONV_DEP", 0.0,      "Convergence depth of telescopes");
+        hdu->card("CONV_RA",  0.0,      "[deg] Convergence Right Ascension");
+        hdu->card("CONV_DEC", 0.0,      "[deg] Convergence Declination");
+        hdu->card("OBSERVER", "string", "Observer");
+
+        // Telescope information
+        hdu->card("N_TELS",   100,      "Number of telescopes in event list");
+        hdu->card("TELLIST",  "string", "Telescope IDs");
+        hdu->card("GEOLAT",   0.0,      "[deg] Geographic latitude of array centre");
+        hdu->card("GEOLON",   0.0,      "[deg] Geographic longitude of array centre");
+        hdu->card("ALTITUDE", 0.0,      "[km] Altitude of array centre");
+
+        // Other information
+        hdu->card("EUNIT",    "TeV",    "Energy unit");
+        hdu->card("EVTVER",   "draft1", "Event list version number");
+        
     } // endif: HDU was valid
 
     // Return
