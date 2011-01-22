@@ -7,7 +7,10 @@ endif
 if WITH_INST_LAT
 INST_LAT = lat
 endif
+if WITH_INST_MWL
+INST_MWL = mwl
+endif
 
 # Set sub directories
-SUBDIRS = mwl $(INST_CTA) $(INST_LAT)
+SUBDIRS = $(INST_MWL) $(INST_CTA) $(INST_LAT)
 
