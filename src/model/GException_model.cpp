@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GException_model.cpp  -  Model exception handlers            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,6 +21,8 @@
 #include <config.h>
 #endif
 #include "GException.hpp"
+#include "GModelSpatialRegistry.hpp"
+#include "GModelSpectralRegistry.hpp"
 #include "GTools.hpp"
 
 
@@ -39,6 +41,20 @@ GException::model_invalid_spatial::model_invalid_spatial(std::string origin,
     m_origin  = origin;
     m_message = "Invalid spatial model type \""+type+"\" encountered. " +
                 message;
+
+    // Add list of valid spatial models
+    GModelSpatialRegistry registry;
+    if (registry.size() > 0) {
+        m_message += "The following models are registered: ";
+        for (int i = 0; i < registry.size(); ++i) {
+            if (i > 0)
+                m_message += ", ";
+            m_message += "\"" + registry.name(i) + "\"";
+        }
+        m_message += ".";
+    }
+    else
+        m_message += "No models are registered.";
 
     // Return
     return;
@@ -60,6 +76,20 @@ GException::model_invalid_spectral::model_invalid_spectral(std::string origin,
     m_origin  = origin;
     m_message = "Invalid spectral model type \""+type+"\" encountered. " +
                 message;
+
+    // Add list of valid spectral models
+    GModelSpectralRegistry registry;
+    if (registry.size() > 0) {
+        m_message += "The following models are registered: ";
+        for (int i = 0; i < registry.size(); ++i) {
+            if (i > 0)
+                m_message += ", ";
+            m_message += "\"" + registry.name(i) + "\"";
+        }
+        m_message += ".";
+    }
+    else
+        m_message += "No models are registered.";
 
     // Return
     return;
