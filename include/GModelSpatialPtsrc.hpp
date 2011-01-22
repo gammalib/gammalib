@@ -57,7 +57,7 @@ public:
     void                clear(void);
     GModelSpatialPtsrc* clone(void) const;
     int                 size(void) const { return m_npars; }
-    std::string         type(void) const { return "PointSource"; }
+    std::string         type(void) const { return "SkyDirFunction"; }
     double              eval(const GSkyDir& srcDir);
     double              eval_gradients(const GSkyDir& srcDir);
     void                read(const GXmlElement& xml);
