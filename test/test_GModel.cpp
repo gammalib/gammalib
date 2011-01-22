@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GModel.cpp  -  test GModel class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -75,7 +75,7 @@ void test_model_par(void)
 void test_model(void)
 {
     // Write header
-    std::cout << "Test GModel: ";
+    std::cout << "Test GSkyModel: ";
 
     // Setup spatial model
     GModelSpatialPtsrc point_source;
@@ -120,9 +120,9 @@ void test_model(void)
     //std::cout << power_law << std::endl;
 
     // Setup Crab model
-    GModel crab;
+    GSkyModel crab;
     try {
-        crab = GModel(point_source, power_law);
+        crab = GSkyModel(point_source, power_law);
         crab.name("Crab");
     }
     catch (std::exception &e) {
