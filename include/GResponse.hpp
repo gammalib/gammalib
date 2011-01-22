@@ -26,9 +26,9 @@
 #include "GEvent.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GSkyModel.hpp"
 
 /* __ Forward declarations _______________________________________________ */
-class GModel;
 class GObservation;
 
 
@@ -66,10 +66,10 @@ public:
     virtual GResponse*  clone(void) const = 0;
     virtual bool        hasedisp(void) const = 0;
     virtual bool        hastdisp(void) const = 0;
-    virtual double      irf(const GEvent& event, const GModel& model,
+    virtual double      irf(const GEvent& event, const GSkyModel& model,
                             const GEnergy& srcEng, const GTime& srcTime,
                             const GObservation& obs) const = 0;
-    virtual double      npred(const GModel& model, const GEnergy& srcEng,
+    virtual double      npred(const GSkyModel& model, const GEnergy& srcEng,
                               const GTime& srcTime,
                               const GObservation& obs) const = 0;
     virtual std::string print(void) const = 0;
