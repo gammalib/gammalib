@@ -88,6 +88,7 @@ protected:
     void         init_members(void);
     void         copy_members(const GModel& model);
     void         free_members(void);
+    std::string  print_name_instrument(void) const;
     virtual void set_pointers(void) = 0;
 
     // Proteced data members
