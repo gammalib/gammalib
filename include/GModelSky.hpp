@@ -1,0 +1,130 @@
+/***************************************************************************
+ *            GModelSky.hpp  -  Abstract virtual sky model class           *
+ * ----------------------------------------------------------------------- *
+ *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ * ----------------------------------------------------------------------- *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+/**
+ * @file GModelSky.hpp
+ * @brief GModelSky class interface definition.
+ * @author J. Knodlseder
+ */
+
+#ifndef GMODELSKY_HPP
+#define GMODELSKY_HPP
+
+/* __ Includes ___________________________________________________________ */
+#include <vector>
+#include <string>
+#include "GModel.hpp"
+#include "GModelPar.hpp"
+#include "GModelSpatial.hpp"
+#include "GModelSpectral.hpp"
+#include "GModelTemporal.hpp"
+#include "GSkyDir.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
+#include "GPhoton.hpp"
+#include "GRan.hpp"
+#include "GVector.hpp"
+#include "GXmlElement.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEvent;
+class GObservation;
+
+
+/***********************************************************************//**
+ * @class GModelSky
+ *
+ * @brief Abstract virtual sky model class interface defintion
+ *
+ * This class implements a sky model that is factorised in a spatial,
+ * a spectral and a temporal component.
+ * The class has two methods for model evaluation. The eval() method
+ * evaluates the model for a given observed photon direction, photon energy
+ * and photon arrival time, given a reponse function and a pointing. The
+ * eval_gradients() also evaluates the model, but also sets the gradients
+ * of the model.
+ * Protected methods are implemented to handle source parameter integrations
+ * depending on the requirements. Integration of the model (method fct) is
+ * first done over all sky directions (method spatial), then over all
+ * energies (method spectral) and then over all times (method temporal).
+ * The eval() and eval_gradients() methods call temporal() to perform the
+ * nested integrations.
+ ***************************************************************************/
+class GModelSky : public GModel {
+
+public:
+    // Constructors and destructors
+    GModelSky(void);
+    explicit GModelSky(const GXmlElement& xml);
+    explicit GModelSky(const GXmlElement& spatial, const GXmlElement& spectral);
+    GModelSky(const GModelSky& model);
+    virtual ~GModelSky(void);
+
+    // Operators
+    GModelPar&       operator() (int index);
+    const GModelPar& operator() (int index) const;
+    GModelSky&       operator= (const GModelSky& model);
+
+    // Pure virtual methods
+    virtual void        clear(void) = 0;
+    virtual GModelSky*  clone(void) const = 0;
+    virtual std::string type(void) const = 0;
+    virtual std::string print(void) const = 0;
+
+    // Implemented pure virtual methods
+    int         size(void) const { return m_npars; }
+    double      eval(const GEvent& event, const GObservation& obs);
+    double      eval_gradients(const GEvent& event, const GObservation& obs);
+    void        read(const GXmlElement& xml);
+    void        write(GXmlElement& xml) const;
+
+    // Other methods
+    GModelSpatial*  spatial(void) const { return m_spatial; }
+    GModelSpectral* spectral(void) const { return m_spectral; }
+    GModelTemporal* temporal(void) const { return m_temporal; }
+    double          value(const GSkyDir& srcDir, const GEnergy& srcEng,
+                          const GTime& srcTime);
+    GVector         gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
+                              const GTime& srcTime);
+    GPhotons        mc(const double& area, const GSkyDir& dir, const double& radius,
+                       const GEnergy& emin, const GEnergy& emax,
+                       const GTime& tmin, const GTime& tmax,
+                       GRan& ran);
+    
+protected:
+    // Protected methods
+    void            init_members(void);
+    void            copy_members(const GModelSky& model);
+    void            free_members(void);
+    void            set_pointers(void);
+    GModelSpatial*  xml_spatial(const GXmlElement& spatial) const;
+    GModelSpectral* xml_spectral(const GXmlElement& spectral) const;
+    GModelTemporal* xml_temporal(const GXmlElement& temporal) const;
+    double          spatial(const GEvent& event, const GEnergy& srcEng,
+                            const GTime& srcTime, const GObservation& obs,
+                            bool grad);
+    double          spectral(const GEvent& event, const GTime& srcTime,
+                             const GObservation& obs, bool grad);
+    double          temporal(const GEvent& event, const GObservation& obs,
+                             bool grad);
+    bool            valid_model(void) const;
+    std::string     print_model(void) const;
+
+    // Proteced data members
+    int             m_npars;         //!< Total number of model parameters
+    GModelPar**     m_par;           //!< Pointers to all model parameters
+    GModelSpatial*  m_spatial;       //!< Spatial model
+    GModelSpectral* m_spectral;      //!< Spectral model
+    GModelTemporal* m_temporal;      //!< Temporal model
+};
+
+#endif /* GMODELSKY_HPP */
