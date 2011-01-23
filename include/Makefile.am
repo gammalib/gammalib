@@ -38,7 +38,8 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelDiffuseSource.hpp \
                      GModelSpatial.hpp \
                      GModelSpatialRegistry.hpp \
-                     GModelSpatialPtsrc.hpp \
+		     GModelSpatialPtsrc.hpp \
+		     GModelSpatialGauss.hpp \
                      GModelSpatialConst.hpp \
                      GModelSpatialCube.hpp \
 		     GModelSpectral.hpp \
