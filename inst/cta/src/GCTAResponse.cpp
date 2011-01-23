@@ -413,7 +413,7 @@ double GCTAResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
  * @param[in] ebds Energy boundaries of data selection.
  * @param[in] gti Good Time Intervals of data selection.
  ***************************************************************************/
-double GCTAResponse::npred(const GModel& model, const GEnergy& srcEng,
+double GCTAResponse::npred(const GModelSky& model, const GEnergy& srcEng,
                            const GTime& srcTime, const GObservation& obs) const
 {
     // Initialise response value

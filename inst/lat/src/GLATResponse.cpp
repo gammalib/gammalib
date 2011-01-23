@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATResponse.cpp  -  Fermi LAT Response class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -219,7 +219,7 @@ void GLATResponse::caldb(const std::string& caldb)
  * This method returns the response of the instrument to a specific source
  * model. The method handles both event atoms and event bins.
  ***************************************************************************/
-double GLATResponse::irf(const GEvent& event, const GModel& model,
+double GLATResponse::irf(const GEvent& event, const GModelSky& model,
                          const GEnergy& srcEng, const GTime& srcTime,
                          const GObservation& obs) const
 {
@@ -248,7 +248,7 @@ double GLATResponse::irf(const GEvent& event, const GModel& model,
  *
  * @todo Not yet implemented.
  ***************************************************************************/
-double GLATResponse::irf(const GLATEventAtom& event, const GModel& model,
+double GLATResponse::irf(const GLATEventAtom& event, const GModelSky& model,
                          const GEnergy& srcEng, const GTime& srcTime,
                          const GObservation& obs) const
 {
@@ -291,7 +291,7 @@ double GLATResponse::irf(const GLATEventAtom& event, const GModel& model,
  *       quite some time since the distance computation is time
  *       consuming.
  ***************************************************************************/
-double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
+double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
                          const GEnergy& srcEng, const GTime& srcTime,
                          const GObservation& obs) const
 {
@@ -410,7 +410,7 @@ double GLATResponse::irf(const GLATEventBin& event, const GModel& model,
  *
  * @todo Not yet implemented.
  ***************************************************************************/
-double GLATResponse::npred(const GModel& model, const GEnergy& srcEng,
+double GLATResponse::npred(const GModelSky& model, const GEnergy& srcEng,
                            const GTime& srcTime,
                            const GObservation& obs) const
 {

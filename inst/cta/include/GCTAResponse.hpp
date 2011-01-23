@@ -62,10 +62,10 @@ public:
     GCTAResponse*  clone(void) const;
     bool           hasedisp(void) const { return false; }
     bool           hastdisp(void) const { return false; }
-    double         irf(const GEvent& event, const GModel& model,
+    double         irf(const GEvent& event, const GModelSky& model,
                        const GEnergy& srcEng, const GTime& srcTime,
                        const GObservation& obs) const;
-    double         npred(const GModel& model, const GEnergy& srcEng,
+    double         npred(const GModelSky& model, const GEnergy& srcEng,
                          const GTime& srcTime,
                          const GObservation& obs) const;
     GCTAEventAtom* mc(const double& area, const GPhoton& photon,
@@ -81,10 +81,10 @@ public:
     double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const;
-    double irf(const GCTAEventAtom& event, const GModel& model,
+    double irf(const GCTAEventAtom& event, const GModelSky& model,
                const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const;
-    double irf(const GCTAEventBin& event, const GModel& model,
+    double irf(const GCTAEventBin& event, const GModelSky& model,
                const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const;
     double npred(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
