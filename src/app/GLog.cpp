@@ -24,6 +24,8 @@
 #include <iostream>
 #include <sstream>
 #include <time.h>
+#include <stdio.h>      // fopen, fgets, fclose, etc...
+#include <string.h>     // memcpy
 #include <stdarg.h>     // for "va_list" type
 #include "GLog.hpp"
 #include "GTools.hpp"
