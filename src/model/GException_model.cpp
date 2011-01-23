@@ -21,9 +21,45 @@
 #include <config.h>
 #endif
 #include "GException.hpp"
+#include "GModelRegistry.hpp"
 #include "GModelSpatialRegistry.hpp"
 #include "GModelSpectralRegistry.hpp"
+#include "GModelTemporalRegistry.hpp"
 #include "GTools.hpp"
+
+
+/***********************************************************************//**
+ * @brief Invalid model type
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] type Model type that has been encountered.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::model_invalid::model_invalid(std::string origin,
+                                         std::string type,
+                                         std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Invalid model type \""+type+"\" encountered. " + message;
+
+    // Add list of valid models
+    GModelRegistry registry;
+    if (registry.size() > 0) {
+        m_message += "The following models are registered: ";
+        for (int i = 0; i < registry.size(); ++i) {
+            if (i > 0)
+                m_message += ", ";
+            m_message += "\"" + registry.name(i) + "\"";
+        }
+        m_message += ".";
+    }
+    else
+        m_message += "No models are registered.";
+
+    // Return
+    return;
+}
 
 
 /***********************************************************************//**
@@ -79,6 +115,41 @@ GException::model_invalid_spectral::model_invalid_spectral(std::string origin,
 
     // Add list of valid spectral models
     GModelSpectralRegistry registry;
+    if (registry.size() > 0) {
+        m_message += "The following models are registered: ";
+        for (int i = 0; i < registry.size(); ++i) {
+            if (i > 0)
+                m_message += ", ";
+            m_message += "\"" + registry.name(i) + "\"";
+        }
+        m_message += ".";
+    }
+    else
+        m_message += "No models are registered.";
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Invalid temporal model type
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] type Temporal model type that has been encountered.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::model_invalid_temporal::model_invalid_temporal(std::string origin,
+                                                           std::string type,
+                                                           std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Invalid temporal model type \""+type+"\" encountered. " +
+                message;
+
+    // Add list of valid spectral models
+    GModelTemporalRegistry registry;
     if (registry.size() > 0) {
         m_message += "The following models are registered: ";
         for (int i = 0; i < registry.size(); ++i) {
