@@ -707,11 +707,16 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
     GCTAEventAtom* event = NULL;
 
     // Compute effective area for photon
-    double effective_area = aeff(photon.dir(), photon.energy(), photon.time(),
-                                 pnt);
+    double effective_area = aeff(photon.dir(), photon.energy(), photon.time(), pnt);
+
+    // Compute livetime fraction for photon
+    double livetime_fraction = live(photon.dir(), photon.energy(), photon.time(), pnt);
+
+    // Compute limiting value
+    double ulimite = (effective_area*livetime_fraction) / area;
 
     // Continue only if event is detected
-    if (ran.uniform() <= effective_area/area) {
+    if (ran.uniform() <= ulimite) {
 
         // Simulate offset from photon arrival direction
         double theta = psf_sigma(photon.energy()) * ran.chisq2() * rad2deg;
