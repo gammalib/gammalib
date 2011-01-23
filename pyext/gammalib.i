@@ -119,15 +119,23 @@
 #include "GPhoton.i"
 
 /* __ Model handling _____________________________________________________ */
+#include "GModelPar.i"
 #include "GModels.i"
 #include "GModel.i"
-#include "GModelPar.i"
+#include "GModelRegistry.i"
+#include "GModelSky.i"
+#include "GModelData.i"
+#include "GModelPointSource.i"
+#include "GModelDiffuseSource.i"
 #include "GModelSpatial.i"
+#include "GModelSpatialRegistry.i"
 #include "GModelSpatialPtsrc.i"
 #include "GModelSpectral.i"
+#include "GModelSpectralRegistry.i"
 #include "GModelSpectralPlaw.i"
 #include "GModelSpectralExpPlaw.i"
 #include "GModelTemporal.i"
+#include "GModelTemporalRegistry.i"
 #include "GModelTemporalConst.i"
 
 /* __ Instrument specific ________________________________________________ */

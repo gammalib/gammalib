@@ -24,6 +24,13 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GModelSpectralPlaw.hpp"
+#include "GModelSpectralRegistry.hpp"
+
+/* __ Constants __________________________________________________________ */
+
+/* __ Globals ____________________________________________________________ */
+const GModelSpectralPlaw     g_spectral_plaw_seed;
+const GModelSpectralRegistry g_spectral_plaw_registry(&g_spectral_plaw_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                       "GModelSpectralPlaw::read(GXmlElement&)"
@@ -522,10 +529,8 @@ std::string GModelSpectralPlaw::print(void) const
     // Append header
     result.append("=== GModelSpectralPlaw ===\n");
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+parformat("Parameter "+str(i+1)));
-        result.append(m_par[i]->print());
-    }
+    for (int i = 0; i < size(); ++i)
+        result.append("\n"+m_par[i]->print());
 
     // Return result
     return result;

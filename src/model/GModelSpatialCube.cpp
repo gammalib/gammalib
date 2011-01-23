@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpatialCube.cpp  -  Spatial map cube model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,8 +23,13 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GModelSpatialCube.hpp"
+#include "GModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
+
+/* __ Globals ____________________________________________________________ */
+const GModelSpatialCube     g_spatial_cube_seed;
+const GModelSpatialRegistry g_spatial_cube_registry(&g_spatial_cube_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                        "GModelSpatialCube::read(GXmlElement&)"
@@ -314,10 +319,8 @@ std::string GModelSpatialCube::print(void) const
     result.append("=== GModelSpatialCube ===\n");
     result.append(parformat("Map cube file")+m_filename);
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+parformat("Parameter "+str(i+1)));
-        result.append(m_par[i]->print());
-    }
+    for (int i = 0; i < size(); ++i)
+        result.append("\n"+m_par[i]->print());
 
     // Return result
     return result;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GModelSpatial.i  -  Spatial model abstract base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -50,6 +50,9 @@ public:
  * @brief GModelSpatial class extension
  ***************************************************************************/
 %extend GModelSpatial {
+    char *__str__() {
+        return tochar(self->print());
+    }
     GModelPar __getitem__(int index) {
     if (index >= 0 && index < self->size())
         return (*self)(index);

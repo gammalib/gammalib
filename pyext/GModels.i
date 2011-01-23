@@ -43,14 +43,12 @@ public:
     void     save(const std::string& filename) const;
     void     read(const GXml& xml);
     void     write(GXml& xml) const;
+    /*
     double   value(const GSkyDir& srcDir, const GEnergy& srcEng,
                    const GTime& srcTime);
+    */
     double   eval(const GEvent& event, const GObservation& obs);
     double   eval_gradients(const GEvent& event, const GObservation& obs);
-    GPhotons mc(const double& area, const GSkyDir& dir, const double& radius,
-                const GEnergy& emin, const GEnergy& emax,
-                const GTime& tmin, const GTime& tmax,
-                GRan& ran);
 };
 
 

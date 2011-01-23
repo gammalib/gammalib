@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLResponse.hpp  -  Multi-wavelength response class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -44,10 +44,10 @@ public:
     GMWLResponse& operator= (const GMWLResponse & rsp);
 
     // Reponse function computation methods
-    double irf(const GEvent& event, const GModel& model,
+    double irf(const GEvent& event, const GModelSky& model,
                const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const { return 1.0; }
-    double npred(const GModel& model, const GEnergy& srcEng,
+    double npred(const GModelSky& model, const GEnergy& srcEng,
                  const GTime& srcTime,
                  const GObservation& obs) const { return 1.0; }
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *                         GModel.hpp  -  Model class                      *
+ *              GModel.hpp - Abstract virtual model base class             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModel.hpp
- * @brief GModel class interface definition.
+ * @brief GModel virtual base class interface definition.
  * @author J. Knodlseder
  */
 
@@ -25,15 +25,6 @@
 #include <iostream>
 #include "GLog.hpp"
 #include "GModelPar.hpp"
-#include "GModelSpatial.hpp"
-#include "GModelSpectral.hpp"
-#include "GModelTemporal.hpp"
-#include "GSkyDir.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
-#include "GPhoton.hpp"
-#include "GRan.hpp"
-#include "GVector.hpp"
 #include "GXmlElement.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -44,29 +35,19 @@ class GObservation;
 /***********************************************************************//**
  * @class GModel
  *
- * @brief GModel class interface defintion.
+ * @brief Model class interface defintion
  *
- * This class implements a source model that is factorised in a spatial,
- * a spectral and a temporal component.
- * The class has two methods for model evaluation. The eval() method
- * evaluates the model for a given observed photon direction, photon energy
- * and photon arrival time, given a reponse function and a pointing. The
- * eval_gradients() also evaluates the model, but also sets the gradients
- * of the model.
- * Protected methods are implemented to handle source parameter integrations
- * depending on the requirements. Integration of the model (method fct) is
- * first done over all sky directions (method spatial), then over all
- * energies (method spectral) and then over all times (method temporal).
- * The eval() and eval_gradients() methods call temporal() to perform the
- * nested integrations.
+ * This class implements a parametric model. The class has two methods for
+ * model evaluation: eval() and eval_gradients().
+ * The eval() method evaluates the model for a given event and observation.
+ * In addition, eval_gradients() also sets the parameter gradients of the
+ * model.
  *
- * @todo Do we need a separate eval_gradients() method or can we just use
- * eval() since we anyway need gradients for function optimization?
+ * This abstract virtual base class implements the methods that handle the
+ * model name and the applicable instruments. It also implements friend
+ * operators for logging.
  ***************************************************************************/
 class GModel {
-
-    // Friend classes
-    friend class GModels;
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GModel& model);
@@ -75,64 +56,43 @@ class GModel {
 public:
     // Constructors and destructors
     GModel(void);
+    explicit GModel(const GXmlElement& xml);
     GModel(const GModel& model);
-    explicit GModel(const GModelSpatial& spatial, const GModelSpectral& spectral);
-    explicit GModel(const GXmlElement& spatial, const GXmlElement& spectral);
     virtual ~GModel(void);
 
     // Operators
-    GModelPar&       operator() (int index);
-    const GModelPar& operator() (int index) const;
-    GModel&          operator= (const GModel& model);
+    virtual GModelPar&       operator() (int index) = 0;
+    virtual const GModelPar& operator() (int index) const = 0;
+    GModel&                  operator= (const GModel& model);
 
-    // Methods
-    void            clear(void);
-    GModel*         clone(void) const;
-    int             size(void) const { return m_npars; }
-    std::string     name(void) const { return m_name; }
-    void            name(const std::string& name) { m_name=name; return; }
-    void            instruments(const std::string& instruments);
-    std::string     instruments(void) const;
-    GModelSpatial*  spatial(void) const { return m_spatial; }
-    GModelSpectral* spectral(void) const { return m_spectral; }
-    GModelTemporal* temporal(void) const { return m_temporal; }
-    double          value(const GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime);
-    GVector         gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
-                              const GTime& srcTime);
-    double          eval(const GEvent& event, const GObservation& obs);
-    double          eval_gradients(const GEvent& event, const GObservation& obs);
-    GPhotons        mc(const double& area, const GSkyDir& dir, const double& radius,
-                       const GEnergy& emin, const GEnergy& emax,
-                       const GTime& tmin, const GTime& tmax,
-                       GRan& ran);
-    bool            isvalid(const std::string& name) const;
-    std::string     print(void) const;
+    // Pure virtual methods
+    virtual void        clear(void) = 0;
+    virtual GModel*     clone(void) const = 0;
+    virtual int         size(void) const = 0;
+    virtual std::string type(void) const = 0;
+    virtual double      eval(const GEvent& event, const GObservation& obs) = 0;
+    virtual double      eval_gradients(const GEvent& event, const GObservation& obs) = 0;
+    virtual void        read(const GXmlElement& xml) = 0;
+    virtual void        write(GXmlElement& xml) const = 0;
+    virtual std::string print(void) const = 0;
+
+    // Implemented methods
+    std::string name(void) const { return m_name; }
+    void        name(const std::string& name) { m_name=name; }
+    void        instruments(const std::string& instruments);
+    std::string instruments(void) const;
+    bool        isvalid(const std::string& name) const;
 
 protected:
     // Protected methods
-    void            init_members(void);
-    void            copy_members(const GModel& model);
-    void            free_members(void);
-    void            set_pointers(void);
-    GModelSpatial*  xml_spatial(const GXmlElement& spatial) const;
-    GModelSpectral* xml_spectral(const GXmlElement& spectral) const;
-    double          spatial(const GEvent& event, const GEnergy& srcEng, const GTime& srcTime,
-                            const GObservation& obs, bool grad = false);
-    double          spectral(const GEvent& event, const GTime& srcTime,
-                             const GObservation& obs, bool grad = false);
-    double          temporal(const GEvent& event,
-                             const GObservation& obs, bool grad = false);
-    bool            valid_model(void) const;
+    void         init_members(void);
+    void         copy_members(const GModel& model);
+    void         free_members(void);
+    virtual void set_pointers(void) = 0;
 
     // Proteced data members
-    std::string              m_name;          //!< Model name
-    std::vector<std::string> m_instruments;   //!< Instruments to which model applies
-    int                      m_npars;         //!< Total number of model parameters
-    GModelPar**              m_par;           //!< Pointers to all model parameters
-    GModelSpatial*           m_spatial;       //!< Spatial model
-    GModelSpectral*          m_spectral;      //!< Spectral model
-    GModelTemporal*          m_temporal;      //!< Temporal model
+    std::string              m_name;         //!< Model name
+    std::vector<std::string> m_instruments;  //!< Instruments to which model applies
 };
 
 #endif /* GMODEL_HPP */

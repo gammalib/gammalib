@@ -23,6 +23,13 @@
 #include "GTools.hpp"
 #include "GException.hpp"
 #include "GModelTemporalConst.hpp"
+#include "GModelTemporalRegistry.hpp"
+
+/* __ Constants __________________________________________________________ */
+
+/* __ Globals ____________________________________________________________ */
+const GModelTemporalConst    g_temporal_const_seed;
+const GModelTemporalRegistry g_temporal_const_registry(&g_temporal_const_seed);
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -269,10 +276,8 @@ std::string GModelTemporalConst::print(void) const
     // Append header
     result.append("=== GModelTemporalConst ===\n");
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+parformat("Parameter "+str(i+1)));
-        result.append(m_par[i]->print());
-    }
+    for (int i = 0; i < size(); ++i)
+        result.append("\n"+m_par[i]->print());
 
     // Return result
     return result;

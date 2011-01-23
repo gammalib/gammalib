@@ -25,6 +25,13 @@
 #include "GTools.hpp"
 #include "GCsv.hpp"
 #include "GModelSpectralFunc.hpp"
+#include "GModelSpectralRegistry.hpp"
+
+/* __ Constants __________________________________________________________ */
+
+/* __ Globals ____________________________________________________________ */
+const GModelSpectralFunc     g_spectral_func_seed;
+const GModelSpectralRegistry g_spectral_func_registry(&g_spectral_func_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_FLUX                 "GModelSpectralFunc::flux(GEnergy&, GEnergy&)"
@@ -418,10 +425,8 @@ std::string GModelSpectralFunc::print(void) const
     result.append(parformat("Function file")+m_filename);
     result.append(parformat("Number of nodes")+str(m_nodes.size()));
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+parformat("Parameter "+str(i+1)));
-        result.append(m_par[i]->print());
-    }
+    for (int i = 0; i < size(); ++i)
+        result.append("\n"+m_par[i]->print());
 
     // Return result
     return result;

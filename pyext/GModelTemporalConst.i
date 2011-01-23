@@ -56,9 +56,6 @@ public:
  * @brief GModelTemporalConst class extension
  ***************************************************************************/
 %extend GModelTemporalConst {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GModelTemporalConst copy() {
         return (*self);
     }

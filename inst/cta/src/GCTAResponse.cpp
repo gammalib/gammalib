@@ -263,7 +263,7 @@ void GCTAResponse::load(const std::string& irfname)
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
  ***************************************************************************/
-double GCTAResponse::irf(const GEvent& event, const GModel& model,
+double GCTAResponse::irf(const GEvent& event, const GModelSky& model,
                          const GEnergy& srcEng, const GTime& srcTime,
                          const GObservation& obs) const
 {
@@ -293,7 +293,7 @@ double GCTAResponse::irf(const GEvent& event, const GModel& model,
  * @exception GException::feature_not_implemented
  *            Diffuse IRF not yet implemented.
  ***************************************************************************/
-double GCTAResponse::irf(const GCTAEventAtom& event, const GModel& model,
+double GCTAResponse::irf(const GCTAEventAtom& event, const GModelSky& model,
                          const GEnergy& srcEng, const GTime& srcTime,
                          const GObservation& obs) const
 {
@@ -338,7 +338,7 @@ double GCTAResponse::irf(const GCTAEventAtom& event, const GModel& model,
  * @exception GException::feature_not_implemented
  *            Diffuse IRF not yet implemented.
  ***************************************************************************/
-double GCTAResponse::irf(const GCTAEventBin& event, const GModel& model,
+double GCTAResponse::irf(const GCTAEventBin& event, const GModelSky& model,
                          const GEnergy& srcEng, const GTime& srcTime,
                          const GObservation& obs) const
 {

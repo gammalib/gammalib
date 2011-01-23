@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpatialConst.cpp  -  Spatial isotropic model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,8 +23,13 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GModelSpatialConst.hpp"
+#include "GModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
+
+/* __ Globals ____________________________________________________________ */
+const GModelSpatialConst    g_spatial_const_seed;
+const GModelSpatialRegistry g_spatial_const_registry(&g_spatial_const_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                       "GModelSpatialConst::read(GXmlElement&)"
@@ -307,10 +312,8 @@ std::string GModelSpatialConst::print(void) const
     // Append header
     result.append("=== GModelSpatialConst ===\n");
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+parformat("Parameter "+str(i+1)));
-        result.append(m_par[i]->print());
-    }
+    for (int i = 0; i < size(); ++i)
+        result.append("\n"+m_par[i]->print());
 
     // Return result
     return result;

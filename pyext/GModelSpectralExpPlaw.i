@@ -62,9 +62,6 @@ public:
  * @brief GModelSpectralExpPlaw class extension
  ***************************************************************************/
 %extend GModelSpectralExpPlaw {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GModelSpectralExpPlaw copy() {
         return (*self);
     }

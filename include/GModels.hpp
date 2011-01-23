@@ -24,11 +24,9 @@
 #include "GLog.hpp"
 #include "GOptimizerPars.hpp"
 #include "GModel.hpp"
-#include "GSkyDir.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
-#include "GPhoton.hpp"
-#include "GRan.hpp"
+//#include "GSkyDir.hpp"
+//#include "GEnergy.hpp"
+//#include "GTime.hpp"
 #include "GXml.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -66,20 +64,18 @@ public:
     // Methods
     void        clear(void);
     GModels*    clone(void) const;
-    int         size(void) const { return m_elements; }
+    int         size(void) const { return m_models.size(); }
     void        append(const GModel& model);
     void        load(const std::string& filename);
     void        save(const std::string& filename) const;
     void        read(const GXml& xml);
     void        write(GXml& xml) const;
+    /*
     double      value(const GSkyDir& srcDir, const GEnergy& srcEng,
                       const GTime& srcTime);
+    */
     double      eval(const GEvent& event, const GObservation& obs);
     double      eval_gradients(const GEvent& event, const GObservation& obs);
-    GPhotons    mc(const double& area, const GSkyDir& dir, const double& radius,
-                   const GEnergy& emin, const GEnergy& emax,
-                   const GTime& tmin, const GTime& tmax,
-                   GRan& ran);
     std::string print(void) const;
 
 protected:
@@ -90,8 +86,7 @@ protected:
     void set_pointers(void);
 
     // Proteced data members
-    int     m_elements;          //!< Total number of models
-    GModel* m_model;             //!< Array of models
+    std::vector<GModel*> m_models;  //!< List of models
 };
 
 #endif /* GMODELS_HPP */

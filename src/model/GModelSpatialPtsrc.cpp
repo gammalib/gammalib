@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialPtsrc.cpp  -  Spatial point source model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,9 +23,14 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GModelSpatialPtsrc.hpp"
+#include "GModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
 const double tolerance =  0.000027777778;    // angular tolerance is 1 arcsec
+
+/* __ Globals ____________________________________________________________ */
+const GModelSpatialPtsrc    g_spatial_ptsrc_seed;
+const GModelSpatialRegistry g_spatial_ptsrc_registry(&g_spatial_ptsrc_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                                   "GModel::operator() (int)"
@@ -368,10 +373,8 @@ std::string GModelSpatialPtsrc::print(void) const
     // Append header
     result.append("=== GModelSpatialPtsrc ===\n");
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+parformat("Parameter "+str(i+1)));
-        result.append(m_par[i]->print());
-    }
+    for (int i = 0; i < size(); ++i)
+        result.append("\n"+m_par[i]->print());
 
     // Return result
     return result;

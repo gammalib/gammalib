@@ -28,20 +28,28 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GInstDir.hpp \
                      GResponse.hpp \
                      GPhoton.hpp \
+                     GModelPar.hpp \
                      GModels.hpp \
                      GModel.hpp \
-                     GModelPar.hpp \
+                     GModelRegistry.hpp \
+                     GModelSky.hpp \
+                     GModelData.hpp \
+                     GModelPointSource.hpp \
+                     GModelDiffuseSource.hpp \
                      GModelSpatial.hpp \
+                     GModelSpatialRegistry.hpp \
                      GModelSpatialPtsrc.hpp \
                      GModelSpatialConst.hpp \
                      GModelSpatialCube.hpp \
-                     GModelSpectral.hpp \
+		     GModelSpectral.hpp \
+		     GModelSpectralRegistry.hpp \
                      GModelSpectralPlaw.hpp \
                      GModelSpectralPlaw2.hpp \
                      GModelSpectralExpPlaw.hpp \
                      GModelSpectralFunc.hpp \
                      GModelSpectralConst.hpp \
                      GModelTemporal.hpp \
+                     GModelTemporalRegistry.hpp \
                      GModelTemporalConst.hpp \
                      GApplication.hpp \
                      GLog.hpp \

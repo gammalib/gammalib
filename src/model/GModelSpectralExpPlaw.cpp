@@ -24,6 +24,13 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GModelSpectralExpPlaw.hpp"
+#include "GModelSpectralRegistry.hpp"
+
+/* __ Constants __________________________________________________________ */
+
+/* __ Globals ____________________________________________________________ */
+const GModelSpectralExpPlaw  g_spectral_expplaw_seed;
+const GModelSpectralRegistry g_spectral_expplaw_registry(&g_spectral_expplaw_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_FLUX              "GModelSpectralExpPlaw::flux(GEnergy&, GEnergy&)"
@@ -529,10 +536,8 @@ std::string GModelSpectralExpPlaw::print(void) const
     // Append header
     result.append("=== GModelSpectralExpPlaw ===\n");
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+parformat("Parameter "+str(i+1)));
-        result.append(m_par[i]->print());
-    }
+    for (int i = 0; i < size(); ++i)
+        result.append("\n"+m_par[i]->print());
 
     // Return result
     return result;

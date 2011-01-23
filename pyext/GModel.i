@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GModel.i  -  Model class python interface               *
+ *         GModel.i - Abstract virtual model base class python I/F         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -31,33 +31,29 @@ class GModel {
 public:
     // Constructors and destructors
     GModel(void);
-    GModel(const GModelSpatial& spatial, const GModelSpectral& spectral);
-    explicit GModel(const GXmlElement& spatial, const GXmlElement& spectral);
-    explicit GModel(const GModel& model);
+    explicit GModel(const GXmlElement& xml);
+    GModel(const GModel& model);
     virtual ~GModel(void);
 
-    // Methods
-    void            clear(void);
-    GModel*         clone(void) const;
-    int             size(void) const { return m_npars; }
-    std::string     name(void) const { return m_name; }
-    void            name(const std::string& name) { m_name=name; return; }
-    void            instruments(const std::string& instruments);
-    std::string     instruments(void) const;
-    GModelSpatial*  spatial(void) const { return m_spatial; }
-    GModelSpectral* spectral(void) const { return m_spectral; }
-    GModelTemporal* temporal(void) const { return m_temporal; }
-    double          value(const GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime);
-    GVector         gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
-                              const GTime& srcTime);
-    double          eval(const GEvent& event, const GObservation& obs);
-    double          eval_gradients(const GEvent& event, const GObservation& obs);
-    GPhotons        mc(const double& area, const GSkyDir& dir, const double& radius,
-                       const GEnergy& emin, const GEnergy& emax,
-                       const GTime& tmin, const GTime& tmax,
-                       GRan& ran);
-    bool            isvalid(const std::string& name) const;
+    // Pure virtual methods
+    virtual void        clear(void) = 0;
+    virtual GModel*     clone(void) const = 0;
+    virtual int         size(void) const = 0;
+    virtual std::string type(void) const = 0;
+    virtual double      eval(const GEvent& event, const GObservation& obs) = 0;
+    virtual double      eval_gradients(const GEvent& event, const GObservation& obs) = 0;
+    virtual void        read(const GXmlElement& xml) = 0;
+    virtual void        write(GXmlElement& xml) const = 0;
+
+    // Implemented methods
+    std::string name(void) const;
+    void        name(const std::string& name);
+    void        instruments(const std::string& instruments);
+    std::string instruments(void) const;
+    bool        isvalid(const std::string& name) const;
+
+protected:
+    virtual void set_pointers(void) = 0;
 };
 
 
@@ -79,8 +75,5 @@ public:
             (*self)(index) = val;
         else
             throw GException::out_of_range("__setitem__(int)", index, self->size());
-    }
-    GModel copy() {
-        return (*self);
     }
 };
