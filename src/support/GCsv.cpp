@@ -266,7 +266,7 @@ int GCsv::integer(const int& row, const int& col) const
  *
  * @exception GException::file_not_found
  *            CSV table file not found.
- * @exception GException::cvs_bad_columns
+ * @exception GException::csv_bad_columns
  *            Inconsistent columns encountered in CSV table file.
  **************************************************************************/
 void GCsv::load(const std::string& filename, std::string sep)
@@ -316,7 +316,7 @@ void GCsv::load(const std::string& filename, std::string sep)
         else {
             // Check table consistency
             if (m_cols != elements.size())
-                throw GException::cvs_bad_columns(G_LOAD, filename,
+                throw GException::csv_bad_columns(G_LOAD, filename,
                                   iline, m_cols, elements.size());
 
             // Append elements

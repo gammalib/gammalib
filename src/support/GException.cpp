@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GException.cpp  -  exception handlers                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -134,7 +134,7 @@ GException::file_open_error::file_open_error(std::string origin, std::string fil
  * @param[in] elements Found number of columns.
  * @param[in] message Optional message.
  ***************************************************************************/
-GException::cvs_bad_columns::cvs_bad_columns(std::string origin,
+GException::csv_bad_columns::csv_bad_columns(std::string origin,
                                              std::string filename,
                                              int         row,
                                              int         cols,
