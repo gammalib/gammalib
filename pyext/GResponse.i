@@ -39,10 +39,10 @@ public:
     virtual GResponse* clone(void) const = 0;
     virtual bool       hasedisp(void) const = 0;
     virtual bool       hastdisp(void) const = 0;
-    virtual double     irf(const GEvent& event, const GSkyModel& model,
+    virtual double     irf(const GEvent& event, const GModelSky& model,
                            const GEnergy& srcEng, const GTime& srcTime,
                            const GObservation& obs) const = 0;
-    virtual double     npred(const GSkyModel& model, const GEnergy& srcEng,
+    virtual double     npred(const GModelSky& model, const GEnergy& srcEng,
                              const GTime& srcTime,
                              const GObservation& obs) const = 0;
 };

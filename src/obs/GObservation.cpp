@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GObservation.cpp  -  Observation abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,6 +23,7 @@
 #include <cmath>
 #include "GException.hpp"
 #include "GObservation.hpp"
+#include "GModelSky.hpp"
 #include "GModelSpatialPtsrc.hpp"
 #include "GIntegral.hpp"
 
@@ -33,8 +34,8 @@
 #define G_NPRED_SPEC              "GObservation::npred_spec(GModel&, GTime&)"
 #define G_NPRED_SPAT       "GObservation::npred_spat(GModel&, int, GEnergy&,"\
                                                                    " GTime&)"
-#define G_NPRED_KERN  "GObservation::npred_kern(GModel&, GSkyDir&, GEnergy&,"\
-                                                       " GTime&, GPointing&)"
+#define G_NPRED_KERN            "GObservation::npred_kern(GModel&, GSkyDir&,"\
+                                             " GEnergy&, GTime&, GPointing&)"
 #define G_NPRED_GRAD_TEMP       "GObservation::npred_grad_temp(GModel&, int)"
 #define G_NPRED_GRAD_SPEC       "GObservation::npred_grad_spec(GModel&, int,"\
                                                                    " GTime&)"
@@ -230,7 +231,7 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
 
-        // Extract pointer to model (bypass const-correctness)
+        // Extract pointer to model (circumvent const-correctness)
         GModel* model = (GModel*)models(i);
 
         // Handle only components that are relevant for the actual
@@ -489,6 +490,8 @@ double GObservation::npred_spec(const GModel& model,
  *
  * @exception GException::no_response
  *            No valid instrument response function for observation.
+ * @exception GException::feature_not_implemented
+ *            Computation for data-space models not yet implemented.
  *
  * Computes
  * \f[\int_{\rm ROI} S(\vec{p}, E, t)
@@ -506,27 +509,47 @@ double GObservation::npred_spec(const GModel& model,
  * \f${\rm ROI}\f$ is the region of interest that is stored in the
  * GObservation::m_roi member.
  * Note that the integration is performed by the GResponse::npred() method.
+ *
+ * @todo Implement computation for data-space model
  ***************************************************************************/
 double GObservation::npred_spat(const GModel& model,
                                 const GEnergy& srcEng,
                                 const GTime& srcTime) const
 {
-    // Get response function
-    GResponse* rsp = response();
-    if (rsp == NULL)
-        throw GException::no_response(G_NPRED_SPAT);
+    // Initialise result
+    double result = 0.0;
 
-    // Compute integrated IRF
-    double npred = rsp->npred(model, srcEng, srcTime, *this);
+    // Get sky model (NULL if not a sky model)
+    GModelSky* sky = dynamic_cast<GModelSky*>((GModel*)&model);
 
-    // Compute source model
-    double source = 1.0;
-    GModel* ptr   = (GModel*)&model; // bypass const-correctness
-    if (ptr->spectral() != NULL) npred  *= ptr->spectral()->eval(srcEng);
-    if (ptr->temporal() != NULL) source *= ptr->temporal()->eval(srcTime);
+    // Case A: We have a sky model
+    if (sky != NULL) {
+
+        // Get response function
+        GResponse* rsp = response();
+        if (rsp == NULL)
+            throw GException::no_response(G_NPRED_SPAT);
+
+        // Compute integrated IRF
+        double npred = rsp->npred(*sky, srcEng, srcTime, *this);
+
+        // Compute source model
+        double source = 1.0;
+        if (sky->spectral() != NULL) npred  *= sky->spectral()->eval(srcEng);
+        if (sky->temporal() != NULL) source *= sky->temporal()->eval(srcTime);
+
+        // Set result
+        result = source * npred;
+    
+    }
+
+    // Case B: We have a data space model
+    else {
+        throw GException::feature_not_implemented(G_NPRED_SPAT);
+    }
 
     // Return
-    return (source * npred);
+    return result;
 }
 
 
@@ -681,30 +704,53 @@ double GObservation::npred_grad_spec(const GModel& model, int ipar,
  *
  * @exception GException::no_response
  *            No valid instrument response function for observation.
+ * @exception GException::feature_not_implemented
+ *            Method not yet implemented for data-space model.
+ *
+ * @todo Implement method for data-space model.
+ * @todo Avoid recomputation of gradients for same model parameters.
  ***************************************************************************/
 double GObservation::npred_grad_spat(const GModel& model, int ipar,
                                      const GEnergy& srcEng,
                                      const GTime& srcTime) const
 {
-    // Get response function
-    GResponse* rsp = response();
-    if (rsp == NULL)
-        throw GException::no_response(G_NPRED_GRAD_SPAT);
+    // Initialise result
+    double result = 0.0;
 
-    // Compute integrated IRF
-    double npred = rsp->npred(model, srcEng, srcTime, *this);
+    // Get sky model (NULL if not a sky model)
+    GModelSky* sky = dynamic_cast<GModelSky*>((GModel*)&model);
 
-    // Compute source model
-    double source = 1.0;
-    GModel* ptr   = (GModel*)&model; // bypass const-correctness
-    if (ptr->spectral() != NULL) source *= ptr->spectral()->eval_gradients(srcEng);
-    if (ptr->temporal() != NULL) source *= ptr->temporal()->eval_gradients(srcTime);
+    // Case A: We have a sky model
+    if (sky != NULL) {
 
-    // Extract requested model gradient
-    double grad = (*ptr)(ipar).gradient();
+        // Get response function
+        GResponse* rsp = response();
+        if (rsp == NULL)
+            throw GException::no_response(G_NPRED_GRAD_SPAT);
 
+        // Compute integrated IRF
+        double npred = rsp->npred(*sky, srcEng, srcTime, *this);
+
+        // Compute source model
+        double source = 1.0;
+        if (sky->spectral() != NULL) source *= sky->spectral()->eval_gradients(srcEng);
+        if (sky->temporal() != NULL) source *= sky->temporal()->eval_gradients(srcTime);
+
+        // Extract requested model gradient
+        double grad = (*sky)(ipar).gradient();
+
+        // Compute result
+        result = grad * npred;
+
+    }
+
+    // Case B: We have a data space model
+    else {
+        throw GException::feature_not_implemented(G_NPRED_SPAT);
+    }
+    
     // Return
-    return (grad * npred);
+    return result;
 }
 
 
