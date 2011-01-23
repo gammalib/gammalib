@@ -210,6 +210,48 @@ GException::model_invalid_parnames::model_invalid_parnames(std::string origin,
 
 
 /***********************************************************************//**
+ * @brief Model parameter has invalid scale
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] scale Scale.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::model_invalid_parscale::model_invalid_parscale(std::string origin,
+                                                           double      scale,
+                                                           std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Model parameter has invalid scale="+str(scale)+". " +
+                message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model parameter has invalid scale
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] xml XML element.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::model_invalid_parscale::model_invalid_parscale(std::string origin,
+                                                           GXmlElement xml,
+                                                           std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Model parameter with invalid scale found in XML element. " +
+                message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Not enough nodes in file function
  *
  * @param[in] origin Method that throws the error.

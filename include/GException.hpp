@@ -472,6 +472,13 @@ public:
         model_invalid_parnames(std::string origin, GXmlElement xml,
                                std::string message = "");
     };
+    class model_invalid_parscale : public GExceptionHandler {
+    public:
+        model_invalid_parscale(std::string origin, double scale,
+                               std::string message = "");
+        model_invalid_parscale(std::string origin, GXmlElement xml,
+                               std::string message = "");
+    };
     class not_enough_data : public GExceptionHandler {
     public:
         not_enough_data(std::string origin, std::string filename,
