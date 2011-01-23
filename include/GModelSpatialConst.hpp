@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialConst.hpp  -  Spatial isotropic model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,9 +20,7 @@
 #define GMODELSPATIALCONST_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include <string>
-#include "GLog.hpp"
 #include "GModelSpatial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
@@ -38,10 +36,6 @@
  * model for an isotropic source.
  ***************************************************************************/
 class GModelSpatialConst  : public GModelSpatial {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GModelSpatialConst& model);
-    friend GLog&         operator<< (GLog& log, const GModelSpatialConst& model);
 
 public:
     // Constructors and destructors

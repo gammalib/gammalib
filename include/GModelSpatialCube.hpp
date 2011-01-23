@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpatialCube.hpp  -  Spatial map cube model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,9 +20,7 @@
 #define GMODELSPATIALCUBE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include <string>
-#include "GLog.hpp"
 #include "GModelSpatial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
@@ -43,10 +41,6 @@
  * @todo eval() and eval_gradients() methods not yet implemented.
  ***************************************************************************/
 class GModelSpatialCube  : public GModelSpatial {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GModelSpatialCube& model);
-    friend GLog&         operator<< (GLog& log, const GModelSpatialCube& model);
 
 public:
     // Constructors and destructors
