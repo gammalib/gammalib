@@ -22,8 +22,9 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GCTAModelRaccDummy.hpp"
 #include "GModelRegistry.hpp"
+#include "GCTAInstDir.hpp"
+#include "GCTAModelRaccDummy.hpp"
 
 /* __ Constants __________________________________________________________ */
 
@@ -51,7 +52,8 @@ const GModelRegistry     g_cta_racc_dummy_registry(&g_cta_racc_dummy_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTAModelRaccDummy::GCTAModelRaccDummy(void) : GModelData()
+GCTAModelRaccDummy::GCTAModelRaccDummy(void) : GModelData(),
+                                               GModelFactorized()
 {
     // Initialise members
     init_members();
@@ -67,12 +69,13 @@ GCTAModelRaccDummy::GCTAModelRaccDummy(void) : GModelData()
  * @param[in] xml XML element.
  ***************************************************************************/
 GCTAModelRaccDummy::GCTAModelRaccDummy(const GXmlElement& xml) :
-                                       GModelData(xml)
+                                       GModelData(xml),
+                                       GModelFactorized()
 {
     // Initialise members
     init_members();
 
-    // Read information from XML element
+    // Read XML
     read(xml);
 
     // Set parameter pointers
@@ -89,7 +92,8 @@ GCTAModelRaccDummy::GCTAModelRaccDummy(const GXmlElement& xml) :
  * @param[in] model Radial acceptance model.
  ***************************************************************************/
 GCTAModelRaccDummy::GCTAModelRaccDummy(const GCTAModelRaccDummy& model) :
-                                       GModelData(model)
+                                       GModelData(model),
+                                       GModelFactorized(model)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -136,6 +140,7 @@ GCTAModelRaccDummy& GCTAModelRaccDummy::operator= (const GCTAModelRaccDummy& mod
 
         // Copy base class members
         this->GModelData::operator=(model);
+        this->GModelFactorized::operator=(model);
 
         // Free members
         free_members();
@@ -166,12 +171,14 @@ void GCTAModelRaccDummy::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
+    this->GModelFactorized::free_members();
     this->GModelData::free_members();
     this->GModel::free_members();
 
     // Initialise members
     this->GModel::init_members();
     this->GModelData::init_members();
+    this->GModelFactorized::init_members();
     init_members();
 
     // Return
@@ -194,12 +201,22 @@ GCTAModelRaccDummy* GCTAModelRaccDummy::clone(void) const
  * @param[in] event Observed event.
  * @param[in] obs Observation.
  *
- * @todo Not yet implemented.
+ * @todo Verify that CTA instrument direction pointer is valid
  ***************************************************************************/
 double GCTAModelRaccDummy::eval(const GEvent& event, const GObservation& obs)
 {
-    // Return value
-    return 1.0;
+    // Get instrument direction
+    const GInstDir*    inst_dir = &(event.dir());
+    const GCTAInstDir* cta_dir  = dynamic_cast<const GCTAInstDir*>(inst_dir);
+
+    // Evaluate function
+    double value = 1.0;
+    if (spatial()  != NULL) value *= spatial()->eval(cta_dir->skydir());
+    if (spectral() != NULL) value *= spectral()->eval(event.energy());
+    if (temporal() != NULL) value *= temporal()->eval(event.time());
+
+    // Return
+    return value;
 }
 
 
@@ -209,16 +226,23 @@ double GCTAModelRaccDummy::eval(const GEvent& event, const GObservation& obs)
  * @param[in] event Observed event.
  * @param[in] obs Observation.
  *
- * @todo Not yet implemented.
+ * @todo Verify that CTA instrument direction pointer is valid
  ***************************************************************************/
 double GCTAModelRaccDummy::eval_gradients(const GEvent& event,
                                           const GObservation& obs)
 {
-    // Set gradient to 0
-    //m_value.gradient(0.0);
+    // Get instrument direction
+    const GInstDir*    inst_dir = &(event.dir());
+    const GCTAInstDir* cta_dir  = dynamic_cast<const GCTAInstDir*>(inst_dir);
+
+    // Evaluate function and gradients
+    double value = 1.0;
+    if (spatial()  != NULL) value *= spatial()->eval_gradients(cta_dir->skydir());
+    if (spectral() != NULL) value *= spectral()->eval_gradients(event.energy());
+    if (temporal() != NULL) value *= temporal()->eval_gradients(event.time());
 
     // Return value
-    return 1.0;
+    return value;
 }
 
 
@@ -226,11 +250,22 @@ double GCTAModelRaccDummy::eval_gradients(const GEvent& event,
  * @brief Read model from XML element
  *
  * @param[in] xml XML element.
- *
- * @todo Not yet implemented.
  ***************************************************************************/
 void GCTAModelRaccDummy::read(const GXmlElement& xml)
 {
+    // Clear model
+    clear();
+
+    // Read model
+    xml_read(xml);
+
+    // Store name and instruments
+    this->name(xml.attribute("name"));
+    this->instruments(xml.attribute("instrument"));
+
+    // Set parameter pointers
+    set_pointers();
+
     // Return
     return;
 }
@@ -240,18 +275,19 @@ void GCTAModelRaccDummy::read(const GXmlElement& xml)
  * @brief Write model into XML element
  *
  * @param[in] xml XML element.
- *
- * @todo Not yet implemented.
  ***************************************************************************/
 void GCTAModelRaccDummy::write(GXmlElement& xml) const
 {
+    // Write model
+    xml_write(xml, name(), instruments());
+
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Print isotropic source information
+ * @brief Print model information
  ***************************************************************************/
 std::string GCTAModelRaccDummy::print(void) const
 {
@@ -260,6 +296,12 @@ std::string GCTAModelRaccDummy::print(void) const
 
     // Append header
     result.append("=== GCTAModelRaccDummy ===");
+
+    // Append name and instrument
+    result.append("\n"+print_name_instrument());
+
+    // Append model
+    result.append("\n"+print_model());
 
     // Return result
     return result;
@@ -277,12 +319,6 @@ std::string GCTAModelRaccDummy::print(void) const
  ***************************************************************************/
 void GCTAModelRaccDummy::init_members(void)
 {
-    // Initialise parameters
-
-    // Initialise Value
-
-    // Initialise other members
-
     // Return
     return;
 }
@@ -295,8 +331,8 @@ void GCTAModelRaccDummy::init_members(void)
  ***************************************************************************/
 void GCTAModelRaccDummy::copy_members(const GCTAModelRaccDummy& model)
 {
-    // Copy model parameters (we do not need to copy the rest since it is
-    // static)
+    // Set parameter pointers
+    set_pointers();
 
     // Return
     return;
@@ -320,6 +356,9 @@ void GCTAModelRaccDummy::free_members(void)
  ***************************************************************************/
 void GCTAModelRaccDummy::set_pointers(void)
 {
+    // Set pointers
+    m_pars = set_par_pointers();
+
     // Return
     return;
 }

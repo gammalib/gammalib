@@ -22,6 +22,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GModelData.hpp"
+#include "GModelFactorized.hpp"
 #include "GModelPar.hpp"
 #include "GEvent.hpp"
 #include "GObservation.hpp"
@@ -35,7 +36,7 @@
  *
  * This class implements a radial acceptance dummy model for CTA.
  ***************************************************************************/
-class GCTAModelRaccDummy : public GModelData {
+class GCTAModelRaccDummy : public GModelData, public GModelFactorized {
 
 public:
     // Constructors and destructors
