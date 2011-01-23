@@ -197,7 +197,7 @@ if test "x$with_cfitsio" = "xyes"; then
   if test "x$cfitsio_lib_dir" != "x"; then
     test -f $cfitsio_lib_dir/libcfitsio.a -o -f $cfitsio_lib_dir/libcfitsio.so -o -f $cfitsio_lib_dir/libcfitsio.dylib && LIBDIR_CFITSIO=$cfitsio_lib_dir
   else
-    for i in /usr/local/lib /usr/local/lib64 /usr/lib /usr/lib64 ; do
+    for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
       test -f $i/libcfitsio.a -o -f $i/libcfitsio.so -o -f $i/libcfitsio.dylib && LIBDIR_CFITSIO=$i
     done
   fi
@@ -242,7 +242,7 @@ if test "x$with_readline" = "xyes"; then
   if test "x$readline_lib_dir" != "x"; then
     test -f $readline_lib_dir/libreadline.a -o -f $readline_lib_dir/libreadline.so -o -f $readline_lib_dir/libreadline.dylib && LIBDIR_READLINE=$readline_lib_dir
   else
-    for i in /usr/local/lib /usr/local/lib64 /usr/lib /usr/lib64 ; do
+    for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
       test -f $i/libreadline.a -o -f $i/libreadline.so -o -f $i/libreadline.dylib && LIBDIR_READLINE=$i
     done
   fi
