@@ -277,6 +277,32 @@ void GModel::free_members(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Print model name and instrument
+ ***************************************************************************/
+std::string GModel::print_name_instrument(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append model
+    result.append(parformat("Name")+name());
+    result.append("\n"+parformat("Instruments"));
+    if (m_instruments.size() > 0) {
+        for (int i = 0; i < m_instruments.size(); ++i) {
+            if (i > 0)
+                result.append(", ");
+            result.append(m_instruments[i]);
+        }
+    }
+    else
+        result.append("all");
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                                  Friends                                =
