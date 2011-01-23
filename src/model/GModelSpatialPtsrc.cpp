@@ -268,31 +268,50 @@ void GModelSpatialPtsrc::read(const GXmlElement& xml)
         throw GException::model_invalid_parnum(G_READ, xml,
               "Point source model requires exactly 2 parameters.");
 
-    // Get pointers on both model parameters
-    GXmlElement* par1 = (GXmlElement*)xml.element("parameter", 0);
-    GXmlElement* par2 = (GXmlElement*)xml.element("parameter", 1);
+    // Extract model parameters
+    bool has_glon = false;
+    bool has_glat = false;
+    int  npar[]   = {0, 0};
+    for (int i = 0; i < 2; ++i) {
 
-    // Get sky direction
-    GSkyDir dir;
-    if (par1->attribute("name") == "RA" && par2->attribute("name") == "DEC")
-        dir.radec_deg(todouble(par1->attribute("value")),
-                      todouble(par2->attribute("value")));
-    else if (par2->attribute("name") == "RA" && par1->attribute("name") == "DEC")
-        dir.radec_deg(todouble(par2->attribute("value")),
-                      todouble(par1->attribute("value")));
-    else if (par1->attribute("name") == "GLON" && par2->attribute("name") == "GLAT")
-        dir.lb_deg(todouble(par1->attribute("value")),
-                   todouble(par2->attribute("value")));
-    else if (par2->attribute("name") == "GLON" && par1->attribute("name") == "GLAT")
-        dir.lb_deg(todouble(par2->attribute("value")),
-                   todouble(par1->attribute("value")));
-    else
+        // Get parameter element
+        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+
+        // Handle RA/GLON
+        if (par->attribute("name") == "RA") {
+            m_ra.read(*par);
+            npar[0]++;
+        }
+        else if (par->attribute("name") == "GLON") {
+            m_ra.read(*par);
+            npar[0]++;
+            has_glon = true;
+        }
+
+        // Handle DEC/GLAT
+        else if (par->attribute("name") == "DEC") {
+            m_dec.read(*par);
+            npar[1]++;
+        }
+        else if (par->attribute("name") == "GLAT") {
+            m_dec.read(*par);
+            npar[1]++;
+            has_glat = true;
+        }
+
+    } // endfor: looped over all parameters
+
+    // Check if we have to convert GLON/GLAT into RA/DEC
+    if (has_glon && has_glat) {
+        GSkyDir dir;
+        dir.lb_deg(ra(), dec()),
+        m_ra.real_value(dir.ra_deg());
+        m_dec.real_value(dir.dec_deg());
+    }
+    else if (has_glon || has_glat) {
         throw GException::model_invalid_parnames(G_READ, xml,
                           "Require either RA/DEC or GLON/GLAT.");
-
-    // Assign sky direction
-    m_ra.value(dir.ra_deg());
-    m_dec.value(dir.dec_deg());
+    }
 
     // Return
     return;
@@ -322,12 +341,12 @@ void GModelSpatialPtsrc::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "")
-        xml.attribute("type", "SkyDirFunction");
+        xml.attribute("type", type());
 
     // Verify model type
-    if (xml.attribute("type") != "SkyDirFunction")
+    if (xml.attribute("type") != type())
         throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Spatial model is not of type \"SkyDirFunction\".");
+              "Spatial model is not of type \""+type()+"\".");
 
     // If XML element has 0 nodes then append 2 parameter nodes
     if (xml.elements() == 0) {
@@ -403,8 +422,8 @@ GSkyDir GModelSpatialPtsrc::dir(void) const
 void GModelSpatialPtsrc::dir(const GSkyDir& dir)
 {
     // Assign Right Ascension and Declination
-    m_ra.value(dir.ra_deg());
-    m_dec.value(dir.dec_deg());
+    m_ra.real_value(dir.ra_deg());
+    m_dec.real_value(dir.dec_deg());
 
     // Return
     return;
@@ -478,34 +497,3 @@ void GModelSpatialPtsrc::free_members(void)
  =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] model Model.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GModelSpatialPtsrc& model)
-{
-     // Write spectrum in output stream
-    os << model.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] model Model.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GModelSpatialPtsrc& model)
-{
-    // Write spectrum into logger
-    log << model.print();
-
-    // Return logger
-    return log;
-}
