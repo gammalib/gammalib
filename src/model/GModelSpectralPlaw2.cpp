@@ -73,14 +73,14 @@ GModelSpectralPlaw2::GModelSpectralPlaw2(void) : GModelSpectral()
  ***************************************************************************/
 GModelSpectralPlaw2::GModelSpectralPlaw2(const double& integral,
                                          const double& index) :
-                     GModelSpectral()
+                                         GModelSpectral()
 {
     // Initialise private members for clean destruction
     init_members();
 
     // Set parameters
-    m_integral.value(integral);
-    m_index.value(index);
+    m_integral.real_value(integral);
+    m_index.real_value(index);
 
     // Return
     return;

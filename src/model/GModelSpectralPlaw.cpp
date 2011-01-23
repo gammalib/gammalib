@@ -71,15 +71,15 @@ GModelSpectralPlaw::GModelSpectralPlaw(void) : GModelSpectral()
  * Construct a spectral power law from a normalization value and a spectral
  * index.
  ***************************************************************************/
-GModelSpectralPlaw::GModelSpectralPlaw(const double& norm, const double& index) :
-                                                                 GModelSpectral()
+GModelSpectralPlaw::GModelSpectralPlaw(const double& norm,
+                                       const double& index) : GModelSpectral()
 {
     // Initialise private members for clean destruction
     init_members();
 
     // Set parameters
-    m_norm.value(norm);
-    m_index.value(index);
+    m_norm.real_value(norm);
+    m_index.real_value(index);
 
     // Return
     return;

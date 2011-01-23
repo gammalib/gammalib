@@ -82,9 +82,9 @@ GModelSpectralExpPlaw::GModelSpectralExpPlaw(const double& norm,
     init_members();
 
     // Set parameters
-    m_norm.value(norm);
-    m_index.value(index);
-    m_ecut.value(ecut);
+    m_norm.real_value(norm);
+    m_index.real_value(index);
+    m_ecut.real_value(ecut);
 
     // Return
     return;
