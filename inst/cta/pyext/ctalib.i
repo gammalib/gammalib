@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          ctalib - SWIG file                             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,6 +21,7 @@
 #include "GCTAResponse.i"
 #include "GCTAInstDir.i"
 #include "GCTARoi.i"
+#include "GCTAModelRaccDummy.i"
 
 
 
