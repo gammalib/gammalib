@@ -39,17 +39,18 @@ public:
     // Implemented virtual methods
     void                clear(void);
     GModelSpatialPtsrc* clone(void) const;
-    int                 size(void) const { return m_npars; }
-    std::string         type(void) const { return "SkyDirFunction"; }
+    int                 size(void) const;
+    std::string         type(void) const;
     double              eval(const GSkyDir& srcDir);
     double              eval_gradients(const GSkyDir& srcDir);
+    GSkyDir             mc(GRan& ran) const;
     void                read(const GXmlElement& xml);
     void                write(GXmlElement& xml) const;
     bool                isptsource(void) const { return true; }
 
     // Other methods
-    double  ra(void) const { return m_ra.real_value(); }
-    double  dec(void) const { return m_dec.real_value(); }
+    double  ra(void) const;
+    double  dec(void) const;
     GSkyDir dir(void) const;
     void    dir(const GSkyDir& dir);
 };

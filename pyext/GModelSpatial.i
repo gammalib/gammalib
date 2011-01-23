@@ -40,6 +40,7 @@ public:
     virtual std::string    type(void) const = 0;
     virtual double         eval(const GSkyDir& srcDir) = 0;
     virtual double         eval_gradients(const GSkyDir& srcDir) = 0;
+    virtual GSkyDir        mc(GRan& ran) const = 0;
     virtual void           read(const GXmlElement& xml) = 0;
     virtual void           write(GXmlElement& xml) const = 0;
     virtual bool           isptsource(void) const = 0;
