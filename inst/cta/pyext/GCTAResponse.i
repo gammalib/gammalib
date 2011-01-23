@@ -38,12 +38,12 @@ public:
     // Implement pure virtual base class methods
     void           clear(void);
     GCTAResponse*  clone(void) const;
-    bool           hasedisp(void) const { return false; }
-    bool           hastdisp(void) const { return false; }
-    double         irf(const GEvent& event, const GModel& model,
+    bool           hasedisp(void) const;
+    bool           hastdisp(void) const;
+    double         irf(const GEvent& event, const GModelSky& model,
                        const GEnergy& srcEng, const GTime& srcTime,
                        const GObservation& obs) const;
-    double         npred(const GModel& model, const GEnergy& srcEng,
+    double         npred(const GModelSky& model, const GEnergy& srcEng,
                          const GTime& srcTime,
                          const GObservation& obs) const;
     GCTAEventAtom* mc(const double& area, const GPhoton& photon,
@@ -51,17 +51,17 @@ public:
 
     // Other Methods
     void        caldb(const std::string& caldb);
-    std::string caldb(void) const { return m_caldb; }
+    std::string caldb(void) const;
     void        load(const std::string& rspname);
 
     // Other response methods
     double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const;
-    double irf(const GCTAEventAtom& event, const GModel& model,
+    double irf(const GCTAEventAtom& event, const GModelSky& model,
                const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const;
-    double irf(const GCTAEventBin& event, const GModel& model,
+    double irf(const GCTAEventBin& event, const GModelSky& model,
                const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const;
     double npred(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,

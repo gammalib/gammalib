@@ -36,32 +36,32 @@ public:
     // Implement pure virtual base class methods
     void          clear(void);
     GLATResponse* clone(void) const;
-    bool          hasedisp(void) const { return false; }
-    bool          hastdisp(void) const { return false; }
-    double        irf(const GEvent& event, const GModel& model,
+    bool          hasedisp(void) const;
+    bool          hastdisp(void) const;
+    double        irf(const GEvent& event, const GModelSky& model,
                       const GEnergy& srcEng, const GTime& srcTime,
                       const GObservation& obs) const;
-    double        npred(const GModel& model, const GEnergy& srcEng,
+    double        npred(const GModelSky& model, const GEnergy& srcEng,
                         const GTime& srcTime,
                         const GObservation& obs) const;
 
     // Other Methods
     void        caldb(const std::string& caldb);
-    std::string caldb(void) const { return m_caldb; }
+    std::string caldb(void) const;
     void        load(const std::string& rspname);
-    int         size(void) const { return m_aeff.size(); }
+    int         size(void) const;
     GLATAeff*   aeff(const int& index) const;
     GLATPsf*    psf(const int& index) const;
     GLATEdisp*  edisp(const int& index) const;
     void        save(const std::string& rspname) const;
-    bool        force_mean(void) { return m_force_mean; }
-    void        force_mean(const bool& value) { m_force_mean=value; }
+    bool        force_mean(void);
+    void        force_mean(const bool& value);
 
     // Reponse methods
-    double irf(const GLATEventAtom& event, const GModel& model,
+    double irf(const GLATEventAtom& event, const GModelSky& model,
                const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const;
-    double irf(const GLATEventBin& event, const GModel& model,
+    double irf(const GLATEventBin& event, const GModelSky& model,
                const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const;
 };
