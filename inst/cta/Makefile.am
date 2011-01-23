@@ -16,7 +16,8 @@ sources = src/GCTAException.cpp \
           src/GCTAResponse.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
-          src/GCTAPointing.cpp
+          src/GCTAPointing.cpp \
+          src/GCTAModelRaccDummy.cpp
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GCTAException.hpp \
@@ -29,6 +30,7 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAInstDir.hpp \
                      include/GCTARoi.hpp \
                      include/GCTAResponse.hpp \
+                     include/GCTAModelRaccDummy.hpp \
                      include/GCTALib.hpp
 
 # Calibration files to distribute
