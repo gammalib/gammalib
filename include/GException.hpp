@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GException.hpp  -  exception handler                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -441,7 +441,12 @@ public:
     };
 
 
-    // GModel exceptions
+    // Model exceptions
+    class model_invalid : public GExceptionHandler {
+    public:
+        model_invalid(std::string origin, std::string type,
+                      std::string message = "");
+    };
     class model_invalid_spatial : public GExceptionHandler {
     public:
         model_invalid_spatial(std::string origin, std::string type,
@@ -450,6 +455,11 @@ public:
     class model_invalid_spectral : public GExceptionHandler {
     public:
         model_invalid_spectral(std::string origin, std::string type,
+                               std::string message = "");
+    };
+    class model_invalid_temporal : public GExceptionHandler {
+    public:
+        model_invalid_temporal(std::string origin, std::string type,
                                std::string message = "");
     };
     class model_invalid_parnum : public GExceptionHandler {
@@ -474,10 +484,10 @@ public:
     };
 
 
-    // GCvs exceptions
-    class cvs_bad_columns : public GExceptionHandler {
+    // CSV exceptions
+    class csv_bad_columns : public GExceptionHandler {
     public:
-        cvs_bad_columns(std::string origin, std::string filename,
+        csv_bad_columns(std::string origin, std::string filename,
                         int rows, int cols, int elements,
                         std::string message = "");
     };
