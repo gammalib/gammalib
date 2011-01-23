@@ -16,7 +16,7 @@
 #include <config.h>
 #endif
 #include <string>
-#include <stdio.h>            // strncpy, etc...
+#include <string.h>           // strncpy, etc...
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
