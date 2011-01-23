@@ -32,6 +32,7 @@ const GModelSpatialCube     g_spatial_cube_seed;
 const GModelSpatialRegistry g_spatial_cube_registry(&g_spatial_cube_seed);
 
 /* __ Method name definitions ____________________________________________ */
+#define G_MC                                  "GModelSpatialCube::mc(GRan&)"
 #define G_READ                        "GModelSpatialCube::read(GXmlElement&)"
 #define G_WRITE                      "GModelSpatialCube::write(GXmlElement&)"
 
@@ -208,6 +209,29 @@ double GModelSpatialCube::eval_gradients(const GSkyDir& srcDir)
 
     // Return value
     return 1.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns MC sky direction
+ *
+ * @param[in] ran Random number generator.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method not yet implemented
+ *
+ * @todo Implement method
+ ***************************************************************************/
+GSkyDir GModelSpatialCube::mc(GRan& ran) const
+{
+    // Allocate sky direction
+    GSkyDir dir;
+
+    // Dump warning that method is not yet implemented
+    throw GException::feature_not_implemented(G_MC);
+    
+    // Return sky direction
+    return dir;
 }
 
 
