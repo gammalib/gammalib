@@ -20,7 +20,9 @@
 #define GMODELSPECTRAL_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
 #include <string>
+#include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GEnergy.hpp"
 #include "GRan.hpp"
@@ -36,6 +38,10 @@
  * model.
  ***************************************************************************/
 class GModelSpectral {
+
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GModelSpectral& model);
+    friend GLog&         operator<< (GLog& log, const GModelSpectral& model);
 
 public:
     // Constructors and destructors

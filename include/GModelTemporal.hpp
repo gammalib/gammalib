@@ -22,6 +22,8 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
+#include <iostream>
+#include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GTime.hpp"
 #include "GRan.hpp"
@@ -39,6 +41,10 @@
  * a mean value of 1.
  ***************************************************************************/
 class GModelTemporal {
+
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GModelTemporal& model);
+    friend GLog&         operator<< (GLog& log, const GModelTemporal& model);
 
 public:
     // Constructors and destructors
