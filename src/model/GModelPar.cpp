@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModelPar.cpp  -  Model parameter class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,6 +25,8 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_REAL_VALUE                         "GModelPar::real_value(double&)"
+#define G_REAL_ERROR                         "GModelPar::real_error(double&)"
 #define G_VALUE                                   "GModelPar::value(double&)"
 #define G_MIN                                       "GModelPar::min(double&)"
 #define G_MAX                                       "GModelPar::max(double&)"
@@ -126,9 +128,68 @@ GModelPar& GModelPar::operator= (const GModelPar& par)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Set real parameter value
+ *
+ * @param[in] value Real parameter value.
+ *
+ * @exception GException::model_invalid_parscale
+ *            Parameter has a zero scale factor
+ *
+ * Assigns the real parameter value by dividing by the parameter scale.
+ ***************************************************************************/
+void GModelPar::real_value(const double& value)
+{
+    // Throw error if scale is 0
+    if (m_scale == 0.0)
+        throw GException::model_invalid_parscale(G_REAL_VALUE, m_scale,
+              "Zero scale not allowed for model parameter.");
+    
+    // Compute value
+    double val = value / m_scale;
+
+    // Assign value
+    this->value(val);
+	
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set real parameter error
+ *
+ * @param[in] error Real parameter error.
+ *
+ * @exception GException::model_invalid_parscale
+ *            Parameter has a zero scale factor
+ *
+ * Assigns the real parameter error by dividing by the parameter scale.
+ ***************************************************************************/
+void GModelPar::real_error(const double& error)
+{
+    // Throw error if scale is 0
+    if (m_scale == 0.0)
+        throw GException::model_invalid_parscale(G_REAL_ERROR, m_scale,
+              "Zero scale not allowed for model parameter.");
+    
+    // Compute error
+    double err = error / m_scale;
+
+    // Assign error
+    this->error(err);
+	
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set parameter value
  *
  * @param[in] value Parameter value.
+ *
+ * @exception GException::out_of_range
+ *            Parameter value outside valid range
  ***************************************************************************/
 void GModelPar::value(const double& value)
 {

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GModelPar.hpp  -  Model parameter class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -66,6 +66,8 @@ public:
     bool        hasmax(void) const { return m_hasmax; }
     void        name(const std::string& name) { m_name=name; return; }
     void        unit(const std::string& unit) { m_unit=unit; return; }
+    void        real_value(const double& value);
+    void        real_error(const double& error);
     void        value(const double& value);
     void        error(const double& error)  { m_error=error; return; }
     void        gradient(const double& gradient) { m_gradient=gradient; return; }

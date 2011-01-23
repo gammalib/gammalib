@@ -35,36 +35,38 @@ public:
     ~GModelPar();
 
     // Methods
-    std::string name(void) const { return m_name; }
-    std::string unit(void) const { return m_unit; }
-    double      real_value(void) const { return m_value*m_scale; }
-    double      real_error(void) const { return m_error*m_scale; }
-    double      real_gradient(void) const { return m_gradient*m_scale; }
-    double      real_min(void) const { return m_min*m_scale; }
-    double      real_max(void) const { return m_max*m_scale; }
-    double      value(void) const { return m_value; }
-    double      error(void) const { return m_error; }
-    double      gradient(void) const { return m_gradient; }
-    double      min(void) const { return m_min; }
-    double      max(void) const { return m_max; }
-    double      scale(void) const { return m_scale; }
-    bool        isfree(void) const { return m_free; }
-    bool        hasmin(void) const { return m_hasmin; }
-    bool        hasmax(void) const { return m_hasmax; }
-    void        name(const std::string& name) { m_name=name; return; }
-    void        unit(const std::string& unit) { m_unit=unit; return; }
+    std::string name(void) const;
+    std::string unit(void) const;
+    double      real_value(void) const;
+    double      real_error(void) const;
+    double      real_gradient(void) const;
+    double      real_min(void) const;
+    double      real_max(void) const;
+    double      value(void) const;
+    double      error(void) const;
+    double      gradient(void) const;
+    double      min(void) const;
+    double      max(void) const;
+    double      scale(void) const;
+    bool        isfree(void) const;
+    bool        hasmin(void) const;
+    bool        hasmax(void) const;
+    void        name(const std::string& name);
+    void        unit(const std::string& unit);
+    void        real_value(const double& value);
+    void        real_error(const double& error);
     void        value(const double& value);
-    void        error(const double& error)  { m_error=error; return; }
-    void        gradient(const double& gradient) { m_gradient=gradient; return; }
+    void        error(const double& error);
+    void        gradient(const double& gradient);
     void        min(const double& min);
     void        max(const double& max);
-    void        scale(const double& scale) { m_scale=scale; return; }
+    void        scale(const double& scale);
     void        range(const double& min, const double& max);
-    void        remove_min(void) { m_hasmin=false; return; }
-    void        remove_max(void) { m_hasmax=false; return; }
-    void        remove_range(void) { m_hasmin=false; m_hasmax=false; return; }
-    void        free(void) { m_free=true; return; }
-    void        fix(void) { m_free=false; return; }
+    void        remove_min(void);
+    void        remove_max(void);
+    void        remove_range(void);
+    void        free(void);
+    void        fix(void);
     void        read(const GXmlElement& xml);
     void        write(GXmlElement& xml) const;
 };
