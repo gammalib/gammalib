@@ -248,6 +248,20 @@ double GModelSpatialPtsrc::eval_gradients(const GSkyDir& srcDir)
 
 
 /***********************************************************************//**
+ * @brief Returns MC sky direction
+ *
+ * @param[in] ran Random number generator.
+ *
+ * This method always returns the directon of the point source.
+ ***************************************************************************/
+GSkyDir GModelSpatialPtsrc::mc(GRan& ran) const
+{
+    // Return point source direction
+    return dir();
+}
+
+
+/***********************************************************************//**
  * @brief Read model from XML element
  *
  * @param[in] xml XML element containing point source model information.

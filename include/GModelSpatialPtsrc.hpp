@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialPtsrc.hpp  -  Spatial point source model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -60,6 +60,7 @@ public:
     std::string         type(void) const { return "SkyDirFunction"; }
     double              eval(const GSkyDir& srcDir);
     double              eval_gradients(const GSkyDir& srcDir);
+    GSkyDir             mc(GRan& ran) const;
     void                read(const GXmlElement& xml);
     void                write(GXmlElement& xml) const;
     std::string         print(void) const;

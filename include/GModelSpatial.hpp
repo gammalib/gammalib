@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpatial.hpp  -  Spatial model abstract base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,6 +25,7 @@
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
 #include "GXmlElement.hpp"
+#include "GRan.hpp"
 
 
 /***********************************************************************//**
@@ -61,6 +62,7 @@ public:
     virtual std::string    type(void) const = 0;
     virtual double         eval(const GSkyDir& srcDir) = 0;
     virtual double         eval_gradients(const GSkyDir& srcDir) = 0;
+    virtual GSkyDir        mc(GRan& ran) const = 0;
     virtual void           read(const GXmlElement& xml) = 0;
     virtual void           write(GXmlElement& xml) const = 0;
     virtual std::string    print(void) const = 0;

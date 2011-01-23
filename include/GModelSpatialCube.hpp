@@ -59,6 +59,7 @@ public:
     std::string        type(void) const { return "MapCubeFunction"; }
     double             eval(const GSkyDir& srcDir);
     double             eval_gradients(const GSkyDir& srcDir);
+    GSkyDir            mc(GRan& ran) const;
     void               read(const GXmlElement& xml);
     void               write(GXmlElement& xml) const;
     std::string        print(void) const;
