@@ -20,8 +20,6 @@
 #define GMODELTEMPORALCONST_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GModelTemporal.hpp"
 #include "GTime.hpp"
@@ -38,10 +36,6 @@
  * supposed to be fitted.
  ***************************************************************************/
 class GModelTemporalConst  : public GModelTemporal {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GModelTemporalConst& model);
-    friend GLog&         operator<< (GLog& log, const GModelTemporalConst& model);
 
 public:
     // Constructors and destructors

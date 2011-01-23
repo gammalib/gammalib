@@ -615,34 +615,3 @@ void GModelSpectralPlaw::free_members(void)
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] model Model.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GModelSpectralPlaw& model)
-{
-     // Write spectrum in output stream
-    os << model.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] model Model.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GModelSpectralPlaw& model)
-{
-    // Write spectrum into logger
-    log << model.print();
-
-    // Return logger
-    return log;
-}

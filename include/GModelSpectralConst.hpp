@@ -20,9 +20,7 @@
 #define GMODELSPECTRALCONST_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include <string>
-#include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
 #include "GEnergy.hpp"
@@ -41,10 +39,6 @@
  * \f$norm\f$ is the normalization constant.
  ***************************************************************************/
 class GModelSpectralConst  : public GModelSpectral {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GModelSpectralConst& model);
-    friend GLog&         operator<< (GLog& log, const GModelSpectralConst& model);
 
 public:
     // Constructors and destructors

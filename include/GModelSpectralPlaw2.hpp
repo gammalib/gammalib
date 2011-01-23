@@ -20,8 +20,6 @@
 #define GMODELSPECTRALPLAW2_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
 #include "GEnergy.hpp"
@@ -46,10 +44,6 @@
  * \f$emax\f$ is the upper energy limit.
  ***************************************************************************/
 class GModelSpectralPlaw2  : public GModelSpectral {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GModelSpectralPlaw2& model);
-    friend GLog&         operator<< (GLog& log, const GModelSpectralPlaw2& model);
 
 public:
     // Constructors and destructors

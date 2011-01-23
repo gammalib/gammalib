@@ -20,8 +20,6 @@
 #define GMODELSPECTRALEXPPLAW_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
 #include "GEnergy.hpp"
@@ -43,10 +41,6 @@
  * \f$ecut\f$ is the cut off energy.
  ***************************************************************************/
 class GModelSpectralExpPlaw  : public GModelSpectral {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GModelSpectralExpPlaw& model);
-    friend GLog&         operator<< (GLog& log, const GModelSpectralExpPlaw& model);
 
 public:
     // Constructors and destructors

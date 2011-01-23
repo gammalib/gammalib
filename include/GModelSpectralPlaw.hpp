@@ -20,8 +20,6 @@
 #define GMODELSPECTRALPLAW_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
 #include "GEnergy.hpp"
@@ -42,10 +40,6 @@
  * \f$index\f$ is the spectral index.
  ***************************************************************************/
 class GModelSpectralPlaw  : public GModelSpectral {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GModelSpectralPlaw& model);
-    friend GLog&         operator<< (GLog& log, const GModelSpectralPlaw& model);
 
 public:
     // Constructors and destructors
