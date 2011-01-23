@@ -524,18 +524,8 @@ GPhotons GModelSky::mc(const double& area,
                 // Set photon arrival time
                 photon.time(times[i]);
 
-                // If source is a point source we simply assign the actual
-                // source position to the photons
-                if (m_spatial->isptsource()) {
-                    GModelSpatialPtsrc* src = dynamic_cast<GModelSpatialPtsrc*>(m_spatial);
-                    photon.dir(src->dir());
-                }
-
-                // ... otherwise we simulate photons using the spatial
-                // component
-                else {
-                    //TODO
-                }
+                // Set incident photon direction
+                photon.dir(m_spatial->mc(ran));
 
                 // Set photon energy
                 photon.energy(m_spectral->mc(emin, emax, ran));
