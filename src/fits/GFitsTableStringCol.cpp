@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableStringCol.cpp  - FITS table string column class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -16,6 +16,7 @@
 #include <config.h>
 #endif
 #include <string>
+#include <stdio.h>            // strncpy, etc...
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"

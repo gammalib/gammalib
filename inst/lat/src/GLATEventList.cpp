@@ -20,6 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <stdio.h>            // sprintf, etc...
 #include "GLATEventList.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"

@@ -20,6 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <stdio.h>            // fopen, fgets, fclose, etc...
 #include "GCsv.hpp"
 #include "GTools.hpp"
 #include "GException.hpp"

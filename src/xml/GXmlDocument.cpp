@@ -21,6 +21,7 @@
 #include <config.h>
 #endif
 #include <iostream>
+#include <stdio.h>            // fprintf, etc...
 #include "GXmlDocument.hpp"
 
 /* __ Method name definitions ____________________________________________ */

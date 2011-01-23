@@ -23,6 +23,7 @@
 #include <vector>
 #include <string>
 #include <unistd.h>           // access() function
+#include <stdio.h>            // fopen, fgets, fclose, etc...
 #include "GCTAResponse.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAInstDir.hpp"
