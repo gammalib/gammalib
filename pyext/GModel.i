@@ -51,9 +51,6 @@ public:
     void        instruments(const std::string& instruments);
     std::string instruments(void) const;
     bool        isvalid(const std::string& name) const;
-
-protected:
-    virtual void set_pointers(void) = 0;
 };
 
 

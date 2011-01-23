@@ -39,7 +39,6 @@ public:
     virtual void        clear(void) = 0;
     virtual GModelData* clone(void) const = 0;
     virtual std::string type(void) const = 0;
-    virtual std::string print(void) const = 0;
     virtual double      eval(const GEvent& event, const GObservation& obs) = 0;
     virtual double      eval_gradients(const GEvent& event, const GObservation& obs) = 0;
     virtual void        read(const GXmlElement& xml) = 0;
@@ -49,9 +48,6 @@ public:
     int size(void) const;
 
     // Other methods
-
-protected:
-    virtual void set_pointers(void) = 0;
 };
 
 
