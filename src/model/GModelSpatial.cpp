@@ -199,3 +199,41 @@ void GModelSpatial::free_members(void)
     // Return
     return;
 }
+
+
+/*==========================================================================
+ =                                                                         =
+ =                                Friends                                  =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] model Model.
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GModelSpatial& model)
+{
+     // Write model in output stream
+    os << model.print();
+
+    // Return output stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] model Model.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GModelSpatial& model)
+{
+    // Write model into logger
+    log << model.print();
+
+    // Return logger
+    return log;
+}

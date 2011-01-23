@@ -20,6 +20,8 @@
 #define GMODELSPATIAL_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <iostream>
+#include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
 #include "GXmlElement.hpp"
@@ -36,6 +38,10 @@
  * model is indeed a point source.
  ***************************************************************************/
 class GModelSpatial {
+
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GModelSpatial& model);
+    friend GLog&         operator<< (GLog& log, const GModelSpatial& model);
 
 public:
     // Constructors and destructors
