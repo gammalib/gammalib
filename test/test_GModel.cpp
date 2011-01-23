@@ -75,7 +75,7 @@ void test_model_par(void)
 void test_model(void)
 {
     // Write header
-    std::cout << "Test GSkyModel: ";
+    std::cout << "Test GModelPointSource: ";
 
     // Setup spatial model
     GModelSpatialPtsrc point_source;
@@ -120,9 +120,9 @@ void test_model(void)
     //std::cout << power_law << std::endl;
 
     // Setup Crab model
-    GSkyModel crab;
+    GModelPointSource crab;
     try {
-        crab = GSkyModel(point_source, power_law);
+        crab = GModelPointSource(point_source, power_law);
         crab.name("Crab");
     }
     catch (std::exception &e) {
