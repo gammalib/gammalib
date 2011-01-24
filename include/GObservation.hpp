@@ -85,21 +85,21 @@ public:
     virtual double npred(const GModels& models, GVector* gradient = NULL) const;
 
     // Implemented methods
-    void        obsname(const std::string& obsname);
-    void        roi(const GRoi& roi) { m_roi=roi.clone(); return; }
-    void        ebounds(const GEbounds& ebounds) { m_ebounds=ebounds; return; }
-    void        gti(const GGti& gti) { m_gti=gti; return; }
-    void        statistics(const std::string& statistics);
-    std::string obsname(void) const { return m_obsname; }
-    GTime       tstart(void) const { return m_gti.tstart(); }
-    GTime       tstop(void) const { return  m_gti.tstop(); }
-    GEnergy     emin(void) const { return m_ebounds.emin(); }
-    GEnergy     emax(void) const { return m_ebounds.emax(); }
-    GRoi*       roi(void) { return m_roi; }
-    GEbounds*   ebounds(void) { return &m_ebounds; }
-    GGti*       gti(void) { return &m_gti; }
-    GEvents*    events(void) const { return m_events; }
-    std::string statistics(void) const { return m_statistics; }
+    void               obsname(const std::string& obsname);
+    void               ebounds(const GEbounds& ebounds) { m_ebounds=ebounds; }
+    void               gti(const GGti& gti) { m_gti=gti; }
+    void               roi(const GRoi& roi) { m_roi=roi.clone(); }
+    void               statistics(const std::string& statistics);
+    const std::string& obsname(void) const { return m_obsname; }
+    GTime              tstart(void) const { return m_gti.tstart(); }
+    GTime              tstop(void) const { return  m_gti.tstop(); }
+    GEnergy            emin(void) const { return m_ebounds.emin(); }
+    GEnergy            emax(void) const { return m_ebounds.emax(); }
+    const GEbounds&    ebounds(void) const { return m_ebounds; }
+    const GGti&        gti(void) const { return m_gti; }
+    const GRoi*        roi(void) const { return m_roi; }
+    const GEvents*     events(void) const { return m_events; }
+    const std::string& statistics(void) const { return m_statistics; }
 
 protected:
     // Protected methods
