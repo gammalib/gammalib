@@ -51,21 +51,21 @@ public:
     virtual double npred(const GModels& models, GVector* gradient = NULL) const;
 
     // Implemented methods
-    void        obsname(const std::string& obsname) { m_obsname=obsname; return; }
-    void        roi(const GRoi& roi) { m_roi=roi.clone(); return; }
-    void        ebounds(const GEbounds& ebounds) { m_ebounds=ebounds; return; }
-    void        gti(const GGti& gti) { m_gti=gti; return; }
-    void        statistics(const std::string& statistics);
-    std::string obsname(void) const { return m_obsname; }
-    GTime       tstart(void) const { return m_gti.tstart(); }
-    GTime       tstop(void) const { return  m_gti.tstop(); }
-    GEnergy     emin(void) const { return m_ebounds.emin(); }
-    GEnergy     emax(void) const { return m_ebounds.emax(); }
-    GRoi*       roi(void) { return m_roi; }
-    GEbounds*   ebounds(void) { return &m_ebounds; }
-    GGti*       gti(void) { return &m_gti; }
-    GEvents*    events(void) const { return m_events; }
-    std::string statistics(void) const { return m_statistics; }
+    void               obsname(const std::string& obsname);
+    void               ebounds(const GEbounds& ebounds);
+    void               gti(const GGti& gti);
+    void               roi(const GRoi& roi);
+    void               statistics(const std::string& statistics);
+    const std::string& obsname(void) const;
+    GTime              tstart(void) const;
+    GTime              tstop(void) const;
+    GEnergy            emin(void) const;
+    GEnergy            emax(void) const;
+    const GEbounds&    ebounds(void) const;
+    const GGti&        gti(void) const;
+    const GRoi*        roi(void) const;
+    const GEvents*     events(void) const;
+    const std::string& statistics(void) const;
 };
 
 
