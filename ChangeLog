@@ -1,6 +1,8 @@
         
         Implement CTA radial acceptance dummy model
         Generalize model class
+        Generation of Python bindings no longer requires swig
+        Include missing headers for Ubuntu and OpenSuse
 
 2011-01-06  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
