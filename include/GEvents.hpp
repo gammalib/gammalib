@@ -75,7 +75,7 @@ public:
         GEvent&   operator*(void) { return *(m_base->pointer(m_index)); }
         GEvent*   operator->(void) { return m_base->pointer(m_index); }
     protected:
-        int      m_index;        //!< Actuel event index
+        int      m_index;        //!< Actual event index
         int      m_num;          //!< Number of events in GEvents object
         GEvents *m_base;         //!< Pointer to GEvents object
     };
