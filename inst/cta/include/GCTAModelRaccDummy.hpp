@@ -27,6 +27,7 @@
 #include "GEvent.hpp"
 #include "GObservation.hpp"
 #include "GXmlElement.hpp"
+#include "GCTAEventList.hpp"
 
 
 /***********************************************************************//**
@@ -54,6 +55,7 @@ public:
     std::string         type(void) const { return "RadialAcceptanceDummy"; }
     double              eval(const GEvent& event, const GObservation& obs);
     double              eval_gradients(const GEvent& event, const GObservation& obs);
+    GCTAEventList*      mc(const GObservation& obs, GRan& ran);
     void                read(const GXmlElement& xml);
     void                write(GXmlElement& xml) const;
     std::string         print(void) const;
