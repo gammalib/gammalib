@@ -20,8 +20,10 @@
 #define GCTAPOINTING_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
+#include <string>
 #include "GPointing.hpp"
+#include "GSkyDir.hpp"
+#include "GTime.hpp"
 
 
 /***********************************************************************//**
@@ -29,31 +31,38 @@
  *
  * @brief Interface for the CTA pointing class.
  *
- * The CTA pointing class contains information for a specific CTA pointing.
+ * This class implements a CTA pointing. For the time being it is assumed
+ * that the pointing direction is time-independent.
  ***************************************************************************/
 class GCTAPointing : public GPointing {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GCTAPointing& pnt);
 
 public:
     // Constructors and destructors
     GCTAPointing(void);
+    explicit GCTAPointing(const GSkyDir& dir);
     GCTAPointing(const GCTAPointing& pnt);
     virtual ~GCTAPointing(void);
 
     // Operators
     GCTAPointing& operator= (const GCTAPointing& pnt);
 
-    // Methods
-    void          clear(void);
-    GCTAPointing* clone(void) const;
+    // Implemented pure virtual methods
+    void           clear(void);
+    GCTAPointing*  clone(void) const;
+    const GSkyDir& dir(void) const { return m_dir; }
+    std::string    print(void) const;
+
+    // Other methods
+    void dir(const GSkyDir& dir) { m_dir=dir; }
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GCTAPointing& pnt);
     void free_members(void);
+
+    // Protected members
+    GSkyDir m_dir;  //!< Pointing direction
 };
 
 #endif /* GCTAPOINTING_HPP */

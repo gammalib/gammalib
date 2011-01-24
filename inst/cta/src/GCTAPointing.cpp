@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAPointing.cpp  -  CTA pointing class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,8 +20,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include "GCTAPointing.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -40,12 +40,30 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GCTAPointing::GCTAPointing(void) : GPointing()
 {
-    // Initialise class members
+    // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Sky direction constructor
+ *
+ * @param[in] pnt Pointing.
+ ***************************************************************************/
+GCTAPointing::GCTAPointing(const GSkyDir& dir) : GPointing()
+{
+    // Initialise members
+    init_members();
+
+    // Assign sky direction
+    this->dir(dir);
 
     // Return
     return;
@@ -55,11 +73,11 @@ GCTAPointing::GCTAPointing(void) : GPointing()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] pnt Pointing from which the instance should be built.
+ * @param[in] pnt Pointing.
  ***************************************************************************/
 GCTAPointing::GCTAPointing(const GCTAPointing& pnt) : GPointing(pnt)
 {
-    // Initialise class members
+    // Initialise members
     init_members();
 
     // Copy members
@@ -92,7 +110,7 @@ GCTAPointing::~GCTAPointing(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] pnt Pointing which should be assigned.
+ * @param[in] pnt Pointing.
  ***************************************************************************/
 GCTAPointing& GCTAPointing::operator= (const GCTAPointing& pnt)
 {
@@ -105,7 +123,7 @@ GCTAPointing& GCTAPointing::operator= (const GCTAPointing& pnt)
         // Free members
         free_members();
 
-        // Initialise private members
+        // Initialise members
         init_members();
 
         // Copy members
@@ -151,6 +169,23 @@ GCTAPointing* GCTAPointing::clone(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print CTA pointing information
+ ***************************************************************************/
+std::string GCTAPointing::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GCTAPointing ===");
+    result.append("\n"+parformat("Pointing direction")+this->dir().print());
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -162,6 +197,9 @@ GCTAPointing* GCTAPointing::clone(void) const
  ***************************************************************************/
 void GCTAPointing::init_members(void)
 {
+    // Initialise members
+    m_dir.clear();
+
     // Return
     return;
 }
@@ -170,10 +208,13 @@ void GCTAPointing::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] pnt Pointing from which members should be copied.
+ * @param[in] pnt Pointing.
  ***************************************************************************/
 void GCTAPointing::copy_members(const GCTAPointing& pnt)
 {
+    // Copy members
+    m_dir = pnt.m_dir;
+
     // Return
     return;
 }
@@ -194,18 +235,3 @@ void GCTAPointing::free_members(void)
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Put pointing into output stream
- *
- * @param[in] os Output stream into which the atom will be dumped
- * @param[in] roi Pointing to be dumped
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GCTAPointing& pnt)
-{
-    // Put pointing in output stream
-    os << "Pointing(" << ")";
-
-    // Return output stream
-    return os;
-}
