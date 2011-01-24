@@ -55,6 +55,7 @@ public:
     void load_unbinned(const std::string& filename);
     void load_binned(const std::string& filename);
     void response(const std::string& irfname, std::string caldb = "");
+    void pointing(const GCTAPointing& pointing);
 
 protected:
     // Protected methods
@@ -67,8 +68,8 @@ protected:
     double npred_grad_temp(const GModel& model, int ipar) const;
 
     // Protected members
-    GCTAResponse* m_response;     //!< Pointer to instrument response functions
-    GCTAPointing* m_pointing;     //!< Pointer to pointing direction
+    GCTAResponse* m_response;   //!< Pointer to instrument response functions
+    GCTAPointing* m_pointing;   //!< Pointer to pointing direction
 };
 
 #endif /* GCTAOBSERVATION_HPP */

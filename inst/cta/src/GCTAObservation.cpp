@@ -206,14 +206,33 @@ GCTAResponse* GCTAObservation::response(void) const
  *
  * @param[in] time Time.
  *
- * Returns pointer to pointing direction for a given time. As the pointing
- * direction is supposed not to vary during an observation, the time argument
- * needs not to be considered.
+ * Returns pointer to pointing direction for a given time.
+ *
+ * @todo Update pointing information as function of time.
  ***************************************************************************/
 GCTAPointing* GCTAObservation::pointing(const GTime& time) const
 {
-    // Return response pointer
+    // Return pointing pointer
     return m_pointing;
+}
+
+
+/***********************************************************************//**
+ * @brief Set CTA pointing direction
+ *
+ * @param[in] pointing Pointing.
+ ***************************************************************************/
+void GCTAObservation::pointing(const GCTAPointing& pointing)
+{
+    // Free any existing pointing
+    if (m_pointing != NULL) delete m_pointing;
+    m_pointing = NULL;
+
+    // Clone pointing
+    m_pointing = pointing.clone();
+
+    // Return
+    return;
 }
 
 
@@ -254,18 +273,24 @@ std::string GCTAObservation::print(void) const
     result.append(" - ");
     result.append(m_ebounds.emax().print());
 
+    // Append pointing
+    if (m_pointing != NULL)
+        result.append("\n"+m_pointing->print());
+    else
+        result.append("\n"+parformat("CTA pointing")+"undefined");
+
     // Append ROI
     if (m_roi != NULL)
-        result.append("\n"+m_roi->print());
+        result.append("\n"+roi()->print());
     else
         result.append("\n"+parformat("Region of interest")+"undefined");
 
     // Append GTIs
-    //result.append("\n"+m_gti->print());
+    //result.append("\n"+gti().print());
 
     // Append response
     if (m_response != NULL)
-        result.append("\n"+m_response->print());
+        result.append("\n"+response()->print());
     else
         result.append("\n"+parformat("CTA response")+"undefined");
 
