@@ -42,20 +42,26 @@ public:
     int            number(void) const;
 
     // Other methods
-    GEbounds&   ebds(void) { return m_ebds; }
-    GGti&       gti(void) { return m_gti; }
-    GTime&      time(void) { return m_time; }
-    GSkymap&    map(void) { return m_map; }
-    double      ontime(void) { return m_ontime; }
-    int         nx(void) const { return m_map.nx(); }
-    int         ny(void) const { return m_map.ny(); }
-    int         npix(void) const { return m_map.npix(); }
-    int         ebins(void) const { return m_map.nmaps(); }
-    int         ndiffrsp(void) const { return m_srcmap.size(); }
-    std::string diffname(const int& index) const;
-    GSkymap*    diffrsp(const int& index) const;
-    GNodeArray* enodes(void) { return &m_enodes; }
-    double      maxrad(const GSkyDir& dir) const;
+    void              ebds(const GEbounds& ebds);
+    void              gti(const GGti& gti);
+    void              time(const GTime& time);
+    void              map(const GSkymap& map);
+    void              enodes(const GNodeArray& enodes);
+    void              ontime(const double& ontime);
+    const GEbounds&   ebds(void) const;
+    const GGti&       gti(void) const;
+    const GTime&      time(void) const;
+    const GSkymap&    map(void) const;
+    const GNodeArray& enodes(void);
+    const double&     ontime(void) const;
+    int               nx(void) const;
+    int               ny(void) const;
+    int               npix(void) const;
+    int               ebins(void) const;
+    int               ndiffrsp(void) const;
+    std::string       diffname(const int& index) const;
+    GSkymap*          diffrsp(const int& index) const;
+    double            maxrad(const GSkyDir& dir) const;
 };
 
 
@@ -65,19 +71,6 @@ public:
  * The __getitem__ method makes the event cube iteratable.
  ***************************************************************************/
 %extend GLATEventCube {
-/*
-    GLATEventCube(const GEvents& events) {
-        if (!events.iscube())
-            throw GException::bad_type("GLATEventCube(GEvents&)",
-                                       "GEvents not an event cube");            
-        GLATEventCube* cube = (GLATEventCube*)&events;
-        return cube;
-    }
-    GLATEventCube(const GEventCube& events) {
-        GLATEventCube* cube = (GLATEventCube*)&events;
-        return cube;
-    }
-*/
     GLATEventBin* __getitem__(int index) {
     if (index >= 0 && index < self->size())
         return self->pointer(index);
