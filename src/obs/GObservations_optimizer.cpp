@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GObservations_optimizer.cpp  -  Optimizer class of observations class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,6 +25,7 @@
 #include "GTools.hpp"
 #include "GEvent.hpp"
 #include "GEventBin.hpp"
+#include "GEventCube.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_EVAL             "GObservations::optimizer::eval(GOptimizerPars&) "
@@ -317,8 +318,8 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
     // Iterate over all events
     for (int i = 0; i < obs.events()->size(); ++i) {
 
-        // Get pointer to event
-        GEvent* event = obs.events()->pointer(i);
+        // Get pointer to event (circumvent const correctness)
+        GEvent* event = ((GEvents*)(obs.events()))->pointer(i);
 
         // Get model and derivative
         double model = obs.model((GModels&)pars, *event, m_wrk_grad);
@@ -444,8 +445,8 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
         n_bins++;
         #endif
 
-        // Get pointer to bin
-        GEventBin* bin = (GEventBin*)obs.events()->pointer(i);
+        // Get pointer to bin (circumvent const correctness)
+        GEventBin* bin = ((GEventCube*)(obs.events()))->pointer(i);
 
         // Get number of counts in bin
         double data = bin->counts();
@@ -625,8 +626,8 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
     // Iterate over all bins
     for (int i = 0; i < obs.events()->size(); ++i) {
 
-        // Get pointer to bin
-        GEventBin* bin = (GEventBin*)obs.events()->pointer(i);
+        // Get pointer to bin (circumvent const correctness)
+        GEventBin* bin = ((GEventCube*)(obs.events()))->pointer(i);
 
         // Get number of counts in bin
         double data = bin->counts();
