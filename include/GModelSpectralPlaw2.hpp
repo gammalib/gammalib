@@ -37,7 +37,7 @@
  * \f[I(E)=integral (index+1)/(emax^{index+1}-emin^{index+1}) E^{index}\f]
  * for \f$index \ne -1\f$ and
  * \f[I(E)=integral / (\log(emax)-\log(emin)) E^{index}\f]
- * for \f$index \eq -1\f$, where
+ * for \f$index = -1\f$, where
  * \f$integral\f$ is the integral flux between \f$emin\f$ and \f$emax\f$,
  * \f$index\f$ is the spectral index,
  * \f$emin\f$ is the lower energy limit, and

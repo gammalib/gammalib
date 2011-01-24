@@ -264,7 +264,7 @@ double GModelSpectralPlaw2::eval(const GEnergy& srcEng)
  * for \f$index \ne -1\f$ and
  * \f[dI/df_v=I(E) / f_v\f]
  * \f[dI/di_v=I(E) \log(E) i_s\f]
- * for \f$index \eq -1\f$.
+ * for \f$index = -1\f$.
  * The partial derivatives for the energy boundaries are fixed to 0 as it is
  * not expected the fit these parameters.
  ***************************************************************************/

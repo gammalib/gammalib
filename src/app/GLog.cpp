@@ -11,7 +11,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GLog.hpp
+ * @file GLog.cpp
  * @brief Information logger class implementation
  * @author Jurgen Knodlseder
  */
