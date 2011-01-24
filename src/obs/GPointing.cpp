@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GPointing.cpp  -  Pointing abstract base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include "GException.hpp"
 #include "GPointing.hpp"
 
@@ -166,3 +165,35 @@ void GPointing::free_members(void)
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
+
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] pnt Pointing.
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GPointing& pnt)
+{
+     // Write pointing in output stream
+    os << pnt.print();
+
+    // Return output stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] pnt Pointing.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GPointing& pnt)
+{
+    // Write pointing into logger
+    log << pnt.print();
+
+    // Return logger
+    return log;
+}
