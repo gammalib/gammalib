@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{CCD}}
 \newcommand{\doctype}{\mbox{Coding Conventions Document}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{18 November 2010}}
+\newcommand{\calendar}{\mbox{23 January 2011}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 \newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
@@ -97,6 +97,24 @@ if (inx < 0 || inx >= m_num)
 \end{verbatim}
 
 Range checking is provided if the {\tt G\_RANGE\_CHECK} macro is defined.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Header inclusions}
+
+Each file should contain the {\tt \#include} directives that are necessary for compilation of
+the specific file.
+Only {\tt \#include} directives that are already given by the corresponding header file can
+be omitted.
+
+Note also that some compilers are more tolerant in omitting {\tt \#include} directives, such
+as {\tt <stdio.h>} or {\tt <string.h>}, so these directives should also be included for compatibility,
+even if they seem not to be required on specific systems.
+Examples of include directives needed by common functions are:
+\begin{itemize}
+\item[] {\tt <stdio.h>} contains {\tt fopen}, {\tt fgets}, {\tt fclose}, {\tt fprintf}, {\tt sprintf}
+\item[] {\tt <string.h>} contains {\tt strncpy}, {\tt memcpy}
+\end{itemize}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
