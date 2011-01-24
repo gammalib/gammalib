@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GObservations.cpp  -  Observation container class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -297,10 +297,11 @@ GObservations::iterator GObservations::begin(void)
         }
     }
 
-    // Initialise event iterator
+    // Initialise event iterator (circumvent const correctness)
     if (iter.m_obs != NULL) {
-        iter.m_event = iter.m_obs->events()->begin();
-        iter.m_end   = iter.m_obs->events()->end();
+        GEvents* events = (GEvents*)(iter.m_obs->events());
+        iter.m_event    = events->begin();
+        iter.m_end      = events->end();
     }
 
     // Return

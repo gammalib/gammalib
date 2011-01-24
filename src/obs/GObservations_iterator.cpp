@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GObservations_iterator.cpp  -  Iterator class of observations class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -119,8 +119,9 @@ GObservations::iterator& GObservations::iterator::operator++(void)
                     
                     // Set iterator to first event of current observation. Exit
                     // only if we have events in that observation
-                    m_event = m_obs->events()->begin();
-                    m_end   = m_obs->events()->end();
+                    GEvents* events = (GEvents*)(m_obs->events());
+                    m_event         = events->begin();
+                    m_end           = events->end();
                     if (m_event != m_end)
                         break;
                 
