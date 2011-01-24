@@ -146,9 +146,10 @@ else
 fi
 
 
-dnl =============================================================================
-dnl Checks for python bindings. This is only set if SWIG and Python ar available.
-dnl =============================================================================
+dnl ======================================================================
+dnl Checks for python binding. Python binding requires Python and either a
+dnl gammalib_wrap.cpp file or SWIG to create this file.
+dnl ======================================================================
 # Checks for SWIG (HAVE_SWIG)
 AC_PATH_PROG([SWIG], [swig])
 AM_CONDITIONAL(HAVE_SWIG, test "$SWIG")
@@ -159,15 +160,36 @@ AM_PATH_PYTHON([2.2],
                [AC_MSG_WARN([Python not found. Python is required to build python binding. Python can be obtained from http://www.python.org])])
 AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
 
+# Checks for gammalib_wrap.cpp and gammalib.py
+AC_CHECK_FILES([pyext/gammalib_wrap.cpp pyext/gammalib.py],
+               [ac_has_python_wrap="yes"],
+               [ac_has_python_wrap="no"])
+if test "x$ac_has_python_wrap" = "xyes"; then
+  AC_MSG_NOTICE([Found gammalib_wrap.cpp and gammalib.py])
+else
+  AC_MSG_NOTICE([gammalib_wrap.cpp and/or gammalib.py not found])
+fi
+AM_CONDITIONAL(HAS_PYTHON_WRAP, test "x$ac_has_python_wrap" = "xyes")
+
 # Python bindings
 AC_ARG_ENABLE([python-binding],
               AS_HELP_STRING([--enable-python-binding],
                              [build python binding (default=yes)]),
-              [ac_enable_python_binding=no],
-              [ac_enable_python_binding=yes])
+              [ac_enable_python_binding="$enableval"],
+              [ac_enable_python_binding="yes"])
 if test "x$ac_enable_python_binding" = "xyes"; then
-  if test ! "$SWIG" -a ! "$PYTHON"; then
-    AC_MSG_WARN([Python binding for gammalib cannot be built. Ensure that SWIG and Python packages are available.])
+  if test "$PYTHON"; then
+    if test "x$ac_has_python_wrap" = "xyes"; then
+      AC_MSG_NOTICE([Build Python binding using shipped gammalib_wrap.cpp])
+    else
+      if test ! "$SWIG"; then
+        AC_MSG_WARN([Neither gammalib_wrap.cpp and/or gammalib.py files nor SWIG has not been found.])
+        AC_MSG_WARN([Python binding for gammalib cannot be built.])
+        AC_MSG_WARN([Either use a gammalib distribution with gammalib_wrap.cpp and gammalib.py shipped or install SWIG on your system.])
+      fi
+    fi
+  else
+    AC_MSG_WARN([Python binding for gammalib cannot be built as Python seems not to be installed on your system.])
   fi
 else
   AC_MSG_NOTICE([Python binding for gammalib will not be built.])
