@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GPointing.hpp  -  Pointing abstract base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,6 +20,11 @@
 #define GPOINTING_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
+#include <iostream>
+#include "GLog.hpp"
+#include "GSkyDir.hpp"
+#include "GTime.hpp"
 
 
 /***********************************************************************//**
@@ -27,10 +32,14 @@
  *
  * @brief Abstract interface for the pointing classes.
  *
- * The pointing classes hold instrument specific information about the
- * pointing of the telescope.
+ * The pointing class holds information about the time dependent telescope
+ * pointing.
  ***************************************************************************/
 class GPointing {
+
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GPointing& rsp);
+    friend GLog&         operator<< (GLog& log, const GPointing& rsp);
 
 public:
     // Constructors and destructors
@@ -42,7 +51,10 @@ public:
     virtual GPointing& operator= (const GPointing& pnt);
 
     // Pure virtual methods
-    virtual GPointing* clone(void) const = 0;
+    virtual void           clear(void) = 0;
+    virtual GPointing*     clone(void) const = 0;
+    virtual const GSkyDir& dir(void) const = 0;
+    virtual std::string    print(void) const = 0;
 
 protected:
     // Protected methods
