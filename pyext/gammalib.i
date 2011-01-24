@@ -125,6 +125,7 @@
 #include "GModelRegistry.i"
 #include "GModelSky.i"
 #include "GModelData.i"
+#include "GModelFactorized.i"
 #include "GModelPointSource.i"
 #include "GModelDiffuseSource.i"
 #include "GModelSpatial.i"
