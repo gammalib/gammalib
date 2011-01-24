@@ -461,9 +461,9 @@ double GCTAResponse::npred(const GSkyDir&  srcDir, const GEnergy& srcEng,
 {
     // Get pointers
     const GPointing *pnt  = obs.pointing(srcTime);
-    GRoi            *roi  = ((GObservation*)&obs)->roi();
-    GEbounds        *ebds = ((GObservation*)&obs)->ebounds();
-    GGti            *gti  = ((GObservation*)&obs)->gti();
+    const GRoi      *roi  = obs.roi();
+    const GEbounds  *ebds = &(obs.ebounds());
+    const GGti      *gti  = &(obs.gti());
 
     // Get IRF components
     double nirf  =   live(srcDir, srcEng, srcTime, *pnt);

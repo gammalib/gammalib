@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATObservation.cpp  -  LAT Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -358,7 +358,7 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
     m_gti = events->gti();
 
     // Set mean time
-    events->time() = 0.5 * (gti()->tstart() + gti()->tstop());
+    events->time() = 0.5 * (gti().tstart() + gti().tstop());
 
     // Optionally allocate and load livetime cube
     if (ltcube_name.length() > 0) {
