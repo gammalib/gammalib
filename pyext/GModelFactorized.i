@@ -32,7 +32,7 @@ public:
     // Constructors and destructors
     GModelFactorized(void);
     GModelFactorized(const GModelFactorized& model);
-    virtual ~GModelFactorized(void);
+    ~GModelFactorized(void);
 
     // Methods
     GModelSpatial*  spatial(void)  const { return m_spatial; }
