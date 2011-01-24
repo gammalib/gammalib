@@ -60,6 +60,10 @@ public:
     public:
         no_response(std::string origin,  std::string message = "");
     };
+    class no_pointing : public GCTAExceptionHandler {
+    public:
+        no_pointing(std::string origin,  std::string message = "");
+    };
     class no_sky : public GCTAExceptionHandler {
     public:
         no_sky(std::string origin,  std::string message = "");

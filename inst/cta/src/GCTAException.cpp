@@ -49,6 +49,20 @@ GCTAException::file_open_error::file_open_error(std::string origin,
 
 
 /***********************************************************************//**
+ * @brief Pointing not set.
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCTAException::no_pointing::no_pointing(std::string origin, std::string message)
+{
+    m_origin  = origin;
+    m_message = "No pointing found in CTA observation. "+message;
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Instrument response not set.
  *
  * @param[in] origin Name of method that has thrown the exception.
