@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GLATPointing.hpp  -  LAT pointing class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -41,14 +41,23 @@ public:
     // Operators
     GLATPointing& operator= (const GLATPointing& pnt);
 
-    // Methods
-    GLATPointing* clone(void) const;
+    // Implemented pure virtual methods
+    void           clear(void);
+    GLATPointing*  clone(void) const;
+    const GSkyDir& dir(void) const { return m_dir; }
+    std::string    print(void) const;
+
+    // Other methods
+    void dir(const GSkyDir& dir) { m_dir=dir; }
 
 protected:
     // Protected methods
     void          init_members(void);
     void          copy_members(const GLATPointing& pnt);
     void          free_members(void);
+
+    // Protected members
+    GSkyDir m_dir;  //!< Pointing direction
 };
 
 #endif /* GLATPOINTING_HPP */

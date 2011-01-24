@@ -178,6 +178,9 @@ std::string GMWLPointing::print(void) const
  ***************************************************************************/
 void GMWLPointing::init_members(void)
 {
+    // Initialise members
+    m_dir.clear();
+
     // Return
     return;
 }
@@ -190,6 +193,9 @@ void GMWLPointing::init_members(void)
  ***************************************************************************/
 void GMWLPointing::copy_members(const GMWLPointing& pnt)
 {
+    // Copy members
+    m_dir = pnt.m_dir;
+
     // Return
     return;
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GLATPointing.cpp  -  LAT pointing class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,9 +20,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include "GException.hpp"
 #include "GLATPointing.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -45,7 +45,7 @@
  ***************************************************************************/
 GLATPointing::GLATPointing(void)
 {
-    // Initialise class members
+    // Initialise members
     init_members();
 
     // Return
@@ -56,11 +56,11 @@ GLATPointing::GLATPointing(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] pnt Pointing from which the instance should be built.
+ * @param[in] pnt Pointing.
  ***************************************************************************/
 GLATPointing::GLATPointing(const GLATPointing& pnt)
 {
-    // Initialise class members
+    // Initialise members
     init_members();
 
     // Copy members
@@ -93,7 +93,7 @@ GLATPointing::~GLATPointing(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] pnt Pointing which should be assigned.
+ * @param[in] pnt Pointing.
  ***************************************************************************/
 GLATPointing& GLATPointing::operator= (const GLATPointing& pnt)
 {
@@ -103,7 +103,7 @@ GLATPointing& GLATPointing::operator= (const GLATPointing& pnt)
         // Free members
         free_members();
 
-        // Initialise private members
+        // Initialise members
         init_members();
 
         // Copy members
@@ -123,11 +123,46 @@ GLATPointing& GLATPointing::operator= (const GLATPointing& pnt)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear instance
+ ***************************************************************************/
+void GLATPointing::clear(void)
+{
+    // Free members
+    free_members();
+    this->GPointing::free_members();
+
+    // Initialise private members
+    this->GPointing::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Clone class
 ***************************************************************************/
 GLATPointing* GLATPointing::clone(void) const
 {
     return new GLATPointing(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Print LAT pointing information
+ ***************************************************************************/
+std::string GLATPointing::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GLATPointing ===");
+    result.append("\n"+parformat("Pointing direction")+this->dir().print());
+
+    // Return result
+    return result;
 }
 
 
@@ -142,6 +177,9 @@ GLATPointing* GLATPointing::clone(void) const
  ***************************************************************************/
 void GLATPointing::init_members(void)
 {
+    // Initialise members
+    m_dir.clear();
+
     // Return
     return;
 }
@@ -154,6 +192,9 @@ void GLATPointing::init_members(void)
  ***************************************************************************/
 void GLATPointing::copy_members(const GLATPointing& pnt)
 {
+    // Copy members
+    m_dir = pnt.m_dir;
+
     // Return
     return;
 }
