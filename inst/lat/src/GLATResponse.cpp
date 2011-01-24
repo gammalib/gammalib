@@ -314,14 +314,14 @@ double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
     if (idiff != -1) {
 
         // Get srcmap indices and weighting factors
-        GNodeArray* nodes = cube->enodes();
-        nodes->set_value(srcEng.log10MeV());
+        GNodeArray nodes = cube->enodes();
+        nodes.set_value(srcEng.log10MeV());
 
         // Compute diffuse response
         GSkymap* map    = cube->diffrsp(idiff);
         double*  pixels = map->pixels() + event.ipix();
-        rsp             = nodes->wgt_left()  * pixels[nodes->inx_left()  * map->npix()] +
-                          nodes->wgt_right() * pixels[nodes->inx_right() * map->npix()];
+        rsp             = nodes.wgt_left()  * pixels[nodes.inx_left()  * map->npix()] +
+                          nodes.wgt_right() * pixels[nodes.inx_right() * map->npix()];
 
         // Divide by solid angle and ontime since source maps are given in units of
         // counts/pixel/MeV.

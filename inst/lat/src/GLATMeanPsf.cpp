@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GLATMeanPsf.cpp  -  Fermi LAT mean PSF                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -288,8 +288,6 @@ int GLATMeanPsf::size(void) const
  *            Response has not been defined.
  * @exception GLATException::no_ltcube
  *            Livetime cube has not been defined.
- * @exception GLATException::no_ebds
- *            Energy binning has not been defined.
  *
  * Computes the mean PSF and the energy dependent exposure for a source at
  * a given sky location. The PSF is computed for all bin boundaries of the
@@ -313,10 +311,8 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     if (ltcube == NULL)
         throw GLATException::no_ltcube(G_SET);
     
-    // Get pointer on energy boundaries
-    GEbounds* ebds = ((GLATObservation*)&obs)->ebounds();
-    if (ebds == NULL)
-        throw GLATException::no_ebds(G_SET);
+    // Get energy boundaries
+    GEbounds ebds = obs.ebounds();
 
     // Store source direction
     m_dir = dir;
@@ -339,12 +335,12 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     // boundaries. Store the energy nodes locally as GEnergy objects and
     // save them also in the class as log10 of energy in MeV.
     std::vector<GEnergy> energy;
-    energy.reserve(ebds->size()+1);
-    energy.push_back(ebds->emin(0));
-    m_energy.append(ebds->emin(0).log10MeV());
-    for (int i = 0; i < ebds->size(); ++i) {
-        m_energy.append(ebds->emax(i).log10MeV());
-        energy.push_back(ebds->emax(i));
+    energy.reserve(ebds.size()+1);
+    energy.push_back(ebds.emin(0));
+    m_energy.append(ebds.emin(0).log10MeV());
+    for (int i = 0; i < ebds.size(); ++i) {
+        m_energy.append(ebds.emax(i).log10MeV());
+        energy.push_back(ebds.emax(i));
     }
 
     // Loop over energies
@@ -698,7 +694,7 @@ void GLATMeanPsf::set_map_corrections(const GLATObservation& obs)
     if (obs.events()->iscube()) {
 
         // Get pointer on event cube
-        GLATEventCube* cube = static_cast<GLATEventCube*>(obs.events());
+        const GLATEventCube* cube = static_cast<const GLATEventCube*>(obs.events());
 
         // Get maximum PSF radius
         double radius = cube->maxrad(m_dir);
