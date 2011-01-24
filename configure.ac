@@ -180,7 +180,7 @@ AC_ARG_ENABLE([python-binding],
 if test "x$ac_enable_python_binding" = "xyes"; then
   if test "$PYTHON"; then
     if test "x$ac_has_python_wrap" = "xyes"; then
-      AC_MSG_NOTICE([Build Python binding using shipped gammalib_wrap.cpp])
+      AC_MSG_NOTICE([Build Python binding using shipped gammalib_wrap.cpp and gammalib.py files])
     else
       if test ! "$SWIG"; then
         AC_MSG_WARN([Neither gammalib_wrap.cpp and/or gammalib.py files nor SWIG has not been found.])
