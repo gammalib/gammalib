@@ -23,6 +23,8 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GModelRegistry.hpp"
+#include "GModelSpatialGauss.hpp"
+#include "GCTAException.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTAModelRaccDummy.hpp"
 
@@ -33,14 +35,14 @@ const GCTAModelRaccDummy g_cta_racc_dummy_seed;
 const GModelRegistry     g_cta_racc_dummy_registry(&g_cta_racc_dummy_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                       "GCTAModelRaccDummy::read(GXmlElement&)"
-#define G_WRITE                     "GCTAModelRaccDummy::write(GXmlElement&)"
+#define G_MC                   "GCTAModelRaccDummy::mc(GObservation&, GRan&)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+#define G_DUMP_MC 1                                 //!< Dump MC information
 
 
 /*==========================================================================
@@ -251,11 +253,108 @@ double GCTAModelRaccDummy::eval_gradients(const GEvent& event,
  *
  * @param[in] obs Observation.
  * @param[in] ran Random number generator.
+ *
+ * @exception GCTAException::no_pointing
+ *            No pointing found
+ *
+ * This method requires that the energy boundaries, the good time interval,
+ * the ROI of the observation and the pointing has been set up previously.
  ***************************************************************************/
 GCTAEventList* GCTAModelRaccDummy::mc(const GObservation& obs, GRan& ran)
 {
     // Initialise new event list
     GCTAEventList* list = new GCTAEventList;
+
+    // Continue only if model is valid)
+    if (valid_model()) {
+
+        // Extract CTA pointing direction
+        GTime time; // not used
+        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing(time));
+        if (pnt == NULL)
+            throw GCTAException::no_pointing(G_MC);
+
+        // Continue only if the spatial model is a Gaussian
+        GModelSpatialGauss* src = dynamic_cast<GModelSpatialGauss*>(spatial());
+        if (src != NULL) {
+
+            // Loop over all energy boundaries
+            for (int ieng = 0; ieng < obs.ebounds().size(); ++ieng) {
+
+                // Compute the on-axis background rate in model within the
+                // energy boundaries from spectral component (units: cts/s/sr)
+                double flux = spectral()->flux(obs.ebounds().emin(ieng),
+                                               obs.ebounds().emax(ieng));
+
+                // Get the on-axis model value
+                double onaxis = spatial()->eval(pnt->dir());
+
+                // Compute solid angle used for normalization
+                double area = 1.0 / onaxis;
+
+                // Derive expecting rate (units: cts/s)
+                double rate = flux * area;
+
+                // Debug option: dump rate
+                #if G_DUMP_MC
+                std::cout << "GCTAModelRaccDummy::mc(\"" << name() << "\": ";
+                std::cout << "flux=" << flux << " cts/s/sr, ";
+                std::cout << "area=" << area << " sr, ";
+                std::cout << "rate=" << rate << " cts/s)" << std::endl;
+                #endif
+
+                // Loop over all good time intervals
+                for (int itime = 0; itime < obs.gti().size(); ++itime) {
+
+                    // Get event arrival times from temporal model
+                    GTimes times = m_temporal->mc(rate, 
+                                                  obs.gti().tstart(itime),
+                                                  obs.gti().tstop(itime), ran);
+
+                    // Reserve space for events
+                    if (times.size() > 0)
+                        list->reserve(times.size());
+
+                    // Loop over events
+                    for (int i = 0; i < times.size(); ++i) {
+
+                        // Simulate offset from photon arrival direction
+                        double theta = src->sigma() * ran.chisq2();
+                        double phi   = 360.0 * ran.uniform();
+
+                        // Rotate pointing direction by offset
+                        GSkyDir sky_dir = pnt->dir();
+                        sky_dir.rotate(phi, theta);
+
+                        // Set measured event arrival direction
+                        GCTAInstDir inst_dir;
+                        inst_dir.skydir(sky_dir);
+
+                        // Set event energy
+                        GEnergy energy = spectral()->mc(obs.ebounds().emin(ieng),
+                                                        obs.ebounds().emax(ieng),
+                                                        ran);
+
+                        // Allocate event
+                        GCTAEventAtom event;
+
+                        // Set event attributes
+                        event.dir(inst_dir);
+                        event.energy(energy);
+                        event.time(times[i]);
+
+                        // Append event to list
+                        list->append(event);
+
+                    } // endfor: looped over all events
+
+                } // endfor: looped over all GTIs
+
+            } // endfor: looped over all energy boundaries
+
+        } // endif: model was Gaussian
+
+    } // endif: model was valid
 
     // Return
     return list;
