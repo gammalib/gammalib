@@ -258,13 +258,14 @@ double GModelSpatialGauss::eval(const GSkyDir& srcDir)
  ***************************************************************************/
 double GModelSpatialGauss::eval_gradients(const GSkyDir& srcDir)
 {
-    // Compute distance from source
-    double theta = srcDir.dist_deg(dir());
+    // Compute distance from source (in radians)
+    double theta = srcDir.dist(dir());
     
-    // Compute value
-    double sigma2 = sigma() * sigma();
-    double theta2 = theta   * theta;
-    double value  = exp(-0.5 * theta * theta / sigma2) / (twopi * sigma2);
+    // Compute value (using radians)
+    double sigma_rad = sigma() * deg2rad;
+    double sigma2    = sigma_rad * sigma_rad;
+    double theta2    = theta   * theta;
+    double value     = exp(-0.5 * theta * theta / sigma2) / (twopi * sigma2);
 
     // Set position gradients to 0
     m_ra.gradient(0.0);
