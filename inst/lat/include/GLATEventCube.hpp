@@ -62,20 +62,26 @@ public:
     std::string    print(void) const;
 
     // Other methods
-    GEbounds&   ebds(void) { return m_ebds; }
-    GGti&       gti(void) { return m_gti; }
-    GTime&      time(void) { return m_time; }
-    GSkymap&    map(void) { return m_map; }
-    double      ontime(void) { return m_ontime; }
-    int         nx(void) const { return m_map.nx(); }
-    int         ny(void) const { return m_map.ny(); }
-    int         npix(void) const { return m_map.npix(); }
-    int         ebins(void) const { return m_map.nmaps(); }
-    int         ndiffrsp(void) const { return m_srcmap.size(); }
-    std::string diffname(const int& index) const;
-    GSkymap*    diffrsp(const int& index) const;
-    GNodeArray* enodes(void) { return &m_enodes; }
-    double      maxrad(const GSkyDir& dir) const;
+    void              ebds(const GEbounds& ebds) { m_ebds=ebds; }
+    void              gti(const GGti& gti) { m_gti=gti; }
+    void              time(const GTime& time) { m_time=time; }
+    void              map(const GSkymap& map) { m_map=map; }
+    void              enodes(const GNodeArray& enodes) { m_enodes=enodes; }
+    void              ontime(const double& ontime) { m_ontime=ontime; }
+    const GEbounds&   ebds(void) const { return m_ebds; }
+    const GGti&       gti(void) const { return m_gti; }
+    const GTime&      time(void) const { return m_time; }
+    const GSkymap&    map(void) const { return m_map; }
+    const GNodeArray& enodes(void) { return m_enodes; }
+    const double&     ontime(void) const { return m_ontime; }
+    int               nx(void) const { return m_map.nx(); }
+    int               ny(void) const { return m_map.ny(); }
+    int               npix(void) const { return m_map.npix(); }
+    int               ebins(void) const { return m_map.nmaps(); }
+    int               ndiffrsp(void) const { return m_srcmap.size(); }
+    std::string       diffname(const int& index) const;
+    GSkymap*          diffrsp(const int& index) const;
+    double            maxrad(const GSkyDir& dir) const;
 
 protected:
     // Protected methods
