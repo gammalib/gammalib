@@ -49,21 +49,17 @@ public:
  * @brief GModelDiffuseSource class extension
  ***************************************************************************/
 %extend GModelDiffuseSource {
-/*
-    GModelPar __getitem__(int index) {
-    if (index >= 0 && index < self->size())
-        return (*self)(index);
-    else
-        throw GException::out_of_range("__getitem__(int)", index, self->size());
-    }
-    void __setitem__(int index, const GModelPar& val) {
-        if (index>=0 && index < self->size())
-            (*self)(index) = val;
-        else
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
-    }
-*/
     GModelDiffuseSource copy() {
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GModelDiffuseSource type casts
+ ***************************************************************************/
+%inline %{
+    GModelDiffuseSource* cast_GModelDiffuseSource(GModel* model) {
+        return dynamic_cast<GModelDiffuseSource*>(model);
+    }
+%};

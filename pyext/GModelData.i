@@ -55,18 +55,17 @@ public:
  * @brief GModelData class extension
  ***************************************************************************/
 %extend GModelData {
-/*
-    GModelPar __getitem__(int index) {
-    if (index >= 0 && index < self->size())
-        return (*self)(index);
-    else
-        throw GException::out_of_range("__getitem__(int)", index, self->size());
-    }
-    void __setitem__(int index, const GModelPar& val) {
-        if (index>=0 && index < self->size())
-            (*self)(index) = val;
-        else
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
-    }
-*/
 };
+
+
+
+
+/***********************************************************************//**
+ * @brief GModelData type casts
+ ***************************************************************************/
+%inline %{
+    GModelData* cast_GModelData(GModel* model) {
+        return dynamic_cast<GModelData*>(model);
+    }
+%};
+

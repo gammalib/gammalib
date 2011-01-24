@@ -49,21 +49,17 @@ public:
  * @brief GModelPointSource class extension
  ***************************************************************************/
 %extend GModelPointSource {
-/*
-    GModelPar __getitem__(int index) {
-    if (index >= 0 && index < self->size())
-        return (*self)(index);
-    else
-        throw GException::out_of_range("__getitem__(int)", index, self->size());
-    }
-    void __setitem__(int index, const GModelPar& val) {
-        if (index>=0 && index < self->size())
-            (*self)(index) = val;
-        else
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
-    }
-*/
     GModelPointSource copy() {
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GModelPointSource type casts
+ ***************************************************************************/
+%inline %{
+    GModelPointSource* cast_GModelPointSource(GModel* model) {
+        return dynamic_cast<GModelPointSource*>(model);
+    }
+%};
