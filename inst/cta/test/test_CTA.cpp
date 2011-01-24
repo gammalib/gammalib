@@ -34,10 +34,9 @@
 const std::string datadir    = "../inst/cta/test/data";
 const std::string cta_caldb  = "../inst/cta/caldb";
 const std::string cta_irf    = "kb_E_50h_v3";
-const std::string cta_events = datadir+"/run_00006028_eventlist_reco.fits.gz";
-const std::string cta_cntmap = datadir+"/run_00006028_cntmap.fits.gz";
-const std::string cta_xml    = datadir+"/source1.xml";
-//const double twopi           =  6.283185307179586476925286766559005768394;
+const std::string cta_events = datadir+"/crab_events.fits.gz";
+const std::string cta_cntmap = datadir+"/crab_cntmap.fits.gz";
+const std::string cta_xml    = datadir+"/crab.xml";
 
 
 /***********************************************************************//**
@@ -318,10 +317,10 @@ void test_unbinned_obs(void)
             //std::cout << event->test() << std::endl;
             num++;
         }
-        if (num != 17020) {
+        if (num != 1536) {
             std::cout << std::endl
                       << "TEST ERROR: Wrong number of iterations in GObservations::iterator."
-                      << " (excepted 17020, found " << num << ")" << std::endl;
+                      << " (excepted 1536, found " << num << ")" << std::endl;
             throw;
         }
     }
@@ -341,10 +340,10 @@ void test_unbinned_obs(void)
             //std::cout << *event->energy() << std::endl;
             num++;
         }
-        if (num != 8510) {
+        if (num != 768) {
             std::cout << std::endl
                       << "TEST ERROR: Wrong number of iterations in GCTAEventList::iterator."
-                      << " (excepted 8510, found " << num << ")" << std::endl;
+                      << " (excepted 768, found " << num << ")" << std::endl;
             throw;
         }
     }
@@ -385,21 +384,21 @@ void test_unbinned_optimizer(void)
         // Setup ROI covered by data
         GCTAInstDir instDir;
         GCTARoi     roi;
-        instDir.radec_deg(117.02, -33.35);  // Adapt to file
+        instDir.radec_deg(83.6331, 22.0145);  // Adapt to file
         roi.centre(instDir);
         roi.radius(2.5);
 
         // Setup energy range covered by data
         GEnergy emin;
         GEnergy emax;
-        emin.TeV(0.02);
+        emin.TeV(0.1);
         emax.TeV(100.0);
 
         // Setup time range covered by data
         GTime tstart;
         GTime tstop;
         tstart.met(0.0);
-        tstop.met(10000.0);
+        tstop.met(1800.0);
 
         // Load data and response and set ROI, energy range and time range
         // for analysis
@@ -424,7 +423,7 @@ void test_unbinned_optimizer(void)
     // Perform LM optimization
     GOptimizerLM opt;
     try {
-        opt.max_iter(1000);
+        opt.max_iter(100);
         obs.optimize(opt);
     }
     catch (std::exception &e) {
@@ -517,7 +516,7 @@ void test_binned_optimizer(void)
     // Perform LM optimization
     GOptimizerLM opt;
     try {
-        opt.max_iter(1000);
+        opt.max_iter(100);
         obs.optimize(opt);
     }
     catch (std::exception &e) {
