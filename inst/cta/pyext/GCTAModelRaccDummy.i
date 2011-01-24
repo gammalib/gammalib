@@ -36,9 +36,6 @@ public:
     GCTAModelRaccDummy(const GCTAModelRaccDummy& model);
     virtual ~GCTAModelRaccDummy(void);
 
-    // Operators
-    GCTAModelRaccDummy& operator= (const GCTAModelRaccDummy& model);
-
     // Implemented pure virtual methods
     void                clear(void);
     GCTAModelRaccDummy* clone(void) const;
