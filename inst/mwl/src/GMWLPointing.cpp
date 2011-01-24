@@ -21,6 +21,7 @@
 #include <config.h>
 #endif
 #include "GMWLPointing.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 

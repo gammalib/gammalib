@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLPointing.hpp  -  Multi-wavelength pointing class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -44,14 +44,19 @@ public:
     GMWLPointing& operator= (const GMWLPointing& pnt);
 
     // Methods
-    void          clear(void);
-    GMWLPointing* clone(void) const;
+    void           clear(void);
+    GMWLPointing*  clone(void) const;
+    const GSkyDir& dir(void) const { return m_dir; }
+    std::string    print(void) const;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GMWLPointing& pnt);
     void free_members(void);
+
+    // Protected members
+    GSkyDir m_dir;  //!< Pointing direction
 };
 
 #endif /* GMWLPOINTING_HPP */
