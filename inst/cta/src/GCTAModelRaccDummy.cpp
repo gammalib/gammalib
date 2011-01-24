@@ -199,7 +199,7 @@ GCTAModelRaccDummy* GCTAModelRaccDummy::clone(void) const
  * @brief Evaluate function
  *
  * @param[in] event Observed event.
- * @param[in] obs Observation.
+ * @param[in] obs Observation (not used).
  *
  * @todo Verify that CTA instrument direction pointer is valid
  ***************************************************************************/
@@ -224,7 +224,7 @@ double GCTAModelRaccDummy::eval(const GEvent& event, const GObservation& obs)
  * @brief Evaluate function and gradients
  *
  * @param[in] event Observed event.
- * @param[in] obs Observation.
+ * @param[in] obs Observation (not used).
  *
  * @todo Verify that CTA instrument direction pointer is valid
  ***************************************************************************/
@@ -243,6 +243,22 @@ double GCTAModelRaccDummy::eval_gradients(const GEvent& event,
 
     // Return value
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Return simulated list of events
+ *
+ * @param[in] obs Observation.
+ * @param[in] ran Random number generator.
+ ***************************************************************************/
+GCTAEventList* GCTAModelRaccDummy::mc(const GObservation& obs, GRan& ran)
+{
+    // Initialise new event list
+    GCTAEventList* list = new GCTAEventList;
+
+    // Return
+    return list;
 }
 
 
