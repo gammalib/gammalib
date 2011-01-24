@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GEbounds.hpp  -  Energy boundary class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -57,9 +57,9 @@ public:
 	void    load(const std::string& filename,
                  const std::string& extname = "EBOUNDS");
 	void    save(const std::string& filename, bool clobber,
-                 const std::string& extname = "EBOUNDS");
+                 const std::string& extname = "EBOUNDS") const;
     void    read(GFitsTable* hdu);
-    void    write(GFits* file, const std::string& extname = "EBOUNDS");
+    void    write(GFits* file, const std::string& extname = "EBOUNDS") const;
     int     index(const GEnergy& eng) const;
     int     size(void) const { return m_num; }
     GEnergy emin(void) const { return m_emin; }

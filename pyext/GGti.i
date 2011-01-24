@@ -45,9 +45,9 @@ public:
 	void   load(const std::string& filename,
                 const std::string& extname = "GTI");
 	void   save(const std::string& filename, bool clobber,
-                const std::string& extname = "GTI");
+                const std::string& extname = "GTI") const;
     void   read(GFitsTable* hdu);
-    void   write(GFits* file, const std::string& extname = "GTI");
+    void   write(GFits* file, const std::string& extname = "GTI") const;
     int    size(void) const { return m_num; }
 	GTime  tstart(void) const { return m_tstart; }
 	GTime  tstop(void) const { return m_tstop; }

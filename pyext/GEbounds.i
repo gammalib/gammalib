@@ -46,9 +46,9 @@ public:
 	void    load(const std::string& filename,
                  const std::string& extname = "EBOUNDS");
 	void    save(const std::string& filename, bool clobber,
-                 const std::string& extname = "EBOUNDS");
+                 const std::string& extname = "EBOUNDS") const;
     void    read(GFitsTable* hdu);
-    void    write(GFits* file, const std::string& extname = "EBOUNDS");
+    void    write(GFits* file, const std::string& extname = "EBOUNDS") const;
     int     index(const GEnergy& eng) const;
     int     size(void) const { return m_num; }
     GEnergy emin(void) const { return m_emin; }

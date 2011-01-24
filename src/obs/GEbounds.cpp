@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GEbounds.cpp  -  Energy boundary class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -303,7 +303,7 @@ void GEbounds::load(const std::string& filename, const std::string& extname)
  * @param[in] extname Energy boundary extension name (default is "EBOUNDS")
  ***************************************************************************/
 void GEbounds::save(const std::string& filename, bool clobber,
-                    const std::string& extname)
+                    const std::string& extname) const
 {
     // Allocate FITS file
     GFits file;
@@ -378,7 +378,7 @@ void GEbounds::read(GFitsTable* hdu)
  *
  * @todo Write header keywords.
  ***************************************************************************/
-void GEbounds::write(GFits* file, const std::string& extname)
+void GEbounds::write(GFits* file, const std::string& extname) const
 {
     // Create energy boundary columns
     GFitsTableDoubleCol cemin = GFitsTableDoubleCol("E_MIN", m_num);

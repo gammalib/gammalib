@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GGti.cpp  -  Good time interval class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -284,7 +284,7 @@ void GGti::load(const std::string& filename, const std::string& extname)
  * @todo Method assumes that times are in MET.
  ***************************************************************************/
 void GGti::save(const std::string& filename, bool clobber,
-                const std::string& extname)
+                const std::string& extname) const
 {
     // Allocate FITS file
     GFits file;
@@ -354,7 +354,7 @@ void GGti::read(GFitsTable* hdu)
  *
  * @todo Implement clobber method for overwriting of existing GTIs.
  ***************************************************************************/
-void GGti::write(GFits* file, const std::string& extname)
+void GGti::write(GFits* file, const std::string& extname) const
 {
     // Create GTI columns
     GFitsTableDoubleCol cstart = GFitsTableDoubleCol("START", m_num);
