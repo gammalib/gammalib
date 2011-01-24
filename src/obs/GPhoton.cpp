@@ -11,7 +11,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GPhoton.hpp
+ * @file GPhoton.cpp
  * @brief Photon class implementation.
  * @author J. Knodlseder
  */

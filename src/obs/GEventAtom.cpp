@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GEventAtom.cpp  -  Event atom abstract base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -11,8 +11,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GEvent.cpp
- * @brief GEvent abstract base class implementation.
+ * @file GEventAtom.cpp
+ * @brief GEvent atom abstract base class implementation.
  * @author J. Knodlseder
  */
 

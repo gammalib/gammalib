@@ -11,7 +11,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GEnergy.hpp
+ * @file GEnergy.cpp
  * @brief Energy value class implementation.
  * @author J. Knodlseder
  */

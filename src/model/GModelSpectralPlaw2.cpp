@@ -257,10 +257,10 @@ double GModelSpectralPlaw2::eval(const GEnergy& srcEng)
  *
  * The partial derivatives of the parameter values are given by
  * \f[dI/df_v=I(E) / f_v\f]
- * \f[dI/di_v=I(E) \[\frac{1}{index+1} -
+ * \f[dI/di_v=I(E) \left( \frac{1}{index+1} -
  *                   \frac{\log(emax) emax^{index+1} - \log(emin) emin^{index+1}}
  *                        {emax^{index+1} - emin^{index+1}}
- *                 + \log(E)\] i_s\f]
+ *                 + \log(E) \right) i_s\f]
  * for \f$index \ne -1\f$ and
  * \f[dI/df_v=I(E) / f_v\f]
  * \f[dI/di_v=I(E) \log(E) i_s\f]

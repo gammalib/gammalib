@@ -11,7 +11,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GPars.hpp
+ * @file GPars.cpp
  * @brief Application parameters class implementation
  * @author Jurgen Knodlseder
  */
