@@ -266,16 +266,18 @@ double GModelSpatialGauss::eval_gradients(const GSkyDir& srcDir)
     // Compute value (using radians)
     double sigma_rad = sigma() * deg2rad;
     double sigma2    = sigma_rad * sigma_rad;
-    double theta2    = theta   * theta;
+    double theta2    = theta * theta;
+    double arg       = theta2 / sigma2;
     double value     = exp(-0.5 * theta2 / sigma2) / (twopi * sigma2);
 
-    // Set position gradients to 0
+    // Compute partial derivatives of the sigma parameter. Note that this
+    // parameter is given in degrees
+    double g_sigma = value * arg / sigma() * m_sigma.scale();
+
+    // Set gradients
     m_ra.gradient(0.0);
     m_dec.gradient(0.0);
-
-    // Set Gaussian size gradient (parameter is in degrees)
-    double grad = value * theta2 / (sigma2 * sigma()) * m_sigma.scale();
-    m_sigma.gradient(grad);
+    m_sigma.gradient(g_sigma);
 
     // Return value
     return value;
