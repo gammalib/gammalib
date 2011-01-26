@@ -54,7 +54,8 @@ public:
     void               obsname(const std::string& obsname);
     void               ebounds(const GEbounds& ebounds);
     void               gti(const GGti& gti);
-    void               roi(const GRoi& roi);
+    void               roi(const GRoi* roi);
+    void               events(const GEvents* events);
     void               statistics(const std::string& statistics);
     const std::string& obsname(void) const;
     GTime              tstart(void) const;
