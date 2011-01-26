@@ -35,6 +35,9 @@ const GCTAModelRaccDummy g_cta_racc_dummy_seed;
 const GModelRegistry     g_cta_racc_dummy_registry(&g_cta_racc_dummy_seed);
 
 /* __ Method name definitions ____________________________________________ */
+#define G_EVAL              "GCTAModelRaccDummy::eval(GEvent&, GObservation&"
+#define G_EVAL_GRADIENTS        "GCTAModelRaccDummy::eval_gradients(GEvent&,"\
+                                                             " GObservation&"
 #define G_MC                   "GCTAModelRaccDummy::mc(GObservation&, GRan&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -203,16 +206,25 @@ GCTAModelRaccDummy* GCTAModelRaccDummy::clone(void) const
  * @param[in] event Observed event.
  * @param[in] obs Observation (not used).
  *
+ * @todo Bookkeeping of last value and evaluate only if argument changed
  * @todo Verify that CTA instrument direction pointer is valid
  ***************************************************************************/
 double GCTAModelRaccDummy::eval(const GEvent& event, const GObservation& obs)
 {
+    // Extract CTA pointing direction
+    GTime time; // not used
+    GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing(time));
+    if (pnt == NULL)
+        throw GCTAException::no_pointing(G_EVAL);
+
     // Get instrument direction
     const GInstDir*    inst_dir = &(event.dir());
     const GCTAInstDir* cta_dir  = dynamic_cast<const GCTAInstDir*>(inst_dir);
 
+    // Get the on-axis model value for normalization
+    double value = (spatial()  != NULL) ? 1.0 / spatial()->eval(pnt->dir()) : 1.0;
+
     // Evaluate function
-    double value = 1.0;
     if (spatial()  != NULL) value *= spatial()->eval(cta_dir->skydir());
     if (spectral() != NULL) value *= spectral()->eval(event.energy());
     if (temporal() != NULL) value *= temporal()->eval(event.time());
@@ -228,17 +240,26 @@ double GCTAModelRaccDummy::eval(const GEvent& event, const GObservation& obs)
  * @param[in] event Observed event.
  * @param[in] obs Observation (not used).
  *
+ * @todo Bookkeeping of last value and evaluate only if argument changed
  * @todo Verify that CTA instrument direction pointer is valid
  ***************************************************************************/
 double GCTAModelRaccDummy::eval_gradients(const GEvent& event,
                                           const GObservation& obs)
 {
+    // Extract CTA pointing direction
+    GTime time; // not used
+    GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing(time));
+    if (pnt == NULL)
+        throw GCTAException::no_pointing(G_EVAL);
+
     // Get instrument direction
     const GInstDir*    inst_dir = &(event.dir());
     const GCTAInstDir* cta_dir  = dynamic_cast<const GCTAInstDir*>(inst_dir);
 
+    // Get the on-axis model value for normalization
+    double value = (spatial()  != NULL) ? 1.0 / spatial()->eval(pnt->dir()) : 1.0;
+
     // Evaluate function and gradients
-    double value = 1.0;
     if (spatial()  != NULL) value *= spatial()->eval_gradients(cta_dir->skydir());
     if (spectral() != NULL) value *= spectral()->eval_gradients(event.energy());
     if (temporal() != NULL) value *= temporal()->eval_gradients(event.time());
