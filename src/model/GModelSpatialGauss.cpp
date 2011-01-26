@@ -217,11 +217,13 @@ GModelSpatialGauss* GModelSpatialGauss::clone(void) const
 double GModelSpatialGauss::eval(const GSkyDir& srcDir)
 {
     // Compute distance from source
-    double theta = srcDir.dist_deg(dir());
+    double theta = srcDir.dist(dir());
     
     // Compute value
-    double sigma2 = sigma() * sigma();
-    double value  = exp(-0.5 * theta * theta / sigma2) / (twopi * sigma2);
+    double sigma_rad = sigma() * deg2rad;
+    double sigma2    = sigma_rad * sigma_rad;
+    double theta2    = theta   * theta;
+    double value     = exp(-0.5 * theta2 / sigma2) / (twopi * sigma2);
 
     // Return value
     return value;
@@ -265,13 +267,13 @@ double GModelSpatialGauss::eval_gradients(const GSkyDir& srcDir)
     double sigma_rad = sigma() * deg2rad;
     double sigma2    = sigma_rad * sigma_rad;
     double theta2    = theta   * theta;
-    double value     = exp(-0.5 * theta * theta / sigma2) / (twopi * sigma2);
+    double value     = exp(-0.5 * theta2 / sigma2) / (twopi * sigma2);
 
     // Set position gradients to 0
     m_ra.gradient(0.0);
     m_dec.gradient(0.0);
 
-    // Set Gaussian size gradient
+    // Set Gaussian size gradient (parameter is in degrees)
     double grad = value * theta2 / (sigma2 * sigma()) * m_sigma.scale();
     m_sigma.gradient(grad);
 
