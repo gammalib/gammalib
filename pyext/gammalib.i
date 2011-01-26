@@ -131,6 +131,7 @@
 #include "GModelSpatial.i"
 #include "GModelSpatialRegistry.i"
 #include "GModelSpatialPtsrc.i"
+#include "GModelSpatialGauss.i"
 #include "GModelSpectral.i"
 #include "GModelSpectralRegistry.i"
 #include "GModelSpectralPlaw.i"
