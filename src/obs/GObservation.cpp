@@ -280,6 +280,46 @@ void GObservation::obsname(const std::string& obsname)
 
 
 /***********************************************************************//**
+ * @brief Set region of interest
+ *
+ * @param[in] roi Region of interest.
+ *
+ * Set region of interest for this observation.
+ ***************************************************************************/
+void GObservation::roi(const GRoi& roi)
+{
+    // Remove an existing ROI
+    if (m_roi != NULL) delete m_roi;
+    
+    // Set ROI
+    m_roi = roi;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set events
+ *
+ * @param[in] events Events.
+ *
+ * Set events for this observation.
+ ***************************************************************************/
+void GObservation::events(const GEvents& events)
+{
+    // Remove an existing events
+    if (m_events != NULL) delete m_events;
+    
+    // Set events
+    m_events = events;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set optimizer statistics
  *
  * @param[in] statistics Optimizer statistics.
