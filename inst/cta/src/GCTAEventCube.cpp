@@ -277,11 +277,11 @@ std::string GCTAEventCube::print(void) const
     std::string result;
 
     // Append header
-    result.append("=== GCTAEventCube ===\n");
-    result.append(parformat("Number of elements")+str(size())+"\n");
-    result.append(parformat("Number of pixels")+str(npix())+"\n");
-    result.append(parformat("Number of energy bins")+str(ebins())+"\n");
-    result.append(parformat("Number of events")+str(number())+"\n");
+    result.append("=== GCTAEventCube ===");
+    result.append("\n"+parformat("Number of elements")+str(size()));
+    result.append("\n"+parformat("Number of pixels")+str(npix()));
+    result.append("\n"+parformat("Number of energy bins")+str(ebins()));
+    result.append("\n"+parformat("Number of events")+str(number()));
 
     // Return result
     return result;
