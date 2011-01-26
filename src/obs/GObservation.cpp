@@ -292,7 +292,7 @@ void GObservation::roi(const GRoi& roi)
     if (m_roi != NULL) delete m_roi;
     
     // Set ROI
-    m_roi = roi;
+    m_roi = roi.clone();
 
     // Return
     return;
@@ -312,7 +312,7 @@ void GObservation::events(const GEvents& events)
     if (m_events != NULL) delete m_events;
     
     // Set events
-    m_events = events;
+    m_events = events.clone();
 
     // Return
     return;
