@@ -286,13 +286,13 @@ void GObservation::obsname(const std::string& obsname)
  *
  * Set region of interest for this observation.
  ***************************************************************************/
-void GObservation::roi(const GRoi& roi)
+void GObservation::roi(const GRoi* roi)
 {
     // Remove an existing ROI
     if (m_roi != NULL) delete m_roi;
     
     // Set ROI
-    m_roi = roi.clone();
+    m_roi = roi->clone();
 
     // Return
     return;
@@ -306,13 +306,13 @@ void GObservation::roi(const GRoi& roi)
  *
  * Set events for this observation.
  ***************************************************************************/
-void GObservation::events(const GEvents& events)
+void GObservation::events(const GEvents* events)
 {
     // Remove an existing events
     if (m_events != NULL) delete m_events;
     
     // Set events
-    m_events = events.clone();
+    m_events = events->clone();
 
     // Return
     return;

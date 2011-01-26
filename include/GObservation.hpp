@@ -88,8 +88,8 @@ public:
     void               obsname(const std::string& obsname);
     void               ebounds(const GEbounds& ebounds) { m_ebounds=ebounds; }
     void               gti(const GGti& gti) { m_gti=gti; }
-    void               roi(const GRoi& roi);
-    void               events(const GEvents& events);
+    void               roi(const GRoi* roi);
+    void               events(const GEvents* events);
     void               statistics(const std::string& statistics);
     const std::string& obsname(void) const { return m_obsname; }
     GTime              tstart(void) const { return m_gti.tstart(); }
