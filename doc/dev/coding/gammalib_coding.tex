@@ -48,13 +48,13 @@ improves code readibility and enhances the portability of the code.
 
 The following general rules should be followed:
 \begin{itemize}
-\item[R1] Each function and/or method terminates with a {\tt return;} statement.
-\item[R2] Put a blank line at the end of each file.
-\item[R3] Use {\tt explicit} for constructors to avoid use of the constructor for unintended
+\item[R1] Each function and/or method terminates with a {\tt return} statement.
+\item[R2] Each function and/or method has only a single exit point (i.e. a single {\tt return} statement).
+\item[R3] Put a blank line at the end of each file.
+\item[R4] Use {\tt explicit} for constructors to avoid use of the constructor for unintended
 type conversion.
-\item[R4] Do not use tabs (to make code formating independent of editor configurations)
-type conversion.
-\item[R5] Blocks are indented by 4 characters.
+\item[R5] Do not use tabs to make code formating independent of editor configurations.
+\item[R6] Blocks are indented by 4 characters.
 \end{itemize}
 
 
@@ -313,6 +313,50 @@ Method arguments should be generally passed as {\tt const} and by reference.
 Numeric argument types should be typically {\tt int} and {\tt double}.
 Unless absolutely required, {\tt short int}, {\tt long}, and {\tt float} should be avoided.
 True/false checks should always be done using {\tt bool}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Arguments and return values}
+
+Arguments to methods should in general be passed by reference to reduce function
+overhead.
+In addition, arguments that are not intended to be changed by a method call should
+be passed as {\tt const}.
+
+If a method sets a class member, the argument should be a pointer if the member
+is a pointer.
+It thus is possible to set a {\tt NULL} pointer.
+
+Return values should be passed by reference if they concern class members.
+To assure that the return values are not changed inadvertably, they should be returned
+as {\tt const}.
+
+If the class member is a pointer, and if the pointer may be {\tt NULL}, it should be
+returned as a pointer.
+Again, the pointer should be declared {\tt const} to avoid inadvertable changes of
+the class members.
+
+An example is given by the following excerpt of the {\tt GObservation} class.
+Note that in general there are two distinct methods to set and to return a
+class member.
+\begin{verbatim}
+    void               obsname(const std::string& obsname);
+    void               ebounds(const GEbounds& ebounds);
+    void               gti(const GGti& gti);
+    void               roi(const GRoi* roi);
+    void               events(const GEvents* events);
+    void               statistics(const std::string& statistics);
+    const std::string& obsname(void) const;
+    GTime              tstart(void) const { return m_gti.tstart(); }  // no class member
+    GTime              tstop(void) const { return  m_gti.tstop(); }   // no class member
+    GEnergy            emin(void) const { return m_ebounds.emin(); }  // no class member
+    GEnergy            emax(void) const { return m_ebounds.emax(); }  // no class member
+    const GEbounds&    ebounds(void) const;
+    const GGti&        gti(void) const;
+    const GRoi*        roi(void) const;
+    const GEvents*     events(void) const;
+    const std::string& statistics(void) const;
+\end{verbatim}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
