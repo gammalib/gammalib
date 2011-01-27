@@ -49,6 +49,11 @@ public:
     GIntegral& operator= (const GIntegral& integral);
 
     // Methods
+    void              max_iter(const int& max_iter) { m_max_iter=max_iter; }
+    void              eps(const double& eps) { m_eps=eps; }
+    int               max_iter(void) const { return m_max_iter; }
+    double            eps(void) const { return m_eps; }
+    int               iter(void) const { return m_iter; }
     void              integrand(GIntegrand* integrand) { m_integrand = integrand; }
     const GIntegrand* integrand(void) const { return m_integrand; }
     double            romb(double a, double b, int k = 5);
@@ -65,7 +70,7 @@ protected:
     GIntegrand* m_integrand;    //!< Pointer to integrand
     double      m_eps;          //!< Integration precision
     int         m_max_iter;     //!< Maximum number of iterations
-
+    int         m_iter;         //!< Number of iterations used
 };
 
 #endif /* GINTEGRAL_HPP */
