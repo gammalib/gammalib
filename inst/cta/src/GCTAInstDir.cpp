@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAInstDir.cpp  -  CTA instrument direction class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -168,6 +168,34 @@ void GCTAInstDir::clear(void)
 GCTAInstDir* GCTAInstDir::clone(void) const
 {
     return new GCTAInstDir(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Rotate CTA instrument direction by zenith and azimuth angle
+ *
+ * @param[in] phi Azimuth angle (deg).
+ * @param[in] theta Zenith angle (deg).
+ *
+ * Rotate CTA instrument direction by a zenith and azimuth angle given in
+ * the system of the instrument direction and aligned in celestial
+ * coordinates. 
+ * The azimuth angle is counted counter clockwise from celestial north
+ * (this is identical to the astronomical definition of a position angle).
+ ***************************************************************************/
+void GCTAInstDir::rotate(const double& phi, const double& theta)
+{
+    // Convert instrument direction into sky direction
+    GSkyDir sky = skydir();
+
+    // Rotate sky direction
+    sky.rotate(phi, theta);
+
+    // Convert sky direction to instrument direction
+    skydir(sky);
+
+    // Return
+    return;
 }
 
 

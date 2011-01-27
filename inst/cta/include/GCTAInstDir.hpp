@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAInstDir.hpp  -  CTA instrument direction class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -56,6 +56,7 @@ public:
     void         radec_deg(const double& ra, const double& dec) { m_dir.radec_deg(ra,dec); }
     void         lb(const double& l, const double& b) { m_dir.lb(l,b); }
     void         lb_deg(const double& l, const double& b) { m_dir.lb_deg(l,b); }
+    void         rotate(const double& phi, const double& theta);
     GSkyDir      skydir(void) const { return m_dir; }
     double       l(void) const { return m_dir.l(); }
     double       l_deg(void) const { return m_dir.l_deg(); }
