@@ -135,6 +135,7 @@
 #include "GModelSpectral.i"
 #include "GModelSpectralRegistry.i"
 #include "GModelSpectralPlaw.i"
+#include "GModelSpectralPlaw2.i"
 #include "GModelSpectralExpPlaw.i"
 #include "GModelTemporal.i"
 #include "GModelTemporalRegistry.i"
