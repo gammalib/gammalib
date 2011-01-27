@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCTAObservation.hpp  -  CTA Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,6 +25,7 @@
 #include "GCTAResponse.hpp"
 #include "GTime.hpp"
 #include "GModel.hpp"
+#include "GFitsTable.hpp"
 
 
 /***********************************************************************//**
@@ -52,16 +53,23 @@ public:
     std::string      print(void) const;
 
     // Other methods
-    void load_unbinned(const std::string& filename);
-    void load_binned(const std::string& filename);
-    void response(const std::string& irfname, std::string caldb = "");
-    void pointing(const GCTAPointing& pointing);
+    void   load_unbinned(const std::string& filename);
+    void   load_binned(const std::string& filename);
+    void   save(const std::string& filename, bool clobber) const;
+    void   response(const std::string& irfname, std::string caldb = "");
+    void   pointing(const GCTAPointing& pointing);
+    int    obs_id(void) const { return m_obs_id; }
+    double livetime(void) const { return m_livetime; }
+    double ra_obj(void) const { return m_ra_obj; }
+    double dec_obj(void) const { return m_dec_obj; }
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GCTAObservation& obs);
     void free_members(void);
+    void read_attributes(GFitsHDU* hdu);
+    void write_attributes(GFitsHDU* hdu) const;
 
     // Npred integration methods
     double npred_temp(const GModel& model) const;
@@ -70,6 +78,10 @@ protected:
     // Protected members
     GCTAResponse* m_response;   //!< Pointer to instrument response functions
     GCTAPointing* m_pointing;   //!< Pointer to pointing direction
+    int           m_obs_id;     //!< Observation ID
+    double        m_livetime;   //!< Livetime
+    double        m_ra_obj;     //!< Right Ascension of object
+    double        m_dec_obj;    //!< Declination of object
 };
 
 #endif /* GCTAOBSERVATION_HPP */

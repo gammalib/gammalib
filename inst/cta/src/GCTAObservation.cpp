@@ -262,10 +262,10 @@ std::string GCTAObservation::print(void) const
 
     // Append time range
     result.append(parformat("Time range"));
-    result.append(str(m_gti.tstart().mjd()));
+    result.append(str(m_gti.tstart().met()));
     result.append(" - ");
-    result.append(str(m_gti.tstop().mjd()));
-    result.append(" days\n");
+    result.append(str(m_gti.tstop().met()));
+    result.append(" s\n");
 
     // Append energy range
     result.append(parformat("Energy range"));
@@ -307,8 +307,6 @@ std::string GCTAObservation::print(void) const
  * @brief Load data for unbinned analysis
  *
  * @param[in] filename Event FITS file name.
- *
- * @todo Implement GTI loading.
  ***************************************************************************/
 void GCTAObservation::load_unbinned(const std::string& filename)
 {
@@ -320,8 +318,20 @@ void GCTAObservation::load_unbinned(const std::string& filename)
     GCTAEventList* events = new GCTAEventList;
     m_events = events;
 
-    // Load events into list
-    events->load(filename);
+    // Open FITS file
+    GFits file(filename);
+
+    // Get HDUs
+    GFitsTable* hdu = file.table("EVENTS");
+
+    // Read events into list
+    events->read(hdu);
+
+    // Read observation attributes
+    read_attributes(hdu);
+    
+    // Close FITS file
+    file.close();
 
     // Load GTIs
     m_gti.load(filename);
@@ -346,12 +356,62 @@ void GCTAObservation::load_binned(const std::string& filename)
     GCTAEventCube* events = new GCTAEventCube;
     m_events = events;
 
-    // Load events into cube
+    // Read events into list
     events->load(filename);
 
+    // Read observation attributes from first header
+    GFits file(filename);
+    GFitsHDU* hdu = file.hdu(0);
+    read_attributes(hdu);
+    file.close();
+
     // Copy energy boundaries and GTIs from event cube
-    m_ebounds = ((GCTAEventCube*)m_events)->m_ebds;
-    m_gti     = ((GCTAEventCube*)m_events)->m_gti;
+    m_ebounds = events->ebounds();
+    m_gti     = events->gti();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save CTA observation into FITS file.
+ *
+ * @param[in] filename FITS filename.
+ * @param[in] clobber Overwrite existing FITS file (default=false).
+ ***************************************************************************/
+void GCTAObservation::save(const std::string& filename, bool clobber) const
+{
+    // Create FITS file
+    GFits fits;
+
+    // Get pointers on event list
+    GCTAEventList* list = dynamic_cast<GCTAEventList*>(m_events);
+    GCTAEventCube* cube = dynamic_cast<GCTAEventCube*>(m_events);
+
+    // Case A: Observation contains an event list
+    if (list != NULL) {
+
+    }
+
+    // Case B: Observation contains an event cube
+    else if (cube != NULL) {
+
+        // Copy energy boundaries and GTIs into event cube
+        cube->ebounds(m_ebounds);
+        cube->gti(m_gti);
+
+        // Write events cube into FITS file
+        cube->write(&fits);
+
+        // Write observation attributes into first header
+        GFitsHDU* hdu = fits.hdu(0);
+        write_attributes(hdu);
+
+    } // endif: observation contained an events cube
+
+    // Save FITS file
+    fits.saveto(filename, clobber);
 
     // Return
     return;
@@ -415,6 +475,116 @@ void GCTAObservation::free_members(void)
     // Mark memory as free
     m_response = NULL;
     m_pointing = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read observation attributes
+ *
+ * @param[in] hdu FITS HDU
+ ***************************************************************************/
+void GCTAObservation::read_attributes(GFitsHDU* hdu)
+{
+    // Continue only if HDU is valid
+    if (hdu != NULL) {
+
+        // Read attributes
+        m_obs_id   = hdu->integer("OBS_ID");
+        m_livetime = hdu->real("LIVETIME");
+        m_obsname  = hdu->string("OBJECT");
+        m_ra_obj   = hdu->real("RA_OBJ");
+        m_dec_obj  = hdu->real("DEC_OBJ");
+
+        // Read pointing information
+        double  ra_pnt  = hdu->real("RA_PNT");
+        double  dec_pnt = hdu->real("DEC_PNT");
+        double  alt_pnt = hdu->real("ALT_PNT");
+        double  az_pnt  = hdu->real("AZ_PNT");
+        GSkyDir pnt;
+        pnt.radec_deg(ra_pnt, dec_pnt);
+
+        // Set pointing
+        if (m_pointing != NULL) delete m_pointing;
+        m_pointing = new GCTAPointing;
+        m_pointing->dir(pnt);
+
+    } // endif: HDU was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write observation attributes
+ *
+ * @param[in] hdu FITS HDU
+ ***************************************************************************/
+void GCTAObservation::write_attributes(GFitsHDU* hdu) const
+{
+    // Continue only if HDU is valid
+    if (hdu != NULL) {
+
+        // Compute some attributes
+        double deadc   = livetime() / gti().ontime();
+        double ra_pnt  = (m_pointing != NULL) ? m_pointing->dir().ra_deg() : 0.0;
+        double dec_pnt = (m_pointing != NULL) ? m_pointing->dir().dec_deg() : 0.0;
+        double tstart  = this->tstart().met();
+        double tstop   = this->tstop().met();
+
+        // Set observation information
+        hdu->card("CREATOR",  "GammaLib", "Program which created the file");
+        hdu->card("TELESCOP", "CTA",      "Telescope");
+        hdu->card("OBS_ID",   obs_id(),   "Observation identifier");
+        hdu->card("DATE_OBS", "string",   "Observation start date");
+        hdu->card("TIME_OBS", "string",   "Observation start time");
+        hdu->card("DATE_END", "string",   "Observation end date");
+        hdu->card("TIME_END", "string",   "Observation end time");
+
+        // Set observation time information
+        hdu->card("TSTART",   tstart, "[s] Mission time of start of observation");
+        hdu->card("TSTOP",    tstop, "[s] Mission time of end of observation");
+        hdu->card("MJDREFI",  51910, "[days] Integer part of mission time reference MJD");
+        hdu->card("MJDREFF",  7.428703703703703e-14, "[days] Fractional part of mission time reference MJD");
+        hdu->card("TIMEUNIT", "s", "Time unit");
+        hdu->card("TIMESYS",  "TT", "Time system");
+        hdu->card("TIMEREF",  "LOCAL", "Time reference");
+        hdu->card("TELAPSE",  gti().telapse(), "[s] Mission elapsed time");
+        hdu->card("ONTIME",   gti().ontime(), "[s] Total good time including deadtime");
+        hdu->card("LIVETIME", livetime(), "[s] Total livetime");
+        hdu->card("DEADC",    deadc, "Deadtime fraction");
+        hdu->card("TIMEDEL",  1.0, "Time resolution");
+
+        // Set pointing information
+        hdu->card("OBJECT",   obsname(), "Observed object");
+        hdu->card("RA_OBJ",   ra_obj(),  "[deg] Target Right Ascension");
+        hdu->card("DEC_OBJ",  dec_obj(), "[deg] Target Declination");
+        hdu->card("RA_PNT",   ra_pnt,    "[deg] Pointing Right Ascension");
+        hdu->card("DEC_PNT",  dec_pnt,   "[deg] Pointing Declination");
+        hdu->card("ALT_PNT",  0.0,       "[deg] Average altitude of pointing");
+        hdu->card("AZ_PNT",   0.0,       "[deg] Average azimuth of pointing");
+        hdu->card("RADECSYS", "FK5",     "Coordinate system");
+        hdu->card("EQUINOX",  2000.0,    "Epoch");
+        hdu->card("CONV_DEP", 0.0,       "Convergence depth of telescopes");
+        hdu->card("CONV_RA",  0.0,       "[deg] Convergence Right Ascension");
+        hdu->card("CONV_DEC", 0.0,       "[deg] Convergence Declination");
+        hdu->card("OBSERVER", "string",  "Observer");
+
+        // Telescope information
+        hdu->card("N_TELS",   100,      "Number of telescopes in event list");
+        hdu->card("TELLIST",  "string", "Telescope IDs");
+        hdu->card("GEOLAT",   0.0,      "[deg] Geographic latitude of array centre");
+        hdu->card("GEOLON",   0.0,      "[deg] Geographic longitude of array centre");
+        hdu->card("ALTITUDE", 0.0,      "[km] Altitude of array centre");
+
+        // Other information
+        hdu->card("EUNIT",    "TeV",    "Energy unit");
+        hdu->card("EVTVER",   "draft1", "Event list version number");
+        
+    } // endif: HDU was valid
 
     // Return
     return;
