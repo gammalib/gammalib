@@ -28,6 +28,9 @@
 #include "GCTARoi.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAResponse.hpp"
-#include "GCTAModelRaccDummy.hpp"
+#include "GCTAModelRadial.hpp"
+#include "GCTAModelRadialRegistry.hpp"
+#include "GCTAModelRadialGauss.hpp"
+#include "GCTAModelRadialAcceptance.hpp"
 
 #endif /* GCTALIB_HPP */
