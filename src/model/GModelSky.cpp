@@ -404,7 +404,8 @@ void GModelSky::write(GXmlElement& xml) const
         xml.append(src);
     }
 
-    // Set model type
+    // Set model attributes
+    src->attribute("name", name());
     if (spatial() != NULL) {
         if (spatial()->type() == "PointSource")
             src->attribute("type", "PointSource");
@@ -413,9 +414,6 @@ void GModelSky::write(GXmlElement& xml) const
     }
     else
         src->attribute("type", "unknown");
-
-    // Set model attributes
-    src->attribute("name", name());
     std::string instruments = this->instruments();
     if (instruments.length() > 0)
         src->attribute("instrument", instruments);
@@ -776,32 +774,45 @@ double GModelSky::spatial(const GEvent& event,
         if (rsp == NULL)
             throw GException::no_response(G_SPATIAL);
 
-        // Get IRF value
+        // Get IRF value. This method returns the spatial component of the
+        // source model.
         double irf = rsp->irf(event, *this, srcEng, srcTime, obs);
-
-        // Compute source model
-        double source = 1.0;
 
         // Case A: evaluate gradients
         if (grad) {
 
             // Evaluate source model
-            if (m_spectral != NULL) source *= m_spectral->eval_gradients(srcEng);
-            if (m_temporal != NULL) source *= m_temporal->eval_gradients(srcTime);
+            double spec = (spectral() != NULL) ? spectral()->eval_gradients(srcEng)  : 1.0;
+            double temp = (temporal() != NULL) ? temporal()->eval_gradients(srcTime) : 1.0;
 
             // Set value
-            value = source * irf;
+            value = spec * temp * irf;
 
-            // Set gradients
-            for (int i = 0; i < m_npars; ++i)
-                m_par[i]->gradient(m_par[i]->gradient() * irf);
+            // Multiply factors to spectral gradients
+            if (spectral() != NULL) {
+                double fact = temp * irf;
+                if (fact != 1.0) {
+                    for (int i = 0; i < spectral()->size(); ++i)
+                        (*spectral())(i).gradient( (*spectral())(i).gradient() * fact );
+                }
+            }
 
-        }
+            // Multiply factors to temporal gradients
+            if (temporal() != NULL) {
+                double fact = spec * irf;
+                if (fact != 1.0) {
+                    for (int i = 0; i < temporal()->size(); ++i)
+                        (*temporal())(i).gradient( (*temporal())(i).gradient() * fact );
+                }
+            }
+
+        } // endif: gradient evaluation has been requested
 
         // Case B: evaluate no gradients
         else {
 
             // Evaluate source model
+            double source = 1.0;
             if (m_spectral != NULL) source *= m_spectral->eval(srcEng);
             if (m_temporal != NULL) source *= m_temporal->eval(srcTime);
 

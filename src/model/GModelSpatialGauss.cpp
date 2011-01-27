@@ -245,7 +245,8 @@ double GModelSpatialGauss::eval(const GSkyDir& srcDir)
  * \f$\sigma\f$ is the Gaussian width.
  *
  * The partial derivative of the Gaussian width is given by
- * \f[\frac{df}{d\sigma_v} = f(\theta) \frac{\theta^2}{\sigma^3} \sigma_s\f]
+ * \f[\frac{df}{d\sigma_v} = 
+ *    f(\theta) (\frac{\theta^2}{\sigma^3} - \frac{2}{\sigma}) \sigma_s\f]
  * where 
  * \f$\sigma_v\f$ is the value part, 
  * \f$\sigma_s\f$ is the scaling part, and 
@@ -253,10 +254,6 @@ double GModelSpatialGauss::eval(const GSkyDir& srcDir)
  *
  * Parameter gradients for the position are set to 0, i.e. it is not
  * expected to fit the position of the Gaussian using derivatives.
- *
- * @todo Add a gradient validity parameter to GModelPar. This can then be
- *       used for computation of numerical gradients in case that no
- *       analytical gradients are given.
  ***************************************************************************/
 double GModelSpatialGauss::eval_gradients(const GSkyDir& srcDir)
 {
@@ -268,11 +265,11 @@ double GModelSpatialGauss::eval_gradients(const GSkyDir& srcDir)
     double sigma2    = sigma_rad * sigma_rad;
     double theta2    = theta * theta;
     double arg       = theta2 / sigma2;
-    double value     = exp(-0.5 * theta2 / sigma2) / (twopi * sigma2);
+    double value     = exp(-0.5 * arg) / (twopi * sigma2);
 
     // Compute partial derivatives of the sigma parameter. Note that this
     // parameter is given in degrees
-    double g_sigma = value * arg / sigma() * m_sigma.scale();
+    double g_sigma = value * (arg - 2.0) / sigma() * m_sigma.scale();
 
     // Set gradients
     m_ra.gradient(0.0);
