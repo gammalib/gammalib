@@ -317,10 +317,10 @@ void test_unbinned_obs(void)
             //std::cout << event->test() << std::endl;
             num++;
         }
-        if (num != 1536) {
+        if (num != 1298) {
             std::cout << std::endl
                       << "TEST ERROR: Wrong number of iterations in GObservations::iterator."
-                      << " (excepted 1536, found " << num << ")" << std::endl;
+                      << " (excepted 1298, found " << num << ")" << std::endl;
             throw;
         }
     }
@@ -340,10 +340,10 @@ void test_unbinned_obs(void)
             //std::cout << *event->energy() << std::endl;
             num++;
         }
-        if (num != 768) {
+        if (num != 649) {
             std::cout << std::endl
                       << "TEST ERROR: Wrong number of iterations in GCTAEventList::iterator."
-                      << " (excepted 768, found " << num << ")" << std::endl;
+                      << " (excepted 649, found " << num << ")" << std::endl;
             throw;
         }
     }
@@ -389,10 +389,12 @@ void test_unbinned_optimizer(void)
         roi.radius(2.5);
 
         // Setup energy range covered by data
-        GEnergy emin;
-        GEnergy emax;
+        GEnergy  emin;
+        GEnergy  emax;
+        GEbounds ebds;
         emin.TeV(0.1);
         emax.TeV(100.0);
+        ebds.append(emin, emax);
 
         // Setup time range covered by data
         GTime tstart;
@@ -404,9 +406,8 @@ void test_unbinned_optimizer(void)
         // for analysis
         run.load_unbinned(cta_events);
         run.response(cta_irf,cta_caldb);
-        run.roi(roi);
-        run.gti()->add(tstart, tstop);
-        run.ebounds()->append(emin, emax);
+        run.roi(&roi);
+        run.ebounds(ebds);
         obs.append(run);
     }
     catch (std::exception &e) {
@@ -561,7 +562,7 @@ int main(void)
         test_unbinned_obs();
         test_binned_obs();
         test_unbinned_optimizer();
-        //test_binned_optimizer();  //!< Disable since very slow ...
+        test_binned_optimizer();
     }
     else {
         std::cout << "Skipped several tests since no test data have been found." << std::endl;
