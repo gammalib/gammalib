@@ -170,14 +170,14 @@ double GIntegral::romb(double a, double b, int k)
     s[0] = 0.0;
 
     // Loop
-    for (int iter = 1; iter <= m_max_iter; ++iter) {
+    for (m_iter = 1; m_iter <= m_max_iter; ++m_iter) {
 
         // Integration using Trapezoid rule
-        s[iter] = trapzd(a, b, iter, s[iter-1]);
+        s[m_iter] = trapzd(a, b, m_iter, s[m_iter-1]);
 
         // Starting from iteration k on, use polynomial interpolation
-        if (iter >= k) {
-            polint(&h[iter-k], &s[iter-k], k, 0.0, &ss, &dss);
+        if (m_iter >= k) {
+            polint(&h[m_iter-k], &s[m_iter-k], k, 0.0, &ss, &dss);
             if (fabs(dss) <= m_eps * fabs(ss)) {
                 converged = true;
                 result    = ss;
@@ -186,7 +186,7 @@ double GIntegral::romb(double a, double b, int k)
         }
 
         // Reduce step size
-        h[iter+1]= 0.25 * h[iter];
+        h[m_iter+1]= 0.25 * h[m_iter];
 
     }
 
@@ -220,6 +220,7 @@ void GIntegral::init_members(void)
     m_integrand = NULL;
     m_eps       = 1.0e-6;
     m_max_iter  = 20;
+    m_iter      = 0;
 
     // Return
     return;
@@ -237,6 +238,7 @@ void GIntegral::copy_members(const GIntegral& integral)
     m_integrand = integral.m_integrand;
     m_eps       = integral.m_eps;
     m_max_iter  = integral.m_max_iter;
+    m_iter      = integral.m_iter;
 
     // Return
     return;
