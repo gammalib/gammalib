@@ -222,6 +222,9 @@ if test "x$with_cfitsio" = "xyes"; then
     for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
       test -f $i/libcfitsio.a -o -f $i/libcfitsio.so -o -f $i/libcfitsio.dylib && LIBDIR_CFITSIO=$i
     done
+    for i in /usr/local/include /opt/local/include /usr/include ; do
+      test -f $i/fitsio.h && INCDIR_CFITSIO=$i
+    done
   fi
   if test -z "$LIBDIR_CFITSIO"; then
     if test "x$cfitsio_lib_dir" != "x";then
@@ -231,6 +234,7 @@ if test "x$with_cfitsio" = "xyes"; then
     fi
   fi
   LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
+  CPPFLAGS="$CPPFLAGS -I$LIBDIR_CFITSIO/../include"
   AC_SUBST(LIBDIR_CFITSIO)
 fi
 
