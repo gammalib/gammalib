@@ -21,7 +21,10 @@
 #include "GCTAResponse.i"
 #include "GCTAInstDir.i"
 #include "GCTARoi.i"
-#include "GCTAModelRaccDummy.i"
+#include "GCTAModelRadial.i"
+#include "GCTAModelRadialRegistry.i"
+#include "GCTAModelRadialGauss.i"
+#include "GCTAModelRadialAcceptance.i"
 
 
 
