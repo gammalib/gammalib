@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAException.hpp  - CTA exception handler               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -50,31 +50,40 @@ protected:
  ***************************************************************************/
 class GCTAException : public GCTAExceptionHandler {
 public:
-    // Exceptions
+    // General exceptions
     class file_open_error : public GCTAExceptionHandler {
     public:
         file_open_error(std::string origin, std::string filename,
                         std::string message = "");
     };
+
+    // Observation exceptions
     class no_response : public GCTAExceptionHandler {
     public:
-        no_response(std::string origin,  std::string message = "");
+        no_response(std::string origin, std::string message = "");
     };
     class no_pointing : public GCTAExceptionHandler {
     public:
-        no_pointing(std::string origin,  std::string message = "");
+        no_pointing(std::string origin, std::string message = "");
     };
     class no_sky : public GCTAExceptionHandler {
     public:
-        no_sky(std::string origin,  std::string message = "");
+        no_sky(std::string origin, std::string message = "");
     };
     class no_ebds : public GCTAExceptionHandler {
     public:
-        no_ebds(std::string origin,  std::string message = "");
+        no_ebds(std::string origin, std::string message = "");
     };
     class no_gti : public GCTAExceptionHandler {
     public:
-        no_gti(std::string origin,  std::string message = "");
+        no_gti(std::string origin, std::string message = "");
+    };
+
+    // Model exceptions
+    class model_invalid_radial : public GCTAExceptionHandler {
+    public:
+        model_invalid_radial(std::string origin, std::string type,
+                             std::string message = "");
     };
 };
 

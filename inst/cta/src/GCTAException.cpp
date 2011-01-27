@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAException.cpp  - CTA exception handler              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,6 +19,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GCTAException.hpp"
 #include "GTools.hpp"
+#include "GCTAModelRadialRegistry.hpp"
 
 
 /***********************************************************************//**
@@ -118,3 +119,40 @@ GCTAException::no_gti::no_gti(std::string origin, std::string message)
     m_message = "No Good Time Intervals (GTIs) have been found. "+message;
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Invalid radial model type
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] type Radial model type that has been encountered.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCTAException::model_invalid_radial::model_invalid_radial(std::string origin,
+                                                          std::string type,
+                                                          std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Invalid radial CTA model type \""+type+"\" encountered. " +
+                message;
+
+    // Add list of valid spatial models
+    GCTAModelRadialRegistry registry;
+    if (registry.size() > 0) {
+        m_message += "The following models are registered: ";
+        for (int i = 0; i < registry.size(); ++i) {
+            if (i > 0)
+                m_message += ", ";
+            m_message += "\"" + registry.name(i) + "\"";
+        }
+        m_message += ".";
+    }
+    else
+        m_message += "No models are registered.";
+
+    // Return
+    return;
+}
+
+
