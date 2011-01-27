@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAEventCube.cpp  -  CTA event cube class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -58,6 +58,22 @@ GCTAEventCube::GCTAEventCube(void) : GEventCube()
 {
     // Initialise class members for clean destruction
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Sky map constructor
+ ***************************************************************************/
+GCTAEventCube::GCTAEventCube(const GSkymap& map) : GEventCube()
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Set sky map
+    m_map = map;
 
     // Return
     return;
@@ -202,6 +218,27 @@ void GCTAEventCube::load(const std::string& filename)
 
     // Close FITS file
     file.close();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write CTA event cube into FITS file.
+ *
+ * @param[in] file FITS file.
+ ***************************************************************************/
+void GCTAEventCube::write(GFits* file) const
+{
+    // Write cube
+    m_map.write(file);
+
+    // Write energy boundaries
+    m_ebds.write(file);
+
+    // Write Good Time intervals
+    m_gti.write(file);
 
     // Return
     return;

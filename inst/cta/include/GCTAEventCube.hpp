@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAEventCube.hpp  -  CTA event cube class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -52,6 +52,7 @@ class GCTAEventCube : public GEventCube {
 public:
     // Constructors and destructors
     GCTAEventCube(void);
+    GCTAEventCube(const GSkymap& map);
     GCTAEventCube(const GCTAEventCube& cube);
     virtual ~GCTAEventCube(void);
 
@@ -62,15 +63,22 @@ public:
     void           clear(void);
     GCTAEventCube* clone(void) const;
     void           load(const std::string& filename);
+    void           write(GFits* file) const;
     GCTAEventBin*  pointer(int index);
     int            number(void) const;
     std::string    print(void) const;
 
     // Other methods
-    int nx(void) const { return m_map.nx(); }
-    int ny(void) const { return m_map.ny(); }
-    int npix(void) const { return m_map.npix(); }
-    int ebins(void) const { return m_map.nmaps(); }
+    void            map(const GSkymap& map) { m_map=map; }
+    void            ebounds(const GEbounds& ebds) { m_ebds=ebds; }
+    void            gti(const GGti& gti) { m_gti=gti; }
+    const GSkymap&  map(void) const { return m_map; }
+    const GEbounds& ebounds(void) const { return m_ebds; }
+    const GGti&     gti(void) const { return m_gti; }
+    int             nx(void) const { return m_map.nx(); }
+    int             ny(void) const { return m_map.ny(); }
+    int             npix(void) const { return m_map.npix(); }
+    int             ebins(void) const { return m_map.nmaps(); }
 
 protected:
     // Protected methods
@@ -91,7 +99,6 @@ protected:
 
     // Protected derived data
     GCTAEventBin m_bin;            //!< Actual event bin
-    //double*      m_counts;         //!< Pointer to skymap pixels
     GCTAInstDir* m_dirs;           //!< Array of event directions
     double*      m_omega;          //!< Array of solid angles (sr)
     GEnergy*     m_energies;       //!< Array of log mean energies
