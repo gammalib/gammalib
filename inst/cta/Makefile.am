@@ -17,7 +17,10 @@ sources = src/GCTAException.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
           src/GCTAPointing.cpp \
-          src/GCTAModelRaccDummy.cpp
+	  src/GCTAModelRadialRegistry.cpp \
+          src/GCTAModelRadial.cpp \
+          src/GCTAModelRadialGauss.cpp \
+          src/GCTAModelRadialAcceptance.cpp
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GCTAException.hpp \
@@ -30,7 +33,10 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAInstDir.hpp \
                      include/GCTARoi.hpp \
                      include/GCTAResponse.hpp \
-                     include/GCTAModelRaccDummy.hpp \
+		     include/GCTAModelRadialRegistry.hpp \
+                     include/GCTAModelRadial.hpp \
+                     include/GCTAModelRadialGauss.hpp \
+                     include/GCTAModelRadialAcceptance.hpp \
                      include/GCTALib.hpp
 
 # Calibration files to distribute
