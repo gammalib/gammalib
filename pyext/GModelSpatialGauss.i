@@ -36,36 +36,33 @@ public:
     GModelSpatialGauss(const GModelSpatialGauss& model);
     virtual ~GModelSpatialGauss(void);
 
-    // Operators
-    GModelSpatialGauss& operator= (const GModelSpatialGauss& model);
-
     // Implemented pure virtual methods
     void                clear(void);
     GModelSpatialGauss* clone(void) const;
-    int                 size(void) const { return m_npars; }
-    std::string         type(void) const { return "GaussFunction"; }
+    int                 size(void) const;
+    std::string         type(void) const;
     double              eval(const GSkyDir& srcDir);
     double              eval_gradients(const GSkyDir& srcDir);
     GSkyDir             mc(GRan& ran) const;
     void                read(const GXmlElement& xml);
     void                write(GXmlElement& xml) const;
-    bool                isptsource(void) const { return false; }
+    bool                isptsource(void) const;
 
     // Other methods
-    double  ra(void) const { return m_ra.real_value(); }
-    double  dec(void) const { return m_dec.real_value(); }
-    double  sigma(void) const { return m_sigma.real_value(); }
+    double  ra(void) const;
+    double  dec(void) const;
+    double  sigma(void) const;
     GSkyDir dir(void) const;
     void    dir(const GSkyDir& dir);
-    void    sigma(const double& sigma) { m_sigma.real_value(sigma); }
+    void    sigma(const double& sigma);
 };
 
 
 /***********************************************************************//**
- * @brief GModelSpatialPtsrc class extension
+ * @brief GModelSpatialGauss class extension
  ***************************************************************************/
-%extend GModelSpatialPtsrc {
-    GModelSpatialPtsrc copy() {
+%extend GModelSpatialGauss {
+    GModelSpatialGauss copy() {
         return (*self);
     }
 };
