@@ -20,8 +20,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GIntegral.hpp"
 #include "GCTAModelRadialGauss.hpp"
 #include "GCTAModelRadialRegistry.hpp"
 
@@ -39,6 +41,7 @@ const GCTAModelRadialRegistry g_cta_radial_gauss_registry(&g_cta_radial_gauss_se
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_DEBUG_MC 0                                     //!< Debug MC method
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -65,7 +68,7 @@ GCTAModelRadialGauss::GCTAModelRadialGauss(void) : GCTAModelRadial()
 /***********************************************************************//**
  * @brief Constructor
  *
- * @param[in] sigma Gaussian width (degrees).
+ * @param[in] sigma Gaussian width (degrees\f$^2\f$).
  ***************************************************************************/
 GCTAModelRadialGauss::GCTAModelRadialGauss(const double& sigma) : GCTAModelRadial()
 {
@@ -245,20 +248,21 @@ GCTAModelRadialGauss* GCTAModelRadialGauss::clone(void) const
  *
  * @param[in] offset Offset angle (degrees).
  *
- * Evaluates the radial part for a Gaussian model. The Gaussian model is
+ * Evaluates the Gaussian model for a given offset. The Gaussian model is
  * defined as
- * \f[f(\theta)=\exp \left(-\frac{1}{2}\frac{\theta^2}{\sigma^2} \right)\f]
+ * \f[f(\theta) = \exp \left(-\frac{1}{2}
+ *                     \left( \frac{\theta^2}{\sigma} \right)^2 \right)\f]
  * where
  * \f$\theta\f$ is the offset angle (in degrees), and
- * \f$\sigma\f$ is the Gaussian width (in degrees).
+ * \f$\sigma\f$ is the Gaussian width (in degrees\f$^2\f$).
  *
- * Note that this method implements a Gaussian function which is unity for
+ * Note that this method implements a function which is unity for
  * \f$\theta=0\f$.
  ***************************************************************************/
 double GCTAModelRadialGauss::eval(const double& offset)
 {
     // Compute value
-    double arg   = offset / sigma();
+    double arg   = offset * offset / sigma();
     double value = exp(-0.5 * arg * arg);
 
     // Return value
@@ -271,27 +275,28 @@ double GCTAModelRadialGauss::eval(const double& offset)
  *
  * @param[in] offset Offset angle (degrees).
  *
- * Evaluates the radial part for a Gaussian model. The Gaussian model is
+ * Evaluates the Gaussian model for a given offset. The Gaussian model is
  * defined as
- * \f[f(\theta)=\exp \left(-\frac{1}{2}\frac{\theta^2}{\sigma^2} \right)\f]
+ * \f[f(\theta) = \exp \left(-\frac{1}{2}
+ *                     \left( \frac{\theta^2}{\sigma} \right)^2 \right)\f]
  * where
  * \f$\theta\f$ is the offset angle (in degrees), and
- * \f$\sigma\f$ is the Gaussian width (in degrees).
+ * \f$\sigma\f$ is the Gaussian width (in degrees\f$^2\f$).
  *
  * The partial derivative of the Gaussian width is given by
- * \f[\frac{df}{d\sigma_v} = f(\theta) \frac{\theta^2}{\sigma^3} \sigma_s\f]
+ * \f[\frac{df}{d\sigma_v} = f(\theta) \frac{\theta^4}{\sigma^3} \sigma_s\f]
  * where 
  * \f$\sigma_v\f$ is the value part, 
  * \f$\sigma_s\f$ is the scaling part, and 
  * \f$\sigma = \sigma_v \sigma_s\f$. 
  *
- * Note that this method implements a Gaussian function which is unity for
+ * Note that this method implements a function which is unity for
  * \f$\theta=0\f$.
  ***************************************************************************/
 double GCTAModelRadialGauss::eval_gradients(const double& offset)
 {
     // Compute value
-    double arg   = offset / sigma();
+    double arg   = offset * offset / sigma();
     double arg2  = arg * arg;
     double value = exp(-0.5 * arg2);
 
@@ -312,14 +317,45 @@ double GCTAModelRadialGauss::eval_gradients(const double& offset)
  * @param[in] dir Pointing direction.
  * @param[in] ran Random number generator.
  *
- * Draws an arbitrary CTA instrument position from a 2D Gaussian
- * distribution.
+ * Draws an arbitrary CTA instrument position from
+ * \f[f(\theta) = \sin(\theta)
+ *                \exp \left(-\frac{1}{2}\frac{\theta^4}{\sigma^2} \right)\f]
+ * where
+ * \f$\theta\f$ is the offset angle (in degrees), and
+ * \f$\sigma\f$ is the Gaussian width (in degrees\f$^2\f$),
+ * using the rejection method.
+ *
+ * @todo Method can be optimised by using a random deviate of sin instead
+ *       of the uniform random deviate which leads to many unnecessary
+ *       rejections.
  ***************************************************************************/
 GCTAInstDir GCTAModelRadialGauss::mc(const GCTAInstDir& dir, GRan& ran) const
 {
     // Simulate offset from photon arrival direction
-    double offset = sigma() * ran.chisq2();
-    double phi    = 360.0 * ran.uniform();
+    #if G_DEBUG_MC
+    int    n_samples = 0;
+    #endif
+    double sigma_max = 4.0 * sqrt(sigma());
+    double u_max     = sin(sigma_max * deg2rad);
+    double value     = 0.0;
+    double u         = 1.0;
+    double offset    = 0.0;
+    do {
+        offset      = ran.uniform() * sigma_max;
+        double arg  = offset * offset / sigma();
+        double arg2 = arg * arg;
+        value       = sin(offset * deg2rad) * exp(-0.5 * arg2);
+        u           = ran.uniform() * u_max;
+        #if G_DEBUG_MC
+        n_samples++;
+        #endif
+    } while (u > value);
+    #if G_DEBUG_MC
+    std::cout << "#=" << n_samples << " ";
+    #endif
+
+    // Simulate azimuth angle
+    double phi = 360.0 * ran.uniform();
 
     // Rotate pointing direction by offset and azimuth angle
     GCTAInstDir mc_dir = dir;
@@ -334,17 +370,34 @@ GCTAInstDir GCTAModelRadialGauss::mc(const GCTAInstDir& dir, GRan& ran) const
  * @brief Returns integral over radial model (in steradians)
  *
  * Computes
- * \f[\Omega = 2 \pi \int f(\theta) sin(\theta) d\theta\f]
+ * \f[\Omega = 2 \pi \int_0^{\pi} \sin \theta f(\theta) d\theta\f]
  * where
- * \f$f(\theta)\f$ is the radial Gaussian function, and
- * \f$\theta\f$ is the offset angle.
+ * \f[f(\theta) = \exp \left(-\frac{1}{2}
+ *                     \left( \frac{\theta^2}{\sigma} \right)^2 \right)\f]
+ * \f$\theta\f$ is the offset angle (in degrees), and
+ * \f$\sigma\f$ is the Gaussian width (in degrees\f$^2\f$).
+ *
+ * The integration is performed numerically, and the upper integration bound
+ * \f$\pi\f$
+ * is set to
+ * \f$\sqrt(10 \sigma)\f$
+ * to reduce inaccuracies in the numerical integration.
  ***************************************************************************/
 double GCTAModelRadialGauss::omega(void) const
 {
-    // Analytically compute integral over the Gaussian
-    double sigma_rad = sigma() * deg2rad;
-    double omega     = twopi * sigma_rad * sigma_rad;
+    // Allocate integrand
+    GCTAModelRadialGauss::integrand integrand(sigma()*deg2rad*deg2rad);
+
+    // Allocate intergal
+    GIntegral integral(&integrand);
+
+    // Set upper integration boundary
+    double offset_max = sqrt(10.0*sigma()) * deg2rad;
+    if (offset_max > pi) offset_max = pi;
     
+    // Perform numerical integration
+    double omega = integral.romb(0.0, offset_max) * twopi;
+
     // Return integral
     return omega;
 }
@@ -493,7 +546,7 @@ void GCTAModelRadialGauss::init_members(void)
     // Initialise Gaussian sigma
     m_sigma = GModelPar();
     m_sigma.name("Sigma");
-    m_sigma.unit("deg");
+    m_sigma.unit("deg2");
     m_sigma.free();
     m_sigma.scale(1.0);
 
