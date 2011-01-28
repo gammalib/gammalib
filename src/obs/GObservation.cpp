@@ -20,12 +20,13 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cmath>
+//#include <cmath>
 #include "GException.hpp"
 #include "GObservation.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatialPtsrc.hpp"
 #include "GIntegral.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MODEL                   "GObservation::model(GModels&, GPointing&,"\
@@ -194,7 +195,8 @@ double GObservation::model(const GModels& models, const GEvent& event,
             if (gradient != NULL) {
                 for (int k = 0; k < ptr->size(); ++k, ++igrad) {
                     double grad        = (*ptr)(k).gradient();
-                    (*gradient)(igrad) = (std::isinf(grad)) ? 0.0 : grad;
+//                    (*gradient)(igrad) = (std::isinf(grad)) ? 0.0 : grad;
+                    (*gradient)(igrad) = (isinfinite(grad)) ? 0.0 : grad;
                 }
             }
                 
