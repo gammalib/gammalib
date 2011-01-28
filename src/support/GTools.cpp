@@ -27,6 +27,7 @@
 #include <cctype>
 #include <unistd.h>        // access() function
 #include <sys/stat.h>
+#include <float.h>
 #include "GTools.hpp"
 
 /* __ Coding definitions _________________________________________________ */
@@ -587,3 +588,14 @@ bool file_exists(const std::string& filename)
 }
 
 
+/***********************************************************************//**
+ * @brief Checks if argument is infinite
+ *
+ * @param[in] x Argument.
+ *
+ * This function has been copied from gnulib.
+ ***************************************************************************/
+bool isinfinite(double x)
+{
+  return (x < -DBL_MAX || x > DBL_MAX);
+}

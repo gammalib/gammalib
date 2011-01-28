@@ -83,5 +83,6 @@ std::string              center(const std::string& s, int n, char c = ' ');
 std::string              parformat(const std::string& s);
 double                   modulo(double v1, double v2);
 bool                     file_exists(const std::string& filename);
+bool                     isinfinite(double x);
 
 #endif /* GTOOLS_HPP */
