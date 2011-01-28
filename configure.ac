@@ -276,7 +276,7 @@ if test "x$with_readline" = "xyes"; then
     if test "x$readline_lib_dir" != "x";then
       AC_MSG_ERROR(Cannot find readline library under $readline_lib_dir)
     else
-      AC_MSG_ERROR(Cannot find readline library. Use --with-readline-lib-dir= to specify non-default path.)
+      AC_MSG_ERROR(Cannot find readline library. Use --with-readline-lib-dir= to specify non-default path or --without-readline to compile with readline library.)
     fi
   fi
   LDFLAGS="$LDFLAGS -L$LIBDIR_READLINE"
