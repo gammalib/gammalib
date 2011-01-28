@@ -201,165 +201,108 @@ AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes"
 dnl ==========================
 dnl Checks for cfitsio library
 dnl ==========================
-#AC_SEARCH_LIBS(ffpss, cfitsio,
-#               AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available]), ,[-lm])
+AC_SEARCH_LIBS(ffpss, cfitsio,
+               AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available]), ,[-lm])
+AM_CONDITIONAL(WITH_CFITSIO, test "x$ac_cv_search_ffpss" = "xyes")
+
 # Check if we want to use cfitsio
-AC_ARG_WITH([cfitsio],
-            [AS_HELP_STRING([--with-cfitsio],
-                            [Use CFITSIO library (needed to support FITS files)])],
-            [],
-            [with_cfitsio=yes])
-AC_ARG_WITH([cfitsio-lib-dir],
-            AC_HELP_STRING([--with-cfitsio-lib-dir],
-                           [CFITSIO library directory [[/usr/(local/)lib(64)]]]),
-            [cfitsio_lib_dir=$withval])
-
+#AC_ARG_WITH([cfitsio],
+#            [AS_HELP_STRING([--with-cfitsio],
+#                            [Use CFITSIO library (needed to support FITS files)])],
+#            [],
+#            [with_cfitsio=yes])
+#AC_ARG_WITH([cfitsio-lib-dir],
+#            AC_HELP_STRING([--with-cfitsio-lib-dir],
+#                           [CFITSIO library directory [[/usr/(local/)lib(64)]]]),
+#            [cfitsio_lib_dir=$withval])
+#
 # If cfitsio is requested then add cfitsio library path to LDFLAGS
-if test "x$with_cfitsio" = "xyes"; then
-  if test "x$cfitsio_lib_dir" != "x"; then
-    test -f $cfitsio_lib_dir/libcfitsio.a -o -f $cfitsio_lib_dir/libcfitsio.so -o -f $cfitsio_lib_dir/libcfitsio.dylib && LIBDIR_CFITSIO=$cfitsio_lib_dir
-  else
-    for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
-      test -f $i/libcfitsio.a -o -f $i/libcfitsio.so -o -f $i/libcfitsio.dylib && LIBDIR_CFITSIO=$i
-    done
-    for i in /usr/local/include /opt/local/include /usr/include ; do
-      test -f $i/fitsio.h && INCDIR_CFITSIO=$i
-    done
-  fi
-  if test -z "$LIBDIR_CFITSIO"; then
-    if test "x$cfitsio_lib_dir" != "x";then
-      AC_MSG_ERROR(Cannot find CFITSIO library under $cfitsio_lib_dir)
-    else
-      AC_MSG_ERROR(Cannot find CFITSIO library. Use --with-cfitsio-lib-dir= to specify non-default path or --without-cfitsio to compile with CFITSIO library.)
-    fi
-  fi
-  LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
-  CPPFLAGS="$CPPFLAGS -I$LIBDIR_CFITSIO/../include"
-  AC_SUBST(LIBDIR_CFITSIO)
-fi
-
+#if test "x$with_cfitsio" = "xyes"; then
+#  if test "x$cfitsio_lib_dir" != "x"; then
+#    test -f $cfitsio_lib_dir/libcfitsio.a -o -f $cfitsio_lib_dir/libcfitsio.so -o -f $cfitsio_lib_dir/libcfitsio.dylib && LIBDIR_CFITSIO=$cfitsio_lib_dir
+#  else
+#    for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
+#      test -f $i/libcfitsio.a -o -f $i/libcfitsio.so -o -f $i/libcfitsio.dylib && LIBDIR_CFITSIO=$i
+#    done
+#    for i in /usr/local/include /opt/local/include /usr/include ; do
+#      test -f $i/fitsio.h && INCDIR_CFITSIO=$i
+#    done
+#  fi
+#  if test -z "$LIBDIR_CFITSIO"; then
+#    if test "x$cfitsio_lib_dir" != "x";then
+#      AC_MSG_ERROR(Cannot find CFITSIO library under $cfitsio_lib_dir)
+#    else
+#      AC_MSG_ERROR(Cannot find CFITSIO library. Use --with-cfitsio-lib-dir= to specify non-default path or --without-cfitsio to compile with CFITSIO library.)
+#    fi
+#  fi
+#  LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
+#  CPPFLAGS="$CPPFLAGS -I$LIBDIR_CFITSIO/../include"
+#  AC_SUBST(LIBDIR_CFITSIO)
+#fi
+#
 # Check for cfitsio library
-if test "x$with_cfitsio" = "xyes"; then
-  AC_CHECK_LIB([cfitsio], [ffpss],
-               [LIBS="${LIBS} -lcfitsio -lm"
-                AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])],
-               [AC_MSG_FAILURE([--with-cfitsio was given, but test for cfitsio failed])],
-               [-lm])
-fi
-AM_CONDITIONAL(WITH_CFITSIO, test "x$with_cfitsio" = "xyes")
+#if test "x$with_cfitsio" = "xyes"; then
+#  AC_CHECK_LIB([cfitsio], [ffpss],
+#               [LIBS="${LIBS} -lcfitsio -lm"
+#                AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])],
+#               [AC_MSG_FAILURE([--with-cfitsio was given, but test for cfitsio failed])],
+#               [-lm])
+#fi
+#AM_CONDITIONAL(WITH_CFITSIO, test "x$with_cfitsio" = "xyes")
 
 
 dnl ===========================
 dnl Checks for readline library
 dnl ===========================
+#AC_SEARCH_LIBS([main], [readline],
+#               AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available]),
+#                         ,[-lncurses])
+AC_CHECK_LIB([readline], [main],
+             [LIBS="${LIBS} -lreadline -lncurses"
+              AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])],
+             [], [-lncurses])
+AM_CONDITIONAL(WITH_READLINE, test "x$ac_cv_lib_readline_main" = "xyes")
+
 # Checks for readline
-AC_ARG_WITH([readline],
-            [AS_HELP_STRING([--with-readline],
-            [support fancy command line editing @<:@default=check@:>@])],
-            [],
-            [with_readline=yes])
-AC_ARG_WITH([readline-lib-dir],
-            AC_HELP_STRING([--with-readline-lib-dir],
-                           [readline library directory [[/usr/(local/)lib(64)]]]),
-            [readline_lib_dir=$withval])
+#AC_ARG_WITH([readline],
+#            [AS_HELP_STRING([--with-readline],
+#            [support fancy command line editing @<:@default=check@:>@])],
+#            [],
+#            [with_readline=yes])
+#AC_ARG_WITH([readline-lib-dir],
+#            AC_HELP_STRING([--with-readline-lib-dir],
+#                           [readline library directory [[/usr/(local/)lib(64)]]]),
+#            [readline_lib_dir=$withval])
 
 # If readline is requested then add readline library path to LDFLAGS
-if test "x$with_readline" = "xyes"; then
-  if test "x$readline_lib_dir" != "x"; then
-    test -f $readline_lib_dir/libreadline.a -o -f $readline_lib_dir/libreadline.so -o -f $readline_lib_dir/libreadline.dylib && LIBDIR_READLINE=$readline_lib_dir
-  else
-    for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
-      test -f $i/libreadline.a -o -f $i/libreadline.so -o -f $i/libreadline.dylib && LIBDIR_READLINE=$i
-    done
-  fi
-  if test -z "$LIBDIR_READLINE"; then
-    if test "x$readline_lib_dir" != "x";then
-      AC_MSG_ERROR(Cannot find readline library under $readline_lib_dir)
-    else
-      AC_MSG_ERROR(Cannot find readline library. Use --with-readline-lib-dir= to specify non-default path or --without-readline to compile with readline library.)
-    fi
-  fi
-  LDFLAGS="$LDFLAGS -L$LIBDIR_READLINE"
-  AC_SUBST(LIBDIR_READLINE)
-fi
+#if test "x$with_readline" = "xyes"; then
+#  if test "x$readline_lib_dir" != "x"; then
+#    test -f $readline_lib_dir/libreadline.a -o -f $readline_lib_dir/libreadline.so -o -f $readline_lib_dir/libreadline.dylib && LIBDIR_READLINE=$readline_lib_dir
+#  else
+#    for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
+#      test -f $i/libreadline.a -o -f $i/libreadline.so -o -f $i/libreadline.dylib && LIBDIR_READLINE=$i
+#    done
+#  fi
+#  if test -z "$LIBDIR_READLINE"; then
+#    if test "x$readline_lib_dir" != "x";then
+#      AC_MSG_ERROR(Cannot find readline library under $readline_lib_dir)
+#    else
+#      AC_MSG_ERROR(Cannot find readline library. Use --with-readline-lib-dir= to specify non-default path or --without-readline to compile with readline library.)
+#    fi
+#  fi
+#  LDFLAGS="$LDFLAGS -L$LIBDIR_READLINE"
+#  AC_SUBST(LIBDIR_READLINE)
+#fi
 
 # Check for readline library
-if test "x$with_readline" = "xyes"; then
-  AC_CHECK_LIB([readline], [main],
-               [LIBS="${LIBS} -lreadline -lncurses"
-                AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])],
-               [AC_MSG_FAILURE([--with-readline was given, but test for readline failed])],
-               [-lncurses])
-fi
-AM_CONDITIONAL(WITH_READLINE, test "x$with_readline" = "xyes")
-
-# Older readline.h's declared readline() without any arguments and outside of 'extern "C"', which freaks out C++
-if test "$with_readline" != no; then
-  AC_LANG_PUSH(C++)
-  AC_MSG_CHECKING([if readline.h needs extern "C"])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <stdio.h>
-#include <readline/readline.h>
-                                     ]],[[
-  char*x=readline("test"); 
-  return (x?0:1);
-                                     ]])],
-                    [AC_MSG_RESULT(no)], 
-                    [AC_DEFINE(READLINE_H_NEEDS_EXTERN_C, 1, [Define to 1 if readline/readline.h needs extern "C"]) 
-                     AC_MSG_RESULT(yes)])
-  AC_LANG_POP(C++)
-fi
-
-# Slightly newer but still broken readline.h's use extern "C" but don't declare arguments as const
-if test "$with_readline" != no; then
-  AC_LANG_PUSH(C++)
-  AC_MSG_CHECKING([if readline.h lacks 'const' in its declarations])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <stdio.h>
-#if READLINE_H_NEEDS_EXTERN_C
-extern "C" {
-#endif
-#include <readline/readline.h>
-#if READLINE_H_NEEDS_EXTERN_C
-} // terminate extern "C"
-#endif
-                                     ]],[[
-  const char* prompt = "abc";
-  char*x = readline(prompt);
-                                     ]])],
-                     [AC_MSG_RESULT(no)],
-                     [AC_DEFINE(READLINE_H_USES_NO_CONST, 1, [Define to 1 if readline/readline.h doesn't properly declare arguments to be const])
-                      AC_MSG_RESULT(yes)])
-  AC_LANG_POP(C++)
-fi
-
-# Some other broken readline.h's use extern "C" and declare arguments for most everything, except for the callback functions
-if test "$with_readline" != no; then
-  AC_LANG_PUSH(C++)
-  AC_MSG_CHECKING([if readline.h lacks types in its declaration of callbacks])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <stdio.h>
-#if READLINE_H_NEEDS_EXTERN_C
-extern "C" {
-#endif
-#include <readline/readline.h>
-#if READLINE_H_NEEDS_EXTERN_C
-} // terminate extern "C"
-#endif
-
-#ifdef READLINE_H_USES_NO_CONST
-char* dummy_completion(char*, int) { return 0; }
-#else
-char* dummy_completion(const char*, int) { return 0; }
-#endif
-                                     ]],[[
-  rl_completion_entry_function = dummy_completion;
-                                     ]])],
-                     [AC_MSG_RESULT(no)],
-                     [AC_DEFINE(READLINE_H_LACKS_TYPES_FOR_CALLBACKS, 1, [Define to 1 if readline/readline.h lacks proper declarations for callbacks])
-                      AC_MSG_RESULT(yes)])
-  AC_LANG_POP(C++)
-fi
+#if test "x$with_readline" = "xyes"; then
+#  AC_CHECK_LIB([readline], [main],
+#               [LIBS="${LIBS} -lreadline -lncurses"
+#                AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])],
+#               [AC_MSG_FAILURE([--with-readline was given, but test for readline failed])],
+#               [-lncurses])
+#fi
+#AM_CONDITIONAL(WITH_READLINE, test "x$with_readline" = "xyes")
 
 
 dnl =========================================
