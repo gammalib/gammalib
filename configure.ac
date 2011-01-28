@@ -199,9 +199,18 @@ AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes"
 dnl ==========================
 dnl Checks for cfitsio library
 dnl ==========================
+# Check if cfitsio is available
 AC_SEARCH_LIBS(ffpss, cfitsio,
                AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available]), ,[-lm])
 AM_CONDITIONAL(WITH_CFITSIO, test "x$ac_cv_search_ffpss" = "xyes")
+
+# If cfitsio is available then get library path for unit testing
+if test "x$ac_cv_search_ffpss" = "xyes"; then
+  for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
+    test -f $i/libcfitsio.a -o -f $i/libcfitsio.so -o -f $i/libcfitsio.dylib && LIBDIR_CFITSIO=$i
+  done
+  AC_SUBST(LIBDIR_CFITSIO)
+fi
 
 # Check if we want to use cfitsio
 #AC_ARG_WITH([cfitsio],
@@ -252,6 +261,7 @@ AM_CONDITIONAL(WITH_CFITSIO, test "x$ac_cv_search_ffpss" = "xyes")
 dnl ===========================
 dnl Checks for readline library
 dnl ===========================
+# Check if readline is available
 #AC_SEARCH_LIBS([main], [readline],
 #               AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available]),
 #                         ,[-lncurses])
@@ -260,6 +270,14 @@ AC_CHECK_LIB([readline], [main],
               AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])],
              [], [-lncurses])
 AM_CONDITIONAL(WITH_READLINE, test "x$ac_cv_lib_readline_main" = "xyes")
+
+# If readline is available then get library path for unit testing
+if test "x$ac_cv_lib_readline_main" = "xyes"; then
+  for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
+    test -f $i/libreadline.a -o -f $i/libreadline.so -o -f $i/libreadline.dylib && LIBDIR_READLINE=$i
+  done
+  AC_SUBST(LIBDIR_READLINE)
+fi
 
 # Checks for readline
 #AC_ARG_WITH([readline],
@@ -271,7 +289,7 @@ AM_CONDITIONAL(WITH_READLINE, test "x$ac_cv_lib_readline_main" = "xyes")
 #            AC_HELP_STRING([--with-readline-lib-dir],
 #                           [readline library directory [[/usr/(local/)lib(64)]]]),
 #            [readline_lib_dir=$withval])
-
+#
 # If readline is requested then add readline library path to LDFLAGS
 #if test "x$with_readline" = "xyes"; then
 #  if test "x$readline_lib_dir" != "x"; then
@@ -291,7 +309,7 @@ AM_CONDITIONAL(WITH_READLINE, test "x$ac_cv_lib_readline_main" = "xyes")
 #  LDFLAGS="$LDFLAGS -L$LIBDIR_READLINE"
 #  AC_SUBST(LIBDIR_READLINE)
 #fi
-
+#
 # Check for readline library
 #if test "x$with_readline" = "xyes"; then
 #  AC_CHECK_LIB([readline], [main],
