@@ -200,12 +200,14 @@ dnl ==========================
 dnl Checks for cfitsio library
 dnl ==========================
 # Check if cfitsio is available
-AC_SEARCH_LIBS(ffpss, cfitsio,
-               AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio is available]), ,[-lm])
-AM_CONDITIONAL(WITH_CFITSIO, test "x$ac_cv_search_ffpss" = "xyes")
+AC_CHECK_LIB([cfitsio], [ffpss],
+             [LIBS="${LIBS} -lm"
+              AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio library is available])],
+             [], [-lm])
+AM_CONDITIONAL(WITH_CFITSIO, test "x$ac_cv_lib_cfitsio_ffpss" = "xyes")
 
 # If cfitsio is available then get library path for unit testing
-if test "x$ac_cv_search_ffpss" = "xyes"; then
+if test "x$ac_cv_lib_cfitsio_ffpss" = "xyes"; then
   for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
     test -f $i/libcfitsio.a -o -f $i/libcfitsio.so -o -f $i/libcfitsio.dylib && LIBDIR_CFITSIO=$i
   done
