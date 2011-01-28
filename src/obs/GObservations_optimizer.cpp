@@ -20,21 +20,11 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <cmath>
-#include <math.h>
 #include "GObservations.hpp"
 #include "GTools.hpp"
 #include "GEvent.hpp"
 #include "GEventBin.hpp"
 #include "GEventCube.hpp"
-
-/* __ Includes ___________________________________________________________ */
-#ifndef isnan
-static inline int isnan(double x) { return x != x; }
-#endif
-#ifndef isinf
-static inline int isinf(double x) { return !isnan(x) & isnan(x-x); }
-#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_EVAL             "GObservations::optimizer::eval(GOptimizerPars&) "
@@ -341,7 +331,7 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
 //            if ((*m_wrk_grad)(i) != 0.0 && !std::isinf((*m_wrk_grad)(i))) {
-            if ((*m_wrk_grad)(i) != 0.0 && !isinf((*m_wrk_grad)(i))) {
+            if ((*m_wrk_grad)(i) != 0.0 && !isinfinite((*m_wrk_grad)(i))) {
                 inx[ndev] = i;
                 ndev++;
             }
@@ -492,7 +482,7 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
 //            if ((*m_wrk_grad)(i) != 0.0 && !std::isinf((*m_wrk_grad)(i))) {
-            if ((*m_wrk_grad)(i) != 0.0 && !isinf((*m_wrk_grad)(i))) {
+            if ((*m_wrk_grad)(i) != 0.0 && !isinfinite((*m_wrk_grad)(i))) {
                 inx[ndev] = i;
                 ndev++;
             }
@@ -670,7 +660,7 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
 //            if ((*m_wrk_grad)(i) != 0.0 && !std::isinf((*m_wrk_grad)(i))) {
-            if ((*m_wrk_grad)(i) != 0.0 && !isinf((*m_wrk_grad)(i))) {
+            if ((*m_wrk_grad)(i) != 0.0 && !isinfinite((*m_wrk_grad)(i))) {
                 inx[ndev] = i;
                 ndev++;
             }
