@@ -12,7 +12,7 @@ if HAVE_PYTHON
 
 SWIG_INTERFACE = gammalib.i
 BUILT_SOURCES = gammalib_wrap.cpp gammalib.py
-CLEANFILES = gammalib_wrap.cpp gammalib.py
+#CLEANFILES = gammalib_wrap.cpp gammalib.py
 #EXTRA_DIST = runme.py
 
 # Set instrument specific SWIG options (those will be catched in gammalib.i)
