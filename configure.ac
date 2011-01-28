@@ -57,11 +57,9 @@ AC_STDC_HEADERS
 dnl =============================================================
 dnl Checks for typedefs, structures, and compiler characteristics
 dnl =============================================================
-dnl AC_TYPE_SIZE_T
-dnl AC_C_CONST
-dnl AC_C_VOLATILE
-dnl AC_C_INLINE
-dnl gl_VISIBILITY
+AC_TYPE_SIZE_T
+AC_C_CONST
+AC_C_INLINE
 
 
 dnl ===================
