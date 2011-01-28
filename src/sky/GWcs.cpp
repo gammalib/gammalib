@@ -746,7 +746,7 @@ void GWcs::wcs_set(const std::string& coords,
         m_invcd(1,1) =  m_cd(0,0) / delta;
     }
     else
-        throw GException::wcs::wcs(G_WCS_SET, "Unable to invert CD matrix.");
+        throw GException::wcs(G_WCS_SET, "Unable to invert CD matrix.");
 
     // Return
     return;
