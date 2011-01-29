@@ -1,12 +1,20 @@
-dnl =============================================================
-dnl Process this file with autoconf to produce a configure script
-dnl =============================================================
-AC_INIT([GammaLib], [0.4], [knodlseder@cesr.fr])
-AC_CONFIG_SRCDIR(src/Makefile.am)
+# Configuration for GammaLib - a versatile toolbox for high-level analysis
+#                              of astronomical gamma-ray data
+#
+# Copyright (C) 2006-2011
+#
+# GammaLib is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; either version 3, or (at your option) any
+# later version.
+#
+# Process this file with autoconf to produce a configure script
+
+AC_INIT([GammaLib], [0.4.4], [knodlseder@cesr.fr], [gammalib], [http://gammalib.sourceforge.net/])
+AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies])
 AC_CONFIG_HEADERS([config.h])
-dnl AM_MAINTAINER_MODE
 
 
 dnl =========================================
@@ -199,11 +207,19 @@ AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes"
 dnl ==========================
 dnl Checks for cfitsio library
 dnl ==========================
+
+# Set host specific cfitsio dependencies
+cfitsio_deps=
+case $host in
+  sparc*-sun-solaris*)  cfitsio_deps="-lm -lsocket" ;;
+  *)                    cfitsio_deps="-lm" ;;
+esac                    
+
 # Check if cfitsio is available
 AC_CHECK_LIB([cfitsio], [ffpss],
-             [LIBS="${LIBS} -lcfitsio -lm"
-              AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])],
-             [], [-lm])
+             [LIBS="${LIBS} -lcfitsio ${cfitsio_deps}"
+              AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio library is available])],
+             [], [${cfitsio_deps}])
 AM_CONDITIONAL(WITH_CFITSIO, test "x$ac_cv_lib_cfitsio_ffpss" = "xyes")
 
 # If cfitsio is available then get library path for unit testing
@@ -263,14 +279,19 @@ fi
 dnl ===========================
 dnl Checks for readline library
 dnl ===========================
+
+# Set host specific readline dependencies
+readline_deps=
+case $host in
+  sparc*-sun-solaris*)  readline_deps="-lncurses" ;;
+  *)                    readline_deps="-lncurses" ;;
+esac                    
+
 # Check if readline is available
-#AC_SEARCH_LIBS([main], [readline],
-#               AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available]),
-#                         ,[-lncurses])
 AC_CHECK_LIB([readline], [main],
-             [LIBS="${LIBS} -lreadline -lncurses"
+             [LIBS="${LIBS} -lreadline ${readline_deps}"
               AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])],
-             [], [-lncurses])
+             [], [${readline_deps}])
 AM_CONDITIONAL(WITH_READLINE, test "x$ac_cv_lib_readline_main" = "xyes")
 
 # If readline is available then get library path for unit testing
