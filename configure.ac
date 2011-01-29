@@ -202,7 +202,7 @@ dnl ==========================
 # Check if cfitsio is available
 AC_CHECK_LIB([cfitsio], [ffpss],
              [LIBS="${LIBS} -lcfitsio -lm"
-              AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio library is available])],
+              AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])],
              [], [-lm])
 AM_CONDITIONAL(WITH_CFITSIO, test "x$ac_cv_lib_cfitsio_ffpss" = "xyes")
 
