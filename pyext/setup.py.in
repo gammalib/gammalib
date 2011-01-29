@@ -7,7 +7,7 @@ data_files   = glob.glob('@top_srcdir@/pyext/*.i')
 libraries    = ['gamma']
 
 # Add cfitsio library only if available
-if '@WITH_CFITSIO@' != '#':
+if '@WITH_CFITSIO_TRUE@' != '#':
     print "Link cfitsio into Python bindings."
     libraries.append('cfitsio')
 
