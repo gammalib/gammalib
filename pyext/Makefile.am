@@ -32,13 +32,16 @@ INC_INST = $(INC_MWL) $(INC_CTA) $(INC_LAT)
 OPT_INST = $(OPT_MWL) $(OPT_CTA) $(OPT_LAT)
 
 all-local: gammalib_wrap.cpp gammalib.py
-	@if test "x`uname`" = "xSunOS"; then \
-		echo "WARNING: This is Solaris"; \
-		CC=CC; \
-	fi
-	@if test "x`uname`" = "xDarwin"; then \
-		echo "WARNING: This is Mac OS X"; \
-	fi
+#	@if test "x`uname`" = "xSunOS"; then \
+#		echo "WARNING: This is Solaris"; \
+#		CC=CC; \
+#		echo ${CC}; \
+#	fi
+#	@if test "x`uname`" = "xDarwin"; then \
+#		echo "WARNING: This is Mac OS X"; \
+#		export CC=CC; \
+#		echo ${CC}; \
+#	fi
 	$(PYTHON) setup.py build --build-platlib build
 
 install-exec-local:
