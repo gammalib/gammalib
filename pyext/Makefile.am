@@ -1,18 +1,22 @@
 ## Process this file with automake to produce Makefile.in
-#
-# Note that we could also ship gammalib_wrap.cpp with the code
-# so that the call to SWIG is not required. We should add some
-# test to the master configure.ac script that will test if
-# gammalib_wrap.cpp is shipped with the distribution. In this
-# case the SWIG call may be omitted and the gammalib_wrap.cpp
-# file will be simply compiled.
 
 if ENABLE_PYTHON_BINDING
 if HAVE_PYTHON
 
+# Set SWIG interface filename
 SWIG_INTERFACE = gammalib.i
-BUILT_SOURCES = gammalib_wrap.cpp gammalib.py
-#CLEANFILES = gammalib_wrap.cpp gammalib.py
+
+# Set files to be built
+if HAVE_SWIG
+  BUILT_SOURCES = gammalib_wrap.cpp gammalib.py
+endif
+
+# Set files to be removed in clean
+if HAVE_SWIG
+  CLEANFILES = gammalib_wrap.cpp gammalib.py
+endif
+
+# Set extra files to distribute
 #EXTRA_DIST = runme.py
 
 # Set instrument specific SWIG options (those will be catched in gammalib.i)
@@ -32,16 +36,6 @@ INC_INST = $(INC_MWL) $(INC_CTA) $(INC_LAT)
 OPT_INST = $(OPT_MWL) $(OPT_CTA) $(OPT_LAT)
 
 all-local: gammalib_wrap.cpp gammalib.py
-#	@if test "x`uname`" = "xSunOS"; then \
-#		echo "WARNING: This is Solaris"; \
-#		CC=CC; \
-#		echo ${CC}; \
-#	fi
-#	@if test "x`uname`" = "xDarwin"; then \
-#		echo "WARNING: This is Mac OS X"; \
-#		export CC=CC; \
-#		echo ${CC}; \
-#	fi
 	$(PYTHON) setup.py build --build-platlib build
 
 install-exec-local:
@@ -53,12 +47,6 @@ clean-local:
 if HAVE_SWIG
 gammalib_wrap.cpp gammalib.py: $(SWIG_INTERFACE)
 	$(SWIG) -c++ -python -Wall -includeall -I$(top_srcdir)/src $(INC_INST) $(OPT_INST) -o gammalib_wrap.cpp -outdir . $(srcdir)/$(SWIG_INTERFACE)
-#	@if test "x`uname`" = "xCygwin"; then \
-#		echo "WARNING: working around bug in SWIG on Windows/Cygwin platforms ONLY"; \
-#		sed -i.bak -f $(srcdir)/fix_wrapper.sed gammalib_wrap.cpp; \
-#	fi
-else
-gammalib_wrap.cpp gammalib.py: $(SWIG_INTERFACE)
 endif # HAVE_SWIG
 
 endif # HAVE_PYTHON
