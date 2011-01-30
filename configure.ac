@@ -187,6 +187,13 @@ if test "x$ac_enable_python_binding" = "xyes"; then
         AC_MSG_NOTICE([Build Python binding using swig])
       fi
     fi
+    # Set host specific build prefix (needed for Solaris bug)
+    PYTHON_BUILD_PREFIX=
+    case $host in
+      sparc*-sun-solaris*)  PYTHON_BUILD_PREFIX="CC=CC" ;;
+      *)                    PYTHON_BUILD_PREFIX="" ;;
+    esac                    
+    AC_SUBST(PYTHON_BUILD_PREFIX)
   else
     AC_MSG_WARN([Python binding for gammalib cannot be built as Python seems not to be installed on your system])
   fi
