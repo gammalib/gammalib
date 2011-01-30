@@ -4,6 +4,7 @@ import glob
 # Set default include directories and data files
 include_dirs = ['@top_srcdir@/include']
 data_files   = glob.glob('@top_srcdir@/pyext/*.i')
+libdirs      = ['../src/.libs']
 libraries    = ['gamma']
 
 # Add cfitsio library only if available
@@ -20,6 +21,11 @@ if '@HAVE_LIBREADLINE@' != '#':
 extra_libs = ('@PYTHON_EXTRA_LIBS@').split(',')
 for extra_lib in extra_libs:
     libraries.append(extra_lib)
+
+# Get extra library paths
+extra_lib_paths = ('@LDFLAGS@').split(' ')
+for extra_lib_path in extra_lib_paths:
+    libdirs.append(extra_lib_path.lstrip('-L'))
 
 # Add instrument specific include directories and data files
 if '@WITH_INST_MWL_TRUE@' != '#':
@@ -45,7 +51,7 @@ setup(name='@PACKAGE_NAME@',
       py_modules=['gammalib'],
       ext_modules=[Extension('_gammalib', ['gammalib_wrap.cpp'],
                              include_dirs=include_dirs,
-                             library_dirs=['../src/.libs'],
+                             library_dirs=libdirs,
                              libraries=libraries,
                              runtime_library_dirs=['@prefix@/lib'])],
                              data_files=[('@prefix@/share/gammalib/swig', data_files)],
