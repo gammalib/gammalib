@@ -194,6 +194,15 @@ if test "x$ac_enable_python_binding" = "xyes"; then
       *)                    PYTHON_BUILD_PREFIX="" ;;
     esac                    
     AC_SUBST(PYTHON_BUILD_PREFIX)
+    
+    # Set host specific extra libraries. Add all host specific libraries here that
+    # need to be linked in the python module
+    PYTHON_EXTRA_LIBS=
+    case $host in
+      sparc*-sun-solaris*)  PYTHON_EXTRA_LIBS="Cstd" ;;
+      *)                    PYTHON_EXTRA_LIBS="" ;;
+    esac                    
+    AC_SUBST(PYTHON_EXTRA_LIBS)
   else
     AC_MSG_WARN([Python binding for gammalib cannot be built as Python seems not to be installed on your system])
   fi

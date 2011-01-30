@@ -11,6 +11,16 @@ if '@WITH_CFITSIO_TRUE@' != '#':
     print "Link cfitsio into Python bindings."
     libraries.append('cfitsio')
 
+# Add readline library only if available
+if '@WITH_CFITSIO_TRUE@' != '#':
+    print "Link readline into Python bindings."
+    libraries.append('readline')
+
+# Add extra libraries
+extra_libs = ('@PYTHON_EXTRA_LIBS@').split(',')
+for extra_lib in extra_libs:
+    libraries.append(extra_lib)
+
 # Add instrument specific include directories and data files
 if '@WITH_INST_MWL_TRUE@' != '#':
     print "Include multi-wavelength interface in gammalib Python bindings."
