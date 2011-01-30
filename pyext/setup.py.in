@@ -9,37 +9,41 @@ libraries    = ['gamma']
 
 # Add cfitsio library only if available
 if '@WITH_CFITSIO_TRUE@' != '#':
-    print "Link cfitsio into Python bindings."
-    libraries.append('cfitsio')
+	print "Link cfitsio into Python bindings."
+	libraries.append('cfitsio')
 
 # Add readline library only if available
-if '@HAVE_LIBREADLINE@' != '#':
-    print "Link readline into Python bindings."
-    libraries.append('readline')
+if '@WITH_READLINE_TRUE@' != '#':
+	print "Link readline into Python bindings."
+	libraries.append('readline')
+	libraries.append('ncurses')
 
 # Add extra libraries
 extra_libs = ('@PYTHON_EXTRA_LIBS@').split(',')
 for extra_lib in extra_libs:
-    libraries.append(extra_lib)
+	if len(extra_lib) > 0:
+		libraries.append(extra_lib)
 
 # Get extra library paths
 extra_lib_paths = ('@LDFLAGS@').split(' ')
 for extra_lib_path in extra_lib_paths:
-    libdirs.append(extra_lib_path.lstrip('-L'))
+	dir = extra_lib_path.lstrip('-L')
+	if len(dir) > 0:
+		libdirs.append(extra_lib_path.lstrip('-L'))
 
 # Add instrument specific include directories and data files
 if '@WITH_INST_MWL_TRUE@' != '#':
-    print "Include multi-wavelength interface in gammalib Python bindings."
-    include_dirs.append('@top_srcdir@/inst/mwl/include')
-    data_files.extend(glob.glob('@top_srcdir@/inst/mwl/pyext/*.i'))
+	print "Include multi-wavelength interface in gammalib Python bindings."
+	include_dirs.append('@top_srcdir@/inst/mwl/include')
+	data_files.extend(glob.glob('@top_srcdir@/inst/mwl/pyext/*.i'))
 if '@WITH_INST_CTA_TRUE@' != '#':
-    print "Include CTA instrument interface in gammalib Python bindings."
-    include_dirs.append('@top_srcdir@/inst/cta/include')
-    data_files.extend(glob.glob('@top_srcdir@/inst/cta/pyext/*.i'))
+	print "Include CTA instrument interface in gammalib Python bindings."
+	include_dirs.append('@top_srcdir@/inst/cta/include')
+	data_files.extend(glob.glob('@top_srcdir@/inst/cta/pyext/*.i'))
 if '@WITH_INST_LAT_TRUE@' != '#':
-    print "Include Fermi/LAT instrument interface in gammalib Python bindings."
-    include_dirs.append('@top_srcdir@/inst/lat/include')
-    data_files.extend(glob.glob('@top_srcdir@/inst/lat/pyext/*.i'))
+	print "Include Fermi/LAT instrument interface in gammalib Python bindings."
+	include_dirs.append('@top_srcdir@/inst/lat/include')
+	data_files.extend(glob.glob('@top_srcdir@/inst/lat/pyext/*.i'))
 
 # Setup
 setup(name='@PACKAGE_NAME@',
