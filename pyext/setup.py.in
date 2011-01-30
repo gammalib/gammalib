@@ -12,7 +12,7 @@ if '@WITH_CFITSIO_TRUE@' != '#':
     libraries.append('cfitsio')
 
 # Add readline library only if available
-if '@WITH_CFITSIO_TRUE@' != '#':
+if '@HAVE_LIBREADLINE@' != '#':
     print "Link readline into Python bindings."
     libraries.append('readline')
 
