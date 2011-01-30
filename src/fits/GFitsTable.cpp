@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GFitsTable.cpp  - FITS table base class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -527,7 +527,7 @@ void GFitsTable::data_open(void* vptr)
             throw GException::fits_error(G_OPEN_DATA, status);
 
         // Check for unsigned columns
-        unsigned long offset;
+        unsigned long offset = 0;
         sprintf(keyname, "TZERO%d", i+1);
         status = __ffgky(FPTR(m_fitsfile), __TULONG, keyname, &offset, NULL, &status);
         if (status == 0) {
