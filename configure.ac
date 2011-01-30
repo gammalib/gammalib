@@ -155,11 +155,21 @@ fi
 dnl ========================================================================
 dnl Checks for python binding. Python binding requires Python and either the
 dnl files gammalib_wrap.cpp and gammalib.py or SWIG to create these files.
+dnl The following conditionals are set:
+dnl  HAVE_PYTHON           - Python >= 2.2 is available
+dnl  HAVE_SWIG             - swig is available
+dnl  ENABLE_PYTHON_BINDING - Python binding is requested
+dnl  WITH_PYTHON_BINDING   - Either has swig or python wraper files
 dnl ========================================================================
 # Checks for Python (HAVE_PYTHON)
 AM_PATH_PYTHON([2.2],
                [],
                [AC_MSG_WARN([Python not found. Python is required to build python binding. Python can be obtained from http://www.python.org])])
+AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
+
+# Checks for SWIG (HAVE_SWIG)
+AC_PATH_PROG([SWIG], [swig])
+AM_CONDITIONAL(HAVE_SWIG, test "$SWIG")
 
 # Python binding enabled?
 AC_ARG_ENABLE([python-binding],
@@ -167,27 +177,31 @@ AC_ARG_ENABLE([python-binding],
                              [build python binding (default=yes)]),
               [ac_enable_python_binding="$enableval"],
               [ac_enable_python_binding="yes"])
+AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes")
+
+# Checks for gammalib_wrap.cpp and gammalib.py
+AC_CHECK_FILES([pyext/gammalib_wrap.cpp pyext/gammalib.py],,)
+has_python_wrap="no"
+if test "x$ac_cv_file_pyext_gammalib_wrap_cpp" = "xyes"; then
+  if test "x$ac_cv_file_pyext_gammalib_py" = "xyes"; then
+    has_python_wrap="yes"
+  fi
+fi
+AM_CONDITIONAL(WITH_PYTHON_BINDING, test "x$has_python_wrap" = "xyes" -o "$SWIG")
+
+# Inform about missing components and set host dependent variables
 if test "x$ac_enable_python_binding" = "xyes"; then
   if test "$PYTHON"; then
-    # Checks for gammalib_wrap.cpp and gammalib.py
-    AC_CHECK_FILES([pyext/gammalib_wrap.cpp pyext/gammalib.py],
-                   [ac_has_python_wrap="yes"],
-                   [ac_has_python_wrap="no"])
-    if test "x$ac_has_python_wrap" = "xyes"; then
-      AC_MSG_NOTICE([Build Python binding using shipped gammalib_wrap.cpp and gammalib.py files])
-    else
-      # Checks for SWIG (HAVE_SWIG)
-      AC_PATH_PROG([SWIG], [swig])
+    if test "x$has_python_wrap" != "xyes"; then
       if test ! "$SWIG"; then
         AC_MSG_WARN([Neither pyext/gammalib_wrap.cpp and pyext/gammalib.py nor swig has not been found])
         AC_MSG_WARN([Python binding for gammalib cannot be built])
         AC_MSG_WARN([Either use a gammalib distribution with gammalib_wrap.cpp and gammalib.py shipped or install swig on your system])
         AC_MSG_WARN([swig can be obtained from http://www.swig.org/])
-      else
-        AC_MSG_NOTICE([Build Python binding using swig])
       fi
     fi
-    # Set host specific build prefix (needed for Solaris bug)
+
+    # Set host specific build prefix (needed for Solaris pycc bug)
     PYTHON_BUILD_PREFIX=
     case $host in
       sparc*-sun-solaris*)  PYTHON_BUILD_PREFIX="CC=CC" ;;
@@ -203,6 +217,7 @@ if test "x$ac_enable_python_binding" = "xyes"; then
       *)                    PYTHON_EXTRA_LIBS="" ;;
     esac                    
     AC_SUBST(PYTHON_EXTRA_LIBS)
+
   else
     AC_MSG_WARN([Python binding for gammalib cannot be built as Python seems not to be installed on your system])
   fi
@@ -210,10 +225,6 @@ else
   AC_MSG_NOTICE([Python binding for gammalib will not be built])
   AC_MSG_NOTICE([Enable Python binding module building with --enable-python-binding])
 fi
-AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes")
-AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
-AM_CONDITIONAL(HAS_PYTHON_WRAP, test "x$ac_has_python_wrap" = "xyes")
-AM_CONDITIONAL(HAVE_SWIG, test "$SWIG")
 
 
 dnl ==========================
@@ -455,15 +466,24 @@ if test "x$ac_cv_lib_readline_main" = "xyes"; then
 else
   echo "  - Readline support             (no)    no readline library found"
 fi
+if test ! "$SWIG"; then
+  echo "  - swig                         (no)"
+else
+  echo "  * swig                         (yes)"
+fi
 if test "x$ac_enable_python_binding" = "xyes"; then
   if test "$PYTHON"; then
-    if test "x$ac_has_python_wrap" = "xyes"; then
-      echo "  * Python binding               (yes)"
+    if test "x$has_python_wrap" = "xyes"; then
+      if test ! "$SWIG"; then
+        echo "  * Python binding               (yes)"
+      else
+        echo "  * Python binding               (yes)   use swig for updates"
+      fi
     else
       if test ! "$SWIG"; then
         echo "  - Python binding               (no)    swig not installed"
       else
-        echo "  * Python binding               (yes)   created by swig"
+        echo "  * Python binding               (yes)   use swig for building"
       fi
     fi
   else

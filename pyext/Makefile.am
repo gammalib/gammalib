@@ -1,12 +1,17 @@
 ## Process this file with automake to produce Makefile.in
+#
+# The actual implemented logic is to use swig if swig is
+# available on the system
 
 if ENABLE_PYTHON_BINDING
 if HAVE_PYTHON
+if WITH_PYTHON_BINDING
 
 # Set SWIG interface filename
 SWIG_INTERFACE = gammalib.i
 
-# Set files to be built
+# Define the targets that should be built before anything else.
+# These are honored by 'make all', 'make check' and 'make install'.
 if HAVE_SWIG
   BUILT_SOURCES = gammalib_wrap.cpp gammalib.py
 endif
@@ -49,5 +54,6 @@ gammalib_wrap.cpp gammalib.py: $(SWIG_INTERFACE)
 	$(SWIG) -c++ -python -Wall -includeall -I$(top_srcdir)/src $(INC_INST) $(OPT_INST) -o gammalib_wrap.cpp -outdir . $(srcdir)/$(SWIG_INTERFACE)
 endif # HAVE_SWIG
 
+endif # WITH_PYTHON_BINDING
 endif # HAVE_PYTHON
 endif # ENABLE_PYTHON_BINDING
