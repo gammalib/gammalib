@@ -152,32 +152,16 @@ else
 fi
 
 
-dnl ======================================================================
-dnl Checks for python binding. Python binding requires Python and either a
-dnl gammalib_wrap.cpp file or SWIG to create this file.
-dnl ======================================================================
-# Checks for SWIG (HAVE_SWIG)
-AC_PATH_PROG([SWIG], [swig])
-AM_CONDITIONAL(HAVE_SWIG, test "$SWIG")
-
+dnl ========================================================================
+dnl Checks for python binding. Python binding requires Python and either the
+dnl files gammalib_wrap.cpp and gammalib.py or SWIG to create these files.
+dnl ========================================================================
 # Checks for Python (HAVE_PYTHON)
 AM_PATH_PYTHON([2.2],
                [],
                [AC_MSG_WARN([Python not found. Python is required to build python binding. Python can be obtained from http://www.python.org])])
-AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
 
-# Checks for gammalib_wrap.cpp and gammalib.py
-AC_CHECK_FILES([pyext/gammalib_wrap.cpp pyext/gammalib.py],
-               [ac_has_python_wrap="yes"],
-               [ac_has_python_wrap="no"])
-if test "x$ac_has_python_wrap" = "xyes"; then
-  AC_MSG_NOTICE([Found gammalib_wrap.cpp and gammalib.py])
-else
-  AC_MSG_NOTICE([gammalib_wrap.cpp and/or gammalib.py not found])
-fi
-AM_CONDITIONAL(HAS_PYTHON_WRAP, test "x$ac_has_python_wrap" = "xyes")
-
-# Python bindings
+# Python binding enabled?
 AC_ARG_ENABLE([python-binding],
               AS_HELP_STRING([--enable-python-binding],
                              [build python binding (default=yes)]),
@@ -185,29 +169,40 @@ AC_ARG_ENABLE([python-binding],
               [ac_enable_python_binding="yes"])
 if test "x$ac_enable_python_binding" = "xyes"; then
   if test "$PYTHON"; then
+    # Checks for gammalib_wrap.cpp and gammalib.py
+    AC_CHECK_FILES([pyext/gammalib_wrap.cpp pyext/gammalib.py],
+                   [ac_has_python_wrap="yes"],
+                   [ac_has_python_wrap="no"])
     if test "x$ac_has_python_wrap" = "xyes"; then
       AC_MSG_NOTICE([Build Python binding using shipped gammalib_wrap.cpp and gammalib.py files])
     else
+      # Checks for SWIG (HAVE_SWIG)
+      AC_PATH_PROG([SWIG], [swig])
       if test ! "$SWIG"; then
-        AC_MSG_WARN([Neither gammalib_wrap.cpp and/or gammalib.py files nor SWIG has not been found.])
-        AC_MSG_WARN([Python binding for gammalib cannot be built.])
-        AC_MSG_WARN([Either use a gammalib distribution with gammalib_wrap.cpp and gammalib.py shipped or install SWIG on your system.])
+        AC_MSG_WARN([Neither pyext/gammalib_wrap.cpp and pyext/gammalib.py nor swig has not been found])
+        AC_MSG_WARN([Python binding for gammalib cannot be built])
+        AC_MSG_WARN([Either use a gammalib distribution with gammalib_wrap.cpp and gammalib.py shipped or install swig on your system])
+        AC_MSG_WARN([swig can be obtained from http://www.swig.org/])
+      else
+        AC_MSG_NOTICE([Build Python binding using swig])
       fi
     fi
   else
-    AC_MSG_WARN([Python binding for gammalib cannot be built as Python seems not to be installed on your system.])
+    AC_MSG_WARN([Python binding for gammalib cannot be built as Python seems not to be installed on your system])
   fi
 else
-  AC_MSG_NOTICE([Python binding for gammalib will not be built.])
+  AC_MSG_NOTICE([Python binding for gammalib will not be built])
   AC_MSG_NOTICE([Enable Python binding module building with --enable-python-binding])
 fi
 AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes")
+AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
+AM_CONDITIONAL(HAS_PYTHON_WRAP, test "x$ac_has_python_wrap" = "xyes")
+AM_CONDITIONAL(HAVE_SWIG, test "$SWIG")
 
 
 dnl ==========================
 dnl Checks for cfitsio library
 dnl ==========================
-
 # Set host specific cfitsio dependencies
 cfitsio_deps=
 case $host in
@@ -218,7 +213,7 @@ esac
 # Check if cfitsio is available
 AC_CHECK_LIB([cfitsio], [ffpss],
              [LIBS="${LIBS} -lcfitsio ${cfitsio_deps}"
-              AC_DEFINE([G_CFITSIO], [1], [Define if cfitsio library is available])],
+              AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])],
              [], [${cfitsio_deps}])
 AM_CONDITIONAL(WITH_CFITSIO, test "x$ac_cv_lib_cfitsio_ffpss" = "xyes")
 
@@ -426,3 +421,56 @@ if test "x$with_lat" = "xyes"; then
   AC_CONFIG_FILES([inst/lat/Makefile])
 fi
 AC_OUTPUT
+
+
+dnl ===========================
+dnl Print configuration summary
+dnl ===========================
+echo
+echo "  GammaLib configuration summary"
+echo "  =============================="
+if test "x$ac_cv_lib_cfitsio_ffpss" = "xyes"; then
+  echo "  * FITS I/O support             (yes)"
+else
+  echo "  - FITS I/O support             (no)    no cfitsio library found"
+fi
+if test "x$ac_cv_lib_readline_main" = "xyes"; then
+  echo "  * Readline support             (yes)"
+else
+  echo "  - Readline support             (no)    no readline library found"
+fi
+if test "x$ac_enable_python_binding" = "xyes"; then
+  if test "$PYTHON"; then
+    if test "x$ac_has_python_wrap" = "xyes"; then
+      echo "  * Python binding               (yes)"
+    else
+      if test ! "$SWIG"; then
+        echo "  - Python binding               (no)    swig not installed"
+      else
+        echo "  * Python binding               (yes)   created by swig"
+      fi
+    fi
+  else
+    echo "  - Python binding               (no)    python not installed"
+  fi
+else
+  echo "  - Python binding               (no)"
+fi
+if test "x$with_mwl" = "xyes"; then
+  echo "  * Multiwavelength interface    (yes)"
+else
+  echo "  - Multiwavelength interface    (no)"
+fi
+if test "x$with_lat" = "xyes"; then
+  echo "  * Fermi-LAT interface          (yes)"
+else
+  echo "  - Fermi-LAT interface          (no)"
+fi
+if test "x$with_cta" = "xyes"; then
+  echo "  * CTA interface                (yes)"
+else
+  echo "  - CTA interface                (no)"
+fi
+echo
+echo "Now type 'make'"
+echo
