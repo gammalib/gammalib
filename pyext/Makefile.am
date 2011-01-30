@@ -36,7 +36,7 @@ INC_INST = $(INC_MWL) $(INC_CTA) $(INC_LAT)
 OPT_INST = $(OPT_MWL) $(OPT_CTA) $(OPT_LAT)
 
 all-local: gammalib_wrap.cpp gammalib.py
-	$(PYTHON) setup.py build --build-platlib build
+	$(PYTHON_BUILD_PREFIX) $(PYTHON) setup.py build --build-platlib build
 
 install-exec-local:
 	$(PYTHON) setup.py install --prefix=$(prefix)
