@@ -5,12 +5,12 @@
 #
 # GammaLib is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
-# Free Software Foundation; either version 3, or (at your option) any
+# Free Software Foundation; either version 2, or (at your option) any
 # later version.
 #
 # Process this file with autoconf to produce a configure script
 
-AC_INIT([GammaLib], [0.4.4], [knodlseder@cesr.fr], [gammalib], [http://gammalib.sourceforge.net/])
+AC_INIT([GammaLib], [0.4.5], [knodlseder@cesr.fr], [gammalib], [http://gammalib.sourceforge.net/])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies])

@@ -1,1 +1,130 @@
-This is the first public release of the GammaLib.
+New Features and Important Changes in GammaLib 00-04-05
+
+Author(s) : Juergen Knoedlseder
+
+January 31, 2011
+
+
+1. Introduction
+---------------
+This document briefly summarizes module by module the most important changes
+made since the last release of GammaLib.
+
+
+2. Configuration
+-----------------
+The GammaLib configuration procedure has been improved. Now, installation
+follows the standard GNU procedure
+> ./configure
+> make
+> make check
+> make install
+
+swig is no longer required to create python bindings. The corresponding wraper
+files are now shipped with the code and automatically recognised by the
+configuration script.
+
+Remove the --with-cfitsio-lib-dir option, as this is not GNU standard. Use
+LDFLAGS='-L/...' and CPPFLAGS='-I/...' instead to specify the corresponding
+directories.
+
+Configure does not halt anymore if cfitsio and/or readline do not exist. A
+summary of the GammaLib configuration is dumped at the end of configuration
+to the screen.
+
+The autogen.sh script is now removed from the release.
+
+
+2. Application module
+---------------------
+None
+
+
+3. FITS I/O Interface
+---------------------
+None
+
+
+4. Linear algebra module
+------------------------
+None
+
+
+5. Model module
+---------------
+The general structure of a model has been considerably reworked. 
+
+GModel is now an abstract base class for any kind of model. Before it was an
+implemented class that only handled factorized sky models.
+
+The original GModel class has been renamed to GModelSky and has also been made
+an abstract base class. Two derived classes have been added that provide now
+the implementations of factorized sky models: GModelPointSource for point
+sources, and GModelDiffuseSource for diffuse models.
+
+An additional abstract base class named GModelData has been added to provide
+the interface for general data models.
+
+Registry classes have been added that allow to register new model components,
+even if they are not linked into GammaLib. Support has been added that these
+registries are used for reading model information from an XML file. Thus, new
+models can now be linked externally to GammaLib and will be automatically
+recognised.
+
+
+6. Numerics module
+------------------
+None
+
+
+7. Observation module
+---------------------
+None
+
+
+8. Optimization module
+----------------------
+None
+
+
+9. Sky module
+-------------
+None
+
+
+10. Support module
+------------------
+None
+
+
+11. XML module
+--------------
+None
+
+
+12. Multi-wavelength interface
+------------------------------
+None
+
+
+13. Fermi-LAT interface
+-----------------------
+None
+
+
+14. CTA interface
+-----------------
+Added a radial acceptance model named GCTAModelRadialAcceptance as a derived
+class of the abstract GModelData class. This model provides a representation
+of the CTA radial acceptance that is factorised in a radial function and a
+spectral function.
+
+An abstract radial acceptance function base class GCTAModelRadial has been
+added, as well as a corresponding registry GCTAModelRadialRegistry. This allows
+now to define arbitrary radial acceptance models for CTA.
+
+As a first dummy model, a Gaussian (in offset squared) radial acceptance model
+has been implemented in GCTAModelRadialGauss. The model also supports the mc()
+for simulating CTA background events.
+
+

@@ -1,22 +1,21 @@
-This is GammaLib version 0.4.4
-==============================
+GammaLib information
+====================
+Version: 00-04-05 (January 31, 2011)
+Author:  Juergen Knodlseder (knodlseder@cesr.fr)
 
 
 License information
--------------------
-
+===================
 To be written ...
 
 
 What's new in this release?
----------------------------
-
-See the file "NEWS".
+===========================
+See the files "NEWS" and "ChangeLog".
 
 
 What is the GammaLib anyway?
-----------------------------
-
+============================
 The GammaLib is a vesatile toolbox for the high-level analysis of
 astronomical gamma-ray data. It is implemented as a C++ library
 that is fully scriptable in the Python scripting language. The library
@@ -30,29 +29,147 @@ data analysis framework that enables simultaneous multi-mission analysis.
 
 
 Web sites
----------
+=========
+http://gammalib.sourceforge.net            - for documentation
+https://sourceforge.net/projects/gammalib/ - for downloads
 
-http://gammalib.sourceforge.net
+
+Prerequisites
+=============
+GammaLib should compile on every modern Unix system without any need
+to install other libraries. 
+
+To enable support for FITS file handling, however, the cfitsio library
+from HEASARC needs to be installed. cfitsio can be downloaded from 
+http://heasarc.gsfc.nasa.gov/fitsio and detailed installation instructions
+can be found there. If cfitsio does not already exist on your system,
+we recommend installation of cfitsio in the default GammaLib install
+directory as a shared library by typing:
+
+     % ./configure --prefix=/usr/local/gamma
+     % make shared
+     % make install
+
+GammaLib can also benefit from the presence of the readline library
+that provides line-editing and history capabilities for text input
+(GammaLib offers however also full functionality without having 
+readline installed). readline can be downloaded from 
+http://ftp.gnu.org/gnu/readline/
+
+
+Unix Installation
+=================
+To build and install GammaLib, simply type the following:
+
+     % ./configure
+     % make
+     % make install
+
+By default GammaLib installs itself in /usr/local/gamma.  If you need to
+install GammaLib in a different location or in your home directory, use
+the --prefix option to ./configure.  For example:
+
+     % ./configure --prefix=/home/yourname/projects
+     % make
+     % make install
+
+The file INSTALL details more about using configure. Also try
+
+     % ./configure --help.
+
+
+Macintosh OS X Installation
+============================
+GammaLib is known to work on various flavors of OS X.  Follow the Unix
+installation instructions above.
+
+
+Solaris Installation
+====================
+GammaLib compiles on Solairs, but there is an issue with using it as a
+shared library (see "Known problems" below).
+
+
+Testing
+=======
+If you want to test GammaLib before installation, type the following:
+
+    % make check
+
+
+Setting up your environment
+===========================
+Before using GammaLib you have to setup some environment variables. 
+Assuming that you have installed GammaLib in the default directory 
+/usr/local/gamma you need to add the following to your .bashrc or 
+$HOME/.profile script on a Linux machine:
+
+    export PYTHONPATH=/usr/local/gamma/lib/python2.5/site-packages:$PYTHONPATH
+    export LD_LIBRARY_PATH=/usr/local/gamma/lib:$LD_LIBRARY_PATH
+
+Please adapt the Python version (python2.5 in this example) to the 
+version available on your machine.
+
+On Mac OS X you have to change LD_LIBRARY_PATH to DYLD_LIBRARY_PATH:
+
+    export PYTHONPATH=/usr/local/gamma/lib/python2.5/site-packages:$PYTHONPATH
+    export DYLD_LIBRARY_PATH=/usr/local/gamma/lib:$DYLD_LIBRARY_PATH
+
+And if you use C shell or a variant, add the following to your 
+.cshrc or .tcshrc script:
+
+    setenv PYTHONPATH      /usr/local/gamma/lib/python2.5/site-packages:$PYTHONPATH
+    setenv LD_LIBRARY_PATH /usr/local/gamma/lib:$LD_LIBRARY_PATH
+
+
+Getting started
+===============
+The easiest way to start with GammaLib is by using the python interface.
+To start, type the following:
+
+    % python
+    >>> from gammalib import *
+    >>> models=GModels()
+    >>> print models
+    === GModels ===
+    Number of models ..........: 0
+    Number of parameters ......: 0
+
+This examples allocates an empty GModels object that holds a collection
+of models.
+
+For examples, inspect the test directory, and the test directories
+of the instrument specific interfaces, e.g. inst/mwl/test, inst/lat/test,
+and inst/cat/test.
+
+
+Documentation
+=============
+The doc directory contains the most recent set of updated documentation
+for this release. The documentation is available in PDF format.
+
+This is a development release and the documentation is largely, but 
+not entirely up to date.  We are working on it. Please be patient or
+volunteer to help.
 
 
 Bug reports
------------
-
+===========
 To report or search for bugs, please use the GammaLib Bug Tracker at
 https://sourceforge.net/tracker/?group_id=282143&atid=1196795.
 
 
 Known problems
---------------
-
-SWIG 1.3.33
-  The definition of the GTimes vector using std_vector.i leads to warnings
-  during creation of the C++ python wrapper using swig. These warnings are
-  however not preventing compilation of the code
+==============
+Solaris
+  Although GammaLib compiles on Solaris using the Sun compiler, there are
+  problems with global symbols in the shared library that prevent the
+  model registry to work correctly. Furthermore, GammaLib is not able
+  to catch its own exceptions, which prevents the FITS interface to work
+  correctly. If GammaLib is linked statically
 
 
 Contact
--------
-
+=======
 To get in touch with the GammaLib developers and to contribute to the
 project please contact Juergen Knoedlseder <knodlseder@cesr.fr>.
