@@ -1,8 +1,14 @@
+2011-01-31  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+        * Version 0.4.5
+        ===============
         
-        Implement CTA radial acceptance dummy model
+        Implement CTA radial acceptance model
         Generalize model class
         Generation of Python bindings no longer requires swig
         Include missing headers for Ubuntu and OpenSuse
+        Improve automatic configuration, remove autogen.sh
+        Adapt for Solaris 2.10
 
 2011-01-06  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
