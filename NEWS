@@ -35,22 +35,22 @@ to the screen.
 The autogen.sh script is now removed from the release.
 
 
-2. Application module
+3. Application module
 ---------------------
 None
 
 
-3. FITS I/O Interface
+4. FITS I/O Interface
 ---------------------
 None
 
 
-4. Linear algebra module
+5. Linear algebra module
 ------------------------
 None
 
 
-5. Model module
+6. Model module
 ---------------
 The general structure of a model has been considerably reworked. 
 
@@ -72,47 +72,47 @@ models can now be linked externally to GammaLib and will be automatically
 recognised.
 
 
-6. Numerics module
+7. Numerics module
 ------------------
 None
 
 
-7. Observation module
+8. Observation module
 ---------------------
 None
 
 
-8. Optimization module
+9. Optimization module
 ----------------------
 None
 
 
-9. Sky module
--------------
-None
-
-
-10. Support module
-------------------
-None
-
-
-11. XML module
+10. Sky module
 --------------
 None
 
 
-12. Multi-wavelength interface
+11. Support module
+------------------
+None
+
+
+12. XML module
+--------------
+None
+
+
+13. Multi-wavelength interface
 ------------------------------
 None
 
 
-13. Fermi-LAT interface
------------------------
+14. Fermi-LAT interface
+----------------------
 None
 
 
-14. CTA interface
+15. CTA interface
 -----------------
 Added a radial acceptance model named GCTAModelRadialAcceptance as a derived
 class of the abstract GModelData class. This model provides a representation
