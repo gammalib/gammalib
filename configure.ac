@@ -35,12 +35,11 @@ dnl Set prefix
 dnl ==========
 AC_PREFIX_DEFAULT([/usr/local/gamma])
 if test "x$prefix" = xNONE; then
-  AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], ["/usr/local/gamma"],
-                     [Location where library is installed])
+  gammalib_prefix="/usr/local/gamma"
 else
-  AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], "${prefix}",
-                     [Location where library is installed])
+  gammalib_prefix=$prefix
 fi
+AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], "${gammalib_prefix}", [Location where library is installed])
 
 
 dnl ===========================
@@ -111,11 +110,6 @@ if test "x$enable_profiling" = "xyes"; then
 else
   AC_MSG_RESULT(no)
 fi
-
-
-dnl ============================
-dnl Checks for library functions
-dnl ============================
 
 
 dnl =====================================
@@ -237,21 +231,47 @@ case $host in
   *)                    cfitsio_deps="-lm" ;;
 esac                    
 
-# Check if cfitsio is available
-AC_CHECK_LIB([cfitsio], [ffpss],
-             [LIBS="${LIBS} -lcfitsio ${cfitsio_deps}"
-              AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])],
-             [], [${cfitsio_deps}])
-AM_CONDITIONAL(WITH_CFITSIO, test "x$ac_cv_lib_cfitsio_ffpss" = "xyes")
-
-# If cfitsio is available then get library path for unit testing
-if test "x$ac_cv_lib_cfitsio_ffpss" = "xyes"; then
-  for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
-    test -f $i/libcfitsio.a -o -f $i/libcfitsio.so -o -f $i/libcfitsio.dylib && LIBDIR_CFITSIO=$i
-  done
+# Search for cfitsio shared library
+for i in "$gammalib_prefix" /usr/local /opt/local /usr ; do
+  if test -f $i/lib/libcfitsio.so -o -f $i/lib/libcfitsio.dylib -a -f $i/include/fitsio.h; then
+    LIBDIR_CFITSIO=$i/lib
+    INCDIR_CFITSIO=$i/include
+    break
+  fi
+  if test -f $i/lib64/libcfitsio.so -o -f $i/lib64/libcfitsio.dylib -a -f $i/include/fitsio.h; then
+    LIBDIR_CFITSIO=$i/lib64
+    INCDIR_CFITSIO=$i/include
+    break
+  fi
+done
+if test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO"; then
+  has_cfitsio="yes"
+  AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])
+  LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
+  CPPFLAGS="$CPPFLAGS -I$INCDIR_CFITSIO"
+  LIBS="${LIBS} -lcfitsio ${cfitsio_deps}"
   AC_SUBST(LIBDIR_CFITSIO)
+  AC_SUBST(INCDIR_CFITSIO)
+else
+    has_cfitsio="no"
 fi
+AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
 
+# Check if cfitsio is available
+#AC_CHECK_LIB([cfitsio], [ffpss],
+#             [LIBS="${LIBS} -lcfitsio ${cfitsio_deps}"
+#              AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])],
+#             [], [${cfitsio_deps}])
+#AM_CONDITIONAL(WITH_CFITSIO, test "x$ac_cv_lib_cfitsio_ffpss" = "xyes")
+#
+## If cfitsio is available then get library path for unit testing
+#if test "x$ac_cv_lib_cfitsio_ffpss" = "xyes"; then
+#  for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
+#    test -f $i/libcfitsio.a -o -f $i/libcfitsio.so -o -f $i/libcfitsio.dylib && LIBDIR_CFITSIO=$i
+#  done
+#  AC_SUBST(LIBDIR_CFITSIO)
+#fi
+#
 # Check if we want to use cfitsio
 #AC_ARG_WITH([cfitsio],
 #            [AS_HELP_STRING([--with-cfitsio],
@@ -309,21 +329,51 @@ case $host in
   *)                    readline_deps="-lncurses" ;;
 esac                    
 
-# Check if readline is available
-AC_CHECK_LIB([readline], [main],
-             [LIBS="${LIBS} -lreadline ${readline_deps}"
-              AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])],
-             [], [${readline_deps}])
-AM_CONDITIONAL(WITH_READLINE, test "x$ac_cv_lib_readline_main" = "xyes")
-
-# If readline is available then get library path for unit testing
-if test "x$ac_cv_lib_readline_main" = "xyes"; then
-  for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
-    test -f $i/libreadline.a -o -f $i/libreadline.so -o -f $i/libreadline.dylib && LIBDIR_READLINE=$i
-  done
+# Search for readline shared library
+for i in "$gammalib_prefix" /usr/local /opt/local /usr ; do
+  if test -f $i/lib/libreadline.so -o -f $i/lib/libreadline.dylib -a -f $i/include/readline/readline.h; then
+    LIBDIR_READLINE=$i/lib
+    INCDIR_READLINE=$i/include
+    break
+  fi
+  if test -f $i/lib64/libreadline.so -o -f $i/lib64/libreadline.dylib -a -f $i/include/readline/readline.h; then
+    LIBDIR_READLINE=$i/lib64
+    INCDIR_READLINE=$i/include
+    break
+  fi
+done
+if test -n "$LIBDIR_READLINE" -a -n "$INCDIR_READLINE"; then
+  has_readline="yes"
+  AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
+  if test "$LIBDIR_READLINE" != "$LIBDIR_CFITSIO"; then
+    LDFLAGS="$LDFLAGS -L$LIBDIR_READLINE"
+  fi
+  if test "$INCDIR_READLINE" != "$INCDIR_CFITSIO"; then
+    CPPFLAGS="$CPPFLAGS -I$INCDIR_READLINE"
+  fi
+  LIBS="${LIBS} -lreadline ${readline_deps}"
   AC_SUBST(LIBDIR_READLINE)
+  AC_SUBST(INCDIR_READLINE)
+else
+    has_readline="no"
 fi
+AM_CONDITIONAL(WITH_READLINE, test "x$has_readline" = "xyes")
 
+# Check if readline is available
+#AC_CHECK_LIB([readline], [main],
+#             [LIBS="${LIBS} -lreadline ${readline_deps}"
+#              AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])],
+#             [], [${readline_deps}])
+#AM_CONDITIONAL(WITH_READLINE, test "x$ac_cv_lib_readline_main" = "xyes")
+#
+# If readline is available then get library path for unit testing
+#if test "x$ac_cv_lib_readline_main" = "xyes"; then
+#  for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
+#    test -f $i/libreadline.a -o -f $i/libreadline.so -o -f $i/libreadline.dylib && LIBDIR_READLINE=$i
+#  done
+#  AC_SUBST(LIBDIR_READLINE)
+#fi
+#
 # Checks for readline
 #AC_ARG_WITH([readline],
 #            [AS_HELP_STRING([--with-readline],
@@ -457,13 +507,13 @@ dnl ===========================
 echo
 echo "  GammaLib configuration summary"
 echo "  =============================="
-if test "x$ac_cv_lib_cfitsio_ffpss" = "xyes"; then
-  echo "  * FITS I/O support             (yes)"
+if test "x$has_cfitsio" = "xyes"; then
+  echo "  * FITS I/O support             (yes)   -L$LIBDIR_CFITSIO -I$INCDIR_CFITSIO"
 else
   echo "  - FITS I/O support             (no)    no cfitsio library found"
 fi
-if test "x$ac_cv_lib_readline_main" = "xyes"; then
-  echo "  * Readline support             (yes)"
+if test "x$has_readline" = "xyes"; then
+  echo "  * Readline support             (yes)   -L$LIBDIR_READLINE -I$INCDIR_READLINE"
 else
   echo "  - Readline support             (no)    no readline library found"
 fi
