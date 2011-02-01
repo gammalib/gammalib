@@ -34,6 +34,11 @@ if WITH_INST_LAT
   INST_LAT = ../inst/lat/liblat.la
 endif
 
+# Scripts to be distributed
+scripts = gammalib-setup \
+          gammalib-init.sh \
+	  gammalib-init.csh
+
 # Build libtool library
 lib_LTLIBRARIES = libgamma.la
 libgamma_la_SOURCES = $(sources)
@@ -51,3 +56,15 @@ libgamma_la_LIBADD = support/libsupport.la \
                      $(INST_CTA) \
                      $(INST_LAT)
 libgamma_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+
+# Distribute scripts
+EXTRA_DIST   = $(scripts)
+scriptsdir   = $(bindir)
+scripts_DATA = $(scripts)
+
+# Add hook rule to make scripts executable
+install-data-hook:
+	@list='$(scripts_DATA)';\
+	for p in $$list; do \
+	  if test -f "$$p"; then chmod +x "$(DESTDIR)$(scriptsdir)/$$p"; fi; \
+	done
