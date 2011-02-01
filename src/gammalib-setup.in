@@ -1,0 +1,122 @@
+#! /bin/sh
+#    Filename: gammalib-setup(.in)
+# Description: Writes an initialization script for GammaLib software
+#              which is custom fit to the user and the particular
+#              software installation. Note that this script is
+#              designed to be invoked by gammalib-init.csh/gammalib-init.sh,
+#              and should not normally be invoked directly by user.
+# Author/Date: Juergen Knoedlseder, IRAP, February 1, 2011
+#-------------------------------------------------------------------------------
+#
+# Set fixed parameters
+# ====================
+this_script=`echo $0 | sed 's:.*/::'`
+gammalib_info="$this_script:"
+
+#
+# Extract argument
+# ================
+flavor=$1
+if [ "x$flavor" != xcsh -a "x$flavor" != xsh ]; then
+  echo "$gammalib_info usage $this_script csh|sh" >&2
+  exit 3
+fi
+
+#
+# Set parameters
+# ==============
+prefix="@prefix@"
+gammalib_bin="@prefix@/bin"
+gammalib_lib="@prefix@/lib"
+uname_system=`uname`
+python_dir="@pythondir@"
+
+#
+# Set LD_LIBRARY_PATH
+# ===================
+if [ "x$LD_LIBRARY_PATH" = x ]; then
+  LD_LIBRARY_PATH="$gammalib_lib"
+else
+  LD_LIBRARY_PATH=`echo ":$LD_LIBRARY_PATH:" | \
+    sed "s%:$gammalib_lib:%:%g" | sed "s%::*$%%"`
+  LD_LIBRARY_PATH="$gammalib_lib$LD_LIBRARY_PATH"
+fi
+
+#
+# Set DYLD_LIBRARY_PATH if required
+# =================================
+case $uname_system in
+  Darwin*)
+    if [ "x$DYLD_LIBRARY_PATH" = x ]; then
+         DYLD_LIBRARY_PATH="$gammalib_lib"
+    else
+      DYLD_LIBRARY_PATH=`echo ":$DYLD_LIBRARY_PATH:" | \
+        sed "s%:$gammalib_lib:%:%g" | sed "s%::*$%%"`
+      DYLD_LIBRARY_PATH="$gammalib_lib$DYLD_LIBRARY_PATH"
+    fi
+    ;;
+  CYGWIN*)
+    if [ "x$PATH" = x ]; then
+      PATH="$gammalib_lib"
+    else
+      PATH=`echo ":$PATH:" | sed "s%:$gammalib_lib:%:%g" | sed "s%::*$%%"`
+      PATH="$gammalib_lib$PATH"
+    fi
+    ;;
+esac
+
+#
+# Set PYTHONPATH
+# ==============
+if [ "x$PYTHONPATH" = x ]; then
+  PYTHONPATH="$python_dir"
+else
+  PYTHONPATH=`echo ":$PYTHONPATH:" | \
+    sed "s%:$python_dir:%:%g" | sed "s%::*$%%"`
+  PYTHONPATH="$python_dir$PYTHONPATH"
+fi
+
+#
+# Set PATH
+# ========
+if [ "x$PATH" = x ]; then
+  PATH="$gammalib_bin"
+else
+  PATH=`echo ":$PATH:" | \
+    sed "s%:$gammalib_bin:%:%g" | sed "s%::*$%%"`
+  PATH="$gammalib_bin$PATH"
+fi
+
+#
+# List of variables needed in initialization script
+# =================================================
+varlist="PATH PYTHONPATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH"
+
+#
+# Save values in output initialization shell scripts
+# ==================================================
+# Name of temporary config script
+HOST_NAME=`hostname`
+gammalib_config="$HOME/gammalib-config-$HOST_NAME"
+
+# Bourne Shell version, write only for sh flavor initialization
+if [ $flavor = sh ]; then
+  rm -f $gammalib_config$$.sh
+  touch $gammalib_config$$.sh
+  for var in $varlist; do
+    eval "if [ \"x\$$var\" != x ]; then
+            echo \"\$var=\\\"\$$var\\\"; export \$var\" >> $gammalib_config$$.sh;
+          fi"
+  done
+  echo "$gammalib_config$$.sh"
+# C Shell version, write only for csh flavor initialization
+elif [ $flavor = csh ]; then
+  rm -f $gammalib_config$$.csh
+  touch $gammalib_config$$.csh
+  for var in $varlist; do
+    eval "if [ \"x\$$var\" != x ]; then
+            echo setenv \$var \\\"\$$var\\\" >> $gammalib_config$$.csh;
+          fi"
+  done
+  echo "$gammalib_config$$.csh"
+fi
