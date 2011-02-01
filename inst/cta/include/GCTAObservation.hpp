@@ -69,6 +69,8 @@ protected:
     void copy_members(const GCTAObservation& obs);
     void free_members(void);
     void read_attributes(GFitsHDU* hdu);
+    void read_ds_ebounds(GFitsHDU* hdu);
+    void read_ds_roi(GFitsHDU* hdu);
     void write_attributes(GFitsHDU* hdu) const;
 
     // Npred integration methods
