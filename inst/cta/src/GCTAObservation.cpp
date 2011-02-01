@@ -33,6 +33,8 @@
 #include "GIntegrand.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_READ_DS_EBOUNDS       "GCTAObservation::read_ds_ebounds(GFitsHDU*)"
+#define G_READ_DS_ROI               "GCTAObservation::read_ds_roi(GFitsHDU*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -310,9 +312,15 @@ std::string GCTAObservation::print(void) const
  ***************************************************************************/
 void GCTAObservation::load_unbinned(const std::string& filename)
 {
-    // Delete old events. We do not call clear() here since we want to
-    // preserve any existing response function.
+    // Delete old events and ROI. We do not call clear() here since we want
+    // to preserve any existing response function.
     if (m_events != NULL) delete m_events;
+    if (m_roi    != NULL) delete m_roi;
+    m_events = NULL;
+    m_roi    = NULL;
+
+    // Reset energy boundaries
+    m_ebounds.clear();
 
     // Allocate events
     GCTAEventList* events = new GCTAEventList;
@@ -329,7 +337,11 @@ void GCTAObservation::load_unbinned(const std::string& filename)
 
     // Read observation attributes
     read_attributes(hdu);
-    
+
+    // Read data selection keywords
+    read_ds_ebounds(hdu);
+    read_ds_roi(hdu);
+
     // Close FITS file
     file.close();
 
@@ -485,6 +497,8 @@ void GCTAObservation::free_members(void)
  * @brief Read observation attributes
  *
  * @param[in] hdu FITS HDU
+ *
+ * Reads the observation attributes.
  ***************************************************************************/
 void GCTAObservation::read_attributes(GFitsHDU* hdu)
 {
@@ -510,6 +524,177 @@ void GCTAObservation::read_attributes(GFitsHDU* hdu)
         if (m_pointing != NULL) delete m_pointing;
         m_pointing = new GCTAPointing;
         m_pointing->dir(pnt);
+
+    } // endif: HDU was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read energy boundary data selection keywords
+ *
+ * @param[in] hdu FITS HDU
+ *
+ * @exception GCTAException::no_ebds
+ *            Invalid energy data selection encountered
+ *
+ * Reads the energy boundary data selection keywords by searching for a 
+ * DSTYPx keyword named "ENERGY". The data selection information is expected
+ * to be in the format "200:50000", where the 2 arguments are the minimum
+ * and maximum energy. The energy unit is given by the keyword DSUNIx, which
+ * supports keV, MeV, GeV and TeV (case independent). No detailed syntax
+ * checking is performed.
+ *
+ * This method does nothing if the HDU is NULL.
+ ***************************************************************************/
+void GCTAObservation::read_ds_ebounds(GFitsHDU* hdu)
+{
+    // Continue only if HDU is valid
+    if (hdu != NULL) {
+
+        // Reset energy boundaries
+        m_ebounds.clear();
+
+        // Get number of data selection keywords
+        int ndskeys = 0;
+        try {
+            ndskeys = hdu->integer("NDSKEYS");
+        }
+        catch (GException::fits_key_not_found) {
+            ;
+        }
+
+        // Loop over all data selection keys
+        for (int i = 1; i <= ndskeys; ++i) {
+            std::string type_key  = "DSTYP"+str(i);
+            std::string unit_key  = "DSUNI"+str(i);
+            std::string value_key = "DSVAL"+str(i);
+            try {
+                if (hdu->string(type_key) == "ENERGY") {
+                    std::string unit                 = toupper(hdu->string(unit_key));
+                    std::string value                = hdu->string(value_key);
+                    std::vector<std::string> ebounds = split(value, ":");
+                    if (ebounds.size() == 2) {
+                        double  emin = todouble(ebounds[0]);
+                        double  emax = todouble(ebounds[1]);
+                        GEnergy e_min;
+                        GEnergy e_max;
+                        if (unit == "KEV") {
+                            e_min.keV(emin);
+                            e_max.keV(emax);
+                        }
+                        else if (unit == "MEV") {
+                            e_min.MeV(emin);
+                            e_max.MeV(emax);
+                        }
+                        else if (unit == "GEV") {
+                            e_min.GeV(emin);
+                            e_max.GeV(emax);
+                        }
+                        else if (unit == "TEV") {
+                            e_min.TeV(emin);
+                            e_max.TeV(emax);
+                        }
+                        else {
+                            throw GCTAException::no_ebds(G_READ_DS_EBOUNDS,
+                                  "Invalid energy unit \""+unit+
+                                  "\" encountered in data selection key \""+
+                                  unit_key+"\"");
+                        }
+                        m_ebounds.append(e_min, e_max);
+                    }
+                    else {
+                        throw GCTAException::no_ebds(G_READ_DS_EBOUNDS,
+                              "Invalid energy value \""+value+
+                              "\" encountered in data selection key \""+
+                              value_key+"\"");
+                    }
+                } // endif: ENERGY type found
+            }
+            catch (GException::fits_key_not_found) {
+                ;
+            }
+        } // endfor: looped over data selection keys
+
+    } // endif: HDU was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read ROI data selection keywords
+ *
+ * @param[in] hdu FITS HDU
+ *
+ * @exception GException::no_roi
+ *            Invalid ROI data selection encountered
+ *
+ * Reads the ROI data selection keywords by searching for a DSTYPx keyword
+ * named "POS(RA,DEC)". The data selection information is expected to be
+ * in the format "CIRCLE(267.0208,-24.78,4.5)", where the 3 arguments are
+ * Right Ascension, Declination and radius in units of degrees. No detailed
+ * syntax checking is performed.
+ *
+ * This method does nothing if the HDU is NULL.
+ ***************************************************************************/
+void GCTAObservation::read_ds_roi(GFitsHDU* hdu)
+{
+    // Continue only if HDU is valid
+    if (hdu != NULL) {
+
+        // Delete any old ROI
+        if (m_roi    != NULL) delete m_roi;
+
+        // Allocate ROI
+        GCTARoi* roi = new GCTARoi;
+        m_roi = roi;
+
+        // Get number of data selection keywords
+        int ndskeys = 0;
+        try {
+            ndskeys = hdu->integer("NDSKEYS");
+        }
+        catch (GException::fits_key_not_found) {
+            ;
+        }
+
+        // Loop over all data selection keys
+        for (int i = 1; i <= ndskeys; ++i) {
+            std::string type_key  = "DSTYP"+str(i);
+            std::string unit_key  = "DSUNI"+str(i);
+            std::string value_key = "DSVAL"+str(i);
+            try {
+                if (hdu->string(type_key) == "POS(RA,DEC)") {
+                    std::string unit              = toupper(hdu->string(unit_key));
+                    std::string value             = hdu->string(value_key);
+                    value                         = strip_chars(value, "CIRCLE(");
+                    value                         = strip_chars(value, ")");
+                    std::vector<std::string> args = split(value, ",");
+                    if (args.size() == 3) {
+                        double  ra  = todouble(args[0]);
+                        double  dec = todouble(args[1]);
+                        double  rad = todouble(args[2]);
+                        GCTAInstDir dir;
+                        dir.radec_deg(ra, dec);
+                        roi->centre(dir);
+                        roi->radius(rad);
+                    }
+                    else {
+                        throw GException::no_roi(G_READ_DS_ROI,
+                              "Invalid acceptance cone value \""+value+
+                              "\" encountered in data selection key \""+
+                              value_key+"\"");
+                    }
+                } // endif: POS(RA,DEC) type found
+            }
+            catch (GException::fits_key_not_found) {
+                ;
+            }
+        } // endfor: looped over data selection keys
 
     } // endif: HDU was valid
 
