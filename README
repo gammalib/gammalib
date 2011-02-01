@@ -99,27 +99,22 @@ If you want to test GammaLib before installation, type the following:
 
 Setting up your environment
 ===========================
-Before using GammaLib you have to setup some environment variables. 
+Before using GammaLib you have to setup some environment variables.
+This will be done automatically by an initialisation script that will
+be installed in the bin directory.
+
 Assuming that you have installed GammaLib in the default directory 
 /usr/local/gamma you need to add the following to your .bashrc or 
 $HOME/.profile script on a Linux machine:
 
-    export PYTHONPATH=/usr/local/gamma/lib/python2.5/site-packages:$PYTHONPATH
-    export LD_LIBRARY_PATH=/usr/local/gamma/lib:$LD_LIBRARY_PATH
+    export GAMMALIB=/usr/local/gamma
+    source $GAMMALIB/bin/gammalib-init.sh
 
-Please adapt the Python version (python2.5 in this example) to the 
-version available on your machine.
-
-On Mac OS X you have to change LD_LIBRARY_PATH to DYLD_LIBRARY_PATH:
-
-    export PYTHONPATH=/usr/local/gamma/lib/python2.5/site-packages:$PYTHONPATH
-    export DYLD_LIBRARY_PATH=/usr/local/gamma/lib:$DYLD_LIBRARY_PATH
-
-And if you use C shell or a variant, add the following to your 
+If you use C shell or a variant then add the following to your
 .cshrc or .tcshrc script:
 
-    setenv PYTHONPATH      /usr/local/gamma/lib/python2.5/site-packages:$PYTHONPATH
-    setenv LD_LIBRARY_PATH /usr/local/gamma/lib:$LD_LIBRARY_PATH
+    setenv GAMMALIB /usr/local/gamma
+    source $GAMMALIB/bin/gammalib-init.csh
 
 
 Getting started
