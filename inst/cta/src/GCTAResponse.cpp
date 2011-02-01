@@ -404,15 +404,12 @@ double GCTAResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
 
 
 /***********************************************************************//**
- * @brief Return integral of instrument response function.
+ * @brief Return spatial integral of instrument response function
  *
  * @param[in] model Source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
- * @param[in] roi Region of interest of data selection.
- * @param[in] ebds Energy boundaries of data selection.
- * @param[in] gti Good Time Intervals of data selection.
  ***************************************************************************/
 double GCTAResponse::npred(const GModelSky& model, const GEnergy& srcEng,
                            const GTime& srcTime, const GObservation& obs) const
@@ -446,15 +443,12 @@ double GCTAResponse::npred(const GModelSky& model, const GEnergy& srcEng,
 
 
 /***********************************************************************//**
- * @brief Return integral of instrument response function.
+ * @brief Return spatial integral of instrument response function
  *
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
- * @param[in] roi Region of interest of data selection.
- * @param[in] ebds Energy boundaries of data selection.
- * @param[in] gti Good Time Intervals of data selection.
  ***************************************************************************/
 double GCTAResponse::npred(const GSkyDir&  srcDir, const GEnergy& srcEng,
                            const GTime& srcTime, const GObservation& obs) const
