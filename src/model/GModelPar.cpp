@@ -392,7 +392,7 @@ std::string GModelPar::print(void) const
 
     // For free parameters, append statistical uncertainty
     if (m_free)
-        result.append(" +/- "+str(real_error()));
+        result.append(" +/- "+str(fabs(real_error())));
 
     // Append parameter limites if they exist
     if (m_hasmin && m_hasmax)
