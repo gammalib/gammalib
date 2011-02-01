@@ -430,6 +430,7 @@ AC_CONFIG_FILES([Makefile
                  src/obs/Makefile
                  src/model/Makefile
                  src/app/Makefile
+                 src/gammalib-setup
                  include/Makefile
                  test/Makefile
                  pyext/Makefile
