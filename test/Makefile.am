@@ -58,7 +58,7 @@ check_PROGRAMS = test_GVector \
                  $(INST_MWL) $(INST_CTA) $(INST_LAT)
 
 # Set test environment (needed for linking with cfitsio and readline)
-TESTS_ENVIRONMENT = LD_LIBRARY_PATH=$(top_builddir)/src/.libs:$(LIBDIR_CFITSIO):$(LIBDIR_READLINE) \
+TESTS_ENVIRONMENT = LD_LIBRARY_PATH=$(top_builddir)/src/.libs:$(LIBDIR_CFITSIO):$(LIBDIR_READLINE):$(LD_LIBRARY_PATH) \
                     $(TEST_PYTHON_ENV)
 
 # Tests (these are the tests to be executed)
