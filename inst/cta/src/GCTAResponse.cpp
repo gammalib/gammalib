@@ -24,15 +24,16 @@
 #include <string>
 #include <unistd.h>           // access() function
 #include <stdio.h>            // fopen, fgets, fclose, etc...
+#include "GModelSpatialPtsrc.hpp"
+#include "GTools.hpp"
+#include "GIntegral.hpp"
+#include "GIntegrand.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTARoi.hpp"
 #include "GCTAException.hpp"
-#include "GModelSpatialPtsrc.hpp"
-#include "GTools.hpp"
-#include "GIntegral.hpp"
-#include "GIntegrand.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                           "GCTAResponse::caldb(std::string&)"
@@ -847,15 +848,9 @@ double GCTAResponse::npsf(const double& psf, const double& radroi,
     // ... otherwise perform numerical integration
     else {
 
-        // Pre-computations
-        double cosroi = cos(radroi);
-        double cospsf = cos(psf);
-        double sinpsf = sin(psf);
-
         // Setup integration function
-        GCTAResponse::npsf_kern_rad_azsym integrand(this, radroi, cosroi,
-                                                    psf, cospsf, sinpsf, sigma);
-        GIntegral integral(&integrand);
+        GCTAResponse::npsf_kern_rad_azsym integrand(this, radroi, psf, sigma);
+        GIntegral                         integral(&integrand);
 
         // Integrate PSF
         value = integral.romb(0.0, rmax);
@@ -878,75 +873,13 @@ double GCTAResponse::npsf(const double& psf, const double& radroi,
 double GCTAResponse::npsf_kern_rad_azsym::eval(double theta)
 {
     // Get arclength for given radius in radians
-    double phi = m_parent->npsf_kern_azsym(theta, m_roi, m_cosroi, m_psf, 
-                                           m_cospsf, m_sinpsf);
+    double phi = cta_roi_arclength(theta, m_psf, m_cospsf, m_sinpsf, m_roi, m_cosroi);
 
     // Get PSF value
-    double value = m_parent->psf(theta, m_sigma) * phi * theta;
+    double value = m_parent->psf(theta, m_sigma) * phi * sin(theta);
 
     // Return
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Integration kernel for npsf integration for azimuthally symmetric PSF
- *
- * @param[in] rad Radial distance of PSF centre in radians (<pi).
- * @param[in] roi ROI radius in radians.
- * @param[in] cosroi Cosine of ROI radius.
- * @param[in] psf PSF distance to ROI centre in radians (<pi).
- * @param[in] cospsf Cosine of PSF distance to ROI centre.
- * @param[in] sinpsf Sinus of PSF distance to ROI centre.
- *
- * This method returns the arclength in radians of a circle of radius 'rad'
- * with a centre that is offset by 'psf' from the ROI centre, where the ROI
- * radius is given by 'roi'. To speed-up computations, the cosines and sinus
- * of 'roi' and 'psf' should be calculated by the client and be passed to
- * the method.
- ***************************************************************************/
-double GCTAResponse::npsf_kern_azsym(const double& rad,
-                                     const double& roi, const double& cosroi,
-                                     const double& psf, const double& cospsf,
-                                     const double& sinpsf) const
-{
-    // Declare arclength
-    double arclength;
-
-    // Handle special case of identical PSF and ROI centres
-    if (psf == 0.0) {
-        if (rad > roi) arclength = 0.0;   // PSF radius outside ROI
-        else           arclength = twopi; // PSF radius inside ROI
-    }
-
-    // ... PSF and ROI centres are not identical
-    else {
-
-        // Handle special case of zero radial distance to PSF centre
-        if (rad == 0.0) {
-            if (psf > roi) arclength = 0.0;   // PSF centre outside ROI
-            else           arclength = twopi; // PSF centre inside ROI
-        }
-
-        // Handle general case
-        else {
-            double dist = roi - psf;
-            if (-rad >= dist) 
-                arclength = 0.0;
-            else if (rad <= dist) 
-                arclength = twopi;
-            else {
-                double cosrad = cos(rad);
-                double sinrad = sin(rad);
-                double cosang = (cosroi - cospsf*cosrad) / (sinpsf*sinrad);
-                arclength = acos(cosang);
-            }
-        }
-
-    } // endelse: PSF and ROI centres were not identical
-
-    // Return arclength
-    return arclength;
 }
 
 

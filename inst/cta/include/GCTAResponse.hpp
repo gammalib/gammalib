@@ -120,16 +120,12 @@ private:
     void read_performance_table(const std::string& filename);
 
     // Integration
-    double npsf_kern_azsym(const double& rad,
-                           const double& roi, const double& cosroi,
-                           const double& psf, const double& cospsf,
-                           const double& sinpsf) const;
     class npsf_kern_rad_azsym : public GIntegrand {
     public:
-        npsf_kern_rad_azsym(const GCTAResponse* parent, double roi, double cosroi,
-                            double psf, double cospsf, double sinpsf, double sigma) :
-                            m_parent(parent), m_roi(roi), m_cosroi(cosroi),
-                            m_psf(psf), m_cospsf(cospsf), m_sinpsf(sinpsf),
+        npsf_kern_rad_azsym(const GCTAResponse* parent, double roi, 
+                            double psf, double sigma) :
+                            m_parent(parent), m_roi(roi), m_cosroi(cos(roi)),
+                            m_psf(psf), m_cospsf(cos(psf)), m_sinpsf(sin(psf)),
                             m_sigma(sigma) { return; }
         double eval(double r);
     protected:
