@@ -75,7 +75,6 @@ protected:
 
     // Npred integration methods
     double npred_temp(const GModel& model) const;
-    double npred_grad_temp(const GModel& model, int ipar) const;
 
     // Protected members
     GCTAResponse* m_response;   //!< Pointer to instrument response functions

@@ -814,44 +814,6 @@ double GCTAObservation::npred_temp(const GModel& model) const
 
 /*==========================================================================
  =                                                                         =
- =                    Npred gradient integration methods                   =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Temporally integrate spatially & spectrally integrated Npred
- *        gradient kernel
- *
- * @param[in] model Gamma-ray source model.
- * @param[in] ipar Parameter index for which gradient should be returned.
- *
- * Implement the temporal integration as a simple multiplication by the
- * elapsed time. This assumes that the source is non-variable during the
- * observation and that the CTA pointing is stable.
- ***************************************************************************/
-double GCTAObservation::npred_grad_temp(const GModel& model, int ipar) const
-{
-    // Initialise result
-    double result = 0.0;
-
-    // Determine ontime
-    double ontime = m_gti.ontime();
-
-    // Integrate only if ontime is positive
-    if (ontime > 0.0) {
-
-        // Integration is a simple multiplication by the time
-        result = npred_grad_spec(model, ipar, m_gti.tstart()) * ontime;
-
-    }
-
-    // Return result
-    return result;
-}
-
-
-/*==========================================================================
- =                                                                         =
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
