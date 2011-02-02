@@ -26,10 +26,13 @@
 #include "GModelSpectralRegistry.hpp"
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"
+#include "GIntegral.hpp"
 #include "GCTAException.hpp"
 #include "GCTAInstDir.hpp"
+#include "GCTARoi.hpp"
 #include "GCTAModelRadialRegistry.hpp"
 #include "GCTAModelRadialAcceptance.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Constants __________________________________________________________ */
 
@@ -42,6 +45,8 @@ const GModelRegistry            g_cta_radial_acceptance_registry(&g_cta_radial_a
 #define G_EVAL                     "GCTAModelRadialAcceptance::eval(GEvent&,"\
                                                             " GObservation&)"
 #define G_EVAL_GRADIENTS "GCTAModelRadialAcceptance::eval_gradients(GEvent&,"\
+                                                            " GObservation&)"
+#define G_NPRED          "GCTAModelRadialAcceptance::npred(GEnergy&, GTime&,"\
                                                             " GObservation&)"
 #define G_MC            "GCTAModelRadialAcceptance::mc(GObservation&, GRan&)"
 #define G_XML_RADIAL    "GCTAModelRadialAcceptance::xml_radial(GXmlElement&)"
@@ -251,6 +256,9 @@ double GCTAModelRadialAcceptance::eval(const GEvent& event, const GObservation& 
  * @param[in] event Observed event.
  * @param[in] obs Observation (not used).
  *
+ * @exception GCTAException::no_pointing
+ *            No valid CTA pointing found in observation
+ *
  * @todo Add bookkeeping of last value and evaluate only if argument 
  *       changed
  * @todo Verify that CTA instrument direction pointer is valid, or better,
@@ -313,6 +321,72 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
 
     // Return value
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Return spatially integrated data model
+ *
+ * @param[in] obsEng Measured event energy.
+ * @param[in] obsTime Measured event time.
+ * @param[in] obs Observation.
+ *
+ * @exception GException::no_roi
+ *            No valid region of interest found in observation
+ * @exception GCTAException::no_pointing
+ *            No valid CTA pointing found in observation
+ *
+ * Spatially integrates the data model for a given measured event energy
+ * and event time.
+ ***************************************************************************/
+double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
+                                        const GTime&        obsTime,
+                                        const GObservation& obs)
+{
+    // Initialise result
+    double npred = 0.0;
+
+    // Evaluate only if model is valid
+    if (valid_model()) {
+
+        // Circumvent const correctness
+        GCTAObservation* cta = (GCTAObservation*)(&obs);
+
+        // Extract CTA ROI information. Throw an exception if ROI has not
+        // been defined
+        GCTARoi* roi = (GCTARoi*)cta->roi();
+        if (roi == NULL)
+            throw GException::no_roi(G_NPRED);
+
+        // Extract CTA pointing direction. Throw an exception if pointing
+        // has not been defined
+        GCTAPointing* pnt = cta->pointing(obsTime);
+        if (pnt == NULL)
+            throw GCTAException::no_pointing(G_NPRED);
+
+        // Get ROI radius in radians
+        double roi_radius = roi->radius() * deg2rad;
+
+        // Get distance from ROI centre in radians
+        double roi_distance = roi->centre().dist(pnt->dir());
+
+        // Setup integration function
+        GCTAModelRadialAcceptance::roi_kern integrand(radial(), roi_radius, roi_distance);
+
+        // Setup integrator
+        GIntegral integral(&integrand);
+
+        // Spatially integrate radial component
+        npred = integral.romb(0.0, roi_radius);
+
+        // Multiply in spectral and temporal components
+        npred *= spectral()->eval(obsEng);
+        npred *= temporal()->eval(obsTime);
+
+    } // endif: model was valid
+
+    // Return
+    return npred;
 }
 
 
@@ -801,6 +875,38 @@ GModelTemporal* GCTAModelRadialAcceptance::xml_temporal(const GXmlElement& tempo
 
     // Return pointer
     return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Integration kernel for the Npred method
+ *
+ * @param[in] offset Offset angle (radians).
+ *
+ * Computes
+ * \f[N_{\rm pred} = \int_{\rm ROI} r(\theta) \sin \theta {\rm d}\phi\f]
+ * where
+ * \f$r(\theta)\f$ is the radial acceptance function,
+ * \f$\theta\f$ is the measured offset angle from the pointing direction
+ * in radians, and
+ * \f$\phi\f$ is the measured azimuth angle. The integration is done over
+ * the arc of the azimuth angle that lies within the ROI. This integration
+ * is done analytically using the "cta_roi_arclength" support function.
+ ***************************************************************************/
+double GCTAModelRadialAcceptance::roi_kern::eval(double offset)
+{
+    // Circumvent const correctness
+    GCTAModelRadial* radial = (GCTAModelRadial*)m_parent;
+
+    // Get arclength for given radius in radians.
+    double phi = cta_roi_arclength(offset, m_dist, m_cosdist, m_sindist,
+                                   m_roi, m_cosroi);
+
+    // Get PSF value
+    double value = radial->eval(offset*rad2deg) * phi * sin(offset);
+
+    // Return
+    return value;
 }
 
 
