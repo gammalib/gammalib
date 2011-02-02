@@ -20,8 +20,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cmath>
 #include "GCTASupport.hpp"
 #include "GTools.hpp"
+#include <iostream>
 
 /* __ Coding definitions _________________________________________________ */
 
@@ -69,10 +71,10 @@ double cta_roi_arclength(const double& rad,     const double& dist,
 
         // ... otherwise we have to handle the general case
         else {
-            double dist = roi - dist;
-            if (-rad >= dist) 
+            double d = roi - dist;
+            if (-rad >= d)
                 arclength = 0.0;
-            else if (rad <= dist) 
+            else if (rad <= d)
                 arclength = twopi;
             else {
                 double cosrad = cos(rad);
