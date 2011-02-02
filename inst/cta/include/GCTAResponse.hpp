@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <vector>
+#include <cmath>
 #include "GCTAEventAtom.hpp"
 #include "GCTAEventBin.hpp"
 #include "GEvent.hpp"
@@ -122,7 +123,7 @@ private:
     // Integration
     class npsf_kern_rad_azsym : public GIntegrand {
     public:
-        npsf_kern_rad_azsym(const GCTAResponse* parent, double roi, 
+        npsf_kern_rad_azsym(const GCTAResponse* parent, double roi,
                             double psf, double sigma) :
                             m_parent(parent), m_roi(roi), m_cosroi(cos(roi)),
                             m_psf(psf), m_cospsf(cos(psf)), m_sinpsf(sin(psf)),

@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <cmath>
 #include "GModelData.hpp"
 #include "GModelPar.hpp"
 #include "GEvent.hpp"
@@ -81,7 +82,7 @@ protected:
     class roi_kern : public GIntegrand {
     public:
         roi_kern(const GCTAModelRadial* parent, const double& roi, const double& dist) :
-                 m_parent(parent), 
+                 m_parent(parent),
                  m_roi(roi),   m_cosroi(cos(roi)),
                  m_dist(dist), m_cosdist(cos(dist)), m_sindist(sin(dist)) { return; }
         double eval(double r);
