@@ -55,6 +55,28 @@ GException::feature_not_implemented::feature_not_implemented(std::string origin,
 
 
 /***********************************************************************//**
+ * @brief Invalid argument
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional message.
+ ***************************************************************************/
+GException::invalid_argument::invalid_argument(std::string origin,
+                                               std::string message)
+{
+    // Set origin
+    m_origin   = origin;
+
+    // Set message string
+    m_message = "Invalid argument encountered.";
+    if (message.length() > 0)
+        m_message += " " + message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Bad type
  *
  * @param[in] origin Name of method that has thrown the exception.

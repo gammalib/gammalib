@@ -60,6 +60,13 @@ public:
                                 std::string message = "");
     };
 
+    // Invalid argument
+    class invalid_argument : public GExceptionHandler {
+    public:
+        invalid_argument(std::string origin,
+                         std::string message = "");
+    };
+
     // Bad type
     class bad_type : public GExceptionHandler {
     public:
