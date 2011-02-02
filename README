@@ -161,7 +161,8 @@ Solaris
   problems with global symbols in the shared library that prevent the
   model registry to work correctly. Furthermore, GammaLib is not able
   to catch its own exceptions, which prevents the FITS interface to work
-  correctly. If GammaLib is linked statically
+  correctly. Possible it will work using gcc on Solaris, yet this has not
+  so far been tested.
 
 
 Contact

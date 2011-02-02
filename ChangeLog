@@ -1,7 +1,7 @@
 2011-02-02  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
-        * Version 0.4.5
-        ===============
+        * Version 0.4.5 released
+        ========================
         
         Implement CTA radial acceptance model
         Generalize model class
