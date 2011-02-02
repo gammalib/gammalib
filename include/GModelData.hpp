@@ -22,6 +22,10 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
+#include "GEnergy.hpp"
+#include "GTime.hpp"
+#include "GEvent.hpp"
+#include "GObservation.hpp"
 #include "GModel.hpp"
 #include "GModelPar.hpp"
 #include "GXmlElement.hpp"
@@ -64,6 +68,8 @@ public:
     virtual std::string type(void) const = 0;
     virtual double      eval(const GEvent& event, const GObservation& obs) = 0;
     virtual double      eval_gradients(const GEvent& event, const GObservation& obs) = 0;
+    virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
+                              const GObservation& obs) = 0;
     virtual void        read(const GXmlElement& xml) = 0;
     virtual void        write(GXmlElement& xml) const = 0;
     virtual std::string print(void) const = 0;

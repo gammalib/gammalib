@@ -36,6 +36,8 @@
 #include "GSparseMatrix.hpp"
 #include "GIntegral.hpp"
 #include "GIntegrand.hpp"
+#include "GDerivative.hpp"
+#include "GFunction.hpp"
 
 /* __ FITS module ________________________________________________________ */
 #include "GFits.hpp"

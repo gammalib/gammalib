@@ -7,7 +7,10 @@ INCLUDES = -I$(top_srcdir)/include \
 
 # Define sources for this directory
 sources = GIntegral.cpp \
-          GIntegrand.cpp
+          GIntegrand.cpp \
+	  GDerivative.cpp \
+          GFunction.cpp \
+          GException_numerics.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libnumerics.la
