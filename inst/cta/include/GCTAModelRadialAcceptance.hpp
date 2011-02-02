@@ -54,6 +54,8 @@ public:
     std::string                type(void) const { return "RadialAcceptance"; }
     double                     eval(const GEvent& event, const GObservation& obs);
     double                     eval_gradients(const GEvent& event, const GObservation& obs);
+    double                     npred(const GEnergy& obsEng, const GTime& obsTime,
+                                     const GObservation& obs);
     GCTAEventList*             mc(const GObservation& obs, GRan& ran);
     void                       read(const GXmlElement& xml);
     void                       write(GXmlElement& xml) const;
@@ -74,6 +76,23 @@ protected:
     GCTAModelRadial* xml_radial(const GXmlElement& radial) const;
     GModelSpectral*  xml_spectral(const GXmlElement& spectral) const;
     GModelTemporal*  xml_temporal(const GXmlElement& temporal) const;
+
+    // ROI integration kernel
+    class roi_kern : public GIntegrand {
+    public:
+        roi_kern(const GCTAModelRadial* parent, const double& roi, const double& dist) :
+                 m_parent(parent), 
+                 m_roi(roi),   m_cosroi(cos(roi)),
+                 m_dist(dist), m_cosdist(cos(dist)), m_sindist(sin(dist)) { return; }
+        double eval(double r);
+    protected:
+        const GCTAModelRadial* m_parent;   //!< Pointer to radial model
+        double                 m_roi;      //!< ROI radius in radians
+        double                 m_cosroi;   //!< Cosine of ROI radius
+        double                 m_dist;     //!< Distance between pointing and ROI centre in radians
+        double                 m_cosdist;  //!< Cosine of distance
+        double                 m_sindist;  //!< Sinus of distance
+    };
 
     // Proteced data members
     GCTAModelRadial* m_radial;       //!< Radial model
