@@ -232,7 +232,7 @@ case $host in
 esac                    
 
 # Search for cfitsio shared library in a some standard directories
-for i in "$gammalib_prefix" /usr/local /opt/local /usr ; do
+for i in "$gammalib_prefix" /usr /usr/local /opt/local ; do
   if test -f $i/lib/libcfitsio.so -o -f $i/lib/libcfitsio.dylib -a -f $i/include/fitsio.h; then
     LIBDIR_CFITSIO=$i/lib
     INCDIR_CFITSIO=$i/include
@@ -335,7 +335,7 @@ case $host in
 esac                    
 
 # Search for readline shared library
-for i in "$gammalib_prefix" /usr/local /opt/local /usr ; do
+for i in "$gammalib_prefix" /usr /usr/local /opt/local ; do
   if test -f $i/lib/libreadline.so -o -f $i/lib/libreadline.dylib -a -f $i/include/readline/readline.h; then
     LIBDIR_READLINE=$i/lib
     INCDIR_READLINE=$i/include
