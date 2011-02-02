@@ -2,12 +2,14 @@
 
 # Set include directories
 INCLUDES = -I$(top_srcdir)/include \
-           -I$(top_builddir)/src \
+           -I$(top_srcdir)/src \
            -I$(top_srcdir)/src/support \
-           -I$(top_srcdir)/inst/cta/include
+           -I$(top_srcdir)/inst/cta/include \
+	   -I$(top_srcdir)/inst/cta/src
 
 # Define sources for this directory
-sources = src/GCTAException.cpp \
+sources = src/GCTASupport.cpp \
+          src/GCTAException.cpp \
           src/GCTAObservation.cpp \
           src/GCTAEventList.cpp \
           src/GCTAEventAtom.cpp \
