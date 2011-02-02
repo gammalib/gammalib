@@ -33,6 +33,7 @@
 #include "GTime.hpp"
 #include "GEnergy.hpp"
 #include "GIntegrand.hpp"
+#include "GFunction.hpp"
 
 
 /***********************************************************************//**
@@ -108,25 +109,19 @@ protected:
     void copy_members(const GObservation& obs);
     void free_members(void);
 
-    // Npred integration methods
+    // Npred methods
+    virtual double npred_grad(const GModel& model, int ipar) const;
     virtual double npred_temp(const GModel& model) const;
-    virtual double npred_spec(const GModel& model, const GTime& srcTime) const;
-    virtual double npred_spat(const GModel& model, const GEnergy& srcEng,
-                              const GTime& srcTime) const;
-
-    // Npred gradient integration methods
-    virtual double npred_grad_temp(const GModel& model, int ipar) const;
-    virtual double npred_grad_spec(const GModel& model, int ipar,
-                                   const GTime& srcTime) const;
-    virtual double npred_grad_spat(const GModel& model, int ipar,
-                                   const GEnergy& srcEng, const GTime& srcTime) const;
+    virtual double npred_spec(const GModel& model, const GTime& obsTime) const;
+    virtual double npred_spat(const GModel& model, const GEnergy& obsEng,
+                              const GTime& obsTime) const;
 
     // Npred kernel classes
     class npred_kern_spat : public GIntegrand {
     public:
         npred_kern_spat(const GObservation* parent, const GModel& model,
-                        const GTime& srcTime) :
-                        m_parent(parent), m_model(&model), m_time(&srcTime)
+                        const GTime& obsTime) :
+                        m_parent(parent), m_model(&model), m_time(&obsTime)
                         { return; }
         double eval(double x);
     protected:
@@ -145,25 +140,10 @@ protected:
     };
 
     // Npred gradient kernel classes
-    class npred_grad_kern_spat : public GIntegrand {
+    class npred_func : public GFunction {
     public:
-        npred_grad_kern_spat(const GObservation* parent, const GModel& model,
-                             int ipar, const GTime& srcTime) :
-                             m_parent(parent), m_model(&model), m_ipar(ipar),
-                             m_time(&srcTime) { return; }
-        double eval(double x);
-    protected:
-        const GObservation* m_parent; //!< Pointer to parent
-        const GModel*       m_model;  //!< Pointer to model
-        int                 m_ipar;   //!< Parameter index
-        const GTime*        m_time;   //!< Pointer to time
-    };
-    class npred_grad_kern_spec : public GIntegrand {
-    public:
-        npred_grad_kern_spec(const GObservation* parent, const GModel& model,
-                             int ipar) :
-                             m_parent(parent), m_model(&model), m_ipar(ipar)
-                             { return; }
+        npred_func(const GObservation* parent, const GModel& model, int ipar) :
+                   m_parent(parent), m_model(&model), m_ipar(ipar) { ; }
         double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
