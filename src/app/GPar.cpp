@@ -203,7 +203,7 @@ void GPar::mode(const std::string& mode)
  ***************************************************************************/
 void GPar::value(const std::string& value)
 {
-    // Verify that valie is valid
+    // Verify that value is valid
     check_value(value);
 
     // Set mode
@@ -580,8 +580,6 @@ void GPar::check_value_filename(const std::string& value) const
  *
  * This method queries the parameter from the stardard input if it is needed
  * to be input by the user.
- *
- * @todo Optional use of readline library
  ***************************************************************************/
 void GPar::query(void)
 {
@@ -612,6 +610,9 @@ void GPar::query(void)
         std::cin.getline(line, 1000);
         std::string value = std::string(line);
         #endif
+
+        // Strip any whitespace from string
+        value = strip_whitespace(value);
 
         // Update value if value is not the default
         if (value.length() > 0) {
