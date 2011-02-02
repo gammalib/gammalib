@@ -58,7 +58,7 @@ const GModelRegistry            g_cta_radial_acceptance_registry(&g_cta_radial_a
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DUMP_MC 1                                 //!< Dump MC information
+#define G_DUMP_MC 0                                 //!< Dump MC information
 
 
 /*==========================================================================
