@@ -30,6 +30,7 @@ gammalib_bin="@prefix@/bin"
 gammalib_lib="@prefix@/lib"
 uname_system=`uname`
 python_dir="@pythondir@"
+pkgconfig_dir="@prefix@/lib/pkgconfig"
 
 #
 # Set LD_LIBRARY_PATH
@@ -77,6 +78,17 @@ else
 fi
 
 #
+# Set PKG_CONFIG_PATH
+# ===================
+if [ "x$PKG_CONFIG_PATH" = x ]; then
+  PKG_CONFIG_PATH="$pkgconfig_dir"
+else
+  PKG_CONFIG_PATH=`echo ":$PKG_CONFIG_PATH:" | \
+    sed "s%:$pkgconfig_dir:%:%g" | sed "s%::*$%%"`
+  PKG_CONFIG_PATH="$pkgconfig_dir$PKG_CONFIG_PATH"
+fi
+
+#
 # Set PATH
 # ========
 if [ "x$PATH" = x ]; then
@@ -90,7 +102,7 @@ fi
 #
 # List of variables needed in initialization script
 # =================================================
-varlist="PATH PYTHONPATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH"
+varlist="PATH PYTHONPATH PKG_CONFIG_PATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH"
 
 #
 # Save values in output initialization shell scripts
