@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GSparseMatrix.hpp  -  sparse matrix class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,9 +20,7 @@
 #define GSPARSEMATRIX_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <math.h>
 #include <iostream>
-#include <stdlib.h>
 #include "GException.hpp"
 #include "GMatrixBase.hpp"
 
