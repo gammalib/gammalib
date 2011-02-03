@@ -12,9 +12,9 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#include <cmath>
 #include <iostream>                           // cout, cerr
 #include <stdexcept>                          // std::exception
-#include <math.h>
 #include "GammaLib.hpp"
 
 /* __ Namespaces _________________________________________________________ */
@@ -77,7 +77,7 @@ int check_matrix(const GMatrix& m, const double scale, const double add)
     for (int row = 0; row < g_rows; ++row) {
       for (int col = 0; col < g_cols; ++col) {
 	    double value = g_matrix[col+row*g_cols] * scale + add;
-	    if (fabs(m(row,col)-value) > 1.0e-15) {
+	    if (abs(m(row,col)-value) > 1.0e-15) {
 		  result = 0;
 		  break;
 		}
@@ -321,7 +321,7 @@ void test_conversion(void)
     //
     // Determine the fill of the matrix. It should be 1.0
     double fill = back_convert.fill();
-    if (fabs(fill-1.0) > 1.0e-15) {
+    if (abs(fill-1.0) > 1.0e-15) {
       cout << endl << "TEST ERROR: Bad fill " << fill << " determined (expected 1.0)." <<
            endl;
       throw;
