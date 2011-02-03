@@ -133,7 +133,7 @@ public:
         return exp(*self);
     }
     GVector abs() {
-        return fabs(*self);
+        return abs(*self);
     }
     GVector log() {
         return log(*self);
