@@ -223,7 +223,7 @@ std::string GApplication::version(void) const
 double GApplication::telapse(void) const
 {
     // Get actual time
-    time_t acttime;
+    std::time_t acttime;
     time(&acttime);
 
     // Compute elapsed time
