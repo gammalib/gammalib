@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GVector.hpp  -  vector class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,10 +20,9 @@
 #define GVECTOR_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <math.h>
 #include <string>
 #include <iostream>
-#include <stdlib.h>
+#include <cmath>
 #include "GException.hpp"
 #include "GLog.hpp"
 
@@ -75,7 +74,7 @@ class GVector {
     friend GVector  cos(const GVector &v);
     friend GVector  cosh(const GVector &v);
     friend GVector  exp(const GVector &v);
-    friend GVector  fabs(const GVector &v);
+    friend GVector  abs(const GVector &v);
     friend GVector  log(const GVector &v);
     friend GVector  log10(const GVector &v);
     friend GVector  sin(const GVector &v);
@@ -323,7 +322,7 @@ double norm(const GVector &v)
     double result = 0.0;
     for (int i = 0; i < v.m_num; ++i)
         result += (v.m_data[i] * v.m_data[i]);
-    result = (result > 0.0) ? sqrt(result) : 0.0;
+    result = (result > 0.0) ? std::sqrt(result) : 0.0;
     return result;
 }
 
@@ -395,7 +394,7 @@ GVector acos(const GVector &v)
 {
     GVector result(v.m_num);
     for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = acos(v.m_data[i]);
+        result.m_data[i] = std::acos(v.m_data[i]);
     return result;
 }
 
@@ -415,7 +414,7 @@ GVector asin(const GVector &v)
 {
     GVector result(v.m_num);
     for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = asin(v.m_data[i]);
+        result.m_data[i] = std::asin(v.m_data[i]);
     return result;
 }
 
@@ -435,7 +434,7 @@ GVector atan(const GVector &v)
 {
     GVector result(v.m_num);
     for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = atan(v.m_data[i]);
+        result.m_data[i] = std::atan(v.m_data[i]);
     return result;
 }
 
@@ -455,7 +454,7 @@ GVector cos(const GVector &v)
 {
     GVector result(v.m_num);
     for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = cos(v.m_data[i]);
+        result.m_data[i] = std::cos(v.m_data[i]);
     return result;
 }
 
@@ -465,7 +464,7 @@ GVector cosh(const GVector &v)
 {
     GVector result(v.m_num);
     for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = cosh(v.m_data[i]);
+        result.m_data[i] = std::cosh(v.m_data[i]);
     return result;
 }
 
@@ -475,17 +474,17 @@ GVector exp(const GVector &v)
 {
     GVector result(v.m_num);
     for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = exp(v.m_data[i]);
+        result.m_data[i] = std::exp(v.m_data[i]);
     return result;
 }
 
-// Vector fabs
+// Vector abs
 inline
-GVector fabs(const GVector &v)
+GVector abs(const GVector &v)
 {
     GVector result(v.m_num);
     for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = fabs(v.m_data[i]);
+        result.m_data[i] = std::abs(v.m_data[i]);
     return result;
 }
 
@@ -495,7 +494,7 @@ GVector log(const GVector &v)
 {
     GVector result(v.m_num);
     for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = log(v.m_data[i]);
+        result.m_data[i] = std::log(v.m_data[i]);
     return result;
 }
 
@@ -505,7 +504,7 @@ GVector log10(const GVector &v)
 {
     GVector result(v.m_num);
     for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = log10(v.m_data[i]);
+        result.m_data[i] = std::log10(v.m_data[i]);
     return result;
 }
 
@@ -515,7 +514,7 @@ GVector sin(const GVector &v)
 {
     GVector result(v.m_num);
     for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = sin(v.m_data[i]);
+        result.m_data[i] = std::sin(v.m_data[i]);
     return result;
 }
 
@@ -525,7 +524,7 @@ GVector sinh(const GVector &v)
 {
     GVector result(v.m_num);
     for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = sinh(v.m_data[i]);
+        result.m_data[i] = std::sinh(v.m_data[i]);
     return result;
 }
 
@@ -535,7 +534,7 @@ GVector sqrt(const GVector &v)
 {
     GVector result(v.m_num);
     for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = sqrt(v.m_data[i]);
+        result.m_data[i] = std::sqrt(v.m_data[i]);
     return result;
 }
 
@@ -545,7 +544,7 @@ GVector tan(const GVector &v)
 {
     GVector result(v.m_num);
     for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = tan(v.m_data[i]);
+        result.m_data[i] = std::tan(v.m_data[i]);
     return result;
 }
 
@@ -555,7 +554,7 @@ GVector tanh(const GVector &v)
 {
     GVector result(v.m_num);
     for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = tanh(v.m_data[i]);
+        result.m_data[i] = std::tanh(v.m_data[i]);
     return result;
 }
 
@@ -565,7 +564,7 @@ GVector pow(const GVector &v, const double &a)
 {
     GVector result(v.m_num);
     for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = pow(v.m_data[i],a);
+        result.m_data[i] = std::pow(v.m_data[i],a);
     return result;
 }
 
