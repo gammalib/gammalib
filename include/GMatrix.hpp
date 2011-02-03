@@ -41,7 +41,7 @@ class GMatrix : public GMatrixBase {
     // Friend functions
     friend GMatrix transpose(const GMatrix& m);
     friend GMatrix invert(const GMatrix& m);
-    friend GMatrix fabs(const GMatrix& m);
+    friend GMatrix abs(const GMatrix& m);
 
 public:
     // Constructors and destructors

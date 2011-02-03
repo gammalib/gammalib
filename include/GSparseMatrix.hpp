@@ -54,7 +54,7 @@ class GSparseMatrix : public GMatrixBase {
 
     // Friend functions
     friend GSparseMatrix transpose(const GSparseMatrix& m);
-    friend GSparseMatrix fabs(const GSparseMatrix& m);
+    friend GSparseMatrix abs(const GSparseMatrix& m);
     friend GSparseMatrix cholesky_decompose(const GSparseMatrix& m,
                                             int compress = 1);
     friend GSparseMatrix cholesky_invert(const GSparseMatrix& m,

@@ -17,10 +17,12 @@
  */
 
 /* __ Includes ___________________________________________________________ */
-#include <stdlib.h>
+//#include <stdlib.h>
+//#include <math.h>
+#include <cstdlib>
+#include <cmath>
 #include <iostream>                           // cout, cerr
 #include <stdexcept>                          // std::exception
-#include <math.h>
 #include "GammaLib.hpp"
 
 /* __ Namespaces _________________________________________________________ */
@@ -93,7 +95,7 @@ int check_matrix(const GSparseMatrix& m, const double scale, const double add)
 			break;
 		  }
 		}
-	    if (fabs(m(row,col)-ref_value) > 1.0e-15) {
+	    if (abs(m(row,col)-ref_value) > 1.0e-15) {
 		  result = 0;
 		  break;
 		}
@@ -172,7 +174,7 @@ int check_matrix_matrix(const GSparseMatrix& m)
 		  }
 		  value += ref_value_1 * ref_value_2;
 		}
-//cout << row << "," << col << ": " << fabs(m(row,col)-value) << endl;
+//cout << row << "," << col << ": " << abs(m(row,col)-value) << endl;
 		if (m(row,col) != value) {
 		  result = 0;
 		  break;
@@ -205,7 +207,7 @@ int check_transpose_matrix(const GSparseMatrix& m, const double scale, const dou
 			break;
 		  }
 		}
-	    if (fabs(m(col,row)-ref_value) > 1.0e-15) {
+	    if (abs(m(col,row)-ref_value) > 1.0e-15) {
 		  result = 0;
 		  break;
 		}
@@ -694,10 +696,10 @@ void test_arithmetics(const GSparseMatrix& m_test)
 	}
 	cout << ".";
 	//
-	// fabs(GSparseMatrix)
-	result = fabs(m_test);
+	// abs(GSparseMatrix)
+	result = abs(m_test);
     if (!check_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt fabs(GSparseMatrix) function." << endl;
+      cout << endl << "TEST ERROR: Corrupt abs(GSparseMatrix) function." << endl;
 	  cout << "result " << result << endl;
 	  cout << "m_test " << m_test << endl;
 	  throw;
@@ -1045,7 +1047,7 @@ void test_conversion(void)
     //
     // Determine the fill of the matrix. It should be 0.28
     double fill = back_convert.fill();
-    if (fabs(fill-0.28) > 1.0e-15) {
+    if (abs(fill-0.28) > 1.0e-15) {
       cout << endl << "TEST ERROR: Bad fill " << fill << " determined (expected 1.0)." <<
            endl;
       throw;
@@ -1205,7 +1207,7 @@ void test_cholesky(void)
         a0(3) = 0.2;
         a0(4) = 0.2;
         GVector s0 = cd.cholesky_solver(a0);
-        double res = max(fabs(s0-e0));
+        double res = max(abs(s0-e0));
         if (res < 1.0e-15) {
             #if defined(DUMP_RESIDUALS)
             std::cout << " Res(S0)=" << res << " ";
@@ -1230,7 +1232,7 @@ void test_cholesky(void)
 	a0(3) = 0.0;
 	a0(4) = 0.0;
 	s0    = cd.cholesky_solver(a0);
-	res   = max(fabs(s0-e0));
+	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(S1)=" << res << " ";
@@ -1249,7 +1251,7 @@ void test_cholesky(void)
 	a0(1) = 0.0;
 	a0(2) = 1.0;
 	s0    = cd.cholesky_solver(a0);
-	res   = max(fabs(s0-e0));
+	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(S2)=" << res << " ";
@@ -1268,7 +1270,7 @@ void test_cholesky(void)
 	a0(2) = 0.0;
 	a0(3) = 1.0;
 	s0    = cd.cholesky_solver(a0);
-	res   = max(fabs(s0-e0));
+	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(S3)=" << res << " ";
@@ -1287,7 +1289,7 @@ void test_cholesky(void)
 	a0(3) = 0.0;
 	a0(4) = 1.0;
 	s0    = cd.cholesky_solver(a0);
-	res   = max(fabs(s0-e0));
+	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(S4)=" << res << " ";
@@ -1331,7 +1333,7 @@ void test_cholesky(void)
 	a0(4) = 0.2;
 	a0(5) = 0.2;
 	s0    = cd_zero.cholesky_solver(a0);
-	res   = max(fabs(s0-e0));
+	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(S0Z)=" << res << " ";
@@ -1353,7 +1355,7 @@ void test_cholesky(void)
 	a0(4) = 0.0;
 	a0(5) = 0.0;
 	s0    = cd_zero.cholesky_solver(a0);
-	res   = max(fabs(s0-e0));
+	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(S1Z)=" << res << " ";
@@ -1372,7 +1374,7 @@ void test_cholesky(void)
 	a0(1) = 0.0;
 	a0(2) = 1.0;
 	s0    = cd_zero.cholesky_solver(a0);
-	res   = max(fabs(s0-e0));
+	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(S2Z)=" << res << " ";
@@ -1391,7 +1393,7 @@ void test_cholesky(void)
 	a0(2) = 0.0;
 	a0(4) = 1.0;
 	s0    = cd_zero.cholesky_solver(a0);
-	res   = max(fabs(s0-e0));
+	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(S3Z)=" << res << " ";
@@ -1410,7 +1412,7 @@ void test_cholesky(void)
 	a0(4) = 0.0;
 	a0(5) = 1.0;
 	s0    = cd_zero.cholesky_solver(a0);
-	res   = max(fabs(s0-e0));
+	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(S4Z)=" << res << " ";
@@ -1454,7 +1456,7 @@ void test_cholesky(void)
 	a0(4) = 0.2;
 	a0(5) = 0.2;
 	s0    = cd_zero2.cholesky_solver(a0);
-	res   = max(fabs(s0-e0));
+	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(S0ZU)=" << res << " ";
@@ -1476,7 +1478,7 @@ void test_cholesky(void)
 	a0(4) = 0.0;
 	a0(5) = 0.0;
 	s0    = cd_zero2.cholesky_solver(a0);
-	res   = max(fabs(s0-e0));
+	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(S1ZU)=" << res << " ";
@@ -1495,7 +1497,7 @@ void test_cholesky(void)
 	a0(1) = 0.0;
 	a0(2) = 1.0;
 	s0    = cd_zero2.cholesky_solver(a0);
-	res   = max(fabs(s0-e0));
+	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(S2ZU)=" << res << " ";
@@ -1514,7 +1516,7 @@ void test_cholesky(void)
 	a0(2) = 0.0;
 	a0(4) = 1.0;
 	s0    = cd_zero2.cholesky_solver(a0);
-	res   = max(fabs(s0-e0));
+	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(S3ZU)=" << res << " ";
@@ -1533,7 +1535,7 @@ void test_cholesky(void)
 	a0(4) = 0.0;
 	a0(5) = 1.0;
 	s0    = cd_zero2.cholesky_solver(a0);
-	res   = max(fabs(s0-e0));
+	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(S4ZU)=" << res << " "; 
@@ -1558,7 +1560,7 @@ void test_cholesky(void)
 	m_chol_test_inv.cholesky_invert();
     GSparseMatrix ci_product   = m_chol_test * m_chol_test_inv;
     GSparseMatrix ci_residuals = ci_product - unit;
-	res = (fabs(ci_residuals)).max();
+	res = (abs(ci_residuals)).max();
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(CI)=" << res << " ";
@@ -1576,7 +1578,7 @@ void test_cholesky(void)
 	m_chol_test_inv = cholesky_invert(m_chol_test);
     ci_product      = m_chol_test * m_chol_test_inv;
     ci_residuals    = ci_product - unit;
-	res             = (fabs(ci_residuals)).max();
+	res             = (abs(ci_residuals)).max();
 	if (res < 1.0e-15)
 	  #if defined(DUMP_RESIDUALS)
 	  cout << "Res(CI2)=" << res << " ";
@@ -1601,7 +1603,7 @@ void test_cholesky(void)
         m_chol_test_zero_inv.cholesky_invert();
         GSparseMatrix ciz_product   = m_chol_test_zero * m_chol_test_zero_inv;
         GSparseMatrix ciz_residuals = ciz_product - unit;
-        res = (fabs(ciz_residuals)).max();
+        res = (abs(ciz_residuals)).max();
         if (res < 1.0e-15) {
             #if defined(DUMP_RESIDUALS)
             std::cout << "Res(CIZ)=" << res << " ";

@@ -19,7 +19,8 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>                           // cout, cerr
 #include <stdexcept>                          // std::exception
-#include <math.h>
+//#include <math.h>
+#include <cmath>
 #include "GammaLib.hpp"
 
 /* __ Namespaces _________________________________________________________ */
@@ -107,7 +108,7 @@ int check_matrix(const GSymMatrix& m, const double scale, const double add)
     for (int row = 0; row < g_rows; ++row) {
       for (int col = 0; col < g_cols; ++col) {
 	    double value = g_matrix[col+row*g_cols] * scale + add;
-	    if (fabs(m(row,col)-value) > 1.0e-15) {
+	    if (abs(m(row,col)-value) > 1.0e-15) {
 		  result = 0;
 		  break;
 		}
@@ -745,7 +746,7 @@ int main(void)
 	GMatrix    cd_product   = cd_lower * cd_upper;
 	GMatrix    cd_residuals = matrix(m_test) - cd_product;
 	//
-	double res = (fabs(cd_residuals)).max();
+	double res = (abs(cd_residuals)).max();
 	if (res < 1.0e-15)
 	  cout << "Res(CD)=" << res << " ";
 	else {
@@ -763,7 +764,7 @@ int main(void)
 	GMatrix    cd_zero_product   = cd_zero_lower * cd_zero_upper;
 	GMatrix    cd_zero_residuals = matrix(m_test_zero) - cd_zero_product;
 	//
-	res = (fabs(cd_zero_residuals)).max();
+	res = (abs(cd_zero_residuals)).max();
 	if (res < 1.0e-15)
 	  cout << "Res(CDZ)=" << res << " ";
 	else {
@@ -793,7 +794,7 @@ int main(void)
 	a0(1) = g_matrix[3];
 	a0(2) = g_matrix[6];
 	GVector s0 = cd.cholesky_solver(a0) - e0;
-	res = max(fabs(s0));
+	res = max(abs(s0));
 	if (res < 1.0e-15)
 	  cout << "Res(S0)=" << res << " ";
 	else {
@@ -810,7 +811,7 @@ int main(void)
 	a0(1) = g_matrix[4];
 	a0(2) = g_matrix[7];
 	s0 = cd.cholesky_solver(a0) - e0;
-	res = max(fabs(s0));
+	res = max(abs(s0));
 	if (res < 1.0e-15)
 	  cout << "Res(S1)=" << res << " ";
 	else {
@@ -827,7 +828,7 @@ int main(void)
 	a0(1) = g_matrix[5];
 	a0(2) = g_matrix[8];
 	s0 = cd.cholesky_solver(a0) - e0;
-	res = max(fabs(s0));
+	res = max(abs(s0));
 	if (res < 1.0e-15)
 	  cout << "Res(S2)=" << res << " ";
 	else {
@@ -849,7 +850,7 @@ int main(void)
 	a0(2) = 0.0;
 	a0(3) = g_matrix[6];
 	s0    = cd_zero.cholesky_solver(a0) - e0;
-	res   = max(fabs(s0));
+	res   = max(abs(s0));
 	if (res < 1.0e-15)
 	  cout << "Res(S0Z)=" << res << " ";
 	else {
@@ -868,7 +869,7 @@ int main(void)
 	a0(2) = 0.0;
 	a0(3) = g_matrix[7];
 	s0    = cd_zero.cholesky_solver(a0) - e0;
-	res   = max(fabs(s0));
+	res   = max(abs(s0));
 	if (res < 1.0e-15)
 	  cout << "Res(S1Z)=" << res << " ";
 	else {
@@ -887,7 +888,7 @@ int main(void)
 	a0(2) = 0.0;
 	a0(3) = g_matrix[8];
 	s0    = cd_zero.cholesky_solver(a0) - e0;
-	res   = max(fabs(s0));
+	res   = max(abs(s0));
 	if (res < 1.0e-15)
 	  cout << "Res(S2Z)=" << res << " ";
 	else {
@@ -905,7 +906,7 @@ int main(void)
     GSymMatrix ci_product   = m_test * m_test12_inv;
     GSymMatrix ci_residuals = ci_product - unit;
 	//
-	res = (fabs(ci_residuals)).max();
+	res = (abs(ci_residuals)).max();
 	if (res < 1.0e-15)
 	  cout << "Res(CI)=" << res << " ";
 	else {
@@ -923,7 +924,7 @@ int main(void)
     GSymMatrix ciz_product   = m_test_zero * m_test12_zero_inv;
     GSymMatrix ciz_residuals = ciz_product - unit;
 	//
-	res = (fabs(ciz_residuals)).max();
+	res = (abs(ciz_residuals)).max();
 	if (res < 1.0e-15)
 	  cout << "Res(CIZ)=" << res << " ";
 	else {
