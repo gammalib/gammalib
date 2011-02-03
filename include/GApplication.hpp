@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.hpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,7 @@
 #define GAPPLICATION_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <time.h>
+#include <ctime>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -81,7 +81,7 @@ protected:
     std::string              m_name;       //!< Application name
     std::string              m_version;    //!< Application version
     std::vector<std::string> m_args;       //!< Command line arguments
-    time_t                   m_tstart;     //!< Start time of execution
+    std::time_t              m_tstart;     //!< Start time of execution
     GPars                    m_pars;       //!< Application parameters
     int                      m_chatter;    //!< Chatter level
     bool                     m_clobber;    //!< Clobber flag
