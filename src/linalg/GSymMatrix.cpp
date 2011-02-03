@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSymMatrix.cpp  -  symmetric matrix class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2009 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -15,6 +15,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cmath>
 #include "GException.hpp"
 #include "GVector.hpp"
 #include "GMatrix.hpp"
@@ -1051,14 +1052,14 @@ std::ostream& operator<< (std::ostream& os, const GSymMatrix& m)
  *
  * @param[in] m Matrix.
  ***************************************************************************/
-GSymMatrix fabs(const GSymMatrix& m)
+GSymMatrix abs(const GSymMatrix& m)
 {
     // Define result matrix
     GSymMatrix result(m.m_rows,m.m_cols);
 
     // Convert all elements to absolute values
     for (int i = 0; i < m.m_elements; ++i)
-        result.m_data[i] = fabs(m.m_data[i]);
+        result.m_data[i] = std::abs(m.m_data[i]);
 
     // Return result
     return result;

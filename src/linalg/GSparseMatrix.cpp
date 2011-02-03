@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSparseMatrix.cpp  -  sparse matrix class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cmath>
 #include "GVector.hpp"
 #include "GSparseMatrix.hpp"
 #include "GSparseSymbolic.hpp"
@@ -2800,7 +2801,7 @@ std::ostream& operator<< (std::ostream& os, const GSparseMatrix& m)
  *
  * @param[in] m Matrix for which absolute values are to be returned.
  ***************************************************************************/
-GSparseMatrix fabs(const GSparseMatrix& m)
+GSparseMatrix abs(const GSparseMatrix& m)
 {
     // Define result matrix
     GSparseMatrix result = m;
@@ -2810,7 +2811,7 @@ GSparseMatrix fabs(const GSparseMatrix& m)
 
     // Convert all elements to absolute values
     for (int i = 0; i < result.m_elements; ++i)
-        result.m_data[i] = fabs(result.m_data[i]);
+        result.m_data[i] = std::abs(result.m_data[i]);
 
     // Return result
     return result;

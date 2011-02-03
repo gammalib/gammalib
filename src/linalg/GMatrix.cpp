@@ -20,6 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cmath>
 #include "GException.hpp"
 #include "GVector.hpp"
 #include "GMatrix.hpp"
@@ -793,14 +794,14 @@ std::ostream& operator<< (std::ostream& os, const GMatrix& m)
  *
  * @param[in] m Matrix for which absolute values are to be returned.
  ***************************************************************************/
-GMatrix fabs(const GMatrix& m)
+GMatrix abs(const GMatrix& m)
 {
     // Define result matrix
     GMatrix result = m;
 
     // Convert all elements to absolute values  
     for (int i = 0; i < result.m_elements; ++i)
-        result.m_data[i] = fabs(result.m_data[i]);
+        result.m_data[i] = std::abs(result.m_data[i]);
 
     // Return result
     return result;
