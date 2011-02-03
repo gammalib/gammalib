@@ -12,7 +12,10 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
-#include "test_GVector.hpp"
+#include "GammaLib.hpp"
+#include <cmath>
+#include <iostream>                           // cout, cerr
+#include <stdexcept>                          // std::exception
 
 using namespace std;
 
@@ -245,8 +248,8 @@ int main(void)
     cout << "  exp(GVector): ";
 	cout << exp(test) << endl;
     //
-    cout << "  fabs(cos(GVector)): ";
-	cout << fabs(cos(test)) << endl;
+    cout << "  abs(cos(GVector)): ";
+	cout << abs(cos(test)) << endl;
     //
     cout << "  log(GVector): ";
 	cout << log(test) << endl;
