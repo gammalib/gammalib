@@ -23,7 +23,8 @@
 #include <vector>
 #include <string>
 #include <unistd.h>           // access() function
-#include <stdio.h>            // fopen, fgets, fclose, etc...
+//#include <stdio.h>            // fopen, fgets, fclose, etc...
+#include <cstdio>             // fopen, fgets, fclose, etc...
 #include "GModelSpatialPtsrc.hpp"
 #include "GTools.hpp"
 #include "GIntegral.hpp"

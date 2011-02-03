@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATEventList.cpp  -  LAT event list class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <stdio.h>            // sprintf, etc...
+//#include <stdio.h>            // sprintf, etc...
+#include <cstdio>             // sprintf, etc...
 #include "GLATEventList.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"

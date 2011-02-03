@@ -20,8 +20,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+//#include <stdio.h>            // fprintf, etc...
 #include <iostream>
-#include <stdio.h>            // fprintf, etc...
+#include <cstdio>             // fprintf, etc...
 #include "GException.hpp"
 #include "GXmlAttribute.hpp"
 

@@ -15,8 +15,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+//#include <string.h>           // strncpy, etc...
 #include <string>
-#include <string.h>           // strncpy, etc...
+#include <cstring>            // strncpy, etc...
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"

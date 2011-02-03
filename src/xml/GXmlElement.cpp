@@ -20,9 +20,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+//#include <stdio.h>            // fopen, fgets, fclose, etc...
 #include <string>
 #include <iostream>
-#include <stdio.h>            // fopen, fgets, fclose, etc...
+#include <cstdio>             // fopen, fgets, fclose, etc...
 #include "GException.hpp"
 #include "GXmlElement.hpp"
 

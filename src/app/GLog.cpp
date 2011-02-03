@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GLog.cpp - Information logger                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,13 +20,15 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <time.h>
+#include <stdarg.h>     // for "va_list" type
+//#include <stdio.h>      // fopen, fgets, fclose, etc...
+//#include <string.h>     // memcpy
 #include <string>
 #include <iostream>
 #include <sstream>
-#include <time.h>
-#include <stdio.h>      // fopen, fgets, fclose, etc...
-#include <string.h>     // memcpy
-#include <stdarg.h>     // for "va_list" type
+#include <cstdio>       // fopen, fgets, fclose, etc...
+#include <cstring>      // memcpy
 #include "GLog.hpp"
 #include "GTools.hpp"
 
