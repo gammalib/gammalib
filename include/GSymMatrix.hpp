@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GSymMatrix.hpp  -  symmetric matrix class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,7 +21,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
-#include <stdlib.h>
 #include "GException.hpp"
 #include "GMatrixBase.hpp"
 
@@ -50,7 +49,7 @@ class GSymMatrix : public GMatrixBase {
 
     // Friend functions
     friend GSymMatrix transpose(const GSymMatrix& m);
-    friend GSymMatrix fabs(const GSymMatrix& m);
+    friend GSymMatrix abs(const GSymMatrix& m);
     friend GSymMatrix cholesky_decompose(const GSymMatrix& m, int compress = 1);
     friend GSymMatrix cholesky_invert(const GSymMatrix& m, int compress = 1);
 
