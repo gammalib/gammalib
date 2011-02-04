@@ -20,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <math.h>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GModelSpectralConst.hpp"
