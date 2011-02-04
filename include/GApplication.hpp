@@ -54,6 +54,7 @@ public:
     std::string name(void) const;
     std::string version(void) const;
     double      telapse(void) const;
+    double      celapse(void) const;
     GPar*       par(const std::string& name);
     bool        logTerse(void) const;
     bool        logNormal(void) const;
@@ -81,7 +82,8 @@ protected:
     std::string              m_name;       //!< Application name
     std::string              m_version;    //!< Application version
     std::vector<std::string> m_args;       //!< Command line arguments
-    std::time_t              m_tstart;     //!< Start time of execution
+    std::time_t              m_tstart;     //!< Calendar start time of execution
+    std::clock_t             m_cstart;     //!< Clock start time of execution
     GPars                    m_pars;       //!< Application parameters
     int                      m_chatter;    //!< Chatter level
     bool                     m_clobber;    //!< Clobber flag
