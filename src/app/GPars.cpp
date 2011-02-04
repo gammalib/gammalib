@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GPars.cpp - Application parameters                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,8 +23,6 @@
 #include <pwd.h>           // user/passwd function
 #include <unistd.h>        // access() function
 #include <sys/stat.h>      // mkdir() function
-#include <stdio.h>
-#include <stdlib.h>
 #include "GPars.hpp"
 #include "GTools.hpp"
 #include "GException.hpp"
