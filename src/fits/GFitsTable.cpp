@@ -16,7 +16,6 @@
 #include <config.h>
 #endif
 #include <iostream>
-#include <string.h>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
