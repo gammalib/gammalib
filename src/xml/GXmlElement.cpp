@@ -20,10 +20,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <stdio.h>            // fopen, fgets, fclose, etc...
+#include <cstdio>             // std::fprintf
 #include <string>
 #include <iostream>
-#include <cstdio>             // fopen, fgets, fclose, etc...
 #include "GException.hpp"
 #include "GXmlElement.hpp"
 
@@ -180,8 +179,8 @@ void GXmlElement::write(FILE* fptr, int indent) const
 {
     // Write element name into file
     for (int k = 0; k < indent; ++k)
-        fprintf(fptr, " ");
-    fprintf(fptr, "<%s", m_name.c_str());
+        std::fprintf(fptr, " ");
+    std::fprintf(fptr, "<%s", m_name.c_str());
 
     // Write attributes into file
     for (int k = 0; k < m_attr.size(); ++k)
@@ -189,13 +188,13 @@ void GXmlElement::write(FILE* fptr, int indent) const
 
     // If there are no children then write an empty tag
     if (children() < 1) {
-        fprintf(fptr, " />\n");
+        std::fprintf(fptr, " />\n");
     }
 
     // ... otherwise finish start tag, write children and write end tag
     else {
         // Finish start tag
-        fprintf(fptr, ">\n");
+        std::fprintf(fptr, ">\n");
 
         // Write children in file
         for (int i = 0; i < children(); ++i)
@@ -203,8 +202,8 @@ void GXmlElement::write(FILE* fptr, int indent) const
 
         // Write end tag
         for (int k = 0; k < indent; ++k)
-            fprintf(fptr, " ");
-        fprintf(fptr, "</%s>\n", m_name.c_str());
+            std::fprintf(fptr, " ");
+        std::fprintf(fptr, "</%s>\n", m_name.c_str());
     }
 
     // Return
@@ -377,7 +376,7 @@ GXmlElement* GXmlElement::clone(void) const
 void GXmlElement::parse_start(const std::string& segment)
 {
     // Initialize position check
-    size_t pos_start = 0;
+    std::size_t pos_start = 0;
 
     // Get length of segment
     int n = segment.length();
@@ -398,7 +397,7 @@ void GXmlElement::parse_start(const std::string& segment)
     } // endif: there were brackets
 
     // Extract element name
-    size_t pos = segment.find_first_of("\x20\x09\x0d\x0a>", 1);
+    std::size_t pos = segment.find_first_of("\x20\x09\x0d\x0a>", 1);
     if (pos == pos_start)
         throw GException::xml_syntax_error(G_PARSE_START, segment,
                           "no whitespace allowed before element name");
@@ -486,26 +485,26 @@ void GXmlElement::parse_attribute(size_t* pos, const std::string& segment)
         std::string error = segment.substr(*pos, segment.length()-*pos);
 
         // Find first character of name substring
-        size_t pos_name_start = segment.find_first_not_of("\x20\x09\x0d\x0a/>?", *pos);
+        std::size_t pos_name_start = segment.find_first_not_of("\x20\x09\x0d\x0a/>?", *pos);
         if (pos_name_start == std::string::npos) {
             *pos = std::string::npos;
             continue;
         }
 
         // Find end of name substring
-        size_t pos_name_end = segment.find_first_of("\x20\x09\x0d\x0a=", pos_name_start);
+        std::size_t pos_name_end = segment.find_first_of("\x20\x09\x0d\x0a=", pos_name_start);
         if (pos_name_end == std::string::npos)
             throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
                               "invalid or missing attribute name");
 
         // Find '=' character
-        size_t pos_equal = segment.find_first_of("=", pos_name_end);
+        std::size_t pos_equal = segment.find_first_of("=", pos_name_end);
         if (pos_equal == std::string::npos)
             throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
                               "'=' sign not found for attribute");
 
         // Find start of value substring
-        size_t pos_value_start = segment.find_first_of("\x22\x27", pos_equal);
+        std::size_t pos_value_start = segment.find_first_of("\x22\x27", pos_equal);
         if (pos_value_start == std::string::npos)
             throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
                               "invalid or missing attribute value start hyphen");
@@ -518,13 +517,13 @@ void GXmlElement::parse_attribute(size_t* pos, const std::string& segment)
                               "invalid or missing attribute value");
 
         // Find end of value substring
-        size_t pos_value_end = segment.find_first_of(hyphen, pos_value_start);
+        std::size_t pos_value_end = segment.find_first_of(hyphen, pos_value_start);
         if (pos_value_end == std::string::npos)
             throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
                               "invalid or missing attribute value end hyphen");
 
         // Get name substring
-        size_t n_name = pos_name_end - pos_name_start;
+        std::size_t n_name = pos_name_end - pos_name_start;
         if (n_name < 1)
             throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
                               "invalid or missing attribute name");
@@ -533,7 +532,7 @@ void GXmlElement::parse_attribute(size_t* pos, const std::string& segment)
         //TODO: Check XML validity of attribute name
 
         // Get value substring length
-        size_t n_value = pos_value_end - pos_value_start;
+        std::size_t n_value = pos_value_end - pos_value_start;
         if (n_value < 0)
             throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
                               "invalid or missing attribute value");

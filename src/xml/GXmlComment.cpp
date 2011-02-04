@@ -20,9 +20,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <stdio.h>            // fopen, fgets, fclose, etc...
+#include <cstdio>             // std::fprintf
 #include <iostream>
-#include <cstdio>             // fopen, fgets, fclose, etc...
 #include "GException.hpp"
 #include "GXmlComment.hpp"
 
@@ -174,8 +173,8 @@ void GXmlComment::write(FILE* fptr, int indent) const
 {
     // Write comment into file
     for (int k = 0; k < indent; ++k)
-        fprintf(fptr, " ");
-    fprintf(fptr, "<!--%s-->\n", m_comment.c_str());
+        std::fprintf(fptr, " ");
+    std::fprintf(fptr, "<!--%s-->\n", m_comment.c_str());
 
     // Return
     return;

@@ -20,9 +20,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <stdio.h>            // fprintf, etc...
+#include <cstdio>             // std::fprintf
 #include <iostream>
-#include <cstdio>             // fprintf, etc...
 #include "GXmlDocument.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -153,10 +152,10 @@ void GXmlDocument::clear(void)
 void GXmlDocument::write(FILE* fptr, int indent) const
 {
     // Write document header in file
-    fprintf(fptr, "<?xml version=\"%s\" encoding=\"%s\" standalone=\"%s\"?>\n",
-            version().c_str(),
-            encoding().c_str(),
-            standalone().c_str());
+    std::fprintf(fptr, "<?xml version=\"%s\" encoding=\"%s\" standalone=\"%s\"?>\n",
+                 version().c_str(),
+                 encoding().c_str(),
+                 standalone().c_str());
 
     // Write children in file
     for (int i = 0; i < children(); ++i)

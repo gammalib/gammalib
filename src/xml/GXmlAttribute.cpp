@@ -20,9 +20,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <stdio.h>            // fprintf, etc...
+#include <cstdio>             // std::fprintf
 #include <iostream>
-#include <cstdio>             // fprintf, etc...
 #include "GException.hpp"
 #include "GXmlAttribute.hpp"
 
@@ -170,7 +169,7 @@ void GXmlAttribute::clear(void)
 void GXmlAttribute::write(FILE* fptr) const
 {
     // Write attribute into file
-    fprintf(fptr, " %s=%s", m_name.c_str(), m_value.c_str());
+    std::fprintf(fptr, " %s=%s", m_name.c_str(), m_value.c_str());
 
     // Return
     return;

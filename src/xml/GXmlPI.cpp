@@ -20,9 +20,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <stdio.h>            // fprintf, etc...
+#include <cstdio>           // std::fprintf
 #include <iostream>
-#include <cstdio>           // fprintf, etc...
 #include "GException.hpp"
 #include "GXmlPI.hpp"
 
@@ -174,8 +173,8 @@ void GXmlPI::write(FILE* fptr, int indent) const
 {
     // Write Processing Instruction into file
     for (int k = 0; k < indent; ++k)
-        fprintf(fptr, " ");
-    fprintf(fptr, "<?%s?>\n", m_pi.c_str());
+        std::fprintf(fptr, " ");
+    std::fprintf(fptr, "<?%s?>\n", m_pi.c_str());
 
     // Return
     return;

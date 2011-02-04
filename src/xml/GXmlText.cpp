@@ -20,9 +20,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <stdio.h>            // fprintf, etc...
+#include <cstdio>             // std::fprintf
 #include <iostream>
-#include <cstdio>             // fprintf, etc...
 #include "GXmlText.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -172,10 +171,10 @@ void GXmlText::write(FILE* fptr, int indent) const
 {
     // Write comment into file
     for (int k = 0; k < indent; ++k)
-        fprintf(fptr, " ");
+        std::fprintf(fptr, " ");
 
     // Write document header in file
-    fprintf(fptr, "%s", m_text.c_str());
+    std::fprintf(fptr, "%s", m_text.c_str());
 
     // Return
     return;
