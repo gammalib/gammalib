@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GIntegral.cpp  -  Integration class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,7 +17,7 @@
  */
 
 /* __ Includes ___________________________________________________________ */
-#include <math.h>
+#include <cmath>            // For std::abs()
 #include "GIntegral.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -178,7 +178,7 @@ double GIntegral::romb(double a, double b, int k)
         // Starting from iteration k on, use polynomial interpolation
         if (m_iter >= k) {
             polint(&h[m_iter-k], &s[m_iter-k], k, 0.0, &ss, &dss);
-            if (fabs(dss) <= m_eps * fabs(ss)) {
+            if (std::abs(dss) <= m_eps * std::abs(ss)) {
                 converged = true;
                 result    = ss;
                 break;
@@ -279,12 +279,12 @@ void GIntegral::polint(double* xa, double* ya, int n, double x, double *y,
     double* d = new double[n+1];
 
     // Compute initial distance to first node
-    double dif = fabs(x-xa[1]);
+    double dif = std::abs(x-xa[1]);
 
     // Find index ns of the closest table entry
     int ns = 1;
     for (int i = 1; i <= n; ++i) {
-        double dift = fabs(x-xa[i]);
+        double dift = std::abs(x-xa[i]);
         if (dift < dif) {
             ns  = i;
             dif = dift;
