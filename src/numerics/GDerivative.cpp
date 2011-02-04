@@ -18,7 +18,8 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <cstdlib>          // Definition of NULL
-#include <float.h>          // for DBL_MAX
+#include <cmath>            // for abs()
+#include <cfloat>           // for DBL_MAX
 #include "GDerivative.hpp"
 #include "GMatrix.hpp"
 
@@ -286,8 +287,8 @@ double GDerivative::ridder(const double& x, const double& h, double& err)
                 fac   *= con2;
 
                 // If the error is reduced then save the improved answer
-                double err1 = fabs(a(j,i) - a(j-1,i));
-                double err2 = fabs(a(j,i) - a(j-1,i-1));
+                double err1 = std::abs(a(j,i) - a(j-1,i));
+                double err2 = std::abs(a(j,i) - a(j-1,i-1));
                 double errt = (err1 > err2) ? err1 : err2;
                 if (errt <= err) {
                     err = errt;
@@ -297,7 +298,7 @@ double GDerivative::ridder(const double& x, const double& h, double& err)
             } // endfor: looped over tableau
 
             // If higher order is worse by a significant factor, the quit early
-            if (fabs( a(i,i) - a(i-1,i-1) ) >= safe*err)
+            if (std::abs( a(i,i) - a(i-1,i-1) ) >= safe*err)
                 break;
 
         } // endfor: looped over computations
