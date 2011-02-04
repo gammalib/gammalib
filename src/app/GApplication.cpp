@@ -46,11 +46,8 @@ const int header_width = 80;                                //!< Header width
  ***************************************************************************/
 GApplication::GApplication(void)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
-
-    // Save the execution start time
-    time(&m_tstart);
 
     // Return
     return;
@@ -65,15 +62,12 @@ GApplication::GApplication(void)
  ***************************************************************************/
 GApplication::GApplication(const std::string& name, const std::string& version)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Set application name and version
     m_name    = name;
     m_version = version;
-
-    // Save the execution start time
-    time(&m_tstart);
 
     // Initialise the application logger
     log.open(log_filename(), true);
@@ -100,15 +94,12 @@ GApplication::GApplication(const std::string& name, const std::string& version)
 GApplication::GApplication(const std::string& name, const std::string& version,
                            int argc, char *argv[])
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Set application name and version
     m_name    = name;
     m_version = version;
-
-    // Save the execution start time
-    time(&m_tstart);
 
     // Initialise the application logger
     log.open(log_filename(), true);
@@ -131,11 +122,11 @@ GApplication::GApplication(const std::string& name, const std::string& version,
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] app Object from which the instance should be built.
+ * @param[in] app Application.
  ***************************************************************************/
 GApplication::GApplication(const GApplication& app)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -168,7 +159,7 @@ GApplication::~GApplication(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] app Object which should be assigned.
+ * @param[in] app Application.
  ***************************************************************************/
 GApplication& GApplication::operator= (const GApplication& app)
 {
@@ -218,19 +209,32 @@ std::string GApplication::version(void) const
 
 
 /***********************************************************************//**
- * @brief Return application elapsed time in CPU seconds
+ * @brief Return application elapsed time in calendar seconds
  ***************************************************************************/
 double GApplication::telapse(void) const
 {
     // Get actual time
     std::time_t acttime;
-    time(&acttime);
+    std::time(&acttime);
 
     // Compute elapsed time
     double telapse = difftime(acttime, m_tstart);
 
     // Return elapsed time
     return telapse;
+}
+
+
+/***********************************************************************//**
+ * @brief Return application elapsed time in CPU seconds
+ ***************************************************************************/
+double GApplication::celapse(void) const
+{
+    // Compute elapsed CPU clock time
+    double celapse = ((double) (clock() - m_cstart)) / CLOCKS_PER_SEC;
+
+    // Return elapsed time
+    return celapse;
 }
 
 
@@ -336,7 +340,6 @@ void GApplication::init_members(void)
     log.clear();
 
     // Initialise protected members
-    m_tstart = 0;
     m_name.clear();
     m_version.clear();
     m_args.clear();
@@ -344,6 +347,12 @@ void GApplication::init_members(void)
     m_chatter = 1;
     m_clobber = true;
     m_debug   = false;
+
+    // Save the execution calendar start time
+    std::time(&m_tstart);
+
+    // Save the execution start clock
+    m_cstart = std::clock();
 
     // Return
     return;
@@ -353,7 +362,7 @@ void GApplication::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] app Object from which members which should be copied.
+ * @param[in] app Application.
  ***************************************************************************/
 void GApplication::copy_members(const GApplication& app)
 {
@@ -365,6 +374,7 @@ void GApplication::copy_members(const GApplication& app)
     m_version = app.m_version;
     m_args    = app.m_args;
     m_tstart  = app.m_tstart;
+    m_cstart  = app.m_cstart;
     m_pars    = app.m_pars;
     m_chatter = app.m_chatter;
     m_clobber = app.m_clobber;
@@ -470,22 +480,21 @@ void GApplication::log_header(void)
 /***********************************************************************//**
  * @brief Write application trailer in log file
  *
- * The application trailer gives the total number of elapsed CPU time.
+ * The application trailer gives the total number of elapsed calendar and
+ * CPU seconds.
  ***************************************************************************/
 void GApplication::log_trailer(void)
 {
-    // Get elapsed time
-    double t = telapse();
-
     // Reset any indentation
     log.indent(0);
 
     // Dump trailer
-    log << "Application \"" << m_name << "\" terminated after";
-    log << " consuming " << telapse() << " seconds of CPU time.";
-    if (t < 0.1)
+    log << "Application \"" << m_name << "\" terminated after ";
+    log << telapse() << " wall clock seconds, consuming ";
+    log << celapse() << " seconds of CPU time.";
+    if (telapse() < 0.1)
          log << " This was rather quick!";
-    if (t > 86400.0)
+    if (telapse() > 86400.0)
          log << " We hope it was worth waiting ...";
     log << std::endl;
 
