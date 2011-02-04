@@ -20,11 +20,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <unistd.h>           // access() function
+#include <cstdio>             // std::fopen, std::fgets, and std::fclose
 #include <vector>
 #include <string>
-#include <unistd.h>           // access() function
-//#include <stdio.h>            // fopen, fgets, fclose, etc...
-#include <cstdio>             // fopen, fgets, fclose, etc...
 #include "GModelSpatialPtsrc.hpp"
 #include "GTools.hpp"
 #include "GIntegral.hpp"
@@ -957,12 +956,12 @@ void GCTAResponse::read_performance_table(const std::string& filename)
     char  line[n];
 
     // Open performance table readonly
-    FILE* fptr = fopen(filename.c_str(), "r");
+    FILE* fptr = std::fopen(filename.c_str(), "r");
     if (fptr == NULL)
         throw GCTAException::file_open_error(G_READ, filename);
 
     // Read lines
-    while (fgets(line, n, fptr) != NULL) {
+    while (std::fgets(line, n, fptr) != NULL) {
 
         // Split line in elements
         std::vector<std::string> elements = split(line, " ");
@@ -996,7 +995,7 @@ void GCTAResponse::read_performance_table(const std::string& filename)
     }
 
     // Close file
-    fclose(fptr);
+    std::fclose(fptr);
 
     // Return
     return;
