@@ -15,9 +15,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <string.h>           // strncpy, etc...
+#include <cstring>            // std::strncpy, etc...
 #include <string>
-#include <cstring>            // strncpy, etc...
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
@@ -329,7 +328,7 @@ void GFitsTableStringCol::copy_members(const GFitsTableStringCol& column)
     // Copy NULL value
     if (column.m_nulval != NULL) {
         m_nulval = new char[m_width+1];
-        strncpy(m_nulval, column.m_nulval, m_width);
+        std::strncpy(m_nulval, column.m_nulval, m_width);
     }
 
     // Small memory option: release column if it was fetch above
@@ -390,7 +389,7 @@ void GFitsTableStringCol::save(void)
     // Transfer string into buffer
     for (int i = 0; i < m_size; ++i) {
         if (m_data[i].length() > 0)
-            strncpy(m_buffer[i], m_data[i].c_str(), m_width);
+            std::strncpy(m_buffer[i], m_data[i].c_str(), m_width);
     }
 
     // Save column
@@ -509,7 +508,7 @@ void GFitsTableStringCol::alloc_nulval(const std::string& value)
         m_nulval[j] = '\0';
 
     // Set nul value
-    strncpy(m_nulval, value.c_str(), m_width);
+    std::strncpy(m_nulval, value.c_str(), m_width);
 
     // Return
     return;
