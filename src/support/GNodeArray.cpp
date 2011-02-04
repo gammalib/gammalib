@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GNodeArray.cpp  -  Array of nodes class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,8 +20,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cmath>
 #include <iostream>
-#include <math.h>
 #include "GException.hpp"
 #include "GNodeArray.hpp"
 
@@ -425,7 +425,6 @@ void GNodeArray::init_members(void)
 void GNodeArray::copy_members(const GNodeArray& array)
 {
     // Copy number of bins
-    //m_nodes         = array.m_nodes;
     m_node          = array.m_node;
     m_step          = array.m_step;
     m_is_linear     = array.m_is_linear;
@@ -473,7 +472,7 @@ void GNodeArray::setup(void)
         m_is_linear = true;
         for (int i = 0; i < nodes-1; ++i) {
             double eps = m_linear_slope * m_node[i] + m_linear_offset - double(i);
-            if (fabs(eps) > 1.0e-6) {
+            if (std::abs(eps) > 1.0e-6) {
                 m_is_linear = false;
                 break;
             }
