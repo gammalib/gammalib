@@ -20,15 +20,13 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <time.h>
-#include <stdarg.h>     // for "va_list" type
-//#include <stdio.h>      // fopen, fgets, fclose, etc...
-//#include <string.h>     // memcpy
+#include <ctime>
+#include <cstdarg>      // for std::va_list type
+#include <cstdio>       // std::fopen, std::fgets, std::fclose, etc...
+#include <cstring>      // std::memcpy
 #include <string>
 #include <iostream>
 #include <sstream>
-#include <cstdio>       // fopen, fgets, fclose, etc...
-#include <cstring>      // memcpy
 #include "GLog.hpp"
 #include "GTools.hpp"
 
@@ -165,9 +163,9 @@ void GLog::operator()(const char *msgFormat, ...)
     char buffer[8192];
 
     // Put message into buffer
-    va_list vl;
+    std::va_list vl;
     va_start(vl, msgFormat);
-    vsprintf(buffer, msgFormat, vl);
+    std::vsprintf(buffer, msgFormat, vl);
     va_end(vl);
 
     // Append message to string buffer
@@ -447,9 +445,9 @@ void GLog::open(const std::string& filename, bool clobber)
 
     // Open file
     if (clobber)
-        m_file = fopen(filename.c_str(), "w");
+        m_file = std::fopen(filename.c_str(), "w");
     else
-        m_file = fopen(filename.c_str(), "a");
+        m_file = std::fopen(filename.c_str(), "a");
 
     // Return
     return;
@@ -469,7 +467,7 @@ void GLog::close(void)
 
     // Close any open file
     if (m_file != NULL) {
-        fclose(m_file);
+        std::fclose(m_file);
         m_file = NULL;
     }
 
@@ -679,7 +677,7 @@ void GLog::flush(bool force)
 
             // Find next CR
             std::string line;
-            size_t pos = m_buffer.find_first_of("\n", 0);
+            std::size_t pos = m_buffer.find_first_of("\n", 0);
             if (pos == std::string::npos) {
                 line    = m_buffer;
                 newline = false;
@@ -709,7 +707,7 @@ void GLog::flush(bool force)
             if (m_stderr)
                 std::cerr << line;
             if (m_file != NULL)
-                fprintf(m_file, line.c_str());
+                std::fprintf(m_file, line.c_str());
 
             // Set newline flag for next line
             m_newline = newline;
@@ -778,26 +776,26 @@ void GLog::header(const std::string& arg, int level)
 std::string GLog::strdate(void)
 {
     // Allocate variables
-    struct tm timeStruct;
-    time_t    now;
-    char      buffer[100];
+    struct std::tm timeStruct;
+    std::time_t    now;
+    char           buffer[100];
 
     // Get time
-    now = time(NULL);
+    now = std::time(NULL);
     #ifdef HAVE_GMTIME_R   
-    gmtime_r(&now, &timeStruct);
+    std::gmtime_r(&now, &timeStruct);
     #else
-    memcpy(&timeStruct, gmtime(&now), sizeof(struct tm));
+    std::memcpy(&timeStruct, gmtime(&now), sizeof(struct tm));
     #endif
 
     // Write message type, time and task name to buffer
-    sprintf(buffer, "%04d-%02d-%02dT%02d:%02d:%02d",
-                    timeStruct.tm_year + 1900,
-                    timeStruct.tm_mon + 1,
-                    timeStruct.tm_mday,
-                    timeStruct.tm_hour,
-                    timeStruct.tm_min,
-                    timeStruct.tm_sec);
+    std::sprintf(buffer, "%04d-%02d-%02dT%02d:%02d:%02d",
+                         timeStruct.tm_year + 1900,
+                         timeStruct.tm_mon + 1,
+                         timeStruct.tm_mday,
+                         timeStruct.tm_hour,
+                         timeStruct.tm_min,
+                         timeStruct.tm_sec);
 
     // Build string from buffer
     std::string date = buffer;
