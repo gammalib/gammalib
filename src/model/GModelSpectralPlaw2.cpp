@@ -20,7 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <math.h>
+#include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GModelSpectralPlaw2.hpp"
@@ -342,21 +342,21 @@ GEnergy GModelSpectralPlaw2::mc(const GEnergy& emin, const GEnergy& emax,
     // Case A: Index is not -1
     if (index() != -1.0) {
         double exponent = index() + 1.0;
-        double e_max    = pow(emax.MeV(), exponent);
-        double e_min    = pow(emin.MeV(), exponent);
+        double e_max    = std::pow(emax.MeV(), exponent);
+        double e_min    = std::pow(emin.MeV(), exponent);
         double u        = ran.uniform();
         double eng      = (u > 0.0) 
-                          ? exp(log(u * (e_max - e_min) + e_min) / exponent)
+                          ? std::exp(std::log(u * (e_max - e_min) + e_min) / exponent)
                           : 0.0;
         energy.MeV(eng);
     }
 
     // Case B: Index is -1
     else {
-        double e_max = log(emax.MeV());
-        double e_min = log(emin.MeV());
+        double e_max = std::log(emax.MeV());
+        double e_min = std::log(emin.MeV());
         double u     = ran.uniform();
-        double eng   = exp(u * (e_max - e_min) + e_min);
+        double eng   = std::exp(u * (e_max - e_min) + e_min);
         energy.MeV(eng);
     }
 
@@ -669,16 +669,16 @@ void GModelSpectralPlaw2::update(const GEnergy& srcEng)
 
         // Change in energy boundaries?
         if (emin() != m_last_emin || emax() != m_last_emax) {
-            m_log_emin  = log(emin());
+            m_log_emin  = std::log(emin());
             m_last_emin = emin();
-            m_log_emax  = log(emax());
+            m_log_emax  = std::log(emax());
             m_last_emax = emax();
         }
 
         // Compute normalization factors
         if (gamma != 0.0) {
-            m_pow_emin  = pow(emin(), gamma);
-            m_pow_emax  = pow(emax(), gamma);
+            m_pow_emin  = std::pow(emin(), gamma);
+            m_pow_emax  = std::pow(emax(), gamma);
             double d    = m_pow_emax - m_pow_emin;
             m_norm      = gamma / d;
             m_g_norm    = 1.0/gamma - 
@@ -690,7 +690,7 @@ void GModelSpectralPlaw2::update(const GEnergy& srcEng)
         }
 
         // Update power law factor
-        m_power       = pow(srcEng.MeV(), index());
+        m_power       = std::pow(srcEng.MeV(), index());
         m_last_energy = srcEng;
 
     } // endif: change in spectral index
@@ -702,15 +702,15 @@ void GModelSpectralPlaw2::update(const GEnergy& srcEng)
         if (emin() != m_last_emin || emax() != m_last_emax) {
 
             // Update energy boundaries
-            m_log_emin  = log(emin());
+            m_log_emin  = std::log(emin());
             m_last_emin = emin();
-            m_log_emax  = log(emax());
+            m_log_emax  = std::log(emax());
             m_last_emax = emax();
         
             // Compute power law normalization
             if (gamma != 0.0) {
-                m_pow_emin  = pow(emin(), gamma);
-                m_pow_emax  = pow(emax(), gamma);
+                m_pow_emin  = std::pow(emin(), gamma);
+                m_pow_emax  = std::pow(emax(), gamma);
                 double d    = m_pow_emax - m_pow_emin;
                 m_norm      = gamma / d;
                 m_g_norm    = 1.0/gamma - 
@@ -725,7 +725,7 @@ void GModelSpectralPlaw2::update(const GEnergy& srcEng)
 
         // Change in energy?
         if (srcEng != m_last_energy) {
-            m_power       = pow(srcEng.MeV(), index());
+            m_power       = std::pow(srcEng.MeV(), index());
             m_last_energy = srcEng;
         }
 

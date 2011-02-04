@@ -20,7 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <math.h>
+#include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GCsv.hpp"
@@ -537,7 +537,7 @@ void GModelSpectralFunc::load_nodes(const std::string& filename)
 
     // Setup nodes
     for (int i = 0; i < csv.nrows(); ++i) {
-        m_nodes.append(log10(csv.real(i,0)));
+        m_nodes.append(std::log10(csv.real(i,0)));
         m_values.push_back(csv.real(i,1));
     }
 

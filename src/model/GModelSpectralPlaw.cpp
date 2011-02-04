@@ -20,7 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <math.h>
+#include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GModelSpectralPlaw.hpp"
@@ -227,7 +227,7 @@ double GModelSpectralPlaw::eval(const GEnergy& srcEng)
 {
     // Compute function value
     double energy = srcEng.MeV() / pivot();
-    double power  = pow(energy, index());
+    double power  = std::pow(energy, index());
     double value  = norm() * power;
 
     // Return
@@ -264,12 +264,12 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng)
 {
     // Compute function value
     double energy = srcEng.MeV() / pivot();
-    double power  = pow(energy, index());
+    double power  = std::pow(energy, index());
     double value  = norm() * power;
 
     // Compute partial derivatives of the parameter values
     double g_norm  = (m_norm.isfree())  ? m_norm.scale() * power : 0.0;
-    double g_index = (m_index.isfree()) ? value * m_index.scale() * log(energy) : 0.0;
+    double g_index = (m_index.isfree()) ? value * m_index.scale() * std::log(energy) : 0.0;
     double g_pivot = (m_pivot.isfree()) ? -value * index() / m_pivot.value() : 0.0;
 
     // Set gradients
@@ -301,10 +301,10 @@ double GModelSpectralPlaw::flux(const GEnergy& emin, const GEnergy& emax) const
     double flux = norm() * pow(pivot(), -index());
     if (index() != -1.0) {
         double exponent = index() + 1.0;
-        flux *= (pow(emax.MeV(), exponent) - pow(emin.MeV(), exponent)) / exponent;
+        flux *= (std::pow(emax.MeV(), exponent) - std::pow(emin.MeV(), exponent)) / exponent;
     }
     else
-        flux *= (log(emax.MeV()) - log(emin.MeV()));
+        flux *= (std::log(emax.MeV()) - std::log(emin.MeV()));
 
     // Return flux
     return flux;
@@ -329,21 +329,21 @@ GEnergy GModelSpectralPlaw::mc(const GEnergy& emin, const GEnergy& emax,
     // Case A: Index is not -1
     if (index() != -1.0) {
         double exponent = index() + 1.0;
-        double e_max    = pow(emax.MeV(), exponent);
-        double e_min    = pow(emin.MeV(), exponent);
+        double e_max    = std::pow(emax.MeV(), exponent);
+        double e_min    = std::pow(emin.MeV(), exponent);
         double u        = ran.uniform();
         double eng      = (u > 0.0) 
-                          ? exp(log(u * (e_max - e_min) + e_min) / exponent)
+                          ? std::exp(std::log(u * (e_max - e_min) + e_min) / exponent)
                           : 0.0;
         energy.MeV(eng);
     }
 
     // Case B: Index is -1
     else {
-        double e_max = log(emax.MeV());
-        double e_min = log(emin.MeV());
+        double e_max = std::log(emax.MeV());
+        double e_min = std::log(emin.MeV());
         double u     = ran.uniform();
-        double eng   = exp(u * (e_max - e_min) + e_min);
+        double eng   = std::exp(u * (e_max - e_min) + e_min);
         energy.MeV(eng);
     }
 

@@ -20,7 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <math.h>
+#include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GModelSpectralExpPlaw.hpp"
@@ -235,7 +235,7 @@ double GModelSpectralExpPlaw::eval(const GEnergy& srcEng)
     double energy = srcEng.MeV();
     double e_norm = energy / pivot();
     double e_cut  = energy / ecut();
-    double power  = pow(e_norm, index()) * exp(-e_cut);
+    double power  = std::pow(e_norm, index()) * std::exp(-e_cut);
     double value  = norm() * power;
 
     // Return
@@ -276,12 +276,12 @@ double GModelSpectralExpPlaw::eval_gradients(const GEnergy& srcEng)
     double energy = srcEng.MeV();
     double e_norm = energy / pivot();
     double e_cut  = energy / ecut();
-    double power  = pow(e_norm, index()) * exp(-e_cut);
+    double power  = std::pow(e_norm, index()) * std::exp(-e_cut);
     double value  = norm() * power;
 
     // Compute partial derivatives of the parameter values
     double g_norm  = (m_norm.isfree())  ? m_norm.scale() * power : 0.0;
-    double g_index = (m_index.isfree()) ? value * m_index.scale() * log(e_norm) : 0.0;
+    double g_index = (m_index.isfree()) ? value * m_index.scale() * std::log(e_norm) : 0.0;
     double g_ecut  = (m_ecut.isfree())  ? value * e_cut/m_ecut.value() : 0.0;
     double g_pivot = (m_pivot.isfree()) ? -value * index() / m_pivot.value() : 0.0;
 
