@@ -20,8 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <stdio.h>            // fopen, fgets, fclose, etc...
-#include <cstdio>            // fopen, fgets, fclose, etc...
+#include <cstdio>            // std::fopen, std::fgets, std::fclose, etc...
 #include "GCsv.hpp"
 #include "GTools.hpp"
 #include "GException.hpp"
@@ -285,13 +284,13 @@ void GCsv::load(const std::string& filename, std::string sep)
     char  line[n];
 
     // Open CSV table (read-only
-    FILE* fptr = fopen(filename.c_str(), "r");
+    FILE* fptr = std::fopen(filename.c_str(), "r");
     if (fptr == NULL)
         throw GException::file_not_found(G_LOAD, filename);
 
     // Read lines
     int iline = 0;
-    while (fgets(line, n, fptr) != NULL) {
+    while (std::fgets(line, n, fptr) != NULL) {
 
         // Increment line counter
         iline++;
@@ -331,7 +330,7 @@ void GCsv::load(const std::string& filename, std::string sep)
     } // endwhile: looped over lines
 
     // Close file
-    fclose(fptr);
+    std::fclose(fptr);
 
     // Return
     return;
