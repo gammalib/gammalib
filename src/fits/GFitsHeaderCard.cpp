@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GFitsHeaderCard.cpp  - FITS header card abstract base class       *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
+ *  copyright : (C) 2008-2011 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -15,9 +15,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cfloat>
+#include <climits>
 #include <iostream>
-#include <limits.h>
-#include <float.h>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
