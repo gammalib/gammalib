@@ -15,6 +15,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdio>
 #include <iostream>
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
@@ -852,10 +853,10 @@ GFitsImage* GFits::new_image(void)
     char      keyname[10];
     long long bzero;
     long long bscale;
-    sprintf(keyname, "BZERO");
+    std::sprintf(keyname, "BZERO");
     if (__ffgky(FPTR(m_fitsfile), __TLONGLONG, keyname, &bzero, NULL, &status) != 0)
         bzero = 0;
-    sprintf(keyname, "BSCALE");
+    std::sprintf(keyname, "BSCALE");
     if (__ffgky(FPTR(m_fitsfile), __TLONGLONG, keyname, &bscale, NULL, &status) != 0)
         bscale = 0;
     if (bitpix == 8 && bzero == -128 && bscale == 1)
