@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.cpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,7 +25,8 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_PAR                                "GApplication::par(std::string)"
+#define G_OPERATOR                  "GApplication::operator() (std::string&)"
+#define G_PAR                               "GApplication::par(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -182,6 +183,36 @@ GApplication& GApplication::operator= (const GApplication& app)
 }
 
 
+/***********************************************************************//**
+ * @brief Parameter access operator
+ *
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::par_error
+ *            Parameter of specified name not found.
+ ***************************************************************************/
+GPar& GApplication::operator() (const std::string& name)
+{
+    // Return dereferenced pointer
+    return (*(this->par(name)));
+}
+
+
+/***********************************************************************//**
+ * @brief Parameter access operator (const version)
+ *
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::par_error
+ *            Parameter of specified name not found.
+ ***************************************************************************/
+const GPar& GApplication::operator() (const std::string& name) const
+{
+    // Return dereferenced pointer
+    return (*(this->par(name)));
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
@@ -244,12 +275,36 @@ double GApplication::celapse(void) const
  * @param[in] name Parameter to be returned.
  *
  * @exception GException::par_error
- *            Parameter not found..
+ *            Parameter of specified name not found.
  ***************************************************************************/
 GPar* GApplication::par(const std::string& name)
 {
     // Get pointer to application parameter
     GPar* ptr = m_pars.par(name);
+
+    // Throw exception if parameter does not exist
+    if (ptr == NULL) {
+        throw GException::par_error(G_PAR, "Parameter '"+name+"' not found "
+                                    "in parameter file.");
+    }
+
+    // Return pointer
+    return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to application parameter (const version)
+ *
+ * @param[in] name Parameter to be returned.
+ *
+ * @exception GException::par_error
+ *            Parameter of specified name not found.
+ ***************************************************************************/
+const GPar* GApplication::par(const std::string& name) const
+{
+    // Get pointer to application parameter
+    const GPar* ptr = m_pars.par(name);
 
     // Throw exception if parameter does not exist
     if (ptr == NULL) {
@@ -322,6 +377,50 @@ bool GApplication::logDebug(void) const
 {
     // Return debug condition
     return (m_debug);
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if specified parameter exists
+ ***************************************************************************/
+bool GApplication::haspar(const std::string& name) const
+{
+    // Return test result
+    return (m_pars.par(name) != NULL);
+}
+
+
+/***********************************************************************//**
+ * @brief Print application
+ ***************************************************************************/
+std::string GApplication::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GApplication ===");
+
+    // Append application name, version and arguments
+    result.append("\n"+parformat("Name")+name());
+    result.append("\n"+parformat("Version")+version());
+    for (int i = 0; i < m_args.size(); ++i) {
+        if (i == 0)
+            result.append("\n"+parformat("Command")+m_args[i]);
+        else if (i == 1)
+            result.append("\n"+parformat("Arguments")+m_args[i]);
+        else
+            result.append("\n"+parformat("                           ")+m_args[i]);
+    }
+
+    // Append parameters
+    for (int i = 0; i < m_pars.size(); ++i) {
+        result.append("\n"+parformat(m_pars.m_pars[i].name()) +
+                           m_pars.m_pars[i].m_value);
+    }
+
+    // Return result
+    return result;
 }
 
 
@@ -420,7 +519,7 @@ std::string GApplication::par_filename(void) const
 /***********************************************************************//**
  * @brief Returns log filename
  *
- * The log filename is given by the task name to which the suffix '.log' is
+ * The log filename is given by the task name to which the suffix ".log" is
  * added.
  ***************************************************************************/
 std::string GApplication::log_filename(void) const
@@ -432,22 +531,17 @@ std::string GApplication::log_filename(void) const
 
 /***********************************************************************//**
  * @brief Get standard parameters from parameter file
+ *
+ * The standard parameters "chatter", "clobber" and "debug" are read from
+ * the parameter file.
  ***************************************************************************/
 void GApplication::get_par_standard(void)
 {
-    // Get parameter pointers (NULL if not found)
-    GPar* par_chatter = par("chatter");
-    GPar* par_clobber = par("clobber");
-    GPar* par_debug   = par("debug");
+    // Extract parameters
+    m_chatter = (*this)("chatter").integer();
+    m_clobber = (*this)("clobber").boolean();
+    m_debug   = (*this)("debug").boolean();
 
-    // Extract parameters if they exist
-    if (par_chatter != NULL)
-        m_chatter = par_chatter->integer();
-    if (par_clobber != NULL)
-        m_clobber = par_clobber->boolean();
-    if (par_debug != NULL)
-        m_debug = par_debug->boolean();
-    
     // Return
     return;
 }
@@ -457,7 +551,7 @@ void GApplication::get_par_standard(void)
  * @brief Write application header in log file
  *
  * Dump the application header into the log file. The header is composed of
- * a fixed width block delimined by '*' characters that contains information
+ * a fixed width block delimined by "*" characters that contains information
  * about the application name and version.
  ***************************************************************************/
 void GApplication::log_header(void)
@@ -541,28 +635,32 @@ void GApplication::log_parameters(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Put object in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the model will be dumped
- * @param[in] app Object to be dumped
+ * @param[in] os Output stream.
+ * @param[in] app Application.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GApplication& app)
 {
-    // Put object in stream
-    os << "=== GApplication ===" << std::endl;
-    os << " Name ......................: " << app.name() << std::endl;
-    os << " Version ...................: " << app.version();
-    for (int i=0; i < app.m_args.size(); ++i) {
-        if (i == 0)
-            os << std::endl << " Command ...................: " << app.m_args[i];
-        else if (i == 1)
-            os << std::endl << " Arguments .................: " << app.m_args[i];
-        else
-            os << std::endl << "                              " << app.m_args[i];
-    }
+     // Write application in output stream
+    os << app.print();
 
     // Return output stream
     return os;
 }
 
 
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] app Application.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GApplication& app)
+{
+    // Write application into logger
+    log << app.print();
+
+    // Return logger
+    return log;
+}

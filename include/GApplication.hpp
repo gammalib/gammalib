@@ -37,6 +37,7 @@ class GApplication {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GApplication& app);
+    friend GLog&         operator<< (GLog&        log, const GApplication& app);
 
 public:
     // Constructors and destructors
@@ -49,6 +50,8 @@ public:
 
     // Operators
     GApplication& operator= (const GApplication& app);
+    GPar&         operator() (const std::string& name);
+    const GPar&   operator() (const std::string& name) const;
 
     // Methods
     std::string name(void) const;
@@ -56,12 +59,15 @@ public:
     double      telapse(void) const;
     double      celapse(void) const;
     GPar*       par(const std::string& name);
+    const GPar* par(const std::string& name) const;
     bool        logTerse(void) const;
     bool        logNormal(void) const;
     bool        logExplicit(void) const;
     bool        logVerbose(void) const;
     bool        logDebug(void) const;
     bool        clobber(void) const { return m_clobber; }
+    bool        haspar(const std::string& name) const;
+    std::string print(void) const;
 
     // Public members
     GLog        log;                       //!< Application logger
