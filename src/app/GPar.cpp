@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GPar.cpp - Application parameter                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,7 +21,7 @@
 #include <config.h>
 #endif
 #ifdef HAVE_LIBREADLINE
-#include <stdio.h>             //!< Needed for declaration of FILE in readline
+#include <cstdio>             //!< Needed for declaration of FILE in readline
 #include <readline/readline.h>
 #endif
 #include "GPar.hpp"
