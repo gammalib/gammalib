@@ -15,6 +15,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstring>
 #include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
@@ -861,7 +862,7 @@ char* GFitsTable::get_ttype(const int& colnum) const
         m_columns[colnum] != NULL) {
         int size = m_columns[colnum]->m_name.length();
         ptr      = new char[size+1];
-        strncpy(ptr, m_columns[colnum]->m_name.c_str(), size);
+        std::strncpy(ptr, m_columns[colnum]->m_name.c_str(), size);
         ptr[size] = '\0';
    }
 
@@ -897,12 +898,12 @@ char* GFitsTable::get_tform(const int& colnum) const
         case GFitsHDU::HT_ASCII_TABLE:
             size = m_columns[colnum]->ascii_format().length();
             ptr  = new char[size+1];
-            strncpy(ptr, m_columns[colnum]->ascii_format().c_str(), size);
+            std::strncpy(ptr, m_columns[colnum]->ascii_format().c_str(), size);
             break;
         case GFitsHDU::HT_BIN_TABLE:
             size = m_columns[colnum]->binary_format().length();
             ptr  = new char[size+1];
-            strncpy(ptr, m_columns[colnum]->binary_format().c_str(), size);
+            std::strncpy(ptr, m_columns[colnum]->binary_format().c_str(), size);
             break;
         default:
             throw GException::fits_unknown_tabtype(G_GET_TFORM, m_type);
@@ -935,7 +936,7 @@ char* GFitsTable::get_tunit(const int& colnum) const
         m_columns[colnum] != NULL) {
         int size = m_columns[colnum]->m_unit.length();
         ptr      = new char[size+1];
-        strncpy(ptr, m_columns[colnum]->m_unit.c_str(), size);
+        std::strncpy(ptr, m_columns[colnum]->m_unit.c_str(), size);
         ptr[size] = '\0';
     }
 
