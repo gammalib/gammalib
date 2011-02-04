@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GException_app.cpp  -  Application exception handlers         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -149,13 +149,17 @@ GException::par_file_syntax_error::par_file_syntax_error(std::string origin,
  * @brief Error encountered in parameter definition
  *
  * @param[in] origin Method that throws the error.
+ * @param[in] name Parameter name.
  * @param[in] message Optional error message.
  ***************************************************************************/
-GException::par_error::par_error(std::string origin, std::string message)
+GException::par_error::par_error(std::string origin, std::string name,
+                                 std::string message)
 {
-    // Set origin and message
+    // Set origin
     m_origin  = origin;
-    m_message = message;
+
+    // Set message
+    m_message = "Parameter \""+name+"\": " + message;
 
     // Return
     return;

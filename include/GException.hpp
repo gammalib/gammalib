@@ -378,7 +378,8 @@ public:
     };
     class par_error : public GExceptionHandler {
     public:
-        par_error(std::string origin, std::string message = "");
+        par_error(std::string origin, std::string name,
+                  std::string message = "");
     };
     class bad_cmdline_argument : public GExceptionHandler {
     public:
