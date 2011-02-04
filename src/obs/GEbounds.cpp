@@ -20,8 +20,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cmath>
 #include <iostream>
-#include <math.h>
 #include "GException.hpp"
 #include "GEbounds.hpp"
 #include "GFits.hpp"
@@ -247,16 +247,16 @@ void GEbounds::setlog(const GEnergy& emin, const GEnergy& emax, const int& num)
     clear();
     
     // Compute bin width
-    double elogmin = log10(emin.MeV());
-    double elogmax = log10(emax.MeV());
+    double elogmin = std::log10(emin.MeV());
+    double elogmax = std::log10(emax.MeV());
     double elogbin = (elogmax - elogmin)/double(num);
 
     // Append boundaries
     GEnergy min;
     GEnergy max;
     for (int i = 0; i < num; ++i) {
-        min.MeV(pow(10.0, double(i)*elogbin   + elogmin));
-        max.MeV(pow(10.0, double(i+1)*elogbin + elogmin));
+        min.MeV(std::pow(10.0, double(i)*elogbin   + elogmin));
+        max.MeV(std::pow(10.0, double(i+1)*elogbin + elogmin));
         append(min, max);
     }
 
@@ -514,9 +514,9 @@ GEnergy GEbounds::elogmean(int inx) const
 
     // Compute logarithmic mean energy
     GEnergy elogmean;
-    double  elogmin  = log10(m_min[inx].MeV());
-    double  elogmax  = log10(m_max[inx].MeV());
-    elogmean.MeV(pow(10.0, 0.5 * (elogmin + elogmax)));
+    double  elogmin  = std::log10(m_min[inx].MeV());
+    double  elogmax  = std::log10(m_max[inx].MeV());
+    elogmean.MeV(std::pow(10.0, 0.5 * (elogmin + elogmax)));
 
     // Return
     return elogmean;
