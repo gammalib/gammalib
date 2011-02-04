@@ -20,14 +20,14 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
-#include <sstream>
-#include <cmath>
-#include <algorithm>
-#include <cctype>
 #include <unistd.h>        // access() function
 #include <sys/stat.h>
-#include <float.h>
+#include <cmath>
+#include <cfloat>
+#include <cctype>
+#include <iostream>
+#include <sstream>
+#include <algorithm>
 #include "GTools.hpp"
 
 /* __ Coding definitions _________________________________________________ */
@@ -223,7 +223,7 @@ char* tochar(const std::string& arg)
     char* str = new char[arg.length()+1];
 
     // Copy characters
-    for (size_t i = 0; i < arg.length(); ++i)
+    for (std::size_t i = 0; i < arg.length(); ++i)
         str[i] = arg[i];
 
     // Set line end character
@@ -412,13 +412,13 @@ std::vector<std::string> split(const std::string& s, const std::string& sep)
     std::vector<std::string> result;
 
     // Initialise counters
-    size_t pos = 0;
-    size_t len = s.size();
+    std::size_t pos = 0;
+    std::size_t len = s.size();
 
     // Loop over string
     while (pos < len && pos != std::string::npos) {
-        size_t index = s.find_first_of(sep, pos);
-        size_t n     = std::string::npos;
+        std::size_t index = s.find_first_of(sep, pos);
+        std::size_t n     = std::string::npos;
         if (index != std::string::npos)
             n = index-pos;
         if (n > 0)
@@ -556,7 +556,7 @@ std::string parformat(const std::string& s)
 double modulo(double v1, double v2)
 {
     // Return
-    return (v1 >= 0) ? ((v1 < v2) ? v1 : fmod(v1,v2)) : (fmod(v1,v2)+v2);
+    return (v1 >= 0) ? ((v1 < v2) ? v1 : std::fmod(v1,v2)) : (std::fmod(v1,v2)+v2);
 }
 
 
