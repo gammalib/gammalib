@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GEnergy.hpp - Energy class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -215,7 +215,7 @@ double GEnergy::log10MeV(void) const
     // as we don't want to show to the client that members of the instance
     // have been changed.
     if (!m_has_log10) {
-        ((GEnergy*)this)->m_elog10    = (m_energy > 0.0) ? log10(m_energy) : DBL_MIN;
+        ((GEnergy*)this)->m_elog10    = (m_energy > 0.0) ? std::log10(m_energy) : DBL_MIN;
         ((GEnergy*)this)->m_has_log10 = true;
     }
     
@@ -323,7 +323,7 @@ void GEnergy::log10MeV(const double& eng)
 {
     // Set energy
     m_elog10    = eng;
-    m_energy    = pow(10.0, eng);
+    m_energy    = std::pow(10.0, eng);
     m_has_log10 = true;
     
     // Return
