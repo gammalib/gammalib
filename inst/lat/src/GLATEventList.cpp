@@ -20,8 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <stdio.h>            // sprintf, etc...
-#include <cstdio>             // sprintf, etc...
+#include <cstdio>             // std::sprintf
 #include "GLATEventList.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"
@@ -483,7 +482,7 @@ void GLATEventList::load_events(GFitsTable* hdu)
                 for (int k = 0; k < m_num_difrsp; ++k) {
 
                     // Set keyword name
-                    sprintf(keyword, "DIFRSP%d", k);
+                    std::sprintf(keyword, "DIFRSP%d", k);
 
                     // Get DIFRSP label
                     try {
@@ -550,7 +549,7 @@ void GLATEventList::load_ds_keys(GFitsTable* hdu)
 
                 // Get DSTYPnn
                 try {
-                    sprintf(keyword, "DSTYP%d", i+1);
+                    std::sprintf(keyword, "DSTYP%d", i+1);
                     m_ds_type[i] = hdu->card(std::string(keyword))->string();
                 }
                 catch (GException::fits_key_not_found &e) {
@@ -559,7 +558,7 @@ void GLATEventList::load_ds_keys(GFitsTable* hdu)
 
                 // Get DSUNInn
                 try {
-                    sprintf(keyword, "DSUNI%d", i+1);
+                    std::sprintf(keyword, "DSUNI%d", i+1);
                     m_ds_unit[i] = hdu->card(std::string(keyword))->string();
                 }
                 catch (GException::fits_key_not_found &e) {
@@ -568,7 +567,7 @@ void GLATEventList::load_ds_keys(GFitsTable* hdu)
 
                 // Get DSVALnn
                 try {
-                    sprintf(keyword, "DSVAL%d", i+1);
+                    std::sprintf(keyword, "DSVAL%d", i+1);
                     m_ds_value[i] = hdu->card(std::string(keyword))->string();
                 }
                 catch (GException::fits_key_not_found &e) {
@@ -577,7 +576,7 @@ void GLATEventList::load_ds_keys(GFitsTable* hdu)
 
                 // Get DSREFnn
                 try {
-                    sprintf(keyword, "DSREF%d", i+1);
+                    std::sprintf(keyword, "DSREF%d", i+1);
                     m_ds_reference[i] = hdu->card(std::string(keyword))->string();
                 }
                 catch (GException::fits_key_not_found &e) {
