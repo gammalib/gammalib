@@ -38,17 +38,17 @@ class GPar {
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GPar& par);
-    friend GLog&         operator<<(GLog& log, const GPar& par);
+    friend GLog&         operator<<(GLog& log,        const GPar& par);
 
 public:
     // Constructors and destructors
     GPar(void);
-    GPar(const std::string& name, const std::string& type,
-         const std::string& mode, const std::string& value,
-         const std::string& min, const std::string& max, 
-         const std::string& prompt);
+    explicit GPar(const std::string& name, const std::string& type,
+                  const std::string& mode, const std::string& value,
+                  const std::string& min, const std::string& max, 
+                  const std::string& prompt);
     GPar(const GPar& par);
-    ~GPar(void);
+    virtual ~GPar(void);
  
     // Operators
     GPar& operator= (const GPar& par);
@@ -57,10 +57,17 @@ public:
     void        type(const std::string& type);
     void        mode(const std::string& mode);
     void        value(const std::string& value);
+    void        string(const std::string& value);
+    void        filename(const std::string& value);
+    void        boolean(const bool& value);
+    void        integer(const int& value);
+    void        real(const double& value);
     std::string name(void) const { return m_name; }
     std::string type(void) const { return m_type; }
     std::string mode(void) const { return m_mode; }
     std::string value(void);
+    std::string string(void);
+    std::string filename(void);
     bool        boolean(void);
     int         integer(void);
     double      real(void);
@@ -69,21 +76,25 @@ public:
     std::string prompt(void) const { return m_prompt; }
     bool        islearn(void) const;
     bool        isquery(void) const;
+    bool        isfilename(void) const;
+    std::string print(void) const;
   
 protected:
     // Protected methods
-    void  init_members(void);
-    void  copy_members(const GPar& par);
-    void  free_members(void);
-    void  check_type(const std::string& type) const;
-    void  check_mode(const std::string& mode) const;
-    void  check_value(const std::string& value) const;
-    void  check_value_bool(const std::string& value) const;
-    void  check_value_int(const std::string& value) const;
-    void  check_value_real(const std::string& value) const;
-    void  check_value_string(const std::string& value) const;
-    void  check_value_filename(const std::string& value) const;
-    void  query(void);
+    void init_members(void);
+    void copy_members(const GPar& par);
+    void free_members(void);
+    void check_type(const std::string& type) const;
+    void check_mode(const std::string& mode) const;
+    void check_value(const std::string& value) const;
+    void check_value_bool(const std::string& value) const;
+    void check_value_int(const std::string& value) const;
+    void check_value_real(const std::string& value) const;
+    void check_value_string(const std::string& value) const;
+    void check_value_filename(const std::string& value) const;
+    void set_value(const std::string& value);
+    void query(void);
+    void stop_query(void);
 
     // Protected data members
     bool        m_update;  //!< Signal value updating

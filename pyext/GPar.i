@@ -20,54 +20,57 @@
 #include "GPar.hpp"
 #include "GTools.hpp"
 %}
-//%include stl.i
 
 
 /***********************************************************************//**
  * @class GPar
  *
- * @brief Application parameter class interface defintion.
+ * @brief Application parameter class Python interface defintion
  ***************************************************************************/
 class GPar {
-
-    // Friend classes
-    friend class GPars;
-
 public:
     // Constructors and destructors
     GPar(void);
-    GPar(const std::string& name, const std::string& type,
-         const std::string& mode, const std::string& value,
-         const std::string& min, const std::string& max, 
-         const std::string& prompt);
+    explicit GPar(const std::string& name, const std::string& type,
+                  const std::string& mode, const std::string& value,
+                  const std::string& min, const std::string& max, 
+                  const std::string& prompt);
     GPar(const GPar& par);
-    ~GPar(void);
+    virtual ~GPar(void);
  
     // Methods
     void        type(const std::string& type);
     void        mode(const std::string& mode);
     void        value(const std::string& value);
-    std::string name(void) const { return m_name; }
-    std::string type(void) const { return m_type; }
-    std::string mode(void) const { return m_mode; }
+    void        string(const std::string& value);
+    void        filename(const std::string& value);
+    void        boolean(const bool& value);
+    void        integer(const int& value);
+    void        real(const double& value);
+    std::string name(void) const;
+    std::string type(void) const;
+    std::string mode(void) const;
     std::string value(void);
-    std::string min(void) const { return m_min; }
-    std::string max(void) const { return m_max; }
-    std::string prompt(void) const { return m_prompt; }
+    std::string string(void);
+    std::string filename(void);
+    bool        boolean(void);
+    int         integer(void);
+    double      real(void);
+    std::string min(void) const;
+    std::string max(void) const;
+    std::string prompt(void) const;
     bool        islearn(void) const;
     bool        isquery(void) const;
+    bool        isfilename(void) const;
 };
 
 
 /***********************************************************************//**
- * @brief GPar class SWIG extension
+ * @brief GPar class extension
  ***************************************************************************/
 %extend GPar {
     char *__str__() {
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        return tochar(str);
+        return tochar(self->print());
     }
     GPar copy() {
         return (*self);

@@ -29,9 +29,16 @@
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_BOOLEAN                                           "GPar::boolean()"
-#define G_INTEGER                                           "GPar::integer()"
-#define G_REAL                                                 "GPar::real()"
+#define G_STRING_SET                             "GPar::string(std::string&)"
+#define G_FILENAME_SET                         "GPar::filename(std::string&)"
+#define G_BOOLEAN_SET                                  "GPar::boolean(bool&)"
+#define G_INTEGER_SET                                  "GPar::integer(bool&)"
+#define G_REAL_SET                                        "GPar::real(bool&)"
+#define G_STRING_GET                                         "GPar::string()"
+#define G_FILENAME_GET                                     "GPar::filename()"
+#define G_BOOLEAN_GET                                       "GPar::boolean()"
+#define G_INTEGER_GET                                       "GPar::integer()"
+#define G_REAL_GET                                             "GPar::real()"
 #define G_CHECK_TYPE                          "GPar::check_type(std::string)"
 #define G_CHECK_MODE                          "GPar::check_mode(std::string)"
 #define G_CHECK_VALUE_BOOL              "GPar::check_value_bool(std::string)"
@@ -41,6 +48,9 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+
+/* __ Prototypes _________________________________________________________ */
+std::string gpar_type_string(const std::string& type);
 
 
 /*==========================================================================
@@ -54,7 +64,7 @@
  ***************************************************************************/
 GPar::GPar(void)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -70,7 +80,7 @@ GPar::GPar(const std::string& name, const std::string& type,
            const std::string& min, const std::string& max, 
            const std::string& prompt)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Set parameter attributes
@@ -90,11 +100,11 @@ GPar::GPar(const std::string& name, const std::string& type,
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] par Object from which the instance should be built.
+ * @param[in] par Parameter.
  ***************************************************************************/
 GPar::GPar(const GPar& par)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -127,7 +137,7 @@ GPar::~GPar(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] par Object which should be assigned.
+ * @param[in] par Parameter.
  ***************************************************************************/
 GPar& GPar::operator= (const GPar& par)
 {
@@ -168,8 +178,8 @@ void GPar::type(const std::string& type)
     // Verify that type is valid
     check_type(type);
 
-    // Set mode
-    m_type  = type;
+    // Set type
+    m_type = type;
 
     // Return
     return;
@@ -189,7 +199,7 @@ void GPar::mode(const std::string& mode)
     check_mode(mode);
 
     // Set mode
-    m_mode  = mode;
+    m_mode = mode;
 
     // Return
     return;
@@ -200,22 +210,18 @@ void GPar::mode(const std::string& mode)
  * @brief Set parameter value
  *
  * @param[in] value Parameter value.
+ *
+ * This method sets the parameter value dependent on the parameter type.
+ * It is a parser method that verifies that the given parameter value is
+ * compatible with the parameter type.
  ***************************************************************************/
 void GPar::value(const std::string& value)
 {
     // Verify that value is valid
     check_value(value);
 
-    // Set mode
-    m_value  = value;
-
-    // Signal update
-    m_update = true;
-
-    // Don't query parameter again
-    if (m_mode == "q")  m_mode = "h";
-    if (m_mode == "ql") m_mode = "hl";
-    if (m_mode == "lq") m_mode = "lh";
+    // Set value
+    set_value(value);
 
     // Return
     return;
@@ -223,7 +229,160 @@ void GPar::value(const std::string& value)
 
 
 /***********************************************************************//**
- * @brief Returns parameter value (as string)
+ * @brief Set string parameter value
+ *
+ * @param[in] value Parameter value.
+ *
+ * @exception GException::par_error
+ *            Parameter is not of string type.
+ *
+ * This method sets a string parameter. The method only applies to parameters
+ * of type "s". Other parameter types will produce an exception.
+ ***************************************************************************/
+void GPar::string(const std::string& value)
+{
+    // Check if parameter is a string parameter
+    if (m_type != "s")
+        throw GException::par_error(G_STRING_SET, name(),
+              "attempted to set "+gpar_type_string(m_type)+
+              " parameter with string value.");
+
+    // Verify that value is a valid string
+    check_value_string(value);
+
+    // Set value
+    set_value(value);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set filename parameter value
+ *
+ * @param[in] value Parameter value.
+ *
+ * @exception GException::par_error
+ *            Parameter is not of filename type.
+ *
+ * This method sets a filename parameter. The method only applies to filename
+ * parameters. Other parameter types will produce an exception.
+ ***************************************************************************/
+void GPar::filename(const std::string& value)
+{
+    // Check if parameter is a filename parameter
+    if (!isfilename())
+        throw GException::par_error(G_FILENAME_SET, name(),
+              "attempted to set "+gpar_type_string(m_type)+
+              " parameter with filename.");
+
+    // Verify that value is a valid filename
+    check_value_filename(value);
+
+    // Set value
+    set_value(value);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set bool parameter value
+ *
+ * @param[in] value Parameter value.
+ *
+ * @exception GException::par_error
+ *            Parameter is not of boolean type.
+ *
+ * This method sets a boolean parameter. The method only applies to parameters
+ * of type "b". Other parameter types will produce an exception.
+ ***************************************************************************/
+void GPar::boolean(const bool& value)
+{
+    // Check if parameter is boolean
+    if (m_type != "b")
+        throw GException::par_error(G_BOOLEAN_SET, name(),
+              "attempted to set "+gpar_type_string(m_type)+
+              " parameter with boolean value.");
+
+    // Set value string
+    std::string value_string = (value) ? "yes" : "no";
+
+    // Set value
+    set_value(value_string);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set integer parameter value
+ *
+ * @param[in] value Parameter value.
+ *
+ * @exception GException::par_error
+ *            Parameter is not of integer type.
+ *
+ * This method sets an integer parameter. The method only applies to
+ * parameters of type "i". Other parameter types will produce an exception.
+ ***************************************************************************/
+void GPar::integer(const int& value)
+{
+    // Check if parameter is boolean
+    if (m_type != "i")
+        throw GException::par_error(G_INTEGER_SET, name(),
+              "attempted to set "+gpar_type_string(m_type)+
+              " parameter with integer value.");
+
+    // Set value string
+    std::string value_string = str(value);
+
+    // Set value
+    set_value(value_string);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set real parameter value
+ *
+ * @param[in] value Parameter value.
+ *
+ * @exception GException::par_error
+ *            Parameter is not of real type.
+ *
+ * This method sets a real parameter. The method only applies to parameters
+ * of type "r". Other parameter types will produce an exception.
+ ***************************************************************************/
+void GPar::real(const double& value)
+{
+    // Check if parameter is boolean
+    if (m_type != "r")
+        throw GException::par_error(G_REAL_SET, name(),
+              "attempted to set "+gpar_type_string(m_type)+
+              " parameter with real value.");
+
+    // Set value string
+    std::string value_string = str(value);
+
+    // Set value
+    set_value(value_string);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns any parameter value as string
+ *
+ * This method queries any parameter and returns it as a string. No parameter
+ * type checking is performed.
  ***************************************************************************/
 std::string GPar::value(void)
 {
@@ -236,22 +395,77 @@ std::string GPar::value(void)
 
 
 /***********************************************************************//**
- * @brief Returns boolean
+ * @brief Returns string parameter value
  *
  * @exception GException::par_error
- *            Parameter is not of Boolean type.
+ *            Parameter is not of string type.
  *
- * Returns the value of a Boolean parameter.
+ * This method queries and returns a string parameter. The method only
+ * applies to parameters of type "s". Other parameter types will produce an
+ * exception.
  ***************************************************************************/
-bool GPar::boolean(void)
+std::string GPar::string(void)
 {
+    // Check if parameter is a string parameter
+    if (m_type != "s")
+        throw GException::par_error(G_STRING_GET, name(),
+              "attempted reading "+gpar_type_string(m_type)+
+              " parameter as a string value.");
+
     // Query parameter
     query();
 
+    // Return value
+    return m_value;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns filename parameter value
+ *
+ * @exception GException::par_error
+ *            Parameter is not of filename type.
+ *
+ * This method queries and returns a filename parameter. The method only
+ * applies to filename parameters. Other parameter types will produce an
+ * exception.
+ ***************************************************************************/
+std::string GPar::filename(void)
+{
+    // Check if parameter is a filename parameter
+    if (!isfilename())
+        throw GException::par_error(G_FILENAME_GET, name(),
+              "attempted reading "+gpar_type_string(m_type)+
+              " parameter as a filename.");
+
+    // Query parameter
+    query();
+
+    // Return value
+    return m_value;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns boolean
+ *
+ * @exception GException::par_error
+ *            Parameter is not of boolean type.
+ *
+ * This method queries and returns a boolean parameter. The method only
+ * applies to parameters of type "b". Other parameter types will produce an
+ * exception.
+ ***************************************************************************/
+bool GPar::boolean(void)
+{
     // Check if parameter is boolean
     if (m_type != "b")
-        throw GException::par_error(G_BOOLEAN, 
-              "Boolean parameter type expected, \""+m_type+"\" found.");
+        throw GException::par_error(G_BOOLEAN_GET, name(),
+              "attempted reading "+gpar_type_string(m_type)+
+              " parameter as a boolean value.");
+
+    // Query parameter
+    query();
 
     // Set result
     bool result = (toupper(m_value) == "YES" || toupper(m_value) == "TRUE");
@@ -267,17 +481,20 @@ bool GPar::boolean(void)
  * @exception GException::par_error
  *            Parameter is not of integer type.
  *
- * Returns the value of an integer parameter.
+ * This method queries and returns an integer parameter. The method only
+ * applies to parameters of type "i". Other parameter types will produce an
+ * exception.
  ***************************************************************************/
 int GPar::integer(void)
 {
-    // Query parameter
-    query();
-
     // Check if parameter is integer
     if (m_type != "i")
-        throw GException::par_error(G_INTEGER, 
-              "Integer parameter type expected, \""+m_type+"\" found.");
+        throw GException::par_error(G_INTEGER_GET, name(),
+              "attempted reading "+gpar_type_string(m_type)+
+              " parameter as an integer value.");
+
+    // Query parameter
+    query();
 
     // Set result
     int result = toint(m_value);
@@ -293,17 +510,20 @@ int GPar::integer(void)
  * @exception GException::par_error
  *            Parameter is not of real type.
  *
- * Returns the value of a real parameter.
+ * This method queries and returns a real parameter. The method only
+ * applies to parameters of type "r". Other parameter types will produce an
+ * exception.
  ***************************************************************************/
 double GPar::real(void)
 {
-    // Query parameter
-    query();
-
     // Check if parameter is integer
     if (m_type != "r")
-        throw GException::par_error(G_REAL, 
-              "Real parameter type expected, \""+m_type+"\" found.");
+        throw GException::par_error(G_REAL_GET, name(),
+              "attempted reading "+gpar_type_string(m_type)+
+              " parameter as a real value.");
+
+    // Query parameter
+    query();
 
     // Set result
     double result = todouble(m_value);
@@ -314,7 +534,10 @@ double GPar::real(void)
 
 
 /***********************************************************************//**
- * @brief Returns if parameter mode is 'learn'
+ * @brief Signals if parameter mode is "learn"
+ *
+ * A parameter is in mode learn when it has one of the following modes:
+ * hl,ql,lh, or lq.
  ***************************************************************************/
 bool GPar::islearn(void) const
 {
@@ -328,12 +551,63 @@ bool GPar::islearn(void) const
 
 
 /***********************************************************************//**
- * @brief Returns if parameter mode is 'query'
+ * @brief Signals if parameter mode is "query"
+ *
+ * A parameter will be queried when it has one of the following modes:
+ * q, ql, or lq.
  ***************************************************************************/
 bool GPar::isquery(void) const
 {
     // Assign result
     bool result = (m_mode == "q" || m_mode == "ql" || m_mode == "lq");
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if parameter mode is of type "filename"
+ *
+ * A parameter is of type "filename" if it has one of the following types:
+ * f, fr, fw, fe, or fn.
+ ***************************************************************************/
+bool GPar::isfilename(void) const
+{
+    // Assign result
+    bool result = (m_type == "f"  || m_type == "fr" || m_type == "fw" ||
+                   m_type == "fe" || m_type == "fn");
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Print parameter
+ *
+ * @todo Implement writing of parameter options. I guess that parameter
+ *       options occur if there is only a minimum but not a maximum
+ *       parameter. Check IRAF documentation.
+ ***************************************************************************/
+std::string GPar::print(void) const
+{
+    // Write parameter name
+    std::string result = parformat(name());
+
+    // Write value (use m_value here to avoid querying when printing)
+    result.append(m_value);
+
+    // Write limits
+    if (min().length() > 0 && max().length() > 0)
+        result.append(" ("+min()+"-"+max()+")");
+    else if (min().length() > 0)
+        result.append(" (>"+min()+")");
+    else if (max().length() > 0)
+        result.append(" (<"+max()+")");
+
+    // Write type information
+    result.append(" [t="+type()+", m="+mode()+"]");
 
     // Return result
     return result;
@@ -404,7 +678,7 @@ void GPar::free_members(void)
  * @param[in] type Type string.
  *
  * @exception GException::par_error
- *            Invalid parameter type specified.
+ *            Invalid parameter type.
  *
  * The parameter type has to be one of b,i,r,s,f,fr,fw,fe,fn. 
  * The fr,fw,fe,fn types test for read access, write access, file existence,
@@ -416,8 +690,8 @@ void GPar::check_type(const std::string& type) const
     if (type != "b"  && type != "i"  && type != "r"  && type != "s" &&
         type != "f"  && type != "fr" && type != "fw" && type != "fe" &&
         type != "fn")
-        throw GException::par_error(G_CHECK_TYPE, 
-                                    "invalid parameter type '"+type+"'");
+        throw GException::par_error(G_CHECK_TYPE, name(),
+              "invalid parameter type \""+type+"\"");
 
     // Return
     return;
@@ -439,8 +713,8 @@ void GPar::check_mode(const std::string& mode) const
     // Check of mode is valid
     if (mode != "a"  && mode != "h"  && mode != "q" && mode != "hl" &&
         mode != "ql" && mode != "lh" && mode != "lq")
-        throw GException::par_error(G_CHECK_MODE, 
-                                    "invalid parameter mode '"+mode+"'");
+        throw GException::par_error(G_CHECK_MODE, name(),
+              "invalid parameter mode \""+mode+"\"");
 
     // Return
     return;
@@ -457,7 +731,7 @@ void GPar::check_mode(const std::string& mode) const
  ***************************************************************************/
 void GPar::check_value(const std::string& value) const
 {
-    // Make type dependend check
+    // Make type dependent check
     if (m_type == "b")
         check_value_bool(value);
     else if (m_type == "i")
@@ -466,8 +740,7 @@ void GPar::check_value(const std::string& value) const
         check_value_real(value);
     else if (m_type == "s")
         check_value_string(value);
-    else if (m_type == "f"  || m_type == "fr" || m_type == "fw" ||
-             m_type == "fe" || m_type == "fn")
+    else if (isfilename())
         check_value_filename(value);
 
     // Return
@@ -483,7 +756,8 @@ void GPar::check_value(const std::string& value) const
  * @exception GException::par_error
  *            Boolean value string is not valid.
  *
- * The Boolean value string has to be one of y,n,yes,no (case insensitive).
+ * The Boolean value string has to be one of y,n,yes,no,true,false
+ * (case insensitive).
  ***************************************************************************/
 void GPar::check_value_bool(const std::string& value) const
 {
@@ -491,9 +765,10 @@ void GPar::check_value_bool(const std::string& value) const
     std::string lvalue = tolower(value);
 
     // Test for validity
-    if (lvalue != "y" && lvalue != "yes" && lvalue != "n" && lvalue != "no")
-        throw GException::par_error(G_CHECK_VALUE_BOOL,
-                        "invalid Boolean value '"+value+"'; use y/n/yes/no");
+    if (lvalue != "y" && lvalue != "yes" && lvalue != "true" &&
+        lvalue != "n" && lvalue != "no"  && lvalue != "false")
+        throw GException::par_error(G_CHECK_VALUE_BOOL, name(),
+              "invalid Boolean value \""+value+"\"; use y/n/yes/no/true/false");
 
     // Return
     return;
@@ -576,10 +851,37 @@ void GPar::check_value_filename(const std::string& value) const
 
 
 /***********************************************************************//**
+ * @brief Set parameter value
+ *
+ * @param[in] value Parameter value.
+ *
+ * Set parameter value, signal it for update and disable parameter querying.
+ *
+ * @todo Implement parameter verification (min, max, options)
+ ***************************************************************************/
+void GPar::set_value(const std::string& value)
+{
+    // Set value
+    m_value  = value;
+
+    // Signal update
+    m_update = true;
+
+    // Don't query parameter again
+    stop_query();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Query parameter if required
  *
  * This method queries the parameter from the stardard input if it is needed
  * to be input by the user.
+ *
+ * @todo Add environment variable substitution.
  ***************************************************************************/
 void GPar::query(void)
 {
@@ -621,11 +923,24 @@ void GPar::query(void)
         }
 
         // Don't query parameter again
-        if (m_mode == "q")  m_mode = "h";
-        if (m_mode == "ql") m_mode = "hl";
-        if (m_mode == "lq") m_mode = "lh";
+        stop_query();
 
     } // endif: parameter had query mode
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Don't query parameter
+ ***************************************************************************/
+void GPar::stop_query(void)
+{
+    // Don't query parameter again
+    if (m_mode == "q")  m_mode = "h";
+    if (m_mode == "ql") m_mode = "hl";
+    if (m_mode == "lq") m_mode = "lh";
 
     // Return
     return;
@@ -641,21 +956,13 @@ void GPar::query(void)
 /***********************************************************************//**
  * @brief Put object in output stream
  *
- * @param[in] os Output stream into which the model will be dumped
- * @param[in] par Object to be dumped
+ * @param[in] os Output stream.
+ * @param[in] par Parameter.
  ***************************************************************************/
 std::ostream& operator<<(std::ostream& os, const GPar& par)
 {
-    // Put object in stream
-    os << par.name() << "=" << par.m_value;
-    if (par.min().length() > 0 && par.max().length() > 0)
-        os << " (" << par.min() << "-" << par.max() << ")";
-    else if (par.min().length() > 0)
-        os << " (>" << par.min() << ")";
-    else if (par.max().length() > 0)
-        os << " (<" << par.max() << ")";
-    os << " t=" << par.type() << " m=" << par.mode();
-    os << " " << par.prompt();
+    // Write parameter in output stream
+    os << par.print();
 
     // Return output stream
     return os;
@@ -666,22 +973,47 @@ std::ostream& operator<<(std::ostream& os, const GPar& par)
  * @brief Write parameter into logger
  *
  * @param[in] log Logger.
- * @param[in] par Parameter to be written.
+ * @param[in] par Parameter.
  ***************************************************************************/
 GLog& operator<<(GLog& log, const GPar& par)
 {
-    // Write parameter in logger
-    log << par.name() << "=" << par.m_value;
-    if (par.min().length() > 0 && par.max().length() > 0)
-        log << " (" << par.min() << "-" << par.max() << ")";
-    else if (par.min().length() > 0)
-        log << " (>" << par.min() << ")";
-    else if (par.max().length() > 0)
-        log << " (<" << par.max() << ")";
-    log << " t=" << par.type() << " m=" << par.mode();
-    log << " " << par.prompt();
+    // Write parameter in logger stream
+    log << par.print();
 
     // Return logger
     return log;
 }
 
+
+/*==========================================================================
+ =                                                                         =
+ =                           Support functions                             =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Return type string
+ ***************************************************************************/
+std::string gpar_type_string(const std::string& type)
+{
+    // Allocate type string
+    std::string type_string;
+
+    // Set type dependent string
+    if (type == "b")
+        type_string = "boolean";
+    else if (type == "i")
+        type_string = "integer";
+    else if (type == "r")
+        type_string = "real";
+    else if (type == "s")
+        type_string = "string";
+    else if (type == "f"  || type == "fr" || type == "fw" ||
+             type == "fe" || type == "fn")
+        type_string = "filename";
+    else
+        type_string = "unknown";
+
+    // Return type string
+    return type_string;
+}
