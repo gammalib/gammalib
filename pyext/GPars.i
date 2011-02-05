@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GPars.i - Application parameters SWIG file              *
+ *            GPars.i - Application parameters Python interface            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GPars.i
- * @brief Application parameters SWIG file.
+ * @brief Application parameters Python interface definition
  * @author Jurgen Knodlseder
  */
 %{
@@ -25,7 +25,7 @@
 /***********************************************************************//**
  * @class GPars
  *
- * @brief Application parameters interface defintion.
+ * @brief Application parameters Python interface defintion
  ***************************************************************************/
 class GPars {
 
@@ -38,22 +38,22 @@ public:
     ~GPars(void);
  
     // Methods
-    void  load(const std::string& filename);
-    void  load(const std::string& filename, const std::vector<std::string>& args);
-    void  save(const std::string& filename);
-    GPar* par(const std::string& name);
+    void        clear(void);
+    int         size(void) const;
+    void        load(const std::string& filename);
+    void        load(const std::string& filename, const std::vector<std::string>& args);
+    void        save(const std::string& filename);
+    GPar*       par(const std::string& name);
+    const GPar* par(const std::string& name) const;
 };
 
 
 /***********************************************************************//**
- * @brief GPars class SWIG extension
+ * @brief GPars class extension
  ***************************************************************************/
 %extend GPars {
     char *__str__() {
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        return tochar(str);
+        return tochar(self->print());
     }
     GPars copy() {
         return (*self);

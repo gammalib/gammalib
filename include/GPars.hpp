@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GPars.hpp - Application parameters                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -39,7 +39,7 @@ class GPars {
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GPars& pars);
-    friend GLog&         operator<<(GLog& log, const GPars& pars);
+    friend GLog&         operator<<(GLog&        log, const GPars& pars);
 
 public:
     // Constructors and destructors
@@ -53,12 +53,14 @@ public:
     GPars& operator= (const GPars& pars);
 
     // Methods
-    void  clear(void);
-    int   size(void) const { return m_pars.size(); }
-    void  load(const std::string& filename);
-    void  load(const std::string& filename, const std::vector<std::string>& args);
-    void  save(const std::string& filename);
-    GPar* par(const std::string& name);
+    void        clear(void);
+    int         size(void) const { return m_pars.size(); }
+    void        load(const std::string& filename);
+    void        load(const std::string& filename, const std::vector<std::string>& args);
+    void        save(const std::string& filename);
+    GPar*       par(const std::string& name);
+    const GPar* par(const std::string& name) const;
+    std::string print(void) const;
   
 protected:
     // Protected methods

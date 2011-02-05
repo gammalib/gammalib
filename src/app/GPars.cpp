@@ -342,6 +342,51 @@ GPar* GPars::par(const std::string& name)
 }
 
 
+/***********************************************************************//**
+ * @brief Returns pointer on parameter (const version)
+ *
+ * @param[in] name Parameter name.
+ *
+ * Method returns a NULL pointer if parameter is not found in list.
+ ***************************************************************************/
+const GPar* GPars::par(const std::string& name) const
+{
+    // Initialise parameter pointer
+    const GPar* ptr = NULL;
+
+    // Search for parameter
+    for (int i = 0; i < m_pars.size(); ++i) {
+        if (m_pars[i].m_name == name) {
+            ptr = &(m_pars[i]);
+            break;
+        }
+    } // endfor: looped over parameters
+
+    // Return pointer
+    return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Print parameters
+ ***************************************************************************/
+std::string GPars::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GPars ===");
+
+    // Append parameters
+    for (int i = 0; i < size(); ++i)
+        result.append("\n"+m_pars[i].print());
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -786,17 +831,15 @@ void GPars::update(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Put object in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the model will be dumped.
- * @param[in] pars Parameters to be dumped.
+ * @param[in] os Output stream.
+ * @param[in] pars Parameters.
  ***************************************************************************/
-std::ostream& operator<<(std::ostream& os, const GPars& pars)
+std::ostream& operator<< (std::ostream& os, const GPars& pars)
 {
-    // Put object in stream
-    os << "=== GPars ===";
-    for (int i = 0; i < pars.m_pars.size(); ++i)
-        os << std::endl << pars.m_pars[i];
+    // Write parameters in output stream
+    os << pars.print();
 
     // Return output stream
     return os;
@@ -804,22 +847,16 @@ std::ostream& operator<<(std::ostream& os, const GPars& pars)
 
 
 /***********************************************************************//**
- * @brief Write parameters into logger
+ * @brief Log operator
  *
  * @param[in] log Logger.
- * @param[in] pars Parameters to be writted.
+ * @param[in] pars Parameters.
  ***************************************************************************/
-GLog& operator<<(GLog& log, const GPars& pars)
+GLog& operator<< (GLog& log, const GPars& pars)
 {
-    // Write parameters in logger
-    for (int i = 0; i < pars.size(); ++i) {
-        if (i == 0)
-            log << pars.m_pars[i];
-        else
-            log << std::endl << pars.m_pars[i];
-    }
+    // Write parameters into logger
+    log << pars.print();
 
     // Return logger
     return log;
 }
-
