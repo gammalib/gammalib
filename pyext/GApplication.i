@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GApplication.i - GammaLib application base class SWIG file       *
+ *   GApplication.i - GammaLib application base class Python interface     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,20 +12,19 @@
  ***************************************************************************/
 /**
  * @file GApplication.i
- * @brief GammaLib application SWIG file.
+ * @brief GammaLib application base class Python interface defintion
  * @author Jurgen Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GApplication.hpp"
 %}
-//%include stl.i
 
 
 /***********************************************************************//**
  * @class GApplication
  *
- * @brief GammaLib application interface defintion.
+ * @brief GammaLib application Python interface defintion.
  ***************************************************************************/
 class GApplication {
 public:
@@ -41,22 +40,31 @@ public:
     std::string name(void) const;
     std::string version(void) const;
     double      telapse(void) const;
+    double      celapse(void) const;
     GPar*       par(const std::string& name);
+    const GPar* par(const std::string& name) const;
+    bool        logTerse(void) const;
+    bool        logNormal(void) const;
+    bool        logExplicit(void) const;
+    bool        logVerbose(void) const;
+    bool        logDebug(void) const;
+    bool        clobber(void) const;
+    bool        haspar(const std::string& name) const;
 };
 
 
 /***********************************************************************//**
- * @brief GApplication class SWIG extension
+ * @brief GApplication class extension
  ***************************************************************************/
 %extend GApplication {
     char *__str__() {
-        static char str_buffer[100001];
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        strncpy(str_buffer, (char*)str.c_str(), 100001);
-        str_buffer[100000] = '\0';
-        return str_buffer;
+        return tochar(self->print());
+    }
+    GPar& __getitem__(const std::string& name) {
+        return (*self)(name);
+    }
+    void __setitem__(const std::string& name, const GPar& val) {
+        (*self)(name) = val;
     }
     GApplication copy() {
         return (*self);
