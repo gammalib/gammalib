@@ -119,40 +119,40 @@ GObservations& GObservations::operator= (const GObservations& obs)
 
 
 /***********************************************************************//**
- * @brief Observation access operator
+ * @brief Return pointer to observation
  *
  * @param[in] index Index of observation (0,1,2,...)
  *
  * @exception GException::out_of_range
  *            Operation index is out of range.
  ***************************************************************************/
-GObservation& GObservations::operator() (int index)
+GObservation* GObservations::operator() (int index)
 {
     // If index is outside boundary then throw an error
     if (index < 0 || index >= m_num)
         throw GException::out_of_range(G_OP_ACCESS1, index, 0, m_num-1);
 
     // Return observation pointer
-    return *(m_obs[index]);
+    return m_obs[index];
 }
 
 
 /***********************************************************************//**
- * @brief Observation access operator
+ * @brief Return pointer to observation (const version)
  *
  * @param[in] index Index of observation (0,1,2,...)
  *
  * @exception GException::out_of_range
  *            Operation index is out of range.
  ***************************************************************************/
-const GObservation& GObservations::operator() (int index) const
+const GObservation* GObservations::operator() (int index) const
 {
     // If index is outside boundary then throw an error
     if (index < 0 || index >= m_num)
         throw GException::out_of_range(G_OP_ACCESS2, index, 0, m_num-1);
 
     // Return observation pointer
-    return *(m_obs[index]);
+    return m_obs[index];
 }
 
 
@@ -265,11 +265,11 @@ std::string GObservations::print(void) const
     // Append observations
     for (int i = 0; i < size(); ++i) {
         result.append("\n");
-        result.append((*this)(i).print());
+        result.append((*this)(i)->print());
     }
 
     // Append models
-    result.append("\n"+((GObservations*)this)->models()->print());
+    result.append("\n"+((GObservations*)this)->models().print());
 
     // Return result
     return result;

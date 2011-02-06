@@ -36,13 +36,13 @@ public:
 
     // Methods
     void     clear(void);
-    int      size(void) const { return m_num; }
+    int      size(void) const;
     void     append(GObservation &obs);
-    void     models(const GModels& models) { m_models=models; return; }
+    void     models(const GModels& models);
     void     models(const std::string& filename);
-    GModels* models(void) { return &m_models; }
+    GModels& models(void);
     void     optimize(GOptimizer& opt);
-    double   npred(void) const { return m_npred; }
+    double   npred(void) const;
 };
 
 
@@ -53,13 +53,13 @@ public:
     char *__str__() {
         return tochar(self->print());
     }
-    GObservation& __getitem__(int index) {
+    GObservation* __getitem__(int index) {
     if (index >= 0 && index < self->size())
         return (*self)(index);
     else
         throw GException::out_of_range("__getitem__(int)", index, self->size());
     }
-    void __setitem__(int index, const GObservation& val) {
+    void __setitem__(int index, const GObservation* val) {
         if (index>=0 && index < self->size())
             (*self)(index) = val;
         else

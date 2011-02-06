@@ -66,8 +66,8 @@ public:
 
     // Operators
     GObservations&      operator= (const GObservations& obs);
-    GObservation&       operator() (int index);
-    const GObservation& operator() (int index) const;
+    GObservation*       operator() (int index);
+    const GObservation* operator() (int index) const;
 
     // Methods
     void        clear(void);
@@ -75,7 +75,7 @@ public:
     void        append(GObservation& obs);
     void        models(const GModels& models) { m_models=models; return; }
     void        models(const std::string& filename);
-    GModels*    models(void) { return &m_models; }
+    GModels&    models(void) { return m_models; }
     void        optimize(GOptimizer& opt);
     double      npred(void) const { return m_npred; }
     std::string print(void) const;
