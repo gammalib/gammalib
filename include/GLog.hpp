@@ -87,6 +87,7 @@ public:
     void        header0(const std::string& arg) { header(arg, 0); }
     void        header1(const std::string& arg) { header(arg, 1); }
     void        header2(const std::string& arg) { header(arg, 2); }
+    void        header3(const std::string& arg) { header(arg, 3); }
     bool        date(void) const { return m_use_date; }
     bool        cout(void) const { return m_stdout; }
     bool        cerr(void) const { return m_stderr; }
