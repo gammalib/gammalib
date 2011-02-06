@@ -44,7 +44,7 @@ public:
     void        load(const std::string& filename, const std::vector<std::string>& args);
     void        save(const std::string& filename);
     GPar*       par(const std::string& name);
-    const GPar* par(const std::string& name) const;
+    //const GPar* par(const std::string& name) const; //!< ignored by SWIG
 };
 
 

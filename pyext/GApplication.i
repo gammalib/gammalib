@@ -42,7 +42,7 @@ public:
     double      telapse(void) const;
     double      celapse(void) const;
     GPar*       par(const std::string& name);
-    const GPar* par(const std::string& name) const;
+    //const GPar* par(const std::string& name) const; //!< ignored by SWIG
     bool        logTerse(void) const;
     bool        logNormal(void) const;
     bool        logExplicit(void) const;
