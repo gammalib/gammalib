@@ -47,6 +47,9 @@ class GObservation;
  *       Before we can do this we also have to use std::vector<GModelPar*>
  *       in GModelSky. Once unified we can move this part to the base
  *       class.
+ * @todo eval() and eval_gradients() should also be const. This has to be
+ *       changed at the GModel level and has also to be propagated to the
+ *       variuos derived classes.
  ***************************************************************************/
 class GModelData : public GModel {
 
@@ -69,7 +72,7 @@ public:
     virtual double      eval(const GEvent& event, const GObservation& obs) = 0;
     virtual double      eval_gradients(const GEvent& event, const GObservation& obs) = 0;
     virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
-                              const GObservation& obs) = 0;
+                              const GObservation& obs) const = 0;
     virtual void        read(const GXmlElement& xml) = 0;
     virtual void        write(GXmlElement& xml) const = 0;
     virtual std::string print(void) const = 0;
