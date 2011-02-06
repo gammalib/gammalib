@@ -310,15 +310,21 @@ void GObservation::roi(const GRoi* roi)
  *
  * @param[in] events Events.
  *
- * Set events for this observation.
+ * Set events for this observation by cloning the specifies events. If NULL
+ * is passed to this method, any existing events are cleared an no event
+ * list is attached.
  ***************************************************************************/
 void GObservation::events(const GEvents* events)
 {
     // Remove an existing events
     if (m_events != NULL) delete m_events;
-    
-    // Set events
-    m_events = events->clone();
+
+    // Signal events as free
+    m_events = NULL;
+
+    // Set events (only if input pointer is valid)
+    if (events != NULL)
+        m_events = events->clone();
 
     // Return
     return;
