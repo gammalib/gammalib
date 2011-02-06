@@ -61,7 +61,7 @@ public:
     }
     void __setitem__(int index, const GObservation* val) {
         if (index>=0 && index < self->size())
-            (*self)(index) = val;
+            *((*self)(index)) = *val;
         else
             throw GException::out_of_range("__setitem__(int)", index, self->size());
     }
