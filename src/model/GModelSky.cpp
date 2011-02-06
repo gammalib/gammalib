@@ -465,7 +465,7 @@ GPhotons GModelSky::mc(const double& area,
                        const GSkyDir& dir,  const double&  radius,
                        const GEnergy& emin, const GEnergy& emax,
                        const GTime&   tmin, const GTime&   tmax,
-                       GRan& ran)
+                       GRan& ran) const
 {
     // Allocate photons
     GPhotons photons;
