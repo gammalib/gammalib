@@ -56,8 +56,8 @@ public:
     double                     eval(const GEvent& event, const GObservation& obs);
     double                     eval_gradients(const GEvent& event, const GObservation& obs);
     double                     npred(const GEnergy& obsEng, const GTime& obsTime,
-                                     const GObservation& obs);
-    GCTAEventList*             mc(const GObservation& obs, GRan& ran);
+                                     const GObservation& obs) const;
+    GCTAEventList*             mc(const GObservation& obs, GRan& ran) const;
     void                       read(const GXmlElement& xml);
     void                       write(GXmlElement& xml) const;
     std::string                print(void) const;

@@ -341,7 +341,7 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
  ***************************************************************************/
 double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
                                         const GTime&        obsTime,
-                                        const GObservation& obs)
+                                        const GObservation& obs) const
 {
     // Initialise result
     double npred = 0.0;
@@ -405,7 +405,8 @@ double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
  *   the good time interval
  * of the observation have been set up previously.
  ***************************************************************************/
-GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs, GRan& ran)
+GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs, 
+                                             GRan& ran) const
 {
     // Initialise new event list
     GCTAEventList* list = new GCTAEventList;
@@ -413,9 +414,8 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs, GRan& ran)
     // Continue only if model is valid)
     if (valid_model()) {
 
-        // Extract CTA pointing direction
-        GTime time; // not used
-        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing(time));
+        // Extract CTA pointing direction at beginning of observation
+        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing(obs.tstart()));
         if (pnt == NULL)
             throw GCTAException::no_pointing(G_MC);
 
