@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_MWL.cpp  -  test multi-wavelength classes             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -203,7 +203,7 @@ void test_optimizer(void)
         obs.optimize(opt);
         std::cout << std::endl << obs << std::endl;
         std::cout << opt << std::endl;
-        std::cout << *(obs.models()) << std::endl;
+        std::cout << obs.models() << std::endl;
     }
     catch (std::exception &e) {
         std::cout << std::endl 

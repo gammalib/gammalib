@@ -531,7 +531,7 @@ void test_binned_optimizer(void)
     }
     std::cout << ".";
     std::cout << std::endl << opt << std::endl;
-    std::cout << *obs.models() << std::endl;
+    std::cout << obs.models() << std::endl;
 
     // Plot final test success
     std::cout << " ok." << std::endl;
