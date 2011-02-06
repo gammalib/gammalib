@@ -58,6 +58,9 @@ public:
     void   save(const std::string& filename, bool clobber) const;
     void   response(const std::string& irfname, std::string caldb = "");
     void   pointing(const GCTAPointing& pointing);
+    void   obs_id(const int& id) { m_obs_id=id; }
+    void   ra_obj(const double& ra) { m_ra_obj=ra; }
+    void   dec_obj(const double& dec) { m_dec_obj=dec; }
     int    obs_id(void) const { return m_obs_id; }
     double livetime(void) const { return m_livetime; }
     double ra_obj(void) const { return m_ra_obj; }
