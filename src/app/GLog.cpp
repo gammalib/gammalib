@@ -725,12 +725,13 @@ void GLog::flush(bool force)
  * @brief Write string as header into logger
  *
  * @param[in] arg Header string.
- * @param[in] level Header level (0,1,...).
+ * @param[in] level Header level (0,1,2,3).
  *
  * Writes a string as header into the logger. Various header levels exist:
  * 0: 80 character wide centred header
  * 1: Header framed by '=' characters
  * 2: Header framed by '-' characters
+ * 3: Header enclosed by '===' string
  ***************************************************************************/
 void GLog::header(const std::string& arg, int level)
 {
@@ -748,20 +749,26 @@ void GLog::header(const std::string& arg, int level)
         frame = (level == 1) ? "+" +  fill("=", text.length()-2) + "+"
                              : "+" +  fill("-", text.length()-2) + "+";
         break;
+    case 3:
+        text  = "=== " + arg + " ===";
     default:
         break;
     }
 
     // Write header into logger
-    if (text.length() > 0) {
+    if (frame.length() > 0) {
         m_buffer.append(frame);
         m_buffer.append("\n");
+    }
+    if (text.length() > 0) {
         m_buffer.append(text);
         m_buffer.append("\n");
+    }
+    if (frame.length() > 0) {
         m_buffer.append(frame);
         m_buffer.append("\n");
-        flush(true);
     }
+    flush(true);
 
     // Return
     return;
