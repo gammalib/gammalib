@@ -404,7 +404,17 @@ void GCTAObservation::save(const std::string& filename, bool clobber) const
     // Case A: Observation contains an event list
     if (list != NULL) {
 
-    }
+        // Write event list into FITS file
+        list->write(&fits);
+
+        // Write observation attributes into EVENTS header
+        GFitsHDU* hdu = fits.hdu("EVENTS");
+        write_attributes(hdu);
+
+        // Write GTIs into FITS file
+        m_gti.write(&fits);
+
+    } // endif: observation contained an events list
 
     // Case B: Observation contains an event cube
     else if (cube != NULL) {
@@ -413,14 +423,16 @@ void GCTAObservation::save(const std::string& filename, bool clobber) const
         cube->ebounds(m_ebounds);
         cube->gti(m_gti);
 
-        // Write events cube into FITS file
+        // Write events cube into FITS file. This method also writes
+        // the energy boundaries and the GTI as they are also part
+        // of the events cube
         cube->write(&fits);
 
         // Write observation attributes into first header
         GFitsHDU* hdu = fits.hdu(0);
         write_attributes(hdu);
 
-    } // endif: observation contained an events cube
+    } // endelse: observation contained an events cube
 
     // Save FITS file
     fits.saveto(filename, clobber);
@@ -447,6 +459,10 @@ void GCTAObservation::init_members(void)
     // Initialise members
     m_response = NULL;
     m_pointing = NULL;
+    m_obs_id   = 0;
+    m_livetime = 0.0;
+    m_ra_obj   = 0.0;
+    m_dec_obj  = 0.0;
 
     // Return
     return;
@@ -466,10 +482,16 @@ void GCTAObservation::init_members(void)
  ***************************************************************************/
 void GCTAObservation::copy_members(const GCTAObservation& obs)
 {
-    // Copy members
+    // Clone members
     if (obs.m_response != NULL) m_response = obs.m_response->clone();
     if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
 
+    // Copy members
+    m_obs_id   = obs.m_obs_id;
+    m_livetime = obs.m_livetime;
+    m_ra_obj   = obs.m_ra_obj;
+    m_dec_obj  = obs.m_dec_obj;
+    
     // Return
     return;
 }
