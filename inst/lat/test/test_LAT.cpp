@@ -41,7 +41,6 @@ const std::string lat_srcmap = datadir+"/srcmap.fits";
 const std::string lat_expmap = datadir+"/binned_expmap.fits";
 const std::string lat_ltcube = datadir+"/ltcube.fits";
 const std::string lat_xml    = datadir+"/source_model1.xml";
-//const double      twopi      =  6.283185307179586476925286766559005768394;
 
 
 /***********************************************************************//**
@@ -153,10 +152,9 @@ void test_ltcube(void)
         // 811432.0 sec, hence the efficiency is 42%. This seems reasonable as the
         // test function returns 1 for half of the sky.
         double sum = ltcube(dir, energy, test_fct1);
-//        if (fabs(sum-247712.0724) > 0.001) {
-        if (fabs(sum-339334.6556) > 0.001) {
+        if (fabs(sum-339733.528629) > 0.001) {
             std::cout << std::endl
-                      << "TEST ERROR: Invalid livetime cube sum (expected 339334.6556,"
+                      << "TEST ERROR: Invalid livetime cube sum (expected 339733.5286,"
                       << " encountered value " << sum
                       << std::endl;
             throw;
@@ -415,10 +413,17 @@ void test_binned_obs(void)
             num++;
             sum += (int)event->counts();
         }
-        if (sum != 920 || num != 400000) {
+        if (sum != 3904) {
             std::cout << std::endl
                       << "TEST ERROR: " << sum
-                      << " iterations in GObservations::iterator instead of 920."
+                      << " iterations in GObservations::iterator instead of 3904."
+                      << std::endl;
+            throw;
+        }
+        if (num != 200000) {
+            std::cout << std::endl
+                      << "TEST ERROR: " << num
+                      << " event bins in GObservations::iterator instead of 200000."
                       << std::endl;
             throw;
         }
@@ -441,10 +446,17 @@ void test_binned_obs(void)
             num++;
             sum += (int)event->counts();
         }
-        if (sum != 460 || num != 200000) {
+        if (sum != 1952) {
             std::cout << std::endl
                       << "TEST ERROR: " << sum
-                      << " iterations in GObservations::iterator instead of 460."
+                      << " iterations in GObservations::iterator instead of 1952."
+                      << std::endl;
+            throw;
+        }
+        if (num != 100000) {
+            std::cout << std::endl
+                      << "TEST ERROR: " << num
+                      << " event bins in GObservations::iterator instead of 100000."
                       << std::endl;
             throw;
         }
