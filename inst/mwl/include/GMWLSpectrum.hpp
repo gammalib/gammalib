@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLSpectrum.hpp  -  Multi-wavelength spectrum class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,10 +20,12 @@
 #define GMWLSPECTRUM_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GLog.hpp"
+#include <string>
 #include "GEventCube.hpp"
 #include "GMWLDatum.hpp"
+#include "GEbounds.hpp"
+#include "GFitsTable.hpp"
+#include "GEnergy.hpp"
 
 
 /***********************************************************************//**
@@ -37,38 +39,33 @@
  ***************************************************************************/
 class GMWLSpectrum : public GEventCube {
 
-    // Friend classes
-    //friend class GMWLObservation;
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GMWLSpectrum& spec);
-    friend GLog&         operator<< (GLog& log, const GMWLSpectrum& spec);
-
 public:
     // Constructors and destructors
     GMWLSpectrum(void);
-    GMWLSpectrum(const std::string& filename);
+    explicit GMWLSpectrum(const std::string& filename);
     GMWLSpectrum(const GMWLSpectrum& spec);
     virtual ~GMWLSpectrum(void);
 
     // Operators
     GMWLSpectrum& operator= (const GMWLSpectrum& spec);
 
-    // Implemented pure virtul methods
+    // Implemented pure virtual methods
     void          clear(void);
     GMWLSpectrum* clone(void) const;
+    int           size(void) const { return m_data.size(); }
+    int           dim(void) const { return 1; }
+    int           naxis(int axis) const { return m_data.size(); }
     void          load(const std::string& filename);
     GMWLDatum*    pointer(int index);
     int           number(void) const;
+    std::string   print(void) const;
 
     // Other methods
-    int         size(void) const;
     std::string telescope(void) const { return m_telescope; }
     std::string instrument(void) const { return m_instrument; }
     GEbounds    ebounds(void) const;
     void        load(const std::string& filename, const std::string& extname);
     void        load_fits(const std::string& filename, int extno = 0);
-    std::string print(void) const;
 
 protected:
     // Protected methods

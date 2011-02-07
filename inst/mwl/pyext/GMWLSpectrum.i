@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GMWLSpectrum.i  -  Multi-wavelength spectrum class python I/F     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -34,24 +34,26 @@ class GMWLSpectrum : public GEventCube {
 public:
     // Constructors and destructors
     GMWLSpectrum(void);
-    GMWLSpectrum(const std::string& filename);
+    explicit GMWLSpectrum(const std::string& filename);
     GMWLSpectrum(const GMWLSpectrum& spec);
     virtual ~GMWLSpectrum(void);
 
     // Implemented pure virtul methods
     void          clear(void);
     GMWLSpectrum* clone(void) const;
+    int           size(void) const;
+    int           dim(void) const;
+    int           naxis(int axis) const;
     void          load(const std::string& filename);
     GMWLDatum*    pointer(int index);
     int           number(void) const;
 
     // Other methods
-    int         size(void) const;
-    std::string telescope(void) const { return m_telescope; }
-    std::string instrument(void) const { return m_instrument; }
-    GEbounds    ebounds(void) const;
-    void        load(const std::string& filename, const std::string& extname);
-    void        load_fits(const std::string& filename, int extno = 0);
+    std::string   telescope(void) const;
+    std::string   instrument(void) const;
+    GEbounds      ebounds(void) const;
+    void          load(const std::string& filename, const std::string& extname);
+    void          load_fits(const std::string& filename, int extno = 0);
 };
 
 

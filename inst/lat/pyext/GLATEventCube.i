@@ -35,11 +35,14 @@ public:
     virtual ~GLATEventCube(void);
 
     // Implemented pure virtual base class methods
-    void           clear(void);
-    GLATEventCube* clone(void) const;
-    void           load(const std::string& filename);
-    GLATEventBin*  pointer(int index);
-    int            number(void) const;
+    void              clear(void);
+    GLATEventCube*    clone(void) const;
+    int               size(void) const;
+    int               dim(void) const;
+    int               naxis(int axis) const;
+    void              load(const std::string& filename);
+    GLATEventBin*     pointer(int index);
+    int               number(void) const;
 
     // Other methods
     void              ebds(const GEbounds& ebds);

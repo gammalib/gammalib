@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GMWLSpectrum.cpp  -  Multi-wavelength spectrum class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,8 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
-#include "GLog.hpp"
 #include "GTools.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
@@ -59,7 +57,7 @@
  ***************************************************************************/
 GMWLSpectrum::GMWLSpectrum(void) : GEventCube()
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -76,7 +74,7 @@ GMWLSpectrum::GMWLSpectrum(void) : GEventCube()
  ***************************************************************************/
 GMWLSpectrum::GMWLSpectrum(const std::string& filename) : GEventCube()
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Load spectrum
@@ -146,7 +144,7 @@ GMWLSpectrum& GMWLSpectrum::operator= (const GMWLSpectrum& spec)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -193,16 +191,6 @@ void GMWLSpectrum::clear(void)
 GMWLSpectrum* GMWLSpectrum::clone(void) const
 {
     return new GMWLSpectrum(*this);
-}
-
-
-/***********************************************************************//**
- * @brief Return number of points in spectrum
- ***************************************************************************/
-int GMWLSpectrum::size(void) const
-{
-    // Return
-    return (m_data.size());
 }
 
 
@@ -632,37 +620,6 @@ double GMWLSpectrum::conv_flux(const GEnergy& energy, const double& flux,
 
 /*==========================================================================
  =                                                                         =
- =                         GMWLSpectrum friends                           =
+ =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] spec Spectrum.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GMWLSpectrum& spec)
-{
-     // Write spectrum in output stream
-    os << spec.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] spec Spectrum.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GMWLSpectrum& spec)
-{
-    // Write spectrum into logger
-    log << spec.print();
-
-    // Return logger
-    return log;
-}

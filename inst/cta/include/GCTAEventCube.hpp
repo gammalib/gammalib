@@ -60,15 +60,19 @@ public:
     GCTAEventCube& operator= (const GCTAEventCube& cube);
 
     // Implemented pure virtual base class methods
-    void           clear(void);
-    GCTAEventCube* clone(void) const;
-    void           load(const std::string& filename);
-    void           write(GFits* file) const;
-    GCTAEventBin*  pointer(int index);
-    int            number(void) const;
-    std::string    print(void) const;
+    void            clear(void);
+    GCTAEventCube*  clone(void) const;
+    int             size(void) const;
+    int             dim(void) const;
+    int             naxis(int axis) const;
+    void            load(const std::string& filename);
+    GCTAEventBin*   pointer(int index);
+    int             number(void) const;
+    std::string     print(void) const;
+
 
     // Other methods
+    void            write(GFits* file) const;
     void            map(const GSkymap& map) { m_map=map; }
     void            ebounds(const GEbounds& ebds) { m_ebds=ebds; }
     void            gti(const GGti& gti) { m_gti=gti; }

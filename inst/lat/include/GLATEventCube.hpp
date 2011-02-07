@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATEventCube.hpp  -  LAT event cube class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -40,7 +40,7 @@
 /***********************************************************************//**
  * @class GLATEventCube
  *
- * @brief GLATEventCube class interface defintion.
+ * @brief GLATEventCube class interface defintion
  ***************************************************************************/
 class GLATEventCube : public GEventCube {
 
@@ -54,12 +54,15 @@ public:
     GLATEventCube& operator= (const GLATEventCube& cube);
 
     // Implemented pure virtual base class methods
-    void           clear(void);
-    GLATEventCube* clone(void) const;
-    void           load(const std::string& filename);
-    GLATEventBin*  pointer(int index);
-    int            number(void) const;
-    std::string    print(void) const;
+    void              clear(void);
+    GLATEventCube*    clone(void) const;
+    int               size(void) const;
+    int               dim(void) const;
+    int               naxis(int axis) const;
+    void              load(const std::string& filename);
+    GLATEventBin*     pointer(int index);
+    int               number(void) const;
+    std::string       print(void) const;
 
     // Other methods
     void              ebds(const GEbounds& ebds) { m_ebds=ebds; }

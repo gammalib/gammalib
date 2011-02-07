@@ -32,6 +32,7 @@
 #include "GFitsImage.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_NAXIS                                   "GCTAEventCube::naxis(int)"
 #define G_POINTER                               "GCTAEventCube::pointer(int)"
 #define G_SET_DIRECTIONS                    "GCTAEventCube::set_directions()"
 #define G_SET_ENERGIES                        "GCTAEventCube::set_energies()"
@@ -56,7 +57,7 @@
  ***************************************************************************/
 GCTAEventCube::GCTAEventCube(void) : GEventCube()
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -66,14 +67,21 @@ GCTAEventCube::GCTAEventCube(void) : GEventCube()
 
 /***********************************************************************//**
  * @brief Sky map constructor
+ *
+ * @param[in] map Sky map.
+ *
+ * Construct instance of events cube from sky map.
  ***************************************************************************/
 GCTAEventCube::GCTAEventCube(const GSkymap& map) : GEventCube()
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Set sky map
     m_map = map;
+
+    // Set sky directions
+    set_directions();
 
     // Return
     return;
@@ -87,7 +95,7 @@ GCTAEventCube::GCTAEventCube(const GSkymap& map) : GEventCube()
  ***************************************************************************/
 GCTAEventCube::GCTAEventCube(const GCTAEventCube& cube) : GEventCube(cube)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -133,7 +141,7 @@ GCTAEventCube& GCTAEventCube::operator= (const GCTAEventCube& cube)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -176,10 +184,73 @@ void GCTAEventCube::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ ***************************************************************************/
 GCTAEventCube* GCTAEventCube::clone(void) const
 {
     return new GCTAEventCube(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of bins in event cube
+ ***************************************************************************/
+int GCTAEventCube::size(void) const
+{
+    // Compute number of bins
+    int nbins = m_map.npix() * m_map.nmaps(); 
+
+    // Return number of bins
+    return nbins;
+}
+
+
+/***********************************************************************//**
+ * @brief Return dimension of event cube
+ ***************************************************************************/
+int GCTAEventCube::dim(void) const
+{
+    // Compute dimension from sky map
+    int dim = (m_map.nmaps() > 1) ? 3 : 2;
+
+    // Return dimension
+    return dim;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of bins in axis
+ *
+ * @param[in] axis Axis.
+ *
+ * @exception GException::out_of_range
+ *            Axis is out of range.
+ *
+ * Returns the number of bins along a given event cube axis.
+ ***************************************************************************/
+int GCTAEventCube::naxis(int axis) const
+{
+    // Optionally check if the axis is valid
+    #if defined(G_RANGE_CHECK)
+    if (axis < 0 || axis >= dim())
+        throw GException::out_of_range(G_NAXIS, axis, 0, dim()-1);
+    #endif
+
+    // Set result
+    int naxis = 0;
+    switch (axis) {
+    case 0:
+        naxis = m_map.nx();
+        break;
+    case 1:
+        naxis = m_map.ny();
+        break;
+    case 2:
+        naxis = m_map.npix();
+        break;
+    }
+
+    // Return result
+    return naxis;
 }
 
 
@@ -263,8 +334,8 @@ GCTAEventBin* GCTAEventCube::pointer(int index)
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= m_elements)
-        throw GException::out_of_range(G_POINTER, index, 0, m_elements-1);
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_POINTER, index, 0, size()-1);
     #endif
 
     // Get pixel and energy bin indices.
@@ -293,10 +364,12 @@ int GCTAEventCube::number(void) const
     // Initialise result
     double number = 0.0;
 
-    // Sum event cube
+    // Get pointer on skymap pixels
     double* pixels = m_map.pixels();
-    if (m_elements > 0 && pixels != NULL) {
-        for (int i = 0; i < m_elements; ++i)
+
+    // Sum event cube
+    if (size() > 0 && pixels != NULL) {
+        for (int i = 0; i < size(); ++i)
             number += pixels[i];
     }
 
@@ -339,14 +412,14 @@ void GCTAEventCube::init_members(void)
     // Initialise members
     m_bin.clear();
     m_map.clear();
+    m_time.clear();
+    m_ebds.clear();
+    m_gti.clear();
     m_dirs     = NULL;
     m_omega    = NULL;
     m_energies = NULL;
     m_ewidth   = NULL;
-    m_time.clear();
     m_ontime   = 0.0;
-    m_ebds.clear();
-    m_gti.clear();
 
     // Return
     return;
@@ -438,17 +511,6 @@ void GCTAEventCube::read_cntmap(GFitsImage* hdu)
 
         // Load counts map as sky map
         m_map.read(hdu);
-
-        // Set GEventCube attributes
-        m_dim      = (m_map.nmaps() > 1) ? 3 : 2;
-        m_naxis    = new int[m_dim];
-        m_naxis[0] = m_map.nx();
-        m_naxis[1] = m_map.ny();
-        m_elements = m_map.npix();
-        if (m_dim == 3) {
-            m_naxis[2]  = m_map.nmaps();
-            m_elements *= m_naxis[2];
-        }
 
         // Set sky directions
         set_directions();

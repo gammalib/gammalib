@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATEventCube.cpp  -  LAT event cube class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,6 +27,7 @@
 #include "GFitsTable.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_NAXIS                                   "GLATEventCube::naxis(int)"
 #define G_POINTER                               "GLATEventCube::pointer(int)"
 #define G_DIFFNAME                            "GLATEventCube::diffname(int&)"
 #define G_DIFFRSP                              "GLATEventCube::diffrsp(int&)"
@@ -53,7 +54,7 @@
  ***************************************************************************/
 GLATEventCube::GLATEventCube(void) : GEventCube()
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -68,7 +69,7 @@ GLATEventCube::GLATEventCube(void) : GEventCube()
  ***************************************************************************/
 GLATEventCube::GLATEventCube(const GLATEventCube& cube) : GEventCube(cube)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -114,7 +115,7 @@ GLATEventCube& GLATEventCube::operator= (const GLATEventCube& cube)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -157,10 +158,73 @@ void GLATEventCube::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ ***************************************************************************/
 GLATEventCube* GLATEventCube::clone(void) const
 {
     return new GLATEventCube(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of bins in event cube
+ ***************************************************************************/
+int GLATEventCube::size(void) const
+{
+    // Compute number of bins
+    int nbins = m_map.npix() * m_map.nmaps(); 
+
+    // Return number of bins
+    return nbins;
+}
+
+
+/***********************************************************************//**
+ * @brief Return dimension of event cube
+ ***************************************************************************/
+int GLATEventCube::dim(void) const
+{
+    // Compute dimension from sky map
+    int dim = (m_map.nmaps() > 1) ? 3 : 2;
+
+    // Return dimension
+    return dim;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of bins in axis
+ *
+ * @param[in] axis Axis.
+ *
+ * @exception GException::out_of_range
+ *            Axis is out of range.
+ *
+ * Returns the number of bins along a given event cube axis.
+ ***************************************************************************/
+int GLATEventCube::naxis(int axis) const
+{
+    // Optionally check if the axis is valid
+    #if defined(G_RANGE_CHECK)
+    if (axis < 0 || axis >= dim())
+        throw GException::out_of_range(G_NAXIS, axis, 0, dim()-1);
+    #endif
+
+    // Set result
+    int naxis = 0;
+    switch (axis) {
+    case 0:
+        naxis = m_map.nx();
+        break;
+    case 1:
+        naxis = m_map.ny();
+        break;
+    case 2:
+        naxis = m_map.npix();
+        break;
+    }
+
+    // Return result
+    return naxis;
 }
 
 
@@ -231,8 +295,8 @@ GLATEventBin* GLATEventCube::pointer(int index)
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= m_elements)
-        throw GException::out_of_range(G_POINTER, index, 0, m_elements-1);
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_POINTER, index, 0, size()-1);
     #endif
 
     // Get pixel and energy bin indices.
@@ -263,10 +327,12 @@ int GLATEventCube::number(void) const
     // Initialise result
     double number = 0.0;
 
-    // Sum event cube
+    // Get pointer on skymap pixels
     double* pixels = m_map.pixels();
-    if (m_elements > 0 && pixels != NULL) {
-        for (int i = 0; i < m_elements; ++i)
+
+    // Sum event cube
+    if (size() > 0 && pixels != NULL) {
+        for (int i = 0; i < size(); ++i)
             number += pixels[i];
     }
 
@@ -284,16 +350,16 @@ std::string GLATEventCube::print(void) const
     std::string result;
 
     // Append header
-    result.append("=== GLATEventCube ===\n");
-    result.append(m_map.wcs()->print()+"\n");
-    result.append(parformat("Number of elements")+str(size())+"\n");
-    result.append(parformat("Number of pixels"));
-    result.append(str(m_map.nx())+" x "+str(m_map.ny())+"\n");
-    result.append(parformat("Number of energy bins")+str(ebins())+"\n");
-    result.append(parformat("Number of events")+str(number())+"\n");
+    result.append("=== GLATEventCube ===");
+    result.append("\n"+parformat("Number of elements")+str(size()));
+    result.append("\n"+parformat("Number of pixels"));
+    result.append(str(m_map.nx())+" x "+str(m_map.ny()));
+    result.append("\n"+parformat("Number of energy bins")+str(ebins()));
+    result.append("\n"+parformat("Number of events")+str(number()));
+    result.append("\n"+m_map.wcs()->print());
 
     // Append source maps
-    result.append(parformat("Number of source maps")+str(m_srcmap.size()));
+    result.append("\n"+parformat("Number of source maps")+str(m_srcmap.size()));
     for (int i = 0; i < m_srcmap.size(); ++i) {
         result.append("\n"+parformat(" "+m_srcmap_names[i]));
         result.append(str(m_srcmap[i]->nx()));
@@ -424,17 +490,17 @@ void GLATEventCube::init_members(void)
     // Initialise members
     m_bin.clear();
     m_map.clear();
-    m_dirs     = NULL;
-    m_omega    = NULL;
-    m_energies = NULL;
-    m_ewidth   = NULL;
     m_time.clear();
-    m_ontime   = 0.0;
     m_ebds.clear();
     m_gti.clear();
     m_srcmap.clear();
     m_srcmap_names.clear();
     m_enodes.clear();
+    m_dirs     = NULL;
+    m_omega    = NULL;
+    m_energies = NULL;
+    m_ewidth   = NULL;
+    m_ontime   = 0.0;
 
     // Return
     return;
@@ -531,17 +597,6 @@ void GLATEventCube::read_cntmap(GFitsImage* hdu)
 
         // Load counts map as sky map
         m_map.read(hdu);
-
-        // Set GEventCube attributes
-        m_dim      = (m_map.nmaps() > 1) ? 3 : 2;
-        m_naxis    = new int[m_dim];
-        m_naxis[0] = m_map.nx();
-        m_naxis[1] = m_map.ny();
-        m_elements = m_map.npix();
-        if (m_dim == 3) {
-            m_naxis[2]  = m_map.nmaps();
-            m_elements *= m_naxis[2];
-        }
 
         // Set sky directions
         set_directions();
