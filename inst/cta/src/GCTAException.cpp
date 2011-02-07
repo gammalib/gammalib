@@ -72,7 +72,7 @@ GCTAException::no_pointing::no_pointing(std::string origin, std::string message)
 GCTAException::no_response::no_response(std::string origin, std::string message)
 {
     m_origin  = origin;
-    m_message = "Attempt to model CTA response, but no response function"
+    m_message = "Attempt to use CTA response, but no response function"
                 " has been found. Use GCTAObservation::response() method"
                 " to set response function. "+message;
     return;
