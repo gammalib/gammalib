@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GMWLObservation.cpp  -  Multi-wavelength observation class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -247,7 +247,7 @@ void GMWLObservation::load(const std::string& filename)
     spec->load(filename);
 
     // Set attributes
-    obsname("Multi-wavelength observation");
+    name("Multi-wavelength observation");
     instrument(spec->instrument());
     //roi(spec->roi());
     ebounds(spec->ebounds());
@@ -280,7 +280,7 @@ void GMWLObservation::load(const std::string& filename,
     spec->load(filename, extname);
 
     // Set attributes
-    obsname("Multi-wavelength observation");
+    name("Multi-wavelength observation");
     instrument(spec->instrument());
     //roi(spec->roi());
     ebounds(spec->ebounds());
@@ -301,7 +301,7 @@ std::string GMWLObservation::print(void) const
 
     // Append header
     result.append("=== GMWLObservation ===\n");
-    result.append(parformat("Name")+obsname()+"\n");
+    result.append(parformat("Name")+name()+"\n");
     result.append(parformat("Instrument")+instrument()+"\n");
     result.append(parformat("Time range")+"\n");
     result.append(parformat("Energy range"));

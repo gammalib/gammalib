@@ -86,13 +86,13 @@ public:
     virtual double npred(const GModels& models, GVector* gradient = NULL) const;
 
     // Implemented methods
-    void               obsname(const std::string& obsname);
+    void               name(const std::string& name);
     void               ebounds(const GEbounds& ebounds) { m_ebounds=ebounds; }
     void               gti(const GGti& gti) { m_gti=gti; }
     void               roi(const GRoi* roi);
     void               events(const GEvents* events);
     void               statistics(const std::string& statistics);
-    const std::string& obsname(void) const { return m_obsname; }
+    const std::string& name(void) const { return m_name; }
     GTime              tstart(void) const { return m_gti.tstart(); }
     GTime              tstop(void) const { return  m_gti.tstop(); }
     GEnergy            emin(void) const { return m_ebounds.emin(); }
@@ -152,7 +152,7 @@ protected:
     };
 
     // Protected data area
-    std::string m_obsname;      //!< Name of observation
+    std::string m_name;         //!< Name of observation
     GEbounds    m_ebounds;      //!< Energy boundaries used for analysis
     GGti        m_gti;          //!< Good time intervals used for analysis
     GRoi*       m_roi;          //!< Pointer to region of interest used for analysis

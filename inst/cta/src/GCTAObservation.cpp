@@ -258,7 +258,7 @@ std::string GCTAObservation::print(void) const
 
     // Append header
     result.append("=== GCTAObservation ===\n");
-    result.append(parformat("Name")+obsname()+"\n");
+    result.append(parformat("Name")+name()+"\n");
     result.append(parformat("Instrument")+instrument()+"\n");
     result.append(parformat("Statistics")+statistics()+"\n");
 
@@ -530,7 +530,7 @@ void GCTAObservation::read_attributes(GFitsHDU* hdu)
         // Read attributes
         m_obs_id   = hdu->integer("OBS_ID");
         m_livetime = hdu->real("LIVETIME");
-        m_obsname  = hdu->string("OBJECT");
+        m_name     = hdu->string("OBJECT");
         m_ra_obj   = hdu->real("RA_OBJ");
         m_dec_obj  = hdu->real("DEC_OBJ");
 
@@ -766,7 +766,7 @@ void GCTAObservation::write_attributes(GFitsHDU* hdu) const
         hdu->card("TIMEDEL",  1.0, "Time resolution");
 
         // Set pointing information
-        hdu->card("OBJECT",   obsname(), "Observed object");
+        hdu->card("OBJECT",   name(),    "Observed object");
         hdu->card("RA_OBJ",   ra_obj(),  "[deg] Target Right Ascension");
         hdu->card("DEC_OBJ",  dec_obj(), "[deg] Target Declination");
         hdu->card("RA_PNT",   ra_pnt,    "[deg] Pointing Right Ascension");

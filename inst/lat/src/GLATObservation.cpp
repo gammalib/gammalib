@@ -20,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <cmath> //isinf
 #include "GException.hpp"
 #include "GLATObservation.hpp"
 #include "GLATEventList.hpp"
@@ -240,7 +239,7 @@ std::string GLATObservation::print(void) const
 
     // Append header
     result.append("=== GLATObservation ===\n");
-    result.append(parformat("Name")+obsname()+"\n");
+    result.append(parformat("Name")+name()+"\n");
     result.append(parformat("Instrument")+instrument()+"\n");
     result.append(parformat("Statistics")+statistics()+"\n");
 

@@ -271,14 +271,14 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
 /***********************************************************************//**
  * @brief Set observation name
  *
- * @param[in] obsname Observation name.
+ * @param[in] name Observation name.
  *
- * Set the name of this observation.
+ * Set the name of observation.
  ***************************************************************************/
-void GObservation::obsname(const std::string& obsname)
+void GObservation::name(const std::string& name)
 {
     // Set name
-    m_obsname = obsname;
+    m_name = name;
 
     // Return
     return;
@@ -360,7 +360,7 @@ void GObservation::statistics(const std::string& statistics)
 void GObservation::init_members(void)
 {
     // Initialise members
-    m_obsname.clear();
+    m_name.clear();
     m_ebounds.clear();
     m_gti.clear();
     m_roi        = NULL;
@@ -382,7 +382,7 @@ void GObservation::init_members(void)
 void GObservation::copy_members(const GObservation& obs)
 {
     // Copy attributes
-    m_obsname    = obs.m_obsname;
+    m_name       = obs.m_name;
     m_ebounds    = obs.m_ebounds;
     m_gti        = obs.m_gti;
     m_statistics = obs.m_statistics;
