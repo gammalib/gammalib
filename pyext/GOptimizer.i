@@ -37,7 +37,6 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GOptimizer* clone(void) const = 0;
-    virtual std::string print(void) const = 0;
 };
 
 
