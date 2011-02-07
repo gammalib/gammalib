@@ -36,16 +36,16 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GEventCube* clone(void) const = 0;
+    virtual int         size(void) const = 0;
+    virtual int         dim(void) const = 0;
+    virtual int         naxis(int axis) const = 0;
     virtual void        load(const std::string& filename) = 0;
     virtual GEventBin*  pointer(int index) = 0;
     virtual int         number(void) const = 0;
 
     // Implemented pure virtual methods
-    int  size(void) const { return m_elements; }
-    int  dim(void) const { return m_dim; }
-    int  naxis(int axis) const;
-    bool islist(void) const { return false; }
-    bool iscube(void) const { return true; }
+    bool islist(void) const;
+    bool iscube(void) const;
 };
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GEventCube.cpp  -  Abstract event cube container class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,6 @@
 #include "GEventCube.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_NAXIS                                      "GEventCube::naxis(int)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -35,7 +34,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                          Constructors/destructors                       =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -44,7 +43,7 @@
  ***************************************************************************/
 GEventCube::GEventCube(void) : GEvents()
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -55,11 +54,11 @@ GEventCube::GEventCube(void) : GEvents()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] cube Event cube from which the instance should be built.
+ * @param[in] cube Event cube.
  ***************************************************************************/
 GEventCube::GEventCube(const GEventCube& cube) : GEvents(cube)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -105,7 +104,7 @@ GEventCube& GEventCube::operator= (const GEventCube& cube)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -124,24 +123,6 @@ GEventCube& GEventCube::operator= (const GEventCube& cube)
  =                                                                         =
  ==========================================================================*/
 
-/***********************************************************************//**
- * @brief Return event cube axis dimension
- *
- * @param[in] axis Cube axis number (starting from 0).
- ***************************************************************************/
-int GEventCube::naxis(int axis) const
-{
-    // Throw error if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (m_naxis == NULL || axis < 0 || axis >= m_dim)
-        throw GException::out_of_range(G_NAXIS, axis, 0, m_dim-1);
-    #endif
-
-    // Return axis dimension
-    return m_naxis[axis];
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                           Private methods                               =
@@ -153,11 +134,6 @@ int GEventCube::naxis(int axis) const
  ***************************************************************************/
 void GEventCube::init_members(void)
 {
-    // Initialise members
-    m_elements = 0;
-    m_dim      = 0;
-    m_naxis    = NULL;
-
     // Return
     return;
 }
@@ -166,26 +142,10 @@ void GEventCube::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] cube GEventCube members to be copied.
+ * @param[in] cube Events cube.
  ***************************************************************************/
 void GEventCube::copy_members(const GEventCube& cube)
 {
-    // Copy attributes
-    m_elements = cube.m_elements;
-    m_dim      = cube.m_dim;
-
-    // If the cube is not empty then copy it
-    if (m_dim > 0 && cube.m_naxis != NULL) {
-
-        // Allocate memory
-        m_naxis = new int[m_dim];
-
-        // Copy axis dimensions
-        for (int i = 0; i < m_dim; ++i)
-            m_naxis[i] = cube.m_naxis[i];
-
-    }
-
     // Return
     return;
 }
@@ -196,12 +156,6 @@ void GEventCube::copy_members(const GEventCube& cube)
  ***************************************************************************/
 void GEventCube::free_members(void)
 {
-    // Free memory
-    if (m_naxis != NULL) delete [] m_naxis;
-
-    // Signal free pointers
-    m_naxis = NULL;
-
     // Return
     return;
 }
