@@ -122,6 +122,50 @@ GCTAException::no_gti::no_gti(std::string origin, std::string message)
 
 
 /***********************************************************************//**
+ * @brief No energies set
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCTAException::no_energies::no_energies(std::string origin, std::string message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Energy vector has not been setup."
+                " Cannot access event information.";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief No sky directions set
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCTAException::no_dirs::no_dirs(std::string origin, std::string message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Sky direction vector has not been setup."
+                " Cannot access event information.";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Invalid radial model type
  *
  * @param[in] origin Method that throws the error.

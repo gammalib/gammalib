@@ -78,6 +78,14 @@ public:
     public:
         no_gti(std::string origin, std::string message = "");
     };
+    class no_energies : public GCTAExceptionHandler {
+    public:
+        no_energies(std::string origin, std::string message = "");
+    };
+    class no_dirs : public GCTAExceptionHandler {
+    public:
+        no_dirs(std::string origin, std::string message = "");
+    };
 
     // Model exceptions
     class model_invalid_radial : public GCTAExceptionHandler {
