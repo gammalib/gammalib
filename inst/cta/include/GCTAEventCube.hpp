@@ -52,7 +52,8 @@ class GCTAEventCube : public GEventCube {
 public:
     // Constructors and destructors
     GCTAEventCube(void);
-    GCTAEventCube(const GSkymap& map);
+    explicit GCTAEventCube(const GSkymap& map, const GEbounds& ebds,
+                           const GGti& gti);
     GCTAEventCube(const GCTAEventCube& cube);
     virtual ~GCTAEventCube(void);
 
@@ -94,7 +95,7 @@ protected:
     void         read_gti(GFitsTable* hdu);
     void         set_directions(void);
     void         set_energies(void);
-    void         set_time(void);
+    void         set_times(void);
 
     // Protected fundamental data
     GSkymap      m_map;            //!< Counts map stored as sky map
