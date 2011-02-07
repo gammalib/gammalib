@@ -182,6 +182,35 @@ GModels& GOptimizerLM::operator() (GOptimizerFunction& fct, GModels& m)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear object
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GOptimizerLM::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GOptimizer::free_members();
+
+    // Initialise members
+    this->GOptimizer::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+***************************************************************************/
+GOptimizerLM* GOptimizerLM::clone(void) const
+{
+    return new GOptimizerLM(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Print optimizer information
  ***************************************************************************/
 std::string GOptimizerLM::print(void) const
@@ -898,34 +927,3 @@ void GOptimizerLM::errors(GOptimizerFunction* fct, GOptimizerPars* pars)
  =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] opt Optimizer.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GOptimizerLM& opt)
-{
-     // Write optimizer in output stream
-    os << opt.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] opt Optimizer.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GOptimizerLM& opt)
-{
-    // Write optimizer into logger
-    log << opt.print();
-
-    // Return logger
-    return log;
-}

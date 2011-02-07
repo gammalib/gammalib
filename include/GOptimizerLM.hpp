@@ -40,10 +40,6 @@
  ***************************************************************************/
 class GOptimizerLM : public GOptimizer {
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GOptimizerLM& opt);
-    friend GLog&         operator<< (GLog& log, const GOptimizerLM& opt);
-
 public:
 
     // Constructors and destructors
@@ -56,6 +52,11 @@ public:
     GOptimizerLM&   operator= (const GOptimizerLM& opt);
     GOptimizerPars& operator() (GOptimizerFunction& fct, GOptimizerPars& p);
     GModels&        operator() (GOptimizerFunction& fct, GModels& m);
+
+    // Implemented pure virtual methods
+    void          clear(void);
+    GOptimizerLM* clone(void) const;
+    std::string   print(void) const;
     
     // Methods
     void        max_iter(const int& n) { m_max_iter=n; }
@@ -76,7 +77,6 @@ public:
     double      lambda(void) const { return m_lambda; }
     double      eps(void) const { return m_eps; }
     double      value(void) const { return m_value; }
-    std::string print(void) const;
 
 protected:
     // Protected methods
@@ -88,7 +88,7 @@ protected:
     void   errors(GOptimizerFunction* fct, GOptimizerPars* pars);
     double step_size(GVector* grad, GOptimizerPars* pars);
 
-    // Protected data area
+    // Protected members
     int               m_npars;           //!< Number of parameters
     int               m_nfree;           //!< Number of free parameters
     double            m_lambda_start;    //!< Initial start value

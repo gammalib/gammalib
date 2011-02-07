@@ -36,10 +36,10 @@ public:
     GOptimizerLM(const GOptimizerLM& opt);
     virtual ~GOptimizerLM(void);
 
-    // Operators (we need those to make the class not abstract!!!)
-    GOptimizerPars& operator() (GOptimizerFunction& fct, GOptimizerPars& p);
-    GModels&        operator() (GOptimizerFunction& fct, GModels& m);
-
+    // Implemented pure virtual methods
+    void          clear(void);
+    GOptimizerLM* clone(void) const;
+    
     // Methods
     void   max_iter(const int& n) { m_max_iter=n; return; }
     void   max_stalls(const int& n) { m_max_stall=n; return; }
@@ -66,9 +66,6 @@ public:
  * @brief GOptimizerLM class extension
  ***************************************************************************/
 %extend GOptimizerLM {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GOptimizerLM copy() {
         return (*self);
     }
