@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GOptimizer.cpp  -  Abstract base class for optimizer          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,7 +9,6 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GOptimizer.cpp
@@ -31,7 +30,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                    GOptimizer constructors/destructors                  =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
@@ -40,7 +39,7 @@
  ***************************************************************************/
 GOptimizer::GOptimizer(void)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
   
     // Return
@@ -51,11 +50,11 @@ GOptimizer::GOptimizer(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] opt Optimizer from which the instance should be built.
+ * @param[in] opt Optimizer.
  ***************************************************************************/
 GOptimizer::GOptimizer(const GOptimizer& opt)
 { 
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -81,14 +80,14 @@ GOptimizer::~GOptimizer()
 
 /*==========================================================================
  =                                                                         =
- =                           GOptimizer operators                          =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] opt Optimizer to be assigned.
+ * @param[in] opt Optimizer.
  ***************************************************************************/
 GOptimizer& GOptimizer::operator= (const GOptimizer& opt)
 { 
@@ -98,7 +97,7 @@ GOptimizer& GOptimizer::operator= (const GOptimizer& opt)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -113,13 +112,13 @@ GOptimizer& GOptimizer::operator= (const GOptimizer& opt)
 
 /*==========================================================================
  =                                                                         =
- =                         GOptimizer public methods                       =
+ =                              Public methods                             =
  =                                                                         =
  ==========================================================================*/
 
 /*==========================================================================
  =                                                                         =
- =                         GOptimizer private methods                      =
+ =                              Private methods                            =
  =                                                                         =
  ==========================================================================*/
 
@@ -136,7 +135,7 @@ void GOptimizer::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] opt GOptimizer members to be copied.
+ * @param[in] opt Optimizer.
  ***************************************************************************/
 void GOptimizer::copy_members(const GOptimizer& opt)
 {
@@ -157,12 +156,38 @@ void GOptimizer::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                             GOptimizer friends                          =
+ =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
 
-/*==========================================================================
- =                                                                         =
- =                    Other functions used by GOptimizer                   =
- =                                                                         =
- ==========================================================================*/
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] opt Optimizer.
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GOptimizer& opt)
+{
+     // Write optimizer in output stream
+    os << opt.print();
+
+    // Return output stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] opt Optimizer.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GOptimizer& opt)
+{
+    // Write optimizer into logger
+    log << opt.print();
+
+    // Return logger
+    return log;
+}
+

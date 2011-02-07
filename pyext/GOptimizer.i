@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GOptimizer.i  -  Optimizer class SWIG interface              *
+ *            GOptimizer.i  -  Optimizer class Python interface            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,28 +12,40 @@
  ***************************************************************************/
 /**
  * @file GOptimizer.i
- * @brief GOptimizer class SWIG interface.
+ * @brief GOptimizer class Python interface.
  * @author J. Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GOptimizer.hpp"
+#include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
  * @class GOptimizer
  *
- * @brief GOptimizer class SWIG interface defintion.
+ * @brief GOptimizer class Python interface defintion
  ***************************************************************************/
 class GOptimizer {
 public:
     // Constructors and destructors
-    GOptimizer();
+    GOptimizer(void);
     GOptimizer(const GOptimizer& opt);
     virtual ~GOptimizer();
 
-    // Operators (we need those to make the class abstract!!!)
-    virtual GOptimizerPars& operator() (GOptimizerFunction& fct, GOptimizerPars& p) = 0;
-    virtual GModels&        operator() (GOptimizerFunction& fct, GModels& m) = 0;
+    // Pure virtual methods
+    virtual void        clear(void) = 0;
+    virtual GOptimizer* clone(void) const = 0;
+    virtual std::string print(void) const = 0;
+};
+
+
+/***********************************************************************//**
+ * @brief GOptimizer class extension
+ ***************************************************************************/
+%extend GOptimizer {
+    char *__str__() {
+        return tochar(self->print());
+    }
 };
