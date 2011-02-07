@@ -60,6 +60,7 @@ public:
     double      celapse(void) const;
     GPar*       par(const std::string& name);
     const GPar* par(const std::string& name) const;
+    void        logFileOpen(bool clobber = true);
     bool        logTerse(void) const;
     bool        logNormal(void) const;
     bool        logExplicit(void) const;
