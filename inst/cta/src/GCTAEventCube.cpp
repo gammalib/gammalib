@@ -66,22 +66,34 @@ GCTAEventCube::GCTAEventCube(void) : GEventCube()
 
 
 /***********************************************************************//**
- * @brief Sky map constructor
+ * @brief Constructor
  *
  * @param[in] map Sky map.
+ * @param[in] ebds Energy boundaries.
+ * @param[in] gti Good Time intervals.
  *
- * Construct instance of events cube from sky map.
+ * Construct instance of events cube from sky map, energy boundaries and
+ * Good Time Intervals.
  ***************************************************************************/
-GCTAEventCube::GCTAEventCube(const GSkymap& map) : GEventCube()
+GCTAEventCube::GCTAEventCube(const GSkymap& map, const GEbounds& ebds,
+                             const GGti& gti) : GEventCube()
 {
     // Initialise members
     init_members();
 
-    // Set sky map
-    m_map = map;
+    // Set sky map, energy boundaries and GTI
+    m_map  = map;
+    m_ebds = ebds;
+    m_gti  = gti;
 
     // Set sky directions
     set_directions();
+
+    // Set energies
+    set_energies();
+
+    // Set times
+    set_times();
 
     // Return
     return;
@@ -323,6 +335,10 @@ void GCTAEventCube::write(GFits* file) const
  *
  * @exception GException::out_of_range
  *            Event index not in valid range.
+ * @exception GCTAException::no_energies
+ *            Energy vector has not been set up.
+ * @exception GCTAException::no_dirs
+ *            Energy vector has not been set up.
  *
  * This method provides the event attributes to the event bin. The event bin
  * is in fact physically stored in the event cube, and only a single event
@@ -337,6 +353,14 @@ GCTAEventBin* GCTAEventCube::pointer(int index)
     if (index < 0 || index >= size())
         throw GException::out_of_range(G_POINTER, index, 0, size()-1);
     #endif
+
+    // Check for the existence of energies and energy widths
+    if (m_energies == NULL || m_ewidth == NULL)
+        throw GCTAException::no_energies(G_POINTER);
+
+    // Check for the existence of energies and energy widths
+    if (m_dirs == NULL || m_omega == NULL)
+        throw GCTAException::no_dirs(G_POINTER);
 
     // Get pixel and energy bin indices.
     int ipix = index % npix();
@@ -562,8 +586,8 @@ void GCTAEventCube::read_gti(GFitsTable* hdu)
         // Read Good Time Intervals
         m_gti.read(hdu);
 
-        // Set time
-        set_time();
+        // Set times
+        set_times();
 
     } // endif: HDU was valid
 
@@ -658,7 +682,7 @@ void GCTAEventCube::set_energies(void)
  *       weights by the length of the GTIs, yet so far we do not really use
  *       the mean event time, hence there is no rush to implement this.
  ***************************************************************************/
-void GCTAEventCube::set_time(void)
+void GCTAEventCube::set_times(void)
 {
     // Throw an error if GTI is empty
     if (m_gti.size() < 1)
