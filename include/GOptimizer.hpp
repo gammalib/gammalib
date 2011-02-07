@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GOptimizer.hpp  -  Abstract base class for optimizer          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,6 +20,9 @@
 #define GOPTIMIZER_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
+#include <iostream>
+#include <GLog.hpp>
 #include "GOptimizerPars.hpp"
 #include "GOptimizerFunction.hpp"
 #include "GModels.hpp"
@@ -33,12 +36,12 @@
 class GOptimizer {
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GOptimizer& opt);
+    friend std::ostream& operator<<(std::ostream& os, const GOptimizer& opt);
+    friend GLog&         operator<<(GLog& log,        const GOptimizer& opt);
 
 public:
-
     // Constructors and destructors
-    GOptimizer();
+    GOptimizer(void);
     GOptimizer(const GOptimizer& opt);
     virtual ~GOptimizer();
 
@@ -47,18 +50,18 @@ public:
     virtual GOptimizerPars& operator() (GOptimizerFunction& fct, GOptimizerPars& p) = 0;
     virtual GModels&        operator() (GOptimizerFunction& fct, GModels& m) = 0;
 
-    // Virtual methods
+    // Pure virtual methods
+    virtual void        clear(void) = 0;
+    virtual GOptimizer* clone(void) const = 0;
+    virtual std::string print(void) const = 0;
  
-    // Implement methods
+    // Implemented methods
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GOptimizer& opt);
     void free_members(void);
-    
-    // Protected data area
-
 };
 
 #endif /* GOPTIMIZER_HPP */
