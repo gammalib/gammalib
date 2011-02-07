@@ -71,7 +71,7 @@ GApplication::GApplication(const std::string& name, const std::string& version)
     m_version = version;
 
     // Initialise the application logger
-    log.open(log_filename(), true);
+    //logFileOpen();
 
     // Initialise application parameters
     m_pars.load(par_filename());
@@ -103,7 +103,7 @@ GApplication::GApplication(const std::string& name, const std::string& version,
     m_version = version;
 
     // Initialise the application logger
-    log.open(log_filename(), true);
+    logFileOpen();
 
     // Save arguments as vector of strings
     for (int i = 0; i < argc; ++i)
@@ -314,6 +314,23 @@ const GPar* GApplication::par(const std::string& name) const
 
     // Return pointer
     return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Open log file
+ *
+ * @param[in] clobber (default: true)
+ *
+ * Opens application log file.
+ ***************************************************************************/
+void GApplication::logFileOpen(bool clobber)
+{
+    // Initialise the application logger
+    log.open(log_filename(), clobber);
+
+    // Return
+    return;
 }
 
 
