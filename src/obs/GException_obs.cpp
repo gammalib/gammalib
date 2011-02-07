@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GException_obs.cpp  -  observations exception handlers         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,33 +25,89 @@
 
 
 /***********************************************************************//**
- * @brief No valid instrument response.
+ * @brief No valid instrument response found
  *
  * @param[in] origin Name of method that has thrown the exception.
  * @param[in] message Optional error message.
  ***************************************************************************/
 GException::no_response::no_response(std::string origin, std::string message)
 {
-    m_origin  = origin;
-    m_message = "Instrument response not defined."
-                " Define instrument response before using this method."+
-                message;
+    // Set method name
+    m_origin = origin;
+
+    // Set error message
+    m_message = "No valid instrument response found in observation." \
+                " Set instrument response before using this method.";
+    if (message.length() > 0)
+        m_message += " " + message;
+
+    // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief No valid region of interest.
+ * @brief No valid event list found
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::no_list::no_list(std::string origin, std::string message)
+{
+    // Set method name
+    m_origin = origin;
+
+    // Set error message
+    m_message = "No valid event list found in observation." \
+                " Set event list before using this method.";
+    if (message.length() > 0)
+        m_message += " " + message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief No valid event cube found
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::no_cube::no_cube(std::string origin, std::string message)
+{
+    // Set method name
+    m_origin = origin;
+
+    // Set error message
+    m_message = "No valid event cube found in observation." \
+                " Set event cube before using this method.";
+    if (message.length() > 0)
+        m_message += " " + message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief No valid region of interest found
  *
  * @param[in] origin Method that throws the error.
  * @param[in] message Optional error message.
  ***************************************************************************/
 GException::no_roi::no_roi(std::string origin, std::string message)
 {
-    m_origin  = origin;
-    m_message = "Region of interest not defined."
-                " Define region of interest before using this method."+
-                message;
+    // Set method name
+    m_origin = origin;
+
+    // Set error message
+    m_message = "No valid region of interest (ROI) found in observation." \
+                " Set region of interest before using this method.";
+    if (message.length() > 0)
+        m_message += " " + message;
+
+    // Return
     return;
 }
 
@@ -67,14 +123,20 @@ GException::gradient_par_mismatch::gradient_par_mismatch(std::string origin,
                                                          int         nsize,
                                                          int         npars)
 {
-    m_origin  = origin;
+    // Set method name
+    m_origin = origin;
+
+    // Set error message
     m_message = "Gradient vector size "+str(nsize)+
                 " mismatches number "+str(npars)+" of model parameters.";
+
+    // Return
+    return;
 }
 
 
 /***********************************************************************//**
- * @brief Calibration database directory not found.
+ * @brief Calibration database directory not found
  *
  * @param[in] origin Name of method that has thrown the exception.
  * @param[in] caldb Name of calibration database.
@@ -84,8 +146,15 @@ GException::caldb_not_found::caldb_not_found(std::string origin,
                                              std::string caldb,
                                              std::string message)
 {
-    m_origin  = origin;
-    m_message = "Calibration database \""+caldb+"\" not found. "+message;
+    // Set method name
+    m_origin = origin;
+
+    // Set error message
+    m_message = "Calibration database \""+caldb+"\" not found.";
+    if (message.length() > 0)
+        m_message += " " + message;
+
+    // Return
     return;
 }
 
@@ -99,13 +168,19 @@ GException::caldb_not_found::caldb_not_found(std::string origin,
 GException::rsp_invalid_type::rsp_invalid_type(std::string origin,
                                                std::string type)
 {
-    m_origin  = origin;
-    m_message = "Invalid response type '"+type+"' specified.";
+    // Set method name
+    m_origin = origin;
+
+    // Set error message
+    m_message = "Invalid response type \""+type+"\" specified.";
+
+    // Return
+    return;
 }
 
 
 /***********************************************************************//**
- * @brief Good Time Intervals are not valid.
+ * @brief Invalid Good Time Interval found
  *
  * @param[in] origin Method that throws the error.
  * @param[in] start Good Time Interval start time.
@@ -115,18 +190,22 @@ GException::rsp_invalid_type::rsp_invalid_type(std::string origin,
 GException::gti_invalid::gti_invalid(std::string origin, GTime tstart,
                                      GTime tstop, std::string message)
 {
-    std::ostringstream s_tstart;
-    std::ostringstream s_tstop;
-    s_tstart  << tstart;
-    s_tstop   << tstop;
-    m_origin  = origin;
-    m_message = "Invalid Good Time Interval ("+s_tstart.str()+"-"+
-                s_tstop.str()+") specified. "+message;
+    // Set method name
+    m_origin = origin;
+
+    // Set error message
+    m_message = "Invalid Good Time Interval (" + tstart.print() + "-" +
+                tstop.print() + ") specified.";
+    if (message.length() > 0)
+        m_message += " " + message;
+
+    // Return
+    return;
 }
 
 
 /***********************************************************************//**
- * @brief Energy range is not valid.
+ * @brief Invalid energy range found
  *
  * @param[in] origin Method that throws the error.
  * @param[in] emin Minimum energy in MeV.
@@ -136,9 +215,17 @@ GException::gti_invalid::gti_invalid(std::string origin, GTime tstart,
 GException::erange_invalid::erange_invalid(std::string origin, double emin, 
                                            double emax, std::string message)
 {
-    m_origin  = origin;
+    // Set method name
+    m_origin = origin;
+
+    // Set error message
     m_message = "Invalid energy range (Emin="+str(emin)+" MeV, Emax="+
-                str(emax)+" MeV. "+message;
+                str(emax)+" MeV specified.";
+    if (message.length() > 0)
+        m_message += " " + message;
+
+    // Return
+    return;
 }
 
 
@@ -153,7 +240,15 @@ GException::invalid_statistics::invalid_statistics(std::string origin,
                                                    std::string statistics,
                                                    std::string message)
 {
-    m_origin  = origin;
+    // Set method name
+    m_origin = origin;
+
+    // Set error message
     m_message = "Invalid optimization statistics \""+statistics+
-                "\" encountered. "+message;
+                "\" specified.";
+    if (message.length() > 0)
+        m_message += " " + message;
+
+    // Return
+    return;
 }

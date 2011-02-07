@@ -397,6 +397,14 @@ public:
     public:
         no_roi(std::string origin, std::string message = "");
     };
+    class no_list : public GExceptionHandler {
+    public:
+        no_list(std::string origin, std::string message = "");
+    };
+    class no_cube : public GExceptionHandler {
+    public:
+        no_cube(std::string origin, std::string message = "");
+    };
     class gradient_par_mismatch : public GExceptionHandler {
     public:
         gradient_par_mismatch(std::string origin, int nsize, int npars);
