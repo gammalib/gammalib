@@ -51,13 +51,13 @@ public:
     virtual double npred(const GModels& models, GVector* gradient = NULL) const;
 
     // Implemented methods
-    void               obsname(const std::string& obsname);
+    void               name(const std::string& name);
     void               ebounds(const GEbounds& ebounds);
     void               gti(const GGti& gti);
     void               roi(const GRoi* roi);
     void               events(const GEvents* events);
     void               statistics(const std::string& statistics);
-    const std::string& obsname(void) const;
+    const std::string& name(void) const;
     GTime              tstart(void) const;
     GTime              tstop(void) const;
     GEnergy            emin(void) const;
