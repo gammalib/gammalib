@@ -23,8 +23,7 @@
 #include <string>
 #include <unistd.h>           // access() function
 #include "GLATResponse.hpp"
-#include "GLATPointing.hpp"
-#include "GLATInstDir.hpp"
+#include "GLATObservation.hpp"
 #include "GLATEventAtom.hpp"
 #include "GLATEventBin.hpp"
 #include "GLATEventCube.hpp"
