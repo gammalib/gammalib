@@ -17,6 +17,10 @@
 
 /* __ CTA ________________________________________________________________ */
 #include "GCTAObservation.i"
+#include "GCTAEventCube.i"
+#include "GCTAEventList.i"
+#include "GCTAEventBin.i"
+#include "GCTAEventAtom.i"
 #include "GCTAPointing.i"
 #include "GCTAResponse.i"
 #include "GCTAInstDir.i"
