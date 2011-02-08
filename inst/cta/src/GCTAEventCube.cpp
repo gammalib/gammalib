@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GCTAEventCube.cpp  -  CTA event cube class               *
+ *           GCTAEventCube.cpp  -  CTA event bin container class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEventCube.cpp
- * @brief GCTAEventCube class implementation.
+ * @brief CTA event bin container class implementation
  * @author J. Knodlseder
  */
 
@@ -21,22 +21,16 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
+#include "GFits.hpp"
 #include "GCTAException.hpp"
 #include "GCTAEventCube.hpp"
-#include "GCTAEventBin.hpp"
-#include "GCTAObservation.hpp"
-#include "GCTAResponse.hpp"
-#include "GSkymap.hpp"
-#include "GFits.hpp"
-#include "GFitsTable.hpp"
-#include "GFitsImage.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NAXIS                                   "GCTAEventCube::naxis(int)"
-#define G_POINTER                               "GCTAEventCube::pointer(int)"
 #define G_SET_DIRECTIONS                    "GCTAEventCube::set_directions()"
 #define G_SET_ENERGIES                        "GCTAEventCube::set_energies()"
 #define G_SET_TIME                                "GCTAEventCube::set_time()"
+#define G_SET_BIN                              "GCTAEventCube::set_bin(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -82,9 +76,9 @@ GCTAEventCube::GCTAEventCube(const GSkymap& map, const GEbounds& ebds,
     init_members();
 
     // Set sky map, energy boundaries and GTI
-    m_map  = map;
-    m_ebds = ebds;
-    m_gti  = gti;
+    m_map = map;
+    this->ebounds(ebds);
+    this->gti(gti);
 
     // Set sky directions
     set_directions();
@@ -163,6 +157,40 @@ GCTAEventCube& GCTAEventCube::operator= (const GCTAEventCube& cube)
 
     // Return this object
     return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Event bin access operator
+ *
+ * @param[in] index Event index [0,...,size()-1].
+ *
+ * Returns pointer to an event bin.
+ ***************************************************************************/
+GCTAEventBin* GCTAEventCube::operator[](const int& index)
+{
+    // Set event bin
+    set_bin(index);
+
+    // Return pointer
+    return (&m_bin);
+}
+
+
+/***********************************************************************//**
+ * @brief Event bin access operator (const version)
+ *
+ * @param[in] index Event index [0,...,size()-1].
+ *
+ * Returns pointer to an event bin.
+ ***************************************************************************/
+const GCTAEventBin* GCTAEventCube::operator[](const int& index) const
+{
+    // Set event bin (circumvent const correctness)
+    ((GCTAEventCube*)this)->set_bin(index);
+
+    // Return pointer
+    return (&m_bin);
 }
 
 
@@ -267,15 +295,12 @@ int GCTAEventCube::naxis(int axis) const
 
 
 /***********************************************************************//**
- * @brief Load CTA counts map from FITS file
+ * @brief Load CTA event cube from FITS file
  *
- * @param[in] filename FITS file name of counts map.
+ * @param[in] filename FITS filename.
  *
- * It is assumed that the counts map resides in the primary extension of the
- * FITS file, the energy boundaries reside in the EBOUNDS extension and the
- * Good Time Intervals reside in the GTI extension.  The method clears the
- * object before loading, thus any events residing in the object before
- * loading will be lost.
+ * The method clears the object before loading, thus any events residing in
+ * the object before loading will be lost.
  ***************************************************************************/
 void GCTAEventCube::load(const std::string& filename)
 {
@@ -284,6 +309,57 @@ void GCTAEventCube::load(const std::string& filename)
 
     // Open counts map FITS file
     GFits file(filename);
+
+    // Load counts map
+    read(file);
+
+    // Close FITS file
+    file.close();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save CTA event cube into FITS file
+ *
+ * @param[in] filename FITS filename.
+ * @param[in] clobber Overwrite existing FITS file (default=false).
+ *
+ * Save the CTA event cube into FITS file.
+ ***************************************************************************/
+void GCTAEventCube::save(const std::string& filename, bool clobber) const
+{
+    // Create empty FITS file
+    GFits fits;
+
+    // Write event cube
+    write(fits);
+    
+    // Save FITS file
+    fits.saveto(filename, clobber);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read CTA event cube from FITS file
+ *
+ * @param[in] file FITS file.
+ *
+ * It is assumed that the counts map resides in the primary extension of the
+ * FITS file, the energy boundaries reside in the EBOUNDS extension and the
+ * Good Time Intervals reside in the GTI extension.  The method clears the
+ * object before loading, thus any events residing in the object before
+ * loading will be lost.
+ ***************************************************************************/
+void GCTAEventCube::read(const GFits& file)
+{
+    // Clear object
+    clear();
 
     // Get HDUs
     GFitsImage* hdu_cntmap  = file.image("Primary");
@@ -299,9 +375,6 @@ void GCTAEventCube::load(const std::string& filename)
     // Load GTIs
     read_gti(hdu_gti);
 
-    // Close FITS file
-    file.close();
-
     // Return
     return;
 }
@@ -312,71 +385,19 @@ void GCTAEventCube::load(const std::string& filename)
  *
  * @param[in] file FITS file.
  ***************************************************************************/
-void GCTAEventCube::write(GFits* file) const
+void GCTAEventCube::write(GFits& file) const
 {
     // Write cube
-    m_map.write(file);
+    m_map.write(&file);
 
     // Write energy boundaries
-    m_ebds.write(file);
+    ebounds().write(&file);
 
     // Write Good Time intervals
-    m_gti.write(file);
+    gti().write(&file);
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to an event
- *
- * @param[in] index Event index (starting from 0).
- *
- * @exception GException::out_of_range
- *            Event index not in valid range.
- * @exception GCTAException::no_energies
- *            Energy vector has not been set up.
- * @exception GCTAException::no_dirs
- *            Energy vector has not been set up.
- *
- * This method provides the event attributes to the event bin. The event bin
- * is in fact physically stored in the event cube, and only a single event
- * bin is indeed allocated. This method sets up the pointers in the event
- * bin so that a client can easily access the information of individual bins
- * as if they were stored in an array.
- ***************************************************************************/
-GCTAEventBin* GCTAEventCube::pointer(int index)
-{
-    // Optionally check if the index is valid
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_POINTER, index, 0, size()-1);
-    #endif
-
-    // Check for the existence of energies and energy widths
-    if (m_energies == NULL || m_ewidth == NULL)
-        throw GCTAException::no_energies(G_POINTER);
-
-    // Check for the existence of energies and energy widths
-    if (m_dirs == NULL || m_omega == NULL)
-        throw GCTAException::no_dirs(G_POINTER);
-
-    // Get pixel and energy bin indices.
-    int ipix = index % npix();
-    int ieng = index / npix();
-
-    // Set pointers
-    m_bin.m_counts = &(m_map.pixels()[index]);
-    m_bin.m_energy = &(m_energies[ieng]);
-    m_bin.m_time   = &m_time;
-    m_bin.m_dir    = &(m_dirs[ipix]);
-    m_bin.m_omega  = &(m_omega[ipix]);
-    m_bin.m_ewidth = &(m_ewidth[ieng]);
-    m_bin.m_ontime = &m_ontime;
-
-    // Return pointer
-    return &m_bin;
 }
 
 
@@ -416,6 +437,16 @@ std::string GCTAEventCube::print(void) const
     result.append("\n"+parformat("Number of pixels")+str(npix()));
     result.append("\n"+parformat("Number of energy bins")+str(ebins()));
     result.append("\n"+parformat("Number of events")+str(number()));
+    result.append("\n"+parformat("Time interval"));
+    if (gti().size() > 0)
+        result.append(str(tstart().met())+" - "+str(tstop().met()));
+    else
+        result.append("not defined");
+    result.append("\n"+parformat("Energy range"));
+    if (ebounds().size() > 0)
+        result.append(emin().print()+" - "+emax().print());
+    else
+        result.append("not defined");
 
     // Return result
     return result;
@@ -434,16 +465,14 @@ std::string GCTAEventCube::print(void) const
 void GCTAEventCube::init_members(void)
 {
     // Initialise members
-    m_bin.clear();
     m_map.clear();
+    m_bin.clear();
     m_time.clear();
-    m_ebds.clear();
-    m_gti.clear();
-    m_dirs     = NULL;
-    m_omega    = NULL;
-    m_energies = NULL;
-    m_ewidth   = NULL;
-    m_ontime   = 0.0;
+    m_dirs.clear();
+    m_omega.clear();
+    m_energies.clear();
+    m_ewidth.clear();
+    m_ontime = 0.0;
 
     // Return
     return;
@@ -457,41 +486,15 @@ void GCTAEventCube::init_members(void)
  ***************************************************************************/
 void GCTAEventCube::copy_members(const GCTAEventCube& cube)
 {
-    // Copy CTA specific attributes
-    m_bin    = cube.m_bin;
-    m_map    = cube.m_map;
-    m_time   = cube.m_time;
-    m_ontime = cube.m_ontime;
-    m_ebds   = cube.m_ebds;
-    m_gti    = cube.m_gti;
-
-    // Copy sky directions and solid angles
-    if (cube.npix() > 0) {
-        if (cube.m_dirs != NULL) {
-            m_dirs = new GCTAInstDir[cube.npix()];
-            for (int i = 0; i < cube.npix(); ++i)
-                m_dirs[i] = cube.m_dirs[i];
-        }
-        if (cube.m_omega != NULL) {
-            m_omega = new double[cube.npix()];
-            for (int i = 0; i < cube.npix(); ++i)
-                m_omega[i] = cube.m_omega[i];
-        }
-    }
-
-    // Copy bin energies and widths
-    if (cube.ebins() > 0) {
-        if (cube.m_energies != NULL) {
-            m_energies = new GEnergy[cube.ebins()];
-            for (int i = 0; i < cube.ebins(); ++i)
-                m_energies[i] = cube.m_energies[i];
-        }
-        if (cube.m_ewidth != NULL) {
-            m_ewidth = new GEnergy[cube.ebins()];
-            for (int i = 0; i < cube.ebins(); ++i)
-                m_ewidth[i] = cube.m_ewidth[i];
-        }
-    }
+    // Copy members
+    m_map      = cube.m_map;
+    m_bin      = cube.m_bin;
+    m_time     = cube.m_time;
+    m_dirs     = cube.m_dirs;
+    m_omega    = cube.m_omega;
+    m_energies = cube.m_energies;
+    m_ewidth   = cube.m_ewidth;
+    m_ontime   = cube.m_ontime;
 
     // Return
     return;
@@ -503,18 +506,6 @@ void GCTAEventCube::copy_members(const GCTAEventCube& cube)
  ***************************************************************************/
 void GCTAEventCube::free_members(void)
 {
-    // Free memory
-    if (m_ewidth   != NULL) delete [] m_ewidth;
-    if (m_energies != NULL) delete [] m_energies;
-    if (m_omega    != NULL) delete [] m_omega;
-    if (m_dirs     != NULL) delete [] m_dirs;
-
-    // Signal free pointers
-    m_dirs     = NULL;
-    m_omega    = NULL;
-    m_energies = NULL;
-    m_ewidth   = NULL;
-
     // Return
     return;
 }
@@ -528,7 +519,7 @@ void GCTAEventCube::free_members(void)
  * This method reads a CTA counts map from a FITS HDU. The counts map is
  * stored in a GSkymap object.
  ***************************************************************************/
-void GCTAEventCube::read_cntmap(GFitsImage* hdu)
+void GCTAEventCube::read_cntmap(const GFitsImage* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
@@ -552,14 +543,16 @@ void GCTAEventCube::read_cntmap(GFitsImage* hdu)
  * @param[in] hdu Pointer to energy boundaries table.
  *
  * Read the energy boundaries from the HDU.
+ *
+ * @todo Energy bounds read method should take const GFitsTable* as argument
  ***************************************************************************/
-void GCTAEventCube::read_ebds(GFitsTable* hdu)
+void GCTAEventCube::read_ebds(const GFitsTable* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
 
         // Read energy boundaries
-        m_ebds.read(hdu);
+        m_ebounds.read((GFitsTable*)hdu);
 
         // Set log mean energies and energy widths
         set_energies();
@@ -577,14 +570,16 @@ void GCTAEventCube::read_ebds(GFitsTable* hdu)
  * @param[in] hdu Pointer to GTI table.
  *
  * Reads the Good Time Intervals from the GTI extension.
+ *
+ * @todo GTI read method should take const GFitsTable* as argument
  ***************************************************************************/
-void GCTAEventCube::read_gti(GFitsTable* hdu)
+void GCTAEventCube::read_gti(const GFitsTable* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
 
         // Read Good Time Intervals
-        m_gti.read(hdu);
+        m_gti.read((GFitsTable*)hdu);
 
         // Set times
         set_times();
@@ -614,18 +609,20 @@ void GCTAEventCube::set_directions(void)
         throw GCTAException::no_sky(G_SET_DIRECTIONS, "Every CTA event cube"
                                    " needs a definiton of the sky pixels.");
 
-    // Delete old pixel directions and solid angles
-    if (m_omega != NULL) delete [] m_omega;
-    if (m_dirs  != NULL) delete [] m_dirs;
+    // Clear old pixel directions and solid angle
+    m_dirs.clear();
+    m_omega.clear();
+
+    // Reserve space for pixel directions and solid angles
+    m_dirs.reserve(npix());
+    m_omega.reserve(npix());
 
     // Set pixel directions and solid angles
-    m_dirs  = new GCTAInstDir[npix()];
-    m_omega = new double[npix()];
-    for (int i = 0, iy = 0; iy < ny(); ++iy) {
-        for (int ix = 0; ix < nx(); ++ix, ++i) {
+    for (int iy = 0; iy < ny(); ++iy) {
+        for (int ix = 0; ix < nx(); ++ix) {
             GSkyPixel pixel = GSkyPixel(double(ix), double(iy));
-            m_dirs[i]       = GCTAInstDir(m_map.xy2dir(pixel));
-            m_omega[i]      = m_map.omega(pixel);
+            m_dirs.push_back(GCTAInstDir(m_map.xy2dir(pixel)));
+            m_omega.push_back(m_map.omega(pixel));
         }
     }
 
@@ -651,16 +648,18 @@ void GCTAEventCube::set_energies(void)
         throw GCTAException::no_ebds(G_SET_ENERGIES, "Every CTA event cube"
                              " needs a definiton of the energy boundaries.");
 
-    // Delete old bin energies and energy widths
-    if (m_ewidth   != NULL) delete [] m_ewidth;
-    if (m_energies != NULL) delete [] m_energies;
+    // Clear old bin energies and energy widths
+    m_energies.clear();
+    m_ewidth.clear();
+
+    // Reserve space for bin energies and energy widths
+    m_energies.reserve(ebins());
+    m_ewidth.reserve(ebins());
 
     // Setup bin energies and energy widths
-    m_energies = new GEnergy[ebins()];
-    m_ewidth   = new GEnergy[ebins()];
     for (int i = 0; i < ebins(); ++i) {
-        m_energies[i] = m_ebds.elogmean(i);
-        m_ewidth[i]   = m_ebds.emax(i) - m_ebds.emin(i);
+        m_energies.push_back(ebounds().elogmean(i));
+        m_ewidth.push_back(ebounds().emax(i) -  ebounds().emin(i));
     }
 
     // Return
@@ -694,6 +693,58 @@ void GCTAEventCube::set_times(void)
 
     // Set ontime
     m_ontime = m_gti.ontime();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set event bin
+ *
+ * @param[in] index Event index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Event index is outside valid range.
+ * @exception GCTAException::no_energies
+ *            Energy vectors have not been set up.
+ * @exception GCTAException::no_dirs
+ *            Sky directions and solid angles vectors have not been set up.
+ *
+ * This method provides the event attributes to the event bin. The event bin
+ * is in fact physically stored in the event cube, and only a single event
+ * bin is indeed allocated. This method sets up the pointers in the event
+ * bin so that a client can easily access the information of individual bins
+ * as if they were stored in an array.
+ ***************************************************************************/
+void GCTAEventCube::set_bin(const int& index)
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_SET_BIN, index, 0, size()-1);
+    #endif
+
+    // Check for the existence of energies and energy widths
+    if (m_energies.size() != ebins() || m_ewidth.size() != ebins())
+        throw GCTAException::no_energies(G_SET_BIN);
+
+    // Check for the existence of sky directions and solid angles
+    if (m_dirs.size() != npix() || m_omega.size() != npix())
+        throw GCTAException::no_dirs(G_SET_BIN);
+
+    // Get pixel and energy bin indices.
+    int ipix = index % npix();
+    int ieng = index / npix();
+
+    // Set pointers
+    m_bin.m_counts = &(m_map.pixels()[index]);
+    m_bin.m_energy = &(m_energies[ieng]);
+    m_bin.m_time   = &m_time;
+    m_bin.m_dir    = &(m_dirs[ipix]);
+    m_bin.m_omega  = &(m_omega[ipix]);
+    m_bin.m_ewidth = &(m_ewidth[ieng]);
+    m_bin.m_ontime = &m_ontime;
 
     // Return
     return;

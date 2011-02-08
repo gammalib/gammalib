@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GCTAEventCube.hpp  -  CTA event cube class               *
+ *            GCTAEventCube.hpp  -  CTA event bin container class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEventCube.hpp
- * @brief GCTAEventCube class interface definition.
+ * @brief CTA event bin container class interface definition
  * @author J. Knodlseder
  */
 
@@ -21,16 +21,15 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include "GEventCube.hpp"
 #include "GCTAEventBin.hpp"
-#include "GCTAObservation.hpp"
 #include "GSkymap.hpp"
 #include "GEbounds.hpp"
 #include "GGti.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GCTAInstDir.hpp"
-#include "GCTAPointing.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsImage.hpp"
 
@@ -38,78 +37,67 @@
 /***********************************************************************//**
  * @class GCTAEventCube
  *
- * @brief GCTAEventCube class interface defintion.
+ * @brief CTA event bin container class
  *
- * The GCTAEventCube class holds event information for the CTA binned
- * analysis. This information is handled on a bin-by-bin basis by the
- * GCTAEventBin class.
+ * This class is a container class for CTA event bins.
  ***************************************************************************/
 class GCTAEventCube : public GEventCube {
-
-    // Friend classes
-    friend class GCTAObservation;
 
 public:
     // Constructors and destructors
     GCTAEventCube(void);
-    explicit GCTAEventCube(const GSkymap& map, const GEbounds& ebds,
-                           const GGti& gti);
+    explicit GCTAEventCube(const GSkymap& map, const GEbounds& ebds, const GGti& gti);
     GCTAEventCube(const GCTAEventCube& cube);
     virtual ~GCTAEventCube(void);
 
     // Operators
-    GCTAEventCube& operator= (const GCTAEventCube& cube);
+    virtual GCTAEventCube&      operator=(const GCTAEventCube& cube);
+    virtual GCTAEventBin*       operator[](const int& index);
+    virtual const GCTAEventBin* operator[](const int& index) const;
 
     // Implemented pure virtual base class methods
-    void            clear(void);
-    GCTAEventCube*  clone(void) const;
-    int             size(void) const;
-    int             dim(void) const;
-    int             naxis(int axis) const;
-    void            load(const std::string& filename);
-    GCTAEventBin*   pointer(int index);
-    int             number(void) const;
-    std::string     print(void) const;
-
+    virtual void           clear(void);
+    virtual GCTAEventCube* clone(void) const;
+    virtual int            size(void) const;
+    virtual int            dim(void) const;
+    virtual int            naxis(int axis) const;
+    virtual void           load(const std::string& filename);
+    virtual void           save(const std::string& filename, bool clobber = false) const;
+    virtual void           read(const GFits& file);
+    virtual void           write(GFits& file) const;
+    virtual int            number(void) const;
+    virtual std::string    print(void) const;
 
     // Other methods
-    void            write(GFits* file) const;
-    void            map(const GSkymap& map) { m_map=map; }
-    void            ebounds(const GEbounds& ebds) { m_ebds=ebds; }
-    void            gti(const GGti& gti) { m_gti=gti; }
-    const GSkymap&  map(void) const { return m_map; }
-    const GEbounds& ebounds(void) const { return m_ebds; }
-    const GGti&     gti(void) const { return m_gti; }
-    int             nx(void) const { return m_map.nx(); }
-    int             ny(void) const { return m_map.ny(); }
-    int             npix(void) const { return m_map.npix(); }
-    int             ebins(void) const { return m_map.nmaps(); }
+    void                   map(const GSkymap& map) { m_map=map; }
+    const GSkymap&         map(void) const { return m_map; }
+    int                    nx(void) const { return m_map.nx(); }
+    int                    ny(void) const { return m_map.ny(); }
+    int                    npix(void) const { return m_map.npix(); }
+    int                    ebins(void) const { return m_map.nmaps(); }
 
 protected:
     // Protected methods
-    void         init_members(void);
-    void         copy_members(const GCTAEventCube& cube);
-    void         free_members(void);
-    void         read_cntmap(GFitsImage* hdu);
-    void         read_ebds(GFitsTable* hdu);
-    void         read_gti(GFitsTable* hdu);
-    void         set_directions(void);
-    void         set_energies(void);
-    void         set_times(void);
+    void init_members(void);
+    void copy_members(const GCTAEventCube& cube);
+    void free_members(void);
+    void read_cntmap(const GFitsImage* hdu);
+    void read_ebds(const GFitsTable* hdu);
+    void read_gti(const GFitsTable* hdu);
+    void set_directions(void);
+    void set_energies(void);
+    void set_times(void);
+    void set_bin(const int& index);
 
-    // Protected fundamental data
-    GSkymap      m_map;            //!< Counts map stored as sky map
-    GEbounds     m_ebds;           //!< Energy boundaries
-    GGti         m_gti;            //!< Good Time Intervals
-
-    // Protected derived data
-    GCTAEventBin m_bin;            //!< Actual event bin
-    GCTAInstDir* m_dirs;           //!< Array of event directions
-    double*      m_omega;          //!< Array of solid angles (sr)
-    GEnergy*     m_energies;       //!< Array of log mean energies
-    GEnergy*     m_ewidth;         //!< Array of energy bin widths
-    GTime        m_time;           //!< Event cube mean time
-    double       m_ontime;         //!< Event cube ontime (sec)
+    // Protected members
+    GSkymap                  m_map;        //!< Counts map stored as sky map
+    GCTAEventBin             m_bin;        //!< Actual event bin
+    GTime                    m_time;       //!< Event cube mean time
+    std::vector<GCTAInstDir> m_dirs;       //!< Array of event directions
+    std::vector<double>      m_omega;      //!< Array of solid angles (sr)
+    std::vector<GEnergy>     m_energies;   //!< Array of log mean energies
+    std::vector<GEnergy>     m_ewidth;     //!< Array of energy bin widths
+    double                   m_ontime;     //!< Event cube ontime (sec)
 };
 
 #endif /* GCTAEVENTCUBE_HPP */
