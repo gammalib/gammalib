@@ -18,6 +18,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GApplication.hpp"
+#include "GTools.hpp"
 %}
 
 
@@ -42,7 +43,6 @@ public:
     double      telapse(void) const;
     double      celapse(void) const;
     GPar*       par(const std::string& name);
-    //const GPar* par(const std::string& name) const; //!< ignored by SWIG
     void        logFileOpen(bool clobber = true);
     bool        logTerse(void) const;
     bool        logNormal(void) const;
