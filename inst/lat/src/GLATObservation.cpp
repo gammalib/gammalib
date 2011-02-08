@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATObservation.cpp
- * @brief GLATObservationclass implementation.
+ * @brief LAT Observation class implementation
  * @author J. Knodlseder
  */
 
@@ -49,7 +49,7 @@
  ***************************************************************************/
 GLATObservation::GLATObservation(void) : GObservation()
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -64,7 +64,7 @@ GLATObservation::GLATObservation(void) : GObservation()
  ***************************************************************************/
 GLATObservation::GLATObservation(const GLATObservation& obs) : GObservation(obs)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -110,7 +110,7 @@ GLATObservation& GLATObservation::operator= (const GLATObservation& obs)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -243,28 +243,6 @@ std::string GLATObservation::print(void) const
     result.append(parformat("Instrument")+instrument()+"\n");
     result.append(parformat("Statistics")+statistics()+"\n");
 
-    // Append time range
-    result.append(parformat("Time range"));
-    result.append(str(m_gti.tstart().mjd()));
-    result.append(" - ");
-    result.append(str(m_gti.tstop().mjd()));
-    result.append(" days\n");
-
-    // Append energy range
-    result.append(parformat("Energy range"));
-    result.append(m_ebounds.emin().print());
-    result.append(" - ");
-    result.append(m_ebounds.emax().print());
-
-    // Append ROI
-    if (m_roi != NULL)
-        result.append("\n"+m_roi->print());
-    else
-        result.append("\n"+parformat("Region of interest")+"undefined");
-
-    // Append GTIs
-    //result.append("\n"+m_gti->print());
-
     // Append response
     if (m_response != NULL)
         result.append("\n"+m_response->print());
@@ -300,20 +278,35 @@ void GLATObservation::load_unbinned(const std::string& ft1name,
                                     const std::string& ft2name,
                                     const std::string& ltcube_name)
 {
-    // Delete old events. We do not call clear() here since we want to
-    // preserve any existing response function.
+    // Delete any existing event container (do not call clear() as we do not
+    // want to delete the response function)
     if (m_events != NULL) delete m_events;
     m_events = NULL;
 
-    // Allocate LAT events
+    // Allocate event list
     GLATEventList* events = new GLATEventList;
+
+    // Assign event list as the observation's event container
     m_events = events;
 
-    // Load LAT events from FT1 file
-    events->load(ft1name);
+    // Open FITS file
+    GFits file(ft1name);
 
-    // Load GTIs from FT1 file
-    m_gti.load(ft1name);
+    // Read event list
+    events->read(file);
+
+    // Read observation attributes from EVENTS extension
+    //GFitsHDU* hdu = file.hdu("EVENTS");
+    //read_attributes(hdu);
+
+    // Close FITS file
+    file.close();
+
+    // Optionally allocate and load livetime cube
+    if (ltcube_name.length() > 0) {
+        m_ltcube = new GLATLtCube;
+        m_ltcube->load(ltcube_name);
+    }
 
     // Return
     return;
@@ -329,8 +322,6 @@ void GLATObservation::load_unbinned(const std::string& ft1name,
  *
  * @todo So far nothing is done with the expmap file.
  *       Approriate loading needs to be implemented.
- *
- * @todo Avoid copying over of information from event cube????
  ***************************************************************************/
 void GLATObservation::load_binned(const std::string& cntmap_name,
                                   const std::string& expmap_name,
@@ -343,21 +334,14 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
     m_events = NULL;
     m_ltcube = NULL;
 
-    // Allocate LAT events
+    // Allocate event cube
     GLATEventCube* events = new GLATEventCube;
+
+    // Assign event cube as the observation's event container
     m_events = events;
 
-    // Load LAT events from counts map file
+    // Load event list
     events->load(cntmap_name);
-
-    // Copy over energy boundaries from events cube
-    m_ebounds = events->ebds();
-
-    // Copy over GTIs from events cube
-    m_gti = events->gti();
-
-    // Set mean time
-    events->time(0.5 * (gti().tstart() + gti().tstop()));
 
     // Optionally allocate and load livetime cube
     if (ltcube_name.length() > 0) {

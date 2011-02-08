@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAObservation.cpp
- * @brief GCTAObservation class implementation.
+ * @brief CTA observation class implementation
  * @author J. Knodlseder
  */
 
@@ -50,13 +50,13 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  *
- * Creates an empty instance of GCTAObservation.
+ * Creates empty class instance.
  ***************************************************************************/
 GCTAObservation::GCTAObservation(void) : GObservation()
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -67,14 +67,13 @@ GCTAObservation::GCTAObservation(void) : GObservation()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] obs Observation from which the instance should be built.
+ * @param[in] obs CTA observation.
  *
- * Creates an instance of GCTAObservation by copying information from an
- * existing instance.
+ * Creates class instance by copying an existing CTA observation.
  ***************************************************************************/
 GCTAObservation::GCTAObservation(const GCTAObservation& obs) : GObservation(obs)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -107,9 +106,9 @@ GCTAObservation::~GCTAObservation(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] obs Observation which should be assigned.
+ * @param[in] obs CTA observation.
  *
- * Assign instance of GCTAObservation to this object.
+ * Assign CTA observation to this object.
  ***************************************************************************/
 GCTAObservation& GCTAObservation::operator= (const GCTAObservation& obs)
 {
@@ -122,7 +121,7 @@ GCTAObservation& GCTAObservation::operator= (const GCTAObservation& obs)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -257,38 +256,16 @@ std::string GCTAObservation::print(void) const
     std::string result;
 
     // Append header
-    result.append("=== GCTAObservation ===\n");
-    result.append(parformat("Name")+name()+"\n");
-    result.append(parformat("Instrument")+instrument()+"\n");
-    result.append(parformat("Statistics")+statistics()+"\n");
-
-    // Append time range
-    result.append(parformat("Time range"));
-    result.append(str(m_gti.tstart().met()));
-    result.append(" - ");
-    result.append(str(m_gti.tstop().met()));
-    result.append(" s\n");
-
-    // Append energy range
-    result.append(parformat("Energy range"));
-    result.append(m_ebounds.emin().print());
-    result.append(" - ");
-    result.append(m_ebounds.emax().print());
+    result.append("=== GCTAObservation ===");
+    result.append("\n"+parformat("Name")+name());
+    result.append("\n"+parformat("Instrument")+instrument());
+    result.append("\n"+parformat("Statistics")+statistics());
 
     // Append pointing
     if (m_pointing != NULL)
         result.append("\n"+m_pointing->print());
     else
         result.append("\n"+parformat("CTA pointing")+"undefined");
-
-    // Append ROI
-    if (m_roi != NULL)
-        result.append("\n"+roi()->print());
-    else
-        result.append("\n"+parformat("Region of interest")+"undefined");
-
-    // Append GTIs
-    //result.append("\n"+gti().print());
 
     // Append response
     if (m_response != NULL)
@@ -312,41 +289,29 @@ std::string GCTAObservation::print(void) const
  ***************************************************************************/
 void GCTAObservation::load_unbinned(const std::string& filename)
 {
-    // Delete old events and ROI. We do not call clear() here since we want
-    // to preserve any existing response function.
+    // Delete any existing event container (do not call clear() as we do not
+    // want to delete the response function)
     if (m_events != NULL) delete m_events;
-    if (m_roi    != NULL) delete m_roi;
     m_events = NULL;
-    m_roi    = NULL;
 
-    // Reset energy boundaries
-    m_ebounds.clear();
-
-    // Allocate events
+    // Allocate event list
     GCTAEventList* events = new GCTAEventList;
+
+    // Assign event list as the observation's event container
     m_events = events;
 
     // Open FITS file
     GFits file(filename);
 
-    // Get HDUs
-    GFitsTable* hdu = file.table("EVENTS");
+    // Read event list
+    events->read(file);
 
-    // Read events into list
-    events->read(hdu);
-
-    // Read observation attributes
+    // Read observation attributes from EVENTS extension
+    GFitsHDU* hdu = file.hdu("EVENTS");
     read_attributes(hdu);
-
-    // Read data selection keywords
-    read_ds_ebounds(hdu);
-    read_ds_roi(hdu);
 
     // Close FITS file
     file.close();
-
-    // Load GTIs
-    m_gti.load(filename);
 
     // Return
     return;
@@ -360,26 +325,29 @@ void GCTAObservation::load_unbinned(const std::string& filename)
  ***************************************************************************/
 void GCTAObservation::load_binned(const std::string& filename)
 {
-    // Delete old events. We do not call clear() here since we want to
-    // preserve any existing response function.
+    // Delete any existing event container (do not call clear() as we do not
+    // want to delete the response function)
     if (m_events != NULL) delete m_events;
+    m_events = NULL;
 
-    // Allocate events
+    // Allocate event cube
     GCTAEventCube* events = new GCTAEventCube;
+
+    // Assign event cube as the observation's event container
     m_events = events;
 
-    // Read events into list
-    events->load(filename);
-
-    // Read observation attributes from first header
+    // Open FITS file
     GFits file(filename);
+
+    // Read event cube
+    events->read(file);
+
+    // Read observation attributes from primary extension
     GFitsHDU* hdu = file.hdu(0);
     read_attributes(hdu);
-    file.close();
 
-    // Copy energy boundaries and GTIs from event cube
-    m_ebounds = events->ebounds();
-    m_gti     = events->gti();
+    // Close FITS file
+    file.close();
 
     // Return
     return;
@@ -404,35 +372,29 @@ void GCTAObservation::save(const std::string& filename, bool clobber) const
     // Case A: Observation contains an event list
     if (list != NULL) {
 
-        // Write event list into FITS file
-        list->write(&fits);
+        // Write event list into FITS file. This method also writes
+        // the GTI as they are part of the event list.
+        list->write(fits);
 
         // Write observation attributes into EVENTS header
         GFitsHDU* hdu = fits.hdu("EVENTS");
         write_attributes(hdu);
 
-        // Write GTIs into FITS file
-        m_gti.write(&fits);
-
-    } // endif: observation contained an events list
+    } // endif: observation contained an event list
 
     // Case B: Observation contains an event cube
     else if (cube != NULL) {
 
-        // Copy energy boundaries and GTIs into event cube
-        cube->ebounds(m_ebounds);
-        cube->gti(m_gti);
-
         // Write events cube into FITS file. This method also writes
         // the energy boundaries and the GTI as they are also part
-        // of the events cube
-        cube->write(&fits);
+        // of the event cube.
+        cube->write(fits);
 
-        // Write observation attributes into first header
+        // Write observation attributes into primary header
         GFitsHDU* hdu = fits.hdu(0);
         write_attributes(hdu);
 
-    } // endelse: observation contained an events cube
+    } // endelse: observation contained an event cube
 
     // Save FITS file
     fits.saveto(filename, clobber);
@@ -450,9 +412,6 @@ void GCTAObservation::save(const std::string& filename, bool clobber) const
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * @todo We allocate void response and pointing instances so make sure they
- * exist (analysis methods depend on the existence of these members).
  ***************************************************************************/
 void GCTAObservation::init_members(void)
 {
@@ -472,13 +431,7 @@ void GCTAObservation::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] obs Observation to be copied
- *
- * @todo Try to avoid the back pointer if possible, or flesh out a way that
- * makes this more solid. The point is: when events are copied the back
- * pointer to the observation needs to be updated, yet when the copying is
- * done in the events class the class does not known about the observation.
- * Thus, back pointer update has to be done by the observation class.
+ * @param[in] obs CTA observation.
  ***************************************************************************/
 void GCTAObservation::copy_members(const GCTAObservation& obs)
 {
@@ -518,11 +471,12 @@ void GCTAObservation::free_members(void)
 /***********************************************************************//**
  * @brief Read observation attributes
  *
- * @param[in] hdu FITS HDU
+ * @param[in] hdu FITS HDU pointer
  *
- * Reads the observation attributes.
+ * Reads the observation attributes from HDU. Nothing is done if the HDU
+ * pointer is NULL.
  ***************************************************************************/
-void GCTAObservation::read_attributes(GFitsHDU* hdu)
+void GCTAObservation::read_attributes(const GFitsHDU* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
@@ -555,180 +509,11 @@ void GCTAObservation::read_attributes(GFitsHDU* hdu)
 
 
 /***********************************************************************//**
- * @brief Read energy boundary data selection keywords
- *
- * @param[in] hdu FITS HDU
- *
- * @exception GCTAException::no_ebds
- *            Invalid energy data selection encountered
- *
- * Reads the energy boundary data selection keywords by searching for a 
- * DSTYPx keyword named "ENERGY". The data selection information is expected
- * to be in the format "200:50000", where the 2 arguments are the minimum
- * and maximum energy. The energy unit is given by the keyword DSUNIx, which
- * supports keV, MeV, GeV and TeV (case independent). No detailed syntax
- * checking is performed.
- *
- * This method does nothing if the HDU is NULL.
- ***************************************************************************/
-void GCTAObservation::read_ds_ebounds(GFitsHDU* hdu)
-{
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
-
-        // Reset energy boundaries
-        m_ebounds.clear();
-
-        // Get number of data selection keywords
-        int ndskeys = 0;
-        try {
-            ndskeys = hdu->integer("NDSKEYS");
-        }
-        catch (GException::fits_key_not_found) {
-            ;
-        }
-
-        // Loop over all data selection keys
-        for (int i = 1; i <= ndskeys; ++i) {
-            std::string type_key  = "DSTYP"+str(i);
-            std::string unit_key  = "DSUNI"+str(i);
-            std::string value_key = "DSVAL"+str(i);
-            try {
-                if (hdu->string(type_key) == "ENERGY") {
-                    std::string unit                 = toupper(hdu->string(unit_key));
-                    std::string value                = hdu->string(value_key);
-                    std::vector<std::string> ebounds = split(value, ":");
-                    if (ebounds.size() == 2) {
-                        double  emin = todouble(ebounds[0]);
-                        double  emax = todouble(ebounds[1]);
-                        GEnergy e_min;
-                        GEnergy e_max;
-                        if (unit == "KEV") {
-                            e_min.keV(emin);
-                            e_max.keV(emax);
-                        }
-                        else if (unit == "MEV") {
-                            e_min.MeV(emin);
-                            e_max.MeV(emax);
-                        }
-                        else if (unit == "GEV") {
-                            e_min.GeV(emin);
-                            e_max.GeV(emax);
-                        }
-                        else if (unit == "TEV") {
-                            e_min.TeV(emin);
-                            e_max.TeV(emax);
-                        }
-                        else {
-                            throw GCTAException::no_ebds(G_READ_DS_EBOUNDS,
-                                  "Invalid energy unit \""+unit+
-                                  "\" encountered in data selection key \""+
-                                  unit_key+"\"");
-                        }
-                        m_ebounds.append(e_min, e_max);
-                    }
-                    else {
-                        throw GCTAException::no_ebds(G_READ_DS_EBOUNDS,
-                              "Invalid energy value \""+value+
-                              "\" encountered in data selection key \""+
-                              value_key+"\"");
-                    }
-                } // endif: ENERGY type found
-            }
-            catch (GException::fits_key_not_found) {
-                ;
-            }
-        } // endfor: looped over data selection keys
-
-    } // endif: HDU was valid
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Read ROI data selection keywords
- *
- * @param[in] hdu FITS HDU
- *
- * @exception GException::no_roi
- *            Invalid ROI data selection encountered
- *
- * Reads the ROI data selection keywords by searching for a DSTYPx keyword
- * named "POS(RA,DEC)". The data selection information is expected to be
- * in the format "CIRCLE(267.0208,-24.78,4.5)", where the 3 arguments are
- * Right Ascension, Declination and radius in units of degrees. No detailed
- * syntax checking is performed.
- *
- * This method does nothing if the HDU is NULL.
- ***************************************************************************/
-void GCTAObservation::read_ds_roi(GFitsHDU* hdu)
-{
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
-
-        // Delete any old ROI
-        if (m_roi    != NULL) delete m_roi;
-
-        // Allocate ROI
-        GCTARoi* roi = new GCTARoi;
-        m_roi = roi;
-
-        // Get number of data selection keywords
-        int ndskeys = 0;
-        try {
-            ndskeys = hdu->integer("NDSKEYS");
-        }
-        catch (GException::fits_key_not_found) {
-            ;
-        }
-
-        // Loop over all data selection keys
-        for (int i = 1; i <= ndskeys; ++i) {
-            std::string type_key  = "DSTYP"+str(i);
-            std::string unit_key  = "DSUNI"+str(i);
-            std::string value_key = "DSVAL"+str(i);
-            try {
-                if (hdu->string(type_key) == "POS(RA,DEC)") {
-                    std::string unit              = toupper(hdu->string(unit_key));
-                    std::string value             = hdu->string(value_key);
-                    value                         = strip_chars(value, "CIRCLE(");
-                    value                         = strip_chars(value, ")");
-                    std::vector<std::string> args = split(value, ",");
-                    if (args.size() == 3) {
-                        double  ra  = todouble(args[0]);
-                        double  dec = todouble(args[1]);
-                        double  rad = todouble(args[2]);
-                        GCTAInstDir dir;
-                        dir.radec_deg(ra, dec);
-                        roi->centre(dir);
-                        roi->radius(rad);
-                    }
-                    else {
-                        throw GException::no_roi(G_READ_DS_ROI,
-                              "Invalid acceptance cone value \""+value+
-                              "\" encountered in data selection key \""+
-                              value_key+"\"");
-                    }
-                } // endif: POS(RA,DEC) type found
-            }
-            catch (GException::fits_key_not_found) {
-                ;
-            }
-        } // endfor: looped over data selection keys
-
-    } // endif: HDU was valid
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Write observation attributes
  *
- * @param[in] hdu FITS HDU
+ * @param[in] hdu FITS HDU pointer
+ *
+ * Nothing is done if the HDU pointer is NULL.
  ***************************************************************************/
 void GCTAObservation::write_attributes(GFitsHDU* hdu) const
 {
@@ -736,11 +521,13 @@ void GCTAObservation::write_attributes(GFitsHDU* hdu) const
     if (hdu != NULL) {
 
         // Compute some attributes
-        double deadc   = livetime() / gti().ontime();
         double ra_pnt  = (m_pointing != NULL) ? m_pointing->dir().ra_deg() : 0.0;
         double dec_pnt = (m_pointing != NULL) ? m_pointing->dir().dec_deg() : 0.0;
-        double tstart  = this->tstart().met();
-        double tstop   = this->tstop().met();
+        double tstart  = events()->tstart().met();
+        double tstop   = events()->tstop().met();
+        double telapse = events()->gti().telapse();
+        double ontime  = events()->gti().ontime();
+        double deadc   = livetime() / ontime;
 
         // Set observation information
         hdu->card("CREATOR",  "GammaLib", "Program which created the file");
@@ -759,8 +546,8 @@ void GCTAObservation::write_attributes(GFitsHDU* hdu) const
         hdu->card("TIMEUNIT", "s", "Time unit");
         hdu->card("TIMESYS",  "TT", "Time system");
         hdu->card("TIMEREF",  "LOCAL", "Time reference");
-        hdu->card("TELAPSE",  gti().telapse(), "[s] Mission elapsed time");
-        hdu->card("ONTIME",   gti().ontime(), "[s] Total good time including deadtime");
+        hdu->card("TELAPSE",  telapse, "[s] Mission elapsed time");
+        hdu->card("ONTIME",   ontime, "[s] Total good time including deadtime");
         hdu->card("LIVETIME", livetime(), "[s] Total livetime");
         hdu->card("DEADC",    deadc, "Deadtime fraction");
         hdu->card("TIMEDEL",  1.0, "Time resolution");
@@ -819,13 +606,13 @@ double GCTAObservation::npred_temp(const GModel& model) const
     double result = 0.0;
 
     // Determine ontime
-    double ontime = m_gti.ontime();
+    double ontime = events()->gti().ontime();
 
     // Integrate only if ontime is positive
     if (ontime > 0.0) {
 
         // Integration is a simple multiplication by the time
-        result = npred_spec(model, m_gti.tstart()) * ontime;
+        result = npred_spec(model, events()->gti().tstart()) * ontime;
 
     }
 

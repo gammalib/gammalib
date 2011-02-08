@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAObservation.hpp
- * @brief GCTAObservation class interface definition.
+ * @brief CTA observation class interface definition
  * @author J. Knodlseder
  */
 
@@ -31,7 +31,9 @@
 /***********************************************************************//**
  * @class GCTAObservation
  *
- * @brief Interface class for CTA observations.
+ * @brief CTA observation class
+ *
+ * This class implements a CTA observation.
  ***************************************************************************/
 class GCTAObservation : public GObservation {
 
@@ -45,12 +47,12 @@ public:
     GCTAObservation& operator= (const GCTAObservation& obs);
 
     // Implemented pure virtual base class methods
-    void             clear(void);
-    GCTAObservation* clone(void) const;
-    GCTAResponse*    response(void) const;
-    GCTAPointing*    pointing(const GTime& time) const;
-    std::string      instrument(void) const;
-    std::string      print(void) const;
+    virtual void             clear(void);
+    virtual GCTAObservation* clone(void) const;
+    virtual GCTAResponse*    response(void) const;
+    virtual GCTAPointing*    pointing(const GTime& time) const;
+    virtual std::string      instrument(void) const;
+    virtual std::string      print(void) const;
 
     // Other methods
     void   load_unbinned(const std::string& filename);
@@ -71,9 +73,7 @@ protected:
     void init_members(void);
     void copy_members(const GCTAObservation& obs);
     void free_members(void);
-    void read_attributes(GFitsHDU* hdu);
-    void read_ds_ebounds(GFitsHDU* hdu);
-    void read_ds_roi(GFitsHDU* hdu);
+    void read_attributes(const GFitsHDU* hdu);
     void write_attributes(GFitsHDU* hdu) const;
 
     // Npred integration methods

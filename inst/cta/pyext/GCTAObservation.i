@@ -1,5 +1,5 @@
 /***************************************************************************
- *       GCTAObservation.i  -  CTA Observation class SWIG interface        *
+ *         GCTAObservation.i  -  CTA Observation class interface           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAObservation.i
- * @brief GCTAObservation class SWIG interface.
+ * @brief CTA observation class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -24,7 +24,7 @@
 /***********************************************************************//**
  * @class GCTAObservation
  *
- * @brief Interface class for CTA observations.
+ * @brief CTA observation class Python interface
  ***************************************************************************/
 class GCTAObservation : public GObservation {
 public:
@@ -33,12 +33,12 @@ public:
     GCTAObservation(const GCTAObservation& obs);
     virtual ~GCTAObservation(void);
 
-    // Pure virtual base class methods
-    void             clear(void);
-    GCTAObservation* clone(void) const;
-    GCTAResponse*    response(void) const;
-    GCTAPointing*    pointing(const GTime& time) const;
-    std::string      instrument(void) const;
+    // Implemented pure virtual base class methods
+    virtual void             clear(void);
+    virtual GCTAObservation* clone(void) const;
+    virtual GCTAResponse*    response(void) const;
+    virtual GCTAPointing*    pointing(const GTime& time) const;
+    virtual std::string      instrument(void) const;
 
     // Other methods
     void   load_unbinned(const std::string& filename);
@@ -46,13 +46,13 @@ public:
     void   save(const std::string& filename, bool clobber) const;
     void   response(const std::string& irfname, std::string caldb = "");
     void   pointing(const GCTAPointing& pointing);
-    void   obs_id(const int& id) { m_obs_id=id; }
-    void   ra_obj(const double& ra) { m_ra_obj=ra; }
-    void   dec_obj(const double& dec) { m_dec_obj=dec; }
-    int    obs_id(void) const { return m_obs_id; }
-    double livetime(void) const { return m_livetime; }
-    double ra_obj(void) const { return m_ra_obj; }
-    double dec_obj(void) const { return m_dec_obj; }
+    void   obs_id(const int& id);
+    void   ra_obj(const double& ra);
+    void   dec_obj(const double& dec);
+    int    obs_id(void) const;
+    double livetime(void) const;
+    double ra_obj(void) const;
+    double dec_obj(void) const;
 };
 
 
@@ -64,3 +64,19 @@ public:
         return (*self);
     }
 };
+
+
+
+
+/***********************************************************************//**
+ * @brief GCTAObservation type casts
+ ***************************************************************************/
+%inline %{
+    GCTAObservation* cast_GCTAObservation(GObservation* obs) {
+        GCTAObservation* cta = dynamic_cast<GCTAObservation*>(obs);
+        if (cta == NULL)
+            throw GException::bad_type("cast_GMWLObservation(GObservation* obs)",
+                                       "GObservation not of type GCTAObservation");            
+        return cta;
+    }
+%}

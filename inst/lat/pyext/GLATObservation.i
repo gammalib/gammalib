@@ -1,5 +1,5 @@
 /***************************************************************************
- *        GLATObservation.i  -  LAT Observation class SWIG interface       *
+ *               GLATObservation.i  -  LAT Observation class               *
  * ----------------------------------------------------------------------- *
  *  copyright : (C) 2008-2011 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATObservation.i
- * @brief GLATObservation class SWIG file.
+ * @brief LAT Observation class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -24,7 +24,7 @@
 /***********************************************************************//**
  * @class GLATObservation
  *
- * @brief Interface for the LAT observation classes.
+ * @brief LAT Observation class Python interface
  ***************************************************************************/
 class GLATObservation : public GObservation {
 public:
@@ -33,20 +33,23 @@ public:
     GLATObservation(const GLATObservation& obs);
     virtual ~GLATObservation();
 
-    // Implement pure virtual methods
-    void             clear(void);
-    GLATObservation* clone(void) const;
-    GLATResponse*    response(void) const;
-    GLATPointing*    pointing(const GTime& time) const;
-    std::string      instrument(void) const;
+    // Implemented pure virtual base class methods
+    virtual void             clear(void);
+    virtual GLATObservation* clone(void) const;
+    virtual GLATResponse*    response(void) const;
+    virtual GLATPointing*    pointing(const GTime& time) const;
+    virtual std::string      instrument(void) const;
 
     // Other methods
-    void        load_unbinned(const std::string& ft1name, const std::string& ft2name,
-                              const std::string& ltcube_name);
-    void        load_binned(const std::string& cntmap_name, const std::string& expmap_name,
-                            const std::string& ltcube_name);
-    void        response(const std::string& irfname, std::string caldb = "");
-    GLATLtCube* ltcube(void) const;
+    void                     load_unbinned(const std::string& ft1name,
+                                           const std::string& ft2name,
+                                           const std::string& ltcube_name);
+    void                     load_binned(const std::string& cntmap_name,
+                                         const std::string& expmap_name,
+                                         const std::string& ltcube_name);
+    void                     response(const std::string& irfname,
+                                      std::string caldb = "");    
+    GLATLtCube*              ltcube(void) const;
 };
 
 
@@ -54,12 +57,6 @@ public:
  * @brief GLATObservation class extension
  ***************************************************************************/
 %extend GLATObservation {
-/*
-    GLATObservation(const GObservation& obs) {
-        GLATObservation* lat = (GLATObservation*)&obs;
-        return lat;
-    }
-*/
     GLATObservation copy() {
         return (*self);
     }
@@ -71,6 +68,10 @@ public:
  ***************************************************************************/
 %inline %{
     GLATObservation* cast_GLATObservation(GObservation* obs) {
-        return dynamic_cast<GLATObservation*>(obs);
+        GLATObservation* lat = dynamic_cast<GLATObservation*>(obs);
+        if (lat == NULL)
+            throw GException::bad_type("cast_GLATObservation(GObservation* obs)",
+                                       "GObservation not of type GLATObservation");            
+        return lat;
     }
 %}

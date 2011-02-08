@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATObservation.hpp  -  LAT Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATObservation.hpp
- * @brief GLATObservation class interface definition.
+ * @brief LAT Observation class interface definition
  * @author J. Knodlseder
  */
 
@@ -47,20 +47,23 @@ public:
     GLATObservation& operator= (const GLATObservation& obs);
 
     // Implemented pure virtual base class methods
-    void             clear(void);
-    GLATObservation* clone(void) const;
-    GLATResponse*    response(void) const;
-    GLATPointing*    pointing(const GTime& time) const;
-    std::string      instrument(void) const;
-    std::string      print(void) const;
+    virtual void             clear(void);
+    virtual GLATObservation* clone(void) const;
+    virtual GLATResponse*    response(void) const;
+    virtual GLATPointing*    pointing(const GTime& time) const;
+    virtual std::string      instrument(void) const;
+    virtual std::string      print(void) const;
 
     // Other methods
-    void        load_unbinned(const std::string& ft1name, const std::string& ft2name,
-                              const std::string& ltcube_name);
-    void        load_binned(const std::string& cntmap_name, const std::string& expmap_name,
-                            const std::string& ltcube_name);
-    void        response(const std::string& irfname, std::string caldb = "");    
-    GLATLtCube* ltcube(void) const;
+    void                     load_unbinned(const std::string& ft1name,
+                                           const std::string& ft2name,
+                                           const std::string& ltcube_name);
+    void                     load_binned(const std::string& cntmap_name,
+                                         const std::string& expmap_name,
+                                         const std::string& ltcube_name);
+    void                     response(const std::string& irfname,
+                                      std::string caldb = "");    
+    GLATLtCube*              ltcube(void) const;
 
 protected:
     // Protected methods
