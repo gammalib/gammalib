@@ -317,10 +317,10 @@ void test_unbinned_obs(void)
             //std::cout << event->test() << std::endl;
             num++;
         }
-        if (num != 1298) {
+        if (num != 8096) {
             std::cout << std::endl
                       << "TEST ERROR: Wrong number of iterations in GObservations::iterator."
-                      << " (excepted 1298, found " << num << ")" << std::endl;
+                      << " (excepted 8096, found " << num << ")" << std::endl;
             throw;
         }
     }
@@ -340,10 +340,10 @@ void test_unbinned_obs(void)
             //std::cout << *event->energy() << std::endl;
             num++;
         }
-        if (num != 649) {
+        if (num != 4048) {
             std::cout << std::endl
                       << "TEST ERROR: Wrong number of iterations in GCTAEventList::iterator."
-                      << " (excepted 649, found " << num << ")" << std::endl;
+                      << " (excepted 4048, found " << num << ")" << std::endl;
             throw;
         }
     }
@@ -381,33 +381,10 @@ void test_unbinned_optimizer(void)
 
     // Load unbinned CTA observation
     try {
-        // Setup ROI covered by data
-        GCTAInstDir instDir;
-        GCTARoi     roi;
-        instDir.radec_deg(83.6331, 22.0145);  // Adapt to file
-        roi.centre(instDir);
-        roi.radius(2.5);
-
-        // Setup energy range covered by data
-        GEnergy  emin;
-        GEnergy  emax;
-        GEbounds ebds;
-        emin.TeV(0.1);
-        emax.TeV(100.0);
-        ebds.append(emin, emax);
-
-        // Setup time range covered by data
-        GTime tstart;
-        GTime tstop;
-        tstart.met(0.0);
-        tstop.met(1800.0);
-
         // Load data and response and set ROI, energy range and time range
         // for analysis
         run.load_unbinned(cta_events);
         run.response(cta_irf,cta_caldb);
-        run.roi(&roi);
-        run.ebounds(ebds);
         obs.append(run);
     }
     catch (std::exception &e) {
