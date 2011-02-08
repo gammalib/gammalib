@@ -27,11 +27,13 @@
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"
 #include "GIntegral.hpp"
-#include "GCTAException.hpp"
-#include "GCTAInstDir.hpp"
-#include "GCTARoi.hpp"
 #include "GCTAModelRadialRegistry.hpp"
 #include "GCTAModelRadialAcceptance.hpp"
+#include "GCTAObservation.hpp"
+#include "GCTAPointing.hpp"
+#include "GCTAInstDir.hpp"
+#include "GCTARoi.hpp"
+#include "GCTAException.hpp"
 #include "GCTASupport.hpp"
 
 /* __ Constants __________________________________________________________ */
@@ -331,8 +333,8 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
  * @param[in] obsTime Measured event time.
  * @param[in] obs Observation.
  *
- * @exception GException::no_roi
- *            No valid region of interest found in observation
+ * @exception GException::no_list
+ *            No valid CTA event list found in observation
  * @exception GCTAException::no_pointing
  *            No valid CTA pointing found in observation
  *
@@ -349,26 +351,21 @@ double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
     // Evaluate only if model is valid
     if (valid_model()) {
 
-        // Circumvent const correctness
-        GCTAObservation* cta = (GCTAObservation*)(&obs);
+        // Get pointer on CTA events list
+        const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
+        if (events == NULL)
+            throw GException::no_list(G_NPRED);
 
-        // Extract CTA ROI information. Throw an exception if ROI has not
-        // been defined
-        GCTARoi* roi = (GCTARoi*)cta->roi();
-        if (roi == NULL)
-            throw GException::no_roi(G_NPRED);
-
-        // Extract CTA pointing direction. Throw an exception if pointing
-        // has not been defined
-        GCTAPointing* pnt = cta->pointing(obsTime);
+        // Get CTA pointing direction
+        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing(obsTime));
         if (pnt == NULL)
             throw GCTAException::no_pointing(G_NPRED);
 
         // Get ROI radius in radians
-        double roi_radius = roi->radius() * deg2rad;
+        double roi_radius = events->roi().radius() * deg2rad;
 
         // Get distance from ROI centre in radians
-        double roi_distance = roi->centre().dist(pnt->dir());
+        double roi_distance = events->roi().centre().dist(pnt->dir());
 
         // Setup integration function
         GCTAModelRadialAcceptance::roi_kern integrand(radial(), roi_radius, roi_distance);
@@ -415,7 +412,7 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
     if (valid_model()) {
 
         // Extract CTA pointing direction at beginning of observation
-        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing(obs.tstart()));
+        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing(obs.events()->tstart()));
         if (pnt == NULL)
             throw GCTAException::no_pointing(G_MC);
 
@@ -423,12 +420,12 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
         GCTAInstDir pnt_dir(pnt->dir());
 
         // Loop over all energy boundaries
-        for (int ieng = 0; ieng < obs.ebounds().size(); ++ieng) {
+        for (int ieng = 0; ieng < obs.events()->ebounds().size(); ++ieng) {
 
             // Compute the on-axis background rate in model within the
             // energy boundaries from spectral component (units: cts/s/sr)
-            double flux = spectral()->flux(obs.ebounds().emin(ieng),
-                                           obs.ebounds().emax(ieng));
+            double flux = spectral()->flux(obs.events()->ebounds().emin(ieng),
+                                           obs.events()->ebounds().emax(ieng));
 
             // Compute solid angle used for normalization
             double area = radial()->omega();
@@ -445,12 +442,12 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
             #endif
 
             // Loop over all good time intervals
-            for (int itime = 0; itime < obs.gti().size(); ++itime) {
+            for (int itime = 0; itime < obs.events()->gti().size(); ++itime) {
 
                 // Get event arrival times from temporal model
                 GTimes times = m_temporal->mc(rate, 
-                                              obs.gti().tstart(itime),
-                                              obs.gti().tstop(itime), ran);
+                                              obs.events()->gti().tstart(itime),
+                                              obs.events()->gti().tstop(itime), ran);
 
                 // Reserve space for events
                 if (times.size() > 0)
@@ -463,8 +460,8 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
                     GCTAInstDir dir = radial()->mc(pnt_dir, ran);
 
                     // Set event energy
-                    GEnergy energy = spectral()->mc(obs.ebounds().emin(ieng),
-                                                    obs.ebounds().emax(ieng),
+                    GEnergy energy = spectral()->mc(obs.events()->ebounds().emin(ieng),
+                                                    obs.events()->ebounds().emax(ieng),
                                                     ran);
 
                     // Allocate event

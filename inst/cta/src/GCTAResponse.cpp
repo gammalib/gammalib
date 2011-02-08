@@ -30,6 +30,7 @@
 #include "GIntegrand.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTAPointing.hpp"
+#include "GCTAEventList.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTARoi.hpp"
 #include "GCTAException.hpp"
@@ -41,7 +42,9 @@
                                                     " GTime&, GObservation&)"
 #define G_IRF_BIN       "GCTAResponse::irf(GCTAEventBin&, GModel&, GEnergy&,"\
                                                     " GTime&, GObservation&)"
-#define G_NPRED              "GCTAResponse::npred(GModel&, GEnergy&, GTime&,"\
+#define G_NPRED1             "GCTAResponse::npred(GModel&, GEnergy&, GTime&,"\
+                                                            " GObservation&)"
+#define G_NPRED2            "GCTAResponse::npred(GSkyDir&, GEnergy&, GTime&,"\
                                                             " GObservation&)"
 #define G_READ           "GCTAResponse::read_performance_table(std::string&)"
 
@@ -433,7 +436,7 @@ double GCTAResponse::npred(const GModelSky& model, const GEnergy& srcEng,
     else {
 
         // Feature not yet implemented
-        throw GException::feature_not_implemented(G_NPRED,
+        throw GException::feature_not_implemented(G_NPRED1,
               "Diffuse IRF not yet implemented.");
 
     } // endelse: model was not a point source
@@ -451,21 +454,23 @@ double GCTAResponse::npred(const GModelSky& model, const GEnergy& srcEng,
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
  ***************************************************************************/
-double GCTAResponse::npred(const GSkyDir&  srcDir, const GEnergy& srcEng,
+double GCTAResponse::npred(const GSkyDir& srcDir, const GEnergy& srcEng,
                            const GTime& srcTime, const GObservation& obs) const
 {
-    // Get pointers
-    const GPointing *pnt  = obs.pointing(srcTime);
-    const GRoi      *roi  = obs.roi();
-    const GEbounds  *ebds = &(obs.ebounds());
-    const GGti      *gti  = &(obs.gti());
+    // Get pointer on CTA events list
+    const GCTAEventList* ptr = dynamic_cast<const GCTAEventList*>(obs.events());
+    if (ptr == NULL)
+        throw GException::no_list(G_NPRED2);
+    
+    // Get pointer on pointing
+    const GPointing *pnt = obs.pointing(srcTime);
 
     // Get IRF components
     double nirf  =   live(srcDir, srcEng, srcTime, *pnt);
     nirf        *=   aeff(srcDir, srcEng, srcTime, *pnt);
-    nirf        *=   npsf(srcDir, srcEng, srcTime, *pnt, *roi);
-    nirf        *= nedisp(srcDir, srcEng, srcTime, *pnt, *ebds);
-    nirf        *= ntdisp(srcDir, srcEng, srcTime, *pnt, *gti);
+    nirf        *=   npsf(srcDir, srcEng, srcTime, *pnt, ptr->roi());
+    nirf        *= nedisp(srcDir, srcEng, srcTime, *pnt, ptr->ebounds());
+    nirf        *= ntdisp(srcDir, srcEng, srcTime, *pnt, ptr->gti());
 
     // Return integrated IRF value
     return nirf;
