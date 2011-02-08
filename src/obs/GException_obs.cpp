@@ -47,6 +47,28 @@ GException::no_response::no_response(std::string origin, std::string message)
 
 
 /***********************************************************************//**
+ * @brief No valid event container found
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::no_events::no_events(std::string origin, std::string message)
+{
+    // Set method name
+    m_origin = origin;
+
+    // Set error message
+    m_message = "No valid event container found in observation." \
+                " Set event container before using this method.";
+    if (message.length() > 0)
+        m_message += " " + message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief No valid event list found
  *
  * @param[in] origin Method that throws the error.

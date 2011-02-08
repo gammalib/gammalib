@@ -397,6 +397,10 @@ public:
     public:
         no_roi(std::string origin, std::string message = "");
     };
+    class no_events : public GExceptionHandler {
+    public:
+        no_events(std::string origin, std::string message = "");
+    };
     class no_list : public GExceptionHandler {
     public:
         no_list(std::string origin, std::string message = "");
