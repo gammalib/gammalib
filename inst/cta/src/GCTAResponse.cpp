@@ -754,11 +754,11 @@ std::string GCTAResponse::print(void) const
     std::string result;
 
     // Append header
-    result.append("=== GCTAResponse ===\n");
-    result.append(parformat("Calibration database")+m_caldb+"\n");
-    result.append(parformat("Response name")+m_rspname+"\n");
+    result.append("=== GCTAResponse ===");
+    result.append("\n"+parformat("Calibration database")+m_caldb);
+    result.append("\n"+parformat("Response name")+m_rspname);
     /*
-    result.append(parformat("Response definiton"));
+    result.append("\n"+parformat("Response definiton"));
     for (int i = 0; i < m_logE.size(); ++i) {
         result.append("\n"+parformat("logE="+str(m_logE.at(i))));
         result.append("Aeff="+str(m_aeff.at(i))+" m2");
