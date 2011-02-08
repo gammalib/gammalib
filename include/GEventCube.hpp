@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GEventCube.hpp  -  Abstract event cube container class         *
+ *          GEventCube.hpp  -  Abstract event bin container class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GEventCube.hpp
- * @brief GEventCube container class interface definition.
+ * @brief Abstract event bin container class interface definition
  * @author J. Knodlseder
  */
 
@@ -28,14 +28,9 @@
 /***********************************************************************//**
  * @class GEventCube
  *
- * @brief GEventCube container class interface defintion.
+ * @brief Abstract event bin container class
  *
- * @todo Remove islist() and iscube() and use dynamic_cast instead. These
- *       methods have also to be removed in the GEvents class and all classes
- *       that derive from GEvents.
- * @todo Replace pointer() method by access operators. Also here we have to
- *       go back to the GEvents class and change this consistently
- *       thoughout all classes.
+ * This class is an abstract container class for event bins.
  ***************************************************************************/
 class GEventCube : public GEvents {
 
@@ -46,7 +41,9 @@ public:
     virtual ~GEventCube(void);
 
     // Operators
-    virtual GEventCube& operator= (const GEventCube& cube);
+    virtual GEventCube&      operator=(const GEventCube& cube);
+    virtual GEventBin*       operator[](const int& index) = 0;
+    virtual const GEventBin* operator[](const int& index) const = 0;
 
     // Pure virtual methods
     virtual void        clear(void) = 0;
@@ -55,13 +52,11 @@ public:
     virtual int         dim(void) const = 0;
     virtual int         naxis(int axis) const = 0;
     virtual void        load(const std::string& filename) = 0;
-    virtual GEventBin*  pointer(int index) = 0;
+    virtual void        save(const std::string& filename, bool clobber = false) const = 0;
+    virtual void        read(const GFits& file) = 0;
+    virtual void        write(GFits& file) const = 0;
     virtual int         number(void) const = 0;
     virtual std::string print(void) const = 0;
-
-    // Implemented pure virtual base class methods
-    bool islist(void) const { return false; }
-    bool iscube(void) const { return true; }
 
 protected:
     // Protected methods

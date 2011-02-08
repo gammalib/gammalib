@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GEventCube.cpp  -  Abstract event cube container class         *
+ *          GEventCube.cpp  -  Abstract event bin container class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GEventCube.cpp
- * @brief GEventCube container class implementation.
+ * @brief Abstract event bin container class implementation
  * @author J. Knodlseder
  */
 
@@ -20,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GException.hpp"
 #include "GEventCube.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -91,9 +90,9 @@ GEventCube::~GEventCube(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] cube Event cube to be assigned.
+ * @param[in] cube Event cube.
  ***************************************************************************/
-GEventCube& GEventCube::operator= (const GEventCube& cube)
+GEventCube& GEventCube::operator=(const GEventCube& cube)
 {
     // Execute only if object is not identical
     if (this != &cube) {
@@ -125,7 +124,7 @@ GEventCube& GEventCube::operator= (const GEventCube& cube)
 
 /*==========================================================================
  =                                                                         =
- =                           Private methods                               =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -142,7 +141,7 @@ void GEventCube::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] cube Events cube.
+ * @param[in] cube Event cube.
  ***************************************************************************/
 void GEventCube::copy_members(const GEventCube& cube)
 {

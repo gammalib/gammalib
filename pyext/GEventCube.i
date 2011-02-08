@@ -1,5 +1,5 @@
 /***************************************************************************
- *     GEventCube.i  -  Abstract event cube container class python I/F     *
+ *           GEventCube.i  -  Abstract event bin container class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GEventCube.i
- * @brief GEventCube class python interface
+ * @brief Abstract event bin container class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -24,7 +24,7 @@
 /***********************************************************************//**
  * @class GEventCube
  *
- * @brief GEventCube container class interface defintion.
+ * @brief Abstract event bin container class interface
  ***************************************************************************/
 class GEventCube : public GEvents {
 public:
@@ -40,27 +40,17 @@ public:
     virtual int         dim(void) const = 0;
     virtual int         naxis(int axis) const = 0;
     virtual void        load(const std::string& filename) = 0;
-    virtual GEventBin*  pointer(int index) = 0;
+    virtual void        save(const std::string& filename, bool clobber = false) const = 0;
+    virtual void        read(const GFits& file) = 0;
+    virtual void        write(GFits& file) const = 0;
     virtual int         number(void) const = 0;
-
-    // Implemented pure virtual methods
-    bool islist(void) const;
-    bool iscube(void) const;
 };
 
 
 /***********************************************************************//**
  * @brief GEventCube class extension
- *
- * The __getitem__ method makes the event cube iteratable.
  ***************************************************************************/
 %extend GEventCube {
-    GEventBin* __getitem__(int index) {
-    if (index >= 0 && index < self->size())
-        return self->pointer(index);
-    else
-        throw GException::out_of_range("__getitem__(int)", index, self->size());
-    }
 };
 
 
@@ -69,9 +59,10 @@ public:
  ***************************************************************************/
 %inline %{
     GEventCube* cast_GEventCube(GEvents* events) {
-        if (!events->iscube())
+        GEventCube* cube = dynamic_cast<GEventCube*>(events);
+        if (cube == NULL)
             throw GException::fits_invalid_type("cast_GEventCube(GEvents*)",
-                                                "GEvents is not an event cube.");
-        return dynamic_cast<GEventCube*>(events);
+                                                "GEvents is not of type GEventCube.");
+        return cube;
     }
 %};

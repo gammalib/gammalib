@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GEvents.cpp  -  Events container class                   *
+ *              GEvents.cpp  -  Abstract Event container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GEvents.cpp
- * @brief GEvents container class implementation.
+ * @brief Abstract event container class implementation
  * @author J. Knodlseder
  */
 
@@ -20,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GException.hpp"
 #include "GEvents.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -34,7 +33,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                          Constructors/destructors                       =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -43,7 +42,7 @@
  ***************************************************************************/
 GEvents::GEvents(void)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -54,11 +53,11 @@ GEvents::GEvents(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] events Events from which the instance should be built.
+ * @param[in] events Event container.
  ***************************************************************************/
 GEvents::GEvents(const GEvents& events)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -91,9 +90,9 @@ GEvents::~GEvents(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] events Events which should be assigned.
+ * @param[in] events Event container.
  ***************************************************************************/
-GEvents& GEvents::operator= (const GEvents& events)
+GEvents& GEvents::operator=(const GEvents& events)
 {
     // Execute only if object is not identical
     if (this != &events) {
@@ -101,7 +100,7 @@ GEvents& GEvents::operator= (const GEvents& events)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -111,6 +110,44 @@ GEvents& GEvents::operator= (const GEvents& events)
 
     // Return this object
     return *this;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                              Public methods                             =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Get iterator for first event
+ ***************************************************************************/
+GEvents::iterator GEvents::begin(void)
+{
+    // Allocate iterator object
+    GEvents::iterator iter(this);
+
+    // Set iterator for first event
+    iter.m_index = 0;
+
+    // Return
+    return iter;
+}
+
+
+/***********************************************************************//**
+ * @brief Get iterator after last event
+ ***************************************************************************/
+GEvents::iterator GEvents::end(void)
+{
+    // Allocate iterator object
+    GEvents::iterator iter(this);
+
+    // Set iterator beyond last event
+    iter.m_index = iter.m_num;
+
+    // Return
+    return iter;
 }
 
 
@@ -166,44 +203,6 @@ GEvents::iterator GEvents::iterator::operator++(int junk)
 }
 
 
-/***********************************************************************//**
- * @brief Get iterator for first event
- ***************************************************************************/
-GEvents::iterator GEvents::begin(void)
-{
-    // Allocate iterator object
-    GEvents::iterator iter(this);
-
-    // Set iterator for first event
-    iter.m_index = 0;
-
-    // Return
-    return iter;
-}
-
-
-/***********************************************************************//**
- * @brief Get iterator after last event
- ***************************************************************************/
-GEvents::iterator GEvents::end(void)
-{
-    // Allocate iterator object
-    GEvents::iterator iter(this);
-
-    // Set iterator beyond last event
-    iter.m_index = iter.m_num;
-
-    // Return
-    return iter;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                             Public methods                              =
- =                                                                         =
- ==========================================================================*/
-
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -216,6 +215,8 @@ GEvents::iterator GEvents::end(void)
 void GEvents::init_members(void)
 {
     // Initialise members
+    m_ebounds.clear();
+    m_gti.clear();
 
     // Return
     return;
@@ -225,11 +226,13 @@ void GEvents::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] events GEvents members which should be copied.
+ * @param[in] events Event container.
  ***************************************************************************/
 void GEvents::copy_members(const GEvents& events)
 {
-    // Copy attributes
+    // Copy members
+    m_ebounds = events.m_ebounds;
+    m_gti     = events.m_gti;
 
     // Return
     return;
@@ -248,7 +251,7 @@ void GEvents::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                                  Friends                                =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
 
@@ -256,7 +259,7 @@ void GEvents::free_members(void)
  * @brief Output operator
  *
  * @param[in] os Output stream.
- * @param[in] events Events.
+ * @param[in] events Event container.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GEvents& events)
 {
@@ -272,7 +275,7 @@ std::ostream& operator<< (std::ostream& os, const GEvents& events)
  * @brief Log operator
  *
  * @param[in] log Logger.
- * @param[in] events Events.
+ * @param[in] events Event container.
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GEvents& events)
 {
