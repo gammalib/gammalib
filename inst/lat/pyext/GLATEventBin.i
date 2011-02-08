@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventBin.i
- * @brief GLATEventBin class python bindings.
+ * @brief LAT event bin class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -24,7 +24,7 @@
 /***********************************************************************//**
  * @class GLATEventBin
  *
- * @brief GLATEventBin class interface defintion.
+ * @brief LAT event bin class Python interface
  ***************************************************************************/
 class GLATEventBin : public GEventBin {
 
@@ -41,20 +41,20 @@ public:
     void               clear(void);
     GLATEventBin*      clone(void) const;
     double             size(void) const;
-    const GLATInstDir& dir(void) const { return *m_dir; }
-    const GEnergy&     energy(void) const { return *m_energy; }
-    const GTime&       time(void) const { return *m_time; }
-    double             counts(void) const { return *m_counts; }
+    const GLATInstDir& dir(void) const;
+    const GEnergy&     energy(void) const;
+    const GTime&       time(void) const;
+    double             counts(void) const;
     double             error(void) const;
 
     // Other methods
-    const double&  omega(void) const { return *m_omega; }
-    const GEnergy& ewidth(void) const { return *m_ewidth; }
-    const double&  ontime(void) const { return *m_ontime; }
-    const int&     index(void) const { return m_index; }
-    const int&     ipix(void) const { return m_ipix; }
-    const int&     ieng(void) const { return m_ieng; }
-    GLATEventCube* cube(void) const { return m_cube; }
+    const double&  omega(void) const;
+    const GEnergy& ewidth(void) const;
+    const double&  ontime(void) const;
+    const int&     index(void) const;
+    const int&     ipix(void) const;
+    const int&     ieng(void) const;
+    GLATEventCube* cube(void) const;
 };
 
 
@@ -62,19 +62,6 @@ public:
  * @brief GLATEventBin class extension
  ***************************************************************************/
 %extend GLATEventBin {
-/*
-    GLATEventBin(const GEvent& event) {
-        if (!event.isbin())
-            throw GException::bad_type("GLATEventBin(GEvent&)",
-                                       "GEvent not an event bin");            
-        GLATEventBin* bin = (GLATEventBin*)&event;
-        return bin;
-    }
-    GLATEventBin(const GEventBin& event) {
-        GLATEventBin* bin = (GLATEventBin*)&event;
-        return bin;
-    }
-*/
     GLATEventBin copy() {
         return (*self);
     }
@@ -86,12 +73,10 @@ public:
  ***************************************************************************/
 %inline %{
     GLATEventBin* cast_GLATEventBin(GEvent* event) {
-        if (!event->isbin())
+        GLATEventBin* bin = dynamic_cast<GLATEventBin*>(event);
+        if (bin == NULL)
             throw GException::bad_type("cast_GLATEventBin(GEvent*)",
-                                       "GEvent not an event bin");            
-        return dynamic_cast<GLATEventBin*>(event);
-    }
-    GLATEventBin* cast_GLATEventBin(GEventBin* event) {
-        return dynamic_cast<GLATEventBin*>(event);
+                                       "GEvent not of type GLATEventBin");            
+        return bin;
     }
 %}
