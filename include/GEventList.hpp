@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GEventList.hpp  -  Abstract event list container class        *
+ *           GEventList.hpp  -  Abstract event atom container class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GEventList.hpp
- * @brief GEventList container class interface definition.
+ * @brief Abstract event atom container class interface definition
  * @author J. Knodlseder
  */
 
@@ -20,7 +20,6 @@
 #define GEVENTLIST_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <string>
 #include "GEvents.hpp"
 #include "GEventAtom.hpp"
 
@@ -28,7 +27,13 @@
 /***********************************************************************//**
  * @class GEventList
  *
- * @brief GEventList container class interface defintion.
+ * @brief Abstract event atom container class
+ *
+ * This class is an abstract container class for event atoms.
+ *
+ * In addition to the base class methods, it defines also an interface to the
+ * region of interest (ROI) that is covered by the data space. The ROI can
+ * be accessed by the roi() methods.
  ***************************************************************************/
 class GEventList : public GEvents {
 
@@ -39,20 +44,22 @@ public:
     virtual ~GEventList(void);
 
     // Operators
-    virtual GEventList& operator= (const GEventList& list);
+    virtual GEventList&       operator=(const GEventList& list);
+    virtual GEventAtom*       operator[](const int& index) = 0;
+    virtual const GEventAtom* operator[](const int& index) const = 0;
 
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GEventList* clone(void) const = 0;
     virtual int         size(void) const = 0;
     virtual void        load(const std::string& filename) = 0;
-    virtual GEventAtom* pointer(int index) = 0;
+    virtual void        save(const std::string& filename, bool clobber = false) const = 0;
+    virtual void        read(const GFits& file) = 0;
+    virtual void        write(GFits& file) const = 0;
     virtual int         number(void) const = 0;
+    virtual void        roi(const GRoi& roi) = 0;
+    virtual const GRoi& roi(void) const = 0;
     virtual std::string print(void) const = 0;
-
-    // Implemented pure virtual base class methods
-    bool islist(void) const { return true; }
-    bool iscube(void) const { return false; }
 
 protected:
     // Protected methods

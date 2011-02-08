@@ -1,5 +1,5 @@
 /***************************************************************************
- *     GEventList.i  -  Abstract event list container class python I/F     *
+ *           GEventList.i  -  Abstract event atom container class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GEventList.i
- * @brief GEventList class python interface
+ * @brief Abstract event atom container class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -24,41 +24,33 @@
 /***********************************************************************//**
  * @class GEventList
  *
- * @brief GEventList container class interface defintion.
+ * @brief Abstract event atom container class interface
  ***************************************************************************/
 class GEventList : public GEvents {
 public:
     // Constructors and destructors
-    GEventList();
+    GEventList(void);
     GEventList(const GEventList& list);
-    virtual ~GEventList();
+    virtual ~GEventList(void);
 
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GEventList* clone(void) const = 0;
-    virtual void        load(const std::string& filename) = 0;
-    virtual GEventAtom* pointer(int index) = 0;
-    virtual int         number(void) const = 0;
     virtual int         size(void) const = 0;
-
-    // Implemented pure virtul methods
-    bool islist(void) const { return true; }
-    bool iscube(void) const { return false; }
+    virtual void        load(const std::string& filename) = 0;
+    virtual void        save(const std::string& filename, bool clobber = false) const = 0;
+    virtual void        read(const GFits& file) = 0;
+    virtual void        write(GFits& file) const = 0;
+    virtual int         number(void) const = 0;
+    virtual void        roi(const GRoi& roi) = 0;
+    virtual const GRoi& roi(void) const = 0;
 };
 
 
 /***********************************************************************//**
  * @brief GEventList class extension
- *
- * The __getitem__ method makes the event list iteratable.
  ***************************************************************************/
 %extend GEventList {
-    GEventAtom* __getitem__(int index) {
-    if (index >= 0 && index < self->size())
-        return self->pointer(index);
-    else
-        throw GException::out_of_range("__getitem__(int)", index, self->size());
-    }
 };
 
 
@@ -67,9 +59,10 @@ public:
  ***************************************************************************/
 %inline %{
     GEventList* cast_GEventList(GEvents* events) {
-        if (!events->islist())
+        GEventList* list = dynamic_cast<GEventList*>(events);
+        if (list == NULL)
             throw GException::fits_invalid_type("cast_GEventList(GEvents*)",
-                                                "GEvents is not an event list.");
-        return dynamic_cast<GEventList*>(events);
+                                                "GEvents is not of type GEventList.");
+        return list;
     }
 %};

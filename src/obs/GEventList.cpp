@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GEventList.cpp  -  Abstract event container class            *
+ *          GEventList.cpp  -  Abstract event atom container class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GEventList.cpp
- * @brief GEventList container class implementation.
+ * @brief Abstract event atom container class implementation
  * @author J. Knodlseder
  */
 
@@ -20,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GException.hpp"
 #include "GEventList.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -39,11 +38,11 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Voic constructor
+ * @brief Void constructor
  ***************************************************************************/
 GEventList::GEventList(void) : GEvents()
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -54,11 +53,11 @@ GEventList::GEventList(void) : GEvents()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] list Event list from which the instance should be built.
+ * @param[in] list Event list.
  ***************************************************************************/
 GEventList::GEventList(const GEventList& list) : GEvents(list)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -91,9 +90,9 @@ GEventList::~GEventList(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] list Event list to be assigned.
+ * @param[in] list Event list.
  ***************************************************************************/
-GEventList& GEventList::operator= (const GEventList& list)
+GEventList& GEventList::operator=(const GEventList& list)
 {
     // Execute only if object is not identical
     if (this != &list) {
@@ -104,7 +103,7 @@ GEventList& GEventList::operator= (const GEventList& list)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -119,13 +118,13 @@ GEventList& GEventList::operator= (const GEventList& list)
 
 /*==========================================================================
  =                                                                         =
- =                            Public methods                               =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /*==========================================================================
  =                                                                         =
- =                            Private methods                              =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -142,7 +141,7 @@ void GEventList::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] list GEventList members to be copied.
+ * @param[in] list Event list.
  ***************************************************************************/
 void GEventList::copy_members(const GEventList& list)
 {
