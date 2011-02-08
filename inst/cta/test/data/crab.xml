@@ -2,14 +2,23 @@
 <source_library title="source library">
   <source name="MAGIC Crab (Albert et al. 2008, ApJ, 674, 1037)" type="PointSource">
     <spectrum type="PowerLaw">
-       <parameter name="Prefactor" scale="1e-16" value="5.0" min="1e-07" max="1000.0" free="1"/>
-       <parameter name="Index"     scale="-1.0"  value="2.5" min="0.0"   max="+5.0"   free="1"/>
-       <parameter name="Scale"     scale="1e6"   value="0.3" min="0.01"  max="1000.0" free="0"/>
+       <parameter name="Prefactor" scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
+       <parameter name="Index"     scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
+       <parameter name="Scale"     scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
     </spectrum>
     <spatialModel type="SkyDirFunction">
       <parameter name="RA"  scale="1.0" value="83.6331" min="-360" max="360" free="0"/>
       <parameter name="DEC" scale="1.0" value="22.0145" min="-90"  max="90"  free="0"/>
     </spatialModel>
   </source>
+  <source name="Background" type="RadialAcceptance" instrument="CTA">
+    <spectrum type="PowerLaw">
+       <parameter name="Prefactor" scale="1e-6" value="61.8" min="0.0"  max="1000.0" free="1"/>
+       <parameter name="Index"     scale="-1"   value="1.85" min="0.0"  max="+5.0"   free="1"/>
+       <parameter name="Scale"     scale="1e6"  value="1.0"  min="0.01" max="1000.0" free="0"/>
+    </spectrum>
+    <radialModel type="Gaussian">
+       <parameter name="Sigma" scale="1.0" value="3.0" min="0.01" max="10.0" free="1"/>
+    </radialModel>
+  </source>
 </source_library>
-
