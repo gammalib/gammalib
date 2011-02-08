@@ -312,7 +312,7 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
         throw GLATException::no_ltcube(G_SET);
     
     // Get energy boundaries
-    GEbounds ebds = obs.ebounds();
+    GEbounds ebds = obs.events()->ebounds();
 
     // Store source direction
     m_dir = dir;
@@ -690,11 +690,11 @@ void GLATMeanPsf::set_map_corrections(const GLATObservation& obs)
     // Initialise map corrections to unity vector
     m_mapcorr.assign(m_energy.size(), 1.0);
 
-    // Continue only if we have an event cube
-    if (obs.events()->iscube()) {
+    // Get pointer on event cube
+    const GLATEventCube* cube = dynamic_cast<const GLATEventCube*>(obs.events());
 
-        // Get pointer on event cube
-        const GLATEventCube* cube = static_cast<const GLATEventCube*>(obs.events());
+    // Continue only if we have an event cube
+    if (cube != NULL) {
 
         // Get maximum PSF radius
         double radius = cube->maxrad(m_dir);
