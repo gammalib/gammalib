@@ -86,6 +86,10 @@ public:
     public:
         no_dirs(std::string origin, std::string message = "");
     };
+    class bad_roi_type : public GCTAExceptionHandler {
+    public:
+        bad_roi_type(std::string origin, std::string message = "");
+    };
 
     // Model exceptions
     class model_invalid_radial : public GCTAExceptionHandler {

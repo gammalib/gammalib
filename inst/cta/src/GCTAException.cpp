@@ -166,6 +166,27 @@ GCTAException::no_dirs::no_dirs(std::string origin, std::string message)
 
 
 /***********************************************************************//**
+ * @brief ROI is not a CTA ROI
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCTAException::bad_roi_type::bad_roi_type(std::string origin, std::string message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Specified ROI is not of type GCTARoi.";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Invalid radial model type
  *
  * @param[in] origin Method that throws the error.
