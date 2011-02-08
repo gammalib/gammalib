@@ -439,7 +439,7 @@ std::string GCTAEventCube::print(void) const
     result.append("\n"+parformat("Number of events")+str(number()));
     result.append("\n"+parformat("Time interval"));
     if (gti().size() > 0)
-        result.append(str(tstart().met())+" - "+str(tstop().met()));
+        result.append(str(tstart().met())+" - "+str(tstop().met())+" sec");
     else
         result.append("not defined");
     result.append("\n"+parformat("Energy range"));
