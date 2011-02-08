@@ -308,10 +308,10 @@ void test_unbinned_obs(void)
             //std::cout << num << std::endl;
             num++;
         }
-        if (num != 1380) {
+        if (num != 5680) {
             std::cout << std::endl
                       << "TEST ERROR: " << num
-                      << " iterations in GObservations::iterator instead of 1380."
+                      << " iterations in GObservations::iterator instead of 5680."
                       << std::endl;
             throw;
         }
@@ -332,10 +332,10 @@ void test_unbinned_obs(void)
             //std::cout << *event->energy() << std::endl;
             num++;
         }
-        if (num != 690) {
+        if (num != 2840) {
             std::cout << std::endl <<
                       "TEST ERROR: Wrong number of iterations in GLATEventList::iterator."
-                      << " (excepted 690, found " << num << ")" << std::endl;
+                      << " (excepted 2840, found " << num << ")" << std::endl;
             throw;
         }
     }
