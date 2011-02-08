@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GCTAEventList.hpp  -  CTA Event list class               *
+ *           GCTAEventList.hpp  -  CTA event atom container class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEventList.hpp
- * @brief GCTAEventList class interface definition.
+ * @brief CTA event atom container class interface definition
  * @author J. Knodlseder
  */
 
@@ -24,7 +24,8 @@
 #include <vector>
 #include "GEventList.hpp"
 #include "GCTAEventAtom.hpp"
-#include "GCTAObservation.hpp"
+#include "GCTARoi.hpp"
+#include "GFitsHDU.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 
@@ -32,7 +33,9 @@
 /***********************************************************************//**
  * @class GCTAEventList
  *
- * @brief GCTAEventList class interface defintion.
+ * @brief CTA event atom container class
+ *
+ * This class is a container class for CTA event atoms.
  ***************************************************************************/
 class GCTAEventList : public GEventList {
 
@@ -43,32 +46,40 @@ public:
     virtual ~GCTAEventList(void);
 
     // Operators
-    GCTAEventList& operator= (const GCTAEventList& list);
+    virtual GCTAEventList&       operator=(const GCTAEventList& list);
+    virtual GCTAEventAtom*       operator[](const int& index);
+    virtual const GCTAEventAtom* operator[](const int& index) const;
 
     // Implemented pure virtual base class methods
-    void           clear(void);
-    GCTAEventList* clone(void) const;
-    int            size(void) const { return m_events.size(); }
-    void           load(const std::string& filename);
-    void           save(const std::string& filename, bool clobber = false) const;
-    void           read(GFitsTable* hdu);
-    void           write(GFits* file) const;
-    GCTAEventAtom* pointer(int index);
-    int            number(void) const { return m_events.size(); }
-    std::string    print(void) const;
+    virtual void           clear(void);
+    virtual GCTAEventList* clone(void) const;
+    virtual int            size(void) const { return m_events.size(); }
+    virtual void           load(const std::string& filename);
+    virtual void           save(const std::string& filename, bool clobber = false) const;
+    virtual void           read(const GFits& file);
+    virtual void           write(GFits& file) const;
+    virtual int            number(void) const { return m_events.size(); }
+    virtual void           roi(const GRoi& roi);
+    virtual const GCTARoi& roi(void) const { return m_roi; }
+    std::string            print(void) const;
 
     // Implement other methods
-    void append(const GCTAEventAtom& event);
-    void reserve(const int& number);
+    void                   append(const GCTAEventAtom& event);
+    void                   reserve(const int& number);
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GCTAEventList& list);
     void free_members(void);
-    void write_header(GFitsBinTable* hdu) const;
+    void read_events(const GFitsTable* hdu);
+    void read_ds_ebounds(const GFitsHDU* hdu);
+    void read_ds_roi(const GFitsHDU* hdu);
+    void write_events(GFitsBinTable* hdu) const;
+    void write_ds_keys(GFitsHDU* hdu) const;
 
     // Protected members
+    GCTARoi                    m_roi;     //!< Region of interest
     std::vector<GCTAEventAtom> m_events;  //!< Events
 };
 
