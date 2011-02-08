@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATException.hpp  - LAT exception handler               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -71,6 +71,18 @@ public:
     class no_ltcube : public GLATExceptionHandler {
     public:
         no_ltcube(std::string origin, std::string message = "");
+    };
+    class no_energies : public GLATExceptionHandler {
+    public:
+        no_energies(std::string origin, std::string message = "");
+    };
+    class no_dirs : public GLATExceptionHandler {
+    public:
+        no_dirs(std::string origin, std::string message = "");
+    };
+    class bad_roi_type : public GLATExceptionHandler {
+    public:
+        bad_roi_type(std::string origin, std::string message = "");
     };
     class invalid_response : public GLATExceptionHandler {
     public:
