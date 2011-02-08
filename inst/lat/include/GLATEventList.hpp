@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATEventList.hpp  -  LAT Event list class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventList.hpp
- * @brief GLATEventList class interface definition.
+ * @brief LAT Event list class interface definition
  * @author J. Knodlseder
  */
 
@@ -21,18 +21,19 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include "GEventList.hpp"
 #include "GLATEventAtom.hpp"
-#include "GLATObservation.hpp"
-#include "GLATResponse.hpp"
+#include "GLATRoi.hpp"
 #include "GFits.hpp"
+#include "GFitsHDU.hpp"
 #include "GFitsTable.hpp"
 
 
 /***********************************************************************//**
  * @class GLATEventList
  *
- * @brief GLATEventList class interface defintion.
+ * @brief LAT Event list interface
  ***************************************************************************/
 class GLATEventList : public GEventList {
 
@@ -43,16 +44,22 @@ public:
     virtual ~GLATEventList(void);
 
     // Operators
-    GLATEventList& operator= (const GLATEventList& list);
+    virtual GLATEventList&       operator= (const GLATEventList& list);
+    virtual GLATEventAtom*       operator[](const int& index);
+    virtual const GLATEventAtom* operator[](const int& index) const;
 
     // Implemented pure virtual base class methods
-    void           clear(void);
-    GLATEventList* clone(void) const;
-    int            size(void) const { return m_num; }
-    void           load(const std::string& filename);
-    GLATEventAtom* pointer(int index);
-    int            number(void) const { return m_num; }
-    std::string    print(void) const;
+    virtual void           clear(void);
+    virtual GLATEventList* clone(void) const;
+    virtual int            size(void) const { return m_events.size(); }
+    virtual void           load(const std::string& filename);
+    virtual void           save(const std::string& filename, bool clobber = false) const;
+    virtual void           read(const GFits& file);
+    virtual void           write(GFits& file) const;
+    virtual int            number(void) const { return m_events.size(); }
+    virtual void           roi(const GRoi& roi);
+    virtual const GLATRoi& roi(void) const { return m_roi; }
+    virtual std::string    print(void) const;
 
     // Other methods
 
@@ -61,26 +68,17 @@ protected:
     void init_members(void);
     void copy_members(const GLATEventList& list);
     void free_members(void);
-    void load_ft1(GFitsTable* hdu);
-    void load_events(GFitsTable* hdu);
-    void load_ds_keys(GFitsTable* hdu);
+    void read_events(const GFitsTable* hdu);
+    void read_ds_keys(const GFitsHDU* hdu);
 
-    // Protected data area
-    int            m_num;            //!< Number of events
-    GLATEventAtom* m_events;         //!< Pointer to events
-
-    // Diffuse response information
-    int            m_num_difrsp;     //!< Number of diffuse response models
-    std::string*   m_difrsp_label;   //!< Diffuse response model labels
-
-    // Data selection information
-    int            m_ds_num;         //!< Number of data selection keys
-    std::string*   m_ds_type;        //!< Data selection types
-    std::string*   m_ds_unit;        //!< Data selection units
-    std::string*   m_ds_value;       //!< Data selection values
-    std::string*   m_ds_reference;   //!< Data selection references
-
-private:
+    // Protected members
+    GLATRoi                    m_roi;            //!< Region of interest
+    std::vector<GLATEventAtom> m_events;         //!< Events
+    std::vector<std::string>   m_difrsp_label;   //!< Diffuse response model labels
+    std::vector<std::string>   m_ds_type;        //!< Data selection types
+    std::vector<std::string>   m_ds_unit;        //!< Data selection units
+    std::vector<std::string>   m_ds_value;       //!< Data selection values
+    std::vector<std::string>   m_ds_reference;   //!< Data selection references
 };
 
 #endif /* GLATEVENTLIST_HPP */

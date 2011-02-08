@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventList.cpp
- * @brief GLATEventList class implementation.
+ * @brief LAT Event list class implementation
  * @author J. Knodlseder
  */
 
@@ -21,9 +21,10 @@
 #include <config.h>
 #endif
 #include <cstdio>             // std::sprintf
-#include "GLATEventList.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GLATEventList.hpp"
+#include "GLATException.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GFitsTableDoubleCol.hpp"
@@ -31,7 +32,8 @@
 #include "GFitsTableShortCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_POINTER                               "GLATEventList::pointer(int)"
+#define G_OPERATOR                          "GLATEventList::operator[](int&)"
+#define G_ROI                                     "GLATEventList::roi(GRoi&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -62,11 +64,11 @@ GLATEventList::GLATEventList(void) : GEventList()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] list Event list from which the instance should be built.
+ * @param[in] list LAT event list.
  ***************************************************************************/
 GLATEventList::GLATEventList(const GLATEventList& list) : GEventList(list)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -99,7 +101,7 @@ GLATEventList::~GLATEventList(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] list Event list to be assigned.
+ * @param[in] list LAT event list.
  ***************************************************************************/
 GLATEventList& GLATEventList::operator= (const GLATEventList& list)
 {
@@ -112,7 +114,7 @@ GLATEventList& GLATEventList::operator= (const GLATEventList& list)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -122,6 +124,52 @@ GLATEventList& GLATEventList::operator= (const GLATEventList& list)
 
     // Return this object
     return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Event atom access operator
+ *
+ * @param[in] index Event index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Event index outside valid range.
+ *
+ * Returns pointer to an event atom.
+ ***************************************************************************/
+GLATEventAtom* GLATEventList::operator[](const int& index)
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+    #endif
+
+    // Return pointer
+    return (&(m_events[index]));
+}
+
+
+/***********************************************************************//**
+ * @brief Event atom access operator
+ *
+ * @param[in] index Event index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Event index outside valid range.
+ *
+ * Returns pointer to an event atom.
+ ***************************************************************************/
+const GLATEventAtom* GLATEventList::operator[](const int& index) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+    #endif
+
+    // Return pointer
+    return (&(m_events[index]));
 }
 
 
@@ -163,26 +211,22 @@ GLATEventList* GLATEventList::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Load LAT events from FT1 file
+ * @brief Load LAT events from FITS file
  *
- * @param[in] ft1name FT1 FITS filename from which events are loaded.
+ * @param[in] filename FITS filename.
+ *
+ * This method loads LAT events from a FT1 file.
  ***************************************************************************/
-void GLATEventList::load(const std::string& ft1name)
+void GLATEventList::load(const std::string& filename)
 {
     // Clear object
     clear();
 
-    // Allocate FITS file
-    GFits file;
+    // Open FITS file
+    GFits file(filename);
 
-    // Open FT1 FITS file
-    file.open(ft1name);
-
-    // Get HDU
-    GFitsTable* hdu = file.table("EVENTS");
-
-    // Load columns
-    load_ft1(hdu);
+    // Read event list
+    read(file);
 
     // Close FITS file
     file.close();
@@ -193,25 +237,89 @@ void GLATEventList::load(const std::string& ft1name)
 
 
 /***********************************************************************//**
- * @brief Returns pointer to an event
+ * @brief Save LAT events
  *
- * @param[in] index Event index for which pointer will be returned.
+ * @param[in] filename FITS filename.
+ * @param[in] clobber Overwrite existing FITS file (default=false).
  *
- * @exception GException::out_of_range
- *            Event index not in valid range.
+ * This method saves LAT events into a FT1 file.
  *
- * This method returns a pointer on an event atom.
+ * @todo To be implemented.
  ***************************************************************************/
-GLATEventAtom* GLATEventList::pointer(int index)
+void GLATEventList::save(const std::string& filename, bool clobber) const
 {
-    // Optionally check if the index is valid
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= m_num)
-        throw GException::out_of_range(G_POINTER, index, 0, m_num-1);
-    #endif
+    // Return
+    return;
+}
 
-    // Return pointer
-    return ((GLATEventAtom*)m_events + index);
+
+/***********************************************************************//**
+ * @brief Read LAT events from FITS file.
+ *
+ * @param[in] file FITS file.
+ *
+ * This method read the LAT event list from a FITS file.
+ *
+ * The method clears the object before loading, thus any events residing in
+ * the object before loading will be lost.
+ ***************************************************************************/
+void GLATEventList::read(const GFits& file)
+{
+    // Clear object
+    clear();
+
+    // Get HDU
+    GFitsTable* hdu = file.table("EVENTS");
+
+    // Read event data
+    read_events(hdu);
+
+    // Read data selection keywords
+    read_ds_keys(hdu);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write LAT event list into FITS file.
+ *
+ * @param[in] file FITS file.
+ *
+ * Write the LAT event list into FITS file.
+ *
+ * @todo To be implemented.
+ ***************************************************************************/
+void GLATEventList::write(GFits& file) const
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set region of interest
+ *
+ * @param[in] roi Region of interest.
+ *
+ * @exception GLATException::bad_roi_type
+ *            ROI is not of type GLATRoi.
+ ***************************************************************************/
+void GLATEventList::roi(const GRoi& roi)
+{
+    // Cast ROI dynamically
+    const GLATRoi* ptr = dynamic_cast<const GLATRoi*>(&roi);
+
+    // Throw exception if ROI is not of correct type
+    if (ptr == NULL)
+        throw GLATException::bad_roi_type(G_ROI);
+
+    // Set ROI
+    m_roi = *ptr;
+
+    // Return
+    return;
 }
 
 
@@ -228,8 +336,8 @@ std::string GLATEventList::print(void) const
     result.append(parformat("Number of events")+str(number())+"\n");
 
     // Append DS keywords
-    result.append(parformat("Number of DS keywords")+str(m_ds_num));
-    for (int i = 0; i < m_ds_num; ++i) {
+    result.append(parformat("Number of DS keywords")+str(m_ds_type.size()));
+    for (int i = 0; i < m_ds_type.size(); ++i) {
         result.append("\n"+parformat(" Data selection"));
         result.append("Type="+m_ds_type[i]);
         if (m_ds_unit[i].length() > 0)
@@ -239,8 +347,8 @@ std::string GLATEventList::print(void) const
     }
 
     // Append diffuse keywords
-    result.append("\n"+parformat("Number of diffuse models")+str(m_num_difrsp));
-    for (int i = 0; i < m_num_difrsp; ++i) {
+    result.append("\n"+parformat("Number of diffuse models")+str(m_difrsp_label.size()));
+    for (int i = 0; i < m_difrsp_label.size(); ++i) {
         result.append("\n"+parformat(" Diffuse component"));
         result.append(m_difrsp_label[i]);
     }
@@ -262,19 +370,13 @@ std::string GLATEventList::print(void) const
 void GLATEventList::init_members(void)
 {
     // Initialise members
-    m_num    = 0;
-    m_events = NULL;
-
-    // Initialise diffuse models
-    m_num_difrsp   = 0;
-    m_difrsp_label = NULL;
-
-    // Initialise data selection keys
-    m_ds_num       = 0;
-    m_ds_type      = NULL;
-    m_ds_unit      = NULL;
-    m_ds_value     = NULL;
-    m_ds_reference = NULL;
+    m_roi.clear();
+    m_events.clear();
+    m_difrsp_label.clear();
+    m_ds_type.clear();
+    m_ds_unit.clear();
+    m_ds_value.clear();
+    m_ds_reference.clear();
 
     // Return
     return;
@@ -284,59 +386,18 @@ void GLATEventList::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] list GLATEventList members which should be copied.
+ * @param[in] list LAT event list.
  ***************************************************************************/
 void GLATEventList::copy_members(const GLATEventList& list)
 {
-    // Copy attributes
-    m_num        = list.m_num;
-    m_num_difrsp = list.m_num_difrsp;
-    m_ds_num     = list.m_ds_num;
-
-    // If there are events then copy them
-    if (m_num > 0 && list.m_events != NULL) {
-
-        // Allocate memory for events
-        m_events = new GLATEventAtom[m_num];
-
-        // Copy events using the correct casts
-        GLATEventAtom* dst = (GLATEventAtom*)m_events;
-        GLATEventAtom* src = (GLATEventAtom*)list.m_events;
-        for (int i = 0; i < m_num; ++i)
-            *dst++ = *src++;
-
-    }
-
-    // If there are diffuse response model labels then copy them
-    if (m_num_difrsp > 0) {
-
-        // Allocate memory for keys
-        m_difrsp_label = new std::string[m_num_difrsp];
-
-        // Copy keys
-        for (int i = 0; i < m_num_difrsp; ++i)
-            m_difrsp_label[i] = list.m_difrsp_label[i];
-
-    } // endif: there were diffuse response model labels
-
-    // If there are data selection keys then copy them
-    if (m_ds_num > 0) {
-
-        // Allocate memory for keys
-        m_ds_type      = new std::string[m_ds_num];
-        m_ds_unit      = new std::string[m_ds_num];
-        m_ds_value     = new std::string[m_ds_num];
-        m_ds_reference = new std::string[m_ds_num];
-
-        // Copy keys
-        for (int i = 0; i < m_ds_num; ++i) {
-            m_ds_type[i]      = list.m_ds_type[i];
-            m_ds_unit[i]      = list.m_ds_unit[i];
-            m_ds_value[i]     = list.m_ds_value[i];
-            m_ds_reference[i] = list.m_ds_reference[i];
-        }
-
-    } // endif: there were data selection keys to copy
+    // Copy members
+    m_roi          = list.m_roi;
+    m_events       = list.m_events;
+    m_difrsp_label = list.m_difrsp_label;
+    m_ds_type      = list.m_ds_type;
+    m_ds_unit      = list.m_ds_unit;
+    m_ds_value     = list.m_ds_value;
+    m_ds_reference = list.m_ds_reference;
 
     // Return
     return;
@@ -348,83 +409,39 @@ void GLATEventList::copy_members(const GLATEventList& list)
  ***************************************************************************/
 void GLATEventList::free_members(void)
 {
-    // Free memory.
-    if (m_events       != NULL) delete [] m_events;
-    if (m_difrsp_label != NULL) delete [] m_difrsp_label;
-    if (m_ds_type      != NULL) delete [] m_ds_type;
-    if (m_ds_unit      != NULL) delete [] m_ds_unit;
-    if (m_ds_value     != NULL) delete [] m_ds_value;
-    if (m_ds_reference != NULL) delete [] m_ds_reference;
-
-    // Signal free pointers
-    m_events       = NULL;
-    m_difrsp_label = NULL;
-    m_ds_type      = NULL;
-    m_ds_unit      = NULL;
-    m_ds_value     = NULL;
-    m_ds_reference = NULL;
-
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Load LAT events from FITS HDU.
+ * @brief Read LAT events from FITS table.
  *
- * @param[in] hdu Pointer to event table.
- *
- * Load the event list from an FT1 file into memory. This method loads the
- * events and also reads the data selection keywords.
+ * @param[in] table FITS table pointer.
  ***************************************************************************/
-void GLATEventList::load_ft1(GFitsTable* hdu)
+void GLATEventList::read_events(const GFitsTable* table)
 {
-    // Free and initialise base class members
-    this->GEvents::free_members();
-    this->GEvents::init_members();
+    // Clear existing events
+    m_events.clear();
 
-    // Free and initialise base class members
-    this->GEventList::free_members();
-    this->GEventList::init_members();
-
-    // Free and initialise class members
-    free_members();
-    init_members();
-
-    // Load event data
-    load_events(hdu);
-
-    // Load data selection keywords
-    load_ds_keys(hdu);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Load LAT events from FITS HDU.
- *
- * @param[in] hdu Pointer to event table.
- *
- * Note that this method does not handle memory deallocation.
- ***************************************************************************/
-void GLATEventList::load_events(GFitsTable* hdu)
-{
     // Allocate space for keyword name
     char keyword[10];
 
     // Continue only if HDU is valid
-    if (hdu != NULL) {
+    if (table != NULL) {
+
+        // Circumvent const correctness. We need this because the column()
+        // method is not declared const. This should be corrected.
+        GFitsTable* hdu = (GFitsTable*)table;
 
         // Extract number of events in FT1 file
-        m_num = hdu->integer("NAXIS2");
+        int num = hdu->integer("NAXIS2");
 
         // If there are events then load them
-        if (m_num > 0) {
+        if (num > 0) {
 
-            // Allocate data
-            m_events = new GLATEventAtom[m_num];
+            // Reserve data
+            m_events.reserve(num);
 
             // Get column pointers
             GFitsTableDoubleCol* ptr_time    = (GFitsTableDoubleCol*)hdu->column("TIME");
@@ -444,71 +461,66 @@ void GLATEventList::load_events(GFitsTable* hdu)
             GFitsTableDoubleCol* ptr_ltime   = (GFitsTableDoubleCol*)hdu->column("LIVETIME");
 
             // Copy data from columns into GLATEventAtom objects
-            GLATEventAtom* ptr = (GLATEventAtom*)m_events;
-            for (int i = 0; i < m_num; ++i) {
-                ptr[i].m_time.met((*ptr_time)(i));
-                ptr[i].m_energy.MeV((*ptr_energy)(i));
-                ptr[i].m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
-                ptr[i].m_theta               = (*ptr_theta)(i);
-                ptr[i].m_phi                 = (*ptr_phi)(i);
-                ptr[i].m_zenith_angle        = (*ptr_zenith)(i);
-                ptr[i].m_earth_azimuth_angle = (*ptr_azimuth)(i);
-                ptr[i].m_event_id            = (*ptr_eid)(i);
-                ptr[i].m_run_id              = (*ptr_rid)(i);
-                ptr[i].m_recon_version       = (*ptr_recon)(i);
-                ptr[i].m_calib_version[0]    = (*ptr_calib)(i,0);
-                ptr[i].m_calib_version[1]    = (*ptr_calib)(i,1);
-                ptr[i].m_calib_version[2]    = (*ptr_calib)(i,2);
-                ptr[i].m_event_class         = (*ptr_class)(i);
-                ptr[i].m_conversion_type     = (*ptr_conv)(i);
-                ptr[i].m_livetime            = (*ptr_ltime)(i);
+            GLATEventAtom event;
+            for (int i = 0; i < num; ++i) {
+                event.m_time.met((*ptr_time)(i));
+                event.m_energy.MeV((*ptr_energy)(i));
+                event.m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
+                event.m_theta               = (*ptr_theta)(i);
+                event.m_phi                 = (*ptr_phi)(i);
+                event.m_zenith_angle        = (*ptr_zenith)(i);
+                event.m_earth_azimuth_angle = (*ptr_azimuth)(i);
+                event.m_event_id            = (*ptr_eid)(i);
+                event.m_run_id              = (*ptr_rid)(i);
+                event.m_recon_version       = (*ptr_recon)(i);
+                event.m_calib_version[0]    = (*ptr_calib)(i,0);
+                event.m_calib_version[1]    = (*ptr_calib)(i,1);
+                event.m_calib_version[2]    = (*ptr_calib)(i,2);
+                event.m_event_class         = (*ptr_class)(i);
+                event.m_conversion_type     = (*ptr_conv)(i);
+                event.m_livetime            = (*ptr_ltime)(i);
+                m_events.push_back(event);
             }
 
             // Extract number of diffuse response labels
-            m_num_difrsp = hdu->integer("NDIFRSP");
+            int num_difrsp = hdu->integer("NDIFRSP");
 
             // Allocate diffuse response components
-            if (m_num_difrsp > 0) {
+            if (num_difrsp > 0) {
 
-                // Allocate labels
-                m_difrsp_label = new std::string[m_num_difrsp];
+                // Reserve space
+                m_difrsp_label.reserve(num_difrsp);
 
                 // Allocate components
-                GLATEventAtom* ptr = (GLATEventAtom*)m_events;
-                for (int i = 0; i < m_num; ++i)
-                    ptr[i].m_difrsp = new double[m_num_difrsp];
+                for (int i = 0; i < num; ++i)
+                    m_events[i].m_difrsp = new double[num_difrsp];
 
                 // Load diffuse columns
-                for (int k = 0; k < m_num_difrsp; ++k) {
+                for (int k = 0; k < num_difrsp; ++k) {
 
                     // Set keyword name
                     std::sprintf(keyword, "DIFRSP%d", k);
 
                     // Get DIFRSP label
                     try {
-                        m_difrsp_label[k] = hdu->card(std::string(keyword))->string();
+                        m_difrsp_label.push_back(hdu->card(std::string(keyword))->string());
                     }
                     catch (GException::fits_key_not_found &e) {
-                        m_difrsp_label[k] = "NONE";
+                        m_difrsp_label.push_back("NONE");
                     }
 
                     // Get column pointer
                     GFitsTableFloatCol* ptr_dif = (GFitsTableFloatCol*)hdu->column(std::string(keyword));
 
                     // Copy data from columns into GLATEventAtom objects
-                    GLATEventAtom* ptr = (GLATEventAtom*)m_events;
-                    for (int i = 0; i < m_num; ++i)
-                        ptr[i].m_difrsp[k] = (*ptr_dif)(i);
+                    for (int i = 0; i < num; ++i)
+                        m_events[i].m_difrsp[k] = (*ptr_dif)(i);
 
                 } // endfor: looped over diffuse columns
 
-            } // endif: allocated memory for diffuse components
-            else
-                m_num_difrsp = 0;
+            } // endif: diffuse components found
 
-        }
-        else
-            m_num = 0;
+        } // endif: events found
 
     } // endif: HDU was valid
 
@@ -518,76 +530,76 @@ void GLATEventList::load_events(GFitsTable* hdu)
 
 
 /***********************************************************************//**
- * @brief Load Data Selection keywords from FITS HDU.
+ * @brief Read data selection keywords from FITS HDU.
  *
- * @param[in] hdu Pointer to event table.
- *
- * Note that this method does not handle memory deallocation.
+ * @param[in] hdu FITS HDU pointer.
  ***************************************************************************/
-void GLATEventList::load_ds_keys(GFitsTable* hdu)
+void GLATEventList::read_ds_keys(const GFitsHDU* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
 
         // Get number of data selection keys
-        m_ds_num = hdu->integer("NDSKEYS");
+        int ds_num = hdu->integer("NDSKEYS");
 
         // Get data selection keys
-        if (m_ds_num > 0) {
+        if (ds_num > 0) {
 
-            // Allocate data selection key information
-            m_ds_type      = new std::string[m_ds_num];
-            m_ds_unit      = new std::string[m_ds_num];
-            m_ds_value     = new std::string[m_ds_num];
-            m_ds_reference = new std::string[m_ds_num];
+            // Circumvent const correctness. We need this because the column()
+            // method is not declared const. This should be corrected.
+            GFitsHDU* ptr = (GFitsHDU*)hdu;
+
+            // Reserve space
+            m_ds_type.reserve(ds_num);
+            m_ds_unit.reserve(ds_num);
+            m_ds_value.reserve(ds_num);
+            m_ds_reference.reserve(ds_num);
 
             // Allocate space for the keyword
             char keyword[10];
 
             // Get columns
-            for (int i = 0; i < m_ds_num; ++i) {
+            for (int i = 0; i < ds_num; ++i) {
 
                 // Get DSTYPnn
                 try {
                     std::sprintf(keyword, "DSTYP%d", i+1);
-                    m_ds_type[i] = hdu->card(std::string(keyword))->string();
+                    m_ds_type.push_back(ptr->card(std::string(keyword))->string());
                 }
                 catch (GException::fits_key_not_found &e) {
-                    m_ds_type[i] = "";
+                    m_ds_type.push_back("");
                 }
 
                 // Get DSUNInn
                 try {
                     std::sprintf(keyword, "DSUNI%d", i+1);
-                    m_ds_unit[i] = hdu->card(std::string(keyword))->string();
+                    m_ds_unit.push_back(ptr->card(std::string(keyword))->string());
                 }
                 catch (GException::fits_key_not_found &e) {
-                    m_ds_unit[i] = "";
+                    m_ds_unit.push_back("");
                 }
 
                 // Get DSVALnn
                 try {
                     std::sprintf(keyword, "DSVAL%d", i+1);
-                    m_ds_value[i] = hdu->card(std::string(keyword))->string();
+                    m_ds_value.push_back(ptr->card(std::string(keyword))->string());
                 }
                 catch (GException::fits_key_not_found &e) {
-                    m_ds_value[i] = "";
+                    m_ds_value.push_back("");
                 }
 
                 // Get DSREFnn
                 try {
                     std::sprintf(keyword, "DSREF%d", i+1);
-                    m_ds_reference[i] = hdu->card(std::string(keyword))->string();
+                    m_ds_reference.push_back(ptr->card(std::string(keyword))->string());
                 }
                 catch (GException::fits_key_not_found &e) {
-                    m_ds_reference[i] = "";
+                    m_ds_reference.push_back("");
                 }
 
             } // endfor: looped over data selection keys
 
         } // endif: there were data selection keys
-        else
-            m_ds_num = 0;
 
     } // endif: HDU was valid
 
