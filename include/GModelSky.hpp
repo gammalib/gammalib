@@ -81,24 +81,26 @@ public:
     virtual std::string print(void) const = 0;
 
     // Implemented pure virtual methods
-    int         size(void) const { return m_npars; }
-    double      eval(const GEvent& event, const GObservation& obs);
-    double      eval_gradients(const GEvent& event, const GObservation& obs);
-    void        read(const GXmlElement& xml);
-    void        write(GXmlElement& xml) const;
+    virtual int         size(void) const { return m_npars; }
+    virtual double      eval(const GEvent& event, const GObservation& obs);
+    virtual double      eval_gradients(const GEvent& event, const GObservation& obs);
+    virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
+                              const GObservation& obs) const;
+    virtual void        read(const GXmlElement& xml);
+    virtual void        write(GXmlElement& xml) const;
 
     // Other methods
-    GModelSpatial*  spatial(void) const { return m_spatial; }
-    GModelSpectral* spectral(void) const { return m_spectral; }
-    GModelTemporal* temporal(void) const { return m_temporal; }
-    double          value(const GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime);
-    GVector         gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
+    GModelSpatial*      spatial(void) const { return m_spatial; }
+    GModelSpectral*     spectral(void) const { return m_spectral; }
+    GModelTemporal*     temporal(void) const { return m_temporal; }
+    double              value(const GSkyDir& srcDir, const GEnergy& srcEng,
                               const GTime& srcTime);
-    GPhotons        mc(const double& area, const GSkyDir& dir, const double& radius,
-                       const GEnergy& emin, const GEnergy& emax,
-                       const GTime& tmin, const GTime& tmax,
-                       GRan& ran) const;
+    GVector             gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
+                                  const GTime& srcTime);
+    GPhotons            mc(const double& area, const GSkyDir& dir, const double& radius,
+                           const GEnergy& emin, const GEnergy& emax,
+                           const GTime& tmin, const GTime& tmax,
+                           GRan& ran) const;
     
 protected:
     // Protected methods

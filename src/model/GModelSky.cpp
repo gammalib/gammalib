@@ -35,6 +35,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                                "GModelSky::operator() (int)"
+#define G_NPRED           "GModelSky::npred(GEnergy&, GTime&, GObservation&)"
 #define G_XML_SPATIAL                  "GModelSky::xml_spatial(GXmlElement&)"
 #define G_XML_SPECTRAL                "GModelSky::xml_spectral(GXmlElement&)"
 #define G_XML_TEMPORAL                "GModelSky::xml_temporal(GXmlElement&)"
@@ -336,6 +337,78 @@ double GModelSky::eval_gradients(const GEvent& event, const GObservation& obs)
 
     // Return
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Return spatially integrated sky model
+ *
+ * @param[in] obsEng Measured photon energy.
+ * @param[in] obsTime Measured photon arrival time.
+ * @param[in] obs Observation.
+ *
+ * @exception GException::no_response
+ *            No valid instrument response function defined.
+ *
+ * Computes
+ * \f[N"_{\rm pred} = \int_{\rm ROI}
+ *    S(\vec{p}, E, t) PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \,
+ *    {\rm d}\vec{p'}\f]
+ * where
+ * \f$S(\vec{p}, E, t)\f$ is the source model,
+ * \f$PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)\f$ is the point
+ * spread function,
+ * \f$\vec{p'}\f$ is the measured photon direction,
+ * \f$E'\f$ is the measured photon energy,
+ * \f$t'\f$ is the measured photon arrival time,
+ * \f$\vec{p}\f$ is the true photon arrival direction,
+ * \f$E\f$ is the true photon energy,
+ * \f$t\f$ is the true photon arrival time, and
+ * \f$d\f$ is the instrument pointing.
+ *
+ * \f${\rm ROI}\f$ is the region of interest that is stored in the
+ * GObservation::m_roi member. The integration over the ROI is performed
+ * by the GResponse::npred() method.
+ *
+ * @todo The actual method is only correct if no energy and time dispersion
+ *       exists. For the moment we set srcEng=obsEng and srcTime=obsTime.
+ *       Formally, Equation (2) of the instrument document has to be
+ *       computed, which is an integration over source energy, time
+ *       and arrival direction. For the moment, only the integration over
+ *       arrival direction is performed by GResponse::npred().
+ ***************************************************************************/
+double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
+                        const GObservation& obs) const
+{
+    // Initialise result
+    double npred = 0.0;
+
+    // Continue only if model is valid)
+    if (valid_model()) {
+
+        // Get response function
+        GResponse* rsp = obs.response();
+        if (rsp == NULL)
+            throw GException::no_response(G_NPRED);
+
+        // Here we make the simplifying approximations
+        // srcEng=obsEng and srcTime=obsTime. To be fully correct we should
+        // integrate over true energy and true time here ... at least true
+        // time if we want to consider energy dispersion ...
+        GEnergy srcEng  = obsEng;
+        GTime   srcTime = obsTime;
+
+        // Compute spatially integrated IRF
+        npred = rsp->npred(*this, srcEng, srcTime, obs);
+
+        // Multiply by spectral and temporal components
+        npred *= spectral()->eval(srcEng);
+        npred *= temporal()->eval(srcTime);
+
+    } // endif: model was valid
+
+    // Return npred
+    return npred;
 }
 
 
