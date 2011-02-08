@@ -582,99 +582,6 @@ double GObservation::npred_spec(const GModel& model,
 
 
 /***********************************************************************//**
- * @brief Spatially integrates the Npred kernel
- *
- * @param[in] model Gamma-ray source model.
- * @param[in] obsEng Measured photon energy.
- * @param[in] obsTime Measured photon arrival time.
- *
- * @exception GException::no_response
- *            No valid instrument response function for observation.
- * @exception GException::feature_not_implemented
- *            Computation for data-space models not yet implemented.
- *
- * Computes
- * \f[N"_{\rm pred} = \int_{\rm ROI}
- *    S(\vec{p}, E, t) PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \,
- *    {\rm d}\vec{p'}\f]
- * where
- * \f$S(\vec{p}, E, t)\f$ is the source model,
- * \f$PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)\f$ is the point
- * spread function,
- * \f$\vec{p'}\f$ is the measured photon direction,
- * \f$E'\f$ is the measured photon energy,
- * \f$t'\f$ is the measured photon arrival time,
- * \f$\vec{p}\f$ is the true photon arrival direction,
- * \f$E\f$ is the true photon energy,
- * \f$t\f$ is the true photon arrival time, and
- * \f$d\f$ is the instrument pointing.
- *
- * \f${\rm ROI}\f$ is the region of interest that is stored in the
- * GObservation::m_roi member.
- * For sky models the integration is performed by the GResponse::npred()
- * method. For data models, the integration is done by the
- * GModelData::npred() method.
- *
- * @todo For sky models, the actual method is only correct if no energy
- *       and time dispersion exists. For the moment we set srcEng=obsEng and
- *       srcTime=obsTime. Formally, Equation (2) of the instrument document
- *       needs computed, which is an integration over source energy, time
- *       and arrival direction. For the moment, only the integration over
- *       arrival direction is performed by GResponse::npred().
- ***************************************************************************/
-double GObservation::npred_spat(const GModel&  model,
-                                const GEnergy& obsEng,
-                                const GTime&   obsTime) const
-{
-    // Initialise result
-    double result = 0.0;
-
-    // Get sky and data models (NULL if not valid)
-    GModelSky*  sky  = dynamic_cast<GModelSky*>((GModel*)&model);
-    GModelData* data = dynamic_cast<GModelData*>((GModel*)&model);
-
-    // Case A: We have a sky model
-    if (sky != NULL) {
-
-        // Get response function
-        GResponse* rsp = response();
-        if (rsp == NULL)
-            throw GException::no_response(G_NPRED_SPAT);
-
-        // Here we make the simplifying approximations
-        // srcEng=obsEng and srcTime=obsTime. To be fully correct we should
-        // integrate over true energy and true time here ... at least true
-        // time if we want to consider energy dispersion ...
-        GEnergy srcEng  = obsEng;
-        GTime   srcTime = obsTime;
-
-        // Compute integrated IRF
-        double npred = rsp->npred(*sky, srcEng, srcTime, *this);
-
-        // Compute source model.
-        double source = 1.0;
-        if (sky->spectral() != NULL) source *= sky->spectral()->eval(srcEng);
-        if (sky->temporal() != NULL) source *= sky->temporal()->eval(srcTime);
-
-        // Set result
-        result = source * npred;
-    
-    } // endif: we had a sky model
-
-    // Case B: We have a data space model
-    else if (data != NULL) {
-
-        // Compute spatially integrated model
-        result = data->npred(obsEng, obsTime, *this);
-
-    }
-
-    // Return
-    return result;
-}
-
-
-/***********************************************************************//**
  * @brief Integration kernel for npred_spec() method
  *
  * @param[in] x Function value.
@@ -695,7 +602,7 @@ double GObservation::npred_kern_spat::eval(double x)
     eng.MeV(x);
 
     // Get function value
-    double value = m_parent->npred_spat(*m_model, eng, *m_time);
+    double value = m_model->npred(eng, *m_time, *m_parent);
 
     #if G_LN_ENERGY_INT
     // Correct for variable substitution

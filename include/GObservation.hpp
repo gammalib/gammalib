@@ -100,8 +100,6 @@ protected:
     virtual double npred_grad(const GModel& model, int ipar) const;
     virtual double npred_temp(const GModel& model) const;
     virtual double npred_spec(const GModel& model, const GTime& obsTime) const;
-    virtual double npred_spat(const GModel& model, const GEnergy& obsEng,
-                              const GTime& obsTime) const;
 
     // Npred kernel classes
     class npred_kern_spat : public GIntegrand {
