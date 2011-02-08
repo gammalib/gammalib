@@ -26,6 +26,8 @@
 #include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GXmlElement.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GEvent;
@@ -72,16 +74,18 @@ public:
     virtual std::string type(void) const = 0;
     virtual double      eval(const GEvent& event, const GObservation& obs) = 0;
     virtual double      eval_gradients(const GEvent& event, const GObservation& obs) = 0;
+    virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
+                              const GObservation& obs) const = 0;
     virtual void        read(const GXmlElement& xml) = 0;
     virtual void        write(GXmlElement& xml) const = 0;
     virtual std::string print(void) const = 0;
 
     // Implemented methods
-    std::string name(void) const { return m_name; }
-    void        name(const std::string& name) { m_name=name; }
-    void        instruments(const std::string& instruments);
-    std::string instruments(void) const;
-    bool        isvalid(const std::string& name) const;
+    std::string         name(void) const { return m_name; }
+    void                name(const std::string& name) { m_name=name; }
+    void                instruments(const std::string& instruments);
+    std::string         instruments(void) const;
+    bool                isvalid(const std::string& name) const;
 
 protected:
     // Protected methods
