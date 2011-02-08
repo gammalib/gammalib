@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GMWLObservation.hpp  -  Multi-wavelength observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GMWLObservation.hpp
- * @brief GMWLObservation class interface definition.
+ * @brief Multi-wavelength observation class interface definition
  * @author J. Knodlseder
  */
 
@@ -20,8 +20,6 @@
 #define GMWLOBSERVATION_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GLog.hpp"
 #include "GObservation.hpp"
 #include "GTime.hpp"
 #include "GModel.hpp"
@@ -40,28 +38,24 @@
  ***************************************************************************/
 class GMWLObservation : public GObservation {
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GMWLObservation& obs);
-    friend GLog&         operator<< (GLog& log, const GMWLObservation& obs);
-
 public:
     // Constructors and destructors
     GMWLObservation(void);
-    GMWLObservation(const std::string& filename);
-    GMWLObservation(const std::string& filename, const std::string& extname);
+    explicit GMWLObservation(const std::string& filename);
+    explicit GMWLObservation(const std::string& filename, const std::string& extname);
     GMWLObservation(const GMWLObservation& obs);
     virtual ~GMWLObservation(void);
 
     // Operators
-    GMWLObservation& operator= (const GMWLObservation& obs);
+    virtual GMWLObservation& operator= (const GMWLObservation& obs);
 
     // Implement pure virtual methods
-    void             clear(void);
-    GMWLObservation* clone(void) const;
-    GMWLResponse*    response(void) const;
-    GMWLPointing*    pointing(const GTime& time) const;
-    std::string      instrument(void) const { return m_instrument; }
-    std::string      print(void) const;
+    virtual void             clear(void);
+    virtual GMWLObservation* clone(void) const;
+    virtual GMWLResponse*    response(void) const;
+    virtual GMWLPointing*    pointing(const GTime& time) const;
+    virtual std::string      instrument(void) const { return m_instrument; }
+    virtual std::string      print(void) const;
 
     // Other methods
     void load(const std::string& filename);

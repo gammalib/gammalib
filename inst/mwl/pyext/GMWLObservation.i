@@ -1,7 +1,7 @@
 /***************************************************************************
- *   GMWLObservation.i  -  Multi-wavelength observation class python I/F   *
+ *        GMWLObservation.i  -  Multi-wavelength observation class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GMWLObservation.i
- * @brief GMWLObservation class python interface
+ * @brief Multi-wavelength observation class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -24,7 +24,7 @@
 /***********************************************************************//**
  * @class GMWLObservation
  *
- * @brief Interface class for multi-wavelength observations
+ * @brief Python interface class for multi-wavelength observations
  *
  * This class implements a multi-wavelength observation. A multi-wavelength
  * observation contains spectral points obtained with an unspecified
@@ -34,22 +34,22 @@ class GMWLObservation : public GObservation {
 public:
     // Constructors and destructors
     GMWLObservation(void);
-    GMWLObservation(const std::string& filename);
-    GMWLObservation(const std::string& filename, const std::string& extname);
+    explicit GMWLObservation(const std::string& filename);
+    explicit GMWLObservation(const std::string& filename, const std::string& extname);
     GMWLObservation(const GMWLObservation& obs);
     virtual ~GMWLObservation(void);
 
     // Implement pure virtual methods
-    void             clear(void);
-    GMWLObservation* clone(void) const;
-    GMWLResponse*    response(void) const;
-    GMWLPointing*    pointing(const GTime& time) const;
-    std::string      instrument(void) const { return m_instrument; }
+    virtual void             clear(void);
+    virtual GMWLObservation* clone(void) const;
+    virtual GMWLResponse*    response(void) const;
+    virtual GMWLPointing*    pointing(const GTime& time) const;
+    virtual std::string      instrument(void) const;
 
     // Other methods
-    void        load(const std::string& filename);
-    void        load(const std::string& filename, const std::string& extname);
-    void        instrument(const std::string& instrument) { m_instrument=instrument; }
+    void load(const std::string& filename);
+    void load(const std::string& filename, const std::string& extname);
+    void instrument(const std::string& instrument);
 };
 
 
@@ -61,3 +61,17 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GMWLObservation type casts
+ ***************************************************************************/
+%inline %{
+    GMWLObservation* cast_GMWLObservation(GObservation* obs) {
+        GMWLObservation* mwl = dynamic_cast<GMWLObservation*>(obs);
+        if (mwl == NULL)
+            throw GException::bad_type("cast_GMWLObservation(GObservation* obs)",
+                                       "GObservation not of type GMWLObservation");            
+        return mwl;
+    }
+%}

@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GMWLObservation.cpp
- * @brief GMWLObservation class implementation.
+ * @brief Multi-wavelength observation class implementation
  * @author J. Knodlseder
  */
 
@@ -20,8 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
-#include "GLog.hpp"
 #include "GTools.hpp"
 #include "GMWLObservation.hpp"
 #include "GMWLSpectrum.hpp"
@@ -48,7 +46,7 @@
  ***************************************************************************/
 GMWLObservation::GMWLObservation(void) : GObservation()
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -65,7 +63,7 @@ GMWLObservation::GMWLObservation(void) : GObservation()
  ***************************************************************************/
 GMWLObservation::GMWLObservation(const std::string& filename) : GObservation()
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Load observation
@@ -87,7 +85,7 @@ GMWLObservation::GMWLObservation(const std::string& filename) : GObservation()
 GMWLObservation::GMWLObservation(const std::string& filename,
                                  const std::string& extname) : GObservation()
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Load observation
@@ -107,7 +105,7 @@ GMWLObservation::GMWLObservation(const std::string& filename,
  ***************************************************************************/
 GMWLObservation::GMWLObservation(const GMWLObservation& obs) : GObservation(obs)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -157,7 +155,7 @@ GMWLObservation& GMWLObservation::operator= (const GMWLObservation& obs)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -231,8 +229,6 @@ GMWLPointing* GMWLObservation::pointing(const GTime& time) const
  * @brief Load observation
  *
  * @param[in] filename File name.
- *
- * @todo Set good time intervals covering observation interval.
  ***************************************************************************/
 void GMWLObservation::load(const std::string& filename)
 {
@@ -249,9 +245,6 @@ void GMWLObservation::load(const std::string& filename)
     // Set attributes
     name("Multi-wavelength observation");
     instrument(spec->instrument());
-    //roi(spec->roi());
-    ebounds(spec->ebounds());
-    //gti(spec->gti());
 
     // Return
     return;
@@ -263,8 +256,6 @@ void GMWLObservation::load(const std::string& filename)
  *
  * @param[in] filename File name.
  * @param[in] extname FITS extension name.
- *
- * @todo Set good time intervals covering observation interval.
  ***************************************************************************/
 void GMWLObservation::load(const std::string& filename,
                            const std::string& extname)
@@ -282,9 +273,6 @@ void GMWLObservation::load(const std::string& filename,
     // Set attributes
     name("Multi-wavelength observation");
     instrument(spec->instrument());
-    //roi(spec->roi());
-    ebounds(spec->ebounds());
-    //gti(spec->gti());
 
     // Return
     return;
@@ -300,11 +288,8 @@ std::string GMWLObservation::print(void) const
     std::string result;
 
     // Append header
-    result.append("=== GMWLObservation ===\n");
-    result.append(parformat("Name")+name()+"\n");
-    result.append(parformat("Instrument")+instrument()+"\n");
-    result.append(parformat("Time range")+"\n");
-    result.append(parformat("Energy range"));
+    result.append("=== GMWLObservation ===");
+    result.append("\n"+parformat("Name")+name());
 
     // Append events
     if (m_events != NULL)
@@ -379,34 +364,3 @@ void GMWLObservation::free_members(void)
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] obs Observation.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GMWLObservation& obs)
-{
-     // Write observation in output stream
-    os << obs.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] obs Observation.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GMWLObservation& obs)
-{
-    // Write observation into logger
-    log << obs.print();
-
-    // Return logger
-    return log;
-}
