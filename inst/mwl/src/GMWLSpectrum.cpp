@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GMWLSpectrum.cpp
- * @brief GMWLSpectrum class implementation.
+ * @brief Multi-wavelength spectrum class implementation
  * @author J. Knodlseder
  */
 
@@ -24,14 +24,13 @@
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GEnergy.hpp"
-#include "GEbounds.hpp"
 #include "GException.hpp"
 #include "GMWLException.hpp"
 #include "GMWLSpectrum.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_POINTER                                "GMWLSpectrum::pointer(int)"
-#define G_LOAD_FITS               "GMWLSpectrum::load_fits(std::string&,int)"
+#define G_OPERATOR                           "GMWLSpectrum::operator[](int&)"
+#define G_READ                             "GMWLSpectrum::read(GFits&, int&)"
 #define G_READ_FITS                    "GMWLSpectrum::read_fits(GFitsTable*)"
 #define G_CONV_ENERGY       "GMWLSpectrum::conv_energy(double&,std::string&)"
 #define G_CONV_FLUX  "GMWLSpectrum::conv_flux(GEnergy&,double&,std::string&)"
@@ -133,7 +132,7 @@ GMWLSpectrum::~GMWLSpectrum(void)
  *
  * Copies spectrum into the instance.
  ***************************************************************************/
-GMWLSpectrum& GMWLSpectrum::operator= (const GMWLSpectrum& spec)
+GMWLSpectrum& GMWLSpectrum::operator=(const GMWLSpectrum& spec)
 {
     // Execute only if object is not identical
     if (this != &spec) {
@@ -154,6 +153,48 @@ GMWLSpectrum& GMWLSpectrum::operator= (const GMWLSpectrum& spec)
 
     // Return this object
     return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Spectral point access operator
+ *
+ * @param[in] index Spectral point index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Spectral point index outside valid range.
+ ***************************************************************************/
+GMWLDatum* GMWLSpectrum::operator[](const int& index)
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+    #endif
+
+    // Return pointer
+    return &(m_data[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Spectral point access operator (const version)
+ *
+ * @param[in] index Spectral point index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Spectral point index outside valid range.
+ ***************************************************************************/
+const GMWLDatum* GMWLSpectrum::operator[](const int& index) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+    #endif
+
+    // Return pointer
+    return &(m_data[index]);
 }
 
 
@@ -195,37 +236,6 @@ GMWLSpectrum* GMWLSpectrum::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Return energy boundaries of spectrum
- ***************************************************************************/
-GEbounds GMWLSpectrum::ebounds(void) const
-{
-    // Initialise energy boundaries
-    GEbounds ebounds;
-
-    // Continue only if we have data
-    if (m_data.size() > 0) {
-
-        // Extract energy boundaries from spectrum
-        GEnergy emin = m_data[0].energy();
-        GEnergy emax = m_data[0].energy();
-        for (int i = 0; i < m_data.size(); ++i) {
-            if (m_data[i].energy() < emin)
-                emin = m_data[i].energy();
-            if (m_data[i].energy() > emax)
-                emax = m_data[i].energy();
-        }
-
-        // Set energy boundaries
-        ebounds.append(emin, emax);
-
-    } // endif: we had data
-
-    // Return
-    return ebounds;
-}
-
-
-/***********************************************************************//**
  * @brief Load spectrum
  *
  * @param[in] filename File name.
@@ -239,35 +249,14 @@ GEbounds GMWLSpectrum::ebounds(void) const
  ***************************************************************************/
 void GMWLSpectrum::load(const std::string& filename)
 {
-    // Load from FITS file
-    load_fits(filename);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Load spectrum
- *
- * @param[in] filename File name.
- * @param[in] extname FITS extension name.
- *
- * This method loads a spectrum from a FITS table.
- ***************************************************************************/
-void GMWLSpectrum::load(const std::string& filename, const std::string& extname)
-{
     // Clear object
     clear();
 
     // Open FITS file
     GFits file(filename);
 
-    // Get table pointer
-    GFitsTable* table = file.table(extname);
-
-    // Read spectrum from table
-    read_fits(table);
+    // Read spectrum
+    read(file);
 
     // Close FITS file
     file.close();
@@ -280,23 +269,133 @@ void GMWLSpectrum::load(const std::string& filename, const std::string& extname)
 /***********************************************************************//**
  * @brief Load spectrum from FITS file
  *
- * @param[in] filename File name.
- * @param[in] extno Extension number of table (optional).
+ * @param[in] filename FITS file name.
+ * @param[in] extname FITS extension name.
  *
- * @exception GMWLException::file_open_error
- *            No table found in file.
- *
- * Loads the spectrum from a FITS table found in the specified extension.
- * In no extension number if specified (or if extno=0) then the spectrum
- * is loaded from the first table extension that is found in the file.
+ * This method loads a spectrum from the specified extension from a FITS
+ * file.
  ***************************************************************************/
-void GMWLSpectrum::load_fits(const std::string& filename, int extno)
+void GMWLSpectrum::load(const std::string& filename, const std::string& extname)
 {
     // Clear object
     clear();
 
     // Open FITS file
     GFits file(filename);
+
+    // Read spectrum from FITS file
+    read(file, extname);
+
+    // Close FITS file
+    file.close();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load spectrum from FITS file
+ *
+ * @param[in] filename FITS file name.
+ * @param[in] extno FITS extension number.
+ *
+ * This method loads a spectrum from the specified extension number from a
+ * FITS file.
+ ***************************************************************************/
+void GMWLSpectrum::load(const std::string& filename, int extno)
+{
+    // Clear object
+    clear();
+
+    // Open FITS file
+    GFits file(filename);
+
+    // Read spectrum from FITS file
+    read(file, extno);
+
+    // Close FITS file
+    file.close();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save spectrum
+ *
+ * @param[in] filename File name.
+ * @param[in] clobber Overwrite existing file (default=false).
+ *
+ * @todo To be implemented.
+ ***************************************************************************/
+void GMWLSpectrum::save(const std::string& filename, bool clobber) const
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read spectrum from FITS file
+ *
+ * @param[in] file FITS file.
+ *
+ * Read spectrum from first extension in FITS file.
+ ***************************************************************************/
+void GMWLSpectrum::read(const GFits& file)
+{
+    // Clear object
+    clear();
+
+    // Read spectrum from first extension in FITS file
+    read(file, 0);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read spectrum from FITS file
+ *
+ * @param[in] file FITS file.
+ * @param[in] extname FITS extension name.
+ ***************************************************************************/
+void GMWLSpectrum::read(const GFits& file, const std::string& extname)
+{
+    // Clear object
+    clear();
+
+    // Get table pointer
+    GFitsTable* table = file.table(extname);
+
+    // Read spectrum from table
+    read_fits(table);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read spectrum from FITS file
+ *
+ * @param[in] file FITS file.
+ * @param[in] extno Extension number of spectrum.
+ *
+ * @exception GMWLException::file_open_error
+ *            No table found in file.
+ *
+ * Read the spectrum from a FITS table found in the specified extension.
+ * In no extension number if specified (or if extno=0) then the spectrum
+ * is loaded from the first table extension that is found in the file.
+ ***************************************************************************/
+void GMWLSpectrum::read(const GFits& file, int extno)
+{
+    // Clear object
+    clear();
 
     // If the extension number is 0 then load first FITS table in file.
     if (extno == 0) {
@@ -311,7 +410,7 @@ void GMWLSpectrum::load_fits(const std::string& filename, int extno)
 
     // If we found no table then throw an exception
     if (extno == 0)
-        throw GMWLException::file_open_error(G_LOAD_FITS, filename,
+        throw GMWLException::file_open_error(G_READ, file.name(),
                                              "No table found in file.");
 
     // Get table pointer
@@ -320,40 +419,27 @@ void GMWLSpectrum::load_fits(const std::string& filename, int extno)
     // Read spectrum from table
     read_fits(table);
 
-    // Close FITS file
-    file.close();
-
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Returns pointer to spectral point
+ * @brief Write spectrum into FITS file
  *
- * @param[in] index Spectral point index (starting from 0).
+ * @param[in] file FITS file.
  *
- * @exception GException::out_of_range
- *            Spectral point index not in valid range.
+ * @todo To be implemented.
  ***************************************************************************/
-GMWLDatum* GMWLSpectrum::pointer(int index)
+void GMWLSpectrum::write(GFits& file) const
 {
-    // Optionally check if the index is valid
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= m_data.size())
-        throw GException::out_of_range(G_POINTER, index, 0, m_data.size()-1);
-    #endif
-
-    // Return pointer
-    return &(m_data[index]);
+    // Return
+    return;
 }
 
 
 /***********************************************************************//**
- * @brief Return number of point in spectrum
- *
- * @todo Obsolete, but still needed as it is pure virtual in the base class.
- * Better use size().
+ * @brief Return number of points in spectrum
  ***************************************************************************/
 int GMWLSpectrum::number(void) const
 {
@@ -371,10 +457,20 @@ std::string GMWLSpectrum::print(void) const
     std::string result;
 
     // Append header
-    result.append("=== GMWLSpectrum ===\n");
-    result.append(parformat("Telescope")+m_telescope+"\n");
-    result.append(parformat("Instrument")+m_instrument+"\n");
-    result.append(parformat("Number of points")+str(size()));
+    result.append("=== GMWLSpectrum ===");
+    result.append("\n"+parformat("Telescope")+m_telescope);
+    result.append("\n"+parformat("Instrument")+m_instrument);
+    result.append("\n"+parformat("Number of points")+str(size()));
+    result.append("\n"+parformat("Time interval"));
+    if (gti().size() > 0)
+        result.append(str(tstart().met())+" - "+str(tstop().met()));
+    else
+        result.append("not defined");
+    result.append("\n"+parformat("Energy range"));
+    if (ebounds().size() > 0)
+        result.append(emin().print()+" - "+emax().print());
+    else
+        result.append("not defined");
 
     // Append spectral points
     for (int i = 0; i < size(); ++i) {
@@ -444,6 +540,37 @@ void GMWLSpectrum::copy_members(const GMWLSpectrum& spec)
  ***************************************************************************/
 void GMWLSpectrum::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set energy boundaries
+ ***************************************************************************/
+void GMWLSpectrum::set_ebounds(void)
+{
+    // Clear energy boundaries
+    m_ebounds.clear();
+
+    // Continue only if we have data
+    if (size() > 0) {
+
+        // Extract energy boundaries from spectrum
+        GEnergy emin = m_data[0].energy();
+        GEnergy emax = m_data[0].energy();
+        for (int i = 0; i < m_data.size(); ++i) {
+            if (m_data[i].energy() < emin)
+                emin = m_data[i].energy();
+            if (m_data[i].energy() > emax)
+                emax = m_data[i].energy();
+        }
+
+        // Set energy boundaries
+        m_ebounds.append(emin, emax);
+
+    } // endif: we had data
+
     // Return
     return;
 }
@@ -528,6 +655,9 @@ void GMWLSpectrum::read_fits(const GFitsTable* table)
     catch (GException::fits_key_not_found &e) {
         m_instrument = "unknown";
     }
+
+    // Set energy boundaries
+    set_ebounds();
 
     // Return
     return;

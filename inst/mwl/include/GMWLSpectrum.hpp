@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GMWLSpectrum.hpp
- * @brief GMWLSpectrum class interface definition.
+ * @brief Multi-wavelength spectrum class interface definition
  * @author J. Knodlseder
  */
 
@@ -23,7 +23,6 @@
 #include <string>
 #include "GEventCube.hpp"
 #include "GMWLDatum.hpp"
-#include "GEbounds.hpp"
 #include "GFitsTable.hpp"
 #include "GEnergy.hpp"
 
@@ -31,7 +30,7 @@
 /***********************************************************************//**
  * @class GMWLSpectrum
  *
- * @brief GMWLSpectrum class interface defintion
+ * @brief Multi-wavelength spectrum class interface
  *
  * This class defines a multi-wavelength spectrum and is a container for
  * spectral points of type GMWLDatum. It derives from the abstract
@@ -47,31 +46,37 @@ public:
     virtual ~GMWLSpectrum(void);
 
     // Operators
-    GMWLSpectrum& operator= (const GMWLSpectrum& spec);
+    virtual GMWLSpectrum&    operator=(const GMWLSpectrum& spec);
+    virtual GMWLDatum*       operator[](const int& index);
+    virtual const GMWLDatum* operator[](const int& index) const;
 
     // Implemented pure virtual methods
-    void          clear(void);
-    GMWLSpectrum* clone(void) const;
-    int           size(void) const { return m_data.size(); }
-    int           dim(void) const { return 1; }
-    int           naxis(int axis) const { return m_data.size(); }
-    void          load(const std::string& filename);
-    GMWLDatum*    pointer(int index);
-    int           number(void) const;
-    std::string   print(void) const;
+    virtual void          clear(void);
+    virtual GMWLSpectrum* clone(void) const;
+    virtual int           size(void) const { return m_data.size(); }
+    virtual int           dim(void) const { return 1; }
+    virtual int           naxis(int axis) const { return m_data.size(); }
+    virtual void          load(const std::string& filename);
+    virtual void          save(const std::string& filename, bool clobber = false) const;
+    virtual void          read(const GFits& file);
+    virtual void          write(GFits& file) const;
+    virtual int           number(void) const;
+    virtual std::string   print(void) const;
 
     // Other methods
-    std::string telescope(void) const { return m_telescope; }
-    std::string instrument(void) const { return m_instrument; }
-    GEbounds    ebounds(void) const;
-    void        load(const std::string& filename, const std::string& extname);
-    void        load_fits(const std::string& filename, int extno = 0);
+    void                  load(const std::string& filename, const std::string& extname);
+    void                  load(const std::string& filename, int extno);
+    void                  read(const GFits& file, const std::string& extname);
+    void                  read(const GFits& file, int extno);
+    std::string           telescope(void) const { return m_telescope; }
+    std::string           instrument(void) const { return m_instrument; }
 
 protected:
     // Protected methods
     void    init_members(void);
     void    copy_members(const GMWLSpectrum& spec);
     void    free_members(void);
+    void    set_ebounds(void);
     void    read_fits(const GFitsTable* table);
     GEnergy conv_energy(const double& energy, const std::string& unit);
     double  conv_flux(const GEnergy& energy, const double& flux, const std::string& unit);
