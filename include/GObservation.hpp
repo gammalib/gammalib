@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GObservation.hpp  -  Observation abstract base class          *
+ *           GObservation.hpp  -  Abstract observation base class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GObservation.hpp
- * @brief GObservation abstract base class interface definition.
+ * @brief Abstract observation base class interface definition
  * @author J. Knodlseder
  */
 
@@ -26,9 +26,6 @@
 #include "GEvents.hpp"
 #include "GResponse.hpp"
 #include "GPointing.hpp"
-#include "GRoi.hpp"
-#include "GEbounds.hpp"
-#include "GGti.hpp"
 #include "GModels.hpp"
 #include "GTime.hpp"
 #include "GEnergy.hpp"
@@ -39,7 +36,7 @@
 /***********************************************************************//**
  * @class GObservation
  *
- * @brief Abstract interface for the observation classes.
+ * @brief Abstract interface for the observation classes
  *
  * This class provides an abstract interface for an observation. The
  * observation collects information about the instrument, holds the measured
@@ -61,7 +58,7 @@ class GObservation {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GObservation& obs);
-    friend GLog&         operator<< (GLog& log, const GObservation& obs);
+    friend GLog&         operator<< (GLog& log,        const GObservation& obs);
 
 public:
     // Constructors and destructors
@@ -81,27 +78,17 @@ public:
     virtual std::string   print(void) const = 0;
 
     // Virtual methods
-    virtual double model(const GModels& models, const GEvent& event,
-                         GVector* gradient = NULL) const;
-    virtual double npred(const GModels& models, GVector* gradient = NULL) const;
+    virtual double        model(const GModels& models, const GEvent& event,
+                                GVector* gradient = NULL) const;
+    virtual double        npred(const GModels& models, GVector* gradient = NULL) const;
 
     // Implemented methods
-    void               name(const std::string& name);
-    void               ebounds(const GEbounds& ebounds) { m_ebounds=ebounds; }
-    void               gti(const GGti& gti) { m_gti=gti; }
-    void               roi(const GRoi* roi);
-    void               events(const GEvents* events);
-    void               statistics(const std::string& statistics);
-    const std::string& name(void) const { return m_name; }
-    GTime              tstart(void) const { return m_gti.tstart(); }
-    GTime              tstop(void) const { return  m_gti.tstop(); }
-    GEnergy            emin(void) const { return m_ebounds.emin(); }
-    GEnergy            emax(void) const { return m_ebounds.emax(); }
-    const GEbounds&    ebounds(void) const { return m_ebounds; }
-    const GGti&        gti(void) const { return m_gti; }
-    const GRoi*        roi(void) const { return m_roi; }
-    const GEvents*     events(void) const { return m_events; }
-    const std::string& statistics(void) const { return m_statistics; }
+    void                  name(const std::string& name);
+    void                  events(const GEvents* events);
+    void                  statistics(const std::string& statistics);
+    const std::string&    name(void) const { return m_name; }
+    const GEvents*        events(void) const;
+    const std::string&    statistics(void) const { return m_statistics; }
 
 protected:
     // Protected methods
@@ -153,11 +140,8 @@ protected:
 
     // Protected data area
     std::string m_name;         //!< Name of observation
-    GEbounds    m_ebounds;      //!< Energy boundaries used for analysis
-    GGti        m_gti;          //!< Good time intervals used for analysis
-    GRoi*       m_roi;          //!< Pointer to region of interest used for analysis
-    GEvents*    m_events;       //!< Pointer to events
     std::string m_statistics;   //!< Optimizer statistics (default=poisson)
+    GEvents*    m_events;       //!< Pointer to event container
 };
 
 #endif /* GOBSERVATION_HPP */

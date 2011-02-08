@@ -1,5 +1,5 @@
 /***************************************************************************
- *    GObservation.i  -  Observation abstract base class SWIG interface    *
+ *       GObservation.i  -  Abstract observation abstract base class       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GObservation.i
- * @brief GObservation class SWIG file.
+ * @brief Abstract observation base class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -25,13 +25,9 @@
 /***********************************************************************//**
  * @class GObservation
  *
- * @brief Abstract interface for the observation classes.
+ * @brief Abstract Python interface for the observation classes
  ***************************************************************************/
 class GObservation {
-
-    // Friend classes
-    friend class GObservations;
-
 public:
     // Constructors and destructors
     GObservation(void);
@@ -46,27 +42,17 @@ public:
     virtual std::string   instrument(void) const = 0;
 
     // Virtual methods
-    virtual double model(const GModels& models, const GEvent& event,
-                         GVector* gradient = NULL) const;
-    virtual double npred(const GModels& models, GVector* gradient = NULL) const;
+    virtual double        model(const GModels& models, const GEvent& event,
+                                GVector* gradient = NULL) const;
+    virtual double        npred(const GModels& models, GVector* gradient = NULL) const;
 
     // Implemented methods
-    void               name(const std::string& name);
-    void               ebounds(const GEbounds& ebounds);
-    void               gti(const GGti& gti);
-    void               roi(const GRoi* roi);
-    void               events(const GEvents* events);
-    void               statistics(const std::string& statistics);
-    const std::string& name(void) const;
-    GTime              tstart(void) const;
-    GTime              tstop(void) const;
-    GEnergy            emin(void) const;
-    GEnergy            emax(void) const;
-    const GEbounds&    ebounds(void) const;
-    const GGti&        gti(void) const;
-    const GRoi*        roi(void) const;
-    const GEvents*     events(void) const;
-    const std::string& statistics(void) const;
+    void                  name(const std::string& name);
+    void                  events(const GEvents* events);
+    void                  statistics(const std::string& statistics);
+    const std::string&    name(void) const;
+    const GEvents*        events(void) const;
+    const std::string&    statistics(void) const;
 };
 
 

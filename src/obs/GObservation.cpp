@@ -32,6 +32,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_MODEL                   "GObservation::model(GModels&, GPointing&,"\
                                     " GInstDir&, GEnergy&, GTime&, GVector*)"
+#define G_EVENTS                                     "GObservation::events()"
 #define G_NPRED_TEMP                 "GObservation::npred_temp(GModel&, int)"
 #define G_NPRED_SPEC              "GObservation::npred_spec(GModel&, GTime&)"
 #define G_NPRED_SPAT       "GObservation::npred_spat(GModel&, int, GEnergy&,"\
@@ -56,7 +57,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                         Constructors/destructors                        =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
@@ -65,7 +66,7 @@
  ***************************************************************************/
 GObservation::GObservation(void)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -82,7 +83,7 @@ GObservation::GObservation(void)
  ***************************************************************************/
 GObservation::GObservation(const GObservation& obs)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -127,7 +128,7 @@ GObservation& GObservation::operator= (const GObservation& obs)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -196,7 +197,6 @@ double GObservation::model(const GModels& models, const GEvent& event,
             if (gradient != NULL) {
                 for (int k = 0; k < ptr->size(); ++k, ++igrad) {
                     double grad        = (*ptr)(k).gradient();
-//                    (*gradient)(igrad) = (std::isinf(grad)) ? 0.0 : grad;
                     (*gradient)(igrad) = (isinfinite(grad)) ? 0.0 : grad;
                 }
             }
@@ -273,7 +273,7 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
  *
  * @param[in] name Observation name.
  *
- * Set the name of observation.
+ * Set name of the observation.
  ***************************************************************************/
 void GObservation::name(const std::string& name)
 {
@@ -286,43 +286,23 @@ void GObservation::name(const std::string& name)
 
 
 /***********************************************************************//**
- * @brief Set region of interest
+ * @brief Set event container
  *
- * @param[in] roi Region of interest.
+ * @param[in] events Event container pointer.
  *
- * Set region of interest for this observation.
- ***************************************************************************/
-void GObservation::roi(const GRoi* roi)
-{
-    // Remove an existing ROI
-    if (m_roi != NULL) delete m_roi;
-    
-    // Set ROI
-    m_roi = roi->clone();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set events
- *
- * @param[in] events Events.
- *
- * Set events for this observation by cloning the specifies events. If NULL
- * is passed to this method, any existing events are cleared an no event
- * list is attached.
+ * Set the event container for this observation by cloning the container
+ * specified in the argument. If NULL is passed to this method, any existing
+ * events are cleared an no event container is attached.
  ***************************************************************************/
 void GObservation::events(const GEvents* events)
 {
-    // Remove an existing events
+    // Remove an existing event container
     if (m_events != NULL) delete m_events;
 
-    // Signal events as free
+    // Signal event container as free
     m_events = NULL;
 
-    // Set events (only if input pointer is valid)
+    // Set event container if the input pointer is valid
     if (events != NULL)
         m_events = events->clone();
 
@@ -336,7 +316,7 @@ void GObservation::events(const GEvents* events)
  *
  * @param[in] statistics Optimizer statistics.
  *
- * Set the optimizer statistics for this observation.
+ * Set optimizer statistics for the observation.
  ***************************************************************************/
 void GObservation::statistics(const std::string& statistics)
 {
@@ -345,6 +325,25 @@ void GObservation::statistics(const std::string& statistics)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return event container
+ *
+ * @exception GException::no_events
+ *            No event container defined for observation.
+ *
+ * Returns pointer to event container.
+ ***************************************************************************/
+const GEvents* GObservation::events(void) const
+{
+    // Throw an exception if the event container is not valid
+    if (m_events == NULL)
+        throw GException::no_events(G_EVENTS);
+
+    // Return pointer to event container
+    return m_events;
 }
 
 
@@ -361,11 +360,8 @@ void GObservation::init_members(void)
 {
     // Initialise members
     m_name.clear();
-    m_ebounds.clear();
-    m_gti.clear();
-    m_roi        = NULL;
-    m_events     = NULL;
     m_statistics = "Poisson";
+    m_events     = NULL;
 
     // Return
     return;
@@ -381,15 +377,12 @@ void GObservation::init_members(void)
  ***************************************************************************/
 void GObservation::copy_members(const GObservation& obs)
 {
-    // Copy attributes
+    // Copy members
     m_name       = obs.m_name;
-    m_ebounds    = obs.m_ebounds;
-    m_gti        = obs.m_gti;
     m_statistics = obs.m_statistics;
 
-    // Clone members that exist
-    m_roi    = (obs.m_roi    != NULL) ? obs.m_roi->clone()      : NULL;
-    m_events = (obs.m_events != NULL) ? obs.m_events->clone()   : NULL;
+    // Clone members
+    m_events = (obs.m_events != NULL) ? obs.m_events->clone() : NULL;
 
     // Return
     return;
@@ -401,13 +394,11 @@ void GObservation::copy_members(const GObservation& obs)
  ***************************************************************************/
 void GObservation::free_members(void)
 {
-    // Free memory
+    // Free members
     if (m_events != NULL) delete m_events;
-    if (m_roi    != NULL) delete m_roi;
 
     // Signal free pointers
     m_events = NULL;
-    m_roi    = NULL;
 
     // Return
     return;
@@ -506,16 +497,16 @@ double GObservation::npred_temp(const GModel& model) const
     double result = 0.0;
 
     // Loop over GTIs
-    for (int i = 0; i < m_gti.size(); ++i) {
+    for (int i = 0; i < events()->gti().size(); ++i) {
 
         // Set integration interval in MET
-        double tstart = m_gti.tstart(i).met();
-        double tstop  = m_gti.tstop(i).met();
+        double tstart = events()->gti().tstart(i).met();
+        double tstop  = events()->gti().tstop(i).met();
 
         // Throw exception if time interval is not valid
         if (tstop <= tstart)
-            throw GException::gti_invalid(G_NPRED_TEMP, m_gti.tstart(i),
-                                          m_gti.tstop(i));
+            throw GException::gti_invalid(G_NPRED_TEMP, events()->gti().tstart(i),
+                                          events()->gti().tstop(i));
 
         // Setup integration function
         GObservation::npred_kern_spec integrand(this, model);
@@ -558,13 +549,16 @@ double GObservation::npred_temp(const GModel& model) const
  *
  * \f$E_{\rm bounds}\f$ are the energy boundaries that are stored in the
  * GObservation::m_ebounds member.
+ *
+ * @todo Loop also over energy boundaries (is more general; there is no
+ *       reason for not doing it).
  ***************************************************************************/
 double GObservation::npred_spec(const GModel& model,
                                 const GTime&  obsTime) const
 {
     // Set integration energy interval in MeV
-    double emin = m_ebounds.emin().MeV();
-    double emax = m_ebounds.emax().MeV();
+    double emin = events()->ebounds().emin().MeV();
+    double emax = events()->ebounds().emax().MeV();
 
     // Throw exception if energy range is not valid
     if (emax <= emin)
