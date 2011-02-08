@@ -23,8 +23,9 @@
 #include "GObservations.hpp"
 #include "GTools.hpp"
 #include "GEvent.hpp"
-#include "GEventBin.hpp"
+#include "GEventList.hpp"
 #include "GEventCube.hpp"
+#include "GEventBin.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_EVAL             "GObservations::optimizer::eval(GOptimizerPars&) "
@@ -201,7 +202,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
             std::string statistics = m_this->m_obs[i]->statistics();
 
             // Unbinned analysis
-            if (m_this->m_obs[i]->events()->islist()) {
+            if (dynamic_cast<const GEventList*>(m_this->m_obs[i]->events()) != NULL) {
 
                 // Poisson statistics
                 if (toupper(statistics) == "POISSON") {
@@ -317,8 +318,8 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
     // Iterate over all events
     for (int i = 0; i < obs.events()->size(); ++i) {
 
-        // Get pointer to event (circumvent const correctness)
-        GEvent* event = ((GEvents*)(obs.events()))->pointer(i);
+        // Get event pointer
+        const GEvent* event = (*obs.events())[i];
 
         // Get model and derivative
         double model = obs.model((GModels&)pars, *event, m_wrk_grad);
@@ -330,7 +331,6 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
         // Create index array of non-zero derivatives
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
-//            if ((*m_wrk_grad)(i) != 0.0 && !std::isinf((*m_wrk_grad)(i))) {
             if ((*m_wrk_grad)(i) != 0.0 && !isinfinite((*m_wrk_grad)(i))) {
                 inx[ndev] = i;
                 ndev++;
@@ -445,8 +445,8 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
         n_bins++;
         #endif
 
-        // Get pointer to bin (circumvent const correctness)
-        GEventBin* bin = ((GEventCube*)(obs.events()))->pointer(i);
+        // Get event pointer
+        const GEventBin* bin = (*((GEventCube*)obs.events()))[i];
 
         // Get number of counts in bin
         double data = bin->counts();
@@ -481,7 +481,6 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
         // Create index array of non-zero derivatives
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
-//            if ((*m_wrk_grad)(i) != 0.0 && !std::isinf((*m_wrk_grad)(i))) {
             if ((*m_wrk_grad)(i) != 0.0 && !isinfinite((*m_wrk_grad)(i))) {
                 inx[ndev] = i;
                 ndev++;
@@ -627,8 +626,8 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
     // Iterate over all bins
     for (int i = 0; i < obs.events()->size(); ++i) {
 
-        // Get pointer to bin (circumvent const correctness)
-        GEventBin* bin = ((GEventCube*)(obs.events()))->pointer(i);
+        // Get event pointer
+        const GEventBin* bin = (*((GEventCube*)obs.events()))[i];
 
         // Get number of counts in bin
         double data = bin->counts();
