@@ -328,6 +328,9 @@ void GCTAEventList::write(GFits& file) const
     // the proper de-allocation of the memory)
     file.append(events);
 
+    // Append GTI to FITS file
+    gti().write(&file);
+    
     // Return
     return;
 }
