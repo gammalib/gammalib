@@ -757,6 +757,7 @@ std::string GCTAResponse::print(void) const
     result.append("=== GCTAResponse ===\n");
     result.append(parformat("Calibration database")+m_caldb+"\n");
     result.append(parformat("Response name")+m_rspname+"\n");
+    /*
     result.append(parformat("Response definiton"));
     for (int i = 0; i < m_logE.size(); ++i) {
         result.append("\n"+parformat("logE="+str(m_logE.at(i))));
@@ -764,6 +765,7 @@ std::string GCTAResponse::print(void) const
         result.append(", r68="+str(m_r68.at(i))+" deg");
         result.append(", r80="+str(m_r68.at(i))+" deg");
     }
+    */
 
     // Return result
     return result;
