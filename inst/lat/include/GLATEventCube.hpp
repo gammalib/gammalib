@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventCube.hpp
- * @brief GLATEventCube class interface definition.
+ * @brief LAT event cube class interface definition.
  * @author J. Knodlseder
  */
 
@@ -23,11 +23,8 @@
 #include <string>
 #include <vector>
 #include "GEventCube.hpp"
-#include "GLATObservation.hpp"
 #include "GLATInstDir.hpp"
 #include "GLATEventBin.hpp"
-#include "GEbounds.hpp"
-#include "GGti.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GFits.hpp"
@@ -40,7 +37,7 @@
 /***********************************************************************//**
  * @class GLATEventCube
  *
- * @brief GLATEventCube class interface defintion
+ * @brief LAT event cube class interface defintion
  ***************************************************************************/
 class GLATEventCube : public GEventCube {
 
@@ -51,28 +48,28 @@ public:
     virtual ~GLATEventCube(void);
 
     // Operators
-    GLATEventCube& operator= (const GLATEventCube& cube);
+    virtual GLATEventCube&      operator=(const GLATEventCube& cube);
+    virtual GLATEventBin*       operator[](const int& index);
+    virtual const GLATEventBin* operator[](const int& index) const;
 
     // Implemented pure virtual base class methods
-    void              clear(void);
-    GLATEventCube*    clone(void) const;
-    int               size(void) const;
-    int               dim(void) const;
-    int               naxis(int axis) const;
-    void              load(const std::string& filename);
-    GLATEventBin*     pointer(int index);
-    int               number(void) const;
-    std::string       print(void) const;
+    virtual void           clear(void);
+    virtual GLATEventCube* clone(void) const;
+    virtual int            size(void) const;
+    virtual int            dim(void) const;
+    virtual int            naxis(int axis) const;
+    virtual void           load(const std::string& filename);
+    virtual void           save(const std::string& filename, bool clobber = false) const;
+    virtual void           read(const GFits& file);
+    virtual void           write(GFits& file) const;
+    virtual int            number(void) const;
+    virtual std::string    print(void) const;
 
     // Other methods
-    void              ebds(const GEbounds& ebds) { m_ebds=ebds; }
-    void              gti(const GGti& gti) { m_gti=gti; }
     void              time(const GTime& time) { m_time=time; }
     void              map(const GSkymap& map) { m_map=map; }
     void              enodes(const GNodeArray& enodes) { m_enodes=enodes; }
     void              ontime(const double& ontime) { m_ontime=ontime; }
-    const GEbounds&   ebds(void) const { return m_ebds; }
-    const GGti&       gti(void) const { return m_gti; }
     const GTime&      time(void) const { return m_time; }
     const GSkymap&    map(void) const { return m_map; }
     const GNodeArray& enodes(void) { return m_enodes; }
@@ -91,25 +88,24 @@ protected:
     void init_members(void);
     void copy_members(const GLATEventCube& cube);
     void free_members(void);
-    void read_cntmap(GFitsImage* hdu);
-    void read_srcmap(GFitsImage* hdu);
-    void read_ebds(GFitsTable* hdu);
-    void read_gti(GFitsTable* hdu);
+    void read_cntmap(const GFitsImage* hdu);
+    void read_srcmap(const GFitsImage* hdu);
+    void read_ebds(const GFitsTable* hdu);
+    void read_gti(const GFitsTable* hdu);
     void set_directions(void);
     void set_energies(void);
     void set_time(void);
+    void set_bin(const int& index);
 
     // Protected data area
     GLATEventBin             m_bin;          //!< Actual energy bin
     GSkymap                  m_map;          //!< Counts map stored as sky map
-    GEbounds                 m_ebds;         //!< Energy boundaries
-    GGti                     m_gti;          //!< Good Time Intervals
     GTime                    m_time;         //!< Event cube mean time
     double                   m_ontime;       //!< Event cube ontime (sec)
-    GLATInstDir*             m_dirs;         //!< Array of event directions
-    double*                  m_omega;        //!< Array of solid angles (sr)
-    GEnergy*                 m_energies;     //!< Array of log mean energies
-    GEnergy*                 m_ewidth;       //!< Array of energy bin widths
+    std::vector<GLATInstDir> m_dirs;         //!< Array of event directions
+    std::vector<double>      m_omega;        //!< Array of solid angles (sr)
+    std::vector<GEnergy>     m_energies;     //!< Array of log mean energies
+    std::vector<GEnergy>     m_ewidth;       //!< Array of energy bin widths
     std::vector<GSkymap*>    m_srcmap;       //!< Pointers to source maps
     std::vector<std::string> m_srcmap_names; //!< Source map names
     GNodeArray               m_enodes;       //!< Energy nodes

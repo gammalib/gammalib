@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventCube.cpp
- * @brief GLATEventCube class implementation.
+ * @brief LAT event cube class implementation
  * @author J. Knodlseder
  */
 
@@ -28,13 +28,13 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NAXIS                                   "GLATEventCube::naxis(int)"
-#define G_POINTER                               "GLATEventCube::pointer(int)"
 #define G_DIFFNAME                            "GLATEventCube::diffname(int&)"
 #define G_DIFFRSP                              "GLATEventCube::diffrsp(int&)"
 #define G_READ_SRCMAP               "GLATEventCube::read_srcmap(GFitsImage*)"
 #define G_SET_DIRECTIONS                    "GLATEventCube::set_directions()"
 #define G_SET_ENERGIES                        "GLATEventCube::set_energies()"
 #define G_SET_TIME                                "GLATEventCube::set_time()"
+#define G_SET_BIN                              "GLATEventCube::set_bin(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -65,7 +65,7 @@ GLATEventCube::GLATEventCube(void) : GEventCube()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] cube Event cube.
+ * @param[in] cube LAT event cube.
  ***************************************************************************/
 GLATEventCube::GLATEventCube(const GLATEventCube& cube) : GEventCube(cube)
 {
@@ -102,7 +102,7 @@ GLATEventCube::~GLATEventCube(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] cube Event cube.
+ * @param[in] cube LAT event cube.
  ***************************************************************************/
 GLATEventCube& GLATEventCube::operator= (const GLATEventCube& cube)
 {
@@ -125,6 +125,40 @@ GLATEventCube& GLATEventCube::operator= (const GLATEventCube& cube)
 
     // Return this object
     return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Event bin access operator
+ *
+ * @param[in] index Event index [0,...,size()-1].
+ *
+ * Returns pointer to an event bin.
+ ***************************************************************************/
+GLATEventBin* GLATEventCube::operator[](const int& index)
+{
+    // Set event bin
+    set_bin(index);
+
+    // Return pointer
+    return (&m_bin);
+}
+
+
+/***********************************************************************//**
+ * @brief Event bin access operator (const version)
+ *
+ * @param[in] index Event index [0,...,size()-1].
+ *
+ * Returns pointer to an event bin.
+ ***************************************************************************/
+const GLATEventBin* GLATEventCube::operator[](const int& index) const
+{
+    // Set event bin (circumvent const correctness)
+    ((GLATEventCube*)this)->set_bin(index);
+
+    // Return pointer
+    return (&m_bin);
 }
 
 
@@ -229,9 +263,48 @@ int GLATEventCube::naxis(int axis) const
 
 
 /***********************************************************************//**
- * @brief Load LAT counts map from FITS file.
+ * @brief Load LAT event cube from FITS file
  *
- * @param[in] filename Counts map FITS filename to be loaded.
+ * @param[in] filename FITS file name.
+ ***************************************************************************/
+void GLATEventCube::load(const std::string& filename)
+{
+    // Clear object
+    clear();
+
+    // Open FITS file
+    GFits file(filename);
+
+    // Read counts map
+    read(file);
+
+    // Close FITS file
+    file.close();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save LAT event cube into FITS file
+ *
+ * @param[in] filename FITS file name.
+ * @param[in] clobber Overwrite existing FITS file? (default=false)
+ *
+ * @todo To be implemented.
+ ***************************************************************************/
+void GLATEventCube::save(const std::string& filename, bool clobber) const
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read LAT event cube from FITS file.
+ *
+ * @param[in] file FITS file.
  *
  * It is assumed that the counts map resides in the primary extension of the
  * FITS file, the energy boundaries reside in the EBOUNDS extension and the
@@ -239,13 +312,10 @@ int GLATEventCube::naxis(int axis) const
  * object before loading, thus any events residing in the object before
  * loading will be lost.
  ***************************************************************************/
-void GLATEventCube::load(const std::string& filename)
+void GLATEventCube::read(const GFits& file)
 {
     // Clear object
     clear();
-
-    // Open counts map FITS file
-    GFits file(filename);
 
     // Get HDUs
     GFitsImage* hdu_cntmap  = file.image("Primary");
@@ -269,53 +339,22 @@ void GLATEventCube::load(const std::string& filename)
         }
     }
 
-    // Close FITS file
-    file.close();
-
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Get pointer to element
+ * @brief Write LAT event cube into FITS file
  *
- * @param[in] index Event index (starting from 0).
+ * @param[in] file FITS file.
  *
- * @exception GException::out_of_range
- *            Event index not in valid range.
- *
- * This method provides the event attributes to the event bin. The event bin
- * is in fact physically stored in the event cube, and only a single event
- * bin is indeed allocated. This method sets up the pointers in the event
- * bin so that a client can easily access the information of individual bins
- * as if they were stored in an array.
+ * @todo To be implemented.
  ***************************************************************************/
-GLATEventBin* GLATEventCube::pointer(int index)
+void GLATEventCube::write(GFits& file) const
 {
-    // Optionally check if the index is valid
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_POINTER, index, 0, size()-1);
-    #endif
-
-    // Get pixel and energy bin indices.
-    m_bin.m_index = index;
-    m_bin.m_ipix  = index % npix();
-    m_bin.m_ieng  = index / npix();
-
-    // Set pointers
-    m_bin.m_cube   = this;
-    m_bin.m_counts = &(m_map.pixels()[index]);
-    m_bin.m_energy = &(m_energies[m_bin.m_ieng]);
-    m_bin.m_time   = &m_time;
-    m_bin.m_dir    = &(m_dirs[m_bin.m_ipix]);
-    m_bin.m_omega  = &(m_omega[m_bin.m_ipix]);
-    m_bin.m_ewidth = &(m_ewidth[m_bin.m_ieng]);
-    m_bin.m_ontime = &m_ontime;
-
-    // Return pointer
-    return &m_bin;
+    // Return
+    return;
 }
 
 
@@ -356,6 +395,16 @@ std::string GLATEventCube::print(void) const
     result.append(str(m_map.nx())+" x "+str(m_map.ny()));
     result.append("\n"+parformat("Number of energy bins")+str(ebins()));
     result.append("\n"+parformat("Number of events")+str(number()));
+    result.append("\n"+parformat("Time interval"));
+    if (gti().size() > 0)
+        result.append(str(tstart().met())+" - "+str(tstop().met()));
+    else
+        result.append("not defined");
+    result.append("\n"+parformat("Energy range"));
+    if (ebounds().size() > 0)
+        result.append(emin().print()+" - "+emax().print());
+    else
+        result.append("not defined");
     result.append("\n"+m_map.wcs()->print());
 
     // Append source maps
@@ -491,16 +540,14 @@ void GLATEventCube::init_members(void)
     m_bin.clear();
     m_map.clear();
     m_time.clear();
-    m_ebds.clear();
-    m_gti.clear();
     m_srcmap.clear();
     m_srcmap_names.clear();
     m_enodes.clear();
-    m_dirs     = NULL;
-    m_omega    = NULL;
-    m_energies = NULL;
-    m_ewidth   = NULL;
-    m_ontime   = 0.0;
+    m_dirs.clear();
+    m_omega.clear();
+    m_energies.clear(); 
+    m_ewidth.clear(); 
+    m_ontime = 0.0;
 
     // Return
     return;
@@ -519,39 +566,13 @@ void GLATEventCube::copy_members(const GLATEventCube& cube)
     m_map          = cube.m_map;
     m_time         = cube.m_time;
     m_ontime       = cube.m_ontime;
-    m_ebds         = cube.m_ebds;
-    m_gti          = cube.m_gti;
     m_srcmap       = cube.m_srcmap;
     m_srcmap_names = cube.m_srcmap_names;
     m_enodes       = cube.m_enodes;
-
-    // Copy sky directions and solid angles
-    if (cube.npix() > 0) {
-        if (cube.m_dirs != NULL) {
-            m_dirs = new GLATInstDir[cube.npix()];
-            for (int i = 0; i < cube.npix(); ++i)
-                m_dirs[i] = cube.m_dirs[i];
-        }
-        if (cube.m_omega != NULL) {
-            m_omega = new double[cube.npix()];
-            for (int i = 0; i < cube.npix(); ++i)
-                m_omega[i] = cube.m_omega[i];
-        }
-    }
-
-    // Copy bin energies and widths
-    if (cube.ebins() > 0) {
-        if (cube.m_energies != NULL) {
-            m_energies = new GEnergy[cube.ebins()];
-            for (int i = 0; i < cube.ebins(); ++i)
-                m_energies[i] = cube.m_energies[i];
-        }
-        if (cube.m_ewidth != NULL) {
-            m_ewidth = new GEnergy[cube.ebins()];
-            for (int i = 0; i < cube.ebins(); ++i)
-                m_ewidth[i] = cube.m_ewidth[i];
-        }
-    }
+    m_dirs         = cube.m_dirs;
+    m_omega        = cube.m_omega;
+    m_energies     = cube.m_energies;
+    m_ewidth       = cube.m_ewidth;
 
     // Return
     return;
@@ -563,18 +584,6 @@ void GLATEventCube::copy_members(const GLATEventCube& cube)
  ***************************************************************************/
 void GLATEventCube::free_members(void)
 {
-    // Free memory
-    if (m_ewidth   != NULL) delete [] m_ewidth;
-    if (m_energies != NULL) delete [] m_energies;
-    if (m_omega    != NULL) delete [] m_omega;
-    if (m_dirs     != NULL) delete [] m_dirs;
-
-    // Signal free pointers
-    m_dirs     = NULL;
-    m_omega    = NULL;
-    m_energies = NULL;
-    m_ewidth   = NULL;
-
     // Return
     return;
 }
@@ -590,7 +599,7 @@ void GLATEventCube::free_members(void)
  * individually. Recall that skymap pixels are stored in the order
  * (ix,iy,ebin).
  ***************************************************************************/
-void GLATEventCube::read_cntmap(GFitsImage* hdu)
+void GLATEventCube::read_cntmap(const GFitsImage* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
@@ -619,7 +628,7 @@ void GLATEventCube::read_cntmap(GFitsImage* hdu)
  * This method reads a LAT source map from a FITS image. The source map is
  * stored in a GSkymap object and is given in units of counts/pixel/MeV.
  ***************************************************************************/
-void GLATEventCube::read_srcmap(GFitsImage* hdu)
+void GLATEventCube::read_srcmap(const GFitsImage* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
@@ -661,14 +670,16 @@ void GLATEventCube::read_srcmap(GFitsImage* hdu)
  * @param[in] hdu Pointer to energy boundaries table.
  *
  * Read the energy boundaries from the HDU.
+ *
+ * @todo Energy bounds read method should take const GFitsTable* as argument
  ***************************************************************************/
-void GLATEventCube::read_ebds(GFitsTable* hdu)
+void GLATEventCube::read_ebds(const GFitsTable* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
 
         // Read energy boundaries
-        m_ebds.read(hdu);
+        m_ebounds.read((GFitsTable*)hdu);
 
         // Set log mean energies and energy widths
         set_energies();
@@ -686,14 +697,16 @@ void GLATEventCube::read_ebds(GFitsTable* hdu)
  * @param[in] hdu Pointer to GTI table.
  *
  * Reads the Good Time Intervals from the GTI extension.
+ *
+ * @todo GTI read method should take const GFitsTable* as argument
  ***************************************************************************/
-void GLATEventCube::read_gti(GFitsTable* hdu)
+void GLATEventCube::read_gti(const GFitsTable* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
 
         // Read Good Time Intervals
-        m_gti.read(hdu);
+        m_gti.read((GFitsTable*)hdu);
 
         // Set time
         set_time();
@@ -722,18 +735,20 @@ void GLATEventCube::set_directions(void)
         throw GLATException::no_sky(G_SET_DIRECTIONS, "Every LAT event cube"
                                    " needs a definiton of the sky pixels.");
 
-    // Delete old pixel directions and solid angles
-    if (m_omega != NULL) delete [] m_omega;
-    if (m_dirs  != NULL) delete [] m_dirs;
+    // Clear old pixel directions and solid angle
+    m_dirs.clear();
+    m_omega.clear();
+
+    // Reserve space for pixel directions and solid angles
+    m_dirs.reserve(npix());
+    m_omega.reserve(npix());
 
     // Set pixel directions and solid angles
-    m_dirs  = new GLATInstDir[npix()];
-    m_omega = new double[npix()];
-    for (int i = 0, iy = 0; iy < ny(); ++iy) {
-        for (int ix = 0; ix < nx(); ++ix, ++i) {
+    for (int iy = 0; iy < ny(); ++iy) {
+        for (int ix = 0; ix < nx(); ++ix) {
             GSkyPixel pixel = GSkyPixel(double(ix), double(iy));
-            m_dirs[i]       = GLATInstDir(m_map.xy2dir(pixel));
-            m_omega[i]      = m_map.omega(pixel);
+            m_dirs.push_back(GLATInstDir(m_map.xy2dir(pixel)));
+            m_omega.push_back(m_map.omega(pixel));
         }
     }
 
@@ -759,22 +774,22 @@ void GLATEventCube::set_energies(void)
         throw GLATException::no_ebds(G_SET_ENERGIES, "Every LAT event cube"
                              " needs a definiton of the energy boundaries.");
 
-    // Delete old bin energies and energy widths
-    if (m_ewidth   != NULL) delete [] m_ewidth;
-    if (m_energies != NULL) delete [] m_energies;
-
-    // Clear energy nodes
+    // Clear old bin energies and energy widths
+    m_energies.clear();
+    m_ewidth.clear();
     m_enodes.clear();
 
+    // Reserve space for bin energies and energy widths
+    m_energies.reserve(ebins());
+    m_ewidth.reserve(ebins());
+
     // Setup bin energies, energy widths and energy nodes
-    m_energies = new GEnergy[ebins()];
-    m_ewidth   = new GEnergy[ebins()];
     for (int i = 0; i < ebins(); ++i) {
-        m_energies[i] = m_ebds.elogmean(i);
-        m_ewidth[i]   = m_ebds.emax(i) - m_ebds.emin(i);
-        m_enodes.append(log10(m_ebds.emin(i).MeV()));
+        m_energies.push_back(ebounds().elogmean(i));
+        m_ewidth.push_back(ebounds().emax(i) -  ebounds().emin(i));
+        m_enodes.append(log10(ebounds().emin(i).MeV()));
     }
-    m_enodes.append(log10(m_ebds.emax(ebins()-1).MeV()));
+    m_enodes.append(log10(ebounds().emax(ebins()-1).MeV()));
     
     // Return
     return;
@@ -803,10 +818,64 @@ void GLATEventCube::set_time(void)
                   " associated GTIs to allow the computation of the ontime.");
 
     // Compute mean time
-    m_time = 0.5 * (m_gti.tstart() + m_gti.tstop());
+    m_time = 0.5 * (gti().tstart() + gti().tstop());
 
     // Set ontime
     m_ontime = m_gti.ontime();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set event bin
+ *
+ * @param[in] index Event index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Event index is outside valid range.
+ * @exception GLATException::no_energies
+ *            Energy vectors have not been set up.
+ * @exception GLATException::no_dirs
+ *            Sky directions and solid angles vectors have not been set up.
+ *
+ * This method provides the event attributes to the event bin. The event bin
+ * is in fact physically stored in the event cube, and only a single event
+ * bin is indeed allocated. This method sets up the pointers in the event
+ * bin so that a client can easily access the information of individual bins
+ * as if they were stored in an array.
+ ***************************************************************************/
+void GLATEventCube::set_bin(const int& index)
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_SET_BIN, index, 0, size()-1);
+    #endif
+
+    // Check for the existence of energies and energy widths
+    if (m_energies.size() != ebins() || m_ewidth.size() != ebins())
+        throw GLATException::no_energies(G_SET_BIN);
+
+    // Check for the existence of sky directions and solid angles
+    if (m_dirs.size() != npix() || m_omega.size() != npix())
+        throw GLATException::no_dirs(G_SET_BIN);
+
+    // Get pixel and energy bin indices.
+    m_bin.m_index = index;
+    m_bin.m_ipix  = index % npix();
+    m_bin.m_ieng  = index / npix();
+
+    // Set pointers
+    m_bin.m_cube   = this;
+    m_bin.m_counts = &(m_map.pixels()[index]);
+    m_bin.m_energy = &(m_energies[m_bin.m_ieng]);
+    m_bin.m_time   = &m_time;
+    m_bin.m_dir    = &(m_dirs[m_bin.m_ipix]);
+    m_bin.m_omega  = &(m_omega[m_bin.m_ipix]);
+    m_bin.m_ewidth = &(m_ewidth[m_bin.m_ieng]);
+    m_bin.m_ontime = &m_ontime;
 
     // Return
     return;
