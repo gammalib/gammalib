@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModels.cpp
- * @brief GModels class implementation.
+ * @brief Model container class implementation
  * @author J. Knodlseder
  */
 
@@ -61,7 +61,7 @@ GModels::GModels(void) : GOptimizerPars()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] models Models.
+ * @param[in] models Model container.
  ***************************************************************************/
 GModels::GModels(const GModels& models) : GOptimizerPars(models)
 {
@@ -79,7 +79,7 @@ GModels::GModels(const GModels& models) : GOptimizerPars(models)
 /***********************************************************************//**
  * @brief Load constructor
  *
- * @param[in] filename XML file.
+ * @param[in] filename XML filename.
  ***************************************************************************/
 GModels::GModels(const std::string& filename)
 {
@@ -160,7 +160,7 @@ const GModel* GModels::operator() (int index) const
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] models Models which should be assigned.
+ * @param[in] models Model container.
  ***************************************************************************/
 GModels& GModels::operator= (const GModels& models)
 { 
@@ -224,7 +224,10 @@ GModels* GModels::clone(void) const
 /***********************************************************************//**
  * @brief Append model to container
  *
- * @param[in] model Model to be added.
+ * @param[in] model Model.
+ *
+ * This method appends one model to the container by cloning the model. The
+ * model provided to the method can be deleted after calling this method.
  ***************************************************************************/
 void GModels::append(const GModel& model)
 {
@@ -242,7 +245,7 @@ void GModels::append(const GModel& model)
 /***********************************************************************//**
  * @brief Load models from XML file.
  *
- * @param[in] file Name of XML file.
+ * @param[in] filename Name of XML file.
  ***************************************************************************/
 void GModels::load(const std::string& filename)
 {
@@ -260,7 +263,7 @@ void GModels::load(const std::string& filename)
 /***********************************************************************//**
  * @brief Save models into XML file.
  *
- * @param[in] file Name of XML file.
+ * @param[in] filename Name of XML file.
  ***************************************************************************/
 void GModels::save(const std::string& filename) const
 {
@@ -363,33 +366,6 @@ void GModels::write(GXml& xml) const
 
 
 /***********************************************************************//**
- * @brief Returns value of source model
- *
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
- *
- * This method evaluates the factorized source model at a given set of
- * parameters.
- ***************************************************************************/
-/*
-double GModels::value(const GSkyDir& srcDir, const GEnergy& srcEng,
-                      const GTime& srcTime)
-{
-    // Initialise value
-    double value = 0.0;
-
-    // Evaluate function for all models
-    for (int i = 0; i < m_elements; ++i)
-        value += m_model[i].value(srcDir, srcEng, srcTime);
-
-    // Return
-    return value;
-}
-*/
-
-
-/***********************************************************************//**
  * @brief Evaluate function
  *
  * @param[in] event Observed event.
@@ -473,7 +449,7 @@ void GModels::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] models Models.
+ * @param[in] models Model container.
  ***************************************************************************/
 void GModels::copy_members(const GModels& models)
 {
@@ -550,7 +526,7 @@ void GModels::set_pointers(void)
  * @brief Output operator
  *
  * @param[in] os Output stream.
- * @param[in] models Models.
+ * @param[in] models Model container.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GModels& models)
 {
@@ -566,7 +542,7 @@ std::ostream& operator<< (std::ostream& os, const GModels& models)
  * @brief Log operator
  *
  * @param[in] log Logger.
- * @param[in] models Models.
+ * @param[in] models Model container.
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GModels& models)
 {

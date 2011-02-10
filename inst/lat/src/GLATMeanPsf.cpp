@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GLATMeanPsf.cpp
+ * @brief Fermi LAT mean PSF class implementation
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
@@ -742,7 +747,7 @@ void GLATMeanPsf::set_map_corrections(const GLATObservation& obs)
 /***********************************************************************//**
  * @brief Compute integral over PSF
  *
- * @param[in] offset Upper offset angle limit.
+ * @param[in] offsetmax Maximum offset angle.
  * @param[in] logE log10 of energy in MeV.
  ***************************************************************************/
 double GLATMeanPsf::integral(const double& offsetmax, const double& logE)

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GLATResponseTable.cpp  -  Fermi LAT Response table class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -315,7 +315,7 @@ int GLATResponseTable::index(const int& ie, const int& ic) const
  *
  * The mean energy is actually computed from the logarithmic average of 
  * lower and upper boundaries:
- * /f$E=10^{0.5 \times (\log{E_{\rm min}} + \log{E_{\rm max}})}/f$
+ * \f$E=10^{0.5 \times (\log{E_{\rm min}} + \log{E_{\rm max}})}\f$
  ***************************************************************************/
 double GLATResponseTable::energy(const int& ie) const
 {

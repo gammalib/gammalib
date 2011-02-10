@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEdisp.cpp  -  Fermi LAT energy dispersion              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -259,28 +259,6 @@ void GLATEdisp::write(GFits& fits) const
     // Return
     return;
 }
-
-
-/***********************************************************************//**
- * @brief Return energy dispersion (units: MeV^-1).
- *
- * @param[in] obsEng Observed energy of photon.
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Pointer to instrument pointing information.
- *
- * @todo Needs to be implemented.
- ***************************************************************************/
-/*
-double GLATResponse::edisp(const GEnergy& obsEng,
-                           const GSkyDir& srcDir, const GEnergy& srcEng,
-                           const GTime& srcTime, const GPointing& pnt) const
-{
-    // Return Edisp value
-    return 1.0;
-}
-*/
 
 
 /***********************************************************************//**

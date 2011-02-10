@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModel.cpp
- * @brief GModel class implementation.
+ * @brief Abstract model base class implementation
  * @author J. Knodlseder
  */
 
@@ -170,8 +170,6 @@ void GModel::instruments(const std::string& instruments)
 
 /***********************************************************************//**
  * @brief Returns instruments to which model applies
- *
- * @param[in] instruments String of instruments.
  *
  * Returns a comma separated list of instruments to which model applies. If
  * no instruments exist then an empty list is returned.

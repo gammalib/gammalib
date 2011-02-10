@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GInstDir.cpp  -  Instrument direction class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GInstDir.cpp
- * @brief GInstDir class implementation.
+ * @brief Abstract instrument direction class implementation
  * @author J. Knodlseder
  */
 
@@ -91,7 +91,7 @@ GInstDir::~GInstDir(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] dir Instrument direction to be assigned.
+ * @param[in] dir Instrument direction.
  ***************************************************************************/
 GInstDir& GInstDir::operator= (const GInstDir& dir)
 {
@@ -101,7 +101,7 @@ GInstDir& GInstDir::operator= (const GInstDir& dir)
         // Free members
         free_members();
 
-        // Initialise private members
+        // Initialise members
         init_members();
 
         // Copy members
@@ -139,7 +139,7 @@ void GInstDir::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] dir Instrument direction from which members should be copied
+ * @param[in] dir Instrument direction.
  ***************************************************************************/
 void GInstDir::copy_members(const GInstDir& dir)
 {
@@ -172,7 +172,7 @@ void GInstDir::free_members(void)
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GInstDir& dir)
 {
-     // Write instrument direction in output stream
+    // Write instrument direction in output stream
     os << dir.print();
 
     // Return output stream
@@ -184,7 +184,7 @@ std::ostream& operator<< (std::ostream& os, const GInstDir& dir)
  * @brief Log operator
  *
  * @param[in] log Logger.
- * @param[in] obs Observation.
+ * @param[in] dir Instrument direction.
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GInstDir& dir)
 {

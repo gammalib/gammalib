@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GIntegrand.cpp  -  Integrand function abstract base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GIntegrand.cpp
- * @brief GIntegrand abstract virtual base class implementation.
+ * @brief Abstract integrand base class implementation
  * @author J. Knodlseder
  */
 
@@ -50,7 +50,7 @@ GIntegrand::GIntegrand(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] arg Object from which the instance should be built.
+ * @param[in] arg Integrand.
  ***************************************************************************/
 GIntegrand::GIntegrand(const GIntegrand& arg)
 {
@@ -87,7 +87,7 @@ GIntegrand::~GIntegrand(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] arg Object to be assigned.
+ * @param[in] arg Integrand.
  ***************************************************************************/
 GIntegrand& GIntegrand::operator= (const GIntegrand& arg)
 {
@@ -135,7 +135,7 @@ void GIntegrand::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] integral Object from which members are to be copied.
+ * @param[in] arg Integrand.
  ***************************************************************************/
 void GIntegrand::copy_members(const GIntegrand& arg)
 {

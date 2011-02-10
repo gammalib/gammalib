@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModels.hpp
- * @brief GModels container class interface definition.
+ * @brief Model container class definition
  * @author J. Knodlseder
  */
 
@@ -24,9 +24,6 @@
 #include "GLog.hpp"
 #include "GOptimizerPars.hpp"
 #include "GModel.hpp"
-//#include "GSkyDir.hpp"
-//#include "GEnergy.hpp"
-//#include "GTime.hpp"
 #include "GXml.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -37,7 +34,7 @@ class GObservation;
 /***********************************************************************//**
  * @class GModels
  *
- * @brief GModels class interface defintion.
+ * @brief Model container class interface defintion.
  *
  * This container class collects models of gamma-ray data that are used
  * for maximum likelihood fitting. It derives from the optimizer parameter
@@ -47,7 +44,7 @@ class GModels : public GOptimizerPars {
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GModels& models);
-    friend GLog&         operator<<(GLog& log, const GModels& models);
+    friend GLog&         operator<<(GLog& log,        const GModels& models);
 
 public:
     // Constructors and destructors
@@ -62,30 +59,26 @@ public:
     GModels&      operator= (const GModels& models);
 
     // Methods
-    void        clear(void);
-    GModels*    clone(void) const;
-    int         size(void) const { return m_models.size(); }
-    void        append(const GModel& model);
-    void        load(const std::string& filename);
-    void        save(const std::string& filename) const;
-    void        read(const GXml& xml);
-    void        write(GXml& xml) const;
-    /*
-    double      value(const GSkyDir& srcDir, const GEnergy& srcEng,
-                      const GTime& srcTime);
-    */
-    double      eval(const GEvent& event, const GObservation& obs);
-    double      eval_gradients(const GEvent& event, const GObservation& obs);
-    std::string print(void) const;
+    void          clear(void);
+    GModels*      clone(void) const;
+    int           size(void) const { return m_models.size(); }
+    void          append(const GModel& model);
+    void          load(const std::string& filename);
+    void          save(const std::string& filename) const;
+    void          read(const GXml& xml);
+    void          write(GXml& xml) const;
+    double        eval(const GEvent& event, const GObservation& obs);
+    double        eval_gradients(const GEvent& event, const GObservation& obs);
+    std::string   print(void) const;
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GModels& models);
-    void free_members(void);
-    void set_pointers(void);
+    void          init_members(void);
+    void          copy_members(const GModels& models);
+    void          free_members(void);
+    void          set_pointers(void);
 
-    // Proteced data members
+    // Proteced members
     std::vector<GModel*> m_models;  //!< List of models
 };
 
