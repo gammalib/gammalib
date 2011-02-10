@@ -11,11 +11,25 @@ endif
 # Subdirectories
 SUBDIRS = include $(INST_DIR) src test pyext
 
-# Extra files to be distributed in the tar file
-EXTRA_DIST = autogen.sh \
-             gammalib.pc.in
-
-# Install pkg-config information
+# Pkgconfig directory
 pkgconfigdir = $(libdir)/pkgconfig
+
+# Files to install in Pkgconfig directory
 pkgconfig_DATA = gammalib.pc
 
+# Manual pages to install
+man_MANS = 
+
+# Architecture independent data files installed in the package's data directory
+doc_DATA = \
+	   AUTHORS \
+	   ChangeLog \
+	   COPYING \
+	   INSTALL \
+	   LICENSE \
+	   NEWS \
+	   README
+
+# Extra files to be distributed in the tar file
+#EXTRA_DIST = autogen.sh \
+#             gammalib.pc.in
