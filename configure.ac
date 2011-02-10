@@ -486,6 +486,10 @@ AM_CONDITIONAL(WITH_INST_LAT, test "x$with_lat" = "xyes")
 dnl =======
 dnl Doxygen
 dnl =======
+DX_HTML_FEATURE(ON)
+DX_PS_FEATURE(OFF)
+DX_PDF_FEATURE(OFF)
+DX_MAN_FEATURE(ON)
 DX_INIT_DOXYGEN([GammaLib], [doc/Doxyfile], [doc/doxygen])
 
 
