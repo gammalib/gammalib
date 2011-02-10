@@ -1,0 +1,336 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+  <title>Installation</title>
+
+
+  <link href="gammalib.css" media="screen,print" type="text/css" rel="stylesheet">
+
+</head>
+
+
+<body>
+
+<p class="Header">Installation</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body"><a href="#Getting_GammaLib">
+Getting GammaLib
+</a><br>
+
+</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+<a href="#Prerequisites">Prerequisites</a></p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+<a href="#Building_GammaLib">Building GammaLib</a></p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+<a href="#Testing_GammaLib">Testing GammaLib</a></p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body"><a href="#Installing_GammaLib">Installing GammaLib</a></p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body"><a href="#Setting_up_your_environment">Setting up your
+environment</a></p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+<a href="#Known_Problems">Known Problems</a></p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+<a href="#Getting_Help">Getting Help</a></p>
+
+<br>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body"><span style="font-weight: bold;">
+Note:</span> These installation instructions apply to
+GammaLib-00-04-05 and
+later.
+</p>
+
+<br>
+
+<br>
+
+<p class="Title"><a name="Getting_GammaLib"></a>Getting
+GammaLib</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+The latest version of the GammaLib source code, documentation, and
+example programs are available on the World-Wide Web from <a href="https://sourceforge.net/projects/gammalib/" target="_blank">https://sourceforge.net/projects/gammalib/</a>.
+</p>
+
+<br>
+
+<br>
+
+<p class="Title"><a name="Prerequisites"></a>Prerequisites</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+GammaLib should compile on every modern Unix system <span style="font-weight: bold;">without any need to
+install other libraries</span>.
+<br>
+
+<br>
+
+To enable support for FITS file handling, however, the cfitsio library
+from HEASARC needs to be installed. cfitsio can be downloaded from
+<a href="http://heasarc.gsfc.nasa.gov/fitsio" target="_blank">http://heasarc.gsfc.nasa.gov/fitsio</a>
+and detailed installation instructions can be found there.
+If cfitsio does not already exist on your system, we recommend
+installation of cfitsio
+in the default GammaLib install directory as a shared library by
+typing:
+</p>
+
+<p class="Code">&gt; ./configure
+--prefix=/usr/local/gamma<br>
+
+&gt; make shared<br>
+
+&gt; make install
+</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+GammaLib can also benefit from the presence of the readline library
+that provides line-editing
+and history capabilities for text input (GammaLib offers however also
+full functionality without having
+readline installed).
+readline can be downloaded from
+<a href="http://ftp.gnu.org/gnu/readline/" target="_blank">http://ftp.gnu.org/gnu/readline/</a>
+</p>
+
+<br>
+
+<br>
+
+<p class="Title"><a name="Building_GammaLib"></a>Building
+GammaLib</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+Download the latest source tarball, save it in an appropriate location,
+and type</p>
+
+<p class="Code">
+&gt; tar xvfz GammaLib-XX-XX-XX.tar.gz
+</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+where <span style="font-family: Courier New,Courier,monospace;">XX-XX-XX</span>
+is the version number of the library.
+Step in the created directory using
+</p>
+
+<p class="Code">
+&gt; cd GammaLib-XX-XX-XX
+</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+and build GammaLib by typing</p>
+
+<p class="Code">
+&gt; ./configure<br>
+
+&gt; make
+</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+at the operating system prompt.
+The configuration command customizes the Makefiles for the particular
+system,
+the <span style="font-family: Courier New,Courier,monospace;">make</span>
+command compiles the source files and builds the library, and
+the <span style="font-family: Courier New,Courier,monospace;">make
+install</span> command installs the library in the install
+directory.
+Type <span style="font-family: Courier New,Courier,monospace;">./configure</span>
+and not simply <span style="font-family: Courier New,Courier,monospace;">configure</span>
+to ensure that the
+configuration
+script in the current directory is run and not some other system-wide
+configuration
+script.
+By default, the install directory is set to
+<span style="font-family: Courier New,Courier,monospace;">/usr/local/gamma</span>.
+To change the install directory an optional <span style="font-family: Courier New,Courier,monospace;">--prefix</span>
+argument should be
+given,
+for example:
+</p>
+
+<p class="Code">
+&gt; ./configure --prefix=/usr/local
+</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+If cfitsio and/or readline is not installed in a standard location for
+libraries (such
+as <span style="font-family: Courier New,Courier,monospace;">/usr/lib</span>
+or <span style="font-family: Courier New,Courier,monospace;">/usr/local/lib</span>),
+the appropriate location(s) can be specified using the <span style="font-family: Courier New,Courier,monospace;">LDFLAGS</span>
+(for the library directory) and <span style="font-family: Courier New,Courier,monospace;">CPPFLAGS</span>
+(for the include directory) options:
+</p>
+
+<p class="Code">
+&gt; ./configure LDFLAGS='-L/opt/local/lib'
+CPPFLAGS='-I/opt/local/include'
+</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">A
+full list of configuration options can be found using</p>
+
+<p class="Code">
+&gt; ./configure --help
+</p>
+
+<br>
+
+<br>
+
+<p class="Title"><a name="Testing_GammaLib"></a>Testing
+GammaLib</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+GammaLib should be tested by typing:</p>
+
+<p class="Code">
+&gt; make check
+</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+This will execute an extensive testing suite that should terminate with
+</p>
+
+<p class="Code">
+===================<br>
+
+All 14 tests passed<br>
+
+===================
+</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">Eventually,
+loading the shared cfitsio and/or readline libraries may fail during
+the test if the libraries are not located in standard locations. In
+this case, add the library directories to the <span style="font-family: Courier New,Courier,monospace;">LD_LIBRARY_PATH</span>
+environment variables (<span style="font-family: Courier New,Courier,monospace;">DYLD_LIBRARY_PATH</span>
+on Mac OS X), e.g.
+</p>
+
+<p class="Code">
+export LD_LIBRARY_PATH=/opt/local/lib:$LD_LIBRARY_PATH
+</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+or
+</p>
+
+<p class="Code">
+setenv LD_LIBRARY_PATH /opt/local/lib:$LD_LIBRARY_PATH
+</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+on C shell variants.</p>
+
+<br>
+
+<br>
+
+<p class="Title"><a name="Installing_GammaLib"></a>Installing
+GammaLib</p>
+
+<span style="font-family: 'Arial','Arial','Arial',sans-serif;"></span>
+<p style="padding-top: 0pt; text-align: left;" class="Body"><span style="font-family: 'Arial','Arial','Arial',sans-serif;">I</span>nstall
+GammaLib by typing</p>
+
+<p class="Code">
+&gt;&nbsp;make install
+</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+at the operating system prompt.
+</p>
+
+<br>
+
+<br>
+
+<p class="Title"><a name="Setting_up_your_environment"></a>Setting
+up your environment</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+Before using GammaLib you have to setup some environment variables.
+This will be done automatically by an initialisation script that will
+be installed in the <span style="font-family: Courier New,Courier,monospace;">bin</span>
+directory. Assuming that you have installed GammaLib in the default
+directory
+<span style="font-family: Courier New,Courier,monospace;">/usr/local/gamma</span>
+you need to add the following to your <span style="font-family: Courier New,Courier,monospace;">.bashrc</span>
+or <span style="font-family: Courier New,Courier,monospace;">$HOME/.profile</span>
+script on a Linux
+machine:
+</p>
+
+<p class="Code">export GAMMALIB=/usr/local/gamma<br>
+
+source $GAMMALIB/bin/gammalib-init.sh
+</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">If
+you use C shell or a variant then add the following to your
+<span style="font-family: Courier New,Courier,monospace;">.cshrc</span>
+or <span style="font-family: Courier New,Courier,monospace;">.tcshrc</span>
+script:
+</p>
+
+<p class="Code">setenv GAMMALIB /usr/local/gamma<br>
+
+source $GAMMALIB/bin/gammalib-init.csh </p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body"><br>
+
+</p>
+
+<br>
+
+<p class="Title"><a name="Known_Problems"></a>Known
+Problems</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+<span style="font-weight: bold; font-size: 14px;">Solaris</span>
+<br>
+
+GammaLib has been compiled successfully on Solaris 2.10 using the Sun
+Studio compiler. However, when linked as a shared library, symbols are
+not globally exported. This prevents the GammaLib library from catching
+its own exceptions and from registering models. Consequently, many unit
+tests will fail.
+<br>
+
+<br>
+
+Using gcc (version 3.4.3), GammaLib works correctly on Solaris 2.10,
+yet loading GammaLib as a Python module fails.
+</p>
+
+<br>
+
+<br>
+
+<p class="Title"><a name="Getting_Help"></a>Getting
+Help</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+Any questions, bug reports, or suggested enhancements related to
+GammaLib should be submitted
+via the Tracker on <a href="https://sourceforge.net/projects/gammalib/" target="_blank">https://sourceforge.net/projects/gammalib/</a>
+or the
+<a href="mailto:gammalib-users@lists.soureforge.net">gammalib-users@lists.sourceforge.net</a>
+mailing list.
+</p>
+
+</body>
+</html>
