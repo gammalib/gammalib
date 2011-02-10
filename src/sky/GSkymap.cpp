@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GSkymap.cpp  -  Class that implements a sky map             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -891,7 +891,7 @@ void GSkymap::alloc_pixels(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] dir Sky map from which members should be copied.
+ * @param[in] map Sky map.
  ***************************************************************************/
 void GSkymap::copy_members(const GSkymap& map)
 {
@@ -949,7 +949,7 @@ void GSkymap::free_members(void)
  * @param[in] wcs World Coordinate System type (3 characters, upper case).
  * @param[in] coords Coordinate system.
  * @param[in] crval1 X value of reference pixel.
- * @param[in] crval1 Y value of reference pixel.
+ * @param[in] crval2 Y value of reference pixel.
  * @param[in] crpix1 X index of reference pixel.
  * @param[in] crpix2 Y index of reference pixel.
  * @param[in] cdelt1 Increment in x direction at reference pixel (deg).

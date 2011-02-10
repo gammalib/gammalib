@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GRoi.cpp  -  Region of interest abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GRoi.cpp
- * @brief GRoi class interface implementation.
+ * @brief Region of interest abstract base class implementation
  * @author J. Knodlseder
  */
 

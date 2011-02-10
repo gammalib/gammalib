@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GPointing.hpp
- * @brief GPointing abstract base class definition.
+ * @brief Pointing abstract base class definition
  * @author J. Knodlseder
  */
 
@@ -30,7 +30,7 @@
 /***********************************************************************//**
  * @class GPointing
  *
- * @brief Abstract interface for the pointing classes.
+ * @brief Abstract interface for the pointing classes
  *
  * The pointing class holds information about the time dependent telescope
  * pointing.
@@ -38,8 +38,8 @@
 class GPointing {
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GPointing& rsp);
-    friend GLog&         operator<< (GLog& log, const GPointing& rsp);
+    friend std::ostream& operator<<(std::ostream& os, const GPointing& pnt);
+    friend GLog&         operator<<(GLog& log,        const GPointing& pnt);
 
 public:
     // Constructors and destructors

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GWcsCAR.cpp  -  Cartesian projection class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GWcsCAR.cpp
- * @brief GWcsCAR class implementation.
+ * @brief Cartesian projection class implementation
  * @author J. Knodlseder
  */
 
@@ -65,7 +65,7 @@ GWcsCAR::GWcsCAR(void) : GWcs()
  *
  * @param[in] coords Coordinate system.
  * @param[in] crval1 X value of reference pixel.
- * @param[in] crval1 Y value of reference pixel.
+ * @param[in] crval2 Y value of reference pixel.
  * @param[in] crpix1 X index of reference pixel.
  * @param[in] crpix2 Y index of reference pixel.
  * @param[in] cdelt1 Increment in x direction at reference pixel (deg).

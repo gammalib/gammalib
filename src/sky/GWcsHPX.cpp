@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GWcsHPX.cpp  -  Healpix projection class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GWcsHPX.cpp
- * @brief GWcsHPX class implementation.
+ * @brief HealPix projection class implementation
  * @author J. Knodlseder
  */
 
@@ -20,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <iostream>
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
@@ -79,7 +78,6 @@ GWcsHPX::GWcsHPX(void) : GWcs()
  * @param[in] nside Number of sides.
  * @param[in] order Pixel ordering ('RING' or 'NESTED').
  * @param[in] coords Coordinate system ('EQU' or 'GAL').
- * @param[in] dimension Vector dimension of pixels.
  *
  * @exception GException::wcs_hpx_bad_nside 
  *            Invalid nside parameter.
@@ -298,7 +296,7 @@ void GWcsHPX::read(const GFitsHDU* hdu)
 /***********************************************************************//**
  * @brief Write Healpix definiton into FITS HDU
  *
- * @param[in] file FITS HDU to which the Healpix definition will be written.
+ * @param[in] hdu FITS HDU.
  *
  * Writes the following keywords in the FITS HDU:
  * EXTNAME  = HEALPIX

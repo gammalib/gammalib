@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GPointing.cpp
- * @brief GPointing class interface implementation.
+ * @brief Pointing abstract base class implementation
  * @author J. Knodlseder
  */
 

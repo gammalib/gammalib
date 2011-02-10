@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GWcs.cpp  -  World Coordinate System virtual base class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GWcs.cpp
- * @brief GWcs virtual base class implementation.
+ * @brief World Coordinate System virtual base class implementation
  * @author J. Knodlseder
  */
 
@@ -75,7 +75,7 @@ GWcs::GWcs(void)
  *
  * @param[in] coords Coordinate system.
  * @param[in] crval1 X value of reference pixel.
- * @param[in] crval1 Y value of reference pixel.
+ * @param[in] crval2 Y value of reference pixel.
  * @param[in] crpix1 X index of reference pixel (first pixel is 1).
  * @param[in] crpix2 Y index of reference pixel (first pixel is 1).
  * @param[in] cdelt1 Increment in x direction at reference pixel (deg).
@@ -698,7 +698,7 @@ GMatrix GWcs::wcs_get_rot(void)
  *
  * @param[in] coords Coordinate system.
  * @param[in] crval1 X value of reference pixel.
- * @param[in] crval1 Y value of reference pixel.
+ * @param[in] crval2 Y value of reference pixel.
  * @param[in] crpix1 X index of reference pixel (first pixel is 1).
  * @param[in] crpix2 Y index of reference pixel (first pixel is 1).
  * @param[in] cdelt1 Increment in x direction at reference pixel (deg).

@@ -275,8 +275,6 @@ double GRan::exp(const double& lambda)
 /***********************************************************************//**
  * @brief Returns Chi2 deviates for 2 degrees of freedom
  *
- * @param[in] lambda Mean rate.
- *
  * Returns exponential deviates from the probability distribution
  * \f[p(x) = \frac{1}{2\pi} x \exp( -\frac{1}{2} x^2 )\f]
  * This method can be used to simulate the radom radial offset of a measured
