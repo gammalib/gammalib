@@ -59,7 +59,7 @@ clean-local:
 	
 if HAVE_SWIG
 gammalib_wrap.cpp gammalib.py: $(SWIG_INTERFACE)
-	$(SWIG) -c++ -python -Wall -includeall -I$(top_srcdir)/src $(INC_INST) $(OPT_INST) -o gammalib_wrap.cpp -outdir . $(srcdir)/$(SWIG_INTERFACE)
+	$(SWIG) -c++ -python -Wall -I$(top_srcdir)/src $(INC_INST) $(OPT_INST) -o gammalib_wrap.cpp -outdir . $(srcdir)/$(SWIG_INTERFACE)
 endif # HAVE_SWIG
 
 endif # WITH_PYTHON_BINDING
