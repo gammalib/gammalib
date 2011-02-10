@@ -35,6 +35,8 @@ Getting GammaLib
 <p style="padding-top: 0pt; text-align: left;" class="Body"><a href="#Setting_up_your_environment">Setting up your
 environment</a></p>
 
+<p style="padding-top: 0pt; text-align: left;" class="Body"><a href="#Installing_documentation">Installing documentation</a></p>
+
 <p style="padding-top: 0pt; text-align: left;" class="Body">
 <a href="#Known_Problems">Known Problems</a></p>
 
@@ -45,7 +47,7 @@ environment</a></p>
 
 <p style="padding-top: 0pt; text-align: left;" class="Body"><span style="font-weight: bold;">
 Note:</span> These installation instructions apply to
-GammaLib-00-04-05 and
+GammaLib-00-04-06 and
 later.
 </p>
 
@@ -290,9 +292,69 @@ script:
 
 source $GAMMALIB/bin/gammalib-init.csh </p>
 
-<p style="padding-top: 0pt; text-align: left;" class="Body"><br>
+<br>
 
+<br>
+
+<p class="Title"><a name="Installing_documentation"></a>Installing
+documentation</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+The GammaLib web pages are shipped together with the source code and
+will be installed in the directory <span style="font-family: Courier New,Courier,monospace;">$(prefix)/share/doc/gammalib/html</span>,
+where <span style="font-family: Courier New,Courier,monospace;">$(prefix)</span>
+is the installation base path, by default <span style="font-family: Courier New,Courier,monospace;">/usr/local/gamma</span>.
 </p>
+
+<br>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+For developers, a more detailed documentation can be built from the
+source code using Doxygen. Doxygen will scan the source files for code
+annotations, and compiles a complete documentation of the implemented
+C++ classes in a set of www pages. In addition, it will create a set of
+man files that can be used by the <span style="font-family: Courier New,Courier,monospace;">man</span>
+command. If you have not installed Doxygen on your machine, but you
+need the development documentation, please visit <a href="http://www.stack.nl/%7Edimitri/doxygen/index.html" target="_blank">http://www.stack.nl/~dimitri/doxygen/index.html</a>
+to download and install the Doxygen package.
+</p>
+
+<br>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+Once Doxygen is install, type the following to build and to install the
+Doxygen documentation:
+</p>
+
+<p class="Code">&gt; ./configure<br>
+
+&gt; make doxygen<br>
+
+&gt; make doxygen-install
+</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+The Doxygen documentation will be installed into
+<span style="font-family: Courier New,Courier,monospace;">$(prefix)/share/doc/gammalib/html/doxygen</span>
+and can be browsed using a regular web browser.
+</p>
+
+<br>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+To check <span style="font-family: Courier New,Courier,monospace;">man</span>
+support, type for example
+</p>
+
+<p class="Code">&gt; man GObservations
+</p>
+
+<p style="padding-top: 0pt; text-align: left;" class="Body">
+and you should see the documentation for the <span style="font-family: Courier New,Courier,monospace;">GObservations</span>
+C++ class.
+</p>
+
+<br>
 
 <br>
 
