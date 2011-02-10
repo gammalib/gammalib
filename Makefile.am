@@ -34,8 +34,6 @@ doc_DATA = \
 #EXTRA_DIST = autogen.sh \
 #             gammalib.pc.in
 
-
-
 # Automatically reconfigure libtool
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
@@ -128,7 +126,26 @@ endif DX_COND_latex
 
 doxygen-run: @DX_DOCDIR@/@PACKAGE@.tag
 
-doxygen-doc: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
+# Make Doxygen files
+doxygen: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
+
+# Install Doxygen files
+DOCDIRS = doxygen/html doxygen/man/man3
+doxygen-install:
+	$(mkinstalldirs) $(DESTDIR)$(docdir)
+	@for dir in $(DOCDIRS) ; do \
+	  $(mkinstalldirs) $(DESTDIR)$(docdir)/$$dir && \
+	  for file in $(srcdir)/doc/$$dir/*.* ; do \
+	    echo "$(INSTALL_DATA) $$file $(DESTDIR)$(docdir)/$$dir" ; \
+	    $(INSTALL_DATA) "$$file" $(DESTDIR)$(docdir)/$$dir ; \
+	  done ; \
+	done
+
+# Uninstall Doxygen files
+doxygen-uninstall:
+	for dir in $(DOCDIRS) ; do \
+	  rm -f -r $(DESTDIR)$(docdir)/$$dir ; \
+	done
 
 @DX_DOCDIR@/@PACKAGE@.tag: $(DX_CONFIG) $(pkginclude_HEADERS)
 	    rm -rf @DX_DOCDIR@
