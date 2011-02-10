@@ -10,7 +10,7 @@
 #
 # Process this file with autoconf to produce a configure script
 
-AC_INIT([GammaLib], [0.4.5], [knodlseder@cesr.fr], [gammalib], [http://gammalib.sourceforge.net/])
+AC_INIT([GammaLib], [0.4.6], [knodlseder@cesr.fr], [gammalib], [http://gammalib.sourceforge.net/])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies])
@@ -481,6 +481,12 @@ if test "x$with_lat" = "xyes"; then
                 [with_lat=no])
 fi
 AM_CONDITIONAL(WITH_INST_LAT, test "x$with_lat" = "xyes")
+
+
+dnl =======
+dnl Doxygen
+dnl =======
+DX_INIT_DOXYGEN([GammaLib], [doc/Doxyfile], [doc/doxygen])
 
 
 dnl ======================================
