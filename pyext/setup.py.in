@@ -86,5 +86,5 @@ setup(name='@PACKAGE_NAME@',
                              library_dirs=library_dirs,
                              libraries=libraries,
                              runtime_library_dirs=runtime_library_dirs)],
-      data_files=[('@prefix@/share/swig/gammalib', data_files)],
+      data_files=[('@datarootdir@/gammalib/swig', data_files)],
       )
