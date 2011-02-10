@@ -582,6 +582,11 @@ if test "x$with_cta" = "xyes"; then
 else
   echo "  - CTA interface                (no)"
 fi
+if test "$DX_DOXYGEN" != ""; then
+  echo "  * Doxygen                      (yes)   $DX_DOXYGEN"
+else
+  echo "  - Doxygen                      (no)"
+fi
 echo
 echo "Now type 'make'"
 echo
