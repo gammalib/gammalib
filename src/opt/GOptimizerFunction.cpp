@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GOptimizerFunction.cpp  -  Abstract base class for optimizer function  *
+ *    GOptimizerFunction.cpp  -  Optimizer function abstract base class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,11 +9,10 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GOptimizerFunction.cpp
- * @brief GOptimizerFunction abstract base class implementation.
+ * @brief Optimizer function abstract base class implementation
  * @author J. Knodlseder
  */
 
@@ -33,12 +32,12 @@
 
 /*==========================================================================
  =                                                                         =
- =               GOptimizerFunction constructors/destructors               =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GOptimizerFunction::GOptimizerFunction(void)
 {
@@ -51,25 +50,9 @@ GOptimizerFunction::GOptimizerFunction(void)
 
 
 /***********************************************************************//**
- * @brief Constructor optimizer function for a given parameter set.
- *
- * @param[in] pars Parameters from which the instance should be built.
- ***************************************************************************/
-/*
-GOptimizerFunction::GOptimizerFunction(const GOptimizerPars& pars)
-{
-    // Initialise class members for clean destruction
-    init_members();
-
-    // Return
-    return;
-}
-*/
-
-/***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] fct Optimizer function from which the instance should be built.
+ * @param[in] fct Optimizer function.
  ***************************************************************************/
 GOptimizerFunction::GOptimizerFunction(const GOptimizerFunction& fct)
 {
@@ -99,14 +82,14 @@ GOptimizerFunction::~GOptimizerFunction()
 
 /*==========================================================================
  =                                                                         =
- =                       GOptimizerFunction operators                      =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] fct Optimizer function to be assigned.
+ * @param[in] fct Optimizer function.
  ***************************************************************************/
 GOptimizerFunction& GOptimizerFunction::operator= (const GOptimizerFunction& fct)
 {
@@ -131,13 +114,13 @@ GOptimizerFunction& GOptimizerFunction::operator= (const GOptimizerFunction& fct
 
 /*==========================================================================
  =                                                                         =
- =                    GOptimizerFunction public methods                    =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /*==========================================================================
  =                                                                         =
- =                    GOptimizerFunction private methods                   =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -154,7 +137,7 @@ void GOptimizerFunction::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] fct GOptimizerFunction members which should be copied.
+ * @param[in] fct Optimizer function.
  ***************************************************************************/
 void GOptimizerFunction::copy_members(const GOptimizerFunction& fct)
 {
@@ -175,12 +158,6 @@ void GOptimizerFunction::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                       GOptimizerFunction friends                        =
- =                                                                         =
- ==========================================================================*/
-
-/*==========================================================================
- =                                                                         =
- =                 Other functions used by GOptimizerFunction              =
+ =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/

@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GOptimizerFunction.hpp  -  Abstract base class for optimizer function  *
+ *    GOptimizerFunction.hpp  -  Optimizer function abstract base class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GOptimizerFunction.hpp
- * @brief GOptimizerFunction abstract base class interface definition.
+ * @brief Optimizer function abstract base class
  * @author J. Knodlseder
  */
 
@@ -28,7 +28,13 @@
 /***********************************************************************//**
  * @class GOptimizerFunction
  *
- * @brief GOptimizerFunction abstract base class interface defintion.
+ * @brief Optimizer function abstract base class
+ *
+ * This class provides an abstract interface for the function that is used
+ * by the GOptimizer optimization class.
+ * The method eval() returns the function value at a given set of parameters
+ * that is defined by an instance of the optimizer parameter container class
+ * GOptimizerPars.
  ***************************************************************************/
 class GOptimizerFunction {
 

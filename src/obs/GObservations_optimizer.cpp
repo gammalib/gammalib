@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GObservations_optimizer.cpp
- * @brief GObservations::optimizer class implementation.
+ * @brief Model parameter optimization class implementation
  * @author J. Knodlseder
  */
 
@@ -28,7 +28,7 @@
 #include "GEventBin.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL             "GObservations::optimizer::eval(GOptimizerPars&) "
+#define G_EVAL              "GObservations::optimizer::eval(GOptimizerPars&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -53,7 +53,7 @@
 ***************************************************************************/
 GObservations::optimizer::optimizer(void) : GOptimizerFunction()
 {
-    // Initialise iterator
+    // Initialise members
     init_members();
 
     // Return
@@ -62,13 +62,13 @@ GObservations::optimizer::optimizer(void) : GOptimizerFunction()
 
 
 /***********************************************************************//**
- * @brief Constructor based on specific object
+ * @brief Construct optimizer from GObservations observation container
  *
- * @param[in] obs Observations container to use for optimizer.
+ * @param[in] obs Observations container.
  ***************************************************************************/
 GObservations::optimizer::optimizer(GObservations *obs) : GOptimizerFunction()
 {
-    // Initialise iterator
+    // Initialise members
     init_members();
 
     // Set object
@@ -83,7 +83,7 @@ GObservations::optimizer::optimizer(GObservations *obs) : GOptimizerFunction()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] obs Instance which should be used for construction
+ * @param[in] fct Optimizer.
  ***************************************************************************/
 GObservations::optimizer::optimizer(const optimizer& fct) : GOptimizerFunction(fct)
 {
@@ -120,7 +120,7 @@ GObservations::optimizer::~optimizer(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] obs Instance to be assigned.
+ * @param[in] fct Optimizer.
  ***************************************************************************/
 GObservations::optimizer& GObservations::optimizer::operator= (const optimizer& fct)
 {
@@ -284,7 +284,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
 
 /***********************************************************************//**
  * @brief Evaluate log-likelihood function for Poisson statistics and
- * unbinned analysis
+ *        unbinned analysis
  *
  * @param[in] obs Observation.
  * @param[in] pars Optimizer parameters.
@@ -394,7 +394,7 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
 
 /***********************************************************************//**
  * @brief Evaluate log-likelihood function for Poisson statistics and
- * binned analysis
+ *        binned analysis
  *
  * @param[in] obs Observation.
  * @param[in] pars Optimizer parameters.
@@ -590,7 +590,7 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
 
 /***********************************************************************//**
  * @brief Evaluate log-likelihood function for Gaussian statistics and
- * binned analysis
+ *        binned analysis
  *
  * @param[in] obs Observation.
  * @param[in] pars Optimizer parameters.
@@ -658,7 +658,6 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
         // Create index array of non-zero derivatives
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
-//            if ((*m_wrk_grad)(i) != 0.0 && !std::isinf((*m_wrk_grad)(i))) {
             if ((*m_wrk_grad)(i) != 0.0 && !isinfinite((*m_wrk_grad)(i))) {
                 inx[ndev] = i;
                 ndev++;
@@ -749,7 +748,7 @@ void GObservations::optimizer::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] fct Members to be copied.
+ * @param[in] fct Optimizer.
  ***************************************************************************/
 void GObservations::optimizer::copy_members(const optimizer& fct)
 {
