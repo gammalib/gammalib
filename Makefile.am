@@ -132,7 +132,7 @@ doxygen-run: @DX_DOCDIR@/@PACKAGE@.tag
 doxygen: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
 
 # Install Doxygen files
-DOCDIRS = doxygen/html doxygen/man/man3
+DOCDIRS = html/doxygen man/man3
 doxygen-install:
 	$(mkinstalldirs) $(DESTDIR)$(docdir)
 	@for dir in $(DOCDIRS) ; do \
@@ -172,10 +172,9 @@ endif DX_COND_doc
 HTMLDIRS = html html/images
 HTML_INSTALL_DATA_TARGETS = install-data-html
 install-data-html:
-	$(mkinstalldirs) $(DESTDIR)$(docdir)
-	$(mkinstalldirs) $(DESTDIR)$(docdir)/doxygen/html
-	$(INSTALL_DATA) $(srcdir)/doc/html/doxygen.html $(DESTDIR)$(docdir)/doxygen/html/index.html
-	$(INSTALL_DATA) $(srcdir)/doc/html/gammalib.css $(DESTDIR)$(docdir)/doxygen/html
+	$(mkinstalldirs) $(DESTDIR)$(docdir)/html/doxygen
+	$(INSTALL_DATA) $(srcdir)/doc/html/doxygen.html $(DESTDIR)$(docdir)/html/doxygen/index.html
+	$(INSTALL_DATA) $(srcdir)/doc/html/gammalib.css $(DESTDIR)$(docdir)/html/doxygen
 	@for dir in $(HTMLDIRS) ; do \
 	  $(mkinstalldirs) $(DESTDIR)$(docdir)/$$dir && \
 	  for file in $(srcdir)/doc/$$dir/*.* ; do \
@@ -187,8 +186,7 @@ install-data-html:
 # Uninstall HTML files
 HTML_UNINSTALL_DATA_TARGETS = uninstall-data-html
 uninstall-data-html:
-	rm -f $(DESTDIR)$(docdir)/doxygen/html/index.html
-	rm -f $(DESTDIR)$(docdir)/doxygen/html/gammalib.css
+	rm -f $(DESTDIR)$(docdir)/html/doxygen
 	for dir in $(HTMLDIRS) ; do \
 	  rm -f -r $(DESTDIR)$(docdir)/$$dir ; \
 	done
