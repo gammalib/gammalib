@@ -75,7 +75,7 @@ GXmlPI::GXmlPI(const GXmlPI& node) : GXmlNode(node)
 /***********************************************************************//**
  * @brief Segment constructor
  *
- * @param[in] text Text for instance building.
+ * @param[in] segment Text for instance building.
  ***************************************************************************/
 GXmlPI::GXmlPI(const std::string& segment) : GXmlNode()
 {
@@ -168,6 +168,7 @@ void GXmlPI::clear(void)
  * @brief Write Processing Instruction into file
  *
  * @param[in] fptr File pointer.
+ * @param[in] indent Text indentation.
  ***************************************************************************/
 void GXmlPI::write(FILE* fptr, int indent) const
 {
@@ -186,6 +187,7 @@ void GXmlPI::write(FILE* fptr, int indent) const
  * @brief Print Processing Instruction in output stream
  *
  * @param[in] os Output stream into which the node will be printed.
+ * @param[in] indent Text indentation.
  ***************************************************************************/
 void GXmlPI::print(std::ostream& os, int indent) const
 {
@@ -255,7 +257,7 @@ GXmlPI* GXmlPI::clone(void) const
 /***********************************************************************//**
  * @brief Parse comment segment string
  *
- * @param[in] segement Segment string.
+ * @param[in] segment Segment string.
  *
  * @exception GException::xml_syntax_error
  *            XML syntax error.

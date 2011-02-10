@@ -148,6 +148,7 @@ void GXmlDocument::clear(void)
  * @brief Write node into file
  *
  * @param[in] fptr File pointer.
+ * @param[in] indent Text indentation.
  ***************************************************************************/
 void GXmlDocument::write(FILE* fptr, int indent) const
 {
@@ -169,7 +170,8 @@ void GXmlDocument::write(FILE* fptr, int indent) const
 /***********************************************************************//**
  * @brief Print node in output stream
  *
- * @param[in] os Output stream into which the node will be printed.
+ * @param[in] os Output stream.
+ * @param[in] indent Text indentation.
  ***************************************************************************/
 void GXmlDocument::print(std::ostream& os, int indent) const
 {

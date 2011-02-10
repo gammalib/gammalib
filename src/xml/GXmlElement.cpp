@@ -174,6 +174,7 @@ void GXmlElement::clear(void)
  * @brief Write node into file
  *
  * @param[in] fptr File pointer.
+ * @param[in] indent Text indentation.
  ***************************************************************************/
 void GXmlElement::write(FILE* fptr, int indent) const
 {
@@ -215,6 +216,7 @@ void GXmlElement::write(FILE* fptr, int indent) const
  * @brief Print node in output stream
  *
  * @param[in] os Output stream into which the node will be printed.
+ * @param[in] indent Text indentation.
  ***************************************************************************/
 void GXmlElement::print(std::ostream& os, int indent) const
 {
@@ -364,7 +366,7 @@ GXmlElement* GXmlElement::clone(void) const
 /***********************************************************************//**
  * @brief Parse element start segment string
  *
- * @param[in] segement Segment string.
+ * @param[in] segment Segment string.
  *
  * @exception GException::xml_syntax_error
  *            XML syntax error.
@@ -420,7 +422,7 @@ void GXmlElement::parse_start(const std::string& segment)
 /***********************************************************************//**
  * @brief Parse element stop segment string
  *
- * @param[in] segement Segment string.
+ * @param[in] segment Segment string.
  *
  * @exception GException::xml_syntax_error
  *            XML syntax error.
@@ -467,7 +469,7 @@ void GXmlElement::parse_stop(const std::string& segment)
  * @brief Parse element attribute
  *
  * @param[in] pos Start position in string.
- * @param[in] segement Segment string.
+ * @param[in] segment Segment string.
  *
  * @exception GException::xml_syntax_error
  *            XML syntax error.
@@ -475,7 +477,7 @@ void GXmlElement::parse_stop(const std::string& segment)
  * Parse the segment string for one attribute, and if attribute was found,
  * attach it to element.
  *
- * @TODO Verify XML validity of attribute name and value
+ * @todo Verify XML validity of attribute name and value
  ***************************************************************************/
 void GXmlElement::parse_attribute(size_t* pos, const std::string& segment)
 {

@@ -612,7 +612,7 @@ void GXml::process_text(GXmlNode** current, const std::string& segment)
 /***********************************************************************//**
  * @brief Get Markup type of segment
  *
- * @param[in] segement Segment for which Markup Type should be determined.
+ * @param[in] segment Segment for which Markup Type should be determined.
  *
  * Returns Markup Type of segment.
  ***************************************************************************/

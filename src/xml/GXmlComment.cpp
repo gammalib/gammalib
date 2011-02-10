@@ -75,7 +75,7 @@ GXmlComment::GXmlComment(const GXmlComment& node) : GXmlNode(node)
 /***********************************************************************//**
  * @brief Segment constructor
  *
- * @param[in] text Text for instance building.
+ * @param[in] segment Text for instance building.
  ***************************************************************************/
 GXmlComment::GXmlComment(const std::string& segment) : GXmlNode()
 {
@@ -168,6 +168,7 @@ void GXmlComment::clear(void)
  * @brief Write comment into file
  *
  * @param[in] fptr File pointer.
+ * @param[in] indent Text indentation.
  ***************************************************************************/
 void GXmlComment::write(FILE* fptr, int indent) const
 {
@@ -184,7 +185,8 @@ void GXmlComment::write(FILE* fptr, int indent) const
 /***********************************************************************//**
  * @brief Print comment in output stream
  *
- * @param[in] os Output stream into which the node will be printed.
+ * @param[in] os Output stream.
+ * @param[in] indent Text indentation.
  ***************************************************************************/
 void GXmlComment::print(std::ostream& os, int indent) const
 {
@@ -254,14 +256,14 @@ GXmlComment* GXmlComment::clone(void) const
 /***********************************************************************//**
  * @brief Parse comment segment string
  *
- * @param[in] segement Segment string.
+ * @param[in] segment Segment string.
  *
  * @exception GException::xml_syntax_error
  *            XML syntax error.
  *
  * Parse the segment string and extract the comment.
  *
- * @TODO Check validity of characters in comment string
+ * @todo Check validity of characters in comment string
  ***************************************************************************/
 void GXmlComment::parse(const std::string& segment)
 {

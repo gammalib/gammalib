@@ -57,7 +57,7 @@ GXmlAttribute::GXmlAttribute(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] attr Object from which the instance should be built.
+ * @param[in] attr XML attribute.
  ***************************************************************************/
 GXmlAttribute::GXmlAttribute(const GXmlAttribute& attr)
 {
@@ -114,7 +114,7 @@ GXmlAttribute::~GXmlAttribute(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] attr Object which should be assigned.
+ * @param[in] attr XML attribute.
  ***************************************************************************/
 GXmlAttribute& GXmlAttribute::operator= (const GXmlAttribute& attr)
 {
@@ -179,7 +179,7 @@ void GXmlAttribute::write(FILE* fptr) const
 /***********************************************************************//**
  * @brief Print attribute in output stream
  *
- * @param[in] os Output stream into which the node will be printed.
+ * @param[in] os Output stream.
  ***************************************************************************/
 void GXmlAttribute::print(std::ostream& os) const
 {
@@ -302,7 +302,7 @@ void GXmlAttribute::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] node Object from which members which should be copied.
+ * @param[in] attr XML attribute.
  ***************************************************************************/
 void GXmlAttribute::copy_members(const GXmlAttribute& attr)
 {
