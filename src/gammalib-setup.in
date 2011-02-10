@@ -31,7 +31,7 @@ gammalib_lib="@prefix@/lib"
 uname_system=`uname`
 python_dir="@pythondir@"
 pkgconfig_dir="@prefix@/lib/pkgconfig"
-man_dir="@prefix@/share/doc/gammalib/doxygen/man"
+man_dir="@prefix@/share/doc/gammalib/man"
 
 #
 # Set LD_LIBRARY_PATH
