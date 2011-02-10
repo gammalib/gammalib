@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GException_sky.cpp  -  sky exception handlers             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GException_sky.cpp
+ * @brief Sky module exception classes implementation
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
@@ -85,7 +90,7 @@ GException::skymap_bad_size::skymap_bad_size(std::string origin,
  *
  * @param[in] origin Method that throws the error.
  * @param[in] ctype1 Encountered ctype1 keyword.
- * @param[in] ctype1 Encountered ctype1 keyword.
+ * @param[in] ctype2 Encountered ctype2 keyword.
  * @param[in] message Error message.
  ***************************************************************************/
 GException::skymap_bad_ctype::skymap_bad_ctype(std::string origin,

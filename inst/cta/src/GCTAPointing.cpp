@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAPointing.cpp
- * @brief GCTAPointing class interface implementation.
+ * @brief CTA pointing class interface implementation
  * @author J. Knodlseder
  */
 
@@ -55,7 +55,9 @@ GCTAPointing::GCTAPointing(void) : GPointing()
 /***********************************************************************//**
  * @brief Sky direction constructor
  *
- * @param[in] pnt Pointing.
+ * @param[in] dir Sky direction.
+ *
+ * Construct CTA pointing from sky direction.
  ***************************************************************************/
 GCTAPointing::GCTAPointing(const GSkyDir& dir) : GPointing()
 {
@@ -73,7 +75,7 @@ GCTAPointing::GCTAPointing(const GSkyDir& dir) : GPointing()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] pnt Pointing.
+ * @param[in] pnt CTA pointing.
  ***************************************************************************/
 GCTAPointing::GCTAPointing(const GCTAPointing& pnt) : GPointing(pnt)
 {
@@ -110,7 +112,7 @@ GCTAPointing::~GCTAPointing(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] pnt Pointing.
+ * @param[in] pnt CTA pointing.
  ***************************************************************************/
 GCTAPointing& GCTAPointing::operator= (const GCTAPointing& pnt)
 {
@@ -208,7 +210,7 @@ void GCTAPointing::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] pnt Pointing.
+ * @param[in] pnt CTA pointing.
  ***************************************************************************/
 void GCTAPointing::copy_members(const GCTAPointing& pnt)
 {

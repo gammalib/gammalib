@@ -481,6 +481,7 @@ std::string left(const std::string& s, int n, char c)
  *
  * @param[in] s String to be centred.
  * @param[in] n Requested total width.
+ * @param[in] c Fill character.
  *
  * Right justify string by adding whitespace to the left to achieve a length
  * of n characters.
@@ -503,6 +504,7 @@ std::string right(const std::string& s, int n, char c)
  *
  * @param[in] s String to be centred.
  * @param[in] n Requested total width.
+ * @param[in] c Left fill character.
  *
  * Center string by adding whitespace to the left and the right to achieve a
  * length of n characters.
@@ -514,7 +516,8 @@ std::string center(const std::string& s, int n, char c)
     int n_left  = n - s.length() - n_right;
 
     // Set result
-    std::string result = fill(std::string(1,c), n_left)+s+fill(" ", n_right);
+    std::string result = fill(std::string(1,c), n_left) + s + 
+                         fill(std::string(1,c), n_right);
 
     // Return result
     return result;

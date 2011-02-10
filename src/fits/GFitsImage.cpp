@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GFitsImage.cpp  - FITS image class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsImage.cpp
+ * @brief FITS image class implementation
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
@@ -457,7 +462,7 @@ std::string GFitsImage::print(void) const
 /***********************************************************************//**
  * @brief Open FITS image
  *
- * @param[in] fptr FITS file pointer
+ * @param[in] vptr FITS file pointer
  *
  * Open FITS image in FITS file. Opening means connecting the FITS file
  * pointer to the image and reading the image and axes dimensions.
@@ -563,7 +568,7 @@ void GFitsImage::init_image_header(void)
 /***********************************************************************//**
  * @brief Open Image
  *
- * @param[in] fptr FITS file void pointer.
+ * @param[in] vptr FITS file void pointer.
  *
  * Open FITS image in FITS file. Opening means connecting the FITS file
  * pointer to the image and reading the image and axes dimensions.
@@ -843,7 +848,7 @@ int GFitsImage::offset(const int& ix, const int& iy, const int& iz) const
  * @param[in] ix Pixel index in first dimension (starting from 0).
  * @param[in] iy Pixel index in second dimension (starting from 0).
  * @param[in] iz Pixel index in third dimension (starting from 0).
- * @param[in] iz Pixel index in forth dimension (starting from 0).
+ * @param[in] it Pixel index in forth dimension (starting from 0).
  *
  * @exception GException::fits_wrong_image_operator
  *            Pixel array has less than 4 dimensions.

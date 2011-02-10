@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GFitsAsciiTable.cpp  - FITS ASCII table class               *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,8 +9,12 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
+/**
+ * @file GFitsAsciiTable.cpp
+ * @brief FITS ASCII table class implementation
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
@@ -29,14 +33,14 @@
 
 /*==========================================================================
  =                                                                         =
- =                  GFitsAsciiTable constructors/destructors               =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GFitsAsciiTable::GFitsAsciiTable() : GFitsTable()
+GFitsAsciiTable::GFitsAsciiTable(void) : GFitsTable()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -49,8 +53,7 @@ GFitsAsciiTable::GFitsAsciiTable() : GFitsTable()
 /***********************************************************************//**
  * @brief Constructor
  *
- * @param[in] nrows Number of rows in table
- * @param[in] ncols Number of columns in table
+ * @param[in] nrows Number of rows in table.
  ***************************************************************************/
 GFitsAsciiTable::GFitsAsciiTable(int nrows) : GFitsTable(nrows)
 {
@@ -65,7 +68,7 @@ GFitsAsciiTable::GFitsAsciiTable(int nrows) : GFitsTable(nrows)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param table Table to be used to initialise instance
+ * @param[in] table Table.
  ***************************************************************************/
 GFitsAsciiTable::GFitsAsciiTable(const GFitsAsciiTable& table) : GFitsTable(table)
 {
@@ -95,14 +98,14 @@ GFitsAsciiTable::~GFitsAsciiTable()
 
 /*==========================================================================
  =                                                                         =
- =                        GFitsAsciiTable operators                        =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param table Table to be assigned
+ * @param[in] table Table.
  ***************************************************************************/
 GFitsAsciiTable& GFitsAsciiTable::operator= (const GFitsAsciiTable& table)
 {
@@ -130,13 +133,13 @@ GFitsAsciiTable& GFitsAsciiTable::operator= (const GFitsAsciiTable& table)
 
 /*==========================================================================
  =                                                                         =
- =                      GFitsAsciiTable public methods                     =
+ =                              Public methods                             =
  =                                                                         =
  ==========================================================================*/
 
 /*==========================================================================
  =                                                                         =
- =                      GFitsAsciiTable private methods                    =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -156,12 +159,10 @@ void GFitsAsciiTable::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param table Table to be copied
+ * @param table Table.
  ***************************************************************************/
 void GFitsAsciiTable::copy_members(const GFitsAsciiTable& table)
 {
-    // Copy members
-    
     // Return
     return;
 }
@@ -172,10 +173,6 @@ void GFitsAsciiTable::copy_members(const GFitsAsciiTable& table)
  ***************************************************************************/
 void GFitsAsciiTable::free_members(void)
 {
-    // Free memory
-    
-    // Mark memory as freed
-    
     // Return
     return;
 }
@@ -192,13 +189,6 @@ GFitsAsciiTable* GFitsAsciiTable::clone(void) const
 
 /*==========================================================================
  =                                                                         =
- =                          GFitsAsciiTable friends                        =
- =                                                                         =
- ==========================================================================*/
-
-
-/*==========================================================================
- =                                                                         =
- =                  Other functions used by GFitsAsciiTable                =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/

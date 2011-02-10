@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsHeaderCard.cpp
+ * @brief FITS header card class implementation
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
@@ -61,9 +66,9 @@ GFitsHeaderCard::GFitsHeaderCard(void)
 /***********************************************************************//**
  * @brief Constructor for string cards
  *
- * @param[in] keyname Name of the header card
- * @param[in] value String value of the header card
- * @param[in] comment Comment of the header card
+ * @param[in] keyname Card name.
+ * @param[in] value Card string value.
+ * @param[in] comment Card comment.
  *
  * This constructor builds a header card from the keyname, value and comment.
  ***************************************************************************/
@@ -87,14 +92,14 @@ GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
 /***********************************************************************//**
  * @brief Constructor for floating point cards
  *
- * @param[in] keyname Name of the header card
- * @param[in] value Floating point value of the header card
- * @param[in] comment Comment of the header card
+ * @param[in] keyname Card name.
+ * @param[in] value Card floating point value.
+ * @param[in] comment Card comment.
  *
  * This constructor builds a header card from the keyname, value and comment.
  ***************************************************************************/
 GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
-                                 const double& value,
+                                 const double&      value,
                                  const std::string& comment)
 {
     // Initialise class members for clean destruction
@@ -113,14 +118,14 @@ GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
 /***********************************************************************//**
  * @brief Constructor for integer cards
  *
- * @param[in] keyname Name of the header card
- * @param[in] value Integer value of the header card
- * @param[in] comment Comment of the header card
+ * @param[in] keyname Card name.
+ * @param[in] value Card integer value.
+ * @param[in] comment Card comment.
  *
  * This constructor builds a header card from the keyname, value and comment.
  ***************************************************************************/
 GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
-                                 const int& value,
+                                 const int&         value,
                                  const std::string& comment)
 {
     // Initialise class members for clean destruction
@@ -139,8 +144,7 @@ GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param card[in] Header card that will be used to construct GFitsHeaderCard
- *                 instance
+ * @param[in] card Header card.
  ***************************************************************************/
 GFitsHeaderCard::GFitsHeaderCard(const GFitsHeaderCard& card)
 {
@@ -176,7 +180,7 @@ GFitsHeaderCard::~GFitsHeaderCard(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param card[in] Header card to be assigned.
+ * @param[in] card Header card.
  ***************************************************************************/
 GFitsHeaderCard& GFitsHeaderCard::operator= (const GFitsHeaderCard& card)
 {
@@ -208,7 +212,7 @@ GFitsHeaderCard& GFitsHeaderCard::operator= (const GFitsHeaderCard& card)
 /***********************************************************************//**
  * @brief Set name of header card
  *
- * @param[in] keyname Name of header card.
+ * @param[in] keyname Card name.
  ***************************************************************************/
 void GFitsHeaderCard::keyname(const std::string& keyname)
 {
@@ -223,7 +227,7 @@ void GFitsHeaderCard::keyname(const std::string& keyname)
 /***********************************************************************//**
  * @brief Set string value of header card
  *
- * @param[in] value String value of header card.
+ * @param[in] value Card string value.
  *
  * This method sets the value of a string header card. The internal string
  * representation contains hyphens, yet for keyword writing the hyphens are
@@ -260,7 +264,7 @@ void GFitsHeaderCard::value(const std::string& value)
 /***********************************************************************//**
  * @brief Set boolean value of header card
  *
- * @param[in] value Single precision value.
+ * @param[in] value Card boolean value.
  ***************************************************************************/
 void GFitsHeaderCard::value(const bool& value)
 {
@@ -280,7 +284,7 @@ void GFitsHeaderCard::value(const bool& value)
 /***********************************************************************//**
  * @brief Set single precision value of header card
  *
- * @param[in] value Single precision value.
+ * @param[in] value Card single precision value.
  ***************************************************************************/
 void GFitsHeaderCard::value(const float& value)
 {
@@ -300,7 +304,7 @@ void GFitsHeaderCard::value(const float& value)
 /***********************************************************************//**
  * @brief Set double precision value of header card
  *
- * @param[in] value Double precision value.
+ * @param[in] value Card double precision value.
  ***************************************************************************/
 void GFitsHeaderCard::value(const double& value)
 {
@@ -320,7 +324,7 @@ void GFitsHeaderCard::value(const double& value)
 /***********************************************************************//**
  * @brief Set unsigned short integer value of header card
  *
- * @param[in] value Unsigned short integer value.
+ * @param[in] value Card unsigned short integer value.
  ***************************************************************************/
 void GFitsHeaderCard::value(const unsigned short& value)
 {
@@ -340,7 +344,7 @@ void GFitsHeaderCard::value(const unsigned short& value)
 /***********************************************************************//**
  * @brief Set short integer value of header card
  *
- * @param[in] value Short integer value.
+ * @param[in] value Card short integer value.
  ***************************************************************************/
 void GFitsHeaderCard::value(const short& value)
 {
@@ -360,7 +364,7 @@ void GFitsHeaderCard::value(const short& value)
 /***********************************************************************//**
  * @brief Set unsigned integer value of header card
  *
- * @param[in] value Unsigned integer value.
+ * @param[in] value Card unsigned integer value.
  ***************************************************************************/
 void GFitsHeaderCard::value(const unsigned int& value)
 {
@@ -380,7 +384,7 @@ void GFitsHeaderCard::value(const unsigned int& value)
 /***********************************************************************//**
  * @brief Set integer value of header card
  *
- * @param[in] value Integer value.
+ * @param[in] value Card integer value.
  ***************************************************************************/
 void GFitsHeaderCard::value(const int& value)
 {
@@ -400,7 +404,7 @@ void GFitsHeaderCard::value(const int& value)
 /***********************************************************************//**
  * @brief Set long integer value of header card
  *
- * @param[in] value Long integer value.
+ * @param[in] value Card long integer value.
  ***************************************************************************/
 void GFitsHeaderCard::value(const long& value)
 {
@@ -420,7 +424,7 @@ void GFitsHeaderCard::value(const long& value)
 /***********************************************************************//**
  * @brief Set unsigned integer long value of header card
  *
- * @param[in] value Unsigned long integer value.
+ * @param[in] value Card unsigned long integer value.
  ***************************************************************************/
 void GFitsHeaderCard::value(const unsigned long& value)
 {
@@ -440,7 +444,7 @@ void GFitsHeaderCard::value(const unsigned long& value)
 /***********************************************************************//**
  * @brief Set long long integer value of header card
  *
- * @param[in] value Long long integer value.
+ * @param[in] value Card long long integer value.
  ***************************************************************************/
 void GFitsHeaderCard::value(const long long& value)
 {
@@ -460,7 +464,7 @@ void GFitsHeaderCard::value(const long long& value)
 /***********************************************************************//**
  * @brief Set unit of header card value
  *
- * @param[in] value Unit of header card.
+ * @param[in] unit Unit of header card.
  ***************************************************************************/
 void GFitsHeaderCard::unit(const std::string& unit)
 {
@@ -475,7 +479,7 @@ void GFitsHeaderCard::unit(const std::string& unit)
 /***********************************************************************//**
  * @brief Set comment of header card
  *
- * @param[in] value Header card comment.
+ * @param[in] comment Header card comment.
  ***************************************************************************/
 void GFitsHeaderCard::comment(const std::string& comment)
 {
@@ -1038,7 +1042,7 @@ void GFitsHeaderCard::read(void* vptr, int keynum)
 /***********************************************************************//**
  * @brief Read header card from FITS file
  *
- * @param[in] fptr FITS file void pointer.
+ * @param[in] vptr FITS file void pointer.
  * @param[in] keyname Name of the header card.
  ***************************************************************************/
 void GFitsHeaderCard::read(void* vptr, const std::string& keyname)
@@ -1078,7 +1082,7 @@ void GFitsHeaderCard::read(void* vptr, const std::string& keyname)
 /***********************************************************************//**
  * @brief Write header card
  *
- * @param fptr[in] FITS file void pointer.
+ * @param[in] vptr FITS file void pointer.
  *
  * Writes any kind of header card to a FITS file.
  ***************************************************************************/

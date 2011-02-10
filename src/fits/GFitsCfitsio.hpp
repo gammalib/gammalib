@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsCfitsio.hpp  - CFITSIO interface header              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsCfitsio.cpp
+ * @brief CFITSIO interface header
+ * @author J. Knodlseder
+ */
 
 #ifndef GFITSCFITSIO_HPP
 #define GFITSCFITSIO_HPP

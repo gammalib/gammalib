@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GEnergy.cpp
- * @brief Energy value class implementation.
+ * @brief Energy value class implementation
  * @author J. Knodlseder
  */
 
@@ -227,7 +227,7 @@ double GEnergy::log10MeV(void) const
 /***********************************************************************//**
  * @brief Set energy in erg
  *
- * @param[in] energy Energy in erg.
+ * @param[in] eng Energy in erg.
  ***************************************************************************/
 void GEnergy::erg(const double& eng)
 {
@@ -245,7 +245,7 @@ void GEnergy::erg(const double& eng)
 /***********************************************************************//**
  * @brief Set energy in keV
  *
- * @param[in] energy Energy in keV.
+ * @param[in] eng Energy in keV.
  ***************************************************************************/
 void GEnergy::keV(const double& eng)
 {
@@ -263,7 +263,7 @@ void GEnergy::keV(const double& eng)
 /***********************************************************************//**
  * @brief Set energy in MeV
  *
- * @param[in] energy Energy in MeV.
+ * @param[in] eng Energy in MeV.
  ***************************************************************************/
 void GEnergy::MeV(const double& eng)
 {
@@ -281,7 +281,7 @@ void GEnergy::MeV(const double& eng)
 /***********************************************************************//**
  * @brief Set energy in GeV
  *
- * @param[in] energy Energy in GeV.
+ * @param[in] eng Energy in GeV.
  ***************************************************************************/
 void GEnergy::GeV(const double& eng)
 {
@@ -299,7 +299,7 @@ void GEnergy::GeV(const double& eng)
 /***********************************************************************//**
  * @brief Set energy in TeV
  *
- * @param[in] energy Energy in TeV.
+ * @param[in] eng Energy in TeV.
  ***************************************************************************/
 void GEnergy::TeV(const double& eng)
 {
@@ -317,7 +317,7 @@ void GEnergy::TeV(const double& eng)
 /***********************************************************************//**
  * @brief Set log10 of energy in MeV
  *
- * @param[in] energy log10 of energy in MeV.
+ * @param[in] eng log10 of energy in MeV.
  ***************************************************************************/
 void GEnergy::log10MeV(const double& eng)
 {

@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFits.cpp
+ * @brief FITS file access class implementation
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
@@ -80,7 +85,7 @@ GFits::GFits(void)
  * @param[in] filename FITS file name.
  *
  * Construct an object by opening a FITS file. If the file does not exist it
- * is created.
+ * will be created.
  ***************************************************************************/
 GFits::GFits(const std::string& filename)
 {
@@ -98,7 +103,7 @@ GFits::GFits(const std::string& filename)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] fits FITS file from which the instance should be built.
+ * @param[in] fits FITS file.
  ***************************************************************************/
 GFits::GFits(const GFits& fits)
 {
@@ -135,7 +140,7 @@ GFits::~GFits(void)
 /***********************************************************************//**
  * @brief  Assignment operator
  *
- * @param fits[in] FITS file that should be assigned to GFits instance.
+ * @param[in] fits FITS file.
  ***************************************************************************/
 GFits& GFits::operator= (const GFits& fits)
 {
@@ -181,7 +186,7 @@ void GFits::clear(void)
 
 
 /***********************************************************************//**
- * @brief Returns number of HDUs in FITS file
+ * @brief Return number of HDUs in FITS file
  ***************************************************************************/
 int GFits::size(void) const
 {
@@ -193,7 +198,7 @@ int GFits::size(void) const
 /***********************************************************************//**
  * @brief Opens or creates FITS file
  *
- * @param[in] filename Name of FITS file to be opened
+ * @param[in] filename Name of FITS file to be opened.
  *
  * @exception GException::fits_already_opened
  *            Class instance contains already an opened FITS file.
@@ -208,11 +213,8 @@ int GFits::size(void) const
  * This method opens all HDUs that are found in the specified FITS file.
  * If the file does not exist then a new FITS file is created.
  * For each HDU, a GFitsHDU object is associated to the GFits object.
- * The HDUs can then be accessed using the
- * GFits::hdu(const std::string&)
- * or
- * GFits::hdu(int extno)
- * methods.
+ * The HDUs can then be accessed using the hdu(const std::string&) or
+ * hdu(int extno) method.
  ***************************************************************************/
 void GFits::open(const std::string& filename)
 {

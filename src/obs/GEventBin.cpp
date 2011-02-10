@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GEventBin.cpp  -  Event bin abstract base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GEventBin.cpp
- * @brief GEventBin abstract base class implementation.
+ * @brief Abstract event bin base class implementation
  * @author J. Knodlseder
  */
 
@@ -54,7 +54,7 @@ GEventBin::GEventBin(void) : GEvent()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] atom Event bin.
+ * @param[in] bin Event bin.
  ***************************************************************************/
 GEventBin::GEventBin(const GEventBin& bin) : GEvent(bin)
 {

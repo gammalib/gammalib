@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableCol.cpp  - FITS table column abstract base class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsTableCol.cpp
+ * @brief Abstract FITS table column class implementation
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
@@ -485,7 +490,6 @@ void GFitsTableCol::save_column(void)
  * @brief Write column in output stream
  *
  * @param[in] os Output stream.
- * @param[in] column Column.
  ***************************************************************************/
 std::ostream& GFitsTableCol::dump_column(std::ostream& os) const
 {
@@ -501,7 +505,6 @@ std::ostream& GFitsTableCol::dump_column(std::ostream& os) const
  * @brief Write column in logger
  *
  * @param[in] log Logger.
- * @param[in] column Column.
  ***************************************************************************/
 GLog& GFitsTableCol::dump_column(GLog& log) const
 {

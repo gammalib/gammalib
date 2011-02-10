@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GException_obs.cpp
- * @brief Observation exception handler interface implementation.
+ * @brief Observation exception handler interface implementation
  * @author J. Knodlseder
  */
 
@@ -205,8 +205,8 @@ GException::rsp_invalid_type::rsp_invalid_type(std::string origin,
  * @brief Invalid Good Time Interval found
  *
  * @param[in] origin Method that throws the error.
- * @param[in] start Good Time Interval start time.
- * @param[in] start Good Time Interval stop time.
+ * @param[in] tstart Good Time Interval start time.
+ * @param[in] tstop Good Time Interval stop time.
  * @param[in] message Optional error message.
  ***************************************************************************/
 GException::gti_invalid::gti_invalid(std::string origin, GTime tstart,

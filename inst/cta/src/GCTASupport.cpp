@@ -33,7 +33,7 @@
  *
  * @param[in] rad Circle radius in radians (<pi).
  * @param[in] dist Circle centre distance to ROI centre (<pi).
- * @param[in] cospsf Cosine of circle centre distance to ROI centre.
+ * @param[in] cosdist Cosine of circle centre distance to ROI centre.
  * @param[in] sindist Sinus of circle centre distance to ROI centre.
  * @param[in] roi Radius of ROI in radians.
  * @param[in] cosroi Cosine of ROI radius.

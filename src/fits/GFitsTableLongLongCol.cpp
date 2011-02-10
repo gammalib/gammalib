@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GFitsTableLongLongCol.cpp  - FITS table long long column class      *
+ * GFitsTableLongLongCol.cpp  - FITS table long long integer column class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GFitsTableLongLongCol.cpp
+ * @brief FITS table long long integer column class implementation
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
