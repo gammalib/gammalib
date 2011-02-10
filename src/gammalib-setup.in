@@ -5,7 +5,7 @@
 #              software installation. Note that this script is
 #              designed to be invoked by gammalib-init.csh/gammalib-init.sh,
 #              and should not normally be invoked directly by user.
-# Author/Date: Juergen Knoedlseder, IRAP, February 1, 2011
+# Author/Date: Juergen Knoedlseder, IRAP, February 10, 2011
 #-------------------------------------------------------------------------------
 #
 # Set fixed parameters
@@ -31,6 +31,7 @@ gammalib_lib="@prefix@/lib"
 uname_system=`uname`
 python_dir="@pythondir@"
 pkgconfig_dir="@prefix@/lib/pkgconfig"
+man_dir="@prefix@/share/doc/gammalib/doxygen/man"
 
 #
 # Set LD_LIBRARY_PATH
@@ -100,9 +101,20 @@ else
 fi
 
 #
+# Set MANPATH
+# ==============
+if [ "x$MANPATH" = x ]; then
+  MANPATH="$man_dir"
+else
+  MANPATH=`echo ":$MANPATH:" | \
+    sed "s%:$man_dir:%:%g" | sed "s%::*$%%"`
+  MANPATH="$man_dir$MANPATH"
+fi
+
+#
 # List of variables needed in initialization script
 # =================================================
-varlist="PATH PYTHONPATH PKG_CONFIG_PATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH"
+varlist="PATH PYTHONPATH PKG_CONFIG_PATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH MANPATH"
 
 #
 # Save values in output initialization shell scripts
