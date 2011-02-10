@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{CCD}}
 \newcommand{\doctype}{\mbox{Coding Conventions Document}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{23 January 2011}}
+\newcommand{\calendar}{\mbox{5 February 2011}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 \newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
@@ -107,26 +107,45 @@ the specific file.
 Only {\tt \#include} directives that are already given by the corresponding header file can
 be omitted.
 
+As \this\ is written in C++, the C++ style headers should be used instead of the C style
+headers to ensure maximum portability.
+Examples of common C++ style headers are
+{\tt <cstdio>} (instead of {\tt <stdio.h>}),
+{\tt <cmath>} (instead of {\tt <math.h>}),
+{\tt <cstring>} (instead of {\tt <string.h>}), etc.
+Functions and types should then be prefixed by {\tt std::}.
+For example,
+{\tt cos} becomes {\tt std::cos},
+{\tt time\_t} becomes {\tt std::time\_t}, etc.
+One significant change is that {\tt fabs} becomes {\tt std::abs} since
+the C style {\tt abs} function only applies to integers.
+Here, the {\tt std::} prefix is crucial to distinguish the C++ function (which is
+also defined for doubles) from the C function.
+
 Note also that some compilers are more tolerant in omitting {\tt \#include} directives, such
-as {\tt <stdio.h>} or {\tt <string.h>}, so these directives should also be included for compatibility,
+as {\tt <cstdio>} or {\tt <cstring>}, so these directives should also be included for compatibility,
 even if they seem not to be required on specific systems.
 Examples of include directives needed by common functions are:
 \begin{itemize}
-\item[] {\tt <stdio.h>} contains {\tt fopen}, {\tt fgets}, {\tt fclose}, {\tt fprintf}, {\tt sprintf}
-\item[] {\tt <string.h>} contains {\tt strncpy}, {\tt memcpy}
+\item[] {\tt <cstdio>} contains {\tt std::fopen}, {\tt std::fgets}, {\tt std::fclose}, {\tt std::fprintf}, {\tt std::sprintf}
+\item[] {\tt <cstring>} contains {\tt std::strncpy}, {\tt std::memcpy}
 \end{itemize}
+
+If possible, however, {\tt std::strncpy} and {\tt std::memcpy} should be avoided at all as these
+functions happend to have some compatibility problems in the past.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{C++ classes}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Data}
+\subsubsection{Members}
 
-Class data should be either {\tt private} or {\tt protected}, the latter being generally used
+Class members should be either {\tt private} or {\tt protected}, the latter being generally used
 when a derived class should be able to access base class data.
 
-Data members should be prefixed by {\tt m\_} and should be in lower case.
+Members should be prefixed by {\tt m\_} and should be in lower case.
 For long member names, additional underscores may be added.
 Examples of valid member names are
 \begin{verbatim}
@@ -250,6 +269,18 @@ the source of memory leaks.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Inheritence}
+
+Class inheritence is heavily used in \this\ to implement instrument specific functionnalities
+that satisfy a generic interface.
+
+Derived classes should never set explicitely base class members.
+Base class members should be set by proper constructors, and base class constructors are
+to to be invoked in derived class constructors.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Methods}
 
 Uniform {\tt public} method names should be provided throughout \this\ for all classes.
@@ -276,14 +307,15 @@ Method & Usage & Implementation \\
 \noalign{\smallskip}
 \hline
 \noalign{\smallskip}
-{\tt clear()} & Set object to initial empty state & All classes \\
-{\tt print()} & Print object into string & All classes (see section \ref{sec:output}) \\
-{\tt append()} & Append element to list of elements & Class containing elements \\
-{\tt size()} & Return number of elements in object & Class containing elements \\
-{\tt load()} & Load data from file (open, read, close) & When useful \\
-{\tt save()} & Save data into file (open, write, close) & When useful \\
-{\tt read()} & Read data from open file & When useful \\
-{\tt write()} & Write data into open file & When useful \\
+{\tt clear()} & Set object to initial empty state & all classes \\
+{\tt print()} & Print object into string & all classes (see section \ref{sec:output}) \\
+{\tt append()} & Append element to list of elements & container classes \\
+{\tt size()} & Return number of elements in object & container classes \\
+{\tt load()} & Load data from file (open, read, close) & if applicable \\
+{\tt save()} & Save data into file (open, write, close) & if applicable \\
+{\tt read()} & Read data from open file & if applicable \\
+{\tt write()} & Write data into open file & if applicable \\
+{\tt name()} & Name of object & if applicable \\
 \noalign{\smallskip}
 \hline
 \end{tabular}
@@ -314,6 +346,14 @@ Numeric argument types should be typically {\tt int} and {\tt double}.
 Unless absolutely required, {\tt short int}, {\tt long}, and {\tt float} should be avoided.
 True/false checks should always be done using {\tt bool}.
 
+Methods should be declated as {\tt const} if they do not alter class members.
+In some classes, pre-computations are done to speed up calculations, and these
+pre-computations will alter class members.
+If these pre-computation are not supposed to alter the content of a class,
+methods that perfom pre-computations should also be declared as {\tt const}.
+Internally, they have to circumvent const correctness by casting the pointer to
+non {\tt const}.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Arguments and return values}
@@ -322,14 +362,16 @@ Arguments to methods should in general be passed by reference to reduce function
 overhead.
 In addition, arguments that are not intended to be changed by a method call should
 be passed as {\tt const}.
+Return values should also be passed by reference.
+To assure that the return values will not change class members inadvertably, return
+values passed by reference should also be declared as {\tt const}.
 
-If a method sets a class member, the argument should be a pointer if the member
-is a pointer.
-It thus is possible to set a {\tt NULL} pointer.
+
+If the class member is a pointer, the argument should also be a pointer to allow
+setting the pointer to {\tt NULL}.
+
 
 Return values should be passed by reference if they concern class members.
-To assure that the return values are not changed inadvertably, they should be returned
-as {\tt const}.
 
 If the class member is a pointer, and if the pointer may be {\tt NULL}, it should be
 returned as a pointer.
@@ -400,6 +442,19 @@ GLog& operator<< (GLog& log, const GFits& fits)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Container classes}
+
+Container classes are classes that contain list of elements.
+
+Each container class should have element access operators {\tt operator[]} implemented,
+returning either a reference or a pointer to the class elements.
+A non-const and a const version of the operator should exist.
+
+Similar to the C++ template classes, {\tt at()} methods could also be implemented that
+perform range checking.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Documentation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Documentation}
@@ -444,6 +499,42 @@ the name of the person which {\bf initially} created the file.
  * @author J. Knodlseder
  */
 \end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Miscellaneous
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Miscellaneous}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Version control}
+
+\this\ applies a three-number version numbering scheme:
+{\tt major\_revision-minor\_revision-patch}.
+
+A {\tt major\_revision} of {\tt 00} designates the development version of \this.
+At this level, external interfaces of \this\ may change constantly, hence no
+interface control system is implemented.
+The {\tt minor\_revision} tag will be incremented once new major features become
+available.
+The {\tt patch} tag will be incremented after adding minor features and code corrections.
+
+Once the development phase is finished the release phase is entred.
+At this moment the {\tt major\_revision} number will be incremented to {\tt 01}.
+
+During release phase, external interfaces of \this\ will be under configuration control.
+If modifications of existing external interfaces will be done, the {\tt major\_revision}
+number will be incremented.
+At the same time, the {\tt libtool} version number of the \this\ will also change.
+
+The {\tt minor\_revision} number will be incremented in the release phase when
+extensions of the existing interfaces get implemented.
+Extensions should always be backward compatible, i.e. any existing software should
+not break due to the add of extensions.
+
+The {\tt patch} number will be incremented in the release phase after bug corrections
+or code improvements.
+The corresponding modifications should not change the functionality of the library.
 
 \end{document}
 
