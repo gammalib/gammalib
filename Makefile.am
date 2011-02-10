@@ -33,3 +33,10 @@ doc_DATA = \
 # Extra files to be distributed in the tar file
 #EXTRA_DIST = autogen.sh \
 #             gammalib.pc.in
+
+
+
+# Automatically reconfigure libtool
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
+libtool: $(LIBTOOL_DEPS)
+	$(SHELL) ./config.status --recheck
