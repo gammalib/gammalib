@@ -1,3 +1,14 @@
+2011-??-??  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+        * Version 0.4.6 released
+        ========================
+        
+        Strict usage of C++ headers
+        Update GEvents and GObservation interfaces
+        Use operator[] for element access
+        Add Doxygen and man support (make doxygen; make doxygen-install)
+        Add html documentation
+
 2011-02-02  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.4.5 released
