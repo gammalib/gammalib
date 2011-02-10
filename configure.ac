@@ -15,7 +15,6 @@ AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies])
 AC_CONFIG_HEADERS([config.h])
-LT_INIT()
 
 
 dnl =========================================
