@@ -34,14 +34,16 @@ doc_DATA = \
 #EXTRA_DIST = autogen.sh \
 #             gammalib.pc.in
 
-# Automatically reconfigure libtool
-LIBTOOL_DEPS = @LIBTOOL_DEPS@
-libtool: $(LIBTOOL_DEPS)
-	$(SHELL) ./config.status --recheck
+install-data-local: $(HTML_INSTALL_DATA_TARGETS)
+
+uninstall-local: $(HTML_UNINSTALL_DATA_TARGETS)
+
 
 #
-# Add Doxygen rules
+# Additional install rules
 #
+
+# Add Doxygen rules
 if DX_COND_doc
 
 # HTML
@@ -165,3 +167,33 @@ DX_CLEANFILES = \
      $(DX_CLEAN_LATEX)
 
 endif DX_COND_doc
+
+# Install HTML files
+HTMLDIRS = html html/images
+HTML_INSTALL_DATA_TARGETS = install-data-html
+install-data-html:
+	$(mkinstalldirs) $(DESTDIR)$(docdir)
+	$(mkinstalldirs) $(DESTDIR)$(docdir)/doxygen/html
+	$(INSTALL_DATA) $(srcdir)/doc/html/doxygen.html $(DESTDIR)$(docdir)/doxygen/html/index.html
+	$(INSTALL_DATA) $(srcdir)/doc/html/gammalib.css $(DESTDIR)$(docdir)/doxygen/html
+	@for dir in $(HTMLDIRS) ; do \
+	  $(mkinstalldirs) $(DESTDIR)$(docdir)/$$dir && \
+	  for file in $(srcdir)/doc/$$dir/*.* ; do \
+	    echo "$(INSTALL_DATA) $$file $(DESTDIR)$(docdir)/$$dir" ; \
+	    $(INSTALL_DATA) "$$file" $(DESTDIR)$(docdir)/$$dir ; \
+	  done ; \
+	done
+
+# Uninstall HTML files
+HTML_UNINSTALL_DATA_TARGETS = uninstall-data-html
+uninstall-data-html:
+	rm -f $(DESTDIR)$(docdir)/doxygen/html/index.html
+	rm -f $(DESTDIR)$(docdir)/doxygen/html/gammalib.css
+	for dir in $(HTMLDIRS) ; do \
+	  rm -f -r $(DESTDIR)$(docdir)/$$dir ; \
+	done
+
+# Automatically reconfigure libtool
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
+libtool: $(LIBTOOL_DEPS)
+	$(SHELL) ./config.status --recheck
