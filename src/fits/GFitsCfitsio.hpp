@@ -11,7 +11,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GFitsCfitsio.cpp
+ * @file GFitsCfitsio.hpp
  * @brief CFITSIO interface header
  * @author J. Knodlseder
  */
