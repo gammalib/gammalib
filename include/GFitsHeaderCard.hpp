@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsHeaderCard.hpp  - FITS header card class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GFitsHeaderCard.hpp
- * @brief GFitsHeaderCard class definition.
+ * @brief FITS header card class definition
  * @author J. Knodlseder
  */
 
@@ -41,8 +41,8 @@ class GFitsHeaderCard {
     friend class GFitsHeader;
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GFitsHeaderCard& card);
-    friend GLog&         operator<< (GLog& log, const GFitsHeaderCard& header);
+    friend std::ostream& operator<<(std::ostream& os, const GFitsHeaderCard& card);
+    friend GLog&         operator<<(GLog& log,        const GFitsHeaderCard& card);
 
 public:
     // Constructors & Destructors
