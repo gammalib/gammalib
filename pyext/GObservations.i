@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GObservations.i
- * @brief GObservations class SWIG file.
+ * @brief Observation container class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -25,7 +25,7 @@
 /***********************************************************************//**
  * @class GObservations
  *
- * @brief Interface for the observations container class.
+ * @brief Observation container class
  ***************************************************************************/
 class GObservations {
 public:
@@ -53,15 +53,17 @@ public:
     char *__str__() {
         return tochar(self->print());
     }
-    GObservation* __getitem__(int index) {
-    if (index >= 0 && index < self->size())
-        return (*self)(index);
-    else
-        throw GException::out_of_range("__getitem__(int)", index, self->size());
+    GObservation& __getitem__(const int& index) {
+        if (index >= 0 && index < self->size())
+            return (*self)[index];
+        else
+            throw GException::out_of_range("__getitem__(int)", index, self->size());
     }
-    void __setitem__(int index, const GObservation* val) {
-        if (index>=0 && index < self->size())
-            *((*self)(index)) = *val;
+    void __setitem__(const int& index, const GObservation& val) {
+        if (index>=0 && index < self->size()) {
+            (*self)[index] = val;
+            return;
+        }
         else
             throw GException::out_of_range("__setitem__(int)", index, self->size());
     }

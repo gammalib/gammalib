@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GObservations.hpp  -  Observation container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GObservations.hpp
- * @brief GObservations container class interface definition.
+ * @brief Observations container class interface definition
  * @author J. Knodlseder
  */
 
@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include <iostream>
 #include "GLog.hpp"
 #include "GObservation.hpp"
@@ -55,8 +56,8 @@
 class GObservations {
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GObservations& obs);
-    friend GLog&         operator<< (GLog& log, const GObservations& obs);
+    friend std::ostream& operator<<(std::ostream& os, const GObservations& obs);
+    friend GLog&         operator<<(GLog& log,        const GObservations& obs);
 
 public:
     // Constructors and destructors
@@ -66,14 +67,14 @@ public:
 
     // Operators
     GObservations&      operator= (const GObservations& obs);
-    GObservation*       operator() (int index);
-    const GObservation* operator() (int index) const;
+    GObservation&       operator[](const int& index);
+    const GObservation& operator[](const int& index) const;
 
     // Methods
     void        clear(void);
-    int         size(void) const { return m_num; }
+    int         size(void) const { return m_obs.size(); }
     void        append(GObservation& obs);
-    void        models(const GModels& models) { m_models=models; return; }
+    void        models(const GModels& models) { m_models=models;}
     void        models(const std::string& filename);
     GModels&    models(void) { return m_models; }
     void        optimize(GOptimizer& opt);
@@ -152,11 +153,10 @@ protected:
     void           copy_members(const GObservations& obs);
     void           free_members(void);
 
-    // Protected data area
-    int            m_num;            //!< Number of observations
-    GObservation** m_obs;            //!< Pointers to observations
-    GModels        m_models;         //!< Models
-    double         m_npred;          //!< Total number of predicted events
+    // Protected members
+    std::vector<GObservation*> m_obs;      //!< List of observations
+    GModels                    m_models;   //!< Models
+    double                     m_npred;    //!< Total number of predicted events
 
 };
 

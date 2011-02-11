@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GObservations.cpp
- * @brief GObservations class implementation.
+ * @brief Observations container class implementation
  * @author J. Knodlseder
  */
 
@@ -25,8 +25,7 @@
 #include "GObservations.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OP_ACCESS1                        "GObservations::operator() (int)"
-#define G_OP_ACCESS2                  "GObservations::operator() (int) const"
+#define G_OP_ACCESS                         "GObservations::operator[](int&)"
 #define G_OBSERVATION                 "GObservations::observation(int) const"
 
 /* __ Macros _____________________________________________________________ */
@@ -43,11 +42,11 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GObservations::GObservations(void)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -58,11 +57,11 @@ GObservations::GObservations(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param obs Instance which should be used for construction
+ * @param obs Observation container.
  ***************************************************************************/
 GObservations::GObservations(const GObservations& obs)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -95,9 +94,9 @@ GObservations::~GObservations(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] obs Instance to be assigned
+ * @param[in] obs Observation container.
  ***************************************************************************/
-GObservations& GObservations::operator= (const GObservations& obs)
+GObservations& GObservations::operator=(const GObservations& obs)
 {
     // Execute only if object is not identical
     if (this != &obs) {
@@ -105,7 +104,7 @@ GObservations& GObservations::operator= (const GObservations& obs)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -119,40 +118,40 @@ GObservations& GObservations::operator= (const GObservations& obs)
 
 
 /***********************************************************************//**
- * @brief Return pointer to observation
+ * @brief Return reference to observation
  *
- * @param[in] index Index of observation (0,1,2,...)
+ * @param[in] index Index of observation [0,...,size()-1]
  *
  * @exception GException::out_of_range
  *            Operation index is out of range.
  ***************************************************************************/
-GObservation* GObservations::operator() (int index)
+GObservation& GObservations::operator[](const int& index)
 {
     // If index is outside boundary then throw an error
-    if (index < 0 || index >= m_num)
-        throw GException::out_of_range(G_OP_ACCESS1, index, 0, m_num-1);
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
 
-    // Return observation pointer
-    return m_obs[index];
+    // Return reference
+    return *(m_obs[index]);
 }
 
 
 /***********************************************************************//**
- * @brief Return pointer to observation (const version)
+ * @brief Return reference to observation (const version)
  *
- * @param[in] index Index of observation (0,1,2,...)
+ * @param[in] index Index of observation [0,...,size()-1]
  *
  * @exception GException::out_of_range
  *            Operation index is out of range.
  ***************************************************************************/
-const GObservation* GObservations::operator() (int index) const
+const GObservation& GObservations::operator[](const int& index) const
 {
     // If index is outside boundary then throw an error
-    if (index < 0 || index >= m_num)
-        throw GException::out_of_range(G_OP_ACCESS2, index, 0, m_num-1);
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
 
-    // Return observation pointer
-    return m_obs[index];
+    // Return reference
+    return *(m_obs[index]);
 }
 
 
@@ -181,32 +180,14 @@ void GObservations::clear(void)
 /***********************************************************************//**
  * @brief Append observation to container
  *
- * @param[in] obs Observation to be appended 
+ * @param[in] obs Observation.
+ *
+ * This method appends an observation to the container by cloning it.
  ***************************************************************************/
 void GObservations::append(GObservation& obs)
 {
-    // Allocate new observation pointers
-    GObservation** new_obs = new GObservation*[m_num+1];
-
-    // If we have already observation pointers then copy them over to the
-    // new pointer array
-    if (m_num > 0) {
-        for (int i = 0; i < m_num; ++i)
-            new_obs[i] = m_obs[i];
-    }
-
-    // Create a copy of the observation that should be added and store the
-    // pointer to this copy as last element of the pointer array
-    new_obs[m_num] = obs.clone();
-
-    // Release old pointer array
-    if (m_obs != NULL) delete [] m_obs;
-
-    // Attach new pointer array to this object
-    m_obs = new_obs;
-
-    // Increment number of observations
-    m_num++;
+    // Clone observation and append to list
+    m_obs.push_back(obs.clone());
 
     // Return
     return;
@@ -265,11 +246,11 @@ std::string GObservations::print(void) const
     // Append observations
     for (int i = 0; i < size(); ++i) {
         result.append("\n");
-        result.append((*this)(i)->print());
+        result.append((*this)[i].print());
     }
 
     // Append models
-    result.append("\n"+((GObservations*)this)->models().print());
+    result.append("\n"+m_models.print());
 
     // Return result
     return result;
@@ -289,7 +270,7 @@ GObservations::iterator GObservations::begin(void)
 
     // Get first valid observation
     if (iter.m_this != NULL) {
-        while (iter.m_index < iter.m_this->m_num) {
+        while (iter.m_index < iter.m_this->size()) {
             if (iter.m_this->m_obs[iter.m_index] != NULL) {
                 iter.m_obs = iter.m_this->m_obs[iter.m_index];
                 break;
@@ -318,7 +299,7 @@ GObservations::iterator GObservations::end(void)
     GObservations::iterator iter(this);
 
     // Set obeservation number beyond last observation
-    iter.m_index = iter.m_this->m_num;
+    iter.m_index = iter.m_this->size();
     iter.m_obs   = NULL;
 
     // Return
@@ -334,16 +315,13 @@ GObservations::iterator GObservations::end(void)
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * @todo Implement GModels::clear() method.
  ***************************************************************************/
 void GObservations::init_members(void)
 {
     // Initialise members
-    m_num    = 0;
-    m_obs    = NULL;
-    m_models = GModels();
-    m_npred  = 0.0;
+    m_obs.clear();
+    m_models.clear();
+    m_npred = 0.0;
 
     // Return
     return;
@@ -353,28 +331,14 @@ void GObservations::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] obs Instance from which members should be copied
- *
- * Copy observations from a GData object into the present object by invoking
- * the observation clone method of each observation.
+ * @param[in] obs Observation container.
  ***************************************************************************/
 void GObservations::copy_members(const GObservations& obs)
 {
     // Copy attributes
-    m_num    = obs.m_num;
+    m_obs    = obs.m_obs;
     m_models = obs.m_models;
     m_npred  = obs.m_npred;
-
-    // Copy observations
-    if (m_num > 0) {
-        m_obs = new GObservation*[m_num];
-        for (int i = 0; i < m_num; ++i) {
-            if (obs.m_obs[i] != NULL)
-                m_obs[i] = (obs.m_obs[i])->clone();
-            else
-                m_obs[i] = NULL;
-        }
-    }
 
     // Return
     return;
@@ -386,17 +350,6 @@ void GObservations::copy_members(const GObservations& obs)
  ***************************************************************************/
 void GObservations::free_members(void)
 {
-    // Free memory
-    if (m_obs != NULL) {
-        for (int i = 0; i < m_num; ++i) {
-            if (m_obs[i] != NULL) delete m_obs[i];
-        }
-        delete [] m_obs;
-    }
-
-    // Mark memory as free
-    m_obs = NULL;
-
     // Return
     return;
 }
@@ -413,7 +366,7 @@ void GObservations::free_members(void)
  * @brief Output operator
  *
  * @param[in] os Output stream.
- * @param[in] obs Observations.
+ * @param[in] obs Observation container.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GObservations& obs)
 {
@@ -429,7 +382,7 @@ std::ostream& operator<< (std::ostream& os, const GObservations& obs)
  * @brief Log operator
  *
  * @param[in] log Logger.
- * @param[in] obs Observations.
+ * @param[in] obs Observation container.
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GObservations& obs)
 {
