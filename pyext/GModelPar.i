@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GModelPar.i  -  Model parameter class SWIG interface         *
+ *           GModelPar.i  -  Model parameter class Python interface        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelPar.i
- * @brief GModelPar class SWIG interface.
+ * @brief Model parameter class Python interface
  * @author J. Knodlseder
  */
 %{
@@ -25,16 +25,18 @@
 /***********************************************************************//**
  * @class GModelPar
  *
- * @brief GModelPar class SWIG interface defintion.
+ * @brief Model parameter class
  ***************************************************************************/
 class GModelPar {
 public:
     // Constructors and destructors
     GModelPar(void);
     GModelPar(const GModelPar& par);
-    ~GModelPar();
+    virtual ~GModelPar(void);
 
     // Methods
+    void        clear(void);
+    GModelPar*  clone(void) const;
     std::string name(void) const;
     std::string unit(void) const;
     double      real_value(void) const;
@@ -51,6 +53,7 @@ public:
     bool        isfree(void) const;
     bool        hasmin(void) const;
     bool        hasmax(void) const;
+    bool        hasgrad(void) const;
     void        name(const std::string& name);
     void        unit(const std::string& unit);
     void        real_value(const double& value);
@@ -67,6 +70,7 @@ public:
     void        remove_range(void);
     void        free(void);
     void        fix(void);
+    void        hasgrad(const bool& grad);
     void        read(const GXmlElement& xml);
     void        write(GXmlElement& xml) const;
 };
