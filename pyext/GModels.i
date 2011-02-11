@@ -37,18 +37,15 @@ public:
  
     // Methods
     void     clear(void);
-    int      size(void) const { return m_elements; }
+    GModels* clone(void) const;
+    int      size(void) const;
     void     append(const GModel& model);
     void     load(const std::string& filename);
     void     save(const std::string& filename) const;
     void     read(const GXml& xml);
     void     write(GXml& xml) const;
-    /*
-    double   value(const GSkyDir& srcDir, const GEnergy& srcEng,
-                   const GTime& srcTime);
-    */
-    double   eval(const GEvent& event, const GObservation& obs);
-    double   eval_gradients(const GEvent& event, const GObservation& obs);
+    double   eval(const GEvent& event, const GObservation& obs) const;
+    double   eval_gradients(const GEvent& event, const GObservation& obs) const;
 };
 
 
@@ -59,17 +56,26 @@ public:
     char *__str__() {
         return tochar(self->print());
     }
-    GModel* __getitem__(int index) {
-    if (index >= 0 && index < self->size())
-        return (*self)(index);
-    else
-        throw GException::out_of_range("__getitem__(int)", index, self->size());
+    GModel& __getitem__(const int& index) {
+        if (index >= 0 && index < self->size())
+            return (*self)[index];
+        else
+            throw GException::out_of_range("__getitem__(int)", index, self->size());
     }
-    void __setitem__(int index, const GModel& val) {
-        if (index>=0 && index < self->size())
-            *(*self)(index) = val;
+    GModel& __getitem__(const std::string& name) {
+        return (*self)[name];
+    }
+    void __setitem__(const int& index, const GModel& val) {
+        if (index>=0 && index < self->size()) {
+            (*self)[index] = val;
+            return;
+        }
         else
             throw GException::out_of_range("__setitem__(int)", index, self->size());
+    }
+    void __setitem__(const std::string& name, const GModel& val) {
+        (*self)[name] = val;
+        return;
     }
     GModels copy() {
         return (*self);
