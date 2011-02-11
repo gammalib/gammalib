@@ -34,7 +34,6 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelRegistry.hpp \
                      GModelSky.hpp \
                      GModelData.hpp \
-		     GModelFactorized.hpp \
                      GModelPointSource.hpp \
                      GModelDiffuseSource.hpp \
                      GModelSpatial.hpp \
