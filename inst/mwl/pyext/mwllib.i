@@ -1,7 +1,7 @@
 /***************************************************************************
  *          mwllib  -  Multi-wavelength support python bindings            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -13,9 +13,9 @@
 %module mwllib
 
 /* __ MWL ________________________________________________________________ */
-#include "GMWLObservation.i"
-#include "GMWLSpectrum.i"
-#include "GMWLDatum.i"
+%include "GMWLObservation.i"
+%include "GMWLSpectrum.i"
+%include "GMWLDatum.i"
 
 
 

@@ -11,24 +11,24 @@
  *                                                                         *
  * ----------------------------------------------------------------------- *
  * Usage:                                                                  *
- * swig -c++ -python -Wall -includeall ctalib.i                            *
+ * swig -c++ -python -Wall ctalib.i                                        *
  ***************************************************************************/
 %module ctalib
 
 /* __ CTA ________________________________________________________________ */
-#include "GCTAObservation.i"
-#include "GCTAEventCube.i"
-#include "GCTAEventList.i"
-#include "GCTAEventBin.i"
-#include "GCTAEventAtom.i"
-#include "GCTAPointing.i"
-#include "GCTAResponse.i"
-#include "GCTAInstDir.i"
-#include "GCTARoi.i"
-#include "GCTAModelRadial.i"
-#include "GCTAModelRadialRegistry.i"
-#include "GCTAModelRadialGauss.i"
-#include "GCTAModelRadialAcceptance.i"
+%include "GCTAObservation.i"
+%include "GCTAEventCube.i"
+%include "GCTAEventList.i"
+%include "GCTAEventBin.i"
+%include "GCTAEventAtom.i"
+%include "GCTAPointing.i"
+%include "GCTAResponse.i"
+%include "GCTAInstDir.i"
+%include "GCTARoi.i"
+%include "GCTAModelRadial.i"
+%include "GCTAModelRadialRegistry.i"
+%include "GCTAModelRadialGauss.i"
+%include "GCTAModelRadialAcceptance.i"
 
 
 

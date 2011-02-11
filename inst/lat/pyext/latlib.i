@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          latlib - SWIG file                             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -11,18 +11,18 @@
  *                                                                         *
  * ----------------------------------------------------------------------- *
  * Usage:                                                                  *
- * swig -c++ -python -Wall -includeall latlib.i                            *
+ * swig -c++ -python -Wall latlib.i                                        *
  ***************************************************************************/
 %module latlib
 
 /* __ LAT ________________________________________________________________ */
-#include "GLATObservation.i"
-#include "GLATEventCube.i"
-#include "GLATEventBin.i"
-#include "GLATResponse.i"
-#include "GLATInstDir.i"
-#include "GLATRoi.i"
-#include "GLATLtCube.i"
+%include "GLATObservation.i"
+%include "GLATEventCube.i"
+%include "GLATEventBin.i"
+%include "GLATResponse.i"
+%include "GLATInstDir.i"
+%include "GLATRoi.i"
+%include "GLATLtCube.i"
 
 
 
