@@ -57,7 +57,7 @@ GVector set_vector(void)
   try {
     GVector vector(g_cols);
 	for (int col = 0; col < g_cols; ++col)
-	  vector(col) = g_vector[col];
+	  vector[col] = g_vector[col];
     return vector;
   }
   catch (exception &e) {
@@ -178,7 +178,7 @@ int check_matrix_vector(const GVector& v)
       double value = 0.0;
 	  for (int col = 0; col < g_cols; ++col)
 	    value += g_matrix[col+row*g_cols] * g_vector[col];
-	  if (v(row) != value) {
+	  if (v[row] != value) {
 	    result = 0;
 	    break;
 	  }
@@ -445,7 +445,7 @@ void test_extract(void)
 	for (int col = 0; col < cols; ++col) {
 	  GVector column(rows);
 	  for (int row = 0; row < rows; ++row)
-	    column(row) = (col+1)*100.0 + (row+1)*1.0;
+	    column[row] = (col+1)*100.0 + (row+1)*1.0;
 	  test.add_col(column, col);
 	  GVector check = test.extract_col(col);
 	  if (check != column) {
@@ -461,7 +461,7 @@ void test_extract(void)
 	for (int col = 0; col < cols; ++col) {
 	  GVector column(rows);
 	  for (int row = 0; row < rows; ++row)
-	    column(row) = (col+1)*100.0 + (row+1)*1.0;
+	    column[row] = (col+1)*100.0 + (row+1)*1.0;
 	  test.insert_col(column, col);
 	  GVector check = test.extract_col(col);
 	  if (check != column) {
@@ -477,7 +477,7 @@ void test_extract(void)
     for (int row = 0; row < rows; ++row) {
 	  GVector v_row(cols);
 	  for (int col = 0; col < cols; ++col)
-	    v_row(col) = (col+1)*100.0 + (row+1)*1.0;
+	    v_row[col] = (col+1)*100.0 + (row+1)*1.0;
 	  GVector check = test.extract_row(row);
 	  if (check != v_row) {
 	    cout << endl << "TEST ERROR: Unable to extract rows." << endl;

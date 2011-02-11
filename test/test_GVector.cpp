@@ -36,11 +36,11 @@ int main(void)
   GVector smaller(num+1);
   GVector bigger(num+1);
   for (int i = 0; i < num; ++i)
-    test(i) = (i+1) * 1.1;
+    test[i] = (i+1) * 1.1;
   for (int i = 0; i < num-1; ++i)
-    smaller(i) = (i+1) * 1.1;
+    smaller[i] = (i+1) * 1.1;
   for (int i = 0; i < num+1; ++i)
-    bigger(i) = (i+1) * 1.1;
+    bigger[i] = (i+1) * 1.1;
 
   // Test 1: Allocate zero vector
   try {
@@ -70,7 +70,7 @@ int main(void)
     //
 	cout << "  test3(1) = pi: ";
     GVector test3(3);
-	test3(1) = acos(-1.0);
+	test3[1] = acos(-1.0);
 	cout << test3 << endl;
 	cout << "  Size = " << test3.size() << endl;
     //
@@ -297,8 +297,8 @@ int main(void)
     cout << "  cross(a,b) (using 3-dim vectors): " << endl;
 	GVector test_cross_a(3);
 	GVector test_cross_b(3);
-	test_cross_a(0) = 1.0;
-	test_cross_b(1) = 1.0;
+	test_cross_a[0] = 1.0;
+	test_cross_b[1] = 1.0;
 	cout << "   a:     " << test_cross_a << endl;
 	cout << "   b:     " << test_cross_b << endl;
 	cout << "   cross: " << cross(test_cross_a, test_cross_b) << endl;

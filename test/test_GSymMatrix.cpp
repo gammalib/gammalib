@@ -19,7 +19,6 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>                           // cout, cerr
 #include <stdexcept>                          // std::exception
-//#include <math.h>
 #include <cmath>
 #include "GammaLib.hpp"
 
@@ -88,7 +87,7 @@ GVector set_vector(void)
   try {
     GVector vector(g_cols);
 	for (int col = 0; col < g_cols; ++col)
-	  vector(col) = g_vector[col];
+	  vector[col] = g_vector[col];
     return vector;
   }
   catch (exception &e) {
@@ -209,7 +208,7 @@ int check_matrix_vector(const GVector& v)
       double value = 0.0;
 	  for (int col = 0; col < g_cols; ++col)
 	    value += g_matrix[col+row*g_cols] * g_vector[col];
-	  if (v(row) != value) {
+	  if (v[row] != value) {
 	    result = 0;
 	    break;
 	  }
@@ -787,12 +786,12 @@ int main(void)
     // Test Cholesky solver
 	GVector e0(g_rows);
 	GVector a0(g_rows);
-	e0(0) = 1.0;
-	e0(1) = 0.0;
-	e0(2) = 0.0;
-	a0(0) = g_matrix[0];
-	a0(1) = g_matrix[3];
-	a0(2) = g_matrix[6];
+	e0[0] = 1.0;
+	e0[1] = 0.0;
+	e0[2] = 0.0;
+	a0[0] = g_matrix[0];
+	a0[1] = g_matrix[3];
+	a0[2] = g_matrix[6];
 	GVector s0 = cd.cholesky_solver(a0) - e0;
 	res = max(abs(s0));
 	if (res < 1.0e-15)
@@ -804,12 +803,12 @@ int main(void)
 	  throw;
 	}
 	//
-	e0(0) = 0.0;
-	e0(1) = 1.0;
-	e0(2) = 0.0;
-	a0(0) = g_matrix[1];
-	a0(1) = g_matrix[4];
-	a0(2) = g_matrix[7];
+	e0[0] = 0.0;
+	e0[1] = 1.0;
+	e0[2] = 0.0;
+	a0[0] = g_matrix[1];
+	a0[1] = g_matrix[4];
+	a0[2] = g_matrix[7];
 	s0 = cd.cholesky_solver(a0) - e0;
 	res = max(abs(s0));
 	if (res < 1.0e-15)
@@ -821,12 +820,12 @@ int main(void)
 	  throw;
 	}
 	//
-	e0(0) = 0.0;
-	e0(1) = 0.0;
-	e0(2) = 1.0;
-	a0(0) = g_matrix[2];
-	a0(1) = g_matrix[5];
-	a0(2) = g_matrix[8];
+	e0[0] = 0.0;
+	e0[1] = 0.0;
+	e0[2] = 1.0;
+	a0[0] = g_matrix[2];
+	a0[1] = g_matrix[5];
+	a0[2] = g_matrix[8];
 	s0 = cd.cholesky_solver(a0) - e0;
 	res = max(abs(s0));
 	if (res < 1.0e-15)
@@ -841,14 +840,14 @@ int main(void)
     // Test compressed Cholesky solver
 	e0 = GVector(g_rows+1);
 	a0 = GVector(g_rows+1);
-	e0(0) = 1.0;
-	e0(1) = 0.0;
-	e0(2) = 0.0;
-	e0(3) = 0.0;
-	a0(0) = g_matrix[0];
-	a0(1) = g_matrix[3];
-	a0(2) = 0.0;
-	a0(3) = g_matrix[6];
+	e0[0] = 1.0;
+	e0[1] = 0.0;
+	e0[2] = 0.0;
+	e0[3] = 0.0;
+	a0[0] = g_matrix[0];
+	a0[1] = g_matrix[3];
+	a0[2] = 0.0;
+	a0[3] = g_matrix[6];
 	s0    = cd_zero.cholesky_solver(a0) - e0;
 	res   = max(abs(s0));
 	if (res < 1.0e-15)
@@ -860,14 +859,14 @@ int main(void)
 	  throw;
 	}
     //
-	e0(0) = 0.0;
-	e0(1) = 1.0;
-	e0(2) = 0.0;
-	e0(3) = 0.0;
-	a0(0) = g_matrix[1];
-	a0(1) = g_matrix[4];
-	a0(2) = 0.0;
-	a0(3) = g_matrix[7];
+	e0[0] = 0.0;
+	e0[1] = 1.0;
+	e0[2] = 0.0;
+	e0[3] = 0.0;
+	a0[0] = g_matrix[1];
+	a0[1] = g_matrix[4];
+	a0[2] = 0.0;
+	a0[3] = g_matrix[7];
 	s0    = cd_zero.cholesky_solver(a0) - e0;
 	res   = max(abs(s0));
 	if (res < 1.0e-15)
@@ -879,14 +878,14 @@ int main(void)
 	  throw;
 	}
     //
-	e0(0) = 0.0;
-	e0(1) = 0.0;
-	e0(2) = 0.0;
-	e0(3) = 1.0;
-	a0(0) = g_matrix[2];
-	a0(1) = g_matrix[5];
-	a0(2) = 0.0;
-	a0(3) = g_matrix[8];
+	e0[0] = 0.0;
+	e0[1] = 0.0;
+	e0[2] = 0.0;
+	e0[3] = 1.0;
+	a0[0] = g_matrix[2];
+	a0[1] = g_matrix[5];
+	a0[2] = 0.0;
+	a0[3] = g_matrix[8];
 	s0    = cd_zero.cholesky_solver(a0) - e0;
 	res   = max(abs(s0));
 	if (res < 1.0e-15)
