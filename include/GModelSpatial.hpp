@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatial.hpp
- * @brief GModelSpatial abstract base class interface definition.
+ * @brief Abstract spatial model base class interface definition
  * @author J. Knodlseder
  */
 
@@ -21,6 +21,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
+#include <string>
 #include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
@@ -31,18 +32,18 @@
 /***********************************************************************//**
  * @class GModelSpatial
  *
- * @brief Abstract interface definition for the spatial model class.
+ * @brief Abstract spatial model base class
  *
  * This class implements the spatial component of the factorized gamma-ray
  * source model. Typical examples of spatial components are a point source
- * or an intensity map. The method isptsource() signals if the spatial
- * model is indeed a point source.
+ * (implemented by the derived class GModelSpatialPtsrc) or a Gaussian
+ * source (implemented by the derived class GModelSpatialGauss).
  ***************************************************************************/
 class GModelSpatial {
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GModelSpatial& model);
-    friend GLog&         operator<< (GLog& log, const GModelSpatial& model);
+    friend std::ostream& operator<<(std::ostream& os, const GModelSpatial& model);
+    friend GLog&         operator<<(GLog& log,        const GModelSpatial& model);
 
 public:
     // Constructors and destructors
@@ -51,22 +52,25 @@ public:
     virtual ~GModelSpatial(void);
 
     // Operators
-    virtual GModelPar&       operator() (int index);
-    virtual const GModelPar& operator() (int index) const;
     virtual GModelSpatial&   operator= (const GModelSpatial& model);
+    virtual GModelPar&       operator[](const int& index);
+    virtual const GModelPar& operator[](const int& index) const;
+    virtual GModelPar&       operator[](const std::string& name);
+    virtual const GModelPar& operator[](const std::string& name) const;
 
     // Pure virtual methods
     virtual void           clear(void) = 0;
     virtual GModelSpatial* clone(void) const = 0;
-    virtual int            size(void) const = 0;
     virtual std::string    type(void) const = 0;
-    virtual double         eval(const GSkyDir& srcDir) = 0;
-    virtual double         eval_gradients(const GSkyDir& srcDir) = 0;
+    virtual double         eval(const GSkyDir& srcDir) const = 0;
+    virtual double         eval_gradients(const GSkyDir& srcDir) const = 0;
     virtual GSkyDir        mc(GRan& ran) const = 0;
     virtual void           read(const GXmlElement& xml) = 0;
     virtual void           write(GXmlElement& xml) const = 0;
     virtual std::string    print(void) const = 0;
-    virtual bool           isptsource(void) const = 0;
+
+    // Methods
+    int size(void) const { return m_pars.size(); }
 
 protected:
     // Protected methods
@@ -74,8 +78,8 @@ protected:
     void copy_members(const GModelSpatial& model);
     void free_members(void);
 
-    // Pure virtual methods
-    virtual GModelPar** par(void) = 0;
+    // Proteced members
+    std::vector<GModelPar*> m_pars;  //!< Parameter pointers
 };
 
 #endif /* GMODELSPATIAL_HPP */
