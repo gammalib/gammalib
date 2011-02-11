@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModel.i
- * @brief GModel class python interface
+ * @brief Abstract model base class python interface
  * @author J. Knodlseder
  */
 %{
@@ -25,7 +25,7 @@
 /***********************************************************************//**
  * @class GModel
  *
- * @brief GModel class python interface defintion
+ * @brief Abstract model base class python interface
  ***************************************************************************/
 class GModel {
 public:
@@ -38,14 +38,18 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GModel*     clone(void) const = 0;
-    virtual int         size(void) const = 0;
     virtual std::string type(void) const = 0;
-    virtual double      eval(const GEvent& event, const GObservation& obs) = 0;
-    virtual double      eval_gradients(const GEvent& event, const GObservation& obs) = 0;
+    virtual double      eval(const GEvent& event,
+                             const GObservation& obs) const = 0;
+    virtual double      eval_gradients(const GEvent& event,
+                                       const GObservation& obs) const = 0;
+    virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
+                              const GObservation& obs) const = 0;
     virtual void        read(const GXmlElement& xml) = 0;
     virtual void        write(GXmlElement& xml) const = 0;
 
     // Implemented methods
+    int         size(void) const;
     std::string name(void) const;
     void        name(const std::string& name);
     void        instruments(const std::string& instruments);
@@ -61,16 +65,25 @@ public:
     char *__str__() {
         return tochar(self->print());
     }
-    GModelPar __getitem__(int index) {
-    if (index >= 0 && index < self->size())
-        return (*self)(index);
-    else
-        throw GException::out_of_range("__getitem__(int)", index, self->size());
+    GModelPar __getitem__(const int& index) {
+        if (index >= 0 && index < self->size())
+            return (*self)[index];
+        else
+            throw GException::out_of_range("__getitem__(int)", index, self->size());
     }
-    void __setitem__(int index, const GModelPar& val) {
-        if (index>=0 && index < self->size())
-            (*self)(index) = val;
+    GModelPar __getitem__(const std::string& name) {
+        return (*self)[name];
+    }
+    void __setitem__(const int& index, const GModelPar& val) {
+        if (index>=0 && index < self->size()) {
+            (*self)[index] = val;
+            return;
+        }
         else
             throw GException::out_of_range("__setitem__(int)", index, self->size());
+    }
+    void __setitem__(const std::string& name, const GModelPar& val) {
+        (*self)[name] = val;
+        return;
     }
 };
