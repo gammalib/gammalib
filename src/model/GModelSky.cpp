@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSky.cpp
- * @brief GModelSky class implementation.
+ * @brief Abstract sky model class implementation
  * @author J. Knodlseder
  */
 
@@ -505,15 +505,17 @@ GPhotons GModelSky::mc(const double& area,
     // Continue only if model is valid)
     if (valid_model()) {
 
+        // Get point source pointer
+        GModelSpatialPtsrc* ptsrc = dynamic_cast<GModelSpatialPtsrc*>(m_spatial);
+
         // Check if model will produce any photons in the specified
         // simulation region. If the model is a point source we check if the
         // source is located within the simulation code. If the model is a
         // diffuse source we check if the source overlaps with the simulation
         // code
         bool use_model = true;
-        if (m_spatial->isptsource()) {
-            GModelSpatialPtsrc* src = dynamic_cast<GModelSpatialPtsrc*>(m_spatial);
-            if (dir.dist(src->dir()) > radius)
+        if (ptsrc != NULL) {
+            if (dir.dist(ptsrc->dir()) > radius)
                 use_model = false;
         }
         else {
@@ -655,15 +657,15 @@ void GModelSky::set_pointers(void)
 
         // Gather spatial parameter pointers
         for (int i = 0; i < n_spatial; ++i)
-            m_pars.push_back(&((*spatial())(i)));
+            m_pars.push_back(&((*spatial())[i]));
 
         // Gather spectral parameters
         for (int i = 0; i < n_spectral; ++i)
-            m_pars.push_back(&((*spectral())(i)));
+            m_pars.push_back(&((*spectral())[i]));
 
         // Gather temporal parameters
         for (int i = 0; i < n_temporal; ++i)
-            m_pars.push_back(&((*temporal())(i)));
+            m_pars.push_back(&((*temporal())[i]));
 
     }
 
@@ -811,7 +813,7 @@ double GModelSky::spatial(const GEvent& event,
                 double fact = temp * irf;
                 if (fact != 1.0) {
                     for (int i = 0; i < spectral()->size(); ++i)
-                        (*spectral())(i).gradient( (*spectral())(i).gradient() * fact );
+                        (*spectral())[i].gradient((*spectral())[i].gradient() * fact);
                 }
             }
 
@@ -820,7 +822,7 @@ double GModelSky::spatial(const GEvent& event,
                 double fact = spec * irf;
                 if (fact != 1.0) {
                     for (int i = 0; i < temporal()->size(); ++i)
-                        (*temporal())(i).gradient( (*temporal())(i).gradient() * fact );
+                        (*temporal())[i].gradient((*temporal())[i].gradient() * fact);
                 }
             }
 
