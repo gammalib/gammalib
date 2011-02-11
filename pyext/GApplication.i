@@ -42,7 +42,6 @@ public:
     std::string version(void) const;
     double      telapse(void) const;
     double      celapse(void) const;
-    GPar*       par(const std::string& name);
     void        logFileOpen(bool clobber = true);
     bool        logTerse(void) const;
     bool        logNormal(void) const;

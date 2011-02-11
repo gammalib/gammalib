@@ -25,8 +25,7 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPERATOR                  "GApplication::operator() (std::string&)"
-#define G_PAR                               "GApplication::par(std::string&)"
+#define G_OPERATOR                   "GApplication::operator[](std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -187,14 +186,11 @@ GApplication& GApplication::operator= (const GApplication& app)
  * @brief Parameter access operator
  *
  * @param[in] name Parameter name.
- *
- * @exception GException::par_error
- *            Parameter of specified name not found.
  ***************************************************************************/
 GPar& GApplication::operator[](const std::string& name)
 {
-    // Return dereferenced pointer
-    return (*(this->par(name)));
+    // Return parameter
+    return (m_pars[name]);
 }
 
 
@@ -202,14 +198,11 @@ GPar& GApplication::operator[](const std::string& name)
  * @brief Parameter access operator (const version)
  *
  * @param[in] name Parameter name.
- *
- * @exception GException::par_error
- *            Parameter of specified name not found.
  ***************************************************************************/
 const GPar& GApplication::operator[](const std::string& name) const
 {
-    // Return dereferenced pointer
-    return (*(this->par(name)));
+    // Return parameter
+    return (m_pars[name]);
 }
 
 
@@ -266,54 +259,6 @@ double GApplication::celapse(void) const
 
     // Return elapsed time
     return celapse;
-}
-
-
-/***********************************************************************//**
- * @brief Return pointer to application parameter
- *
- * @param[in] name Parameter to be returned.
- *
- * @exception GException::par_error
- *            Parameter of specified name not found.
- ***************************************************************************/
-GPar* GApplication::par(const std::string& name)
-{
-    // Get pointer to application parameter
-    GPar* ptr = m_pars.par(name);
-
-    // Throw exception if parameter does not exist
-    if (ptr == NULL) {
-        throw GException::par_error(G_PAR, "Parameter '"+name+"' not found "
-                                    "in parameter file.");
-    }
-
-    // Return pointer
-    return ptr;
-}
-
-
-/***********************************************************************//**
- * @brief Return pointer to application parameter (const version)
- *
- * @param[in] name Parameter to be returned.
- *
- * @exception GException::par_error
- *            Parameter of specified name not found.
- ***************************************************************************/
-const GPar* GApplication::par(const std::string& name) const
-{
-    // Get pointer to application parameter
-    const GPar* ptr = m_pars.par(name);
-
-    // Throw exception if parameter does not exist
-    if (ptr == NULL) {
-        throw GException::par_error(G_PAR, "Parameter '"+name+"' not found "
-                                    "in parameter file.");
-    }
-
-    // Return pointer
-    return ptr;
 }
 
 
@@ -399,11 +344,13 @@ bool GApplication::logDebug(void) const
 
 /***********************************************************************//**
  * @brief Signal if specified parameter exists
+ *
+ * @param[in] name Parameter name.
  ***************************************************************************/
 bool GApplication::haspar(const std::string& name) const
 {
     // Return test result
-    return (m_pars.par(name) != NULL);
+    return (m_pars.haspar(name));
 }
 
 
