@@ -53,8 +53,8 @@ public:
     void                       clear(void);
     GCTAModelRadialAcceptance* clone(void) const;
     std::string                type(void) const { return "RadialAcceptance"; }
-    double                     eval(const GEvent& event, const GObservation& obs);
-    double                     eval_gradients(const GEvent& event, const GObservation& obs);
+    double                     eval(const GEvent& event, const GObservation& obs) const;
+    double                     eval_gradients(const GEvent& event, const GObservation& obs) const;
     double                     npred(const GEnergy& obsEng, const GTime& obsTime,
                                      const GObservation& obs) const;
     GCTAEventList*             mc(const GObservation& obs, GRan& ran) const;

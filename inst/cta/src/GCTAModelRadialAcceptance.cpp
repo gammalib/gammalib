@@ -224,7 +224,8 @@ GCTAModelRadialAcceptance* GCTAModelRadialAcceptance::clone(void) const
  *       similar to the Fermi/LAT livetime cube that provides the effective
  *       sky exposure as function of offset angle).
  ***************************************************************************/
-double GCTAModelRadialAcceptance::eval(const GEvent& event, const GObservation& obs)
+double GCTAModelRadialAcceptance::eval(const GEvent& event,
+                                       const GObservation& obs) const
 {
     // Extract CTA pointing direction
     GTime time; // not used
@@ -271,7 +272,7 @@ double GCTAModelRadialAcceptance::eval(const GEvent& event, const GObservation& 
  *       sky exposure as function of offset angle).
  ***************************************************************************/
 double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
-                                                 const GObservation& obs)
+                                                 const GObservation& obs) const
 {
     // Extract CTA pointing direction
     GTime time; // not used
