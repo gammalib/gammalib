@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelData.i
- * @brief GModelData class python interface
+ * @brief Abstract data model base class python interface
  * @author J. Knodlseder
  */
 %{
@@ -25,7 +25,7 @@
 /***********************************************************************//**
  * @class GModelData
  *
- * @brief Abstract virtual sky model class python interface defintion.
+ * @brief Abstract data model base class python interface
  ***************************************************************************/
 class GModelData : public GModel {
 public:
@@ -39,15 +39,14 @@ public:
     virtual void        clear(void) = 0;
     virtual GModelData* clone(void) const = 0;
     virtual std::string type(void) const = 0;
-    virtual double      eval(const GEvent& event, const GObservation& obs) = 0;
-    virtual double      eval_gradients(const GEvent& event, const GObservation& obs) = 0;
+    virtual double      eval(const GEvent& event,
+                             const GObservation& obs) const = 0;
+    virtual double      eval_gradients(const GEvent& event,
+                                       const GObservation& obs) const = 0;
+    virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
+                              const GObservation& obs) const = 0;
     virtual void        read(const GXmlElement& xml) = 0;
     virtual void        write(GXmlElement& xml) const = 0;
-
-    // Implemented pure virtual methods
-    int size(void) const;
-
-    // Other methods
 };
 
 
