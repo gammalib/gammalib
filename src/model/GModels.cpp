@@ -470,7 +470,7 @@ std::string GModels::print(void) const
     // Append header
     result.append("=== GModels ===");
     result.append("\n"+parformat("Number of models")+str(size()));
-    result.append("\n"+parformat("Number of parameters")+str(m_npars));
+    result.append("\n"+parformat("Number of parameters")+str(npars()));
 
     // Append models
     for (int i = 0; i < size(); ++i)
@@ -534,36 +534,17 @@ void GModels::free_members(void)
  * Gathers all parameter pointers from the models into a linear array of
  * GModelPar pointers. This allows the optimizer to see all parameters in a
  * linear array.
- *
- * @todo Replace GModelPar** by std::vector<GModelPar*> in GOptimizerPars
  ***************************************************************************/
 void GModels::set_pointers(void)
 {
-    // Delete old pointers (if they exist)
-    if (m_par != NULL) delete [] m_par;
-    m_par = NULL;
+    // Clear parameters
+    m_pars.clear();
 
-    // Determine total number of parameters
-    m_npars = 0;
-    for (int i = 0; i < size(); ++i)
-        m_npars += m_models[i]->size();
-
-    // Continue only if there are parameters
-    if (m_npars > 0) {
-
-        // Allocate parameter pointers
-        m_par = new GModelPar*[m_npars];
-
-        // Initialise pointer on pointer array
-        GModelPar** ptr = m_par;
-
-        // Gather all pointers
-        for (int i = 0; i < size(); ++i) {
-            for (int k = 0; k < m_models[i]->size(); ++k)
-                *ptr++ = &((*m_models[i])[k]);
-        }
-
-    } // endif: there were model parameters
+    // Gather all pointers
+    for (int i = 0; i < size(); ++i) {
+        for (int k = 0; k < m_models[i]->size(); ++k)
+            m_pars.push_back(&(*m_models[i])[k]);
+    }
 
     // Return
     return;
