@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAModelRadial.cpp
- * @brief GCTAModelRadial class implementation.
+ * @brief Abstract radial acceptance model class implementation
  * @author J. Knodlseder
  */
 
@@ -25,6 +25,8 @@
 #include "GCTAModelRadial.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ACCESS1                           "GModelSpatial::operator[](int&)"
+#define G_ACCESS2                   "GModelSpatial::operator[](std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -55,7 +57,7 @@ GCTAModelRadial::GCTAModelRadial(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Model.
+ * @param[in] model Radial acceptance model.
  ***************************************************************************/
 GCTAModelRadial::GCTAModelRadial(const GCTAModelRadial& model)
 {
@@ -92,7 +94,7 @@ GCTAModelRadial::~GCTAModelRadial(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Model.
+ * @param[in] model Radial acceptance model.
  ***************************************************************************/
 GCTAModelRadial& GCTAModelRadial::operator= (const GCTAModelRadial& model)
 {
@@ -115,6 +117,100 @@ GCTAModelRadial& GCTAModelRadial::operator= (const GCTAModelRadial& model)
 }
 
 
+/***********************************************************************//**
+ * @brief Returns model parameter
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ ***************************************************************************/
+GModelPar& GCTAModelRadial::operator[](const int& index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    #endif
+
+    // Return reference
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns model parameter (const version)
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ ***************************************************************************/
+const GModelPar& GCTAModelRadial::operator[](const int& index) const
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    #endif
+
+    // Return reference
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model parameter
+ *
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::par_not_found
+ *            Parameter with specified name not found in container.
+ ***************************************************************************/
+GModelPar& GCTAModelRadial::operator[](const std::string& name)
+{
+    // Get parameter index
+    int index = 0;
+    for (; index < size(); ++index) {
+        if (m_pars[index]->name() == name)
+            break;
+    }
+
+    // Throw exception if parameter name was not found
+    if (index >= size())
+        throw GException::par_not_found(G_ACCESS2, name);
+
+    // Return reference
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model parameter (const version)
+ *
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::par_not_found
+ *            Parameter with specified name not found in container.
+ ***************************************************************************/
+const GModelPar& GCTAModelRadial::operator[](const std::string& name) const
+{
+    // Get parameter index
+    int index = 0;
+    for (; index < size(); ++index) {
+        if (m_pars[index]->name() == name)
+            break;
+    }
+
+    // Throw exception if parameter name was not found
+    if (index >= size())
+        throw GException::par_not_found(G_ACCESS2, name);
+
+    // Return reference
+    return *(m_pars[index]);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
@@ -132,6 +228,9 @@ GCTAModelRadial& GCTAModelRadial::operator= (const GCTAModelRadial& model)
  ***************************************************************************/
 void GCTAModelRadial::init_members(void)
 {
+    // Initialise members
+    m_pars.clear();
+
     // Return
     return;
 }
@@ -140,10 +239,13 @@ void GCTAModelRadial::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model GCTAModelRadial members which should be copied.
+ * @param[in] model Radial acceptance model.
  ***************************************************************************/
 void GCTAModelRadial::copy_members(const GCTAModelRadial& model)
 {
+    // Copy members
+    m_pars = model.m_pars;
+
     // Return
     return;
 }
@@ -169,9 +271,9 @@ void GCTAModelRadial::free_members(void)
  * @brief Output operator
  *
  * @param[in] os Output stream.
- * @param[in] model Model.
+ * @param[in] model Radial acceptance model.
  ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GCTAModelRadial& model)
+std::ostream& operator<<(std::ostream& os, const GCTAModelRadial& model)
 {
      // Write model in output stream
     os << model.print();
@@ -185,9 +287,9 @@ std::ostream& operator<< (std::ostream& os, const GCTAModelRadial& model)
  * @brief Log operator
  *
  * @param[in] log Logger.
- * @param[in] model Model.
+ * @param[in] model Radial acceptance model.
  ***************************************************************************/
-GLog& operator<< (GLog& log, const GCTAModelRadial& model)
+GLog& operator<<(GLog& log, const GCTAModelRadial& model)
 {
     // Write model into logger
     log << model.print();
