@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAResponse.cpp
- * @brief GCTAResponse class implementation.
+ * @brief CTA response class implementation
  * @author J. Knodlseder
  */
 
@@ -305,15 +305,15 @@ double GCTAResponse::irf(const GCTAEventAtom& event, const GModelSky& model,
     // Initialise response value
     double rsp = 0.0;
 
-    // If model is a point source then return the point source IRF
-    if (model.spatial()->isptsource()) {
+    // Get model pointers
+    GModelSpatialPtsrc* ptsrc = dynamic_cast<GModelSpatialPtsrc*>(model.spatial());
 
-        // Get point source location
-        GSkyDir srcDir = static_cast<GModelSpatialPtsrc*>(model.spatial())->dir();
+    // If model is a point source then return the point source IRF
+    if (ptsrc != NULL) {
 
         // Compute IRF
         rsp = irf(event.dir(), event.energy(), event.time(),
-                  srcDir, srcEng, srcTime, obs);
+                  ptsrc->dir(), srcEng, srcTime, obs);
 
     } // endif: model was point source
 
@@ -350,15 +350,15 @@ double GCTAResponse::irf(const GCTAEventBin& event, const GModelSky& model,
     // Initialise response value
     double rsp = 0.0;
 
-    // If model is a point source then return the point source IRF
-    if (model.spatial()->isptsource()) {
+    // Get model pointers
+    GModelSpatialPtsrc* ptsrc = dynamic_cast<GModelSpatialPtsrc*>(model.spatial());
 
-        // Get point source location
-        GSkyDir srcDir = static_cast<GModelSpatialPtsrc*>(model.spatial())->dir();
+    // If model is a point source then return the point source IRF
+    if (ptsrc != NULL) {
 
         // Compute IRF
         rsp = irf(event.dir(), event.energy(), event.time(),
-                  srcDir, srcEng, srcTime, obs);
+                  ptsrc->dir(), srcEng, srcTime, obs);
 
     } // endif: model was point source
 
@@ -421,14 +421,14 @@ double GCTAResponse::npred(const GModelSky& model, const GEnergy& srcEng,
     // Initialise response value
     double rsp = 0.0;
 
-    // If model is a point source then return the point source IRF
-    if (model.spatial()->isptsource()) {
+    // Get model pointers
+    GModelSpatialPtsrc* ptsrc = dynamic_cast<GModelSpatialPtsrc*>(model.spatial());
 
-        // Get point source location
-        GSkyDir srcDir = static_cast<GModelSpatialPtsrc*>(model.spatial())->dir();
+    // If model is a point source then return the point source IRF
+    if (ptsrc != NULL) {
 
         // Compute IRF
-        rsp = npred(srcDir, srcEng, srcTime, obs);
+        rsp = npred(ptsrc->dir(), srcEng, srcTime, obs);
 
     } // endif: model was point source
 

@@ -300,6 +300,9 @@ double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
     // Get pointer to event cube
     GLATEventCube* cube = event.cube();
 
+    // Get pointer on point source spatial model
+    GModelSpatialPtsrc* ptsrc = dynamic_cast<GModelSpatialPtsrc*>(model.spatial());
+
     // Search for diffuse response in event cube
     int idiff = -1;
     for (int i = 0; i < cube->ndiffrsp(); ++i) {
@@ -330,7 +333,7 @@ double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
 
     // ... otherwise check if model is a point source. If this is true
     // then return response from mean PSF
-    if ((idiff == -1 || m_force_mean) && model.spatial()->isptsource()) {
+    if ((idiff == -1 || m_force_mean) && ptsrc != NULL) {
 
         // Search for mean PSF
         int ipsf = -1;
@@ -344,11 +347,9 @@ double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
         // If mean PSF has not been found then create it now
         if (ipsf == -1) {
 
-            // Get point source location
-            GSkyDir srcDir = static_cast<GModelSpatialPtsrc*>(model.spatial())->dir();
-
             // Allocate new mean PSF
-            GLATMeanPsf* psf = new GLATMeanPsf(srcDir, static_cast<const GLATObservation&>(obs));
+            GLATMeanPsf* psf = 
+                new GLATMeanPsf(ptsrc->dir(), static_cast<const GLATObservation&>(obs));
 
             // Set source name
             psf->name(model.name());
@@ -391,7 +392,7 @@ double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
     } // endif: model was point source
 
     // ... otherwise throw an exception
-    if ((idiff == -1) && !model.spatial()->isptsource())
+    if ((idiff == -1) && ptsrc == NULL)
         throw GLATException::diffuse_not_found(G_IRF_BIN, model.name());
 
     // Return IRF value
