@@ -1,7 +1,7 @@
 /***************************************************************************
- *                       GVector.cpp  -  vector class                      *
+ *                       GVector.cpp  -  Vector class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GVector.cpp
- * @brief GVector class implementation.
+ * @brief Vector class implementation
  * @author J. Knodlseder
  */
 
@@ -25,8 +25,7 @@
 
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS1                                    "GVector::operator(int)"
-#define G_ACCESS2                              "GVector::operator(int) const"
+#define G_ACCESS                                  "GVector::operator[](int&)"
 #define G_CROSS                                      "cross(GVector,GVector)"
 
 
@@ -222,17 +221,17 @@ GVector& GVector::operator= (const GVector& v)
 /***********************************************************************//**
  * @brief Vector element access operator
  *
+ * @param[in] inx Vector element index to be accessed [0,...,size()-1]
+ *
  * @exception GException::out_of_range
  *            Element index is out of range.
- *
- * @param[in] inx Vector element index to be accessed (0,1,...).
  ***************************************************************************/
-double& GVector::operator() (int inx)
+double& GVector::operator[](const int& inx)
 {
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (inx < 0 || inx >= m_num)
-        throw GException::out_of_range(G_ACCESS1, inx, m_num);
+    if (inx < 0 || inx >= size())
+        throw GException::out_of_range(G_ACCESS, inx, size()-1);
     #endif
 
     // Return vector element
@@ -241,19 +240,19 @@ double& GVector::operator() (int inx)
 
 
 /***********************************************************************//**
- * @brief Vector element access operator
+ * @brief Vector element access operator (const variant)
+ *
+ * @param[in] inx Vector element index to be accessed [0,...,size()-1]
  *
  * @exception GException::out_of_range
  *            Element index is out of range.
- *
- * @param[in] inx Vector element index to be accessed (0,1,...).
  ***************************************************************************/
-const double& GVector::operator() (int inx) const
+const double& GVector::operator[](const int& inx) const
 {
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (inx < 0 || inx >= m_num)
-        throw GException::out_of_range(G_ACCESS2, inx, m_num);
+    if (inx < 0 || inx >= size())
+        throw GException::out_of_range(G_ACCESS, inx, size()-1);
     #endif
 
     // Return vector element
@@ -310,7 +309,7 @@ std::string GVector::print(void) const
 
     // Put all elements in stream
     for (int i = 0; i < m_num; ++i) {
-        result += str((*this)(i));
+        result += str((*this)[i]);
         if (i != m_num-1)
             result += ", ";
     }
@@ -463,9 +462,9 @@ GVector cross(const GVector &a, const GVector &b)
 
     // Compute cross product
     GVector result(3);
-    result(0) = a.m_data[1]*b.m_data[2] - a.m_data[2]*b.m_data[1];
-    result(1) = a.m_data[2]*b.m_data[0] - a.m_data[0]*b.m_data[2];
-    result(2) = a.m_data[0]*b.m_data[1] - a.m_data[1]*b.m_data[0];
+    result.m_data[0] = a.m_data[1]*b.m_data[2] - a.m_data[2]*b.m_data[1];
+    result.m_data[1] = a.m_data[2]*b.m_data[0] - a.m_data[0]*b.m_data[2];
+    result.m_data[2] = a.m_data[0]*b.m_data[1] - a.m_data[1]*b.m_data[0];
 
     // Return result
     return result;

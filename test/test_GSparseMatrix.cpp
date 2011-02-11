@@ -17,8 +17,6 @@
  */
 
 /* __ Includes ___________________________________________________________ */
-//#include <stdlib.h>
-//#include <math.h>
 #include <cstdlib>
 #include <cmath>
 #include <iostream>                           // cout, cerr
@@ -68,7 +66,7 @@ GVector set_vector(void)
   try {
     GVector vector(g_cols);
 	for (int col = 0; col < g_cols; ++col)
-	  vector(col) = g_vector[col];
+	  vector[col] = g_vector[col];
     return vector;
   }
   catch (exception &e) {
@@ -130,7 +128,7 @@ int check_matrix_vector(const GVector& v)
 		}
 	    value += ref_value * g_vector[col];
 	  }
-	  if (v(row) != value) {
+	  if (v[row] != value) {
 	    result = 0;
 	    break;
 	  }
@@ -416,8 +414,8 @@ void test_assign_values(const GSparseMatrix& m_test)
 	  int i_max = (j > 8) ? 10 : j+2;
 	  column    = 0.0;
 	  for (int i = i_min; i < i_max; ++i) {
-		column(i)         = (i+1)*1;
-		reference(i,col) += column(i);
+		column[i]         = (i+1)*1;
+		reference(i,col) += column[i];
 	  }
 	  //
 	  // Add vector
@@ -835,7 +833,7 @@ void test_arithmetics(const GSparseMatrix& m_test)
 	result = m_test;
  	GVector v_add(g_rows);
 	for (int i = 0; i < g_rows; ++i)
-	  v_add(i) = 7.0;
+	  v_add[i] = 7.0;
 	for (int col = 0; col < g_cols; ++col)
 	  result.add_col(v_add, col);
     if (!check_matrix(result, 1.0, 7.0) || !check_matrix(m_test, 1.0, 0.0)) {
@@ -861,7 +859,7 @@ void test_arithmetics(const GSparseMatrix& m_test)
 	GSparseMatrix compare = m_test;
  	GVector v_sparse(g_rows);
 	for (int i = 0; i < g_rows; i += 2)  // Build vector for comparison
-	  v_sparse(i) = 7.0;
+	  v_sparse[i] = 7.0;
 	for (int col = 0; col < g_cols; ++col)
 	  compare.add_col(v_sparse, col);
 	result = m_test;
@@ -1200,12 +1198,12 @@ void test_cholesky(void)
         // Test Cholesky solver
         GVector e0(5);
         GVector a0(5);
-        e0(0) = 1.0;
-        a0(0) = 1.0;
-        a0(1) = 0.2;
-        a0(2) = 0.2;
-        a0(3) = 0.2;
-        a0(4) = 0.2;
+        e0[0] = 1.0;
+        a0[0] = 1.0;
+        a0[1] = 0.2;
+        a0[2] = 0.2;
+        a0[3] = 0.2;
+        a0[4] = 0.2;
         GVector s0 = cd.cholesky_solver(a0);
         double res = max(abs(s0-e0));
         if (res < 1.0e-15) {
@@ -1224,13 +1222,13 @@ void test_cholesky(void)
             throw;
         }
 	//
-	e0(0) = 0.0;
-	e0(1) = 1.0;
-	a0(0) = 0.2;
-	a0(1) = 1.0;
-	a0(2) = 0.0;
-	a0(3) = 0.0;
-	a0(4) = 0.0;
+	e0[0] = 0.0;
+	e0[1] = 1.0;
+	a0[0] = 0.2;
+	a0[1] = 1.0;
+	a0[2] = 0.0;
+	a0[3] = 0.0;
+	a0[4] = 0.0;
 	s0    = cd.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
@@ -1246,10 +1244,10 @@ void test_cholesky(void)
 	  throw;
 	}
 	//
-	e0(1) = 0.0;
-	e0(2) = 1.0;
-	a0(1) = 0.0;
-	a0(2) = 1.0;
+	e0[1] = 0.0;
+	e0[2] = 1.0;
+	a0[1] = 0.0;
+	a0[2] = 1.0;
 	s0    = cd.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
@@ -1265,10 +1263,10 @@ void test_cholesky(void)
 	  throw;
 	}
 	//
-	e0(2) = 0.0;
-	e0(3) = 1.0;
-	a0(2) = 0.0;
-	a0(3) = 1.0;
+	e0[2] = 0.0;
+	e0[3] = 1.0;
+	a0[2] = 0.0;
+	a0[3] = 1.0;
 	s0    = cd.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
@@ -1284,10 +1282,10 @@ void test_cholesky(void)
 	  throw;
 	}
 	//
-	e0(3) = 0.0;
-	e0(4) = 1.0;
-	a0(3) = 0.0;
-	a0(4) = 1.0;
+	e0[3] = 0.0;
+	e0[4] = 1.0;
+	a0[3] = 0.0;
+	a0[4] = 1.0;
 	s0    = cd.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
@@ -1326,12 +1324,12 @@ void test_cholesky(void)
     // Test compressed Cholesky solver
 	e0 = GVector(6);
 	a0 = GVector(6);
-	e0(0) = 1.0;
-	a0(0) = 1.0;
-	a0(1) = 0.2;
-	a0(2) = 0.2;
-	a0(4) = 0.2;
-	a0(5) = 0.2;
+	e0[0] = 1.0;
+	a0[0] = 1.0;
+	a0[1] = 0.2;
+	a0[2] = 0.2;
+	a0[4] = 0.2;
+	a0[5] = 0.2;
 	s0    = cd_zero.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
@@ -1347,13 +1345,13 @@ void test_cholesky(void)
 	  throw;
 	}
 	//
-	e0(0) = 0.0;
-	e0(1) = 1.0;
-	a0(0) = 0.2;
-	a0(1) = 1.0;
-	a0(2) = 0.0;
-	a0(4) = 0.0;
-	a0(5) = 0.0;
+	e0[0] = 0.0;
+	e0[1] = 1.0;
+	a0[0] = 0.2;
+	a0[1] = 1.0;
+	a0[2] = 0.0;
+	a0[4] = 0.0;
+	a0[5] = 0.0;
 	s0    = cd_zero.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
@@ -1369,10 +1367,10 @@ void test_cholesky(void)
 	  throw;
 	}
 	//
-	e0(1) = 0.0;
-	e0(2) = 1.0;
-	a0(1) = 0.0;
-	a0(2) = 1.0;
+	e0[1] = 0.0;
+	e0[2] = 1.0;
+	a0[1] = 0.0;
+	a0[2] = 1.0;
 	s0    = cd_zero.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
@@ -1388,10 +1386,10 @@ void test_cholesky(void)
 	  throw;
 	}
 	//
-	e0(2) = 0.0;
-	e0(4) = 1.0;
-	a0(2) = 0.0;
-	a0(4) = 1.0;
+	e0[2] = 0.0;
+	e0[4] = 1.0;
+	a0[2] = 0.0;
+	a0[4] = 1.0;
 	s0    = cd_zero.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
@@ -1407,10 +1405,10 @@ void test_cholesky(void)
 	  throw;
 	}
 	//
-	e0(4) = 0.0;
-	e0(5) = 1.0;
-	a0(4) = 0.0;
-	a0(5) = 1.0;
+	e0[4] = 0.0;
+	e0[5] = 1.0;
+	a0[4] = 0.0;
+	a0[5] = 1.0;
 	s0    = cd_zero.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
@@ -1449,12 +1447,12 @@ void test_cholesky(void)
     // Test compressed Cholesky solver (unsymmetric case)
 	e0 = GVector(5);
 	a0 = GVector(6);
-	e0(0) = 1.0;
-	a0(0) = 1.0;
-	a0(1) = 0.2;
-	a0(2) = 0.2;
-	a0(4) = 0.2;
-	a0(5) = 0.2;
+	e0[0] = 1.0;
+	a0[0] = 1.0;
+	a0[1] = 0.2;
+	a0[2] = 0.2;
+	a0[4] = 0.2;
+	a0[5] = 0.2;
 	s0    = cd_zero2.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
@@ -1470,13 +1468,13 @@ void test_cholesky(void)
 	  throw;
 	}
 	//
-	e0(0) = 0.0;
-	e0(1) = 1.0;
-	a0(0) = 0.2;
-	a0(1) = 1.0;
-	a0(2) = 0.0;
-	a0(4) = 0.0;
-	a0(5) = 0.0;
+	e0[0] = 0.0;
+	e0[1] = 1.0;
+	a0[0] = 0.2;
+	a0[1] = 1.0;
+	a0[2] = 0.0;
+	a0[4] = 0.0;
+	a0[5] = 0.0;
 	s0    = cd_zero2.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
@@ -1492,10 +1490,10 @@ void test_cholesky(void)
 	  throw;
 	}
 	//
-	e0(1) = 0.0;
-	e0(2) = 1.0;
-	a0(1) = 0.0;
-	a0(2) = 1.0;
+	e0[1] = 0.0;
+	e0[2] = 1.0;
+	a0[1] = 0.0;
+	a0[2] = 1.0;
 	s0    = cd_zero2.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
@@ -1511,10 +1509,10 @@ void test_cholesky(void)
 	  throw;
 	}
 	//
-	e0(2) = 0.0;
-	e0(3) = 1.0;
-	a0(2) = 0.0;
-	a0(4) = 1.0;
+	e0[2] = 0.0;
+	e0[3] = 1.0;
+	a0[2] = 0.0;
+	a0[4] = 1.0;
 	s0    = cd_zero2.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
@@ -1530,10 +1528,10 @@ void test_cholesky(void)
 	  throw;
 	}
 	//
-	e0(3) = 0.0;
-	e0(4) = 1.0;
-	a0(4) = 0.0;
-	a0(5) = 1.0;
+	e0[3] = 0.0;
+	e0[4] = 1.0;
+	a0[4] = 0.0;
+	a0[5] = 1.0;
 	s0    = cd_zero2.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
 	if (res < 1.0e-15)
@@ -1687,7 +1685,7 @@ void test_heavy(int block = 512)
 	  i_max = (j > num_cols-2) ? num_cols : j+2;
 	  column = 0.0;
 	  for (int i = i_min; i < i_max; ++i)
-	    column(i) = (i+1)*0.01;
+	    column[i] = (i+1)*0.01;
 	  large.add_col(column, j);
     }
 	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
@@ -1710,7 +1708,7 @@ void test_heavy(int block = 512)
 	  i_max = (j > num_cols-2) ? num_cols : j+2;
 	  column = 0.0;
 	  for (int i = i_min; i < i_max; ++i)
-	    column(i) = (i+1)*0.01;
+	    column[i] = (i+1)*0.01;
 	  stack.add_col(column, j);
     }
 	stack.stack_destroy();

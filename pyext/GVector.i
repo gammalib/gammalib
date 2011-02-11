@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   GVector.i - Vector class SWIG file                    *
+ *                       GVector.i - Vector class                          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -10,6 +10,12 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GVector.i
+ * @brief Vector class Python interface definition
+ * @author J. Knodlseder
+ */
+
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GVector.hpp"
@@ -17,14 +23,19 @@
 %}
 
 
-/***************************************************************************
- *                         GVector class definition                        *
+/***********************************************************************//**
+ * @class GVector
+ *
+ * @brief Vector class
  ***************************************************************************/
 class GVector {
 public:
-
     // Constructors and destructors
-    explicit GVector(int num);
+    GVector(void);
+    explicit GVector(const int& num);
+    explicit GVector(const double& a);
+    explicit GVector(const double& a, const double& b);
+    explicit GVector(const double& a, const double& b, const double& c);
     GVector(const GVector& v);
     virtual ~GVector(void);
 
@@ -44,24 +55,24 @@ public:
 };
 
 
-/***************************************************************************
- *                      GVector class SWIG extension                       *
+/***********************************************************************//**
+ * @brief GVector class extension
  ***************************************************************************/
 %extend GVector {
     char *__str__() {
         return tochar(self->print());
     }
-    double __getitem__(int index) {
-        if (index >= 0 && index < (int)self->size())
-            return (*self)(index);
+    double& __getitem__(const int& index) {
+        if (index >= 0 && index < self->size())
+            return (*self)[index];
         else
-            throw GException::out_of_range("__getitem__(int)", index, (int)self->size());
+            throw GException::out_of_range("__getitem__(int)", index, self->size());
     }
-    void __setitem__(int index, const double val) {
-        if (index>=0 && index < (int)self->size())
-            (*self)(index) = val;
+    void __setitem__(const int& index, const double& val) {
+        if (index>=0 && index < self->size())
+            (*self)[index] = val;
         else
-            throw GException::out_of_range("__setitem__(int)", index, (int)self->size());
+            throw GException::out_of_range("__setitem__(int)", index, self->size());
     }
     GVector __add__(const GVector &a) {
         return (*self) + a;

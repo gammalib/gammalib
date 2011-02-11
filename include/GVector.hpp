@@ -1,5 +1,5 @@
 /***************************************************************************
- *                         GVector.hpp  -  vector class                    *
+ *                         GVector.hpp  -  Vector class                    *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GVector.hpp
- * @brief GVector class definition.
+ * @brief Vector class interface definition
  * @author J. Knodlseder
  */
 
@@ -20,42 +20,41 @@
 #define GVECTOR_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <cmath>
 #include <string>
 #include <iostream>
-#include <cmath>
-#include "GException.hpp"
 #include "GLog.hpp"
+#include "GException.hpp"
 
 
 /***********************************************************************//**
  * @class GVector
  *
- * @brief GVector class interface defintion
+ * @brief Vector class
+ *
+ * This class implement a double precision floating point vector class that
+ * is intended to be used for numerical computation (it is not ment to
+ * replace the std::vector template class).
  ***************************************************************************/
 class GVector {
 
-    // Friend classes
-    friend class GMatrix;
-    friend class GSymMatrix;
-    friend class GSparseMatrix;
+    // I/O friends
+    friend std::ostream& operator<<(std::ostream& os, const GVector& v);
+    friend GLog&         operator<<(GLog& log,        const GVector& v);
 
     // Operator friends
-    friend GVector  operator+ (const GVector &a, const GVector &b);
-    friend GVector  operator+ (const GVector &a, const double &b);
-    friend GVector  operator+ (const double &a, const GVector &b);
-    friend GVector  operator- (const GVector &a, const GVector &b);
-    friend GVector  operator- (const GVector &a, const double &b);
-    friend GVector  operator- (const double &a, const GVector &b);
-    friend double   operator* (const GVector &a, const GVector &b);
-    friend GVector  operator* (const GVector &a, const double &b);
-    friend GVector  operator* (const double &a, const GVector &b);
-    friend GVector  operator/ (const GVector &a, const double &b);
-    friend int      operator== (const GVector &a, const GVector &b);
-    friend int      operator!= (const GVector &a, const GVector &b);
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GVector& v);
-    friend GLog&         operator<< (GLog& log, const GVector& v);
+    friend GVector  operator+(const GVector &a, const GVector &b);
+    friend GVector  operator+(const GVector &a, const double &b);
+    friend GVector  operator+(const double &a, const GVector &b);
+    friend GVector  operator-(const GVector &a, const GVector &b);
+    friend GVector  operator-(const GVector &a, const double &b);
+    friend GVector  operator-(const double &a, const GVector &b);
+    friend double   operator*(const GVector &a, const GVector &b);
+    friend GVector  operator*(const GVector &a, const double &b);
+    friend GVector  operator*(const double &a, const GVector &b);
+    friend GVector  operator/(const GVector &a, const double &b);
+    friend int      operator==(const GVector &a, const GVector &b);
+    friend int      operator!=(const GVector &a, const GVector &b);
 
     // Friend functions
     friend GVector  cross(const GVector &a, const GVector &b);
@@ -95,19 +94,19 @@ public:
     virtual ~GVector(void);
 
     // Vector element access operators
-    double& operator() (int inx);
-    const double& operator() (int inx) const;
+    double&       operator[](const int& inx);
+    const double& operator[](const int& inx) const;
 
     // Vector operators
-    GVector& operator= (const GVector& v);
-    GVector& operator+= (const GVector& v);
-    GVector& operator-= (const GVector& v);
-    GVector& operator= (const double& v);
-    GVector& operator+= (const double& v);
-    GVector& operator-= (const double& v);
-    GVector& operator*= (const double& v);
-    GVector& operator/= (const double& v);
-    GVector  operator- () const;
+    GVector& operator=(const GVector& v);
+    GVector& operator+=(const GVector& v);
+    GVector& operator-=(const GVector& v);
+    GVector& operator=(const double& v);
+    GVector& operator+=(const double& v);
+    GVector& operator-=(const double& v);
+    GVector& operator*=(const double& v);
+    GVector& operator/=(const double& v);
+    GVector  operator-() const;
 
     // Vector methods
     void        clear(void);
