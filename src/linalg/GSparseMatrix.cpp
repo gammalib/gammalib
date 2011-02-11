@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GSparseMatrix.cpp
- * @brief GSparseMatrix class implementation
+ * @brief Sparse matrix class implementation
  * @author J. Knodlseder
  */
 
@@ -259,8 +259,8 @@ const double& GSparseMatrix::operator() (int row, int col) const
 GVector GSparseMatrix::operator* (const GVector& v) const
 {
     // Raise an exception if the matrix and vector dimensions are not compatible
-    if (m_cols != v.m_num)
-        throw GException::matrix_vector_mismatch(G_OP_MUL_VEC, v.m_num,
+    if (m_cols != v.size())
+        throw GException::matrix_vector_mismatch(G_OP_MUL_VEC, v.size(),
                                                  m_rows, m_cols);
 
     // Initialise result vector
@@ -276,12 +276,12 @@ GVector GSparseMatrix::operator* (const GVector& v) const
             double* ptr_data   = m_data   + i_start;
             int*    ptr_rowinx = m_rowinx + i_start;
             for (int i = i_start; i < i_stop; ++i)
-                result(*ptr_rowinx++) += *ptr_data++ * v(col);
+                result[*ptr_rowinx++] += *ptr_data++ * v[col];
         }
 
         // If fill is pending then add-in also this element into the product
         if (m_fill_val != 0.0) {
-            result(m_fill_row) += m_fill_val * v(m_fill_col);
+            result[m_fill_row] += m_fill_val * v[m_fill_col];
             #if defined(G_DEBUG_SPARSE_PENDING)
             std::cout << G_OP_MUL_VEC << ": pending value " << m_fill_val
                       << " for location (" <<  m_fill_row << "," << m_fill_col
@@ -519,8 +519,8 @@ void GSparseMatrix::add_col(const GVector& v, int col)
     #endif
 
     // Raise an exception if the matrix and vector dimensions are incompatible
-    if (m_rows != v.m_num)
-      throw GException::matrix_vector_mismatch(G_ADD_COL, v.m_num, m_rows, m_cols);
+    if (m_rows != v.size())
+      throw GException::matrix_vector_mismatch(G_ADD_COL, v.size(), m_rows, m_cols);
 
     // Determine number of non-zero elements in vector
     non_zero = v.non_zeros();
@@ -535,11 +535,11 @@ void GSparseMatrix::add_col(const GVector& v, int col)
 
     // Add elements to vector
     for (int i = m_colstart[col]; i < m_colstart[col+1]; ++i)
-      column.m_data[m_rowinx[i]] += m_data[i];
+      column[m_rowinx[i]] += m_data[i];
 
     // If there is a pending element then put it in the vector
     if (m_fill_val != 0.0 && m_fill_col == col)
-      column.m_data[m_fill_row] += m_fill_val;
+      column[m_fill_row] += m_fill_val;
 
     // Insert vector into matrix
     insert_col(column, col);
@@ -764,8 +764,8 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
     #endif
 
     // Raise an exception if the matrix and vector dimensions are incompatible
-    if (m_rows != v.m_num)
-        throw GException::matrix_vector_mismatch(G_CHOL_SOLVE, v.m_num,
+    if (m_rows != v.size())
+        throw GException::matrix_vector_mismatch(G_CHOL_SOLVE, v.size(),
                                                  m_rows, m_cols);
     // Raise an exception if there is no symbolic pointer
     if (!m_symbolic)
@@ -802,26 +802,26 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
         GVector x(m_rows);
 
         // Perform inverse vector permutation
-        for (int i = 0; i < v.m_num; ++i)
-            x.m_data[symbolic->m_pinv[i]] = v.m_data[i];  
+        for (int i = 0; i < v.size(); ++i)
+            x[symbolic->m_pinv[i]] = v[i];  
 
         // Inplace solve L\x=x
         for (int col = 0; col < m_cols; ++col) {            // loop over columns
-            x.m_data[col] /= Lx[Lp[col]];                   // divide by diag.
+            x[col] /= Lx[Lp[col]];                          // divide by diag.
             for (int p = Lp[col]+1; p < Lp[col+1]; p++)     // loop over elements
-                x.m_data[Li[p]] -= Lx[p] * x.m_data[col];
+                x[Li[p]] -= Lx[p] * x[col];
         }
 
         // Inplace solve L'\x=x
         for (int col = m_cols-1; col >= 0; --col) {         // loop over columns
             for (int p = Lp[col]+1; p < Lp[col+1]; p++)     // loop over elements
-                x.m_data[col] -= Lx[p] * x.m_data[Li[p]];
-                x.m_data[col] /= Lx[Lp[col]];
+                x[col] -= Lx[p] * x[Li[p]];
+                x[col] /= Lx[Lp[col]];
         }
 
         // Perform vector permutation
         for (int i = 0; i < m_cols; ++i)
-            result.m_data[i] = x.m_data[symbolic->m_pinv[i]];
+            result[i] = x[symbolic->m_pinv[i]];
 
     } // endif: Case A
 
@@ -878,7 +878,7 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
         // Compress input vector v -> c_v if required
         if (m_rowsel != NULL && m_num_rowsel < m_rows) {
             for (int c_row = 0; c_row < m_num_rowsel; ++c_row)
-                x.m_data[c_row] = v.m_data[m_rowsel[c_row]];
+                x[c_row] = v[m_rowsel[c_row]];
         }
         else
             x = v;
@@ -897,11 +897,11 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
         for (int col = 0; col < m_cols; ++col) {              // loop over columns
             int c_col = col_map[col];
             if (c_col >= 0) {                                 // use only non-zero cols
-                x.m_data[c_col] /= Lx[Lp[col]];               // divide by diag.
+                x[c_col] /= Lx[Lp[col]];                      // divide by diag.
                 for (int p = Lp[col]+1; p < Lp[col+1]; p++) { // loop over elements
                     int c_row = row_map[Li[p]];
                     if (c_row >= 0)                           // use only non-zero rows
-                        x.m_data[c_row] -= Lx[p] * x.m_data[c_col];
+                        x[c_row] -= Lx[p] * x[c_col];
                 }
             }
         }
@@ -917,9 +917,9 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
                 for (int p = Lp[col]+1; p < Lp[col+1]; p++) { // loop over elements
                     int c_row = row_map[Li[p]];
                     if (c_row >= 0)                           // use only non-zero rows
-                        x.m_data[c_col] -= Lx[p] * x.m_data[c_row];
+                        x[c_col] -= Lx[p] * x[c_row];
                 }
-                x.m_data[c_col] /= Lx[Lp[col]];
+                x[c_col] /= Lx[Lp[col]];
             }
         }
         #if defined(G_DEBUG_SPARSE_COMPRESSION)
@@ -936,7 +936,7 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
         // accordingly
         if (m_colsel != NULL && m_num_colsel < m_cols) {
             for (int c_col = 0; c_col < m_num_colsel; ++c_col)
-                result.m_data[m_colsel[c_col]] = x.m_data[c_col];
+                result[m_colsel[c_col]] = x[c_col];
         }
         else
             result = x;
@@ -973,7 +973,7 @@ void GSparseMatrix::cholesky_invert(int compress)
   for (int col = 0; col < m_cols; ++col) {
 
     // Set unit vector
-    unit.m_data[col] = 1.0;
+    unit[col] = 1.0;
 
     // Solve for column
     GVector x = cholesky_solver(unit, compress);
@@ -982,7 +982,7 @@ void GSparseMatrix::cholesky_invert(int compress)
     result.insert_col(x, col);
 
     // Clear unit vector for next round
-    unit.m_data[col] = 0.0;
+    unit[col] = 0.0;
 
   }
 
@@ -1041,13 +1041,13 @@ GVector GSparseMatrix::extract_row(int row) const
 
     // Copy element if we found one
     if (i < i_stop)
-      result(col) = m_data[i];
+      result[col] = m_data[i];
 
   } // endfor: looped over all columns
 
   // If there is a pending element then put it in the vector
   if (m_fill_val != 0.0 && m_fill_row == row)
-    result(m_fill_col) = m_fill_val;
+    result[m_fill_col] = m_fill_val;
 
   // Return vector
   return result;
@@ -1075,11 +1075,11 @@ GVector GSparseMatrix::extract_col(int col) const
 
   // Extract elements into vector
   for (int i = i_start; i < i_stop; ++i)
-    result(m_rowinx[i]) = m_data[i];
+    result[m_rowinx[i]] = m_data[i];
 
   // If there is a pending element then put it in the vector
   if (m_fill_val != 0.0 && m_fill_col == col)
-    result(m_fill_row) = m_fill_val;
+    result[m_fill_row] = m_fill_val;
 
   // Return vector
   return result;
@@ -1149,8 +1149,8 @@ void GSparseMatrix::insert_col(const GVector& v, int col)
   #endif
 
   // Raise an exception if the matrix and vector dimensions are not compatible
-  if (m_rows != v.m_num)
-    throw GException::matrix_vector_mismatch(G_INSERT_COL, v.m_num, m_rows, m_cols);
+  if (m_rows != v.size())
+    throw GException::matrix_vector_mismatch(G_INSERT_COL, v.size(), m_rows, m_cols);
 
   // If there is a pending element for this column then delete it since
   // the vector overwrites this element
@@ -1168,7 +1168,7 @@ void GSparseMatrix::insert_col(const GVector& v, int col)
   // Determine the number of non-zero elements in the vector
   int n_vector = 0;
   for (int row = 0; row < m_rows; ++row) {
-    if (v.m_data[row] != 0.0)
+    if (v[row] != 0.0)
       n_vector++;
   }
 
@@ -1201,8 +1201,8 @@ void GSparseMatrix::insert_col(const GVector& v, int col)
   // Insert the vector elements in the matrix
   if (n_vector > 0) {
     for (int row = 0, i = i_start; row < m_rows; ++row) {
-      if (v.m_data[row] != 0.0) {
-        m_data[i]   = v.m_data[row];
+      if (v[row] != 0.0) {
+        m_data[i]   = v[row];
         m_rowinx[i] = row;
         i++;
       }
@@ -1610,9 +1610,9 @@ int GSparseMatrix::stack_push_column(const GVector& v, int col)
   int non_zero = 0;
 
   // Compress vector in the buffer and set-up row index array
-  for (int i = 0; i < v.m_num; ++i) {
-    if (v.m_data[i] != 0.0) {
-      m_stack_buffer[non_zero] = v.m_data[i];
+  for (int i = 0; i < v.size(); ++i) {
+    if (v[i] != 0.0) {
+      m_stack_buffer[non_zero] = v[i];
       m_stack_work[non_zero]   = i;
       non_zero++;
     }

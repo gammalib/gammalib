@@ -49,7 +49,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                   GSymMatrix constructors/destructors                   =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -267,16 +267,16 @@ const double& GSymMatrix::operator() (int row, int col) const
 GVector GSymMatrix::operator* (const GVector& v) const
 {
     // Raise an exception if the matrix and vector dimensions are not compatible
-    if (m_cols != v.m_num)
-      throw GException::matrix_vector_mismatch(G_OP_MUL_VEC, v.m_num, m_rows, m_cols);
+    if (m_cols != v.size())
+      throw GException::matrix_vector_mismatch(G_OP_MUL_VEC, v.size(), m_rows, m_cols);
 
     // Perform vector multiplication
     GVector result(m_rows);
     for (int row = 0; row < m_rows; ++row) {
         double sum = 0.0;
         for (int col = 0; col < m_cols; ++col)
-            sum += (*this)(row,col) * v.m_data[col];
-        result.m_data[row] = sum;
+            sum += (*this)(row,col) * v[col];
+        result[row] = sum;
     }
 
     // Return result
@@ -394,12 +394,12 @@ void GSymMatrix::add_col(const GVector& v, int col)
 
     // Compile option: raise an exception if the matrix and vector dimensions
     // are not compatible
-    if (m_rows != v.m_num)
-        throw GException::matrix_vector_mismatch(G_ADD_COL, v.m_num, m_rows, m_cols);
+    if (m_rows != v.size())
+        throw GException::matrix_vector_mismatch(G_ADD_COL, v.size(), m_rows, m_cols);
 
     // Insert column into vector
     for (int row = 0; row < m_rows; ++row)
-        (*this)(row,col) += v.m_data[row];
+        (*this)(row,col) += v[row];
 
     // Return
     return;
@@ -520,8 +520,8 @@ void GSymMatrix::cholesky_decompose(int compress)
 GVector GSymMatrix::cholesky_solver(const GVector& v, int compress)
 {
     // Raise an exception if the matrix and vector dimensions are not compatible
-    if (m_rows != v.m_num)
-        throw GException::matrix_vector_mismatch(G_CHOL_SOLVE, v.m_num, m_rows, m_cols);
+    if (m_rows != v.size())
+        throw GException::matrix_vector_mismatch(G_CHOL_SOLVE, v.size(), m_rows, m_cols);
 
     // Allocate result vector
     GVector x(m_rows);
@@ -534,19 +534,19 @@ GVector GSymMatrix::cholesky_solver(const GVector& v, int compress)
 
         // Solve L*y=b, storing y in x (row>k)
         for (int row = 0; row < m_rows; ++row) {
-            double sum = v.m_data[row];
+            double sum = v[row];
             for (int k = 0; k < row; ++k)
-                sum -= m_data[m_colstart[k]+(row-k)] * x.m_data[k]; // sum -= M(row,k) * x(k)
-            x.m_data[row] = sum/m_data[m_colstart[row]];            // x(row) = sum/M(row,row)
+                sum -= m_data[m_colstart[k]+(row-k)] * x[k]; // sum -= M(row,k) * x(k)
+            x[row] = sum/m_data[m_colstart[row]];            // x(row) = sum/M(row,row)
         }
 
         // Solve trans(L)*x=y (k>row)
         for (int row = m_rows-1; row >= 0; --row) {
-            double  sum = x.m_data[row];
+            double  sum = x[row];
             double* ptr = m_data + m_colstart[row] + 1;
             for (int k = row+1; k < m_rows; ++k)
-                sum -= *ptr++ * x.m_data[k];               // sum -= M(k,row) * x(k)
-            x.m_data[row] = sum/m_data[m_colstart[row]];   // x(row) = sum/M(row,row)
+                sum -= *ptr++ * x[k];               // sum -= M(k,row) * x(k)
+            x[row] = sum/m_data[m_colstart[row]];   // x(row) = sum/M(row,row)
         }
     } // endif: no zero-row/col compression needed
 
@@ -561,21 +561,21 @@ GVector GSymMatrix::cholesky_solver(const GVector& v, int compress)
 
         // Solve L*y=b, storing y in x (row>k)
         for (row = 0, row_ptr = m_inx; row < m_num_inx; ++row, ++row_ptr) {
-            double  sum = v.m_data[*row_ptr];
+            double  sum = v[*row_ptr];
             double* ptr = m_data + *row_ptr;
             for (k = 0, k_ptr = m_inx; k < row; ++k, ++k_ptr)
-                sum -= *(ptr + m_colstart[*k_ptr] - *k_ptr) * x.m_data[*k_ptr]; // sum -= M(row,k) * x(k)
-            x.m_data[*row_ptr] = sum/m_data[m_colstart[*row_ptr]];              // x(row) = sum/M(row,row)
+                sum -= *(ptr + m_colstart[*k_ptr] - *k_ptr) * x[*k_ptr]; // sum -= M(row,k) * x(k)
+            x[*row_ptr] = sum/m_data[m_colstart[*row_ptr]];              // x(row) = sum/M(row,row)
         }
 
         // Solve trans(L)*x=y (k>row)
         for (row = m_num_inx-1, row_ptr = m_inx+m_num_inx-1; row >= 0; --row, --row_ptr) {
-            double  sum      = x.m_data[*row_ptr];
+            double  sum      = x[*row_ptr];
             double* ptr_diag = m_data + m_colstart[*row_ptr];
             double* ptr      = ptr_diag - *row_ptr;
             for (k = row+1, k_ptr = m_inx+row+1; k < m_num_inx; ++k, ++k_ptr)
-                sum -= *(ptr + *k_ptr) * x.m_data[*k_ptr];              // sum -= M(k,row) * x(k)
-            x.m_data[*row_ptr] = sum/(*ptr_diag);                       // x(row) = sum/M(row,row)
+                sum -= *(ptr + *k_ptr) * x[*k_ptr];              // sum -= M(k,row) * x(k)
+            x[*row_ptr] = sum/(*ptr_diag);                       // x(row) = sum/M(row,row)
         }
     } // endelse: zero-row/col compression needed
 
@@ -707,7 +707,7 @@ GVector GSymMatrix::extract_row(int row) const
 
     // Extract row into vector
     for (int col = 0; col < m_cols; ++col)
-        result.m_data[col] = (*this)(row,col);
+        result[col] = (*this)(row,col);
 
     // Return vector
     return result;
@@ -732,7 +732,7 @@ GVector GSymMatrix::extract_col(int col) const
 
     // Extract column into vector
     for (int row = 0; row < m_rows; ++row)
-        result.m_data[row] = (*this)(row,col);
+        result[row] = (*this)(row,col);
 
     // Return vector
     return result;
@@ -821,12 +821,12 @@ void GSymMatrix::insert_col(const GVector& v, int col)
     #endif
 
     // Raise an exception if the matrix and vector dimensions are not compatible
-    if (m_rows != v.m_num)
-        throw GException::matrix_vector_mismatch(G_INSERT_COL, v.m_num, m_rows, m_cols);
+    if (m_rows != v.size())
+        throw GException::matrix_vector_mismatch(G_INSERT_COL, v.size(), m_rows, m_cols);
 
     // Insert column into vector
     for (int row = 0; row < m_rows; ++row)
-        (*this)(row,col) = v.m_data[row];
+        (*this)(row,col) = v[row];
 
     // Return
     return;

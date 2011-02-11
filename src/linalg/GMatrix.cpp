@@ -206,8 +206,8 @@ const double& GMatrix::operator() (int row, int col) const
 GVector GMatrix::operator* (const GVector& v) const
 {
     // Raise an exception if the matrix and vector dimensions are not compatible
-    if (m_cols != v.m_num)
-        throw GException::matrix_vector_mismatch(G_OP_MUL_VEC, v.m_num,
+    if (m_cols != v.size())
+        throw GException::matrix_vector_mismatch(G_OP_MUL_VEC, v.size(),
                                                  m_rows, m_cols);
 
     // Perform vector multiplication
@@ -215,8 +215,8 @@ GVector GMatrix::operator* (const GVector& v) const
     for (int row = 0; row < m_rows; ++row) {
         double sum = 0.0;
         for (int col = 0; col < m_cols; ++col)
-            sum += (*this)(row,col) * v.m_data[col];
-        result.m_data[row] = sum;
+            sum += (*this)(row,col) * v[col];
+        result[row] = sum;
     }
 
     // Return result
@@ -288,7 +288,7 @@ GMatrix& GMatrix::operator*= (const GMatrix& m)
             for (int col = 0; col < m_cols; ++col) {
                 double sum = 0.0;
                 for (int i = 0; i < m_cols; ++i)
-                    sum += v_row.m_data[i] * m(i,col);
+                    sum += v_row[i] * m(i,col);
                 (*this)(row,col) = sum;
             }
         }
@@ -393,8 +393,8 @@ void GMatrix::add_col(const GVector& v, int col)
     #endif
 
     // Raise an exception if the matrix and vector dimensions are not compatible
-    if (m_rows != v.m_num)
-        throw GException::matrix_vector_mismatch(G_ADD_COL, v.m_num,
+    if (m_rows != v.size())
+        throw GException::matrix_vector_mismatch(G_ADD_COL, v.size(),
                                                  m_rows, m_cols);
 
     // Continue only if we have elements
@@ -405,7 +405,7 @@ void GMatrix::add_col(const GVector& v, int col)
 
         // Add column into vector
         for (int row = 0; row < m_rows; ++row)
-            m_data[i++] += v.m_data[row];
+            m_data[i++] += v[row];
 
     } // endif: matrix had elements
 
@@ -429,8 +429,8 @@ void GMatrix::insert_col(const GVector& v, int col)
     #endif
 
     // Raise an exception if the matrix and vector dimensions are not compatible
-    if (m_rows != v.m_num)
-         throw GException::matrix_vector_mismatch(G_INSERT_COL, v.m_num,
+    if (m_rows != v.size())
+         throw GException::matrix_vector_mismatch(G_INSERT_COL, v.size(),
                                                   m_rows, m_cols);
 
     // Continue only if we have elements
@@ -441,7 +441,7 @@ void GMatrix::insert_col(const GVector& v, int col)
 
         // Insert column into vector
         for (int row = 0; row < m_rows; ++row)
-            m_data[i++] = v.m_data[row];
+            m_data[i++] = v[row];
 
     } // endif: matrix had elements
 
@@ -468,7 +468,7 @@ GVector GMatrix::extract_row(int row) const
 
     // Extract row into vector
     for (int col = 0, i = row; col < m_cols; ++col, i+=m_rows)
-        result.m_data[col] = m_data[i];
+        result[col] = m_data[i];
 
     // Return vector
     return result;
@@ -499,7 +499,7 @@ GVector GMatrix::extract_col(int col) const
 
         // Extract column into vector
         for (int row = 0; row < m_rows; ++row)
-            result.m_data[row] = m_data[i++];
+            result[row] = m_data[i++];
 
     } // endif: matrix had elements
 
