@@ -130,7 +130,6 @@
 #include "GModelRegistry.hpp"
 #include "GModelSky.hpp"
 #include "GModelData.hpp"
-#include "GModelFactorized.hpp"
 #include "GModelPointSource.hpp"
 #include "GModelDiffuseSource.hpp"
 #include "GModelSpatial.hpp"
