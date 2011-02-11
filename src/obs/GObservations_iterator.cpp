@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GObservations_iterator.cpp
- * @brief GObservations::iterator class implementation.
+ * @brief Observation container iterator class implementation
  * @author J. Knodlseder
  */
 
@@ -99,14 +99,14 @@ GObservations::iterator& GObservations::iterator::operator++(void)
         if (m_event == m_end) {
 
             // Find next valid observation
-            while (m_index < m_this->m_num) {
+            while (m_index < m_this->size()) {
         
                 // Go to next observation
                 m_index++;
             
                 // If we still have an observation then set now the iterator
                 // to the first event from this observation ...
-                if (m_index < m_this->m_num) {
+                if (m_index < m_this->size()) {
             
                     // Get next observation. Skip if empty
                     m_obs = m_this->m_obs[m_index];
@@ -130,8 +130,8 @@ GObservations::iterator& GObservations::iterator::operator++(void)
             } // endwhile: searched for next valid observation
         
             // If observations are exhausted then set iterator to signal the end
-            if (m_index >= m_this->m_num) {
-                m_index = m_this->m_num;
+            if (m_index >= m_this->size()) {
+                m_index = m_this->size();
                 m_obs   = NULL;
                 m_event = GEvents::iterator();
                 m_end   = GEvents::iterator();

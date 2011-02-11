@@ -196,7 +196,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         m_covar->stack_init(npars,10000);
 
         // Loop over all observations
-        for (int i = 0; i < m_this->m_num; ++i) {
+        for (int i = 0; i < m_this->size(); ++i) {
 
             // Extract statistics for this observation
             std::string statistics = m_this->m_obs[i]->statistics();
