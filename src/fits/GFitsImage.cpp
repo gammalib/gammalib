@@ -708,10 +708,10 @@ void GFitsImage::save_image(int datatype, const void* pixels)
         }
         status = __ffpss(FPTR(m_fitsfile), datatype, fpixel, lpixel,
                          (void*)pixels, &status);
-        if (status != 0)
-            throw GException::fits_error(G_SAVE_IMAGE, status);
         delete [] fpixel;
         delete [] lpixel;
+        if (status != 0)
+            throw GException::fits_error(G_SAVE_IMAGE, status);
     }
 
     // Return
