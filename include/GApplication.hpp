@@ -31,7 +31,12 @@
 /***********************************************************************//**
  * @class GApplication
  *
- * @brief GammaLib application interface defintion.
+ * @brief GammaLib application interface defintion
+ *
+ * This class provides the base class for ftools-like executables based on
+ * GammaLib. The ftools-like executables will be implemented as derived
+ * classes, and automatically have access to task parameters and the
+ * application logger.
  ***************************************************************************/
 class GApplication {
 
@@ -50,8 +55,8 @@ public:
 
     // Operators
     GApplication& operator= (const GApplication& app);
-    GPar&         operator() (const std::string& name);
-    const GPar&   operator() (const std::string& name) const;
+    GPar&         operator[](const std::string& name);
+    const GPar&   operator[](const std::string& name) const;
 
     // Methods
     std::string name(void) const;

@@ -191,7 +191,7 @@ GApplication& GApplication::operator= (const GApplication& app)
  * @exception GException::par_error
  *            Parameter of specified name not found.
  ***************************************************************************/
-GPar& GApplication::operator() (const std::string& name)
+GPar& GApplication::operator[](const std::string& name)
 {
     // Return dereferenced pointer
     return (*(this->par(name)));
@@ -206,7 +206,7 @@ GPar& GApplication::operator() (const std::string& name)
  * @exception GException::par_error
  *            Parameter of specified name not found.
  ***************************************************************************/
-const GPar& GApplication::operator() (const std::string& name) const
+const GPar& GApplication::operator[](const std::string& name) const
 {
     // Return dereferenced pointer
     return (*(this->par(name)));
@@ -555,9 +555,9 @@ std::string GApplication::log_filename(void) const
 void GApplication::get_par_standard(void)
 {
     // Extract parameters
-    m_chatter = (*this)("chatter").integer();
-    m_clobber = (*this)("clobber").boolean();
-    m_debug   = (*this)("debug").boolean();
+    m_chatter = (*this)["chatter"].integer();
+    m_clobber = (*this)["clobber"].boolean();
+    m_debug   = (*this)["debug"].boolean();
 
     // Return
     return;
