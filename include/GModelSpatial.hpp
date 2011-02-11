@@ -20,8 +20,9 @@
 #define GMODELSPATIAL_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include <string>
+#include <vector>
+#include <iostream>
 #include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
