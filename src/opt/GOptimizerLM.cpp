@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GOptimizerLM.cpp  -  Levenberg Marquardt optimizer           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GOptimizerLM.cpp
- * @brief GOptimizerLM base class implementation.
+ * @brief Levenberg-Marquardt optimizer class implementation
  * @author J. Knodlseder
  */
 
@@ -550,12 +550,12 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
         // Save parameter values in vector
         GVector save_pars(m_npars);
         for (int ipar = 0; ipar < m_npars; ++ipar)
-            save_pars(ipar) = pars->par(ipar)->value();
+            save_pars[ipar] = pars->par(ipar)->value();
 
         // Setup matrix and vector for covariance computation
         for (int ipar = 0; ipar < m_npars; ++ipar) {
             (*covar)(ipar,ipar) *= (1.0 + m_lambda);
-            (*grad)(ipar)        = -(*grad)(ipar);
+            (*grad)[ipar]        = -(*grad)[ipar];
         }
 
         // Solve: covar * X = grad. Handle matrix problems
@@ -600,7 +600,7 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
                 double p_max = pars->par(ipar)->max();
 
                 // Compute new parameter value
-                p += (*grad)(ipar) * step;
+                p += (*grad)[ipar] * step;
 
                 // Constrain parameter to within the valid range
                 if (pars->par(ipar)->hasmin() && p < p_min) {
@@ -672,7 +672,7 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
         // Determine how many parameters have changed
         int par_change = 0;
         for (int ipar = 0; ipar < m_npars; ++ipar) {
-            if (pars->par(ipar)->value() != save_pars(ipar))
+            if (pars->par(ipar)->value() != save_pars[ipar])
                 par_change++;
         }
 
@@ -705,7 +705,7 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
             *grad     = save_grad;
             *covar    = save_covar;
             for (int ipar = 0; ipar < m_npars; ++ipar)
-                pars->par(ipar)->value(save_pars(ipar));
+                pars->par(ipar)->value(save_pars[ipar]);
         }
 
     } while (0); // endwhile: main loop
@@ -745,7 +745,7 @@ double GOptimizerLM::step_size(GVector* grad, GOptimizerPars* pars)
             double p     = pars->par(ipar)->value();
             double p_min = pars->par(ipar)->min();
             double p_max = pars->par(ipar)->max();
-            double delta = (*grad)(ipar);
+            double delta = (*grad)[ipar];
 
             // Check if a parameter minimum requires a reduced step size
             if (pars->par(ipar)->hasmin()) {
@@ -850,15 +850,15 @@ void GOptimizerLM::errors(GOptimizerFunction* fct, GOptimizerPars* pars)
             covar->cholesky_decompose(1);
             GVector unit(npars);
             for (int ipar = 0; ipar < npars; ++ipar) {
-                unit(ipar) = 1.0;
+                unit[ipar] = 1.0;
                 GVector x  = covar->cholesky_solver(unit,1);
-                if (x(ipar) >= 0.0)
-                    pars->par(ipar)->error(sqrt(x(ipar)));
+                if (x[ipar] >= 0.0)
+                    pars->par(ipar)->error(sqrt(x[ipar]));
                 else {
                     pars->par(ipar)->error(0.0);
                     m_status = G_LM_BAD_ERRORS;
                 }
-                unit(ipar) = 0.0;
+                unit[ipar] = 0.0;
             }
         }
         catch (GException::matrix_zero &e) {

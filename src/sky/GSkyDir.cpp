@@ -238,8 +238,8 @@ void GSkyDir::celvector(const GVector& vector)
     m_has_radec = true;
 
     // Convert vector into sky position
-    m_dec = asin(vector(2));
-    m_ra  = atan2(vector(1), vector(0));
+    m_dec = asin(vector[2]);
+    m_ra  = atan2(vector[1], vector[0]);
 
     // Return
     return;

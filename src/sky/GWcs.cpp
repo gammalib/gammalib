@@ -416,7 +416,7 @@ GSkyPixel GWcs::dir2xy(GSkyDir dir) const
     GVector offset = m_invcd * xy + m_refpix;
 
     // Set sky pixel
-    GSkyPixel pixel(offset(0), offset(1));
+    GSkyPixel pixel(offset[0], offset[1]);
 
     // Debug: Dump transformation steps
     #if defined(G_DIR2XY_DEBUG)
@@ -465,12 +465,12 @@ GVector GWcs::wcs_dir2native(GSkyDir dir) const
     GVector b = m_rot * x;
 
     // Account for possible roundoff in 3rd element
-    if (b(2) < -1.0) b(2) = -1.0;
-    if (b(2) > +1.0) b(2) = +1.0;
+    if (b[2] < -1.0) b[2] = -1.0;
+    if (b[2] > +1.0) b[2] = +1.0;
 
     // Compute native coordinates in radians
-    double  theta = asin(b(2));
-    double  phi   = atan2(b(1),b(0));
+    double  theta = asin(b[2]);
+    double  phi   = atan2(b[1],b[0]);
     GVector native(phi, theta);
 
     // Return native coordinates
@@ -486,8 +486,8 @@ GVector GWcs::wcs_dir2native(GSkyDir dir) const
 GSkyDir GWcs::wcs_native2dir(GVector native) const
 {
     // Get native coordinates
-    double phi1   = native(0);
-    double theta1 = native(1);
+    double phi1   = native[0];
+    double theta1 = native[1];
 
     // Define right hand side vector for matrix equation
     double  ct = cos(theta1);
@@ -500,12 +500,12 @@ GSkyDir GWcs::wcs_native2dir(GVector native) const
     GVector b = m_trot * x;
 
     // Account for possible roundoff in 3rd element
-    if (b(2) < -1.0) b(2) = -1.0;
-    if (b(2) > +1.0) b(2) = +1.0;
+    if (b[2] < -1.0) b[2] = -1.0;
+    if (b[2] > +1.0) b[2] = +1.0;
 
     // Compute sky coordinates in radians
-    double  theta = asin(b(2));
-    double  phi   = atan2(b(1),b(0));
+    double  theta = asin(b[2]);
+    double  phi   = atan2(b[1],b[0]);
 
     // Assign sky direction
     GSkyDir dir;
@@ -566,12 +566,12 @@ GVector GWcs::wcs_getpole(const double& theta0)
     double delta_p;
 
     // Compute crval in radians
-    double alpha_0 = m_refval(0) * deg2rad;
-    double delta_0 = m_refval(1) * deg2rad;
+    double alpha_0 = m_refval[0] * deg2rad;
+    double delta_0 = m_refval[1] * deg2rad;
 
     // Get longitude and latitude of pole
-    double lonpole = m_npole(0);
-    double latpole = m_npole(1);
+    double lonpole = m_npole[0];
+    double latpole = m_npole[1];
 
     // If theta0=90 then the coordinate of the native pole are given by crval
     if (theta0 == 90.0) {
@@ -670,12 +670,12 @@ GMatrix GWcs::wcs_get_rot(void)
     GMatrix r(3,3);
 
     // Compute useful quantities relating to reference angles
-    double sp = sin(m_npole(0)*deg2rad);
-    double cp = cos(m_npole(0)*deg2rad);
-    double sa = sin(m_native_pole(0));
-    double ca = cos(m_native_pole(0));
-    double sd = sin(m_native_pole(1));
-    double cd = cos(m_native_pole(1));
+    double sp = sin(m_npole[0]*deg2rad);
+    double cp = cos(m_npole[0]*deg2rad);
+    double sa = sin(m_native_pole[0]);
+    double ca = cos(m_native_pole[0]);
+    double sd = sin(m_native_pole[1]);
+    double cd = cos(m_native_pole[1]);
 
     // Compute rotation matrix
     r(0,0) = -sa*sp - ca*cp*sd;
@@ -732,10 +732,10 @@ void GWcs::wcs_set(const std::string& coords,
     m_refpix  = m_crpix - GVector(1.0,1.0);
 
     // Set CD matrix corresponding to no rotation
-    m_cd(0,0) = m_cdelt(0);
+    m_cd(0,0) = m_cdelt[0];
     m_cd(1,0) = 0.0;
     m_cd(0,1) = 0.0;
-    m_cd(1,1) = m_cdelt(1);
+    m_cd(1,1) = m_cdelt[1];
 
     // Compute inverse CD matrix
     double delta = m_cd(0,0)*m_cd(1,1) - m_cd(0,1)*m_cd(1,0);
@@ -873,17 +873,17 @@ void GWcs::wcs_write(GFitsHDU* hdu) const
         hdu->card("EQUINOX", 2000.0,       c_equinox);
         hdu->card("CTYPE1",  wcs_crval1(), "Projection Type");
         hdu->card("CTYPE2",  wcs_crval2(), "Projection Type");
-        hdu->card("CDELT1",  m_cdelt(0),   c_cdelt1);
-        hdu->card("CDELT2",  m_cdelt(1),   c_cdelt2);
-        hdu->card("CRPIX1",  m_crpix(0),
+        hdu->card("CDELT1",  m_cdelt[0],   c_cdelt1);
+        hdu->card("CDELT2",  m_cdelt[1],   c_cdelt2);
+        hdu->card("CRPIX1",  m_crpix[0],
                   "X index of reference pixel (starting from 1)");
-        hdu->card("CRPIX2",  m_crpix(1),
+        hdu->card("CRPIX2",  m_crpix[1],
                   "Y index of reference pixel (starting from 1)");
-        hdu->card("CRVAL1",  m_crval(0),   c_crval1);
-        hdu->card("CRVAL2",  m_crval(1),   c_crval2);
+        hdu->card("CRVAL1",  m_crval[0],   c_crval1);
+        hdu->card("CRVAL2",  m_crval[1],   c_crval2);
         hdu->card("CROTA2",  0.0,          "[deg] Rotation Angle");
-        hdu->card("LONPOLE", m_npole(0),   c_lonpole);
-        hdu->card("LATPOLE", m_npole(1),   c_lonpole);
+        hdu->card("LONPOLE", m_npole[0],   c_lonpole);
+        hdu->card("LATPOLE", m_npole[1],   c_lonpole);
         hdu->card("PV2_1",   0.0,          "Projection parameter 1");
         hdu->card("PV2_2",   0.0,          "Projection parameter 2");
 
