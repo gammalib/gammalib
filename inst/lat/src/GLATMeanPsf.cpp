@@ -365,7 +365,7 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
             // Compute point spread function by looping over the responses
             double psf = 0.0;
             for (int i = 0; i < rsp->size(); ++i)
-                psf += (*ltcube)(dir, energy[ieng], m_offset(ioffset),
+                psf += (*ltcube)(dir, energy[ieng], m_offset[ioffset],
                                  *rsp->psf(i), *rsp->aeff(i));
 
             // Normalize PSF by exposure and clip when exposure drops to 0
@@ -552,7 +552,7 @@ std::string GLATMeanPsf::print(void) const
     result.append(str(min_exposure)+" - "+str(max_exposure)+" s cm2");
     for (int i = 0; i < nenergies(); ++i) {
         GEnergy energy;
-        energy.log10MeV(m_energy(i));
+        energy.log10MeV(m_energy[i]);
         result.append("\n"+parformat(energy.print()));
         result.append(str(m_exposure[i])+" s cm2");
         if (m_mapcorr.size() == nenergies())
@@ -722,7 +722,7 @@ void GLATMeanPsf::set_map_corrections(const GLATObservation& obs)
 
                         // Accumulate energy dependent pixel sum
                         for (int ieng = 0; ieng < m_energy.size(); ++ieng)
-                            sum[ieng] += psf(offset, m_energy(ieng)) * omega;
+                            sum[ieng] += psf(offset, m_energy[ieng]) * omega;
                         
                     } // endif: pixel was within maximum PSF radius
 
@@ -732,7 +732,7 @@ void GLATMeanPsf::set_map_corrections(const GLATObservation& obs)
             // Compute map correction
             for (int ieng = 0; ieng < m_energy.size(); ++ieng) {
                 if (sum[ieng] > 0.0) {
-                    m_mapcorr[ieng] = integral(radius, m_energy(ieng)) / sum[ieng];
+                    m_mapcorr[ieng] = integral(radius, m_energy[ieng]) / sum[ieng];
                 }
             }
 
@@ -769,9 +769,9 @@ double GLATMeanPsf::integral(const double& offsetmax, const double& logE)
 
         // If interval is fully contained within offset then simply use
         // tabulated values for integration
-        if (m_offset(i+1) <= offsetmax) {
-            double theta_min = m_offset(i)   * deg2rad;
-            double theta_max = m_offset(i+1) * deg2rad;
+        if (m_offset[i+1] <= offsetmax) {
+            double theta_min = m_offset[i]   * deg2rad;
+            double theta_max = m_offset[i+1] * deg2rad;
             int_left  += 0.5 * (m_psf[inx_energy_left+i]   * sin(theta_min) +
                                 m_psf[inx_energy_left+i+1] * sin(theta_max)) *
                                (theta_max - theta_min);
@@ -783,7 +783,7 @@ double GLATMeanPsf::integral(const double& offsetmax, const double& logE)
         // ... otherwise interpolate the PSF value for theta_max. We can
         // then exit the loop since we're done with the integration
         else {
-            double theta_min = m_offset(i) * deg2rad;
+            double theta_min = m_offset[i] * deg2rad;
             double theta_max = offsetmax   * deg2rad;
             double psf_left  = m_psf[inx_energy_left+i]    * m_offset.wgt_left() +
                                m_psf[inx_energy_left+i+1]  * m_offset.wgt_right();
