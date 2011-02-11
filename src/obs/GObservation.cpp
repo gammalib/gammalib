@@ -161,10 +161,6 @@ GObservation& GObservation::operator= (const GObservation& obs)
  * model gives the probability for an event to occur with a given instrument
  * direction, at a given energy and at a given time. The gradient is the
  * parameter derivative of this probability.
- *
- * @todo We actually circumvent the const correctness for the eval_gradients()
- * method, yet I don't know why this method is not const. This should be
- * checked, and better put this method const.
  ***************************************************************************/
 double GObservation::model(const GModels& models, const GEvent& event,
                            GVector* gradient) const
@@ -184,19 +180,16 @@ double GObservation::model(const GModels& models, const GEvent& event,
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
 
-        // Get model pointer (enforce const correctness)
-        GModel* ptr = (GModel*)models(i);
-
         // Check if model applies to specific instrument
-        if (ptr->isvalid(instrument())) {
+        if (models[i].isvalid(instrument())) {
 
             // Compute value and add to model
-            model += ptr->eval_gradients(event, *this);
+            model += models[i].eval_gradients(event, *this);
 
             // Optionally set gradient vector
             if (gradient != NULL) {
-                for (int k = 0; k < ptr->size(); ++k, ++igrad) {
-                    double grad        = (*ptr)(k).gradient();
+                for (int k = 0; k < models[i].size(); ++k, ++igrad) {
+                    double grad        = models[i][k].gradient();
                     (*gradient)(igrad) = (isinfinite(grad)) ? 0.0 : grad;
                 }
             }
@@ -205,7 +198,7 @@ double GObservation::model(const GModels& models, const GEvent& event,
 
         // ... otherwise set gradient vector to 0
         else if (gradient != NULL) {
-            for (int k = 0; k < ptr->size(); ++k, ++igrad) {
+            for (int k = 0; k < models[i].size(); ++k, ++igrad) {
                 (*gradient)(igrad) = 0.0;
             }
         }
@@ -240,26 +233,23 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
 
-        // Extract pointer to model (circumvent const-correctness)
-        GModel* model = (GModel*)models(i);
-
         // Handle only components that are relevant for the actual
         // instrument
-        if (model->isvalid(instrument())) {
+        if (models[i].isvalid(instrument())) {
 
             // Determine Npred for model
-            npred += npred_temp(*model);
+            npred += npred_temp(models[i]);
 
             // Optionally determine Npred gradients
             if (gradient != NULL) {
-                for (int k = 0; k < model->size(); ++k)
-                    (*gradient)(igrad+k) = npred_grad(*model, k);
+                for (int k = 0; k < models[i].size(); ++k)
+                    (*gradient)(igrad+k) = npred_grad(models[i], k);
             }
 
         } // endif: model component was valid for instrument
 
         // Increment parameter counter for gradient
-        igrad += model->size();
+        igrad += models[i].size();
 
     } // endfor: Looped over models
 
@@ -443,14 +433,14 @@ double GObservation::npred_grad(const GModel& model, int ipar) const
     double result = 0.0;
 
     // Compute gradient only if parameter is free
-    if (model(ipar).isfree()) {
+    if (model[ipar].isfree()) {
 
         // Setup derivative function
         GObservation::npred_func function(this, model, ipar);
         GDerivative              derivative(&function);
 
         // Get derivative
-        result = derivative.value(model(ipar).value());
+        result = derivative.value(model[ipar].value());
         
     } // endif: model parameter was free
 
@@ -658,17 +648,17 @@ double GObservation::npred_func::eval(double x)
     GModel* model = (GModel*)m_model;
     
     // Save current model parameter
-    GModelPar current = (*model)(m_ipar);
+    GModelPar current = (*model)[m_ipar];
 
     // Set requested model value. Remove any boundaries to avoid limitations.
-    (*model)(m_ipar).value(x);
-    (*model)(m_ipar).remove_range();
+    (*model)[m_ipar].value(x);
+    (*model)[m_ipar].remove_range();
 
     // Compute Npred value
     double npred = m_parent->npred_temp(*model);
 
     // Restore current model parameter
-    (*model)(m_ipar) = current;
+    (*model)[m_ipar] = current;
 
     // Return value
     return npred;
