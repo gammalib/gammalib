@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GPars.cpp
- * @brief Application parameters class implementation
+ * @brief Application parameter container class implementation
  * @author Jurgen Knodlseder
  */
 
@@ -28,6 +28,8 @@
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ACCESS1                                   "GPars::operator[](int&)"
+#define G_ACCESS2                           "GPars::operator[](std::string&)"
 #define G_LOAD1                              "GPars::load(const std::string)"
 #define G_LOAD2    "GPars::load(const std::string, std::vector<std::string>)"
 #define G_SAVE                               "GPars::save(const std::string)"
@@ -161,6 +163,102 @@ GPars& GPars::operator= (const GPars& pars)
 }
 
 
+/***********************************************************************//**
+ * @brief Returns reference to parameter
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ ***************************************************************************/
+GPar& GPars::operator[](const int& index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    #endif
+
+    // Return reference
+    return (m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to parameter (const version)
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ ***************************************************************************/
+const GPar& GPars::operator[](const int& index) const
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    #endif
+
+    // Return reference
+    return (m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to parameter
+ *
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::par_error
+ *            Parameter with specified name not found in container.
+ ***************************************************************************/
+GPar& GPars::operator[](const std::string& name)
+{
+    // Get parameter index
+    int index = 0;
+    for (; index < size(); ++index) {
+        if (m_pars[index].name() == name)
+            break;
+    }
+
+    // Throw exception if parameter name has not been found
+    if (index >= size())
+        throw GException::par_error(G_ACCESS2, name,
+                          "has not been found in parameter file.");
+
+    // Return reference
+    return (m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to parameter (const version)
+ *
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::par_error
+ *            Parameter with specified name not found in container.
+ ***************************************************************************/
+const GPar& GPars::operator[](const std::string& name) const
+{
+    // Get parameter index
+    int index = 0;
+    for (; index < size(); ++index) {
+        if (m_pars[index].name() == name)
+            break;
+    }
+
+    // Throw exception if parameter name has not been found
+    if (index >= size())
+        throw GException::par_error(G_ACCESS2, name,
+                          "has not been found in parameter file.");
+
+    // Return reference
+    return (m_pars[index]);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
@@ -252,37 +350,36 @@ void GPars::load(const std::string& filename,
         size_t pos = args[i].find("=");
         if (pos == std::string::npos)
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],
-                                                   "no '=' specified");
+                                                   "no \"=\" specified");
         std::string name  = args[i].substr(0, pos);
         std::string value = args[i].substr(pos+1);
         if (name.length() < 1)
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],
-                                       "no parameter name before '='");
+                                       "no parameter name before \"=\"");
         if (value.length() < 1)
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],
-                                       "no parameter value after '='");
+                                       "no parameter value after \"=\"");
 
-        // Get pointer to parameter
-        GPar* ptr = par(name);
-        if (ptr == NULL)
+        // Check if parameter exists
+        if (!haspar(name))
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],
-                                  "invalid parameter name '"+name+"'");
+                                  "invalid parameter name \""+name+"\"");
 
         // Assign value
         try {
-            ptr->value(value);
+            (*this)[name].value(value);
         }
         catch (GException::par_error &e) {
             throw GException::bad_cmdline_argument(G_LOAD2, args[i]);
         }
 
         // Set mode to hidden to prevent querying the parameter
-        if (ptr->mode() == "q")
-            ptr->mode("h");
-        else if (ptr->mode() == "ql")
-            ptr->mode("hl");
-        else if (ptr->mode() == "lq")
-            ptr->mode("lh");
+        if ((*this)[name].mode() == "q")
+            (*this)[name].mode("h");
+        else if ((*this)[name].mode() == "ql")
+            (*this)[name].mode("hl");
+        else if ((*this)[name].mode() == "lq")
+            (*this)[name].mode("lh");
 
     } // endfor: looped over all parameters
 
@@ -324,6 +421,7 @@ void GPars::save(const std::string& filename)
  *
  * Method returns a NULL pointer if parameter is not found in list.
  ***************************************************************************/
+/*
 GPar* GPars::par(const std::string& name)
 {
     // Initialise parameter pointer
@@ -340,7 +438,7 @@ GPar* GPars::par(const std::string& name)
     // Return pointer
     return ptr;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Returns pointer on parameter (const version)
@@ -349,6 +447,7 @@ GPar* GPars::par(const std::string& name)
  *
  * Method returns a NULL pointer if parameter is not found in list.
  ***************************************************************************/
+/*
 const GPar* GPars::par(const std::string& name) const
 {
     // Initialise parameter pointer
@@ -364,6 +463,26 @@ const GPar* GPars::par(const std::string& name) const
 
     // Return pointer
     return ptr;
+}
+*/
+
+
+/***********************************************************************//**
+ * @brief Signal if specified parameter exists
+ *
+ * @param[in] name Parameter name.
+ ***************************************************************************/
+bool GPars::haspar(const std::string& name) const
+{
+    // Get parameter index
+    int index = 0;
+    for (; index < size(); ++index) {
+        if (m_pars[index].name() == name)
+            break;
+    }
+
+    // Return test result
+    return (index < size());
 }
 
 
@@ -751,10 +870,10 @@ void GPars::parse(void)
                                  "found "+str(index)+" fields, require 7");
 
         // Verify if parameter name does not yet exist
-        if (par(fields[0]) != NULL)
+        if (haspar(fields[0]))
             throw GException::par_file_syntax_error(G_PARSE, 
                                                     strip_chars(line,"\n"),
-                          "redefiniton of parameter name '"+fields[0]+"'");
+                          "redefiniton of parameter name \""+fields[0]+"\"");
 
         // Add parameter
         try {
@@ -778,7 +897,7 @@ void GPars::parse(void)
                 fields[3] != "lh" && fields[3] != "lq")
                 throw GException::par_file_syntax_error(G_PARSE, 
                                                     strip_chars(line,"\n"),
-                       "mode parameter has invalid value '"+fields[3]+"'");
+                       "mode parameter has invalid value \""+fields[3]+"\"");
             m_mode = fields[3];
         }
 

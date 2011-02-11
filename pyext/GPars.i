@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GPars.i
- * @brief Application parameters Python interface definition
+ * @brief Application parameter container class Python interface definition
  * @author Jurgen Knodlseder
  */
 %{
@@ -25,17 +25,17 @@
 /***********************************************************************//**
  * @class GPars
  *
- * @brief Application parameters Python interface defintion
+ * @brief Application parameter container class
  ***************************************************************************/
 class GPars {
 
 public:
     // Constructors and destructors
     GPars(void);
-    GPars(const std::string& filename);
-    GPars(const std::string& filename, const std::vector<std::string>& args);
+    explicit GPars(const std::string& filename);
+    explicit GPars(const std::string& filename, const std::vector<std::string>& args);
     GPars(const GPars& pars);
-    ~GPars(void);
+    virtual ~GPars(void);
  
     // Methods
     void        clear(void);
@@ -43,8 +43,7 @@ public:
     void        load(const std::string& filename);
     void        load(const std::string& filename, const std::vector<std::string>& args);
     void        save(const std::string& filename);
-    GPar*       par(const std::string& name);
-    //const GPar* par(const std::string& name) const; //!< ignored by SWIG
+    bool        haspar(const std::string& name) const;
 };
 
 
@@ -54,6 +53,27 @@ public:
 %extend GPars {
     char *__str__() {
         return tochar(self->print());
+    }
+    GPar& __getitem__(const int& index) {
+        if (index >= 0 && index < self->size())
+            return (*self)[index];
+        else
+            throw GException::out_of_range("__getitem__(int)", index, self->size());
+    }
+    GPar& __getitem__(const std::string& name) {
+        return (*self)[name];
+    }
+    void __setitem__(const int& index, const GPar& par) {
+        if (index>=0 && index < self->size()) {
+            (*self)[index] = par;
+            return;
+        }
+        else
+            throw GException::out_of_range("__setitem__(int)", index, self->size());
+    }
+    void __setitem__(const std::string& name, const GPar& par) {
+        (*self)[name] = par;
+        return;
     }
     GPars copy() {
         return (*self);

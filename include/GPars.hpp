@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GPars.hpp
- * @brief Application parameters class definition
+ * @brief Application parameter container class definition
  * @author Jurgen Knodlseder
  */
 
@@ -30,7 +30,9 @@
 /***********************************************************************//**
  * @class GPars
  *
- * @brief Application parameters interface defintion.
+ * @brief Application parameter container class
+ *
+ * This class holds a collection of application parameters.
  ***************************************************************************/
 class GPars {
 
@@ -44,13 +46,17 @@ class GPars {
 public:
     // Constructors and destructors
     GPars(void);
-    GPars(const std::string& filename);
-    GPars(const std::string& filename, const std::vector<std::string>& args);
+    explicit GPars(const std::string& filename);
+    explicit GPars(const std::string& filename, const std::vector<std::string>& args);
     GPars(const GPars& pars);
-    ~GPars(void);
+    virtual ~GPars(void);
  
     // Operators
-    GPars& operator= (const GPars& pars);
+    GPars&      operator=(const GPars& pars);
+    GPar&       operator[](const int& index);
+    const GPar& operator[](const int& index) const;
+    GPar&       operator[](const std::string& name);
+    const GPar& operator[](const std::string& name) const;
 
     // Methods
     void        clear(void);
@@ -58,8 +64,7 @@ public:
     void        load(const std::string& filename);
     void        load(const std::string& filename, const std::vector<std::string>& args);
     void        save(const std::string& filename);
-    GPar*       par(const std::string& name);
-    const GPar* par(const std::string& name) const;
+    bool        haspar(const std::string& name) const;
     std::string print(void) const;
   
 protected:
