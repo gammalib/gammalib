@@ -168,48 +168,6 @@ GModelSky::~GModelSky(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Returns reference to model parameter
- *
- * @param[in] index Parameter index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- ***************************************************************************/
-GModelPar& GModelSky::operator() (int index)
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= m_npars)
-        throw GException::out_of_range(G_ACCESS, index, 0, m_npars-1);
-    #endif
-
-    // Return pointer
-    return *(m_par[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Returns reference to model parameter (const version)
- *
- * @param[in] index Parameter index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- ***************************************************************************/
-const GModelPar& GModelSky::operator() (int index) const
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= m_npars)
-        throw GException::out_of_range(G_ACCESS, index, 0, m_npars-1);
-    #endif
-
-    // Return pointer
-    return *(m_par[index]);
-}
-
-
-/***********************************************************************//**
  * @brief Assignment operator
  *
  * @param[in] model Sky model.
@@ -294,7 +252,7 @@ GVector GModelSky::gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
     if (size() > 0) {
         gradients = GVector(size());
         for (int i = 0; i < size(); ++i)
-            gradients(i) = m_par[i]->gradient();
+            gradients(i) = m_pars[i]->gradient();
     }
 
     // Return gradients
@@ -311,7 +269,7 @@ GVector GModelSky::gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
  * This method evaluates the source model for a given event within a given
  * observation.
  ***************************************************************************/
-double GModelSky::eval(const GEvent& event, const GObservation& obs)
+double GModelSky::eval(const GEvent& event, const GObservation& obs) const
 {
     // Evaluate function
     double value = temporal(event, obs, false);
@@ -330,7 +288,8 @@ double GModelSky::eval(const GEvent& event, const GObservation& obs)
  * This method evaluates the source model and model gradients for a given
  * event within a given observation.
  ***************************************************************************/
-double GModelSky::eval_gradients(const GEvent& event, const GObservation& obs)
+double GModelSky::eval_gradients(const GEvent& event, 
+                                 const GObservation& obs) const
 {
     // Evaluate function
     double value = temporal(event, obs, true);
@@ -626,8 +585,6 @@ GPhotons GModelSky::mc(const double& area,
 void GModelSky::init_members(void)
 {
     // Initialise members
-    m_npars    = 0;
-    m_par      = NULL;
     m_spatial  = NULL;
     m_spectral = NULL;
     m_temporal = NULL;
@@ -644,9 +601,6 @@ void GModelSky::init_members(void)
  ***************************************************************************/
 void GModelSky::copy_members(const GModelSky& model)
 {
-    // Copy attributes
-    m_npars = model.m_npars;
-
     // Clone spatial and spectral models
     m_spatial  = (model.m_spatial  != NULL) ? model.m_spatial->clone()  : NULL;
     m_spectral = (model.m_spectral != NULL) ? model.m_spectral->clone() : NULL;
@@ -666,13 +620,11 @@ void GModelSky::copy_members(const GModelSky& model)
 void GModelSky::free_members(void)
 {
     // Free memory
-    if (m_par      != NULL) delete [] m_par;
     if (m_spatial  != NULL) delete m_spatial;
     if (m_spectral != NULL) delete m_spectral;
     if (m_temporal != NULL) delete m_temporal;
 
     // Signal free pointers
-    m_par      = NULL;
     m_spatial  = NULL;
     m_spectral = NULL;
     m_temporal = NULL;
@@ -689,36 +641,29 @@ void GModelSky::free_members(void)
  ***************************************************************************/
 void GModelSky::set_pointers(void)
 {
-    // Delete old pointers (if they exist)
-    if (m_par != NULL) delete [] m_par;
-    m_par = NULL;
+    // Clear parameters
+    m_pars.clear();
 
     // Determine the number of parameters
-    int n_spatial  = (m_spatial  != NULL) ? m_spatial->size() : 0;
-    int n_spectral = (m_spectral != NULL) ? m_spectral->size() : 0;
-    int n_temporal = (m_temporal != NULL) ? m_temporal->size() : 0;
-    m_npars        = n_spatial + n_spectral + n_temporal;
+    int n_spatial  = (spatial()  != NULL) ? spatial()->size()  : 0;
+    int n_spectral = (spectral() != NULL) ? spectral()->size() : 0;
+    int n_temporal = (temporal() != NULL) ? temporal()->size() : 0;
+    int n_pars     = n_spatial + n_spectral + n_temporal;
 
     // Continue only if there are parameters
-    if (m_npars > 0) {
-
-        // Allocate parameter pointers
-        m_par = new GModelPar*[m_npars];
-
-        // Initialise pointer on pointer array
-        GModelPar** ptr = m_par;
+    if (n_pars > 0) {
 
         // Gather spatial parameter pointers
         for (int i = 0; i < n_spatial; ++i)
-            *ptr++ = &((*m_spatial)(i));
+            m_pars.push_back(&((*spatial())(i)));
 
         // Gather spectral parameters
         for (int i = 0; i < n_spectral; ++i)
-            *ptr++ = &((*m_spectral)(i));
+            m_pars.push_back(&((*spectral())(i)));
 
         // Gather temporal parameters
         for (int i = 0; i < n_temporal; ++i)
-            *ptr++ = &((*m_temporal)(i));
+            m_pars.push_back(&((*temporal())(i)));
 
     }
 
@@ -834,7 +779,7 @@ GModelTemporal* GModelSky::xml_temporal(const GXmlElement& temporal) const
  ***************************************************************************/
 double GModelSky::spatial(const GEvent& event,
                           const GEnergy& srcEng, const GTime& srcTime,
-                          const GObservation& obs, bool grad)
+                          const GObservation& obs, bool grad) const
 {
     // Initialise result
     double value = 0.0;
@@ -923,7 +868,7 @@ double GModelSky::spatial(const GEvent& event,
  *       dispersion.
  ***************************************************************************/
 double GModelSky::spectral(const GEvent& event, const GTime& srcTime,
-                           const GObservation& obs, bool grad)
+                           const GObservation& obs, bool grad) const
 {
     // Initialise result
     double value = 0.0;
@@ -971,7 +916,7 @@ double GModelSky::spectral(const GEvent& event, const GTime& srcTime,
  *       dispersion.
  ***************************************************************************/
 double GModelSky::temporal(const GEvent& event, const GObservation& obs,
-                           bool grad)
+                           bool grad) const
 {
     // Initialise result
     double value = 0.0;
@@ -1042,15 +987,15 @@ std::string GModelSky::print_model(void) const
     result.append("\n"+parformat("Number of spatial par's")+str(n_spatial));
     int i;
     for (i = 0; i < n_spatial; ++i) {
-        result.append("\n"+(*this)(i).print());
+        result.append("\n"+(*this)[i].print());
     }
     result.append("\n"+parformat("Number of spectral par's")+str(n_spectral));
     for (; i < n_spatial+n_spectral; ++i) {
-        result.append("\n"+(*this)(i).print());
+        result.append("\n"+(*this)[i].print());
     }
     result.append("\n"+parformat("Number of temporal par's")+str(n_temporal));
     for (; i < n_spatial+n_spectral+n_temporal; ++i) {
-        result.append("\n"+(*this)(i).print());
+        result.append("\n"+(*this)[i].print());
     }
 
     // Return result

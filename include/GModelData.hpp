@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelData.hpp
- * @brief GModelData class interface definition.
+ * @brief Abstract data model base class interface definition
  * @author J. Knodlseder
  */
 
@@ -38,18 +38,10 @@ class GObservation;
 /***********************************************************************//**
  * @class GModelData
  *
- * @brief Abstract virtual data model class interface defintion
+ * @brief Abstract data model class
  *
  * This abstract virtual base class implements methods to access model
  * parameters.
- *
- * @todo These methods could also be implemented on the GModel level.
- *       Before we can do this we also have to use std::vector<GModelPar*>
- *       in GModelSky. Once unified we can move this part to the base
- *       class.
- * @todo eval() and eval_gradients() should also be const. This has to be
- *       changed at the GModel level and has also to be propagated to the
- *       variuos derived classes.
  ***************************************************************************/
 class GModelData : public GModel {
 
@@ -61,36 +53,25 @@ public:
     virtual ~GModelData(void);
 
     // Operators
-    GModelPar&       operator() (int index);
-    const GModelPar& operator() (int index) const;
-    GModelData&      operator= (const GModelData& model);
+    virtual GModelData& operator=(const GModelData& model);
 
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GModelData* clone(void) const = 0;
     virtual std::string type(void) const = 0;
-    virtual double      eval(const GEvent& event, const GObservation& obs) = 0;
-    virtual double      eval_gradients(const GEvent& event, const GObservation& obs) = 0;
+    virtual double      eval(const GEvent& event, const GObservation& obs) const = 0;
+    virtual double      eval_gradients(const GEvent& event, const GObservation& obs) const = 0;
     virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
                               const GObservation& obs) const = 0;
     virtual void        read(const GXmlElement& xml) = 0;
     virtual void        write(GXmlElement& xml) const = 0;
     virtual std::string print(void) const = 0;
-
-    // Implemented pure virtual methods
-    int size(void) const { return m_pars.size(); }
-
-    // Other methods
     
 protected:
     // Protected methods
-    void         init_members(void);
-    void         copy_members(const GModelData& model);
-    void         free_members(void);
-    virtual void set_pointers(void) = 0;
-
-    // Proteced data members
-    std::vector<GModelPar*> m_pars;  //!< Pointers to all model parameters
+    void init_members(void);
+    void copy_members(const GModelData& model);
+    void free_members(void);
 };
 
 #endif /* GMODELDATA_HPP */

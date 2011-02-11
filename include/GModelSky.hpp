@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSky.hpp
- * @brief GModelSky class interface definition.
+ * @brief Abstract sky model class interface definition
  * @author J. Knodlseder
  */
 
@@ -43,7 +43,7 @@ class GObservation;
 /***********************************************************************//**
  * @class GModelSky
  *
- * @brief Abstract virtual sky model class interface defintion
+ * @brief Abstract sky model class
  *
  * This class implements a sky model that is factorised in a spatial,
  * a spectral and a temporal component.
@@ -70,9 +70,7 @@ public:
     virtual ~GModelSky(void);
 
     // Operators
-    GModelPar&       operator() (int index);
-    const GModelPar& operator() (int index) const;
-    GModelSky&       operator= (const GModelSky& model);
+    virtual GModelSky&  operator=(const GModelSky& model);
 
     // Pure virtual methods
     virtual void        clear(void) = 0;
@@ -81,9 +79,8 @@ public:
     virtual std::string print(void) const = 0;
 
     // Implemented pure virtual methods
-    virtual int         size(void) const { return m_npars; }
-    virtual double      eval(const GEvent& event, const GObservation& obs);
-    virtual double      eval_gradients(const GEvent& event, const GObservation& obs);
+    virtual double      eval(const GEvent& event, const GObservation& obs) const;
+    virtual double      eval_gradients(const GEvent& event, const GObservation& obs) const;
     virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
                               const GObservation& obs) const;
     virtual void        read(const GXmlElement& xml);
@@ -113,17 +110,15 @@ protected:
     GModelTemporal* xml_temporal(const GXmlElement& temporal) const;
     double          spatial(const GEvent& event, const GEnergy& srcEng,
                             const GTime& srcTime, const GObservation& obs,
-                            bool grad);
+                            bool grad) const;
     double          spectral(const GEvent& event, const GTime& srcTime,
-                             const GObservation& obs, bool grad);
+                             const GObservation& obs, bool grad) const;
     double          temporal(const GEvent& event, const GObservation& obs,
-                             bool grad);
+                             bool grad) const;
     bool            valid_model(void) const;
     std::string     print_model(void) const;
 
     // Proteced data members
-    int             m_npars;         //!< Total number of model parameters
-    GModelPar**     m_par;           //!< Pointers to all model parameters
     GModelSpatial*  m_spatial;       //!< Spatial model
     GModelSpectral* m_spectral;      //!< Spectral model
     GModelTemporal* m_temporal;      //!< Temporal model
