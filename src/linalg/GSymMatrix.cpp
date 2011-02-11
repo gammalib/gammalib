@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GSymMatrix.cpp  -  symmetric matrix class              *
+ *                  GSymMatrix.cpp  -  Symmetric matrix class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -10,6 +10,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GSymMatrix.cpp
+ * @brief Symmetric matrix class implementation
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
@@ -270,8 +275,8 @@ GVector GSymMatrix::operator* (const GVector& v) const
     for (int row = 0; row < m_rows; ++row) {
         double sum = 0.0;
         for (int col = 0; col < m_cols; ++col)
-            sum += (*this)(row,col) * v(col);
-        result(row) = sum;
+            sum += (*this)(row,col) * v.m_data[col];
+        result.m_data[row] = sum;
     }
 
     // Return result
@@ -394,7 +399,7 @@ void GSymMatrix::add_col(const GVector& v, int col)
 
     // Insert column into vector
     for (int row = 0; row < m_rows; ++row)
-        (*this)(row,col) += v(row);
+        (*this)(row,col) += v.m_data[row];
 
     // Return
     return;
@@ -529,19 +534,19 @@ GVector GSymMatrix::cholesky_solver(const GVector& v, int compress)
 
         // Solve L*y=b, storing y in x (row>k)
         for (int row = 0; row < m_rows; ++row) {
-            double sum = v(row);
+            double sum = v.m_data[row];
             for (int k = 0; k < row; ++k)
-                sum -= m_data[m_colstart[k]+(row-k)] * x(k); // sum -= M(row,k) * x(k)
-            x(row) = sum/m_data[m_colstart[row]];            // x(row) = sum/M(row,row)
+                sum -= m_data[m_colstart[k]+(row-k)] * x.m_data[k]; // sum -= M(row,k) * x(k)
+            x.m_data[row] = sum/m_data[m_colstart[row]];            // x(row) = sum/M(row,row)
         }
 
         // Solve trans(L)*x=y (k>row)
         for (int row = m_rows-1; row >= 0; --row) {
-            double  sum = x(row);
+            double  sum = x.m_data[row];
             double* ptr = m_data + m_colstart[row] + 1;
             for (int k = row+1; k < m_rows; ++k)
-                sum -= *ptr++ * x(k);                      // sum -= M(k,row) * x(k)
-            x(row) = sum/m_data[m_colstart[row]];          // x(row) = sum/M(row,row)
+                sum -= *ptr++ * x.m_data[k];               // sum -= M(k,row) * x(k)
+            x.m_data[row] = sum/m_data[m_colstart[row]];   // x(row) = sum/M(row,row)
         }
     } // endif: no zero-row/col compression needed
 
@@ -549,28 +554,28 @@ GVector GSymMatrix::cholesky_solver(const GVector& v, int compress)
     else if (m_num_inx > 0) {
 
         // Allocate loop variables and pointers
-        int       row;
+        int  row;
         int  k;
         int* row_ptr;
         int* k_ptr;
 
         // Solve L*y=b, storing y in x (row>k)
         for (row = 0, row_ptr = m_inx; row < m_num_inx; ++row, ++row_ptr) {
-            double  sum = v(*row_ptr);
+            double  sum = v.m_data[*row_ptr];
             double* ptr = m_data + *row_ptr;
             for (k = 0, k_ptr = m_inx; k < row; ++k, ++k_ptr)
-                sum -= *(ptr + m_colstart[*k_ptr] - *k_ptr) * x(*k_ptr); // sum -= M(row,k) * x(k)
-            x(*row_ptr) = sum/m_data[m_colstart[*row_ptr]];              // x(row) = sum/M(row,row)
+                sum -= *(ptr + m_colstart[*k_ptr] - *k_ptr) * x.m_data[*k_ptr]; // sum -= M(row,k) * x(k)
+            x.m_data[*row_ptr] = sum/m_data[m_colstart[*row_ptr]];              // x(row) = sum/M(row,row)
         }
 
         // Solve trans(L)*x=y (k>row)
         for (row = m_num_inx-1, row_ptr = m_inx+m_num_inx-1; row >= 0; --row, --row_ptr) {
-            double  sum      = x(*row_ptr);
+            double  sum      = x.m_data[*row_ptr];
             double* ptr_diag = m_data + m_colstart[*row_ptr];
             double* ptr      = ptr_diag - *row_ptr;
             for (k = row+1, k_ptr = m_inx+row+1; k < m_num_inx; ++k, ++k_ptr)
-                sum -= *(ptr + *k_ptr) * x(*k_ptr);                     // sum -= M(k,row) * x(k)
-            x(*row_ptr) = sum/(*ptr_diag);                              // x(row) = sum/M(row,row)
+                sum -= *(ptr + *k_ptr) * x.m_data[*k_ptr];              // sum -= M(k,row) * x(k)
+            x.m_data[*row_ptr] = sum/(*ptr_diag);                       // x(row) = sum/M(row,row)
         }
     } // endelse: zero-row/col compression needed
 
@@ -702,7 +707,7 @@ GVector GSymMatrix::extract_row(int row) const
 
     // Extract row into vector
     for (int col = 0; col < m_cols; ++col)
-        result(col) = (*this)(row,col);
+        result.m_data[col] = (*this)(row,col);
 
     // Return vector
     return result;
@@ -727,7 +732,7 @@ GVector GSymMatrix::extract_col(int col) const
 
     // Extract column into vector
     for (int row = 0; row < m_rows; ++row)
-        result(row) = (*this)(row,col);
+        result.m_data[row] = (*this)(row,col);
 
     // Return vector
     return result;
@@ -821,7 +826,7 @@ void GSymMatrix::insert_col(const GVector& v, int col)
 
     // Insert column into vector
     for (int row = 0; row < m_rows; ++row)
-        (*this)(row,col) = v(row);
+        (*this)(row,col) = v.m_data[row];
 
     // Return
     return;

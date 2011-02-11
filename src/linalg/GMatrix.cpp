@@ -1,5 +1,5 @@
 /***************************************************************************
- *                       GMatrix.cpp  -  matrix class                      *
+ *                       GMatrix.cpp  -  Matrix class                      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GMatrix.cpp
- * @brief GMatrix class implementation.
+ * @brief Matrix class implementation
  * @author J. Knodlseder
  */
 
@@ -215,8 +215,8 @@ GVector GMatrix::operator* (const GVector& v) const
     for (int row = 0; row < m_rows; ++row) {
         double sum = 0.0;
         for (int col = 0; col < m_cols; ++col)
-            sum += (*this)(row,col) * v(col);
-        result(row) = sum;
+            sum += (*this)(row,col) * v.m_data[col];
+        result.m_data[row] = sum;
     }
 
     // Return result
@@ -288,7 +288,7 @@ GMatrix& GMatrix::operator*= (const GMatrix& m)
             for (int col = 0; col < m_cols; ++col) {
                 double sum = 0.0;
                 for (int i = 0; i < m_cols; ++i)
-                    sum += v_row(i) * m(i,col);
+                    sum += v_row.m_data[i] * m(i,col);
                 (*this)(row,col) = sum;
             }
         }
