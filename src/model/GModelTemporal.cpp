@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelTemporal.cpp
- * @brief GModelTemporal class implementation.
+ * @brief Abstract temporal model base class implementation
  * @author J. Knodlseder
  */
 
@@ -24,7 +24,8 @@
 #include "GModelTemporal.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS                           "GModelTemporal::operator() (int)"
+#define G_ACCESS1                          "GModelTemporal::operator[](int&)"
+#define G_ACCESS2                  "GModelTemporal::operator[](std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -44,7 +45,7 @@
  ***************************************************************************/
 GModelTemporal::GModelTemporal(void)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
   
     // Return
@@ -55,11 +56,11 @@ GModelTemporal::GModelTemporal(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Model from which the instance should be built.
+ * @param[in] model Temporal model.
  ***************************************************************************/
 GModelTemporal::GModelTemporal(const GModelTemporal& model)
 { 
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -90,6 +91,32 @@ GModelTemporal::~GModelTemporal(void)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param[in] model Temporal model.
+ ***************************************************************************/
+GModelTemporal& GModelTemporal::operator= (const GModelTemporal& model)
+{ 
+    // Execute only if object is not identical
+    if (this != &model) {
+
+        // Free members
+        free_members();
+
+        // Initialise members
+        init_members();
+
+        // Copy members
+        copy_members(model);
+
+    } // endif: object was not identical
+  
+    // Return
+    return *this;
+}
+
+
+/***********************************************************************//**
  * @brief Returns model parameter
  *
  * @param[in] index Parameter index [0,...,size()-1].
@@ -97,16 +124,16 @@ GModelTemporal::~GModelTemporal(void)
  * @exception GException::out_of_range
  *            Parameter index is out of range.
  ***************************************************************************/
-GModelPar& GModelTemporal::operator() (int index)
+GModelPar& GModelTemporal::operator[](const int& index)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size())
-        throw GException::out_of_range(G_ACCESS, index, 0, size()-1);
+        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
     #endif
 
-    // Return pointer
-    return *(par()[index]);
+    // Return reference
+    return *(m_pars[index]);
 }
 
 
@@ -118,42 +145,68 @@ GModelPar& GModelTemporal::operator() (int index)
  * @exception GException::out_of_range
  *            Parameter index is out of range.
  ***************************************************************************/
-const GModelPar& GModelTemporal::operator() (int index) const
+const GModelPar& GModelTemporal::operator[](const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size())
-        throw GException::out_of_range(G_ACCESS, index, 0, size()-1);
+        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
     #endif
 
-    // Return pointer
-    return *((((GModelTemporal*)this)->par())[index]);
+    // Return reference
+    return *(m_pars[index]);
 }
 
 
 /***********************************************************************//**
- * @brief Assignment operator
+ * @brief Returns reference to model parameter
  *
- * @param[in] model Model which should be assigned.
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::par_not_found
+ *            Parameter with specified name not found in container.
  ***************************************************************************/
-GModelTemporal& GModelTemporal::operator= (const GModelTemporal& model)
-{ 
-    // Execute only if object is not identical
-    if (this != &model) {
+GModelPar& GModelTemporal::operator[](const std::string& name)
+{
+    // Get parameter index
+    int index = 0;
+    for (; index < size(); ++index) {
+        if (m_pars[index]->name() == name)
+            break;
+    }
 
-        // Free members
-        free_members();
+    // Throw exception if parameter name was not found
+    if (index >= size())
+        throw GException::par_not_found(G_ACCESS2, name);
 
-        // Initialise private members for clean destruction
-        init_members();
+    // Return reference
+    return *(m_pars[index]);
+}
 
-        // Copy members
-        copy_members(model);
 
-    } // endif: object was not identical
-  
-    // Return
-    return *this;
+/***********************************************************************//**
+ * @brief Returns reference to model parameter (const version)
+ *
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::par_not_found
+ *            Parameter with specified name not found in container.
+ ***************************************************************************/
+const GModelPar& GModelTemporal::operator[](const std::string& name) const
+{
+    // Get parameter index
+    int index = 0;
+    for (; index < size(); ++index) {
+        if (m_pars[index]->name() == name)
+            break;
+    }
+
+    // Throw exception if parameter name was not found
+    if (index >= size())
+        throw GException::par_not_found(G_ACCESS2, name);
+
+    // Return reference
+    return *(m_pars[index]);
 }
 
 
@@ -174,6 +227,9 @@ GModelTemporal& GModelTemporal::operator= (const GModelTemporal& model)
  ***************************************************************************/
 void GModelTemporal::init_members(void)
 {
+    // Initialise members
+    m_pars.clear();
+
     // Return
     return;
 }
@@ -182,10 +238,13 @@ void GModelTemporal::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model GModelTemporal members which should be copied.
+ * @param[in] model Temporal model.
  ***************************************************************************/
 void GModelTemporal::copy_members(const GModelTemporal& model)
 {
+    // Copy members
+    m_pars = model.m_pars;
+
     // Return
     return;
 }
@@ -211,9 +270,9 @@ void GModelTemporal::free_members(void)
  * @brief Output operator
  *
  * @param[in] os Output stream.
- * @param[in] model Model.
+ * @param[in] model Temporal model.
  ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GModelTemporal& model)
+std::ostream& operator<<(std::ostream& os, const GModelTemporal& model)
 {
      // Write model in output stream
     os << model.print();
@@ -227,9 +286,9 @@ std::ostream& operator<< (std::ostream& os, const GModelTemporal& model)
  * @brief Log operator
  *
  * @param[in] log Logger.
- * @param[in] model Model.
+ * @param[in] model Temporal model.
  ***************************************************************************/
-GLog& operator<< (GLog& log, const GModelTemporal& model)
+GLog& operator<<(GLog& log, const GModelTemporal& model)
 {
     // Write model into logger
     log << model.print();

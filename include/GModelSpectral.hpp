@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectral.hpp
- * @brief GModelSpectral abstract base class interface definition.
+ * @brief Abstract spectral model base class interface definition
  * @author J. Knodlseder
  */
 
@@ -20,8 +20,9 @@
 #define GMODELSPECTRAL_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include <string>
+#include <vector>
+#include <iostream>
 #include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GEnergy.hpp"
@@ -32,7 +33,7 @@
 /***********************************************************************//**
  * @class GModelSpectral
  *
- * @brief Abstract interface definition for the spectral model class.
+ * @brief Abstract spectral model base class
  *
  * This class implements the spectral component of the factorised source
  * model.
@@ -40,8 +41,8 @@
 class GModelSpectral {
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GModelSpectral& model);
-    friend GLog&         operator<< (GLog& log, const GModelSpectral& model);
+    friend std::ostream& operator<<(std::ostream& os, const GModelSpectral& model);
+    friend GLog&         operator<<(GLog& log,        const GModelSpectral& model);
 
 public:
     // Constructors and destructors
@@ -50,22 +51,26 @@ public:
     virtual ~GModelSpectral(void);
 
     // Operators
-    virtual GModelPar&       operator() (int index);
-    virtual const GModelPar& operator() (int index) const;
-    virtual GModelSpectral&  operator= (const GModelSpectral& model);
+    virtual GModelSpectral&  operator=(const GModelSpectral& model);
+    virtual GModelPar&       operator[](const int& index);
+    virtual const GModelPar& operator[](const int& index) const;
+    virtual GModelPar&       operator[](const std::string& name);
+    virtual const GModelPar& operator[](const std::string& name) const;
 
     // Pure virtual methods
     virtual void            clear(void) = 0;
     virtual GModelSpectral* clone(void) const = 0;
-    virtual int             size(void) const = 0;
     virtual std::string     type(void) const = 0;
-    virtual double          eval(const GEnergy& srcEng) = 0;
-    virtual double          eval_gradients(const GEnergy& srcEng) = 0;
+    virtual double          eval(const GEnergy& srcEng) const = 0;
+    virtual double          eval_gradients(const GEnergy& srcEng) const = 0;
     virtual double          flux(const GEnergy& emin, const GEnergy& emax) const = 0;
     virtual GEnergy         mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const = 0;
     virtual void            read(const GXmlElement& xml) = 0;
     virtual void            write(GXmlElement& xml) const = 0;
     virtual std::string     print(void) const = 0;
+
+    // Methods
+    int size(void) const { return m_pars.size(); }
 
 protected:
     // Protected methods
@@ -73,8 +78,8 @@ protected:
     void copy_members(const GModelSpectral& model);
     void free_members(void);
 
-    // Pure virtual methods
-    virtual GModelPar** par(void) = 0;
+    // Proteced members
+    std::vector<GModelPar*> m_pars;  //!< Parameter pointers
 };
 
 #endif /* GMODELSPECTRAL_HPP */

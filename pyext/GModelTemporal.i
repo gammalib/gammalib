@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GModelTemporal.i  -  Temporal model class python I/F           *
+ *         GModelTemporal.i  -  Abstract temporal model base class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,19 +12,20 @@
  ***************************************************************************/
 /**
  * @file GModelTemporal.i
- * @brief GModelTemporal class python interface.
+ * @brief Abstract temporal model base class Python interface definition
  * @author J. Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModelTemporal.hpp"
+#include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
  * @class GModelTemporal
  *
- * @brief Abstract python interface definition for the temporal model class
+ * @brief Abstract temporal model base class
  ***************************************************************************/
 class GModelTemporal {
 public:
@@ -36,15 +37,16 @@ public:
     // Virtual methods
     virtual void            clear(void) = 0;
     virtual GModelTemporal* clone(void) const = 0;
-    virtual int             size(void) const = 0;
     virtual std::string     type(void) const = 0;
-    virtual double          eval(const GTime& srcTime) = 0;
-    virtual double          eval_gradients(const GTime& srcTime) = 0;
-    virtual GTimes          mc(const double& rate,
-                               const GTime& tmin, const GTime& tmax,
-                               GRan& ran) = 0;
+    virtual double          eval(const GTime& srcTime) const = 0;
+    virtual double          eval_gradients(const GTime& srcTime) const = 0;
+    virtual GTimes          mc(const double& rate, const GTime& tmin,
+                               const GTime& tmax, GRan& ran) const = 0;
     virtual void            read(const GXmlElement& xml) = 0;
     virtual void            write(GXmlElement& xml) const = 0;
+
+    // Methods
+    int size(void) const { return m_pars.size(); }
 };
 
 
@@ -55,16 +57,25 @@ public:
     char *__str__() {
         return tochar(self->print());
     }
-    GModelPar __getitem__(int index) {
-    if (index >= 0 && index < self->size())
-        return (*self)(index);
-    else
-        throw GException::out_of_range("__getitem__(int)", index, self->size());
+    GModelPar __getitem__(const int& index) {
+        if (index >= 0 && index < self->size())
+            return (*self)[index];
+        else
+            throw GException::out_of_range("__getitem__(int)", index, self->size());
     }
-    void __setitem__(int index, const GModelPar& val) {
-        if (index>=0 && index < self->size())
-            (*self)(index) = val;
+    GModelPar __getitem__(const std::string& name) {
+        return (*self)[name];
+    }
+    void __setitem__(const int& index, const GModelPar& val) {
+        if (index>=0 && index < self->size()) {
+            (*self)[index] = val;
+            return;
+        }
         else
             throw GException::out_of_range("__setitem__(int)", index, self->size());
+    }
+    void __setitem__(const std::string& name, const GModelPar& val) {
+        (*self)[name] = val;
+        return;
     }
 };
