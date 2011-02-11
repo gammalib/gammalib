@@ -1,5 +1,5 @@
 /***************************************************************************
- * GModelSpatialPtsrc.i  -  Spatial point source model class SWIG interface*
+ *       GModelSpatialPtsrc.i  -  Spatial point source model class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatialPtsrc.i
- * @brief GModelSpatialPtsrc class SWIG interface.
+ * @brief Point source spatial model class Python interface
  * @author J. Knodlseder
  */
 %{
@@ -25,7 +25,7 @@
 /***********************************************************************//**
  * @class GModelSpatialPtsrc
  *
- * @brief Point source model interface definition.
+ * @brief Point source spatial model
  ***************************************************************************/
 class GModelSpatialPtsrc  : public GModelSpatial {
 public:
@@ -37,16 +37,14 @@ public:
     virtual ~GModelSpatialPtsrc(void);
 
     // Implemented virtual methods
-    void                clear(void);
-    GModelSpatialPtsrc* clone(void) const;
-    int                 size(void) const;
-    std::string         type(void) const;
-    double              eval(const GSkyDir& srcDir);
-    double              eval_gradients(const GSkyDir& srcDir);
-    GSkyDir             mc(GRan& ran) const;
-    void                read(const GXmlElement& xml);
-    void                write(GXmlElement& xml) const;
-    bool                isptsource(void) const { return true; }
+    virtual void                clear(void);
+    virtual GModelSpatialPtsrc* clone(void) const;
+    virtual std::string         type(void) const;
+    virtual double              eval(const GSkyDir& srcDir) const;
+    virtual double              eval_gradients(const GSkyDir& srcDir) const;
+    virtual GSkyDir             mc(GRan& ran) const;
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
 
     // Other methods
     double  ra(void) const;

@@ -1,5 +1,5 @@
 /***************************************************************************
- * GModelSpatialGauss.i  -  Spatial Gaussian source model class python I/F *
+ *      GModelSpatialGauss.i  -  Spatial Gaussian source model class       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatialGauss.i
- * @brief GModelSpatialGauss class python interface.
+ * @brief Gaussian spatial model class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -25,9 +25,9 @@
 /***********************************************************************//**
  * @class GModelSpatialGauss
  *
- * @brief Gaussian source model interface definition.
+ * @brief Gaussian spatial model class
  ***************************************************************************/
-class GModelSpatialGauss  : public GModelSpatial {
+class GModelSpatialGauss : public GModelSpatial {
 public:
     // Constructors and destructors
     GModelSpatialGauss(void);
@@ -37,16 +37,14 @@ public:
     virtual ~GModelSpatialGauss(void);
 
     // Implemented pure virtual methods
-    void                clear(void);
-    GModelSpatialGauss* clone(void) const;
-    int                 size(void) const;
-    std::string         type(void) const;
-    double              eval(const GSkyDir& srcDir);
-    double              eval_gradients(const GSkyDir& srcDir);
-    GSkyDir             mc(GRan& ran) const;
-    void                read(const GXmlElement& xml);
-    void                write(GXmlElement& xml) const;
-    bool                isptsource(void) const;
+    virtual void                clear(void);
+    virtual GModelSpatialGauss* clone(void) const;
+    virtual std::string         type(void) const;
+    virtual double              eval(const GSkyDir& srcDir) const;
+    virtual double              eval_gradients(const GSkyDir& srcDir) const;
+    virtual GSkyDir             mc(GRan& ran) const;
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
 
     // Other methods
     double  ra(void) const;

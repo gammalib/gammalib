@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatialPtsrc.cpp
- * @brief GModelSpatialPtsrc class implementation.
+ * @brief Point source spatial model class implementation
  * @author J. Knodlseder
  */
 
@@ -33,7 +33,6 @@ const GModelSpatialPtsrc    g_spatial_ptsrc_seed;
 const GModelSpatialRegistry g_spatial_ptsrc_registry(&g_spatial_ptsrc_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS                                   "GModel::operator() (int)"
 #define G_READ                       "GModelSpatialPtsrc::read(GXmlElement&)"
 #define G_WRITE                     "GModelSpatialPtsrc::write(GXmlElement&)"
 
@@ -55,7 +54,7 @@ const GModelSpatialRegistry g_spatial_ptsrc_registry(&g_spatial_ptsrc_seed);
  ***************************************************************************/
 GModelSpatialPtsrc::GModelSpatialPtsrc(void) : GModelSpatial()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -66,11 +65,13 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(void) : GModelSpatial()
 /***********************************************************************//**
  * @brief Constructor
  *
- * @param[in] dir Position of the point source on the sky.
+ * @param[in] dir Sky direction.
+ *
+ * Creates instance of a point source spatial model using a sky direction.
  ***************************************************************************/
 GModelSpatialPtsrc::GModelSpatialPtsrc(const GSkyDir& dir) : GModelSpatial()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Assign direction
@@ -82,13 +83,17 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(const GSkyDir& dir) : GModelSpatial()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief XML constructor
  *
- * @param[in] xml XML element containing position information.
+ * @param[in] xml XML element.
+ *
+ * Creates instance of a point source spatial model by extracting information
+ * from an XML element. See GModelSpatialPtsrc::read() for more information
+ * about the expected structure of the XML element.
  ***************************************************************************/
 GModelSpatialPtsrc::GModelSpatialPtsrc(const GXmlElement& xml) : GModelSpatial()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Read information from XML element
@@ -102,12 +107,12 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(const GXmlElement& xml) : GModelSpatial()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Model from which the instance should be built.
+ * @param[in] model Point source spatial model.
  ***************************************************************************/
 GModelSpatialPtsrc::GModelSpatialPtsrc(const GModelSpatialPtsrc& model) :
    GModelSpatial(model)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -140,7 +145,7 @@ GModelSpatialPtsrc::~GModelSpatialPtsrc(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Model which should be assigned.
+ * @param[in] model Point source spatial model.
  ***************************************************************************/
 GModelSpatialPtsrc& GModelSpatialPtsrc::operator= (const GModelSpatialPtsrc& model)
 {
@@ -153,7 +158,7 @@ GModelSpatialPtsrc& GModelSpatialPtsrc::operator= (const GModelSpatialPtsrc& mod
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -209,7 +214,7 @@ GModelSpatialPtsrc* GModelSpatialPtsrc::clone(void) const
  * reasons a certain tolerance is accepted (typically 0.1 arcsec, i.e. well
  * below the angular resolution of gamma-ray telescopes).
  ***************************************************************************/
-double GModelSpatialPtsrc::eval(const GSkyDir& srcDir)
+double GModelSpatialPtsrc::eval(const GSkyDir& srcDir) const
 {
     // Set value dependent on source distance
     double value = (srcDir.dist_deg(dir()) < tolerance) ? 1.0 : 0.0;
@@ -229,18 +234,13 @@ double GModelSpatialPtsrc::eval(const GSkyDir& srcDir)
  * source.  For numerical reasons a certain tolerance is accepted (typically
  * 0.1 arcsec, i.e. well below the angular resolution of gamma-ray
  * telescopes).
- * Parameter gradients are set to 0.
  *
- * @todo Correctly set parameter gradients.
+ * This method does not provide valid parameter gradients.
  ***************************************************************************/
-double GModelSpatialPtsrc::eval_gradients(const GSkyDir& srcDir)
+double GModelSpatialPtsrc::eval_gradients(const GSkyDir& srcDir) const
 {
     // Set value dependent on source distance
     double value = (srcDir.dist_deg(dir()) < tolerance) ? 1.0 : 0.0;
-
-    // Set gradients to 0
-    m_ra.gradient(0.0);
-    m_dec.gradient(0.0);
 
     // Return value
     return value;
@@ -272,8 +272,8 @@ GSkyDir GModelSpatialPtsrc::mc(GRan& ran) const
  *            Invalid model parameter names found in XML element.
  *
  * Read the point source information from an XML element. The XML element
- * is required to have 2 parameters named either 'RA' and 'DEC' or 'GLON'
- * and 'GLAT'.
+ * is required to have 2 parameters named either "RA" and "DEC" or "GLON"
+ * and "GLAT".
  ***************************************************************************/
 void GModelSpatialPtsrc::read(const GXmlElement& xml)
 {
@@ -348,8 +348,8 @@ void GModelSpatialPtsrc::read(const GXmlElement& xml)
  * has to be of type 'SkyDirFunction' and will have 2 parameter leafs
  * named 'RA' and 'DEC'.
  *
- * @todo The case that an existing spatial XML element with 'GLON' and 'GLAT'
- * as coordinates is not supported.
+ * @todo The case that an existing spatial XML element with "GLON" and "GLAT"
+ *       as coordinates is not supported.
  ***************************************************************************/
 void GModelSpatialPtsrc::write(GXmlElement& xml) const
 {
@@ -407,7 +407,7 @@ std::string GModelSpatialPtsrc::print(void) const
     result.append("=== GModelSpatialPtsrc ===\n");
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i)
-        result.append("\n"+m_par[i]->print());
+        result.append("\n"+m_pars[i]->print());
 
     // Return result
     return result;
@@ -455,24 +455,28 @@ void GModelSpatialPtsrc::dir(const GSkyDir& dir)
  ***************************************************************************/
 void GModelSpatialPtsrc::init_members(void)
 {
-    // Initialise parameters
-    m_npars  = 2;
-    m_par[0] = &m_ra;
-    m_par[1] = &m_dec;
-
     // Initialise Right Ascension
-    m_ra = GModelPar();
+    m_ra.clear();
     m_ra.name("RA");
     m_ra.unit("deg");
     m_ra.fix();
     m_ra.scale(1.0);
+    m_ra.gradient(0.0);
+    m_ra.hasgrad(false);
 
     // Initialise Declination
-    m_dec = GModelPar();
+    m_dec.clear();
     m_dec.name("DEC");
     m_dec.unit("deg");
     m_dec.fix();
     m_dec.scale(1.0);
+    m_dec.gradient(0.0);
+    m_dec.hasgrad(false);
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_ra);
+    m_pars.push_back(&m_dec);
 
     // Return
     return;
@@ -482,14 +486,18 @@ void GModelSpatialPtsrc::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model GModelSpatialPtsrc members which should be copied.
+ * @param[in] model Point source spatial model.
  ***************************************************************************/
 void GModelSpatialPtsrc::copy_members(const GModelSpatialPtsrc& model)
 {
-    // Copy model parameters (we do not need to copy the rest since it is
-    // static)
+    // Copy members
     m_ra  = model.m_ra;
     m_dec = model.m_dec;
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_ra);
+    m_pars.push_back(&m_dec);
 
     // Return
     return;

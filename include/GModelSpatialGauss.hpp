@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatialGauss.hpp
- * @brief GModelSpatialGauss class interface definition.
+ * @brief Gaussian spatial model class interface definition
  * @author J. Knodlseder
  */
 
@@ -20,6 +20,7 @@
 #define GMODELSPATIALGAUSS_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GModelSpatial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
@@ -29,12 +30,12 @@
 /***********************************************************************//**
  * @class GModelSpatialGauss
  *
- * @brief Gaussian source model interface definition.
+ * @brief Gaussian spatial model class
  *
  * This class implements the spatial component of the factorised source
  * model for a Gaussian source.
  ***************************************************************************/
-class GModelSpatialGauss  : public GModelSpatial {
+class GModelSpatialGauss : public GModelSpatial {
 
 public:
     // Constructors and destructors
@@ -45,20 +46,18 @@ public:
     virtual ~GModelSpatialGauss(void);
 
     // Operators
-    GModelSpatialGauss& operator= (const GModelSpatialGauss& model);
+    virtual GModelSpatialGauss& operator=(const GModelSpatialGauss& model);
 
     // Implemented pure virtual methods
-    void                clear(void);
-    GModelSpatialGauss* clone(void) const;
-    int                 size(void) const { return m_npars; }
-    std::string         type(void) const { return "GaussFunction"; }
-    double              eval(const GSkyDir& srcDir);
-    double              eval_gradients(const GSkyDir& srcDir);
-    GSkyDir             mc(GRan& ran) const;
-    void                read(const GXmlElement& xml);
-    void                write(GXmlElement& xml) const;
-    std::string         print(void) const;
-    bool                isptsource(void) const { return false; }
+    virtual void                clear(void);
+    virtual GModelSpatialGauss* clone(void) const;
+    virtual std::string         type(void) const { return "GaussFunction"; }
+    virtual double              eval(const GSkyDir& srcDir) const;
+    virtual double              eval_gradients(const GSkyDir& srcDir) const;
+    virtual GSkyDir             mc(GRan& ran) const;
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
+    virtual std::string         print(void) const;
 
     // Other methods
     double  ra(void) const { return m_ra.real_value(); }
@@ -74,15 +73,10 @@ protected:
     void copy_members(const GModelSpatialGauss& model);
     void free_members(void);
 
-    // Implemented pure virtual methods
-    GModelPar** par(void) { return m_par; }
-
     // Protected members
-    int        m_npars;           //!< Number of parameters
-    GModelPar* m_par[3];          //!< Pointers to parameters
-    GModelPar  m_ra;              //!< Right Ascension (deg)
-    GModelPar  m_dec;             //!< Declination (deg)
-    GModelPar  m_sigma;           //!< Gaussian width (deg)
+    GModelPar m_ra;         //!< Right Ascension (deg)
+    GModelPar m_dec;        //!< Declination (deg)
+    GModelPar m_sigma;      //!< Gaussian width (deg)
 };
 
 #endif /* GMODELSPATIALGAUSS_HPP */

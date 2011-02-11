@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatialConst.cpp
- * @brief GModelSpatialConst class implementation.
+ * @brief Isotropic spatial model class implementation
  * @author J. Knodlseder
  */
 
@@ -54,7 +54,7 @@ const GModelSpatialRegistry g_spatial_const_registry(&g_spatial_const_seed);
  ***************************************************************************/
 GModelSpatialConst::GModelSpatialConst(void) : GModelSpatial()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -63,14 +63,18 @@ GModelSpatialConst::GModelSpatialConst(void) : GModelSpatial()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief XML constructor
  *
- * @param[in] xml XML element containing position information.
+ * @param[in] xml XML element.
+ *
+ * Creates instance of isotropic spatial model by extracting information from
+ * an XML element. See GModelSpatialConst::read() for more information about
+ * the expected structure of the XML element.
  ***************************************************************************/
 GModelSpatialConst::GModelSpatialConst(const GXmlElement& xml) :
                     GModelSpatial()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Read information from XML element
@@ -84,12 +88,12 @@ GModelSpatialConst::GModelSpatialConst(const GXmlElement& xml) :
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Model from which the instance should be built.
+ * @param[in] model Isotropic spatial model.
  ***************************************************************************/
 GModelSpatialConst::GModelSpatialConst(const GModelSpatialConst& model) :
                     GModelSpatial(model)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -122,7 +126,7 @@ GModelSpatialConst::~GModelSpatialConst(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Model which should be assigned.
+ * @param[in] model Isotropic spatial model.
  ***************************************************************************/
 GModelSpatialConst& GModelSpatialConst::operator= (const GModelSpatialConst& model)
 {
@@ -135,7 +139,7 @@ GModelSpatialConst& GModelSpatialConst::operator= (const GModelSpatialConst& mod
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -189,7 +193,7 @@ GModelSpatialConst* GModelSpatialConst::clone(void) const
  * Evaluates the spatial part for an isotropic source model. By definition
  * this value is independent from the sky direction and is unity.
  ***************************************************************************/
-double GModelSpatialConst::eval(const GSkyDir& srcDir)
+double GModelSpatialConst::eval(const GSkyDir& srcDir) const
 {
     // Return value
     return 1.0;
@@ -201,14 +205,14 @@ double GModelSpatialConst::eval(const GSkyDir& srcDir)
  *
  * @param[in] srcDir True photon arrival direction.
  *
- * Evaluates the spatial part for an isotropic source model and the gradient.
- * By definition the value and gradient is independent from the sky
- * direction. The value is 1, the parameter gradient is 0.
+ * Evaluates the spatial part for an isotropic source model and set the
+ * parameter gradient. By definition, the value and gradient is independent
+ * from the sky direction. The value is 1, the parameter gradient is 0.
  ***************************************************************************/
-double GModelSpatialConst::eval_gradients(const GSkyDir& srcDir)
+double GModelSpatialConst::eval_gradients(const GSkyDir& srcDir) const
 {
-    // Set gradient to 0
-    m_value.gradient(0.0);
+    // Set gradient to 0 (circumvent const correctness)
+    ((GModelSpatialConst*)this)->m_value.gradient(0.0);
 
     // Return value
     return 1.0;
@@ -248,8 +252,8 @@ GSkyDir GModelSpatialConst::mc(GRan& ran) const
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Read the isotropic source information from an XML element. The XML element
- * is required to have 1 parameter named 'Value'.
+ * Read the isotropic source model information from an XML element. The XML
+ * element is required to have 1 parameter named "Value".
  ***************************************************************************/
 void GModelSpatialConst::read(const GXmlElement& xml)
 {
@@ -285,9 +289,9 @@ void GModelSpatialConst::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the isotropic source information into an XML element. The XML element
- * has to be of type "ConstantValue" and will have 1 parameter leaf named
- * "Value".
+ * Write the isotropic source model information into an XML element. The XML
+ * element has to be of type "ConstantValue" and will have 1 parameter leaf
+ * named "Value".
  ***************************************************************************/
 void GModelSpatialConst::write(GXmlElement& xml) const
 {
@@ -326,7 +330,7 @@ void GModelSpatialConst::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print isotropic source information
+ * @brief Print isotropic source model information
  ***************************************************************************/
 std::string GModelSpatialConst::print(void) const
 {
@@ -337,7 +341,7 @@ std::string GModelSpatialConst::print(void) const
     result.append("=== GModelSpatialConst ===\n");
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i)
-        result.append("\n"+m_par[i]->print());
+        result.append("\n"+m_pars[i]->print());
 
     // Return result
     return result;
@@ -355,17 +359,19 @@ std::string GModelSpatialConst::print(void) const
  ***************************************************************************/
 void GModelSpatialConst::init_members(void)
 {
-    // Initialise parameters
-    m_npars  = 1;
-    m_par[0] = &m_value;
-
     // Initialise Value
-    m_value = GModelPar();
+    m_value.clear();
     m_value.name("Value");
     m_value.fix();
     m_value.value(1.0);
     m_value.scale(1.0);
     m_value.range(0.0, 10.0);
+    m_value.gradient(0.0);
+    m_value.hasgrad(true);
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_value);
 
     // Return
     return;
@@ -375,13 +381,16 @@ void GModelSpatialConst::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model GModelSpatialConst members which should be copied.
+ * @param[in] model Isotropic spatial model.
  ***************************************************************************/
 void GModelSpatialConst::copy_members(const GModelSpatialConst& model)
 {
-    // Copy model parameters (we do not need to copy the rest since it is
-    // static)
+    // Copy members
     m_value = model.m_value;
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_value);
 
     // Return
     return;

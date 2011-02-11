@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatialCube.cpp
- * @brief GModelSpatialCube class implementation.
+ * @brief Spatial map cube model class implementation
  * @author J. Knodlseder
  */
 
@@ -32,9 +32,12 @@ const GModelSpatialCube     g_spatial_cube_seed;
 const GModelSpatialRegistry g_spatial_cube_registry(&g_spatial_cube_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MC                                  "GModelSpatialCube::mc(GRan&)"
+#define G_EVAL                            "GModelSpatialCube::eval(GSkyDir&)"
+#define G_EVAL_GRADIENTS        "GModelSpatialCube::eval_gradients(GSkyDir&)"
+#define G_MC                                   "GModelSpatialCube::mc(GRan&)"
 #define G_READ                        "GModelSpatialCube::read(GXmlElement&)"
 #define G_WRITE                      "GModelSpatialCube::write(GXmlElement&)"
+#define G_LOAD_CUBE              "GModelSpatialCube::load_cube(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -54,7 +57,7 @@ const GModelSpatialRegistry g_spatial_cube_registry(&g_spatial_cube_seed);
  ***************************************************************************/
 GModelSpatialCube::GModelSpatialCube(void) : GModelSpatial()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -63,14 +66,18 @@ GModelSpatialCube::GModelSpatialCube(void) : GModelSpatial()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief XML constructor
  *
  * @param[in] xml XML element.
+ *
+ * Creates instance of spatial map cube model by extracting information from
+ * an XML element. See GModelSpatialCube::read() for more information about
+ * the expected structure of the XML element.
  ***************************************************************************/
 GModelSpatialCube::GModelSpatialCube(const GXmlElement& xml) :
                    GModelSpatial()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Read information from XML element
@@ -84,12 +91,12 @@ GModelSpatialCube::GModelSpatialCube(const GXmlElement& xml) :
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Spatial map cube component.
+ * @param[in] model Spatial map cube model.
  ***************************************************************************/
 GModelSpatialCube::GModelSpatialCube(const GModelSpatialCube& model) :
                    GModelSpatial(model)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -122,7 +129,7 @@ GModelSpatialCube::~GModelSpatialCube(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Spatial map cube component.
+ * @param[in] model Spatial map cube model.
  ***************************************************************************/
 GModelSpatialCube& GModelSpatialCube::operator= (const GModelSpatialCube& model)
 {
@@ -135,7 +142,7 @@ GModelSpatialCube& GModelSpatialCube::operator= (const GModelSpatialCube& model)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -186,10 +193,16 @@ GModelSpatialCube* GModelSpatialCube::clone(void) const
  *
  * @param[in] srcDir True photon arrival direction.
  *
- * @todo Not yet implemented.
+ * @exception GException::feature_not_implemented
+ *            Method not yet implemented
+ *
+ * @todo Implement method.
  ***************************************************************************/
-double GModelSpatialCube::eval(const GSkyDir& srcDir)
+double GModelSpatialCube::eval(const GSkyDir& srcDir) const
 {
+    // Dump warning that method is not yet implemented
+    throw GException::feature_not_implemented(G_EVAL);
+
     // Return value
     return 1.0;
 }
@@ -200,12 +213,15 @@ double GModelSpatialCube::eval(const GSkyDir& srcDir)
  *
  * @param[in] srcDir True photon arrival direction.
  *
- * @todo Not yet implemented.
+ * @todo Implement method.
  ***************************************************************************/
-double GModelSpatialCube::eval_gradients(const GSkyDir& srcDir)
+double GModelSpatialCube::eval_gradients(const GSkyDir& srcDir) const
 {
-    // Set gradient to 0
-    m_value.gradient(0.0);
+    // Dump warning that method is not yet implemented
+    throw GException::feature_not_implemented(G_EVAL_GRADIENTS);
+
+    // Set gradient to 0 (circumvent const correctness)
+    ((GModelSpatialCube*)this)->m_value.gradient(0.0);
 
     // Return value
     return 1.0;
@@ -220,7 +236,7 @@ double GModelSpatialCube::eval_gradients(const GSkyDir& srcDir)
  * @exception GException::feature_not_implemented
  *            Method not yet implemented
  *
- * @todo Implement method
+ * @todo Implement method.
  ***************************************************************************/
 GSkyDir GModelSpatialCube::mc(GRan& ran) const
 {
@@ -332,7 +348,7 @@ void GModelSpatialCube::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print isotropic source information
+ * @brief Print map cube information
  ***************************************************************************/
 std::string GModelSpatialCube::print(void) const
 {
@@ -344,7 +360,7 @@ std::string GModelSpatialCube::print(void) const
     result.append(parformat("Map cube file")+m_filename);
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i)
-        result.append("\n"+m_par[i]->print());
+        result.append("\n"+m_pars[i]->print());
 
     // Return result
     return result;
@@ -362,17 +378,19 @@ std::string GModelSpatialCube::print(void) const
  ***************************************************************************/
 void GModelSpatialCube::init_members(void)
 {
-    // Initialise parameters
-    m_npars  = 1;
-    m_par[0] = &m_value;
-
     // Initialise Value
-    m_value = GModelPar();
+    m_value.clear();
     m_value.name("Normalization");
     m_value.value(1.0);
     m_value.scale(1.0);
     m_value.range(0.001, 1000.0);
+    m_value.gradient(0.0);
     m_value.fix();
+    m_value.hasgrad(true);
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_value);
 
     // Initialise other members
     m_filename.clear();
@@ -385,14 +403,17 @@ void GModelSpatialCube::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model GModelSpatialCube members which should be copied.
+ * @param[in] model Spatial map cube model.
  ***************************************************************************/
 void GModelSpatialCube::copy_members(const GModelSpatialCube& model)
 {
-    // Copy model parameters (we do not need to copy the rest since it is
-    // static)
+    // Copy members
     m_value    = model.m_value;
     m_filename = model.m_filename;
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_value);
 
     // Return
     return;
@@ -414,12 +435,18 @@ void GModelSpatialCube::free_members(void)
  *
  * @param[in] filename File name.
  *
- * @todo Not yet implemented. 
+ * @exception GException::feature_not_implemented
+ *            Map cube loading not yet implemented.
+ *
+ * @todo Implement method. 
  ***************************************************************************/
 void GModelSpatialCube::load_cube(const std::string& filename)
 {
     // Set filename
     m_filename = filename;
+
+    // Dump warning that method is not yet implemented
+    throw GException::feature_not_implemented(G_LOAD_CUBE);
 
     // Return
     return;
