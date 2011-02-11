@@ -331,7 +331,7 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
         // Create index array of non-zero derivatives
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
-            if ((*m_wrk_grad)(i) != 0.0 && !isinfinite((*m_wrk_grad)(i))) {
+            if ((*m_wrk_grad)[i] != 0.0 && !isinfinite((*m_wrk_grad)[i])) {
                 inx[ndev] = i;
                 ndev++;
             }
@@ -352,16 +352,16 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
 
             // Initialise computation
             register int jpar    = inx[jdev];
-            double       g       = (*m_wrk_grad)(jpar);
+            double       g       = (*m_wrk_grad)[jpar];
             double       fa_i    = fa * g;
 
             // Update gradient.
-            (*m_gradient)(jpar) -= fb * g;
+            (*m_gradient)[jpar] -= fb * g;
 
             // Loop over rows
             register int* ipar = inx;
             for (register int idev = 0; idev < ndev; ++idev, ++ipar)
-                values[idev] = fa_i * (*m_wrk_grad)(*ipar);
+                values[idev] = fa_i * (*m_wrk_grad)[*ipar];
 
             // Add column to matrix
             m_covar->add_col(values, inx, ndev, jpar);
@@ -481,7 +481,7 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
         // Create index array of non-zero derivatives
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
-            if ((*m_wrk_grad)(i) != 0.0 && !isinfinite((*m_wrk_grad)(i))) {
+            if ((*m_wrk_grad)[i] != 0.0 && !isinfinite((*m_wrk_grad)[i])) {
                 inx[ndev] = i;
                 ndev++;
             }
@@ -512,16 +512,16 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
 
                 // Initialise computation
                 register int jpar    = inx[jdev];
-                double       g       = (*m_wrk_grad)(jpar);
+                double       g       = (*m_wrk_grad)[jpar];
                 double       fa_i    = fa * g;
 
                 // Update gradient
-                (*m_gradient)(jpar) += fc * g;
+                (*m_gradient)[jpar] += fc * g;
 
                 // Loop over rows
                 register int* ipar = inx;
                 for (register int idev = 0; idev < ndev; ++idev, ++ipar)
-                    values[idev] = fa_i * (*m_wrk_grad)(*ipar);
+                    values[idev] = fa_i * (*m_wrk_grad)[*ipar];
 
                 // Add column to matrix
                 m_covar->add_col(values, inx, ndev, jpar);
@@ -548,7 +548,7 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
             // Update gradient
             register int* ipar = inx;
             for (register int idev = 0; idev < ndev; ++idev, ++ipar)
-                (*m_gradient)(*ipar) += (*m_wrk_grad)(*ipar);
+                (*m_gradient)[*ipar] += (*m_wrk_grad)[*ipar];
 
         } // endif: data was 0
 
@@ -658,7 +658,7 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
         // Create index array of non-zero derivatives
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
-            if ((*m_wrk_grad)(i) != 0.0 && !isinfinite((*m_wrk_grad)(i))) {
+            if ((*m_wrk_grad)[i] != 0.0 && !isinfinite((*m_wrk_grad)[i])) {
                 inx[ndev] = i;
                 ndev++;
             }
@@ -680,15 +680,15 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
 
             // Initialise computation
             register int jpar = inx[jdev];
-            double       fa_i = (*m_wrk_grad)(jpar) * weight;
+            double       fa_i = (*m_wrk_grad)[jpar] * weight;
 
             // Update gradient
-            (*m_gradient)(jpar) -= fa * fa_i;
+            (*m_gradient)[jpar] -= fa * fa_i;
 
             // Loop over rows
             register int* ipar = inx;
             for (register int idev = 0; idev < ndev; ++idev, ++ipar)
-                values[idev] = fa_i * (*m_wrk_grad)(*ipar);
+                values[idev] = fa_i * (*m_wrk_grad)[*ipar];
 
             // Add column to matrix
             m_covar->add_col(values, inx, ndev, jpar);

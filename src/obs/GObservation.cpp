@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GObservation.cpp
- * @brief GObservation abstract base class implementation.
+ * @brief Abstract observation base class implementation
  * @author J. Knodlseder
  */
 
@@ -190,7 +190,7 @@ double GObservation::model(const GModels& models, const GEvent& event,
             if (gradient != NULL) {
                 for (int k = 0; k < models[i].size(); ++k, ++igrad) {
                     double grad        = models[i][k].gradient();
-                    (*gradient)(igrad) = (isinfinite(grad)) ? 0.0 : grad;
+                    (*gradient)[igrad] = (isinfinite(grad)) ? 0.0 : grad;
                 }
             }
                 
@@ -199,7 +199,7 @@ double GObservation::model(const GModels& models, const GEvent& event,
         // ... otherwise set gradient vector to 0
         else if (gradient != NULL) {
             for (int k = 0; k < models[i].size(); ++k, ++igrad) {
-                (*gradient)(igrad) = 0.0;
+                (*gradient)[igrad] = 0.0;
             }
         }
 
@@ -243,7 +243,7 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
             // Optionally determine Npred gradients
             if (gradient != NULL) {
                 for (int k = 0; k < models[i].size(); ++k)
-                    (*gradient)(igrad+k) = npred_grad(models[i], k);
+                    (*gradient)[igrad+k] = npred_grad(models[i], k);
             }
 
         } // endif: model component was valid for instrument
