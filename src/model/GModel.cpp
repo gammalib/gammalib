@@ -25,6 +25,8 @@
 #include "GModel.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ACCESS1                                  "GModel::operator[](int&)"
+#define G_ACCESS2                          "GModel::operator[](std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -113,9 +115,9 @@ GModel::~GModel(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Model which should be assigned.
+ * @param[in] model Model.
  ***************************************************************************/
-GModel& GModel::operator= (const GModel& model)
+GModel& GModel::operator=(const GModel& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -133,6 +135,100 @@ GModel& GModel::operator= (const GModel& model)
 
     // Return
     return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model parameter
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ ***************************************************************************/
+GModelPar& GModel::operator[](const int& index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    #endif
+
+    // Return reference
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model parameter (const version)
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ ***************************************************************************/
+const GModelPar& GModel::operator[](const int& index) const
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    #endif
+
+    // Return reference
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model parameter
+ *
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::par_not_found
+ *            Parameter with specified name not found in container.
+ ***************************************************************************/
+GModelPar& GModel::operator[](const std::string& name)
+{
+    // Get parameter index
+    int index = 0;
+    for (; index < size(); ++index) {
+        if (m_pars[index]->name() == name)
+            break;
+    }
+
+    // Throw exception if parameter name was not found
+    if (index >= size())
+        throw GException::par_not_found(G_ACCESS2, name);
+
+    // Return reference
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model parameter (const version)
+ *
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::par_not_found
+ *            Parameter with specified name not found in container.
+ ***************************************************************************/
+const GModelPar& GModel::operator[](const std::string& name) const
+{
+    // Get parameter index
+    int index = 0;
+    for (; index < size(); ++index) {
+        if (m_pars[index]->name() == name)
+            break;
+    }
+
+    // Throw exception if parameter name was not found
+    if (index >= size())
+        throw GException::par_not_found(G_ACCESS2, name);
+
+    // Return reference
+    return *(m_pars[index]);
 }
 
 
@@ -243,6 +339,7 @@ void GModel::init_members(void)
     // Initialise members
     m_name.clear();
     m_instruments.clear();
+    m_pars.clear();
 
     // Return
     return;
@@ -252,13 +349,14 @@ void GModel::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model GModel members which should be copied.
+ * @param[in] model Model.
  ***************************************************************************/
 void GModel::copy_members(const GModel& model)
 {
-    // Copy attributes
+    // Copy members
     m_name        = model.m_name;
     m_instruments = model.m_instruments;
+    m_pars        = model.m_pars;
 
     // Return
     return;
