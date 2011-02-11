@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GOptimizerPars.i
- * @brief GOptimizerPars class SWIG interface.
+ * @brief Optimizer parameter container class Python interface
  * @author J. Knodlseder
  */
 %{
@@ -25,19 +25,20 @@
 /***********************************************************************//**
  * @class GOptimizerPars
  *
- * @brief GOptimizerPars container class SWIG interface defintion.
+ * @brief Optimizer parameter container class
  ***************************************************************************/
 class GOptimizerPars {
 public:
     // Constructors and destructors
     GOptimizerPars(void);
     GOptimizerPars(const GOptimizerPars& pars);
-    ~GOptimizerPars();
+    virtual ~GOptimizerPars(void);
 
     // Methods
-    int        npars(void) const { return m_npars; }
-    int        nfree(void) const;
-    GModelPar* par(int index) const;
+    int              npars(void) const;
+    int              nfree(void) const;
+    GModelPar&       par(const int& index);
+    const GModelPar& par(const int& index) const;
 };
 
 
@@ -46,10 +47,7 @@ public:
  ***************************************************************************/
 %extend GOptimizerPars {
     char *__str__() {
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        return tochar(str);
+        return tochar(self->print());
     }
     GOptimizerPars copy() {
         return (*self);

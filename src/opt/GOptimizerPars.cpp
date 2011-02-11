@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GOptimizerPars.cpp  -  Parameter container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -9,21 +9,23 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
- * ----------------------------------------------------------------------- *
  ***************************************************************************/
 /**
  * @file GOptimizerPars.cpp
- * @brief GOptimizerPars container class implementation.
+ * @brief Optimizer parameter container class implementation
  * @author J. Knodlseder
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GException.hpp"
 #include "GOptimizerPars.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_PAR                                "GOptimizerPars::par(int) const"
-#define G_COPY_MEMBERS  "GOptimizerPars::copy_members(const GOptimizerPars&)"
+#define G_PAR                                     "GOptimizerPars::par(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -34,16 +36,16 @@
 
 /*==========================================================================
  =                                                                         =
- =                  GOptimizerPars constructors/destructors                =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GOptimizerPars::GOptimizerPars(void)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
   
     // Return
@@ -54,11 +56,11 @@ GOptimizerPars::GOptimizerPars(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] pars Parameters from which the instance should be built.
+ * @param[in] pars Optimizer parameters.
  ***************************************************************************/
 GOptimizerPars::GOptimizerPars(const GOptimizerPars& pars)
 { 
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -84,14 +86,14 @@ GOptimizerPars::~GOptimizerPars()
 
 /*==========================================================================
  =                                                                         =
- =                         GOptimizerPars operators                        =
+ =                                Operators                                =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] pars Parameters which should be assigned.
+ * @param[in] pars Optimizer parameters.
  ***************************************************************************/
 GOptimizerPars& GOptimizerPars::operator= (const GOptimizerPars& pars)
 { 
@@ -101,7 +103,7 @@ GOptimizerPars& GOptimizerPars::operator= (const GOptimizerPars& pars)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -116,12 +118,12 @@ GOptimizerPars& GOptimizerPars::operator= (const GOptimizerPars& pars)
 
 /*==========================================================================
  =                                                                         =
- =                       GOptimizerPars public methods                     =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Compute number of free parameters
+ * @brief Returns number of free parameters
  ***************************************************************************/
 int GOptimizerPars::nfree(void) const
 {
@@ -129,8 +131,8 @@ int GOptimizerPars::nfree(void) const
     int nfree = 0;
     
     // Collect all free parameters
-    for (int i = 0; i < m_npars; ++i) {
-        if (m_par[i]->isfree())
+    for (int i = 0; i < npars(); ++i) {
+        if (m_pars[i]->isfree())
             nfree++;
     }
     
@@ -140,24 +142,69 @@ int GOptimizerPars::nfree(void) const
 
 
 /***********************************************************************//**
- * @brief Get pointer to model parameter
+ * @brief Returns reference to model parameter
  *
- * @param[in] index Parameter index.
+ * @param[in] index Parameter index [0,...,npars()-1]
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
  ***************************************************************************/
-GModelPar* GOptimizerPars::par(int index) const
+GModelPar& GOptimizerPars::par(const int& index)
 {
-    // If index is outside boundary then throw an error
-    if (index < 0 || index >= m_npars)
-        throw GException::out_of_range(G_PAR, index, 0, m_npars-1);
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= npars())
+        throw GException::out_of_range(G_PAR, index, 0, npars()-1);
+    #endif
     
-    // Return parameter pointer
-    return m_par[index];
+    // Return parameter reference
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model parameter (const version)
+ *
+ * @param[in] index Parameter index [0,...,npars()-1]
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ ***************************************************************************/
+const GModelPar& GOptimizerPars::par(const int& index) const
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= npars())
+        throw GException::out_of_range(G_PAR, index, 0, npars()-1);
+    #endif
+    
+    // Return parameter reference
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Print models
+ ***************************************************************************/
+std::string GOptimizerPars::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GOptimizerPars ===");
+    result.append("\n"+parformat("Number of parameters")+str(npars()));
+    for (int i = 0; i < npars(); ++i)
+        result.append("\n"+m_pars[i]->print());
+
+    // Return result
+    return result;
 }
 
 
 /*==========================================================================
  =                                                                         =
- =                       GOptimizerPars private methods                    =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -167,8 +214,7 @@ GModelPar* GOptimizerPars::par(int index) const
 void GOptimizerPars::init_members(void)
 {
     // Initialise members
-    m_npars = 0;
-    m_par   = NULL;
+    m_pars.clear();
   
     // Return
     return;
@@ -178,26 +224,12 @@ void GOptimizerPars::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] pars GOptimizerPars members which should be copied.
+ * @param[in] pars Optimizer parameters.
  ***************************************************************************/
 void GOptimizerPars::copy_members(const GOptimizerPars& pars)
 {
     // Copy attributes
-    m_npars = pars.m_npars;
-    
-    // If there are parameters then copy them
-    if (m_npars > 0 && pars.m_par != NULL) {
-    
-        // Allocate parameters
-        m_par = new GModelPar*[m_npars];
-        if (m_par == NULL)
-            throw GException::mem_alloc(G_COPY_MEMBERS, m_npars);
-        
-        // Copy parameters
-        for (int i = 0; i < m_npars; ++i)
-            m_par[i] = pars.m_par[i];
-
-    }
+    m_pars = pars.m_pars;
     
     // Return
     return;
@@ -209,12 +241,6 @@ void GOptimizerPars::copy_members(const GOptimizerPars& pars)
  ***************************************************************************/
 void GOptimizerPars::free_members(void)
 {
-    // Free memory
-    if (m_par != NULL) delete [] m_par;
-
-    // Signal free pointers
-    m_par = NULL;
-  
     // Return
     return;
 }
@@ -222,39 +248,38 @@ void GOptimizerPars::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                           GOptimizerPars friends                        =
+ =                                Friends                                  =
  =                                                                         =
  ==========================================================================*/
 
+
 /***********************************************************************//**
- * @brief Put parameters in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the parameters will be dumped
- * @param[in] pars Parameters to be dumped
+ * @param[in] os Output stream.
+ * @param[in] pars Parameter container.
  ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GOptimizerPars& pars)
+std::ostream& operator<<(std::ostream& os, const GOptimizerPars& pars)
 {
-    // Allocate filler
-    std::string filler = " ..............";
-    
-    // Put model in stream
-    os << "=== GOptimizerPars ===" << std::endl;
-    os << " Number of parameters ......: " << pars.npars();
-    for (int i = 0; i < pars.npars(); ++i) {
-        os << std::endl;
-        if (i == 10) filler = " .............";
-        if (i == 100) filler = " ............";
-        if (i == 1000) filler = " ...........";
-        os << "  Parameter " << i << filler << ": " << *(pars.par(i));
-    }
+     // Write parameters in output stream
+    os << pars.print();
 
     // Return output stream
     return os;
 }
 
 
-/*==========================================================================
- =                                                                         =
- =                  Other functions used by GOptimizerPars                 =
- =                                                                         =
- ==========================================================================*/
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] pars Parameter container.
+ ***************************************************************************/
+GLog& operator<<(GLog& log, const GOptimizerPars& pars)
+{
+    // Write parameters into logger
+    log << pars.print();
+
+    // Return logger
+    return log;
+}

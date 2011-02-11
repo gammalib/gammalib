@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GOptimizerPars.hpp  -  Parameter container class           *
+ *        GOptimizerPars.hpp  -  Optimizer parameter container class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GOptimizerPars.hpp
- * @brief GOptimizerPars container class interface definition.
+ * @brief Optimizer parameter container class interface definition
  * @author J. Knodlseder
  */
 
@@ -20,33 +20,47 @@
 #define GOPTIMIZERPARS_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include <iostream>
+#include "GLog.hpp"
 #include "GModelPar.hpp"
 
 
 /***********************************************************************//**
  * @class GOptimizerPars
  *
- * @brief GOptimizerPars container class interface defintion.
+ * @brief Optimizer parameter container class
+ *
+ * This class is a container class for model parameters.
+ *
+ * @todo This container class has no operator[] method as GModels is a
+ *       derived class of this container class so that GModels can be
+ *       passed to the optimizer. GModels has an operator[] to access
+ *       models, so we cannot implement this here again. This is not
+ *       very clean. We should think about how we can make this a clean
+ *       thing ...
  ***************************************************************************/
 class GOptimizerPars {
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GOptimizerPars& pars);
+    friend std::ostream& operator<<(std::ostream& os, const GOptimizerPars& pars);
+    friend GLog&         operator<<(GLog& log,        const GOptimizerPars& pars);
 
 public:
     // Constructors and destructors
     GOptimizerPars(void);
     GOptimizerPars(const GOptimizerPars& pars);
-    ~GOptimizerPars();
+    virtual ~GOptimizerPars(void);
  
     // Operators
-    GOptimizerPars& operator= (const GOptimizerPars& pars);
+    virtual GOptimizerPars& operator=(const GOptimizerPars& pars);
 
     // Methods
-    int        npars(void) const { return m_npars; }
-    int        nfree(void) const;
-    GModelPar* par(int index) const;
+    int              npars(void) const { return m_pars.size(); }
+    int              nfree(void) const;
+    GModelPar&       par(const int& index);
+    const GModelPar& par(const int& index) const;
+    std::string      print(void) const;
   
 protected:
     // Protected methods
@@ -54,9 +68,8 @@ protected:
     void copy_members(const GOptimizerPars& pars);
     void free_members(void);
 
-    // Proteced data members
-    int         m_npars;         //!< Total number of model parameters
-    GModelPar** m_par;           //!< Pointers to model parameters
+    // Proteced members
+    std::vector<GModelPar*> m_pars;   //!< Pointers to model parameters
 };
 
 #endif /* GOPTIMIZERPARS_HPP */
