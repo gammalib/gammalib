@@ -62,10 +62,11 @@ public:
         return tochar(self->print());
     }
     GPar& __getitem__(const std::string& name) {
-        return (*self)(name);
+        return (*self)[name];
     }
     void __setitem__(const std::string& name, const GPar& val) {
-        (*self)(name) = val;
+        (*self)[name] = val;
+        return;
     }
     GApplication copy() {
         return (*self);
