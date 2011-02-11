@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GNodeArray.i  -  Array of nodes class SWIG definition          *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2008-2011 by Jurgen Knodlseder                         *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GNodeArray.i
- * @brief GNodeArray class SWIG file.
+ * @brief Node array class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -25,7 +25,7 @@
 /***********************************************************************//**
  * @class GNodeArray
  *
- * @brief SWIG interface for the node array class.
+ * @brief Python interface for the node array class
  ***************************************************************************/
 class GNodeArray {
 public:
@@ -35,19 +35,20 @@ public:
     virtual ~GNodeArray(void);
 
     // Methods
-    void        clear(void);
-    GNodeArray* clone(void) const;
-    int         size(void) { return m_node.size(); }
-    void        nodes(const int& num, const double* array);
-    void        nodes(const GVector& vector);
-    void        nodes(const std::vector<double>& vector);
-    void        append(const double& node);
-    double      interpolate(const double& value, const std::vector<double>& vector);
-    void        set_value(const double& value);
-    int         inx_left(void) { return m_inx_left; }
-    int         inx_right(void) { return m_inx_right; }
-    double      wgt_left(void) { return m_wgt_left; }
-    double      wgt_right(void) { return m_wgt_right; }
+    void          clear(void);
+    GNodeArray*   clone(void) const;
+    int           size(void) const;
+    void          nodes(const int& num, const double* array);
+    void          nodes(const GVector& vector);
+    void          nodes(const std::vector<double>& vector);
+    void          append(const double& node);
+    double        interpolate(const double& value,
+                              const std::vector<double>& vector) const;
+    void          set_value(const double& value);
+    const int&    inx_left(void) const;
+    const int&    inx_right(void) const;
+    const double& wgt_left(void) const;
+    const double& wgt_right(void) const;
 };
 
 
@@ -55,11 +56,23 @@ public:
  * @brief GNodeArray class extension
  ***************************************************************************/
 %extend GNodeArray {
-    /*
     char *__str__() {
         return tochar(self->print());
     }
-    */    
+    double __getitem__(const int& index) {
+        if (index >= 0 && index < self->size())
+            return (*self)[index];
+        else
+            throw GException::out_of_range("__getitem__(int)", index, self->size());
+    }
+    void __setitem__(const int& index, const double& val) {
+        if (index>=0 && index < self->size()) {
+            (*self)[index] = val;
+            return;
+        }
+        else
+            throw GException::out_of_range("__setitem__(int)", index, self->size());
+    }
     GNodeArray copy() {
         return (*self);
     }

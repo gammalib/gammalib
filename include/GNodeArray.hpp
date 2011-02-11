@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GNodeArray.hpp  -  Array of nodes class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GNodeArray.hpp
- * @brief GNodeArray class interface definition.
+ * @brief Node array class interface definition
  * @author J. Knodlseder
  */
 
@@ -21,14 +21,16 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <vector>
+#include <string>
 #include <iostream>
+#include "GLog.hpp"
 #include "GVector.hpp"
 
 
 /***********************************************************************//**
  * @class GNodeArray
  *
- * @brief Interface for the node array class.
+ * @brief Interface for the node array class
  *
  * The node array class collects nodes \f$x_i\f$ that may be used to describe
  * a functional relation \f$y_i=f(x_i)\f$. This class may be used to perform
@@ -46,7 +48,8 @@
 class GNodeArray {
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GNodeArray& array);
+    friend std::ostream& operator<<(std::ostream& os, const GNodeArray& array);
+    friend GLog&         operator<<(GLog& log,        const GNodeArray& array);
 
 public:
     // Constructors and destructors
@@ -56,23 +59,25 @@ public:
 
     // Operators
     GNodeArray&   operator= (const GNodeArray & array);
-    double&       operator() (int index);
-    const double& operator() (int index) const;
+    double&       operator[](const int& index);
+    const double& operator[](const int& index) const;
 
     // Methods
-    void        clear(void);
-    GNodeArray* clone(void) const;
-    int         size(void) const { return m_node.size(); }
-    void        nodes(const int& num, const double* array);
-    void        nodes(const GVector& vector);
-    void        nodes(const std::vector<double>& vector);
-    void        append(const double& node);
-    double      interpolate(const double& value, const std::vector<double>& vector);
-    void        set_value(const double& value);
-    int         inx_left(void) { return m_inx_left; }
-    int         inx_right(void) { return m_inx_right; }
-    double      wgt_left(void) { return m_wgt_left; }
-    double      wgt_right(void) { return m_wgt_right; }
+    void          clear(void);
+    GNodeArray*   clone(void) const;
+    int           size(void) const { return m_node.size(); }
+    void          nodes(const int& num, const double* array);
+    void          nodes(const GVector& vector);
+    void          nodes(const std::vector<double>& vector);
+    void          append(const double& node);
+    double        interpolate(const double& value,
+                              const std::vector<double>& vector) const;
+    void          set_value(const double& value);
+    const int&    inx_left(void) const { return m_inx_left; }
+    const int&    inx_right(void) const { return m_inx_right; }
+    const double& wgt_left(void) const { return m_wgt_left; }
+    const double& wgt_right(void) const { return m_wgt_right; }
+    std::string   print(void) const;
 
 private:
     // Methods

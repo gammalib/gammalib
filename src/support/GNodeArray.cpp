@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GNodeArray.cpp
- * @brief GNodeArray class implementation.
+ * @brief Node array class implementation
  * @author J. Knodlseder
  */
 
@@ -21,12 +21,12 @@
 #include <config.h>
 #endif
 #include <cmath>
-#include <iostream>
 #include "GException.hpp"
 #include "GNodeArray.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS                               "GNodeArray::operator() (int)"
+#define G_ACCESS                                "GNodeArray::operator[](int)"
 #define G_INTERPOLATE "GNodeArray::interpolate(std::vector<double>&, double&"
 
 /* __ Macros _____________________________________________________________ */
@@ -123,12 +123,12 @@ GNodeArray& GNodeArray::operator= (const GNodeArray& array)
 /***********************************************************************//**
  * @brief Node access operator
  *
- * @param[in] index Node index (0,1,...).
+ * @param[in] index Node index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Node index is out of range.
  ***************************************************************************/
-double& GNodeArray::operator() (int index)
+double& GNodeArray::operator[](const int& index)
 {
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -144,12 +144,12 @@ double& GNodeArray::operator() (int index)
 /***********************************************************************//**
  * @brief Node access operator (const version)
  *
- * @param[in] index Node index (0,1,...).
+ * @param[in] index Node index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Node index is out of range.
  ***************************************************************************/
-const double& GNodeArray::operator() (int index) const
+const double& GNodeArray::operator[](const int& index) const
 {
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -301,7 +301,7 @@ void GNodeArray::append(const double& node)
  * corresponding values \f$x_i\f$ are stored in the node array.
  ***************************************************************************/
 double GNodeArray::interpolate(const double& value,
-                               const std::vector<double>& vector)
+                               const std::vector<double>& vector) const
 {
     // Throw exception if there are not enough nodes
     if (m_node.size() < 2)
@@ -312,8 +312,8 @@ double GNodeArray::interpolate(const double& value,
         throw GException::vector_mismatch(G_INTERPOLATE, m_node.size(),
                                           vector.size());
     
-    // Set interpolation value
-    set_value(value);
+    // Set interpolation value (circumvent const correctness)
+    ((GNodeArray*)this)->set_value(value);
 
     // Interpolate
     double y = vector[inx_left()]  * wgt_left() +
@@ -391,6 +391,44 @@ void GNodeArray::set_value(const double& value)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Print nodes
+ ***************************************************************************/
+std::string GNodeArray::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GNodeArray ===");
+
+    // Append array type
+    result.append("\n"+parformat("Number of nodes in array")+str(size()));
+    if (m_is_linear) {
+        result.append("\n"+parformat("Array type")+"linear");
+        result.append("\n"+parformat("Linear slope")+str(m_linear_slope));
+        result.append("\n"+parformat("Linear offset")+str(m_linear_offset));
+    }
+    else
+        result.append("\n"+parformat("Array type")+"nonlinear");
+
+    // Append indices and weights
+    result.append("\n"+parformat("Indices and weights"));
+    result.append("("+str(m_inx_left)+","+str(m_inx_right)+")=");
+    result.append("("+str(m_wgt_left)+","+str(m_wgt_right)+")");
+
+    // Append nodes
+    for (int i = 0; i < size(); ++i) {
+        result.append("\n"+parformat("Node "+str(i)));
+        result.append(str(m_node[i]));
+        result.append(" (delta="+str(m_step[i])+")");
+    }
+
+    // Return result
+    return result;
 }
 
 
@@ -491,34 +529,34 @@ void GNodeArray::setup(void)
  =                                                                         =
  ==========================================================================*/
 
+
 /***********************************************************************//**
- * @brief Put object in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the model will be dumped
- * @param[in] array Node array to be dumped
+ * @param[in] os Output stream.
+ * @param[in] array Node array.
  ***************************************************************************/
-std::ostream& operator<< (std::ostream& os,const GNodeArray& array)
+std::ostream& operator<<(std::ostream& os, const GNodeArray& array)
 {
-    // Put object in stream
-    os << "=== GNodeArray ===" << std::endl;
-    os << " Number of nodes in array ..: " << array.m_node.size() << std::endl;
-    if (array.m_is_linear) {
-        os << " Array type ................: linear" << std::endl;
-        os << " Linear slope ..............: " << array.m_linear_slope
-           << std::endl;
-        os << " Linear offset .............: " << array.m_linear_offset
-           << std::endl;
-    }
-    else
-        os << " Array type ................: nonlinear" << std::endl;
-    os << " Indices and weights .......: (" 
-       << array.m_inx_left << "," 
-       << array.m_inx_right << ")=("
-       << array.m_wgt_left << ","
-       << array.m_wgt_right << ")" << std::endl;
-    for (int i = 0; i < array.m_node.size(); ++i)
-        os << " " << array.m_node.at(i);
+     // Write array in output stream
+    os << array.print();
 
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] array Node array.
+ ***************************************************************************/
+GLog& operator<<(GLog& log, const GNodeArray& array)
+{
+    // Write array into logger
+    log << array.print();
+
+    // Return logger
+    return log;
 }
