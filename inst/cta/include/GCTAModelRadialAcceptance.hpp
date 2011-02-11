@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAModelRadialAcceptance.hpp
- * @brief GCTAModelRadialAcceptance class interface definition.
+ * @brief Radial acceptance model class interface definition
  * @author J. Knodlseder
  */
 
@@ -33,7 +33,7 @@
 /***********************************************************************//**
  * @class GCTAModelRadialAcceptance
  *
- * @brief Radial acceptance model interface definition.
+ * @brief Radial acceptance model class
  *
  * This class implements a radial acceptance model for CTA.
  ***************************************************************************/
@@ -47,20 +47,22 @@ public:
     virtual ~GCTAModelRadialAcceptance(void);
 
     // Operators
-    GCTAModelRadialAcceptance& operator= (const GCTAModelRadialAcceptance& model);
+    virtual GCTAModelRadialAcceptance& operator=(const GCTAModelRadialAcceptance& model);
 
     // Implemented pure virtual methods
-    void                       clear(void);
-    GCTAModelRadialAcceptance* clone(void) const;
-    std::string                type(void) const { return "RadialAcceptance"; }
-    double                     eval(const GEvent& event, const GObservation& obs) const;
-    double                     eval_gradients(const GEvent& event, const GObservation& obs) const;
-    double                     npred(const GEnergy& obsEng, const GTime& obsTime,
-                                     const GObservation& obs) const;
-    GCTAEventList*             mc(const GObservation& obs, GRan& ran) const;
-    void                       read(const GXmlElement& xml);
-    void                       write(GXmlElement& xml) const;
-    std::string                print(void) const;
+    virtual void                       clear(void);
+    virtual GCTAModelRadialAcceptance* clone(void) const;
+    virtual std::string                type(void) const { return "RadialAcceptance"; }
+    virtual double                     eval(const GEvent& event,
+                                            const GObservation& obs) const;
+    virtual double                     eval_gradients(const GEvent& event,
+                                                      const GObservation& obs) const;
+    virtual double                     npred(const GEnergy& obsEng, const GTime& obsTime,
+                                             const GObservation& obs) const;
+    virtual GCTAEventList*             mc(const GObservation& obs, GRan& ran) const;
+    virtual void                       read(const GXmlElement& xml);
+    virtual void                       write(GXmlElement& xml) const;
+    virtual std::string                print(void) const;
 
     // Other methods
     GCTAModelRadial* radial(void)   const { return m_radial; }

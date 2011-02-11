@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAModelRadialGauss.cpp
- * @brief GCTAModelRadialGauss class implementation.
+ * @brief Radial Gaussian model class implementation
  * @author J. Knodlseder
  */
 
@@ -34,7 +34,6 @@ const GCTAModelRadialGauss    g_cta_radial_gauss_seed;
 const GCTAModelRadialRegistry g_cta_radial_gauss_registry(&g_cta_radial_gauss_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS                     "GCTAModelRadialGauss::operator() (int)"
 #define G_READ                     "GCTAModelRadialGauss::read(GXmlElement&)"
 #define G_WRITE                   "GCTAModelRadialGauss::write(GXmlElement&)"
 
@@ -84,9 +83,13 @@ GCTAModelRadialGauss::GCTAModelRadialGauss(const double& sigma) : GCTAModelRadia
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief XML constructor
  *
  * @param[in] xml XML element.
+ *
+ * Creates instance of a radial Gaussian model by extracting information
+ * from an XML element. See GCTAModelRadialGauss::read() for more information
+ * about the expected structure of the XML element.
  ***************************************************************************/
 GCTAModelRadialGauss::GCTAModelRadialGauss(const GXmlElement& xml) : GCTAModelRadial()
 {
@@ -104,7 +107,7 @@ GCTAModelRadialGauss::GCTAModelRadialGauss(const GXmlElement& xml) : GCTAModelRa
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Model.
+ * @param[in] model Radial Gaussian model.
  ***************************************************************************/
 GCTAModelRadialGauss::GCTAModelRadialGauss(const GCTAModelRadialGauss& model) :
                                            GCTAModelRadial(model)
@@ -140,53 +143,11 @@ GCTAModelRadialGauss::~GCTAModelRadialGauss(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Returns model parameter
- *
- * @param[in] index Parameter index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- ***************************************************************************/
-GModelPar& GCTAModelRadialGauss::operator() (int index)
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_ACCESS, index, 0, size()-1);
-    #endif
-
-    // Return pointer
-    return *(m_par[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Returns model parameter (const version)
- *
- * @param[in] index Parameter index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- ***************************************************************************/
-const GModelPar& GCTAModelRadialGauss::operator() (int index) const
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_ACCESS, index, 0, size()-1);
-    #endif
-
-    // Return pointer
-    return *(m_par[index]);
-}
-
-
-/***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Model.
+ * @param[in] model Radial Gaussian model.
  ***************************************************************************/
-GCTAModelRadialGauss& GCTAModelRadialGauss::operator= (const GCTAModelRadialGauss& model)
+GCTAModelRadialGauss& GCTAModelRadialGauss::operator=(const GCTAModelRadialGauss& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -259,7 +220,7 @@ GCTAModelRadialGauss* GCTAModelRadialGauss::clone(void) const
  * Note that this method implements a function which is unity for
  * \f$\theta=0\f$.
  ***************************************************************************/
-double GCTAModelRadialGauss::eval(const double& offset)
+double GCTAModelRadialGauss::eval(const double& offset) const
 {
     // Compute value
     double arg   = offset * offset / sigma();
@@ -293,7 +254,7 @@ double GCTAModelRadialGauss::eval(const double& offset)
  * Note that this method implements a function which is unity for
  * \f$\theta=0\f$.
  ***************************************************************************/
-double GCTAModelRadialGauss::eval_gradients(const double& offset)
+double GCTAModelRadialGauss::eval_gradients(const double& offset) const
 {
     // Compute value
     double arg   = offset * offset / sigma();
@@ -303,8 +264,8 @@ double GCTAModelRadialGauss::eval_gradients(const double& offset)
     // Compute partial derivatives of the sigma parameter.
     double g_sigma = value * arg2 / sigma() * m_sigma.scale();
 
-    // Set gradients
-    m_sigma.gradient(g_sigma);
+    // Set gradients (circumvent const correctness)
+    ((GCTAModelRadialGauss*)this)->m_sigma.gradient(g_sigma);
 
     // Return value
     return value;
@@ -414,7 +375,7 @@ double GCTAModelRadialGauss::omega(void) const
  *            Invalid model parameter names found in XML element.
  *
  * Read the Gaussian radial model information from an XML element. The XML
- * element is required to have 1 parameter named 'Sigma'. 
+ * element is required to have one parameter named "Sigma". 
  ***************************************************************************/
 void GCTAModelRadialGauss::read(const GXmlElement& xml)
 {
@@ -451,7 +412,7 @@ void GCTAModelRadialGauss::read(const GXmlElement& xml)
 /***********************************************************************//**
  * @brief Write model into XML element
  *
- * @param[in] xml XML element into which model information is written.
+ * @param[in] xml XML element.
  *
  * @exception GException::model_invalid_spatial
  *            Existing XML element is not of type 'GaussFunction'
@@ -461,7 +422,7 @@ void GCTAModelRadialGauss::read(const GXmlElement& xml)
  *            Invalid model parameter names found in XML element.
  *
  * Write the Gaussian radial model information into an XML element. The XML
- * element will have 1 parameter leaf named 'Sigma'.
+ * element will have one parameter leaf named "Sigma".
  ***************************************************************************/
 void GCTAModelRadialGauss::write(GXmlElement& xml) const
 {
@@ -521,7 +482,7 @@ std::string GCTAModelRadialGauss::print(void) const
     result.append("=== GCTAModelRadialGauss ===");
     result.append("\n"+parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i)
-        result.append("\n"+m_par[i]->print());
+        result.append("\n"+m_pars[i]->print());
 
     // Return result
     return result;
@@ -539,16 +500,18 @@ std::string GCTAModelRadialGauss::print(void) const
  ***************************************************************************/
 void GCTAModelRadialGauss::init_members(void)
 {
-    // Initialise parameters
-    m_npars  = 1;
-    m_par[0] = &m_sigma;
-
     // Initialise Gaussian sigma
-    m_sigma = GModelPar();
+    m_sigma.clear();
     m_sigma.name("Sigma");
     m_sigma.unit("deg2");
     m_sigma.free();
     m_sigma.scale(1.0);
+    m_sigma.gradient(0.0);
+    m_sigma.hasgrad(true);
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_sigma);
 
     // Return
     return;
@@ -558,13 +521,16 @@ void GCTAModelRadialGauss::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model Model.
+ * @param[in] model Radial Gaussian model.
  ***************************************************************************/
 void GCTAModelRadialGauss::copy_members(const GCTAModelRadialGauss& model)
 {
-    // Copy model parameters (we do not need to copy the rest since it is
-    // static)
+    // Copy members
     m_sigma = model.m_sigma;
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_sigma);
 
     // Return
     return;

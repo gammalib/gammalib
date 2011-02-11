@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAModelRadialGauss.hpp
- * @brief GCTAModelRadialGauss class interface definition.
+ * @brief Radial Gaussian model class interface definition
  * @author J. Knodlseder
  */
 
@@ -20,6 +20,7 @@
 #define GCTAMODELRADIALGAUSS_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GModelPar.hpp"
 #include "GXmlElement.hpp"
 #include "GCTAModelRadial.hpp"
@@ -30,7 +31,7 @@
 /***********************************************************************//**
  * @class GCTAModelRadialGauss
  *
- * @brief Radial Gaussian CTA model interface definition
+ * @brief Radial Gaussian CTA model class
  *
  * This class implements the radial function
  * \f[f(\theta) = \exp \left(-\frac{1}{2}
@@ -52,22 +53,19 @@ public:
     virtual ~GCTAModelRadialGauss(void);
 
     // Operators
-    GModelPar&            operator() (int index);
-    const GModelPar&      operator() (int index) const;
-    GCTAModelRadialGauss& operator= (const GCTAModelRadialGauss& model);
+    virtual GCTAModelRadialGauss& operator= (const GCTAModelRadialGauss& model);
 
     // Implemented pure virtual methods
-    void                  clear(void);
-    GCTAModelRadialGauss* clone(void) const;
-    int                   size(void) const { return m_npars; }
-    std::string           type(void) const { return "Gaussian"; }
-    double                eval(const double& offset);
-    double                eval_gradients(const double& offset);
-    GCTAInstDir           mc(const GCTAInstDir& dir, GRan& ran) const;
-    double                omega(void) const;
-    void                  read(const GXmlElement& xml);
-    void                  write(GXmlElement& xml) const;
-    std::string           print(void) const;
+    virtual void                  clear(void);
+    virtual GCTAModelRadialGauss* clone(void) const;
+    virtual std::string           type(void) const { return "Gaussian"; }
+    virtual double                eval(const double& offset) const;
+    virtual double                eval_gradients(const double& offset) const;
+    virtual GCTAInstDir           mc(const GCTAInstDir& dir, GRan& ran) const;
+    virtual double                omega(void) const;
+    virtual void                  read(const GXmlElement& xml);
+    virtual void                  write(GXmlElement& xml) const;
+    virtual std::string           print(void) const;
 
     // Other methods
     double sigma(void) const { return m_sigma.real_value(); }
@@ -95,9 +93,7 @@ protected:
     };
 
     // Protected members
-    int        m_npars;        //!< Number of parameters
-    GModelPar* m_par[1];       //!< Pointers to parameters
-    GModelPar  m_sigma;        //!< Width parameter (degrees^2)
+    GModelPar m_sigma;        //!< Width parameter (degrees^2)
 };
 
 #endif /* GCTAMODELRADIALGAUSS_HPP */

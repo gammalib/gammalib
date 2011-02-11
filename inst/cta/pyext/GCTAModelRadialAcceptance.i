@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAModelRadialAcceptance.i
- * @brief GCTAModelRadialAcceptance class python interface.
+ * @brief Radial acceptance model class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -36,16 +36,18 @@ public:
     virtual ~GCTAModelRadialAcceptance(void);
 
     // Implemented pure virtual methods
-    void                       clear(void);
-    GCTAModelRadialAcceptance* clone(void) const;
-    std::string                type(void) const;
-    double                     eval(const GEvent& event, const GObservation& obs);
-    double                     eval_gradients(const GEvent& event, const GObservation& obs);
-    double                     npred(const GEnergy& obsEng, const GTime& obsTime,
-                                     const GObservation& obs) const;
-    GCTAEventList*             mc(const GObservation& obs, GRan& ran) const;
-    void                       read(const GXmlElement& xml);
-    void                       write(GXmlElement& xml) const;
+    virtual void                       clear(void);
+    virtual GCTAModelRadialAcceptance* clone(void) const;
+    virtual std::string                type(void) const;
+    virtual double                     eval(const GEvent& event,
+                                            const GObservation& obs) const;
+    virtual double                     eval_gradients(const GEvent& event,
+                                                      const GObservation& obs) const;
+    virtual double                     npred(const GEnergy& obsEng, const GTime& obsTime,
+                                             const GObservation& obs) const;
+    virtual GCTAEventList*             mc(const GObservation& obs, GRan& ran) const;
+    virtual void                       read(const GXmlElement& xml);
+    virtual void                       write(GXmlElement& xml) const;
 
     // Other methods
     GCTAModelRadial* radial(void)   const;

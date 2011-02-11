@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAModelRadialAcceptance.cpp
- * @brief GCTAModelRadialAcceptance class implementation.
+ * @brief Radial acceptance model class implementation
  * @author J. Knodlseder
  */
 
@@ -300,7 +300,7 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
         double fact = spec * temp;
         if (fact != 1.0) {
             for (int i = 0; i < radial()->size(); ++i)
-                (*radial())(i).gradient( (*radial())(i).gradient() * fact );
+                (*radial())[i].gradient( (*radial())[i].gradient() * fact );
         }
     }
 
@@ -309,7 +309,7 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
         double fact = rad * temp;
         if (fact != 1.0) {
             for (int i = 0; i < spectral()->size(); ++i)
-                (*spectral())(i).gradient( (*spectral())(i).gradient() * fact );
+                (*spectral())[i].gradient( (*spectral())[i].gradient() * fact );
         }
     }
 
@@ -318,7 +318,7 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
         double fact = rad * spec;
         if (fact != 1.0) {
             for (int i = 0; i < temporal()->size(); ++i)
-                (*temporal())(i).gradient( (*temporal())(i).gradient() * fact );
+                (*temporal())[i].gradient( (*temporal())[i].gradient() * fact );
         }
     }
 
@@ -649,13 +649,13 @@ std::string GCTAModelRadialAcceptance::print(void) const
     result.append("\n"+parformat("Number of parameters")+str(size()));
     result.append("\n"+parformat("Number of radial par's")+str(n_radial));
     for (int i = 0; i < n_radial; ++i)
-        result.append("\n"+(*radial())(i).print());
+        result.append("\n"+(*radial())[i].print());
     result.append("\n"+parformat("Number of spectral par's")+str(n_spectral));
     for (int i = 0; i < n_spectral; ++i)
-        result.append("\n"+(*spectral())(i).print());
+        result.append("\n"+(*spectral())[i].print());
     result.append("\n"+parformat("Number of temporal par's")+str(n_temporal));
     for (int i = 0; i < n_temporal; ++i)
-        result.append("\n"+(*temporal())(i).print());
+        result.append("\n"+(*temporal())[i].print());
 
     // Return result
     return result;
@@ -745,15 +745,15 @@ void GCTAModelRadialAcceptance::set_pointers(void)
 
         // Gather radial parameter pointers
         for (int i = 0; i < n_radial; ++i)
-            m_pars.push_back(&((*radial())(i)));
+            m_pars.push_back(&((*radial())[i]));
 
         // Gather spectral parameters
         for (int i = 0; i < n_spectral; ++i)
-            m_pars.push_back(&((*spectral())(i)));
+            m_pars.push_back(&((*spectral())[i]));
 
         // Gather temporal parameters
         for (int i = 0; i < n_temporal; ++i)
-            m_pars.push_back(&((*temporal())(i)));
+            m_pars.push_back(&((*temporal())[i]));
 
     }
 

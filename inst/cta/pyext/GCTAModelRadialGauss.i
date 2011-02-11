@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAModelRadialGauss.i
- * @brief GCTAModelRadialGauss class python interface.
+ * @brief Radial Gaussian model class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -25,9 +25,9 @@
 /***********************************************************************//**
  * @class GCTAModelRadialGauss
  *
- * @brief Radial Gaussian CTA model interface definition
+ * @brief Radial Gaussian CTA model class
  ***************************************************************************/
-class GCTAModelRadialGauss  : public GCTAModelRadial {
+class GCTAModelRadialGauss : public GCTAModelRadial {
 public:
     // Constructors and destructors
     GCTAModelRadialGauss(void);
@@ -37,16 +37,15 @@ public:
     virtual ~GCTAModelRadialGauss(void);
 
     // Implemented pure virtual methods
-    void                  clear(void);
-    GCTAModelRadialGauss* clone(void) const;
-    int                   size(void) const;
-    std::string           type(void) const;
-    double                eval(const double& offset);
-    double                eval_gradients(const double& offset);
-    GCTAInstDir           mc(const GCTAInstDir& dir, GRan& ran) const;
-    double                omega(void) const;
-    void                  read(const GXmlElement& xml);
-    void                  write(GXmlElement& xml) const;
+    virtual void                  clear(void);
+    virtual GCTAModelRadialGauss* clone(void) const;
+    virtual std::string           type(void) const;
+    virtual double                eval(const double& offset) const;
+    virtual double                eval_gradients(const double& offset) const;
+    virtual GCTAInstDir           mc(const GCTAInstDir& dir, GRan& ran) const;
+    virtual double                omega(void) const;
+    virtual void                  read(const GXmlElement& xml);
+    virtual void                  write(GXmlElement& xml) const;
 
     // Other methods
     double sigma(void) const;
@@ -61,18 +60,4 @@ public:
     char *__str__() {
         return tochar(self->print());
     }
-    /*
-    GModelPar __getitem__(int index) {
-    if (index >= 0 && index < self->size())
-        return (*self)(index);
-    else
-        throw GException::out_of_range("__getitem__(int)", index, self->size());
-    }
-    void __setitem__(int index, const GModelPar& val) {
-        if (index>=0 && index < self->size())
-            (*self)(index) = val;
-        else
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
-    }
-    */
 };
