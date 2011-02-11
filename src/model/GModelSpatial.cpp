@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatial.cpp
- * @brief GModelSpatial class implementation.
+ * @brief Abstract spatial model base class implementation.
  * @author J. Knodlseder
  */
 
@@ -24,7 +24,8 @@
 #include "GModelSpatial.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS                            "GModelSpatial::operator() (int)"
+#define G_ACCESS1                           "GModelSpatial::operator[](int&)"
+#define G_ACCESS2                   "GModelSpatial::operator[](std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -40,11 +41,11 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GModelSpatial::GModelSpatial(void)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -55,7 +56,7 @@ GModelSpatial::GModelSpatial(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Model from which the instance should be built.
+ * @param[in] model Spatial model.
  ***************************************************************************/
 GModelSpatial::GModelSpatial(const GModelSpatial& model)
 {
@@ -90,48 +91,6 @@ GModelSpatial::~GModelSpatial(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Returns model parameter
- *
- * @param[in] index Parameter index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- ***************************************************************************/
-GModelPar& GModelSpatial::operator() (int index)
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_ACCESS, index, 0, size()-1);
-    #endif
-
-    // Return pointer
-    return *(par()[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Returns model parameter (const version)
- *
- * @param[in] index Parameter index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- ***************************************************************************/
-const GModelPar& GModelSpatial::operator() (int index) const
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_ACCESS, index, 0, size()-1);
-    #endif
-
-    // Return pointer
-    return *((((GModelSpatial*)this)->par())[index]);
-}
-
-
-/***********************************************************************//**
  * @brief Assignment operator
  *
  * @param[in] model Model which should be assigned.
@@ -157,6 +116,100 @@ GModelSpatial& GModelSpatial::operator= (const GModelSpatial& model)
 }
 
 
+/***********************************************************************//**
+ * @brief Returns model parameter
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ ***************************************************************************/
+GModelPar& GModelSpatial::operator[](const int& index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    #endif
+
+    // Return reference
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns model parameter (const version)
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ ***************************************************************************/
+const GModelPar& GModelSpatial::operator[](const int& index) const
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    #endif
+
+    // Return reference
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model parameter
+ *
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::par_not_found
+ *            Parameter with specified name not found in container.
+ ***************************************************************************/
+GModelPar& GModelSpatial::operator[](const std::string& name)
+{
+    // Get parameter index
+    int index = 0;
+    for (; index < size(); ++index) {
+        if (m_pars[index]->name() == name)
+            break;
+    }
+
+    // Throw exception if parameter name was not found
+    if (index >= size())
+        throw GException::par_not_found(G_ACCESS2, name);
+
+    // Return reference
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model parameter (const version)
+ *
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::par_not_found
+ *            Parameter with specified name not found in container.
+ ***************************************************************************/
+const GModelPar& GModelSpatial::operator[](const std::string& name) const
+{
+    // Get parameter index
+    int index = 0;
+    for (; index < size(); ++index) {
+        if (m_pars[index]->name() == name)
+            break;
+    }
+
+    // Throw exception if parameter name was not found
+    if (index >= size())
+        throw GException::par_not_found(G_ACCESS2, name);
+
+    // Return reference
+    return *(m_pars[index]);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
@@ -174,6 +227,9 @@ GModelSpatial& GModelSpatial::operator= (const GModelSpatial& model)
  ***************************************************************************/
 void GModelSpatial::init_members(void)
 {
+    // Initialise members
+    m_pars.clear();
+
     // Return
     return;
 }
@@ -182,10 +238,13 @@ void GModelSpatial::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model GModelSpatial members which should be copied.
+ * @param[in] model Spatial model.
  ***************************************************************************/
 void GModelSpatial::copy_members(const GModelSpatial& model)
 {
+    // Copy members
+    m_pars = model.m_pars;
+
     // Return
     return;
 }
@@ -211,7 +270,7 @@ void GModelSpatial::free_members(void)
  * @brief Output operator
  *
  * @param[in] os Output stream.
- * @param[in] model Model.
+ * @param[in] model Spatial model.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GModelSpatial& model)
 {
@@ -227,7 +286,7 @@ std::ostream& operator<< (std::ostream& os, const GModelSpatial& model)
  * @brief Log operator
  *
  * @param[in] log Logger.
- * @param[in] model Model.
+ * @param[in] model Spatial model.
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GModelSpatial& model)
 {
