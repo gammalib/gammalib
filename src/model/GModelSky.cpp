@@ -252,7 +252,7 @@ GVector GModelSky::gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
     if (size() > 0) {
         gradients = GVector(size());
         for (int i = 0; i < size(); ++i)
-            gradients(i) = m_pars[i]->gradient();
+            gradients[i] = m_pars[i]->gradient();
     }
 
     // Return gradients

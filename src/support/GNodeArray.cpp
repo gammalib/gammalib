@@ -234,7 +234,7 @@ void GNodeArray::nodes(const GVector& vector)
     
     // Set node values
     for (int i = 0; i < vector.size(); ++i)
-        m_node.push_back(vector(i));
+        m_node.push_back(vector[i]);
 
     // Setup node distances and linear array handling
     setup();
