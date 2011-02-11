@@ -297,3 +297,51 @@ GException::not_enough_columns::not_enough_columns(std::string origin,
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Parameter not found
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] name Parameter name.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::par_not_found::par_not_found(std::string origin,
+                                         std::string name,
+                                         std::string message)
+{
+    // Set origin
+    m_origin  = origin;
+
+    // Set message
+    m_message = "Parameter \""+name+"\" not found in container.";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model not found
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] name Model name.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::model_not_found::model_not_found(std::string origin,
+                                             std::string name,
+                                             std::string message)
+{
+    // Set origin
+    m_origin  = origin;
+
+    // Set message
+    m_message = "Model \""+name+"\" not found in container.";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}

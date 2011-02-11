@@ -509,6 +509,16 @@ public:
         not_enough_columns(std::string origin, std::string filename,
                            int num, std::string message = "");
     };
+    class par_not_found : public GExceptionHandler {
+    public:
+        par_not_found(std::string origin, std::string name,
+                      std::string message = "");
+    };
+    class model_not_found : public GExceptionHandler {
+    public:
+        model_not_found(std::string origin, std::string name,
+                        std::string message = "");
+    };
 
 
     // CSV exceptions
