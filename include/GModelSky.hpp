@@ -79,8 +79,10 @@ public:
     virtual std::string print(void) const = 0;
 
     // Implemented pure virtual methods
-    virtual double      eval(const GEvent& event, const GObservation& obs) const;
-    virtual double      eval_gradients(const GEvent& event, const GObservation& obs) const;
+    virtual double      eval(const GEvent& event,
+                             const GObservation& obs) const;
+    virtual double      eval_gradients(const GEvent& event,
+                                       const GObservation& obs) const;
     virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
                               const GObservation& obs) const;
     virtual void        read(const GXmlElement& xml);

@@ -59,8 +59,10 @@ public:
     virtual void        clear(void) = 0;
     virtual GModelData* clone(void) const = 0;
     virtual std::string type(void) const = 0;
-    virtual double      eval(const GEvent& event, const GObservation& obs) const = 0;
-    virtual double      eval_gradients(const GEvent& event, const GObservation& obs) const = 0;
+    virtual double      eval(const GEvent& event,
+                             const GObservation& obs) const = 0;
+    virtual double      eval_gradients(const GEvent& event,
+                                       const GObservation& obs) const = 0;
     virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
                               const GObservation& obs) const = 0;
     virtual void        read(const GXmlElement& xml) = 0;
