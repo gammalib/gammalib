@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatial.cpp
- * @brief Abstract spatial model base class implementation.
+ * @brief Abstract spatial model base class implementation
  * @author J. Knodlseder
  */
 
@@ -60,7 +60,7 @@ GModelSpatial::GModelSpatial(void)
  ***************************************************************************/
 GModelSpatial::GModelSpatial(const GModelSpatial& model)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -93,7 +93,7 @@ GModelSpatial::~GModelSpatial(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Model which should be assigned.
+ * @param[in] model Spatial model.
  ***************************************************************************/
 GModelSpatial& GModelSpatial::operator= (const GModelSpatial& model)
 {
@@ -103,7 +103,7 @@ GModelSpatial& GModelSpatial::operator= (const GModelSpatial& model)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -272,7 +272,7 @@ void GModelSpatial::free_members(void)
  * @param[in] os Output stream.
  * @param[in] model Spatial model.
  ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GModelSpatial& model)
+std::ostream& operator<<(std::ostream& os, const GModelSpatial& model)
 {
      // Write model in output stream
     os << model.print();
@@ -288,7 +288,7 @@ std::ostream& operator<< (std::ostream& os, const GModelSpatial& model)
  * @param[in] log Logger.
  * @param[in] model Spatial model.
  ***************************************************************************/
-GLog& operator<< (GLog& log, const GModelSpatial& model)
+GLog& operator<<(GLog& log, const GModelSpatial& model)
 {
     // Write model into logger
     log << model.print();
