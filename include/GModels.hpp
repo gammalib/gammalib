@@ -34,7 +34,7 @@ class GObservation;
 /***********************************************************************//**
  * @class GModels
  *
- * @brief Model container class interface defintion.
+ * @brief Model container class
  *
  * This container class collects models of gamma-ray data that are used
  * for maximum likelihood fitting. It derives from the optimizer parameter
@@ -54,9 +54,11 @@ public:
     virtual ~GModels(void);
 
     // Operators
-    GModel*       operator() (int index);
-    const GModel* operator() (int index) const;
-    GModels&      operator= (const GModels& models);
+    GModels&      operator=(const GModels& models);
+    GModel&       operator[](const int& index);
+    const GModel& operator[](const int& index) const;
+    GModel&       operator[](const std::string& name);
+    const GModel& operator[](const std::string& name) const;
 
     // Methods
     void          clear(void);
@@ -67,8 +69,8 @@ public:
     void          save(const std::string& filename) const;
     void          read(const GXml& xml);
     void          write(GXml& xml) const;
-    double        eval(const GEvent& event, const GObservation& obs);
-    double        eval_gradients(const GEvent& event, const GObservation& obs);
+    double        eval(const GEvent& event, const GObservation& obs) const;
+    double        eval_gradients(const GEvent& event, const GObservation& obs) const;
     std::string   print(void) const;
 
 protected:

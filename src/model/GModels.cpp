@@ -29,7 +29,8 @@
 #include "GXmlElement.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS                                  "GModels::operator() (int)"
+#define G_ACCESS1                                 "GModels::operator[](int&)"
+#define G_ACCESS2                         "GModels::operator[](std::string&)"
 #define G_READ                                         "GModels::read(GXml&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -116,48 +117,6 @@ GModels::~GModels(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Returns pointer to model
- *
- * @param[in] index Model index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Model index is out of range.
- ***************************************************************************/
-GModel* GModels::operator() (int index)
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_ACCESS, index, 0, size()-1);
-    #endif
-
-    // Return pointer
-    return m_models[index];
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to model
- *
- * @param[in] index Model index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Model index is out of range.
- ***************************************************************************/
-const GModel* GModels::operator() (int index) const
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_ACCESS, index, 0, size()-1);
-    #endif
-
-    // Return pointer
-    return (m_models[index]);
-}
-
-
-/***********************************************************************//**
  * @brief Assignment operator
  *
  * @param[in] models Model container.
@@ -183,6 +142,100 @@ GModels& GModels::operator= (const GModels& models)
 
     // Return
     return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model
+ *
+ * @param[in] index Model index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Model index is out of range.
+ ***************************************************************************/
+GModel& GModels::operator[](const int& index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    #endif
+
+    // Return reference
+    return *(m_models[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model
+ *
+ * @param[in] index Model index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Model index is out of range.
+ ***************************************************************************/
+const GModel& GModels::operator[](const int& index) const
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size())
+        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    #endif
+
+    // Return reference
+    return *(m_models[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model
+ *
+ * @param[in] name Model name.
+ *
+ * @exception GException::model_not_found
+ *            Model with specified name not found in container.
+ ***************************************************************************/
+GModel& GModels::operator[](const std::string& name)
+{
+    // Get parameter index
+    int index = 0;
+    for (; index < size(); ++index) {
+        if (m_models[index]->name() == name)
+            break;
+    }
+
+    // Throw exception if parameter name was not found
+    if (index >= size())
+        throw GException::model_not_found(G_ACCESS2, name);
+
+    // Return reference
+    return *(m_models[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model (const version)
+ *
+ * @param[in] name Model name.
+ *
+ * @exception GException::model_not_found
+ *            Model with specified name not found in container.
+ ***************************************************************************/
+const GModel& GModels::operator[](const std::string& name) const
+{
+    // Get parameter index
+    int index = 0;
+    for (; index < size(); ++index) {
+        if (m_models[index]->name() == name)
+            break;
+    }
+
+    // Throw exception if parameter name was not found
+    if (index >= size())
+        throw GException::model_not_found(G_ACCESS2, name);
+
+    // Return reference
+    return *(m_models[index]);
 }
 
 
@@ -371,7 +424,7 @@ void GModels::write(GXml& xml) const
  * @param[in] event Observed event.
  * @param[in] obs Observation.
  ***************************************************************************/
-double GModels::eval(const GEvent& event, const GObservation& obs)
+double GModels::eval(const GEvent& event, const GObservation& obs) const
 {
     // Initialise function value
     double value = 0.0;
@@ -391,7 +444,8 @@ double GModels::eval(const GEvent& event, const GObservation& obs)
  * @param[in] event Observed event.
  * @param[in] obs Observation.
  ***************************************************************************/
-double GModels::eval_gradients(const GEvent& event, const GObservation& obs)
+double GModels::eval_gradients(const GEvent& event,
+                               const GObservation& obs) const
 {
     // Initialise function value
     double value = 0.0;
@@ -506,7 +560,7 @@ void GModels::set_pointers(void)
         // Gather all pointers
         for (int i = 0; i < size(); ++i) {
             for (int k = 0; k < m_models[i]->size(); ++k)
-                *ptr++ = &((*m_models[i])(k));
+                *ptr++ = &((*m_models[i])[k]);
         }
 
     } // endif: there were model parameters

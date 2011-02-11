@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModel.hpp
- * @brief GModel virtual base class interface definition.
+ * @brief Abstract model base class interface definition
  * @author J. Knodlseder
  */
 
@@ -37,7 +37,7 @@ class GObservation;
 /***********************************************************************//**
  * @class GModel
  *
- * @brief Model class interface defintion
+ * @brief Abstract model class
  *
  * This class implements a parametric model. The class has two methods for
  * model evaluation: eval() and eval_gradients().
@@ -63,17 +63,20 @@ public:
     virtual ~GModel(void);
 
     // Operators
-    virtual GModelPar&       operator() (int index) = 0;
-    virtual const GModelPar& operator() (int index) const = 0;
-    GModel&                  operator= (const GModel& model);
+    virtual GModel&          operator=(const GModel& model);
+    virtual GModelPar&       operator[](const int& index);
+    virtual const GModelPar& operator[](const int& index) const;
+    virtual GModelPar&       operator[](const std::string& name);
+    virtual const GModelPar& operator[](const std::string& name) const;
 
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GModel*     clone(void) const = 0;
-    virtual int         size(void) const = 0;
     virtual std::string type(void) const = 0;
-    virtual double      eval(const GEvent& event, const GObservation& obs) = 0;
-    virtual double      eval_gradients(const GEvent& event, const GObservation& obs) = 0;
+    virtual double      eval(const GEvent& event,
+                             const GObservation& obs) const = 0;
+    virtual double      eval_gradients(const GEvent& event,
+                                       const GObservation& obs) const = 0;
     virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
                               const GObservation& obs) const = 0;
     virtual void        read(const GXmlElement& xml) = 0;
@@ -81,6 +84,7 @@ public:
     virtual std::string print(void) const = 0;
 
     // Implemented methods
+    int                 size(void) const { return m_pars.size(); }
     std::string         name(void) const { return m_name; }
     void                name(const std::string& name) { m_name=name; }
     void                instruments(const std::string& instruments);
@@ -93,11 +97,11 @@ protected:
     void         copy_members(const GModel& model);
     void         free_members(void);
     std::string  print_name_instrument(void) const;
-    virtual void set_pointers(void) = 0;
 
-    // Proteced data members
+    // Proteced members
     std::string              m_name;         //!< Model name
     std::vector<std::string> m_instruments;  //!< Instruments to which model applies
+    std::vector<GModelPar*>  m_pars;         //!< Pointers to all model parameters
 };
 
 #endif /* GMODEL_HPP */
