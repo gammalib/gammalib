@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelPar.hpp
- * @brief GModelPar class interface definition.
+ * @brief Model parameter class interface definition
  * @author J. Knodlseder
  */
 
@@ -22,21 +22,35 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
+#include "GLog.hpp"
 #include "GException.hpp"
 #include "GXmlElement.hpp"
-#include "GLog.hpp"
 
 
 /***********************************************************************//**
  * @class GModelPar
  *
- * @brief GModelPar class interface defintion.
+ * @brief Model parameter class
+ *
+ * This method implements a model parameter. The model parameter is
+ * factorised into a "value" and a "scale" factor, the real parameter value
+ * being the product of both. Parameter optimization is only done on the
+ * "value" part of the parameter. This allows scaling of the parameter to
+ * have a "value" around unity (which makes the optimizer routines better
+ * behave). Methods that work on the real value (i.e. the product of
+ * "value" and "scale") are prefixed with "real_".
+ *
+ * The parameter "value" can optionally by bounded by a minimum and/or
+ * maximum value. Note that the boundaries apply to "value".
+ *
+ * Each parameter has a name, and holds optionally information about its
+ * gradient (if "hasgrad" is true).
  ***************************************************************************/
 class GModelPar {
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GModelPar& par);
-    friend GLog&         operator<<(GLog& log, const GModelPar& par);
+    friend GLog&         operator<<(GLog& log,        const GModelPar& par);
 
 public:
     // Constructors and destructors
@@ -45,9 +59,11 @@ public:
     virtual ~GModelPar(void);
 
     // Operators
-    GModelPar& operator= (const GModelPar& par);
+    GModelPar& operator=(const GModelPar& par);
 
     // Methods
+    void        clear(void);
+    GModelPar*  clone(void) const;
     std::string name(void) const { return m_name; }
     std::string unit(void) const { return m_unit; }
     double      real_value(void) const { return m_value*m_scale; }
@@ -64,22 +80,24 @@ public:
     bool        isfree(void) const { return m_free; }
     bool        hasmin(void) const { return m_hasmin; }
     bool        hasmax(void) const { return m_hasmax; }
-    void        name(const std::string& name) { m_name=name; return; }
-    void        unit(const std::string& unit) { m_unit=unit; return; }
+    bool        hasgrad(void) const { return m_hasgrad; }
+    void        name(const std::string& name) { m_name=name; }
+    void        unit(const std::string& unit) { m_unit=unit; }
     void        real_value(const double& value);
     void        real_error(const double& error);
     void        value(const double& value);
-    void        error(const double& error)  { m_error=error; return; }
-    void        gradient(const double& gradient) { m_gradient=gradient; return; }
+    void        error(const double& error)  { m_error=error; }
+    void        gradient(const double& gradient) { m_gradient=gradient; }
     void        min(const double& min);
     void        max(const double& max);
-    void        scale(const double& scale) { m_scale=scale; return; }
+    void        scale(const double& scale) { m_scale=scale; }
     void        range(const double& min, const double& max);
-    void        remove_min(void) { m_hasmin=false; return; }
-    void        remove_max(void) { m_hasmax=false; return; }
-    void        remove_range(void) { m_hasmin=false; m_hasmax=false; return; }
-    void        free(void) { m_free=true; return; }
-    void        fix(void) { m_free=false; return; }
+    void        remove_min(void) { m_hasmin=false; }
+    void        remove_max(void) { m_hasmax=false; }
+    void        remove_range(void) { m_hasmin=false; m_hasmax=false; }
+    void        free(void) { m_free=true; }
+    void        fix(void) { m_free=false; }
+    void        hasgrad(const bool& grad) { m_hasgrad=grad; }
     void        read(const GXmlElement& xml);
     void        write(GXmlElement& xml) const;
     std::string print(void) const;
@@ -102,6 +120,7 @@ protected:
     bool         m_free;         //!< Parameter is free
     bool         m_hasmin;       //!< Parameter has minimum boundary
     bool         m_hasmax;       //!< Parameter has maximum boundary
+    bool         m_hasgrad;      //!< Parameter has analytic gradient
 };
 
 #endif /* GMODELPAR_HPP */

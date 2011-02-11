@@ -50,7 +50,7 @@
  ***************************************************************************/
 GModelPar::GModelPar(void)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
   
     // Return
@@ -61,11 +61,11 @@ GModelPar::GModelPar(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] par Parameter from which the instance should be built.
+ * @param[in] par Model parameter.
  ***************************************************************************/
 GModelPar::GModelPar(const GModelPar& par)
 { 
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -98,9 +98,9 @@ GModelPar::~GModelPar(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] par Parameter which should be assigned.
+ * @param[in] par Model parameter.
  ***************************************************************************/
-GModelPar& GModelPar::operator= (const GModelPar& par)
+GModelPar& GModelPar::operator=(const GModelPar& par)
 { 
     // Execute only if object is not identical
     if (this != &par) {
@@ -108,7 +108,7 @@ GModelPar& GModelPar::operator= (const GModelPar& par)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -126,6 +126,31 @@ GModelPar& GModelPar::operator= (const GModelPar& par)
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear instance
+***************************************************************************/
+void GModelPar::clear(void)
+{
+    // Free class members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+***************************************************************************/
+GModelPar* GModelPar::clone(void) const
+{
+    return new GModelPar(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Set real parameter value
@@ -215,6 +240,9 @@ void GModelPar::value(const double& value)
  * @brief Set parameter minimum
  *
  * @param[in] min Parameter minimum.
+ *
+ * @exception GException::out_of_range
+ *            Parameter minimum is larger than actual parameter value.
  ***************************************************************************/
 void GModelPar::min(const double& min)
 {
@@ -237,6 +265,9 @@ void GModelPar::min(const double& min)
  * @brief Set parameter maximum
  *
  * @param[in] max Parameter maximum.
+ *
+ * @exception GException::out_of_range
+ *            Parameter maximum is smaller than actual parameter value.
  ***************************************************************************/
 void GModelPar::max(const double& max)
 {
@@ -260,6 +291,10 @@ void GModelPar::max(const double& max)
  *
  * @param[in] min Parameter minimum.
  * @param[in] max Parameter maximum.
+ *
+ * @exception GException::out_of_range
+ *            Parameter boundaries are in conflict with actual parameter
+ *            value.
  ***************************************************************************/
 void GModelPar::range(const double& min, const double& max)
 {
@@ -283,12 +318,12 @@ void GModelPar::range(const double& min, const double& max)
 /***********************************************************************//**
  * @brief Extract parameter attributes from XML element
  *
- * @param[in] xml XML element containing parameter attributes.
+ * @param[in] xml XML element
  *
  * The following parameter attributes may exist (they take the default
  * values when they are not found in the XML element):
- * 'value' (default=0.0), 'error' (default=0.0), 'scale' (default=1.0),
- * 'min' (default=INDEF), 'max' (default=INDEF), 'free' (default=0).
+ * "value" (default=0.0), "error" (default=0.0), "scale" (default=1.0),
+ * "min" (default=INDEF), "max" (default=INDEF), "free" (default=0).
  ***************************************************************************/
 void GModelPar::read(const GXmlElement& xml)
 {
@@ -338,12 +373,12 @@ void GModelPar::read(const GXmlElement& xml)
 /***********************************************************************//**
  * @brief Set or update parameter attributes in XML element
  *
- * @param[in] xml XML element containing parameter attributes.
+ * @param[in] xml XML element.
  *
  * The following parameter attributes may exist (they take the default
  * values when they are not found in the XML element):
- * 'value' (default=0.0), 'error' (default=0.0), 'scale' (default=1.0),
- * 'min' (default=INDEF), 'max' (default=INDEF), 'free' (default=0).
+ * "value" (default=0.0), "error" (default=0.0), "scale" (default=1.0),
+ * "min" (default=INDEF), "max" (default=INDEF), "free" (default=0).
  ***************************************************************************/
 void GModelPar::write(GXmlElement& xml) const
 {
@@ -377,7 +412,7 @@ void GModelPar::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print powerlaw information
+ * @brief Print parameter information
  ***************************************************************************/
 std::string GModelPar::print(void) const
 {
@@ -407,12 +442,18 @@ std::string GModelPar::print(void) const
 
     // Signal if parameter was free or fixed
     if (m_free)
-        result.append(" (free,");
+        result.append(" (free");
     else
-        result.append(" (fixed,");
+        result.append(" (fixed");
 
     // Append parameter scale
-    result.append("scale="+str(m_scale)+")");
+    result.append(",scale="+str(m_scale));
+
+    // Signal if parameter has analytic gradient
+    if (m_hasgrad)
+        result.append(",gradient)");
+    else
+        result.append(")");
 
     // Return result
     return result;
@@ -439,9 +480,10 @@ void GModelPar::init_members(void)
     m_min      = 0.0;
     m_max      = 0.0;
     m_scale    = 1.0;
+    m_free     = true;
     m_hasmin   = false;
     m_hasmax   = false;
-    m_free     = true;
+    m_hasgrad  = false;
   
     // Return
     return;
@@ -451,7 +493,7 @@ void GModelPar::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] par GModelPar members which should be copied.
+ * @param[in] par Model parameter.
  ***************************************************************************/
 void GModelPar::copy_members(const GModelPar& par)
 {
@@ -464,9 +506,10 @@ void GModelPar::copy_members(const GModelPar& par)
     m_min     = par.m_min;
     m_max     = par.m_max;
     m_scale   = par.m_scale;
+    m_free    = par.m_free;
     m_hasmin  = par.m_hasmin;
     m_hasmax  = par.m_hasmax;
-    m_free    = par.m_free;
+    m_hasgrad = par.m_hasgrad;
 
     // Return
     return;
@@ -477,8 +520,7 @@ void GModelPar::copy_members(const GModelPar& par)
  * @brief Delete class members
  ***************************************************************************/
 void GModelPar::free_members(void)
-{
-  
+{  
     // Return
     return;
 }
@@ -494,7 +536,7 @@ void GModelPar::free_members(void)
  * @brief Output operator
  *
  * @param[in] os Output stream.
- * @param[in] par Parameter.
+ * @param[in] par Model parameter.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GModelPar& par)
 {
@@ -510,7 +552,7 @@ std::ostream& operator<< (std::ostream& os, const GModelPar& par)
  * @brief Log operator
  *
  * @param[in] log Logger.
- * @param[in] par Parameter.
+ * @param[in] par Model parameter.
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GModelPar& par)
 {
