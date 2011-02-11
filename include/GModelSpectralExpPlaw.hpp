@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralExpPlaw.hpp
- * @brief GModelSpectralExpPlaw class interface definition.
+ * @brief Exponential cut off power law spectral class interface definition
  * @author J. Knodlseder
  */
 
@@ -20,6 +20,7 @@
 #define GMODELSPECTRALEXPPLAW_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
 #include "GEnergy.hpp"
@@ -29,10 +30,10 @@
 /***********************************************************************//**
  * @class GModelSpectralExpPlaw
  *
- * @brief Spectral power law interface definition.
+ * @brief Exponential cut off power law spectral class
  *
  * This class implements a power law as the spectral component of the
- * gamma-ray data model. The power law is defined as
+ * gamma-ray sky model. The power law is defined as
  * \f[I(E)=norm (E/pivot)^{index} \exp(-E/ecut)\f]
  * where
  * \f$norm\f$ is the normalization or prefactor,
@@ -40,7 +41,7 @@
  * \f$index\f$ is the spectral index, and
  * \f$ecut\f$ is the cut off energy.
  ***************************************************************************/
-class GModelSpectralExpPlaw  : public GModelSpectral {
+class GModelSpectralExpPlaw : public GModelSpectral {
 
 public:
     // Constructors and destructors
@@ -51,20 +52,19 @@ public:
     virtual ~GModelSpectralExpPlaw(void);
 
     // Operators
-    GModelSpectralExpPlaw& operator= (const GModelSpectralExpPlaw& model);
+    virtual GModelSpectralExpPlaw& operator= (const GModelSpectralExpPlaw& model);
 
     // Implemented pure virtual methods
-    void                   clear(void);
-    GModelSpectralExpPlaw* clone(void) const;
-    int                    size(void) const { return m_npars; }
-    std::string            type(void) const { return "ExpCutoff"; }
-    double                 eval(const GEnergy& srcEng);
-    double                 eval_gradients(const GEnergy& srcEng);
-    double                 flux(const GEnergy& emin, const GEnergy& emax) const;
-    GEnergy                mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
-    void                   read(const GXmlElement& xml);
-    void                   write(GXmlElement& xml) const;
-    std::string            print(void) const;
+    virtual void                   clear(void);
+    virtual GModelSpectralExpPlaw* clone(void) const;
+    virtual std::string            type(void) const { return "ExpCutoff"; }
+    virtual double                 eval(const GEnergy& srcEng) const;
+    virtual double                 eval_gradients(const GEnergy& srcEng) const;
+    virtual double                 flux(const GEnergy& emin, const GEnergy& emax) const;
+    virtual GEnergy                mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual void                   read(const GXmlElement& xml);
+    virtual void                   write(GXmlElement& xml) const;
+    virtual std::string            print(void) const;
 
     // Other methods
     void   autoscale(void);
@@ -79,16 +79,11 @@ protected:
     void copy_members(const GModelSpectralExpPlaw& model);
     void free_members(void);
 
-    // Implemented pure virtual methods
-    GModelPar** par(void) { return m_par; }
-
     // Protected members
-    int        m_npars;           //!< Number of parameters
-    GModelPar* m_par[4];          //!< Pointers to parameters
-    GModelPar  m_norm;            //!< Normalization factor
-    GModelPar  m_index;           //!< Spectral index
-    GModelPar  m_ecut;            //!< Exponential cut off energy
-    GModelPar  m_pivot;           //!< Pivot energy
+    GModelPar m_norm;            //!< Normalization factor
+    GModelPar m_index;           //!< Spectral index
+    GModelPar m_ecut;            //!< Exponential cut off energy
+    GModelPar m_pivot;           //!< Pivot energy
 };
 
 #endif /* GMODELSPECTRALEXPPLAW_HPP */

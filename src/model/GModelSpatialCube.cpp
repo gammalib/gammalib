@@ -435,18 +435,12 @@ void GModelSpatialCube::free_members(void)
  *
  * @param[in] filename File name.
  *
- * @exception GException::feature_not_implemented
- *            Map cube loading not yet implemented.
- *
  * @todo Implement method. 
  ***************************************************************************/
 void GModelSpatialCube::load_cube(const std::string& filename)
 {
     // Set filename
     m_filename = filename;
-
-    // Dump warning that method is not yet implemented
-    throw GException::feature_not_implemented(G_LOAD_CUBE);
 
     // Return
     return;

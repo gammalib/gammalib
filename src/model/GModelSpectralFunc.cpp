@@ -58,7 +58,7 @@ const GModelSpectralRegistry g_spectral_func_registry(&g_spectral_func_seed);
  ***************************************************************************/
 GModelSpectralFunc::GModelSpectralFunc(void) : GModelSpectral()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -67,17 +67,18 @@ GModelSpectralFunc::GModelSpectralFunc(void) : GModelSpectral()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief File constructor
  *
  * @param[in] filename File name of nodes.
  *
- * Construct an arbitrary spectral function from a list of nodes that is
- * found in the specified file.
+ * Creates instance of a spectral function model from a list of nodes that is
+ * found in the specified file. See GModelSpectralFunc::load_nodes() for more
+ * information about the expected structure of the file.
  ***************************************************************************/
 GModelSpectralFunc::GModelSpectralFunc(const std::string& filename) :
                     GModelSpectral()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Load nodes
@@ -89,16 +90,18 @@ GModelSpectralFunc::GModelSpectralFunc(const std::string& filename) :
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief XML constructor
  *
  * @param[in] xml XML element.
  *
- * Construct an arbitrary spectral function from a XML element.
+ * Creates instance of a spectral function model by extracting information
+ * from an XML element. See GModelSpectralFunc::read() for more information
+ * about the expected structure of the XML element.
  ***************************************************************************/
 GModelSpectralFunc::GModelSpectralFunc(const GXmlElement& xml) :
                     GModelSpectral()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Read information from XML element
@@ -112,12 +115,12 @@ GModelSpectralFunc::GModelSpectralFunc(const GXmlElement& xml) :
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Spectral component.
+ * @param[in] model Spectral function model.
  ***************************************************************************/
 GModelSpectralFunc::GModelSpectralFunc(const GModelSpectralFunc& model) :
                     GModelSpectral(model)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -150,7 +153,7 @@ GModelSpectralFunc::~GModelSpectralFunc(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Spectral component.
+ * @param[in] model Spectral function model.
  ***************************************************************************/
 GModelSpectralFunc& GModelSpectralFunc::operator= (const GModelSpectralFunc& model)
 {
@@ -163,7 +166,7 @@ GModelSpectralFunc& GModelSpectralFunc::operator= (const GModelSpectralFunc& mod
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -221,7 +224,7 @@ GModelSpectralFunc* GModelSpectralFunc::clone(void) const
  * Note that the node energies are stored as log10 of energy in units of
  * MeV.
  ***************************************************************************/
-double GModelSpectralFunc::eval(const GEnergy& srcEng)
+double GModelSpectralFunc::eval(const GEnergy& srcEng) const
 {
     // Interpolate function
     double func = m_nodes.interpolate(srcEng.log10MeV(), m_values);
@@ -250,7 +253,7 @@ double GModelSpectralFunc::eval(const GEnergy& srcEng)
  * The partial derivative of the normalization value is given by
  * \f[dI/dn_v=n_s f(E)\f]
  ***************************************************************************/
-double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng)
+double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng) const
 {
     // Interpolate function
     double func = m_nodes.interpolate(srcEng.log10MeV(), m_values);
@@ -261,8 +264,8 @@ double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng)
     // Compute partial derivatives of the parameter values
     double g_norm  = (m_norm.isfree())  ? m_norm.scale() * func : 0.0;
 
-    // Set gradients
-    m_norm.gradient(g_norm);
+    // Set gradients (circumvent const correctness)
+    ((GModelSpectralFunc*)this)->m_norm.gradient(g_norm);
 
     // Return
     return value;
@@ -274,6 +277,9 @@ double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng)
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method not yet implemented
  *
  * Computes
  * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
@@ -300,6 +306,9 @@ double GModelSpectralFunc::flux(const GEnergy& emin, const GEnergy& emax) const
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
  * @param[in] ran Random number generator.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method not yet implemented
  *
  * @todo To be implemented
  ***************************************************************************/
@@ -426,7 +435,7 @@ std::string GModelSpectralFunc::print(void) const
     result.append(parformat("Number of nodes")+str(m_nodes.size()));
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i)
-        result.append("\n"+m_par[i]->print());
+        result.append("\n"+m_pars[i]->print());
 
     // Return result
     return result;
@@ -444,18 +453,20 @@ std::string GModelSpectralFunc::print(void) const
  ***************************************************************************/
 void GModelSpectralFunc::init_members(void)
 {
-    // Initialise parameters
-    m_npars  = 1;
-    m_par[0] = &m_norm;
-
     // Initialise powerlaw normalisation
-    m_norm = GModelPar();
+    m_norm.clear();
     m_norm.name("Normalization");
     m_norm.min(0.0);
     m_norm.max(1000.0);
     m_norm.value(1.0);
     m_norm.scale(1.0);
     m_norm.free();
+    m_norm.gradient(0.0);
+    m_norm.hasgrad(true);
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_norm);
 
     // Initialise other members
     m_nodes.clear();
@@ -470,16 +481,19 @@ void GModelSpectralFunc::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model Spectral model component.
+ * @param[in] model Spectral function model.
  ***************************************************************************/
 void GModelSpectralFunc::copy_members(const GModelSpectralFunc& model)
 {
-    // Copy model parameters (we do not need to copy the rest since it is
-    // static)
+    // Copy members
     m_norm     = model.m_norm;
     m_nodes    = model.m_nodes;
     m_values   = model.m_values;
     m_filename = model.m_filename;
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_norm);
 
     // Return
     return;

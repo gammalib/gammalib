@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralConst.hpp
- * @brief GModelSpectralConst class interface definition.
+ * @brief Constant spectral model class interface definition
  * @author J. Knodlseder
  */
 
@@ -30,15 +30,15 @@
 /***********************************************************************//**
  * @class GModelSpectralConst
  *
- * @brief Spectral constant interface definition
+ * @brief Constant spectral model class
  *
  * This class implements a constant as the spectral component of the
- * gamma-ray data model. The function is defined as
+ * gamma-ray sky model. The function is defined as
  * \f[I(E)=norm\f]
  * where
  * \f$norm\f$ is the normalization constant.
  ***************************************************************************/
-class GModelSpectralConst  : public GModelSpectral {
+class GModelSpectralConst : public GModelSpectral {
 
 public:
     // Constructors and destructors
@@ -48,20 +48,19 @@ public:
     virtual ~GModelSpectralConst(void);
 
     // Operators
-    GModelSpectralConst& operator= (const GModelSpectralConst& model);
+    virtual GModelSpectralConst& operator=(const GModelSpectralConst& model);
 
     // Implemented pure virtual methods
-    void                 clear(void);
-    GModelSpectralConst* clone(void) const;
-    int                  size(void) const { return m_npars; }
-    std::string          type(void) const { return "ConstantValue"; }
-    double               eval(const GEnergy& srcEng);
-    double               eval_gradients(const GEnergy& srcEng);
-    double               flux(const GEnergy& emin, const GEnergy& emax) const;
-    GEnergy              mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
-    void                 read(const GXmlElement& xml);
-    void                 write(GXmlElement& xml) const;
-    std::string          print(void) const;
+    virtual void                 clear(void);
+    virtual GModelSpectralConst* clone(void) const;
+    virtual std::string          type(void) const { return "ConstantValue"; }
+    virtual double               eval(const GEnergy& srcEng) const;
+    virtual double               eval_gradients(const GEnergy& srcEng) const;
+    virtual double               flux(const GEnergy& emin, const GEnergy& emax) const;
+    virtual GEnergy              mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual void                 read(const GXmlElement& xml);
+    virtual void                 write(GXmlElement& xml) const;
+    virtual std::string          print(void) const;
 
     // Other methods
     double norm(void) const { return m_norm.real_value(); }
@@ -72,13 +71,8 @@ protected:
     void copy_members(const GModelSpectralConst& model);
     void free_members(void);
 
-    // Implemented pure virtual methods
-    GModelPar** par(void) { return m_par; }
-
     // Protected members
-    int        m_npars;     //!< Number of parameters
-    GModelPar* m_par[1];    //!< Pointers to parameters
-    GModelPar  m_norm;      //!< Normalization factor
+    GModelPar m_norm;      //!< Normalization factor
 };
 
 #endif /* GMODELSPECTRALCONST_HPP */

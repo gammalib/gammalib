@@ -1,5 +1,5 @@
 /***************************************************************************
- *   GModelSpectralPlaw2.i  -  Spectral power law model class python I/F   *
+ *        GModelSpectralPlaw2.i  -  Spectral power law model class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralPlaw2.i
- * @brief GModelSpectralPlaw2 class python interface
+ * @brief Flux normalized power law spectral model class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -25,9 +25,9 @@
 /***********************************************************************//**
  * @class GModelSpectralPlaw2
  *
- * @brief Powerlaw python interface definition
+ * @brief Flux normalized power law spectral model class
  ***************************************************************************/
-class GModelSpectralPlaw2  : public GModelSpectral {
+class GModelSpectralPlaw2 : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralPlaw2(void);
@@ -37,16 +37,15 @@ public:
     virtual ~GModelSpectralPlaw2(void);
 
     // Implemented pure virtual methods
-    void                 clear(void);
-    GModelSpectralPlaw2* clone(void) const;
-    int                  size(void) const;
-    std::string          type(void) const;
-    double               eval(const GEnergy& srcEng);
-    double               eval_gradients(const GEnergy& srcEng);
-    double               flux(const GEnergy& emin, const GEnergy& emax) const;
-    GEnergy              mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
-    void                 read(const GXmlElement& xml);
-    void                 write(GXmlElement& xml) const;
+    virtual void                 clear(void);
+    virtual GModelSpectralPlaw2* clone(void) const;
+    virtual std::string          type(void) const;
+    virtual double               eval(const GEnergy& srcEng) const;
+    virtual double               eval_gradients(const GEnergy& srcEng) const;
+    virtual double               flux(const GEnergy& emin, const GEnergy& emax) const;
+    virtual GEnergy              mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual void                 read(const GXmlElement& xml);
+    virtual void                 write(GXmlElement& xml) const;
 
     // Other methods
     double integral(void) const;

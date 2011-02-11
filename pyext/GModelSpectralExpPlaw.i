@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralExpPlaw.i
- * @brief GModelSpectralExpPlaw class python interface
+ * @brief Exponential cut off power law spectral class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -25,9 +25,9 @@
 /***********************************************************************//**
  * @class GModelSpectralExpPlaw
  *
- * @brief Implements an exponentially cut off power law.
+ * @brief Exponential cut off power law spectral class
  ***************************************************************************/
-class GModelSpectralExpPlaw  : public GModelSpectral {
+class GModelSpectralExpPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralExpPlaw(void);
@@ -38,23 +38,22 @@ public:
     virtual ~GModelSpectralExpPlaw(void);
 
     // Implemented pure virtual methods
-    void                   clear(void);
-    GModelSpectralExpPlaw* clone(void) const;
-    int                    size(void) const { return m_npars; }
-    std::string            type(void) const { return "ExpCutoff"; }
-    double                 eval(const GEnergy& srcEng);
-    double                 eval_gradients(const GEnergy& srcEng);
-    double                 flux(const GEnergy& emin, const GEnergy& emax) const;
-    GEnergy                mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
-    void                   read(const GXmlElement& xml);
-    void                   write(GXmlElement& xml) const;
+    virtual void                   clear(void);
+    virtual GModelSpectralExpPlaw* clone(void) const;
+    virtual std::string            type(void) const;
+    virtual double                 eval(const GEnergy& srcEng) const;
+    virtual double                 eval_gradients(const GEnergy& srcEng) const;
+    virtual double                 flux(const GEnergy& emin, const GEnergy& emax) const;
+    virtual GEnergy                mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual void                   read(const GXmlElement& xml);
+    virtual void                   write(GXmlElement& xml) const;
 
     // Other methods
     void   autoscale(void);
-    double norm(void) const { return m_norm.real_value(); }
-    double index(void) const { return m_index.real_value(); }
-    double ecut(void) const { return m_ecut.real_value(); }
-    double pivot(void) const { return m_pivot.real_value(); }
+    double norm(void) const;
+    double index(void) const;
+    double ecut(void) const;
+    double pivot(void) const;
 };
 
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   GModelTemporalConst.i  -  Temporal constant model class python I/F    *
+ *         GModelTemporalConst.i  -  Temporal constant model class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelTemporalConst.i
- * @brief GModelTemporalConst class python interface
+ * @brief Constant temporal model class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -25,7 +25,7 @@
 /***********************************************************************//**
  * @class GModelTemporalConst
  *
- * @brief Python interface definition for the constant model class.
+ * @brief Constant temporal model class
  ***************************************************************************/
 class GModelTemporalConst  : public GModelTemporal {
 public:
@@ -35,20 +35,18 @@ public:
     virtual ~GModelTemporalConst(void);
 
     // Implemented virtual methods
-    void                 clear(void);
-    GModelTemporalConst* clone(void) const;
-    int                  size(void) const { return m_npars; }
-    std::string          type(void) const { return "Constant"; }
-    double               eval(const GTime& srcTime);
-    double               eval_gradients(const GTime& srcTime);
-    GTimes               mc(const double& rate,
-                            const GTime& tmin, const GTime& tmax,
-                            GRan& ran);
-    void                 read(const GXmlElement& xml);
-    void                 write(GXmlElement& xml) const;
+    virtual void                 clear(void);
+    virtual GModelTemporalConst* clone(void) const;
+    virtual std::string          type(void) const;
+    virtual double               eval(const GTime& srcTime) const;
+    virtual double               eval_gradients(const GTime& srcTime) const;
+    virtual GTimes               mc(const double& rate, const GTime& tmin,
+                                    const GTime& tmax, GRan& ran) const;
+    virtual void                 read(const GXmlElement& xml);
+    virtual void                 write(GXmlElement& xml) const;
 
     // Other methods
-    double norm(void) const { return m_norm.real_value(); }
+    double norm(void) const;
 };
 
 

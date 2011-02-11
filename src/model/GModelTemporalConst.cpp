@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelTemporalConst.cpp
- * @brief GModelTemporalConst class implementation.
+ * @brief Constant temporal model class interface implementation
  * @author J. Knodlseder
  */
 
@@ -51,7 +51,7 @@ const GModelTemporalRegistry g_temporal_const_registry(&g_temporal_const_seed);
  ***************************************************************************/
 GModelTemporalConst::GModelTemporalConst(void) : GModelTemporal()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -62,12 +62,12 @@ GModelTemporalConst::GModelTemporalConst(void) : GModelTemporal()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Model from which the instance should be built.
+ * @param[in] model Constant temporal model
  ***************************************************************************/
 GModelTemporalConst::GModelTemporalConst(const GModelTemporalConst& model) :
     GModelTemporal(model)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -100,7 +100,7 @@ GModelTemporalConst::~GModelTemporalConst(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Model which should be assigned.
+ * @param[in] model Constant temporal model
  ***************************************************************************/
 GModelTemporalConst& GModelTemporalConst::operator= (const GModelTemporalConst& model)
 {
@@ -113,7 +113,7 @@ GModelTemporalConst& GModelTemporalConst::operator= (const GModelTemporalConst& 
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -167,10 +167,13 @@ GModelTemporalConst* GModelTemporalConst::clone(void) const
  * This method implements the temporal component of a constant model. It
  * simply returns the normalization constant (which typically is set to 1).
  ***************************************************************************/
-double GModelTemporalConst::eval(const GTime& srcTime)
+double GModelTemporalConst::eval(const GTime& srcTime) const
 {
+    // Compute function value
+    double value = norm();
+
     // Return
-    return (norm());
+    return value;
 }
 
 
@@ -179,17 +182,30 @@ double GModelTemporalConst::eval(const GTime& srcTime)
  *
  * @param[in] srcTime True photon arrival time (not used).
  *
- * This method implements the temporal component of a constant model. It
- * simply returns the normalization constant (which typically is set to 1)
- * and a gradient of 0 (as it is not expected to fit this parameter).
+ * The temporal model is defined as
+ * \f[I(E)=norm\f]
+ * where
+ * \f$norm=n_s n_v\f$ is the normalization of the function.
+ * Note that the normalization is factorised into a scaling factor and a
+ * value and that the method is expected to return the gradient with respect
+ * to the parameter value \f$n_v\f$.
+ *
+ * The partial derivative of the normalization value is given by
+ * \f[dI/dn_v=n_s\f]
  ***************************************************************************/
-double GModelTemporalConst::eval_gradients(const GTime& srcTime)
+double GModelTemporalConst::eval_gradients(const GTime& srcTime) const
 {
-    // Set gradient to 0
-    m_norm.gradient(0.0);
+    // Compute function value
+    double value = norm();
+
+    // Compute partial derivatives of the parameter values
+    double g_norm = (m_norm.isfree()) ? m_norm.scale() : 0.0;
+
+    // Set gradients (circumvent const correctness)
+    ((GModelTemporalConst*)this)->m_norm.gradient(g_norm);
 
     // Return
-    return (norm());
+    return value;
 }
 
 
@@ -205,7 +221,7 @@ double GModelTemporalConst::eval_gradients(const GTime& srcTime)
  * event rate that is specified by the rate parameter.
  ***************************************************************************/
 GTimes GModelTemporalConst::mc(const double& rate, const GTime&  tmin,
-                               const GTime&  tmax, GRan& ran)
+                               const GTime&  tmax, GRan& ran) const
 {
     // Allocates empty vector of times
     GTimes times;
@@ -240,9 +256,9 @@ GTimes GModelTemporalConst::mc(const double& rate, const GTime&  tmin,
 /***********************************************************************//**
  * @brief Read model from XML element
  *
- * @param[in] xml XML element containing power law model information.
+ * @param[in] xml XML element.
  *
- * @todo Not yet implemented.
+ * @todo To be implemented.
  ***************************************************************************/
 void GModelTemporalConst::read(const GXmlElement& xml)
 {
@@ -254,9 +270,9 @@ void GModelTemporalConst::read(const GXmlElement& xml)
 /***********************************************************************//**
  * @brief Write model into XML element
  *
- * @param[in] xml XML element into which model information is written.
+ * @param[in] xml XML element.
  *
- * @todo Not yet implemented.
+ * @todo To be implemented.
  ***************************************************************************/
 void GModelTemporalConst::write(GXmlElement& xml) const
 {
@@ -277,7 +293,7 @@ std::string GModelTemporalConst::print(void) const
     result.append("=== GModelTemporalConst ===\n");
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i)
-        result.append("\n"+m_par[i]->print());
+        result.append("\n"+m_pars[i]->print());
 
     // Return result
     return result;
@@ -295,16 +311,18 @@ std::string GModelTemporalConst::print(void) const
  ***************************************************************************/
 void GModelTemporalConst::init_members(void)
 {
-    // Initialise parameters
-    m_npars  = 1;
-    m_par[0] = &m_norm;
-
     // Initialise normalisation parameter
-    m_norm = GModelPar();
+    m_norm.clear();
     m_norm.name("Constant");
     m_norm.unit("(relative value)");
     m_norm.value(1.0);
     m_norm.fix();
+    m_norm.gradient(0.0);
+    m_norm.hasgrad(true);
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_norm);
 
     // Return
     return;
@@ -314,13 +332,16 @@ void GModelTemporalConst::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model GModelTemporalConst members which should be copied.
+ * @param[in] model Constant temporal model
  ***************************************************************************/
 void GModelTemporalConst::copy_members(const GModelTemporalConst& model)
 {
-    // Copy model parameters (we do not need to copy the rest since it is
-    // static)
-    m_norm  = model.m_norm;
+    // Copy members
+    m_norm = model.m_norm;
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_norm);
 
     // Return
     return;

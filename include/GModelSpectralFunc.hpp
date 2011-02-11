@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GModelSpectralFunc
  *
- * @brief Spectral function interface definition
+ * @brief Spectral function model class
  *
  * This class implements an arbitrary function as the spectral component of
  * the model. The function is defined as
@@ -40,7 +40,7 @@
  * where
  * \f$norm\f$ is the normalization of the function.
  ***************************************************************************/
-class GModelSpectralFunc  : public GModelSpectral {
+class GModelSpectralFunc : public GModelSpectral {
 
 public:
     // Constructors and destructors
@@ -51,20 +51,19 @@ public:
     virtual ~GModelSpectralFunc(void);
 
     // Operators
-    GModelSpectralFunc& operator= (const GModelSpectralFunc& model);
+    virtual GModelSpectralFunc& operator=(const GModelSpectralFunc& model);
 
     // Implemented pure virtual methods
-    void                clear(void);
-    GModelSpectralFunc* clone(void) const;
-    int                 size(void) const { return m_npars; }
-    std::string         type(void) const { return "FileFunction"; }
-    double              eval(const GEnergy& srcEng);
-    double              eval_gradients(const GEnergy& srcEng);
-    double              flux(const GEnergy& emin, const GEnergy& emax) const;
-    GEnergy             mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
-    void                read(const GXmlElement& xml);
-    void                write(GXmlElement& xml) const;
-    std::string         print(void) const;
+    virtual void                clear(void);
+    virtual GModelSpectralFunc* clone(void) const;
+    virtual std::string         type(void) const { return "FileFunction"; }
+    virtual double              eval(const GEnergy& srcEng) const;
+    virtual double              eval_gradients(const GEnergy& srcEng) const;
+    virtual double              flux(const GEnergy& emin, const GEnergy& emax) const;
+    virtual GEnergy             mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
+    virtual std::string         print(void) const;
 
     // Other methods
     double norm(void) const { return m_norm.real_value(); }
@@ -76,12 +75,7 @@ protected:
     void free_members(void);
     void load_nodes(const std::string& filename);
 
-    // Implemented pure virtual methods
-    GModelPar** par(void) { return m_par; }
-
     // Protected members
-    int                 m_npars;     //!< Number of parameters
-    GModelPar*          m_par[1];    //!< Pointers to parameters
     GModelPar           m_norm;      //!< Normalization factor
     GNodeArray          m_nodes;     //!< Nodes of function
     std::vector<double> m_values;    //!< Function values at nodes

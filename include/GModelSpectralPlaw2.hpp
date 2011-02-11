@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralPlaw2.hpp
- * @brief GModelSpectralPlaw2 class interface definition.
+ * @brief Flux normalized power law spectral model class interface definition
  * @author J. Knodlseder
  */
 
@@ -20,6 +20,7 @@
 #define GMODELSPECTRALPLAW2_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
 #include "GEnergy.hpp"
@@ -29,10 +30,10 @@
 /***********************************************************************//**
  * @class GModelSpectralPlaw2
  *
- * @brief Spectral power law interface definition.
+ * @brief Flux normalized power law spectral model class
  *
  * This class implements a power law as the spectral component of the
- * gamma-ray data model.
+ * gamma-ray sky model.
  * The power law function is defined as
  * \f[I(E)=integral (index+1)/(emax^{index+1}-emin^{index+1}) E^{index}\f]
  * for \f$index \ne -1\f$ and
@@ -43,7 +44,7 @@
  * \f$emin\f$ is the lower energy limit, and
  * \f$emax\f$ is the upper energy limit.
  ***************************************************************************/
-class GModelSpectralPlaw2  : public GModelSpectral {
+class GModelSpectralPlaw2 : public GModelSpectral {
 
 public:
     // Constructors and destructors
@@ -54,20 +55,19 @@ public:
     virtual ~GModelSpectralPlaw2(void);
 
     // Operators
-    GModelSpectralPlaw2& operator= (const GModelSpectralPlaw2& model);
+    virtual GModelSpectralPlaw2& operator= (const GModelSpectralPlaw2& model);
 
     // Implemented pure virtual methods
-    void                 clear(void);
-    GModelSpectralPlaw2* clone(void) const;
-    int                  size(void) const { return m_npars; }
-    std::string          type(void) const { return "PowerLaw2"; }
-    double               eval(const GEnergy& srcEng);
-    double               eval_gradients(const GEnergy& srcEng);
-    double               flux(const GEnergy& emin, const GEnergy& emax) const;
-    GEnergy              mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
-    void                 read(const GXmlElement& xml);
-    void                 write(GXmlElement& xml) const;
-    std::string          print(void) const;
+    virtual void                 clear(void);
+    virtual GModelSpectralPlaw2* clone(void) const;
+    virtual std::string          type(void) const { return "PowerLaw2"; }
+    virtual double               eval(const GEnergy& srcEng) const;
+    virtual double               eval_gradients(const GEnergy& srcEng) const;
+    virtual double               flux(const GEnergy& emin, const GEnergy& emax) const;
+    virtual GEnergy              mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual void                 read(const GXmlElement& xml);
+    virtual void                 write(GXmlElement& xml) const;
+    virtual std::string          print(void) const;
 
     // Other methods
     double integral(void) const { return m_integral.real_value(); }
@@ -82,31 +82,26 @@ protected:
     void free_members(void);
     void update(const GEnergy& srcEng);
 
-    // Implemented pure virtual methods
-    GModelPar** par(void) { return m_par; }
-
     // Protected members
-    int        m_npars;           //!< Number of parameters
-    GModelPar* m_par[4];          //!< Pointers to parameters
-    GModelPar  m_integral;        //!< Integral flux
-    GModelPar  m_index;           //!< Spectral index
-    GModelPar  m_emin;            //!< Lower energy limit (MeV)
-    GModelPar  m_emax;            //!< Upper energy limit (MeV)
-    double     m_log_emin;        //!< Log(emin)
-    double     m_log_emax;        //!< Log(emax)
-    double     m_pow_emin;        //!< emin^(index+1)
-    double     m_pow_emax;        //!< emax^(index+1)
-    double     m_norm;            //!< Power-law normalization (for pivot energy 1 MeV)
-    double     m_g_norm;          //!< Power-law normalization gradient
-    double     m_power;           //!< Power-law factor
-    double     m_last_integral;   //!< Last integral flux
-    double     m_last_index;      //!< Last spectral index (MeV)
-    double     m_last_emin;       //!< Last lower energy limit (MeV)
-    double     m_last_emax;       //!< Last upper energy limit (MeV)
-    GEnergy    m_last_energy;     //!< Last source energy
-    double     m_last_value;      //!< Last function value
-    double     m_last_g_integral; //!< Last integral flux gradient
-    double     m_last_g_index;    //!< Last spectral index gradient
+    GModelPar m_integral;        //!< Integral flux
+    GModelPar m_index;           //!< Spectral index
+    GModelPar m_emin;            //!< Lower energy limit (MeV)
+    GModelPar m_emax;            //!< Upper energy limit (MeV)
+    double    m_log_emin;        //!< Log(emin)
+    double    m_log_emax;        //!< Log(emax)
+    double    m_pow_emin;        //!< emin^(index+1)
+    double    m_pow_emax;        //!< emax^(index+1)
+    double    m_norm;            //!< Power-law normalization (for pivot energy 1 MeV)
+    double    m_g_norm;          //!< Power-law normalization gradient
+    double    m_power;           //!< Power-law factor
+    double    m_last_integral;   //!< Last integral flux
+    double    m_last_index;      //!< Last spectral index (MeV)
+    double    m_last_emin;       //!< Last lower energy limit (MeV)
+    double    m_last_emax;       //!< Last upper energy limit (MeV)
+    GEnergy   m_last_energy;     //!< Last source energy
+    double    m_last_value;      //!< Last function value
+    double    m_last_g_integral; //!< Last integral flux gradient
+    double    m_last_g_index;    //!< Last spectral index gradient
 };
 
 #endif /* GMODELSPECTRALPLAW2_HPP */

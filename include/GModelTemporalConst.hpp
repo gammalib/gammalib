@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelTemporalConst.hpp
- * @brief GModelTemporalConst class interface definition.
+ * @brief Constant temporal model class interface definition
  * @author J. Knodlseder
  */
 
@@ -20,22 +20,24 @@
 #define GMODELTEMPORALCONST_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GModelPar.hpp"
 #include "GModelTemporal.hpp"
 #include "GTime.hpp"
+#include "GXmlElement.hpp"
 
 
 /***********************************************************************//**
  * @class GModelTemporalConst
  *
- * @brief Interface definition for the constant model class
+ * @brief Constant temporal model class
  *
  * This class implements the temporal component of the factorised model for
  * a model that is constant in time. It has a single parameter norm that is
  * used for scaling, and that normally is set to 1. The parameter is not
  * supposed to be fitted.
  ***************************************************************************/
-class GModelTemporalConst  : public GModelTemporal {
+class GModelTemporalConst : public GModelTemporal {
 
 public:
     // Constructors and destructors
@@ -44,21 +46,19 @@ public:
     virtual ~GModelTemporalConst(void);
 
     // Operators
-    GModelTemporalConst& operator= (const GModelTemporalConst& model);
+    virtual GModelTemporalConst& operator= (const GModelTemporalConst& model);
 
     // Implemented virtual methods
-    void                 clear(void);
-    GModelTemporalConst* clone(void) const;
-    int                  size(void) const { return m_npars; }
-    std::string          type(void) const { return "Constant"; }
-    double               eval(const GTime& srcTime);
-    double               eval_gradients(const GTime& srcTime);
-    GTimes               mc(const double& rate,
-                            const GTime& tmin, const GTime& tmax,
-                            GRan& ran);
-    void                 read(const GXmlElement& xml);
-    void                 write(GXmlElement& xml) const;
-    std::string          print(void) const;
+    virtual void                 clear(void);
+    virtual GModelTemporalConst* clone(void) const;
+    virtual std::string          type(void) const { return "Constant"; }
+    virtual double               eval(const GTime& srcTime) const;
+    virtual double               eval_gradients(const GTime& srcTime) const;
+    virtual GTimes               mc(const double& rate, const GTime& tmin,
+                                    const GTime& tmax, GRan& ran) const;
+    virtual void                 read(const GXmlElement& xml);
+    virtual void                 write(GXmlElement& xml) const;
+    virtual std::string          print(void) const;
 
     // Other methods
     double norm(void) const { return m_norm.real_value(); }
@@ -69,13 +69,8 @@ protected:
     void copy_members(const GModelTemporalConst& model);
     void free_members(void);
 
-    // Implemented pure virtual methods
-    GModelPar** par(void) { return m_par; }
-
     // Protected members
-    int        m_npars;   //!< Number of parameters
-    GModelPar* m_par[1];  //!< Pointers to parameters
-    GModelPar  m_norm;    //!< Constant
+    GModelPar m_norm;    //!< Constant
 };
 
 #endif /* GMODELTEMPORALCONST_HPP */

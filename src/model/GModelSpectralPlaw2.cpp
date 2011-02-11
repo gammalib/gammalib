@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralPlaw2.cpp
- * @brief GModelSpectralPlaw2 class implementation.
+ * @brief Flux normalized power law spectral model class implementation
  * @author J. Knodlseder
  */
 
@@ -55,7 +55,7 @@ const GModelSpectralRegistry g_spectral_plaw2_registry(&g_spectral_plaw2_seed);
  ***************************************************************************/
 GModelSpectralPlaw2::GModelSpectralPlaw2(void) : GModelSpectral()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -75,7 +75,7 @@ GModelSpectralPlaw2::GModelSpectralPlaw2(const double& integral,
                                          const double& index) :
                                          GModelSpectral()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Set parameters
@@ -88,16 +88,18 @@ GModelSpectralPlaw2::GModelSpectralPlaw2(const double& integral,
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief XML constructor
  *
  * @param[in] xml XML element.
  *
- * Construct a spectral power law from a XML element.
+ * Creates instance of a flux normalized power law spectral model by
+ * extracting information from an XML element. See GModelSpectralPlaw2::read()
+ * for more information about the expected structure of the XML element.
  ***************************************************************************/
 GModelSpectralPlaw2::GModelSpectralPlaw2(const GXmlElement& xml) :
                      GModelSpectral()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Read information from XML element
@@ -116,7 +118,7 @@ GModelSpectralPlaw2::GModelSpectralPlaw2(const GXmlElement& xml) :
 GModelSpectralPlaw2::GModelSpectralPlaw2(const GModelSpectralPlaw2& model) :
                      GModelSpectral(model)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -162,7 +164,7 @@ GModelSpectralPlaw2& GModelSpectralPlaw2::operator= (const GModelSpectralPlaw2& 
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -223,10 +225,10 @@ GModelSpectralPlaw2* GModelSpectralPlaw2::clone(void) const
  * \f$emin\f$ is the lower energy limit, and
  * \f$emax\f$ is the upper energy limit.
  ***************************************************************************/
-double GModelSpectralPlaw2::eval(const GEnergy& srcEng)
+double GModelSpectralPlaw2::eval(const GEnergy& srcEng) const
 {
     // Update precomputed values
-    update(srcEng);
+    ((GModelSpectralPlaw2*)this)->update(srcEng);
 
     // Compute function value
     double value = integral() * m_norm * m_power;
@@ -265,17 +267,17 @@ double GModelSpectralPlaw2::eval(const GEnergy& srcEng)
  * \f[dI/df_v=I(E) / f_v\f]
  * \f[dI/di_v=I(E) \log(E) i_s\f]
  * for \f$index = -1\f$.
- * The partial derivatives for the energy boundaries are fixed to 0 as it is
- * not expected the fit these parameters.
+ *
+ * No partial derivatives are supported for the energy boundaries.
  ***************************************************************************/
-double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng)
+double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng) const
 {
     // Initialise gradients
     double g_integral = 0.0;
     double g_index    = 0.0;
     
     // Update precomputed values
-    update(srcEng);
+    ((GModelSpectralPlaw2*)this)->update(srcEng);
 
     // Compute function value
     double value = integral() * m_norm * m_power;
@@ -289,10 +291,8 @@ double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng)
         g_index = value * (m_g_norm + ln10*srcEng.log10MeV()) * m_index.scale();
 
     // Set gradients
-    m_integral.gradient(g_integral);
-    m_index.gradient(g_index);
-    m_emin.gradient(0.0);
-    m_emax.gradient(0.0);
+    ((GModelSpectralPlaw2*)this)->m_integral.gradient(g_integral);
+    ((GModelSpectralPlaw2*)this)->m_index.gradient(g_index);
 
     // Return
     return value;
@@ -526,7 +526,7 @@ std::string GModelSpectralPlaw2::print(void) const
     result.append("=== GModelSpectralPlaw2 ===\n");
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i)
-        result.append("\n"+m_par[i]->print());
+        result.append("\n"+m_pars[i]->print());
 
     // Return result
     return result;
@@ -544,47 +544,55 @@ std::string GModelSpectralPlaw2::print(void) const
  ***************************************************************************/
 void GModelSpectralPlaw2::init_members(void)
 {
-    // Initialise parameters
-    m_npars  = 4;
-    m_par[0] = &m_integral;
-    m_par[1] = &m_index;
-    m_par[2] = &m_emin;
-    m_par[3] = &m_emax;
-
     // Initialise integral flux
-    m_integral = GModelPar();
+    m_integral.clear();
     m_integral.name("Integral");
     m_integral.unit("ph/cm2/s");
     m_integral.value(1.0);
     m_integral.scale(1.0);
     m_integral.range(0.0, 10.0);
     m_integral.free();
+    m_integral.gradient(0.0);
+    m_integral.hasgrad(true);
 
     // Initialise powerlaw index
-    m_index = GModelPar();
+    m_index.clear();
     m_index.name("Index");
     m_index.value(-2.0);
     m_index.scale(1.0);
     m_index.range(-5.0, -0.1);
     m_index.free();
+    m_index.gradient(0.0);
+    m_index.hasgrad(true);
 
     // Initialise lower limit
-    m_emin = GModelPar();
+    m_emin.clear();
     m_emin.name("LowerLimit");
     m_emin.unit("MeV");
     m_emin.value(100.0);
     m_emin.scale(1.0);
     m_emin.range(0.001, 1.0e15);
     m_emin.fix();
+    m_emin.gradient(0.0);
+    m_emin.hasgrad(false);
 
     // Initialise upper limit
-    m_emax = GModelPar();
+    m_emax.clear();
     m_emax.name("UpperLimit");
     m_emax.unit("MeV");
     m_emax.value(500000.0);
     m_emax.scale(1.0);
     m_emax.range(0.001, 1.0e15);
     m_emax.fix();
+    m_emax.gradient(0.0);
+    m_emax.hasgrad(false);
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_integral);
+    m_pars.push_back(&m_index);
+    m_pars.push_back(&m_emin);
+    m_pars.push_back(&m_emax);
 
     // Initialise last parameters (for fast computation)
     m_log_emin        = 0.0;
@@ -614,11 +622,18 @@ void GModelSpectralPlaw2::init_members(void)
  ***************************************************************************/
 void GModelSpectralPlaw2::copy_members(const GModelSpectralPlaw2& model)
 {
-    // Copy model parameters (no need to copy others since they are static)
+    // Copy members
     m_integral = model.m_integral;
     m_index    = model.m_index;
     m_emin     = model.m_emin;
     m_emax     = model.m_emax;
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_integral);
+    m_pars.push_back(&m_index);
+    m_pars.push_back(&m_emin);
+    m_pars.push_back(&m_emax);
 
     // Copy bookkeeping information
     m_log_emin        = model.m_log_emin;

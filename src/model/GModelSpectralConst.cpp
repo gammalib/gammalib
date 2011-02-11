@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralConst.cpp
- * @brief GModelSpectralConst class implementation.
+ * @brief Constant spectral model class implementation
  * @author J. Knodlseder
  */
 
@@ -54,7 +54,7 @@ const GModelSpectralRegistry g_spectral_const_registry(&g_spectral_const_seed);
  ***************************************************************************/
 GModelSpectralConst::GModelSpectralConst(void) : GModelSpectral()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -63,16 +63,18 @@ GModelSpectralConst::GModelSpectralConst(void) : GModelSpectral()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief XML constructor
  *
  * @param[in] xml XML element.
  *
- * Construct an arbitrary spectral function from a XML element.
+ * Creates instance of a constant spectral model by extracting information
+ * from an XML element. See GModelSpectralConst::read() for more information
+ * about the expected structure of the XML element.
  ***************************************************************************/
 GModelSpectralConst::GModelSpectralConst(const GXmlElement& xml) :
                      GModelSpectral()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Read information from XML element
@@ -86,12 +88,12 @@ GModelSpectralConst::GModelSpectralConst(const GXmlElement& xml) :
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Spectral component.
+ * @param[in] model Spectral constant model.
  ***************************************************************************/
 GModelSpectralConst::GModelSpectralConst(const GModelSpectralConst& model) :
                      GModelSpectral(model)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -124,7 +126,7 @@ GModelSpectralConst::~GModelSpectralConst(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Spectral component.
+ * @param[in] model Spectral constant model.
  ***************************************************************************/
 GModelSpectralConst& GModelSpectralConst::operator= (const GModelSpectralConst& model)
 {
@@ -137,7 +139,7 @@ GModelSpectralConst& GModelSpectralConst::operator= (const GModelSpectralConst& 
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -193,7 +195,7 @@ GModelSpectralConst* GModelSpectralConst::clone(void) const
  * where
  * \f$norm\f$ is the normalization of the function.
  ***************************************************************************/
-double GModelSpectralConst::eval(const GEnergy& srcEng)
+double GModelSpectralConst::eval(const GEnergy& srcEng) const
 {
     // Compute function value
     double value = norm();
@@ -219,16 +221,16 @@ double GModelSpectralConst::eval(const GEnergy& srcEng)
  * The partial derivative of the normalization value is given by
  * \f[dI/dn_v=n_s\f]
  ***************************************************************************/
-double GModelSpectralConst::eval_gradients(const GEnergy& srcEng)
+double GModelSpectralConst::eval_gradients(const GEnergy& srcEng) const
 {
     // Compute function value
     double value = norm();
 
     // Compute partial derivatives of the parameter values
-    double g_norm = (m_norm.isfree())  ? m_norm.scale() : 0.0;
+    double g_norm = (m_norm.isfree()) ? m_norm.scale() : 0.0;
 
-    // Set gradients
-    m_norm.gradient(g_norm);
+    // Set gradients (circumvent const correctness)
+    ((GModelSpectralConst*)this)->m_norm.gradient(g_norm);
 
     // Return
     return value;
@@ -387,7 +389,7 @@ std::string GModelSpectralConst::print(void) const
     result.append("=== GModelSpectralConst ===\n");
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i)
-        result.append("\n"+m_par[i]->print());
+        result.append("\n"+m_pars[i]->print());
 
     // Return result
     return result;
@@ -405,17 +407,19 @@ std::string GModelSpectralConst::print(void) const
  ***************************************************************************/
 void GModelSpectralConst::init_members(void)
 {
-    // Initialise parameters
-    m_npars  = 1;
-    m_par[0] = &m_norm;
-
     // Initialise powerlaw normalisation
-    m_norm = GModelPar();
+    m_norm.clear();
     m_norm.name("Value");
     m_norm.value(1.0);
     m_norm.scale(1.0);
     m_norm.range(0.0, 1000.0);
     m_norm.free();
+    m_norm.gradient(0.0);
+    m_norm.hasgrad(true);
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_norm);
 
     // Return
     return;
@@ -425,12 +429,16 @@ void GModelSpectralConst::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model Spectral model component.
+ * @param[in] model Spectral constant model.
  ***************************************************************************/
 void GModelSpectralConst::copy_members(const GModelSpectralConst& model)
 {
-    // Copy model parameters
+    // Copy members
     m_norm = model.m_norm;
+
+    // Set parameter pointer(s)
+    m_pars.clear();
+    m_pars.push_back(&m_norm);
 
     // Return
     return;

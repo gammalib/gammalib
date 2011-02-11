@@ -1,5 +1,5 @@
 /***************************************************************************
- *   GModelSpectralPlaw.i  -  Spectral power law model class python I/F    *
+ *         GModelSpectralPlaw.i  -  Spectral power law model class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralPlaw.i
- * @brief GModelSpectralPlaw class python interface
+ * @brief Power law spectral model class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -25,9 +25,9 @@
 /***********************************************************************//**
  * @class GModelSpectralPlaw
  *
- * @brief Powerlaw python interface definition
+ * @brief Power law spectral model class
  ***************************************************************************/
-class GModelSpectralPlaw  : public GModelSpectral {
+class GModelSpectralPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralPlaw(void);
@@ -37,22 +37,21 @@ public:
     virtual ~GModelSpectralPlaw(void);
 
     // Implemented pure virtual methods
-    void                clear(void);
-    GModelSpectralPlaw* clone(void) const;
-    int                 size(void) const { return m_npars; }
-    std::string         type(void) const { return "PowerLaw"; }
-    double              eval(const GEnergy& srcEng);
-    double              eval_gradients(const GEnergy& srcEng);
-    double              flux(const GEnergy& emin, const GEnergy& emax) const;
-    GEnergy             mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
-    void                read(const GXmlElement& xml);
-    void                write(GXmlElement& xml) const;
+    virtual void                clear(void);
+    virtual GModelSpectralPlaw* clone(void) const;
+    virtual std::string         type(void) const;
+    virtual double              eval(const GEnergy& srcEng) const;
+    virtual double              eval_gradients(const GEnergy& srcEng) const;
+    virtual double              flux(const GEnergy& emin, const GEnergy& emax) const;
+    virtual GEnergy             mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
 
     // Other methods
     void   autoscale(void);
-    double norm(void) const { return m_norm.real_value(); }
-    double index(void) const { return m_index.real_value(); }
-    double pivot(void) const { return m_pivot.real_value(); }
+    double norm(void) const;
+    double index(void) const;
+    double pivot(void) const;
 };
 
 

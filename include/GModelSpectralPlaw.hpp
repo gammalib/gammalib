@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralPlaw.hpp
- * @brief GModelSpectralPlaw class interface definition.
+ * @brief Power law spectral model class interface definition
  * @author J. Knodlseder
  */
 
@@ -20,6 +20,7 @@
 #define GMODELSPECTRALPLAW_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
 #include "GEnergy.hpp"
@@ -29,17 +30,17 @@
 /***********************************************************************//**
  * @class GModelSpectralPlaw
  *
- * @brief Spectral power law interface definition.
+ * @brief Power law spectral model class
  *
  * This class implements a power law as the spectral component of the
- * gamma-ray data model. The power law is defined as
+ * gamma-ray sky model. The power law is defined as
  * \f[I(E)=norm (E/pivot)^{index}\f]
  * where
  * \f$norm\f$ is the normalization or prefactor,
  * \f$pivot\f$ is the pivot energy, and
  * \f$index\f$ is the spectral index.
  ***************************************************************************/
-class GModelSpectralPlaw  : public GModelSpectral {
+class GModelSpectralPlaw : public GModelSpectral {
 
 public:
     // Constructors and destructors
@@ -50,20 +51,19 @@ public:
     virtual ~GModelSpectralPlaw(void);
 
     // Operators
-    GModelSpectralPlaw& operator= (const GModelSpectralPlaw& model);
+    virtual GModelSpectralPlaw& operator=(const GModelSpectralPlaw& model);
 
     // Implemented pure virtual methods
-    void                clear(void);
-    GModelSpectralPlaw* clone(void) const;
-    int                 size(void) const { return m_npars; }
-    std::string         type(void) const { return "PowerLaw"; }
-    double              eval(const GEnergy& srcEng);
-    double              eval_gradients(const GEnergy& srcEng);
-    double              flux(const GEnergy& emin, const GEnergy& emax) const;
-    GEnergy             mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
-    void                read(const GXmlElement& xml);
-    void                write(GXmlElement& xml) const;
-    std::string         print(void) const;
+    virtual void                clear(void);
+    virtual GModelSpectralPlaw* clone(void) const;
+    virtual std::string         type(void) const { return "PowerLaw"; }
+    virtual double              eval(const GEnergy& srcEng) const;
+    virtual double              eval_gradients(const GEnergy& srcEng) const;
+    virtual double              flux(const GEnergy& emin, const GEnergy& emax) const;
+    virtual GEnergy             mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
+    virtual std::string         print(void) const;
 
     // Other methods
     void   autoscale(void);
@@ -77,15 +77,10 @@ protected:
     void copy_members(const GModelSpectralPlaw& model);
     void free_members(void);
 
-    // Implemented pure virtual methods
-    GModelPar** par(void) { return m_par; }
-
     // Protected members
-    int        m_npars;           //!< Number of parameters
-    GModelPar* m_par[3];          //!< Pointers to parameters
-    GModelPar  m_norm;            //!< Normalization factor
-    GModelPar  m_index;           //!< Spectral index
-    GModelPar  m_pivot;           //!< Pivot energy
+    GModelPar m_norm;            //!< Normalization factor
+    GModelPar m_index;           //!< Spectral index
+    GModelPar m_pivot;           //!< Pivot energy
 };
 
 #endif /* GMODELSPECTRALPLAW_HPP */
