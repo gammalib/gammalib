@@ -80,12 +80,22 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpatialShell& model);
     void free_members(void);
+    void update(void) const;
 
     // Protected members
-    GModelPar m_ra;        //!< Right Ascension of shell centre (deg)
-    GModelPar m_dec;       //!< Declination of shell centre (deg)
-    GModelPar m_radius;    //!< Inner shell radius (deg)
-    GModelPar m_width;     //!< Shell thickness (deg)
+    GModelPar       m_ra;            //!< Right Ascension of shell centre (deg)
+    GModelPar       m_dec;           //!< Declination of shell centre (deg)
+    GModelPar       m_radius;        //!< Inner shell radius (deg)
+    GModelPar       m_width;         //!< Shell thickness (deg)
+
+    // Cached members used for pre-computations
+    mutable double  m_last_radius;   //!< Last shell radius (deg)
+    mutable double  m_last_width;    //!< Last shell width (deg)
+    mutable double  m_theta_in;      //!< Inner shell radius (rad)
+    mutable double  m_theta_in2;     //!< Inner shell radius squared (rad^2)
+    mutable double  m_theta_out;     //!< Outer shell radius (rad)
+    mutable double  m_theta_out2;    //!< Outer shell radius squared (rad^2)
+    mutable double  m_norm;          //!< Shell normalization
 };
 
 #endif /* GMODELSPATIALSHELL_HPP */

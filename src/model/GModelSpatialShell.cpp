@@ -251,35 +251,28 @@ GModelSpatialShell* GModelSpatialShell::clone(void) const
  *       for a sphere. It is however reasonably precise for small shell
  *       radii.
  * @todo Implement parameter check to avoid division by zero error.
- * @todo Implement precomputation.
  ***************************************************************************/
 double GModelSpatialShell::eval(const GSkyDir& srcDir) const
 {
-    // Set constants
-    const double c1 = twopi / 3.0;
+    // Update precomputation cache
+    update();
 
     // Compute distance from shell centre in radians
-    double theta = srcDir.dist(dir());
+    double theta = dir().dist(srcDir);
 
-    // Pre-compute some parameters (@todo this may go later in a common
-    // precomputation block)
-    double theta_in   = radius()  * deg2rad;
-    double theta_out  = (radius() + width()) * deg2rad;
-    double theta_in2  = theta_in * theta_in;
-    double theta_in3  = theta_in2 * theta_in;
-    double theta_out2 = theta_out * theta_out;
-    double theta_out3 = theta_out2 * theta_out;
-    double norm   = 1.0 / (c1 * (theta_out3 - theta_in3));
+    // Case 1: theta > theta_out
+    double value = 0.0;
 
-    // Compute value
-    double value = 0.0;             // case 1: theta > theta_out
-    if (theta <= theta_in) {        // case 2: theta <= theta_in
+    // Case 2: theta <= theta_in
+    if (theta <= m_theta_in) {
         double theta2 = theta * theta;
-    	value         = norm * (sqrt(theta_out2 - theta2) -
-                                sqrt(theta_in2  - theta2));
+    	value         = m_norm * (sqrt(m_theta_out2 - theta2) -
+                                  sqrt(m_theta_in2  - theta2));
     }
-    else if (theta <= theta_out)    // case 3: theta_in < theta <= theta_out
-    	value = norm * sqrt(theta_out2 - theta * theta);
+
+    // Case 3: theta_in < theta <= theta_out
+    else if (theta <= m_theta_out)
+    	value = m_norm * sqrt(m_theta_out2 - theta * theta);
 
     // Return value
     return value;
@@ -601,6 +594,16 @@ void GModelSpatialShell::init_members(void)
     m_pars.push_back(&m_radius);
     m_pars.push_back(&m_width);
 
+    // Initialise precomputation cache. Note that zero values flag
+    // uninitialised as a zero radius and width shell is not meaningful
+    m_last_radius = 0.0;
+    m_last_width  = 0.0;
+    m_theta_in    = 0.0;
+    m_theta_in2   = 0.0;
+    m_theta_out   = 0.0;
+    m_theta_out2  = 0.0;
+    m_norm        = 0.0;
+
     // Return
     return;
 }
@@ -626,6 +629,15 @@ void GModelSpatialShell::copy_members(const GModelSpatialShell& model)
     m_pars.push_back(&m_radius);
     m_pars.push_back(&m_width);
 
+    // Copy precomputation cache
+    m_last_radius = model.m_last_radius;
+    m_last_width  = model.m_last_width;
+    m_theta_in    = model.m_theta_in;
+    m_theta_in2   = model.m_theta_in2;
+    m_theta_out   = model.m_theta_out;
+    m_theta_out2  = model.m_theta_out2;
+    m_norm        = model.m_norm;
+
     // Return
     return;
 }
@@ -636,6 +648,36 @@ void GModelSpatialShell::copy_members(const GModelSpatialShell& model)
  ***************************************************************************/
 void GModelSpatialShell::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update precomputation cache
+ ***************************************************************************/
+void GModelSpatialShell::update(void) const
+{
+    // Set constants
+    const double c1 = twopi / 3.0;
+
+    // Update if radius or width have changed
+    if (m_last_radius != radius() || m_last_width != width()) {
+
+        // Store last values
+        m_last_radius = radius();
+        m_last_width  = width();
+
+        // Perform precomputations
+        m_theta_in   = radius()  * deg2rad;
+        m_theta_in2  = m_theta_in * m_theta_in;
+        m_theta_out  = (radius() + width()) * deg2rad;
+        m_theta_out2 = m_theta_out * m_theta_out;
+        m_norm       = 1.0 / (c1 * (m_theta_out2 * m_theta_out -
+                                    m_theta_in2  * m_theta_in));
+
+    } // endif: update required
+
     // Return
     return;
 }
