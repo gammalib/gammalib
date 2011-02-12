@@ -38,7 +38,7 @@ public:
     int              npars(void) const;
     int              nfree(void) const;
     GModelPar&       par(const int& index);
-    const GModelPar& par(const int& index) const;
+    //const GModelPar& par(const int& index) const; // now overloaded by SWIG
 };
 
 
