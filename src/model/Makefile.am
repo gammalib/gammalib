@@ -18,6 +18,7 @@ sources = GModelPar.cpp \
           GModelSpatialRegistry.cpp \
           GModelSpatialPtsrc.cpp \
 	  GModelSpatialGauss.cpp \
+	  GModelSpatialShell.cpp \
           GModelSpatialConst.cpp \
           GModelSpatialCube.cpp \
           GModelSpectral.cpp \
