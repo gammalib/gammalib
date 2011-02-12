@@ -228,7 +228,7 @@ GModelSpectralPlaw2* GModelSpectralPlaw2::clone(void) const
 double GModelSpectralPlaw2::eval(const GEnergy& srcEng) const
 {
     // Update precomputed values
-    ((GModelSpectralPlaw2*)this)->update(srcEng);
+    update(srcEng);
 
     // Compute function value
     double value = integral() * m_norm * m_power;
@@ -277,7 +277,7 @@ double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng) const
     double g_index    = 0.0;
     
     // Update precomputed values
-    ((GModelSpectralPlaw2*)this)->update(srcEng);
+    update(srcEng);
 
     // Compute function value
     double value = integral() * m_norm * m_power;
@@ -671,7 +671,7 @@ void GModelSpectralPlaw2::free_members(void)
  *
  * @param[in] srcEng Source energy
  ***************************************************************************/
-void GModelSpectralPlaw2::update(const GEnergy& srcEng)
+void GModelSpectralPlaw2::update(const GEnergy& srcEng) const
 {
     // Compute index+1
     double gamma = index() + 1.0;

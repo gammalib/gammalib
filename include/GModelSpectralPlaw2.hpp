@@ -80,28 +80,30 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpectralPlaw2& model);
     void free_members(void);
-    void update(const GEnergy& srcEng);
+    void update(const GEnergy& srcEng) const;
 
     // Protected members
-    GModelPar m_integral;        //!< Integral flux
-    GModelPar m_index;           //!< Spectral index
-    GModelPar m_emin;            //!< Lower energy limit (MeV)
-    GModelPar m_emax;            //!< Upper energy limit (MeV)
-    double    m_log_emin;        //!< Log(emin)
-    double    m_log_emax;        //!< Log(emax)
-    double    m_pow_emin;        //!< emin^(index+1)
-    double    m_pow_emax;        //!< emax^(index+1)
-    double    m_norm;            //!< Power-law normalization (for pivot energy 1 MeV)
-    double    m_g_norm;          //!< Power-law normalization gradient
-    double    m_power;           //!< Power-law factor
-    double    m_last_integral;   //!< Last integral flux
-    double    m_last_index;      //!< Last spectral index (MeV)
-    double    m_last_emin;       //!< Last lower energy limit (MeV)
-    double    m_last_emax;       //!< Last upper energy limit (MeV)
-    GEnergy   m_last_energy;     //!< Last source energy
-    double    m_last_value;      //!< Last function value
-    double    m_last_g_integral; //!< Last integral flux gradient
-    double    m_last_g_index;    //!< Last spectral index gradient
+    GModelPar       m_integral;        //!< Integral flux
+    GModelPar       m_index;           //!< Spectral index
+    GModelPar       m_emin;            //!< Lower energy limit (MeV)
+    GModelPar       m_emax;            //!< Upper energy limit (MeV)
+
+    // Cached members used for pre-computations
+    mutable double  m_log_emin;        //!< Log(emin)
+    mutable double  m_log_emax;        //!< Log(emax)
+    mutable double  m_pow_emin;        //!< emin^(index+1)
+    mutable double  m_pow_emax;        //!< emax^(index+1)
+    mutable double  m_norm;            //!< Power-law normalization (for pivot energy 1 MeV)
+    mutable double  m_g_norm;          //!< Power-law normalization gradient
+    mutable double  m_power;           //!< Power-law factor
+    mutable double  m_last_integral;   //!< Last integral flux
+    mutable double  m_last_index;      //!< Last spectral index (MeV)
+    mutable double  m_last_emin;       //!< Last lower energy limit (MeV)
+    mutable double  m_last_emax;       //!< Last upper energy limit (MeV)
+    mutable GEnergy m_last_energy;     //!< Last source energy
+    mutable double  m_last_value;      //!< Last function value
+    mutable double  m_last_g_integral; //!< Last integral flux gradient
+    mutable double  m_last_g_index;    //!< Last spectral index gradient
 };
 
 #endif /* GMODELSPECTRALPLAW2_HPP */
