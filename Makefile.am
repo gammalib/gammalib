@@ -29,6 +29,7 @@ doc_DATA = \
 	   LICENSE \
 	   NEWS \
 	   README
+docdir = ${datadir}/doc/${PACKAGE}
 
 # Extra files to be distributed in the tar file
 #EXTRA_DIST = autogen.sh \
