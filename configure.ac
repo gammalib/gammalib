@@ -65,7 +65,7 @@ dnl =============================================================
 dnl Checks for typedefs, structures, and compiler characteristics
 dnl =============================================================
 AC_TYPE_SIZE_T
-AC_TYPE_LONG_LONG_INT
+dnl AC_TYPE_LONG_LONG_INT
 AC_C_CONST
 AC_C_INLINE
 
