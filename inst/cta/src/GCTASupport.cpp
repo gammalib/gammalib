@@ -80,7 +80,7 @@ double cta_roi_arclength(const double& rad,     const double& dist,
                 double cosrad = cos(rad);
                 double sinrad = sin(rad);
                 double cosang = (cosroi - cosdist*cosrad) / (sindist*sinrad);
-                arclength = acos(cosang);
+                arclength = 2.0 * acos(cosang);
             }
         }
 
