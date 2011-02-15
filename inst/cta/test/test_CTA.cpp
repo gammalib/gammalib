@@ -52,15 +52,12 @@ void test_response_aeff(void)
 
         // Sum over effective area for control
         GEnergy      eng;
-        GSkyDir      dir;
-        GTime        time;
-        GCTAPointing pnt;
         double sum = 0.0;
         double ref = 123299125000.0;
         for (int i = 0; i < 30; ++i) {
             eng.TeV(pow(10.0, -1.7 + 0.1*double(i)));
-            double aeff = rsp.aeff(dir, eng, time, pnt);
-            //std::cout << eng << " " << aeff << std::endl;
+            double aeff = rsp.aeff(0.0, 0.0, 0.0, 0.0, eng.log10TeV());
+            //std::cout << eng << " " << eng.log10TeV() << " " << aeff << std::endl;
             sum += aeff;
         }
         //printf("%30.5f\n", sum);
@@ -99,11 +96,6 @@ void test_response_psf(void)
 
         // Integrate Psf
         GEnergy      eng;
-        GTime        time;
-        GCTAInstDir  obsDir;
-        GSkyDir      srcDir;
-        GCTAPointing pnt;
-        srcDir.radec_deg(0.0, 0.0);
         for (double e = 0.1; e < 10.0; e*=2) {
             eng.TeV(e);
             double r     = 0.0;
@@ -112,8 +104,9 @@ void test_response_psf(void)
             double sum   = 0.0;
             for (int i = 0; i < steps; ++i) {
                 r   += dr;
-                obsDir.radec(0.0, r);
-                sum += rsp.psf(obsDir, srcDir, eng, time, pnt) * twopi * r * dr;
+                //obsDir.radec(0.0, r);
+                sum += rsp.psf(r, 0.0, 0.0, 0.0, 0.0, eng.log10TeV()) *
+                       twopi * std::sin(r*deg2rad) * dr;
             }
             if ((sum - 1.0) > 0.001) {
                 std::cout << std::endl
@@ -165,7 +158,7 @@ void test_response_npsf(void)
 
         // Test PSF centred on ROI
         srcDir.radec_deg(0.0, 0.0);
-        double npsf = rsp.npsf(srcDir, srcEng, srcTime, pnt, roi);
+        double npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
         double ref  = 1.0;
         if (fabs(npsf - ref) > 1.0e-3) {
             std::cout << std::endl
@@ -178,7 +171,7 @@ void test_response_npsf(void)
 
         // Test PSF offset but inside ROI
         srcDir.radec_deg(1.0, 1.0);
-        npsf = rsp.npsf(srcDir, srcEng, srcTime, pnt, roi);
+        npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
         ref  = 1.0;
         if (fabs(npsf - ref) > 1.0e-3) {
             std::cout << std::endl
@@ -191,7 +184,7 @@ void test_response_npsf(void)
 
         // Test PSF outside and overlapping ROI
         srcDir.radec_deg(0.0, 2.1);
-        npsf = rsp.npsf(srcDir, srcEng, srcTime, pnt, roi);
+        npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
         ref  = 0.0916301;
         if (fabs(npsf - ref) > 1.0e-3) {
             std::cout << std::endl
@@ -204,7 +197,7 @@ void test_response_npsf(void)
 
         // Test PSF outside ROI
         srcDir.radec_deg(2.0, 2.0);
-        npsf = rsp.npsf(srcDir, srcEng, srcTime, pnt, roi);
+        npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
         ref  = 0.0;
         if (fabs(npsf - ref) > 1.0e-3) {
             std::cout << std::endl
