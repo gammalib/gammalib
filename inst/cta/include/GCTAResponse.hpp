@@ -56,62 +56,56 @@ public:
     virtual ~GCTAResponse(void);
 
     // Operators
-    GCTAResponse& operator= (const GCTAResponse & rsp);
+    virtual GCTAResponse& operator= (const GCTAResponse & rsp);
 
     // Implement pure virtual base class methods
-    void           clear(void);
-    GCTAResponse*  clone(void) const;
-    bool           hasedisp(void) const { return false; }
-    bool           hastdisp(void) const { return false; }
-    double         irf(const GEvent& event, const GModelSky& model,
-                       const GEnergy& srcEng, const GTime& srcTime,
-                       const GObservation& obs) const;
-    double         npred(const GModelSky& model, const GEnergy& srcEng,
-                         const GTime& srcTime,
-                         const GObservation& obs) const;
-    GCTAEventAtom* mc(const double& area, const GPhoton& photon,
-                      const GPointing& pnt, GRan& ran) const;
-    std::string    print(void) const;
+    virtual void          clear(void);
+    virtual GCTAResponse* clone(void) const;
+    virtual bool          hasedisp(void) const { return false; }
+    virtual bool          hastdisp(void) const { return false; }
+    virtual double        irf(const GEvent& event, const GModelSky& model,
+                              const GEnergy& srcEng, const GTime& srcTime,
+                              const GObservation& obs) const;
+    virtual double        npred(const GModelSky& model, const GEnergy& srcEng,
+                                const GTime& srcTime, const GObservation& obs) const;
+    virtual std::string   print(void) const;
 
     // Other Methods
-    void        caldb(const std::string& caldb);
-    std::string caldb(void) const { return m_caldb; }
-    void        load(const std::string& rspname);
+    GCTAEventAtom* mc(const double& area, const GPhoton& photon,
+                      const GPointing& pnt, GRan& ran) const;
+    void           caldb(const std::string& caldb);
+    std::string    caldb(void) const { return m_caldb; }
+    void           load(const std::string& rspname);
 
     // Other response methods
+    double irf(const GCTAEventAtom* atom, const GModelSky& model,
+               const GEnergy& srcEng, const GTime& srcTime,
+               const GObservation& obs) const;
+    double irf(const GCTAEventBin* bin, const GModelSky& model,
+               const GEnergy& srcEng, const GTime& srcTime,
+               const GObservation& obs) const;
     double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const;
-    double irf(const GCTAEventAtom& event, const GModelSky& model,
-               const GEnergy& srcEng, const GTime& srcTime,
-               const GObservation& obs) const;
-    double irf(const GCTAEventBin& event, const GModelSky& model,
-               const GEnergy& srcEng, const GTime& srcTime,
-               const GObservation& obs) const;
+    double aeff(const double& theta, const double& phi,
+                const double& zenith, const double& azimuth,
+                const double& srcLogEng) const;
+    double psf(const double& delta,
+               const double& theta, const double& phi,
+               const double& zenith, const double& azimuth,
+               const double& srcLogEng) const;
+    double edisp(const double& obsLogEng,
+                 const double& theta, const double& phi,
+                 const double& zenith, const double& azimuth,
+                 const double& srcLogEng) const;
     double npred(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
                  const GObservation& obs) const;
-    double live(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                const GPointing& pnt) const;
-    double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                const GPointing& pnt) const;
-    double psf(const GInstDir& obsDir,
-               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-               const GPointing& pnt) const;
-    double edisp(const GEnergy& obsEng,
-                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                 const GPointing& pnt) const;
-    double tdisp(const GTime& obsTime,
-                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                 const GPointing& pnt) const;
-    double npsf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+    double npsf(const GSkyDir&  srcDir, const double& srcLogEng, const GTime& srcTime,
                 const GPointing& pnt, const GRoi& roi) const;
     double nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                   const GPointing& pnt, const GEbounds& ebds) const;
-    double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                  const GPointing& pnt, const GGti& gti) const;
-    double psf(const double& theta, const double& sigma) const;
-    double psf_sigma(const GEnergy& srcEng) const;
-    double npsf(const double& psf, const double& radroi, const double& sigma) const;
+    double psf_dummy(const double& delta, const double& sigma) const;
+    double psf_dummy_sigma(const double& srcLogEng) const;
 
 private:
     // Private methods
@@ -119,6 +113,27 @@ private:
     void copy_members(const GCTAResponse& rsp);
     void free_members(void);
     void read_performance_table(const std::string& filename);
+
+    // Integration
+    class psf_kern_phi : public GIntegrand {
+    public:
+        psf_kern_phi(const GCTAResponse* parent,
+                     double theta, double zenith, double azimuth,
+                     double srcLogEng, double obsLogEng, double sigma) :
+                     m_parent(parent),
+                     m_theta(theta), m_zenith(zenith), m_azimuth(azimuth),
+                     m_srcLogEng(srcLogEng), m_obsLogEng(obsLogEng),
+                     m_sigma(sigma) { return; }
+        double eval(double phi);
+    protected:
+        const GCTAResponse* m_parent;    //!< Pointer to response
+        double              m_theta;     //!< Radial offset in camera
+        double              m_zenith;    //!< Telescope zenith
+        double              m_azimuth;   //!< Telescope azimuth
+        double              m_srcLogEng; //!< True photon energy
+        double              m_obsLogEng; //!< Measured photon energy
+        double              m_sigma;     //!< Width of PSF in radians
+    };
 
     // Integration
     class npsf_kern_rad_azsym : public GIntegrand {

@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GCTAResponse.i  -  CTA Response class SWIG definition          *
+ *        GCTAResponse.i  -  CTA instrument response function class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,20 +12,19 @@
  ***************************************************************************/
 /**
  * @file GCTAResponse.i
- * @brief GCTAResponse class SWIG file.
+ * @brief CTA instrument response function Python interface definition
  * @author J. Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GCTAResponse.hpp"
 %}
-//%include stl.i
 
 
 /***********************************************************************//**
  * @class GCTAResponse
  *
- * @brief SWIG interface for the GLAST LAT instrument response function.
+ * @brief CTA instrument response function
  ***************************************************************************/
 class GCTAResponse : public GResponse {
 public:
@@ -36,58 +35,52 @@ public:
     virtual ~GCTAResponse(void);
 
     // Implement pure virtual base class methods
-    void           clear(void);
-    GCTAResponse*  clone(void) const;
-    bool           hasedisp(void) const;
-    bool           hastdisp(void) const;
-    double         irf(const GEvent& event, const GModelSky& model,
-                       const GEnergy& srcEng, const GTime& srcTime,
-                       const GObservation& obs) const;
-    double         npred(const GModelSky& model, const GEnergy& srcEng,
-                         const GTime& srcTime,
-                         const GObservation& obs) const;
-    GCTAEventAtom* mc(const double& area, const GPhoton& photon,
-                      const GPointing& pnt, GRan& ran) const;
+    virtual void          clear(void);
+    virtual GCTAResponse* clone(void) const;
+    virtual bool          hasedisp(void) const;
+    virtual bool          hastdisp(void) const;
+    virtual double        irf(const GEvent& event, const GModelSky& model,
+                              const GEnergy& srcEng, const GTime& srcTime,
+                              const GObservation& obs) const;
+    virtual double        npred(const GModelSky& model, const GEnergy& srcEng,
+                                const GTime& srcTime, const GObservation& obs) const;
 
     // Other Methods
-    void        caldb(const std::string& caldb);
-    std::string caldb(void) const;
-    void        load(const std::string& rspname);
+    GCTAEventAtom* mc(const double& area, const GPhoton& photon,
+                      const GPointing& pnt, GRan& ran) const;
+    void           caldb(const std::string& caldb);
+    std::string    caldb(void) const;
+    void           load(const std::string& rspname);
 
     // Other response methods
+    double irf(const GCTAEventAtom* atom, const GModelSky& model,
+               const GEnergy& srcEng, const GTime& srcTime,
+               const GObservation& obs) const;
+    double irf(const GCTAEventBin* bin, const GModelSky& model,
+               const GEnergy& srcEng, const GTime& srcTime,
+               const GObservation& obs) const;
     double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
                const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                const GObservation& obs) const;
-    double irf(const GCTAEventAtom& event, const GModelSky& model,
-               const GEnergy& srcEng, const GTime& srcTime,
-               const GObservation& obs) const;
-    double irf(const GCTAEventBin& event, const GModelSky& model,
-               const GEnergy& srcEng, const GTime& srcTime,
-               const GObservation& obs) const;
+    double aeff(const double& theta, const double& phi,
+                const double& zenith, const double& azimuth,
+                const double& srcLogEng) const;
+    double psf(const double& delta,
+               const double& theta, const double& phi,
+               const double& zenith, const double& azimuth,
+               const double& srcLogEng) const;
+    double edisp(const double& obsLogEng,
+                 const double& theta, const double& phi,
+                 const double& zenith, const double& azimuth,
+                 const double& srcLogEng) const;
     double npred(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
                  const GObservation& obs) const;
-    double live(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                const GPointing& pnt) const;
-    double aeff(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                const GPointing& pnt) const;
-    double psf(const GInstDir& obsDir,
-               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-               const GPointing& pnt) const;
-    double edisp(const GEnergy& obsEng,
-                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                 const GPointing& pnt) const;
-    double tdisp(const GTime& obsTime,
-                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                 const GPointing& pnt) const;
-    double npsf(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+    double npsf(const GSkyDir&  srcDir, const double& srcLogEng, const GTime& srcTime,
                 const GPointing& pnt, const GRoi& roi) const;
     double nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
                   const GPointing& pnt, const GEbounds& ebds) const;
-    double ntdisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                  const GPointing& pnt, const GGti& gti) const;
-    double psf(const double& theta, const double& sigma) const;
-    double psf_sigma(const GEnergy& srcEng) const;
-    double npsf(const double& psf, const double& radroi, const double& sigma) const;
+    double psf_dummy(const double& theta, const double& sigma) const;
+    double psf_dummy_sigma(const double& srcLogEng) const;
 };
 
 
