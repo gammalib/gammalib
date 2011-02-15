@@ -74,6 +74,8 @@ public:
     GVector     celvector(void) const;
     double      dist(const GSkyDir& dir) const;
     double      dist_deg(const GSkyDir& dir) const;
+    double      posang(const GSkyDir& dir) const;
+    double      posang_deg(const GSkyDir& dir) const;
     std::string print(void) const;
 
 private:
@@ -86,7 +88,7 @@ private:
     void euler(const int& type, const double& xin, const double &yin,
                double* xout, double *yout) const;
     
-    // Private data area
+    // Private members
     bool   m_has_lb;     //!< Has galactic coordinates
     bool   m_has_radec;  //!< Has equatorial coordinates
     double m_l;          //!< Galactic longitude in radians

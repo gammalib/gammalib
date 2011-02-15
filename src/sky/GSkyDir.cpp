@@ -488,6 +488,75 @@ double GSkyDir::dist_deg(const GSkyDir& dir) const
 
 
 /***********************************************************************//**
+ * @brief Compute position angle between sky directions in radians
+ *
+ * @param[in] dir Sky direction.
+ *
+ * Computes the position angle using
+ * \f[PA = \arctan \left( 
+ *         \frac{\sin( \alpha_1 - \alpha_0 )}
+ *              {\cos \delta_0 \tan \delta_1 -
+ *               \sin \delta_0 \cos(\alpha_1 - \alpha_0)} \right)\f]
+ * where
+ * \f$(\alpha_0,\delta_0)\f$ are the coordinates of the reference point, and
+ * \f$(\alpha_1,\delta_1)\f$ are the coordinates of sky direction for which
+ * the position angle is to be computed.
+ *
+ * The position angle is counted counterclockwise from north.
+ ***************************************************************************/
+double GSkyDir::posang(const GSkyDir& dir) const
+{
+    // Initialise arguments of arctan
+    double arg_1;
+    double arg_2;
+
+    // Compute dependent on coordinate system availability. This speeds
+    // up things by avoiding unnecessary coordinate transformations.
+    if (m_has_lb && dir.m_has_lb) {
+        arg_1 = std::sin(dir.m_l - m_l);
+        arg_2 = std::cos(m_b)*std::tan(dir.m_b) - std::sin(m_b)*std::cos(dir.m_l - m_l);
+    }
+    else if (m_has_radec && dir.m_has_radec) {
+        arg_1 = std::sin(dir.m_ra - m_ra);
+        arg_2 = std::cos(m_dec)*std::tan(dir.m_dec) - std::sin(m_dec)*std::cos(dir.m_ra - m_ra);
+    }
+    else if (m_has_lb) {
+        arg_1 = std::sin(dir.l() - m_l);
+        arg_2 = std::cos(m_b)*std::tan(dir.b()) - std::sin(m_b)*std::cos(dir.l() - m_l);
+    }
+    else if (m_has_radec) {
+        arg_1 = std::sin(dir.ra() - m_ra);
+        arg_2 = std::cos(m_dec)*std::tan(dir.dec()) - std::sin(m_dec)*std::cos(dir.ra() - m_ra);
+    }
+    else {
+        arg_1 = std::sin(dir.ra() - ra());
+        arg_2 = std::cos(dec())*std::tan(dir.dec()) - std::sin(dec())*std::cos(dir.ra() - ra());
+    }
+
+    // Compute position angle
+    double pa = std::atan2(arg_1, arg_2);
+
+    // Return position angle
+    return pa;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute position angle between sky directions in degrees
+ *
+ * @param[in] dir Sky direction.
+ *
+ * See GSkyDir::posang for more information about the computation of the
+ * position angle.
+ ***************************************************************************/
+double GSkyDir::posang_deg(const GSkyDir& dir) const
+{
+    // Return position angle in degrees
+    return (posang(dir) * rad2deg);
+}
+
+
+/***********************************************************************//**
  * @brief Print vector information
  ***************************************************************************/
 std::string GSkyDir::print(void) const

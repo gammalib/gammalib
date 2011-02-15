@@ -53,6 +53,8 @@ public:
     GVector celvector(void) const;
     double  dist(const GSkyDir& dir) const;
     double  dist_deg(const GSkyDir& dir) const;
+    double  posang(const GSkyDir& dir) const;
+    double  posang_deg(const GSkyDir& dir) const;
 };
 
 
