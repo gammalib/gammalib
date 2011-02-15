@@ -202,6 +202,18 @@ double GEnergy::TeV(void) const
 
 
 /***********************************************************************//**
+ * @brief Return log10 of energy in keV
+ *
+ * Returns the log10 of the energy in keV.
+ ***************************************************************************/
+double GEnergy::log10keV(void) const
+{
+    // Return log10 energy
+    return (log10keV()+3.0); 
+}
+
+
+/***********************************************************************//**
  * @brief Return log10 of energy in MeV
  *
  * Returns the log10 of the energy in MeV. The result is stored internally
@@ -211,16 +223,38 @@ double GEnergy::TeV(void) const
  ***************************************************************************/
 double GEnergy::log10MeV(void) const
 {
-    // If required compute log10 of energy. Circumvent const correctness
-    // as we don't want to show to the client that members of the instance
-    // have been changed.
+    // If required compute log10 of energy.
     if (!m_has_log10) {
-        ((GEnergy*)this)->m_elog10    = (m_energy > 0.0) ? std::log10(m_energy) : DBL_MIN;
-        ((GEnergy*)this)->m_has_log10 = true;
+        m_elog10    = (m_energy > 0.0) ? std::log10(m_energy) : DBL_MIN;
+        m_has_log10 = true;
     }
     
     // Return log10 energy
     return m_elog10; 
+}
+
+
+/***********************************************************************//**
+ * @brief Return log10 of energy in GeV
+ *
+ * Returns the log10 of the energy in GeV.
+ ***************************************************************************/
+double GEnergy::log10GeV(void) const
+{
+    // Return log10 energy
+    return (log10MeV()-3.0); 
+}
+
+
+/***********************************************************************//**
+ * @brief Return log10 of energy in TeV
+ *
+ * Returns the log10 of the energy in TeV.
+ ***************************************************************************/
+double GEnergy::log10TeV(void) const
+{
+    // Return log10 energy
+    return (log10MeV()-6.0); 
 }
 
 
@@ -315,6 +349,21 @@ void GEnergy::TeV(const double& eng)
 
 
 /***********************************************************************//**
+ * @brief Set log10 of energy in keV
+ *
+ * @param[in] eng log10 of energy in keV.
+ ***************************************************************************/
+void GEnergy::log10keV(const double& eng)
+{
+    // Set energy
+    log10MeV(eng-3.0);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set log10 of energy in MeV
  *
  * @param[in] eng log10 of energy in MeV.
@@ -325,6 +374,36 @@ void GEnergy::log10MeV(const double& eng)
     m_elog10    = eng;
     m_energy    = std::pow(10.0, eng);
     m_has_log10 = true;
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set log10 of energy in GeV
+ *
+ * @param[in] eng log10 of energy in GeV.
+ ***************************************************************************/
+void GEnergy::log10GeV(const double& eng)
+{
+    // Set energy
+    log10MeV(eng+3.0);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set log10 of energy in TeV
+ *
+ * @param[in] eng log10 of energy in TeV.
+ ***************************************************************************/
+void GEnergy::log10TeV(const double& eng)
+{
+    // Set energy
+    log10MeV(eng+6.0);
     
     // Return
     return;

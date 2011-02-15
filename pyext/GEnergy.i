@@ -37,24 +37,32 @@ public:
     // Constructors and destructors
     GEnergy(void);
     GEnergy(const GEnergy& eng);
-    ~GEnergy(void);
+    virtual ~GEnergy(void);
  
     // Operators
     GEnergy& operator+= (const GEnergy& eng);
     GEnergy& operator-= (const GEnergy& eng);
 
     // Methods
-    void        clear(void) { m_energy = 0.0; }
-    double      erg(void) const;
-    double      keV(void) const;
-    double      MeV(void) const;
-    double      GeV(void) const;
-    double      TeV(void) const;
-    void        erg(const double& eng);
-    void        keV(const double& eng);
-    void        MeV(const double& eng);
-    void        GeV(const double& eng);
-    void        TeV(const double& eng);
+    void   clear(void);
+    double erg(void) const;
+    double keV(void) const;
+    double MeV(void) const;
+    double GeV(void) const;
+    double TeV(void) const;
+    double log10keV(void) const;
+    double log10MeV(void) const;
+    double log10GeV(void) const;
+    double log10TeV(void) const;
+    void   erg(const double& eng);
+    void   keV(const double& eng);
+    void   MeV(const double& eng);
+    void   GeV(const double& eng);
+    void   TeV(const double& eng);
+    void   log10keV(const double& eng);
+    void   log10MeV(const double& eng);
+    void   log10GeV(const double& eng);
+    void   log10TeV(const double& eng);
 };
 
 

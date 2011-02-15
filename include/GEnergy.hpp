@@ -75,13 +75,19 @@ public:
     double      MeV(void) const;
     double      GeV(void) const;
     double      TeV(void) const;
+    double      log10keV(void) const;
     double      log10MeV(void) const;
+    double      log10GeV(void) const;
+    double      log10TeV(void) const;
     void        erg(const double& eng);
     void        keV(const double& eng);
     void        MeV(const double& eng);
     void        GeV(const double& eng);
     void        TeV(const double& eng);
+    void        log10keV(const double& eng);
     void        log10MeV(const double& eng);
+    void        log10GeV(const double& eng);
+    void        log10TeV(const double& eng);
     std::string print(void) const;
   
 protected:
@@ -91,9 +97,9 @@ protected:
     void free_members(void);
 
     // Protected data members
-    double m_energy;        //!< Energy in MeV
-    double m_elog10;        //!< log10 of energy in MeV
-    bool   m_has_log10;     //!< log10 of energy is valid
+    double         m_energy;      //!< Energy in MeV
+    mutable double m_elog10;      //!< log10 of energy in MeV
+    mutable bool   m_has_log10;   //!< log10 of energy is valid
 };
 
 /***************************************************************************
