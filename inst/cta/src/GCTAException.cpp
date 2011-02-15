@@ -166,6 +166,27 @@ GCTAException::no_dirs::no_dirs(std::string origin, std::string message)
 
 
 /***********************************************************************//**
+ * @brief Event is not a CTA event
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCTAException::bad_event_type::bad_event_type(std::string origin, std::string message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Event is not of type GCTAEventAtom or GCTAEventBin.";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief ROI is not a CTA ROI
  *
  * @param[in] origin Name of method that has thrown the exception.
