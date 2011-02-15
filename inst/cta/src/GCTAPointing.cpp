@@ -172,6 +172,19 @@ GCTAPointing* GCTAPointing::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Set pointing direction
+***************************************************************************/
+void GCTAPointing::dir(const GSkyDir& dir)
+{
+    // Set sky direction
+    m_dir = dir;
+
+    // Return;
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print CTA pointing information
  ***************************************************************************/
 std::string GCTAPointing::print(void) const

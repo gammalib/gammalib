@@ -53,7 +53,7 @@ public:
     std::string    print(void) const;
 
     // Other methods
-    void dir(const GSkyDir& dir) { m_dir=dir; }
+    void dir(const GSkyDir& dir);
 
 protected:
     // Protected methods
