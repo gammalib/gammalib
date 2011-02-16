@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAInstDir.hpp
- * @brief GCTAInstDir class definition.
+ * @brief CTA instrument direction class interface definition
  * @author J. Knodlseder
  */
 
@@ -28,7 +28,7 @@
 /***********************************************************************//**
  * @class GCTAInstDir
  *
- * @brief Interface for the CTA instrument direction class.
+ * @brief CTA instrument direction class.
  *
  * The CTA instrument direction is an encapsulation of a sky direction
  * as CTA is an imaging device.
@@ -70,13 +70,17 @@ public:
     double       dist_deg(const GSkyDir& dir) const { return m_dir.dist_deg(dir); }
     double       dist(const GCTAInstDir& dir) const;
     double       dist_deg(const GCTAInstDir& dir) const;
+    double       posang(const GSkyDir& dir) const { return m_dir.posang(dir); }
+    double       posang_deg(const GSkyDir& dir) const { return m_dir.posang_deg(dir); }
+    double       posang(const GCTAInstDir& dir) const;
+    double       posang_deg(const GCTAInstDir& dir) const;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GCTAInstDir& dir);
     void free_members(void);
-    
+
     // Data members
     GSkyDir m_dir;  //!< Observed incident direction of event
 };

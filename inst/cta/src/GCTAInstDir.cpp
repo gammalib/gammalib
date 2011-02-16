@@ -63,7 +63,7 @@ GCTAInstDir::GCTAInstDir(const GSkyDir& dir) : GInstDir()
 {
     // Initialise class members
     init_members();
-    
+
     // Assign sky direction
     m_dir = dir;
 
@@ -211,7 +211,7 @@ double GCTAInstDir::dist(const GCTAInstDir& dir) const
     double  ra  = dir.ra();
     double  dec = dir.dec();
     sky.radec(ra,dec);
-    
+
     // Compute distance
     double dist = m_dir.dist(sky);
 
@@ -229,6 +229,39 @@ double GCTAInstDir::dist_deg(const GCTAInstDir& dir) const
 {
     // Return distance in degrees
     return (dist(dir) * rad2deg);
+}
+
+
+/***********************************************************************//**
+ * @brief Compute position angle between instrument directions in radians
+ *
+ * @param[in] dir Instrument direction.
+ ***************************************************************************/
+double GCTAInstDir::posang(const GCTAInstDir& dir) const
+{
+    // Assign sky direction from instrument direction
+    GSkyDir sky;
+    double  ra  = dir.ra();
+    double  dec = dir.dec();
+    sky.radec(ra,dec);
+
+    // Compute position angle
+    double pa = m_dir.posang(sky);
+
+    // Return position angle
+    return pa;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute position angle between instrument directions in degrees
+ *
+ * @param[in] dir Instrument direction.
+ ***************************************************************************/
+double GCTAInstDir::posang_deg(const GCTAInstDir& dir) const
+{
+    // Return position angle in degrees
+    return (posang(dir) * rad2deg);
 }
 
 

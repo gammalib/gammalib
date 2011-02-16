@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTAInstDir.i
- * @brief GCTAInstDir class python bindings
+ * @brief CTA instrument direction class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -24,7 +24,7 @@
 /***********************************************************************//**
  * @class GCTAInstDir
  *
- * @brief Python bindings for the CTA instrument direction class
+ * @brief CTA instrument direction class
  ***************************************************************************/
 class GCTAInstDir : public GInstDir {
 public:
@@ -36,25 +36,29 @@ public:
     // Methods
     void         clear(void);
     GCTAInstDir* clone(void) const;
-    void         skydir(const GSkyDir& dir) { m_dir=dir; }
-    void         radec(const double& ra, const double& dec) { m_dir.radec(ra,dec); }
-    void         radec_deg(const double& ra, const double& dec) { m_dir.radec_deg(ra,dec); }
-    void         lb(const double& l, const double& b) { m_dir.lb(l,b); }
-    void         lb_deg(const double& l, const double& b) { m_dir.lb_deg(l,b); }
+    void         skydir(const GSkyDir& dir);
+    void         radec(const double& ra, const double& dec);
+    void         radec_deg(const double& ra, const double& dec);
+    void         lb(const double& l, const double& b);
+    void         lb_deg(const double& l, const double& b);
     void         rotate(const double& phi, const double& theta);
-    GSkyDir      skydir(void) const { return m_dir; }
-    double       l(void) const { return m_dir.l(); }
-    double       l_deg(void) const { return m_dir.l_deg(); }
-    double       b(void) const { return m_dir.b(); }
-    double       b_deg(void) const { return m_dir.b_deg(); }
-    double       ra(void) const { return m_dir.ra(); }
-    double       ra_deg(void) const { return m_dir.ra_deg(); }
-    double       dec(void) const { return m_dir.dec(); }
-    double       dec_deg(void) const { return m_dir.dec_deg(); }
-    double       dist(GSkyDir& dir) const { return m_dir.dist(dir); }
-    double       dist_deg(GSkyDir& dir) const { return m_dir.dist_deg(dir); }
+    GSkyDir      skydir(void) const;
+    double       l(void) const;
+    double       l_deg(void) const;
+    double       b(void) const;
+    double       b_deg(void) const;
+    double       ra(void) const;
+    double       ra_deg(void) const;
+    double       dec(void) const;
+    double       dec_deg(void) const;
+    double       dist(GSkyDir& dir) const;
+    double       dist_deg(GSkyDir& dir) const;
     double       dist(GCTAInstDir& dir) const;
     double       dist_deg(GCTAInstDir& dir) const;
+    double       posang(const GSkyDir& dir) const;
+    double       posang_deg(const GSkyDir& dir) const;
+    double       posang(const GCTAInstDir& dir) const;
+    double       posang_deg(const GCTAInstDir& dir) const;
 };
 
 
@@ -66,3 +70,17 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GCTAInstDir type casts
+ ***************************************************************************/
+%inline %{
+    GCTAInstDir* cast_GCTAInstDir(GInstDir* arg) {
+        GCTAInstDir* dir = dynamic_cast<GCTAInstDir*>(arg);
+        if (dir == NULL)
+            throw GException::bad_type("cast_GCTAInstDir(GInstDir*)",
+                                       "GInstDir not of type GCTAInstDir");
+        return dir;
+    }
+%}
