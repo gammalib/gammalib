@@ -63,6 +63,9 @@ public:
 
 protected:
     // Protected methods
+    void   init_members(void);
+    void   copy_members(const GMatrixBase& m);
+    void   free_members(void);
     void   select_non_zero(void);
     void   negation(void);
     void   addition(const GMatrixBase& m);
@@ -87,12 +90,6 @@ protected:
     int*    m_rowsel;     //!< Row selection (for compressed decomposition)
     int*    m_colsel;     //!< Column selection (for compressed decomposition)
     double* m_data;       //!< Matrix data
-
-private:
-    // Private methods
-    void init_members(void);
-    void copy_members(const GMatrixBase& m);
-    void free_members(void);
 };
 
 #endif /* GMATRIXBASE_HPP */
