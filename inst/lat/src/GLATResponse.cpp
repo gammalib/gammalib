@@ -20,8 +20,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <string>
 #include <unistd.h>           // access() function
+#include <cstdlib>            // std::getenv() function
+#include <string>
 #include "GLATResponse.hpp"
 #include "GLATObservation.hpp"
 #include "GLATEventAtom.hpp"
@@ -652,7 +653,7 @@ void GLATResponse::init_members(void)
     m_ptsrc.clear();
     
     // By default use HANDOFF response database.
-    char* handoff = getenv("HANDOFF_IRF_DIR");
+    char* handoff = std::getenv("HANDOFF_IRF_DIR");
     if (handoff != NULL)
         m_caldb.assign(handoff);
 
