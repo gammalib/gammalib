@@ -601,10 +601,10 @@ double GMatrix::fill(void) const
 void GMatrix::eulerx(const double& angle)
 {
     // Free members
-    free_members();
+    GMatrixBase::free_members();
 
     // Initialise members
-    init_members();
+    GMatrixBase::init_members();
 
     // Construct 3*3 matrix
     constructor(3,3);
@@ -637,10 +637,10 @@ void GMatrix::eulerx(const double& angle)
 void GMatrix::eulery(const double& angle)
 {
     // Free members
-    free_members();
+    GMatrixBase::free_members();
 
     // Initialise members
-    init_members();
+    GMatrixBase::init_members();
 
     // Construct 3*3 matrix
     constructor(3,3);
@@ -673,10 +673,10 @@ void GMatrix::eulery(const double& angle)
 void GMatrix::eulerz(const double& angle)
 {
     // Free members
-    free_members();
+    GMatrixBase::free_members();
 
     // Initialise members
-    init_members();
+    GMatrixBase::init_members();
 
     // Construct 3*3 matrix
     constructor(3,3);
