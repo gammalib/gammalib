@@ -179,8 +179,24 @@ void GCTAPointing::dir(const GSkyDir& dir)
     // Set sky direction
     m_dir = dir;
 
-    // Return;
+    // Invalidate cache
+    m_has_cache = false;
+
+    // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return rotation matrix
+***************************************************************************/
+const GMatrix& GCTAPointing::rot(void) const
+{
+    // Update cache
+    update();
+
+    // Return rotation matrix
+    return m_Rback;
 }
 
 
@@ -209,11 +225,15 @@ std::string GCTAPointing::print(void) const
 
 /***********************************************************************//**
  * @brief Initialise class members
+ *
+ * @todo Implement GMatrix::clear() method and use it.
  ***************************************************************************/
 void GCTAPointing::init_members(void)
 {
     // Initialise members
     m_dir.clear();
+    m_has_cache = false;
+    m_Rback = GMatrix();
 
     // Return
     return;
@@ -228,7 +248,9 @@ void GCTAPointing::init_members(void)
 void GCTAPointing::copy_members(const GCTAPointing& pnt)
 {
     // Copy members
-    m_dir = pnt.m_dir;
+    m_dir       = pnt.m_dir;
+    m_has_cache = pnt.m_has_cache;
+    m_Rback     = pnt.m_Rback;
 
     // Return
     return;
@@ -240,6 +262,33 @@ void GCTAPointing::copy_members(const GCTAPointing& pnt)
  ***************************************************************************/
 void GCTAPointing::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update coordinate transformation cache
+ ***************************************************************************/
+void GCTAPointing::update(void) const
+{
+    // Update coordinate transformation cache only if required
+    if (!m_has_cache) {
+
+        // Set up Euler matrices
+        GMatrix Ry;
+        GMatrix Rz;
+        Ry.eulery(m_dir.dec_deg() - 90.0);
+        Rz.eulerz(-m_dir.ra_deg());
+
+        // Compute rotation matrix
+        m_Rback = transpose(Ry * Rz);
+
+        // Signal that we have a valid transformation cache
+        m_has_cache = true;
+
+    } // endif: Update of cache was required
+
     // Return
     return;
 }

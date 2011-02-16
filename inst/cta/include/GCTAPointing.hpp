@@ -24,6 +24,7 @@
 #include "GPointing.hpp"
 #include "GSkyDir.hpp"
 #include "GTime.hpp"
+#include "GMatrix.hpp"
 
 
 /***********************************************************************//**
@@ -44,25 +45,31 @@ public:
     virtual ~GCTAPointing(void);
 
     // Operators
-    GCTAPointing& operator= (const GCTAPointing& pnt);
+    virtual GCTAPointing& operator=(const GCTAPointing& pnt);
 
     // Implemented pure virtual methods
-    void           clear(void);
-    GCTAPointing*  clone(void) const;
-    const GSkyDir& dir(void) const { return m_dir; }
-    std::string    print(void) const;
+    virtual void           clear(void);
+    virtual GCTAPointing*  clone(void) const;
+    virtual const GSkyDir& dir(void) const { return m_dir; }
+    virtual std::string    print(void) const;
 
     // Other methods
-    void dir(const GSkyDir& dir);
+    void  dir(const GSkyDir& dir);
+    const GMatrix& rot(void) const;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GCTAPointing& pnt);
     void free_members(void);
+    void update(void) const;
 
     // Protected members
-    GSkyDir m_dir;  //!< Pointing direction
+    GSkyDir         m_dir;        //!< Pointing direction
+
+    // Cached members
+    mutable bool    m_has_cache;  //!< Has transformation cache
+    mutable GMatrix m_Rback;      //!< Rotation matrix
 };
 
 #endif /* GCTAPOINTING_HPP */
