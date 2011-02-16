@@ -67,18 +67,22 @@ GModelSpatialShell::GModelSpatialShell(void) : GModelSpatial()
  * @param[in] dir Sky position of shell centre.
  * @param[in] radius Inner shell radius (degrees).
  * @param[in] width Shell width (degrees).
+ * @param [in] small_angle Use small angle approximation
+ * (faster, but incorrect for very large shells (> a few degrees))
  ***************************************************************************/
 GModelSpatialShell::GModelSpatialShell(const GSkyDir& dir,
                                        const double&  radius,
-                                       const double&  width) : GModelSpatial()
+                                       const double&  width,
+                                       const bool& small_angle) : GModelSpatial()
 {
     // Initialise members
     init_members();
 
-    // Assign direction and sigma
+    // Assign parameters
     this->dir(dir);
     this->radius(radius);
     this->width(width);
+    this->small_angle(small_angle);
 
     // Return
     return;
@@ -214,9 +218,11 @@ GModelSpatialShell* GModelSpatialShell::clone(void) const
  *
  * Evaluates the spatial part for a shell source model. The shell source
  * model is a radial function \f$f(\theta)\f$, where \f$\theta\f$ is the
- * angular separation between shell centre and the actual location, and
+ * angular separation between shell centre and the actual location.
+ *
+ * In the small angle approximation,
  * \f[
- * f(\theta) = f_0 \left \{
+ * f(\theta) = {\tt m\_norm} \left \{
  *  \begin{array}{l l}
  *     \displaystyle
  *     \sqrt{ \theta_{\rm out}^2 - \theta^2 } -
@@ -232,25 +238,30 @@ GModelSpatialShell* GModelSpatialShell::clone(void) const
  *  \end{array}
  *  \right .
  * \f]
- * is the radial function.
- * \f$f_0\f$ is a normalization constant that for small \f$\theta\f$
- * (where \f$\sin \theta \approx \theta\f$ can be approximated by
- * \f[
- * \frac{1}{f_0} = \frac{2 \pi}{3} 
- *                 \left( \theta_{\rm out}^3 - \theta_{\rm in}^3 \right)
- * \f].
- * Here, 
- * \f$\theta\f$ is the angular separation from the shell centre, and
- * \f$\theta_{\rm in}\f$ and \f$\theta_{\rm out}\f$ are the shell inner and
- * outer radius.
+ * where \f${\tt m\_norm}\f$ is a normalization constant (see the update()
+ * method).
  *
- * @todo Reformulate so that the parameters are \f$\theta_{\rm in}\f$ and
- *       \f$\Delta \theta\f$, i.e. the thickness of the shell. This avoids
- *       the case \f$\theta_{\rm in} > \theta_{\rm out}\f$
- * @todo The analytical integral is only an approximation, and is not correct
- *       for a sphere. It is however reasonably precise for small shell
- *       radii.
- * @todo Implement parameter check to avoid division by zero error.
+ * In the general form that is also valid for large angles
+ * \f[
+ * f(\theta) = {\tt m\_norm} \left \{
+ *  \begin{array}{l l}
+ *     \displaystyle
+ *     \sqrt{ \sin^2 \theta_{\rm out} - \sin^2 \theta } -
+       \sqrt{ \sin^2 \theta_{\rm in}  - \sin^2 \theta }
+ *     & \mbox{if $\theta \le \theta_{\rm in}$} \\
+ *     \\
+ *    \displaystyle
+ *     \sqrt{ \sin^2 \theta_{\rm out} - \sin^2 \theta }
+ *     & \mbox{if $\theta_{\rm in} < \theta \le \theta_{\rm out}$} \\
+ *     \\
+ *    \displaystyle
+ *    0 & \mbox{if $\theta > \theta_{\rm out}$}
+ *  \end{array}
+ *  \right .
+ * \f]
+ * 
+ * Here, \f$\theta_{\rm in}\f$ and \f$\theta_{\rm out}\f$ are the shell inner
+ * and outer radius.
  ***************************************************************************/
 double GModelSpatialShell::eval(const GSkyDir& srcDir) const
 {
@@ -260,22 +271,25 @@ double GModelSpatialShell::eval(const GSkyDir& srcDir) const
     // Compute distance from shell centre in radians
     double theta = dir().dist(srcDir);
 
-    // Case 1: theta > theta_out
-    double value = 0.0;
-
-    // Case 2: theta <= theta_in
-    if (theta <= m_theta_in) {
-        double theta2 = theta * theta;
-    	value         = m_norm * (sqrt(m_theta_out2 - theta2) -
-                                  sqrt(m_theta_in2  - theta2));
+    // Set x appropriately for the small angle approximation or not
+    double x;
+    if (m_small_angle)
+    	x = theta * theta;
+    else {
+        x  = std::sin(theta);
+    	x *= x;
     }
 
-    // Case 3: theta_in < theta <= theta_out
-    else if (theta <= m_theta_out)
-    	value = m_norm * sqrt(m_theta_out2 - theta * theta);
+    // Compute value
+  	double value = 0;
+  	if (x < m_x_out) {
+  		value = sqrt(m_x_out - x);
+        if (x < m_x_in)
+            value -= sqrt(m_x_in - x);
+    }
 
-    // Return value
-    return value;
+    // Return normalised value
+  	return (m_norm * value);
 }
 
 
@@ -287,8 +301,6 @@ double GModelSpatialShell::eval(const GSkyDir& srcDir) const
  * This method simply calls GModelSpatialShell::eval() as no analytical
  * gradients will be computed. See GModelSpatialShell::eval() for details
  * about the implemented method.
- *
- * @todo Implement analytical gradients.
  ***************************************************************************/
 double GModelSpatialShell::eval_gradients(const GSkyDir& srcDir) const
 {
@@ -398,6 +410,11 @@ void GModelSpatialShell::read(const GXmlElement& xml)
         throw GException::model_invalid_parnames(G_READ, xml,
                           "Require either RA/DEC or GLON/GLAT.");
     }
+
+    // Verify that all parameters were found
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1)
+        throw GException::model_invalid_parnames(G_READ, xml,
+              "Require \"RA/GLON\", \"DEC/GLAT\", \"Radius\" and \"Width\" parameters.");
 
     // Return
     return;
@@ -594,14 +611,17 @@ void GModelSpatialShell::init_members(void)
     m_pars.push_back(&m_radius);
     m_pars.push_back(&m_width);
 
+    // Initialise other members
+    m_small_angle = true;
+
     // Initialise precomputation cache. Note that zero values flag
     // uninitialised as a zero radius and width shell is not meaningful
     m_last_radius = 0.0;
     m_last_width  = 0.0;
     m_theta_in    = 0.0;
-    m_theta_in2   = 0.0;
+    m_x_in        = 0.0;
     m_theta_out   = 0.0;
-    m_theta_out2  = 0.0;
+    m_x_out       = 0.0;
     m_norm        = 0.0;
 
     // Return
@@ -617,10 +637,11 @@ void GModelSpatialShell::init_members(void)
 void GModelSpatialShell::copy_members(const GModelSpatialShell& model)
 {
     // Copy members
-    m_ra     = model.m_ra;
-    m_dec    = model.m_dec;
-    m_radius = model.m_radius;
-    m_width  = model.m_width;
+    m_ra          = model.m_ra;
+    m_dec         = model.m_dec;
+    m_radius      = model.m_radius;
+    m_width       = model.m_width;
+    m_small_angle = model.m_small_angle;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -633,9 +654,9 @@ void GModelSpatialShell::copy_members(const GModelSpatialShell& model)
     m_last_radius = model.m_last_radius;
     m_last_width  = model.m_last_width;
     m_theta_in    = model.m_theta_in;
-    m_theta_in2   = model.m_theta_in2;
+    m_x_in        = model.m_x_in;
     m_theta_out   = model.m_theta_out;
-    m_theta_out2  = model.m_theta_out2;
+    m_x_out       = model.m_x_out;
     m_norm        = model.m_norm;
 
     // Return
@@ -655,11 +676,39 @@ void GModelSpatialShell::free_members(void)
 
 /***********************************************************************//**
  * @brief Update precomputation cache
+ *
+ * Performs precomputations that are valid for a given pair of radius and
+ * width values. The following members are set by this method:
+ * m_last_radius, m_last_width, m_theta_in, m_theta_out, m_x_in, m_x_out
+ * and m_norm.
+ *
+ * m_theta_in contains the inner shell radius in radians, while m_theta_out
+ * contains the outer shell radius in radians.
+ *
+ * In the small angle approximation, 
+ * \f${\tt m\_x\_in} = {\tt m\_theta\_in}^2\f$,
+ * \f${\tt m\_x\_out} = {\tt m\_theta\_out}^2\f$, and
+ * \f[{\tt m\_norm} = \frac{3}{2 \pi}
+ *    \frac{1}\left( {\tt m\_theta\_out}^3 - {\tt m\_theta\_in}^3 \right)\f].
+ *
+ * In the general case that is also valid for large angles,
+ * \f${\tt m\_x\_in} = \sin^2 {\tt m\_theta\_in}\f$,
+ * \f${\tt m\_x\_out} = \sin^2 {\tt m\_theta\_out}\f$, and
+ * \f[{\tt m\_norm} = \frac{1}{2 \pi}
+ *    \frac{\sqrt{1-\cos 2 {\tt m\_theta\_out}} -
+ *          \sqrt{1-\cos 2 {\tt m\_theta\_in}}}{2 \sqrt{2}} +
+ *    \frac{1+\cos 2 {\tt m\_theta\_out}}{4} \ln \left(
+ *          \frac{\sqrt{2} \cos {\tt m\_theta\_out}}
+ *               {\sqrt{2} + \sqrt{1 - \cos 2 {\tt m\_theta\_out}}} -
+ *    \frac{1+\cos 2 {\tt m\_theta\_in}}{4} \ln \left(
+ *          \frac{\sqrt{2} \cos {\tt m\_theta\_in}}
+ *               {\sqrt{2} + \sqrt{1 - \cos 2 {\tt m\_theta\_in}}}\f]
  ***************************************************************************/
-void GModelSpatialShell::update(void) const
+void GModelSpatialShell::update() const
 {
     // Set constants
     const double c1 = twopi / 3.0;
+    const double c2 = 1.0 / (2.0 * sqrt_two);
 
     // Update if radius or width have changed
     if (m_last_radius != radius() || m_last_width != width()) {
@@ -670,16 +719,62 @@ void GModelSpatialShell::update(void) const
 
         // Perform precomputations
         m_theta_in   = radius()  * deg2rad;
-        m_theta_in2  = m_theta_in * m_theta_in;
         m_theta_out  = (radius() + width()) * deg2rad;
-        m_theta_out2 = m_theta_out * m_theta_out;
-        m_norm       = 1.0 / (c1 * (m_theta_out2 * m_theta_out -
-                                    m_theta_in2  * m_theta_in));
+        if (m_small_angle) {
+            m_x_in  = m_theta_in  * m_theta_in;
+            m_x_out = m_theta_out * m_theta_out;
+            m_norm  = 1.0 / (c1 * (m_x_out*m_theta_out - m_x_in*m_theta_in));
+        } else {
+            double sin_theta_in  = std::sin(m_theta_in);
+            double sin_theta_out = std::sin(m_theta_out);
+            double term1         = (f1(m_theta_out) - f1(m_theta_in)) * c2;
+            double term2         = f2(m_theta_out);
+            double term3         = f2(m_theta_in);
+            m_norm  = 1.0 / (twopi * (term1 + term2 - term3));
+            m_x_in  = sin_theta_in*sin_theta_in;
+            m_x_out = sin_theta_out * sin_theta_out;
+        }
 
     } // endif: update required
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return function 1 value needed for precomputation
+ *
+ * Computes \f$f1(x) = \sqrt{1 - \cos 2 x}\f$.
+ ***************************************************************************/
+double GModelSpatialShell::f1(double x)
+{
+    // Compute value
+    double f1 = std::sqrt(1.0 - std::cos(2.0 * x));
+
+    // Return value
+	return f1;
+}
+
+
+/***********************************************************************//**
+ * @brief Return function 2 value needed for precomputation
+ *
+ * Compute
+ * \f[f2(x) = \frac{1+\cos 2x}{4} 
+ *    \ln \left( \frac{\sqrt{2} \cos x}{\sqrt{2} + \sqrt{ 1 - \cos 2 x}}
+ *        \right)\f].
+ ***************************************************************************/
+double GModelSpatialShell::f2(double x)
+{
+    // Compute value
+	double t1 = (1.0 + std::cos(2.0*x)) / 4.0;
+	double t2 = sqrt_two * std::cos(x);
+	double t3 = sqrt_two + f1(x);
+	double f2 = t1 * std::log(t2 / t3);
+
+    // Return value
+	return f2;
 }
 
 

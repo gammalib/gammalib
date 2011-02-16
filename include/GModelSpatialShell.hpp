@@ -46,7 +46,8 @@ public:
     // Constructors and destructors
     GModelSpatialShell(void);
     explicit GModelSpatialShell(const GSkyDir& dir,
-                                const double& theta, const double& width);
+                                const double& radius, const double& width,
+                                const bool& small_angle = true);
     explicit GModelSpatialShell(const GXmlElement& xml);
     GModelSpatialShell(const GModelSpatialShell& model);
     virtual ~GModelSpatialShell(void);
@@ -70,31 +71,36 @@ public:
     double  dec(void) const { return m_dec.real_value(); }
     double  radius(void) const { return m_radius.real_value(); }
     double  width(void) const { return m_width.real_value(); }
+    bool    small_angle(void) const { return m_small_angle; }
     GSkyDir dir(void) const;
     void    dir(const GSkyDir& dir);
     void    radius(const double& radius) { m_radius.real_value(radius); }
     void    width(const double& width) { m_width.real_value(width); }
+    void    small_angle(const bool& small_angle) { m_small_angle = small_angle; }
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GModelSpatialShell& model);
-    void free_members(void);
-    void update(void) const;
+    void          init_members(void);
+    void          copy_members(const GModelSpatialShell& model);
+    void          free_members(void);
+    void          update() const;
+    static double f1(double x);
+    static double f2(double x);    
 
     // Protected members
     GModelPar       m_ra;            //!< Right Ascension of shell centre (deg)
     GModelPar       m_dec;           //!< Declination of shell centre (deg)
     GModelPar       m_radius;        //!< Inner shell radius (deg)
     GModelPar       m_width;         //!< Shell thickness (deg)
+    bool            m_small_angle;   //!< Use small angle approximate formulae
 
     // Cached members used for pre-computations
     mutable double  m_last_radius;   //!< Last shell radius (deg)
     mutable double  m_last_width;    //!< Last shell width (deg)
     mutable double  m_theta_in;      //!< Inner shell radius (rad)
-    mutable double  m_theta_in2;     //!< Inner shell radius squared (rad^2)
+    mutable double  m_x_in;          //!< m_theta_in^2 or sin(m_theta_in)^2
     mutable double  m_theta_out;     //!< Outer shell radius (rad)
-    mutable double  m_theta_out2;    //!< Outer shell radius squared (rad^2)
+    mutable double  m_x_out;         //!< m_theta_out^2 or sin(m_theta_out)^2
     mutable double  m_norm;          //!< Shell normalization
 };
 
