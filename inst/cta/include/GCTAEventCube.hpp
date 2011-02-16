@@ -69,7 +69,7 @@ public:
     virtual std::string    print(void) const;
 
     // Other methods
-    void                   map(const GSkymap& map) { m_map=map; }
+    void                   map(const GSkymap& map);
     const GSkymap&         map(void) const { return m_map; }
     int                    nx(void) const { return m_map.nx(); }
     int                    ny(void) const { return m_map.ny(); }
@@ -78,16 +78,16 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GCTAEventCube& cube);
-    void free_members(void);
-    void read_cntmap(const GFitsImage* hdu);
-    void read_ebds(const GFitsTable* hdu);
-    void read_gti(const GFitsTable* hdu);
-    void set_directions(void);
-    void set_energies(void);
-    void set_times(void);
-    void set_bin(const int& index);
+    void         init_members(void);
+    void         copy_members(const GCTAEventCube& cube);
+    void         free_members(void);
+    void         read_cntmap(const GFitsImage* hdu);
+    void         read_ebds(const GFitsTable* hdu);
+    void         read_gti(const GFitsTable* hdu);
+    void         set_directions(void);
+    virtual void set_energies(void);
+    virtual void set_times(void);
+    void         set_bin(const int& index);
 
     // Protected members
     GSkymap                  m_map;        //!< Counts map stored as sky map

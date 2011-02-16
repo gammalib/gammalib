@@ -424,6 +424,22 @@ int GCTAEventCube::number(void) const
 
 
 /***********************************************************************//**
+ * @brief Set event cube from sky map
+ ***************************************************************************/
+void GCTAEventCube::map(const GSkymap& map)
+{
+    // Store sky map
+    m_map = map;
+
+    // Compute sky directions
+    set_directions();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print event cube information
  ***************************************************************************/
 std::string GCTAEventCube::print(void) const
