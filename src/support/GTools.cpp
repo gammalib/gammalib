@@ -564,6 +564,31 @@ double modulo(double v1, double v2)
 
 
 /***********************************************************************//**
+ * @brief Computes acos by avoiding NaN due to rounding errors
+ *
+ * @param[in] arg Argument.
+ *
+ * Returns the arcus cosinus by restricting the argument to [-1,1].
+ ***************************************************************************/
+double arccos(const double& arg)
+{
+    // Allocate result
+    double arccos;
+
+    // Compute acos
+    if (arg >= 1)
+        arccos = 0.0;
+    else if (arg <= -1.0)
+        arccos = pi;
+    else
+        arccos = std::acos(arg);
+
+    // Return result
+    return arccos;
+}
+
+
+/***********************************************************************//**
  * @brief Checks if a file exists.
  *
  * @param[in] filename File name.
