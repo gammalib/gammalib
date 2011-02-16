@@ -211,9 +211,6 @@ GCTAResponse* GCTAResponse::clone(void) const
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
- *
- * @exception GCTAException::bad_event_type
- *            Event is not a valid CTA event type.
  ***************************************************************************/
 double GCTAResponse::irf(const GEvent& event, const GModelSky& model,
                          const GEnergy& srcEng, const GTime& srcTime,
@@ -222,17 +219,18 @@ double GCTAResponse::irf(const GEvent& event, const GModelSky& model,
     // Initialise IRF value
     double irf = 0.0;
 
-    // Get event pointers
-    const GCTAEventAtom* atom = dynamic_cast<const GCTAEventAtom*>(&event);
-    const GCTAEventBin*  bin  = dynamic_cast<const GCTAEventBin*>(&event);
+    // Get model pointers
+    GModelSpatialPtsrc* ptsrc = dynamic_cast<GModelSpatialPtsrc*>(model.spatial());
 
-    // Get IRF value
-    if (atom != NULL)
-        irf = this->irf(atom, model, srcEng, srcTime, obs);
-    else if (bin != NULL)
-        irf = this->irf(bin, model, srcEng, srcTime, obs);
+    // If model is a point source then compute point source IRF
+    if (ptsrc != NULL)
+        irf = ptirf(event.dir(), event.energy(), event.time(),
+                    ptsrc->dir(), srcEng, srcTime, obs);
+
+    // ... otherwise compute diffuse IRF
     else
-        throw GCTAException::bad_event_type(G_IRF);
+        irf = diffirf(event.dir(), event.energy(), event.time(),
+                      model, srcEng, srcTime, obs);
 
     // Return IRF value
     return irf;
@@ -436,96 +434,6 @@ std::string GCTAResponse::print(void) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return value of model IRF for event atom
- *
- * @param[in] atom Event atom.
- * @param[in] model Source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] obs Observation.
- *
- * @exception GException::feature_not_implemented
- *            Diffuse IRF not yet implemented.
- ***************************************************************************/
-double GCTAResponse::irf(const GCTAEventAtom* atom, const GModelSky& model,
-                         const GEnergy& srcEng, const GTime& srcTime,
-                         const GObservation& obs) const
-{
-    // Initialise response value
-    double rsp = 0.0;
-
-    // Get model pointers
-    GModelSpatialPtsrc* ptsrc = dynamic_cast<GModelSpatialPtsrc*>(model.spatial());
-
-    // If model is a point source then return the point source IRF
-    if (ptsrc != NULL) {
-
-        // Compute IRF
-        rsp = irf(atom->dir(), atom->energy(), atom->time(),
-                  ptsrc->dir(), srcEng, srcTime, obs);
-
-    } // endif: model was point source
-
-    // ... otherwise return diffuse IRF
-    else {
-
-        // Feature not yet implemented
-        throw GException::feature_not_implemented(G_IRF_ATOM,
-              "Diffuse IRF not yet implemented.");
-
-    } // endelse: model was not a point source
-
-    // Return IRF value
-    return rsp;
-}
-
-
-/***********************************************************************//**
- * @brief Return value of model IRF for event bin
- *        
- * @param[in] bin Event bin.
- * @param[in] model Source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] obs Observation.
- *
- * @exception GException::feature_not_implemented
- *            Diffuse IRF not yet implemented.
- ***************************************************************************/
-double GCTAResponse::irf(const GCTAEventBin* bin, const GModelSky& model,
-                         const GEnergy& srcEng, const GTime& srcTime,
-                         const GObservation& obs) const
-{
-    // Initialise response value
-    double rsp = 0.0;
-
-    // Get model pointers
-    GModelSpatialPtsrc* ptsrc = dynamic_cast<GModelSpatialPtsrc*>(model.spatial());
-
-    // If model is a point source then return the point source IRF
-    if (ptsrc != NULL) {
-
-        // Compute IRF
-        rsp = irf(bin->dir(), bin->energy(), bin->time(),
-                  ptsrc->dir(), srcEng, srcTime, obs);
-
-    } // endif: model was point source
-
-    // ... otherwise return diffuse IRF
-    else {
-
-        // Feature not yet implemented
-        throw GException::feature_not_implemented(G_IRF_BIN,
-              "Diffuse IRF not yet implemented.");
-
-    } // endelse: model was not a point source
-
-    // Return IRF value
-    return rsp;
-}
-
-
-/***********************************************************************//**
  * @brief Return value of point source instrument response function
  *
  * @param[in] obsDir Observed photon direction.
@@ -540,10 +448,10 @@ double GCTAResponse::irf(const GCTAEventBin* bin, const GModelSky& model,
  *       and polar angles in the camera are not yet computed correctly (as
  *       the actual IRF implement does not need these values).
  ***************************************************************************/
-double GCTAResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
-                         const GTime& obsTime,
-                         const GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GTime& srcTime, const GObservation& obs) const
+double GCTAResponse::ptirf(const GInstDir& obsDir, const GEnergy& obsEng,
+                           const GTime& obsTime,
+                           const GSkyDir& srcDir, const GEnergy& srcEng,
+                           const GTime& srcTime, const GObservation& obs) const
 {
     // Get pointing direction zenith angle and azimuth
     const GPointing *pnt = obs.pointing(srcTime);
@@ -578,6 +486,35 @@ double GCTAResponse::irf(const GInstDir& obsDir, const GEnergy& obsEng,
 
     // Return IRF value
     return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of diffuse source instrument response function
+ *
+ * @param[in] obsDir Observed photon direction.
+ * @param[in] obsEng Observed energy of photon.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] model Diffuse model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] obs Observations.
+ *
+ * @todo The telescope zenith and azimuth angles as well as the radial offset
+ *       and polar angles in the camera are not yet computed correctly (as
+ *       the actual IRF implement does not need these values).
+ ***************************************************************************/
+double GCTAResponse::diffirf(const GInstDir& obsDir, const GEnergy& obsEng,
+                             const GTime& obsTime,
+                             const GModelSky& model, const GEnergy& srcEng,
+                             const GTime& srcTime, const GObservation& obs) const
+{
+    // Feature not yet implemented
+    throw GException::feature_not_implemented(G_IRF_BIN,
+          "Diffuse IRF not yet implemented.");
+
+    // Return IRF value
+    return 0.0;
 }
 
 

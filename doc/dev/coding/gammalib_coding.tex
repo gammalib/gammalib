@@ -366,10 +366,10 @@ Return values should also be passed by reference.
 To assure that the return values will not change class members inadvertably, return
 values passed by reference should also be declared as {\tt const}.
 
-
 If the class member is a pointer, the argument should also be a pointer to allow
 setting the pointer to {\tt NULL}.
-
+The exception to this are container classes which in general do not contain
+{\tt NULL} pointers in the container.
 
 Return values should be passed by reference if they concern class members.
 
@@ -377,6 +377,9 @@ If the class member is a pointer, and if the pointer may be {\tt NULL}, it shoul
 returned as a pointer.
 Again, the pointer should be declared {\tt const} to avoid inadvertable changes of
 the class members.
+The exception to this are container classes which in general do not contain
+{\tt NULL} pointers in the container.
+Container classes should return references to container elements.
 
 An example is given by the following excerpt of the {\tt GObservation} class.
 Note that in general there are two distinct methods to set and to return a
@@ -399,6 +402,12 @@ class member.
     const GEvents*     events(void) const;
     const std::string& statistics(void) const;
 \end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{More about const correctness}
+
+Use mutable keyword for cached variables, when object will not logially change.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

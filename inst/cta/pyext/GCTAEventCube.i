@@ -47,12 +47,12 @@ public:
     virtual int            number(void) const;
 
     // Other methods
-    void                   map(const GSkymap& map) { m_map=map; }
-    const GSkymap&         map(void) const { return m_map; }
-    int                    nx(void) const { return m_map.nx(); }
-    int                    ny(void) const { return m_map.ny(); }
-    int                    npix(void) const { return m_map.npix(); }
-    int                    ebins(void) const { return m_map.nmaps(); }
+    void                   map(const GSkymap& map);
+    const GSkymap&         map(void) const;
+    int                    nx(void) const;
+    int                    ny(void) const;
+    int                    npix(void) const;
+    int                    ebins(void) const;
 };
 
 

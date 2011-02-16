@@ -78,15 +78,12 @@ public:
     void           load(const std::string& rspname);
 
     // Other response methods
-    double irf(const GCTAEventAtom* atom, const GModelSky& model,
-               const GEnergy& srcEng, const GTime& srcTime,
-               const GObservation& obs) const;
-    double irf(const GCTAEventBin* bin, const GModelSky& model,
-               const GEnergy& srcEng, const GTime& srcTime,
-               const GObservation& obs) const;
-    double irf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-               const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-               const GObservation& obs) const;
+    double ptirf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                 const GObservation& obs) const;
+    double diffirf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                   const GModelSky& model, const GEnergy& srcEng, const GTime& srcTime,
+                   const GObservation& obs) const;
     double aeff(const double& theta, const double& phi,
                 const double& zenith, const double& azimuth,
                 const double& srcLogEng) const;
