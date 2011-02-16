@@ -134,6 +134,7 @@
 %include "GModelSpatialPtsrc.i"
 %include "GModelSpatialGauss.i"
 %include "GModelSpatialShell.i"
+%include "GModelSpatialDisk.i"
 %include "GModelSpectral.i"
 %include "GModelSpectralRegistry.i"
 %include "GModelSpectralConst.i"
