@@ -82,14 +82,14 @@ public:
     virtual std::string print(void) const = 0;
 
     // Implemented methods
-    void                ebounds(const GEbounds& ebounds) { m_ebounds=ebounds; }
-    void                gti(const GGti& gti) { m_gti=gti; }
-    GTime               tstart(void) const { return m_gti.tstart(); }
-    GTime               tstop(void) const { return  m_gti.tstop(); }
-    GEnergy             emin(void) const { return m_ebounds.emin(); }
-    GEnergy             emax(void) const { return m_ebounds.emax(); }
+    void                ebounds(const GEbounds& ebounds);
+    void                gti(const GGti& gti);
     const GEbounds&     ebounds(void) const { return m_ebounds; }
     const GGti&         gti(void) const { return m_gti; }
+    GTime               tstart(void) const { return gti().tstart(); }
+    GTime               tstop(void) const { return  gti().tstop(); }
+    GEnergy             emin(void) const { return ebounds().emin(); }
+    GEnergy             emax(void) const { return ebounds().emax(); }
 
     // Event iterator
     class iterator {
@@ -114,9 +114,11 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GEvents& events);
-    void free_members(void);
+    void         init_members(void);
+    void         copy_members(const GEvents& events);
+    void         free_members(void);
+    virtual void set_energies(void) = 0;
+    virtual void set_times(void) = 0;
 
     // Protected members
     GEbounds m_ebounds;      //!< Energy boundaries covered by events

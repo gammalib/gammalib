@@ -63,9 +63,11 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GEventList& list);
-    void free_members(void);
+    void         init_members(void);
+    void         copy_members(const GEventList& list);
+    void         free_members(void);
+    virtual void set_energies(void) = 0;
+    virtual void set_times(void) = 0;
 };
 
 #endif /* GEVENTLIST_HPP */
