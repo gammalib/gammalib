@@ -44,6 +44,7 @@ const double twothird     =  2.0/3.0;
 const double fourthird    =  4.0/3.0;
 const double sqrt_onehalf = sqrt(1.0/2.0);
 const double sqrt_pihalf  = sqrt(pihalf);
+const double sqrt_two     = sqrt(2.0);
 const double MeV2erg      =  1.6021765e-6;
 const double erg2MeV      =  624150.96;
 const double pc2cm        =  3.08568025e18;
