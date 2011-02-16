@@ -33,7 +33,7 @@ def ptsrc_model(ra=0.0, dec=0.0):
 # =============== #
 # Set shell model #
 # =============== #
-def shell_model(ra=0.0, dec=0.0, radius=1.0, width=0.3):
+def shell_model(ra=0.3, dec=0.3, radius=0.3, width=0.1):
 	"""
 	Set shell model.
 	"""
@@ -60,7 +60,7 @@ def shell_model(ra=0.0, dec=0.0, radius=1.0, width=0.3):
 # ========================== #
 # Set binned CTA observation #
 # ========================== #
-def observation(ra=0.0, dec=0.0, binsz=0.02, npix=100, ebins=10):
+def observation(ra=0.0, dec=0.0, binsz=0.02, npix=100, ebins=1):
 	"""
 	Set binned CTA observation.
 	"""
