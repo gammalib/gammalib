@@ -175,14 +175,10 @@ double GIntegral::romb(double a, double b, int k)
 
         // Integration using Trapezoid rule
         s[m_iter] = trapzd(a, b, m_iter, s[m_iter-1]);
-if (std::isnan(s[m_iter]))
-    std::cout << "*** polint NaN trapzd m_iter=" << m_iter << std::endl;
 
         // Starting from iteration k on, use polynomial interpolation
         if (m_iter >= k) {
             ss = polint(&h[m_iter-k], &s[m_iter-k], k, 0.0, &dss);
-if (std::isnan(ss))
-    std::cout << "*** polint NaN m_iter=" << m_iter << std::endl;
             if (std::abs(dss) <= m_eps * std::abs(ss)) {
                 converged = true;
                 result    = ss;
@@ -201,8 +197,9 @@ if (std::isnan(ss))
 
     // Dump warning
     if (!converged) {
-        std::cout << "GIntegral::romb: Integration did not converge (result="
-                  << ss << ")" << std::endl;
+        std::cout << "*** ERROR: GIntegral::romb: ";
+        std::cout << "Integration did not converge (result=" << ss << ")";
+        std::cout << std::endl;
     }
 
     // Return result
@@ -314,9 +311,9 @@ double GIntegral::polint(double* xa, double* ya, int n, double x, double *dy)
             double w   = c[i+1] - d[i];
             double den = ho - hp;
             if (den == 0.0) {
-                std::cout << "GIntegral::polint: an error occured. "
-                          << "This error can only occur if two input xa's are identical."
-                          << std::endl;
+                std::cout << "*** ERROR: GIntegral::polint: ";
+                std::cout << "This error can only occur if two input xa's are identical.";
+                std::cout << std::endl;
             }
             den  = w/den;
             d[i] = hp*den;
@@ -325,68 +322,12 @@ double GIntegral::polint(double* xa, double* ya, int n, double x, double *dy)
 
         // Compute y correction
         *dy = (2*(ns+1) < (n-m)) ? c[ns+1] : d[ns--];
-if (std::isnan(*dy))
-    std::cout << "*** polint NaN dy=" << *dy << std::endl;
 
         // Update y
         y += *dy;
 
     } // endfor: looped over columns of tableau
 
-/*
-    // Allocate temporary memory
-    double* c = new double[n+1];
-    double* d = new double[n+1];
-
-    // Compute initial distance to first node
-    double dif = std::abs(x-xa[1]);
-
-    // Find index ns of the closest table entry
-    int ns = 1;
-    for (int i = 1; i <= n; ++i) {
-        double dift = std::abs(x-xa[i]);
-        if (dift < dif) {
-            ns  = i;
-            dif = dift;
-        }
-        c[i] = ya[i];
-        d[i] = ya[i];
-    }
-
-    // Get initial approximation to y
-    *y = ya[ns--];
-
-    // Loop over each column of the tableau
-    for (int m = 1; m < n; ++m) {
-
-        // Update current c's and d's
-        for (int i = 1; i <= n-m; ++i) {
-            double ho  = xa[i]   - x;
-            double hp  = xa[i+m] - x;
-            double w   = c[i+1] - d[i];
-            double den = ho - hp;
-            if (den == 0.0) {
-                std::cout << "GIntegral::polint: an error occured. "
-                          << "This error can only occur if two input xa's are identical."
-                          << std::endl;
-            }
-            den  = w/den;
-            d[i] = hp*den;
-            c[i] = ho*den;
-        }
-
-        // Compute y correction
-        *dy = (2*ns < (n-m)) ? c[ns+1] : d[ns--];
-
-        // Update y
-        *y += *dy;
-
-    } // endfor: looped over columns of tableau
-
-    // Delete temporary memory
-    delete [] d;
-    delete [] c;
-*/
     // Return
     return y;
 }
