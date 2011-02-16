@@ -86,6 +86,10 @@ public:
     public:
         no_dirs(std::string origin, std::string message = "");
     };
+    class bad_observation_type : public GCTAExceptionHandler {
+    public:
+        bad_observation_type(std::string origin, std::string message = "");
+    };
     class bad_event_type : public GCTAExceptionHandler {
     public:
         bad_event_type(std::string origin, std::string message = "");
@@ -93,6 +97,10 @@ public:
     class bad_roi_type : public GCTAExceptionHandler {
     public:
         bad_roi_type(std::string origin, std::string message = "");
+    };
+    class bad_instdir_type : public GCTAExceptionHandler {
+    public:
+        bad_instdir_type(std::string origin, std::string message = "");
     };
 
     // Model exceptions

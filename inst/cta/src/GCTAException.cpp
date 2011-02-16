@@ -166,6 +166,28 @@ GCTAException::no_dirs::no_dirs(std::string origin, std::string message)
 
 
 /***********************************************************************//**
+ * @brief Observation is not a CTA observation
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCTAException::bad_observation_type::bad_observation_type(std::string origin,
+                                                          std::string message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Observation is not of type GCTAObservation.";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Event is not a CTA event
  *
  * @param[in] origin Name of method that has thrown the exception.
@@ -198,7 +220,29 @@ GCTAException::bad_roi_type::bad_roi_type(std::string origin, std::string messag
     m_origin = origin;
 
     // Set message
-    m_message = "Specified ROI is not of type GCTARoi.";
+    m_message = "ROI is not of type GCTARoi.";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Instrument direction is not a CTA instrument direction
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCTAException::bad_instdir_type::bad_instdir_type(std::string origin,
+                                                  std::string message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Instrument direction is not of type GCTAInstDir.";
     if (message.length() > 0)
         m_message += " "+message;
 
