@@ -28,6 +28,7 @@
 #include "GTools.hpp"
 #include "GIntegral.hpp"
 #include "GIntegrand.hpp"
+#include "GVector.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTAPointing.hpp"
@@ -53,6 +54,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+#define G_DEBUG_IRF_DIFFUSE 1
 
 /* __ Constants __________________________________________________________ */
 
@@ -536,10 +538,6 @@ double GCTAResponse::irf_diffuse(const GCTAInstDir& obsDir, const GEnergy& obsEn
                                  const GModelSky& model, const GEnergy& srcEng,
                                  const GTime& srcTime, const GCTAObservation& obs) const
 {
-    // Feature not yet implemented
-    //throw GException::feature_not_implemented(G_IRF_DIFFUSE,
-    //      "Diffuse IRF not yet implemented.");
-
     // Get CTA pointing
     const GCTAPointing* pnt = obs.pointing(srcTime);
 
@@ -551,8 +549,9 @@ double GCTAResponse::irf_diffuse(const GCTAInstDir& obsDir, const GEnergy& obsEn
     double theta = 0.0;
     double phi   = 0.0;
 
-    // Get log10(E/TeV) of true photon energy.
+    // Get log10(E/TeV) of true and measured photon energies
     double srcLogEng = srcEng.log10TeV();
+    double obsLogEng = obsEng.log10TeV();
 
     // Get PSF sigma
     double sigma = psf_dummy_sigma(srcLogEng);
@@ -565,16 +564,26 @@ double GCTAResponse::irf_diffuse(const GCTAInstDir& obsDir, const GEnergy& obsEn
     double dist = pnt->dir().dist(obsDir.skydir());
     double pa   = pnt->dir().posang(obsDir.skydir());
 
-    // Setup integration function
-    GCTAResponse::psf_kern_theta integrand(this, dist, pa, delta_max, zenith, azimuth, sigma);
-    GIntegral                    integral(&integrand);
+    // Setup integration kernel
+    GCTAResponse::psf_kern_theta integrand(this, pnt, model.spatial(),
+                                           dist, pa, delta_max,
+                                           zenith, azimuth,
+                                           srcLogEng, obsLogEng, sigma);
 
     // Integrate over theta
-    double theta_min = (dist > delta_max) ? dist - delta_max : 0.0;
-    double theta_max = dist + delta_max;
-    double irf       = integral.romb(theta_min, theta_max);
-std::cout << "theta_min=" << theta_min << ", theta_max=" << theta_max;
-std::cout << ": " << irf << std::endl;
+    GIntegral integral(&integrand);
+    double    theta_min = (dist > delta_max) ? dist - delta_max : 0.0;
+    double    theta_max = dist + delta_max;
+    double    irf       = integral.romb(theta_min, theta_max);
+
+    // Compile option: Show integration results
+    #if G_DEBUG_IRF_DIFFUSE
+    std::cout << "irf_diffuse";
+    std::cout << " sigma=" << sigma;
+    std::cout << " theta_min=" << theta_min;
+    std::cout << " theta_max=" << theta_max;
+    std::cout << " irf=" << irf << std::endl;
+    #endif
 
     // Return IRF value
     return irf;
@@ -873,52 +882,88 @@ double GCTAResponse::psf_dummy_sigma(const double& srcLogEng) const
 
 
 /***********************************************************************//**
- * @brief Integration kernel for PSF theta integration
+ * @brief Integration kernel for IRF radial offset angle integration
  *
- * @param[in] theta Zenith angle angle (radians).
+ * @param[in] theta Radial offset angle (radians).
+ *
+ * This method provides the integration kernel for the IRF radial offset
+ * angle integration. The radial offset angle is given in the camera system.
  ***************************************************************************/
 double GCTAResponse::psf_kern_theta::eval(double theta)
 {
-    // Compute arclength
-    double arc = cta_roi_arclength(theta, m_dist, m_cos_dist, m_sin_dist,
-                                   m_delta_max, m_cos_delta_max);
+    // Compute half interval length
+    double delta_phi = 0.5 * cta_roi_arclength(theta, 
+                                               m_dist, m_cos_dist, m_sin_dist,
+                                               m_delta_max, m_cos_delta_max);
 
-    double value = arc * std::sin(theta);
+    // Set phi interval
+    double phi_min = m_pa - delta_phi;
+    double phi_max = m_pa + delta_phi;
 
-if (std::isnan(value)) {
-    std::cout << "*** GCTAResponse::psf_kern_theta::eval NaN";
-    std::cout << " arc=" << arc;
-    std::cout << " std::sin(theta)=" << std::sin(theta);
-    std::cout << " theta=" << theta;
-    std::cout << " value=" << value << std::endl;
-}
+    // Compute cosine and sine terms for PSF delta computation
+    double cos_term = std::cos(theta) * m_cos_dist;
+    double sin_term = std::sin(theta) * m_sin_dist;
 
-    // Return
-//std::cout << "theta=" << theta << ": " << arc << std::endl;
+    // Setup integration kernel
+    GCTAResponse::psf_kern_phi integrand(m_rsp, m_pnt, m_spatial,
+                                         theta, m_pa,
+                                         m_zenith, m_azimuth,
+                                         m_srcLogEng, m_obsLogEng, m_sigma,
+                                         cos_term, sin_term);
+
+    // Integrate over phi
+    GIntegral integral(&integrand);
+    double    value = integral.romb(phi_min, phi_max) * std::sin(theta);
+
+    // Return result
     return value;
 }
 
 
 /***********************************************************************//**
- * @brief Integration kernel for ...
+ * @brief Integration kernel for IRF polar angle integration
  *
- * @param[in] phi Polar angle angle (radians).
+ * @param[in] phi Polar angle (radians).
+ *
+ * This method provides the integration kernel for the IRF polar angle
+ * integration. The polar angle is given in the camera system.
  ***************************************************************************/
 double GCTAResponse::psf_kern_phi::eval(double phi)
 {
+    // Initialise result
+    double value = 0.0;
+
+    // Transform theta and phi in sky coordinates
+    double  cos_phi   = std::cos(-phi);
+    double  sin_phi   = std::sin(-phi);
+    double  cos_theta = std::cos(-m_theta);
+    double  sin_theta = std::sin(-m_theta);
+    GVector vector(cos_phi*sin_theta, sin_phi*sin_theta, cos_theta);
+    GVector vector_rot = m_pnt->rot() * vector;
+    GSkyDir skydir;
+    skydir.celvector(vector_rot);
+
     // Evaluate sky model
-    double model = 1.0; //TODO
+    double model = m_spatial->eval(skydir);
 
-    // Compute PSF offset angle
-    double delta = 0.0; //TODO
+    // Continue only if model is valid
+    if (model > 0.0) {
 
-    // Evaluate IRF
-    double irf = m_parent->aeff(m_theta, phi, m_zenith, m_azimuth, m_srcLogEng) *
-                 m_parent->psf_dummy(delta, m_sigma) *
-                 m_parent->edisp(m_obsLogEng, m_theta, phi, m_zenith, m_azimuth, m_srcLogEng);
+        // Compute PSF offset angle
+        double delta = arccos(m_cos_term + m_sin_term * std::cos(phi - m_pa));
+
+        // Evaluate IRF
+        double irf = m_rsp->aeff(m_theta, phi, m_zenith, m_azimuth, m_srcLogEng) *
+                     m_rsp->psf_dummy(delta, m_sigma) *
+                     m_rsp->edisp(m_obsLogEng, m_theta, phi, m_zenith, m_azimuth, m_srcLogEng);
+
+        // Compute value
+        value = model * irf;
+
+    } // endif: model was valid
 
     // Return
-    return (model * irf);
+    return value;
 }
 
 

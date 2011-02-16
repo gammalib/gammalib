@@ -118,52 +118,70 @@ private:
     void free_members(void);
     void read_performance_table(const std::string& filename);
 
-    // Integration
+    // PSF theta integration kernel
     class psf_kern_theta : public GIntegrand {
     public:
-        psf_kern_theta(const GCTAResponse* parent,
+        psf_kern_theta(const GCTAResponse* rsp,
+                       const GCTAPointing* pnt,
+                       const GModelSpatial* spatial,
                        double dist, double pa, double delta_max,
                        double zenith, double azimuth,
-                       double sigma) :
-                       m_parent(parent), m_dist(dist),
+                       double srcLogEng, double obsLogEng, double sigma) :
+                       m_rsp(rsp), m_pnt(pnt), m_spatial(spatial),
+                       m_dist(dist),
                        m_cos_dist(std::cos(dist)), m_sin_dist(std::sin(dist)),
                        m_pa(pa), m_delta_max(delta_max),
                        m_cos_delta_max(std::cos(delta_max)),
                        m_zenith(zenith), m_azimuth(azimuth),
+                       m_srcLogEng(srcLogEng), m_obsLogEng(obsLogEng),
                        m_sigma(sigma) { return; }
         double eval(double theta);
     protected:
-        const GCTAResponse* m_parent;        //!< Pointer to response
-        double              m_dist;          //!< Distance
-        double              m_cos_dist;      //!< Cosine of distance
-        double              m_sin_dist;      //!< Cosine of distance
-        double              m_pa;            //!< Position angle
-        double              m_delta_max;     //!< delta_max
-        double              m_cos_delta_max; //!< cosine of delta_max
-        double              m_zenith;        //!< Telescope zenith
-        double              m_azimuth;       //!< Telescope azimuth
-        double              m_sigma;         //!< Width of PSF in radians
+        const GCTAResponse*  m_rsp;           //!< Pointer to CTA response
+        const GCTAPointing*  m_pnt;           //!< Pointer to CTA pointing
+        const GModelSpatial* m_spatial;       //!< Pointer to spatial model
+        double               m_dist;          //!< PSF centre offset angle
+        double               m_cos_dist;      //!< Cosine of PSF centre radial offset angle
+        double               m_sin_dist;      //!< Sine of PSF centre radial offset angle
+        double               m_pa;            //!< Position angle
+        double               m_delta_max;     //!< Maximum PSF angle delta_max
+        double               m_cos_delta_max; //!< Cosine of delta_max
+        double               m_zenith;        //!< Telescope zenith
+        double               m_azimuth;       //!< Telescope azimuth
+        double               m_srcLogEng;     //!< True photon energy
+        double               m_obsLogEng;     //!< Measured photon energy
+        double               m_sigma;         //!< Width of PSF in radians
     };
 
-    // Integration
+    // PSF phi integration kernel
     class psf_kern_phi : public GIntegrand {
     public:
-        psf_kern_phi(const GCTAResponse* parent,
-                     double theta, double zenith, double azimuth,
-                     double srcLogEng, double obsLogEng, double sigma) :
-                     m_parent(parent),
-                     m_theta(theta), m_zenith(zenith), m_azimuth(azimuth),
+        psf_kern_phi(const GCTAResponse* rsp,
+                     const GCTAPointing* pnt,
+                     const GModelSpatial* spatial,
+                     double theta, double pa, double zenith, double azimuth,
+                     double srcLogEng, double obsLogEng, double sigma,
+                     double cos_term, double sin_term) :
+                     m_rsp(rsp), m_pnt(pnt), m_spatial(spatial),
+                     m_theta(theta), m_pa(pa),
+                     m_zenith(zenith), m_azimuth(azimuth),
                      m_srcLogEng(srcLogEng), m_obsLogEng(obsLogEng),
-                     m_sigma(sigma) { return; }
+                     m_sigma(sigma),
+                     m_cos_term(cos_term), m_sin_term(sin_term) { return; }
         double eval(double phi);
     protected:
-        const GCTAResponse* m_parent;    //!< Pointer to response
-        double              m_theta;     //!< Radial offset in camera
-        double              m_zenith;    //!< Telescope zenith
-        double              m_azimuth;   //!< Telescope azimuth
-        double              m_srcLogEng; //!< True photon energy
-        double              m_obsLogEng; //!< Measured photon energy
-        double              m_sigma;     //!< Width of PSF in radians
+        const GCTAResponse*  m_rsp;           //!< Pointer to CTA response
+        const GCTAPointing*  m_pnt;           //!< Pointer to CTA pointing
+        const GModelSpatial* m_spatial;       //!< Pointer to spatial model
+        double               m_theta;         //!< Radial offset in camera
+        double               m_pa;            //!< Position angle
+        double               m_zenith;        //!< Telescope zenith
+        double               m_azimuth;       //!< Telescope azimuth
+        double               m_srcLogEng;     //!< True photon energy
+        double               m_obsLogEng;     //!< Measured photon energy
+        double               m_sigma;         //!< Width of PSF in radians
+        double               m_cos_term;      //!< Cosine term
+        double               m_sin_term;      //!< Sine term
     };
 
     // Integration
