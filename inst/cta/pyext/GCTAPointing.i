@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GCTAPointing.i  -  CTA pointing class python bindings          *
+ *                   GCTAPointing.i  -  CTA pointing class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,20 +12,19 @@
  ***************************************************************************/
 /**
  * @file GCTAPointing.i
- * @brief GCTAPointing class SWIG file.
+ * @brief CTA pointing class Python interface definition
  * @author J. Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GCTAPointing.hpp"
 %}
-//%include stl.i
 
 
 /***********************************************************************//**
  * @class GCTAPointing
  *
- * @brief Interface for the CTA pointing class
+ * @brief CTA pointing class
  ***************************************************************************/
 class GCTAPointing : public GPointing {
 public:
@@ -34,7 +33,21 @@ public:
     GCTAPointing(const GCTAPointing& pnt);
     ~GCTAPointing(void);
 
-    // Methods
-    void          clear(void);
-    GCTAPointing* clone(void) const;
+    // Implemented pure virtual methods
+    virtual void           clear(void);
+    virtual GCTAPointing*  clone(void) const;
+    virtual const GSkyDir& dir(void) const;
+
+    // Other methods
+    void dir(const GSkyDir& dir);
+};
+
+
+/***********************************************************************//**
+ * @brief GCTAPointing class extension
+ ***************************************************************************/
+%extend GCTAPointing {
+    GCTAPointing copy() {
+        return (*self);
+    }
 };
