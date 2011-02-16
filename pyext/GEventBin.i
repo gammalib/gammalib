@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GEventBin.i  -  Abstract event bin class python I/F            *
+ *                GEventBin.i  -  Abstract event bin class                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GEventBin.i
- * @brief GEventBin class python interface
+ * @brief Abstract event bin class python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -24,7 +24,7 @@
 /***********************************************************************//**
  * @class GEventBin
  *
- * @brief Abstract interface for the event bin class.
+ * @brief Abstract event bin class.
  *
  * An event bin is a collection of event atoms with similar properties.
  * Event bins are used for binned analysis.
@@ -63,10 +63,11 @@ public:
     virtual const GTime&    time(void) const = 0;
     virtual double          counts(void) const = 0;
     virtual double          error(void) const = 0;
+    virtual void            counts(const double& counts) = 0;
 
     // Other methods
-    bool isatom(void) const { return false; }
-    bool isbin(void) const { return true; }
+    bool isatom(void) const;
+    bool isbin(void) const;
 };
 
 
