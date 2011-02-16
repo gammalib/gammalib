@@ -21,11 +21,14 @@
 #include <config.h>
 #endif
 #include <cmath>
+#include <iostream>
 #include "GCTASupport.hpp"
 #include "GTools.hpp"
-#include <iostream>
 
 /* __ Coding definitions _________________________________________________ */
+
+/* __ Debug definitions __________________________________________________ */
+#define G_CHECK_FOR_NAN 0
 
 
 /***********************************************************************//**
@@ -77,10 +80,22 @@ double cta_roi_arclength(const double& rad,     const double& dist,
             else if (rad <= d)
                 arclength = twopi;
             else {
-                double cosrad = cos(rad);
-                double sinrad = sin(rad);
+                double cosrad = std::cos(rad);
+                double sinrad = std::sin(rad);
                 double cosang = (cosroi - cosdist*cosrad) / (sindist*sinrad);
-                arclength = 2.0 * acos(cosang);
+                arclength     = 2.0 * arccos(cosang);
+                #if G_CHECK_FOR_NAN
+                if (std::isnan(arclength)) {
+                    std::cout << "cta_roi_arclength: NaN occured";
+                    std::cout << " rad=" << rad;
+                    std::cout << " sinrad=" << sinrad;
+                    std::cout << " cosrad=" << cosrad;
+                    std::cout << " sindist=" << sindist;
+                    std::cout << " cosdist=" << cosdist;
+                    std::cout << " cosang=" << cosang;
+                    std::cout << std::endl;
+                }
+                #endif
             }
         }
 
