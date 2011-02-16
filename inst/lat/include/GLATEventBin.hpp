@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GLATEventBin.hpp  -  LAT event bin class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventBin.hpp
- * @brief GLATEventBin class interface definition.
+ * @brief Fermi-LAT event bin class interface definition
  * @author J. Knodlseder
  */
 
@@ -20,7 +20,6 @@
 #define GLATEVENTBIN_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include "GEventBin.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
@@ -33,7 +32,9 @@ class GLATEventCube;
 /***********************************************************************//**
  * @class GLATEventBin
  *
- * @brief GLATEventBin class interface defintion.
+ * @brief Fermi-LAT event bin class
+ *
+ * This class implement a counts map bin for the Fermi-LAT telescope.
  ***************************************************************************/
 class GLATEventBin : public GEventBin {
 
@@ -47,18 +48,19 @@ public:
     virtual ~GLATEventBin(void);
 
     // Operators
-    GLATEventBin& operator= (const GLATEventBin& bin);
+    virtual GLATEventBin& operator= (const GLATEventBin& bin);
 
     // Implemented pure virtual base class methods
-    void               clear(void);
-    GLATEventBin*      clone(void) const;
-    double             size(void) const;
-    const GLATInstDir& dir(void) const { return *m_dir; }
-    const GEnergy&     energy(void) const { return *m_energy; }
-    const GTime&       time(void) const { return *m_time; }
-    double             counts(void) const { return *m_counts; }
-    double             error(void) const;
-    std::string        print(void) const;
+    virtual void               clear(void);
+    virtual GLATEventBin*      clone(void) const;
+    virtual double             size(void) const;
+    virtual const GLATInstDir& dir(void) const { return *m_dir; }
+    virtual const GEnergy&     energy(void) const { return *m_energy; }
+    virtual const GTime&       time(void) const { return *m_time; }
+    virtual double             counts(void) const { return *m_counts; }
+    virtual double             error(void) const;
+    virtual void               counts(const double& counts) { *m_counts=counts; }
+    virtual std::string        print(void) const;
 
     // Other methods
     const double&  omega(void) const { return *m_omega; }

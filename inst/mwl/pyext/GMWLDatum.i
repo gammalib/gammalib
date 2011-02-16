@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GMWLDatum.i  -  Multi-wavelength spectral point class python I/F    *
+ *         GMWLDatum.i  -  Multi-wavelength spectral point class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GMWLDatum.i
- * @brief GMWLDatum class python interface
+ * @brief Multi-wavelength spectral point class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -24,7 +24,7 @@
 /***********************************************************************//**
  * @class GMWLDatum
  *
- * @brief GMWLDatum class interface defintion
+ * @brief Multi-wavelength spectral point class
  *
  * This class defines a spectral data point for the multi-wavelength
  * interface. It derives from the abstract GEventBin base class.
@@ -36,20 +36,23 @@ public:
     GMWLDatum(const GMWLDatum& datum);
     virtual ~GMWLDatum(void);
 
-    // Event access methods
-    const GEnergy&  energy(void) const { return m_eng; }
-    const GInstDir& dir(void) const { return m_dir; }
-    const GTime&    time(void) const { return m_time; }
-    double          counts(void) const { return m_flux; }
-    double          error(void) const;
+    // Implemented pure virtual base class methods
+    virtual void               clear(void);
+    virtual GMWLDatum*         clone(void) const;
+    virtual double             size(void) const;
+    virtual const GInstDir&    dir(void) const;
+    virtual const GEnergy&     energy(void) const;
+    virtual const GTime&       time(void) const;
+    virtual double             counts(void) const;
+    virtual double             error(void) const;
+    virtual void               counts(const double& counts);
 
     // Other methods
-    void        clear(void);
-    GMWLDatum*  clone(void) const;
-    double      size(void) const { return 1.0; }
-    GEnergy     energy_err(void) const { return m_eng_err; }
-    double      flux(void) const { return m_flux; }
-    double      flux_err(void) const { return m_flux_err; }
+    GEnergy energy_err(void) const;
+    double  flux(void) const;
+    double  flux_err(void) const;
+    void    flux(const double& flux);
+    void    flux_err(const double& flux_err);
 };
 
 
@@ -57,10 +60,6 @@ public:
  * @brief GMWLDatum class extension
  ***************************************************************************/
 %extend GMWLDatum {
-    char *__str__() {
-        static std::string result = self->print();
-        return ((char*)result.c_str());
-    }
     GMWLDatum copy() {
         return (*self);
     }

@@ -24,7 +24,7 @@
 /***********************************************************************//**
  * @class GCTAEventBin
  *
- * @brief CTA event bin class Python interface
+ * @brief CTA event bin class
  ***************************************************************************/
 class GCTAEventBin : public GEventBin {
 
@@ -38,14 +38,15 @@ public:
     virtual ~GCTAEventBin(void);
 
     // Implemented pure virtual base class methods
-    void               clear(void);
-    GCTAEventBin*      clone(void) const;
-    double             size(void) const;
-    const GCTAInstDir& dir(void) const;
-    const GEnergy&     energy(void) const;
-    const GTime&       time(void) const;
-    double             counts(void) const;
-    double             error(void) const;
+    virtual void               clear(void);
+    virtual GCTAEventBin*      clone(void) const;
+    virtual double             size(void) const;
+    virtual const GCTAInstDir& dir(void) const;
+    virtual const GEnergy&     energy(void) const;
+    virtual const GTime&       time(void) const;
+    virtual double             counts(void) const;
+    virtual double             error(void) const;
+    virtual void               counts(const double& counts);
 
     // Other methods
     const double&  omega(void) const;
@@ -72,7 +73,7 @@ public:
         GCTAEventBin* bin = dynamic_cast<GCTAEventBin*>(event);
         if (bin == NULL)
             throw GException::bad_type("cast_GCTAEventBin(GEvent*)",
-                                       "GEvent not of type GCTAEventBin");            
+                                       "GEvent not of type GCTAEventBin");
         return bin;
     }
 %}

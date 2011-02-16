@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GMWLDatum.hpp
- * @brief GMWLDatum class interface definition.
+ * @brief Multi-wavelength spectral point class interface definition
  * @author J. Knodlseder
  */
 
@@ -20,8 +20,6 @@
 #define GMWLDATUM_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GLog.hpp"
 #include "GEventBin.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
@@ -31,7 +29,7 @@
 /***********************************************************************//**
  * @class GMWLDatum
  *
- * @brief GMWLDatum class interface defintion
+ * @brief Multi-wavelength spectral point class
  *
  * This class defines a spectral data point for the multi-wavelength
  * interface. It derives from the abstract GEventBin base class.
@@ -41,10 +39,6 @@ class GMWLDatum : public GEventBin {
     // Friend classes
     friend class GMWLSpectrum;   //!< Needs access to load data
 
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GMWLDatum& datum);
-    friend GLog&         operator<< (GLog& log, const GMWLDatum& datum);
-
 public:
     // Constructors and destructors
     GMWLDatum(void);
@@ -52,23 +46,26 @@ public:
     virtual ~GMWLDatum(void);
 
     // Operators
-    GMWLDatum& operator= (const GMWLDatum& datum);
+    virtual GMWLDatum& operator= (const GMWLDatum& datum);
 
-    // Event access methods
-    const GEnergy&  energy(void) const { return m_eng; }
-    const GInstDir& dir(void) const { return m_dir; }
-    const GTime&    time(void) const { return m_time; }
-    double          counts(void) const { return m_flux; }
-    double          error(void) const;
+    // Implemented pure virtual base class methods
+    virtual void               clear(void);
+    virtual GMWLDatum*         clone(void) const;
+    virtual double             size(void) const { return 1.0; }
+    virtual const GInstDir&    dir(void) const { return m_dir; }
+    virtual const GEnergy&     energy(void) const { return m_eng; }
+    virtual const GTime&       time(void) const { return m_time; }
+    virtual double             counts(void) const { return m_flux; }
+    virtual double             error(void) const;
+    virtual void               counts(const double& counts) { m_flux=counts; }
+    virtual std::string        print(void) const;
 
     // Other methods
-    void        clear(void);
-    GMWLDatum*  clone(void) const;
-    double      size(void) const { return 1.0; }
-    GEnergy     energy_err(void) const { return m_eng_err; }
-    double      flux(void) const { return m_flux; }
-    double      flux_err(void) const { return m_flux_err; }
-    std::string print(void) const;
+    GEnergy energy_err(void) const { return m_eng_err; }
+    double  flux(void) const { return m_flux; }
+    double  flux_err(void) const { return m_flux_err; }
+    void    flux(const double& flux) { m_flux=flux; }
+    void    flux_err(const double& flux_err) { m_flux_err=flux_err; }
 
 protected:
     // Protected methods

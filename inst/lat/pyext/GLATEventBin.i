@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventBin.i
- * @brief LAT event bin class Python interface definition
+ * @brief Fermi-LAT event bin class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -24,7 +24,7 @@
 /***********************************************************************//**
  * @class GLATEventBin
  *
- * @brief LAT event bin class Python interface
+ * @brief Fermi-LAT event bin class
  ***************************************************************************/
 class GLATEventBin : public GEventBin {
 
@@ -38,14 +38,15 @@ public:
     virtual ~GLATEventBin(void);
 
     // Implemented pure virtual base class methods
-    void               clear(void);
-    GLATEventBin*      clone(void) const;
-    double             size(void) const;
-    const GLATInstDir& dir(void) const;
-    const GEnergy&     energy(void) const;
-    const GTime&       time(void) const;
-    double             counts(void) const;
-    double             error(void) const;
+    virtual void               clear(void);
+    virtual GLATEventBin*      clone(void) const;
+    virtual double             size(void) const;
+    virtual const GLATInstDir& dir(void) const;
+    virtual const GEnergy&     energy(void) const;
+    virtual const GTime&       time(void) const;
+    virtual double             counts(void) const;
+    virtual double             error(void) const;
+    virtual void               counts(const double& counts);
 
     // Other methods
     const double&  omega(void) const;
@@ -76,7 +77,7 @@ public:
         GLATEventBin* bin = dynamic_cast<GLATEventBin*>(event);
         if (bin == NULL)
             throw GException::bad_type("cast_GLATEventBin(GEvent*)",
-                                       "GEvent not of type GLATEventBin");            
+                                       "GEvent not of type GLATEventBin");
         return bin;
     }
 %}

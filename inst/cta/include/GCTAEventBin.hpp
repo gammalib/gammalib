@@ -53,18 +53,19 @@ public:
     virtual ~GCTAEventBin(void);
 
     // Operators
-    GCTAEventBin& operator= (const GCTAEventBin& bin);
+    virtual GCTAEventBin& operator= (const GCTAEventBin& bin);
 
     // Implemented pure virtual base class methods
-    void               clear(void);
-    GCTAEventBin*      clone(void) const;
-    double             size(void) const;
-    const GCTAInstDir& dir(void) const { return *m_dir; }
-    const GEnergy&     energy(void) const { return *m_energy; }
-    const GTime&       time(void) const { return *m_time; }
-    double             counts(void) const { return *m_counts; }
-    double             error(void) const;
-    std::string        print(void) const;
+    virtual void               clear(void);
+    virtual GCTAEventBin*      clone(void) const;
+    virtual double             size(void) const;
+    virtual const GCTAInstDir& dir(void) const { return *m_dir; }
+    virtual const GEnergy&     energy(void) const { return *m_energy; }
+    virtual const GTime&       time(void) const { return *m_time; }
+    virtual double             counts(void) const { return *m_counts; }
+    virtual double             error(void) const;
+    virtual void               counts(const double& counts) { *m_counts=counts; }
+    virtual std::string        print(void) const;
 
     // Other methods
     const double&  omega(void) const { return *m_omega; }

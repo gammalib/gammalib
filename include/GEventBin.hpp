@@ -76,6 +76,7 @@ public:
     virtual const GTime&    time(void) const = 0;
     virtual double          counts(void) const = 0;
     virtual double          error(void) const = 0;
+    virtual void            counts(const double& counts) = 0;
     virtual std::string     print(void) const = 0;
 
     // Other methods
