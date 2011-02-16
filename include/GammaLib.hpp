@@ -137,6 +137,7 @@
 #include "GModelSpatialPtsrc.hpp"
 #include "GModelSpatialGauss.hpp"
 #include "GModelSpatialShell.hpp"
+#include "GModelSpatialDisk.hpp"
 #include "GModelSpatialConst.hpp"
 #include "GModelSpatialCube.hpp"
 #include "GModelSpectral.hpp"
