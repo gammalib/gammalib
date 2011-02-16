@@ -238,8 +238,8 @@ void GSkyDir::celvector(const GVector& vector)
     m_has_radec = true;
 
     // Convert vector into sky position
-    m_dec = asin(vector[2]);
-    m_ra  = atan2(vector[1], vector[0]);
+    m_dec = std::asin(vector[2]);
+    m_ra  = std::atan2(vector[1], vector[0]);
 
     // Return
     return;
@@ -419,10 +419,10 @@ GVector GSkyDir::celvector(void) const
         gal2equ();
 
     // Compute 3D vector
-    double  cosra  = cos(m_ra);
-    double  sinra  = sin(m_ra);
-    double  cosdec = cos(m_dec);
-    double  sindec = sin(m_dec);
+    double  cosra  = std::cos(m_ra);
+    double  sinra  = std::sin(m_ra);
+    double  cosdec = std::cos(m_dec);
+    double  sindec = std::sin(m_dec);
     GVector vector(cosdec*cosra, cosdec*sinra, sindec);
 
     // Return vector
@@ -443,32 +443,28 @@ double GSkyDir::dist(const GSkyDir& dir) const
     // Compute dependent on coordinate system availability. This speeds
     // up things by avoiding unnecessary coordinate transformations.
     if (m_has_lb && dir.m_has_lb) {
-        cosdis = sin(m_b)*sin(dir.m_b) +
-                 cos(m_b)*cos(dir.m_b) * cos(dir.m_l - m_l);
+        cosdis = std::sin(m_b)*std::sin(dir.m_b) +
+                 std::cos(m_b)*std::cos(dir.m_b) * std::cos(dir.m_l - m_l);
     }
     else if (m_has_radec && dir.m_has_radec) {
-        cosdis = sin(m_dec)*sin(dir.m_dec) +
-                 cos(m_dec)*cos(dir.m_dec) * cos(dir.m_ra - m_ra);
+        cosdis = std::sin(m_dec)*std::sin(dir.m_dec) +
+                 std::cos(m_dec)*std::cos(dir.m_dec) * std::cos(dir.m_ra - m_ra);
     }
     else if (m_has_lb) {
-        cosdis = sin(m_b)*sin(dir.b()) +
-                 cos(m_b)*cos(dir.b()) * cos(dir.l() - m_l);
+        cosdis = std::sin(m_b)*std::sin(dir.b()) +
+                 std::cos(m_b)*std::cos(dir.b()) * std::cos(dir.l() - m_l);
     }
     else if (m_has_radec) {
         cosdis = sin(m_dec)*sin(dir.dec()) +
-                 cos(m_dec)*cos(dir.dec()) * cos(dir.ra() - m_ra);
+                 cos(m_dec)*cos(dir.dec()) * std::cos(dir.ra() - m_ra);
     }
     else {
-        cosdis = sin(dec())*sin(dir.dec()) +
-                 cos(dec())*cos(dir.dec()) * cos(dir.ra() - ra());
+        cosdis = std::sin(dec())*std::sin(dir.dec()) +
+                 std::cos(dec())*std::cos(dir.dec()) * std::cos(dir.ra() - ra());
     }
 
-    // Put cosine of distance in [-1,1]
-    if (cosdis < -1.0) cosdis = -1.0;
-    if (cosdis >  1.0) cosdis =  1.0;
-
-    // Compute distance
-    double dist = acos(cosdis);
+    // Compute distance (use argument save GTools function)
+    double dist = arccos(cosdis);
 
     // Return distance
     return dist;
@@ -690,18 +686,18 @@ void GSkyDir::euler(const int& type, const double& xin, const double &yin,
     // Perform transformation
     double a    = xin - phi[type];
     double b    = yin;
-    double sb   = sin(b);
-    double cb   = cos(b);
-    double cbsa = cb * sin(a);
+    double sb   = std::sin(b);
+    double cb   = std::cos(b);
+    double cbsa = cb * std::sin(a);
 
     //
-    a = atan2(ctheta[type] * cbsa + stheta[type] * sb, cb * cos(a));
+    a = std::atan2(ctheta[type] * cbsa + stheta[type] * sb, cb * std::cos(a));
     b = -stheta[type] * cbsa + ctheta[type] * sb;
     if (b > 1.0)
         b = 1.0;
 
     //
-    *yout = asin(b);
+    *yout = std::asin(b);
     *xout = modulo((a+psi[type] + fourpi), twopi);
 
     // Return
@@ -745,5 +741,4 @@ GLog& operator<< (GLog& log, const GSkyDir& dir)
     // Return logger
     return log;
 }
-
 
