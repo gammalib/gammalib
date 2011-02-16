@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GPointing.i  -  Pointing class python bindings             *
+ *                 GPointing.i  -  Abstract pointing class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,19 +12,20 @@
  ***************************************************************************/
 /**
  * @file GPointing.i
- * @brief GPointing class SWIG file.
+ * @brief Abstract pointing class Python interface definition.
  * @author J. Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GPointing.hpp"
+#include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
  * @class GPointing
  *
- * @brief Pointing class
+ * @brief Abstract Pointing class
  ***************************************************************************/
 class GPointing {
 
@@ -35,5 +36,17 @@ public:
     virtual ~GPointing(void);
 
     // Pure virtual methods
-    virtual GPointing* clone(void) const = 0;
+    virtual void           clear(void) = 0;
+    virtual GPointing*     clone(void) const = 0;
+    virtual const GSkyDir& dir(void) const = 0;
+};
+
+
+/***********************************************************************//**
+ * @brief GPointing class extension
+ ***************************************************************************/
+%extend GPointing {
+    char *__str__() {
+        return tochar(self->print());
+    }
 };
