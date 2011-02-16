@@ -12,12 +12,13 @@
  ***************************************************************************/
 /**
  * @file GIntegral.cpp
- * @brief GIntegral class implementation.
+ * @brief Integration class implementation
  * @author J. Knodlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #include <cmath>            // For std::abs()
+#include <vector>
 #include "GIntegral.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -174,10 +175,14 @@ double GIntegral::romb(double a, double b, int k)
 
         // Integration using Trapezoid rule
         s[m_iter] = trapzd(a, b, m_iter, s[m_iter-1]);
+if (std::isnan(s[m_iter]))
+    std::cout << "*** polint NaN trapzd m_iter=" << m_iter << std::endl;
 
         // Starting from iteration k on, use polynomial interpolation
         if (m_iter >= k) {
-            polint(&h[m_iter-k], &s[m_iter-k], k, 0.0, &ss, &dss);
+            ss = polint(&h[m_iter-k], &s[m_iter-k], k, 0.0, &dss);
+if (std::isnan(ss))
+    std::cout << "*** polint NaN m_iter=" << m_iter << std::endl;
             if (std::abs(dss) <= m_eps * std::abs(ss)) {
                 converged = true;
                 result    = ss;
@@ -262,7 +267,6 @@ void GIntegral::free_members(void)
  * @param[in] ya Pointer to array of Y values.
  * @param[in] n Number of elements in arrays.
  * @param[in] x X value at which interpolations should be performed.
- * @param[out] y Interpolated Y value.
  * @param[out] dy Error estimate for interpolated values.
  *
  * Given arrays xa[1,..,n] and ya[1,..,n], and given a value x, this
@@ -270,10 +274,66 @@ void GIntegral::free_members(void)
  * polynomial of degree n-1, then the returned value y=P(x).
  *
  * @todo Implement exceptions instead of screen dump.
+ * @todo Use std::vector for xa and ya and start at 0
  ***************************************************************************/
-void GIntegral::polint(double* xa, double* ya, int n, double x, double *y,
-                       double *dy)
+double GIntegral::polint(double* xa, double* ya, int n, double x, double *dy)
 {
+    // Initialise result
+    double y = 0.0;
+
+    // Allocate temporary memory
+    std::vector<double> c(n, 0.0);
+    std::vector<double> d(n, 0.0);
+
+    // Compute initial distance to first node
+    double dif = std::abs(x-xa[1]);
+
+    // Find index ns of the closest table entry
+    int ns = 0;
+    for (int i = 0; i < n; ++i) {
+        double dift = std::abs(x-xa[i+1]);
+        if (dift < dif) {
+            ns  = i;
+            dif = dift;
+        }
+        c[i] = ya[i+1];
+        d[i] = ya[i+1];
+    }
+
+    // Get initial approximation to y
+    y = ya[ns+1];
+    ns--;
+
+    // Loop over each column of the tableau
+    for (int m = 1; m < n; ++m) {
+
+        // Update current c's and d's
+        for (int i = 0; i < n-m; ++i) {
+            double ho  = xa[i+1]   - x;
+            double hp  = xa[i+m+1] - x;
+            double w   = c[i+1] - d[i];
+            double den = ho - hp;
+            if (den == 0.0) {
+                std::cout << "GIntegral::polint: an error occured. "
+                          << "This error can only occur if two input xa's are identical."
+                          << std::endl;
+            }
+            den  = w/den;
+            d[i] = hp*den;
+            c[i] = ho*den;
+        }
+
+        // Compute y correction
+        *dy = (2*(ns+1) < (n-m)) ? c[ns+1] : d[ns--];
+if (std::isnan(*dy))
+    std::cout << "*** polint NaN dy=" << *dy << std::endl;
+
+        // Update y
+        y += *dy;
+
+    } // endfor: looped over columns of tableau
+
+/*
     // Allocate temporary memory
     double* c = new double[n+1];
     double* d = new double[n+1];
@@ -326,9 +386,9 @@ void GIntegral::polint(double* xa, double* ya, int n, double x, double *y,
     // Delete temporary memory
     delete [] d;
     delete [] c;
-
+*/
     // Return
-    return;
+    return y;
 }
 
 
@@ -365,7 +425,7 @@ double GIntegral::trapzd(double a, double b, int n, double result)
         // Sum up values
         double x   = a + 0.5*del;
         double sum = 0.0;
-        for (int j = 1; j <= it; ++j, x+=del)
+        for (int j = 0; j < it; ++j, x+=del)
             sum += m_integrand->eval(x);
 
         // Set result

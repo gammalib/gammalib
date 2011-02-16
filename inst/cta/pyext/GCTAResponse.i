@@ -53,12 +53,12 @@ public:
     void           load(const std::string& rspname);
 
     // Other response methods
-    double ptirf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                 const GObservation& obs) const;
-    double diffirf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                   const GModelSky& model, const GEnergy& srcEng, const GTime& srcTime,
-                   const GObservation& obs) const;
+    double irf_ptsrc(const GCTAInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                     const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                     const GCTAObservation& obs) const;
+    double irf_diffuse(const GCTAInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                       const GModelSky& model, const GEnergy& srcEng, const GTime& srcTime,
+                       const GCTAObservation& obs) const;
     double aeff(const double& theta, const double& phi,
                 const double& zenith, const double& azimuth,
                 const double& srcLogEng) const;
@@ -66,6 +66,9 @@ public:
                const double& theta, const double& phi,
                const double& zenith, const double& azimuth,
                const double& srcLogEng) const;
+    double psf_delta_max(const double& theta, const double& phi,
+                         const double& zenith, const double& azimuth,
+                         const double& srcLogEng) const;
     double edisp(const double& obsLogEng,
                  const double& theta, const double& phi,
                  const double& zenith, const double& azimuth,
@@ -89,3 +92,17 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GCTAResponse type casts
+ ***************************************************************************/
+%inline %{
+    GCTAResponse* cast_GCTAResponse(GResponse* arg) {
+        GCTAResponse* rsp = dynamic_cast<GCTAResponse*>(arg);
+        if (rsp == NULL)
+            throw GException::bad_type("cast_GCTAResponse(GResponse*)",
+                                       "GResponse not of type GCTAResponse");
+        return rsp;
+    }
+%}

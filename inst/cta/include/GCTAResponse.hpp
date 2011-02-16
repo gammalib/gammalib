@@ -20,10 +20,8 @@
 #define GCTARESPONSE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <vector>
 #include <cmath>
-#include "GCTAEventAtom.hpp"
-#include "GCTAEventBin.hpp"
+#include <vector>
 #include "GEvent.hpp"
 #include "GModel.hpp"
 #include "GObservation.hpp"
@@ -39,6 +37,12 @@
 #include "GPhoton.hpp"
 #include "GNodeArray.hpp"
 #include "GIntegrand.hpp"
+#include "GCTAEventAtom.hpp"
+#include "GCTAEventBin.hpp"
+#include "GCTAInstDir.hpp"
+
+/* __ Forward declaration ________________________________________________ */
+class GCTAObservation;
 
 
 /***********************************************************************//**
@@ -78,12 +82,12 @@ public:
     void           load(const std::string& rspname);
 
     // Other response methods
-    double ptirf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                 const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                 const GObservation& obs) const;
-    double diffirf(const GInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                   const GModelSky& model, const GEnergy& srcEng, const GTime& srcTime,
-                   const GObservation& obs) const;
+    double irf_ptsrc(const GCTAInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                     const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
+                     const GCTAObservation& obs) const;
+    double irf_diffuse(const GCTAInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
+                       const GModelSky& model, const GEnergy& srcEng, const GTime& srcTime,
+                       const GCTAObservation& obs) const;
     double aeff(const double& theta, const double& phi,
                 const double& zenith, const double& azimuth,
                 const double& srcLogEng) const;
@@ -91,6 +95,9 @@ public:
                const double& theta, const double& phi,
                const double& zenith, const double& azimuth,
                const double& srcLogEng) const;
+    double psf_delta_max(const double& theta, const double& phi,
+                         const double& zenith, const double& azimuth,
+                         const double& srcLogEng) const;
     double edisp(const double& obsLogEng,
                  const double& theta, const double& phi,
                  const double& zenith, const double& azimuth,
@@ -110,6 +117,33 @@ private:
     void copy_members(const GCTAResponse& rsp);
     void free_members(void);
     void read_performance_table(const std::string& filename);
+
+    // Integration
+    class psf_kern_theta : public GIntegrand {
+    public:
+        psf_kern_theta(const GCTAResponse* parent,
+                       double dist, double pa, double delta_max,
+                       double zenith, double azimuth,
+                       double sigma) :
+                       m_parent(parent), m_dist(dist),
+                       m_cos_dist(std::cos(dist)), m_sin_dist(std::sin(dist)),
+                       m_pa(pa), m_delta_max(delta_max),
+                       m_cos_delta_max(std::cos(delta_max)),
+                       m_zenith(zenith), m_azimuth(azimuth),
+                       m_sigma(sigma) { return; }
+        double eval(double theta);
+    protected:
+        const GCTAResponse* m_parent;        //!< Pointer to response
+        double              m_dist;          //!< Distance
+        double              m_cos_dist;      //!< Cosine of distance
+        double              m_sin_dist;      //!< Cosine of distance
+        double              m_pa;            //!< Position angle
+        double              m_delta_max;     //!< delta_max
+        double              m_cos_delta_max; //!< cosine of delta_max
+        double              m_zenith;        //!< Telescope zenith
+        double              m_azimuth;       //!< Telescope azimuth
+        double              m_sigma;         //!< Width of PSF in radians
+    };
 
     // Integration
     class psf_kern_phi : public GIntegrand {

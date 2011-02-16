@@ -28,10 +28,10 @@
 #include "GTools.hpp"
 #include "GIntegral.hpp"
 #include "GIntegrand.hpp"
+#include "GCTAObservation.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAEventList.hpp"
-#include "GCTAInstDir.hpp"
 #include "GCTARoi.hpp"
 #include "GCTAException.hpp"
 #include "GCTASupport.hpp"
@@ -40,14 +40,12 @@
 #define G_CALDB                           "GCTAResponse::caldb(std::string&)"
 #define G_IRF      "GCTAResponse::irf(GEvent&, GModelSky&, GEnergy&, GTime&,"\
                                                             " GObservation&)"
-#define G_IRF_ATOM     "GCTAResponse::irf(GCTAEventAtom&, GModel&, GEnergy&,"\
-                                                    " GTime&, GObservation&)"
-#define G_IRF_BIN       "GCTAResponse::irf(GCTAEventBin&, GModel&, GEnergy&,"\
-                                                    " GTime&, GObservation&)"
 #define G_NPRED1             "GCTAResponse::npred(GModel&, GEnergy&, GTime&,"\
                                                             " GObservation&)"
 #define G_NPRED2            "GCTAResponse::npred(GSkyDir&, GEnergy&, GTime&,"\
                                                             " GObservation&)"
+#define G_IRF_DIFFUSE        "GCTAResponse::irf_diffuse(GInstDir&, GEnergy&,"\
+                      " GTime&, GModelSky&, GEnergy&, GTime&, GObservation&)"
 #define G_READ           "GCTAResponse::read_performance_table(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -211,6 +209,11 @@ GCTAResponse* GCTAResponse::clone(void) const
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
+ *
+ * @exception GCTAException::bad_observation_type
+ *            Observation is not a CTA observation.
+ * @exception GCTAException::bad_instdir_type
+ *            Instrument direction is not a CTA instrument direction.
  ***************************************************************************/
 double GCTAResponse::irf(const GEvent& event, const GModelSky& model,
                          const GEnergy& srcEng, const GTime& srcTime,
@@ -219,18 +222,28 @@ double GCTAResponse::irf(const GEvent& event, const GModelSky& model,
     // Initialise IRF value
     double irf = 0.0;
 
-    // Get model pointers
+    // Get pointer on CTA observation
+    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+    if (ctaobs == NULL)
+        throw GCTAException::bad_observation_type(G_IRF);
+
+    // Get pointer on CTA instrument direction
+    const GCTAInstDir* ctadir = dynamic_cast<const GCTAInstDir*>(&event.dir());
+    if (ctadir == NULL)
+        throw GCTAException::bad_instdir_type(G_IRF);
+
+    // Get pointer on point source spatial component
     GModelSpatialPtsrc* ptsrc = dynamic_cast<GModelSpatialPtsrc*>(model.spatial());
 
     // If model is a point source then compute point source IRF
     if (ptsrc != NULL)
-        irf = ptirf(event.dir(), event.energy(), event.time(),
-                    ptsrc->dir(), srcEng, srcTime, obs);
+        irf = irf_ptsrc(*ctadir, event.energy(), event.time(),
+                        ptsrc->dir(), srcEng, srcTime, *ctaobs);
 
     // ... otherwise compute diffuse IRF
     else
-        irf = diffirf(event.dir(), event.energy(), event.time(),
-                      model, srcEng, srcTime, obs);
+        irf = irf_diffuse(*ctadir, event.energy(), event.time(),
+                          model, srcEng, srcTime, *ctaobs);
 
     // Return IRF value
     return irf;
@@ -244,6 +257,8 @@ double GCTAResponse::irf(const GEvent& event, const GModelSky& model,
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
+ *
+ * @todo Implement diffuse computation.
  ***************************************************************************/
 double GCTAResponse::npred(const GModelSky& model, const GEnergy& srcEng,
                            const GTime& srcTime, const GObservation& obs) const
@@ -252,15 +267,12 @@ double GCTAResponse::npred(const GModelSky& model, const GEnergy& srcEng,
     double rsp = 0.0;
 
     // Get model pointers
-    GModelSpatialPtsrc* ptsrc = dynamic_cast<GModelSpatialPtsrc*>(model.spatial());
+    GModelSpatialPtsrc* ptsrc =
+                        dynamic_cast<GModelSpatialPtsrc*>(model.spatial());
 
-    // If model is a point source then return the point source IRF
-    if (ptsrc != NULL) {
-
-        // Compute IRF
+    // If model is a point source then compute the point source IRF
+    if (ptsrc != NULL)
         rsp = npred(ptsrc->dir(), srcEng, srcTime, obs);
-
-    } // endif: model was point source
 
     // ... otherwise return diffuse IRF
     else {
@@ -287,6 +299,8 @@ double GCTAResponse::npred(const GModelSky& model, const GEnergy& srcEng,
  * Simulates a CTA event using the response function from an incident photon.
  * If the event is not detected a NULL pointer is returned.
  *
+ * @todo Implement computation of telescope pointing and radial offset and
+ *       polar angles.
  * @todo Implement energy dispersion.
  ***************************************************************************/
 GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
@@ -358,7 +372,7 @@ void GCTAResponse::caldb(const std::string& caldb)
     // Check if calibration database directory is accessible
     if (access(caldb.c_str(), R_OK) != 0)
         throw GException::caldb_not_found(G_CALDB, caldb);
-    
+
     // Store the path to the calibration database
     m_caldb = caldb;
 
@@ -448,13 +462,15 @@ std::string GCTAResponse::print(void) const
  *       and polar angles in the camera are not yet computed correctly (as
  *       the actual IRF implement does not need these values).
  ***************************************************************************/
-double GCTAResponse::ptirf(const GInstDir& obsDir, const GEnergy& obsEng,
-                           const GTime& obsTime,
-                           const GSkyDir& srcDir, const GEnergy& srcEng,
-                           const GTime& srcTime, const GObservation& obs) const
+double GCTAResponse::irf_ptsrc(const GCTAInstDir& obsDir, const GEnergy& obsEng,
+                               const GTime& obsTime,
+                               const GSkyDir& srcDir, const GEnergy& srcEng,
+                               const GTime& srcTime, const GCTAObservation& obs) const
 {
+    // Get CTA pointing
+    const GCTAPointing* pnt = obs.pointing(srcTime);
+
     // Get pointing direction zenith angle and azimuth
-    const GPointing *pnt = obs.pointing(srcTime);
     double zenith  = 0.0;
     double azimuth = 0.0;
 
@@ -467,22 +483,33 @@ double GCTAResponse::ptirf(const GInstDir& obsDir, const GEnergy& obsEng,
 
     // Determine angular separation between true and measured photon
     // direction in radians
-    double delta = ((GCTAInstDir*)&obsDir)->dist(srcDir);
+    double delta = obsDir.dist(srcDir);
 
-    // Get point source IRF
-    double irf = aeff(theta, phi, zenith, azimuth, srcLogEng);
-    irf       *= psf(delta, theta, phi, zenith, azimuth, srcLogEng);
+    // Get maximum angular separation for which PSF is significant
+    double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
 
-    // Multiply-in energy dispersion
-    if (hasedisp()) {
+    // Initialise IRF value
+    double irf = 0.0;
 
-        // Get log10(E/TeV) of measured photon energy.
-        double obsLogEng = obsEng.log10TeV();
+    // Compute only if we're sufficiently close to PSF
+    if (delta <= delta_max) {
+
+        // Get point source IRF
+        irf  = aeff(theta, phi, zenith, azimuth, srcLogEng);
+        irf *= psf(delta, theta, phi, zenith, azimuth, srcLogEng);
 
         // Multiply-in energy dispersion
-        irf *= edisp(obsLogEng, theta, phi, zenith, azimuth, srcLogEng);
+        if (hasedisp()) {
 
-    } // endif: energy dispersion was available
+            // Get log10(E/TeV) of measured photon energy.
+            double obsLogEng = obsEng.log10TeV();
+
+            // Multiply-in energy dispersion
+            irf *= edisp(obsLogEng, theta, phi, zenith, azimuth, srcLogEng);
+
+        } // endif: energy dispersion was available
+
+    } // endif: we were sufficiently close to PSF
 
     // Return IRF value
     return irf;
@@ -504,17 +531,53 @@ double GCTAResponse::ptirf(const GInstDir& obsDir, const GEnergy& obsEng,
  *       and polar angles in the camera are not yet computed correctly (as
  *       the actual IRF implement does not need these values).
  ***************************************************************************/
-double GCTAResponse::diffirf(const GInstDir& obsDir, const GEnergy& obsEng,
-                             const GTime& obsTime,
-                             const GModelSky& model, const GEnergy& srcEng,
-                             const GTime& srcTime, const GObservation& obs) const
+double GCTAResponse::irf_diffuse(const GCTAInstDir& obsDir, const GEnergy& obsEng,
+                                 const GTime& obsTime,
+                                 const GModelSky& model, const GEnergy& srcEng,
+                                 const GTime& srcTime, const GCTAObservation& obs) const
 {
     // Feature not yet implemented
-    throw GException::feature_not_implemented(G_IRF_BIN,
-          "Diffuse IRF not yet implemented.");
+    //throw GException::feature_not_implemented(G_IRF_DIFFUSE,
+    //      "Diffuse IRF not yet implemented.");
+
+    // Get CTA pointing
+    const GCTAPointing* pnt = obs.pointing(srcTime);
+
+    // Get pointing direction zenith angle and azimuth
+    double zenith  = 0.0;
+    double azimuth = 0.0;
+
+    // Get radial offset and polar angles in camera
+    double theta = 0.0;
+    double phi   = 0.0;
+
+    // Get log10(E/TeV) of true photon energy.
+    double srcLogEng = srcEng.log10TeV();
+
+    // Get PSF sigma
+    double sigma = psf_dummy_sigma(srcLogEng);
+
+    // Get maximum angular separation for which PSF is significant
+    double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
+
+    // Determine angular distance and position angle of measured photon
+    // direction with respect to pointing direction (in radians)
+    double dist = pnt->dir().dist(obsDir.skydir());
+    double pa   = pnt->dir().posang(obsDir.skydir());
+
+    // Setup integration function
+    GCTAResponse::psf_kern_theta integrand(this, dist, pa, delta_max, zenith, azimuth, sigma);
+    GIntegral                    integral(&integrand);
+
+    // Integrate over theta
+    double theta_min = (dist > delta_max) ? dist - delta_max : 0.0;
+    double theta_max = dist + delta_max;
+    double irf       = integral.romb(theta_min, theta_max);
+std::cout << "theta_min=" << theta_min << ", theta_max=" << theta_max;
+std::cout << ": " << irf << std::endl;
 
     // Return IRF value
-    return 0.0;
+    return irf;
 }
 
 
@@ -571,6 +634,37 @@ double GCTAResponse::psf(const double& delta,
 
 
 /***********************************************************************//**
+ * @brief Return maximum angular separation (in radians)
+ *
+ * @param[in] theta Radial offset angle in camera (radians).
+ * @param[in] phi Polar angle in camera (radians).
+ * @param[in] zenith Zenith angle of telescope pointing (radians).
+ * @param[in] azimuth Azimuth angle of telescope pointing (radians).
+ * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
+ *
+ * This method returns the maximum angular separation between true and
+ * measured photon directions for which the PSF is non zero. The maximum
+ * separation is actually fixed to 5 sigma, which corresponds to less than
+ * 1e-5 of the central IRF value.
+ *
+ * @todo So far the parameters theta, phi, zenith, and azimuth are not used.
+ ***************************************************************************/
+double GCTAResponse::psf_delta_max(const double& theta, const double& phi,
+                                   const double& zenith, const double& azimuth,
+                                   const double& srcLogEng) const
+{
+    // Determine energy dependent width of PSF
+    double sigma = psf_dummy_sigma(srcLogEng);
+
+    // Set maximum angular separation
+    double delta_max = sigma * 5.0;
+
+    // Return PSF
+    return delta_max;
+}
+
+
+/***********************************************************************//**
  * @brief Return energy dispersion (in units or MeV^-1)
  *
  * @param[in] obsLogEng Log10 of measured photon energy (E/TeV).
@@ -613,7 +707,7 @@ double GCTAResponse::npred(const GSkyDir& srcDir, const GEnergy& srcEng,
     const GCTAEventList* ptr = dynamic_cast<const GCTAEventList*>(obs.events());
     if (ptr == NULL)
         throw GException::no_list(G_NPRED2);
-    
+
     // Get pointing direction zenith angle and azimuth
     const GPointing *pnt = obs.pointing(srcTime);
     double zenith  = 0.0;
@@ -743,6 +837,8 @@ double GCTAResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
  * \f$\sigma\f$ by the relation \f$r=\sigma \sqrt{-2 \ln (1-P)}\f$, where
  * \f$P\f$ is the containment fraction. For 68% one obtains
  * \f$\sigma=0.6624 \times r_{68}\f$.
+ *
+ * @todo The actual PSF is only valid in the small angle approximation.
  ***************************************************************************/
 double GCTAResponse::psf_dummy(const double& delta, const double& sigma) const
 {
@@ -773,6 +869,33 @@ double GCTAResponse::psf_dummy_sigma(const double& srcLogEng) const
 
     // Return result
     return sigma;
+}
+
+
+/***********************************************************************//**
+ * @brief Integration kernel for PSF theta integration
+ *
+ * @param[in] theta Zenith angle angle (radians).
+ ***************************************************************************/
+double GCTAResponse::psf_kern_theta::eval(double theta)
+{
+    // Compute arclength
+    double arc = cta_roi_arclength(theta, m_dist, m_cos_dist, m_sin_dist,
+                                   m_delta_max, m_cos_delta_max);
+
+    double value = arc * std::sin(theta);
+
+if (std::isnan(value)) {
+    std::cout << "*** GCTAResponse::psf_kern_theta::eval NaN";
+    std::cout << " arc=" << arc;
+    std::cout << " std::sin(theta)=" << std::sin(theta);
+    std::cout << " theta=" << theta;
+    std::cout << " value=" << value << std::endl;
+}
+
+    // Return
+//std::cout << "theta=" << theta << ": " << arc << std::endl;
+    return value;
 }
 
 

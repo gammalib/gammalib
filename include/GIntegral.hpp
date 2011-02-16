@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GIntegral.hpp  -  Integration class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GIntegral.hpp
- * @brief GIntegral class interface definition.
+ * @brief Integration class interface definition
  * @author J. Knodlseder
  */
 
@@ -63,7 +63,7 @@ protected:
     void   init_members(void);
     void   copy_members(const GIntegral& integral);
     void   free_members(void);
-    void   polint(double* xa, double* ya, int n, double x, double *y, double *dy);
+    double polint(double* xa, double* ya, int n, double x, double *dy);
     double trapzd(double a, double b, int n, double result);
 
     // Protected data area
