@@ -151,6 +151,42 @@ GEvents::iterator GEvents::end(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Set energy boundaries
+ *
+ * @param[in] ebounds Energy boundaries.
+ ***************************************************************************/
+void GEvents::ebounds(const GEbounds& ebounds)
+{
+    // Store energy boundaries
+    m_ebounds = ebounds;
+
+    // Call (optional) energy boundary update method
+    set_energies();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set Good Time Intervals
+ *
+ * @param[in] gti Good Time Intervals.
+ ***************************************************************************/
+void GEvents::gti(const GGti& gti)
+{
+    // Store Good Time Intervals
+    m_gti = gti;
+
+    // Call (optional) good time interval update method
+    set_times();
+
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                          GEvents event iterator                         =
