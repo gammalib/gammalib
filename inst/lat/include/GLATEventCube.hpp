@@ -67,7 +67,7 @@ public:
 
     // Other methods
     void              time(const GTime& time) { m_time=time; }
-    void              map(const GSkymap& map) { m_map=map; }
+    void              map(const GSkymap& map);
     void              enodes(const GNodeArray& enodes) { m_enodes=enodes; }
     void              ontime(const double& ontime) { m_ontime=ontime; }
     const GTime&      time(void) const { return m_time; }
@@ -85,17 +85,17 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GLATEventCube& cube);
-    void free_members(void);
-    void read_cntmap(const GFitsImage* hdu);
-    void read_srcmap(const GFitsImage* hdu);
-    void read_ebds(const GFitsTable* hdu);
-    void read_gti(const GFitsTable* hdu);
-    void set_directions(void);
-    void set_energies(void);
-    void set_time(void);
-    void set_bin(const int& index);
+    void         init_members(void);
+    void         copy_members(const GLATEventCube& cube);
+    void         free_members(void);
+    void         read_cntmap(const GFitsImage* hdu);
+    void         read_srcmap(const GFitsImage* hdu);
+    void         read_ebds(const GFitsTable* hdu);
+    void         read_gti(const GFitsTable* hdu);
+    void         set_directions(void);
+    virtual void set_energies(void);
+    virtual void set_times(void);
+    void         set_bin(const int& index);
 
     // Protected data area
     GLATEventBin             m_bin;          //!< Actual energy bin

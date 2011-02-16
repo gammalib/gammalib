@@ -33,7 +33,7 @@
 #define G_READ_SRCMAP               "GLATEventCube::read_srcmap(GFitsImage*)"
 #define G_SET_DIRECTIONS                    "GLATEventCube::set_directions()"
 #define G_SET_ENERGIES                        "GLATEventCube::set_energies()"
-#define G_SET_TIME                                "GLATEventCube::set_time()"
+#define G_SET_TIMES                              "GLATEventCube::set_times()"
 #define G_SET_BIN                              "GLATEventCube::set_bin(int&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -381,6 +381,22 @@ int GLATEventCube::number(void) const
 
 
 /***********************************************************************//**
+ * @brief Set event cube from sky map
+ ***************************************************************************/
+void GLATEventCube::map(const GSkymap& map)
+{
+    // Store sky map
+    m_map = map;
+
+    // Compute sky directions
+    set_directions();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print event cube information
  ***************************************************************************/
 std::string GLATEventCube::print(void) const
@@ -709,7 +725,7 @@ void GLATEventCube::read_gti(const GFitsTable* hdu)
         m_gti.read((GFitsTable*)hdu);
 
         // Set time
-        set_time();
+        set_times();
 
     } // endif: HDU was valid
 
@@ -810,11 +826,11 @@ void GLATEventCube::set_energies(void)
  *       weights by the length of the GTIs, yet so far we do not really use
  *       the mean event time, hence there is no rush to implement this.
  ***************************************************************************/
-void GLATEventCube::set_time(void)
+void GLATEventCube::set_times(void)
 {
     // Throw an error if GTI is empty
     if (m_gti.size() < 1)
-        throw GLATException::no_gti(G_SET_TIME, "Every LAT event cube needs"
+        throw GLATException::no_gti(G_SET_TIMES, "Every LAT event cube needs"
                   " associated GTIs to allow the computation of the ontime.");
 
     // Compute mean time
