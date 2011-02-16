@@ -69,14 +69,16 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GCTAEventList& list);
-    void free_members(void);
-    void read_events(const GFitsTable* hdu);
-    void read_ds_ebounds(const GFitsHDU* hdu);
-    void read_ds_roi(const GFitsHDU* hdu);
-    void write_events(GFitsBinTable* hdu) const;
-    void write_ds_keys(GFitsHDU* hdu) const;
+    void         init_members(void);
+    void         copy_members(const GCTAEventList& list);
+    void         free_members(void);
+    virtual void set_energies(void) { return; }
+    virtual void set_times(void) { return; }
+    void         read_events(const GFitsTable* hdu);
+    void         read_ds_ebounds(const GFitsHDU* hdu);
+    void         read_ds_roi(const GFitsHDU* hdu);
+    void         write_events(GFitsBinTable* hdu) const;
+    void         write_ds_keys(GFitsHDU* hdu) const;
 
     // Protected members
     GCTARoi                    m_roi;     //!< Region of interest

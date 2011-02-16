@@ -65,11 +65,13 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GLATEventList& list);
-    void free_members(void);
-    void read_events(const GFitsTable* hdu);
-    void read_ds_keys(const GFitsHDU* hdu);
+    void         init_members(void);
+    void         copy_members(const GLATEventList& list);
+    void         free_members(void);
+    virtual void set_energies(void) { return; }
+    virtual void set_times(void) { return; }
+    void         read_events(const GFitsTable* hdu);
+    void         read_ds_keys(const GFitsHDU* hdu);
 
     // Protected members
     GLATRoi                    m_roi;            //!< Region of interest
