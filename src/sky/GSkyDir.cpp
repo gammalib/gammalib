@@ -276,6 +276,7 @@ void GSkyDir::rotate(const double& phi, const double& theta)
     Rback = transpose(Ry * Rz);
 
     // Set up rotation matrix for native coordinate vector
+    /*
     Ry.eulery(-theta);
     Rz.eulerz(-phi);
     Rrot = Rz * Ry;
@@ -285,6 +286,12 @@ void GSkyDir::rotate(const double& phi, const double& theta)
 
     // Rotate native coordinate vector
     GVector rotnative = Rrot * native;
+    */
+    double  cos_phi   = std::cos(-phi*deg2rad);
+    double  sin_phi   = std::sin(-phi*deg2rad);
+    double  cos_theta = std::cos(-theta*deg2rad);
+    double  sin_theta = std::sin(-theta*deg2rad);
+    GVector rotnative(cos_phi*sin_theta, sin_phi*sin_theta, cos_theta);
 
     // Rotate vector back into sky direction
     GVector dir = Rback * rotnative;
