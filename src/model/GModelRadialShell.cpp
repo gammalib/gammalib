@@ -20,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GModelRadialShell.hpp"
@@ -231,7 +230,7 @@ GModelRadialShell* GModelRadialShell::clone(void) const
  *  \begin{array}{l l}
  *     \displaystyle
  *     \sqrt{ \theta_{\rm out}^2 - \theta^2 } -
-       \sqrt{ \theta_{\rm in}^2  - \theta^2 }
+ *     \sqrt{ \theta_{\rm in}^2  - \theta^2 }
  *     & \mbox{if $\theta \le \theta_{\rm in}$} \\
  *     \\
  *    \displaystyle
@@ -252,7 +251,7 @@ GModelRadialShell* GModelRadialShell::clone(void) const
  *  \begin{array}{l l}
  *     \displaystyle
  *     \sqrt{ \sin^2 \theta_{\rm out} - \sin^2 \theta } -
-       \sqrt{ \sin^2 \theta_{\rm in}  - \sin^2 \theta }
+ *     \sqrt{ \sin^2 \theta_{\rm in}  - \sin^2 \theta }
  *     & \mbox{if $\theta \le \theta_{\rm in}$} \\
  *     \\
  *    \displaystyle
