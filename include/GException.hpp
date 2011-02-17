@@ -519,7 +519,16 @@ public:
         model_not_found(std::string origin, std::string name,
                         std::string message = "");
     };
-
+    class no_point_source : public GExceptionHandler {
+    public:
+        no_point_source(std::string origin, std::string name,
+                        std::string message = "");
+    };
+    class no_extended_source : public GExceptionHandler {
+    public:
+        no_extended_source(std::string origin, std::string name,
+                           std::string message = "");
+    };
 
     // CSV exceptions
     class csv_bad_columns : public GExceptionHandler {
