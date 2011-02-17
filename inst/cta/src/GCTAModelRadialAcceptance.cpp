@@ -645,7 +645,7 @@ std::string GCTAModelRadialAcceptance::print(void) const
     if (n_temporal > 0)
         result.append("\""+temporal()->type()+"\"");
 
-
+    // Append parameters
     result.append("\n"+parformat("Number of parameters")+str(size()));
     result.append("\n"+parformat("Number of radial par's")+str(n_radial));
     for (int i = 0; i < n_radial; ++i)
