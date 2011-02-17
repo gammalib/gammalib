@@ -51,6 +51,33 @@ def shell_model(ra=0.3, dec=0.3, radius=0.3, width=0.1):
 	model = GModelExtendedSource(radial, spectral)
 	
 	# Optionally show model
+	#print model
+	
+	# Return model
+	return model
+
+
+# =============== #
+# Set disk model #
+# =============== #
+def disk_model(ra=359.6, dec=-0.2, radius=0.4):
+	"""
+	Set shell model.
+	"""
+	# Set disk centre
+	center = GSkyDir()
+	center.radec_deg(ra, dec)
+	
+	# Set radial model
+	radial = GModelRadialDisk(center, radius)
+	
+	# Set spectral model
+	spectral = GModelSpectralPlaw(1.0, -2.0)
+	
+	# Set sky model
+	model = GModelExtendedSource(radial, spectral)
+	
+	# Optionally show model
 	print model
 	
 	# Return model
@@ -124,19 +151,10 @@ def test_irf(model, filename="cntmap.fits"):
 		srcTime = bin.time()
 		
 		# Compute IRF
-		irf = obs.response().irf(bin, model, srcEng, srcTime, obs) #*bin.size()
+		irf = obs.response().irf(bin, model, srcEng, srcTime, obs)*bin.size()
 		
 		# Set bin
 		bin.counts(irf)
-		
-		# Optionally print result
-		#print bin.energy(), bin.dir(), bin.time(), irf
-		
-		# Compute distance
-		#if irf > 0.0:
-		#	distance = bin.dir().dist(src)
-		#	sigma    = obs.response().psf_dummy_sigma(bin.energy().log10TeV())
-		#	print distance/sigma, irf
 	
 	# Save observation
 	obs.save(filename, True)
@@ -160,7 +178,8 @@ if __name__ == '__main__':
 	
 	# Set shell model
 	#model = ptsrc_model()
-	model = shell_model()
+	#model = shell_model()
+	model = disk_model()
 	
 	# Test IRF
 	test_irf(model)
