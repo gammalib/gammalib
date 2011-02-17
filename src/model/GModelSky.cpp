@@ -34,7 +34,6 @@
 #include "GObservation.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS                                "GModelSky::operator() (int)"
 #define G_NPRED           "GModelSky::npred(GEnergy&, GTime&, GObservation&)"
 #define G_XML_SPATIAL                  "GModelSky::xml_spatial(GXmlElement&)"
 #define G_XML_SPECTRAL                "GModelSky::xml_spectral(GXmlElement&)"
@@ -126,8 +125,8 @@ GModelSky::GModelSky(const GModelSky& model) : GModel(model)
  * @param[in] spatial Spatial XML element.
  * @param[in] spectral Spectral XML element.
  ***************************************************************************/
-GModelSky::GModelSky(const GXmlElement& spatial, const GXmlElement& spectral) : 
-                     GModel()
+GModelSky::GModelSky(const GXmlElement& spatial, const GXmlElement& spectral)
+                                                                   : GModel()
 {
     // Initialise private members for clean destruction
     init_members();
@@ -457,7 +456,7 @@ void GModelSky::write(GXmlElement& xml) const
     }
 
     // Write spatial model
-    if (spatial()) {
+    if (spatial() != NULL) {
         GXmlElement* spat = (GXmlElement*)src->element("spatialModel", 0);
         spatial()->write(*spat);
     }
@@ -988,16 +987,25 @@ std::string GModelSky::print_model(void) const
     result.append("\n"+parformat("Number of parameters")+str(size()));
     result.append("\n"+parformat("Number of spatial par's")+str(n_spatial));
     int i;
-    for (i = 0; i < n_spatial; ++i) {
-        result.append("\n"+(*this)[i].print());
+    if (n_spatial > 0) {
+        result.append("\n"+parformat(" Model type")+m_spatial->type());
+        for (i = 0; i < n_spatial; ++i) {
+            result.append("\n"+(*this)[i].print());
+        }
     }
     result.append("\n"+parformat("Number of spectral par's")+str(n_spectral));
-    for (; i < n_spatial+n_spectral; ++i) {
-        result.append("\n"+(*this)[i].print());
+    if (n_spectral > 0) {
+        result.append("\n"+parformat(" Model type")+m_spectral->type());
+        for (; i < n_spatial+n_spectral; ++i) {
+            result.append("\n"+(*this)[i].print());
+        }
     }
     result.append("\n"+parformat("Number of temporal par's")+str(n_temporal));
-    for (; i < n_spatial+n_spectral+n_temporal; ++i) {
-        result.append("\n"+(*this)[i].print());
+    if (n_temporal > 0) {
+        result.append("\n"+parformat(" Model type")+m_temporal->type());
+        for (; i < n_spatial+n_spectral+n_temporal; ++i) {
+            result.append("\n"+(*this)[i].print());
+        }
     }
 
     // Return result
