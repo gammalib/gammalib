@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GObservation.cpp  -  Observation abstract base class          *
+ *           GObservation.cpp  -  Abstract observation base class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -118,7 +118,7 @@ GObservation::~GObservation(void)
  *
  * @param[in] obs Observation.
  *
- * Assign one observation to another.
+ * Assign observation.
  ***************************************************************************/
 GObservation& GObservation::operator= (const GObservation& obs)
 {
@@ -152,7 +152,7 @@ GObservation& GObservation::operator= (const GObservation& obs)
  *
  * @param[in] models Model descriptor.
  * @param[in] event Observed event.
- * @param[out] gradient Pointer to gradient vector (NULL=not computed).
+ * @param[out] gradient Pointer to gradient vector (optional).
  *
  * @exception GException::gradient_par_mismatch
  *            Dimension of gradient vector mismatches number of parameters.
@@ -161,21 +161,30 @@ GObservation& GObservation::operator= (const GObservation& obs)
  * model gives the probability for an event to occur with a given instrument
  * direction, at a given energy and at a given time. The gradient is the
  * parameter derivative of this probability.
+ *
+ * If NULL is passed for the gradient vector, then gradients will not be
+ * computed.
  ***************************************************************************/
 double GObservation::model(const GModels& models, const GEvent& event,
                            GVector* gradient) const
 {
-    // Verify that gradients vector has the same dimension than the
-    // model has parameters
+    // Verify that gradient vector and models have the same dimension
     #if defined(G_RANGE_CHECK)
-    if (models.npars() != gradient->size())
-        throw GException::gradient_par_mismatch(G_MODEL, gradient->size(),
-                                                models.npars());
+    if (gradient != NULL) {
+        if (models.npars() != gradient->size())
+            throw GException::gradient_par_mismatch(G_MODEL, 
+                                                    gradient->size(),
+                                                    models.npars());
+    }
     #endif
 
-    // Initialise model value and gradient index
-    double model = 0.0;
-    int    igrad = 0;
+    // Initialise
+    double model = 0.0;    // Reset model value
+    int    igrad = 0;      // Reset gradient counter
+
+    // If gradient is available then reset gradient vector elements to 0
+    if (gradient != NULL)
+        (*gradient) = 0.0;
 
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
@@ -186,24 +195,18 @@ double GObservation::model(const GModels& models, const GEvent& event,
             // Compute value and add to model
             model += models[i].eval_gradients(event, *this);
 
-            // Optionally set gradient vector
+            // Optionally determine model gradients
             if (gradient != NULL) {
-                for (int k = 0; k < models[i].size(); ++k, ++igrad) {
-                    double grad        = models[i][k].gradient();
-                    (*gradient)[igrad] = (isinfinite(grad)) ? 0.0 : grad;
-                }
+                for (int k = 0; k < models[i].size(); ++k)
+                    (*gradient)[igrad+k] = model_grad(models[i], event, k);
             }
-                
-        } // endif: model was applicable
 
-        // ... otherwise set gradient vector to 0
-        else if (gradient != NULL) {
-            for (int k = 0; k < models[i].size(); ++k, ++igrad) {
-                (*gradient)[igrad] = 0.0;
-            }
-        }
+        } // endif: model component was valid for instrument
 
-    } // endfor: looped over models
+        // Increment parameter counter for gradients
+        igrad += models[i].size();
+
+    } // endfor: Looped over models
 
     // Return
     return model;
@@ -211,17 +214,31 @@ double GObservation::model(const GModels& models, const GEvent& event,
 
 
 /***********************************************************************//**
- * @brief Return total number of predicted counts for all models.
+ * @brief Return total number (and optionally gradient) of predicted counts
+ *        for all models
  *
  * @param[in] models Models.
  * @param[out] gradient Model parameter gradients (optional).
  *
- * Returns the total number of predicted counts within the analysis region.
+ * @exception GException::gradient_par_mismatch
+ *            Dimension of gradient vector mismatches number of parameters.
  *
- * @todo Check consistency of gradient verctor
+ * Returns the total number of predicted counts within the analysis region.
+ * If NULL is passed for the gradient vector then gradients will not be
+ * computed.
  ***************************************************************************/
 double GObservation::npred(const GModels& models, GVector* gradient) const
 {
+    // Verify that gradient vector and models have the same dimension
+    #if defined(G_RANGE_CHECK)
+    if (gradient != NULL) {
+        if (models.npars() != gradient->size())
+            throw GException::gradient_par_mismatch(G_MODEL, 
+                                                    gradient->size(),
+                                                    models.npars());
+    }
+    #endif
+
     // Initialise
     double npred = 0.0;    // Reset predicted number of counts
     int    igrad = 0;      // Reset gradient counter
@@ -400,6 +417,48 @@ void GObservation::free_members(void)
  =                        Npred integration methods                        =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Returns parameter gradient of model for a given event
+ *
+ * @param[in] model Model.
+ * @param[in] event Event.
+ * @param[in] ipar Parameter index for which gradient should be returned.
+ ***************************************************************************/
+double GObservation::model_grad(const GModel& model, const GEvent& event,
+                                int ipar) const
+{
+    // Initialise gradient
+    double grad = 0.0;
+
+    // Compute gradient only if parameter is free
+    if (model[ipar].isfree()) {
+
+        // If model has a gradient then use it
+        if (model[ipar].hasgrad())
+            grad = model[ipar].gradient();
+
+        // ... otherwise compute it numerically
+        else {
+
+            // Setup derivative function
+            GObservation::model_func function(this, model, event, ipar);
+
+            // Get derivative
+            GDerivative derivative(&function);
+            double x = model[ipar].value();
+            derivative.eps(1.0e-4);
+            derivative.silent(true);
+            grad = derivative.value(x, 0.2*std::abs(x));
+
+        } // endelse: computed gradient numerically
+        
+    } // endif: model parameter was free
+
+    // Return gradient
+    return grad;
+}
+
 
 /***********************************************************************//**
  * @brief Returns parameter gradient of Npred
@@ -620,6 +679,48 @@ double GObservation::npred_kern_spec::eval(double x)
 
     // Return value
     return (m_parent->npred_spec(*m_model,time));
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                        Model gradient computation                       =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Model function evaluation for gradient computation
+ *
+ * @param[in] x Function value.
+ *
+ * @todo We simply remove any parameter boundaries here for the computation
+ *       to avoid any out of boundary errors. We may have models, however,
+ *       for which out of bound parameters lead to illegal computations, such
+ *       a division by zero or taking the square root of negative values.
+ *       I cannot see any elegant method to catch this at this level.
+ *       Eventually, the higher level method should avoid going in a
+ *       parameter domain that is not defined. 
+ ***************************************************************************/
+double GObservation::model_func::eval(double x)
+{
+    // Circumvent const correctness
+    GModel* model = (GModel*)m_model;
+    
+    // Save current model parameter
+    GModelPar current = (*model)[m_ipar];
+
+    // Set requested model value. Remove any boundaries to avoid limitations.
+    (*model)[m_ipar].value(x);
+    (*model)[m_ipar].remove_range();
+
+    // Compute model value
+    double value = model->eval_gradients(*m_event, *m_parent);
+
+    // Restore current model parameter
+    (*model)[m_ipar] = current;
+
+    // Return value
+    return value;
 }
 
 

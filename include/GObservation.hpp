@@ -96,6 +96,28 @@ protected:
     void copy_members(const GObservation& obs);
     void free_members(void);
 
+    // Model methods
+    virtual double model_grad(const GModel& model, const GEvent& event, int ipar) const;
+
+    // Model gradient kernel classes
+    class model_func : public GFunction {
+    public:
+        model_func(const GObservation* parent,
+                   const GModel&       model,
+                   const GEvent&       event,
+                   int                 ipar) :
+                   m_parent(parent),
+                   m_model(&model),
+                   m_event(&event),
+                   m_ipar(ipar) { return; }
+        double eval(double x);
+    protected:
+        const GObservation* m_parent; //!< Pointer to parent
+        const GModel*       m_model;  //!< Pointer to model
+        const GEvent*       m_event;  //!< Pointer to event
+        int                 m_ipar;   //!< Parameter index
+    };
+
     // Npred methods
     virtual double npred_grad(const GModel& model, int ipar) const;
     virtual double npred_temp(const GModel& model) const;
@@ -104,10 +126,12 @@ protected:
     // Npred kernel classes
     class npred_kern_spat : public GIntegrand {
     public:
-        npred_kern_spat(const GObservation* parent, const GModel& model,
-                        const GTime& obsTime) :
-                        m_parent(parent), m_model(&model), m_time(&obsTime)
-                        { return; }
+        npred_kern_spat(const GObservation* parent,
+                        const GModel&       model,
+                        const GTime&        obsTime) :
+                        m_parent(parent),
+                        m_model(&model),
+                        m_time(&obsTime) { return; }
         double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
@@ -116,8 +140,10 @@ protected:
     };
     class npred_kern_spec : public GIntegrand {
     public:
-        npred_kern_spec(const GObservation* parent, const GModel& model) :
-                        m_parent(parent), m_model(&model) { return; }
+        npred_kern_spec(const GObservation* parent,
+                        const GModel&       model) :
+                        m_parent(parent),
+                        m_model(&model) { return; }
         double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
@@ -127,8 +153,12 @@ protected:
     // Npred gradient kernel classes
     class npred_func : public GFunction {
     public:
-        npred_func(const GObservation* parent, const GModel& model, int ipar) :
-                   m_parent(parent), m_model(&model), m_ipar(ipar) { ; }
+        npred_func(const GObservation* parent,
+                   const GModel&       model,
+                   int                 ipar) :
+                   m_parent(parent),
+                   m_model(&model),
+                   m_ipar(ipar) { return; }
         double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
