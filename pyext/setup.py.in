@@ -1,25 +1,33 @@
 from distutils.core import setup, Extension
 import glob
 import os
+import sys
 
-# Remove any existing symbolic link to libgamma.a
-# This will prevent any exception in creating the symbolic link due to
-# an already existing link.
-try:
-	os.remove('../src/.libs/libgamma_python.a')
-	print 'Removed ../src/.libs/libgamma_python.a'
-except:
-	pass
-
-# Create a symbolic link. This allows us to enforce static linking instead of
-# dynamic linking. We prefer here static linking to avoid any problems with
-# finding the gammalib shared library during checking.
-try:
-	os.symlink('libgamma.a', '../src/.libs/libgamma_python.a')
-	print 'Created ../src/.libs/libgamma_python.a'
-	libgamma='gamma_python'
-except:
-	libgamma='gamma'
+# Set GammaLib library name. If we're about to make the test build then
+# create a symbolic link to the static library to enforce static linking.
+# This is required on some system (such as Mac OS X) to avoid problems
+# with finding the shared library during unit testing.
+libgamma='gamma'
+if (len(sys.argv) > 3):
+	if (sys.argv[3] == 'build'):
+		
+		# Remove any existing symbolic link to libgamma.a. This will
+		# prevent any exception in creating the symbolic link due to
+		# an already existing link.
+		try:
+			os.remove('../src/.libs/libgamma_python.a')
+			print 'Removed ../src/.libs/libgamma_python.a'
+		except:
+			pass
+		
+		# Now create a symbolic link and set the library name to this
+		# symbolic link
+		try:
+			os.symlink('libgamma.a', '../src/.libs/libgamma_python.a')
+			print 'Created ../src/.libs/libgamma_python.a'
+			libgamma='gamma_python'
+		except:
+			print 'WARNING: Failed to create symbolic link to static library. Link dynamically.'
 
 # Set default include directories and data files
 include_dirs         = ['@top_srcdir@/include']
