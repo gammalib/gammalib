@@ -345,3 +345,51 @@ GException::model_not_found::model_not_found(std::string origin,
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief No point source model component found
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] name Model name.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::no_point_source::no_point_source(std::string origin,
+                                             std::string name,
+                                             std::string message)
+{
+    // Set origin
+    m_origin  = origin;
+
+    // Set message
+    m_message = "No point source model component found in model \""+name+"\".";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief No extended source model component found
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] name Model name.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::no_extended_source::no_extended_source(std::string origin,
+                                                   std::string name,
+                                                   std::string message)
+{
+    // Set origin
+    m_origin  = origin;
+
+    // Set message
+    m_message = "No extended source model component found in model \""+name+"\".";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
