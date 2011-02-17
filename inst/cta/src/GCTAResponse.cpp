@@ -36,17 +36,24 @@
 #include "GCTARoi.hpp"
 #include "GCTAException.hpp"
 #include "GCTASupport.hpp"
+#include "GCTADir.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                           "GCTAResponse::caldb(std::string&)"
 #define G_IRF      "GCTAResponse::irf(GEvent&, GModelSky&, GEnergy&, GTime&,"\
                                                             " GObservation&)"
-#define G_NPRED1             "GCTAResponse::npred(GModel&, GEnergy&, GTime&,"\
+#define G_NPRED           "GCTAResponse::npred(GModelSky&, GEnergy&, GTime&,"\
                                                             " GObservation&)"
-#define G_NPRED2            "GCTAResponse::npred(GSkyDir&, GEnergy&, GTime&,"\
-                                                            " GObservation&)"
-#define G_IRF_DIFFUSE        "GCTAResponse::irf_diffuse(GInstDir&, GEnergy&,"\
-                      " GTime&, GModelSky&, GEnergy&, GTime&, GObservation&)"
+#define G_IRF_EXTENDED      "GCTAResponse::irf_extended(GInstDir&, GEnergy&,"\
+           " GTime&, GModelExtendedSource&, GEnergy&, GTime&, GObservation&)"
+#define G_IRF_DIFFUSE     "GCTAResponse::irf_diffuse(GCTAInstDir&, GEnergy&,"\
+         " GTime&, GModelDiffuseSource&, GEnergy&, GTime&, GCTAObservation&)"
+#define G_NPRED_PTSRC                            "GCTAResponse::npred_ptsrc("\
+                    "GModelPointSource&, GEnergy&, GTime&, GCTAObservation&)"
+#define G_NPRED_EXTENDED                      "GCTAResponse::npred_extended("\
+                 "GModelExtendedSource&, GEnergy&, GTime&, GCTAObservation&)"
+#define G_NPRED_DIFFUSE                        "GCTAResponse::npred_diffuse("\
+                  "GModelDiffuseSource&, GEnergy&, GTime&, GCTAObservation&)"
 #define G_READ           "GCTAResponse::read_performance_table(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -54,7 +61,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DEBUG_IRF_DIFFUSE 1
+#define G_DEBUG_IRF_EXTENDED 0                 //!< Debug irf_extended method
 
 /* __ Constants __________________________________________________________ */
 
@@ -146,7 +153,7 @@ GCTAResponse::~GCTAResponse(void)
  *
  * @param[in] rsp CTA response.
  ***************************************************************************/
-GCTAResponse& GCTAResponse::operator= (const GCTAResponse& rsp)
+GCTAResponse& GCTAResponse::operator=(const GCTAResponse& rsp)
 {
     // Execute only if object is not identical
     if (this != &rsp) {
@@ -216,9 +223,13 @@ GCTAResponse* GCTAResponse::clone(void) const
  *            Observation is not a CTA observation.
  * @exception GCTAException::bad_instdir_type
  *            Instrument direction is not a CTA instrument direction.
+ *
+ * @todo Throw exception if model pointer is invalid.
  ***************************************************************************/
-double GCTAResponse::irf(const GEvent& event, const GModelSky& model,
-                         const GEnergy& srcEng, const GTime& srcTime,
+double GCTAResponse::irf(const GEvent&       event,
+                         const GModelSky&    model,
+                         const GEnergy&      srcEng,
+                         const GTime&        srcTime,
                          const GObservation& obs) const
 {
     // Initialise IRF value
@@ -234,18 +245,21 @@ double GCTAResponse::irf(const GEvent& event, const GModelSky& model,
     if (ctadir == NULL)
         throw GCTAException::bad_instdir_type(G_IRF);
 
-    // Get pointer on point source spatial component
-    GModelSpatialPtsrc* ptsrc = dynamic_cast<GModelSpatialPtsrc*>(model.spatial());
+    // Get model pointers
+    const GModelPointSource*    ptsrc  = dynamic_cast<const GModelPointSource*>(&model);
+    const GModelExtendedSource* extsrc = dynamic_cast<const GModelExtendedSource*>(&model);
+    const GModelDiffuseSource*  difsrc = dynamic_cast<const GModelDiffuseSource*>(&model);
 
-    // If model is a point source then compute point source IRF
+    // Call model dependent method
     if (ptsrc != NULL)
         irf = irf_ptsrc(*ctadir, event.energy(), event.time(),
-                        ptsrc->dir(), srcEng, srcTime, *ctaobs);
-
-    // ... otherwise compute diffuse IRF
-    else
+                        *ptsrc, srcEng, srcTime, *ctaobs);
+    else if (extsrc != NULL)
+        irf = irf_extended(*ctadir, event.energy(), event.time(),
+                           *extsrc, srcEng, srcTime, *ctaobs);
+    else if (difsrc != NULL)
         irf = irf_diffuse(*ctadir, event.energy(), event.time(),
-                          model, srcEng, srcTime, *ctaobs);
+                          *difsrc, srcEng, srcTime, *ctaobs);
 
     // Return IRF value
     return irf;
@@ -260,33 +274,39 @@ double GCTAResponse::irf(const GEvent& event, const GModelSky& model,
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
  *
- * @todo Implement diffuse computation.
+ * @exception GCTAException::bad_observation_type
+ *            Observation is not a CTA observation.
+ *
+ * @todo Throw exception if model pointer is invalid.
  ***************************************************************************/
-double GCTAResponse::npred(const GModelSky& model, const GEnergy& srcEng,
-                           const GTime& srcTime, const GObservation& obs) const
+double GCTAResponse::npred(const GModelSky&    model,
+                           const GEnergy&      srcEng,
+                           const GTime&        srcTime,
+                           const GObservation& obs) const
 {
-    // Initialise response value
-    double rsp = 0.0;
+    // Initialise Npred value
+    double npred = 0.0;
+
+    // Get pointer on CTA observation
+    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+    if (ctaobs == NULL)
+        throw GCTAException::bad_observation_type(G_NPRED);
 
     // Get model pointers
-    GModelSpatialPtsrc* ptsrc =
-                        dynamic_cast<GModelSpatialPtsrc*>(model.spatial());
+    const GModelPointSource*    ptsrc  = dynamic_cast<const GModelPointSource*>(&model);
+    const GModelExtendedSource* extsrc = dynamic_cast<const GModelExtendedSource*>(&model);
+    const GModelDiffuseSource*  difsrc = dynamic_cast<const GModelDiffuseSource*>(&model);
 
-    // If model is a point source then compute the point source IRF
+    // Call model dependent method
     if (ptsrc != NULL)
-        rsp = npred(ptsrc->dir(), srcEng, srcTime, obs);
-
-    // ... otherwise return diffuse IRF
-    else {
-
-        // Feature not yet implemented
-        throw GException::feature_not_implemented(G_NPRED1,
-              "Diffuse IRF not yet implemented.");
-
-    } // endelse: model was not a point source
+        npred = npred_ptsrc(*ptsrc, srcEng, srcTime, *ctaobs);
+    else if (extsrc != NULL)
+        npred = npred_extended(*extsrc, srcEng, srcTime, *ctaobs);
+    else if (difsrc != NULL)
+        npred = npred_diffuse(*difsrc, srcEng, srcTime, *ctaobs);
 
     // Return response value
-    return rsp;
+    return npred;
 }
 
 
@@ -445,7 +465,7 @@ std::string GCTAResponse::print(void) const
 
 /*==========================================================================
  =                                                                         =
- =                         CTA specific IRF methods                        =
+ =              Model type dependent CTA response methods                  =
  =                                                                         =
  ==========================================================================*/
 
@@ -455,20 +475,26 @@ std::string GCTAResponse::print(void) const
  * @param[in] obsDir Observed photon direction.
  * @param[in] obsEng Observed energy of photon.
  * @param[in] obsTime Observed photon arrival time.
- * @param[in] srcDir True photon direction.
+ * @param[in] model Point source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] obs Observations.
+ * @param[in] obs CTA Observation.
  *
  * @todo The telescope zenith and azimuth angles as well as the radial offset
  *       and polar angles in the camera are not yet computed correctly (as
  *       the actual IRF implement does not need these values).
  ***************************************************************************/
-double GCTAResponse::irf_ptsrc(const GCTAInstDir& obsDir, const GEnergy& obsEng,
-                               const GTime& obsTime,
-                               const GSkyDir& srcDir, const GEnergy& srcEng,
-                               const GTime& srcTime, const GCTAObservation& obs) const
+double GCTAResponse::irf_ptsrc(const GCTAInstDir&       obsDir,
+                               const GEnergy&           obsEng,
+                               const GTime&             obsTime,
+                               const GModelPointSource& model,
+                               const GEnergy&           srcEng,
+                               const GTime&             srcTime,
+                               const GCTAObservation&   obs) const
 {
+    // Get point source location
+    GSkyDir srcDir = model.dir();
+
     // Get CTA pointing
     const GCTAPointing* pnt = obs.pointing(srcTime);
 
@@ -519,24 +545,27 @@ double GCTAResponse::irf_ptsrc(const GCTAInstDir& obsDir, const GEnergy& obsEng,
 
 
 /***********************************************************************//**
- * @brief Return value of diffuse source instrument response function
+ * @brief Return value of extended source instrument response function
  *
  * @param[in] obsDir Observed photon direction.
  * @param[in] obsEng Observed energy of photon.
  * @param[in] obsTime Observed photon arrival time.
- * @param[in] model Diffuse model.
+ * @param[in] model Extended source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] obs Observations.
+ * @param[in] obs CTA Observation.
  *
  * @todo The telescope zenith and azimuth angles as well as the radial offset
  *       and polar angles in the camera are not yet computed correctly (as
  *       the actual IRF implement does not need these values).
  ***************************************************************************/
-double GCTAResponse::irf_diffuse(const GCTAInstDir& obsDir, const GEnergy& obsEng,
-                                 const GTime& obsTime,
-                                 const GModelSky& model, const GEnergy& srcEng,
-                                 const GTime& srcTime, const GCTAObservation& obs) const
+double GCTAResponse::irf_extended(const GCTAInstDir&          obsDir,
+                                  const GEnergy&              obsEng,
+                                  const GTime&                obsTime,
+                                  const GModelExtendedSource& model,
+                                  const GEnergy&              srcEng,
+                                  const GTime&                srcTime,
+                                  const GCTAObservation&      obs) const
 {
     // Get CTA pointing
     const GCTAPointing* pnt = obs.pointing(srcTime);
@@ -559,26 +588,35 @@ double GCTAResponse::irf_diffuse(const GCTAInstDir& obsDir, const GEnergy& obsEn
     // Get maximum angular separation for which PSF is significant
     double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
 
-    // Determine angular distance and position angle of measured photon
-    // direction with respect to pointing direction (in radians)
-    double dist = pnt->dir().dist(obsDir.skydir());
-    double pa   = pnt->dir().posang(obsDir.skydir());
+    // Determine camera direction of measured photon
+    GCTADir obsCam(obsDir, *pnt);
+
+    // Determine camera direction of source model centre
+    GCTADir srcCam(model.dir(), *pnt);
 
     // Setup integration kernel
-    GCTAResponse::psf_kern_theta integrand(this, pnt, model.spatial(),
-                                           dist, pa, delta_max,
-                                           zenith, azimuth,
-                                           srcLogEng, obsLogEng, sigma);
+    GCTAResponse::irf_kern_theta integrand(this,
+                                           pnt,
+                                           model.radial(),
+                                           &obsCam,
+                                           &srcCam,
+                                           delta_max,
+                                           zenith,
+                                           azimuth,
+                                           srcLogEng,
+                                           obsLogEng,
+                                           sigma);
 
     // Integrate over theta
     GIntegral integral(&integrand);
-    double    theta_min = (dist > delta_max) ? dist - delta_max : 0.0;
-    double    theta_max = dist + delta_max;
+    integral.eps(m_eps);
+    double    theta_min = (obsCam.theta() > delta_max) ? obsCam.theta() - delta_max : 0.0;
+    double    theta_max = obsCam.theta() + delta_max;
     double    irf       = integral.romb(theta_min, theta_max);
 
     // Compile option: Show integration results
-    #if G_DEBUG_IRF_DIFFUSE
-    std::cout << "irf_diffuse";
+    #if G_DEBUG_IRF_EXTENDED
+    std::cout << "irf_extended";
     std::cout << " sigma=" << sigma;
     std::cout << " theta_min=" << theta_min;
     std::cout << " theta_max=" << theta_max;
@@ -591,7 +629,153 @@ double GCTAResponse::irf_diffuse(const GCTAInstDir& obsDir, const GEnergy& obsEn
 
 
 /***********************************************************************//**
- * @brief Return effective area (units: cm2)
+ * @brief Return value of diffuse source instrument response function
+ *
+ * @param[in] obsDir Observed photon direction.
+ * @param[in] obsEng Observed energy of photon.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] model Diffuse source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] obs CTA observation.
+ *
+ * @exception GException::feature_not_implemented
+ *            Diffuse source method is not yet implemented.
+ *
+ * @todo Implement method.
+ ***************************************************************************/
+double GCTAResponse::irf_diffuse(const GCTAInstDir&         obsDir,
+                                 const GEnergy&             obsEng,
+                                 const GTime&               obsTime,
+                                 const GModelDiffuseSource& model,
+                                 const GEnergy&             srcEng,
+                                 const GTime&               srcTime,
+                                 const GCTAObservation&     obs) const
+{
+    // Feature not yet implemented
+    throw GException::feature_not_implemented(G_IRF_DIFFUSE,
+          "Diffuse IRF not yet implemented.");
+
+    // Return IRF value
+    return 0.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Return spatial integral of point source model
+ *
+ * @param[in] model Point source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] obs Observation.
+ *
+ * @exception GException::no_list
+ *            Observation does not contain an event list.
+ ***************************************************************************/
+double GCTAResponse::npred_ptsrc(const GModelPointSource& model,
+                                 const GEnergy&           srcEng,
+                                 const GTime&             srcTime,
+                                 const GCTAObservation&   obs) const
+{
+    // Get point source location
+    GSkyDir srcDir = model.dir();
+
+    // Get pointer on CTA events list
+    const GCTAEventList* ptr = dynamic_cast<const GCTAEventList*>(obs.events());
+    if (ptr == NULL)
+        throw GException::no_list(G_NPRED_PTSRC);
+
+    // Get pointing direction zenith angle and azimuth
+    const GCTAPointing *pnt = obs.pointing(srcTime);
+    double zenith  = 0.0;
+    double azimuth = 0.0;
+
+    // Get radial offset and polar angles in camera
+    double theta = 0.0;
+    double phi   = 0.0;
+
+    // Get log10(E/TeV) of true photon energy.
+    double srcLogEng = srcEng.log10TeV();
+
+    // Get IRF components
+    double nirf = aeff(theta, phi, zenith, azimuth, srcLogEng);
+    nirf       *= npsf(srcDir, srcLogEng, srcTime, *pnt, ptr->roi());
+
+    // Multiply-in energy dispersion
+    if (hasedisp()) {
+
+        // Multiply-in energy dispersion
+        nirf *= nedisp(srcDir, srcEng, srcTime, *pnt, ptr->ebounds());
+
+    } // endif: had energy dispersion
+
+    // Return integrated IRF value
+    return nirf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return spatial integral of extended source model
+ *
+ * @param[in] model Extended source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] obs Observation.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method not yet implemented.
+ *
+ * @todo Implement method.
+ ***************************************************************************/
+double GCTAResponse::npred_extended(const GModelExtendedSource& model,
+                                    const GEnergy&              srcEng,
+                                    const GTime&                srcTime,
+                                    const GCTAObservation&      obs) const
+{
+    // Feature not yet implemented
+    throw GException::feature_not_implemented(G_NPRED_EXTENDED,
+                      "Method for extended source not yet implemented.");
+
+    // Return integrated IRF value
+    return 0.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Return spatial integral of diffuse source model
+ *
+ * @param[in] model Diffuse source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] obs Observation.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method not yet implemented.
+ *
+ * @todo Implement method.
+ ***************************************************************************/
+double GCTAResponse::npred_diffuse(const GModelDiffuseSource& model,
+                                   const GEnergy&             srcEng,
+                                   const GTime&               srcTime,
+                                   const GCTAObservation&     obs) const
+{
+    // Feature not yet implemented
+    throw GException::feature_not_implemented(G_NPRED_DIFFUSE,
+                      "Method for extended source not yet implemented.");
+
+    // Return integrated IRF value
+    return 0.0;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                    Low-level CTA response methods                       =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Return effective area (in units of cm2)
  *
  * @param[in] theta Radial offset angle in camera (radians).
  * @param[in] phi Polar angle in camera (radians).
@@ -601,12 +785,14 @@ double GCTAResponse::irf_diffuse(const GCTAInstDir& obsDir, const GEnergy& obsEn
  *
  * @todo So far the parameters theta, phi, zenith, and azimuth are not used.
  ***************************************************************************/
-double GCTAResponse::aeff(const double& theta, const double& phi,
-                          const double& zenith, const double& azimuth,
+double GCTAResponse::aeff(const double& theta,
+                          const double& phi,
+                          const double& zenith,
+                          const double& azimuth,
                           const double& srcLogEng) const
 {
-    // Interpolate effective area using node array and convert to cm^2
-    double aeff = m_nodes.interpolate(srcLogEng, m_aeff) * 10000.0;
+    // Interpolate effective area using node array
+    double aeff = m_nodes.interpolate(srcLogEng, m_aeff);
 
     // Return effective area
     return aeff;
@@ -627,8 +813,10 @@ double GCTAResponse::aeff(const double& theta, const double& phi,
  * @todo So far the parameters theta, phi, zenith, and azimuth are not used.
  ***************************************************************************/
 double GCTAResponse::psf(const double& delta,
-                         const double& theta, const double& phi,
-                         const double& zenith, const double& azimuth,
+                         const double& theta,
+                         const double& phi,
+                         const double& zenith,
+                         const double& azimuth,
                          const double& srcLogEng) const
 {
     // Determine energy dependent width of PSF
@@ -658,8 +846,10 @@ double GCTAResponse::psf(const double& delta,
  *
  * @todo So far the parameters theta, phi, zenith, and azimuth are not used.
  ***************************************************************************/
-double GCTAResponse::psf_delta_max(const double& theta, const double& phi,
-                                   const double& zenith, const double& azimuth,
+double GCTAResponse::psf_delta_max(const double& theta,
+                                   const double& phi,
+                                   const double& zenith,
+                                   const double& azimuth,
                                    const double& srcLogEng) const
 {
     // Determine energy dependent width of PSF
@@ -686,8 +876,10 @@ double GCTAResponse::psf_delta_max(const double& theta, const double& phi,
  * @todo So far the parameters theta, phi, zenith, and azimuth are not used.
  ***************************************************************************/
 double GCTAResponse::edisp(const double& obsLogEng,
-                           const double& theta, const double& phi,
-                           const double& zenith, const double& azimuth,
+                           const double& theta,
+                           const double& phi,
+                           const double& zenith,
+                           const double& azimuth,
                            const double& srcLogEng) const
 {
     // Dirac energy dispersion
@@ -699,61 +891,13 @@ double GCTAResponse::edisp(const double& obsLogEng,
 
 
 /***********************************************************************//**
- * @brief Return spatial integral of instrument response function
- *
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] obs Observation.
- *
- * @exception GException::no_list
- *            Observation does not contain an event list.
- ***************************************************************************/
-double GCTAResponse::npred(const GSkyDir& srcDir, const GEnergy& srcEng,
-                           const GTime& srcTime, const GObservation& obs) const
-{
-    // Get pointer on CTA events list
-    const GCTAEventList* ptr = dynamic_cast<const GCTAEventList*>(obs.events());
-    if (ptr == NULL)
-        throw GException::no_list(G_NPRED2);
-
-    // Get pointing direction zenith angle and azimuth
-    const GPointing *pnt = obs.pointing(srcTime);
-    double zenith  = 0.0;
-    double azimuth = 0.0;
-
-    // Get radial offset and polar angles in camera
-    double theta = 0.0;
-    double phi   = 0.0;
-
-    // Get log10(E/TeV) of true photon energy.
-    double srcLogEng = srcEng.log10TeV();
-
-    // Get IRF components
-    double nirf = aeff(theta, phi, zenith, azimuth, srcLogEng);
-    nirf       *= npsf(srcDir, srcLogEng, srcTime, *pnt, ptr->roi());
-
-    // Multiply-in energy dispersion
-    if (hasedisp()) {
-
-        // Multiply-in energy dispersion
-        nirf *= nedisp(srcDir, srcEng, srcTime, *pnt, ptr->ebounds());
-
-    } // endif: had energy dispersion
-
-    // Return integrated IRF value
-    return nirf;
-}
-
-
-/***********************************************************************//**
  * @brief Return result of PSF integration over ROI.
  *
  * @param[in] srcDir True photon direction.
  * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
  * @param[in] srcTime True photon arrival time (not used).
- * @param[in] pnt Pointer to instrument pointing information (nut used).
- * @param[in] roi Region of interest of data selection.
+ * @param[in] pnt CTA pointing.
+ * @param[in] roi CTA region of interest.
  *
  * This method integrates the PSF over the circular region of interest.
  * Integration is done in a polar coordinate system centred on the PSF since
@@ -765,19 +909,18 @@ double GCTAResponse::npred(const GSkyDir& srcDir, const GEnergy& srcEng,
  * that part of the PSF may be outside the ROI. For all other cases, the
  * integral is simply 1.
  ***************************************************************************/
-double GCTAResponse::npsf(const GSkyDir& srcDir, const double& srcLogEng,
-                          const GTime& srcTime, const GPointing& pnt,
-                          const GRoi& roi) const
+double GCTAResponse::npsf(const GSkyDir&      srcDir,
+                          const double&       srcLogEng,
+                          const GTime&        srcTime,
+                          const GCTAPointing& pnt,
+                          const GCTARoi&      roi) const
 {
     // Declare result
     double value = 0.0;
 
-    // Get pointer to CTA ROI
-    GCTARoi* ctaroi = (GCTARoi*)&roi;
-
     // Extract relevant parameters from arguments
-    double radroi = ctaroi->radius() * deg2rad;
-    double psf    = ctaroi->centre().dist(srcDir);
+    double radroi = roi.radius() * deg2rad;
+    double psf    = roi.centre().dist(srcDir);
     double sigma  = psf_dummy_sigma(srcLogEng);
 
     // Get maximum PSF radius
@@ -791,11 +934,12 @@ double GCTAResponse::npsf(const GSkyDir& srcDir, const double& srcLogEng,
     // ... otherwise perform numerical integration
     else {
 
-        // Setup integration function
+        // Setup integration kernel
         GCTAResponse::npsf_kern_rad_azsym integrand(this, radroi, psf, sigma);
-        GIntegral                         integral(&integrand);
 
         // Integrate PSF
+        GIntegral integral(&integrand);
+        integral.eps(m_eps);
         value = integral.romb(0.0, rmax);
 
     } // endelse: numerical integration required
@@ -811,14 +955,16 @@ double GCTAResponse::npsf(const GSkyDir& srcDir, const double& srcLogEng,
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Pointer to instrument pointing information.
+ * @param[in] pnt CTA pointing.
  * @param[in] ebds Energy boundaries of data selection.
  *
  * @todo Implement integration over energy range.
  ***************************************************************************/
-double GCTAResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
-                            const GTime& srcTime, const GPointing& pnt,
-                            const GEbounds& ebds) const
+double GCTAResponse::nedisp(const GSkyDir&      srcDir,
+                            const GEnergy&      srcEng,
+                            const GTime&        srcTime,
+                            const GCTAPointing& pnt,
+                            const GEbounds&     ebds) const
 {
     // Dummy
     double nedisp = 1.0;
@@ -827,6 +973,12 @@ double GCTAResponse::nedisp(const GSkyDir& srcDir, const GEnergy& srcEng,
     return nedisp;
 }
 
+
+/*==========================================================================
+ =                                                                         =
+ =                   Analytical CTA PSF implementation                     =
+ =                                                                         =
+ ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Return dummy point spread function (in units of sr^-1)
@@ -881,39 +1033,182 @@ double GCTAResponse::psf_dummy_sigma(const double& srcLogEng) const
 }
 
 
+/*==========================================================================
+ =                                                                         =
+ =                             Private methods                             =
+ =                                                                         =
+ ==========================================================================*/
+
 /***********************************************************************//**
- * @brief Integration kernel for IRF radial offset angle integration
+ * @brief Initialise class members
+ *
+ * We set the relative integration precision to 1e-4 as test images have
+ * revealed smooth with this precision.
+ ***************************************************************************/
+void GCTAResponse::init_members(void)
+{
+    // Initialise members
+    m_caldb.clear();
+    m_rspname.clear();
+    m_logE.clear();
+    m_aeff.clear();
+    m_r68.clear();
+    m_r80.clear();
+    m_eps = 1.0e-4;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] rsp Response to be copied
+ ***************************************************************************/
+void GCTAResponse::copy_members(const GCTAResponse& rsp)
+{
+    // Copy attributes
+    m_caldb   = rsp.m_caldb;
+    m_rspname = rsp.m_rspname;
+    m_nodes   = rsp.m_nodes;
+    m_logE    = rsp.m_logE;
+    m_aeff    = rsp.m_aeff;
+    m_r68     = rsp.m_r68;
+    m_r80     = rsp.m_r80;
+    m_eps     = rsp.m_eps;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ ***************************************************************************/
+void GCTAResponse::free_members(void)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read CTA performance table
+ *
+ * @param[in] filename Filename of CTA performance table.
+ *
+ * @exception GCTAExceptionHandler::file_open_error
+ *            File could not be opened for read access.
+ *
+ * This method reads a CTA performance table given in the format that is
+ * distributed within the CTA collaboration. Note that the effective area
+ * is converted from m2 to cm2 and stored in units of cm2.
+ ***************************************************************************/
+void GCTAResponse::read_performance_table(const std::string& filename)
+{
+    // Allocate line buffer
+    const int n = 1000; 
+    char  line[n];
+
+    // Open performance table readonly
+    FILE* fptr = std::fopen(filename.c_str(), "r");
+    if (fptr == NULL)
+        throw GCTAException::file_open_error(G_READ, filename);
+
+    // Read lines
+    while (std::fgets(line, n, fptr) != NULL) {
+
+        // Split line in elements
+        std::vector<std::string> elements = split(line, " ");
+        for (std::vector<std::string>::iterator it = elements.begin();
+             it != elements.end(); ++it) {
+            if (strip_whitespace(*it).length() == 0)
+                elements.erase(it);
+        }
+
+        // Skip header
+        if (elements[0].find("log(E)") != std::string::npos)
+            continue;
+
+        // Break loop if end of data table has been reached
+        if (elements[0].find("----------") != std::string::npos)
+            break;
+
+        // Push elements in vectors
+        m_logE.push_back(todouble(elements[0]));
+        m_aeff.push_back(todouble(elements[1])*10000.0);
+        m_r68.push_back(todouble(elements[2]));
+        m_r80.push_back(todouble(elements[3]));
+
+    } // endwhile: looped over lines
+
+    // If we have nodes then setup node array
+    int num = m_logE.size();
+    if (num > 0) {
+        for (int i = 0; i < num; ++i)
+            m_nodes.append(m_logE.at(i));
+    }
+
+    // Close file
+    std::fclose(fptr);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for radial offset angle IRF integration
  *
  * @param[in] theta Radial offset angle (radians).
  *
- * This method provides the integration kernel for the IRF radial offset
- * angle integration. The radial offset angle is given in the camera system.
+ * This method provides the integration kernel for the radial offset angle
+ * IRF integration. The radial offset angle is given in the camera system.
  ***************************************************************************/
-double GCTAResponse::psf_kern_theta::eval(double theta)
+double GCTAResponse::irf_kern_theta::eval(double theta)
 {
-    // Compute half interval length
-    double delta_phi = 0.5 * cta_roi_arclength(theta, 
-                                               m_dist, m_cos_dist, m_sin_dist,
+    // Compute half interval length (in radians)
+    double delta_phi = 0.5 * cta_roi_arclength(theta,
+                                               m_obs_cam->theta(),
+                                               m_obs_cam->costheta(),
+                                               m_obs_cam->sintheta(),
                                                m_delta_max, m_cos_delta_max);
 
-    // Set phi interval
-    double phi_min = m_pa - delta_phi;
-    double phi_max = m_pa + delta_phi;
+    // Set phi interval (in radians)
+    double phi_min = m_obs_cam->phi() - delta_phi;
+    double phi_max = m_obs_cam->phi() + delta_phi;
 
-    // Compute cosine and sine terms for PSF delta computation
-    double cos_term = std::cos(theta) * m_cos_dist;
-    double sin_term = std::sin(theta) * m_sin_dist;
+    // Precompute cosine and sine terms for azimuthal integration
+    double cos_theta = std::cos(theta);
+    double sin_theta = std::sin(theta);
+    double cos_obs   = cos_theta * m_obs_cam->costheta();
+    double sin_obs   = sin_theta * m_obs_cam->sintheta();
+    double cos_src   = cos_theta * m_src_cam->costheta();
+    double sin_src   = sin_theta * m_src_cam->sintheta();
 
     // Setup integration kernel
-    GCTAResponse::psf_kern_phi integrand(m_rsp, m_pnt, m_spatial,
-                                         theta, m_pa,
-                                         m_zenith, m_azimuth,
-                                         m_srcLogEng, m_obsLogEng, m_sigma,
-                                         cos_term, sin_term);
+    GCTAResponse::irf_kern_phi integrand(m_rsp,
+                                         m_pnt,
+                                         m_radial,
+                                         m_obs_cam,
+                                         m_src_cam,
+                                         theta,
+                                         m_zenith,
+                                         m_azimuth,
+                                         m_srcLogEng,
+                                         m_obsLogEng,
+                                         m_sigma,
+                                         cos_obs,
+                                         sin_obs,
+                                         cos_src,
+                                         sin_src);
 
     // Integrate over phi
     GIntegral integral(&integrand);
-    double    value = integral.romb(phi_min, phi_max) * std::sin(theta);
+    integral.eps(m_rsp->m_eps);
+    integral.silent(true);
+    double    value = integral.romb(phi_min, phi_max) * sin_theta;
 
     // Return result
     return value;
@@ -921,36 +1216,34 @@ double GCTAResponse::psf_kern_theta::eval(double theta)
 
 
 /***********************************************************************//**
- * @brief Integration kernel for IRF polar angle integration
+ * @brief Kernel for polar angle IRF integration
  *
  * @param[in] phi Polar angle (radians).
  *
- * This method provides the integration kernel for the IRF polar angle
- * integration. The polar angle is given in the camera system.
+ * This method provides the kernel for the polar angle IRF integration. The
+ * polar angle is given in the camera system.
+ *
+ * Note that removing the Aeff and Edisp computation from this inner loop
+ * has not given any noticable gain in execution speed (probably because the
+ * aeff() method uses the GNodeArray cache and the edisp() method actually
+ * does nothing.
  ***************************************************************************/
-double GCTAResponse::psf_kern_phi::eval(double phi)
+double GCTAResponse::irf_kern_phi::eval(double phi)
 {
     // Initialise result
     double value = 0.0;
 
-    // Transform theta and phi in sky coordinates
-    double  cos_phi   = std::cos(-phi);
-    double  sin_phi   = std::sin(-phi);
-    double  cos_theta = std::cos(-m_theta);
-    double  sin_theta = std::sin(-m_theta);
-    GVector vector(cos_phi*sin_theta, sin_phi*sin_theta, cos_theta);
-    GVector vector_rot = m_pnt->rot() * vector;
-    GSkyDir skydir;
-    skydir.celvector(vector_rot);
+    // Compute radial offset angle from model centre
+    double offset = arccos(m_cos_src + m_sin_src*std::cos(phi-m_src_cam->phi()));
 
     // Evaluate sky model
-    double model = m_spatial->eval(skydir);
+    double model = m_radial->eval(offset);
 
     // Continue only if model is valid
     if (model > 0.0) {
 
         // Compute PSF offset angle
-        double delta = arccos(m_cos_term + m_sin_term * std::cos(phi - m_pa));
+        double delta = arccos(m_cos_obs + m_sin_obs*std::cos(phi-m_obs_cam->phi()));
 
         // Evaluate IRF
         double irf = m_rsp->aeff(m_theta, phi, m_zenith, m_azimuth, m_srcLogEng) *
@@ -985,125 +1278,6 @@ double GCTAResponse::npsf_kern_rad_azsym::eval(double theta)
 
     // Return
     return value;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                             Private methods                             =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Initialise class members
- ***************************************************************************/
-void GCTAResponse::init_members(void)
-{
-    // Initialise members
-    m_caldb.clear();
-    m_rspname.clear();
-    m_logE.clear();
-    m_aeff.clear();
-    m_r68.clear();
-    m_r80.clear();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Copy class members
- *
- * @param[in] rsp Response to be copied
- ***************************************************************************/
-void GCTAResponse::copy_members(const GCTAResponse& rsp)
-{
-    // Copy attributes
-    m_caldb   = rsp.m_caldb;
-    m_rspname = rsp.m_rspname;
-    m_nodes   = rsp.m_nodes;
-    m_logE    = rsp.m_logE;
-    m_aeff    = rsp.m_aeff;
-    m_r68     = rsp.m_r68;
-    m_r80     = rsp.m_r80;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Delete class members
- ***************************************************************************/
-void GCTAResponse::free_members(void)
-{
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Read CTA performance table
- *
- * @param[in] filename Filename of CTA performance table.
- *
- * @exception GCTAExceptionHandler::file_open_error
- *            File could not be opened for read access.
- *
- * This method reads a CTA performance table given in the format that is
- * distributed within the CTA collaboration.
- ***************************************************************************/
-void GCTAResponse::read_performance_table(const std::string& filename)
-{
-    // Allocate line buffer
-    const int n = 1000; 
-    char  line[n];
-
-    // Open performance table readonly
-    FILE* fptr = std::fopen(filename.c_str(), "r");
-    if (fptr == NULL)
-        throw GCTAException::file_open_error(G_READ, filename);
-
-    // Read lines
-    while (std::fgets(line, n, fptr) != NULL) {
-
-        // Split line in elements
-        std::vector<std::string> elements = split(line, " ");
-        for (std::vector<std::string>::iterator it = elements.begin();
-             it != elements.end(); ++it) {
-            if (strip_whitespace(*it).length() == 0)
-                elements.erase(it);
-        }
-
-        // Skip header
-        if (elements[0].find("log(E)") != std::string::npos)
-            continue;
-
-        // Break loop if end of data table has been reached
-        if (elements[0].find("----------") != std::string::npos)
-            break;
-
-        // Push elements in vectors
-        m_logE.push_back(todouble(elements[0]));
-        m_aeff.push_back(todouble(elements[1]));
-        m_r68.push_back(todouble(elements[2]));
-        m_r80.push_back(todouble(elements[3]));
-
-    } // endwhile: looped over lines
-
-    // If we have nodes then setup node array
-    int num = m_logE.size();
-    if (num > 0) {
-        for (int i = 0; i < num; ++i)
-            m_nodes.append(m_logE.at(i));
-    }
-
-    // Close file
-    std::fclose(fptr);
-
-    // Return
-    return;
 }
 
 

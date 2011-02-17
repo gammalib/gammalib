@@ -51,34 +51,79 @@ public:
     void           caldb(const std::string& caldb);
     std::string    caldb(void) const;
     void           load(const std::string& rspname);
+    void           eps(const double& eps);
+    const double&  eps(void) const;
 
-    // Other response methods
-    double irf_ptsrc(const GCTAInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                     const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                     const GCTAObservation& obs) const;
-    double irf_diffuse(const GCTAInstDir& obsDir, const GEnergy& obsEng, const GTime& obsTime,
-                       const GModelSky& model, const GEnergy& srcEng, const GTime& srcTime,
-                       const GCTAObservation& obs) const;
-    double aeff(const double& theta, const double& phi,
-                const double& zenith, const double& azimuth,
+    // Model type dependent response methods
+    double irf_ptsrc(const GCTAInstDir&       obsDir,
+                     const GEnergy&           obsEng,
+                     const GTime&             obsTime,
+                     const GModelPointSource& model,
+                     const GEnergy&           srcEng,
+                     const GTime&             srcTime,
+                     const GCTAObservation&   obs) const;
+    double irf_extended(const GCTAInstDir&          obsDir,
+                        const GEnergy&              obsEng,
+                        const GTime&                obsTime,
+                        const GModelExtendedSource& model,
+                        const GEnergy&              srcEng,
+                        const GTime&                srcTime,
+                        const GCTAObservation&      obs) const;
+    double irf_diffuse(const GCTAInstDir&         obsDir,
+                       const GEnergy&             obsEng,
+                       const GTime&               obsTime,
+                       const GModelDiffuseSource& model,
+                       const GEnergy&             srcEng,
+                       const GTime&               srcTime,
+                       const GCTAObservation&     obs) const;
+    double npred_ptsrc(const GModelPointSource& model,
+                       const GEnergy&           srcEng,
+                       const GTime&             srcTime,
+                       const GCTAObservation&   obs) const;
+    double npred_extended(const GModelExtendedSource& model,
+                          const GEnergy&              srcEng,
+                          const GTime&                srcTime,
+                          const GCTAObservation&      obs) const;
+    double npred_diffuse(const GModelDiffuseSource& model,
+                         const GEnergy&             srcEng,
+                         const GTime&               srcTime,
+                         const GCTAObservation&     obs) const;
+
+    // Low-level response methods
+    double aeff(const double& theta,
+                const double& phi,
+                const double& zenith,
+                const double& azimuth,
                 const double& srcLogEng) const;
     double psf(const double& delta,
-               const double& theta, const double& phi,
-               const double& zenith, const double& azimuth,
+               const double& theta,
+               const double& phi,
+               const double& zenith,
+               const double& azimuth,
                const double& srcLogEng) const;
-    double psf_delta_max(const double& theta, const double& phi,
-                         const double& zenith, const double& azimuth,
+    double psf_delta_max(const double& theta,
+                         const double& phi,
+                         const double& zenith,
+                         const double& azimuth,
                          const double& srcLogEng) const;
     double edisp(const double& obsLogEng,
-                 const double& theta, const double& phi,
-                 const double& zenith, const double& azimuth,
+                 const double& theta,
+                 const double& phi,
+                 const double& zenith,
+                 const double& azimuth,
                  const double& srcLogEng) const;
-    double npred(const GSkyDir& srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                 const GObservation& obs) const;
-    double npsf(const GSkyDir&  srcDir, const double& srcLogEng, const GTime& srcTime,
-                const GPointing& pnt, const GRoi& roi) const;
-    double nedisp(const GSkyDir&  srcDir, const GEnergy& srcEng, const GTime& srcTime,
-                  const GPointing& pnt, const GEbounds& ebds) const;
+    double npsf(const GSkyDir&      srcDir,
+                const double&       srcLogEng,
+                const GTime&        srcTime,
+                const GCTAPointing& pnt,
+                const GCTARoi&      roi) const;
+    double nedisp(const GSkyDir&      srcDir,
+                  const GEnergy&      srcEng,
+                  const GTime&        srcTime,
+                  const GCTAPointing& pnt,
+                  const GEbounds&     ebds) const;
+
+    // Analytical PSF implementation
     double psf_dummy(const double& delta, const double& sigma) const;
     double psf_dummy_sigma(const double& srcLogEng) const;
 };
