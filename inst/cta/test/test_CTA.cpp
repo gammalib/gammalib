@@ -185,7 +185,7 @@ void test_response_npsf(void)
         // Test PSF outside and overlapping ROI
         srcDir.radec_deg(0.0, 2.1);
         npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
-        ref  = 0.0916301;
+        ref  = 0.0928484;
         if (fabs(npsf - ref) > 1.0e-3) {
             std::cout << std::endl
                       << "TEST ERROR: Uncertainty in PS(0,2.1) integration >0.1%"
