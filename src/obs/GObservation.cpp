@@ -414,7 +414,7 @@ void GObservation::free_members(void)
 
 /*==========================================================================
  =                                                                         =
- =                        Npred integration methods                        =
+ =                          Model gradient methods                         =
  =                                                                         =
  ==========================================================================*/
 
@@ -446,10 +446,11 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
 
             // Get derivative
             GDerivative derivative(&function);
-            double x = model[ipar].value();
+            double x  = model[ipar].value();
+            double dx = 0.1;
             derivative.eps(1.0e-4);
             //derivative.silent(true);
-            grad = derivative.value(x, 0.2*std::abs(x));
+            grad = derivative.value(x, dx);
 
         } // endelse: computed gradient numerically
         
@@ -459,6 +460,48 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
     return grad;
 }
 
+
+/***********************************************************************//**
+ * @brief Model function evaluation for gradient computation
+ *
+ * @param[in] x Function value.
+ *
+ * @todo We simply remove any parameter boundaries here for the computation
+ *       to avoid any out of boundary errors. We may have models, however,
+ *       for which out of bound parameters lead to illegal computations, such
+ *       as division by zero or taking the square root of negative values.
+ *       I cannot see any elegant method to catch this at this level.
+ *       Eventually, the higher level method should avoid going in a
+ *       parameter domain that is not defined. 
+ ***************************************************************************/
+double GObservation::model_func::eval(double x)
+{
+    // Circumvent const correctness
+    GModel* model = (GModel*)m_model;
+    
+    // Save current model parameter
+    GModelPar current = (*model)[m_ipar];
+
+    // Set requested model value. Remove any boundaries to avoid limitations.
+    (*model)[m_ipar].value(x);
+    (*model)[m_ipar].remove_range();
+
+    // Compute model value
+    double value = model->eval(*m_event, *m_parent);
+
+    // Restore current model parameter
+    (*model)[m_ipar] = current;
+
+    // Return value
+    return value;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                         Npred computation methods                       =
+ =                                                                         =
+ ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Returns parameter gradient of Npred
@@ -681,54 +724,6 @@ double GObservation::npred_kern_spec::eval(double x)
     return (m_parent->npred_spec(*m_model,time));
 }
 
-
-/*==========================================================================
- =                                                                         =
- =                        Model gradient computation                       =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Model function evaluation for gradient computation
- *
- * @param[in] x Function value.
- *
- * @todo We simply remove any parameter boundaries here for the computation
- *       to avoid any out of boundary errors. We may have models, however,
- *       for which out of bound parameters lead to illegal computations, such
- *       as division by zero or taking the square root of negative values.
- *       I cannot see any elegant method to catch this at this level.
- *       Eventually, the higher level method should avoid going in a
- *       parameter domain that is not defined. 
- ***************************************************************************/
-double GObservation::model_func::eval(double x)
-{
-    // Circumvent const correctness
-    GModel* model = (GModel*)m_model;
-    
-    // Save current model parameter
-    GModelPar current = (*model)[m_ipar];
-
-    // Set requested model value. Remove any boundaries to avoid limitations.
-    (*model)[m_ipar].value(x);
-    (*model)[m_ipar].remove_range();
-
-    // Compute model value
-    double value = model->eval(*m_event, *m_parent);
-
-    // Restore current model parameter
-    (*model)[m_ipar] = current;
-
-    // Return value
-    return value;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                    Npred gradient integration methods                   =
- =                                                                         =
- ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Npred function evaluation for gradient computation
