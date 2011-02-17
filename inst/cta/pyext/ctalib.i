@@ -29,6 +29,7 @@
 %include "GCTAModelRadialRegistry.i"
 %include "GCTAModelRadialGauss.i"
 %include "GCTAModelRadialAcceptance.i"
+%include "GCTADir.i"
 
 
 
