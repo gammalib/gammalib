@@ -1,5 +1,5 @@
 /***************************************************************************
- *        GModelSpatialDisk.i  -  Spatial disk source model class          *
+ *        GModelRadialDisk.i  -  Radial disk source model class            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011 by Christoph Deil                                   *
  * ----------------------------------------------------------------------- *
@@ -11,18 +11,18 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpatialDisk.i
- * @brief Disk spatial model class Python interface definition
+ * @file GModelRadialDisk.i
+ * @brief Radial disk model class Python interface definition
  * @author C. Deil
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GModelSpatialDisk.hpp"
+#include "GModelRadialDisk.hpp"
 #include "GTools.hpp"
 %}
 
 /**************************************************************************
- * @class GModelSpatialDisk
+ * @class GModelRadialDisk
  *
  * @brief Disk source model class
  *
@@ -30,42 +30,47 @@
  * model for a disk source, i.e. constant surface brightness within some
  * radius and no emission outside.
  ***************************************************************************/
-class GModelSpatialDisk : public GModelSpatial {
-	
+class GModelRadialDisk : public GModelRadial {
+
 public:
     // Constructors and destructors
-    GModelSpatialDisk(void);
-    explicit GModelSpatialDisk(const GSkyDir& dir,
-							   const double& radius);
-    explicit GModelSpatialDisk(const GXmlElement& xml);
-    GModelSpatialDisk(const GModelSpatialDisk& model);
-    virtual ~GModelSpatialDisk(void);
-	
+    GModelRadialDisk(void);
+    explicit GModelRadialDisk(const GSkyDir& dir, const double& radius);
+    explicit GModelRadialDisk(const GXmlElement& xml);
+    GModelRadialDisk(const GModelRadialDisk& model);
+    virtual ~GModelRadialDisk(void);
+
     // Implemented pure virtual methods
-    virtual void                clear(void);
-    virtual GModelSpatialDisk*  clone(void) const;
-    virtual std::string         type(void) const;
-    virtual double              eval(const GSkyDir& srcDir) const;
-    virtual double              eval_gradients(const GSkyDir& srcDir) const;
-    virtual GSkyDir             mc(GRan& ran) const;
-    virtual void                read(const GXmlElement& xml);
-    virtual void                write(GXmlElement& xml) const;
-	
+    virtual void              clear(void);
+    virtual GModelRadialDisk* clone(void) const;
+    virtual std::string       type(void) const;
+    virtual double            eval(const double& theta) const;
+    virtual double            eval_gradients(const double& theta) const;
+    virtual GSkyDir           mc(GRan& ran) const;
+    virtual void              read(const GXmlElement& xml);
+    virtual void              write(GXmlElement& xml) const;
+
     // Other methods
-    double  ra(void) const;
-    double  dec(void) const;
-    double  radius(void) const;
-    GSkyDir dir(void) const;
-    void    dir(const GSkyDir& dir);
-    void    radius(const double& radius);
+    double radius(void) const;
+    void   radius(const double& radius);
 };
 
 
 /***********************************************************************//**
- * @brief GModelSpatialDisk class extension
+ * @brief GModelRadialDisk class extension
  ***************************************************************************/
-%extend GModelSpatialDisk {
-    GModelSpatialDisk copy() {
+%extend GModelRadialDisk {
+    GModelRadialDisk copy() {
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GModelRadialDisk type casts
+ ***************************************************************************/
+%inline %{
+    GModelRadialDisk* cast_GModelRadialDisk(GModelSpatial* model) {
+        return dynamic_cast<GModelRadialDisk*>(model);
+    }
+%};

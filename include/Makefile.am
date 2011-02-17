@@ -41,11 +41,11 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpatialRegistry.hpp \
                      GModelSpatialPtsrc.hpp \
                      GModelSpatialGauss.hpp \
-                     GModelSpatialDisk.hpp \
                      GModelSpatialConst.hpp \
                      GModelSpatialCube.hpp \
                      GModelRadial.hpp \
                      GModelRadialRegistry.hpp \
+                     GModelRadialDisk.hpp \
                      GModelRadialShell.hpp \
                      GModelSpectral.hpp \
                      GModelSpectralRegistry.hpp \
