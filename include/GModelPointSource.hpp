@@ -53,7 +53,10 @@ public:
     GModelPointSource* clone(void) const;
     std::string        type(void) const { return "PointSource"; }
     std::string        print(void) const;
-    
+
+    // Other methods
+    GSkyDir dir(void) const;
+
 protected:
     // Protected methods
     void init_members(void);

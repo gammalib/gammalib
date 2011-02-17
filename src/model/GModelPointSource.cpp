@@ -32,6 +32,7 @@ const GModelPointSource g_pointsource_seed;
 const GModelRegistry    g_pointsource_registry(&g_pointsource_seed);
 
 /* __ Method name definitions ____________________________________________ */
+#define G_DIR                                      "GModelPointSource::dir()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -224,6 +225,26 @@ void GModelPointSource::clear(void)
 GModelPointSource* GModelPointSource::clone(void) const
 {
     return new GModelPointSource(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Return source location
+ *
+ * @exception GException::no_point_source
+ *            No point source model component found.
+ ***************************************************************************/
+GSkyDir GModelPointSource::dir(void) const
+{
+    // Get pointer on point source spatial model
+    GModelSpatialPtsrc* ptr = dynamic_cast<GModelSpatialPtsrc*>(m_spatial);
+
+    // Throw an exception if the spatial model is not a point source
+    if (ptr == NULL)
+        GException::no_point_source(G_DIR, name());
+
+    // Return source location
+    return (ptr->dir());
 }
 
 
