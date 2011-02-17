@@ -493,7 +493,7 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
             // Monitor the number of subsequent increases of lambda and
             // stop if the number of increases exceeds threshold
             lambda_inc = (m_lambda > lambda_old) ? lambda_inc + 1 : 0;
-            if (lambda_inc > m_max_stall) {
+            if (lambda_inc >= m_max_stall) {
                 m_status = G_LM_STALLED;
                 break;
             }
