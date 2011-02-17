@@ -41,17 +41,17 @@ def shell_model(ra=0.3, dec=0.3, radius=0.3, width=0.1):
 	center = GSkyDir()
 	center.radec_deg(ra, dec)
 	
-	# Set spatial model
-	spatial = GModelSpatialShell(center, radius, width, False)
+	# Set radial model
+	radial = GModelRadialShell(center, radius, width, False)
 	
 	# Set spectral model
 	spectral = GModelSpectralPlaw(1.0, -2.0)
 	
 	# Set sky model
-	model = GModelDiffuseSource(spatial, spectral)
+	model = GModelExtendedSource(radial, spectral)
 	
 	# Optionally show model
-	#print model
+	print model
 	
 	# Return model
 	return model
@@ -60,7 +60,7 @@ def shell_model(ra=0.3, dec=0.3, radius=0.3, width=0.1):
 # ========================== #
 # Set binned CTA observation #
 # ========================== #
-def observation(ra=0.0, dec=0.0, binsz=0.02, npix=100, ebins=1):
+def observation(ra=0.0, dec=0.0, binsz=0.02, npix=100, ebins=10):
 	"""
 	Set binned CTA observation.
 	"""
