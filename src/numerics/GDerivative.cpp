@@ -22,6 +22,7 @@
 #include <cfloat>           // for DBL_MAX
 #include "GDerivative.hpp"
 #include "GMatrix.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_RIDDER             "GDerivative::ridder(double&, double&, double&)"
@@ -29,7 +30,6 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_VALUE_SIGNAL_BAD_TOLERANCE 1              //!< Signal bad tolerance
 
 /* __ Debug definitions __________________________________________________ */
 #define G_VALUE_DEBUG 0                               //!< Debug value method
@@ -147,36 +147,73 @@ GDerivative& GDerivative::operator= (const GDerivative& dx)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear instance
+ ***************************************************************************/
+void GDerivative::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise private members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+ ***************************************************************************/
+GDerivative* GDerivative::clone(void) const
+{
+    return new GDerivative(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Returns derivative
  *
  * @param[in] x Function value.
+ * @param[in] step Initial step size (default: automatic)
  *
- * Computes derivative using the Ridders' method. The method starts with a
- * step size h=0.02*|x| (with h >= 1e-6) and iteratively decreases the
- * step size until the error becomes less than 1e-6. A maximum number of
- * 5 iterations is done.
+ * Computes derivative using the Ridders' method. If the specified initial
+ * step size is non-zero, the method starts with this step size and
+ * iteratively decreases the step size until the error becomes less than
+ * a threshold defined with the eps() method (by default the threshold is
+ * set to 1e-6). If the initial step size is zero, the method takes
+ * h=0.02*|x| as initial step size.
+ * The maximum number of iterations is controlled by the max_iter()
+ * method (by default, the maximum is set to 5).
  ***************************************************************************/
-double GDerivative::value(const double& x)
+double GDerivative::value(const double& x, double step)
 {
     // Set constants
-    const int    max_iter = 5;
-    const double min_h    = 1.0e-6;
-    const double max_err  = 1.0e-6;
+    const double min_h = 1.0e-6;
 
     // Initialise result
     double result = 0.0;
 
     // Set initial step size
-    double h = 0.02*fabs(x);
-    if (h < min_h)
-        h = min_h;
+    double h = step;
+    if (h == 0.0) {
+        h = m_step_frac * std::abs(x);
+        if (h < min_h)
+            h = min_h;
+    }
 
-    // Initialise tolerance
-    double err = 1.0;
+    // Save initial step size
+    double h_initial = h;
+
+    // Initialise
+    double err         = DBL_MAX;  // Tolenarce
+    double last_result = 0.0;      // Last result
+    double last_err    = DBL_MAX;  // Last error
+    double last_h      = h;        // Last step size
 
     // Loop over Ridder's method until we have an acceptable tolerance
-    int iter = 0;
-    for (; iter < max_iter; ++iter) {
+    m_iter = 0;
+    for (; m_iter < m_max_iter; ++m_iter) {
 
         // Compute derivative using Ridder's method
         result = ridder(x, h, err);
@@ -184,7 +221,7 @@ double GDerivative::value(const double& x)
         // Debug option: Show actual results
         #if G_VALUE_DEBUG
         std::cout << "GDerivative::value(";
-        std::cout << "iter=" << iter;
+        std::cout << "iter=" << m_iter;
         std::cout << ", x=" << x;
         std::cout << ", dy/dx=" << result;
         std::cout << ", h=" << h;
@@ -193,28 +230,54 @@ double GDerivative::value(const double& x)
         #endif
 
         // If uncertainty is below tolerance then exit now
-        if (err < max_err)
+        if (err < m_eps)
             break;
 
-        // ... otherwise reduce the step size
+        // Did last error increase? If yes then take last value and stop
+        if (err > last_err) {
+
+            // Recover last results
+            result = last_result;
+            err    = last_err;
+            h      = last_h;
+
+            // Optional dump warning
+            if (!silent()) {
+                std::cout << "WARNING: GDerivative::value(x=";
+                std::cout << x;
+                std::cout << "): initial step size ";
+                std::cout << h_initial;
+                std::cout << " possibly too small." << std::endl;
+            }
+
+            // Break
+            break;
+
+        } // endif: last error increased
+
+        // Store last values
+        last_result = result;
+        last_err    = err;
+        last_h      = h;
+
+        // Reduce the step size
         h /= 5.0;
 
     } // endfor: tolerance matching loop
 
     // Compile option: signal if we exceed the tolerance
-    #if G_VALUE_SIGNAL_BAD_TOLERANCE
-    if (err >= max_err) {
-        std::cout << "WARNING: GDerivative::value(";
-        std::cout << "iter=" << iter;
-        std::cout << ", x=" << x;
-        std::cout << ", dy/dx=" << result;
-        std::cout << ", h=" << h;
-        std::cout << ", err=" << err;
-        std::cout << "): error exceeds tolerance of ";
-        std::cout << max_err << std::endl;
+    if (!silent()) {
+        if (err >= m_eps) {
+            std::cout << "WARNING: GDerivative::value(";
+            std::cout << "iter=" << m_iter;
+            std::cout << ", x=" << x;
+            std::cout << ", dy/dx=" << result;
+            std::cout << ", h=" << h;
+            std::cout << ", err=" << err;
+            std::cout << "): error exceeds tolerance of ";
+            std::cout << m_eps << std::endl;
+        }
     }
-    #endif
-    
 
     // Return derivative
     return result;
@@ -310,6 +373,31 @@ double GDerivative::ridder(const double& x, const double& h, double& err)
 }
 
 
+/***********************************************************************//**
+ * @brief Print derivative information
+ ***************************************************************************/
+std::string GDerivative::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GDerivative ===");
+
+    // Append information
+    result.append("\n"+parformat("Relative precision")+str(eps()));
+    result.append("\n"+parformat("Max. number of iterations")+str(max_iter()));
+    result.append("\n"+parformat("Initial step fraction")+str(step_frac()));
+    if (silent())
+        result.append("\n"+parformat("Warnings")+"suppressed");
+    else
+        result.append("\n"+parformat("Warnings")+"in standard output");
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -322,7 +410,12 @@ double GDerivative::ridder(const double& x, const double& h, double& err)
 void GDerivative::init_members(void)
 {
     // Initialise members
-    m_func = NULL;
+    m_func      = NULL;
+    m_eps       = 1.0e-6;
+    m_step_frac = 0.02;
+    m_max_iter  = 5;
+    m_iter      = 0;
+    m_silent    = false;
 
     // Return
     return;
@@ -337,7 +430,12 @@ void GDerivative::init_members(void)
 void GDerivative::copy_members(const GDerivative& dx)
 {
     // Copy attributes
-    m_func = dx.m_func;
+    m_func      = dx.m_func;
+    m_eps       = dx.m_eps;
+    m_step_frac = dx.m_step_frac;
+    m_max_iter  = dx.m_max_iter;
+    m_iter      = dx.m_iter;
+    m_silent    = dx.m_silent;
 
     // Return
     return;
@@ -359,3 +457,34 @@ void GDerivative::free_members(void)
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] dx Derivative.
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GDerivative& dx)
+{
+    // Write derivative in output stream
+    os << dx.print();
+
+    // Return output stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] dx Derivative.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GDerivative& dx)
+{
+    // Write derivative into logger
+    log << dx.print();
+
+    // Return logger
+    return log;
+}

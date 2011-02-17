@@ -20,6 +20,9 @@
 #define GDERIVATIVE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
+#include <iostream>
+#include "GLog.hpp"
 #include "GFunction.hpp"
 
 
@@ -34,6 +37,10 @@
  ***************************************************************************/
 class GDerivative {
 
+    // I/O friends
+    friend std::ostream& operator<<(std::ostream& os, const GDerivative& dx);
+    friend GLog&         operator<<(GLog& os,         const GDerivative& dx);
+
 public:
 
     // Constructors and destructors
@@ -46,10 +53,22 @@ public:
     GDerivative& operator= (const GDerivative& dx);
 
     // Methods
+    void             clear(void);
+    GDerivative*     clone(void) const;
+    void             max_iter(const int& max_iter) { m_max_iter=max_iter; }
+    void             eps(const double& eps) { m_eps=eps; }
+    void             step_frac(const double& f) { m_step_frac=f; }
+    void             silent(const bool& silent) { m_silent=silent; }
+    const int&       iter(void) const { return m_iter; }
+    const int&       max_iter(void) const { return m_max_iter; }
+    const double&    eps(void) const { return m_eps; }
+    const double&    step_frac(void) const { return m_step_frac; }
+    const bool&      silent(void) const { return m_silent; }
     void             function(GFunction* func) { m_func = func; }
     const GFunction* function(void) const { return m_func; }
-    double           value(const double& x);
+    double           value(const double& x, double step = 0.0);
     double           ridder(const double& x, const double& h, double& err);
+    std::string      print(void) const;
 
 protected:
     // Protected methods
@@ -57,8 +76,13 @@ protected:
     void   copy_members(const GDerivative& dx);
     void   free_members(void);
 
-    // Protected data area
-    GFunction* m_func;    //!< Pointer to function
+    // Protected members
+    GFunction* m_func;         //!< Pointer to function
+    double     m_eps;          //!< Derivative precision
+    double     m_step_frac;    //!< Value fraction to use for initial step
+    int        m_max_iter;     //!< Maximum number of iterations
+    int        m_iter;         //!< Number of iterations used
+    bool       m_silent;       //!< Suppress warnings
 };
 
 #endif /* GDERIVATIVE_HPP */
