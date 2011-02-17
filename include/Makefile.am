@@ -35,17 +35,20 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSky.hpp \
                      GModelData.hpp \
                      GModelPointSource.hpp \
+                     GModelExtendedSource.hpp \
                      GModelDiffuseSource.hpp \
                      GModelSpatial.hpp \
                      GModelSpatialRegistry.hpp \
-		     GModelSpatialPtsrc.hpp \
-		     GModelSpatialGauss.hpp \
-		     GModelSpatialShell.hpp \
-		     GModelSpatialDisk.hpp \
+                     GModelSpatialPtsrc.hpp \
+                     GModelSpatialGauss.hpp \
+                     GModelSpatialDisk.hpp \
                      GModelSpatialConst.hpp \
                      GModelSpatialCube.hpp \
-		     GModelSpectral.hpp \
-		     GModelSpectralRegistry.hpp \
+                     GModelRadial.hpp \
+                     GModelRadialRegistry.hpp \
+                     GModelRadialShell.hpp \
+                     GModelSpectral.hpp \
+                     GModelSpectralRegistry.hpp \
                      GModelSpectralPlaw.hpp \
                      GModelSpectralPlaw2.hpp \
                      GModelSpectralExpPlaw.hpp \
@@ -105,7 +108,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GSparseMatrix.hpp \
                      GIntegral.hpp \
                      GIntegrand.hpp \
-		     GDerivative.hpp \
+                     GDerivative.hpp \
                      GFunction.hpp \
                      GOptimizer.hpp \
                      GOptimizerLM.hpp \

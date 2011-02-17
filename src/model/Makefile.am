@@ -2,8 +2,8 @@
 
 # Set include directories
 INCLUDES = -I$(top_srcdir)/include \
-	   -I$(top_builddir)/src \
-	   -I$(top_srcdir)/src
+           -I$(top_builddir)/src \
+           -I$(top_srcdir)/src
 
 # Define sources for this directory
 sources = GModelPar.cpp \
@@ -13,15 +13,18 @@ sources = GModelPar.cpp \
           GModelSky.cpp \
           GModelData.cpp \
           GModelPointSource.cpp \
+          GModelExtendedSource.cpp \
           GModelDiffuseSource.cpp \
           GModelSpatial.cpp \
           GModelSpatialRegistry.cpp \
           GModelSpatialPtsrc.cpp \
-	  GModelSpatialGauss.cpp \
-	  GModelSpatialShell.cpp \
-	  GModelSpatialDisk.cpp \
+          GModelSpatialGauss.cpp \
+          GModelSpatialDisk.cpp \
           GModelSpatialConst.cpp \
           GModelSpatialCube.cpp \
+          GModelRadial.cpp \
+          GModelRadialRegistry.cpp \
+          GModelRadialShell.cpp \
           GModelSpectral.cpp \
           GModelSpectralRegistry.cpp \
           GModelSpectralPlaw.cpp \
