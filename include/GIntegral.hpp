@@ -20,7 +20,9 @@
 #define GINTEGRAL_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include <iostream>
+#include "GLog.hpp"
 #include "GIntegrand.hpp"
 
 
@@ -35,7 +37,8 @@
 class GIntegral {
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GIntegral& integral);
+    friend std::ostream& operator<<(std::ostream& os, const GIntegral& integral);
+    friend GLog&         operator<<(GLog& os,         const GIntegral& integral);
 
 public:
 
@@ -46,17 +49,22 @@ public:
     virtual ~GIntegral(void);
 
     // Operators
-    GIntegral& operator= (const GIntegral& integral);
+    GIntegral& operator=(const GIntegral& integral);
 
     // Methods
+    void              clear(void);
+    GIntegral*        clone(void) const;
     void              max_iter(const int& max_iter) { m_max_iter=max_iter; }
     void              eps(const double& eps) { m_eps=eps; }
-    int               max_iter(void) const { return m_max_iter; }
-    double            eps(void) const { return m_eps; }
-    int               iter(void) const { return m_iter; }
-    void              integrand(GIntegrand* integrand) { m_integrand = integrand; }
+    void              silent(const bool& silent) { m_silent=silent; }
+    const int&        iter(void) const { return m_iter; }
+    const int&        max_iter(void) const { return m_max_iter; }
+    const double&     eps(void) const { return m_eps; }
+    const bool&       silent(void) const { return m_silent; }
+    void              integrand(GIntegrand* integrand) { m_integrand=integrand; }
     const GIntegrand* integrand(void) const { return m_integrand; }
     double            romb(double a, double b, int k = 5);
+    std::string       print(void) const;
 
 protected:
     // Protected methods
@@ -71,6 +79,7 @@ protected:
     double      m_eps;          //!< Integration precision
     int         m_max_iter;     //!< Maximum number of iterations
     int         m_iter;         //!< Number of iterations used
+    bool        m_silent;       //!< Suppress integration warnings
 };
 
 #endif /* GINTEGRAL_HPP */

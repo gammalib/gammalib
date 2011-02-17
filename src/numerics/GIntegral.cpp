@@ -20,6 +20,7 @@
 #include <cmath>            // For std::abs()
 #include <vector>
 #include "GIntegral.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -32,7 +33,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                         Constructors/destructors                        =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
@@ -41,7 +42,7 @@
  ***************************************************************************/
 GIntegral::GIntegral(void)
 {
-    // Initialise private members
+    // Initialise members
     init_members();
 
     // Return
@@ -52,14 +53,14 @@ GIntegral::GIntegral(void)
 /***********************************************************************//**
  * @brief Integrand constructor
  *
- * @param[in] integrand Pointer to integrand that should be assigned.
+ * @param[in] integrand Pointer to integrand.
  *
  * The Integrand constructor assigns the integrand pointer in constructing
  * the object.
  ***************************************************************************/
 GIntegral::GIntegral(GIntegrand* integrand)
 {
-    // Initialise private members
+    // Initialise members
     init_members();
 
     // Set integrand
@@ -73,11 +74,11 @@ GIntegral::GIntegral(GIntegrand* integrand)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] integral Object from which the instance should be built.
+ * @param[in] integral Integral.
  ***************************************************************************/
 GIntegral::GIntegral(const GIntegral& integral)
 { 
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -110,7 +111,7 @@ GIntegral::~GIntegral(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] integral Object to be assigned.
+ * @param[in] integral Integral.
  ***************************************************************************/
 GIntegral& GIntegral::operator= (const GIntegral& integral)
 {
@@ -120,7 +121,7 @@ GIntegral& GIntegral::operator= (const GIntegral& integral)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise integral
         init_members();
 
         // Copy members
@@ -140,6 +141,31 @@ GIntegral& GIntegral::operator= (const GIntegral& integral)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear instance
+ ***************************************************************************/
+void GIntegral::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise private members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+ ***************************************************************************/
+GIntegral* GIntegral::clone(void) const
+{
+    return new GIntegral(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Perform Romberg integration
  *
  * @param[in] a Left integration boundary.
@@ -153,6 +179,7 @@ GIntegral& GIntegral::operator= (const GIntegral& integral)
  * requested fractional accuracy. By default it is set to 1e-6.
  *
  * @todo Check that k is smaller than m_max_iter
+ * @todo Make use of std::vector class
  ***************************************************************************/
 double GIntegral::romb(double a, double b, int k)
 {
@@ -196,11 +223,37 @@ double GIntegral::romb(double a, double b, int k)
     delete [] h;
 
     // Dump warning
-    if (!converged) {
-        std::cout << "*** ERROR: GIntegral::romb: ";
-        std::cout << "Integration did not converge (result=" << ss << ")";
-        std::cout << std::endl;
+    if (!m_silent) {
+        if (!converged) {
+            std::cout << "*** WARNING: GIntegral::romb: ";
+            std::cout << "Integration did not converge (result=" << ss << ")";
+            std::cout << std::endl;
+        }
     }
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Print integral information
+ ***************************************************************************/
+std::string GIntegral::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GIntegral ===");
+
+    // Append information
+    result.append("\n"+parformat("Relative precision")+str(eps()));
+    result.append("\n"+parformat("Max. number of iterations")+str(max_iter()));
+    if (silent())
+        result.append("\n"+parformat("Warnings")+"suppressed");
+    else
+        result.append("\n"+parformat("Warnings")+"in standard output");
 
     // Return result
     return result;
@@ -209,7 +262,7 @@ double GIntegral::romb(double a, double b, int k)
 
 /*==========================================================================
  =                                                                         =
- =                             Private methods                             =
+ =                            Protected methods                            =
  =                                                                         =
  ==========================================================================*/
 
@@ -223,6 +276,7 @@ void GIntegral::init_members(void)
     m_eps       = 1.0e-6;
     m_max_iter  = 20;
     m_iter      = 0;
+    m_silent    = false;
 
     // Return
     return;
@@ -232,7 +286,7 @@ void GIntegral::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] integral Object from which members are to be copied.
+ * @param[in] integral Integral.
  ***************************************************************************/
 void GIntegral::copy_members(const GIntegral& integral)
 {
@@ -241,6 +295,7 @@ void GIntegral::copy_members(const GIntegral& integral)
     m_eps       = integral.m_eps;
     m_max_iter  = integral.m_max_iter;
     m_iter      = integral.m_iter;
+    m_silent    = integral.m_silent;
 
     // Return
     return;
@@ -385,18 +440,32 @@ double GIntegral::trapzd(double a, double b, int n, double result)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Put object in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the model will be dumped
- * @param[in] integral Object to be dumped
+ * @param[in] os Output stream.
+ * @param[in] integral Integral.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GIntegral& integral)
 {
-    // Put object in stream
-    os << "=== GIntegral ===" << std::endl;
-    os << " Integration precision .....: " << integral.m_eps << std::endl;
-    os << " Max. number of iterations .: " << integral.m_max_iter;
+    // Write integral in output stream
+    os << integral.print();
 
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] integral Integral.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GIntegral& integral)
+{
+    // Write integral into logger
+    log << integral.print();
+
+    // Return logger
+    return log;
 }
