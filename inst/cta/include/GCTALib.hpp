@@ -32,5 +32,6 @@
 #include "GCTAModelRadialRegistry.hpp"
 #include "GCTAModelRadialGauss.hpp"
 #include "GCTAModelRadialAcceptance.hpp"
+#include "GCTADir.hpp"
 
 #endif /* GCTALIB_HPP */

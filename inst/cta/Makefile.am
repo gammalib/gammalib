@@ -5,7 +5,7 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/src \
            -I$(top_srcdir)/src/support \
            -I$(top_srcdir)/inst/cta/include \
-	   -I$(top_srcdir)/inst/cta/src
+           -I$(top_srcdir)/inst/cta/src
 
 # Define sources for this directory
 sources = src/GCTASupport.cpp \
@@ -19,10 +19,11 @@ sources = src/GCTASupport.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
           src/GCTAPointing.cpp \
-	  src/GCTAModelRadialRegistry.cpp \
+          src/GCTAModelRadialRegistry.cpp \
           src/GCTAModelRadial.cpp \
           src/GCTAModelRadialGauss.cpp \
-          src/GCTAModelRadialAcceptance.cpp
+          src/GCTAModelRadialAcceptance.cpp \
+          src/GCTADir.cpp
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GCTAException.hpp \
@@ -35,10 +36,11 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAInstDir.hpp \
                      include/GCTARoi.hpp \
                      include/GCTAResponse.hpp \
-		     include/GCTAModelRadialRegistry.hpp \
+                     include/GCTAModelRadialRegistry.hpp \
                      include/GCTAModelRadial.hpp \
                      include/GCTAModelRadialGauss.hpp \
                      include/GCTAModelRadialAcceptance.hpp \
+                     include/GCTADir.hpp \
                      include/GCTALib.hpp
 
 # Calibration files to distribute
