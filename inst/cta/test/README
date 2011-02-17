@@ -13,3 +13,5 @@ example_sim_photons.py     - Python script to illustrate MC simulation of photon
                              > ./example_sim_photons.py
                              If matplotlib is installed, the spectrum will be displayed
                              on the screen.
+
+test_model.py              - Test model handling by CTA response function.
