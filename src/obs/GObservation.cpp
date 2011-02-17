@@ -448,7 +448,7 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
             GDerivative derivative(&function);
             double x = model[ipar].value();
             derivative.eps(1.0e-4);
-            derivative.silent(true);
+            //derivative.silent(true);
             grad = derivative.value(x, 0.2*std::abs(x));
 
         } // endelse: computed gradient numerically
@@ -696,7 +696,7 @@ double GObservation::npred_kern_spec::eval(double x)
  * @todo We simply remove any parameter boundaries here for the computation
  *       to avoid any out of boundary errors. We may have models, however,
  *       for which out of bound parameters lead to illegal computations, such
- *       a division by zero or taking the square root of negative values.
+ *       as division by zero or taking the square root of negative values.
  *       I cannot see any elegant method to catch this at this level.
  *       Eventually, the higher level method should avoid going in a
  *       parameter domain that is not defined. 
@@ -714,7 +714,7 @@ double GObservation::model_func::eval(double x)
     (*model)[m_ipar].remove_range();
 
     // Compute model value
-    double value = model->eval_gradients(*m_event, *m_parent);
+    double value = model->eval(*m_event, *m_parent);
 
     // Restore current model parameter
     (*model)[m_ipar] = current;
