@@ -372,13 +372,17 @@ double GDerivative::minuit(const double& x, double& err)
     double grad_tol = 0.02;
 
     // Initialise values
-    double grd    = 0.0;    // Gradient
-    double g2     = 0.0;    //
-    double gstep  = 0.0;    // Gradient step
     double epspri = eps2;   // Minuit2: eps2 + fabs(grd(i)*eps2)
     double stepb4 = 0.0;    //
     err           = 0.0;    // Initial error estimate
 
+    // Initial gradient estimation
+    double gstep = 0.1;    // Initial gradient step
+    double fs1   = m_func->eval(x + gstep);
+    double fs2   = m_func->eval(x - gstep);
+    double grd   = 0.5 * (fs1 - fs2) / gstep;
+    double g2    = (fs1 + fs2 - 2.0*fcnmin) / gstep / gstep;
+    
     // Loop over cycles
     for (m_iter = 0; m_iter < ncycles; ++m_iter) {
 
