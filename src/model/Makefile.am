@@ -17,21 +17,21 @@ sources = GModelPar.cpp \
           GModelDiffuseSource.cpp \
           GModelSpatial.cpp \
           GModelSpatialRegistry.cpp \
-          GModelSpatialPtsrc.cpp \
-          GModelSpatialGauss.cpp \
           GModelSpatialConst.cpp \
           GModelSpatialCube.cpp \
+          GModelSpatialPtsrc.cpp \
           GModelRadial.cpp \
           GModelRadialRegistry.cpp \
           GModelRadialDisk.cpp \
+          GModelRadialGauss.cpp \
           GModelRadialShell.cpp \
           GModelSpectral.cpp \
           GModelSpectralRegistry.cpp \
-          GModelSpectralPlaw.cpp \
-          GModelSpectralPlaw2.cpp \
+          GModelSpectralConst.cpp \
           GModelSpectralExpPlaw.cpp \
           GModelSpectralFunc.cpp \
-          GModelSpectralConst.cpp \
+          GModelSpectralPlaw.cpp \
+          GModelSpectralPlaw2.cpp \
           GModelTemporal.cpp \
           GModelTemporalRegistry.cpp \
           GModelTemporalConst.cpp \
