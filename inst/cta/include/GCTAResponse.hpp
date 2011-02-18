@@ -161,6 +161,7 @@ public:
     // Analytical PSF implementation
     double psf_dummy(const double& delta, const double& sigma) const;
     double psf_dummy_sigma(const double& srcLogEng) const;
+    double psf_dummy_max(const double& sigma) const;
 
 private:
     // Private methods
@@ -178,6 +179,7 @@ private:
                        const GCTADir*      obsCam,
                        const GCTADir*      srcCam,
                        double              delta_max,
+                       double              src_max,
                        double              zenith,
                        double              azimuth,
                        double              srcLogEng,
@@ -190,6 +192,8 @@ private:
                        m_src_cam(srcCam),
                        m_delta_max(delta_max),
                        m_cos_delta_max(std::cos(delta_max)),
+                       m_src_max(src_max),
+                       m_cos_src_max(std::cos(src_max)),
                        m_zenith(zenith),
                        m_azimuth(azimuth),
                        m_srcLogEng(srcLogEng),
@@ -204,6 +208,8 @@ private:
         const GCTADir*      m_src_cam;       //!< Pointer to source location in camera
         double              m_delta_max;     //!< Maximum PSF angle delta_max
         double              m_cos_delta_max; //!< Cosine of delta_max
+        double              m_src_max;       //!< Maximum source radius
+        double              m_cos_src_max;   //!< Cosine of source radius
         double              m_zenith;        //!< Telescope zenith
         double              m_azimuth;       //!< Telescope azimuth
         double              m_srcLogEng;     //!< True photon energy

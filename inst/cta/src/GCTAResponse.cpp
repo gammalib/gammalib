@@ -558,6 +558,9 @@ double GCTAResponse::irf_ptsrc(const GCTAInstDir&       obsDir,
  * @todo The telescope zenith and azimuth angles as well as the radial offset
  *       and polar angles in the camera are not yet computed correctly (as
  *       the actual IRF implement does not need these values).
+ *
+ * @todo The theta limits could still improved as only the theta range is
+ *       relevant for which the source and the PSF circle overlap.
  ***************************************************************************/
 double GCTAResponse::irf_extended(const GCTAInstDir&          obsDir,
                                   const GEnergy&              obsEng,
@@ -585,34 +588,54 @@ double GCTAResponse::irf_extended(const GCTAInstDir&          obsDir,
     // Get PSF sigma
     double sigma = psf_dummy_sigma(srcLogEng);
 
-    // Get maximum angular separation for which PSF is significant
-    double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
-
     // Determine camera direction of measured photon
     GCTADir obsCam(obsDir, *pnt);
 
     // Determine camera direction of source model centre
     GCTADir srcCam(model.dir(), *pnt);
 
-    // Setup integration kernel
-    GCTAResponse::irf_kern_theta integrand(this,
-                                           pnt,
-                                           model.radial(),
-                                           &obsCam,
-                                           &srcCam,
-                                           delta_max,
-                                           zenith,
-                                           azimuth,
-                                           srcLogEng,
-                                           obsLogEng,
-                                           sigma);
+    // Get maximum angular separation for which PSF is significant (in radians).
+    // Set offset angle range that bounds PSF.
+    double delta_max     = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
+    double theta_psf_min = (obsCam.theta() > delta_max) ? obsCam.theta() - delta_max : 0.0;
+    double theta_psf_max = obsCam.theta() + delta_max;
 
-    // Integrate over theta
-    GIntegral integral(&integrand);
-    integral.eps(m_eps);
-    double    theta_min = (obsCam.theta() > delta_max) ? obsCam.theta() - delta_max : 0.0;
-    double    theta_max = obsCam.theta() + delta_max;
-    double    irf       = integral.romb(theta_min, theta_max);
+    // Get maximum source radius in radians.
+    // Set offset angle range that bounds the source.
+    double src_max       = model.radial()->theta_max();
+    double theta_src_min = (srcCam.theta() > src_max) ? srcCam.theta() - src_max : 0.0;
+    double theta_src_max = srcCam.theta() + src_max;
+
+    // Set overlapping offset angle range for integration (in radians).
+    double theta_min = std::max(theta_psf_min, theta_src_min);
+    double theta_max = std::min(theta_psf_max, theta_src_max);
+
+    // Initialise IRF value
+    double irf = 0.0;
+
+    // Perform offset angle integration if interval is valid
+    if (theta_max > theta_min) {
+
+        // Setup integration kernel
+        GCTAResponse::irf_kern_theta integrand(this,
+                                               pnt,
+                                               model.radial(),
+                                               &obsCam,
+                                               &srcCam,
+                                               delta_max,
+                                               src_max,
+                                               zenith,
+                                               azimuth,
+                                               srcLogEng,
+                                               obsLogEng,
+                                               sigma);
+
+        // Integrate over theta
+        GIntegral integral(&integrand);
+        integral.eps(m_eps);
+        irf = integral.romb(theta_min, theta_max);
+
+    }
 
     // Compile option: Show integration results
     #if G_DEBUG_IRF_EXTENDED
@@ -856,7 +879,7 @@ double GCTAResponse::psf_delta_max(const double& theta,
     double sigma = psf_dummy_sigma(srcLogEng);
 
     // Set maximum angular separation
-    double delta_max = sigma * 5.0;
+    double delta_max = psf_dummy_max(sigma);
 
     // Return PSF
     return delta_max;
@@ -922,9 +945,7 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
     double radroi = roi.radius() * deg2rad;
     double psf    = roi.centre().dist(srcDir);
     double sigma  = psf_dummy_sigma(srcLogEng);
-
-    // Get maximum PSF radius
-    double rmax = 5.0*sigma;
+    double rmax   = psf_dummy_max(sigma);
 
     // If PSF is sufficiently enclosed by ROI, skip the numerical integration
     // and assume that the integral is 1.0
@@ -1033,6 +1054,18 @@ double GCTAResponse::psf_dummy_sigma(const double& srcLogEng) const
 }
 
 
+/***********************************************************************//**
+ * @brief Returns radius beyond which PSF is negligible (in radians)
+ *
+ * @param[in] sigma Width of point spread function (radians).
+ ***************************************************************************/
+double GCTAResponse::psf_dummy_max(const double& sigma) const
+{
+    // Return radius
+    return (5.0*sigma);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -1042,8 +1075,20 @@ double GCTAResponse::psf_dummy_sigma(const double& srcLogEng) const
 /***********************************************************************//**
  * @brief Initialise class members
  *
- * We set the relative integration precision to 1e-4 as test images have
- * revealed smooth with this precision.
+ * We set the relative integration precision to 1e-4 as test images are
+ * pretty smooth with this precision and computations are reasonably fast.
+ * We know that integration is not perfect, however, and the results are
+ * still a little noisy. We could still improve a little more the current
+ * theta integration scheme, but the mathematics have to be worked out
+ * for this first.
+ *
+ * The following timing was obtained for a 0.4 deg disk model on a 100x100
+ * grid with 10 energy layers on a 64 Bit machine (fermi):
+ * m_eps = 1e-4 : user 0m12.894s
+ * m_eps = 5e-5 : user 0m21.929s
+ * m_eps = 1e-5 : user 1m53.607s
+ * So the time increases about linearly with an increased precision
+ * requirement.
  ***************************************************************************/
 void GCTAResponse::init_members(void)
 {
@@ -1108,7 +1153,7 @@ void GCTAResponse::free_members(void)
 void GCTAResponse::read_performance_table(const std::string& filename)
 {
     // Allocate line buffer
-    const int n = 1000; 
+    const int n = 1000;
     char  line[n];
 
     // Open performance table readonly
@@ -1165,53 +1210,99 @@ void GCTAResponse::read_performance_table(const std::string& filename)
  *
  * This method provides the integration kernel for the radial offset angle
  * IRF integration. The radial offset angle is given in the camera system.
+ *
+ * @todo I tried to cover the wrap around properly, yet I have not
+ *       demonstrated mathematically that it works in all cases (but I did
+ *       many tests to check that it works).
  ***************************************************************************/
 double GCTAResponse::irf_kern_theta::eval(double theta)
 {
-    // Compute half interval length (in radians)
-    double delta_phi = 0.5 * cta_roi_arclength(theta,
-                                               m_obs_cam->theta(),
-                                               m_obs_cam->costheta(),
-                                               m_obs_cam->sintheta(),
-                                               m_delta_max, m_cos_delta_max);
+    // Compute half interval length for PSF circle (in radians)
+    double dphi_psf = 0.5 * cta_roi_arclength(theta,
+                                              m_obs_cam->theta(),
+                                              m_obs_cam->costheta(),
+                                              m_obs_cam->sintheta(),
+                                              m_delta_max, m_cos_delta_max);
 
-    // Set phi interval (in radians)
-    double phi_min = m_obs_cam->phi() - delta_phi;
-    double phi_max = m_obs_cam->phi() + delta_phi;
+    // Compute half interval length for model circle (in radians)
+    double dphi_src = 0.5 * cta_roi_arclength(theta,
+                                              m_src_cam->theta(),
+                                              m_src_cam->costheta(),
+                                              m_src_cam->sintheta(),
+                                              m_src_max, m_cos_src_max);
 
-    // Precompute cosine and sine terms for azimuthal integration
-    double cos_theta = std::cos(theta);
-    double sin_theta = std::sin(theta);
-    double cos_obs   = cos_theta * m_obs_cam->costheta();
-    double sin_obs   = sin_theta * m_obs_cam->sintheta();
-    double cos_src   = cos_theta * m_src_cam->costheta();
-    double sin_src   = sin_theta * m_src_cam->sintheta();
+    // Set the phi phase to common half space
+    double phi_psf = m_obs_cam->phi();
+    double phi_src = m_src_cam->phi();
+    if (phi_src-phi_psf > pi)
+        phi_src -= twopi;
+    if (phi_src-phi_psf < -pi)
+        phi_src += twopi;
 
-    // Setup integration kernel
-    GCTAResponse::irf_kern_phi integrand(m_rsp,
-                                         m_pnt,
-                                         m_radial,
-                                         m_obs_cam,
-                                         m_src_cam,
-                                         theta,
-                                         m_zenith,
-                                         m_azimuth,
-                                         m_srcLogEng,
-                                         m_obsLogEng,
-                                         m_sigma,
-                                         cos_obs,
-                                         sin_obs,
-                                         cos_src,
-                                         sin_src);
+    // Set phi interval for PSF and source region (in radians)
+    double phi_psf_min = phi_psf - dphi_psf;
+    double phi_psf_max = phi_psf + dphi_psf;
+    double phi_src_min = phi_src - dphi_src;
+    double phi_src_max = phi_src + dphi_src;
 
-    // Integrate over phi
-    GIntegral integral(&integrand);
-    integral.eps(m_rsp->m_eps);
-    integral.silent(true);
-    double    value = integral.romb(phi_min, phi_max) * sin_theta;
+    // Set common phi interval. If one of the intervals covers the entire
+    // azimuth range then just apply the other interval
+    double phi_min;
+    double phi_max;
+    if (dphi_src >= pi) {
+        phi_min = phi_psf_min;
+        phi_max = phi_psf_max;
+    }
+    else if (dphi_psf >= pi) {
+        phi_min = phi_src_min;
+        phi_max = phi_src_max;
+    }
+    else {
+        phi_min = std::max(phi_psf_min, phi_src_min);
+        phi_max = std::min(phi_psf_max, phi_src_max);
+    }
+
+    // Initialise result
+    double irf = 0.0;
+
+    // Perform phi integration (only if interval is valid)
+    if (phi_min < phi_max) {
+
+        // Precompute cosine and sine terms for azimuthal integration
+        double cos_theta = std::cos(theta);
+        double sin_theta = std::sin(theta);
+        double cos_obs   = cos_theta * m_obs_cam->costheta();
+        double sin_obs   = sin_theta * m_obs_cam->sintheta();
+        double cos_src   = cos_theta * m_src_cam->costheta();
+        double sin_src   = sin_theta * m_src_cam->sintheta();
+
+        // Setup integration kernel
+        GCTAResponse::irf_kern_phi integrand(m_rsp,
+                                             m_pnt,
+                                             m_radial,
+                                             m_obs_cam,
+                                             m_src_cam,
+                                             theta,
+                                             m_zenith,
+                                             m_azimuth,
+                                             m_srcLogEng,
+                                             m_obsLogEng,
+                                             m_sigma,
+                                             cos_obs,
+                                             sin_obs,
+                                             cos_src,
+                                             sin_src);
+
+        // Integrate over phi
+        GIntegral integral(&integrand);
+        integral.eps(m_rsp->m_eps);
+        integral.silent(true);
+        irf = integral.romb(phi_min, phi_max) * sin_theta;
+
+    } // endif: phi intervals was valid
 
     // Return result
-    return value;
+    return irf;
 }
 
 
