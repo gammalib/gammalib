@@ -23,9 +23,6 @@ def ptsrc_model(ra=0.0, dec=0.0):
 	# Set sky model
 	model = GModelPointSource(spatial, spectral)
 	
-	# Optionally show model
-	#print model
-	
 	# Return model
 	return model
 
@@ -50,9 +47,6 @@ def shell_model(ra=0.3, dec=0.3, radius=0.3, width=0.1):
 	# Set sky model
 	model = GModelExtendedSource(radial, spectral)
 	
-	# Optionally show model
-	#print model
-	
 	# Return model
 	return model
 
@@ -62,7 +56,7 @@ def shell_model(ra=0.3, dec=0.3, radius=0.3, width=0.1):
 # =============== #
 def disk_model(ra=359.6, dec=-0.2, radius=0.4):
 	"""
-	Set shell model.
+	Set disk model.
 	"""
 	# Set disk centre
 	center = GSkyDir()
@@ -77,8 +71,29 @@ def disk_model(ra=359.6, dec=-0.2, radius=0.4):
 	# Set sky model
 	model = GModelExtendedSource(radial, spectral)
 	
-	# Optionally show model
-	print model
+	# Return model
+	return model
+
+
+# ================== #
+# Set Gaussian model #
+# ================== #
+def gauss_model(ra=359.6, dec=+0.1, sigma=0.2):
+	"""
+	Set Gaussian model.
+	"""
+	# Set Gaussian centre
+	center = GSkyDir()
+	center.radec_deg(ra, dec)
+	
+	# Set radial model
+	radial = GModelRadialGauss(center, sigma)
+	
+	# Set spectral model
+	spectral = GModelSpectralPlaw(1.0, -2.0)
+	
+	# Set sky model
+	model = GModelExtendedSource(radial, spectral)
 	
 	# Return model
 	return model
@@ -163,6 +178,44 @@ def test_irf(model, filename="cntmap.fits"):
 	return
 
 
+# ========================= #
+# Test gradient computation #
+# ========================= #
+def test_grad(model, filename="gradmap.fits", ipar=2):
+	"""
+	Test gradient computation.
+	"""
+	# Set CTA observation
+	obs = observation()
+	src = GSkyDir()
+	src.radec_deg(0.0,0.0)
+	
+	# Make sure that parameter is free
+	model[ipar].free()
+	
+	# Loop over all bins
+	for bin in obs.events():
+		
+		# Cast to CTA bin
+		bin = cast_GCTAEventBin(bin)
+		
+		# Set bin energy and time as source energy and time (no dispersion)
+		srcEng  = bin.energy()
+		srcTime = bin.time()
+		
+		# Compute gradient
+		grad = obs.model_grad(model, bin, ipar)
+		
+		# Set bin
+		bin.counts(grad)
+	
+	# Save observation
+	obs.save(filename, True)
+	
+	# Return
+	return
+
+
 #==========================#
 # Main routine entry point #
 #==========================#
@@ -179,8 +232,13 @@ if __name__ == '__main__':
 	# Set shell model
 	#model = ptsrc_model()
 	#model = shell_model()
-	model = disk_model()
+	#model = disk_model()
+	model = gauss_model()
+	
+	# Print model
+	print model
 	
 	# Test IRF
 	test_irf(model)
+	#test_grad(model, ipar=2)
 
