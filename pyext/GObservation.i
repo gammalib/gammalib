@@ -53,6 +53,10 @@ public:
     const std::string&    name(void) const;
     const GEvents*        events(void) const;
     const std::string&    statistics(void) const;
+
+    // Other methods
+    virtual double model_grad(const GModel& model, const GEvent& event, int ipar) const;
+    virtual double npred_grad(const GModel& model, int ipar) const;
 };
 
 
