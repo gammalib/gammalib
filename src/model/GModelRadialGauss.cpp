@@ -1,5 +1,5 @@
 /***************************************************************************
- *     GModelSpatialGauss.cpp  -  Spatial Gaussian source model class      *
+ *      GModelRadialGauss.cpp  -  Radial Gaussian source model class       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
@@ -11,8 +11,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpatialGauss.cpp
- * @brief Gaussian spatial model class implementation
+ * @file GModelRadialGauss.cpp
+ * @brief Radial Gaussian model class implementation
  * @author J. Knodlseder
  */
 
@@ -22,18 +22,18 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GModelSpatialGauss.hpp"
-#include "GModelSpatialRegistry.hpp"
+#include "GModelRadialGauss.hpp"
+#include "GModelRadialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpatialGauss    g_spatial_gauss_seed;
-const GModelSpatialRegistry g_spatial_gauss_registry(&g_spatial_gauss_seed);
+const GModelRadialGauss    g_radial_gauss_seed;
+const GModelRadialRegistry g_radial_gauss_registry(&g_radial_gauss_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                       "GModelSpatialGauss::read(GXmlElement&)"
-#define G_WRITE                     "GModelSpatialGauss::write(GXmlElement&)"
+#define G_READ                        "GModelRadialGauss::read(GXmlElement&)"
+#define G_WRITE                      "GModelRadialGauss::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -51,7 +51,7 @@ const GModelSpatialRegistry g_spatial_gauss_registry(&g_spatial_gauss_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelSpatialGauss::GModelSpatialGauss(void) : GModelSpatial()
+GModelRadialGauss::GModelRadialGauss(void) : GModelRadial()
 {
     // Initialise members
     init_members();
@@ -70,8 +70,8 @@ GModelSpatialGauss::GModelSpatialGauss(void) : GModelSpatial()
  * Creates instance of a Gaussian spatial model using a sky direction and
  * a Gaussian width parameter \f$\sigma\f$ (in degrees).
  ***************************************************************************/
-GModelSpatialGauss::GModelSpatialGauss(const GSkyDir& dir,
-                                       const double& sigma) : GModelSpatial()
+GModelRadialGauss::GModelRadialGauss(const GSkyDir& dir,
+                                     const double&  sigma) : GModelRadial()
 {
     // Initialise members
     init_members();
@@ -91,10 +91,10 @@ GModelSpatialGauss::GModelSpatialGauss(const GSkyDir& dir,
  * @param[in] xml XML element.
  *
  * Creates instance of a Gaussian spatial model by extracting information
- * from an XML element. See GModelSpatialGauss::read() for more information
+ * from an XML element. See GModelRadialGauss::read() for more information
  * about the expected structure of the XML element.
  ***************************************************************************/
-GModelSpatialGauss::GModelSpatialGauss(const GXmlElement& xml) : GModelSpatial()
+GModelRadialGauss::GModelRadialGauss(const GXmlElement& xml) : GModelRadial()
 {
     // Initialise members
     init_members();
@@ -110,10 +110,10 @@ GModelSpatialGauss::GModelSpatialGauss(const GXmlElement& xml) : GModelSpatial()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Gaussian spatial model.
+ * @param[in] model Radial Gaussian model.
  ***************************************************************************/
-GModelSpatialGauss::GModelSpatialGauss(const GModelSpatialGauss& model) :
-                                       GModelSpatial(model)
+GModelRadialGauss::GModelRadialGauss(const GModelRadialGauss& model)
+                                                        : GModelRadial(model)
 {
     // Initialise members
     init_members();
@@ -129,7 +129,7 @@ GModelSpatialGauss::GModelSpatialGauss(const GModelSpatialGauss& model) :
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelSpatialGauss::~GModelSpatialGauss(void)
+GModelRadialGauss::~GModelRadialGauss(void)
 {
     // Free members
     free_members();
@@ -148,15 +148,15 @@ GModelSpatialGauss::~GModelSpatialGauss(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Gaussian spatial model.
+ * @param[in] model Radial Gaussian model.
  ***************************************************************************/
-GModelSpatialGauss& GModelSpatialGauss::operator=(const GModelSpatialGauss& model)
+GModelRadialGauss& GModelRadialGauss::operator=(const GModelRadialGauss& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
 
         // Copy base class members
-        this->GModelSpatial::operator=(model);
+        this->GModelRadial::operator=(model);
 
         // Free members
         free_members();
@@ -183,14 +183,16 @@ GModelSpatialGauss& GModelSpatialGauss::operator=(const GModelSpatialGauss& mode
 /***********************************************************************//**
  * @brief Clear instance
 ***************************************************************************/
-void GModelSpatialGauss::clear(void)
+void GModelRadialGauss::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
+    this->GModelRadial::free_members();
     this->GModelSpatial::free_members();
 
     // Initialise members
     this->GModelSpatial::init_members();
+    this->GModelRadial::init_members();
     init_members();
 
     // Return
@@ -201,16 +203,16 @@ void GModelSpatialGauss::clear(void)
 /***********************************************************************//**
  * @brief Clone instance
 ***************************************************************************/
-GModelSpatialGauss* GModelSpatialGauss::clone(void) const
+GModelRadialGauss* GModelRadialGauss::clone(void) const
 {
-    return new GModelSpatialGauss(*this);
+    return new GModelRadialGauss(*this);
 }
 
 
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] srcDir True photon arrival direction.
+ * @param[in] theta Angular distance from Gaussian centre (radians).
  *
  * Evaluates the spatial part for a Gaussian source model. The Gaussian
  * source model is defined as
@@ -219,12 +221,12 @@ GModelSpatialGauss* GModelSpatialGauss::clone(void) const
  * where
  * \f$\theta\f$ is the angular separation from the source direction, and
  * \f$\sigma\f$ is the Gaussian width.
+ *
+ * @todo The Gaussian function is only correct in the small angle
+ *       approximation.
  ***************************************************************************/
-double GModelSpatialGauss::eval(const GSkyDir& srcDir) const
+double GModelRadialGauss::eval(const double& theta) const
 {
-    // Compute distance from source
-    double theta = srcDir.dist(dir());
-    
     // Compute value
     double sigma_rad = sigma() * deg2rad;
     double sigma2    = sigma_rad * sigma_rad;
@@ -239,49 +241,16 @@ double GModelSpatialGauss::eval(const GSkyDir& srcDir) const
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] srcDir True photon arrival direction.
+ * @param[in] theta Angular distance from Gaussian centre (radians).
  *
- * Evaluates the spatial part for a Gaussian source model and the gradient
- * with respect to the source extent.  The Gaussian source model is defined
- * as
- * \f[f(\theta)=\frac{1}{2 \pi \sigma^2} \exp 
- *    \left(-\frac{1}{2}\frac{\theta^2}{\sigma^2} \right)\f]
- * where
- * \f$\theta\f$ is the angular separation from the source direction, and
- * \f$\sigma\f$ is the Gaussian width.
- *
- * The partial derivative of the Gaussian width is given by
- * \f[\frac{df}{d\sigma_v} = 
- *    f(\theta) (\frac{\theta^2}{\sigma^3} - \frac{2}{\sigma}) \sigma_s\f]
- * where 
- * \f$\sigma_v\f$ is the value part, 
- * \f$\sigma_s\f$ is the scaling part, and 
- * \f$\sigma = \sigma_v \sigma_s\f$. 
- *
- * This method only provides the parameter gradient for the Gaussian width
- * \f$\sigma\f$. No gradients are provided for the position of the Gaussian.
+ * This method simply calls GModelRadialShell::eval() as no analytical
+ * gradients will be computed. See GModelRadialShell::eval() for details
+ * about the implemented method.
  ***************************************************************************/
-double GModelSpatialGauss::eval_gradients(const GSkyDir& srcDir) const
+double GModelRadialGauss::eval_gradients(const double& theta) const
 {
-    // Compute distance from source (in radians)
-    double theta = srcDir.dist(dir());
-    
-    // Compute value (using radians)
-    double sigma_rad = sigma() * deg2rad;
-    double sigma2    = sigma_rad * sigma_rad;
-    double theta2    = theta * theta;
-    double arg       = theta2 / sigma2;
-    double value     = exp(-0.5 * arg) / (twopi * sigma2);
-
-    // Compute partial derivatives of the sigma parameter. Note that this
-    // parameter is given in degrees
-    double g_sigma = value * (arg - 2.0) / sigma() * m_sigma.scale();
-
-    // Set gradients
-    ((GModelSpatialGauss*)this)->m_sigma.gradient(g_sigma);
-
     // Return value
-    return value;
+    return (eval(theta));
 }
 
 
@@ -291,19 +260,35 @@ double GModelSpatialGauss::eval_gradients(const GSkyDir& srcDir) const
  * @param[in] ran Random number generator.
  *
  * Draws an arbitrary sky position from the 2D Gaussian distribution.
+ *
+ * @todo This method is only valid in the small angle approximation.
  ***************************************************************************/
-GSkyDir GModelSpatialGauss::mc(GRan& ran) const
+GSkyDir GModelRadialGauss::mc(GRan& ran) const
 {
     // Simulate offset from photon arrival direction
     double theta = sigma() * ran.chisq2();
-    double phi   = 360.0 * ran.uniform();
+    double phi   = 360.0   * ran.uniform();
 
     // Rotate sky direction by offset
     GSkyDir sky_dir = dir();
     sky_dir.rotate(phi, theta);
-    
+
     // Return sky direction
     return sky_dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum model radius (in radians)
+ *
+ * Returns \f$5 \sigma\f$ as approximate edge of the Gaussian. This limit
+ * is of course arbitrary, but allows to limit the integration region for
+ * response computation.
+ ***************************************************************************/
+double GModelRadialGauss::theta_max(void) const
+{
+    // Return value
+    return (sigma()*deg2rad*5.0);
 }
 
 
@@ -317,68 +302,43 @@ GSkyDir GModelSpatialGauss::mc(GRan& ran) const
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Read the point source information from an XML element. The XML element
+ * Read the Gaussian source information from an XML element. The XML element
  * is required to have 3 parameters. 
  * The position is named either "RA" and "DEC" or "GLON" and "GLAT", the
  * Gaussian width is named "Sigma".
  ***************************************************************************/
-void GModelSpatialGauss::read(const GXmlElement& xml)
+void GModelRadialGauss::read(const GXmlElement& xml)
 {
+    // Determine number of parameter nodes in XML element
+    int npars = xml.elements("parameter");
+
     // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || xml.elements("parameter") != 3)
+    if (xml.elements() != 3 || npars != 3)
         throw GException::model_invalid_parnum(G_READ, xml,
-              "Point source model requires exactly 3 parameters.");
+              "Gaussian source model requires exactly 3 parameters.");
+
+    // Read Gaussian location
+    GModelRadial::read(xml);
 
     // Extract model parameters
-    bool has_glon = false;
-    bool has_glat = false;
-    int  npar[]   = {0, 0, 0};
-    for (int i = 0; i < 3; ++i) {
+    int  npar[1]   = {0};
+    for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
         GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
 
-        // Handle RA/GLON
-        if (par->attribute("name") == "RA") {
-            m_ra.read(*par);
-            npar[0]++;
-        }
-        else if (par->attribute("name") == "GLON") {
-            m_ra.read(*par);
-            npar[0]++;
-            has_glon = true;
-        }
-
-        // Handle DEC/GLAT
-        else if (par->attribute("name") == "DEC") {
-            m_dec.read(*par);
-            npar[1]++;
-        }
-        else if (par->attribute("name") == "GLAT") {
-            m_dec.read(*par);
-            npar[1]++;
-            has_glat = true;
-        }
-
-        // Handle pivot energy
-        else if (par->attribute("name") == "Sigma") {
+        // Handle Gaussian width
+        if (par->attribute("name") == "Sigma") {
             m_sigma.read(*par);
-            npar[2]++;
+            npar[0]++;
         }
 
     } // endfor: looped over all parameters
 
-    // Check if we have to convert GLON/GLAT into RA/DEC
-    if (has_glon && has_glat) {
-        GSkyDir dir;
-        dir.lb_deg(ra(), dec()),
-        m_ra.real_value(dir.ra_deg());
-        m_dec.real_value(dir.dec_deg());
-    }
-    else if (has_glon || has_glat) {
+    // Verify that all parameters were found
+    if (npar[0] != 1)
         throw GException::model_invalid_parnames(G_READ, xml,
-                          "Require either RA/DEC or GLON/GLAT.");
-    }
+              "Require \"Sigma\" parameters.");
 
     // Return
     return;
@@ -398,66 +358,47 @@ void GModelSpatialGauss::read(const GXmlElement& xml)
  *            Invalid model parameter names found in XML element.
  *
  * Write the Gaussian source information into an XML element. The XML element
- * has to be of type 'GaussFunction' and will have 3 parameter leafs
- * named "RA", "DEC" and "Sigma".
- *
- * @todo The case that an existing spatial XML element with "GLON" and "GLAT"
- *       as coordinates is not supported.
+ * will have 3 parameter leafs named "RA", "DEC" and "Sigma". The location
+ * leafs are handled by the GModelRadial base class.
  ***************************************************************************/
-void GModelSpatialGauss::write(GXmlElement& xml) const
+void GModelRadialGauss::write(GXmlElement& xml) const
 {
-    // Set model type
-    if (xml.attribute("type") == "")
-        xml.attribute("type", type());
+    // Write shell location
+    GModelRadial::write(xml);
 
-    // Verify model type
-    if (xml.attribute("type") != type())
-        throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Spatial model is not of type \""+type()+"\".");
-
-    // If XML element has 0 nodes then append 3 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(new GXmlElement("parameter name=\"RA\""));
-        xml.append(new GXmlElement("parameter name=\"DEC\""));
+    // If XML element has 2 nodes (which should be the location nodes)
+    // then append 1 parameter node
+    if (xml.elements() == 2) {
         xml.append(new GXmlElement("parameter name=\"Sigma\""));
     }
 
+    // Determine number of parameter nodes in XML element
+    int npars = xml.elements("parameter");
+
     // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || xml.elements("parameter") != 3)
+    if (xml.elements() != 3 || npars != 3)
         throw GException::model_invalid_parnum(G_WRITE, xml,
               "Point source model requires exactly 3 parameters.");
 
     // Set or update model parameter attributes
-    int npar[] = {0, 0, 0};
-    for (int i = 0; i < 3; ++i) {
+    int npar[1] = {0};
+    for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
         GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
 
-        // Handle prefactor
-        if (par->attribute("name") == "RA") {
-            npar[0]++;
-            m_ra.write(*par);
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "DEC") {
-            npar[1]++;
-            m_dec.write(*par);
-        }
-
-        // Handle pivot energy
-        else if (par->attribute("name") == "Sigma") {
+        // Handle Sigma
+        if (par->attribute("name") == "Sigma") {
             m_sigma.write(*par);
-            npar[2]++;
+            npar[0]++;
         }
 
     } // endfor: looped over all parameters
 
     // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1)
+    if (npar[0] != 1)
         throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"RA\", \"DEC\" and \"Sigma\" parameters.");
+              "Require \"Sigma\" parameter.");
 
     // Return
     return;
@@ -467,49 +408,19 @@ void GModelSpatialGauss::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print Gaussian source information
  ***************************************************************************/
-std::string GModelSpatialGauss::print(void) const
+std::string GModelRadialGauss::print(void) const
 {
     // Initialise result string
     std::string result;
 
     // Append header
-    result.append("=== GModelSpatialGauss ===\n");
+    result.append("=== GModelRadialGauss ===\n");
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i)
         result.append("\n"+m_pars[i]->print());
 
     // Return result
     return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return position of point source
- ***************************************************************************/
-GSkyDir GModelSpatialGauss::dir(void) const
-{
-    // Allocate sky direction
-    GSkyDir srcDir;
-
-    // Set sky direction
-    srcDir.radec_deg(ra(), dec());
-
-    // Return direction
-    return srcDir;
-}
-
-
-/***********************************************************************//**
- * @brief Set position of point source
- ***************************************************************************/
-void GModelSpatialGauss::dir(const GSkyDir& dir)
-{
-    // Assign Right Ascension and Declination
-    m_ra.real_value(dir.ra_deg());
-    m_dec.real_value(dir.dec_deg());
-
-    // Return
-    return;
 }
 
 
@@ -521,26 +432,12 @@ void GModelSpatialGauss::dir(const GSkyDir& dir)
 
 /***********************************************************************//**
  * @brief Initialise class members
+ *
+ * Note that this model implements no gradients, as spatial models will
+ * always require numerical gradient computations.
  ***************************************************************************/
-void GModelSpatialGauss::init_members(void)
+void GModelRadialGauss::init_members(void)
 {
-    // Initialise Right Ascension
-    m_ra.clear();
-    m_ra.name("RA");
-    m_ra.unit("deg");
-    m_ra.fix();
-    m_ra.scale(1.0);
-    m_ra.gradient(0.0);
-    m_ra.hasgrad(false);
-
-    // Initialise Declination
-    m_dec.clear();
-    m_dec.name("DEC");
-    m_dec.unit("deg");
-    m_dec.fix();
-    m_dec.scale(1.0);
-    m_dec.gradient(0.0);
-    m_dec.hasgrad(false);
 
     // Initialise Gaussian sigma
     m_sigma.clear();
@@ -549,12 +446,9 @@ void GModelSpatialGauss::init_members(void)
     m_sigma.free();
     m_sigma.scale(1.0);
     m_sigma.gradient(0.0);
-    m_sigma.hasgrad(true);
+    m_sigma.hasgrad(false);
 
     // Set parameter pointer(s)
-    m_pars.clear();
-    m_pars.push_back(&m_ra);
-    m_pars.push_back(&m_dec);
     m_pars.push_back(&m_sigma);
 
     // Return
@@ -566,19 +460,15 @@ void GModelSpatialGauss::init_members(void)
  * @brief Copy class members
  *
  * @param[in] model Gaussian spatial model.
+ *
+ * We do not have to push back the members on the parameter stack as this
+ * should have been done by init_members() that was called before. Otherwise
+ * we would have sigma twice on the stack.
  ***************************************************************************/
-void GModelSpatialGauss::copy_members(const GModelSpatialGauss& model)
+void GModelRadialGauss::copy_members(const GModelRadialGauss& model)
 {
     // Copy members
-    m_ra    = model.m_ra;
-    m_dec   = model.m_dec;
     m_sigma = model.m_sigma;
-
-    // Set parameter pointer(s)
-    m_pars.clear();
-    m_pars.push_back(&m_ra);
-    m_pars.push_back(&m_dec);
-    m_pars.push_back(&m_sigma);
 
     // Return
     return;
@@ -588,7 +478,7 @@ void GModelSpatialGauss::copy_members(const GModelSpatialGauss& model)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GModelSpatialGauss::free_members(void)
+void GModelRadialGauss::free_members(void)
 {
     // Return
     return;
