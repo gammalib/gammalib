@@ -182,7 +182,7 @@ GDerivative* GDerivative::clone(void) const
  * iteratively decreases the step size until the error becomes less than
  * a threshold defined with the eps() method (by default the threshold is
  * set to 1e-6). If the initial step size is zero, the method takes
- * h=0.02*|x| as initial step size.
+ * \f$h={\tt m\_step\_frac} |x|\f$ as initial step size.
  * The maximum number of iterations is controlled by the max_iter()
  * method (by default, the maximum is set to 5).
  ***************************************************************************/
@@ -194,7 +194,9 @@ double GDerivative::value(const double& x, double step)
     // Initialise result
     double result = 0.0;
 
-    // Set initial step size
+    // Set initial step size. Use either the specified initial step size,
+    // or if the initial step size is 0, use a fixed fraction of the function
+    // value
     double h = step;
     if (h == 0.0) {
         h = m_step_frac * std::abs(x);
@@ -205,11 +207,8 @@ double GDerivative::value(const double& x, double step)
     // Save initial step size
     double h_initial = h;
 
-    // Initialise
-    double err         = DBL_MAX;  // Tolenarce
-    double last_result = 0.0;      // Last result
-    double last_err    = DBL_MAX;  // Last error
-    double last_h      = h;        // Last step size
+    // Initialise tolerance
+    double err = DBL_MAX;
 
     // Loop over Ridder's method until we have an acceptable tolerance
     m_iter = 0;
@@ -232,33 +231,6 @@ double GDerivative::value(const double& x, double step)
         // If uncertainty is below tolerance then exit now
         if (err < m_eps)
             break;
-
-        // Did last error increase? If yes then take last value and stop
-        if (err > last_err) {
-
-            // Recover last results
-            result = last_result;
-            err    = last_err;
-            h      = last_h;
-
-            // Optional dump warning
-            if (!silent()) {
-                std::cout << "WARNING: GDerivative::value(x=";
-                std::cout << x;
-                std::cout << "): initial step size ";
-                std::cout << h_initial;
-                std::cout << " possibly too small." << std::endl;
-            }
-
-            // Break
-            break;
-
-        } // endif: last error increased
-
-        // Store last values
-        last_result = result;
-        last_err    = err;
-        last_h      = h;
 
         // Reduce the step size
         h /= 5.0;
