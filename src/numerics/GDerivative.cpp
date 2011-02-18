@@ -346,6 +346,83 @@ double GDerivative::ridder(const double& x, const double& h, double& err)
 
 
 /***********************************************************************//**
+ * @brief Returns derivative using minuit2 algorithm
+ *
+ * @param[in] x Function value.
+ * @param[out] err Estimated error in the derivative.
+ ***************************************************************************/
+double GDerivative::minuit(const double& x, double& err)
+{
+    // Evaluate function at x
+    double fcnmin = m_func->eval(x);
+
+    // Set precision
+    double eps  = m_eps;   // Minuit2: smallest number that gives 1.+eps>1
+    double eps2 = 2.0 * std::sqrt(eps);
+
+    // Set ...
+    double fcnup  = 1.0;    // Minuit2: Fcn().Up()
+    double dfmin  = 8.0 * eps2 * (std::abs(fcnmin) + fcnup);
+    double vrysml = 8.0 * eps * eps;
+
+    // Set high strategy (see MnStrategy)
+    int    ncycles  = 5;
+    double step_tol = 0.1;
+    double grad_tol = 0.02;
+
+    // Initialise values
+    double grd    = 0.0;    // Gradient
+    double g2     = 0.0;    //
+    double gstep  = 0.0;    // Gradient step
+    double epspri = eps2;   // Minuit2: eps2 + fabs(grd(i)*eps2)
+    double stepb4 = 0.0;    //
+    err           = 0.0;    // Initial error estimate
+
+    // Loop over cycles
+    for (int j = 0; j < ncycles; ++j) {
+
+        // Compute optimum step size
+        double optstp = std::sqrt(dfmin/(std::abs(g2)+epspri));
+
+        // Compute step size
+        double step   = std::max(optstp, std::abs(0.1*gstep));
+        double stpmax = 10.0 * std::abs(gstep);
+        double stpmin = std::max(vrysml, 8.0 * std::abs(eps2*x));
+        if (step > stpmax) step = stpmax;
+        if (step < stpmin) step = stpmin;
+
+        // Break is we are below the step tolerance
+        if (std::abs((step-stepb4)/step) < step_tol)
+            break;
+
+        // Store step size information
+        gstep  = step;
+        stepb4 = step;
+
+        // Bookkeeping of last gradient
+        double grdb4 = grd;
+
+        // Evaluate gradient
+        double fs1 = m_func->eval(x + step);
+        double fs2 = m_func->eval(x - step);
+        grd = 0.5 * (fs1 - fs2) / step;
+        g2  = (fs1 + fs2 - 2.0*fcnmin) / step / step;
+
+        // Compute error
+        err = std::abs(grdb4-grd) / (std::abs(grd)+dfmin/step);
+
+        // Break if gradient is accurate enough
+        if (err < grad_tol)
+            break;
+        
+    } // endfor: looped over cycles
+
+    // Return gradient
+    return grd;
+}
+
+
+/***********************************************************************//**
  * @brief Print derivative information
  ***************************************************************************/
 std::string GDerivative::print(void) const

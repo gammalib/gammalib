@@ -68,6 +68,7 @@ public:
     const GFunction* function(void) const { return m_func; }
     double           value(const double& x, double step = 0.0);
     double           ridder(const double& x, const double& h, double& err);
+    double           minuit(const double& x, double& err);
     std::string      print(void) const;
 
 protected:
