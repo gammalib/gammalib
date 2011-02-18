@@ -92,7 +92,7 @@ GOptimizerLM::GOptimizerLM(const GOptimizerLM& opt) : GOptimizer(opt)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GOptimizerLM::~GOptimizerLM()
+GOptimizerLM::~GOptimizerLM(void)
 {
     // Free members
     free_members();
@@ -143,7 +143,8 @@ GOptimizerLM& GOptimizerLM::operator= (const GOptimizerLM& opt)
  * @param[in] fct Optimization function.
  * @param[in] p Parameters to be optimised.
  ***************************************************************************/
-GOptimizerPars& GOptimizerLM::operator() (GOptimizerFunction& fct, GOptimizerPars& p)
+GOptimizerPars& GOptimizerLM::operator()(GOptimizerFunction& fct,
+                                         GOptimizerPars&     p)
 {
     // Initalise output parameters with input parameters
     GOptimizerPars* pars = new GOptimizerPars(p);
@@ -276,7 +277,7 @@ void GOptimizerLM::init_members(void)
     m_lambda_dec   = 0.1;
     m_eps          = 1.0e-6;
     m_max_iter     = 1000;
-    m_max_stall    = 10;
+    m_max_stall    = 5;
     m_max_hit      = 3; //!< Maximum successive boundary hits before freeze
     m_step_adjust  = true;
 
@@ -335,7 +336,6 @@ void GOptimizerLM::copy_members(const GOptimizerLM& opt)
  ***************************************************************************/
 void GOptimizerLM::free_members(void)
 {
-
     // Return
     return;
 }
@@ -382,7 +382,7 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
             m_hit_maximum.push_back(0);
             m_par_freeze.push_back(false);
         }
-    
+
         // Initial evaluation
         fct->eval(*pars);
 
@@ -587,7 +587,7 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
 
         // Get LM step size
         double step = step_size(grad, pars);
-     
+
         // Derive new parameter vector
         for (int ipar = 0; ipar < m_npars; ++ipar) {
 
@@ -697,7 +697,7 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
             m_lambda *= m_lambda_inc;
 
         // ... otherwise,  if the statistics did not improve then use old parameters
-        // and increase lamdba. Restore also the best statistics value that was 
+        // and increase lamdba. Restore also the best statistics value that was
         // reached so far, the gradient vector and the curve matrix.
         else {
             m_lambda *= m_lambda_inc;
