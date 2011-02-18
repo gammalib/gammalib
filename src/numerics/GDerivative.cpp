@@ -33,7 +33,7 @@
 
 /* __ Debug definitions __________________________________________________ */
 #define G_VALUE_DEBUG  0                             //!< Debug value method
-#define G_MINUIT_DEBUG 1                             //!< Debug minuit method
+#define G_MINUIT_DEBUG 0                             //!< Debug minuit method
 
 
 /*==========================================================================
@@ -333,7 +333,7 @@ double GDerivative::ridder(const double& x, const double& h, double& err)
 
             } // endfor: looped over tableau
 
-            // If higher order is worse by a significant factor, the quit early
+            // If higher order is worse by a significant factor, then quit early
             if (std::abs( a(i,i) - a(i-1,i-1) ) >= safe*err)
                 break;
 
@@ -347,57 +347,90 @@ double GDerivative::ridder(const double& x, const double& h, double& err)
 
 
 /***********************************************************************//**
- * @brief Returns derivative using minuit2 algorithm
+ * @brief Returns derivative using Minuit2 algorithm
  *
  * @param[in] x Function value.
  * @param[out] err Estimated error in the derivative.
+ *
+ * This method has been inspired by corresponding code in the Minuit2
+ * package. Please check the following files in Minuit2 for more information:
+ * Numerical2PGradientCalculator.cxx for the main code
+ * MnStrategy.cxx for the definition of algorithm parameters
+ * MnMachinePrecision.h for the definition of eps and eps2
+ * InitialGradientCalculator.cxx for the Minuit2 way of estimating initial
+ * gradients.
+ *
+ * The exact value of fcnup has little impact on the results.
  ***************************************************************************/
-double GDerivative::minuit(const double& x, double& err)
+double GDerivative::minuit2(const double& x, double& err)
 {
     // Evaluate function at x
     double fcnmin = m_func->eval(x);
 
     // Set precision
-    double eps  = m_eps;   // Minuit2: smallest number that gives 1.+eps>1
+//    double eps  = m_eps;       // Minuit2: smallest number that gives 1.+eps>1
+//    double eps  = m_tiny;         // Bad
+//    double eps  = 1.0e-30;        // Bad
+//    double eps  = 1.0e-10;        // Poor
+//    double eps  = 1.0e-6;        // Quite good
+//    double eps  = 1.0e-8;        // Worse than 1.0e-6
+    double eps  = 1.0e-4;        // Pretty good !
+//    double eps  = 1.0e-2;        // Wrong
     double eps2 = 2.0 * std::sqrt(eps);
 
     // Set ...
-    double fcnup  = 1.0;    // Minuit2: Fcn().Up()
-    double dfmin  = 8.0 * eps2 * (std::abs(fcnmin) + fcnup);
-    double vrysml = 8.0 * eps * eps;
+    //double fcnup  = 1.0;     // Minuit2: Fcn().Up() - function delta for 1 sigma errors
+    double fcnup  = 0.01 * fcnmin;
+    double dfmin  = 8.0  * eps2 * (std::abs(fcnmin) + fcnup);
+    double vrysml = 8.0  * eps * eps;
 
     // Set high strategy (see MnStrategy)
     int    ncycles  = 5;
     double step_tol = 0.1;
     double grad_tol = 0.02;
 
-    // Initialise values
-    double epspri = eps2;   // Minuit2: eps2 + fabs(grd(i)*eps2)
-    double stepb4 = 0.0;    //
-    err           = 0.0;    // Initial error estimate
-
-    // Initial gradient estimation
-    double gstep = 0.1;    // Initial gradient step
+    // Initial gradient estimation. Note that this is brute force method
+    // that does not correspond to the Minuit2 approach. For the Minuit2
+    // approach, check InitialGradientCalculator.cxx
+    double gstep = 0.001;    // Initial gradient step
     double fs1   = m_func->eval(x + gstep);
     double fs2   = m_func->eval(x - gstep);
     double grd   = 0.5 * (fs1 - fs2) / gstep;
     double g2    = (fs1 + fs2 - 2.0*fcnmin) / gstep / gstep;
-    
+
+    // Debug option: Show actual results
+    #if G_MINUIT_DEBUG
+    std::cout << "GDerivative::minuit(";
+    std::cout << "iter=0";
+    std::cout << ", x=" << x;
+    std::cout << ", grd=" << grd;
+    std::cout << ", step=" << gstep;
+    std::cout << ")" << std::endl;
+    #endif
+
+    // Initialise values
+    double epspri      = eps2 + std::abs(grd*eps2);
+    double step        = 0.0;
+    double stepb4      = 0.0;
+    double step_change = 0.0;
+    err                = 0.0;
+
     // Loop over cycles
-    for (m_iter = 0; m_iter < ncycles; ++m_iter) {
+    for (m_iter = 1; m_iter <= ncycles; ++m_iter) {
 
         // Compute optimum step size
         double optstp = std::sqrt(dfmin/(std::abs(g2)+epspri));
 
         // Compute step size
-        double step   = std::max(optstp, std::abs(0.1*gstep));
+        step = std::max(optstp, std::abs(0.1*gstep));
         double stpmax = 10.0 * std::abs(gstep);
         double stpmin = std::max(vrysml, 8.0 * std::abs(eps2*x));
         if (step > stpmax) step = stpmax;
         if (step < stpmin) step = stpmin;
 
         // Break is we are below the step tolerance
-        if (std::abs((step-stepb4)/step) < step_tol)
+        step_change = std::abs((step-stepb4)/step);
+        if (step_change < step_tol)
             break;
 
         // Store step size information
@@ -432,6 +465,43 @@ double GDerivative::minuit(const double& x, double& err)
             break;
 
     } // endfor: looped over cycles
+
+    // Compile option: signal if we exceed the tolerance
+    if (!silent()) {
+        if (err >= grad_tol) {
+            std::cout << "WARNING: GDerivative::minuit(";
+            std::cout << "iter=" << m_iter;
+            std::cout << ", x=" << x;
+            std::cout << ", grd=" << grd;
+            std::cout << ", step=" << step;
+            std::cout << ", step_change=" << step_change;
+            std::cout << ", err=" << err;
+            std::cout << "): error exceeds tolerance of ";
+            std::cout << grad_tol << std::endl;
+        }
+    }
+
+    // Return gradient
+    return grd;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns gradient computed from function difference
+ *
+ * @param[in] x Function value.
+ * @param[in] h Step size.
+ *
+ * This is the most simple and dumb gradient computation method we can think
+ * of. It does a reasonable good job if the problem is well controlled, and
+ * in particular, if the step size is known in advance.
+ ***************************************************************************/
+double GDerivative::difference(const double& x, const double& h)
+{
+    // Compute gradient
+    double fs1 = m_func->eval(x + h);
+    double fs2 = m_func->eval(x - h);
+    double grd = 0.5 * (fs1 - fs2) / h;
 
     // Return gradient
     return grd;
@@ -478,9 +548,13 @@ void GDerivative::init_members(void)
     m_func      = NULL;
     m_eps       = 1.0e-6;
     m_step_frac = 0.02;
+    m_tiny      = 1.0e-7;
     m_max_iter  = 5;
     m_iter      = 0;
     m_silent    = false;
+
+    // Compute machine precision
+    //set_tiny();
 
     // Return
     return;
@@ -498,6 +572,7 @@ void GDerivative::copy_members(const GDerivative& dx)
     m_func      = dx.m_func;
     m_eps       = dx.m_eps;
     m_step_frac = dx.m_step_frac;
+    m_tiny      = dx.m_tiny;
     m_max_iter  = dx.m_max_iter;
     m_iter      = dx.m_iter;
     m_silent    = dx.m_silent;
@@ -514,6 +589,61 @@ void GDerivative::free_members(void)
 {
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute tiny number for Minuit2
+ *
+ * On fermi gives m_tiny = 8.88178e-16 for i=51.
+ ***************************************************************************/
+void GDerivative::set_tiny(void)
+{
+    // Allocate tiny instance
+    GDerivative::tiny tiny;
+
+    // Calculate machine precision
+    double epstry = 0.5;
+    double epsbak = 0.0;
+    double epsp1  = 0.0;
+    double one    = 1.0;
+
+    // Loop until we found
+    for (int i = 0; i < 100; ++i) {
+        epstry *= 0.5;
+        epsp1   = one + epstry;
+        epsbak  = tiny(epsp1);
+        if (epsbak < epstry) {
+            m_tiny = 8.0 * epstry;
+            break;
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return one
+ ***************************************************************************/
+double GDerivative::tiny::one(void) const
+{
+    // Return
+    return m_one;
+}
+
+
+/***********************************************************************//**
+ * @brief Evaluate minimal difference between two floating points
+ ***************************************************************************/
+double GDerivative::tiny::operator()(double eps) const
+{
+    // Compute difference
+    double result = eps - one();
+
+    // Return result
+    return result;
 }
 
 

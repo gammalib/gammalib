@@ -68,19 +68,33 @@ public:
     const GFunction* function(void) const { return m_func; }
     double           value(const double& x, double step = 0.0);
     double           ridder(const double& x, const double& h, double& err);
-    double           minuit(const double& x, double& err);
+    double           minuit2(const double& x, double& err);
+    double           difference(const double& x, const double& h);
     std::string      print(void) const;
 
 protected:
     // Protected methods
-    void   init_members(void);
-    void   copy_members(const GDerivative& dx);
-    void   free_members(void);
+    void init_members(void);
+    void copy_members(const GDerivative& dx);
+    void free_members(void);
+    void set_tiny(void);
+
+    // Tiny number computation
+    class tiny {
+    public:
+        tiny(void) : m_one(1.0) {}
+        ~tiny(void) {}
+        double one(void) const;
+        double operator()(double eps) const;
+    private:
+        double m_one;
+    };
 
     // Protected members
     GFunction* m_func;         //!< Pointer to function
     double     m_eps;          //!< Derivative precision
     double     m_step_frac;    //!< Value fraction to use for initial step
+    double     m_tiny;         //!< Tiny number for minuit2
     int        m_max_iter;     //!< Maximum number of iterations
     int        m_iter;         //!< Number of iterations used
     bool       m_silent;       //!< Suppress warnings
