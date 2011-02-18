@@ -44,6 +44,7 @@ public:
     virtual double             eval(const double& theta) const;
     virtual double             eval_gradients(const double& theta) const;
     virtual GSkyDir            mc(GRan& ran) const;
+    virtual double             theta_max(void) const;
     virtual void               read(const GXmlElement& xml);
     virtual void               write(GXmlElement& xml) const;
 

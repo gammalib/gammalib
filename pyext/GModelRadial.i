@@ -1,5 +1,5 @@
 /***************************************************************************
- *       GModelRadial.i  -  radial spatial model abstract base class       *
+ *           GModelRadial.i  -  Abstract radial model base class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GModelRadial.i
- * @brief Abstract radial spatial model base class Python interface
+ * @brief Abstract radial model base class Python interface
  * @author J. Knodlseder
  */
 %{
@@ -24,9 +24,10 @@
 /***********************************************************************//**
  * @class GModelRadial
  *
- * @brief Abstract spatial model base class
+ * @brief Abstract radial model base class
  ***************************************************************************/
 class GModelRadial : public GModelSpatial {
+
 public:
     // Constructors and destructors
     GModelRadial(void);
@@ -41,6 +42,7 @@ public:
     virtual double        eval(const double& theta) const = 0;
     virtual double        eval_gradients(const double& theta) const = 0;
     virtual GSkyDir       mc(GRan& ran) const = 0;
+    virtual double        theta_max(void) const = 0;
 
     // Implemented virtual methods
     virtual double        eval(const GSkyDir& srcDir) const;

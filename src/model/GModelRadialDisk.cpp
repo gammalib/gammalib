@@ -273,9 +273,19 @@ GSkyDir GModelRadialDisk::mc(GRan& ran) const
     // Rotate sky direction by offset
     GSkyDir sky_dir = dir();
     sky_dir.rotate(phi, theta);
-    
+
     // Return sky direction
     return sky_dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum model radius (in radians)
+ ***************************************************************************/
+double GModelRadialDisk::theta_max(void) const
+{
+    // Return value
+    return (radius()*deg2rad);
 }
 
 

@@ -57,6 +57,7 @@ public:
     virtual double        eval(const double& theta) const = 0;
     virtual double        eval_gradients(const double& theta) const = 0;
     virtual GSkyDir       mc(GRan& ran) const = 0;
+    virtual double        theta_max(void) const = 0;
     virtual std::string   print(void) const = 0;
 
     // Implemented virtual methods

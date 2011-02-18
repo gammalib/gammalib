@@ -336,6 +336,16 @@ GSkyDir GModelRadialShell::mc(GRan& ran) const
 
 
 /***********************************************************************//**
+ * @brief Return maximum model radius (in radians)
+ ***************************************************************************/
+double GModelRadialShell::theta_max(void) const
+{
+    // Return value
+    return ((radius()+width())*deg2rad);
+}
+
+
+/***********************************************************************//**
  * @brief Read model from XML element
  *
  * @param[in] xml XML element.
