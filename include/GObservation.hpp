@@ -90,14 +90,16 @@ public:
     const GEvents*        events(void) const;
     const std::string&    statistics(void) const { return m_statistics; }
 
+    // Other methods
+    virtual double model_grad(const GModel& model, const GEvent& event, int ipar) const;
+    virtual double npred_grad(const GModel& model, int ipar) const;
+
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GObservation& obs);
     void free_members(void);
 
-    // Model methods
-    virtual double model_grad(const GModel& model, const GEvent& event, int ipar) const;
 
     // Model gradient kernel classes
     class model_func : public GFunction {
@@ -119,7 +121,6 @@ protected:
     };
 
     // Npred methods
-    virtual double npred_grad(const GModel& model, int ipar) const;
     virtual double npred_temp(const GModel& model) const;
     virtual double npred_spec(const GModel& model, const GTime& obsTime) const;
 

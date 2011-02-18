@@ -425,6 +425,12 @@ void GObservation::free_members(void)
  * @param[in] event Event.
  * @param[in] ipar Parameter index for which gradient should be returned.
  *
+ * This method uses a robust but dumb method to estimate parameter
+ * gradients that have not been provided by the model. We use here a dumb
+ * method as this method is likely used for spatial model parameters, and
+ * the spatial model may eventually be noisy due to numerical integration
+ * limits.
+ *
  * @todo We simply remove any parameter boundaries here for the computation
  *       to avoid any out of boundary errors. We may have models, however,
  *       for which out of bound parameters lead to illegal computations, such
@@ -461,13 +467,12 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
             // Setup derivative function
             GObservation::model_func function(this, model, event, ipar);
 
-            // Get derivative
+            // Get derivative. We use a fixed step size here that has been
+            // checked on spatial parameters of models
             GDerivative derivative(&function);
             double x  = model[ipar].value();
-            double dx = 0.1;
-            derivative.eps(1.0e-4);
-            //derivative.silent(true);
-            grad = derivative.value(x, dx);
+            double dx = 0.05;
+            grad = derivative.difference(x, dx);
 
             // Restore current model parameter
             (*ptr)[ipar] = current;
