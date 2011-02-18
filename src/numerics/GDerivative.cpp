@@ -32,7 +32,8 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_VALUE_DEBUG 0                               //!< Debug value method
+#define G_VALUE_DEBUG  0                             //!< Debug value method
+#define G_MINUIT_DEBUG 1                             //!< Debug minuit method
 
 
 /*==========================================================================
@@ -379,7 +380,7 @@ double GDerivative::minuit(const double& x, double& err)
     err           = 0.0;    // Initial error estimate
 
     // Loop over cycles
-    for (int j = 0; j < ncycles; ++j) {
+    for (m_iter = 0; m_iter < ncycles; ++m_iter) {
 
         // Compute optimum step size
         double optstp = std::sqrt(dfmin/(std::abs(g2)+epspri));
@@ -411,10 +412,21 @@ double GDerivative::minuit(const double& x, double& err)
         // Compute error
         err = std::abs(grdb4-grd) / (std::abs(grd)+dfmin/step);
 
+        // Debug option: Show actual results
+        #if G_MINUIT_DEBUG
+        std::cout << "GDerivative::minuit(";
+        std::cout << "iter=" << m_iter;
+        std::cout << ", x=" << x;
+        std::cout << ", grd=" << grd;
+        std::cout << ", step=" << step;
+        std::cout << ", err=" << err;
+        std::cout << ")" << std::endl;
+        #endif
+
         // Break if gradient is accurate enough
         if (err < grad_tol)
             break;
-        
+
     } // endfor: looped over cycles
 
     // Return gradient
