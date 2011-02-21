@@ -125,30 +125,31 @@ protected:
     virtual double npred_spec(const GModel& model, const GTime& obsTime) const;
 
     // Npred kernel classes
-    class npred_kern_spat : public GIntegrand {
+    class npred_temp_kern : public GIntegrand {
     public:
-        npred_kern_spat(const GObservation* parent,
-                        const GModel&       model,
-                        const GTime&        obsTime) :
+        npred_temp_kern(const GObservation* parent,
+                        const GModel*       model) :
                         m_parent(parent),
-                        m_model(&model),
-                        m_time(&obsTime) { return; }
+                        m_model(model) { return; }
         double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
-        const GModel*       m_model;  //!< Pointer to model
-        const GTime*        m_time;   //!< Pointer to time
+        const GModel*       m_model;  //!< Pointer to source model
     };
-    class npred_kern_spec : public GIntegrand {
+
+    class npred_spec_kern : public GIntegrand {
     public:
-        npred_kern_spec(const GObservation* parent,
-                        const GModel&       model) :
+        npred_spec_kern(const GObservation* parent,
+                        const GModel*       model,
+                        const GTime*        obsTime) :
                         m_parent(parent),
-                        m_model(&model) { return; }
+                        m_model(model),
+                        m_time(obsTime) { return; }
         double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
-        const GModel*       m_model;  //!< Pointer to model
+        const GModel*       m_model;  //!< Pointer to source model
+        const GTime*        m_time;   //!< Pointer to time
     };
 
     // Npred gradient kernel classes

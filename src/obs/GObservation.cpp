@@ -652,7 +652,7 @@ double GObservation::npred_temp(const GModel& model) const
                                           events()->gti().tstop(i));
 
         // Setup integration function
-        GObservation::npred_kern_spec integrand(this, model);
+        GObservation::npred_temp_kern integrand(this, &model);
         GIntegral                     integral(&integrand);
 
         // Do Romberg integration
@@ -662,6 +662,25 @@ double GObservation::npred_temp(const GModel& model) const
 
     // Return result
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Integration kernel for npred_temp() method
+ *
+ * @param[in] x Function value.
+ *
+ * Note that MET is used for the time conversion. This, however, is no
+ * specialisation since npred_grad_temp() hands MET.
+ ***************************************************************************/
+double GObservation::npred_temp_kern::eval(double x)
+{
+    // Convert argument in MET
+    GTime time;
+    time.met(x);
+
+    // Return value
+    return (m_parent->npred_spec(*m_model, time));
 }
 
 
@@ -708,9 +727,8 @@ double GObservation::npred_spec(const GModel& model,
         throw GException::erange_invalid(G_NPRED_SPEC, emin, emax);
 
     // Setup integration function
-    GObservation::npred_kern_spat integrand(this, model, obsTime);
+    GObservation::npred_spec_kern integrand(this, &model, &obsTime);
     GIntegral                     integral(&integrand);
-
 
     // Do Romberg integration
     #if G_LN_ENERGY_INT
@@ -733,7 +751,7 @@ double GObservation::npred_spec(const GModel& model,
  * method. Upon the defintion of the G_LN_ENERGY_INT declaration the energy
  * integration is done logarithmically (G_LN_ENERGY_INT=1) or not.
  ***************************************************************************/
-double GObservation::npred_kern_spat::eval(double x)
+double GObservation::npred_spec_kern::eval(double x)
 {
     #if G_LN_ENERGY_INT
     // Variable substitution
@@ -754,25 +772,6 @@ double GObservation::npred_kern_spat::eval(double x)
 
     // Return value
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Integration kernel for npred_temp() method
- *
- * @param[in] x Function value.
- *
- * Note that MET is used for the time conversion. This, however, is no
- * specialisation since npred_grad_temp() hands MET.
- ***************************************************************************/
-double GObservation::npred_kern_spec::eval(double x)
-{
-    // Convert argument in MET
-    GTime time;
-    time.met(x);
-
-    // Return value
-    return (m_parent->npred_spec(*m_model,time));
 }
 
 
