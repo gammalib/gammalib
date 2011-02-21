@@ -40,6 +40,7 @@ const GModelRadialRegistry g_radial_shell_registry(&g_radial_shell_seed);
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+#define G_DEBUG_MC 0                                     //!< Debug MC method
 
 
 /*==========================================================================
@@ -316,19 +317,40 @@ double GModelRadialShell::eval_gradients(const double& theta) const
  * @param[in] ran Random number generator.
  *
  * Draws an arbitrary sky position from the 2D shell distribution.
- *
- * @todo To be implemented.
  ***************************************************************************/
 GSkyDir GModelRadialShell::mc(GRan& ran) const
 {
-    // Simulate offset from photon arrival direction
-    // @todo How to draw theta for this model?
-    double theta = (radius()+width()) * sqrt(ran.uniform());
-    double phi   = 360.0 * ran.uniform();
+    // Update precomputation cache
+    update();
 
-    // Rotate sky direction by offset
+    // Simulate offset from photon arrival direction
+    #if G_DEBUG_MC
+    int    n_samples = 0;
+    #endif
+    double theta_max     = this->theta_max();
+    double sin_theta_max = std::sin(theta_max);
+    double u_max         = m_norm * sin_theta_max * sin_theta_max;
+    double value         = 0.0;
+    double u             = 1.0;
+    double theta         = 0.0;
+    do {
+        theta = ran.uniform() * theta_max;
+        value = eval(theta) * std::sin(theta);
+        u     = ran.uniform() * u_max;
+        #if G_DEBUG_MC
+        n_samples++;
+        #endif
+    } while (u > value);
+    #if G_DEBUG_MC
+    std::cout << "#=" << n_samples << " ";
+    #endif
+
+    // Simulate azimuth angle
+    double phi = 360.0 * ran.uniform();
+
+    // Rotate pointing direction by offset and azimuth angle
     GSkyDir sky_dir = dir();
-    sky_dir.rotate(phi, theta);
+    sky_dir.rotate(phi, theta*rad2deg);
 
     // Return sky direction
     return sky_dir;
