@@ -263,10 +263,10 @@ double GResponse::irf_diffuse(const GInstDir&            obsDir,
 
 
 /***********************************************************************//**
- * @brief Return spatial integral of instrument response function
+ * @brief Return data space integral of instrument response function
  *
  * @param[in] model Source model.
- * @param[in] srcEng True energy of photon.
+ * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
  *

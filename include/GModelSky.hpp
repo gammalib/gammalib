@@ -100,7 +100,7 @@ public:
                            const GEnergy& emin, const GEnergy& emax,
                            const GTime& tmin, const GTime& tmax,
                            GRan& ran) const;
-    
+
 protected:
     // Protected methods
     void            init_members(void);
