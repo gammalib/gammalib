@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GSkyDir.hpp
- * @brief GSkyDir class definition.
+ * @brief Sky direction class interface definition
  * @author J. Knodlseder
  */
 
@@ -43,8 +43,12 @@
 class GSkyDir {
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GSkyDir& dir);
-    friend GLog&         operator<< (GLog& log, const GSkyDir& dir);
+    friend std::ostream& operator<<(std::ostream& os, const GSkyDir& dir);
+    friend GLog&         operator<<(GLog& log,        const GSkyDir& dir);
+
+    // Operator friends
+    friend bool operator==(const GSkyDir &a, const GSkyDir &b);
+    friend bool operator!=(const GSkyDir &a, const GSkyDir &b);
 
 public:
     // Constructors and destructors
@@ -87,7 +91,7 @@ private:
     void gal2equ(void) const;
     void euler(const int& type, const double& xin, const double &yin,
                double* xout, double *yout) const;
-    
+
     // Private members
     bool   m_has_lb;     //!< Has galactic coordinates
     bool   m_has_radec;  //!< Has equatorial coordinates

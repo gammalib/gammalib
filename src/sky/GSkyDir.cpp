@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GSkyDir.cpp
- * @brief GSkyDir class implementation.
+ * @brief Sky direction class implementation
  * @author J. Knodlseder
  */
 
@@ -48,7 +48,7 @@
  ***************************************************************************/
 GSkyDir::GSkyDir(void)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -59,11 +59,11 @@ GSkyDir::GSkyDir(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] dir Sky direction from which class should be instantiated.
+ * @param[in] dir Sky direction.
  ***************************************************************************/
 GSkyDir::GSkyDir(const GSkyDir& dir)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -96,7 +96,7 @@ GSkyDir::~GSkyDir(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] dir Sky direction to be assigned.
+ * @param[in] dir Sky direction.
  ***************************************************************************/
 GSkyDir& GSkyDir::operator= (const GSkyDir& dir)
 {
@@ -106,7 +106,7 @@ GSkyDir& GSkyDir::operator= (const GSkyDir& dir)
         // Free members
         free_members();
 
-        // Initialise private members
+        // Initialise members
         init_members();
 
         // Copy members
@@ -133,7 +133,7 @@ void GSkyDir::clear(void)
     // Free members
     free_members();
 
-    // Initialise private members
+    // Initialise members
     init_members();
 
     // Return
@@ -607,7 +607,7 @@ void GSkyDir::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] dir Sky direction from which members should be copied
+ * @param[in] dir Sky direction.
  ***************************************************************************/
 void GSkyDir::copy_members(const GSkyDir& dir)
 {
@@ -747,5 +747,73 @@ GLog& operator<< (GLog& log, const GSkyDir& dir)
 
     // Return logger
     return log;
+}
+
+
+/***********************************************************************//**
+ * @brief Equality operator
+ *
+ * @param[in] a First sky direction.
+ * @param[in] b Second sky direction.
+ *
+ * Compare two sky directions. If the coordinate is at the pole, the Right
+ * Ascension or Longitude value is irrelevant.
+ *
+ * Comparisons are done dependent on the available coordinate system. This
+ * speeds up things and avoids unnecessary coordinate transformations.
+ ***************************************************************************/
+bool operator==(const GSkyDir &a, const GSkyDir &b)
+{
+    // Initialise result
+    bool equal = false;
+
+    // Compute dependent on coordinate system availability. This speeds
+    // up things by avoiding unnecessary coordinate transformations.
+    if (a.m_has_lb && b.m_has_lb) {
+        if (std::abs(a.m_b) == 90.0)
+            equal = (a.m_b == b.m_b);
+        else
+            equal = (a.m_b == b.m_b && a.m_l == b.m_l);
+    }
+    else if (a.m_has_radec && b.m_has_radec) {
+        if (std::abs(a.m_dec) == 90.0)
+            equal = (a.m_dec == b.m_dec);
+        else
+            equal = (a.m_dec == b.m_dec && a.m_ra == b.m_ra);
+    }
+    else if (a.m_has_lb) {
+        if (std::abs(a.m_b) == 90.0)
+            equal = (a.m_b == b.b());
+        else
+            equal = (a.m_b == b.b() && a.m_l == b.l());
+    }
+    else if (a.m_has_radec) {
+        if (std::abs(a.m_dec) == 90.0)
+            equal = (a.m_dec == b.dec());
+        else
+            equal = (a.m_dec == b.dec() && a.m_ra == b.ra());
+    }
+    else {
+        if (std::abs(b.dec()) == 90.0)
+            equal = (b.dec() == a.dec());
+        else
+            equal = (b.dec() == a.dec() && b.ra() == a.ra());
+    }
+
+    // Return equality
+    return equal;
+}
+
+
+/***********************************************************************//**
+ * @brief Non equality operator
+ *
+ * @param[in] a First sky direction.
+ * @param[in] b Second sky direction.
+ ***************************************************************************/
+bool operator!=(const GSkyDir &a, const GSkyDir &b)
+{
+    // Return non equality
+    return (!(a==b));
 }
 

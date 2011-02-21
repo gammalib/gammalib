@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GSkyDir.i  -  Sky direction class SWIG file               *
+ *                    GSkyDir.i  -  Sky direction class                    *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GSkyDir.i
- * @brief GSkyDir class SWIG file.
+ * @brief Sky direction class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -25,9 +25,10 @@
 /***********************************************************************//**
  * @class GSkyDir
  *
- * @brief GSkyDir class interface defintion
+ * @brief Sky direction class
  ***************************************************************************/
 class GSkyDir {
+
 public:
     // Constructors and destructors
     GSkyDir(void);
@@ -64,6 +65,12 @@ public:
 %extend GSkyDir {
     char *__str__() {
         return tochar(self->print());
+    }
+    bool __eq__(const GSkyDir& dir) const {
+        return ((*self) == dir);
+    }
+    bool __ne__(const GSkyDir& dir) const {
+        return ((*self) != dir);
     }
     GSkyDir copy() {
         return (*self);
