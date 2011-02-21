@@ -65,10 +65,10 @@ public:
     double       ra_deg(void) const { return m_dir.ra_deg(); }
     double       dec(void) const { return m_dir.dec(); }
     double       dec_deg(void) const { return m_dir.dec_deg(); }
-    double       dist(GSkyDir& dir) const { return m_dir.dist(dir); }
-    double       dist_deg(GSkyDir& dir) const { return m_dir.dist_deg(dir); }
-    double       dist(GLATInstDir& dir) const;
-    double       dist_deg(GLATInstDir& dir) const;
+    double       dist(const GSkyDir& dir) const { return m_dir.dist(dir); }
+    double       dist_deg(const GSkyDir& dir) const { return m_dir.dist_deg(dir); }
+    double       dist(const GLATInstDir& dir) const;
+    double       dist_deg(const GLATInstDir& dir) const;
 
 protected:
     // Protected methods

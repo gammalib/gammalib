@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GLATInstDir.cpp  -  LAT instrument direction class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -63,7 +63,7 @@ GLATInstDir::GLATInstDir(const GSkyDir& dir) : GInstDir()
 {
     // Initialise class members
     init_members();
-    
+
     // Assign sky direction
     m_dir = dir;
 
@@ -176,14 +176,14 @@ GLATInstDir* GLATInstDir::clone(void) const
  *
  * @param[in] dir Instrument direction.
  ***************************************************************************/
-double GLATInstDir::dist(GLATInstDir& dir) const
+double GLATInstDir::dist(const GLATInstDir& dir) const
 {
     // Assign sky direction from instrument direction
     GSkyDir sky;
     double  ra  = dir.ra();
     double  dec = dir.dec();
     sky.radec(ra,dec);
-    
+
     // Compute distance
     double dist = m_dir.dist(sky);
 
@@ -197,7 +197,7 @@ double GLATInstDir::dist(GLATInstDir& dir) const
  *
  * @param[in] dir Instrument direction.
  ***************************************************************************/
-double GLATInstDir::dist_deg(GLATInstDir& dir) const
+double GLATInstDir::dist_deg(const GLATInstDir& dir) const
 {
     // Return distance in degrees
     return (dist(dir) * rad2deg);
