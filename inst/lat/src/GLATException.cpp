@@ -26,8 +26,11 @@
  ***************************************************************************/
 const char* GLATExceptionHandler::what() const throw()
 {
+    // Set error message
     std::string message = "*** ERROR in " + m_origin + ": " + m_message;
-    return message.c_str();
+
+    // Return message as C character array
+    return tochar(message);
 }
 
 
@@ -161,6 +164,28 @@ GLATException::bad_roi_type::bad_roi_type(std::string origin, std::string messag
 
     // Set message
     m_message = "Specified ROI is not of type GLATRoi.";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Instrument direction is not a CTA instrument direction
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GLATException::bad_instdir_type::bad_instdir_type(std::string origin,
+                                                  std::string message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Instrument direction is not of type GLATInstDir.";
     if (message.length() > 0)
         m_message += " "+message;
 

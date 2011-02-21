@@ -84,6 +84,10 @@ public:
     public:
         bad_roi_type(std::string origin, std::string message = "");
     };
+    class bad_instdir_type : public GLATExceptionHandler {
+    public:
+        bad_instdir_type(std::string origin, std::string message = "");
+    };
     class invalid_response : public GLATExceptionHandler {
     public:
         invalid_response(std::string origin, std::string message = "");
