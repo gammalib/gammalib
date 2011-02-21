@@ -1,11 +1,13 @@
-2011-??-??  Juergen Knoedlseder  <knodlseder@cesr.fr>
+2011-02-21  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.4.6 released
         ========================
-        
-        Strict usage of C++ headers
-        Update GEvents and GObservation interfaces
+
+        Add support for extended source models
+        Implement CTA binned and unbinned support for extended source models
+        Update GEvents, GObservation and GResponse interfaces
         Use operator[] for element access
+        Strict usage of C++ headers
         Add Doxygen and man support (make doxygen; make doxygen-install)
         Add html documentation
 
@@ -13,7 +15,7 @@
 
         * Version 0.4.5 released
         ========================
-        
+
         Implement CTA radial acceptance model
         Generalize model class
         Generation of Python bindings no longer requires swig
