@@ -74,7 +74,7 @@ GModelExtendedSource::GModelExtendedSource(const GXmlElement& xml)
 
     // Get pointers on spectrum and spatial model
     GXmlElement* spec = (GXmlElement*)xml.element("spectrum", 0);
-    GXmlElement* rad  = (GXmlElement*)xml.element("radialModel", 0);
+    GXmlElement* rad  = (GXmlElement*)xml.element("spatialModel", 0);
 
     // Allocate constant
     GModelTemporalConst temporal;
@@ -267,7 +267,7 @@ void GModelExtendedSource::read(const GXmlElement& xml)
 
     // Get pointers on spectrum and spatial model
     GXmlElement* spec = (GXmlElement*)xml.element("spectrum", 0);
-    GXmlElement* rad  = (GXmlElement*)xml.element("radialModel", 0);
+    GXmlElement* rad  = (GXmlElement*)xml.element("spatialModel", 0);
 
     // Allocate constant
     GModelTemporalConst temporal;
@@ -316,7 +316,7 @@ void GModelExtendedSource::write(GXmlElement& xml) const
         src = new GXmlElement("source");
         src->attribute("name") = name();
         if (spectral() != NULL) src->append(new GXmlElement("spectrum"));
-        if (radial()   != NULL) src->append(new GXmlElement("radialModel"));
+        if (radial()   != NULL) src->append(new GXmlElement("spatialModel"));
         xml.append(src);
     }
 
@@ -335,7 +335,7 @@ void GModelExtendedSource::write(GXmlElement& xml) const
 
     // Write spatial model
     if (radial() != NULL) {
-        GXmlElement* rad = (GXmlElement*)src->element("radialModel", 0);
+        GXmlElement* rad = (GXmlElement*)src->element("spatialModel", 0);
         radial()->write(*rad);
     }
 
