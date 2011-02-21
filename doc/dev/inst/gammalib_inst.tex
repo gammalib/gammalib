@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{INST}}
 \newcommand{\doctype}{\mbox{Instrument specific interface}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{21 February 2011}}
+\newcommand{\calendar}{\mbox{15 February 2011}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 \newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
@@ -206,9 +206,9 @@ The following diagram gives the call tree of this method:
 \begin{verbatim}
   GObservation::npred()                          - compute Eq. (3) for all source models
     GObservation::npred_temp()                   - compute GTI integrated source model
-      GObservation::npred_temp_kern::eval()      - time integration kernel
+      GObservation::npred_kern_spec::eval()      - time integration kernel
         GObservation::npred_spec()               - compute Ebounds integrated source model
-          GObservation::npred_spec_kern::eval()  - energy integration kernel
+          GObservation::npred_kern_spat::eval()  - energy integration kernel
             GModelSky::npred()                   - compute ROI integrated source model
               GResponse::npred()                 - perform integration over ROI
 \end{verbatim}
