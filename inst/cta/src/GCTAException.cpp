@@ -27,8 +27,11 @@
  ***************************************************************************/
 const char* GCTAExceptionHandler::what() const throw()
 {
+    // Set error message
     std::string message = "*** ERROR in " + m_origin + ": " + m_message;
-    return message.c_str();
+
+    // Return message as C character array
+    return tochar(message);
 }
 
 
