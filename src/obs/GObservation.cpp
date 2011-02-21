@@ -539,6 +539,10 @@ double GObservation::model_func::eval(double x)
  * \f$t\f$ is the true photon arrival time, and
  * \f$d\f$ is the instrument pointing.
  *
+ * This method uses a robust but dumb method to estimate gradients. This
+ * method has turned out more robust then the Riddler's method implement
+ * by the GDerivative::value() method.
+ *
  * @todo We simply remove any parameter boundaries here for the computation
  *       to avoid any out of boundary errors. We may have models, however,
  *       for which out of bound parameters lead to illegal computations, such
@@ -550,7 +554,7 @@ double GObservation::model_func::eval(double x)
 double GObservation::npred_grad(const GModel& model, int ipar) const
 {
     // Initialise result
-    double result = 0.0;
+    double grad = 0.0;
 
     // Compute gradient only if parameter is free
     if (model[ipar].isfree()) {
@@ -566,10 +570,14 @@ double GObservation::npred_grad(const GModel& model, int ipar) const
 
         // Setup derivative function
         GObservation::npred_func function(this, model, ipar);
-        GDerivative              derivative(&function);
 
-        // Get derivative
-        result = derivative.value(model[ipar].value());
+        // Get derivative. We use a fixed step size here that has been
+        // checked on several models
+        GDerivative derivative(&function);
+        double x  = model[ipar].value();
+        double dx = 0.05;
+        grad = derivative.difference(x, dx);
+        //grad = derivative.value(x);
 
         // Restore current model parameter
         (*ptr)[ipar] = current;
@@ -577,7 +585,7 @@ double GObservation::npred_grad(const GModel& model, int ipar) const
     } // endif: model parameter was free
 
     // Return result
-    return result;
+    return grad;
 }
 
 
