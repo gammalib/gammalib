@@ -27,6 +27,7 @@
  * @brief CTA instrument response function
  ***************************************************************************/
 class GCTAResponse : public GResponse {
+
 public:
     // Constructors and destructors
     GCTAResponse(void);
@@ -39,11 +40,33 @@ public:
     virtual GCTAResponse* clone(void) const;
     virtual bool          hasedisp(void) const;
     virtual bool          hastdisp(void) const;
-    virtual double        irf(const GEvent& event, const GModelSky& model,
-                              const GEnergy& srcEng, const GTime& srcTime,
+    virtual double        irf(const GInstDir&     obsDir,
+                              const GEnergy&      obsEng,
+                              const GTime&        obsTime,
+                              const GSkyDir&      srcDir,
+                              const GEnergy&      srcEng,
+                              const GTime&        srcTime,
                               const GObservation& obs) const;
-    virtual double        npred(const GModelSky& model, const GEnergy& srcEng,
-                                const GTime& srcTime, const GObservation& obs) const;
+    virtual double        npred(const GSkyDir&      srcDir,
+                                const GEnergy&      srcEng,
+                                const GTime&        srcTime,
+                                const GObservation& obs) const;
+
+    // Overload virtual base class methods
+    virtual double irf_extended(const GInstDir&             obsDir,
+                                const GEnergy&              obsEng,
+                                const GTime&                obsTime,
+                                const GModelExtendedSource& model,
+                                const GEnergy&              srcEng,
+                                const GTime&                srcTime,
+                                const GObservation&         obs) const;
+    virtual double irf_diffuse(const GInstDir&            obsDir,
+                               const GEnergy&             obsEng,
+                               const GTime&               obsTime,
+                               const GModelDiffuseSource& model,
+                               const GEnergy&             srcEng,
+                               const GTime&               srcTime,
+                               const GObservation&        obs) const;
 
     // Other Methods
     GCTAEventAtom* mc(const double& area, const GPhoton& photon,
@@ -53,41 +76,6 @@ public:
     void           load(const std::string& rspname);
     void           eps(const double& eps);
     const double&  eps(void) const;
-
-    // Model type dependent response methods
-    double irf_ptsrc(const GCTAInstDir&       obsDir,
-                     const GEnergy&           obsEng,
-                     const GTime&             obsTime,
-                     const GModelPointSource& model,
-                     const GEnergy&           srcEng,
-                     const GTime&             srcTime,
-                     const GCTAObservation&   obs) const;
-    double irf_extended(const GCTAInstDir&          obsDir,
-                        const GEnergy&              obsEng,
-                        const GTime&                obsTime,
-                        const GModelExtendedSource& model,
-                        const GEnergy&              srcEng,
-                        const GTime&                srcTime,
-                        const GCTAObservation&      obs) const;
-    double irf_diffuse(const GCTAInstDir&         obsDir,
-                       const GEnergy&             obsEng,
-                       const GTime&               obsTime,
-                       const GModelDiffuseSource& model,
-                       const GEnergy&             srcEng,
-                       const GTime&               srcTime,
-                       const GCTAObservation&     obs) const;
-    double npred_ptsrc(const GModelPointSource& model,
-                       const GEnergy&           srcEng,
-                       const GTime&             srcTime,
-                       const GCTAObservation&   obs) const;
-    double npred_extended(const GModelExtendedSource& model,
-                          const GEnergy&              srcEng,
-                          const GTime&                srcTime,
-                          const GCTAObservation&      obs) const;
-    double npred_diffuse(const GModelDiffuseSource& model,
-                         const GEnergy&             srcEng,
-                         const GTime&               srcTime,
-                         const GCTAObservation&     obs) const;
 
     // Low-level response methods
     double aeff(const double& theta,
@@ -126,6 +114,7 @@ public:
     // Analytical PSF implementation
     double psf_dummy(const double& delta, const double& sigma) const;
     double psf_dummy_sigma(const double& srcLogEng) const;
+    double psf_dummy_max(const double& sigma) const;
 };
 
 

@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GResponse.i
- * @brief Abstract response base class python bindings
+ * @brief Abstract response base class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -25,9 +25,10 @@
 /***********************************************************************//**
  * @class GResponse
  *
- * @brief Abstract response base class python bindings
+ * @brief Abstract response base class
  ***************************************************************************/
 class GResponse {
+
 public:
     // Constructors and destructors
     GResponse(void);
@@ -35,16 +36,65 @@ public:
     virtual ~GResponse(void);
 
     // Pure virtual methods
-    virtual void       clear(void) = 0;
-    virtual GResponse* clone(void) const = 0;
-    virtual bool       hasedisp(void) const = 0;
-    virtual bool       hastdisp(void) const = 0;
-    virtual double     irf(const GEvent& event, const GModelSky& model,
-                           const GEnergy& srcEng, const GTime& srcTime,
-                           const GObservation& obs) const = 0;
-    virtual double     npred(const GModelSky& model, const GEnergy& srcEng,
-                             const GTime& srcTime,
-                             const GObservation& obs) const = 0;
+    virtual void        clear(void) = 0;
+    virtual GResponse*  clone(void) const = 0;
+    virtual bool        hasedisp(void) const = 0;
+    virtual bool        hastdisp(void) const = 0;
+    virtual double      irf(const GInstDir&     obsDir,
+                            const GEnergy&      obsEng,
+                            const GTime&        obsTime,
+                            const GSkyDir&      srcDir,
+                            const GEnergy&      srcEng,
+                            const GTime&        srcTime,
+                            const GObservation& obs) const = 0;
+    virtual double      npred(const GSkyDir&      srcDir,
+                              const GEnergy&      srcEng,
+                              const GTime&        srcTime,
+                              const GObservation& obs) const = 0;
+
+    // Virtual methods
+    virtual double irf(const GEvent&       event,
+                       const GModelSky&    model,
+                       const GEnergy&      srcEng,
+                       const GTime&        srcTime,
+                       const GObservation& obs) const;
+    virtual double irf_ptsrc(const GInstDir&       obsDir,
+                             const GEnergy&           obsEng,
+                             const GTime&             obsTime,
+                             const GModelPointSource& model,
+                             const GEnergy&           srcEng,
+                             const GTime&             srcTime,
+                             const GObservation&   obs) const;
+    virtual double irf_extended(const GInstDir&             obsDir,
+                                const GEnergy&              obsEng,
+                                const GTime&                obsTime,
+                                const GModelExtendedSource& model,
+                                const GEnergy&              srcEng,
+                                const GTime&                srcTime,
+                                const GObservation&         obs) const;
+    virtual double irf_diffuse(const GInstDir&            obsDir,
+                               const GEnergy&             obsEng,
+                               const GTime&               obsTime,
+                               const GModelDiffuseSource& model,
+                               const GEnergy&             srcEng,
+                               const GTime&               srcTime,
+                               const GObservation&        obs) const;
+    virtual double npred(const GModelSky&    model,
+                         const GEnergy&      srcEng,
+                         const GTime&        srcTime,
+                         const GObservation& obs) const;
+    virtual double npred_ptsrc(const GModelPointSource& model,
+                               const GEnergy&           srcEng,
+                               const GTime&             srcTime,
+                               const GObservation&      obs) const;
+    virtual double npred_extended(const GModelExtendedSource& model,
+                                  const GEnergy&              srcEng,
+                                  const GTime&                srcTime,
+                                  const GObservation&         obs) const;
+    virtual double npred_diffuse(const GModelDiffuseSource& model,
+                                 const GEnergy&             srcEng,
+                                 const GTime&               srcTime,
+                                 const GObservation&        obs) const;
 };
 
 

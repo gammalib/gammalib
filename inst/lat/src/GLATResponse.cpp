@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GLATResponse.cpp  -  Fermi LAT Response class             *
+ *               GLATResponse.cpp  -  Fermi-LAT response class             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.cpp
- * @brief Fermi LAT Response class implementation.
+ * @brief Fermi-LAT response class implementation
  * @author J. Knodlseder
  */
 
@@ -23,6 +23,7 @@
 #include <unistd.h>           // access() function
 #include <cstdlib>            // std::getenv() function
 #include <string>
+#include "GLATInstDir.hpp"
 #include "GLATResponse.hpp"
 #include "GLATObservation.hpp"
 #include "GLATEventAtom.hpp"
@@ -37,6 +38,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                           "GLATResponse::caldb(std::string&)"
 #define G_LOAD                             "GLATResponse::load(std::string&)"
+#define G_IRF      "GLATResponse::irf(GInstDir&, GEnergy&, GTime&, GSkyDir&,"\
+                                          " GEnergy&, GTime&, GObservation&)"
 #define G_AEFF                                     "GLATResponse::aeff(int&)"
 #define G_PSF                                       "GLATResponse::psf(int&)"
 #define G_EDISP                                   "GLATResponse::edisp(int&)"
@@ -44,7 +47,7 @@
                                                      "GTime&, GObservation&)"
 #define G_IRF_BIN       "GLATResponse::irf(GLATEventBin&, GModel&, GEnergy&,"\
                                                      "GTime&, GObservation&)"
-#define G_NPRED              "GLATResponse::npred(GModel&, GEnergy&, GTime&,"\
+#define G_NPRED             "GLATResponse::npred(GSkyDir&, GEnergy&, GTime&,"\
                                                             " GObservation&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -69,7 +72,7 @@
  ***************************************************************************/
 GLATResponse::GLATResponse(void) : GResponse()
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -84,7 +87,7 @@ GLATResponse::GLATResponse(void) : GResponse()
  ***************************************************************************/
 GLATResponse::GLATResponse(const GLATResponse& rsp) : GResponse(rsp)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -130,7 +133,7 @@ GLATResponse& GLATResponse::operator= (const GLATResponse& rsp)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -198,12 +201,84 @@ void GLATResponse::caldb(const std::string& caldb)
     // Check if calibration database directory is accessible
     if (access(caldb.c_str(), R_OK) != 0)
         throw GException::caldb_not_found(G_CALDB, caldb);
-    
+
     // Store the path to the calibration database
     m_caldb = caldb;
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of point source IRF
+ *
+ * @param[in] obsDir Measured photon arrival direction.
+ * @param[in] obsEng Measured photon energy.
+ * @param[in] obsTime Measured photon arrival time.
+ * @param[in] srcDir True photon arrival direction.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] obs Observation.
+ *
+ * @exception GLATException::bad_instdir_type
+ *            Instrument direction is not a valid LAT instrument direction.
+ *
+ * @todo The IRF value is not devided by ontime of the event, but it is
+ *       already time integrated.
+ ***************************************************************************/
+double GLATResponse::irf(const GInstDir&     obsDir,
+                         const GEnergy&      obsEng,
+                         const GTime&        obsTime,
+                         const GSkyDir&      srcDir,
+                         const GEnergy&      srcEng,
+                         const GTime&        srcTime,
+                         const GObservation& obs) const
+{
+    // Get LAT instrument direction
+    const GLATInstDir* dir = dynamic_cast<const GLATInstDir*>(&obsDir);
+    if (dir == NULL)
+        throw GLATException::bad_instdir_type(G_IRF);
+
+    // Search for mean PSF
+    int ipsf = -1;
+    for (int i = 0; i < m_ptsrc.size(); ++i) {
+        if (m_ptsrc[i]->dir() == srcDir) {
+            ipsf = i;
+            break;
+        }
+    }
+
+    // If mean PSF has not been found then create it now
+    if (ipsf == -1) {
+
+        // Allocate new mean PSF
+        GLATMeanPsf* psf = new GLATMeanPsf(srcDir, static_cast<const GLATObservation&>(obs));
+
+        // Set source name
+        std::string name = "SRC("+str(srcDir.ra_deg())+","+str(srcDir.dec_deg())+")";
+        psf->name(name);
+
+        // Push mean PSF on stack
+        ((GLATResponse*)this)->m_ptsrc.push_back(psf);
+
+        // Set index of mean PSF
+        ipsf = m_ptsrc.size()-1;
+
+        // Debug option: dump mean PSF
+        #if G_DUMP_MEAN_PSF
+        std::cout << "Added new mean PSF \""+name+"\"" << std::endl;
+        std::cout << *psf << std::endl;
+        #endif
+
+    } // endif: created new mean PSF
+
+    // Get IRF value
+    double offset = dir->dist_deg(srcDir);
+    double irf    = (*m_ptsrc[ipsf])(offset, srcEng.log10MeV());
+
+    // Return IRF value
+    return irf;
 }
 
 
@@ -265,7 +340,7 @@ double GLATResponse::irf(const GLATEventAtom& event, const GModelSky& model,
 
 /***********************************************************************//**
  * @brief Return value of model IRF for event bin
- *        
+ *
  * @param[in] event Event bin.
  * @param[in] model Source model.
  * @param[in] srcEng True energy of photon.
@@ -404,14 +479,14 @@ double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
 /***********************************************************************//**
  * @brief Return integral of instrument response function.
  *
- * @param[in] model Source model.
+ * @param[in] srcDir True photon arrival direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
  *
  * @todo Not yet implemented.
  ***************************************************************************/
-double GLATResponse::npred(const GModelSky& model, const GEnergy& srcEng,
+double GLATResponse::npred(const GSkyDir& srcDir, const GEnergy& srcEng,
                            const GTime& srcTime,
                            const GObservation& obs) const
 {

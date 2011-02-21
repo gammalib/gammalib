@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GMWLResponse.hpp
- * @brief GMWLResponse class interface definition.
+ * @brief Multi-wavelength response class interface definition
  * @author J. Knodlseder
  */
 
@@ -26,11 +26,14 @@
 /***********************************************************************//**
  * @class GMWLResponse
  *
- * @brief Interface for the Multi-wavelength response class
+ * @brief Multi-wavelength response class
  *
- * The Multi-wavelength response class is needed to evaluate the response
- * to a source model. Since the multi-wavelength instrument classes work
- * directly in photon space, the response is by definition unity.
+ * This class implements a dummy response class for multi-wavelength
+ * observations. Since the multi-wavelength instrument classes handles data
+ * that a provided in photon space, no instrument response is in fact needed.
+ * The dummy response implemented by this class provides a simple diagonal
+ * response matrix that allows integration of multi-wavelength observations
+ * using the standard instrument specific interface.
  ***************************************************************************/
 class GMWLResponse : public GResponse {
 
@@ -41,22 +44,25 @@ public:
     virtual ~GMWLResponse(void);
 
     // Operators
-    GMWLResponse& operator= (const GMWLResponse & rsp);
+    virtual GMWLResponse& operator= (const GMWLResponse & rsp);
 
-    // Reponse function computation methods
-    double irf(const GEvent& event, const GModelSky& model,
-               const GEnergy& srcEng, const GTime& srcTime,
-               const GObservation& obs) const { return 1.0; }
-    double npred(const GModelSky& model, const GEnergy& srcEng,
-                 const GTime& srcTime,
-                 const GObservation& obs) const { return 1.0; }
-
-    // Pure virtual base class methods
-    void          clear(void);
-    GMWLResponse* clone(void) const;
-    bool          hasedisp(void) const { return false; }
-    bool          hastdisp(void) const { return false; }
-    std::string   print(void) const;
+    // Implemented pure virtual methods
+    virtual void          clear(void);
+    virtual GMWLResponse* clone(void) const;
+    virtual bool          hasedisp(void) const { return false; }
+    virtual bool          hastdisp(void) const { return false; }
+    virtual double        irf(const GInstDir&     obsDir,
+                              const GEnergy&      obsEng,
+                              const GTime&        obsTime,
+                              const GSkyDir&      srcDir,
+                              const GEnergy&      srcEng,
+                              const GTime&        srcTime,
+                              const GObservation& obs) const { return 1.0; }
+    virtual double       npred(const GSkyDir& srcDir,
+                               const GEnergy& srcEng,
+                               const GTime& srcTime,
+                               const GObservation& obs) const { return 1.0; }
+    virtual std::string  print(void) const;
 
 protected:
     // Protected methods

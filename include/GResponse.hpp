@@ -24,9 +24,15 @@
 #include <iostream>
 #include "GLog.hpp"
 #include "GEvent.hpp"
+#include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GModelSky.hpp"
+#include "GModelPointSource.hpp"
+#include "GModelExtendedSource.hpp"
+#include "GModelDiffuseSource.hpp"
+#include "GIntegrand.hpp"
+#include "GMatrix.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GObservation;
@@ -66,19 +72,125 @@ public:
     virtual GResponse*  clone(void) const = 0;
     virtual bool        hasedisp(void) const = 0;
     virtual bool        hastdisp(void) const = 0;
-    virtual double      irf(const GEvent& event, const GModelSky& model,
-                            const GEnergy& srcEng, const GTime& srcTime,
+    virtual double      irf(const GInstDir&     obsDir,
+                            const GEnergy&      obsEng,
+                            const GTime&        obsTime,
+                            const GSkyDir&      srcDir,
+                            const GEnergy&      srcEng,
+                            const GTime&        srcTime,
                             const GObservation& obs) const = 0;
-    virtual double      npred(const GModelSky& model, const GEnergy& srcEng,
-                              const GTime& srcTime,
+    virtual double      npred(const GSkyDir&      srcDir,
+                              const GEnergy&      srcEng,
+                              const GTime&        srcTime,
                               const GObservation& obs) const = 0;
     virtual std::string print(void) const = 0;
+
+    // Virtual methods
+    virtual double irf(const GEvent&       event,
+                       const GModelSky&    model,
+                       const GEnergy&      srcEng,
+                       const GTime&        srcTime,
+                       const GObservation& obs) const;
+    virtual double irf_ptsrc(const GInstDir&       obsDir,
+                             const GEnergy&           obsEng,
+                             const GTime&             obsTime,
+                             const GModelPointSource& model,
+                             const GEnergy&           srcEng,
+                             const GTime&             srcTime,
+                             const GObservation&   obs) const;
+    virtual double irf_extended(const GInstDir&             obsDir,
+                                const GEnergy&              obsEng,
+                                const GTime&                obsTime,
+                                const GModelExtendedSource& model,
+                                const GEnergy&              srcEng,
+                                const GTime&                srcTime,
+                                const GObservation&         obs) const;
+    virtual double irf_diffuse(const GInstDir&            obsDir,
+                               const GEnergy&             obsEng,
+                               const GTime&               obsTime,
+                               const GModelDiffuseSource& model,
+                               const GEnergy&             srcEng,
+                               const GTime&               srcTime,
+                               const GObservation&        obs) const;
+    virtual double npred(const GModelSky&    model,
+                         const GEnergy&      srcEng,
+                         const GTime&        srcTime,
+                         const GObservation& obs) const;
+    virtual double npred_ptsrc(const GModelPointSource& model,
+                               const GEnergy&           srcEng,
+                               const GTime&             srcTime,
+                               const GObservation&      obs) const;
+    virtual double npred_extended(const GModelExtendedSource& model,
+                                  const GEnergy&              srcEng,
+                                  const GTime&                srcTime,
+                                  const GObservation&         obs) const;
+    virtual double npred_diffuse(const GModelDiffuseSource& model,
+                                 const GEnergy&             srcEng,
+                                 const GTime&               srcTime,
+                                 const GObservation&        obs) const;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GResponse& rsp);
     void free_members(void);
+
+    // Npred theta integration kernel
+    class npred_kern_theta : public GIntegrand {
+    public:
+        npred_kern_theta(const GResponse*    rsp,
+                         const GModelRadial* radial,
+                         const GEnergy*      srcEng,
+                         const GTime*        srcTime,
+                         const GObservation* obs,
+                         const GMatrix*      rot) :
+                         m_rsp(rsp),
+                         m_radial(radial),
+                         m_srcEng(srcEng),
+                         m_srcTime(srcTime),
+                         m_obs(obs),
+                         m_rot(rot) { return; }
+        double eval(double theta);
+    protected:
+        const GResponse*    m_rsp;           //!< Pointer to response
+        const GModelRadial* m_radial;        //!< Pointer to radial spatial model
+        const GEnergy*      m_srcEng;        //!< Pointer to true photon energy
+        const GTime*        m_srcTime;       //!< Pointer to true photon arrival time
+        const GObservation* m_obs;           //!< Pointer to observation
+        const GMatrix*      m_rot;           //!< Rotation matrix
+    };
+
+    // Npred phi integration kernel
+    class npred_kern_phi : public GIntegrand {
+    public:
+        npred_kern_phi(const GResponse*    rsp,
+                       const GEnergy*      srcEng,
+                       const GTime*        srcTime,
+                       const GObservation* obs,
+                       const GMatrix*      rot,
+                       double              theta,
+                       double              sin_theta) :
+                       m_rsp(rsp),
+                       m_srcEng(srcEng),
+                       m_srcTime(srcTime),
+                       m_obs(obs),
+                       m_rot(rot),
+                       m_theta(theta),
+                       m_cos_theta(std::cos(theta)),
+                       m_sin_theta(sin_theta) { return; }
+        double eval(double phi);
+    protected:
+        const GResponse*    m_rsp;           //!< Pointer to response
+        const GModelRadial* m_radial;        //!< Pointer to radial spatial model
+        const GEnergy*      m_srcEng;        //!< Pointer to true photon energy
+        const GTime*        m_srcTime;       //!< Pointer to true photon arrival time
+        const GObservation* m_obs;           //!< Pointer to observation
+        const GMatrix*      m_rot;           //!< Rotation matrix
+        double              m_theta;         //!< Offset angle (radians)
+        double              m_cos_theta;     //!< cosine of offset angle
+        double              m_sin_theta;     //!< Sine of offset angle
+    };
+
 };
 
 #endif /* GRESPONSE_HPP */

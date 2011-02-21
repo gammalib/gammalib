@@ -32,8 +32,6 @@
 #include "GModel.hpp"
 #include "GObservation.hpp"
 #include "GResponse.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
 
 
 /***********************************************************************//**
@@ -52,18 +50,28 @@ public:
     // Operators
     GLATResponse& operator= (const GLATResponse & rsp);
 
-    // Implement pure virtual base class methods
-    void          clear(void);
-    GLATResponse* clone(void) const;
-    bool          hasedisp(void) const { return false; }
-    bool          hastdisp(void) const { return false; }
-    double        irf(const GEvent& event, const GModelSky& model,
-                      const GEnergy& srcEng, const GTime& srcTime,
-                      const GObservation& obs) const;
-    double        npred(const GModelSky& model, const GEnergy& srcEng,
-                        const GTime& srcTime,
-                        const GObservation& obs) const;
-    std::string   print(void) const;
+    // Implemented pure virtual methods
+    virtual void          clear(void);
+    virtual GLATResponse* clone(void) const;
+    virtual bool          hasedisp(void) const { return false; }
+    virtual bool          hastdisp(void) const { return false; }
+    virtual double        irf(const GInstDir&     obsDir,
+                              const GEnergy&      obsEng,
+                              const GTime&        obsTime,
+                              const GSkyDir&      srcDir,
+                              const GEnergy&      srcEng,
+                              const GTime&        srcTime,
+                              const GObservation& obs) const;
+    virtual double       npred(const GSkyDir& srcDir,
+                               const GEnergy& srcEng,
+                               const GTime& srcTime,
+                               const GObservation& obs) const;
+    virtual std::string  print(void) const;
+
+    // Implemented virtual methods
+    virtual double       irf(const GEvent& event, const GModelSky& model,
+                             const GEnergy& srcEng, const GTime& srcTime,
+                             const GObservation& obs) const;
 
     // Other Methods
     void        caldb(const std::string& caldb);

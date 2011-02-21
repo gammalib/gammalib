@@ -40,20 +40,14 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                           "GCTAResponse::caldb(std::string&)"
-#define G_IRF      "GCTAResponse::irf(GEvent&, GModelSky&, GEnergy&, GTime&,"\
-                                                            " GObservation&)"
-#define G_NPRED           "GCTAResponse::npred(GModelSky&, GEnergy&, GTime&,"\
+#define G_IRF      "GCTAResponse::irf(GInstDir&, GEnergy&, GTime&, GSkyDir&,"\
+                                          " GEnergy&, GTime&, GObservation&)"
+#define G_NPRED             "GCTAResponse::npred(GSkyDir&, GEnergy&, GTime&,"\
                                                             " GObservation&)"
 #define G_IRF_EXTENDED      "GCTAResponse::irf_extended(GInstDir&, GEnergy&,"\
            " GTime&, GModelExtendedSource&, GEnergy&, GTime&, GObservation&)"
 #define G_IRF_DIFFUSE     "GCTAResponse::irf_diffuse(GCTAInstDir&, GEnergy&,"\
          " GTime&, GModelDiffuseSource&, GEnergy&, GTime&, GCTAObservation&)"
-#define G_NPRED_PTSRC                            "GCTAResponse::npred_ptsrc("\
-                    "GModelPointSource&, GEnergy&, GTime&, GCTAObservation&)"
-#define G_NPRED_EXTENDED                      "GCTAResponse::npred_extended("\
-                 "GModelExtendedSource&, GEnergy&, GTime&, GCTAObservation&)"
-#define G_NPRED_DIFFUSE                        "GCTAResponse::npred_diffuse("\
-                  "GModelDiffuseSource&, GEnergy&, GTime&, GCTAObservation&)"
 #define G_READ           "GCTAResponse::read_performance_table(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -213,53 +207,70 @@ GCTAResponse* GCTAResponse::clone(void) const
 /***********************************************************************//**
  * @brief Return value of instrument response function
  *
- * @param[in] event Event.
- * @param[in] model Source model.
+ * @param[in] obsDir Observed photon direction.
+ * @param[in] obsEng Observed energy of photon.
+ * @param[in] obsTime Observed photon arrival time.
+ * @param[in] srcDir True photon arrival direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
  *
- * @exception GCTAException::bad_observation_type
- *            Observation is not a CTA observation.
  * @exception GCTAException::bad_instdir_type
- *            Instrument direction is not a CTA instrument direction.
- *
- * @todo Throw exception if model pointer is invalid.
+ *            Instrument direction is not a valid CTA instrument direction.
  ***************************************************************************/
-double GCTAResponse::irf(const GEvent&       event,
-                         const GModelSky&    model,
+double GCTAResponse::irf(const GInstDir&     obsDir,
+                         const GEnergy&      obsEng,
+                         const GTime&        obsTime,
+                         const GSkyDir&      srcDir,
                          const GEnergy&      srcEng,
                          const GTime&        srcTime,
                          const GObservation& obs) const
 {
+    // Get pointer on CTA instrument direction
+    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
+    if (dir == NULL)
+        throw GCTAException::bad_instdir_type(G_IRF);
+
+    // Get pointing direction zenith angle and azimuth
+    double zenith  = 0.0;
+    double azimuth = 0.0;
+
+    // Get radial offset and polar angles in camera
+    double theta = 0.0;
+    double phi   = 0.0;
+
+    // Get log10(E/TeV) of true photon energy.
+    double srcLogEng = srcEng.log10TeV();
+
+    // Determine angular separation between true and measured photon
+    // direction in radians
+    double delta = dir->dist(srcDir);
+
+    // Get maximum angular separation for which PSF is significant
+    double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
+
     // Initialise IRF value
     double irf = 0.0;
 
-    // Get pointer on CTA observation
-    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL)
-        throw GCTAException::bad_observation_type(G_IRF);
+    // Compute only if we're sufficiently close to PSF
+    if (delta <= delta_max) {
 
-    // Get pointer on CTA instrument direction
-    const GCTAInstDir* ctadir = dynamic_cast<const GCTAInstDir*>(&event.dir());
-    if (ctadir == NULL)
-        throw GCTAException::bad_instdir_type(G_IRF);
+        // Get point source IRF
+        irf  = aeff(theta, phi, zenith, azimuth, srcLogEng);
+        irf *= psf(delta, theta, phi, zenith, azimuth, srcLogEng);
 
-    // Get model pointers
-    const GModelPointSource*    ptsrc  = dynamic_cast<const GModelPointSource*>(&model);
-    const GModelExtendedSource* extsrc = dynamic_cast<const GModelExtendedSource*>(&model);
-    const GModelDiffuseSource*  difsrc = dynamic_cast<const GModelDiffuseSource*>(&model);
+        // Multiply-in energy dispersion
+        if (hasedisp()) {
 
-    // Call model dependent method
-    if (ptsrc != NULL)
-        irf = irf_ptsrc(*ctadir, event.energy(), event.time(),
-                        *ptsrc, srcEng, srcTime, *ctaobs);
-    else if (extsrc != NULL)
-        irf = irf_extended(*ctadir, event.energy(), event.time(),
-                           *extsrc, srcEng, srcTime, *ctaobs);
-    else if (difsrc != NULL)
-        irf = irf_diffuse(*ctadir, event.energy(), event.time(),
-                          *difsrc, srcEng, srcTime, *ctaobs);
+            // Get log10(E/TeV) of measured photon energy.
+            double obsLogEng = obsEng.log10TeV();
+
+            // Multiply-in energy dispersion
+            irf *= edisp(obsLogEng, theta, phi, zenith, azimuth, srcLogEng);
+
+        } // endif: energy dispersion was available
+
+    } // endif: we were sufficiently close to PSF
 
     // Return IRF value
     return irf;
@@ -267,45 +278,62 @@ double GCTAResponse::irf(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return spatial integral of instrument response function
+ * @brief Return spatial integral of point spread function
  *
- * @param[in] model Source model.
+ * @param[in] srcDir True photon arrival direction.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
  *
  * @exception GCTAException::bad_observation_type
  *            Observation is not a CTA observation.
- *
- * @todo Throw exception if model pointer is invalid.
+ * @exception GException::no_list
+ *            Observation does not contain a valid CTA event list.
  ***************************************************************************/
-double GCTAResponse::npred(const GModelSky&    model,
+double GCTAResponse::npred(const GSkyDir&      srcDir,
                            const GEnergy&      srcEng,
                            const GTime&        srcTime,
                            const GObservation& obs) const
 {
-    // Initialise Npred value
-    double npred = 0.0;
-
     // Get pointer on CTA observation
     const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
     if (ctaobs == NULL)
         throw GCTAException::bad_observation_type(G_NPRED);
 
-    // Get model pointers
-    const GModelPointSource*    ptsrc  = dynamic_cast<const GModelPointSource*>(&model);
-    const GModelExtendedSource* extsrc = dynamic_cast<const GModelExtendedSource*>(&model);
-    const GModelDiffuseSource*  difsrc = dynamic_cast<const GModelDiffuseSource*>(&model);
+    // Get pointer on CTA events list
+    const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
+    if (events == NULL)
+        throw GException::no_list(G_NPRED);
 
-    // Call model dependent method
-    if (ptsrc != NULL)
-        npred = npred_ptsrc(*ptsrc, srcEng, srcTime, *ctaobs);
-    else if (extsrc != NULL)
-        npred = npred_extended(*extsrc, srcEng, srcTime, *ctaobs);
-    else if (difsrc != NULL)
-        npred = npred_diffuse(*difsrc, srcEng, srcTime, *ctaobs);
+    // Get pointer on CTA pointing
+    const GCTAPointing *pnt = ctaobs->pointing(srcTime);
 
-    // Return response value
+    // Get pointing direction zenith angle and azimuth
+    // @todo Not yet implemented (and not yet needed)
+    double zenith  = 0.0;
+    double azimuth = 0.0;
+
+    // Get radial offset and polar angles in camera
+    // @todo Not yet implemented (and not yet needed)
+    double theta = 0.0;
+    double phi   = 0.0;
+
+    // Get log10(E/TeV) of true photon energy.
+    double srcLogEng = srcEng.log10TeV();
+
+    // Get IRF components
+    double npred = aeff(theta, phi, zenith, azimuth, srcLogEng);
+    npred       *= npsf(srcDir, srcLogEng, srcTime, *pnt, events->roi());
+
+    // Multiply-in energy dispersion
+    if (hasedisp()) {
+
+        // Multiply-in energy dispersion
+        npred *= nedisp(srcDir, srcEng, srcTime, *pnt, events->ebounds());
+
+    } // endif: had energy dispersion
+
+    // Return Npred
     return npred;
 }
 
@@ -470,81 +498,6 @@ std::string GCTAResponse::print(void) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return value of point source instrument response function
- *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
- * @param[in] model Point source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] obs CTA Observation.
- *
- * @todo The telescope zenith and azimuth angles as well as the radial offset
- *       and polar angles in the camera are not yet computed correctly (as
- *       the actual IRF implement does not need these values).
- ***************************************************************************/
-double GCTAResponse::irf_ptsrc(const GCTAInstDir&       obsDir,
-                               const GEnergy&           obsEng,
-                               const GTime&             obsTime,
-                               const GModelPointSource& model,
-                               const GEnergy&           srcEng,
-                               const GTime&             srcTime,
-                               const GCTAObservation&   obs) const
-{
-    // Get point source location
-    GSkyDir srcDir = model.dir();
-
-    // Get CTA pointing
-    const GCTAPointing* pnt = obs.pointing(srcTime);
-
-    // Get pointing direction zenith angle and azimuth
-    double zenith  = 0.0;
-    double azimuth = 0.0;
-
-    // Get radial offset and polar angles in camera
-    double theta = 0.0;
-    double phi   = 0.0;
-
-    // Get log10(E/TeV) of true photon energy.
-    double srcLogEng = srcEng.log10TeV();
-
-    // Determine angular separation between true and measured photon
-    // direction in radians
-    double delta = obsDir.dist(srcDir);
-
-    // Get maximum angular separation for which PSF is significant
-    double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
-
-    // Initialise IRF value
-    double irf = 0.0;
-
-    // Compute only if we're sufficiently close to PSF
-    if (delta <= delta_max) {
-
-        // Get point source IRF
-        irf  = aeff(theta, phi, zenith, azimuth, srcLogEng);
-        irf *= psf(delta, theta, phi, zenith, azimuth, srcLogEng);
-
-        // Multiply-in energy dispersion
-        if (hasedisp()) {
-
-            // Get log10(E/TeV) of measured photon energy.
-            double obsLogEng = obsEng.log10TeV();
-
-            // Multiply-in energy dispersion
-            irf *= edisp(obsLogEng, theta, phi, zenith, azimuth, srcLogEng);
-
-        } // endif: energy dispersion was available
-
-    } // endif: we were sufficiently close to PSF
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
  * @brief Return value of extended source instrument response function
  *
  * @param[in] obsDir Observed photon direction.
@@ -553,7 +506,12 @@ double GCTAResponse::irf_ptsrc(const GCTAInstDir&       obsDir,
  * @param[in] model Extended source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] obs CTA Observation.
+ * @param[in] obs Observation.
+ *
+ * @exception GCTAException::bad_observation_type
+ *            Observation is not a valid CTA observation
+ * @exception GCTAException::bad_instdir_type
+ *            Instrument direction is not a valid CTA instrument direction
  *
  * @todo The telescope zenith and azimuth angles as well as the radial offset
  *       and polar angles in the camera are not yet computed correctly (as
@@ -562,16 +520,26 @@ double GCTAResponse::irf_ptsrc(const GCTAInstDir&       obsDir,
  * @todo The theta limits could still improved as only the theta range is
  *       relevant for which the source and the PSF circle overlap.
  ***************************************************************************/
-double GCTAResponse::irf_extended(const GCTAInstDir&          obsDir,
+double GCTAResponse::irf_extended(const GInstDir&             obsDir,
                                   const GEnergy&              obsEng,
                                   const GTime&                obsTime,
                                   const GModelExtendedSource& model,
                                   const GEnergy&              srcEng,
                                   const GTime&                srcTime,
-                                  const GCTAObservation&      obs) const
+                                  const GObservation&         obs) const
 {
-    // Get CTA pointing
-    const GCTAPointing* pnt = obs.pointing(srcTime);
+    // Get pointer on CTA observation
+    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+    if (ctaobs == NULL)
+        throw GCTAException::bad_observation_type(G_IRF_EXTENDED);
+
+    // Get pointer on CTA instrument direction
+    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
+    if (dir == NULL)
+        throw GCTAException::bad_instdir_type(G_IRF_EXTENDED);
+
+    // Get pointer on CTA pointing
+    const GCTAPointing *pnt = ctaobs->pointing(srcTime);
 
     // Get pointing direction zenith angle and azimuth
     double zenith  = 0.0;
@@ -589,7 +557,7 @@ double GCTAResponse::irf_extended(const GCTAInstDir&          obsDir,
     double sigma = psf_dummy_sigma(srcLogEng);
 
     // Determine camera direction of measured photon
-    GCTADir obsCam(obsDir, *pnt);
+    GCTADir obsCam(*dir, *pnt);
 
     // Determine camera direction of source model centre
     GCTADir srcCam(model.dir(), *pnt);
@@ -667,126 +635,19 @@ double GCTAResponse::irf_extended(const GCTAInstDir&          obsDir,
  *
  * @todo Implement method.
  ***************************************************************************/
-double GCTAResponse::irf_diffuse(const GCTAInstDir&         obsDir,
+double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
                                  const GEnergy&             obsEng,
                                  const GTime&               obsTime,
                                  const GModelDiffuseSource& model,
                                  const GEnergy&             srcEng,
                                  const GTime&               srcTime,
-                                 const GCTAObservation&     obs) const
+                                 const GObservation&        obs) const
 {
     // Feature not yet implemented
     throw GException::feature_not_implemented(G_IRF_DIFFUSE,
           "Diffuse IRF not yet implemented.");
 
     // Return IRF value
-    return 0.0;
-}
-
-
-/***********************************************************************//**
- * @brief Return spatial integral of point source model
- *
- * @param[in] model Point source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] obs Observation.
- *
- * @exception GException::no_list
- *            Observation does not contain an event list.
- ***************************************************************************/
-double GCTAResponse::npred_ptsrc(const GModelPointSource& model,
-                                 const GEnergy&           srcEng,
-                                 const GTime&             srcTime,
-                                 const GCTAObservation&   obs) const
-{
-    // Get point source location
-    GSkyDir srcDir = model.dir();
-
-    // Get pointer on CTA events list
-    const GCTAEventList* ptr = dynamic_cast<const GCTAEventList*>(obs.events());
-    if (ptr == NULL)
-        throw GException::no_list(G_NPRED_PTSRC);
-
-    // Get pointing direction zenith angle and azimuth
-    const GCTAPointing *pnt = obs.pointing(srcTime);
-    double zenith  = 0.0;
-    double azimuth = 0.0;
-
-    // Get radial offset and polar angles in camera
-    double theta = 0.0;
-    double phi   = 0.0;
-
-    // Get log10(E/TeV) of true photon energy.
-    double srcLogEng = srcEng.log10TeV();
-
-    // Get IRF components
-    double nirf = aeff(theta, phi, zenith, azimuth, srcLogEng);
-    nirf       *= npsf(srcDir, srcLogEng, srcTime, *pnt, ptr->roi());
-
-    // Multiply-in energy dispersion
-    if (hasedisp()) {
-
-        // Multiply-in energy dispersion
-        nirf *= nedisp(srcDir, srcEng, srcTime, *pnt, ptr->ebounds());
-
-    } // endif: had energy dispersion
-
-    // Return integrated IRF value
-    return nirf;
-}
-
-
-/***********************************************************************//**
- * @brief Return spatial integral of extended source model
- *
- * @param[in] model Extended source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] obs Observation.
- *
- * @exception GException::feature_not_implemented
- *            Method not yet implemented.
- *
- * @todo Implement method.
- ***************************************************************************/
-double GCTAResponse::npred_extended(const GModelExtendedSource& model,
-                                    const GEnergy&              srcEng,
-                                    const GTime&                srcTime,
-                                    const GCTAObservation&      obs) const
-{
-    // Feature not yet implemented
-    throw GException::feature_not_implemented(G_NPRED_EXTENDED,
-                      "Method for extended source not yet implemented.");
-
-    // Return integrated IRF value
-    return 0.0;
-}
-
-
-/***********************************************************************//**
- * @brief Return spatial integral of diffuse source model
- *
- * @param[in] model Diffuse source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] obs Observation.
- *
- * @exception GException::feature_not_implemented
- *            Method not yet implemented.
- *
- * @todo Implement method.
- ***************************************************************************/
-double GCTAResponse::npred_diffuse(const GModelDiffuseSource& model,
-                                   const GEnergy&             srcEng,
-                                   const GTime&               srcTime,
-                                   const GCTAObservation&     obs) const
-{
-    // Feature not yet implemented
-    throw GException::feature_not_implemented(G_NPRED_DIFFUSE,
-                      "Method for extended source not yet implemented.");
-
-    // Return integrated IRF value
     return 0.0;
 }
 

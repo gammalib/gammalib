@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GLATResponse.i  -  Fermi LAT Response class               *
+ *               GLATResponse.i  -  Fermi-LAT response class               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.i
- * @brief Fermi LAT Response class python bindings
+ * @brief Fermi-LAT Response class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -24,26 +24,37 @@
 /***********************************************************************//**
  * @class GLATResponse
  *
- * @brief Fermi LAT Response class python bindings
+ * @brief Fermi-LAT response class
  ***************************************************************************/
 class GLATResponse : public GResponse {
+
 public:
     // Constructors and destructors
     GLATResponse(void);
     GLATResponse(const GLATResponse& rsp);
     virtual ~GLATResponse(void);
 
-    // Implement pure virtual base class methods
-    void          clear(void);
-    GLATResponse* clone(void) const;
-    bool          hasedisp(void) const;
-    bool          hastdisp(void) const;
-    double        irf(const GEvent& event, const GModelSky& model,
-                      const GEnergy& srcEng, const GTime& srcTime,
-                      const GObservation& obs) const;
-    double        npred(const GModelSky& model, const GEnergy& srcEng,
-                        const GTime& srcTime,
-                        const GObservation& obs) const;
+    // Implemented pure virtual methods
+    virtual void          clear(void);
+    virtual GLATResponse* clone(void) const;
+    virtual bool          hasedisp(void) const;
+    virtual bool          hastdisp(void) const;
+    virtual double        irf(const GInstDir&     obsDir,
+                              const GEnergy&      obsEng,
+                              const GTime&        obsTime,
+                              const GSkyDir&      srcDir,
+                              const GEnergy&      srcEng,
+                              const GTime&        srcTime,
+                              const GObservation& obs) const;
+    virtual double       npred(const GSkyDir& srcDir,
+                               const GEnergy& srcEng,
+                               const GTime& srcTime,
+                               const GObservation& obs) const;
+
+    // Implemented virtual methods
+    virtual double       irf(const GEvent& event, const GModelSky& model,
+                             const GEnergy& srcEng, const GTime& srcTime,
+                             const GObservation& obs) const;
 
     // Other Methods
     void        caldb(const std::string& caldb);
