@@ -23,6 +23,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstring>
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -159,7 +160,7 @@ typedef struct {
 inline
 void __error(int status, char* err_text)
 {
-    strcpy(err_text, "CFITSIO not available");
+    std::strcpy(err_text, "CFITSIO not available");
 }
 inline
 int __dummy(void)
