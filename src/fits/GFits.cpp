@@ -927,6 +927,13 @@ GFitsImage* GFits::new_primary(void)
     // Open HDU
     image->open(fptr,0);
 
+    // Close FITS file in memory
+    status = __ffclos(fptr, &status);
+    if (status == 252) {
+        status = 0;
+        status = __ffdelt(fptr, &status);
+    }
+
     // Initialise FITS file pointer
     FPTR(image->m_fitsfile)->HDUposition = 0;
     FPTR(image->m_fitsfile)->Fptr        = NULL;
