@@ -58,7 +58,7 @@ public:
                        const GEnergy&      srcEng,
                        const GTime&        srcTime,
                        const GObservation& obs) const;
-    virtual double irf_ptsrc(const GInstDir&       obsDir,
+    virtual double irf_ptsrc(const GInstDir&          obsDir,
                              const GEnergy&           obsEng,
                              const GTime&             obsTime,
                              const GModelPointSource& model,
