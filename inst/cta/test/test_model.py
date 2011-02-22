@@ -162,6 +162,7 @@ def test_irf(model, filename="cntmap.fits"):
 		bin = cast_GCTAEventBin(bin)
 		
 		# Set bin energy and time as source energy and time (no dispersion)
+		srcDir  = bin.dir()
 		srcEng  = bin.energy()
 		srcTime = bin.time()
 		
@@ -231,14 +232,14 @@ if __name__ == '__main__':
 	
 	# Set shell model
 	#model = ptsrc_model()
-	#model = shell_model()
+	model = shell_model()
 	#model = disk_model()
-	model = gauss_model()
+	#model = gauss_model()
 	
 	# Print model
 	print model
 	
 	# Test IRF
-	test_irf(model)
-	#test_grad(model, ipar=2)
+	#test_irf(model)
+	test_grad(model, ipar=3)
 
