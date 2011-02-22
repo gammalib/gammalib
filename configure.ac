@@ -84,7 +84,7 @@ dnl =================================
 AC_MSG_CHECKING(whether to enable debugging)
 AC_ARG_ENABLE([debug],
               AS_HELP_STRING([--enable-debug],
-                             [turn on debugging (default=no)]),
+                             [turn on debugging [default=no]]),
               [enable_debug="$enableval"],
               [enable_debug="no"])
 if test "x$enable_debug" = "xyes"; then
@@ -99,7 +99,7 @@ fi
 AC_MSG_CHECKING(whether to enable profiling)
 AC_ARG_ENABLE([profiling],
               AS_HELP_STRING([--enable-profiling],
-                             [turn on profiling (default=no)]),
+                             [turn on profiling [default=no]]),
               [enable_profiling="$enableval"],
               [enable_profiling="no"])
 if test "x$enable_profiling" = "xyes"; then
@@ -119,7 +119,7 @@ dnl =====================================
 AC_MSG_CHECKING(whether to enable range checking)
 AC_ARG_ENABLE([range_check],
               AS_HELP_STRING([--enable-range-check],
-                             [performs index range checking (default=yes)]),
+                             [performs index range checking [default=yes]]),
              [RANGE_CHECK="$enableval"],
              [RANGE_CHECK="yes"])
 if test "x$RANGE_CHECK" = "xyes"; then
@@ -136,7 +136,7 @@ dnl ====================================
 AC_MSG_CHECKING(whether to enable small memory option)
 AC_ARG_ENABLE([small_memory],
               AS_HELP_STRING([--enable-small-memory],
-                             [optimizes code for small memory (default=yes)]),
+                             [optimizes code for small memory [default=yes]]),
              [SMALL_MEMORY="$enableval"],
              [SMALL_MEMORY="yes"])
 if test "x$SMALL_MEMORY" = "xyes"; then
@@ -169,7 +169,7 @@ AM_CONDITIONAL(HAVE_SWIG, test "$SWIG")
 # Python binding enabled?
 AC_ARG_ENABLE([python-binding],
               AS_HELP_STRING([--enable-python-binding],
-                             [build python binding (default=yes)]),
+                             [build python binding [default=yes]]),
               [ac_enable_python_binding="$enableval"],
               [ac_enable_python_binding="yes"])
 AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes")
@@ -201,16 +201,16 @@ if test "x$ac_enable_python_binding" = "xyes"; then
     case $host in
       sparc*-sun-solaris*)  PYTHON_BUILD_PREFIX="CC=CC" ;;
       *)                    PYTHON_BUILD_PREFIX="" ;;
-    esac                    
+    esac
     AC_SUBST(PYTHON_BUILD_PREFIX)
-    
+
     # Set host specific extra libraries. Add all host specific libraries here that
     # need to be linked in the python module
     PYTHON_EXTRA_LIBS=
     case $host in
       sparc*-sun-solaris*)  PYTHON_EXTRA_LIBS="Cstd" ;;
       *)                    PYTHON_EXTRA_LIBS="" ;;
-    esac                    
+    esac
     AC_SUBST(PYTHON_EXTRA_LIBS)
 
   else
@@ -225,49 +225,64 @@ fi
 dnl ==========================
 dnl Checks for cfitsio library
 dnl ==========================
-# Set host specific cfitsio dependencies
-cfitsio_deps=
-case $host in
-  sparc*-sun-solaris*)  cfitsio_deps="-lm -lsocket" ;;
-  *)                    cfitsio_deps="-lm" ;;
-esac                    
+# Check if we want to use cfitsio
+AC_ARG_WITH([cfitsio],
+            [AS_HELP_STRING([--with-cfitsio],
+                            [Use CFITSIO library [default=yes]])],
+            [],
+            [with_cfitsio=yes])
 
-# Search for cfitsio shared library in a some standard directories
-for i in "$gammalib_prefix" /usr /usr/local /opt/local ; do
-  if test -f $i/lib/libcfitsio.so -o -f $i/lib/libcfitsio.dylib -a -f $i/include/fitsio.h; then
-    LIBDIR_CFITSIO=$i/lib
-    INCDIR_CFITSIO=$i/include
-    break
-  fi
-  if test -f $i/lib64/libcfitsio.so -o -f $i/lib64/libcfitsio.dylib -a -f $i/include/fitsio.h; then
-    LIBDIR_CFITSIO=$i/lib64
-    INCDIR_CFITSIO=$i/include
-    break
-  fi
-done
-if test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO"; then
-  has_cfitsio="yes"
-  AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])
-  LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
-  CPPFLAGS="$CPPFLAGS -I$INCDIR_CFITSIO"
-  LIBS="${LIBS} -lcfitsio ${cfitsio_deps}"
-  AC_SUBST(LIBDIR_CFITSIO)
-  AC_SUBST(INCDIR_CFITSIO)
-else
+# If we want to use cfitsio, then search now the library
+if test "x$with_cfitsio" = "xyes"; then
+
+  # Set host specific cfitsio dependencies
+  cfitsio_deps=
+  case $host in
+    sparc*-sun-solaris*)  cfitsio_deps="-lm -lsocket" ;;
+    *)                    cfitsio_deps="-lm" ;;
+  esac
+
+  # Search for cfitsio shared library in a some standard directories
+  for i in "$gammalib_prefix" /usr /usr/local /opt/local ; do
+    if test -f $i/lib/libcfitsio.so -o -f $i/lib/libcfitsio.dylib -a -f $i/include/fitsio.h; then
+      LIBDIR_CFITSIO=$i/lib
+      INCDIR_CFITSIO=$i/include
+      break
+    fi
+    if test -f $i/lib64/libcfitsio.so -o -f $i/lib64/libcfitsio.dylib -a -f $i/include/fitsio.h; then
+      LIBDIR_CFITSIO=$i/lib64
+      INCDIR_CFITSIO=$i/include
+      break
+    fi
+  done
+  if test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO"; then
+    has_cfitsio="yes"
+    AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])
+    LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
+    CPPFLAGS="$CPPFLAGS -I$INCDIR_CFITSIO"
+    LIBS="${LIBS} -lcfitsio ${cfitsio_deps}"
+    AC_SUBST(LIBDIR_CFITSIO)
+    AC_SUBST(INCDIR_CFITSIO)
+  else
     has_cfitsio="no"
-fi
-AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
+  fi
+  AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
 
-# If cfitsio has not yet been found then search now using the AC_CHECK_LIB
-# macro. This allows also search in paths that are eventually specified in
-# LDFLAGS
-if test "x$has_cfitsio" != "xyes"; then
-  AC_CHECK_LIB([cfitsio], [ffpss],
-               [LIBS="${LIBS} -lcfitsio ${cfitsio_deps}"
-                has_cfitsio="yes"
-                AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])],
-               [], [${cfitsio_deps}])
-  AM_CONDITIONAL(WITH_CFITSIO, test "x$ac_cv_lib_cfitsio_ffpss" = "xyes")
+  # If cfitsio has not yet been found then search now using the AC_CHECK_LIB
+  # macro. This allows also search in paths that are eventually specified in
+  # LDFLAGS
+  if test "x$has_cfitsio" != "xyes"; then
+    AC_CHECK_LIB([cfitsio], [ffpss],
+                 [LIBS="${LIBS} -lcfitsio ${cfitsio_deps}"
+                  has_cfitsio="yes"
+                  AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])],
+                 [], [${cfitsio_deps}])
+    AM_CONDITIONAL(WITH_CFITSIO, test "x$ac_cv_lib_cfitsio_ffpss" = "xyes")
+  fi
+
+else
+  has_cfitsio="no"
+  AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
 fi
 
 ## If cfitsio is available then get library path for unit testing
@@ -327,54 +342,68 @@ fi
 dnl ===========================
 dnl Checks for readline library
 dnl ===========================
+# Check if we want to use readline
+AC_ARG_WITH([readline],
+            [AS_HELP_STRING([--with-readline],
+                            [Use readline library [default=yes]])],
+            [],
+            [with_readline=yes])
 
-# Set host specific readline dependencies
-readline_deps=
-case $host in
-  sparc*-sun-solaris*)  readline_deps="-lncurses" ;;
-  *)                    readline_deps="-lncurses" ;;
-esac                    
+# If we want to use readline, then search now the library
+if test "x$with_readline" = "xyes"; then
 
-# Search for readline shared library
-for i in "$gammalib_prefix" /usr /usr/local /opt/local ; do
-  if test -f $i/lib/libreadline.so -o -f $i/lib/libreadline.dylib -a -f $i/include/readline/readline.h; then
-    LIBDIR_READLINE=$i/lib
-    INCDIR_READLINE=$i/include
-    break
-  fi
-  if test -f $i/lib64/libreadline.so -o -f $i/lib64/libreadline.dylib -a -f $i/include/readline/readline.h; then
-    LIBDIR_READLINE=$i/lib64
-    INCDIR_READLINE=$i/include
-    break
-  fi
-done
-if test -n "$LIBDIR_READLINE" -a -n "$INCDIR_READLINE"; then
-  has_readline="yes"
-  AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
-  if test "$LIBDIR_READLINE" != "$LIBDIR_CFITSIO"; then
-    LDFLAGS="$LDFLAGS -L$LIBDIR_READLINE"
-  fi
-  if test "$INCDIR_READLINE" != "$INCDIR_CFITSIO"; then
-    CPPFLAGS="$CPPFLAGS -I$INCDIR_READLINE"
-  fi
-  LIBS="${LIBS} -lreadline ${readline_deps}"
-  AC_SUBST(LIBDIR_READLINE)
-  AC_SUBST(INCDIR_READLINE)
-else
+  # Set host specific readline dependencies
+  readline_deps=
+  case $host in
+    sparc*-sun-solaris*)  readline_deps="-lncurses" ;;
+    *)                    readline_deps="-lncurses" ;;
+  esac
+
+  # Search for readline shared library
+  for i in "$gammalib_prefix" /usr /usr/local /opt/local ; do
+    if test -f $i/lib/libreadline.so -o -f $i/lib/libreadline.dylib -a -f $i/include/readline/readline.h; then
+      LIBDIR_READLINE=$i/lib
+      INCDIR_READLINE=$i/include
+      break
+    fi
+    if test -f $i/lib64/libreadline.so -o -f $i/lib64/libreadline.dylib -a -f $i/include/readline/readline.h; then
+      LIBDIR_READLINE=$i/lib64
+      INCDIR_READLINE=$i/include
+      break
+    fi
+  done
+  if test -n "$LIBDIR_READLINE" -a -n "$INCDIR_READLINE"; then
+    has_readline="yes"
+    AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
+    if test "$LIBDIR_READLINE" != "$LIBDIR_CFITSIO"; then
+      LDFLAGS="$LDFLAGS -L$LIBDIR_READLINE"
+    fi
+    if test "$INCDIR_READLINE" != "$INCDIR_CFITSIO"; then
+      CPPFLAGS="$CPPFLAGS -I$INCDIR_READLINE"
+    fi
+    LIBS="${LIBS} -lreadline ${readline_deps}"
+    AC_SUBST(LIBDIR_READLINE)
+    AC_SUBST(INCDIR_READLINE)
+  else
     has_readline="no"
-fi
-AM_CONDITIONAL(WITH_READLINE, test "x$has_readline" = "xyes")
+  fi
+  AM_CONDITIONAL(WITH_READLINE, test "x$has_readline" = "xyes")
 
-# If readline has not yet been found then search now using the AC_CHECK_LIB
-# macro. This allows also search in paths that are eventually specified in
-# LDFLAGS
-if test "x$has_readline" != "xyes"; then
-  AC_CHECK_LIB([readline], [main],
-               [LIBS="${LIBS} -lreadline ${readline_deps}"
-                has_readline="yes"
-                AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])],
-               [], [${readline_deps}])
-  AM_CONDITIONAL(WITH_READLINE, test "x$ac_cv_lib_readline_main" = "xyes")
+  # If readline has not yet been found then search now using the AC_CHECK_LIB
+  # macro. This allows also search in paths that are eventually specified in
+  # LDFLAGS
+  if test "x$has_readline" != "xyes"; then
+    AC_CHECK_LIB([readline], [main],
+                 [LIBS="${LIBS} -lreadline ${readline_deps}"
+                  has_readline="yes"
+                  AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])],
+                 [], [${readline_deps}])
+    AM_CONDITIONAL(WITH_READLINE, test "x$ac_cv_lib_readline_main" = "xyes")
+  fi
+
+else
+  has_readline="no"
+  AM_CONDITIONAL(WITH_READLINE, test "x$has_readline" = "xyes")
 fi
 
 # Check if readline is available
