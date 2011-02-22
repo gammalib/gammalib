@@ -179,17 +179,17 @@ GCTAInstDir* GCTAInstDir::clone(void) const
  *
  * Rotate CTA instrument direction by a zenith and azimuth angle given in
  * the system of the instrument direction and aligned in celestial
- * coordinates. 
+ * coordinates.
  * The azimuth angle is counted counter clockwise from celestial north
  * (this is identical to the astronomical definition of a position angle).
  ***************************************************************************/
-void GCTAInstDir::rotate(const double& phi, const double& theta)
+void GCTAInstDir::rotate_deg(const double& phi, const double& theta)
 {
     // Convert instrument direction into sky direction
     GSkyDir sky = skydir();
 
     // Rotate sky direction
-    sky.rotate(phi, theta);
+    sky.rotate_deg(phi, theta);
 
     // Convert sky direction to instrument direction
     skydir(sky);

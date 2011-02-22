@@ -56,7 +56,7 @@ public:
     void         radec_deg(const double& ra, const double& dec) { m_dir.radec_deg(ra,dec); }
     void         lb(const double& l, const double& b) { m_dir.lb(l,b); }
     void         lb_deg(const double& l, const double& b) { m_dir.lb_deg(l,b); }
-    void         rotate(const double& phi, const double& theta);
+    void         rotate_deg(const double& phi, const double& theta);
     GSkyDir      skydir(void) const { return m_dir; }
     double       l(void) const { return m_dir.l(); }
     double       l_deg(void) const { return m_dir.l_deg(); }

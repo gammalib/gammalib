@@ -27,6 +27,7 @@
  * @brief CTA instrument direction class
  ***************************************************************************/
 class GCTAInstDir : public GInstDir {
+
 public:
     // Constructors and destructors
     GCTAInstDir(void);
@@ -41,7 +42,7 @@ public:
     void         radec_deg(const double& ra, const double& dec);
     void         lb(const double& l, const double& b);
     void         lb_deg(const double& l, const double& b);
-    void         rotate(const double& phi, const double& theta);
+    void         rotate_deg(const double& phi, const double& theta);
     GSkyDir      skydir(void) const;
     double       l(void) const;
     double       l_deg(void) const;
