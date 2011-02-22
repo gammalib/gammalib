@@ -42,7 +42,7 @@ public:
     void    lb(const double& l, const double& b);
     void    lb_deg(const double& l, const double& b);
     void    celvector(const GVector& vector);
-    void    rotate(const double& phi, const double& theta);
+    void    rotate_deg(const double& phi, const double& theta);
     double  l(void) const;
     double  l_deg(void) const;
     double  b(void) const;

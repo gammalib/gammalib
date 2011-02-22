@@ -24,16 +24,17 @@
 #include <iostream>
 #include "GLog.hpp"
 #include "GVector.hpp"
+#include "GMatrix.hpp"
 
 
 /***********************************************************************//**
  * @class GSkyDir
  *
- * @brief GSkyDir class interface defintion
+ * @brief Sky direction class
  *
- * The GSkyDir class implements a coordinate on the sphere. Two coordinate
+ * This class implements a spherical coordinate on the sky. Two coordinate
  * systems are supported: celestial (or equatorial), defined by Right
- * Ascension and Declination, and galactic, defined by galactic longitude
+ * Ascension and Declination, and Galactic, defined by galactic longitude
  * and galactic latitude. The class provides automatic conversion between
  * both systems if required. Coordinates are stored in either of the
  * systems (in units of radians), and conversion is performed (and stored)
@@ -66,7 +67,7 @@ public:
     void        lb(const double& l, const double& b);
     void        lb_deg(const double& l, const double& b);
     void        celvector(const GVector& vector);
-    void        rotate(const double& phi, const double& theta);
+    void        rotate_deg(const double& phi, const double& theta);
     double      l(void) const;
     double      l_deg(void) const;
     double      b(void) const;
