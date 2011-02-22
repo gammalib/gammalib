@@ -174,118 +174,84 @@ public:
                       int max_order);
     };
 
-    // General FITS error
+
+    // FITS exceptions
     class fits_error : public GExceptionHandler {
     public:
         fits_error(std::string origin, int status, std::string message = "");
     };
-
-    // FITS file open error
     class fits_open_error : public GExceptionHandler {
     public:
         fits_open_error(std::string origin, std::string filename, int status);
     };
-
-    // FITS file exists already
     class fits_file_exist : public GExceptionHandler {
     public:
         fits_file_exist(std::string origin, std::string filename, int status = 0);
     };
-
-    // FITS file has already been opened
+    class fits_file_not_open : public GExceptionHandler {
+    public:
+        fits_file_not_open(std::string origin, std::string filename);
+    };
     class fits_already_opened : public GExceptionHandler {
     public:
         fits_already_opened(std::string origin, std::string filename);
     };
-
-    // FITS keyword not found error
     class fits_key_not_found : public GExceptionHandler {
     public:
         fits_key_not_found(std::string origin, std::string keyname, 
                            int status = 0);
     };
-
-    // FITS column not found error
     class fits_column_not_found : public GExceptionHandler {
     public:
         fits_column_not_found(std::string origin, std::string colname, 
                               int status = 0);
     };
-
-    // FITS has no header
     class fits_no_header : public GExceptionHandler {
     public:
         fits_no_header(std::string origin, std::string message, int status = 0);
     };
-
-    // FITS has no data
     class fits_no_data : public GExceptionHandler {
     public:
         fits_no_data(std::string origin, std::string message, int status = 0);
     };
-
-    // FITS HDU not found error
     class fits_hdu_not_found : public GExceptionHandler {
     public:
-        fits_hdu_not_found(std::string origin, std::string extname, 
+        fits_hdu_not_found(std::string origin, std::string extname,
                            int status = 0);
         fits_hdu_not_found(std::string origin, int extno, int status = 0);
     };
-
-    // FITS HDU not an image
     class fits_hdu_not_image : public GExceptionHandler {
     public:
         fits_hdu_not_image(std::string origin, std::string extname, int type);
     };
-
-    // FITS HDU not a table
     class fits_hdu_not_table : public GExceptionHandler {
     public:
         fits_hdu_not_table(std::string origin, std::string extname, int type);
     };
-
-    // FITS unknown HDU type
     class fits_unknown_HDU_type : public GExceptionHandler {
     public:
         fits_unknown_HDU_type(std::string origin, int type);
     };
-    // FITS HDU is not a table
-    class fits_HDU_not_a_table : public GExceptionHandler {
-    public:
-        fits_HDU_not_a_table(std::string origin, int type);
-    };
-
-    // FITS invalid type
     class fits_invalid_type : public GExceptionHandler {
     public:
         fits_invalid_type(std::string origin, std::string message);
     };
-
-    // FITS unknown table type
     class fits_unknown_tabtype : public GExceptionHandler {
     public:
         fits_unknown_tabtype(std::string origin, int type);
     };
-
-    // FITS unknown column type
     class fits_unknown_coltype : public GExceptionHandler {
     public:
         fits_unknown_coltype(std::string origin, std::string colname, int type);
     };
-
-    // FITS bad column length
     class fits_bad_col_length : public GExceptionHandler {
     public:
         fits_bad_col_length(std::string origin, int length, int rows);
     };
-
-    // FITS bad bitpix value
     class fits_bad_bitpix : public GExceptionHandler {
     public:
         fits_bad_bitpix(std::string origin, int bitpix);
     };
-
-    // FITS bad image operator
     class fits_wrong_image_operator : public GExceptionHandler {
     public:
         fits_wrong_image_operator(std::string origin, int naxis, int nargs);

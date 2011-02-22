@@ -28,12 +28,22 @@ GException::fits_error::fits_error(std::string origin,
                                    int         status,
                                    std::string message)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     std::ostringstream s_error;
     char err_text[31];
     __ffgerr(status, err_text);
-    s_error << err_text << " (status=" << status << ") " + message;
+    s_error << err_text << " (status=" << status << ")";
     m_message = s_error.str();
+
+    // Add optional error message
+    if (message.length() > 0)
+        m_message += " " + message;
+
+    // Return
+    return;
 }
 
 
@@ -48,10 +58,18 @@ GException::fits_open_error::fits_open_error(std::string origin,
                                              std::string filename,
                                              int         status)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "Unable to open FITS file '" + filename + "'";
+
+    // Set message
+    m_message = "Unable to open FITS file \"" + filename + "\"";
+
+    // Add status
     if (status != 0)
         m_message += " (status=" + str(status) + ")";
+
+    // Return
+    return;
 }
 
 
@@ -66,10 +84,43 @@ GException::fits_file_exist::fits_file_exist(std::string origin,
                                              std::string filename,
                                              int         status)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "Attempted to overwrite FITS file '" + filename + "'";
+
+    // Set message
+    m_message = "Attempted to overwrite FITS file \"" + filename + "\"";
+
+    // Add status
     if (status != 0)
         m_message += " (status=" + str(status) + ")";
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief FITS error: file not open
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::fits_file_not_open::fits_file_not_open(std::string origin,
+                                                   std::string message)
+{
+    // Set origin
+    m_origin  = origin;
+
+    // Set message
+    m_message = "FITS file not open.";
+
+
+    // Add optional error message
+    if (message.length() > 0)
+        m_message += " " + message;
+
+    // Return
+    return;
 }
 
 
@@ -82,8 +133,14 @@ GException::fits_file_exist::fits_file_exist(std::string origin,
 GException::fits_already_opened::fits_already_opened(std::string origin,
                                                      std::string filename)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "FITS file '" + filename + "' is already open";
+
+    // Set message
+    m_message = "FITS file \"" + filename + "\" is already open";
+
+    // Return
+    return;
 }
 
 
@@ -98,10 +155,18 @@ GException::fits_key_not_found::fits_key_not_found(std::string origin,
                                                    std::string keyname,
                                                    int         status)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "Keyword '" + keyname + "' not found in header";
+
+    // Set message
+    m_message = "Keyword \"" + keyname + "\" not found in header";
+
+    // Add status
     if (status != 0)
         m_message += " (status=" + str(status) + ")";
+
+    // Return
+    return;
 }
 
 
@@ -116,10 +181,18 @@ GException::fits_column_not_found::fits_column_not_found(std::string origin,
                                                          std::string colname,
                                                          int         status)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "Column '" + colname + "' not found in table";
+
+    // Set message
+    m_message = "Column \"" + colname + "\" not found in table";
+
+    // Add status
     if (status != 0)
         m_message += " (status=" + str(status) + ")";
+
+    // Return
+    return;
 }
 
 
@@ -134,10 +207,18 @@ GException::fits_no_header::fits_no_header(std::string origin,
                                            std::string message,
                                            int         status)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = message;
+
+    // Add status
     if (status != 0)
         m_message += " (status=" + str(status) + ")";
+
+    // Return
+    return;
 }
 
 
@@ -152,10 +233,18 @@ GException::fits_no_data::fits_no_data(std::string origin,
                                        std::string message,
                                        int         status)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = message;
+
+    // Add status
     if (status != 0)
         m_message += " (status=" + str(status) + ")";
+
+    // Return
+    return;
 }
 
 
@@ -170,10 +259,18 @@ GException::fits_hdu_not_found::fits_hdu_not_found(std::string origin,
                                                    std::string extname,
                                                    int         status)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = "HDU \"" + extname + "\" not found in FITS file";
+
+    // Add status
     if (status != 0)
         m_message += " (status=" + str(status) + ")";
+
+    // Return
+    return;
 }
 
 
@@ -188,10 +285,18 @@ GException::fits_hdu_not_found::fits_hdu_not_found(std::string origin,
                                                    int         extno,
                                                    int         status)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = "HDU number " + str(extno) + " not found in FITS file";
+
+    // Add status
     if (status != 0)
         m_message += " (status=" + str(status) + ")";
+
+    // Return
+    return;
 }
 
 
@@ -206,8 +311,14 @@ GException::fits_hdu_not_image::fits_hdu_not_image(std::string origin,
                                                    std::string extname,
                                                    int         type)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = "HDU \""+extname+"\" is not an image (type="+str(type)+")";
+
+    // Return
+    return;
 }
 
 
@@ -222,8 +333,14 @@ GException::fits_hdu_not_table::fits_hdu_not_table(std::string origin,
                                                    std::string extname,
                                                    int         type)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = "HDU \""+extname+"\" is not a table (type="+str(type)+")";
+
+    // Return
+    return;
 }
 
 
@@ -236,22 +353,14 @@ GException::fits_hdu_not_table::fits_hdu_not_table(std::string origin,
 GException::fits_unknown_HDU_type::fits_unknown_HDU_type(std::string origin,
                                                          int         type)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = "HDU type (type="+str(type)+") is not defined";
-}
 
-
-/***********************************************************************//**
- * @brief FITS error: HDU is not a table
- *
- * @param[in] origin Method that throws the error.
- * @param[in] type Specified HDU type.
- ***************************************************************************/
-GException::fits_HDU_not_a_table::fits_HDU_not_a_table(std::string origin,
-                                                       int         type)
-{
-    m_origin  = origin;
-    m_message = "HDU is not of type 'table' (type=" + str(type) + ")";
+    // Return
+    return;
 }
 
 
@@ -264,8 +373,14 @@ GException::fits_HDU_not_a_table::fits_HDU_not_a_table(std::string origin,
 GException::fits_invalid_type::fits_invalid_type(std::string origin,
                                                  std::string message)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = message;
+
+    // Return
+    return;
 }
 
 
@@ -278,8 +393,14 @@ GException::fits_invalid_type::fits_invalid_type(std::string origin,
 GException::fits_unknown_tabtype::fits_unknown_tabtype(std::string origin,
                                                        int         type)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "Table type '" + str(type) + "' is unknown";
+
+    // Set message
+    m_message = "Table type \"" + str(type) + "\" is unknown";
+
+    // Return
+    return;
 }
 
 
@@ -294,8 +415,14 @@ GException::fits_unknown_coltype::fits_unknown_coltype(std::string origin,
                                                        std::string colname,
                                                        int         type)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = "Column \""+colname+"\" has unsupported typecode="+str(type);
+
+    // Return
+    return;
 }
 
 
@@ -310,10 +437,16 @@ GException::fits_bad_col_length::fits_bad_col_length(std::string origin,
                                                      int         length,
                                                      int         rows)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "Column length '" + str(length) + "' is not compatible"
-                " with the number of rows '" + str(rows) + "' in the"
+
+    // Set message
+    m_message = "Column length (" + str(length) + ") is not compatible"
+                " with the number of rows (" + str(rows) + ") in the"
                 " table";
+
+    // Return
+    return;
 }
 
 
@@ -326,8 +459,14 @@ GException::fits_bad_col_length::fits_bad_col_length(std::string origin,
 GException::fits_bad_bitpix::fits_bad_bitpix(std::string origin,
                                              int         bitpix)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = "Invalid number of bits per pixel (bitpix="+str(bitpix)+")";
+
+    // Return
+    return;
 }
 
 
@@ -342,7 +481,13 @@ GException::fits_wrong_image_operator::fits_wrong_image_operator(std::string ori
                                                                  int         naxis,
                                                                  int         nargs)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = "Wrong image pixel access operator has been used (dimension=" +
                 str(naxis) + " < arguments=" + str(nargs) + ")";
+
+    // Return
+    return;
 }
