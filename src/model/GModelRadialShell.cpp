@@ -329,7 +329,8 @@ GSkyDir GModelRadialShell::mc(GRan& ran) const
     #endif
     double theta_max     = this->theta_max();
     double sin_theta_max = std::sin(theta_max);
-    double u_max         = m_norm * sin_theta_max * sin_theta_max;
+    double u_max         = (m_small_angle) ? m_norm * sin_theta_max * theta_max
+                                           : m_norm * sin_theta_max * sin_theta_max;
     double value         = 0.0;
     double u             = 1.0;
     double theta         = 0.0;
@@ -350,7 +351,7 @@ GSkyDir GModelRadialShell::mc(GRan& ran) const
 
     // Rotate pointing direction by offset and azimuth angle
     GSkyDir sky_dir = dir();
-    sky_dir.rotate(phi, theta*rad2deg);
+    sky_dir.rotate_deg(phi, theta*rad2deg);
 
     // Return sky direction
     return sky_dir;

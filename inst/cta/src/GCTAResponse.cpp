@@ -379,7 +379,7 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
 
         // Rotate sky direction by offset
         GSkyDir sky_dir = photon.dir();
-        sky_dir.rotate(phi, theta);
+        sky_dir.rotate_deg(phi, theta);
 
         // Set measured photon arrival direction
         GCTAInstDir inst_dir;

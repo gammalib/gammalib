@@ -272,7 +272,7 @@ GSkyDir GModelRadialDisk::mc(GRan& ran) const
 
     // Rotate sky direction by offset
     GSkyDir sky_dir = dir();
-    sky_dir.rotate(phi, theta);
+    sky_dir.rotate_deg(phi, theta);
 
     // Return sky direction
     return sky_dir;
