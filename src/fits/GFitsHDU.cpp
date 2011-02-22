@@ -292,6 +292,7 @@ void GFitsHDU::card(const std::string& keyname, const int& value,
  *
  * Creates a memory FITS file containing a primary HDU.
  ***************************************************************************/
+/*
 GFitsHDU* GFitsHDU::primary(void)
 {
     // Free any allocated data
@@ -314,7 +315,7 @@ GFitsHDU* GFitsHDU::primary(void)
     // Return
     return this;
 }
-
+*/
 
 /*==========================================================================
  =                                                                         =
@@ -401,6 +402,11 @@ GFitsHDU::HDUType GFitsHDU::get_hdu_type(void) const
  * @param[in] vptr FITS file pointer.
  * @param[in] hdunum Number of HDU (starting from 0).
  *
+ * @exception GException::fits_file_not_open
+ *            FITS file pointer does not point to an open FITS file
+ * @exception GException::fits_error
+ *            Unable to open FITS HDU.
+ *
  * Opens an (existing) HDU in the FITS file. This method does NOT create any
  * HDU if it does not exist. Opening consists of fetching all header cards
  * (by opening an associated GFitsHeader instance) and of opening the data
@@ -408,6 +414,11 @@ GFitsHDU::HDUType GFitsHDU::get_hdu_type(void) const
  ***************************************************************************/
 void GFitsHDU::open(void* vptr, int hdunum)
 {
+    // Verify that FITS file pointer is valid
+    if (vptr == NULL)
+        throw GException::fits_file_not_open(G_OPEN,
+              "FITS file pointer does not point to an open FITS file.");
+
     // Move to HDU
     int status = 0;
     status     = __ffmahd(FPTR(vptr), hdunum+1, NULL, &status);
