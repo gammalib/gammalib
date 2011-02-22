@@ -287,36 +287,6 @@ void GFitsHDU::card(const std::string& keyname, const int& value,
 }
 
 
-/***********************************************************************//**
- * @brief Setup minimal primary HDU
- *
- * Creates a memory FITS file containing a primary HDU.
- ***************************************************************************/
-/*
-GFitsHDU* GFitsHDU::primary(void)
-{
-    // Free any allocated data
-    //if (m_data != NULL) delete m_data;
-    //m_data = NULL;
-
-    // Create primary image in memory
-    int status = 0;
-    __fitsfile* fptr;
-    status = __ffinit(&fptr, "mem://", &status);
-    status = __ffcrim(fptr, 8, 0, NULL, &status);
-
-    // Open HDU
-    this->open(fptr, 0);
-
-    // Initialise FITS file pointer
-    FPTR(this->m_fitsfile)->HDUposition = 0;
-    FPTR(this->m_fitsfile)->Fptr        = NULL;
-
-    // Return
-    return this;
-}
-*/
-
 /*==========================================================================
  =                                                                         =
  =                            Protected methods                            =
