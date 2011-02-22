@@ -83,7 +83,6 @@ public:
                           const std::string& comment);
     void             card(const std::string& keyname, const int& value,
                           const std::string& comment);
-    GFitsHDU*        primary(void);
 
 protected:
     // Protected methods

@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GFitsHDU.i  - FITS HDU handling class SWIG file             *
+ *                   GFitsHDU.i  - FITS HDU handling class                 *
  * ----------------------------------------------------------------------- *
  *  copyright : (C) 2008-2011 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GFitsHDU.i
- * @brief GFitsHDU class SWIG file
+ * @brief FITS HDU class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -20,13 +20,12 @@
 #include "GFitsHDU.hpp"
 #include "GTools.hpp"
 %}
-%include stl.i
 
 
 /***********************************************************************//**
  * @class GFitsHDU
  *
- * @brief Implements the FITS Header Data Unit (HDU) SWIG interface
+ * @brief FITS Header Data Unit (HDU) class
  *
  * The HDU is the basic unit of a FITS file. Each HDU consists of a header
  * and a data area. The header is composed of cards and is implemented by
@@ -34,6 +33,7 @@
  * is implemented by the abstract GFitsData base class.
  ***************************************************************************/
 class GFitsHDU {
+
 public:
     // Constructors and destructors
     GFitsHDU(void);
@@ -52,24 +52,26 @@ public:
     virtual GFitsHDU*   clone(void) const = 0;
 
     // Implemented methods
-    virtual std::string      extname(void) const { return m_name; }
+    virtual std::string      extname(void) const;
     virtual void             extname(const std::string& extname);
-    virtual int              extno(void) const { return m_hdunum; }
-    virtual void             extno(int num) { m_hdunum=num; }
-    virtual GFitsHeader*     header(void) { return &m_header; }
+    virtual int              extno(void) const;
+    virtual void             extno(int num);
+    virtual GFitsHeader*     header(void);
     virtual GFitsHeaderCard* card(const std::string& keyname);
     virtual GFitsHeaderCard* card(const int& cardno);
-    virtual int              cards(void) const { return m_header.size(); }
+    virtual int              cards(void) const;
     virtual std::string      string(const std::string& keyname) const;
     virtual double           real(const std::string& keyname) const;
     virtual int              integer(const std::string& keyname) const;
-    virtual void             card(const std::string& keyname, const std::string& value,
+    virtual void             card(const std::string& keyname,
+                                  const std::string& value,
                                   const std::string& comment);
-    virtual void             card(const std::string& keyname, const double& value,
+    virtual void             card(const std::string& keyname,
+                                  const double&      value,
                                   const std::string& comment);
-    virtual void             card(const std::string& keyname, const int& value,
+    virtual void             card(const std::string& keyname,
+                                  const int&         value,
                                   const std::string& comment);
-    virtual GFitsHDU*        primary(void);
 };
 
 
