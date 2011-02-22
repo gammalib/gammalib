@@ -257,46 +257,36 @@ void GSkyDir::celvector(const GVector& vector)
  * The azimuth angle is counted counter clockwise from celestial north
  * (this is identical to the astronomical definition of a position angle).
  ***************************************************************************/
-void GSkyDir::rotate(const double& phi, const double& theta)
+void GSkyDir::rotate_deg(const double& phi, const double& theta)
 {
     // If we have no equatorial coordinates then get them now
     if (!m_has_radec && m_has_lb)
         gal2equ();
 
     // Allocate Euler and rotation matrices
-    GMatrix Ry;
-    GMatrix Rz;
-    GMatrix Rback;
-    GMatrix Rrot;
+    GMatrix ry;
+    GMatrix rz;
+    GMatrix rot;
 
-    // Set up rotation matrix to rotate into and back from the native
-    // coordinate
-    Ry.eulery(m_dec*rad2deg - 90.0);
-    Rz.eulerz(-m_ra*rad2deg);
-    Rback = transpose(Ry * Rz);
+    // Set up rotation matrix to rotate from native coordinates to
+    // celestial coordinates
+    ry.eulery(m_dec*rad2deg - 90.0);
+    rz.eulerz(-m_ra*rad2deg);
+    rot = transpose(ry * rz);
 
-    // Set up rotation matrix for native coordinate vector
-    /*
-    Ry.eulery(-theta);
-    Rz.eulerz(-phi);
-    Rrot = Rz * Ry;
+    // Set up native coordinate vector
+    double phi_rad   = phi   * deg2rad;
+    double theta_rad = theta * deg2rad;
+    double cos_phi   = std::cos(phi_rad);
+    double sin_phi   = std::sin(phi_rad);
+    double cos_theta = std::cos(theta_rad);
+    double sin_theta = std::sin(theta_rad);
+    GVector native(-cos_phi*sin_theta, sin_phi*sin_theta, cos_theta);
 
-    // Set native coordinate vector (in z-direction by definition)
-    GVector native(0.0, 0.0, 1.0);
+    // Rotate vector into celestial coordinates
+    GVector dir = rot * native;
 
-    // Rotate native coordinate vector
-    GVector rotnative = Rrot * native;
-    */
-    double  cos_phi   = std::cos(-phi*deg2rad);
-    double  sin_phi   = std::sin(-phi*deg2rad);
-    double  cos_theta = std::cos(-theta*deg2rad);
-    double  sin_theta = std::sin(-theta*deg2rad);
-    GVector rotnative(cos_phi*sin_theta, sin_phi*sin_theta, cos_theta);
-
-    // Rotate vector back into sky direction
-    GVector dir = Rback * rotnative;
-
-    // Set sky direction
+    // Convert vector into sky position
     celvector(dir);
 
     // Return
@@ -611,7 +601,7 @@ void GSkyDir::init_members(void)
  ***************************************************************************/
 void GSkyDir::copy_members(const GSkyDir& dir)
 {
-    // Copy attributes
+    // Copy members
     m_has_lb    = dir.m_has_lb;
     m_has_radec = dir.m_has_radec;
     m_l         = dir.m_l;
