@@ -53,9 +53,10 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_IRF_EXTENDED_OLD    0              //!< Use old irf_extended method
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DEBUG_IRF_EXTENDED 0                 //!< Debug irf_extended method
+#define G_DEBUG_IRF_EXTENDED  0                //!< Debug irf_extended method
 
 /* __ Constants __________________________________________________________ */
 
@@ -508,17 +509,10 @@ std::string GCTAResponse::print(void) const
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
  *
- * @exception GCTAException::bad_observation_type
- *            Observation is not a valid CTA observation
  * @exception GCTAException::bad_instdir_type
  *            Instrument direction is not a valid CTA instrument direction
  *
- * @todo The telescope zenith and azimuth angles as well as the radial offset
- *       and polar angles in the camera are not yet computed correctly (as
- *       the actual IRF implement does not need these values).
- *
- * @todo The theta limits could still improved as only the theta range is
- *       relevant for which the source and the PSF circle overlap.
+ * @todo Does not yet implement offset/polar angle dependencies of IRF.
  ***************************************************************************/
 double GCTAResponse::irf_extended(const GInstDir&             obsDir,
                                   const GEnergy&              obsEng,
@@ -528,26 +522,10 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
                                   const GTime&                srcTime,
                                   const GObservation&         obs) const
 {
-    // Get pointer on CTA observation
-    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL)
-        throw GCTAException::bad_observation_type(G_IRF_EXTENDED);
-
     // Get pointer on CTA instrument direction
     const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
     if (dir == NULL)
         throw GCTAException::bad_instdir_type(G_IRF_EXTENDED);
-
-    // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing(srcTime);
-
-    // Get pointing direction zenith angle and azimuth
-    double zenith  = 0.0;
-    double azimuth = 0.0;
-
-    // Get radial offset and polar angles in camera
-    double theta = 0.0;
-    double phi   = 0.0;
 
     // Get log10(E/TeV) of true and measured photon energies
     double srcLogEng = srcEng.log10TeV();
@@ -556,27 +534,18 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
     // Get PSF sigma
     double sigma = psf_dummy_sigma(srcLogEng);
 
-    // Determine camera direction of measured photon
-    GCTADir obsCam(*dir, *pnt);
+    // Get maximum PSF and source radius in radians.
+    double delta_max = psf_delta_max(0.0, 0.0, 0.0, 0.0, srcLogEng);
+    double src_max   = model.radial()->theta_max();
 
-    // Determine camera direction of source model centre
-    GCTADir srcCam(model.dir(), *pnt);
+    // Determine distance of measured photon direction from model centre
+    double dist = model.dir().dist(dir->skydir());
 
-    // Get maximum angular separation for which PSF is significant (in radians).
-    // Set offset angle range that bounds PSF.
-    double delta_max     = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
-    double theta_psf_min = (obsCam.theta() > delta_max) ? obsCam.theta() - delta_max : 0.0;
-    double theta_psf_max = obsCam.theta() + delta_max;
-
-    // Get maximum source radius in radians.
-    // Set offset angle range that bounds the source.
-    double src_max       = model.radial()->theta_max();
-    double theta_src_min = (srcCam.theta() > src_max) ? srcCam.theta() - src_max : 0.0;
-    double theta_src_max = srcCam.theta() + src_max;
-
-    // Set overlapping offset angle range for integration (in radians).
-    double theta_min = std::max(theta_psf_min, theta_src_min);
-    double theta_max = std::min(theta_psf_max, theta_src_max);
+    // Set radial model theta angle range
+    double theta_min = (dist > delta_max) ? dist - delta_max : 0.0;
+    double theta_max = dist + delta_max;
+    if (theta_max > src_max)
+        theta_max = src_max;
 
     // Initialise IRF value
     double irf = 0.0;
@@ -586,17 +555,12 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
 
         // Setup integration kernel
         GCTAResponse::irf_kern_theta integrand(this,
-                                               pnt,
                                                model.radial(),
-                                               &obsCam,
-                                               &srcCam,
-                                               delta_max,
-                                               src_max,
-                                               zenith,
-                                               azimuth,
                                                srcLogEng,
                                                obsLogEng,
-                                               sigma);
+                                               sigma,
+                                               dist,
+                                               delta_max);
 
         // Integrate over theta
         GIntegral integral(&integrand);
@@ -936,20 +900,17 @@ double GCTAResponse::psf_dummy_max(const double& sigma) const
 /***********************************************************************//**
  * @brief Initialise class members
  *
- * We set the relative integration precision to 1e-4 as test images are
- * pretty smooth with this precision and computations are reasonably fast.
- * We know that integration is not perfect, however, and the results are
- * still a little noisy. We could still improve a little more the current
- * theta integration scheme, but the mathematics have to be worked out
- * for this first.
+ * We set the relative integration precision to 1e-5 as test images are
+ * pretty smooth with this precision and computations are still reasonably
+ * fast.
  *
- * The following timing was obtained for a 0.4 deg disk model on a 100x100
- * grid with 10 energy layers on a 64 Bit machine (fermi):
- * m_eps = 1e-4 : user 0m12.894s
- * m_eps = 5e-5 : user 0m21.929s
- * m_eps = 1e-5 : user 1m53.607s
- * So the time increases about linearly with an increased precision
- * requirement.
+ * The following timing was obtained on a 64 Bit machine (fermi) using the
+ * script ./test_model for a disk, a Gaussian, and a shell model:
+ *                      Disk      Gauss      Shell
+ * m_eps = 1e-3 : user 0m03.80s  0m13.41s   0m03.83s
+ * m_eps = 1e-4 : user 0m03.85s  0m13.71s   0m04.68s
+ * m_eps = 1e-5 : user 0m06.29s  0m23.22s   0m16.94s
+ * m_eps = 1e-6 : user 0m12.65s  0m55.08s   1m32.52s
  ***************************************************************************/
 void GCTAResponse::init_members(void)
 {
@@ -960,7 +921,7 @@ void GCTAResponse::init_members(void)
     m_aeff.clear();
     m_r68.clear();
     m_r80.clear();
-    m_eps = 1.0e-4;
+    m_eps = 1.0e-5;
 
     // Return
     return;
@@ -1065,102 +1026,60 @@ void GCTAResponse::read_performance_table(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Kernel for radial offset angle IRF integration
+ * @brief Kernel for offset angle IRF integration
  *
- * @param[in] theta Radial offset angle (radians).
+ * @param[in] theta Offset angle (radians).
  *
- * This method provides the integration kernel for the radial offset angle
- * IRF integration. The radial offset angle is given in the camera system.
+ * This method provides the kernel for the offset angle integration of the
+ * IRF. The offset angle is given with respect to the centre of the radial
+ * model.
  *
- * @todo I tried to cover the wrap around properly, yet I have not
- *       demonstrated mathematically that it works in all cases (but I did
- *       many tests to check that it works).
+ * @todo Does not handle offset/polar angle dependences of IRF.
  ***************************************************************************/
 double GCTAResponse::irf_kern_theta::eval(double theta)
 {
-    // Compute half interval length for PSF circle (in radians)
-    double dphi_psf = 0.5 * cta_roi_arclength(theta,
-                                              m_obs_cam->theta(),
-                                              m_obs_cam->costheta(),
-                                              m_obs_cam->sintheta(),
-                                              m_delta_max, m_cos_delta_max);
-
-    // Compute half interval length for model circle (in radians)
-    double dphi_src = 0.5 * cta_roi_arclength(theta,
-                                              m_src_cam->theta(),
-                                              m_src_cam->costheta(),
-                                              m_src_cam->sintheta(),
-                                              m_src_max, m_cos_src_max);
-
-    // Set the phi phase to common half space
-    double phi_psf = m_obs_cam->phi();
-    double phi_src = m_src_cam->phi();
-    if (phi_src-phi_psf > pi)
-        phi_src -= twopi;
-    if (phi_src-phi_psf < -pi)
-        phi_src += twopi;
-
-    // Set phi interval for PSF and source region (in radians)
-    double phi_psf_min = phi_psf - dphi_psf;
-    double phi_psf_max = phi_psf + dphi_psf;
-    double phi_src_min = phi_src - dphi_src;
-    double phi_src_max = phi_src + dphi_src;
-
-    // Set common phi interval. If one of the intervals covers the entire
-    // azimuth range then just apply the other interval
-    double phi_min;
-    double phi_max;
-    if (dphi_src >= pi) {
-        phi_min = phi_psf_min;
-        phi_max = phi_psf_max;
-    }
-    else if (dphi_psf >= pi) {
-        phi_min = phi_src_min;
-        phi_max = phi_src_max;
-    }
-    else {
-        phi_min = std::max(phi_psf_min, phi_src_min);
-        phi_max = std::min(phi_psf_max, phi_src_max);
-    }
+    // Compute half length of arc that lies within PSF validity circle
+    // (in radians)
+    double dphi = 0.5 * cta_roi_arclength(theta,
+                                          m_dist,
+                                          m_cos_dist,
+                                          m_sin_dist,
+                                          m_delta_max,
+                                          m_cos_delta_max);
 
     // Initialise result
     double irf = 0.0;
 
-    // Perform phi integration (only if interval is valid)
-    if (phi_min < phi_max) {
+    // Continue only if arc length is positive
+    if (dphi > 0.0) {
+
+        // Compute phi integration range
+        double phi_min = -dphi;
+        double phi_max = +dphi;
+
+        // Evaluate sky model
+        double model = m_radial->eval(theta);
 
         // Precompute cosine and sine terms for azimuthal integration
         double cos_theta = std::cos(theta);
         double sin_theta = std::sin(theta);
-        double cos_obs   = cos_theta * m_obs_cam->costheta();
-        double sin_obs   = sin_theta * m_obs_cam->sintheta();
-        double cos_src   = cos_theta * m_src_cam->costheta();
-        double sin_src   = sin_theta * m_src_cam->sintheta();
+        double cos_term  = cos_theta*m_cos_dist;
+        double sin_term  = sin_theta*m_sin_dist;
 
         // Setup integration kernel
         GCTAResponse::irf_kern_phi integrand(m_rsp,
-                                             m_pnt,
-                                             m_radial,
-                                             m_obs_cam,
-                                             m_src_cam,
-                                             theta,
-                                             m_zenith,
-                                             m_azimuth,
                                              m_srcLogEng,
                                              m_obsLogEng,
                                              m_sigma,
-                                             cos_obs,
-                                             sin_obs,
-                                             cos_src,
-                                             sin_src);
+                                             cos_term,
+                                             sin_term);
 
         // Integrate over phi
         GIntegral integral(&integrand);
         integral.eps(m_rsp->m_eps);
-        integral.silent(true);
-        irf = integral.romb(phi_min, phi_max) * sin_theta;
+        irf = integral.romb(phi_min, phi_max) * model * sin_theta;
 
-    } // endif: phi intervals was valid
+    } // endif: arc length was positive
 
     // Return result
     return irf;
@@ -1168,47 +1087,33 @@ double GCTAResponse::irf_kern_theta::eval(double theta)
 
 
 /***********************************************************************//**
- * @brief Kernel for polar angle IRF integration
+ * @brief Kernel for azimuth angle IRF integration
  *
- * @param[in] phi Polar angle (radians).
+ * @param[in] phi Azimuth angle (radians).
  *
- * This method provides the kernel for the polar angle IRF integration. The
- * polar angle is given in the camera system.
+ * This method provides the kernel for the azimuth angle integration of the
+ * IRF. The azimuth angle is given with respect to the centre of the radial
+ * model, and is counted from the line that connects that centre to the
+ * location of the observed photon.
  *
- * Note that removing the Aeff and Edisp computation from this inner loop
- * has not given any noticable gain in execution speed (probably because the
- * aeff() method uses the GNodeArray cache and the edisp() method actually
- * does nothing.
+ * @todo Does not handle offset/polar angle dependences of IRF.
  ***************************************************************************/
 double GCTAResponse::irf_kern_phi::eval(double phi)
 {
-    // Initialise result
-    double value = 0.0;
+    // Compute PSF offset angle in radians
+    double delta = arccos(m_cos_term + m_sin_term * std::cos(phi));
 
-    // Compute radial offset angle from model centre
-    double offset = arccos(m_cos_src + m_sin_src*std::cos(phi-m_src_cam->phi()));
+    // Evaluate IRF
+    double irf = m_rsp->aeff(0.0, 0.0, 0.0, 0.0, m_srcLogEng) *
+                 m_rsp->psf_dummy(delta, m_sigma);
 
-    // Evaluate sky model
-    double model = m_radial->eval(offset);
+    // Optionally take energy dispersion into account
+    if (m_rsp->hasedisp())
+        irf *= m_rsp->edisp(m_obsLogEng, 0.0, 0.0, 0.0, 0.0, m_srcLogEng);
 
-    // Continue only if model is valid
-    if (model > 0.0) {
-
-        // Compute PSF offset angle
-        double delta = arccos(m_cos_obs + m_sin_obs*std::cos(phi-m_obs_cam->phi()));
-
-        // Evaluate IRF
-        double irf = m_rsp->aeff(m_theta, phi, m_zenith, m_azimuth, m_srcLogEng) *
-                     m_rsp->psf_dummy(delta, m_sigma) *
-                     m_rsp->edisp(m_obsLogEng, m_theta, phi, m_zenith, m_azimuth, m_srcLogEng);
-
-        // Compute value
-        value = model * irf;
-
-    } // endif: model was valid
 
     // Return
-    return value;
+    return irf;
 }
 
 
