@@ -48,7 +48,6 @@
 #include "GCTADir.hpp"
 
 /* __ Forward declaration ________________________________________________ */
-class GCTAObservation;
 
 
 /***********************************************************************//**
@@ -161,99 +160,59 @@ private:
     class irf_kern_theta : public GIntegrand {
     public:
         irf_kern_theta(const GCTAResponse* rsp,
-                       const GCTAPointing* pnt,
                        const GModelRadial* radial,
-                       const GCTADir*      obsCam,
-                       const GCTADir*      srcCam,
-                       double              delta_max,
-                       double              src_max,
-                       double              zenith,
-                       double              azimuth,
                        double              srcLogEng,
                        double              obsLogEng,
-                       double              sigma) :
+                       double              sigma,
+                       double              dist,
+                       double              delta_max) :
                        m_rsp(rsp),
-                       m_pnt(pnt),
                        m_radial(radial),
-                       m_obs_cam(obsCam),
-                       m_src_cam(srcCam),
-                       m_delta_max(delta_max),
-                       m_cos_delta_max(std::cos(delta_max)),
-                       m_src_max(src_max),
-                       m_cos_src_max(std::cos(src_max)),
-                       m_zenith(zenith),
-                       m_azimuth(azimuth),
                        m_srcLogEng(srcLogEng),
                        m_obsLogEng(obsLogEng),
-                       m_sigma(sigma) { return; }
+                       m_sigma(sigma),
+                       m_dist(dist),
+                       m_cos_dist(std::cos(dist)),
+                       m_sin_dist(std::sin(dist)),
+                       m_delta_max(delta_max),
+                       m_cos_delta_max(std::cos(delta_max)) { return; }
         double eval(double theta);
     protected:
         const GCTAResponse* m_rsp;           //!< Pointer to CTA response
-        const GCTAPointing* m_pnt;           //!< Pointer to CTA pointing
         const GModelRadial* m_radial;        //!< Pointer to radial spatial model
-        const GCTADir*      m_obs_cam;       //!< Pointer to photon direction in camera
-        const GCTADir*      m_src_cam;       //!< Pointer to source location in camera
-        double              m_delta_max;     //!< Maximum PSF angle delta_max
-        double              m_cos_delta_max; //!< Cosine of delta_max
-        double              m_src_max;       //!< Maximum source radius
-        double              m_cos_src_max;   //!< Cosine of source radius
-        double              m_zenith;        //!< Telescope zenith
-        double              m_azimuth;       //!< Telescope azimuth
         double              m_srcLogEng;     //!< True photon energy
         double              m_obsLogEng;     //!< Measured photon energy
         double              m_sigma;         //!< Width of PSF in radians
+        double              m_dist;          //!< Distance model centre - measured photon
+        double              m_cos_dist;      //!< Cosine of distance
+        double              m_sin_dist;      //!< Sine of distance
+        double              m_delta_max;     //!< Maximum PSF radius
+        double              m_cos_delta_max; //!< Cosine of maximum PSF radius
     };
 
     // IRF phi integration kernel
     class irf_kern_phi : public GIntegrand {
     public:
         irf_kern_phi(const GCTAResponse* rsp,
-                     const GCTAPointing* pnt,
-                     const GModelRadial* radial,
-                     const GCTADir*      obsCam,
-                     const GCTADir*      srcCam,
-                     double              theta,
-                     double              zenith,
-                     double              azimuth,
                      double              srcLogEng,
                      double              obsLogEng,
                      double              sigma,
-                     double              cos_obs,
-                     double              sin_obs,
-                     double              cos_src,
-                     double              sin_src) :
+                     double              cos_term,
+                     double              sin_term) :
                      m_rsp(rsp),
-                     m_pnt(pnt),
-                     m_radial(radial),
-                     m_obs_cam(obsCam),
-                     m_src_cam(srcCam),
-                     m_theta(theta),
-                     m_zenith(zenith),
-                     m_azimuth(azimuth),
                      m_srcLogEng(srcLogEng),
                      m_obsLogEng(obsLogEng),
                      m_sigma(sigma),
-                     m_cos_obs(cos_obs),
-                     m_sin_obs(sin_obs),
-                     m_cos_src(cos_src),
-                     m_sin_src(sin_src) { return; }
+                     m_cos_term(cos_term),
+                     m_sin_term(sin_term) { return; }
         double eval(double phi);
     protected:
         const GCTAResponse* m_rsp;           //!< Pointer to CTA response
-        const GCTAPointing* m_pnt;           //!< Pointer to CTA pointing
-        const GModelRadial* m_radial;        //!< Pointer to radial spatial model
-        const GCTADir*      m_obs_cam;       //!< Pointer to photon direction in camera
-        const GCTADir*      m_src_cam;       //!< Pointer to source location in camera
-        double              m_theta;         //!< Radial offset in camera
-        double              m_zenith;        //!< Telescope zenith
-        double              m_azimuth;       //!< Telescope azimuth
         double              m_srcLogEng;     //!< True photon energy
         double              m_obsLogEng;     //!< Measured photon energy
         double              m_sigma;         //!< Width of PSF in radians
-        double              m_cos_obs;       //!< Cosine term for photon distance
-        double              m_sin_obs;       //!< Sine term for photon distance
-        double              m_cos_src;       //!< Cosine term for source location distance
-        double              m_sin_src;       //!< Sine term for source location distance
+        double              m_cos_term;      //!< Cosine term for PSF offset angle computation
+        double              m_sin_term;      //!< Sine term for PSF offset angle computation
     };
 
     // Integration
