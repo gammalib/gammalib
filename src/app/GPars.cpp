@@ -23,6 +23,7 @@
 #include <pwd.h>           // user/passwd function
 #include <unistd.h>        // access() function
 #include <sys/stat.h>      // mkdir() function
+#include <cstdlib>         // std::getenv() function
 #include "GPars.hpp"
 #include "GTools.hpp"
 #include "GException.hpp"
@@ -580,7 +581,7 @@ std::string GPars::inpath(const std::string& filename) const
     std::string path;
 
     // Search for parameter file in PFILES directories
-    char* ptr = getenv("PFILES");
+    char* ptr = std::getenv("PFILES");
     if (ptr != NULL) {
 
         // Extract directories from PFILES environment variable
@@ -618,7 +619,7 @@ std::string GPars::inpath(const std::string& filename) const
     // If we have no valid path so far then search file within GAMMAROOT
     // repository (${GAMMAROOT}/syspfiles)
     if (path.size() == 0) {
-        ptr = getenv("GAMMAROOT");
+        ptr = std::getenv("GAMMAROOT");
         if (ptr != NULL) {
             std::string fname = std::string(ptr) + "/syspfiles/" + filename;
             if (access(fname.c_str(), R_OK) == 0)
@@ -667,7 +668,7 @@ std::string GPars::outpath(const std::string& filename) const
     std::string path;
 
     // Search for writeable PFILES directories
-    char* ptr = getenv("PFILES");
+    char* ptr = std::getenv("PFILES");
     if (ptr != NULL) {
 
         // Extract directories from PFILES environment variable
