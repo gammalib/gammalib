@@ -1,7 +1,35 @@
 from distutils.core import setup, Extension
+from distutils import sysconfig
 import glob
 import os
 import sys
+
+# Removes list of bad prefixes from list
+def remove_prefixes(optlist, bad_prefixes):
+	for bad_prefix in bad_prefixes:
+		for i, flag in enumerate(optlist):
+			if flag.startswith(bad_prefix):
+				optlist.pop(i)
+				break
+	return optlist
+
+# Adjust compile options for darwin
+if sys.platform.lower().startswith("darwin"):
+
+	# Remove some time consuming options
+	cvars = sysconfig.get_config_vars()
+	cflags = cvars.get('OPT')
+	if cflags:
+		cflags = remove_prefixes(cflags.split(), 
+		         ['-g', '-O', '-Wstrict-prototypes', '-DNDEBUG'])
+	cvars['OPT'] = str.join(' ', cflags)
+	cvars['CFLAGS'] = cvars['BASECFLAGS'] + ' ' + cvars['OPT']
+	
+	# Remove -arch flags. This prevents building a fat library
+	cvars['ARCHFLAGS'] = ''
+	
+	# Signal darwin compiler adjustments
+	print 'Adjust default distutils compiler options for darwin.'
 
 # Set GammaLib library name. If we're about to make the test build then
 # create a symbolic link to the static library to enforce static linking.
