@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GXmlAttribute.hpp - XML attribute node class definition          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,9 @@
 #define GXMLATTRIBUTE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <cstdio>             // FILE, std::fprintf
 #include <string>
+#include <iostream>
 
 
 /***********************************************************************//**
@@ -45,20 +47,20 @@ public:
     GXmlAttribute& operator= (const GXmlAttribute& attr);
 
     // Methods
-    void        clear(void);
-    void        write(FILE* fptr) const;
-    void        print(std::ostream& os) const;
-    std::string name(void) const { return m_name; }
-    std::string value(void) const;
-    void        name(const std::string& name) { m_name=name; }
-    void        value(std::string value);
+    void           clear(void);
+    GXmlAttribute* clone(void) const;
+    void           write(FILE* fptr) const;
+    void           print(std::ostream& os) const;
+    std::string    name(void) const { return m_name; }
+    std::string    value(void) const;
+    void           name(const std::string& name) { m_name=name; }
+    void           value(std::string value);
 
 protected:
     // Protected methods
-    void           init_members(void);
-    void           copy_members(const GXmlAttribute& attr);
-    void           free_members(void);
-    GXmlAttribute* clone(void) const;
+    void init_members(void);
+    void copy_members(const GXmlAttribute& attr);
+    void free_members(void);
 
     // Protected data members
     std::string m_name;       //!< Attribute name

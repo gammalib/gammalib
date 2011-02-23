@@ -20,8 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdio>             // std::fprintf
-#include <iostream>
 #include "GException.hpp"
 #include "GXmlAttribute.hpp"
 
@@ -46,7 +44,7 @@
  ***************************************************************************/
 GXmlAttribute::GXmlAttribute(void)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -61,7 +59,7 @@ GXmlAttribute::GXmlAttribute(void)
  ***************************************************************************/
 GXmlAttribute::GXmlAttribute(const GXmlAttribute& attr)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -75,12 +73,14 @@ GXmlAttribute::GXmlAttribute(const GXmlAttribute& attr)
 /***********************************************************************//**
  * @brief Name-Value pair constructor
  *
- * @param[in] name Name for instance building.
- * @param[in] value Value for instance building.
+ * @param[in] name Attribute name.
+ * @param[in] value Attribute value.
+ *
+ * Construct object from attribute name and value.
  ***************************************************************************/
 GXmlAttribute::GXmlAttribute(const std::string& name, const std::string& value)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Set attribute
@@ -124,7 +124,7 @@ GXmlAttribute& GXmlAttribute::operator= (const GXmlAttribute& attr)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -142,7 +142,7 @@ GXmlAttribute& GXmlAttribute::operator= (const GXmlAttribute& attr)
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
- 
+
  /***********************************************************************//**
  * @brief Clear object.
  *
@@ -150,7 +150,7 @@ GXmlAttribute& GXmlAttribute::operator= (const GXmlAttribute& attr)
  ***************************************************************************/
 void GXmlAttribute::clear(void)
 {
-    // Free class members (base and derived classes, derived class first)
+    // Free members
     free_members();
 
     // Initialise members
@@ -158,6 +158,15 @@ void GXmlAttribute::clear(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+***************************************************************************/
+GXmlAttribute* GXmlAttribute::clone(void) const
+{
+    return new GXmlAttribute(*this);
 }
 
 
@@ -322,15 +331,6 @@ void GXmlAttribute::free_members(void)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GXmlAttribute* GXmlAttribute::clone(void) const
-{
-    return new GXmlAttribute(*this);
 }
 
 
