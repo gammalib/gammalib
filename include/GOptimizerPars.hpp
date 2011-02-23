@@ -33,6 +33,11 @@
  *
  * This class is a container class for model parameters.
  *
+ * As the class holds simpliy a collection of model parameters, it should
+ * neither deal with allocation and deallocation, nor with cloning of
+ * model parameters. This will be done by the classes that actually
+ * implement the model parameters.
+ *
  * @todo This container class has no operator[] method as GModels is a
  *       derived class of this container class so that GModels can be
  *       passed to the optimizer. GModels has an operator[] to access
@@ -51,7 +56,7 @@ public:
     GOptimizerPars(void);
     GOptimizerPars(const GOptimizerPars& pars);
     virtual ~GOptimizerPars(void);
- 
+
     // Operators
     virtual GOptimizerPars& operator=(const GOptimizerPars& pars);
 
@@ -61,7 +66,7 @@ public:
     GModelPar&       par(const int& index);
     const GModelPar& par(const int& index) const;
     std::string      print(void) const;
-  
+
 protected:
     // Protected methods
     void init_members(void);
