@@ -444,7 +444,7 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     m_livetime = obs.m_livetime;
     m_ra_obj   = obs.m_ra_obj;
     m_dec_obj  = obs.m_dec_obj;
-    
+
     // Return
     return;
 }
@@ -577,7 +577,7 @@ void GCTAObservation::write_attributes(GFitsHDU* hdu) const
         // Other information
         hdu->card("EUNIT",    "TeV",    "Energy unit");
         hdu->card("EVTVER",   "draft1", "Event list version number");
-        
+
     } // endif: HDU was valid
 
     // Return
