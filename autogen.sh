@@ -1,13 +1,13 @@
 #!/bin/sh
 
-#autoreconf --force --install
-#autoreconf --force --install --symlink \
-#&& aclocal -I m4 \
-#&& automake --add-missing \
-#&& autoconf
 aclocal -I m4
-libtoolize --copy
+if which libtoolize >/dev/null; then
+  libtoolize --copy
+else
+  if which glibtoolize >/dev/null; then
+    glibtoolize --copy
+  fi
+fi
 autoconf
 autoheader
 automake --add-missing --copy
-
