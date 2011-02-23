@@ -122,7 +122,7 @@ GModels::~GModels(void)
  * @param[in] models Model container.
  ***************************************************************************/
 GModels& GModels::operator= (const GModels& models)
-{ 
+{
     // Execute only if object is not identical
     if (this != &models) {
 
@@ -302,6 +302,9 @@ void GModels::append(const GModel& model)
  ***************************************************************************/
 void GModels::load(const std::string& filename)
 {
+    // Clear any existing models
+    clear();
+
     // Load XML document
     GXml xml(filename);
 
@@ -383,6 +386,9 @@ void GModels::read(const GXml& xml)
         // Append model
         append(*ptr);
 
+        // Free model (appending clones the model)
+        delete ptr;
+
     } // endfor: looped over all sources
 
     // Return
@@ -405,7 +411,7 @@ void GModels::write(GXml& xml) const
     if (xml.elements("source_library") == 0) {
         xml.append(new GXmlElement("source_library title=\"source library\""));
     }
-    
+
     // Get pointer on source library
     GXmlElement* lib = xml.element("source_library", 0);
 
@@ -504,11 +510,15 @@ void GModels::init_members(void)
  * @brief Copy class members
  *
  * @param[in] models Model container.
+ *
+ * This method clones all models.
  ***************************************************************************/
 void GModels::copy_members(const GModels& models)
 {
-    // Copy members
-    m_models = models.m_models;
+    // Copy models
+    m_models.clear();
+    for (int i = 0; i < models.m_models.size(); ++i)
+        m_models.push_back((models.m_models[i]->clone()));
 
     // Set parameter pointers
     set_pointers();
@@ -520,9 +530,19 @@ void GModels::copy_members(const GModels& models)
 
 /***********************************************************************//**
  * @brief Delete class members
+ *
+ * As container classes that hold pointers need to handle themselves the
+ * proper deallocation of memory, we loop here over all pointers and make
+ * sure that we deallocate all models in the container.
  ***************************************************************************/
 void GModels::free_members(void)
 {
+    // Free models
+    for (int i = 0; i < m_models.size(); ++i) {
+        delete m_models[i];
+        m_models[i] = NULL;
+    }
+
     // Return
     return;
 }

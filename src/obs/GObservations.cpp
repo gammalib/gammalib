@@ -332,13 +332,20 @@ void GObservations::init_members(void)
  * @brief Copy class members
  *
  * @param[in] obs Observation container.
+ *
+ * This method clones all observations and copies over the other class
+ * members.
  ***************************************************************************/
 void GObservations::copy_members(const GObservations& obs)
 {
     // Copy attributes
-    m_obs    = obs.m_obs;
     m_models = obs.m_models;
     m_npred  = obs.m_npred;
+
+    // Copy observations
+    m_obs.clear();
+    for (int i = 0; i < obs.m_obs.size(); ++i)
+        m_obs.push_back((obs.m_obs[i]->clone()));
 
     // Return
     return;
@@ -347,9 +354,19 @@ void GObservations::copy_members(const GObservations& obs)
 
 /***********************************************************************//**
  * @brief Delete class members
+ *
+ * As container classes that hold pointers need to handle themselves the
+ * proper deallocation of memory, we loop here over all pointers and make
+ * sure that we deallocate all models in the container.
  ***************************************************************************/
 void GObservations::free_members(void)
 {
+    // Free observations
+    for (int i = 0; i < m_obs.size(); ++i) {
+        delete m_obs[i];
+        m_obs[i] = NULL;
+    }
+
     // Return
     return;
 }
