@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GFits.i  - FITS file access class SWIG file             *
+ *                     GFits.i  - FITS file access class                   *
  * ----------------------------------------------------------------------- *
  *  copyright : (C) 2008-2011 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GFits.i
- * @brief GFits class SWIG definition.
+ * @brief Fits file access class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -21,18 +21,18 @@
 #include "GTools.hpp"
 %}
 
-%include stl.i
 
 /***********************************************************************//**
  * @class GFits
  *
- * @brief Implements FITS file SWIG interface
+ * @brief FITS file access class
  *
  * GFits is the basic FITS file interface. All FITS file handlings operate
  * via members of GFits. A FITS file is composed of Header Data Units (HDU)
  * which are implemented by the GFitsHDU class.
  ***************************************************************************/
 class GFits {
+
 public:
     // Constructors and destructors
     GFits(void);
@@ -47,7 +47,7 @@ public:
     void        close(void);
     void        save(void);
     void        saveto(const std::string& filename, bool clobber = false);
-    void        append(GFitsHDU* hdu);
+    void        append(const GFitsHDU& hdu);
     GFitsHDU*   hdu(const std::string& extname) const;
     GFitsHDU*   hdu(int extno) const;
     GFitsImage* image(const std::string& extname) const;

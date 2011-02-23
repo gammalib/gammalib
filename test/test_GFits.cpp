@@ -77,7 +77,7 @@ void test_create(void)
         GFits fits;
         fits.open("test_empty_image.fits");
         GFitsImageDouble image;
-        fits.append(&image);
+        fits.append(image);
         fits.save();
     }
     catch (std::exception &e) {
@@ -105,7 +105,7 @@ void test_create(void)
                 sum += image(ix,iy);
             }
         }
-        fits.append(&image);
+        fits.append(image);
         fits.saveto("test.fits");
     }
     catch (std::exception &e) {
@@ -168,7 +168,7 @@ void test_create(void)
         table.append_column(second);
 
         // Append table to FILE file
-        fits.append(&table);
+        fits.append(table);
 
         // Save FITS file
         fits.save(true);
@@ -200,7 +200,7 @@ void test_create(void)
         table.append_column(second);
 
         // Append table to FILE file
-        fits.append(&table);
+        fits.append(table);
 
         // Save FITS file
         fits.saveto("test_create_bintable.fits");
@@ -380,7 +380,7 @@ void test_image_byte(void)
 
         // Save image
         GFits fits(filename);
-        fits.append(&image);
+        fits.append(image);
         fits.save();
 
         // Open FITS image
@@ -581,7 +581,7 @@ void test_image_ushort(void)
 
         // Save image
         GFits fits(filename);
-        fits.append(&image);
+        fits.append(image);
         fits.save();
 
         // Open FITS image
@@ -782,7 +782,7 @@ void test_image_short(void)
 
         // Save image
         GFits fits(filename);
-        fits.append(&image);
+        fits.append(image);
         fits.save();
 
         // Open FITS image
@@ -983,7 +983,7 @@ void test_image_ulong(void)
 
         // Save image
         GFits fits(filename);
-        fits.append(&image);
+        fits.append(image);
         fits.save();
 
         // Open FITS image
@@ -1184,7 +1184,7 @@ void test_image_long(void)
 
         // Save image
         GFits fits(filename);
-        fits.append(&image);
+        fits.append(image);
         fits.save();
 
         // Open FITS image
@@ -1385,7 +1385,7 @@ void test_image_longlong(void)
 
         // Save image
         GFits fits(filename);
-        fits.append(&image);
+        fits.append(image);
         fits.save();
 
         // Open FITS image
@@ -1586,7 +1586,7 @@ void test_image_float(void)
 
         // Save image
         GFits fits(filename);
-        fits.append(&image);
+        fits.append(image);
         fits.save();
 
         // Open FITS image
@@ -1787,7 +1787,7 @@ void test_image_double(void)
 
         // Save image
         GFits fits(filename);
-        fits.append(&image);
+        fits.append(image);
         fits.save();
 
         // Open FITS image
@@ -2017,7 +2017,7 @@ void test_bintable_double(void)
         table.insert_column(1, col_dbl10);
 
         // Append to FILE file
-        fits.append(&table);
+        fits.append(table);
 
         // Save FITS file
         fits.save();
@@ -2197,7 +2197,7 @@ void test_bintable_float(void)
 
     // Dump header
     std::cout << "Test GFitsTableFloatCol: ";
-    
+
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
     system(cmd.c_str());
@@ -2374,7 +2374,7 @@ void test_bintable_float(void)
         table.insert_column(0, col_flt);
 
         // Create HDU and append to FILE file
-        fits.append(&table);
+        fits.append(table);
 
         // Save FITS file
         fits.save();
@@ -2554,7 +2554,7 @@ void test_bintable_short(void)
 
     // Dump header
     std::cout << "Test GFitsTableShortCol: ";
-    
+
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
     system(cmd.c_str());
@@ -2732,7 +2732,7 @@ void test_bintable_short(void)
         table.insert_column(0, col_sht10);
 
         // Append to file
-        fits.append(&table);
+        fits.append(table);
 
         // Save FITS file
         fits.save();
@@ -3092,7 +3092,7 @@ void test_bintable_ushort(void)
         table.insert_column(0, col_sht10);
 
         // Append to file
-        fits.append(&table);
+        fits.append(table);
 
         // Save FITS file
         fits.save();
@@ -3452,7 +3452,7 @@ void test_bintable_long(void)
         table.insert_column(99, col_lng10);
 
         // Append to file
-        fits.append(&table);
+        fits.append(table);
 
         // Save FITS file
         fits.save();
@@ -3633,7 +3633,7 @@ void test_bintable_longlong(void)
 
     // Dump header
     std::cout << "Test GFitsTableLongLongCol: ";
-    
+
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
     system(cmd.c_str());
@@ -3811,7 +3811,7 @@ void test_bintable_longlong(void)
         table.insert_column(99, col_lng10);
 
         // Append to file
-        fits.append(&table);
+        fits.append(table);
 
         // Save FITS file
         fits.save();
@@ -4170,7 +4170,7 @@ void test_bintable_ulong(void)
         table.insert_column(99, col_lng10);
 
         // Append to file
-        fits.append(&table);
+        fits.append(table);
 
         // Save FITS file
         fits.save();
@@ -4528,7 +4528,7 @@ void test_bintable_string(void)
         table.append_column(col_str10);
 
         // Append to file
-        fits.append(&table);
+        fits.append(table);
 
         // Save FITS file
         fits.save();
@@ -4891,7 +4891,7 @@ void test_bintable_logical(void)
         table.insert_column(0, col10);
 
         // Append to file
-        fits.append(&table);
+        fits.append(table);
 
         // Save FITS file
         fits.save();
@@ -5255,7 +5255,7 @@ void test_bintable_bit(void)
         table.insert_column(0, col10);
 
         // Append to file
-        fits.append(&table);
+        fits.append(table);
 
         // Save FITS file
         fits.save();

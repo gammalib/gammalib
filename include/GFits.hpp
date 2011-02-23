@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GFits.hpp  - FITS file access class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GFits.hpp
- * @brief GFits class definition.
+ * @brief FITS file access class interface definition
  * @author J. Knodlseder
  */
 
@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GFits
  *
- * @brief Implements FITS file interface
+ * @brief FITS file access class
  *
  * GFits is the basic FITS file interface. All FITS file handlings operate
  * via members of GFits. A FITS file is composed of Header Data Units (HDU)
@@ -42,8 +42,8 @@
 class GFits {
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GFits& fits);
-    friend GLog&         operator<< (GLog& log, const GFits& fits);
+    friend std::ostream& operator<<(std::ostream& os, const GFits& fits);
+    friend GLog&         operator<<(GLog& log,        const GFits& fits);
 
 public:
     // Constructors and destructors
@@ -53,7 +53,7 @@ public:
     virtual ~GFits(void);
 
     // Operators
-    GFits& operator= (const GFits& fits);
+    GFits& operator=(const GFits& fits);
 
     // Methods
     void        clear(void);
@@ -62,7 +62,7 @@ public:
     void        save(bool clobber = false);
     void        saveto(const std::string& filename, bool clobber = false);
     void        close(void);
-    void        append(GFitsHDU* hdu);
+    void        append(const GFitsHDU& hdu);
     GFitsHDU*   hdu(const std::string& extname) const;
     GFitsHDU*   hdu(int extno) const;
     GFitsImage* image(const std::string& extname) const;
