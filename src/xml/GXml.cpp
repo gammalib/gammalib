@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GXml.cpp - XML class implementation                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -57,7 +57,7 @@
  ***************************************************************************/
 GXml::GXml(void)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -68,11 +68,11 @@ GXml::GXml(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] xml Object from which the instance should be built.
+ * @param[in] xml XML object.
  ***************************************************************************/
 GXml::GXml(const GXml& xml)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -86,11 +86,11 @@ GXml::GXml(const GXml& xml)
 /***********************************************************************//**
  * @brief Load constructor
  *
- * @param[in] filename XML file from which object should be constructed.
+ * @param[in] filename XML file name.
  ***************************************************************************/
 GXml::GXml(const std::string& filename)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Load XML file
@@ -123,7 +123,7 @@ GXml::~GXml(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] xml Object which should be assigned.
+ * @param[in] xml XML object.
  ***************************************************************************/
 GXml& GXml::operator= (const GXml& xml)
 {
@@ -133,7 +133,7 @@ GXml& GXml::operator= (const GXml& xml)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -203,7 +203,7 @@ void GXml::load(const std::string& filename)
     // Check if file exists
     if (!file_exists(filename))
         throw GException::file_not_found(G_LOAD, filename);
-    
+
     // Open parameter file
     FILE* fptr = fopen(filename.c_str(), "r");
     if (fptr == NULL)
@@ -356,7 +356,6 @@ void GXml::copy_members(const GXml& xml)
  ***************************************************************************/
 void GXml::free_members(void)
 {
-
     // Return
     return;
 }
@@ -414,7 +413,7 @@ void GXml::parse(FILE* fptr)
             else if (c == '>') {
                  segment.append(1, (char)c);
                  throw GException::xml_syntax_error(G_PARSE, segment,
-                                   "unexpected closing bracket '>' encountered");
+                       "unexpected closing bracket \">\" encountered");
             }
 
             // ... otherwise add character to segment
@@ -442,7 +441,7 @@ void GXml::parse(FILE* fptr)
             else if (c == '<') {
                  segment.append(1, (char)c);
                  throw GException::xml_syntax_error(G_PARSE, segment,
-                                   "unexpected opening bracket '<' encountered");
+                       "unexpected opening bracket \"<\" encountered");
             }
 
             // ... otherwise add character to segment
@@ -504,7 +503,7 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
             // Check if we have the correct end tag
             GXmlElement* element = (GXmlElement*)(*current);
             element->parse_stop(segment);
-        
+
             // Set current node pointer back to parent of the current node
             (*current) = element->parent();
         }
@@ -620,7 +619,7 @@ GXml::MarkupType GXml::get_markuptype(const std::string& segment) const
 {
     // Initialise with invalid Markup Type
     MarkupType type = MT_INVALID;
-    
+
     // Get length of segment
     int n = segment.length();
 
