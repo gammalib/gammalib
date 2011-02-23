@@ -52,7 +52,7 @@ const int g_indent = 2;                      //!< Indent for XML file writing
  ***************************************************************************/
 GXmlElement::GXmlElement(void) : GXmlNode()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -63,11 +63,11 @@ GXmlElement::GXmlElement(void) : GXmlNode()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] node Object from which the instance should be built.
+ * @param[in] node XML element.
  ***************************************************************************/
 GXmlElement::GXmlElement(const GXmlElement& node) : GXmlNode(node)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -81,11 +81,11 @@ GXmlElement::GXmlElement(const GXmlElement& node) : GXmlNode(node)
 /***********************************************************************//**
  * @brief Segment constructor
  *
- * @param[in] segment XML segment from which instance is built.
+ * @param[in] segment XML segment.
  ***************************************************************************/
 GXmlElement::GXmlElement(const std::string& segment) : GXmlNode()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Parse start element
@@ -118,7 +118,7 @@ GXmlElement::~GXmlElement(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] node Object which should be assigned.
+ * @param[in] node XML element.
  ***************************************************************************/
 GXmlElement& GXmlElement::operator= (const GXmlElement& node)
 {
@@ -131,7 +131,7 @@ GXmlElement& GXmlElement::operator= (const GXmlElement& node)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -167,6 +167,15 @@ void GXmlElement::clear(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone class
+***************************************************************************/
+GXmlElement* GXmlElement::clone(void) const
+{
+    return new GXmlElement(*this);
 }
 
 
@@ -326,14 +335,22 @@ void GXmlElement::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] node Object from which members which should be copied.
+ * @param[in] node XML element.
+ *
+ * This method copies all class members. XML attributes are cloned.
+ *
+ * @todo Is copying the parent correct?
  ***************************************************************************/
 void GXmlElement::copy_members(const GXmlElement& node)
 {
-    // Copy attributes
+    // Copy members
     m_name   = node.m_name;
-    m_attr   = node.m_attr;
     m_parent = node.m_parent;
+
+    // Copy attribute container
+    m_attr.clear();
+    for (int i = 0; i < node.m_attr.size(); ++i)
+        m_attr.push_back((node.m_attr[i]->clone()));
 
     // Return
     return;
@@ -342,24 +359,21 @@ void GXmlElement::copy_members(const GXmlElement& node)
 
 /***********************************************************************//**
  * @brief Delete class members
+ *
+ * As container classes that hold pointers need to handle themselves the
+ * proper deallocation of memory, we loop here over all pointers and make
+ * sure that we deallocate the associated nodes.
  ***************************************************************************/
 void GXmlElement::free_members(void)
 {
     // Free attributes
-//    for (int i = 0; i < m_attr.size(); ++i)
-//        delete m_attr[i];
+    for (int i = 0; i < m_attr.size(); ++i) {
+        delete m_attr[i];
+        m_attr[i] = NULL;
+    }
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GXmlElement* GXmlElement::clone(void) const
-{
-    return new GXmlElement(*this);
 }
 
 
@@ -444,7 +458,7 @@ void GXmlElement::parse_stop(const std::string& segment)
     size_t pos = segment.find_first_of("\x20\x09\x0d\x0a>", 2);
     if (pos == 2)
         throw GException::xml_syntax_error(G_PARSE_STOP, segment,
-                          "no whitespace allowed after '</'");
+                          "no whitespace allowed after \"</\"");
     if (pos == std::string::npos)
         throw GException::xml_syntax_error(G_PARSE_STOP, segment,
                           "element name not found");
@@ -452,7 +466,7 @@ void GXmlElement::parse_stop(const std::string& segment)
     if (name != m_name)
         throw GException::xml_syntax_error(G_PARSE_STOP, segment,
                           "invalid name in element stop tag"
-                          " (found "+name+", expected "+m_name);
+                          " (found \""+name+"\", expected \""+m_name+"\"");
 
     // Verify that no further characters exist in element stop tag
     size_t pos2 = segment.find_first_of("\x20\x09\x0d\x0a>", pos);
@@ -503,7 +517,7 @@ void GXmlElement::parse_attribute(size_t* pos, const std::string& segment)
         std::size_t pos_equal = segment.find_first_of("=", pos_name_end);
         if (pos_equal == std::string::npos)
             throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
-                              "'=' sign not found for attribute");
+                              "\"=\" sign not found for attribute");
 
         // Find start of value substring
         std::size_t pos_value_start = segment.find_first_of("\x22\x27", pos_equal);
@@ -531,7 +545,7 @@ void GXmlElement::parse_attribute(size_t* pos, const std::string& segment)
                               "invalid or missing attribute name");
         std::string name = segment.substr(pos_name_start, n_name);
 
-        //TODO: Check XML validity of attribute name
+        //@todo Check XML validity of attribute name
 
         // Get value substring length
         std::size_t n_value = pos_value_end - pos_value_start;
@@ -540,7 +554,7 @@ void GXmlElement::parse_attribute(size_t* pos, const std::string& segment)
                               "invalid or missing attribute value");
         std::string value = segment.substr(pos_value_start-1, n_value+2);
 
-        //TODO: Check XML validity of attribute value
+        //@todo Check XML validity of attribute value
 
         // Allocate, set and append new attribute to element
         GXmlAttribute* attr  = new GXmlAttribute(name, value);
