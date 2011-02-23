@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GXmlComment.hpp - XML comment node class definition           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,6 +20,7 @@
 #define GXMLCOMMENT_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <cstdio>             // FILE*, std::fprintf
 #include <string>
 #include <iostream>
 #include "GXmlNode.hpp"
@@ -46,20 +47,22 @@ public:
     GXmlComment& operator= (const GXmlComment& node);
 
     // Implemented virtual methods
-    void     clear(void);
-    void     write(FILE* fptr, int indent = 0) const;
-    void     print(std::ostream& os, int indent = 0) const;
-    NodeType type(void) const { return NT_COMMENT; }
+    void         clear(void);
+    GXmlComment* clone(void) const;
+    void         write(FILE* fptr, int indent = 0) const;
+    void         print(std::ostream& os, int indent = 0) const;
+    NodeType     type(void) const { return NT_COMMENT; }
+
+    // Other methods
+    const std::string& comment(void) const { return m_comment; }
+    void               comment(const std::string& comment) { m_comment=comment; }
 
 protected:
     // Protected methods
     void         init_members(void);
     void         copy_members(const GXmlComment& node);
     void         free_members(void);
-    GXmlComment* clone(void) const;
     void         parse(const std::string& segment);
-    std::string  comment(void) const { return m_comment; }
-    void         comment(const std::string& comment) { m_comment=comment; }
 
     // Protected data members
     std::string m_comment;       //!< Comment (excluding brackets)

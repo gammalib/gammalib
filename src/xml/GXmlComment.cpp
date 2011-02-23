@@ -20,8 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdio>             // std::fprintf
-#include <iostream>
 #include "GException.hpp"
 #include "GXmlComment.hpp"
 
@@ -46,7 +44,7 @@
  ***************************************************************************/
 GXmlComment::GXmlComment(void) : GXmlNode()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -57,11 +55,11 @@ GXmlComment::GXmlComment(void) : GXmlNode()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] node Object from which the instance should be built.
+ * @param[in] node XML comment.
  ***************************************************************************/
 GXmlComment::GXmlComment(const GXmlComment& node) : GXmlNode(node)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -79,7 +77,7 @@ GXmlComment::GXmlComment(const GXmlComment& node) : GXmlNode(node)
  ***************************************************************************/
 GXmlComment::GXmlComment(const std::string& segment) : GXmlNode()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Parse segment
@@ -112,7 +110,7 @@ GXmlComment::~GXmlComment(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] node Object which should be assigned.
+ * @param[in] node XML comment.
  ***************************************************************************/
 GXmlComment& GXmlComment::operator= (const GXmlComment& node)
 {
@@ -161,6 +159,15 @@ void GXmlComment::clear(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone class
+***************************************************************************/
+GXmlComment* GXmlComment::clone(void) const
+{
+    return new GXmlComment(*this);
 }
 
 
@@ -222,7 +229,7 @@ void GXmlComment::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] node Object from which members which should be copied.
+ * @param[in] node XML comment.
  ***************************************************************************/
 void GXmlComment::copy_members(const GXmlComment& node)
 {
@@ -241,15 +248,6 @@ void GXmlComment::free_members(void)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GXmlComment* GXmlComment::clone(void) const
-{
-    return new GXmlComment(*this);
 }
 
 
@@ -289,7 +287,7 @@ void GXmlComment::parse(const std::string& segment)
         else
             m_comment = segment;
 
-        //TODO Check validity of characters comment string
+        //@todo Check validity of characters comment string
 
     } // endif: string is not empty
 

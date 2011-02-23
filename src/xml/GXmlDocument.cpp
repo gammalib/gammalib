@@ -145,6 +145,15 @@ void GXmlDocument::clear(void)
 
 
 /***********************************************************************//**
+ * @brief Clone class
+***************************************************************************/
+GXmlDocument* GXmlDocument::clone(void) const
+{
+    return new GXmlDocument(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Write node into file
  *
  * @param[in] fptr File pointer.
@@ -245,15 +254,6 @@ void GXmlDocument::free_members(void)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GXmlDocument* GXmlDocument::clone(void) const
-{
-    return new GXmlDocument(*this);
 }
 
 

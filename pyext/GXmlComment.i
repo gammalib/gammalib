@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GXmlComment.i - XML comment node class definition            *
+ *                  GXmlComment.i - XML comment node class                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GXmlComment.i
- * @brief GXmlComment class python bindings
+ * @brief XML comment class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -25,7 +25,7 @@
 /***********************************************************************//**
  * @class GXmlComment
  *
- * @brief XML comment node class interface defintion.
+ * @brief XML comment node class
  *
  * This class implements a XML comment. The comment text is stored without
  * the <!-- --> brackets.
@@ -40,10 +40,15 @@ public:
     ~GXmlComment(void);
 
     // Implemented virtual methods
-    void     clear(void);
-    void     write(FILE* fptr, int indent = 0) const;
-    //void     print(std::ostream& os, int indent = 0) const;
-    NodeType type(void) const { return NT_COMMENT; }
+    void         clear(void);
+    GXmlComment* clone(void) const;
+    void         write(FILE* fptr, int indent = 0) const;
+    //void         print(std::ostream& os, int indent = 0) const;
+    NodeType     type(void) const { return NT_COMMENT; }
+
+    // Other methods
+    const std::string& comment(void) const;
+    void               comment(const std::string& comment);
 };
 
 

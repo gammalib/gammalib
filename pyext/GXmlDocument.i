@@ -46,12 +46,12 @@ public:
     NodeType      type(void) const;
 
     // Methods
-    const std::string& version(void) const;
-    const std::string& encoding(void) const;
-    const std::string& standalone(void) const;
-    void               version(const std::string& version);
-    void               encoding(const std::string& encoding);
-    void               standalone(const std::string& standalone);
+    std::string version(void) const;
+    std::string encoding(void) const;
+    std::string standalone(void) const;
+    void        version(const std::string& version);
+    void        encoding(const std::string& encoding);
+    void        standalone(const std::string& standalone);
 };
 
 
