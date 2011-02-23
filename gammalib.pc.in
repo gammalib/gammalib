@@ -5,6 +5,11 @@ includedir=${prefix}/include
 
 Name: GammaLib
 Description: Versatile toolbox for analysis of astronomical gamma-ray data
-Version: 0.4.5
-Libs: -L${libdir} -lgamma @LIBS@ -lm
+URL: http://gammalib.sourceforge.net/
+Version: 0.4.7
+Requires: 
+Requires.private: @CFITSIO@
+Conflicts: 
 Cflags: -I${includedir}/gammalib
+Libs: -L${libdir} -lgamma 
+Libs.private: @LIBS_READLINE@
