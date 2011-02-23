@@ -10,7 +10,7 @@
 #
 # Process this file with autoconf to produce a configure script
 
-AC_INIT([GammaLib], [0.4.6], [knodlseder@cesr.fr], [gammalib], [http://gammalib.sourceforge.net/])
+AC_INIT([GammaLib], [0.4.7], [knodlseder@cesr.fr], [gammalib], [http://gammalib.sourceforge.net/])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies])
@@ -225,6 +225,7 @@ fi
 dnl ==========================
 dnl Checks for cfitsio library
 dnl ==========================
+
 # Check if we want to use cfitsio
 AC_ARG_WITH([cfitsio],
             [AS_HELP_STRING([--with-cfitsio],
@@ -257,29 +258,34 @@ if test "x$with_cfitsio" = "xyes"; then
   done
   if test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO"; then
     has_cfitsio="yes"
-    AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])
     LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
     CPPFLAGS="$CPPFLAGS -I$INCDIR_CFITSIO"
-    LIBS="${LIBS} -lcfitsio ${cfitsio_deps}"
     AC_SUBST(LIBDIR_CFITSIO)
     AC_SUBST(INCDIR_CFITSIO)
   else
     has_cfitsio="no"
   fi
-  AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
 
   # If cfitsio has not yet been found then search now using the AC_CHECK_LIB
   # macro. This allows also search in paths that are eventually specified in
   # LDFLAGS
   if test "x$has_cfitsio" != "xyes"; then
     AC_CHECK_LIB([cfitsio], [ffpss],
-                 [LIBS="${LIBS} -lcfitsio ${cfitsio_deps}"
-                  has_cfitsio="yes"
-                  AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])],
+                 [has_cfitsio="yes"],
                  [], [${cfitsio_deps}])
-    AM_CONDITIONAL(WITH_CFITSIO, test "x$ac_cv_lib_cfitsio_ffpss" = "xyes")
   fi
 
+  # Set cfitsio information
+  if test "x$has_cfitsio" = "xyes"; then
+    CFITSIO="cfitsio"
+	AC_SUBST(CFITSIO)
+    LIBS_CFITSIO="-lcfitsio ${cfitsio_deps}"
+	AC_SUBST(LIBS_CFITSIO)
+    LIBS="${LIBS} ${LIBS_CFITSIO}"
+    AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])    
+    AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
+  fi
+  
 else
   has_cfitsio="no"
   AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
@@ -342,6 +348,7 @@ fi
 dnl ===========================
 dnl Checks for readline library
 dnl ===========================
+
 # Check if we want to use readline
 AC_ARG_WITH([readline],
             [AS_HELP_STRING([--with-readline],
@@ -374,31 +381,34 @@ if test "x$with_readline" = "xyes"; then
   done
   if test -n "$LIBDIR_READLINE" -a -n "$INCDIR_READLINE"; then
     has_readline="yes"
-    AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
     if test "$LIBDIR_READLINE" != "$LIBDIR_CFITSIO"; then
       LDFLAGS="$LDFLAGS -L$LIBDIR_READLINE"
     fi
     if test "$INCDIR_READLINE" != "$INCDIR_CFITSIO"; then
       CPPFLAGS="$CPPFLAGS -I$INCDIR_READLINE"
     fi
-    LIBS="${LIBS} -lreadline ${readline_deps}"
     AC_SUBST(LIBDIR_READLINE)
     AC_SUBST(INCDIR_READLINE)
   else
     has_readline="no"
   fi
-  AM_CONDITIONAL(WITH_READLINE, test "x$has_readline" = "xyes")
 
   # If readline has not yet been found then search now using the AC_CHECK_LIB
   # macro. This allows also search in paths that are eventually specified in
   # LDFLAGS
   if test "x$has_readline" != "xyes"; then
     AC_CHECK_LIB([readline], [main],
-                 [LIBS="${LIBS} -lreadline ${readline_deps}"
-                  has_readline="yes"
-                  AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])],
+                 [has_readline="yes"],
                  [], [${readline_deps}])
-    AM_CONDITIONAL(WITH_READLINE, test "x$ac_cv_lib_readline_main" = "xyes")
+  fi
+
+  # Set readline information
+  if test "x$has_readline" = "xyes"; then
+    LIBS_READLINE="-lreadline ${readline_deps}"
+	AC_SUBST(LIBS_READLINE)
+    LIBS="${LIBS} ${LIBS_READLINE}"
+    AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])    
+    AM_CONDITIONAL(WITH_READLINE, test "x$has_readline" = "xyes")
   fi
 
 else
