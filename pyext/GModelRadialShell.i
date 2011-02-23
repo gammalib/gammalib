@@ -60,10 +60,20 @@ public:
 
 /***********************************************************************//**
  * @brief GModelRadialShell class extension
+ *
+ * The eval() and eval_gradients() methods are required here to force swig
+ * to build also the interface for these methods. I guess that it is a swig
+ * bug that these interfaces are not built automatically.
  ***************************************************************************/
 %extend GModelRadialShell {
     GModelRadialShell copy() {
         return (*self);
+    }
+    double eval(const GSkyDir& srcDir) const {
+        return self->GModelRadial::eval(srcDir);
+    }
+    double eval_gradients(const GSkyDir& srcDir) const {
+        return self->GModelRadial::eval_gradients(srcDir);
     }
 };
 
