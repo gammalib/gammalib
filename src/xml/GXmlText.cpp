@@ -20,8 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdio>             // std::fprintf
-#include <iostream>
 #include "GXmlText.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -44,7 +42,7 @@
  ***************************************************************************/
 GXmlText::GXmlText(void) : GXmlNode()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -59,7 +57,7 @@ GXmlText::GXmlText(void) : GXmlNode()
  ***************************************************************************/
 GXmlText::GXmlText(const GXmlText& node) : GXmlNode(node)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -77,7 +75,7 @@ GXmlText::GXmlText(const GXmlText& node) : GXmlNode(node)
  ***************************************************************************/
 GXmlText::GXmlText(const std::string& text) : GXmlNode()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Set text
@@ -123,7 +121,7 @@ GXmlText& GXmlText::operator= (const GXmlText& node)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -159,6 +157,15 @@ void GXmlText::clear(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone class
+***************************************************************************/
+GXmlText* GXmlText::clone(void) const
+{
+    return new GXmlText(*this);
 }
 
 
@@ -241,15 +248,6 @@ void GXmlText::free_members(void)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GXmlText* GXmlText::clone(void) const
-{
-    return new GXmlText(*this);
 }
 
 

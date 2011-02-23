@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GXmlDocument.i - XML document node class definition          *
+ *                 GXmlDocument.i - XML document node class                *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GXmlDocument.i
- * @brief GXmlDocument class python bindings
+ * @brief XML document class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -25,7 +25,7 @@
 /***********************************************************************//**
  * @class GXmlDocument
  *
- * @brief XML document node class interface defintion.
+ * @brief XML document node class
  *
  * This class implements the root node of an XML document. It contains the
  * three special attributes 'version', 'encoding', and 'standalone'.
@@ -39,18 +39,19 @@ public:
     ~GXmlDocument(void);
 
     // Implemented virtual methods
-    void     clear(void);
-    void     write(FILE* fptr, int indent = 0) const;
-    //void     print(std::ostream& os, int indent = 0) const;
-    NodeType type(void) const { return NT_DOCUMENT; }
+    void          clear(void);
+    GXmlDocument* clone(void) const;
+    void          write(FILE* fptr, int indent = 0) const;
+    //void          print(std::ostream& os, int indent = 0) const;
+    NodeType      type(void) const;
 
     // Methods
-    std::string version(void) const { return m_version.value(); }
-    std::string encoding(void) const { return m_encoding.value(); }
-    std::string standalone(void) const { return m_standalone.value(); }
-    void        version(const std::string& version) { m_version.value(version); }
-    void        encoding(const std::string& encoding) { m_encoding.value(encoding); }
-    void        standalone(const std::string& standalone) { m_standalone.value(standalone); }
+    const std::string& version(void) const;
+    const std::string& encoding(void) const;
+    const std::string& standalone(void) const;
+    void               version(const std::string& version);
+    void               encoding(const std::string& encoding);
+    void               standalone(const std::string& standalone);
 };
 
 

@@ -46,10 +46,11 @@ public:
     GXmlDocument& operator= (const GXmlDocument& node);
 
     // Implemented virtual methods
-    void     clear(void);
-    void     write(FILE* fptr, int indent = 0) const;
-    void     print(std::ostream& os, int indent = 0) const;
-    NodeType type(void) const { return NT_DOCUMENT; }
+    void          clear(void);
+    GXmlDocument* clone(void) const;
+    void          write(FILE* fptr, int indent = 0) const;
+    void          print(std::ostream& os, int indent = 0) const;
+    NodeType      type(void) const { return NT_DOCUMENT; }
 
     // Methods
     std::string version(void) const { return m_version.value(); }
@@ -61,10 +62,9 @@ public:
 
 protected:
     // Protected methods
-    void          init_members(void);
-    void          copy_members(const GXmlDocument& node);
-    void          free_members(void);
-    GXmlDocument* clone(void) const;
+    void init_members(void);
+    void copy_members(const GXmlDocument& node);
+    void free_members(void);
 
     // Protected data members
     GXmlAttribute m_version;      //!< XML version ("1.0", "1.1")

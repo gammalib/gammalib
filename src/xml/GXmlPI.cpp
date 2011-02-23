@@ -20,8 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdio>           // std::fprintf
-#include <iostream>
 #include "GException.hpp"
 #include "GXmlPI.hpp"
 
@@ -165,6 +163,15 @@ void GXmlPI::clear(void)
 
 
 /***********************************************************************//**
+ * @brief Clone class
+***************************************************************************/
+GXmlPI* GXmlPI::clone(void) const
+{
+    return new GXmlPI(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Write Processing Instruction into file
  *
  * @param[in] fptr File pointer.
@@ -242,15 +249,6 @@ void GXmlPI::free_members(void)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
-GXmlPI* GXmlPI::clone(void) const
-{
-    return new GXmlPI(*this);
 }
 
 

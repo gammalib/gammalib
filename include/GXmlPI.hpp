@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlPI.hpp - XML PI node class definition                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,6 +20,7 @@
 #define GXMLPI_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <cstdio>           // FILE*, std::fprintf
 #include <string>
 #include <iostream>
 #include "GXmlNode.hpp"
@@ -46,19 +47,21 @@ public:
 
     // Implemented virtual methods
     void     clear(void);
+    GXmlPI*  clone(void) const;
     void     write(FILE* fptr, int indent = 0) const;
     void     print(std::ostream& os, int indent = 0) const;
     NodeType type(void) const { return NT_PI; }
 
+    // Other methods
+    const std::string& pi(void) const { return m_pi; }
+    void               pi(const std::string& pi) { m_pi=pi; }
+
 protected:
     // Protected methods
-    void         init_members(void);
-    void         copy_members(const GXmlPI& node);
-    void         free_members(void);
-    GXmlPI*      clone(void) const;
-    void         parse(const std::string& segment);
-    std::string  pi(void) const { return m_pi; }
-    void         pi(const std::string& pi) { m_pi=pi; }
+    void init_members(void);
+    void copy_members(const GXmlPI& node);
+    void free_members(void);
+    void parse(const std::string& segment);
 
     // Protected data members
     std::string m_pi;       //!< Processing instruction (without brackets)

@@ -20,6 +20,7 @@
 #define GXMLTEXT_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <cstdio>             // FILE*, std::fprintf
 #include <string>
 #include <iostream>
 #include "GXmlNode.hpp"
@@ -45,17 +46,17 @@ public:
     GXmlText& operator= (const GXmlText& node);
 
     // Implemented virtual methods
-    void     clear(void);
-    void     write(FILE* fptr, int indent = 0) const;
-    void     print(std::ostream& os, int indent = 0) const;
-    NodeType type(void) const { return NT_TEXT; }
+    void      clear(void);
+    GXmlText* clone(void) const;
+    void      write(FILE* fptr, int indent = 0) const;
+    void      print(std::ostream& os, int indent = 0) const;
+    NodeType  type(void) const { return NT_TEXT; }
 
 protected:
     // Protected methods
-    void      init_members(void);
-    void      copy_members(const GXmlText& node);
-    void      free_members(void);
-    GXmlText* clone(void) const;
+    void init_members(void);
+    void copy_members(const GXmlText& node);
+    void free_members(void);
 
     // Protected data members
     std::string m_text;       //!< Text
