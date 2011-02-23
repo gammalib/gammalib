@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GXmlNode.cpp - XML node base class implementation           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -48,7 +48,7 @@
  ***************************************************************************/
 GXmlNode::GXmlNode(void)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Return
@@ -59,11 +59,11 @@ GXmlNode::GXmlNode(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] node Object from which the instance should be built.
+ * @param[in] node XML node.
  ***************************************************************************/
 GXmlNode::GXmlNode(const GXmlNode& node)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -96,7 +96,7 @@ GXmlNode::~GXmlNode(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] node Object which should be assigned.
+ * @param[in] node XML node.
  ***************************************************************************/
 GXmlNode& GXmlNode::operator= (const GXmlNode& node)
 {
@@ -106,7 +106,7 @@ GXmlNode& GXmlNode::operator= (const GXmlNode& node)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise members
         init_members();
 
         // Copy members
@@ -335,12 +335,18 @@ void GXmlNode::copy_members(const GXmlNode& node)
 
 /***********************************************************************//**
  * @brief Delete class members
+ *
+ * As container classes that hold pointers need to handle themselves the
+ * proper deallocation of memory, we loop here over all pointers and make
+ * sure that we deallocate the associated nodes.
  ***************************************************************************/
 void GXmlNode::free_members(void)
 {
-    // Free nodes
-//    for (int i = 0; i < m_nodes.size(); ++i)
-//        delete m_nodes[i];
+    // Free memory for all nodes
+    for (int i = 0; i < m_nodes.size(); ++i) {
+        delete m_nodes[i];
+        m_nodes[i] = NULL;
+    }
 
     // Return
     return;
