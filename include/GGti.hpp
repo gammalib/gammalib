@@ -36,8 +36,8 @@
  ***************************************************************************/
 class GGti {
 
-	// Friend classes
-	friend class GObservation;
+    // Friend classes
+    friend class GObservation;
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GGti& gti);
@@ -56,21 +56,21 @@ public:
     void   add(const GTime& tstart, const GTime& tstop);
     void   append(const GTime& tstart, const GTime& tstop);
     void   insert(const GTime& tstart, const GTime& tstop);
-	void   load(const std::string& filename,
+    void   load(const std::string& filename,
                 const std::string& extname = "GTI");
-	void   save(const std::string& filename, bool clobber,
+    void   save(const std::string& filename, bool clobber,
                 const std::string& extname = "GTI") const;
     void   read(GFitsTable* hdu);
     void   write(GFits* file, const std::string& extname = "GTI") const;
     int    size(void) const { return m_num; }
-	GTime  tstart(void) const { return m_tstart; }
-	GTime  tstop(void) const { return m_tstop; }
-	GTime  tstart(int inx) const;
-	GTime  tstop(int inx) const;
-	double telapse(void) const { return m_telapse; }
-	double ontime(void) const { return m_ontime; }
+    GTime  tstart(void) const { return m_tstart; }
+    GTime  tstop(void) const { return m_tstop; }
+    GTime  tstart(int inx) const;
+    GTime  tstop(int inx) const;
+    double telapse(void) const { return m_telapse; }
+    double ontime(void) const { return m_ontime; }
     bool   isin(const GTime& t) const;
-  
+
 protected:
     // Protected methods
     void  init_members(void);
@@ -82,13 +82,13 @@ protected:
     void  merge_gtis(void);
 
     // Protected data area
-	int     m_num;      //!< Number of intervals
-	GTime   m_tstart;   //!< Start of observation
-	GTime   m_tstop;    //!< Stop of observation
-	double  m_ontime;   //!< Sum of GTI durations (in seconds)
-	double  m_telapse;  //!< Time between start of first GTI and stop of last GTI (in seconds)
-	GTime  *m_start;    //!< Array of start times
-	GTime  *m_stop;     //!< Array of stop times
+    int     m_num;      //!< Number of intervals
+    GTime   m_tstart;   //!< Start of observation
+    GTime   m_tstop;    //!< Stop of observation
+    double  m_ontime;   //!< Sum of GTI durations (in seconds)
+    double  m_telapse;  //!< Time between start of first GTI and stop of last GTI (in seconds)
+    GTime  *m_start;    //!< Array of start times
+    GTime  *m_stop;     //!< Array of stop times
 
 private:
 };

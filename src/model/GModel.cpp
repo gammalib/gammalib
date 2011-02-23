@@ -274,7 +274,7 @@ std::string GModel::instruments(void) const
 {
     // Initialise string
     std::string result;
-    
+
     // Attach all instruments
     for (int i = 0; i < m_instruments.size(); ++i) {
         if (i > 0)
