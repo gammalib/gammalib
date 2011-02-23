@@ -168,13 +168,13 @@ void GGti::add(const GTime& tstart, const GTime& tstop)
             if (tstart < m_start[i])
                 break;
         }
-        
+
         // Insert GTI
         insert_gti(inx, tstart, tstop);
 
         // Merge any overlapping GTIs
         merge_gtis();
-        
+
     } // endif: Time interval was valid
 
     // Return
@@ -199,7 +199,7 @@ void GGti::append(const GTime& tstart, const GTime& tstop)
 
         // Insert GTI at end of list
         insert_gti(m_num, tstart, tstop);
-        
+
     } // endif: Time interval was valid
 
     // Return
@@ -229,7 +229,7 @@ void GGti::insert(const GTime& tstart, const GTime& tstop)
             if (tstart < m_start[i])
                 break;
         }
-        
+
         // Insert GTI
         insert_gti(inx, tstart, tstop);
 
@@ -294,7 +294,7 @@ void GGti::save(const std::string& filename, bool clobber,
 
     // Save to file
     file.saveto(filename, clobber);
-    
+
     // Return
     return;
 }
@@ -310,29 +310,29 @@ void GGti::save(const std::string& filename, bool clobber,
  ***************************************************************************/
 void GGti::read(GFitsTable* hdu)
 {
-	// Free members
-	free_members();
+    // Free members
+    free_members();
 
-	// Initialise attributes
-	init_members();
-	
-	// Extract GTI information from FITS file
-	m_num = hdu->integer("NAXIS2");
-	if (m_num > 0) {
-	
-		// Set GTIs
-		m_start = new GTime[m_num];
-		m_stop  = new GTime[m_num];
-		for (int i = 0; i < m_num; ++i) {
-			m_start[i].met(hdu->column("START")->real(i));
-			m_stop[i].met(hdu->column("STOP")->real(i));
-		}
-		
-		// Set attributes
+    // Initialise attributes
+    init_members();
+
+    // Extract GTI information from FITS file
+    m_num = hdu->integer("NAXIS2");
+    if (m_num > 0) {
+
+        // Set GTIs
+        m_start = new GTime[m_num];
+        m_stop  = new GTime[m_num];
+        for (int i = 0; i < m_num; ++i) {
+            m_start[i].met(hdu->column("START")->real(i));
+            m_stop[i].met(hdu->column("STOP")->real(i));
+        }
+
+        // Set attributes
         set_attributes();
 
-	}
-	
+    }
+
     // Return
     return;
 }
@@ -373,8 +373,11 @@ void GGti::write(GFits* file, const std::string& extname) const
     table->extname(extname);
 
     // Write to FITS file
-    file->append(table);
-    
+    file->append(*table);
+
+    // Free table
+    delete table;
+
     // Return
     return;
 }
@@ -416,7 +419,7 @@ GTime GGti::tstop(int inx) const
     if (inx < 0 || inx >= m_num)
         throw GException::out_of_range(G_TSTOP, inx, 0, m_num-1);
     #endif
-    
+
     // Return
     return (m_stop[inx]);
 }
@@ -458,12 +461,12 @@ void GGti::init_members(void)
 {
     // Initialise members
     m_num     = 0;
-	m_tstart.clear();
-	m_tstop.clear();
-	m_ontime  = 0.0;
-	m_telapse = 0.0;
-	m_start   = NULL;
-	m_stop    = NULL;
+    m_tstart.clear();
+    m_tstop.clear();
+    m_ontime  = 0.0;
+    m_telapse = 0.0;
+    m_start   = NULL;
+    m_stop    = NULL;
 
     // Return
     return;
@@ -524,17 +527,17 @@ void GGti::set_attributes(void)
 {
     // Continue only if there are GTIs
     if (m_num > 0) {
-    
+
         // Set attributes
         m_tstart  = m_start[0];
         m_tstop   = m_stop[m_num-1];
         m_telapse = m_tstop.met() - m_tstart.met();
         m_ontime  = 0.0;
-		for (int i = 0; i < m_num; ++i)
-			m_ontime += (m_stop[i].met() - m_start[i].met());
+        for (int i = 0; i < m_num; ++i)
+            m_ontime += (m_stop[i].met() - m_start[i].met());
 
     } // endif: there were GTIs
-    
+
     // Return
     return;
 }
@@ -576,18 +579,18 @@ void GGti::insert_gti(int inx, const GTime& tstart, const GTime& tstop)
         // If inx is out of range then adjust it
         if (inx < 0)     inx = 0;
         if (inx > m_num) inx = m_num;
-    
+
         // Allocate new intervals
         int    num   = m_num+1;
         GTime* start = new GTime[num];
         GTime* stop  = new GTime[num];
-        
+
         // Copy intervals before GTI to be inserted
         for (int i = 0; i < inx; ++i) {
             start[i] = m_start[i];
             stop[i]  = m_stop[i];
         }
-        
+
         // Insert GTI
         start[inx] = tstart;
         stop[inx]  = tstop;
@@ -597,19 +600,19 @@ void GGti::insert_gti(int inx, const GTime& tstart, const GTime& tstop)
             start[i] = m_start[i-1];
             stop[i]  = m_stop[i-1];
         }
-        
+
         // Free memory
         if (m_start != NULL) delete [] m_start;
         if (m_stop  != NULL) delete [] m_stop;
-        
+
         // Set new memory
         m_start = start;
         m_stop  = stop;
-        
+
         // Set attributes
         m_num = num;
         set_attributes();
-    
+
     } // endif: Time interval was valid
 
     // Return
@@ -649,10 +652,10 @@ void GGti::merge_gtis(void)
             i++;
 
     } // endwhile: there were still GTIs to check
-    
+
     // Update number of elements in GTI
     m_num = num;
-    
+
     // Return
     return;
 }
@@ -678,7 +681,7 @@ std::ostream& operator<< (std::ostream& os, const GGti& gti)
     os << " Ontime ....................: " << gti.ontime() << " sec" << std::endl;
     os << " Elapsed time ..............: " << gti.telapse() << " sec" << std::endl;
     os << " Time range ................: " << gti.tstart() << " - " << gti.tstop();
-	
+
     // Return output stream
     return os;
 }

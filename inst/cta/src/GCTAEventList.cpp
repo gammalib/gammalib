@@ -324,13 +324,15 @@ void GCTAEventList::write(GFits& file) const
     // Write data selection keywords
     write_ds_keys(events);
 
-    // Append event table to FITS file (the GFits classes will later handle
-    // the proper de-allocation of the memory)
-    file.append(events);
+    // Append event table to FITS file
+    file.append(*events);
+
+    // Free binary table
+    delete events;
 
     // Append GTI to FITS file
     gti().write(&file);
-    
+
     // Return
     return;
 }

@@ -420,9 +420,12 @@ void GLATEdisp::write_edisp(GFits& file) const
         // Append columns to table
         hdu_edisp->append_column(col_norm);
         hdu_edisp->append_column(col_ls1);
-        
+
         // Append HDU to FITS file
-        file.append(hdu_edisp);
+        file.append(*hdu_edisp);
+
+        // Free table
+        delete hdu_edisp;
 
     } // endif: there were data to write
 

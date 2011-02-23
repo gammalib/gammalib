@@ -194,7 +194,7 @@ void GEbounds::insert(const GEnergy& emin, const GEnergy& emax)
             if (emin < m_min[i])
                 break;
         }
-        
+
         // Insert interval
         insert_eng(inx, emin, emax);
 
@@ -216,7 +216,7 @@ void GEbounds::setlin(const GEnergy& emin, const GEnergy& emax, const int& num)
 {
     // Initialise members
     clear();
-    
+
     // Compute bin width
     GEnergy ebin = (emax - emin)/double(num); 
 
@@ -245,7 +245,7 @@ void GEbounds::setlog(const GEnergy& emin, const GEnergy& emax, const int& num)
 {
     // Initialise members
     clear();
-    
+
     // Compute bin width
     double elogmin = std::log10(emin.MeV());
     double elogmax = std::log10(emax.MeV());
@@ -313,7 +313,7 @@ void GEbounds::save(const std::string& filename, bool clobber,
 
     // Save to file
     file.saveto(filename, clobber);
-    
+
     // Return
     return;
 }
@@ -397,8 +397,11 @@ void GEbounds::write(GFits* file, const std::string& extname) const
     table->extname(extname);
 
     // Write to FITS file
-    file->append(table);
-    
+    file->append(*table);
+
+    // Free table
+    delete table;
+
     // Return
     return;
 }
@@ -580,7 +583,7 @@ void GEbounds::copy_members(const GEbounds& ebds)
     m_num  = ebds.m_num;
     m_emin = ebds.m_emin;
     m_emax = ebds.m_emax;
-    
+
     // Copy arrays
     if (m_num > 0) {
         m_min = new GEnergy[m_num];
@@ -621,13 +624,13 @@ void GEbounds::set_attributes(void)
 {
     // Continue only if there are intervals
     if (m_num > 0) {
-    
+
         // Set attributes
         m_emin = m_min[0];
         m_emax = m_max[m_num-1];
 
     } // endif: there were intervals
-    
+
     // Return
     return;
 }
@@ -669,18 +672,18 @@ void GEbounds::insert_eng(int inx, const GEnergy& emin, const GEnergy& emax)
         // If inx is out of range then adjust it
         if (inx < 0)     inx = 0;
         if (inx > m_num) inx = m_num;
-    
+
         // Allocate new intervals
         int      num = m_num+1;
         GEnergy* min = new GEnergy[num];
         GEnergy* max = new GEnergy[num];
-        
+
         // Copy intervals before GTI to be inserted
         for (int i = 0; i < inx; ++i) {
             min[i] = m_min[i];
             max[i] = m_max[i];
         }
-        
+
         // Insert interval
         min[inx] = emin;
         max[inx] = emax;
@@ -690,19 +693,19 @@ void GEbounds::insert_eng(int inx, const GEnergy& emin, const GEnergy& emax)
             min[i] = m_min[i-1];
             max[i] = m_max[i-1];
         }
-        
+
         // Free memory
         if (m_min != NULL) delete [] m_min;
         if (m_max != NULL) delete [] m_max;
-        
+
         // Set new memory
         m_min = min;
         m_max = max;
-        
+
         // Set attributes
         m_num = num;
         set_attributes();
-    
+
     } // endif: Energy interval was valid
 
     // Return
@@ -744,10 +747,10 @@ void GEbounds::merge_engs(void)
             i++;
 
     } // endwhile: there were still intervals to check
-    
+
     // Update number of elements in object
     m_num = num;
-    
+
     // Return
     return;
 }

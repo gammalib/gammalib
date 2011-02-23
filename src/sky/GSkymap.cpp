@@ -513,7 +513,7 @@ void GSkymap::save(const std::string& filename, bool clobber) const
         // Create FITS file and save it to disk
         if (hdu != NULL) {
             GFits fits;
-            fits.append(hdu);
+            fits.append(*hdu);
             fits.saveto(filename, clobber);
         }
 
@@ -595,10 +595,12 @@ void GSkymap::write(GFits* file) const
         else
             hdu = create_wcs_hdu();
 
-        // Append HDU to FITS file. The FITS class will later handle the
-        // proper deallocation of the HDU
+        // Append HDU to FITS file.
         if (hdu != NULL)
-            file->append(hdu);
+            file->append(*hdu);
+
+        // Delete HDU
+        if (hdu != NULL) delete hdu;
 
     } // endif: we had data to save
 
@@ -835,7 +837,7 @@ std::string GSkymap::print(void) const
         result.append("\n"+m_wcs->print());
     else
         result.append("\n"+parformat("WCS")+"not defined");
-    
+
     // Return result
     return result;
 }

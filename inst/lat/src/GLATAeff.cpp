@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GLATAeff.cpp  -  Fermi LAT effective area               *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
+ *  copyright : (C) 2008-2011 by Jurgen Knodlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATAeff.cpp
- * @brief Fermi LAT effective area class definition.
+ * @brief Fermi LAT effective area class implementation
  * @author J. Knodlseder
  */
 
@@ -479,9 +479,12 @@ void GLATAeff::write_aeff(GFits& file) const
 
         // Append columns to table
         hdu_aeff->append_column(col_aeff);
-        
+
         // Append HDU to FITS file
-        file.append(hdu_aeff);
+        file.append(*hdu_aeff);
+
+        // Free binary table
+        delete hdu_aeff;
 
     } // endif: there were data to write
 

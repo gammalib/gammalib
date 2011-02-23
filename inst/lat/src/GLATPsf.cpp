@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATPsf.cpp  -  Fermi LAT point spread function             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GLATPsf.cpp
- * @brief Fermi LAT point spread function class implementation.
+ * @brief Fermi LAT point spread function class implementation
  * @author J. Knodlseder
  */
 
@@ -547,9 +547,12 @@ void GLATPsf::write_scale(GFits& file) const
 
     // Append column to table
     hdu_scale->append_column(col_scale);
-        
+
     // Append HDU to FITS file
-    file.append(hdu_scale);
+    file.append(*hdu_scale);
+
+    // Free binary table
+    delete hdu_scale;
 
     // Return
     return;
@@ -696,9 +699,12 @@ void GLATPsf::write_psf_v1(GFits& file) const
         hdu_rpsf->append_column(col_sigma);
         hdu_rpsf->append_column(col_gcore);
         hdu_rpsf->append_column(col_gtail);
-        
+
         // Append HDU to FITS file
-        file.append(hdu_rpsf);
+        file.append(*hdu_rpsf);
+
+        // Free binary table
+        delete hdu_rpsf;
 
     } // endif: there were data to write
 
