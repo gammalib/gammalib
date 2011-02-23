@@ -54,9 +54,9 @@ public:
     void    insert(const GEnergy& emin, const GEnergy& emax);
     void    setlin(const GEnergy& emin, const GEnergy& emax, const int& num);
     void    setlog(const GEnergy& emin, const GEnergy& emax, const int& num);
-	void    load(const std::string& filename,
+    void    load(const std::string& filename,
                  const std::string& extname = "EBOUNDS");
-	void    save(const std::string& filename, bool clobber,
+    void    save(const std::string& filename, bool clobber,
                  const std::string& extname = "EBOUNDS") const;
     void    read(GFitsTable* hdu);
     void    write(GFits* file, const std::string& extname = "EBOUNDS") const;
@@ -69,7 +69,7 @@ public:
     GEnergy emean(int inx) const;
     GEnergy elogmean(int inx) const;
     bool    isin(const GEnergy& eng) const;
-    
+
 protected:
     // Protected methods
     void      init_members(void);
@@ -81,7 +81,7 @@ protected:
     void      merge_engs(void);
 
     // Protected data area
-	int      m_num;         //!< Number of energy boundaries
+    int      m_num;         //!< Number of energy boundaries
     GEnergy  m_emin;        //!< Minimum energy covered
     GEnergy  m_emax;        //!< Maximum energy covered
     GEnergy* m_min;         //!< Energy bin minima
