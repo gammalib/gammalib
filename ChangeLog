@@ -1,3 +1,10 @@
+2011-??-??  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+        * Version 0.4.7 released
+        ========================
+
+        Fix memory leaks in container classes handling pointers
+
 2011-02-21  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.4.6 released
