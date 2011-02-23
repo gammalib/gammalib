@@ -50,28 +50,28 @@ public:
     GXmlElement& operator= (const GXmlElement& node);
 
     // Implemented virtual methods
-    void     clear(void);
-    void     write(FILE* fptr, int indent = 0) const;
-    void     print(std::ostream& os, int indent = 0) const;
-    NodeType type(void) const { return NT_ELEMENT; }
+    void         clear(void);
+    GXmlElement* clone(void) const;
+    void         write(FILE* fptr, int indent = 0) const;
+    void         print(std::ostream& os, int indent = 0) const;
+    NodeType     type(void) const { return NT_ELEMENT; }
 
     // Methods
-    std::string name(void) const { return m_name; }
-    std::string attribute(const std::string& name) const;
-    GXmlNode*   parent(void) const { return m_parent; }
-    void        name(const std::string& name) { m_name=name; }
-    void        parent(GXmlNode* node) { m_parent = node; }
-    void        attribute(const std::string& name, const std::string& value);
+    std::string  name(void) const { return m_name; }
+    std::string  attribute(const std::string& name) const;
+    GXmlNode*    parent(void) const { return m_parent; }
+    void         name(const std::string& name) { m_name=name; }
+    void         parent(GXmlNode* node) { m_parent = node; }
+    void         attribute(const std::string& name, const std::string& value);
 
 protected:
     // Protected methods
-    void         init_members(void);
-    void         copy_members(const GXmlElement& node);
-    void         free_members(void);
-    GXmlElement* clone(void) const;
-    void         parse_start(const std::string& segment);
-    void         parse_stop(const std::string& segment);
-    void         parse_attribute(size_t* pos, const std::string& segment);
+    void init_members(void);
+    void copy_members(const GXmlElement& node);
+    void free_members(void);
+    void parse_start(const std::string& segment);
+    void parse_stop(const std::string& segment);
+    void parse_attribute(size_t* pos, const std::string& segment);
 
     // Protected data members
     std::string                 m_name;       //!< Element name

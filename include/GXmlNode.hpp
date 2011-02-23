@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlNode.hpp - XML node base class definition            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -54,11 +54,12 @@ public:
     };
 
     // Pure virtual methods
-    virtual void     clear(void) = 0;
-    virtual void     write(FILE* fptr, int indent = 0) const = 0;
-    virtual void     print(std::ostream& os, int indent = 0) const = 0;
-    virtual NodeType type(void) const = 0;
-    
+    virtual void      clear(void) = 0;
+    virtual GXmlNode* clone(void) const = 0;
+    virtual void      write(FILE* fptr, int indent = 0) const = 0;
+    virtual void      print(std::ostream& os, int indent = 0) const = 0;
+    virtual NodeType  type(void) const = 0;
+
     // Methods
     void      append(GXmlNode* node);
     int       children(void) const;
@@ -70,10 +71,9 @@ public:
 
 protected:
     // Protected methods
-    void              init_members(void);
-    void              copy_members(const GXmlNode& node);
-    void              free_members(void);
-    virtual GXmlNode* clone(void) const = 0;
+    void init_members(void);
+    void copy_members(const GXmlNode& node);
+    void free_members(void);
 
     // Protected data members
     std::vector<GXmlNode*> m_nodes;    //!< Pointer to nodes contained in node
