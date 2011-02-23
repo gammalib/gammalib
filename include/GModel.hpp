@@ -48,6 +48,11 @@ class GObservation;
  * This abstract virtual base class implements the methods that handle the
  * model name and the applicable instruments. It also implements friend
  * operators for logging.
+ *
+ * As the class holds simpliy a collection of model parameters, it should
+ * neither deal with allocation and deallocation, nor with cloning of
+ * model parameters. This will be done by the classes that actually
+ * implement the model parameters.
  ***************************************************************************/
 class GModel {
 
