@@ -35,7 +35,7 @@ def binned_analysis(model, cntmap, irf, caldb):
 	# Optimize model parameters
 	obs.optimize(opt)
 
-	# Get maximum likelihood value (just for fun)
+	# Get maximum likelihood value
 	logL = -(opt.value())
 
 	# Get a copy of the model fitting results. We want a copy
@@ -46,6 +46,31 @@ def binned_analysis(model, cntmap, irf, caldb):
 	
 	# Print optimizer results
 	print opt
+	
+	# Create now a copy of the source model without background
+	# only
+	background = GModels()
+	for m in models:
+		if m.name() == "Background":
+			background.append(m)
+	
+	# Assign background model for fitting
+	obs.models(background)
+
+	# Optimize background parameters
+	obs.optimize(opt)
+
+	# Get maximum likelihood value of background
+	logL0 = -(opt.value())
+	
+	# Compute TS
+	ts = 2.0 * (logL - logL0)
+
+	# Print optimizer results
+	print opt
+	
+	# Print TS
+	print " Test statistics ...........:", ts
 	
 	# Return models
 	return models
