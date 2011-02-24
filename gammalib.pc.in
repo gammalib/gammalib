@@ -12,4 +12,4 @@ Requires.private: @CFITSIO@
 Conflicts: 
 Cflags: -I${includedir}/gammalib
 Libs: -L${libdir} -lgamma 
-Libs.private: @LIBS_READLINE@
+Libs.private: @LIBS_CFITSIO@ @LIBS_READLINE@
