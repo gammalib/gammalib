@@ -1,17 +1,23 @@
-This folder contains test and example scripts and programs.
+This folder contains files used for unit testing and files that serve
+as example scripts for the CTA interface of GammaLib.
 
-test_CTA.cpp               - CTA classes test program
-                             This program will be compiled and executed after typing
-                             > make check
-                             in the GammaLib source repository. If an older version of
-                             GammaLib exists, make sure to install the new version
-                             before using
-                             > make install
+test_CTA.cpp
+  Unit test C++ file for CTA specific GammaLib components.
 
-example_sim_photons.py     - Python script to illustrate MC simulation of photons
-                             After installing GammaLib, type
-                             > ./example_sim_photons.py
-                             If matplotlib is installed, the spectrum will be displayed
-                             on the screen.
+test_model.py
+  Creates images of sources models convolved with the CTA instrument
+  response function. Also allows the creation of gradient images.
 
-test_model.py              - Test model handling by CTA response function.
+test_gauss.py
+  Test Gaussian.
+
+example_binned_ml_fit.py
+  Illustrates a binned maximum likelihood fit of CTA data.
+  This script implements a full analysis chain, and computes
+  also the TS statistics value that estimates the significance
+  of the source detection.
+
+example_sim_photons.py
+  Illustrates how photons are simulated from a source model. If
+  matplotlib is installed, the simulated photons are shown as
+  a spectrum.
