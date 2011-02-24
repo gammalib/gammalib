@@ -1,0 +1,18 @@
+This folder contains files used for unit testing and files that serve
+as example scripts for GammaLib. For more test files and examples,
+please check the instrument specific test folders inst/xxx/test.
+
+test_XXX.cpp
+  Unit test C++ files for GammaLib components.
+
+test_python.py
+  Unit test for GammaLib Python interface.
+
+example_model_xml_io.py
+  Illustrates how gamma-ray source models are built and saved
+  on disk into an XML file.
+
+example_radial_models.py
+  Illustrates how source models are accessed and used for
+  create images. Tests also the correct normalization of the
+  source models.
