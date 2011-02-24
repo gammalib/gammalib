@@ -1,7 +1,9 @@
 #! /bin/bash -f
 
+# Parameters
 sourcedir=gammalib
 installdir=$(pwd)/build
+makedoc="no"
 
 echo "Remove existing folder"
 rm -rf $sourcedir
@@ -9,25 +11,24 @@ rm -rf $sourcedir
 
 echo "Checkout latest GammaLib"
 cvs -Q -d /home/cvs export -N -r HEAD "gammalib"
-rm -rf $sourcedir/inst/lat/test/data
-rm -rf $sourcedir/inst/lat/test/irf
-#rm -rf $sourcedir/inst/cta/test/data
-#rm -rf $sourcedir/inst/cta/test/irf
+rm -rf $sourcedir/inst/lat/test/data/ft2.fits.gz
 
 echo "Create Makefile.in and configure scripts"
 cd $sourcedir
 #
-aclocal -I m4
-libtoolize --copy
-autoconf
-autoheader
-automake --add-missing --copy
+./autogen.sh
+#aclocal -I m4
+#libtoolize --copy
+#autoconf
+#autoheader
+#automake --add-missing --copy
 #
-rm -f autogen.sh      
+#rm -f autogen.sh      
 #rm -rf m4
-rm -rf autom4te.cache
+#rm -rf autom4te.cache
 #rm -f configure.ac
 #rm -f Makefile.am
+rm -f gammalib.sh
 #
 cd ..
 
@@ -36,10 +37,17 @@ inc_inst="-I$sourcedir/inst/mwl/pyext -I$sourcedir/inst/lat/pyext -I$sourcedir/i
 opt_inst="-DWITH_INST_MWL -DWITH_INST_LAT -DWITH_INST_CTA"
 swig -c++ -python -Wall -includeall -I$sourcedir/src $inc_inst $opt_inst -o $sourcedir/pyext/gammalib_wrap.cpp -outdir $sourcedir/pyext $sourcedir/pyext/gammalib.i
 
-#echo "Create doxygen documentation"
-#cd gammalib/doc
-#doxygen Doxyfile
-#cd ../..
+if [ "x$makedoc" == "xyes" ] ; then
+  echo "Create doxygen documentation"
+  cd gammalib/doc
+  doxygen Doxyfile
+  cd latex
+  make
+  make
+  dvips -o refman.ps refman
+  ps2pdf refman.ps 
+  cd ../..
+fi
 
 echo "Create LaTeX documentation"
 cd gammalib/doc
@@ -103,11 +111,15 @@ cd $sourcedir
 echo "Compile GammaLib"
 make -j10
 
+#echo "Install GammaLib"
+#make install
+
+echo "Check GammaLib"
+#export PATH=$installdir/bin:$PATH
+#export LD_LIBRARY_PATH=$installdir/lib:$LD_LIBRARY_PATH
+#export PYTHONPATH=$installdir/lib/python2.5/site-packages:$PYTHONPATH
+make check
+
 echo "Install GammaLib"
 make install
 
-echo "Check GammaLib"
-export PATH=$installdir/bin:$PATH
-export LD_LIBRARY_PATH=$installdir/lib:$LD_LIBRARY_PATH
-export PYTHONPATH=$installdir/lib/python2.5/site-packages:$PYTHONPATH
-make check
