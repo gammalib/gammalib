@@ -25,13 +25,16 @@
 /***********************************************************************//**
  * @class GCTAModelRadialAcceptance
  *
- * @brief Radial acceptance model interface definition.
+ * @brief Radial acceptance model class
  ***************************************************************************/
 class GCTAModelRadialAcceptance : public GModelData {
+
 public:
     // Constructors and destructors
     GCTAModelRadialAcceptance(void);
     explicit GCTAModelRadialAcceptance(const GXmlElement& xml);
+    explicit GCTAModelRadialAcceptance(const GCTAModelRadial& radial,
+                                       const GModelSpectral& spectral);
     GCTAModelRadialAcceptance(const GCTAModelRadialAcceptance& model);
     virtual ~GCTAModelRadialAcceptance(void);
 

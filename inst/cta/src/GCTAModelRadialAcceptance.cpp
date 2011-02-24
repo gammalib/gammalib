@@ -105,6 +105,35 @@ GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GXmlElement& xml) :
 
 
 /***********************************************************************//**
+ * @brief Construct from radial and spectral components
+ *
+ * @param[in] radial Radial CTA model component.
+ * @param[in] spectral Spectral model component.
+ ***************************************************************************/
+GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GCTAModelRadial& radial,
+                                                     const GModelSpectral&  spectral)
+                                                               : GModelData()
+{
+    // Initialise members
+    init_members();
+
+    // Allocate temporal constant model
+    GModelTemporalConst temporal;
+
+    // Clone model components
+    m_radial   = radial.clone();
+    m_spectral = spectral.clone();
+    m_temporal = temporal.clone();
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] model Radial acceptance model.
