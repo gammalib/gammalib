@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCTARoi.i  -  CTA region of interest class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -12,7 +12,7 @@
  ***************************************************************************/
 /**
  * @file GCTARoi.i
- * @brief GCTARoi class python bindings
+ * @brief CTA region of interest class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -24,9 +24,10 @@
 /***********************************************************************//**
  * @class GCTARoi
  *
- * @brief Python bindings for the CTA region of interest class
+ * @brief CTA region of interest class
  ***************************************************************************/
 class GCTARoi : public GRoi {
+
 public:
     // Constructors and destructors
     GCTARoi(void);
@@ -38,10 +39,10 @@ public:
     GCTARoi*    clone(void) const;
 
     // Other methods
-    GCTAInstDir centre(void) const { return m_centre; }
-    double      radius(void) const { return m_radius; }
-    void        centre(const GCTAInstDir& centre) { m_centre=centre; return; }
-    void        radius(const double& radius) { m_radius=radius; return; }
+    GCTAInstDir centre(void) const;
+    double      radius(void) const;
+    void        centre(const GCTAInstDir& centre);
+    void        radius(const double& radius);
 };
 
 
