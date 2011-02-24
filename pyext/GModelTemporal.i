@@ -28,6 +28,7 @@
  * @brief Abstract temporal model base class
  ***************************************************************************/
 class GModelTemporal {
+
 public:
     // Constructors and destructors
     GModelTemporal(void);
@@ -57,13 +58,13 @@ public:
     char *__str__() {
         return tochar(self->print());
     }
-    GModelPar __getitem__(const int& index) {
+    GModelPar& __getitem__(const int& index) {
         if (index >= 0 && index < self->size())
             return (*self)[index];
         else
             throw GException::out_of_range("__getitem__(int)", index, self->size());
     }
-    GModelPar __getitem__(const std::string& name) {
+    GModelPar& __getitem__(const std::string& name) {
         return (*self)[name];
     }
     void __setitem__(const int& index, const GModelPar& val) {
