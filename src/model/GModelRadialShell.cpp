@@ -634,10 +634,10 @@ void GModelRadialShell::free_members(void)
  *          \sqrt{1-\cos 2 {\tt m\_theta\_in}}}{2 \sqrt{2}} +
  *    \frac{1+\cos 2 {\tt m\_theta\_out}}{4} \ln \left(
  *          \frac{\sqrt{2} \cos {\tt m\_theta\_out}}
- *               {\sqrt{2} + \sqrt{1 - \cos 2 {\tt m\_theta\_out}}} -
+ *               {\sqrt{2} + \sqrt{1 - \cos 2 {\tt m\_theta\_out}}} \right) -
  *    \frac{1+\cos 2 {\tt m\_theta\_in}}{4} \ln \left(
  *          \frac{\sqrt{2} \cos {\tt m\_theta\_in}}
- *               {\sqrt{2} + \sqrt{1 - \cos 2 {\tt m\_theta\_in}}}\f]
+ *               {\sqrt{2} + \sqrt{1 - \cos 2 {\tt m\_theta\_in}}} \right)\f]
  ***************************************************************************/
 void GModelRadialShell::update() const
 {

@@ -39,7 +39,7 @@ class GDerivative {
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GDerivative& dx);
-    friend GLog&         operator<<(GLog& os,         const GDerivative& dx);
+    friend GLog&         operator<<(GLog& log,        const GDerivative& dx);
 
 public:
 
