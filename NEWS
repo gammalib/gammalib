@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 00-04-06
+New Features and Important Changes in GammaLib 00-04-07
 
 Author(s) : Juergen Knoedlseder
 
-February 21, 2011
+February 24, 2011
 
 
 1. Introduction
@@ -13,56 +13,40 @@ made since the last release of GammaLib.
 
 2. Configuration
 -----------------
-Add back autogen.sh script is release for developers
+Use pkgconfig information for cfitsio if available.
 
 
 3. Application module
 ---------------------
-Replace par() method by operator[]
 
 
 4. FITS I/O Interface
 ---------------------
-None
+Pass GFitsHDU as reference in GFits::append() method. GFits now properly
+deallocates all HDUs on file closing and instance destruction. This
+fixes a memory leak that occured in earlier version.
 
 
 5. Linear algebra module
 ------------------------
-Use operator[] instead of operator() for vector element access in GVector
-class.
+None
 
 
 6. Model module
 ---------------
-Introduce GModelExtendedSource for extended gamma-ray sources. Their spatial
-component is implemented by the new class GModelRadial which defines
-axisymmetric spatial models. The following radial models have been
-implemented
-- GModelRadialDisk  - a disk of uniform intensity
-- GModelRadialGauss - a 2D Gaussian shaped intensity distribution
-- GModelRadialShell - a SNR shell toy model
-Radial models have their own registry class GModelRadialRegistry.
-
-Use now operator[] for model parameter access instead of par() method.
-
-Add GModelPar::hasgrad() method to signal parameters with analytical
-gradients.
+None
 
 
 7. Numerics module
 ------------------
-Add new gradient methods in GDerivative. In particular, a simple difference
-method is now used to compite fast and robust numerical gradients.
+None
 
 
 8. Observation module
 ---------------------
-Compute numerical gradients for free parameters without analytical gradients.
-
-Implement extended source support in GResponse base class (binned and unbinned
-analyses).
-
-Use now operator[] for observation access.
+GObservations now correctly clones observation in copy operations and
+deallocates all obserations on destruction. This fixes memory leaks that
+were introduced by using the std::vector template class to hold observations.
 
 
 9. Optimization module
@@ -72,7 +56,7 @@ None
 
 10. Sky module
 --------------
-Add GSkyDir posang() method for computation of position angles.
+None
 
 
 11. Support module
@@ -82,7 +66,12 @@ None
 
 12. XML module
 --------------
-None
+GXmlElement now correctly clones attributes in copy operations and
+deallocates all attributes on destruction. GXmlNode now correctly clones
+nodes in copy operations and deallocates all nodes on destruction.
+This fixes memory leaks that were introduced by using the std::vector
+template class to hold attributes and nodes.
+
 
 
 13. Multi-wavelength interface
@@ -97,5 +86,6 @@ None
 
 15. CTA interface
 -----------------
-Implement extended source support in response class.
+Implement improved integration scheme for extended source (now operates
+in reference frame of model).
 
