@@ -37,9 +37,16 @@ AC_PREFIX_DEFAULT([/usr/local/gamma])
 if test "x$prefix" = xNONE; then
   gammalib_prefix="/usr/local/gamma"
 else
-  gammalib_prefix=$prefix
+  gammalib_prefix=${prefix}
 fi
 AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], "${gammalib_prefix}", [Location where library is installed])
+
+
+dnl ==============================================
+dnl Add pkgconfig information of install directory
+dnl ==============================================
+PKG_CONFIG_PATH="${gammalib_prefix}/lib/pkgconfig:/opt/local/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib/pkgconfig:$PKG_CONFIG_PATH"
+export PKG_CONFIG_PATH
 
 
 dnl ===========================
@@ -225,6 +232,8 @@ fi
 dnl ==========================
 dnl Checks for cfitsio library
 dnl ==========================
+# Initialise cfitsio flag
+has_cfitsio="no"
 
 # Check if we want to use cfitsio
 AC_ARG_WITH([cfitsio],
@@ -233,121 +242,81 @@ AC_ARG_WITH([cfitsio],
             [],
             [with_cfitsio=yes])
 
-# If we want to use cfitsio, then search now the library
+# If we want to use cfitsio, then search the library now
 if test "x$with_cfitsio" = "xyes"; then
 
-  # Set host specific cfitsio dependencies
-  cfitsio_deps=
-  case $host in
-    sparc*-sun-solaris*)  cfitsio_deps="-lm -lsocket" ;;
-    *)                    cfitsio_deps="-lm" ;;
-  esac
-
-  # Search for cfitsio shared library in a some standard directories
-  for i in "$gammalib_prefix" /usr /usr/local /opt/local ; do
-    if test -f $i/lib/libcfitsio.so -o -f $i/lib/libcfitsio.dylib -a -f $i/include/fitsio.h; then
-      LIBDIR_CFITSIO=$i/lib
-      INCDIR_CFITSIO=$i/include
-      break
-    fi
-    if test -f $i/lib64/libcfitsio.so -o -f $i/lib64/libcfitsio.dylib -a -f $i/include/fitsio.h; then
-      LIBDIR_CFITSIO=$i/lib64
-      INCDIR_CFITSIO=$i/include
-      break
-    fi
-  done
-  if test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO"; then
-    has_cfitsio="yes"
-    LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
-    CPPFLAGS="$CPPFLAGS -I$INCDIR_CFITSIO"
-    AC_SUBST(LIBDIR_CFITSIO)
-    AC_SUBST(INCDIR_CFITSIO)
-  else
-    has_cfitsio="no"
-  fi
-
-  # If cfitsio has not yet been found then search now using the AC_CHECK_LIB
-  # macro. This allows also search in paths that are eventually specified in
-  # LDFLAGS
-  if test "x$has_cfitsio" != "xyes"; then
-    AC_CHECK_LIB([cfitsio], [ffpss],
-                 [has_cfitsio="yes"],
-                 [], [${cfitsio_deps}])
-  fi
-
-  # Set cfitsio information
+  # First try pkgconfig
+  PKG_CHECK_MODULES([cfitsio], [cfitsio],
+                    [has_cfitsio="yes"],
+                    [AC_MSG_WARN([cfitsio pkgconfig information not found - try now locating library directly])])
   if test "x$has_cfitsio" = "xyes"; then
+    CFLAGS="$CFLAGS $cfitsio_CFLAGS"
+    CPPFLAGS="$CPPFLAGS $cfitsio_CFLAGS"
+    LDFLAGS="$LDFLAGS $cfitsio_LIBS"
     CFITSIO="cfitsio"
-	AC_SUBST(CFITSIO)
-    LIBS_CFITSIO="-lcfitsio ${cfitsio_deps}"
-	AC_SUBST(LIBS_CFITSIO)
-    LIBS="${LIBS} ${LIBS_CFITSIO}"
-    AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])    
-    AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
-  fi
-  
-else
-  has_cfitsio="no"
-  AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
-fi
+  else
 
-## If cfitsio is available then get library path for unit testing
-#if test "x$ac_cv_lib_cfitsio_ffpss" = "xyes"; then
-#  for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
-#    test -f $i/libcfitsio.a -o -f $i/libcfitsio.so -o -f $i/libcfitsio.dylib && LIBDIR_CFITSIO=$i
-#  done
-#  AC_SUBST(LIBDIR_CFITSIO)
-#fi
-#
-# Check if we want to use cfitsio
-#AC_ARG_WITH([cfitsio],
-#            [AS_HELP_STRING([--with-cfitsio],
-#                            [Use CFITSIO library (needed to support FITS files)])],
-#            [],
-#            [with_cfitsio=yes])
-#AC_ARG_WITH([cfitsio-lib-dir],
-#            AC_HELP_STRING([--with-cfitsio-lib-dir],
-#                           [CFITSIO library directory [[/usr/(local/)lib(64)]]]),
-#            [cfitsio_lib_dir=$withval])
-#
-# If cfitsio is requested then add cfitsio library path to LDFLAGS
-#if test "x$with_cfitsio" = "xyes"; then
-#  if test "x$cfitsio_lib_dir" != "x"; then
-#    test -f $cfitsio_lib_dir/libcfitsio.a -o -f $cfitsio_lib_dir/libcfitsio.so -o -f $cfitsio_lib_dir/libcfitsio.dylib && LIBDIR_CFITSIO=$cfitsio_lib_dir
-#  else
-#    for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
-#      test -f $i/libcfitsio.a -o -f $i/libcfitsio.so -o -f $i/libcfitsio.dylib && LIBDIR_CFITSIO=$i
-#    done
-#    for i in /usr/local/include /opt/local/include /usr/include ; do
-#      test -f $i/fitsio.h && INCDIR_CFITSIO=$i
-#    done
-#  fi
-#  if test -z "$LIBDIR_CFITSIO"; then
-#    if test "x$cfitsio_lib_dir" != "x";then
-#      AC_MSG_ERROR(Cannot find CFITSIO library under $cfitsio_lib_dir)
-#    else
-#      AC_MSG_ERROR(Cannot find CFITSIO library. Use --with-cfitsio-lib-dir= to specify non-default path or --without-cfitsio to compile with CFITSIO library.)
-#    fi
-#  fi
-#  LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
-#  CPPFLAGS="$CPPFLAGS -I$LIBDIR_CFITSIO/../include"
-#  AC_SUBST(LIBDIR_CFITSIO)
-#fi
-#
-# Check for cfitsio library
-#if test "x$with_cfitsio" = "xyes"; then
-#  AC_CHECK_LIB([cfitsio], [ffpss],
-#               [LIBS="${LIBS} -lcfitsio -lm"
-#                AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])],
-#               [AC_MSG_FAILURE([--with-cfitsio was given, but test for cfitsio failed])],
-#               [-lm])
-#fi
-#AM_CONDITIONAL(WITH_CFITSIO, test "x$with_cfitsio" = "xyes")
+    # Set host specific cfitsio dependencies
+    cfitsio_deps=
+    case $host in
+      sparc*-sun-solaris*)  cfitsio_deps="-lm -lsocket" ;;
+      *)                    cfitsio_deps="-lm" ;;
+    esac
+
+    # Search for cfitsio shared library in a some standard directories
+    for i in "$gammalib_prefix" /opt/local /usr/local /usr ; do
+      if test -f $i/lib/libcfitsio.so -o -f $i/lib/libcfitsio.dylib -a -f $i/include/fitsio.h; then
+        LIBDIR_CFITSIO=$i/lib
+        INCDIR_CFITSIO=$i/include
+        break
+      fi
+      if test -f $i/lib64/libcfitsio.so -o -f $i/lib64/libcfitsio.dylib -a -f $i/include/fitsio.h; then
+        LIBDIR_CFITSIO=$i/lib64
+        INCDIR_CFITSIO=$i/include
+        break
+      fi
+    done
+    if test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO"; then
+      has_cfitsio="yes"
+      LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
+      CPPFLAGS="$CPPFLAGS -I$INCDIR_CFITSIO"
+      AC_MSG_NOTICE([cfitsio found in ${LIBDIR_CFITSIO}])
+    else
+
+      # If cfitsio has not yet been found then search now using the AC_CHECK_LIB
+      # macro. This allows also search in paths that are eventually specified in
+      # LDFLAGS
+      if test "x$has_cfitsio" != "xyes"; then
+        AC_CHECK_LIB([cfitsio], [ffpss],
+                     [has_cfitsio="yes"
+                      AC_MSG_NOTICE([cfitsio found])],
+                     [], [${cfitsio_deps}])
+      fi
+    fi
+
+    # Set cfitsio information
+    if test "x$has_cfitsio" = "xyes"; then
+      LIBS_CFITSIO="-lcfitsio ${cfitsio_deps}"
+      LIBS="${LIBS} ${LIBS_CFITSIO}"
+    fi
+
+  fi
+fi
+if test "x$has_cfitsio" = "xyes"; then
+  AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])
+  AC_SUBST(CFITSIO)
+  AC_SUBST(LIBS_CFITSIO)
+  AC_SUBST(LIBDIR_CFITSIO)
+  AC_SUBST(INCDIR_CFITSIO)
+fi
+AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
 
 
 dnl ===========================
 dnl Checks for readline library
 dnl ===========================
+# Initialise readline flag
+has_readline="no"
 
 # Check if we want to use readline
 AC_ARG_WITH([readline],
@@ -367,7 +336,7 @@ if test "x$with_readline" = "xyes"; then
   esac
 
   # Search for readline shared library
-  for i in "$gammalib_prefix" /usr /usr/local /opt/local ; do
+  for i in "$gammalib_prefix" /opt/local /usr/local /usr ; do
     if test -f $i/lib/libreadline.so -o -f $i/lib/libreadline.dylib -a -f $i/include/readline/readline.h; then
       LIBDIR_READLINE=$i/lib
       INCDIR_READLINE=$i/include
@@ -389,8 +358,7 @@ if test "x$with_readline" = "xyes"; then
     fi
     AC_SUBST(LIBDIR_READLINE)
     AC_SUBST(INCDIR_READLINE)
-  else
-    has_readline="no"
+    AC_MSG_NOTICE([readline found in ${LIBDIR_READLINE}])
   fi
 
   # If readline has not yet been found then search now using the AC_CHECK_LIB
@@ -398,23 +366,23 @@ if test "x$with_readline" = "xyes"; then
   # LDFLAGS
   if test "x$has_readline" != "xyes"; then
     AC_CHECK_LIB([readline], [main],
-                 [has_readline="yes"],
+                 [has_readline="yes"
+                  AC_MSG_NOTICE([readline found])],
                  [], [${readline_deps}])
   fi
 
   # Set readline information
   if test "x$has_readline" = "xyes"; then
     LIBS_READLINE="-lreadline ${readline_deps}"
-	AC_SUBST(LIBS_READLINE)
+    AC_SUBST(LIBS_READLINE)
     LIBS="${LIBS} ${LIBS_READLINE}"
-    AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])    
-    AM_CONDITIONAL(WITH_READLINE, test "x$has_readline" = "xyes")
   fi
 
-else
-  has_readline="no"
-  AM_CONDITIONAL(WITH_READLINE, test "x$has_readline" = "xyes")
 fi
+if test "x$has_readline" = "xyes"; then
+  AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
+fi
+AM_CONDITIONAL(WITH_READLINE, test "x$has_readline" = "xyes")
 
 # Check if readline is available
 #AC_CHECK_LIB([readline], [main],
