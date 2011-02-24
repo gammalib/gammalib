@@ -26,8 +26,8 @@
  *
  * @brief Abstract spectral model class
  ***************************************************************************/
-
 class GModelSpectral {
+
 public:
     // Constructors and destructors
     GModelSpectral(void);
