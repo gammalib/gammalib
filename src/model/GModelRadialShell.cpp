@@ -624,7 +624,7 @@ void GModelRadialShell::free_members(void)
  * \f${\tt m\_x\_in} = {\tt m\_theta\_in}^2\f$,
  * \f${\tt m\_x\_out} = {\tt m\_theta\_out}^2\f$, and
  * \f[{\tt m\_norm} = \frac{3}{2 \pi}
- *    \frac{1}\left( {\tt m\_theta\_out}^3 - {\tt m\_theta\_in}^3 \right)\f].
+ *    \frac{1}{\left( {\tt m\_theta\_out}^3 - {\tt m\_theta\_in}^3 \right)}\f].
  *
  * In the general case that is also valid for large angles,
  * \f${\tt m\_x\_in} = \sin^2 {\tt m\_theta\_in}\f$,

@@ -38,7 +38,7 @@ class GIntegral {
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GIntegral& integral);
-    friend GLog&         operator<<(GLog& os,         const GIntegral& integral);
+    friend GLog&         operator<<(GLog& log,        const GIntegral& integral);
 
 public:
 
