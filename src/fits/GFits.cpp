@@ -4,10 +4,18 @@
  *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -54,7 +62,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define DELETE_EMPTY_FITS_FILES 0         //!< Do not write empty FITS files
+#define DELETE_EMPTY_FITS_FILES 1         //!< Do not write empty FITS files
 
 /* __ Debug definitions __________________________________________________ */
 #define DEBUG 0                                    //!< Code debugging option
@@ -83,17 +91,18 @@ GFits::GFits(void)
  * @brief Constructor from FITS file
  *
  * @param[in] filename FITS file name.
+ * @param[in] create Create FITS file if it does not exist (default=false)
  *
  * Construct an object by opening a FITS file. If the file does not exist it
- * will be created.
+ * will (optionally) be created.
  ***************************************************************************/
-GFits::GFits(const std::string& filename)
+GFits::GFits(const std::string& filename, bool create)
 {
     // Initialise class members
     init_members();
 
     // Open specified FITS file
-    open(filename);
+    open(filename, create);
 
     // Return
     return;
@@ -196,9 +205,10 @@ int GFits::size(void) const
 
 
 /***********************************************************************//**
- * @brief Opens or creates FITS file
+ * @brief Opens or (optionaly) creates FITS file
  *
  * @param[in] filename Name of FITS file to be opened.
+ * @param[in] create Create FITS file if it does not exist (default=false)
  *
  * @exception GException::fits_already_opened
  *            Class instance contains already an opened FITS file.
@@ -211,12 +221,12 @@ int GFits::size(void) const
  *            Unable to determine number of HDUs in the FITS file.
  *
  * This method opens all HDUs that are found in the specified FITS file.
- * If the file does not exist then a new FITS file is created.
+ * If the file does not exist, and if create=true, a new FITS file is created.
  * For each HDU, a GFitsHDU object is associated to the GFits object.
  * The HDUs can then be accessed using the hdu(const std::string&) or
  * hdu(int extno) method.
  ***************************************************************************/
-void GFits::open(const std::string& filename)
+void GFits::open(const std::string& filename, bool create)
 {
     // Remove any HDUs
     m_hdu.clear();
@@ -240,16 +250,23 @@ void GFits::open(const std::string& filename)
         m_readwrite = false;
     }
 
-    // If failed then create FITS file now
-    if (status == 104) {
+    // If failed and if we are allowed to create a new FITS file then create
+    // FITS file now
+    if (create && status == 104) {
         status      = 0;
         status      = __ffinit(FHANDLE(m_fitsfile), filename.c_str(), &status);
         m_readwrite = true;
         m_created   = true;
     }
 
+	// Throw special exception if status=202 (keyword not found). This error
+	// may occur if the file is opened with an expression
+	if (status == 202)
+        throw GException::fits_open_error(G_OPEN, filename, status,
+		                  "Keyword not found when opening file.");
+
     // Throw any other error
-    if (status != 0)
+    else if (status != 0)
         throw GException::fits_open_error(G_OPEN, filename, status);
 
     // Store FITS file attributes
@@ -388,7 +405,7 @@ void GFits::saveto(const std::string& filename, bool clobber)
 
     // Create or open FITS file
     GFits new_fits;
-    new_fits.open(filename);
+    new_fits.open(filename, true);
 
     // Append all headers
     for (int i = 0; i < size(); ++i)
@@ -535,8 +552,10 @@ GFitsHDU* GFits::hdu(const std::string& extname) const
     GFitsHDU* ptr = NULL;
 
     // Return primary HDU if requested ...
-    if (toupper(extname) == "PRIMARY")
-        ptr = m_hdu[0];
+    if (toupper(extname) == "PRIMARY") {
+        if (size() > 0)
+            ptr = m_hdu[0];
+    }
 
     // ... otherwise search for specified extension
     else {
