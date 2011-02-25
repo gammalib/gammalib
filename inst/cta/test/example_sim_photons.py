@@ -119,8 +119,8 @@ def show_photons(photons, xmlname, e_min, e_max, area, duration, ebins=30):
 		# Show plot
 		plt.show()
 
-	except:
-		print "Matplotlib is not (correctly) installed on your system. No data are shown."
+	except ImportError:
+		print "Matplotlib is not (correctly) installed on your system."
 
 	# Return
 	return
