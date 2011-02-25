@@ -1,18 +1,26 @@
 /***************************************************************************
- *                       GXml.hpp - XML class definition                   *
+ *                           GXml.hpp - XML class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
  * @file GXml.hpp
- * @brief XML class definition
+ * @brief XML class interface definition
  * @author J. Knodlseder
  */
 
@@ -21,6 +29,8 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
+#include <string>
+#include "GLog.hpp"
 #include "GXmlNode.hpp"
 #include "GXmlDocument.hpp"
 #include "GXmlElement.hpp"
@@ -32,9 +42,10 @@
 /***********************************************************************//**
  * @class GXml
  *
- * @brief XML class interface defintion.
+ * @brief XML class
  *
- * This class implements an XML document. It holds the root node.
+ * This class implements an XML object. It holds the root node of the XML
+ * document.
  ***************************************************************************/
 class GXml {
 
@@ -44,13 +55,14 @@ class GXml {
     friend class GXmlText;
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GXml& xml);
+    friend std::ostream& operator<<(std::ostream& os, const GXml& xml);
+    friend GLog&         operator<<(GLog& log,        const GXml& xml);
 
 public:
     // Constructors and destructors
     GXml(void);
     GXml(const GXml& xml);
-    GXml(const std::string& filename);
+    explicit GXml(const std::string& filename);
     ~GXml(void);
 
     // Operators
@@ -67,6 +79,7 @@ public:
     int          elements(const std::string& name) const;
     GXmlElement* element(int index) const;
     GXmlElement* element(const std::string& name, int index) const;
+    std::string  print(int indent = 0) const;
 
 protected:
     // Protected enumerators
@@ -89,7 +102,7 @@ protected:
     void       process_text(GXmlNode** current, const std::string& segment);
     MarkupType get_markuptype(const std::string& segment) const;
 
-    // Protected data members
+    // Protected members
     GXmlDocument m_root;         //!< Root node
 };
 

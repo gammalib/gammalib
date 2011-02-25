@@ -1,18 +1,26 @@
 /***************************************************************************
- *                GXmlNode.hpp - XML node base class definition            *
+ *                GXmlNode.hpp - Abstract XML node base class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
  * @file GXmlNode.hpp
- * @brief XML node base class definition
+ * @brief Abstract XML node base class interface definition
  * @author J. Knodlseder
  */
 
@@ -20,17 +28,24 @@
 #define GXMLNODE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <vector>
 #include <iostream>
+#include <string>
+#include <vector>
+#include "GLog.hpp"
+
 
 /***********************************************************************//**
  * @class GXmlNode
  *
- * @brief XML node base class interface defintion.
+ * @brief Abstract XML node base class
  *
  * This class defines an abstract node of a XML document.
  ***************************************************************************/
 class GXmlNode {
+
+    // I/O friends
+    friend std::ostream& operator<<(std::ostream& os, const GXmlNode& node);
+    friend GLog&         operator<<(GLog& log,        const GXmlNode& node);
 
 public:
     // Constructors and destructors
@@ -39,7 +54,7 @@ public:
     virtual ~GXmlNode(void);
 
     // Operators
-    GXmlNode&       operator= (const GXmlNode& node);
+    GXmlNode& operator= (const GXmlNode& node);
 
     // Public enumerators
     enum NodeType {
@@ -54,11 +69,11 @@ public:
     };
 
     // Pure virtual methods
-    virtual void      clear(void) = 0;
-    virtual GXmlNode* clone(void) const = 0;
-    virtual void      write(FILE* fptr, int indent = 0) const = 0;
-    virtual void      print(std::ostream& os, int indent = 0) const = 0;
-    virtual NodeType  type(void) const = 0;
+    virtual void        clear(void) = 0;
+    virtual GXmlNode*   clone(void) const = 0;
+    virtual void        write(FILE* fptr, int indent = 0) const = 0;
+    virtual std::string print(int indent = 0) const = 0;
+    virtual NodeType    type(void) const = 0;
 
     // Methods
     void      append(GXmlNode* node);

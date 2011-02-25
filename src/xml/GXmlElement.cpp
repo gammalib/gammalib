@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -21,10 +29,9 @@
 #include <config.h>
 #endif
 #include <cstdio>             // std::fprintf
-#include <string>
-#include <iostream>
 #include "GException.hpp"
 #include "GXmlElement.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_PARSE_START                "GXmlElement::parse_start(std::string&)"
@@ -222,28 +229,26 @@ void GXmlElement::write(FILE* fptr, int indent) const
 
 
 /***********************************************************************//**
- * @brief Print node in output stream
+ * @brief Print node
  *
- * @param[in] os Output stream into which the node will be printed.
  * @param[in] indent Text indentation.
  ***************************************************************************/
-void GXmlElement::print(std::ostream& os, int indent) const
+std::string GXmlElement::print(int indent) const
 {
-    // Put element name in output stream
-    for (int k = 0; k < indent; ++k)
-        os << " ";
-    os << "GXmlElement::" << m_name;
-    for (int k = 0; k < m_attr.size(); ++k)
-        m_attr[k]->print(os);
+    // Initialise result string
+    std::string result = fill(" ", indent);
 
-    // Put children in stream
-    for (int i = 0; i < children(); ++i) {
-        os << std::endl;
-        m_nodes[i]->print(os, indent+g_indent);
-    }
+    // Append element to string
+    result.append("GXmlElement::"+m_name);
+    for (int k = 0; k < m_attr.size(); ++k)
+        result.append(m_attr[k]->print());
+
+    // Append children
+    for (int i = 0; i < children(); ++i)
+        result.append("\n" + m_nodes[i]->print(indent+g_indent));
 
     // Return
-    return;
+    return result;
 }
 
 

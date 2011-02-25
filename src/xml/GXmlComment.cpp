@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -22,6 +30,7 @@
 #endif
 #include "GException.hpp"
 #include "GXmlComment.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_PARSE                            "GXmlComment::parse(std::string&)"
@@ -192,18 +201,18 @@ void GXmlComment::write(FILE* fptr, int indent) const
 /***********************************************************************//**
  * @brief Print comment in output stream
  *
- * @param[in] os Output stream.
  * @param[in] indent Text indentation.
  ***************************************************************************/
-void GXmlComment::print(std::ostream& os, int indent) const
+std::string GXmlComment::print(int indent) const
 {
-    // Put comment into output stream
-    for (int k = 0; k < indent; ++k)
-        os << " ";
-    os << "GXmlComment::" << m_comment;
+    // Initialise result string
+    std::string result = fill(" ", indent);
+
+    // Append comment to string
+    result.append("GXmlComment::"+m_comment);
 
     // Return
-    return;
+    return result;
 }
 
 

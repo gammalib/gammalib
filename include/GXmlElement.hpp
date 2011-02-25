@@ -1,18 +1,26 @@
 /***************************************************************************
  *            GXmlElement.hpp - XML element node class definition          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
  * @file GXmlElement.hpp
- * @brief XML element node class definition
+ * @brief XML element node class interface definition
  * @author J. Knodlseder
  */
 
@@ -22,7 +30,6 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include <iostream>
 #include "GXmlNode.hpp"
 #include "GXmlAttribute.hpp"
 
@@ -30,7 +37,7 @@
 /***********************************************************************//**
  * @class GXmlElement
  *
- * @brief XML element node class interface defintion.
+ * @brief XML element node class
  *
  * This class implements an XML element with it's associated attributes.
  ***************************************************************************/
@@ -43,18 +50,18 @@ public:
     // Constructors and destructors
     GXmlElement(void);
     GXmlElement(const GXmlElement& node);
-    GXmlElement(const std::string& segment);
-    ~GXmlElement(void);
+    explicit GXmlElement(const std::string& segment);
+    virtual ~GXmlElement(void);
 
     // Operators
     GXmlElement& operator= (const GXmlElement& node);
 
     // Implemented virtual methods
-    void         clear(void);
-    GXmlElement* clone(void) const;
-    void         write(FILE* fptr, int indent = 0) const;
-    void         print(std::ostream& os, int indent = 0) const;
-    NodeType     type(void) const { return NT_ELEMENT; }
+    virtual void         clear(void);
+    virtual GXmlElement* clone(void) const;
+    virtual void         write(FILE* fptr, int indent = 0) const;
+    virtual std::string  print(int indent = 0) const;
+    virtual NodeType     type(void) const { return NT_ELEMENT; }
 
     // Methods
     std::string  name(void) const { return m_name; }

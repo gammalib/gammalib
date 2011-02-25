@@ -1,18 +1,26 @@
 /***************************************************************************
  *           GXmlDocument.hpp - XML document node class definition         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
  * @file GXmlDocument.hpp
- * @brief XML document node class definition
+ * @brief XML document node class interface definition
  * @author J. Knodlseder
  */
 
@@ -20,7 +28,6 @@
 #define GXMLDOCUMENT_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include <string>
 #include "GXmlNode.hpp"
 #include "GXmlAttribute.hpp"
@@ -29,7 +36,7 @@
 /***********************************************************************//**
  * @class GXmlDocument
  *
- * @brief XML document node class interface defintion.
+ * @brief XML document node class
  *
  * This class implements the root node of an XML document. It contains the
  * three special attributes 'version', 'encoding', and 'standalone'.
@@ -49,7 +56,7 @@ public:
     void          clear(void);
     GXmlDocument* clone(void) const;
     void          write(FILE* fptr, int indent = 0) const;
-    void          print(std::ostream& os, int indent = 0) const;
+    std::string   print(int indent = 0) const;
     NodeType      type(void) const { return NT_DOCUMENT; }
 
     // Methods

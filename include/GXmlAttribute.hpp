@@ -1,18 +1,26 @@
 /***************************************************************************
- *        GXmlAttribute.hpp - XML attribute node class definition          *
+ *           GXmlAttribute.hpp - XML attribute class definition            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
  * @file GXmlAttribute.hpp
- * @brief XML attribute node class definition
+ * @brief XML attribute class interface definition
  * @author J. Knodlseder
  */
 
@@ -22,15 +30,14 @@
 /* __ Includes ___________________________________________________________ */
 #include <cstdio>             // FILE, std::fprintf
 #include <string>
-#include <iostream>
 
 
 /***********************************************************************//**
  * @class GXmlAttribute
  *
- * @brief XML attribute node class interface defintion.
+ * @brief XML attribute class
  *
- * This class implements the attribute of an XML elements. An attribute
+ * This class implements the attribute of an XML element. An attribute
  * consists of a name-value pair. Note that the hyphens are stored for the
  * attribute value. Allowed hyphens are " and '.
  ***************************************************************************/
@@ -39,9 +46,9 @@ class GXmlAttribute {
 public:
     // Constructors and destructors
     GXmlAttribute(void);
-    GXmlAttribute(const GXmlAttribute& attr);
-    GXmlAttribute(const std::string& name, const std::string& value);
-    ~GXmlAttribute(void);
+    explicit GXmlAttribute(const GXmlAttribute& attr);
+    explicit GXmlAttribute(const std::string& name, const std::string& value);
+    virtual ~GXmlAttribute(void);
 
     // Operators
     GXmlAttribute& operator= (const GXmlAttribute& attr);
@@ -50,7 +57,7 @@ public:
     void           clear(void);
     GXmlAttribute* clone(void) const;
     void           write(FILE* fptr) const;
-    void           print(std::ostream& os) const;
+    std::string    print(void) const;
     std::string    name(void) const { return m_name; }
     std::string    value(void) const;
     void           name(const std::string& name) { m_name=name; }

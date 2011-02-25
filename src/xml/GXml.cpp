@@ -29,8 +29,6 @@
 #include <config.h>
 #endif
 #include <cstdio>
-#include <string>
-#include <iostream>
 #include "GXml.hpp"
 #include "GXmlNode.hpp"
 #include "GXmlDocument.hpp"
@@ -325,6 +323,25 @@ GXmlElement* GXml::element(const std::string& name, int index) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print XML object
+ ***************************************************************************/
+std::string GXml::print(int indent) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GXml ===");
+
+    // Append model
+    result.append("\n"+m_root.print(0));
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -386,6 +403,7 @@ void GXml::parse(FILE* fptr)
     // Initialise parser
     int         c;
     bool        in_markup  = false;
+    bool        in_comment = false;
     std::string segment;
     GXmlNode*   current = &m_root;
 
@@ -429,32 +447,56 @@ void GXml::parse(FILE* fptr)
                 segment.append(1, (char)c);
         }
 
-        // If we are within a markuo and if a markup end is reached then process
+        // If we are within a markup and if a markup end is reached then process
         // the markup and switch to not in_tag mode
         else {
 
             // Markup stop reached?
             if (c == '>') {
 
-                // Process markup
+                // Append character to segment
                 segment.append(1, (char)c);
-                process_markup(&current, segment);
 
-                // Prepare new segment and signal that we are not within markup
-                segment.clear();
-                in_markup = false;
+                // If we are in comment then check if this is the end of
+                // the comment
+                if (in_comment) {
+                    int n = segment.length();
+                    if (n > 2) {
+                        if (segment.compare(n-3,3,"-->") == 0)
+                            in_comment = false;
+                    }
+                }
+
+                // If we are not in the comment, then process markup
+                if (!in_comment) {
+
+                    // Process markup
+                    process_markup(&current, segment);
+
+                    // Prepare new segment and signal that we are not
+                    // within markup
+                    segment.clear();
+                    in_markup  = false;
+                }
             }
 
             // Markup start encountered?
-            else if (c == '<') {
-                 segment.append(1, (char)c);
-                 throw GException::xml_syntax_error(G_PARSE, segment,
-                       "unexpected opening bracket \"<\" encountered");
+            else if (!in_comment && c == '<') {
+
+                // Append character to segment
+                segment.append(1, (char)c);
+
+                // If we encounter an opening bracket then throw an exception
+                throw GException::xml_syntax_error(G_PARSE, segment,
+                      "unexpected opening bracket \"<\" encountered");
             }
 
             // ... otherwise add character to segment
-            else
+            else {
                 segment.append(1, (char)c);
+                if (!in_comment && segment == "<!--")
+                    in_comment = true;
+            }
         }
 
     }
@@ -683,18 +725,34 @@ GXml::MarkupType GXml::get_markuptype(const std::string& segment) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Put object in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the model will be dumped
- * @param[in] xml Object to be dumped
+ * @param[in] os Output stream.
+ * @param[in] xml XML object.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GXml& xml)
 {
-    // Put object in stream
+     // Write XML document in output stream
     os << "=== GXml ===" << std::endl;
-    xml.m_root.print(os, 0);
+    os << xml.m_root.print(0);
 
     // Return output stream
     return os;
 }
 
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] xml XML object.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GXml& xml)
+{
+     // Write XML document into logger
+    log << "=== GXml ===" << std::endl;
+    log << xml.m_root.print(0);
+
+    // Return logger
+    return log;
+}

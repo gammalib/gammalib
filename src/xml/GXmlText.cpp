@@ -1,13 +1,21 @@
 /***************************************************************************
- *            GXmlText.cpp - XML text node class implementation            *
+ *                  GXmlText.cpp - XML text node class                     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -21,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GXmlText.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -190,20 +199,20 @@ void GXmlText::write(FILE* fptr, int indent) const
 
 
 /***********************************************************************//**
- * @brief Print text in output stream
+ * @brief Print text in string
  *
- * @param[in] os Output stream into which the node will be printed.
- * @param[in] indent Text indentation.
+ * @param[in] indent Text indentation (optional, default=0).
  ***************************************************************************/
-void GXmlText::print(std::ostream& os, int indent) const
+std::string GXmlText::print(int indent) const
 {
-    // Put text in output stream
-    for (int k = 0; k < indent; ++k)
-        os << " ";
-    os << "GXmlText::" << m_text;
+    // Initialise result string
+    std::string result = fill(" ", indent);
+
+    // Append text to string
+    result.append("GXmlText::"+m_text);
 
     // Return
-    return;
+    return result;
 }
 
 

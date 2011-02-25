@@ -1,18 +1,26 @@
 /***************************************************************************
- *             GXmlNode.cpp - XML node base class implementation           *
+ *                GXmlNode.cpp - Abstract XML node base class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
  * @file GXmlNode.cpp
- * @brief XML node base class implementation
+ * @brief Abstract XML node base class implementation
  * @author J. Knodlseder
  */
 
@@ -358,4 +366,35 @@ void GXmlNode::free_members(void)
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] node XML node.
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GXmlNode& node)
+{
+     // Write node in output stream
+    os << node.print(0);
+
+    // Return output stream
+    return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] node XML node.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GXmlNode& node)
+{
+     // Write node into logger
+    log << node.print(0);
+
+    // Return logger
+    return log;
+}
 

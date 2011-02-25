@@ -4,16 +4,24 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
  * @file GXmlElement.i
- * @brief GXmlElement class python bindings
- * @author J. Knodlseder
+ * @brief XML element node class Python interface definition
+  * @author J. Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -25,30 +33,31 @@
 /***********************************************************************//**
  * @class GXmlElement
  *
- * @brief XML element node class interface defintion.
+ * @brief XML element node class
  *
  * This class implements an XML element with it's associated attributes.
  ***************************************************************************/
 class GXmlElement : public GXmlNode {
+
 public:
     // Constructors and destructors
     GXmlElement(void);
     GXmlElement(const GXmlElement& node);
-    GXmlElement(const std::string& segment);
-    ~GXmlElement(void);
+    explicit GXmlElement(const std::string& segment);
+    virtual ~GXmlElement(void);
 
     // Implemented virtual methods
-    void     clear(void);
-    void     write(FILE* fptr, int indent = 0) const;
-    //void     print(std::ostream& os, int indent = 0) const;
-    NodeType type(void) const { return NT_ELEMENT; }
+    virtual void         clear(void);
+    virtual GXmlElement* clone(void) const;
+    virtual void         write(FILE* fptr, int indent = 0) const;
+    virtual NodeType     type(void) const;
 
     // Methods
-    std::string name(void) const { return m_name; }
+    std::string name(void) const;
     std::string attribute(const std::string& name) const;
-    GXmlNode*   parent(void) const { return m_parent; }
-    void        name(const std::string& name) { m_name=name; }
-    void        parent(GXmlNode* node) { m_parent = node; }
+    GXmlNode*   parent(void) const;
+    void        name(const std::string& name);
+    void        parent(GXmlNode* node);
     void        attribute(const std::string& name, const std::string& value);
 };
 
@@ -57,9 +66,9 @@ public:
  * @brief GXmlElement class extension
  ***************************************************************************/
 %extend GXmlElement {
-//    char *__str__() {
-//        return tochar(self->print());
-//    }
+    char *__str__() {
+        return tochar(self->print());
+    }
 };
 
 
