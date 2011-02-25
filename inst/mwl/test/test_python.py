@@ -27,16 +27,16 @@ def extract_data(filename):
 			
 			# Load spectrum
 			spectrum = GMWLSpectrum()
-			spectrum.load_fits(filename, extno)
+			spectrum.load(filename, extno)
 			
 			# Add spectral points
 			x  = []
 			y  = []
 			dy = []
 			for i in range(spectrum.size()):
-				xval = spectrum.pointer(i).energy().MeV()
-				yval = spectrum.pointer(i).flux()
-				yerr = spectrum.pointer(i).flux_err()
+				xval = spectrum[i].energy().MeV()
+				yval = spectrum[i].flux()
+				yerr = spectrum[i].flux_err()
 				conv = xval*xval*1.6021765e-6
 				x.append(xval)
 				y.append(yval*conv)
@@ -81,6 +81,9 @@ def fit_spectrum(filename, xmlname):
 	obs.optimize(opt)
 	print obs
 	
+	# Get pointer on Crab model
+	crab = cast_GModelSky(obs.models()[0])
+	
 	# Get model values
 	x = np.power(10., np.arange(-1., 8., 0.1))
 	y = []
@@ -90,7 +93,7 @@ def fit_spectrum(filename, xmlname):
 	t = GTime()
 	for energy in x:
 		e.MeV(energy)
-		f = obs.models().value(d, e, t) * energy*energy*1.6021765e-6
+		f = crab.value(d, e, t) * energy*energy*1.6021765e-6
 		y.append(f)
 	plt.plot(x, y)
     
@@ -122,11 +125,10 @@ if __name__ == '__main__':
 		extract_data("data/crab_mwl.fits")
 
 		# Fit spectrum
-#		  fit_spectrum("data/crab_mwl.fits", "data/crab_mwl2.xml")
-		fit_spectrum("data/crab_mwl.fits", "data/crab_mwl3.xml")
+		fit_spectrum("data/crab_mwl.fits", "data/crab_mwl2.xml")
 
 		# Show spectrum
 		plt.show()
 		
-	except:
+	except ImportError:
 		print "Matplotlib is not (correctly) installed on your system."
