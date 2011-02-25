@@ -75,8 +75,8 @@ def show_gaussian(sigma):
 		# Show plot
 		plt.show()
 
-	except:
-		print "Matplotlib is not (correctly) installed on your system. No data are shown."
+	except ImportError:
+		print "Matplotlib is not (correctly) installed on your system."
 
 	# Return
 	return
