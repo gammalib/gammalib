@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -458,6 +466,16 @@ void GXml::parse(FILE* fptr)
         else
             process_text(&current, segment);
     } // endif: there was a pending segment
+
+    // Verify that we are back to the root node
+    if (current != &m_root) {
+        std::string message = "closing tag ";
+        GXmlElement* element = dynamic_cast<GXmlElement*>(current);
+        if (element != NULL)
+            message += "for GXmlElement \""+element->name()+"\"";
+        message += " is missing";
+        throw GException::xml_syntax_error(G_PARSE, "", message);
+    }
 
     // Return
     return;
