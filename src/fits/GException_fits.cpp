@@ -1,13 +1,21 @@
 /***************************************************************************
  *               GException_fits.cpp  -  fits exception handlers           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 
@@ -53,10 +61,12 @@ GException::fits_error::fits_error(std::string origin,
  * @param[in] origin Method that throws the error.
  * @param[in] filename Name of the file for which opening was attempted.
  * @param[in] status cfitsio status.
+ * @param[in] message Optional error message.																		
  ***************************************************************************/
 GException::fits_open_error::fits_open_error(std::string origin,
                                              std::string filename,
-                                             int         status)
+                                             int         status,
+											 std::string message)
 {
     // Set origin
     m_origin  = origin;
@@ -67,6 +77,10 @@ GException::fits_open_error::fits_open_error(std::string origin,
     // Add status
     if (status != 0)
         m_message += " (status=" + str(status) + ")";
+
+    // Add optional error message
+    if (message.length() > 0)
+        m_message += ". " + message;
 
     // Return
     return;
@@ -112,12 +126,12 @@ GException::fits_file_not_open::fits_file_not_open(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message = "FITS file not open.";
+    m_message = "FITS file not open";
 
 
     // Add optional error message
     if (message.length() > 0)
-        m_message += " " + message;
+        m_message += ". " + message;
 
     // Return
     return;

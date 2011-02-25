@@ -4,10 +4,18 @@
  *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -178,83 +186,115 @@ public:
     // FITS exceptions
     class fits_error : public GExceptionHandler {
     public:
-        fits_error(std::string origin, int status, std::string message = "");
+        fits_error(std::string origin,
+		           int         status,
+				   std::string message = "");
     };
     class fits_open_error : public GExceptionHandler {
     public:
-        fits_open_error(std::string origin, std::string filename, int status);
+        fits_open_error(std::string origin,
+		                std::string filename,
+		                int         status,
+						std::string message = "");
     };
     class fits_file_exist : public GExceptionHandler {
     public:
-        fits_file_exist(std::string origin, std::string filename, int status = 0);
+        fits_file_exist(std::string origin,
+		                std::string filename,
+						int         status = 0);
     };
     class fits_file_not_open : public GExceptionHandler {
     public:
-        fits_file_not_open(std::string origin, std::string filename);
+        fits_file_not_open(std::string origin,
+		                   std::string filename);
     };
     class fits_already_opened : public GExceptionHandler {
     public:
-        fits_already_opened(std::string origin, std::string filename);
+        fits_already_opened(std::string origin,
+		                    std::string filename);
     };
     class fits_key_not_found : public GExceptionHandler {
     public:
-        fits_key_not_found(std::string origin, std::string keyname, 
-                           int status = 0);
+        fits_key_not_found(std::string origin,
+		                   std::string keyname, 
+                           int         status = 0);
     };
     class fits_column_not_found : public GExceptionHandler {
     public:
-        fits_column_not_found(std::string origin, std::string colname, 
-                              int status = 0);
+        fits_column_not_found(std::string origin,
+		                      std::string colname, 
+                              int         status = 0);
     };
     class fits_no_header : public GExceptionHandler {
     public:
-        fits_no_header(std::string origin, std::string message, int status = 0);
+        fits_no_header(std::string origin,
+		               std::string message,
+					   int         status = 0);
     };
     class fits_no_data : public GExceptionHandler {
     public:
-        fits_no_data(std::string origin, std::string message, int status = 0);
+        fits_no_data(std::string origin,
+		             std::string message,
+					 int         status = 0);
     };
     class fits_hdu_not_found : public GExceptionHandler {
     public:
-        fits_hdu_not_found(std::string origin, std::string extname,
-                           int status = 0);
-        fits_hdu_not_found(std::string origin, int extno, int status = 0);
+        fits_hdu_not_found(std::string origin,
+		                   std::string extname,
+                           int         status = 0);
+        fits_hdu_not_found(std::string origin,
+		                   int         extno,
+						   int         status = 0);
     };
     class fits_hdu_not_image : public GExceptionHandler {
     public:
-        fits_hdu_not_image(std::string origin, std::string extname, int type);
+        fits_hdu_not_image(std::string origin,
+		                   std::string extname,
+						   int         type);
     };
     class fits_hdu_not_table : public GExceptionHandler {
     public:
-        fits_hdu_not_table(std::string origin, std::string extname, int type);
+        fits_hdu_not_table(std::string origin,
+		                   std::string extname,
+						   int         type);
     };
     class fits_unknown_HDU_type : public GExceptionHandler {
     public:
-        fits_unknown_HDU_type(std::string origin, int type);
+        fits_unknown_HDU_type(std::string origin,
+		                      int         type);
     };
     class fits_invalid_type : public GExceptionHandler {
     public:
-        fits_invalid_type(std::string origin, std::string message);
+        fits_invalid_type(std::string origin,
+		                  std::string message);
     };
     class fits_unknown_tabtype : public GExceptionHandler {
     public:
-        fits_unknown_tabtype(std::string origin, int type);
+        fits_unknown_tabtype(std::string origin,
+		                     int         type);
     };
     class fits_unknown_coltype : public GExceptionHandler {
     public:
-        fits_unknown_coltype(std::string origin, std::string colname, int type);
+        fits_unknown_coltype(std::string origin,
+		                     std::string colname,
+							 int         type);
     };
     class fits_bad_col_length : public GExceptionHandler {
     public:
-        fits_bad_col_length(std::string origin, int length, int rows);
+        fits_bad_col_length(std::string origin,
+		                    int         length,
+							int         rows);
     };
     class fits_bad_bitpix : public GExceptionHandler {
     public:
-        fits_bad_bitpix(std::string origin, int bitpix);
+        fits_bad_bitpix(std::string origin,
+		                int         bitpix);
     };
     class fits_wrong_image_operator : public GExceptionHandler {
     public:
-        fits_wrong_image_operator(std::string origin, int naxis, int nargs);
+        fits_wrong_image_operator(std::string origin,
+		                          int         naxis,
+								  int         nargs);
     };
 
 
