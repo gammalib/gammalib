@@ -26,7 +26,7 @@ def test_fits():
         pass
 
     # Create FITS file
-    fits = GFits(file1)
+    fits = GFits(file1, True)
 
     # Create images
     nx   = 10
