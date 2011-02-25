@@ -63,6 +63,12 @@ public:
     GMWLSpectrum copy() {
         return (*self);
     }
+    GMWLDatum* __getitem__(int index) {
+        if (index >= 0 && index < self->size())
+            return (*self)[index];
+        else
+            throw GException::out_of_range("__getitem__(int)", index, self->size());
+    }
 };
 
 
