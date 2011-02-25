@@ -1,13 +1,21 @@
 /***************************************************************************
  *                  test_GFits.cpp  -  test FITS classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 
@@ -60,7 +68,7 @@ void test_create(void)
 
     // Create empty FITS file
     try {
-        GFits fits("test_empty.fits");
+        GFits fits("test_empty.fits", true);
         fits.save();
     }
     catch (std::exception &e) {
@@ -75,7 +83,7 @@ void test_create(void)
     // Create FITS file with empty double precision image
     try {
         GFits fits;
-        fits.open("test_empty_image.fits");
+        fits.open("test_empty_image.fits", true);
         GFitsImageDouble image;
         fits.append(image);
         fits.save();
@@ -379,7 +387,7 @@ void test_image_byte(void)
         GFitsImageByte image(4, naxes, pixels);
 
         // Save image
-        GFits fits(filename);
+        GFits fits(filename, true);
         fits.append(image);
         fits.save();
 
@@ -408,7 +416,7 @@ void test_image_byte(void)
     }
     catch (std::exception &e) {
         std::cout << std::endl
-                  << "TEST ERROR: Unable to test pixel access operators."
+                  << "TEST ERROR: Unable to test pixel access operators (read)."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -580,7 +588,7 @@ void test_image_ushort(void)
         GFitsImageUShort image(4, naxes, pixels);
 
         // Save image
-        GFits fits(filename);
+        GFits fits(filename, true);
         fits.append(image);
         fits.save();
 
@@ -781,7 +789,7 @@ void test_image_short(void)
         GFitsImageShort image(4, naxes, pixels);
 
         // Save image
-        GFits fits(filename);
+        GFits fits(filename, true);
         fits.append(image);
         fits.save();
 
@@ -982,7 +990,7 @@ void test_image_ulong(void)
         GFitsImageULong image(4, naxes, pixels);
 
         // Save image
-        GFits fits(filename);
+        GFits fits(filename, true);
         fits.append(image);
         fits.save();
 
@@ -1183,7 +1191,7 @@ void test_image_long(void)
         GFitsImageLong image(4, naxes, pixels);
 
         // Save image
-        GFits fits(filename);
+        GFits fits(filename, true);
         fits.append(image);
         fits.save();
 
@@ -1384,7 +1392,7 @@ void test_image_longlong(void)
         GFitsImageLongLong image(4, naxes, pixels);
 
         // Save image
-        GFits fits(filename);
+        GFits fits(filename, true);
         fits.append(image);
         fits.save();
 
@@ -1585,7 +1593,7 @@ void test_image_float(void)
         GFitsImageFloat image(4, naxes, pixels);
 
         // Save image
-        GFits fits(filename);
+        GFits fits(filename, true);
         fits.append(image);
         fits.save();
 
@@ -1786,7 +1794,7 @@ void test_image_double(void)
         GFitsImageDouble image(4, naxes, pixels);
 
         // Save image
-        GFits fits(filename);
+        GFits fits(filename, true);
         fits.append(image);
         fits.save();
 
@@ -1855,9 +1863,9 @@ void test_bintable_double(void)
 
     // Build tables
     try {
-        // Open FITS file
+        // Create FITS file
         GFits fits;
-        fits.open(filename);
+        fits.open(filename, true);
 
         // Set number of rows
         int nrows = 10;
@@ -2212,9 +2220,9 @@ void test_bintable_float(void)
 
     // Build tables
     try {
-        // Open FITS file
+        // Create FITS file
         GFits fits;
-        fits.open(filename);
+        fits.open(filename, true);
 
         // Set number of rows
         int nrows = 10;
@@ -2569,9 +2577,9 @@ void test_bintable_short(void)
 
     // Build tables
     try {
-        // Open FITS file
+        // Create FITS file
         GFits fits;
-        fits.open(filename);
+        fits.open(filename, true);
 
         // Set number of rows
         int nrows = 10;
@@ -2929,9 +2937,9 @@ void test_bintable_ushort(void)
 
     // Build tables
     try {
-        // Open FITS file
+        // Create FITS file
         GFits fits;
-        fits.open(filename);
+        fits.open(filename, true);
 
         // Set number of rows
         int nrows = 10;
@@ -3289,9 +3297,9 @@ void test_bintable_long(void)
 
     // Build tables
     try {
-        // Open FITS file
+        // Create FITS file
         GFits fits;
-        fits.open(filename);
+        fits.open(filename, true);
 
         // Set number of rows
         int nrows = 10;
@@ -3648,9 +3656,9 @@ void test_bintable_longlong(void)
 
     // Build tables
     try {
-        // Open FITS file
+        // Create FITS file
         GFits fits;
-        fits.open(filename);
+        fits.open(filename, true);
 
         // Set number of rows
         int nrows = 10;
@@ -4007,9 +4015,9 @@ void test_bintable_ulong(void)
 
     // Build tables
     try {
-        // Open FITS file
+        // Create FITS file
         GFits fits;
-        fits.open(filename);
+        fits.open(filename, true);
 
         // Set number of rows
         int nrows = 10;
@@ -4366,9 +4374,9 @@ void test_bintable_string(void)
 
     // Build tables
     try {
-        // Open FITS file
+        // Create FITS file
         GFits fits;
-        fits.open(filename);
+        fits.open(filename, true);
 
         // Set number of rows
         int nrows = 10;
@@ -4724,9 +4732,9 @@ void test_bintable_logical(void)
 
     // Build tables
     try {
-        // Open FITS file
+        // Create FITS file
         GFits fits;
-        fits.open(filename);
+        fits.open(filename, true);
 
         // Set number of rows
         int nrows = 10;
@@ -5088,9 +5096,9 @@ void test_bintable_bit(void)
 
     // Build tables
     try {
-        // Open FITS file
+        // Create FITS file
         GFits fits;
-        fits.open(filename);
+        fits.open(filename, true);
 
         // Set number of rows
         int nrows = 10;
