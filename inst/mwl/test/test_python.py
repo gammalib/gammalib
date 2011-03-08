@@ -81,9 +81,6 @@ def fit_spectrum(filename, xmlname):
 	obs.optimize(opt)
 	print obs
 	
-	# Get pointer on Crab model
-	crab = cast_GModelSky(obs.models()[0])
-	
 	# Get model values
 	x = np.power(10., np.arange(-1., 8., 0.1))
 	y = []
@@ -93,8 +90,12 @@ def fit_spectrum(filename, xmlname):
 	t = GTime()
 	for energy in x:
 		e.MeV(energy)
-		f = crab.value(d, e, t) * energy*energy*1.6021765e-6
-		y.append(f)
+		yval = 0.0
+		for model in obs.models():
+			crab = cast_GModelSky(model)
+			if crab != None:
+				yval += crab.value(d, e, t) * energy*energy*1.6021765e-6
+		y.append(yval)
 	plt.plot(x, y)
     
 
