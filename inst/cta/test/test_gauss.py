@@ -48,7 +48,7 @@ def show_gaussian(sigma):
 		
 		# Setup gaussian
 		skydir = GSkyDir()
-		gauss  = GModelSpatialGauss(skydir, sigma)
+		gauss  = GModelRadialGauss(skydir, sigma)
 		
 		# Create angular axis
 		theta = [i*sigma*0.05 for i in range(50)]
@@ -56,11 +56,13 @@ def show_gaussian(sigma):
 		# Extract function
 		f_gauss    = []
 		f_expected = []
+		sigma_rad  = sigma*(pi/180.0)
+		norm       = 1.0/(2.0*pi*sigma_rad*sigma_rad)
 		for t in theta:
 			s = GSkyDir()
 			s.radec_deg(0.0, t)
-			f = gauss.eval_gradients(s)
-			e = exp(-0.5*t*t/sigma/sigma)
+			f = gauss.eval(s)
+			e = norm * exp(-0.5*t*t/sigma/sigma)
 			f_gauss.append(f)
 			f_expected.append(e)
 		
