@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 00-04-07
+New Features and Important Changes in GammaLib 00-04-08
 
 Author(s) : Juergen Knoedlseder
 
-February 24, 2011
+February ??, 2011
 
 
 1. Introduction
@@ -13,18 +13,23 @@ made since the last release of GammaLib.
 
 2. Configuration
 -----------------
-Use pkgconfig information for cfitsio if available.
+Upgrade the license to GPL v3. Remove LICENSE file (license text is given
+in file COPYING).
 
 
 3. Application module
 ---------------------
+None
 
 
 4. FITS I/O Interface
 ---------------------
-Pass GFitsHDU as reference in GFits::append() method. GFits now properly
-deallocates all HDUs on file closing and instance destruction. This
-fixes a memory leak that occured in earlier version.
+Add create parameter to GFits::open() and the corresponding constructor. This
+makes FITS file creation when opening optional. By default, create is set to
+false, hence FITS file creation is no longer automatic. This behaviour is
+preferred as it provides better control on the creation of new FITS files
+(before, FITS files were accidentally created if the filename was mistyped).
+Do also not write empty FITS files anymore.
 
 
 5. Linear algebra module
@@ -44,9 +49,7 @@ None
 
 8. Observation module
 ---------------------
-GObservations now correctly clones observation in copy operations and
-deallocates all obserations on destruction. This fixes memory leaks that
-were introduced by using the std::vector template class to hold observations.
+None
 
 
 9. Optimization module
@@ -66,12 +69,9 @@ None
 
 12. XML module
 --------------
-GXmlElement now correctly clones attributes in copy operations and
-deallocates all attributes on destruction. GXmlNode now correctly clones
-nodes in copy operations and deallocates all nodes on destruction.
-This fixes memory leaks that were introduced by using the std::vector
-template class to hold attributes and nodes.
-
+Correctly detect multi-line comments and check for missing closing tags at
+the end of the XML file. Update the print() interface (now returns std::string
+instead of piping in stream object).
 
 
 13. Multi-wavelength interface
@@ -86,6 +86,4 @@ None
 
 15. CTA interface
 -----------------
-Implement improved integration scheme for extended source (now operates
-in reference frame of model).
-
+None
