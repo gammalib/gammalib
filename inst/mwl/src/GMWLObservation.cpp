@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -20,9 +28,14 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GObservationRegistry.hpp"
 #include "GTools.hpp"
 #include "GMWLObservation.hpp"
 #include "GMWLSpectrum.hpp"
+
+/* __ Globals ____________________________________________________________ */
+const GMWLObservation      g_obs_mwl_seed;
+const GObservationRegistry g_obs_mwl_registry(&g_obs_mwl_seed);
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -308,13 +321,17 @@ std::string GMWLObservation::print(void) const
 
 /***********************************************************************//**
  * @brief Initialise class members
+ *
+ * The instrument name is set here to "MWL" so that the registry has an
+ * instrument type with that name. This may be later overwritten by a
+ * specific instrument.
  ***************************************************************************/
 void GMWLObservation::init_members(void)
 {
     // Initialise members
-    m_instrument.clear();
-    m_response = new GMWLResponse;
-    m_pointing = new GMWLPointing;
+    m_instrument = "MWL";
+    m_response   = new GMWLResponse;
+    m_pointing   = new GMWLPointing;
 
     // Overwrite base class statistics
     m_statistics = "Gaussian";

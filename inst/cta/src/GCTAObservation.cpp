@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GObservationRegistry.hpp"
 #include "GCTAException.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAEventList.hpp"
@@ -39,6 +40,10 @@
 #include "GModelSpatialPtsrc.hpp"
 #include "GIntegral.hpp"
 #include "GIntegrand.hpp"
+
+/* __ Globals ____________________________________________________________ */
+const GCTAObservation      g_obs_cta_seed;
+const GObservationRegistry g_obs_cta_registry(&g_obs_cta_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ_DS_EBOUNDS       "GCTAObservation::read_ds_ebounds(GFitsHDU*)"
