@@ -15,6 +15,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GTime.hpp \
                      GObservations.hpp \
                      GObservation.hpp \
+                     GObservationRegistry.hpp \
                      GEvents.hpp \
                      GEventList.hpp \
                      GEventCube.hpp \

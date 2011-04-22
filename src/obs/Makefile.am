@@ -12,6 +12,7 @@ sources = GEnergy.cpp \
           GObservations_iterator.cpp \
           GObservations_optimizer.cpp \
           GObservation.cpp \
+          GObservationRegistry.cpp \
           GEvents.cpp \
           GEventList.cpp \
           GEventCube.cpp \
@@ -22,8 +23,8 @@ sources = GEnergy.cpp \
           GRoi.cpp \
           GEbounds.cpp \
           GResponse.cpp \
-	  GInstDir.cpp \
-	  GPointing.cpp \
+          GInstDir.cpp \
+          GPointing.cpp \
           GPhoton.cpp \
           GException_obs.cpp
 

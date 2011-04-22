@@ -119,6 +119,7 @@
 #include "GTime.hpp"
 #include "GObservations.hpp"
 #include "GObservation.hpp"
+#include "GObservationRegistry.hpp"
 #include "GEvents.hpp"
 #include "GEventList.hpp"
 #include "GEventCube.hpp"
