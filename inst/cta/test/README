@@ -21,3 +21,7 @@ example_sim_photons.py
   Illustrates how photons are simulated from a source model. If
   matplotlib is installed, the simulated photons are shown as
   a spectrum.
+
+example_make_model.py
+  Illustrates how to make a model in counts space for a counts
+  map given a specific model in XML format.
