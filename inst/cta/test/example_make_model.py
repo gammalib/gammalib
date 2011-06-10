@@ -27,8 +27,8 @@ def make_model_for_cntmap(cntmap, modname, xmlname, irf, caldb, clobber=True):
 	# Loop over all bins in counts map
 	events = cast_GCTAEventCube(obs.events())
 	for event in events:
-		value = models.eval(event, obs)
-		event.counts(value)
+		model = models.eval(event, obs) * event.size()
+		event.counts(model)
 	
 	# Save CTA observation
 	obs.save(modname, clobber)
