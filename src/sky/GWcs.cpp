@@ -882,8 +882,8 @@ void GWcs::wcs_write(GFitsHDU* hdu) const
         hdu->card("CRVAL1",  m_crval[0],   c_crval1);
         hdu->card("CRVAL2",  m_crval[1],   c_crval2);
         hdu->card("CROTA2",  0.0,          "[deg] Rotation Angle");
-        hdu->card("LONPOLE", m_npole[0],   c_lonpole);
-        hdu->card("LATPOLE", m_npole[1],   c_lonpole);
+        //hdu->card("LONPOLE", m_npole[0],   c_lonpole);
+        //hdu->card("LATPOLE", m_npole[1],   c_latpole);
         hdu->card("PV2_1",   0.0,          "Projection parameter 1");
         hdu->card("PV2_2",   0.0,          "Projection parameter 2");
 
