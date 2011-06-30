@@ -84,7 +84,6 @@ dnl AC_TYPE_LONG_LONG_INT
 AC_C_CONST
 AC_C_INLINE
 
-
 dnl ===================
 dnl Checks for programs
 dnl ===================
