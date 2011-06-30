@@ -10,6 +10,7 @@ sources = GSkyDir.cpp \
           GSkyPixel.cpp \
           GSkymap.cpp \
           GWcs.cpp \
+          GWcsRegistry.cpp \
           GWcslib.cpp \
           GWcsCAR.cpp \
           GWcsHPX.cpp \
