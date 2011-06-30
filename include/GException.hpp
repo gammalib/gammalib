@@ -350,6 +350,15 @@ public:
     public:
         wcs_hpx_bad_ordering(std::string origin, std::string ordering);
     };
+    class wcs_singular_matrix : public GExceptionHandler {
+    public:
+        wcs_singular_matrix(std::string origin, int naxis,
+                            const std::vector<double>& mat);
+    };
+    class wcs_invalid_parameter : public GExceptionHandler {
+    public:
+        wcs_invalid_parameter(std::string origin, std::string message = "");
+    };
 
 
     // Application exceptions

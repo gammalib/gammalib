@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -241,3 +249,54 @@ GException::wcs_hpx_bad_ordering::wcs_hpx_bad_ordering(std::string origin,
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Singular matrix encountered
+ *
+ * @param[in] origin Method that throws the error.
+ ***************************************************************************/
+GException::wcs_singular_matrix::wcs_singular_matrix(std::string                origin,
+                                                     int                        naxis,
+                                                     const std::vector<double>& mat)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Singular matrix encountered: mat=[";
+    for (int i = 0, ij = 0; i < naxis; ++i) {
+        if (i > 0)
+            m_message += ",";
+        m_message += "[";
+        for (int j = 0; j < naxis; ++j, ++ij) {
+            if (j > 0)
+                m_message += ",";
+            m_message += str(mat[ij]);
+        }
+        m_message += "]";
+    }
+    m_message += "].";
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Invalid WCS parameter
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::wcs_invalid_parameter::wcs_invalid_parameter(std::string origin,
+                                                         std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Invalid WCS parameter encountered.";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
