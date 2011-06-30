@@ -104,6 +104,8 @@
 %include "GSkyPixel.i"
 %include "GSkymap.i"
 %include "GWcs.i"
+%include "GWcsRegistry.i"
+%include "GWcslib.i"
 %include "GWcsCAR.i"
 %include "GWcsHPX.i"
 
