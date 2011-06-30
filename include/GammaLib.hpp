@@ -111,6 +111,7 @@
 #include "GSkyPixel.hpp"
 #include "GSkymap.hpp"
 #include "GWcs.hpp"
+#include "GWcslib.hpp"
 #include "GWcsCAR.hpp"
 #include "GWcsHPX.hpp"
 

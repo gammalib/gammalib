@@ -9,6 +9,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GSkyPixel.hpp \
                      GSkymap.hpp \
                      GWcs.hpp \
+                     GWcslib.hpp \
                      GWcsCAR.hpp \
                      GWcsHPX.hpp \
                      GEnergy.hpp \
