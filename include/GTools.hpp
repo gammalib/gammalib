@@ -92,7 +92,6 @@ std::string              center(const std::string& s, int n, char c = ' ');
 std::string              parformat(const std::string& s);
 double                   modulo(double v1, double v2);
 double                   arccos(const double& arg);
-void                     sincos(const double& arg, double *sinval, double *cosval);
 bool                     file_exists(const std::string& filename);
 bool                     isinfinite(double x);
 

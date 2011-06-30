@@ -597,28 +597,6 @@ double arccos(const double& arg)
 
 
 /***********************************************************************//**
- * @brief Compute sine and cosine of argument
- *
- * @param[in] arg Argument.
- * @param[out] sinval Sine value.
- * @param[out] cosval Cosine value.
- *
- * Returns the sine and cosine of the specified value.
- ***************************************************************************/
-void sincos(const double& arg, double *sinval, double *cosval)
-{
-    // Compute sine
-    *sinval = std::sin(arg);
-    
-    // Compute cosine
-    *cosval = std::sqrt(1.0 - *sinval * *sinval);
-    
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Checks if a file exists.
  *
  * @param[in] filename File name.
