@@ -3,11 +3,18 @@
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -20,6 +27,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GWcs.hpp"
@@ -84,6 +92,7 @@ GWcs::GWcs(void)
  * Construct standard WCS sky map from standard definition parameters. This
  * method
  ***************************************************************************/
+/*
 GWcs::GWcs(const std::string& coords,
            const double& crval1, const double& crval2,
            const double& crpix1, const double& crpix2,
@@ -97,12 +106,12 @@ GWcs::GWcs(const std::string& coords,
     m_reverse = 0;
 
     // Set standard parameters
-    wcs_set(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
+    set_members(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
 
     // Return
     return;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Copy constructor
@@ -371,13 +380,13 @@ GSkyDir GWcs::xy2dir(const GSkyPixel& pix) const
     if (m_reverse)
         xy = perm(xy, __permutation);
 
-    // Perform CAR map projection
+    // Perform map projection
     GVector native = xy;
     nat2std(&native);
 
     // Get sky direction for native coordinates
     GSkyDir dir = wcs_native2dir(native);
-
+    
     // Debug: Dump transformation steps
     #if defined(G_XY2DIR_DEBUG)
     std::cout << "xy2dir: pixel=" << offset << " xy=" << xy
@@ -404,7 +413,7 @@ GSkyPixel GWcs::dir2xy(GSkyDir dir) const
     // Get native coordinates for sky direction in radians
     GVector native = wcs_dir2native(dir);
 
-    // Perform CAR map projection
+    // Perform map projection
     GVector xy = native;
     std2nat(&xy);
 
@@ -526,11 +535,22 @@ GSkyDir GWcs::wcs_native2dir(GVector native) const
  ***************************************************************************/
 void GWcs::wcs_init(const double& theta0)
 {
+    // Initialise World Coordinate System. This has to be done here and
+    // not in wcs_set(...) as this method will be called by the derived
+    // class constructor. We're not allowed to call pure virtual functions
+    // in base class constructors !!!
+    //wcs_set();
+
     // Set native latitude of the fiducial point
-    m_theta0 = theta0;
+    //m_theta0 = theta0;
+    
+    // Set pole
+    //m_npole[0] = (m_refval[1] < theta0) ? 180.0 : 0.0;
+    //m_npole[1] = 90.0;
 
     // Compute the coordinates of native pole for non-polar projection
-    m_native_pole = wcs_getpole(m_theta0);
+    //m_native_pole = wcs_getpole(m_theta0);
+    m_native_pole = wcs_getpole(theta0);
 
     // Get matrix for rotation between sky and native coordinates
     m_rot = wcs_get_rot();
@@ -556,8 +576,9 @@ void GWcs::wcs_init(const double& theta0)
  * http://www.aoc.nrao.edu/~egreisen.
  * This method returns the coordinates of the native pole for non-polar
  * projections in spherical coordinates. Units are radians.
- * The code has largely be inspired by the IDL routine wcs_getpole.pro
- * (update of May 1998).
+ * The code has largely been inspired by the IDL routine wcs_getpole.pro
+ * (update of May 1998). Is is equivalent to the code found in the
+ * wcslib routine cel.c::celset().
  ***************************************************************************/
 GVector GWcs::wcs_getpole(const double& theta0)
 {
@@ -566,37 +587,39 @@ GVector GWcs::wcs_getpole(const double& theta0)
     double delta_p;
 
     // Compute crval in radians
-    double alpha_0 = m_refval[0] * deg2rad;
-    double delta_0 = m_refval[1] * deg2rad;
+    double alpha_0 = m_refval[0] * deg2rad; // lng0
+    double delta_0 = m_refval[1] * deg2rad; // lat0
 
     // Get longitude and latitude of pole
-    double lonpole = m_npole[0];
-    double latpole = m_npole[1];
+    double lonpole = m_npole[0]; // phip
+    double latpole = m_npole[1]; // latp
 
     // If theta0=90 then the coordinate of the native pole are given by crval
+    // (fiducial point at the native pole)
     if (theta0 == 90.0) {
-        alpha_p = alpha_0;
-        delta_p = delta_0;
+        alpha_p = alpha_0; // lngp = lng0
+        delta_p = delta_0; // latp = lat0
     }
 
     // ... otherwise perform computations
     else {
         // Compute some angles
-        double phi_p = lonpole*deg2rad;
-        double sp    = sin(phi_p);
-        double cp    = cos(phi_p);
-        double sd    = sin(delta_0);
-        double cd    = sin(delta_0);
-        double tand  = sin(delta_0);
+        double phi_p   = lonpole * deg2rad;
+        double theta_p = latpole * deg2rad;
+        double sp      = sin(phi_p);
+        double cp      = cos(phi_p);
+        double sd      = sin(delta_0);
+        double cd      = cos(delta_0);
+        double tand    = tan(delta_0);
 
         // Case A: theta0 = 0
         if (theta0 == 0.0) {
-            if (delta_0 == 0.0 && lonpole == 90.0)
-                delta_p = latpole;
+            if (delta_0 == 0.0 && std::abs(lonpole) == 90.0)
+                delta_p = theta_p;
             else
                 delta_p = acos(sd/cp);
             if (latpole != 90.0) {
-                if (fabs(latpole + delta_p) < fabs(latpole - delta_p))
+                if (std::abs(theta_p + delta_p) < std::abs(theta_p - delta_p))
                     delta_p = -delta_p;
             }
             if (lonpole == 180.0 || cd == 0.0)
@@ -625,7 +648,7 @@ GVector GWcs::wcs_getpole(const double& theta0)
                 else { // Two valid solutions
                     delta_p1 = (term1+term2)*rad2deg;
                     delta_p2 = (term1-term2)*rad2deg;
-                    if (fabs(latpole-delta_p1) < fabs(latpole-delta_p2))
+                    if (std::abs(latpole-delta_p1) < std::abs(latpole-delta_p2))
                         delta_p = term1 + term2;
                     else
                         delta_p = term1 - term2;
@@ -662,7 +685,7 @@ GVector GWcs::wcs_getpole(const double& theta0)
 /***********************************************************************//**
  * @brief Get matrix for rotation between sky and native coordinates
  *
- * Requires m_npole and m_native_pole to be set.
+ * Requires m_npole[0] and m_native_pole to be set.
  ***************************************************************************/
 GMatrix GWcs::wcs_get_rot(void)
 {
@@ -694,66 +717,6 @@ GMatrix GWcs::wcs_get_rot(void)
 
 
 /***********************************************************************//**
- * @brief Set standard WCS parameters
- *
- * @param[in] coords Coordinate system.
- * @param[in] crval1 X value of reference pixel.
- * @param[in] crval2 Y value of reference pixel.
- * @param[in] crpix1 X index of reference pixel (first pixel is 1).
- * @param[in] crpix2 Y index of reference pixel (first pixel is 1).
- * @param[in] cdelt1 Increment in x direction at reference pixel (deg).
- * @param[in] cdelt2 Increment in y direction at reference pixel (deg).
- *
- * @exception GException::wcs
- *            Unable to invert CD matrix.
- *
- * This method sets the WCS standard parameters as class members. It does
- * however not set the rotation matrices. A call to wcs_init is mandatory
- * before the projection can be used.
- *
- * @todo Implement parameter check
- ***************************************************************************/
-void GWcs::wcs_set(const std::string& coords,
-                   const double& crval1, const double& crval2,
-                   const double& crpix1, const double& crpix2,
-                   const double& cdelt1, const double& cdelt2)
-
-{
-    //TODO: Check parameters
-
-    // Set coordinate system
-    coordsys(coords);
-
-    // Set parameters
-    m_crval   = GVector(crval1, crval2);
-    m_crpix   = GVector(crpix1, crpix2);
-    m_cdelt   = GVector(cdelt1, cdelt2);
-    m_refval  = m_crval;
-    m_refpix  = m_crpix - GVector(1.0,1.0);
-
-    // Set CD matrix corresponding to no rotation
-    m_cd(0,0) = m_cdelt[0];
-    m_cd(1,0) = 0.0;
-    m_cd(0,1) = 0.0;
-    m_cd(1,1) = m_cdelt[1];
-
-    // Compute inverse CD matrix
-    double delta = m_cd(0,0)*m_cd(1,1) - m_cd(0,1)*m_cd(1,0);
-    if (delta != 0.0) {
-        m_invcd(0,0) =  m_cd(1,1) / delta;
-        m_invcd(0,1) = -m_cd(0,1) / delta;
-        m_invcd(1,0) = -m_cd(1,0) / delta;
-        m_invcd(1,1) =  m_cd(0,0) / delta;
-    }
-    else
-        throw GException::wcs(G_WCS_SET, "Unable to invert CD matrix.");
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Read WCS definiton from FITS header.
  *
  * @param[in] hdu FITS HDU containing the WCS definition.
@@ -764,11 +727,12 @@ void GWcs::wcs_set(const std::string& coords,
  *            Coordinate system is not of valid type.
  *
  * This method reads the WCS definition from the FITS header. It calls the
- * wcs_set() method
+ * set_members() method.
  *
  * @todo Projection ketwords are not yet extracted from the header. Assume
  *       theta0=0.0 for the moment.
  ***************************************************************************/
+/*
 void GWcs::wcs_read(const GFitsHDU* hdu)
 {
     // Continue only if HDU is valid
@@ -808,7 +772,7 @@ void GWcs::wcs_read(const GFitsHDU* hdu)
             throw GException::wcs_bad_coords(G_WCS_READ, coordsys());
 
         // Set standard parameters
-        wcs_set(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
+        set_members(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
 
         // Get projection keywords
         //TODO
@@ -821,7 +785,7 @@ void GWcs::wcs_read(const GFitsHDU* hdu)
     // Return
     return;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Write WCS definiton into FITS HDU
@@ -831,6 +795,7 @@ void GWcs::wcs_read(const GFitsHDU* hdu)
  * @exception GException::wcs_bad_coords
  *            Coordinate system is not of valid type.
  ***************************************************************************/
+/*
 void GWcs::wcs_write(GFitsHDU* hdu) const
 {
     // Continue only if HDU is valid
@@ -842,8 +807,6 @@ void GWcs::wcs_write(GFitsHDU* hdu) const
         std::string c_crval2;
         std::string c_cdelt1;
         std::string c_cdelt2;
-        std::string c_lonpole;
-        std::string c_latpole;
         if (m_coordsys == 0) {
             c_equinox = "Equinox for celestial coordinate system";
             c_crval1  = "[deg] Right Ascension at reference pixel";
@@ -852,8 +815,6 @@ void GWcs::wcs_write(GFitsHDU* hdu) const
                         " reference pixel";
             c_cdelt2  = "[deg/pixel] Declination increment at"
                         " reference pixel";
-            c_lonpole = "[deg] Native longitude of Celestial North Pole";
-            c_latpole = "[deg] Native latitude of Celestial North Pole";
         }
         else if (m_coordsys == 1) {
             c_equinox = "Equinox for celestial coordinate system";
@@ -863,8 +824,6 @@ void GWcs::wcs_write(GFitsHDU* hdu) const
                         " reference pixel";
             c_cdelt2  = "[deg/pixel] Galactic Latitude increment at"
                         " reference pixel";
-            c_lonpole = "[deg] Native longitude of Galactic North Pole";
-            c_latpole = "[deg] Native latitude of Galactic North Pole";
         }
         else
             throw GException::wcs_bad_coords(G_WCS_WRITE, coordsys());
@@ -882,17 +841,17 @@ void GWcs::wcs_write(GFitsHDU* hdu) const
         hdu->card("CRVAL1",  m_crval[0],   c_crval1);
         hdu->card("CRVAL2",  m_crval[1],   c_crval2);
         hdu->card("CROTA2",  0.0,          "[deg] Rotation Angle");
-        //hdu->card("LONPOLE", m_npole[0],   c_lonpole);
-        //hdu->card("LATPOLE", m_npole[1],   c_latpole);
-        hdu->card("PV2_1",   0.0,          "Projection parameter 1");
-        hdu->card("PV2_2",   0.0,          "Projection parameter 2");
+        hdu->card("LONPOLE", m_lonpole,    "[deg] Native longitude of celestial pole");
+        hdu->card("LATPOLE", m_latpole,    "[deg] Native latitude of celestial pole");
+        //hdu->card("PV2_1",   0.0,          "Projection parameter 1");
+        //hdu->card("PV2_2",   0.0,          "Projection parameter 2");
 
     } // endif: HDU was valid
 
     // Return
     return;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Return crval1 string
@@ -959,6 +918,7 @@ std::string GWcs::wcs_crval2(void) const
 /***********************************************************************//**
  * @brief Print WCS information
  ***************************************************************************/
+/*
 std::string GWcs::wcs_dump(void) const
 {
     // Initialise result string
@@ -987,21 +947,116 @@ std::string GWcs::wcs_dump(void) const
     result.append(" "+str(m_invcd(1,1))+"]\n");
 
     // Append coordinate of native pole
-    result.append(parformat("Coordinate of native pole")+native.print());
+    result.append(parformat("Coordinate of native pole")+native.print()+"\n");
+
+    // NEW VERSION
+    
+    // Append World Coordinate parameters
+    result.append(parformat("Number of axes")+str(m_naxis)+"\n");
+    result.append(parformat("Longitude axis")+str(m_lng)+"\n");
+    result.append(parformat("Latitude axis")+str(m_lat)+"\n");
+    result.append(parformat("Spectral axis")+str(m_spec)+"\n");
+    
+    // Append coordinates
+    result.append(parformat("Reference coordinate")+"(");
+    for (int i = 0; i < m_Crval.size(); ++i) {
+        if (i > 0)
+            result.append(", ");
+        result.append(str(m_Crval[i]));
+        if (m_cunit.size() > i)
+            result.append(" "+m_cunit[i]);
+            
+    }
+    result.append(")\n");
+    result.append(parformat("Reference pixel")+"(");
+    for (int i = 0; i < m_Crpix.size(); ++i) {
+        if (i > 0)
+            result.append(", ");
+        result.append(str(m_Crpix[i]));
+    }
+    result.append(")\n");
+    result.append(parformat("Increment at reference")+"(");
+    for (int i = 0; i < m_Cdelt.size(); ++i) {
+        if (i > 0)
+            result.append(", ");
+        result.append(str(m_Cdelt[i]));
+        if (m_cunit.size() > i)
+            result.append(" "+m_cunit[i]);
+    }
+    result.append(")\n");
+        
+    // Append celestial transformation parameters
+    result.append(parformat("(Phi0, Theta0)")+"(");
+    if (undefined(m_phi0))
+        result.append("UNDEFINED, ");
+    else
+        result.append(str(m_phi0)+", ");
+    if (undefined(m_theta0))
+        result.append("UNDEFINED)\n");
+    else
+        result.append(str(m_theta0)+") deg\n");
+    result.append(parformat("(Lonpole, Latpole)")+"(");
+    if (undefined(m_lonpole))
+        result.append("UNDEFINED, ");
+    else
+        result.append(str(m_lonpole)+", ");
+    result.append(str(m_latpole)+") deg\n");
+    result.append(parformat("Ref")+"(");
+    for (int k = 0; k < 4; ++k) {
+        if (k > 0)
+            result.append(", ");
+        if (undefined(m_ref[k]))
+            result.append("UNDEFINED");
+        else
+            result.append(str(m_ref[k]));
+    }
+    result.append(") deg\n");
+    result.append(parformat("Euler")+"(");
+    for (int k = 0; k < 5; ++k) {
+        if (k > 0)
+            result.append(", ");
+        result.append(str(m_euler[k]));
+    }
+    result.append(") deg\n");
+    result.append(parformat("Latpole requirement")+str(m_latpreq)+"\n");
+    if (m_isolat)
+        result.append(parformat("Latitude preserved")+"True\n");
+    else
+        result.append(parformat("Latitude preserved")+"False\n");
+    
+    // Append projection parameters
+    result.append(parformat("Projection code")+m_code+"\n");
+    result.append(parformat("Radius of the gen. sphere")+str(m_r0)+"\n");
+    if (m_bounds)
+        result.append(parformat("Strict bounds checking")+"True\n");
+    else
+        result.append(parformat("Strict bounds checking")+"False\n");
+    if (m_offset)
+        result.append(parformat("Offset")+"True\n");
+    else
+        result.append(parformat("Offset")+"False\n");
+    result.append(parformat("Fiducial offset")+str(m_x0)+", "+str(m_y0)+"\n");
+    
+
+    // Append spectral transformation parameters
+    result.append(parformat("Rest frequency")+str(m_restfrq)+"\n");
+    result.append(parformat("Rest wavelength")+str(m_restwav)+"\n");
 
     // Return
     return result;
 }
-
+*/
 
 /*==========================================================================
  =                                                                         =
- =                           GWcs private methods                          =
+ =                          GWcs protected methods                         =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Initialise class members
+ *
+ * Code adapted from wcs.c::wcsini().
  ***************************************************************************/
 void GWcs::init_members(void)
 {
@@ -1017,14 +1072,14 @@ void GWcs::init_members(void)
     m_pv2      = GVector(21);
 
     // Initialise derived members
-    m_theta0      = 0.0;
+    //m_theta0      = 0.0;
     m_refval      = GVector(2);
     m_refpix      = GVector(2);
     m_invcd       = GMatrix(2,2);
     m_native_pole = GVector(2);
     m_rot         = GMatrix(3,3);
     m_trot        = GMatrix(3,3);
-
+    
     // Return
     return;
 }
@@ -1049,7 +1104,7 @@ void GWcs::copy_members(const GWcs& wcs)
     m_pv2      = wcs.m_pv2;
 
     // Copy derived attributes
-    m_theta0      = wcs.m_theta0;
+    //m_theta0      = wcs.m_theta0;
     m_refval      = wcs.m_refval;
     m_refpix      = wcs.m_refpix;
     m_invcd       = wcs.m_invcd;

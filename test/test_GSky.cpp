@@ -1,13 +1,21 @@
 /***************************************************************************
  *                  test_GSky.cpp  -  test GSky classes                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -28,6 +36,132 @@
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
+
+
+/***************************************************************************
+ *  Test consistency of forward and background transformations             *
+ ***************************************************************************/
+double wcs_forth_back_pixel(GWcs& wcs, double& crpix1, double& crpix2)
+{
+    // Initialise maximal distance
+    double dist_max = 0.0;
+    
+    // Initialise number of pixels
+    int nx = 100;
+    int ny = 100;
+    
+    // Loop over x pixels
+    for (int ix = -nx; ix <= nx; ++ix) {
+    
+        // Set x value
+        double x = double(ix) + crpix1;
+        
+        // Loop over y pixels
+        for (int iy = -ny; iy <= ny; ++iy) {
+        
+            // Set y value
+            double    y = double(iy) + crpix2;
+            
+            // Set sky pixel
+            GSkyPixel pix_in(x,y);
+            
+            // Forth: Transform to world
+            GSkyDir dir = wcs.xy2dir(pix_in);
+            
+            // Back: Transform to pixel
+            GSkyPixel pix_out = wcs.dir2xy(dir);
+            
+            // Compute distance
+            double dx      = pix_in.x()-pix_out.x();
+            double dy      = pix_in.y()-pix_out.y();
+            double dist    = sqrt(dx*dx+dy*dy);
+            //std::cout << dist << std::endl;
+            
+            // Store maximum distance
+            if (dist > dist_max)
+                dist_max = dist;
+                
+        } // endfor: y pixels
+    } // endfor: x pixels
+
+    // Return
+    return dist_max;
+}
+
+
+/***************************************************************************
+ *  Test: GWcsCAR                                                          *
+ ***************************************************************************/
+void test_GWcsCAR(void)
+{
+    // Dump header
+    std::cout << "Test GWcsCAR: ";
+
+    // Allocate parameters for testing
+    std::string coords = "CEL";
+    double      crval1 = 83.63;
+    double      crval2 = 22.01;
+    double      crpix1 = 100.5;
+    double      crpix2 = 100.5;
+    double      cdelt1 = 0.02;
+    double      cdelt2 = 0.02;
+    GMatrix     cd(2,2);
+    GVector     pv2(21);
+
+    // Test void constructor
+    try {
+        GWcsCAR wcs;
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to construct empty GWcsCAR."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test constructor
+    try {
+        GWcsCAR wcs(coords, crval1, crval2, crpix1, crpix2,
+                    cdelt1, cdelt2, cd, pv2);
+        std::cout << wcs << std::endl;
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to construct GWcsCAR."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Build now skymap for conversion testing
+    GWcsCAR car(coords, crval1, crval2, crpix1, crpix2,
+                cdelt1, cdelt2, cd, pv2);
+    
+    // Test (x,y) to (lon,lat)
+    try {
+        double tol = 0.0;
+        if ((tol = wcs_forth_back_pixel(car, crpix1, crpix2)) > 1.0e-10) {
+            std::cout << std::endl 
+                      << "TEST ERROR: GWcsCAR transformation tolerance "
+                      << tol << std::endl;
+            throw;
+        }
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl 
+                  << "TEST ERROR: Error while testing sky conversion."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Exit test
+    return;
+}
 
 
 /***************************************************************************
@@ -468,10 +602,11 @@ int main(void)
     std::cout << "************************" << std::endl;
 
     // Execute Healpix tests
-    test_GSkymap_healpix_construct();
-    test_GSkymap_healpix_io();
-    test_GSkymap_wcs_construct();
-    test_GSkymap_wcs_io();
+    test_GWcsCAR();
+    //test_GSkymap_healpix_construct();
+    //test_GSkymap_healpix_io();
+    //test_GSkymap_wcs_construct();
+    //test_GSkymap_wcs_io();
 
     // Return
     return 0;

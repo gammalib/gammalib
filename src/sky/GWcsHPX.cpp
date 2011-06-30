@@ -900,6 +900,46 @@ unsigned int GWcsHPX::isqrt(unsigned int arg) const
 }
 
 
+/***********************************************************************//**
+ * @brief Setup of projection
+ *
+ * Dummy (only implemented for non HPX classes).
+ ***************************************************************************/
+void GWcsHPX::prj_set(void)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Cartesian-to-spherical deprojection
+ *
+ * Dummy (only implemented for non HPX classes).
+ ***************************************************************************/
+int GWcsHPX::prj_x2s(int nx, int ny, int sxy, int spt, 
+                     const double* x, const double* y,
+                     double* phi, double* theta, int* stat) const
+{
+    // Return
+    return 0;
+}
+
+
+/***********************************************************************//**
+ * @brief Generic spherical-to-Cartesian projection
+ *
+ * Dummy (only implemented for non HPX classes).
+ ***************************************************************************/
+int GWcsHPX::prj_s2x(int nphi, int ntheta, int spt, int sxy,
+                     const double* phi, const double* theta,
+                     double* x, double* y, int* stat) const
+{
+    // Return
+    return 0;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                                  Friends                                =
