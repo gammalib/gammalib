@@ -4,15 +4,23 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
  * @file GSkymap.cpp
- * @brief GSkymap class implementation.
+ * @brief Sky map class implementation
  * @author J. Knodlseder
  */
 
@@ -23,6 +31,7 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GSkymap.hpp"
+#include "GWcsRegistry.hpp"
 #include "GWcsCAR.hpp"
 #include "GWcsHPX.hpp"
 #include "GFits.hpp"
@@ -503,7 +512,7 @@ void GSkymap::save(const std::string& filename, bool clobber) const
         GFitsHDU* hdu = NULL;
 
         // Case A: Skymap is Healpix
-        if (m_wcs->type() == "HPX")
+        if (m_wcs->code() == "HPX")
             hdu = create_healpix_hdu();
 
         // Case B: Skymap is not Healpix
@@ -588,7 +597,7 @@ void GSkymap::write(GFits* file) const
         GFitsHDU* hdu = NULL;
 
         // Case A: Skymap is Healpix
-        if (m_wcs->type() == "HPX")
+        if (m_wcs->code() == "HPX")
             hdu = create_healpix_hdu();
 
         // Case B: Skymap is not Healpix
@@ -827,7 +836,7 @@ std::string GSkymap::print(void) const
     result.append("=== GSkymap ===\n");
     result.append(parformat("Number of pixels")+str(m_num_pixels)+"\n");
     result.append(parformat("Number of maps")+str(m_num_maps));
-    if (m_wcs != NULL && m_wcs->type() != "HPX") {
+    if (m_wcs != NULL && m_wcs->code() != "HPX") {
         result.append("\n"+parformat("X axis dimension")+str(m_num_x));
         result.append("\n"+parformat("Y axis dimension")+str(m_num_y));
     }
@@ -948,7 +957,7 @@ void GSkymap::free_members(void)
 /***********************************************************************//**
  * @brief Set WCS
  *
- * @param[in] wcs World Coordinate System type (3 characters, upper case).
+ * @param[in] wcs World Coordinate System code.
  * @param[in] coords Coordinate system.
  * @param[in] crval1 X value of reference pixel.
  * @param[in] crval2 Y value of reference pixel.
@@ -960,11 +969,14 @@ void GSkymap::free_members(void)
  * @param[in] pv2 Projection parameters (length WCS type dependent).
  *
  * @exception GException::wcs_invalid
- *            Invalid wcs parameter (World Coordinate System not supported
- *            or known to method).
+ *            Invalid wcs parameter (World Coordinate System not known).
  *
- * This method sets the WCS projection pointer based on the WCS type and
- * sky map parameters.
+ * This method sets the WCS projection pointer based on the WCS code and
+ * sky map parameters. It makes use of the GWcsRegistry class to allocate
+ * the correct derived class. Note that this method does not support the
+ * HPX projection.
+ *
+ * @todo Remove cd and pv2 parameters.
  ***************************************************************************/
 void GSkymap::set_wcs(const std::string& wcs, const std::string& coords,
                       const double& crval1, const double& crval2,
@@ -974,19 +986,31 @@ void GSkymap::set_wcs(const std::string& wcs, const std::string& coords,
 {
     // Convert WCS to upper case
     std::string uwcs = toupper(wcs);
-
-    // Check projections
-    if (uwcs == "" || uwcs == "CAR") {
-        m_wcs = new GWcsCAR(coords, crval1, crval2, crpix1, crpix2,
-                            cdelt1, cdelt2, cd, pv2);
-    }
-    else if (uwcs == "HPX") {         // HPX not allowed with this method
-       throw GException::wcs_invalid(G_SET_WCS, wcs,
+    
+    // Check if HPX was requested (since this is not allowed)
+    if (uwcs == "HPX") {
+       throw GException::wcs_invalid(G_SET_WCS, uwcs,
                                      "Method not valid for HPX projection.");
     }
+    
+    // ... otherwise get projection from registry
     else {
-       throw GException::wcs_invalid(G_SET_WCS, wcs,
-                                     "Projection type not known to method.");
+        // Allocate WCS registry
+        GWcsRegistry registry;
+        
+        // Allocate projection from registry
+        m_wcs = registry.alloc(uwcs);
+        
+        // Setup WCS
+        ((GWcslib*)m_wcs)->set(coords, crval1, crval2, crpix1, crpix2,
+                               cdelt1, cdelt2);
+    
+        // Signal if projection type is not known
+        if (m_wcs == NULL) {
+            std::string message = "Projection code not known. "
+                                  "Supported projections are: "+registry.print()+".";
+            throw GException::wcs_invalid(G_SET_WCS, uwcs, message);
+        }
     }
 
     // Return
