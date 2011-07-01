@@ -54,8 +54,8 @@
 //#define G_LIN_MATINV_FORCE_PC                             // Force PC usage
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DIR2XY_DEBUG                                      // Debug dir2xy
-#define G_XY2DIR_DEBUG                                      // Debug xy2dir
+//#define G_DIR2XY_DEBUG                                      // Debug dir2xy
+//#define G_XY2DIR_DEBUG                                      // Debug xy2dir
 
 /* __ Local prototypes ___________________________________________________ */
 
