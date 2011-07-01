@@ -1001,17 +1001,18 @@ void GSkymap::set_wcs(const std::string& wcs, const std::string& coords,
         // Allocate projection from registry
         m_wcs = registry.alloc(uwcs);
         
+        // Signal if projection type is not known
+        if (m_wcs == NULL) {
+            std::string message = "Projection code not known. "
+                                  "Should be one of "+registry.list()+".";
+            throw GException::wcs_invalid(G_SET_WCS, uwcs, message);
+        }
+
         // Setup WCS
         ((GWcslib*)m_wcs)->set(coords, crval1, crval2, crpix1, crpix2,
                                cdelt1, cdelt2);
     
-        // Signal if projection type is not known
-        if (m_wcs == NULL) {
-            std::string message = "Projection code not known. "
-                                  "Supported projections are: "+registry.print()+".";
-            throw GException::wcs_invalid(G_SET_WCS, uwcs, message);
-        }
-    }
+    } // endelse: got projection from registry
 
     // Return
     return;
