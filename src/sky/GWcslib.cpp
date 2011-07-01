@@ -35,9 +35,10 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                                     "GWcslib::read(GFitsHDU*)"
-#define G_WRITE                                   "GWcslib::write(GFitsHDU*)"
-#define G_WCS_SET "GWcslib::GWcslib(std::string,double,double,double,double,"\
-                                                             "double,double)"
+#define G_OMEGA                                        "GWcslib::omega(int&)"
+#define G_PIX2DIR                                    "GWcslib::pix2dir(int&)"
+#define G_DIR2PIX                                "GWcslib::dir2pix(GSkyDir&)"
+#define G_WCS_SET_CTYPE                            "GWcslib::wcs_set_ctype()"
 #define G_WCS_P2S "GWcslib::wcs_s2p(int,int,double*,double*,double*,double*,"\
                                                               "double*,int*)"
 #define G_WCS_S2P "GWcslib::wcs_s2p(int,int,double*,double*,double*,double*,"\
@@ -70,7 +71,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GWcslib::GWcslib(void)
+GWcslib::GWcslib(void) : GWcs()
 {
     // Initialise class members
     init_members();
@@ -96,17 +97,32 @@ GWcslib::GWcslib(void)
 GWcslib::GWcslib(const std::string& coords,
                  const double& crval1, const double& crval2,
                  const double& crpix1, const double& crpix2,
-                 const double& cdelt1, const double& cdelt2)
+                 const double& cdelt1, const double& cdelt2) : GWcs()
+{
+    // Initialise class members
+    init_members();
+    
+    // Set standard parameters
+    set_members(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Construct from FITS HDU table
+ *
+ * @param[in] hdu FITS HDU.
+ ***************************************************************************/
+GWcslib::GWcslib(const GFitsHDU* hdu) : GWcs()
 {
     // Initialise class members
     init_members();
 
-    // Initialise reverse flag
-    m_reverse = 0;
+    // Read WCS definition from FITS HDU
+    read(hdu);
 
-    // Set standard parameters
-    set_members(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
-    
     // Return
     return;
 }
@@ -189,16 +205,10 @@ GWcslib& GWcslib::operator= (const GWcslib& wcs)
  *
  * @param[in] hdu FITS HDU containing the WCS definition.
  *
- * @exception GException::fits_key_not_found
- *            Unable to find required FITS header keyword.
  * @exception GException::wcs_bad_coords
  *            Coordinate system is not of valid type.
  *
- * This method reads the WCS definition from the FITS header. It calls the
- * set_members() method.
- *
- * @todo Projection ketwords are not yet extracted from the header. Assume
- *       theta0=0.0 for the moment.
+ * This method reads the WCS definition from the FITS header.
  ***************************************************************************/
 void GWcslib::read(const GFitsHDU* hdu)
 {
@@ -223,32 +233,60 @@ void GWcslib::read(const GFitsHDU* hdu)
         std::string xcoord = ctype1.substr(0,4);
         std::string ycoord = ctype2.substr(0,4);
         if (xcoord == "RA--" && ycoord == "DEC-") {
-            m_reverse = 0;
-            coords    = "EQU";
+            m_lng  = 0;
+            m_lat  = 1;
+            coords = "EQU";
         }
         else if (xcoord == "DEC-" && ycoord == "RA--") {
-            m_reverse = 1;
-            coords    = "EQU";
+            m_lng  = 1;
+            m_lat  = 0;
+            coords = "EQU";
         }
         else if (xcoord == "GLON" && ycoord == "GLAT") {
-            m_reverse = 0;
-            coords    = "GAL";
+            m_lng  = 0;
+            m_lat  = 1;
+            coords = "GAL";
         }
         else if (xcoord == "GLAT" && ycoord == "GLON") {
-            m_reverse = 1;
-            coords    = "GAL";
+            m_lng  = 1;
+            m_lat  = 0;
+            coords = "GAL";
+        }
+        else if (xcoord == "ELON" && ycoord == "ELAT") {
+            m_lng  = 0;
+            m_lat  = 1;
+            coords = "ECL";
+        }
+        else if (xcoord == "ELAT" && ycoord == "ELON") {
+            m_lng  = 1;
+            m_lat  = 0;
+            coords = "ECL";
+        }
+        else if (xcoord == "HLON" && ycoord == "HLAT") {
+            m_lng  = 0;
+            m_lat  = 1;
+            coords = "HEL";
+        }
+        else if (xcoord == "HLAT" && ycoord == "HLON") {
+            m_lng  = 1;
+            m_lat  = 0;
+            coords = "HEL";
+        }
+        else if (xcoord == "SLON" && ycoord == "SLAT") {
+            m_lng  = 0;
+            m_lat  = 1;
+            coords = "SGL";
+        }
+        else if (xcoord == "SLAT" && ycoord == "SLON") {
+            m_lng  = 1;
+            m_lat  = 0;
+            coords = "SGL";
         }
         else
             throw GException::wcs_bad_coords(G_READ, coordsys());
 
         // Set standard parameters
         set_members(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
-
-        //TODO: Get projection keywords
-
-        // Initialise derived projection parameters
-        wcs_set();
-        wcs_init(0.0);  // theta0 = 0.0 <= THIS DISAPPEARS LATER
 
     } // endif: HDU was valid
 
@@ -258,62 +296,119 @@ void GWcslib::read(const GFitsHDU* hdu)
 
 
 /***********************************************************************//**
- * @brief Write WCS definiton into FITS HDU
+ * @brief Write WCS definiton into FITS HDU header
  *
- * @param[in] hdu FITS HDU into which WCS definition will be written.
+ * @param[in] hdu FITS HDU.
  *
- * @exception GException::wcs_bad_coords
- *            Coordinate system is not of valid type.
+ * This method writes the World Coordinate System definition into the FITS
+ * HDU header.
+ *
+ * The method does nothing if the HDU is not valid.
+ *
+ * This method has been adapted from wcshdr.c::wcshdo().
  ***************************************************************************/
 void GWcslib::write(GFitsHDU* hdu) const
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
 
-        // Set coordinate system dependent strings
-        std::string c_equinox;
-        std::string c_crval1;
-        std::string c_crval2;
-        std::string c_cdelt1;
-        std::string c_cdelt2;
-        if (m_coordsys == 0) {
-            c_equinox = "Equinox for celestial coordinate system";
-            c_crval1  = "[deg] Right Ascension at reference pixel";
-            c_crval2  = "[deg] Declination at reference pixel";
-            c_cdelt1  = "[deg/pixel] Right Ascension increment at"
-                        " reference pixel";
-            c_cdelt2  = "[deg/pixel] Declination increment at"
-                        " reference pixel";
+        // Write reference pixel coordinates
+        for (int i = 0; i < m_naxis; ++i) {
+            std::string keyname = "CRPIX"+str(i+1);
+            std::string comment = "Pixel coordinate of reference point (starting from 1)";
+            hdu->card(keyname, m_crpix.at(i), comment);
         }
-        else if (m_coordsys == 1) {
-            c_equinox = "Equinox for celestial coordinate system";
-            c_crval1 = "[deg] Galactic Longitude at reference pixel";
-            c_crval2 = "[deg] Galactic Latitude at reference pixel";
-            c_cdelt1  = "[deg/pixel] Galactic Longitude increment at"
-                        " reference pixel";
-            c_cdelt2  = "[deg/pixel] Galactic Latitude increment at"
-                        " reference pixel";
+        
+        //TODO: Write linear transformation matrix
+        
+        // Write coordinate increment at reference point
+        for (int i = 0; i < m_naxis; ++i) {
+            std::string keyname = "CDELT"+str(i+1);
+            std::string comment;
+            if (m_cunit.at(i).length() > 0)
+                comment += "["+strip_whitespace(m_cunit.at(i))+"] ";
+            comment += "Coordinate increment at reference point";
+            hdu->card(keyname, m_cdelt.at(i), comment);
         }
-        else
-            throw GException::wcs_bad_coords(G_WRITE, coordsys());
+        
+        // Write units of coordinate increment and reference value
+        for (int i = 0; i < m_naxis; ++i) {
+            if (m_cunit.at(i).length() > 0) {
+                std::string keyname = "CUNIT"+str(i+1);
+                std::string comment = "Units of coordinate increment and value";
+                hdu->card(keyname, m_cunit.at(0), comment);
+            }
+        }
+        
+        // Write coordinate type
+        wcs_set_ctype();
+        for (int i = 0; i < m_naxis; ++i) {
+            if (i == m_lng) {
+                std::string keyname = "CTYPE"+str(i+1);
+                hdu->card(keyname, m_ctype.at(i), m_ctype_c.at(i));
+            }
+            if (i == m_lat) {
+                std::string keyname = "CTYPE"+str(i+1);
+                hdu->card(keyname, m_ctype.at(i), m_ctype_c.at(i));
+            }
+            if (i == m_spec) {
+                std::string keyname = "CTYPE"+str(i+1);
+                hdu->card(keyname, m_ctype.at(i), m_ctype_c.at(i));
+            }
+        }
 
-        // Set keywords
-        hdu->card("EQUINOX", 2000.0,       c_equinox);
-        hdu->card("CTYPE1",  wcs_crval1(), "Projection Type");
-        hdu->card("CTYPE2",  wcs_crval2(), "Projection Type");
-        hdu->card("CDELT1",  m_cdelt[0],   c_cdelt1);
-        hdu->card("CDELT2",  m_cdelt[1],   c_cdelt2);
-        hdu->card("CRPIX1",  m_crpix[0],
-                  "X index of reference pixel (starting from 1)");
-        hdu->card("CRPIX2",  m_crpix[1],
-                  "Y index of reference pixel (starting from 1)");
-        hdu->card("CRVAL1",  m_crval[0],   c_crval1);
-        hdu->card("CRVAL2",  m_crval[1],   c_crval2);
-        hdu->card("CROTA2",  0.0,          "[deg] Rotation Angle");
-        hdu->card("LONPOLE", m_lonpole,    "[deg] Native longitude of celestial pole");
-        hdu->card("LATPOLE", m_latpole,    "[deg] Native latitude of celestial pole");
+        // Write coordinate value at reference point
+        for (int i = 0; i < m_naxis; ++i) {
+            std::string keyname = "CRVAL"+str(i+1);
+            std::string comment;
+            if (m_cunit.at(i).length() > 0)
+                comment += "["+strip_whitespace(m_cunit.at(i))+"] ";
+            comment += "Coordinate value at reference point";
+            hdu->card(keyname, m_crval.at(i), comment);
+        }
+        
+        //TODO: Parameter values
+        hdu->card("CROTA2", 0.0, "[deg] Rotation Angle"); // Old style, use PV instead
         //hdu->card("PV2_1",   0.0,          "Projection parameter 1");
         //hdu->card("PV2_2",   0.0,          "Projection parameter 2");
+        
+        // Celestial and spectral transformation parameters
+        if (!undefined(m_lonpole))
+            hdu->card("LONPOLE", m_lonpole, "[deg] Native longitude of celestial pole");
+        if (!undefined(m_latpole))
+            hdu->card("LATPOLE", m_latpole, "[deg] Native latitude of celestial pole");
+        if (!undefined(m_restfrq))
+            hdu->card("RESTFRQ", m_restfrq, "[Hz] Line rest frequency");
+        if (!undefined(m_restwav))
+            hdu->card("RESTWAV", m_restwav, "[Hz] Line rest wavelength");
+        
+        // Equatorial coordinate system type
+        if (m_radesys.length() > 0)
+            hdu->card("RADESYS", m_radesys, "Equatorial coordinate system");
+        
+        // Equinox of equatorial coordinate system
+        if (!undefined(m_equinox))
+            hdu->card("EQUINOX", m_equinox, "[yr] Equinox of equatorial coordinates");
+        
+        //TODO: Reference frame of spectral coordinates
+        
+        //TODO: Reference frame of spectral observation
+        
+        //TODO: Observer's velocity towards source
+        
+        //TODO: Reference frame of source redshift
+        
+        //TODO: Redshift of the source
+        
+        //TODO: Observatory coordinates
+        
+        //TODO: MJD of observation
+        
+        //TODO: MJD mid-observation time
+        
+        //TODO: ISO-8601 date corresponding to MJD-OBS
+        
+        //TODO: ISO-8601 date corresponding to MJD-AVG
 
     } // endif: HDU was valid
 
@@ -325,14 +420,40 @@ void GWcslib::write(GFitsHDU* hdu) const
 /***********************************************************************//**
  * @brief Returns solid angle of pixel in units of steradians
  *
+ * @param[in] pix Pixel index.
+ *
+ * This dummy method throws an error when called as pixel indices are not
+ * implemented for a HealPix grid. Maybe we should drop this method and
+ * implement a general GSkyPixel class tha also handles HealPix?
+ *
+ * @todo Think about implementation of sky pixel for HealPix data. We may
+ *       use only the first argument, and even carry a usage flag in
+ *       GSkyPixel
+ ***************************************************************************/
+double GWcslib::omega(const int& pix) const
+{
+    // Set error message
+    std::string message = "Method not defined for general WCS projection.";
+
+    // Throw error
+    throw GException::wcs(G_OMEGA, message);
+
+    // Return
+    return 0.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns solid angle of pixel in units of steradians
+ *
  * @param[in] pix Pixel index (x,y)
  *
  * Estimate solid angles of pixel by compuing the coordinates in the 4 pixel
  * corners. The surface is computed using a cartesian approximation:
  *           a
- *     1-----------2                 a+b
- * h  /             \    where A = h ---
- *   4---------------3                2
+ *     1-----5-----2                 a+b
+ *    /      | h    \    where A = h ---
+ *   4-------6-------3                2
  *           b
  * This is a brute force technique that works sufficiently well for non-
  * rotated sky maps. Something more intelligent should be implemented in
@@ -340,16 +461,13 @@ void GWcslib::write(GFitsHDU* hdu) const
  ***************************************************************************/
 double GWcslib::omega(const GSkyPixel& pix) const
 {
-    // Bypass const correctness
-    GWcslib* ptr = (GWcslib*)this;
-
-    // Get the sky directions of the 4 corners
-    GSkyDir dir1 = ptr->xy2dir(GSkyPixel(pix.x()-0.5, pix.y()-0.5));
-    GSkyDir dir2 = ptr->xy2dir(GSkyPixel(pix.x()+0.5, pix.y()-0.5));
-    GSkyDir dir3 = ptr->xy2dir(GSkyPixel(pix.x()+0.5, pix.y()+0.5));
-    GSkyDir dir4 = ptr->xy2dir(GSkyPixel(pix.x()-0.5, pix.y()+0.5));
-    GSkyDir dir5 = ptr->xy2dir(GSkyPixel(pix.x(), pix.y()-0.5));
-    GSkyDir dir6 = ptr->xy2dir(GSkyPixel(pix.x(), pix.y()+0.5));
+    // Get the sky directions of the 6 points
+    GSkyDir dir1 = xy2dir(GSkyPixel(pix.x()-0.5, pix.y()-0.5));
+    GSkyDir dir2 = xy2dir(GSkyPixel(pix.x()+0.5, pix.y()-0.5));
+    GSkyDir dir3 = xy2dir(GSkyPixel(pix.x()+0.5, pix.y()+0.5));
+    GSkyDir dir4 = xy2dir(GSkyPixel(pix.x()-0.5, pix.y()+0.5));
+    GSkyDir dir5 = xy2dir(GSkyPixel(pix.x(), pix.y()-0.5));
+    GSkyDir dir6 = xy2dir(GSkyPixel(pix.x(), pix.y()+0.5));
 
     // Compute distances between sky directions
     double a = dir1.dist(dir2);
@@ -365,6 +483,57 @@ double GWcslib::omega(const GSkyPixel& pix) const
 
 
 /***********************************************************************//**
+ * @brief Returns sky direction of pixel (DUMMY METHOD)
+ *
+ * @param[in] pix Pixel number (0,1,...,m_num_pixels).
+ *
+ * @exception GException::wcs
+ *            Method not defined for projection.
+ *
+ * This method should be overloaded by the appropriate method of the derived
+ * class. It thus should never get called.
+ ***************************************************************************/
+GSkyDir GWcslib::pix2dir(const int& pix) const
+{
+    // Set error message
+    std::string message = "Method not defined for general WCS projection.";
+
+    // Throw error
+    throw GException::wcs(G_PIX2DIR, message);
+
+    // Define direction
+    GSkyDir dir;
+
+    // Return
+    return dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pixel for sky direction (DUMMY METHOD)
+ *
+ * @param[in] dir Sky direction.
+ *
+ * @exception GException::wcs
+ *            Method not defined for projection.
+ *
+ * This method should be overloaded by the appropriate method of the derived
+ * class. It thus should never get called.
+ ***************************************************************************/
+int GWcslib::dir2pix(const GSkyDir& dir) const
+{
+    // Set error message
+    std::string message = "Method not defined for general WCS projection.";
+
+    // Throw error
+    throw GException::wcs(G_DIR2PIX, message);
+
+    // Return
+    return 0;
+}
+
+
+/***********************************************************************//**
  * @brief Returns sky direction of pixel
  *
  * @param[in] pix Sky pixel.
@@ -373,28 +542,6 @@ double GWcslib::omega(const GSkyPixel& pix) const
  ***************************************************************************/
 GSkyDir GWcslib::xy2dir(const GSkyPixel& pix) const
 {
-    // Set constants
-    const int __permutation[2] = {1,0};
-
-    // Determine offset
-    GVector offset = GVector(pix.x(), pix.y());
-
-    // Determine xy
-    GVector xy = m_cd * (offset - m_refpix);
-
-    // Swap result if coordinates are reversed
-    if (m_reverse)
-        xy = perm(xy, __permutation);
-
-    // Perform map projection
-    GVector native = xy;
-    nat2std(&native);
-
-    // Get sky direction for native coordinates
-    //GSkyDir dir = wcs_native2dir(native);
-    
-    // NEW METHOD -- DELETE ALL OF ABOVE
-
     // Allocate memory for transformation
     double pixcrd[2];
     double imgcrd[2];
@@ -420,8 +567,7 @@ GSkyDir GWcslib::xy2dir(const GSkyPixel& pix) const
 
     // Debug: Dump transformation steps
     #if defined(G_XY2DIR_DEBUG)
-    std::cout << "xy2dir: pixel=" << offset << " xy=" << xy
-              << " native=" << native << " dir=" << wcs_native2dir(native)
+    std::cout << "xy2dir: pixel=" << pix
               << " (x,y)=(" << pixcrd[0] << "," << pixcrd[1] << ")"
               << " (phi,theta)=(" << phi << "," << theta << ")"
               << " (lng,lat)=(" << world[0] << "," << world[1] << ")" << std::endl;
@@ -440,30 +586,8 @@ GSkyDir GWcslib::xy2dir(const GSkyPixel& pix) const
  * Note that GSkyPixel indices start from 0 while the WCS pixel reference
  * starts from 1.
  ***************************************************************************/
-GSkyPixel GWcslib::dir2xy(GSkyDir dir) const
+GSkyPixel GWcslib::dir2xy(const GSkyDir& dir) const
 {
-    // Set constants
-    const int __permutation[2] = {1,0};
-
-    // Get native coordinates for sky direction in radians
-    GVector native = wcs_dir2native(dir);
-
-    // Perform map projection
-    GVector xy = native;
-    std2nat(&xy);
-
-    // Swap result if coordinates are reversed
-    if (m_reverse)
-        xy = perm(xy, __permutation);
-
-    // Determine pixel offset
-    GVector offset = m_invcd * xy + m_refpix;
-
-    // Set sky pixel
-    //GSkyPixel pixel(offset[0], offset[1]);
-
-    // NEW METHOD -- DELETE ALL OF ABOVE
-
     // Allocate memory for transformation
     double pixcrd[2];
     double imgcrd[2];
@@ -491,8 +615,7 @@ GSkyPixel GWcslib::dir2xy(GSkyDir dir) const
 
     // Debug: Dump transformation steps
     #if defined(G_DIR2XY_DEBUG)
-    std::cout << "dir2xy: dir=" << dir << " native=" << native
-              << " xy=" << xy << " pixel=" << offset
+    std::cout << "dir2xy: dir=" << dir
               << " (lng,lat)=(" << world[0] << "," << world[1] << ")"
               << " (phi,theta)=(" << phi << "," << theta << ")"
               << " (x,y)=" << pixel << std::endl;
@@ -500,6 +623,39 @@ GSkyPixel GWcslib::dir2xy(GSkyDir dir) const
 
     // Return sky pixel
     return pixel;
+}
+
+
+/***********************************************************************//**
+ * @brief Set World Coordinate System parameters
+ *
+ * @param[in] coords Coordinate system.
+ * @param[in] crval1 X value of reference pixel.
+ * @param[in] crval2 Y value of reference pixel.
+ * @param[in] crpix1 X index of reference pixel (first pixel is 1).
+ * @param[in] crpix2 Y index of reference pixel (first pixel is 1).
+ * @param[in] cdelt1 Increment in x direction at reference pixel (deg).
+ * @param[in] cdelt2 Increment in y direction at reference pixel (deg).
+ *
+ * This method sets the WCS parameters.
+ ***************************************************************************/
+void GWcslib::set(const std::string& coords,
+                  const double& crval1, const double& crval2,
+                  const double& crpix1, const double& crpix2,
+                  const double& cdelt1, const double& cdelt2)
+
+{
+    // Clear any existing information
+    clear();
+    
+    // Set standard parameters
+    set_members(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
+    
+    // Setup WCS derived parameters
+    wcs_set();
+    
+    // Return
+    return;
 }
 
 
@@ -534,14 +690,17 @@ void GWcslib::copy_members(const GWcslib& wcs)
     // Copy WCS attributes
     m_wcsset  = wcs.m_wcsset;
     m_naxis   = wcs.m_naxis;
-    m_Crval   = wcs.m_Crval;
+    m_crval   = wcs.m_crval;
     m_cunit   = wcs.m_cunit;
     m_ctype   = wcs.m_ctype;
+    m_ctype_c = wcs.m_ctype_c;
     m_lonpole = wcs.m_lonpole;
     m_latpole = wcs.m_latpole;
     m_restfrq = wcs.m_restfrq;
     m_restwav = wcs.m_restwav;
-    m_Cd      = wcs.m_Cd;
+    m_radesys = wcs.m_radesys;
+    m_equinox = wcs.m_equinox;
+    m_cd      = wcs.m_cd;
     m_crota   = wcs.m_crota;
     m_lng     = wcs.m_lng;
     m_lat     = wcs.m_lat;
@@ -550,9 +709,9 @@ void GWcslib::copy_members(const GWcslib& wcs)
     // Copy linear transformation parameters
     m_linset  = wcs.m_linset;
     m_unity   = wcs.m_unity;
-    m_Crpix   = wcs.m_Crpix;
+    m_crpix   = wcs.m_crpix;
     m_pc      = wcs.m_pc;
-    m_Cdelt   = wcs.m_Cdelt;
+    m_cdelt   = wcs.m_cdelt;
     m_piximg  = wcs.m_piximg;
     m_imgpix  = wcs.m_imgpix;
 
@@ -575,12 +734,11 @@ void GWcslib::copy_members(const GWcslib& wcs)
 
     // Copy projection parameters
     m_prjset = wcs.m_prjset;
-    m_code   = wcs.m_code;
-    m_name   = wcs.m_name;
     m_r0     = wcs.m_r0;
     m_bounds = wcs.m_bounds;
     m_x0     = wcs.m_x0;
     m_y0     = wcs.m_y0;
+    m_w      = wcs.m_w;
     for (int i = 0; i < PVN; ++i)
         m_pv[i] = wcs.m_pv[i];
 
@@ -600,7 +758,7 @@ void GWcslib::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Set standard WCS parameters
+ * @brief Set World Coordinate System parameters
  *
  * @param[in] coords Coordinate system.
  * @param[in] crval1 X value of reference pixel.
@@ -610,18 +768,11 @@ void GWcslib::free_members(void)
  * @param[in] cdelt1 Increment in x direction at reference pixel (deg).
  * @param[in] cdelt2 Increment in y direction at reference pixel (deg).
  *
- * @exception GException::wcs
- *            Unable to invert CD matrix.
+ * This method sets the WCS parameters. It does not call wcs_set(), however,
+ * as wcs_set() may depend on the availability of derived class methods which
+ * can not be used in a base class constructor.
  *
- * This method sets the WCS standard parameters as class members. It does
- * however not set the rotation matrices. A call to wcs_init is mandatory
- * before the projection can be used.
- *
- * @todo Implement parameter check
- *
- * Note: This method will be called by the base class constructors, hence
- * it cannot contain any call to pure virtual functions!!! The method
- * should definitely be renamed in the new version!!!
+ * @todo Implement parameter validity check
  ***************************************************************************/
 void GWcslib::set_members(const std::string& coords,
                           const double& crval1, const double& crval2,
@@ -631,58 +782,64 @@ void GWcslib::set_members(const std::string& coords,
 {
     //TODO: Check parameters
 
+    // Initialise WCS
+    wcs_ini(2);
+
     // Set coordinate system
     coordsys(coords);
 
-    // Set parameters
-    m_crval   = GVector(crval1, crval2);
-    m_crpix   = GVector(crpix1, crpix2);
-    m_cdelt   = GVector(cdelt1, cdelt2);
-    m_refval  = m_crval;
-    m_refpix  = m_crpix - GVector(1.0,1.0); //!< Needed as skypixel starts with 0
-
-    // Set CD matrix corresponding to no rotation
-    m_cd(0,0) = m_cdelt[0];
-    m_cd(1,0) = 0.0;
-    m_cd(0,1) = 0.0;
-    m_cd(1,1) = m_cdelt[1];
-
-    // Compute inverse CD matrix
-    double delta = m_cd(0,0)*m_cd(1,1) - m_cd(0,1)*m_cd(1,0);
-    if (delta != 0.0) {
-        m_invcd(0,0) =  m_cd(1,1) / delta;
-        m_invcd(0,1) = -m_cd(0,1) / delta;
-        m_invcd(1,0) = -m_cd(1,0) / delta;
-        m_invcd(1,1) =  m_cd(0,0) / delta;
-    }
-    else
-        throw GException::wcs(G_WCS_SET, "Unable to invert CD matrix.");
-
-    // NEW VERSION
-    
     // Set World Coordinate parameters
-    wcs_ini(2);
     m_lng      = 0;
     m_lat      = 1;
-    m_Crpix[0] = crpix1;
-    m_Crpix[1] = crpix2;
-    m_Cdelt[0] = cdelt1;
-    m_Cdelt[1] = cdelt2;
-    m_Crval[0] = crval1;
-    m_Crval[1] = crval2;
-    //m_Cd.push_back(cdelt1);
-    //m_Cd.push_back(0.0);
-    //m_Cd.push_back(0.0);
-    //m_Cd.push_back(cdelt2);
+    m_crpix[0] = crpix1;
+    m_crpix[1] = crpix2;
+    m_cdelt[0] = cdelt1;
+    m_cdelt[1] = cdelt2;
+    m_crval[0] = crval1;
+    m_crval[1] = crval2;
     
     // Return
     return;
 }
 
 
+/***********************************************************************//**
+ * @brief Returns true if argument is identical
+ *
+ * @param[in] wcs Pointer to World Coordinate System
+ *
+ * This method is a helper for the World Coordinate Comparison friends. It
+ * does not compare derived quantities as those may not have been initialised
+ * in both objects.
+ ***************************************************************************/
+bool GWcslib::compare(const GWcs& wcs) const
+{
+    // Initialise result
+    bool result = false;
+    
+    // Continue only we compare to a GWcslib object
+    const GWcslib* ptr = dynamic_cast<const GWcslib*>(&wcs);
+    if (ptr != NULL) {
+    
+        // Perform comparion of standard (non derived) parameters
+        result = ((code()     == ptr->code())     &&
+                  (m_coordsys == ptr->m_coordsys) &&
+                  (m_lng      == ptr->m_lng)      &&
+                  (m_lat      == ptr->m_lat)      &&
+                  (m_crval    == ptr->m_crval)    &&
+                  (m_crpix    == ptr->m_crpix)    &&
+                  (m_cdelt    == ptr->m_cdelt));
+        
+    }
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
- =            World Coordinate Methods adapted from wcslib                 =
+ =              World Coordinate Methods adapted from wcslib               =
  =                                                                         =
  ==========================================================================*/
 
@@ -703,13 +860,14 @@ void GWcslib::wcs_ini(int naxis)
     m_wcsset = false;
     
     // Clear vectors
-    m_Crpix.clear();
+    m_crpix.clear();
     m_pc.clear();
-    m_Cdelt.clear();
-    m_Crval.clear();
+    m_cdelt.clear();
+    m_crval.clear();
     m_cunit.clear();
     m_ctype.clear();
-    m_Cd.clear();
+    m_ctype_c.clear();
+    m_cd.clear();
     m_crota.clear();
 
     // Set number of axes
@@ -721,9 +879,10 @@ void GWcslib::wcs_ini(int naxis)
     // Set default axes parameters
     if (naxis > 0) {
         for (int i = 0; i < naxis; ++i) {
-            m_Crval.push_back(0.0);
+            m_crval.push_back(0.0);
             m_cunit.push_back("");
             m_ctype.push_back("");
+            m_ctype_c.push_back("");
         }
     }
     
@@ -732,8 +891,8 @@ void GWcslib::wcs_ini(int naxis)
     m_latpole = +90.0;
     
     // Set defaults for the spectral transformation parameters
-    m_restfrq = 0.0;
-    m_restwav = 0.0;
+    m_restfrq = UNDEFINED; // 0.0 in wcslib
+    m_restwav = UNDEFINED; // 0.0 in wcslib
     
     //TODO: Default parameter values
     
@@ -741,12 +900,14 @@ void GWcslib::wcs_ini(int naxis)
     if (naxis > 0) {
         for (int i = 0; i < naxis; ++i) {
             for (int j = 0; j < naxis; ++j)
-                m_Cd.push_back(0.0);
+                m_cd.push_back(0.0);
             m_crota.push_back(0.0);
         }
     }
     
     //TODO: Defaults for auxiliary coordinate system information
+    m_radesys.clear();
+    m_equinox = UNDEFINED;
     
     // Reset derived values
     m_lng  = -1;
@@ -796,8 +957,8 @@ void GWcslib::wcs_set(void) const
         cel_ini();
         
         // Set CRVALia, LONPOLEa, and LATPOLEa keyvalues
-        m_ref[0] = m_Crval[m_lng]; // Longitude reference value
-        m_ref[1] = m_Crval[m_lat]; // Latitude reference value
+        m_ref[0] = m_crval[m_lng]; // Longitude reference value
+        m_ref[1] = m_crval[m_lat]; // Latitude reference value
         m_ref[2] = m_lonpole;      // LONPOLE
         m_ref[3] = m_latpole;      // LATPOLE
         
@@ -830,6 +991,98 @@ void GWcslib::wcs_set(void) const
     // Return
     return;
 }    
+
+
+/***********************************************************************//**
+ * @brief Set CTYPEa keywords
+ *
+ * @exception GException::wcs_invalid
+ *            WCS projection not valid.
+ * @exception GException::wcs_bad_coords
+ *            Coordinate system is not of valid type.
+ *
+ * This method has been inspired by code from wcshdr.c::wcshdo.
+ ***************************************************************************/
+void GWcslib::wcs_set_ctype(void) const
+{
+    // Check on correct type length
+    if (code().length() != 3)
+        throw GException::wcs_invalid(G_WCS_SET_CTYPE, code(),
+              "3-character type required.");
+    
+    // Set longitude keyword
+    if (m_lng >= 0) {
+    
+        // Set coordinate system
+        if (m_coordsys == 0) {
+            m_ctype.at(m_lng) = "RA---" + code();
+            m_ctype_c.at(m_lng) = "Right ascension, ";
+        }
+        else if (m_coordsys == 1) {
+            m_ctype.at(m_lng) = "GLON-" + code();
+            m_ctype_c.at(m_lng) = "Galactic longitude, ";
+        }
+        else if (m_coordsys == 2) {
+            m_ctype.at(m_lng) = "ELON-" + code();
+            m_ctype_c.at(m_lng) = "Ecliptic longitude, ";
+        }
+        else if (m_coordsys == 3) {
+            m_ctype.at(m_lng) = "HLON-" + code();
+            m_ctype_c.at(m_lng) = "Helioecliptic longitude, ";
+        }
+        else if (m_coordsys == 4) {
+            m_ctype.at(m_lng) = "SLON-" + code();
+            m_ctype_c.at(m_lng) = "Supergalactic longitude, ";
+        }
+        else
+            throw GException::wcs_bad_coords(G_WCS_SET_CTYPE, coordsys());
+        
+        // Add projection name to comment
+        m_ctype_c.at(m_lng).append(name());
+        m_ctype_c.at(m_lng).append(" projection");
+    }
+
+    // Set latitude keyword
+    if (m_lat >= 0) {
+    
+        // Set coordinate system
+        if (m_coordsys == 0) {
+            m_ctype.at(m_lat) = "DEC--" + code();
+            m_ctype_c.at(m_lat) = "Declination, ";
+        }
+        else if (m_coordsys == 1) {
+            m_ctype.at(m_lat) = "GLAT-" + code();
+            m_ctype_c.at(m_lat) = "Galactic latitude, ";
+        }
+        else if (m_coordsys == 2) {
+            m_ctype.at(m_lat) = "ELAT-" + code();
+            m_ctype_c.at(m_lat) = "Ecliptic latitude, ";
+        }
+        else if (m_coordsys == 3) {
+            m_ctype.at(m_lat) = "HLAT-" + code();
+            m_ctype_c.at(m_lat) = "Helioecliptic latitude, ";
+        }
+        else if (m_coordsys == 4) {
+            m_ctype.at(m_lat) = "SLAT-" + code();
+            m_ctype_c.at(m_lat) = "Supergalactic latitude, ";
+        }
+        else
+            throw GException::wcs_bad_coords(G_WCS_SET_CTYPE, coordsys());
+
+        // Add projection name to comment
+        m_ctype_c.at(m_lng).append(name());
+        m_ctype_c.at(m_lng).append(" projection");
+    }
+
+    //TODO: Set spectral keyword
+    if (m_spec >= 0) {
+        m_ctype.at(m_spec) = "NONE";
+        m_ctype_c.at(m_spec) = "Not yet implemented";
+    }
+    
+    // Return
+    return;
+}
 
 
 /***********************************************************************//**
@@ -967,33 +1220,6 @@ std::string GWcslib::wcs_print(void) const
     // Initialise result string
     std::string result;
 
-    // Append information
-    GVector native = m_native_pole*rad2deg; 
-    result.append(parformat("Coordinate system")+coordsys()+"\n");
-    result.append(parformat("Reference coordinate")+m_crval.print()+" deg\n");
-    result.append(parformat("Reference pixel")+m_crpix.print()+"\n");
-    result.append(parformat("Increment at reference")+m_cdelt.print()+" deg\n");
-    result.append(parformat("Coordinate of North Pole")+m_npole.print()+" deg\n");
-
-    // Append CD matrix
-    result.append(parformat("CD matrix"));
-    result.append("["+str(m_cd(0,0)));
-    result.append(" "+str(m_cd(0,1)));
-    result.append("]["+str(m_cd(1,0)));
-    result.append(" "+str(m_cd(1,1))+"]\n");
-
-    // Append inverse CD matrix
-    result.append(parformat("Inverse CD matrix"));
-    result.append("["+str(m_invcd(0,0)));
-    result.append(" "+str(m_invcd(0,1)));
-    result.append("]["+str(m_invcd(1,0)));
-    result.append(" "+str(m_invcd(1,1))+"]\n");
-
-    // Append coordinate of native pole
-    result.append(parformat("Coordinate of native pole")+native.print()+"\n");
-
-    // NEW VERSION
-    
     // Append World Coordinate parameters
     result.append(parformat("Number of axes")+str(m_naxis)+"\n");
     result.append(parformat("Longitude axis")+str(m_lng)+"\n");
@@ -1002,27 +1228,27 @@ std::string GWcslib::wcs_print(void) const
     
     // Append coordinates
     result.append(parformat("Reference coordinate")+"(");
-    for (int i = 0; i < m_Crval.size(); ++i) {
+    for (int i = 0; i < m_crval.size(); ++i) {
         if (i > 0)
             result.append(", ");
-        result.append(str(m_Crval[i]));
+        result.append(str(m_crval[i]));
         if (m_cunit[i].length() > 0)
             result.append(" "+m_cunit[i]);
             
     }
     result.append(")\n");
     result.append(parformat("Reference pixel")+"(");
-    for (int i = 0; i < m_Crpix.size(); ++i) {
+    for (int i = 0; i < m_crpix.size(); ++i) {
         if (i > 0)
             result.append(", ");
-        result.append(str(m_Crpix[i]));
+        result.append(str(m_crpix[i]));
     }
     result.append(")\n");
     result.append(parformat("Increment at reference")+"(");
-    for (int i = 0; i < m_Cdelt.size(); ++i) {
+    for (int i = 0; i < m_cdelt.size(); ++i) {
         if (i > 0)
             result.append(", ");
-        result.append(str(m_Cdelt[i]));
+        result.append(str(m_cdelt[i]));
         if (m_cunit[i].length() > 0)
             result.append(" "+m_cunit[i]);
     }
@@ -1030,22 +1256,13 @@ std::string GWcslib::wcs_print(void) const
         
     // Append origin
     result.append(parformat("(Phi_0, Theta_0)")+"(");
-    if (undefined(m_phi0))
-        result.append("UNDEFINED, ");
-    else
-        result.append(str(m_phi0)+", ");
-    if (undefined(m_theta0))
-        result.append("UNDEFINED)\n");
-    else
-        result.append(str(m_theta0)+") deg\n");
+    result.append(wcs_print_value(m_phi0)+", ");
+    result.append(wcs_print_value(m_theta0)+") deg\n");
     
     // Append native pole
     result.append(parformat("(Phi_p, Theta_p)")+"(");
-    if (undefined(m_lonpole))
-        result.append("UNDEFINED, ");
-    else
-        result.append(str(m_lonpole)+", ");
-    result.append(str(m_latpole)+") deg\n");
+    result.append(wcs_print_value(m_lonpole)+", ");
+    result.append(wcs_print_value(m_latpole)+") deg\n");
 
     // Append LATPOLEa keyword usage
     result.append(parformat("LATPOLE keyword usage"));
@@ -1061,6 +1278,9 @@ std::string GWcslib::wcs_print(void) const
     case 2:
         result.append("Theta_p was specified solely by LATPOLE.\n");
         break;
+    default:
+        result.append("UNDEFINED\n");
+        break;
     }
 
     // Append celestial transformation parameters
@@ -1068,10 +1288,7 @@ std::string GWcslib::wcs_print(void) const
     for (int k = 0; k < 4; ++k) {
         if (k > 0)
             result.append(", ");
-        if (undefined(m_ref[k]))
-            result.append("UNDEFINED");
-        else
-            result.append(str(m_ref[k]));
+        result.append(wcs_print_value(m_ref[k]));
     }
     result.append(") deg\n");
 
@@ -1112,9 +1329,12 @@ std::string GWcslib::wcs_print(void) const
     }
     result.append(")\n");
     
+    // Append coordinate system
+    result.append(parformat("Coodinate system")+coordsys()+"\n");
+    
     // Append projection parameters
-    result.append(parformat("Projection code")+m_code+"\n");
-    result.append(parformat("Projection name")+m_name+"\n");
+    result.append(parformat("Projection code")+code()+"\n");
+    result.append(parformat("Projection name")+name()+"\n");
     result.append(parformat("Radius of the gen. sphere")+str(m_r0)+" deg\n");
 
     // Append boundary checking information
@@ -1131,10 +1351,34 @@ std::string GWcslib::wcs_print(void) const
     result.append(parformat("Fiducial offset")+"("+str(m_x0)+", "+str(m_y0)+")\n");
     
     // Append spectral transformation parameters
-    result.append(parformat("Rest frequency")+str(m_restfrq)+"\n");
-    result.append(parformat("Rest wavelength")+str(m_restwav)+"\n");
+    result.append(parformat("Rest frequency")+wcs_print_value(m_restfrq)+"\n");
+    result.append(parformat("Rest wavelength")+wcs_print_value(m_restwav)+"\n");
 
     // Return
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Helper function for value printing
+ *
+ * @param[in] value Double precision value
+ *
+ * This helper function either prints a double precision value or the
+ * word 'UNDEFINED', depending on whether the value is defined or not.
+ ***************************************************************************/
+std::string GWcslib::wcs_print_value(const double& value) const
+{
+    // Initialise result
+    std::string result;
+    
+    // Depend value dependent string
+    if (undefined(value))
+        result.append("UNDEFINED");
+    else
+        result.append(str(value));
+    
+    // Return result
     return result;
 }
 
@@ -1978,9 +2222,9 @@ void GWcslib::lin_ini(int naxis)
     m_unity  = false;
     
     // Clear vectors
-    m_Crpix.clear();
+    m_crpix.clear();
     m_pc.clear();
-    m_Cdelt.clear();
+    m_cdelt.clear();
     m_piximg.clear();
     m_imgpix.clear();
     
@@ -1991,7 +2235,7 @@ void GWcslib::lin_ini(int naxis)
         for (int i = 0; i < naxis; ++i) {
         
             // CRPIXja defaults to 0.0
-            m_Crpix.push_back(0.0);
+            m_crpix.push_back(0.0);
             
             // PCi_ja defaults to the unit matrix
             for (int j = 0; j < naxis; ++j) {
@@ -2002,7 +2246,7 @@ void GWcslib::lin_ini(int naxis)
             }
             
             // CDELTia defaults to 1.0
-            m_Cdelt.push_back(1.0);
+            m_cdelt.push_back(1.0);
         
         } // endfor: looped over axes
         
@@ -2058,7 +2302,7 @@ void GWcslib::lin_set(void) const
         // Compute the pixel-to-image transformation matrix
         for (int i = 0, index = 0; i < m_naxis; ++i) {
             for (int j = 0; j < m_naxis; ++j, ++index)
-                m_piximg.push_back(m_Cdelt[i] * m_pc[index]);
+                m_piximg.push_back(m_cdelt[i] * m_pc[index]);
         }
     
         // Compute the image-to-pixel transformation matrix
@@ -2105,7 +2349,7 @@ void GWcslib::lin_p2x(int ncoord, int nelem, const double* pixcrd, double* imgcr
             
             // Transform the first m_naxis elements
             for (int i = 0; i < m_naxis; ++i)
-                *(img++) = m_Cdelt[i] * (*(pix++) - m_Crpix[i]);
+                *(img++) = m_cdelt[i] * (*(pix++) - m_crpix[i]);
             
             // Go to next coordinate
             pix += (nelem - m_naxis);
@@ -2128,7 +2372,7 @@ void GWcslib::lin_p2x(int ncoord, int nelem, const double* pixcrd, double* imgcr
             // Perform matrix multiplication (column-wise multiplication
             // allows this to be cached)
             for (int j = 0; j < m_naxis; ++j) {
-                double  temp   = *(pix++) - m_Crpix[j];
+                double  temp   = *(pix++) - m_crpix[j];
                 for (int i = 0, ji = j; i < m_naxis; ++i, ji += m_naxis)
                     img[i] += m_piximg[ji] * temp;
             }
@@ -2177,7 +2421,7 @@ void GWcslib::lin_x2p(int ncoord, int nelem, const double* imgcrd, double* pixcr
             
             // Transform the first m_naxis elements
             for (int i = 0; i < m_naxis; ++i)
-                *(pix++) = (*(img++) / m_Cdelt[i]) + m_Crpix[i];
+                *(pix++) = (*(img++) / m_cdelt[i]) + m_crpix[i];
             
             // Go to next coordinate
             pix += (nelem - m_naxis);
@@ -2198,7 +2442,7 @@ void GWcslib::lin_x2p(int ncoord, int nelem, const double* imgcrd, double* pixcr
                 *pix = 0.0;
                 for (int i = 0; i < m_naxis; ++i, ++ji)
                     *pix += m_imgpix[ji] * img[i];
-                *(pix++) += m_Crpix[j];
+                *(pix++) += m_crpix[j];
             }
 
             // Go to next coordinate
@@ -2372,8 +2616,6 @@ void GWcslib::prj_ini(void) const
 {
     // Initialise parameters
     m_prjset = false;
-    m_code   = "";
-    m_name   = "";
     m_r0     = 0.0;
     m_pv[0]  = 0.0;
     m_pv[1]  = UNDEFINED;
@@ -2384,6 +2626,7 @@ void GWcslib::prj_ini(void) const
     m_bounds = true; // 1 in wcslib
     m_x0     = 0.0;
     m_y0     = 0.0;
+    m_w.clear();
     
     // Return
     return;
@@ -2669,70 +2912,3 @@ void GWcslib::sincosd(const double& angle, double *s, double *c) const
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Equality operator
- *
- * @param[in] a First WCS.
- * @param[in] b Second WCS.
- ***************************************************************************/
-bool operator== (const GWcslib &a, const GWcslib &b)
-{
-    // Set result
-    bool result = ((a.m_type     == b.m_type) &&
-                   (a.m_coordsys == b.m_coordsys) &&
-                   (a.m_reverse  == b.m_reverse) &&
-                   (a.m_crval    == b.m_crval) &&
-                   (a.m_crpix    == b.m_crpix) &&
-                   (a.m_cdelt    == b.m_cdelt) &&
-                   (a.m_npole    == b.m_npole) &&
-                   (a.m_cd       == b.m_cd));
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Non-equality operator
- *
- * @param[in] a First WCS.
- * @param[in] b Second WCS.
- ***************************************************************************/
-bool operator!= (const GWcslib &a, const GWcslib &b)
-{
-    // Return result
-    return !(a == b);
-}
-
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] wcs WCS.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GWcslib& wcs)
-{
-     // Write WCS in output stream
-    os << wcs.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] wcs WCS.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GWcslib& wcs)
-{
-    // Write WCS into logger
-    log << wcs.print();
-
-    // Return logger
-    return log;
-}

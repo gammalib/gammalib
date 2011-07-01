@@ -41,13 +41,9 @@
 /***********************************************************************//**
  * @class GWcslib
  *
- * @brief GWcslib virtual base class interface defintion
+ * @brief Virtual base class for wcslib based World Coordinate System
  ***************************************************************************/
 class GWcslib : public GWcs {
-
-    // Operator friends
-    friend bool operator== (const GWcslib &a, const GWcslib &b);
-    friend bool operator!= (const GWcslib &a, const GWcslib &b);
 
 public:
     // Constructors and destructors
@@ -56,6 +52,7 @@ public:
                      const double& crval1, const double& crval2,
                      const double& crpix1, const double& crpix2,
                      const double& cdelt1, const double& cdelt2);
+    explicit GWcslib(const GFitsHDU* hdu);
     GWcslib(const GWcslib& wcs);
     virtual ~GWcslib(void);
 
@@ -65,14 +62,25 @@ public:
     // Pure virtual methods (not implemented)
     virtual void        clear(void) = 0;
     virtual GWcslib*    clone(void) const = 0;
+    virtual std::string code(void) const = 0;
+    virtual std::string name(void) const = 0;
     virtual std::string print(void) const = 0;
     
-    // Implemented methods
-    void      read(const GFitsHDU* hdu);
-    void      write(GFitsHDU* hdu) const;
-    double    omega(const GSkyPixel& pix) const;
-    GSkyDir   xy2dir(const GSkyPixel& pix) const;
-    GSkyPixel dir2xy(GSkyDir dir) const;
+    // Implemented virtual methods
+    virtual void        read(const GFitsHDU* hdu);
+    virtual void        write(GFitsHDU* hdu) const;
+    virtual double      omega(const int& pix) const;
+    virtual double      omega(const GSkyPixel& pix) const;
+    virtual GSkyDir     pix2dir(const int& pix) const;
+    virtual int         dir2pix(const GSkyDir& dir) const;
+    virtual GSkyDir     xy2dir(const GSkyPixel& pix) const;
+    virtual GSkyPixel   dir2xy(const GSkyDir& dir) const;
+
+    // Other methods
+    void set(const std::string& coords,
+             const double& crval1, const double& crval2,
+             const double& crpix1, const double& crpix2,
+             const double& cdelt1, const double& cdelt2);
 
 private:
     // Constants
@@ -81,24 +89,27 @@ private:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GWcslib& wcs);
-    void free_members(void);
-    bool undefined(const double& value) const { return (value==UNDEFINED); }
-    void set_members(const std::string& coords,
-                     const double& crval1, const double& crval2,
-                     const double& crpix1, const double& crpix2,
-                     const double& cdelt1, const double& cdelt2);
+    void         init_members(void);
+    void         copy_members(const GWcslib& wcs);
+    void         free_members(void);
+    void         set_members(const std::string& coords,
+                             const double& crval1, const double& crval2,
+                             const double& crpix1, const double& crpix2,
+                             const double& cdelt1, const double& cdelt2);
+    virtual bool compare(const GWcs& wcs) const;
+    bool         undefined(const double& value) const { return (value==UNDEFINED); }
 
     // Methods adapted from wcslib::wcs.c 
     void        wcs_ini(int naxis);
     void        wcs_set(void) const;
+    void        wcs_set_ctype(void) const;
     void        wcs_p2s(int ncoord, int nelem, const double* pixcrd, double* imgcrd,
                         double* phi, double* theta, double* world, int* stat) const;
     void        wcs_s2p(int ncoord, int nelem, const double* world,
                         double* phi, double* theta,  double* imgcrd,
                         double* pixcrd, int* stat) const;
     std::string wcs_print(void) const;
+    std::string wcs_print_value(const double& value) const;
     
     // Methods adapted from wcslib::cel.c
     void cel_ini(void) const;
@@ -152,51 +163,53 @@ protected:
     void   sincosd(const double& angle, double *s, double *c) const;
 
     // World Coordinate System parameters
-    mutable bool                m_wcsset;  //!< WCS information is set
-    int                         m_naxis;   //!< Number of axes
-    std::vector<double>         m_Crval;   //!< CRVALia keyvalues for each coord axis
-    std::vector<std::string>    m_cunit;   //!< CUNITia keyvalues for each coord axis
-    std::vector<std::string>    m_ctype;   //!< CTYPEia keyvalues for each coord axis
-    mutable double              m_lonpole; //!< LONPOLEa keyvalue
-    mutable double              m_latpole; //!< LATPOLEa keyvalue
-    double                      m_restfrq; //!< RESTFRQa keyvalue
-    double                      m_restwav; //!< RESTWAVa keyvalue
-    std::vector<double>         m_Cd;      //!< CDi_ja linear transformation matrix
-    std::vector<double>         m_crota;   //!< CROTAia keyvalues for each coord axis
-    int                         m_lng;     //!< Longitude axis
-    int                         m_lat;     //!< Latitude axis
-    int                         m_spec;    //!< Spectral axis
+    mutable bool                     m_wcsset;  //!< WCS information is set
+    int                              m_naxis;   //!< Number of axes
+    std::vector<double>              m_crval;   //!< CRVALia keyvalues for each coord axis
+    std::vector<std::string>         m_cunit;   //!< CUNITia keyvalues for each coord axis
+    mutable std::vector<std::string> m_ctype;   //!< CTYPEia keyvalues for each coord axis
+    mutable std::vector<std::string> m_ctype_c; //!< CTYPEia comments for each coord axis
+    mutable double                   m_lonpole; //!< LONPOLEa keyvalue
+    mutable double                   m_latpole; //!< LATPOLEa keyvalue
+    double                           m_restfrq; //!< RESTFRQa keyvalue
+    double                           m_restwav; //!< RESTWAVa keyvalue
+    std::string                      m_radesys; //!< RADESYS keyvalue
+    double                           m_equinox; //!< EQUINOX keyvalue
+    std::vector<double>              m_cd;      //!< CDi_ja linear transformation matrix
+    std::vector<double>              m_crota;   //!< CROTAia keyvalues for each coord axis
+    int                              m_lng;     //!< Longitude axis
+    int                              m_lat;     //!< Latitude axis
+    int                              m_spec;    //!< Spectral axis
     
     // Linear transformation parameters
-    mutable bool                m_linset;  //!< Linear transformation is set
-    mutable bool                m_unity;   //!< Signals unity PC matrix
-    std::vector<double>         m_Crpix;   //!< CRPIXja keyvalues for each pixel axis
-    std::vector<double>         m_pc;      //!< PCi_ja  linear transformation matrix
-    std::vector<double>         m_Cdelt;   //!< CDELTia keyvalues for each coord axis
-    mutable std::vector<double> m_piximg;  //!< Pixel to image transformation matrix
-    mutable std::vector<double> m_imgpix;  //!< Image to pixel transformation matrix
+    mutable bool                     m_linset;  //!< Linear transformation is set
+    mutable bool                     m_unity;   //!< Signals unity PC matrix
+    std::vector<double>              m_crpix;   //!< CRPIXja keyvalues for each pixel axis
+    std::vector<double>              m_pc;      //!< PCi_ja  linear transformation matrix
+    std::vector<double>              m_cdelt;   //!< CDELTia keyvalues for each coord axis
+    mutable std::vector<double>      m_piximg;  //!< Pixel to image transformation matrix
+    mutable std::vector<double>      m_imgpix;  //!< Image to pixel transformation matrix
 
     // Celestial transformation parameters
-    mutable bool                m_celset;  //!< Celestial transformation is set
-    mutable bool                m_offset;  //!< Force (x,y) = (0,0) at (phi_0,theta_0)
-    mutable double              m_phi0;    //!< Native azimuth angle of fiducial point
-    mutable double              m_theta0;  //!< Native zenith angle of fiducial point
-    mutable double              m_ref[4];  //!< Celestial coordinates of fiducial
-                                           //   point and native coordinates of celestial
-                                           //   pole
-    mutable double              m_euler[5];//!< Euler angles and functions thereof
-    mutable int                 m_latpreq; //!< LATPOLEa requirement
-    mutable bool                m_isolat;  //!< True if |latitude| is preserved
+    mutable bool                     m_celset;  //!< Celestial transformation is set
+    mutable bool                     m_offset;  //!< Force (x,y) = (0,0) at (phi_0,theta_0)
+    mutable double                   m_phi0;    //!< Native azimuth angle of fiducial point
+    mutable double                   m_theta0;  //!< Native zenith angle of fiducial point
+    mutable double                   m_ref[4];  //!< Celestial coordinates of fiducial
+                                                //   point and native coordinates of celestial
+                                                //   pole
+    mutable double                   m_euler[5];//!< Euler angles and functions thereof
+    mutable int                      m_latpreq; //!< LATPOLEa requirement
+    mutable bool                     m_isolat;  //!< True if |latitude| is preserved
     
     // Projection parameters
-    mutable bool                m_prjset;  //!< Projection is set
-    mutable std::string         m_code;    //!< Three-letter projection code
-    mutable std::string         m_name;    //!< Projection name
-    mutable double              m_r0;      //!< Radius of the generating sphere
-    mutable double              m_pv[PVN]; //!< Projection parameters
-    mutable bool                m_bounds;  //!< Enable strict bounds checking
-    mutable double              m_x0;      //!< Fiducial x offset
-    mutable double              m_y0;      //!< Fiducial y offset
+    mutable bool                     m_prjset;  //!< Projection is set
+    mutable double                   m_r0;      //!< Radius of the generating sphere
+    mutable double                   m_pv[PVN]; //!< Projection parameters
+    mutable bool                     m_bounds;  //!< Enable strict bounds checking
+    mutable double                   m_x0;      //!< Fiducial x offset
+    mutable double                   m_y0;      //!< Fiducial y offset
+    mutable std::vector<double>      m_w;       //!< Intermediate values
     
     // Spectral transformation parameters
     //struct spcprm spc

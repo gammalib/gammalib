@@ -105,8 +105,6 @@ void test_GWcsCAR(void)
     double      crpix2 = 100.5;
     double      cdelt1 = 0.02;
     double      cdelt2 = 0.02;
-    GMatrix     cd(2,2);
-    GVector     pv2(21);
 
     // Test void constructor
     try {
@@ -123,8 +121,7 @@ void test_GWcsCAR(void)
 
     // Test constructor
     try {
-        GWcsCAR wcs(coords, crval1, crval2, crpix1, crpix2,
-                    cdelt1, cdelt2, cd, pv2);
+        GWcsCAR wcs(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
         std::cout << wcs << std::endl;
     }
     catch (std::exception &e) {
@@ -137,8 +134,7 @@ void test_GWcsCAR(void)
     std::cout << ".";
 
     // Build now skymap for conversion testing
-    GWcsCAR car(coords, crval1, crval2, crpix1, crpix2,
-                cdelt1, cdelt2, cd, pv2);
+    GWcsCAR car(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
     
     // Test (x,y) to (lon,lat)
     try {
