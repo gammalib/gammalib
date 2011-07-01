@@ -34,6 +34,8 @@
 #include "GWcsRegistry.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_PRJ_S2X "GWcsTAN::prj_s2x(int,int,int,int,double*,double*,double*,"\
+                                                              "double*,int*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -397,7 +399,6 @@ void GWcsTAN::prj_x2s(int nx, int ny, int sxy, int spt,
  * wcslib routine, however, the method assumes that the projection has been
  * setup previsouly (as this will be done by the constructor).
  ***************************************************************************/
-#define G_PRJ_S2X "GWcsTAN::prj_s2x(int,int,int,int,double*,double*,double*,double*,int*)"
 void GWcsTAN::prj_s2x(int nphi, int ntheta, int spt, int sxy,
                       const double* phi, const double* theta,
                       double* x, double* y, int* stat) const
