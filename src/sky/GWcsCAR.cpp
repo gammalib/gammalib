@@ -271,8 +271,6 @@ void GWcsCAR::free_members(void)
  *      m_theta0  Reset to 0.0 if undefined.
  *
  *   Returned:
- *      m_code    "CAR"
- *      m_name    "plate caree"
  *      m_x0      Fiducial offset in x.
  *      m_y0      Fiducial offset in y.
  *      m_w[0]    r0*(pi/180)
@@ -281,8 +279,6 @@ void GWcsCAR::free_members(void)
 void GWcsCAR::prj_set(void) const
 {
     // Initialise projection parameters
-    //m_code = "CAR";
-    //m_name = "plate caree";
     m_w.clear();
     
     // Precompute 
