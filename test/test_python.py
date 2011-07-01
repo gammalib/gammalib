@@ -3,6 +3,7 @@
 from gammalib import *
 from math import *
 import os
+import sys
 
 #================#
 # Test FITS file #
@@ -12,7 +13,7 @@ def test_fits():
     Test GFits interface.
     """
     # Dump testing
-    print "Test GFits."
+    print "Test GFits: ",
 
     # Set filenames
     file1 = "test_python_fits_v1.fits"
@@ -27,6 +28,7 @@ def test_fits():
 
     # Create FITS file
     fits = GFits(file1, True)
+    sys.stdout.write(".")
 
     # Create images
     nx   = 10
@@ -60,6 +62,7 @@ def test_fits():
     img7.extname("Short")
     img8.extname("ULong")
     img9.extname("UShort")
+    sys.stdout.write(".")
 
     # Append images to FITS file
     fits.append(img1)
@@ -71,12 +74,14 @@ def test_fits():
     fits.append(img7)
     fits.append(img8)
     fits.append(img9)
+    sys.stdout.write(".")
 
     # Set header keywords
     img_byte = fits.image(0)
     img_byte.card("test", "test-value", "this is for testing")
     img_byte.card("real", 3.1415, "a real value")
     img_byte.card("int", 41, "an integer value")
+    sys.stdout.write(".")
 
     # Create table columns
     nrows = 10
@@ -103,6 +108,7 @@ def test_fits():
         col9[i] = str(i*100)
         col10[i] = i*100
         col11[i] = i*100
+    sys.stdout.write(".")
 
     # Set ASCII table
     tbl_ascii = GFitsAsciiTable()
@@ -119,6 +125,7 @@ def test_fits():
     tbl_ascii.append_column(col11)
     tbl_ascii.extname("ASCII table")
     fits.append(tbl_ascii)
+    sys.stdout.write(".")
 
     # Set binary table
     tbl_bin = GFitsBinTable()
@@ -135,16 +142,20 @@ def test_fits():
     tbl_bin.append_column(col11)
     tbl_bin.extname("Binary table")
     fits.append(tbl_bin)
+    sys.stdout.write(".")
 
     # Save FITS file
     #print fits
     fits.save()
+    sys.stdout.write(".")
 
     # Close FITS file
     fits.close()
+    sys.stdout.write(".")
 
     # Re-open FITS file
     fits = GFits(file1)
+    sys.stdout.write(".")
 
     # Get double precision image, take square root of pixel and save in
     # another file
@@ -153,12 +164,18 @@ def test_fits():
         for y in range(ny):
             img_double[x,y] = sqrt(img_double[x,y])
     #img_byte = cast_GFitsImageByte(fits.image("Double"))
+    sys.stdout.write(".")
 
     # Save into another FITS file
     fits.saveto(file2)
+    sys.stdout.write(".")
 
     # Close FITS file
     fits.close()
+    sys.stdout.write(".")
+
+    # Print final success
+    print " ok."
 
     # Return
     return
@@ -172,18 +189,24 @@ def test_skymap():
     Test GSkymap interface.
     """
     # Dump testing
-    print "Test GSkymap."
+    print "Test GSkymap: ",
 
     # Set filenames
     file1 = "test_python_skymap_hpx_v1.fits"
     file2 = "test_python_skymap_hpx_v2.fits"
     file3 = "test_python_skymap_car.fits"
+    file4 = "test_python_skymap_tan.fits"
+    file5 = "test_python_skymap_stg.fits"
+    file6 = "test_python_skymap_azp.fits"
 
     # Remove test files
     try:
         os.remove(file1)
         os.remove(file2)
         os.remove(file3)
+        os.remove(file4)
+        os.remove(file5)
+        os.remove(file6)
     except:
         pass
 
@@ -193,9 +216,11 @@ def test_skymap():
         pixels[i]   = i+1.0
         pixels[i,1] = i+1.0 + 1000.0
     pixels.save(file1)
+    sys.stdout.write(".")
 
     # Load HEALPix skymap
     pixels = GSkymap(file1)
+    sys.stdout.write(".")
 
     # Control pix2dir / dir2pix
     for i in range(pixels.npix()):
@@ -205,6 +230,7 @@ def test_skymap():
             msg = "HEALPix GSkymap trouble with pixel "+str(i)+" ("+str(ipix)+ \
                   "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
             raise RuntimeError("*** TEST ERROR: "+msg)
+    sys.stdout.write(".")
 
     # Control SkyDir coordinate transformation for all pixels
     for i in range(pixels.npix()):
@@ -219,6 +245,7 @@ def test_skymap():
             msg = "GSkyDir Trouble with pixel "+str(i)+" ("+str(dra)+ \
                   ","+str(ddec)+")"
             raise RuntimeError("*** TEST ERROR: "+msg)
+    sys.stdout.write(".")
 
     # Save HEALPix skymap twice. The second saving should fail.
     try:
@@ -229,9 +256,11 @@ def test_skymap():
     else:
         raise RuntimeError("*** TEST ERROR: FITS file overwritten!")
     pixels.save(file2, True)
+    sys.stdout.write(".")
 
     # Load again HEALPix skymap
     pixels = GSkymap(file1)
+    sys.stdout.write(".")
 
     # Create CAR skymap
     pixels = GSkymap("CAR", "CEL", 83.6331, 22.0145, -0.1, 0.1, 100, 100, 20)
@@ -239,6 +268,7 @@ def test_skymap():
         for i in range(pixels.npix()):
             pixels[i,map] = i+map*pixels.npix()
     pixels.save(file3)
+    sys.stdout.write(".")
 
     # Control pix2dir / dir2pix
     for i in range(pixels.npix()):
@@ -248,13 +278,61 @@ def test_skymap():
             msg = "CAR GSkymap trouble with pixel "+str(i)+" ("+str(ipix)+ \
                   "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
             raise RuntimeError("*** TEST ERROR: "+msg)
+    sys.stdout.write(".")
 
     # Create TAN skymap
-    #pixels = GSkymap("TAN", "CEL", 83.6331, 22.0145, -0.1, 0.1, 100, 100, 20)
-    #for map in range(pixels.nmaps()):
-    #    for i in range(pixels.npix()):
-    #        pixels[i,map] = i+map*pixels.npix()
-    #pixels.save(file3)
+    pixels = GSkymap("TAN", "CEL", 83.6331, 22.0145, -0.1, 0.1, 100, 100, 20)
+    for map in range(pixels.nmaps()):
+        for i in range(pixels.npix()):
+            pixels[i,map] = i+map*pixels.npix()
+    pixels.save(file4)
+    sys.stdout.write(".")
+
+    # Control pix2dir / dir2pix
+    for i in range(pixels.npix()):
+        dir  = pixels.pix2dir(i)
+        ipix = pixels.dir2pix(dir)
+        if (i != ipix):
+            msg = "TAN GSkymap trouble with pixel "+str(i)+" ("+str(ipix)+ \
+                  "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
+            raise RuntimeError("*** TEST ERROR: "+msg)
+    sys.stdout.write(".")
+
+    # Create STG skymap
+    pixels = GSkymap("STG", "CEL", 83.6331, 22.0145, -0.1, 0.1, 100, 100, 20)
+    for map in range(pixels.nmaps()):
+        for i in range(pixels.npix()):
+            pixels[i,map] = i+map*pixels.npix()
+    pixels.save(file5)
+    sys.stdout.write(".")
+
+    # Control pix2dir / dir2pix
+    for i in range(pixels.npix()):
+        dir  = pixels.pix2dir(i)
+        ipix = pixels.dir2pix(dir)
+        if (i != ipix):
+            msg = "STG GSkymap trouble with pixel "+str(i)+" ("+str(ipix)+ \
+                  "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
+            raise RuntimeError("*** TEST ERROR: "+msg)
+    sys.stdout.write(".")
+
+    # Create AZP skymap
+    pixels = GSkymap("AZP", "CEL", 83.6331, 22.0145, -0.1, 0.1, 100, 100, 20)
+    for map in range(pixels.nmaps()):
+        for i in range(pixels.npix()):
+            pixels[i,map] = i+map*pixels.npix()
+    pixels.save(file6)
+    sys.stdout.write(".")
+
+    # Control pix2dir / dir2pix
+    for i in range(pixels.npix()):
+        dir  = pixels.pix2dir(i)
+        ipix = pixels.dir2pix(dir)
+        if (i != ipix):
+            msg = "AZP GSkymap trouble with pixel "+str(i)+" ("+str(ipix)+ \
+                  "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
+            raise RuntimeError("*** TEST ERROR: "+msg)
+    sys.stdout.write(".")
 
     # SkyPixel access
     #for i in range(pixels.npix()):
@@ -264,6 +342,9 @@ def test_skymap():
 
     # Dump skymap
     #print pixels
+
+    # Print final success
+    print " ok."
 
     # Return
     return
