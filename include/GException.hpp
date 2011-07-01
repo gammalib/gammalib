@@ -359,6 +359,14 @@ public:
     public:
         wcs_invalid_parameter(std::string origin, std::string message = "");
     };
+    class wcs_invalid_x_y : public GExceptionHandler {
+    public:
+        wcs_invalid_x_y(std::string origin, int num, std::string message = "");
+    };
+    class wcs_invalid_phi_theta : public GExceptionHandler {
+    public:
+        wcs_invalid_phi_theta(std::string origin, int num, std::string message = "");
+    };
 
 
     // Application exceptions

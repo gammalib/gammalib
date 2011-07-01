@@ -300,3 +300,47 @@ GException::wcs_invalid_parameter::wcs_invalid_parameter(std::string origin,
     return;
 }
 
+
+/***********************************************************************//**
+ * @brief Invalid (x,y) coordinate(s)
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] num Number of invalid coordinates.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::wcs_invalid_x_y::wcs_invalid_x_y(std::string origin,
+                                             int         num,
+                                             std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = str(num)+" (x,y) coordinates were invalid.";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Invalid (phi,theta) coordinate(s)
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] num Number of invalid coordinates.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::wcs_invalid_phi_theta::wcs_invalid_phi_theta(std::string origin,
+                                                         int         num,
+                                                         std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = str(num)+" (phi,theta) coordinates were invalid.";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
