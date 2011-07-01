@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GWcsTAN.i
- * @brief Plate carree (CAR) projection class Python interface
+ * @brief Gnomonic (TAN) projection class Python interface
  * @author J. Knodlseder
  */
 %{
