@@ -156,7 +156,7 @@ GException::wcs::wcs(std::string origin,
 
 
 /***********************************************************************//**
- * @brief Invalid WCS
+ * @brief Invalid WCS code
  *
  * @param[in] origin Method that throws the error.
  * @param[in] wcs WCS.
@@ -168,7 +168,7 @@ GException::wcs_invalid::wcs_invalid(std::string origin,
 {
     // Set origin and message
     m_origin  = origin;
-    m_message = "Invalid WCS ("+wcs+"). " + message;
+    m_message = "Invalid World Coordinate System code ("+wcs+"). " + message;
 
     // Return
     return;
@@ -187,7 +187,7 @@ GException::wcs_bad_coords::wcs_bad_coords(std::string origin,
     // Set origin and message
     m_origin  = origin;
     m_message = "Invalid WCS coordinate system ("+coordsys+"). "
-                "Should be one of 'EQU', 'CEL' or 'GAL'.";
+                "Should be one of EQU/CEL/GAL/ECL/HEL/SGL.";
 
     // Return
     return;
