@@ -284,7 +284,7 @@ void GWcsTAN::prj_set(void) const
         m_r0 = rad2deg;
     
     // Compute fiducial offset
-    prj_off(0.0, 0.0);
+    prj_off(0.0, 90.0);
     
     // Signal that projection has been set
     m_prjset = true;
