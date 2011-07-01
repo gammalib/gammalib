@@ -12,7 +12,10 @@ sources = GSkyDir.cpp \
           GWcs.cpp \
           GWcsRegistry.cpp \
           GWcslib.cpp \
+          GWcsAZP.cpp \
           GWcsCAR.cpp \
+          GWcsTAN.cpp \
+          GWcsSTG.cpp \
           GWcsHPX.cpp \
           GException_sky.cpp
 

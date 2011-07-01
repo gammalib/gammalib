@@ -106,7 +106,10 @@
 %include "GWcs.i"
 %include "GWcsRegistry.i"
 %include "GWcslib.i"
+%include "GWcsAZP.i"
 %include "GWcsCAR.i"
+%include "GWcsTAN.i"
+%include "GWcsSTG.i"
 %include "GWcsHPX.i"
 
 /* __ Observation handling _______________________________________________ */

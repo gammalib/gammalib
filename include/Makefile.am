@@ -11,7 +11,10 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GWcs.hpp \
                      GWcsRegistry.hpp \
                      GWcslib.hpp \
+                     GWcsAZP.hpp \
                      GWcsCAR.hpp \
+                     GWcsTAN.hpp \
+                     GWcsSTG.hpp \
                      GWcsHPX.hpp \
                      GEnergy.hpp \
                      GTime.hpp \

@@ -113,7 +113,10 @@
 #include "GWcs.hpp"
 #include "GWcsRegistry.hpp"
 #include "GWcslib.hpp"
+#include "GWcsAZP.hpp"
 #include "GWcsCAR.hpp"
+#include "GWcsTAN.hpp"
+#include "GWcsSTG.hpp"
 #include "GWcsHPX.hpp"
 
 /* __ Observation handling _______________________________________________ */
