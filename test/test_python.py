@@ -249,6 +249,13 @@ def test_skymap():
                   "), RA="+str(dir.ra()*180/pi)+", Dec="+str(dir.dec()*180/pi)
             raise RuntimeError("*** TEST ERROR: "+msg)
 
+    # Create TAN skymap
+    #pixels = GSkymap("TAN", "CEL", 83.6331, 22.0145, -0.1, 0.1, 100, 100, 20)
+    #for map in range(pixels.nmaps()):
+    #    for i in range(pixels.npix()):
+    #        pixels[i,map] = i+map*pixels.npix()
+    #pixels.save(file3)
+
     # SkyPixel access
     #for i in range(pixels.npix()):
     #    dir = pixels.pix2dir(i)
