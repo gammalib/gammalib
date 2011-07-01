@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GWcs.hpp
- * @brief GWcs virtual base class definition.
+ * @brief World Coordinate System virtual base class definition
  * @author J. Knodlseder
  */
 
@@ -34,8 +34,6 @@
 #include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
-#include "GMatrix.hpp"
-#include "GVector.hpp"
 
 
 /***********************************************************************//**
@@ -44,9 +42,6 @@
  * @brief GWcs virtual base class interface defintion
  ***************************************************************************/
 class GWcs {
-
-    // Friend classes
-    friend class GSkymap;
 
     // Operator friends
     friend bool operator== (const GWcs &a, const GWcs &b);
@@ -59,10 +54,6 @@ class GWcs {
 public:
     // Constructors and destructors
     GWcs(void);
-    //explicit GWcs(const std::string& coords,
-    //              const double& crval1, const double& crval2,
-    //              const double& crpix1, const double& crpix2,
-    //              const double& cdelt1, const double& cdelt2);
     GWcs(const GWcs& wcs);
     virtual ~GWcs(void);
 
@@ -72,60 +63,31 @@ public:
     // Pure virtual methods (not implemented)
     virtual void        clear(void) = 0;
     virtual GWcs*       clone(void) const = 0;
+    virtual std::string code(void) const = 0;
+    virtual std::string name(void) const = 0;
     virtual void        read(const GFitsHDU* hdu) = 0;
     virtual void        write(GFitsHDU* hdu) const = 0;
+    virtual double      omega(const int& pix) const = 0;
+    virtual double      omega(const GSkyPixel& pix) const = 0;
+    virtual GSkyDir     pix2dir(const int& pix) const = 0;
+    virtual int         dir2pix(const GSkyDir& dir) const = 0;
+    virtual GSkyDir     xy2dir(const GSkyPixel& pix) const = 0;
+    virtual GSkyPixel   dir2xy(const GSkyDir& dir) const = 0;
     virtual std::string print(void) const = 0;
 
     // Virtual methods
-    virtual std::string type(void) const;
     virtual std::string coordsys(void) const;
     virtual void        coordsys(const std::string& coordsys);
-    virtual double      omega(const int& pix) const;
-    virtual double      omega(const GSkyPixel& pix) const;
-    virtual GSkyDir     pix2dir(const int& pix) const;
-    virtual int         dir2pix(GSkyDir dir) const;
-    virtual GSkyDir     xy2dir(const GSkyPixel& pix) const;
-    virtual GSkyPixel   dir2xy(GSkyDir dir) const;
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GWcs& wcs);
-    void free_members(void);
+    void         init_members(void);
+    void         copy_members(const GWcs& wcs);
+    void         free_members(void);
+    virtual bool compare(const GWcs& wcs) const = 0;
 
-    // Protected methods (providing services to derived classes)
-    virtual void std2nat(GVector *coord) const = 0;
-    virtual void nat2std(GVector *coord) const = 0;
-    GVector      wcs_dir2native(GSkyDir dir) const;
-    GSkyDir      wcs_native2dir(GVector native) const;
-    void         wcs_init(const double& theta0);
-    GVector      wcs_getpole(const double& theta0);
-    GMatrix      wcs_get_rot(void);
-    //void         wcs_read(const GFitsHDU* hdu);
-    //void         wcs_write(GFitsHDU* hdu) const;
-    std::string  wcs_crval1(void) const;
-    std::string  wcs_crval2(void) const;
-    //std::string  wcs_dump(void) const;
-
-    // Protected members (astr structure)
-    std::string m_type;     //!< WCS type
-    int         m_coordsys; //!< 0=celestial, 1=galactic
-    int         m_reverse;  //!< Reverse axes (1=true)
-    GVector     m_crval;    //!< Value of reference point
-    GVector     m_crpix;    //!< Pixel of reference point (starting from 1)
-    GVector     m_cdelt;    //!< Increment at reference point (deg/pixel)
-    GVector     m_npole;    //!< Native coordinate of North Pole
-    GMatrix     m_cd;       //!< Astrometry parameters (2x2 matrix, deg/pixel)
-    GVector     m_pv2;      //!< Projection parameters (up to 21)
-
-    // Derived members
-    //double  m_theta0;       //!< Native latitude of the fiducial point
-    GVector m_refval;       //!< Ordered value of reference point
-    GVector m_refpix;       //!< Pixel of reference point (starting from 0)
-    GMatrix m_invcd;        //!< Inverse of CD matrix
-    GVector m_native_pole;  //!< Coordinates of native pole
-    GMatrix m_rot;          //!< Rotation matrix
-    GMatrix m_trot;         //!< Transpose of rotation matrix
+    // Protected members
+    int m_coordsys;   //!< 0=celestial, 1=galactic, 2=ecl, 3=hel, 4=sgl
 };
 
 #endif /* GWCS_HPP */

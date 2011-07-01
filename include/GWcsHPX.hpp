@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GWcsHPX.hpp
- * @brief GWcsHPX class definition.
+ * @brief HealPix projection class definition
  * @author J. Knodlseder
  */
 
@@ -37,7 +37,11 @@
 /***********************************************************************//**
  * @class GWcsHPX
  *
- * @brief GWcsHPX class interface defintion
+ * @brief HealPix projection class interface defintion
+ *
+ * The HealPix projection class has been implemented by adapting code from
+ * the HealPix library (version 2.1). For more information about HEALPix, see
+ * http://healpix.jpl.nasa.gov
  ***************************************************************************/
 class GWcsHPX : public GWcs {
 
@@ -54,28 +58,32 @@ public:
     GWcsHPX& operator= (const GWcsHPX& wcs);
 
     // Implemented pure virtual base class methods
-    void        clear(void);
-    GWcsHPX*    clone(void) const;
-    void        read(const GFitsHDU* hdu);
-    void        write(GFitsHDU* hdu) const;
-    std::string print(void) const;
+    virtual void        clear(void);
+    virtual GWcsHPX*    clone(void) const;
+    virtual std::string code(void) const { return "HPX"; }
+    virtual std::string name(void) const { return "HealPix"; }
+    virtual void        read(const GFitsHDU* hdu);
+    virtual void        write(GFitsHDU* hdu) const;
+    virtual double      omega(const int& pix) const;
+    virtual double      omega(const GSkyPixel& pix) const;
+    virtual GSkyDir     pix2dir(const int& pix) const;
+    virtual int         dir2pix(const GSkyDir& dir) const;
+    virtual GSkyDir     xy2dir(const GSkyPixel& pix) const;
+    virtual GSkyPixel   dir2xy(const GSkyDir& dir) const;
+    virtual std::string print(void) const;
 
-    // Overloaded base class methods
-    double      omega(const int& pix) const;
-    GSkyDir     pix2dir(const int& pix) const;
-    int         dir2pix(GSkyDir dir) const;
-
-    // Class specific methods
-    int         npix(void) const;
-    int         nside(void) const;
-    std::string ordering(void) const;
-    void        ordering(const std::string& ordering);
+    // Additional class specific methods
+    int          npix(void) const;
+    int          nside(void) const;
+    std::string  ordering(void) const;
+    void         ordering(const std::string& ordering);
 
 private:
     // Private methods
     void         init_members(void);
     void         copy_members(const GWcsHPX& wcs);
     void         free_members(void);
+    virtual bool compare(const GWcs& wcs) const;
     void         std2nat(GVector *coord) const { return; }
     void         nat2std(GVector *coord) const { return; }
     int          nside2order(int nside);

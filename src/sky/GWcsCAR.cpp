@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GWcsCAR.cpp  -  Cartesian projection class              *
+ *            GWcsCAR.cpp  -  Plate carree (CAR) projection class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GWcsCAR.cpp
- * @brief Cartesian projection class implementation
+ * @brief Plate carree (CAR) projection class implementation
  * @author J. Knodlseder
  */
 
@@ -31,10 +31,9 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GWcsCAR.hpp"
+#include "GWcsRegistry.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_XY2DIR                                      "GWcsCAR::pix2dir(int)"
-#define G_DIR2XY                                  "GWcsCAR::dir2pix(GSkyDir)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -46,7 +45,9 @@
 
 /* __ Constants __________________________________________________________ */
 
-/* __ Static conversion arrays ___________________________________________ */
+/* __ Globals ____________________________________________________________ */
+const GWcsCAR      g_wcs_car_seed;
+const GWcsRegistry g_wcs_car_registry(&g_wcs_car_seed);
 
 
 /*==========================================================================
@@ -74,50 +75,20 @@ GWcsCAR::GWcsCAR(void) : GWcslib()
  * @param[in] coords Coordinate system.
  * @param[in] crval1 X value of reference pixel.
  * @param[in] crval2 Y value of reference pixel.
- * @param[in] crpix1 X index of reference pixel.
- * @param[in] crpix2 Y index of reference pixel.
- * @param[in] cdelt1 Increment in x direction at reference pixel (deg).
- * @param[in] cdelt2 Increment in y direction at reference pixel (deg).
- * @param[in] cd Astrometry parameters (2x2 matrix, deg/pixel).
- * @param[in] pv2 Projection parameters (length WCS type dependent).
+ * @param[in] crpix1 X index of reference pixel (starting from 1).
+ * @param[in] crpix2 Y index of reference pixel (starting from 1).
+ * @param[in] cdelt1 Increment in x direction at reference pixel [deg].
+ * @param[in] cdelt2 Increment in y direction at reference pixel [deg].
  ***************************************************************************/
 GWcsCAR::GWcsCAR(const std::string& coords,
                  const double& crval1, const double& crval2,
                  const double& crpix1, const double& crpix2,
-                 const double& cdelt1, const double& cdelt2,
-                 const GMatrix& cd, const GVector& pv2) :
+                 const double& cdelt1, const double& cdelt2) :
                  GWcslib(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2)
 
 {
     // Initialise class members
     init_members();
-
-    // Initialise World Coordinate System. This has to be done here and
-    // not in wcs_set(...) as this method will be called by the derived
-    // class constructor. We're not allowed to call pure virtual functions
-    // in base class constructors !!!
-    wcs_set();
-
-    // Initialise derived projection parameters
-    wcs_init(0.0);  // theta0 = 0.0
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Constructor from FITS HDU table
- *
- * @param[in] hdu FITS HDU.
- ***************************************************************************/
-GWcsCAR::GWcsCAR(const GFitsHDU* hdu) : GWcslib()
-{
-    // Initialise class members
-    init_members();
-
-    // Read Healpix defintion from FITS HDU
-    read(hdu);
 
     // Return
     return;
@@ -227,96 +198,6 @@ GWcsCAR* GWcsCAR::clone(void) const
 }
 
 
-/***********************************************************************//**
- * @brief Read WCS definiton from FITS header
- *
- * @param[in] hdu FITS HDU.
- ***************************************************************************/
-/*
-void GWcsCAR::read(const GFitsHDU* hdu)
-{
-    // Clear object
-    clear();
-
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
-
-        // Read standard WCS definition
-        wcs_read(hdu);
-
-    } // endif: HDU was valid
-
-    // Return
-    return;
-}
-*/
-
-/***********************************************************************//**
- * @brief Write Healpix definiton into FITS HDU
- *
- * @param[in] hdu FITS HDU.
- ***************************************************************************/
-/*
-void GWcsCAR::write(GFitsHDU* hdu) const
-{
-    // Continue only if HDU pointer is valid
-    if (hdu != NULL) {
-
-        // Write standard WCS definition
-        wcs_write(hdu);
-
-    } // endif: HDU was valid
-
-    // Return
-    return;
-}
-*/
-
-/***********************************************************************//**
- * @brief Returns solid angle of pixel in units of steradians
- *
- * @param[in] pix Pixel index (x,y)
- *
- * Estimate solid angles of pixel by compuing the coordinates in the 4 pixel
- * corners. The surface is computed using a cartesian approximation:
- *           a
- *     1-----------2                 a+b
- * h  /             \    where A = h ---
- *   4---------------3                2
- *           b
- * This is a brute force technique that works sufficiently well for non-
- * rotated sky maps. Something more intelligent should be implemented in
- * the future.
- *
- * @todo Implement accurate solid angle computation (so far only brute force
- *       estimation)
- ***************************************************************************/
-/*
-double GWcsCAR::omega(const GSkyPixel& pix) const
-{
-    // Bypass const correctness
-    GWcsCAR* ptr = (GWcsCAR*)this;
-
-    // Get the sky directions of the 4 corners
-    GSkyDir dir1 = ptr->xy2dir(GSkyPixel(pix.x()-0.5, pix.y()-0.5));
-    GSkyDir dir2 = ptr->xy2dir(GSkyPixel(pix.x()+0.5, pix.y()-0.5));
-    GSkyDir dir3 = ptr->xy2dir(GSkyPixel(pix.x()+0.5, pix.y()+0.5));
-    GSkyDir dir4 = ptr->xy2dir(GSkyPixel(pix.x()-0.5, pix.y()+0.5));
-    GSkyDir dir5 = ptr->xy2dir(GSkyPixel(pix.x(), pix.y()-0.5));
-    GSkyDir dir6 = ptr->xy2dir(GSkyPixel(pix.x(), pix.y()+0.5));
-
-    // Compute distances between sky directions
-    double a = dir1.dist(dir2);
-    double b = dir3.dist(dir4);
-    double h = dir5.dist(dir6);
-
-    // Compute solid angle
-    double omega = 0.5*(h*(a+b));
-
-    // Return solid angle
-    return omega;
-}
-*/
 
 /***********************************************************************//**
  * @brief Print WCS information
@@ -344,28 +225,12 @@ std::string GWcsCAR::print(void) const
 /***********************************************************************//**
  * @brief Initialise class members
  *
- *   Given and/or returned:
- *      m_r0      Reset to 180/pi if 0.
- *      m_phi0    Reset to 0.0 if undefined.
- *      m_theta0  Reset to 0.0 if undefined.
- *
- *   Returned:
- *      m_code    "CAR"
- *      m_name    "plate caree"
- *      m_x0      Fiducial offset in x.
- *      m_y0      Fiducial offset in y.
- *      m_w0      r0*(pi/180)
- *      m_w1      (180/pi)/r0
+ * This method sets up the World Coordinate System by calling wcs_set().
  ***************************************************************************/
 void GWcsCAR::init_members(void)
 {
-    // Initialise members
-    m_type = "CAR";
-
-    // NEW VERSION
-    
-    // Initialise projection parameters
-    prj_set();
+    // Setup World Coordinate System
+    wcs_set();
     
     // Return
     return;
@@ -395,61 +260,39 @@ void GWcsCAR::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Projects from standard to native coordinates
- *
- * @param[in,out] coord Pointer to coordinate vector.
- *
- * Transforms coordinate vector from the standard coordinate system to the
- * native coordinate system.
- ***************************************************************************/
-void GWcsCAR::std2nat(GVector *coord) const
-{
-    // Perform CAR projection
-    *coord *= rad2deg;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Projects from native to standard coordinates
- *
- * @param[in,out] coord Pointer to coordinate vector.
- *
- * Transforms coordinate vector from the native coordinate system to the
- * standard coordinate system.
- ***************************************************************************/
-void GWcsCAR::nat2std(GVector *coord) const
-{
-    // Perform CAR projection
-    *coord *= deg2rad;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Setup of projection
  *
  * This method sets up the projection information. The method has been
  * adapted from the wcslib function prj.c::carset.
+ *
+ *   Given and/or returned:
+ *      m_r0      Reset to 180/pi if 0.
+ *      m_phi0    Reset to 0.0 if undefined.
+ *      m_theta0  Reset to 0.0 if undefined.
+ *
+ *   Returned:
+ *      m_code    "CAR"
+ *      m_name    "plate caree"
+ *      m_x0      Fiducial offset in x.
+ *      m_y0      Fiducial offset in y.
+ *      m_w[0]    r0*(pi/180)
+ *      m_w[1]    (180/pi)/r0
  ***************************************************************************/
 void GWcsCAR::prj_set(void) const
 {
     // Initialise projection parameters
-    m_code = "CAR";
-    m_name = "plate caree";
+    //m_code = "CAR";
+    //m_name = "plate caree";
+    m_w.clear();
     
     // Precompute 
     if (m_r0 == 0.0) {
         m_r0 = rad2deg;
-        m_w0 = 1.0;
-        m_w1 = 1.0;
+        m_w.push_back(1.0);
+        m_w.push_back(1.0);
     } else {
-        m_w0 = m_r0 * deg2rad;
-        m_w1 = 1.0/m_w0;
+        m_w.push_back(m_r0 * deg2rad);
+        m_w.push_back(1.0/m_w[0]);
     }
     
     // Compute fiducial offset
@@ -512,7 +355,7 @@ void GWcsCAR::prj_x2s(int nx, int ny, int sxy, int spt,
     int           rowoff = 0;
     int           rowlen = nx * spt;
     for (int ix = 0; ix < nx; ++ix, rowoff += spt, xp += sxy) {
-        double  s    = m_w1 * (*xp + m_x0);
+        double  s    = m_w[1] * (*xp + m_x0);
         double* phip = phi + rowoff;
         for (int iy = 0; iy < my; ++iy, phip += rowlen)
             *phip = s;
@@ -523,7 +366,7 @@ void GWcsCAR::prj_x2s(int nx, int ny, int sxy, int spt,
     double*       thetap = theta;
     int*          statp  = stat;
     for (int iy = 0; iy < ny; ++iy, yp += sxy) {
-        double t = m_w1 * (*yp + m_y0);
+        double t = m_w[1] * (*yp + m_y0);
         for (int ix = 0; ix < mx; ++ix, thetap += spt) {
             *thetap    = t;
             *(statp++) = 0;
@@ -584,7 +427,7 @@ void GWcsCAR::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     int           rowoff = 0;
     int           rowlen = nphi * sxy;
     for (int iphi = 0; iphi < nphi; ++iphi, rowoff += sxy, phip += spt) {
-        double  xi = m_w0 * (*phip) - m_x0;
+        double  xi = m_w[0] * (*phip) - m_x0;
         double* xp = x + rowoff;
         for (int itheta = 0; itheta < mtheta; ++itheta, xp += rowlen)
             *xp = xi;
@@ -596,7 +439,7 @@ void GWcsCAR::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     double*       yp     = y;
     int*          statp  = stat;
     for (int itheta = 0; itheta < ntheta; ++itheta, thetap += spt) {
-        double eta = m_w0 * (*thetap) - m_y0;
+        double eta = m_w[0] * (*thetap) - m_y0;
         for (int iphi = 0; iphi < mphi; ++iphi, yp += sxy) {
             *yp = eta;
             *(statp++) = 0;

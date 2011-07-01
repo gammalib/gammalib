@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GWcsCAR.hpp  -  Cartesian projection class               *
+ *            GWcsCAR.hpp  -  Plate carree (CAR) projection class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GWcsCAR.hpp
- * @brief GWcsCAR class definition.
+ * @brief Plate carree (CAR) projection class definition
  * @author J. Knodlseder
  */
 
@@ -29,20 +29,17 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GWcslib.hpp"
-#include "GFitsHDU.hpp"
-#include "GSkyDir.hpp"
-#include "GSkyPixel.hpp"
 
 
 /***********************************************************************//**
  * @class GWcsCAR
  *
- * @brief GWcsCAR class interface defintion
+ * @brief Plate carree (CAR) projection class definition
+ *
+ * This class implements the "plate carree" projection for the World
+ * Coordinate System.
  ***************************************************************************/
 class GWcsCAR : public GWcslib {
-
-    // I/O friends
-    //friend std::ostream& operator<< (std::ostream& os, const GWcsCAR& wcs);
 
 public:
     // Constructors and destructors
@@ -50,9 +47,7 @@ public:
     explicit GWcsCAR(const std::string& coords,
                      const double& crval1, const double& crval2,
                      const double& crpix1, const double& crpix2,
-                     const double& cdelt1, const double& cdelt2,
-                     const GMatrix& cd, const GVector& pv2);
-    explicit GWcsCAR(const GFitsHDU* hdu);
+                     const double& cdelt1, const double& cdelt2);
     GWcsCAR(const GWcsCAR& wcs);
     virtual ~GWcsCAR(void);
 
@@ -60,24 +55,17 @@ public:
     GWcsCAR& operator= (const GWcsCAR& wcs);
 
     // Implemented pure virtual base class methods
-    void        clear(void);
-    GWcsCAR*    clone(void) const;
-    //void        read(const GFitsHDU* hdu);
-    //void        write(GFitsHDU* hdu) const;
-    std::string print(void) const;
-
-    // Overloaded base class methods
-    //double omega(const GSkyPixel& pix) const;
+    virtual void        clear(void);
+    virtual GWcsCAR*    clone(void) const;
+    virtual std::string code(void) const { return "CAR"; }
+    virtual std::string name(void) const { return "plate carree"; }
+    virtual std::string print(void) const;
 
 private:
     // Private methods
     void init_members(void);
     void copy_members(const GWcsCAR& wcs);
     void free_members(void);
-    void std2nat(GVector *coord) const;
-    void nat2std(GVector *coord) const;
-    
-    // NEW VERSION
     void prj_set(void) const;
     void prj_x2s(int nx, int ny, int sxy, int spt, 
                  const double* x, const double* y,
@@ -85,10 +73,6 @@ private:
     void prj_s2x(int nphi, int ntheta, int spt, int sxy,
                  const double* phi, const double* theta,
                  double* x, double* y, int* stat) const;
-    
-    // Protected members
-    mutable double m_w0;
-    mutable double m_w1;
 };
 
 #endif /* GWCSCAR_HPP */

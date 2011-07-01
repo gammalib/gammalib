@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -24,12 +32,13 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GWcsHPX.hpp"
+#include "GWcsRegistry.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT           "GWcsHPX::GWcsHPX(int,std::string,std::string)"
 #define G_READ                                     "GWcsHPX::read(GFitsHDU*)"
-#define G_XY2DIR                                 "GWcsHPX::xy2dir(GSkyPixel)"
-#define G_DIR2XY                                   "GWcsHPX::dir2xy(GSkyDir)"
+#define G_XY2DIR                                "GWcsHPX::xy2dir(GSkyPixel&)"
+#define G_DIR2XY2                                 "GWcsHPX::dir2xy(GSkyDir&)"
 #define G_PIX2ANG_RING           "GWcsHPX::pix2ang_ring(int,double*,double*)"
 #define G_PIX2ANG_NEST           "GWcsHPX::pix2ang_nest(int,double*,double*)"
 #define G_ORDERING_SET                       "GWcsHPX::coordsys(std::string)"
@@ -51,6 +60,10 @@ const int ns_max    = 1 << order_max;
 /* __ Static conversion arrays ___________________________________________ */
 static short ctab[0x100];
 static short utab[0x100];
+
+/* __ Globals ____________________________________________________________ */
+const GWcsHPX      g_wcs_hpx_seed;
+const GWcsRegistry g_wcs_hpx_registry(&g_wcs_hpx_seed);
 
 
 /*==========================================================================
@@ -348,6 +361,21 @@ double GWcsHPX::omega(const int& pix) const
 
 
 /***********************************************************************//**
+ * @brief Returns solid angle of pixel
+ *
+ * @param[in] pix Sky pixel.
+ *
+ * HEALPix pixels have all the same solid angle, hence the pix argument is
+ * not used.
+ ***************************************************************************/
+double GWcsHPX::omega(const GSkyPixel& pix) const
+{
+    // Return solid angle
+    return m_omega;
+}
+
+
+/***********************************************************************//**
  * @brief Returns sky direction of pixel
  *
  * @param[in] pix Pixel number (0,1,...,m_num_pixels).
@@ -393,7 +421,7 @@ GSkyDir GWcsHPX::pix2dir(const int& pix) const
  *
  * @param[in] dir Sky direction.
  ***************************************************************************/
-int GWcsHPX::dir2pix(GSkyDir dir) const
+int GWcsHPX::dir2pix(const GSkyDir& dir) const
 {
     // Declare result
     int    pix;
@@ -428,6 +456,62 @@ int GWcsHPX::dir2pix(GSkyDir dir) const
 
     // Return pixel index
     return pix;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns sky direction of pixel
+ *
+ * @param[in] pix Sky pixel.
+ *
+ * This dummy method throws an error when called as sky pixels are not
+ * implemented for a HealPix grid. Maybe we should implement them?
+ *
+ * @todo Think about implementation of sky pixel for HealPix data. We may
+ *       use only the first argument, and even carry a usage flag in
+ *       GSkyPixel
+ ***************************************************************************/
+GSkyDir GWcsHPX::xy2dir(const GSkyPixel& pix) const
+{
+    // Set error message
+    std::string message = "Method not defined for HPX projection.";
+
+    // Throw error
+    throw GException::wcs(G_XY2DIR, message);
+
+    // Set dummy return value
+    GSkyDir result;
+    
+    // Return
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pixel of sky direction
+ *
+ * @param[in] dir Sky direction.
+ *
+ * This dummy method throws an error when called as sky pixels are not
+ * implemented for a HealPix grid. Maybe we should implement them?
+ *
+ * @todo Think about implementation of sky pixel for HealPix data. We may
+ *       use only the first argument, and even carry a usage flag in
+ *       GSkyPixel
+ ***************************************************************************/
+GSkyPixel GWcsHPX::dir2xy(const GSkyDir& dir) const
+{
+    // Set error message
+    std::string message = "Method not defined for HPX projection.";
+
+    // Throw error
+    throw GException::wcs(G_DIR2XY2, message);
+
+    // Set dummy return value
+    GSkyPixel result;
+    
+    // Return
+    return result;
 }
 
 
@@ -537,7 +621,7 @@ std::string GWcsHPX::print(void) const
 void GWcsHPX::init_members(void)
 {
     // Initialise members
-    m_type        = "HPX";
+    //m_type        = "HPX";
     m_nside       = 0;
     m_npface      = 0;
     m_ncap        = 0;
@@ -571,15 +655,15 @@ void GWcsHPX::init_members(void)
 void GWcsHPX::copy_members(const GWcsHPX& wcs)
 {
     // Copy attributes
-    m_nside       = wcs.m_nside;
-    m_npface      = wcs.m_npface;
-    m_ncap        = wcs.m_ncap;
-    m_order       = wcs.m_order;
-    m_ordering    = wcs.m_ordering;
-    m_num_pixels  = wcs.m_num_pixels;
-    m_fact1       = wcs.m_fact1;
-    m_fact2       = wcs.m_fact2;
-    m_omega       = wcs.m_omega;
+    m_nside      = wcs.m_nside;
+    m_npface     = wcs.m_npface;
+    m_ncap       = wcs.m_ncap;
+    m_order      = wcs.m_order;
+    m_ordering   = wcs.m_ordering;
+    m_num_pixels = wcs.m_num_pixels;
+    m_fact1      = wcs.m_fact1;
+    m_fact2      = wcs.m_fact2;
+    m_omega      = wcs.m_omega;
 
     // Return
     return;
@@ -593,6 +677,35 @@ void GWcsHPX::free_members(void)
 {
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns true if argument is identical
+ *
+ * @param[in] wcs Pointer to World Coordinate System
+ *
+ * This method is a helper for the World Coordinate Comparison friends.
+ ***************************************************************************/
+bool GWcsHPX::compare(const GWcs& wcs) const
+{
+    // Initialise result
+    bool result = false;
+    
+    // Continue only we compare to a GWcsHPX object
+    const GWcsHPX* ptr = dynamic_cast<const GWcsHPX*>(&wcs);
+    if (ptr != NULL) {
+        result = ((m_coordsys   == ptr->m_coordsys) &&
+                  (m_nside      == ptr->m_nside)    &&
+                  (m_npface     == ptr->m_npface)   &&
+                  (m_ncap       == ptr->m_ncap)     &&
+                  (m_order      == ptr->m_order)    &&
+                  (m_ordering   == ptr->m_ordering) &&
+                  (m_num_pixels == ptr->m_num_pixels));
+    }
+
+    // Return result
+    return result;
 }
 
 
