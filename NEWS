@@ -1,4 +1,4 @@
-New Features and Important Changes in GammaLib 00-04-08
+New Features and Important Changes in GammaLib 00-04-09
 
 Author(s) : Juergen Knoedlseder
 
@@ -13,8 +13,7 @@ made since the last release of GammaLib.
 
 2. Configuration
 -----------------
-Upgrade the license to GPL v3. Remove LICENSE file (license text is given
-in file COPYING).
+None
 
 
 3. Application module
@@ -24,12 +23,7 @@ None
 
 4. FITS I/O Interface
 ---------------------
-Add create parameter to GFits::open() and the corresponding constructor. This
-makes FITS file creation when opening optional. By default, create is set to
-false, hence FITS file creation is no longer automatic. This behaviour is
-preferred as it provides better control on the creation of new FITS files
-(before, FITS files were accidentally created if the filename was mistyped).
-Do also not write empty FITS files anymore.
+None
 
 
 5. Linear algebra module
@@ -59,7 +53,16 @@ None
 
 10. Sky module
 --------------
-None
+Replaced the IDL based World Coordinate System code by wcslib based code.
+This improves performance and accuracy of the coordinate transformation
+and corrects a bug in the LONPOLE/LATPOLE keywords that were written in
+the earlier version into the FITS file.
+Introduced GWcslib base class for projections that are wcslib based.
+All code adapted from wcslib goes into that class. Not all functionality
+has yet been ported from wcslib to GammaLib, but the essential things
+for creating, writing and reading WCS compliant FITS files is there.
+Introduced a World Coordinate System registry for easy extension of the
+set of projections.
 
 
 11. Support module
@@ -69,9 +72,7 @@ None
 
 12. XML module
 --------------
-Correctly detect multi-line comments and check for missing closing tags at
-the end of the XML file. Update the print() interface (now returns std::string
-instead of piping in stream object).
+None
 
 
 13. Multi-wavelength interface
