@@ -49,30 +49,30 @@ if DX_COND_doc
 # HTML
 if DX_COND_html
 DX_CLEAN_HTML = @DX_DOCDIR@/html
-endif DX_COND_html
+endif #DX_COND_html
 
 # CHI & CHI
 if DX_COND_chm
 DX_CLEAN_CHM = @DX_DOCDIR@/chm
 if DX_COND_chi
 DX_CLEAN_CHI = @DX_DOCDIR@/@PACKAGE@.chi
-endif DX_COND_chi
-endif DX_COND_chm
+endif #DX_COND_chi
+endif #DX_COND_chm
 
 # MAN
 if DX_COND_man
 DX_CLEAN_MAN = @DX_DOCDIR@/man
-endif DX_COND_man
+endif #DX_COND_man
 
 # RTF
 if DX_COND_rtf
 DX_CLEAN_RTF = @DX_DOCDIR@/rtf
-endif DX_COND_rtf
+endif #DX_COND_rtf
 
 # XML
 if DX_COND_xml
 DX_CLEAN_XML = @DX_DOCDIR@/xml
-endif DX_COND_xml
+endif #DX_COND_xml
 
 # PS
 if DX_COND_ps
@@ -93,7 +93,7 @@ doxygen-ps: @DX_DOCDIR@/@PACKAGE@.ps
 	       countdown=`expr $$countdown - 1`; \
 	   done; \
 	   $(DX_DVIPS) -o ../@PACKAGE@.ps refman.dvi
-endif DX_COND_ps
+endif #DX_COND_ps
 
 # PDF
 if DX_COND_pdf
@@ -114,12 +114,12 @@ doxygen-pdf: @DX_DOCDIR@/@PACKAGE@.pdf
 	       countdown=`expr $$countdown - 1`; \
 	   done; \
 	   mv refman.pdf ../@PACKAGE@.pdf
-endif DX_COND_pdf
+endif #DX_COND_pdf
 
 # LaTeX
 if DX_COND_latex
 DX_CLEAN_LATEX = @DX_DOCDIR@/latex
-endif DX_COND_latex
+endif #DX_COND_latex
 
 # Rules
 .PHONY: doxygen-run doxygen-doc $(DX_PS_GOAL) $(DX_PDF_GOAL)
@@ -166,7 +166,7 @@ DX_CLEANFILES = \
      $(DX_CLEAN_PDF) \
      $(DX_CLEAN_LATEX)
 
-endif DX_COND_doc
+endif #DX_COND_doc
 
 # Install HTML files
 HTMLDIRS = html html/images
