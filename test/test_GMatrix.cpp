@@ -46,6 +46,7 @@ GMatrix set_matrix(void)
     cout << "TEST ERROR: Unable to set test matrix." << endl;
     throw;
   }
+  return
 }
 
 
@@ -64,6 +65,7 @@ GVector set_vector(void)
     cout << "TEST ERROR: Unable to set test vector." << endl;
 	throw;
   }
+  return
 }
 
 
