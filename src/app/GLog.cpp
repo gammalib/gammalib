@@ -707,7 +707,7 @@ void GLog::flush(bool force)
             if (m_stderr)
                 std::cerr << line;
             if (m_file != NULL)
-                std::fprintf(m_file, line.c_str());
+                std::fprintf(m_file, "%s", line.c_str());
 
             // Set newline flag for next line
             m_newline = newline;
@@ -751,6 +751,7 @@ void GLog::header(const std::string& arg, int level)
         break;
     case 3:
         text  = "=== " + arg + " ===";
+        break;
     default:
         break;
     }
