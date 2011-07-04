@@ -38,7 +38,7 @@ public:
     // Constructors and destructors
     GMWLPointing(void);
     GMWLPointing(const GMWLPointing& pnt);
-    ~GMWLPointing(void);
+    virtual ~GMWLPointing(void);
 
     // Operators
     GMWLPointing& operator= (const GMWLPointing& pnt);

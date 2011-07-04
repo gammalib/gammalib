@@ -36,7 +36,7 @@ public:
     // Constructors and destructors
     GLATPointing(void);
     GLATPointing(const GLATPointing& pnt);
-    ~GLATPointing(void);
+    virtual ~GLATPointing(void);
 
     // Operators
     GLATPointing& operator= (const GLATPointing& pnt);

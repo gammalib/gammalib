@@ -48,7 +48,7 @@ public:
     GMatrix(void);
     GMatrix(int rows, int cols);
     GMatrix(const GMatrix& m);
-    ~GMatrix(void);
+    virtual ~GMatrix(void);
 
     // Operators
     GMatrix&      operator= (const GMatrix& m);

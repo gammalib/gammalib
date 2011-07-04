@@ -47,7 +47,7 @@ public:
     // Constructors and destructors
     GXmlDocument(void);
     GXmlDocument(const GXmlDocument& node);
-    ~GXmlDocument(void);
+    virtual ~GXmlDocument(void);
 
     // Operators
     GXmlDocument& operator= (const GXmlDocument& node);

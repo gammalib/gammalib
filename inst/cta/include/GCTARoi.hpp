@@ -40,7 +40,7 @@ public:
     // Constructors and destructors
     GCTARoi(void);
     GCTARoi(const GCTARoi& roi);
-    ~GCTARoi(void);
+    virtual ~GCTARoi(void);
 
     // Operators
     GCTARoi& operator= (const GCTARoi& roi);
