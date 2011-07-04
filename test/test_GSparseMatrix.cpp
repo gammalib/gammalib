@@ -55,6 +55,7 @@ GSparseMatrix set_matrix(void)
     cout << "TEST ERROR: Unable to set test matrix." << endl;
 	throw;
   }
+  return GSparseMatrix(g_rows,g_cols);
 }
 
 
@@ -73,6 +74,7 @@ GVector set_vector(void)
     cout << "TEST ERROR: Unable to set test vector." << endl;
 	throw;
   }
+  return GVector(g_cols);
 }
 
 

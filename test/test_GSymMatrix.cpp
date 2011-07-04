@@ -49,6 +49,7 @@ GSymMatrix set_matrix(void)
     cout << "TEST ERROR: Unable to set test matrix." << endl;
     throw;
   }
+  return GSymMatrix(g_rows,g_cols);
 }
 
 
@@ -76,6 +77,7 @@ GSymMatrix set_matrix_zero(void)
     cout << "TEST ERROR: Unable to set test matrix." << endl;
 	throw;
   }
+  return GSymMatrix(g_rows+1,g_cols+1);
 }
 
 
@@ -94,6 +96,7 @@ GVector set_vector(void)
     cout << "TEST ERROR: Unable to set test vector." << endl;
 	throw;
   }
+  return GVector(g_cols);
 }
 
 
