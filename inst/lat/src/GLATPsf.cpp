@@ -321,7 +321,7 @@ void GLATPsf::read(const GFits& fits)
     try {
         m_version = hdu_rpsf->integer("PSFVER");
     }
-    catch (GException::fits_key_not_found) {
+    catch (GException::fits_key_not_found &e) {
         m_version = 1;
     }
 

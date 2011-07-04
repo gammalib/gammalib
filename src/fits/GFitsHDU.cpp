@@ -410,7 +410,7 @@ void GFitsHDU::open(void* vptr, int hdunum)
     try {
         m_name = strip_whitespace(m_header.string("EXTNAME"));
     }
-    catch (GException::fits_key_not_found) {
+    catch (GException::fits_key_not_found &e) {
         m_name.clear();
     }
     if (m_name.length() == 0) {

@@ -278,7 +278,7 @@ void GFitsHeader::update(const GFitsHeaderCard& card)
             *ptr = card;
             return;
         }
-        catch (GException::fits_key_not_found) {
+        catch (GException::fits_key_not_found &e) {
             ;
         }
     }

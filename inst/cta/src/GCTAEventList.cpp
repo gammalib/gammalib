@@ -604,7 +604,7 @@ void GCTAEventList::read_ds_ebounds(const GFitsHDU* hdu)
         try {
             ndskeys = hdu->integer("NDSKEYS");
         }
-        catch (GException::fits_key_not_found) {
+        catch (GException::fits_key_not_found &e) {
             ;
         }
 
@@ -655,7 +655,7 @@ void GCTAEventList::read_ds_ebounds(const GFitsHDU* hdu)
                     }
                 } // endif: ENERGY type found
             }
-            catch (GException::fits_key_not_found) {
+            catch (GException::fits_key_not_found &e) {
                 ;
             }
         } // endfor: looped over data selection keys
@@ -697,7 +697,7 @@ void GCTAEventList::read_ds_roi(const GFitsHDU* hdu)
         try {
             ndskeys = hdu->integer("NDSKEYS");
         }
-        catch (GException::fits_key_not_found) {
+        catch (GException::fits_key_not_found &e) {
             ;
         }
 
@@ -730,7 +730,7 @@ void GCTAEventList::read_ds_roi(const GFitsHDU* hdu)
                     }
                 } // endif: POS(RA,DEC) type found
             }
-            catch (GException::fits_key_not_found) {
+            catch (GException::fits_key_not_found &e) {
                 ;
             }
         } // endfor: looped over data selection keys
