@@ -277,7 +277,7 @@ void GXmlPI::parse(const std::string& segment)
     int n = segment.length();
 
     // Check on existence of brackets
-    if (n < 4 || (segment.compare(0,2,"<?") != 0) &&
+    if (n < 4 || (segment.compare(0,2,"<?")   != 0) ||
                  (segment.compare(n-2,2,"?>") != 0))
         throw GException::xml_syntax_error(G_PARSE, segment,
               "missing or invalid Processing Instruction brackets");

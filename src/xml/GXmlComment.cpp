@@ -286,8 +286,8 @@ void GXmlComment::parse(const std::string& segment)
         // If string starts with brackets then check that the brackets are
         // valid comment brackets
         if (segment[0] == '<') {
-            if (n < 7 || (segment.compare(0,4,"<!--") != 0) &&
-                          (segment.compare(n-3,3,"-->") != 0))
+            if (n < 7 || (segment.compare(0,4,"<!--")  != 0) ||
+                         (segment.compare(n-3,3,"-->") != 0))
                 throw GException::xml_syntax_error(G_PARSE, segment,
                                   "invalid comment brackets");
             else
