@@ -27,6 +27,7 @@
 class Gauss : public GIntegrand {
 public:
     Gauss(const double& sigma) : m_sigma(sigma) { return; }
+    virtual ~Gauss(void) { return; }
     double eval(double x) {
         double arg = -0.5*x*x/m_sigma/m_sigma;
         double val = 1.0/sqrt(twopi)/m_sigma * exp(arg);
