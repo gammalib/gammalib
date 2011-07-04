@@ -895,7 +895,7 @@ void test_arithmetics(const GSparseMatrix& m_test)
 	result  = m_test;
 	result += bigger;
   }
-  catch (GException::matrix_mismatch) {
+  catch (GException::matrix_mismatch &e) {
 	cout << ".";
   }
   catch (exception &e) {

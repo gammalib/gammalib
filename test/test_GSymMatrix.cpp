@@ -603,7 +603,7 @@ int main(void)
 	result  = m_test;
 	result += bigger;
   }
-  catch (GException::matrix_mismatch) {
+  catch (GException::matrix_mismatch &e) {
   }
   catch (exception &e) {
     cout << e.what() << endl;
