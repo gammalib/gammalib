@@ -18,7 +18,7 @@
 #
 # Process this file with autoconf to produce a configure script
 
-AC_INIT([GammaLib], [0.4.8], [knodlseder@cesr.fr], [gammalib], [http://gammalib.sourceforge.net/])
+AC_INIT([GammaLib], [0.4.9], [knodlseder@cesr.fr], [gammalib], [http://gammalib.sourceforge.net/])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies])
@@ -53,8 +53,8 @@ AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], "${gammalib_prefix}", [Location where libra
 dnl ==============================================
 dnl Add pkgconfig information of install directory
 dnl ==============================================
-PKG_CONFIG_PATH="${gammalib_prefix}/lib/pkgconfig:/opt/local/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib/pkgconfig:$PKG_CONFIG_PATH"
-export PKG_CONFIG_PATH
+dnl PKG_CONFIG_PATH="${gammalib_prefix}/lib/pkgconfig:/opt/local/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib/pkgconfig:$PKG_CONFIG_PATH"
+dnl export PKG_CONFIG_PATH
 
 
 dnl ===========================
@@ -253,61 +253,60 @@ AC_ARG_WITH([cfitsio],
 if test "x$with_cfitsio" = "xyes"; then
 
   # First try pkgconfig
-  PKG_CHECK_MODULES([cfitsio], [cfitsio],
-                    [has_cfitsio="yes"],
-                    [AC_MSG_WARN([cfitsio pkgconfig information not found - try now locating library directly])])
-  if test "x$has_cfitsio" = "xyes"; then
-    CFLAGS="$CFLAGS $cfitsio_CFLAGS"
-    CPPFLAGS="$CPPFLAGS $cfitsio_CFLAGS"
-    LDFLAGS="$LDFLAGS $cfitsio_LIBS"
-    CFITSIO="cfitsio"
+  #PKG_CHECK_MODULES([cfitsio], [cfitsio],
+  #                  [has_cfitsio="yes"],
+  #                  [AC_MSG_WARN([cfitsio pkgconfig information not found - try now locating library directly])])
+  #if test "x$has_cfitsio" = "xyes"; then
+  #  CFLAGS="$CFLAGS $cfitsio_CFLAGS"
+  #  CPPFLAGS="$CPPFLAGS $cfitsio_CFLAGS"
+  #  LDFLAGS="$LDFLAGS $cfitsio_LIBS"
+  #  CFITSIO="cfitsio"
+  #else
+
+  # Set host specific cfitsio dependencies
+  cfitsio_deps=
+  case $host in
+    sparc*-sun-solaris*)  cfitsio_deps="-lm -lsocket" ;;
+    *)                    cfitsio_deps="-lm" ;;
+  esac
+
+  # Search for cfitsio shared library in a some standard directories
+  for i in "$gammalib_prefix" /opt/local /usr/local /usr ; do
+    if test -f $i/lib/libcfitsio.so -o -f $i/lib/libcfitsio.dylib -a -f $i/include/fitsio.h; then
+      LIBDIR_CFITSIO=$i/lib
+      INCDIR_CFITSIO=$i/include
+      break
+    fi
+    if test -f $i/lib64/libcfitsio.so -o -f $i/lib64/libcfitsio.dylib -a -f $i/include/fitsio.h; then
+      LIBDIR_CFITSIO=$i/lib64
+      INCDIR_CFITSIO=$i/include
+      break
+    fi
+  done
+  if test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO"; then
+    has_cfitsio="yes"
+    LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
+    CPPFLAGS="$CPPFLAGS -I$INCDIR_CFITSIO"
+    AC_MSG_NOTICE([cfitsio found in ${LIBDIR_CFITSIO}])
   else
 
-    # Set host specific cfitsio dependencies
-    cfitsio_deps=
-    case $host in
-      sparc*-sun-solaris*)  cfitsio_deps="-lm -lsocket" ;;
-      *)                    cfitsio_deps="-lm" ;;
-    esac
-
-    # Search for cfitsio shared library in a some standard directories
-    for i in "$gammalib_prefix" /opt/local /usr/local /usr ; do
-      if test -f $i/lib/libcfitsio.so -o -f $i/lib/libcfitsio.dylib -a -f $i/include/fitsio.h; then
-        LIBDIR_CFITSIO=$i/lib
-        INCDIR_CFITSIO=$i/include
-        break
-      fi
-      if test -f $i/lib64/libcfitsio.so -o -f $i/lib64/libcfitsio.dylib -a -f $i/include/fitsio.h; then
-        LIBDIR_CFITSIO=$i/lib64
-        INCDIR_CFITSIO=$i/include
-        break
-      fi
-    done
-    if test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO"; then
-      has_cfitsio="yes"
-      LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
-      CPPFLAGS="$CPPFLAGS -I$INCDIR_CFITSIO"
-      AC_MSG_NOTICE([cfitsio found in ${LIBDIR_CFITSIO}])
-    else
-
-      # If cfitsio has not yet been found then search now using the AC_CHECK_LIB
-      # macro. This allows also search in paths that are eventually specified in
-      # LDFLAGS
-      if test "x$has_cfitsio" != "xyes"; then
-        AC_CHECK_LIB([cfitsio], [ffpss],
-                     [has_cfitsio="yes"
-                      AC_MSG_NOTICE([cfitsio found])],
-                     [], [${cfitsio_deps}])
-      fi
+    # If cfitsio has not yet been found then search now using the AC_CHECK_LIB
+    # macro. This allows also search in paths that are eventually specified in
+    # LDFLAGS
+    if test "x$has_cfitsio" != "xyes"; then
+      AC_CHECK_LIB([cfitsio], [ffpss],
+                   [has_cfitsio="yes"
+                    AC_MSG_NOTICE([cfitsio found])],
+                   [], [${cfitsio_deps}])
     fi
-
-    # Set cfitsio information
-    if test "x$has_cfitsio" = "xyes"; then
-      LIBS_CFITSIO="-lcfitsio ${cfitsio_deps}"
-      LIBS="${LIBS} ${LIBS_CFITSIO}"
-    fi
-
   fi
+
+  # Set cfitsio information
+  if test "x$has_cfitsio" = "xyes"; then
+    LIBS_CFITSIO="-lcfitsio ${cfitsio_deps}"
+    LIBS="${LIBS} ${LIBS_CFITSIO}"
+  fi
+
 fi
 if test "x$has_cfitsio" = "xyes"; then
   AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])
