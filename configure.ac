@@ -84,6 +84,13 @@ dnl AC_TYPE_LONG_LONG_INT
 AC_C_CONST
 AC_C_INLINE
 
+
+dnl ============================
+dnl Checks for library functions
+dnl ============================
+# AC_CHECK_LIB(m, sincos, [AC_DEFINE([HAVE_SINCOS],[1],[Define to 1 if your system has `sincos'.])])
+
+
 dnl ===================
 dnl Checks for programs
 dnl ===================
@@ -165,20 +172,43 @@ dnl ========================================================================
 dnl Checks for python binding. Python binding requires Python and either the
 dnl files gammalib_wrap.cpp and gammalib.py or SWIG to create these files.
 dnl The following conditionals are set:
-dnl  HAVE_PYTHON           - Python >= 2.2 is available
+dnl  HAVE_PYTHON           - Python >= 2.2 and headers are available
+dnl  has_python            - Python >= 2.2 and headers are available
 dnl  HAVE_SWIG             - swig is available
 dnl  ENABLE_PYTHON_BINDING - Python binding is requested
 dnl  WITH_PYTHON_BINDING   - Either has swig or python wraper files
 dnl ========================================================================
 # Checks for Python (HAVE_PYTHON)
+has_python="no"
 AM_PATH_PYTHON([2.2],
-               [],
-               [AC_MSG_WARN([Python not found. Python is required to build python binding. Python can be obtained from http://www.python.org])])
-AM_CONDITIONAL(HAVE_PYTHON, test "$PYTHON")
+               [has_python="yes"],
+               [AC_MSG_WARN([Python >= 2.2 not found. Python >= 2.2 is required to build python binding. Python can be obtained from http://www.python.org])])
+if test "x$has_python" = "xyes"; then
+
+  # Determine include path for python
+  AC_PATH_PROG(PY_INCLUDE, python)  
+  PY_INCLUDE=`echo $PY_INCLUDE | sed -e "s/bin/include/"`
+  PY_INCLUDE="$PY_INCLUDE$PYTHON_VERSION"
+  
+  # Check if we have Python.h
+  AC_CHECK_HEADERS($PY_INCLUDE/Python.h, [has_python="yes"], [has_python="no"])
+  
+  # Mac OS X kluge: if test before was unsuccessful then check for headers in /usr/include
+  if test "x$has_python" = "xno"; then
+    AC_CHECK_HEADERS("/usr/include/python$PYTHON_VERSION/Python.h", [has_python="yes"], [has_python="no"])
+  fi
+
+  # Signal any problem
+  if test "x$has_python" = "xno"; then
+    AC_MSG_WARN([No Python header file "$PY_INCLUDE/Python.h" found. Please install appropriate Python development package.])
+  fi
+fi
+AM_CONDITIONAL(HAVE_PYTHON, test "x$has_python" = "xyes")
 
 # Checks for SWIG (HAVE_SWIG)
 AC_PATH_PROG([SWIG], [swig])
 AM_CONDITIONAL(HAVE_SWIG, test "$SWIG")
+#echo $HAVE_SWIG
 
 # Python binding enabled?
 AC_ARG_ENABLE([python-binding],
@@ -564,7 +594,7 @@ else
   echo "  * swig                         (yes)"
 fi
 if test "x$ac_enable_python_binding" = "xyes"; then
-  if test "$PYTHON"; then
+  if test "x$has_python" = "xyes"; then
     if test "x$has_python_wrap" = "xyes"; then
       if test ! "$SWIG"; then
         echo "  * Python binding               (yes)"
@@ -579,7 +609,7 @@ if test "x$ac_enable_python_binding" = "xyes"; then
       fi
     fi
   else
-    echo "  - Python binding               (no)    python not installed"
+    echo "  - Python binding               (no)    Python >=2.2 not installed"
   fi
 else
   echo "  - Python binding               (no)"
