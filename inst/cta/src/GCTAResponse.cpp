@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -44,6 +52,7 @@
                                           " GEnergy&, GTime&, GObservation&)"
 #define G_NPRED             "GCTAResponse::npred(GSkyDir&, GEnergy&, GTime&,"\
                                                             " GObservation&)"
+#define G_MC            "GCTAResponse::mc(double&,GPhoton&,GPointing&,GRan&)"
 #define G_IRF_EXTENDED      "GCTAResponse::irf_extended(GInstDir&, GEnergy&,"\
            " GTime&, GModelExtendedSource&, GEnergy&, GTime&, GObservation&)"
 #define G_IRF_DIFFUSE     "GCTAResponse::irf_diffuse(GCTAInstDir&, GEnergy&,"\
@@ -218,6 +227,9 @@ GCTAResponse* GCTAResponse::clone(void) const
  *
  * @exception GCTAException::bad_instdir_type
  *            Instrument direction is not a valid CTA instrument direction.
+ *
+ * @todo Set polar angle of photon in camera system
+ * @todo Set telescope zenith and azimuth angles
  ***************************************************************************/
 double GCTAResponse::irf(const GInstDir&     obsDir,
                          const GEnergy&      obsEng,
@@ -227,18 +239,26 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
                          const GTime&        srcTime,
                          const GObservation& obs) const
 {
+    // Get pointer on CTA observation
+    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+    if (ctaobs == NULL)
+        throw GCTAException::bad_observation_type(G_IRF);
+
+    // Get pointer on CTA pointing
+    const GCTAPointing *pnt = ctaobs->pointing(srcTime);
+
     // Get pointer on CTA instrument direction
     const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
     if (dir == NULL)
         throw GCTAException::bad_instdir_type(G_IRF);
 
-    // Get pointing direction zenith angle and azimuth
-    double zenith  = 0.0;
-    double azimuth = 0.0;
+    // Get pointing direction zenith angle and azimuth [radians]
+    double zenith  = 0.0; //TODO: not yet set
+    double azimuth = 0.0; //TODO: not yet set
 
-    // Get radial offset and polar angles in camera
-    double theta = 0.0;
-    double phi   = 0.0;
+    // Get radial offset and polar angles of true photon in camera [radians]
+    double theta = pnt->dir().dist(srcDir);
+    double phi   = 0.0; //TODO: not yet set
 
     // Get log10(E/TeV) of true photon energy.
     double srcLogEng = srcEng.log10TeV();
@@ -290,6 +310,9 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
  *            Observation is not a CTA observation.
  * @exception GException::no_list
  *            Observation does not contain a valid CTA event list.
+ *
+ * @todo Set polar angle of photon in camera system
+ * @todo Set telescope zenith and azimuth angles
  ***************************************************************************/
 double GCTAResponse::npred(const GSkyDir&      srcDir,
                            const GEnergy&      srcEng,
@@ -309,15 +332,13 @@ double GCTAResponse::npred(const GSkyDir&      srcDir,
     // Get pointer on CTA pointing
     const GCTAPointing *pnt = ctaobs->pointing(srcTime);
 
-    // Get pointing direction zenith angle and azimuth
-    // @todo Not yet implemented (and not yet needed)
-    double zenith  = 0.0;
-    double azimuth = 0.0;
+    // Get pointing direction zenith angle and azimuth [radians]
+    double zenith  = 0.0;  //TODO: not yet set
+    double azimuth = 0.0;  //TODO: not yet set
 
-    // Get radial offset and polar angles in camera
-    // @todo Not yet implemented (and not yet needed)
-    double theta = 0.0;
-    double phi   = 0.0;
+    // Get radial offset and polar angles of true photon in camera [radians]
+    double theta = pnt->dir().dist(srcDir);
+    double phi   = 0.0;    //TODO: not yet set
 
     // Get log10(E/TeV) of true photon energy.
     double srcLogEng = srcEng.log10TeV();
@@ -347,11 +368,14 @@ double GCTAResponse::npred(const GSkyDir&      srcDir,
  * @param[in] pnt Pointing.
  * @param[in] ran Random number generator.
  *
+ * @exception GCTAException::bad_pointing_type
+ *            Specified pointing is not a CTA pointing.
+ *
  * Simulates a CTA event using the response function from an incident photon.
  * If the event is not detected a NULL pointer is returned.
  *
- * @todo Implement computation of telescope pointing and radial offset and
- *       polar angles.
+ * @todo Set polar angle of photon in camera system
+ * @todo Set telescope zenith and azimuth angles
  * @todo Implement energy dispersion.
  ***************************************************************************/
 GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
@@ -360,13 +384,22 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
     // Initialise event
     GCTAEventAtom* event = NULL;
 
+    // Get pointer on CTA pointing
+    const GCTAPointing *ctapnt = dynamic_cast<const GCTAPointing*>(&pnt);
+    if (ctapnt == NULL)
+        throw GCTAException::bad_pointing_type(G_MC);
+
+    // Get pointing direction zenith angle and azimuth [radians]
+    double zenith  = 0.0;  //TODO: not yet set
+    double azimuth = 0.0;  //TODO: not yet set
+
+    // Get radial offset and polar angles of true photon in camera [radians]
+    double theta_p = ctapnt->dir().dist(photon.dir());
+    double phi_p   = 0.0;    //TODO: not yet set
+
     // Compute effective area for photon
-    double theta          = 0.0;
-    double phi            = 0.0;
-    double zenith         = 0.0;
-    double azimuth        = 0.0;
     double srcLogEng      = photon.energy().log10TeV();
-    double effective_area = aeff(theta, phi, zenith, azimuth, srcLogEng);
+    double effective_area = aeff(theta_p, phi_p, zenith, azimuth, srcLogEng);
 
     // Compute limiting value
     double ulimite = effective_area / area;
@@ -477,6 +510,12 @@ std::string GCTAResponse::print(void) const
     result.append("=== GCTAResponse ===");
     result.append("\n"+parformat("Calibration database")+m_caldb);
     result.append("\n"+parformat("Response name")+m_rspname);
+    if (m_offset_sigma == 0)
+        result.append("\n"+parformat("Offset angle dependence")+"none");
+    else {
+        std::string txt = "Fixed sigma="+str(m_offset_sigma);
+        result.append("\n"+parformat("Offset angle dependence")+txt);
+    }
     /*
     result.append("\n"+parformat("Response definiton"));
     for (int i = 0; i < m_logE.size(); ++i) {
@@ -512,7 +551,7 @@ std::string GCTAResponse::print(void) const
  * @exception GCTAException::bad_instdir_type
  *            Instrument direction is not a valid CTA instrument direction
  *
- * @todo Does not yet implement offset/polar angle dependencies of IRF.
+ * @todo Does not yet implement polar angle dependencies of IRF.
  ***************************************************************************/
 double GCTAResponse::irf_extended(const GInstDir&             obsDir,
                                   const GEnergy&              obsEng,
@@ -631,7 +670,13 @@ double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
  * @param[in] azimuth Azimuth angle of telescope pointing (radians).
  * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
  *
- * @todo So far the parameters theta, phi, zenith, and azimuth are not used.
+ * A simple offset angle dependence has been implemented using a Gaussian
+ * if theta^2 (similar to the radial acceptance model implemented for the
+ * background). The width of the Gaussian is assumed independent of energy
+ * and given by the fixed parameter m_offset_sigma.
+ *
+ * @todo Implement offset angle dependence from response file.
+ * @todo So far the parameters phi, zenith, and azimuth are not used.
  ***************************************************************************/
 double GCTAResponse::aeff(const double& theta,
                           const double& phi,
@@ -641,6 +686,21 @@ double GCTAResponse::aeff(const double& theta,
 {
     // Interpolate effective area using node array
     double aeff = m_nodes.interpolate(srcLogEng, m_aeff);
+    
+    // Optionally add in offset angle dependence
+    if (m_offset_sigma != 0.0) {
+        double offset = theta * rad2deg;
+        double arg    = offset * offset / m_offset_sigma;
+        double scale  = exp(-0.5 * arg * arg);
+        aeff         *= scale;
+/*
+std::cout << "GCTAResponse::aeff:"
+          << " scale=" << scale
+          << " theta=" << theta
+          << " offset=" << offset
+          << " arg=" << arg << std::endl;
+*/
+    }
 
     // Return effective area
     return aeff;
@@ -921,7 +981,8 @@ void GCTAResponse::init_members(void)
     m_aeff.clear();
     m_r68.clear();
     m_r80.clear();
-    m_eps = 1.0e-5;
+    m_eps          = 1.0e-5;
+    m_offset_sigma = 3.0;    // default value for now ...
 
     // Return
     return;
@@ -936,14 +997,15 @@ void GCTAResponse::init_members(void)
 void GCTAResponse::copy_members(const GCTAResponse& rsp)
 {
     // Copy attributes
-    m_caldb   = rsp.m_caldb;
-    m_rspname = rsp.m_rspname;
-    m_nodes   = rsp.m_nodes;
-    m_logE    = rsp.m_logE;
-    m_aeff    = rsp.m_aeff;
-    m_r68     = rsp.m_r68;
-    m_r80     = rsp.m_r80;
-    m_eps     = rsp.m_eps;
+    m_caldb        = rsp.m_caldb;
+    m_rspname      = rsp.m_rspname;
+    m_nodes        = rsp.m_nodes;
+    m_logE         = rsp.m_logE;
+    m_aeff         = rsp.m_aeff;
+    m_r68          = rsp.m_r68;
+    m_r80          = rsp.m_r80;
+    m_eps          = rsp.m_eps;
+    m_offset_sigma = rsp.m_offset_sigma;
 
     // Return
     return;
@@ -1034,7 +1096,8 @@ void GCTAResponse::read_performance_table(const std::string& filename)
  * IRF. The offset angle is given with respect to the centre of the radial
  * model.
  *
- * @todo Does not handle offset/polar angle dependences of IRF.
+ * @todo Does not handle angular dependencies of Psf
+ * @todo Does not handle zenith and azimuth angle dependences of Aeff and Edisp.
  ***************************************************************************/
 double GCTAResponse::irf_kern_theta::eval(double theta)
 {
@@ -1070,6 +1133,7 @@ double GCTAResponse::irf_kern_theta::eval(double theta)
         GCTAResponse::irf_kern_phi integrand(m_rsp,
                                              m_srcLogEng,
                                              m_obsLogEng,
+                                             theta,
                                              m_sigma,
                                              cos_term,
                                              sin_term);
@@ -1096,20 +1160,28 @@ double GCTAResponse::irf_kern_theta::eval(double theta)
  * model, and is counted from the line that connects that centre to the
  * location of the observed photon.
  *
- * @todo Does not handle offset/polar angle dependences of IRF.
+ * @todo Implement offset angle computation !!!
+ * @todo Does not handle angular dependencies of Psf
+ * @todo Does not handle zenith and azimuth angle dependences of Aeff and Edisp.
  ***************************************************************************/
 double GCTAResponse::irf_kern_phi::eval(double phi)
 {
     // Compute PSF offset angle in radians
     double delta = arccos(m_cos_term + m_sin_term * std::cos(phi));
+    
+    // Transform (theta,phi), which is given with respect to the model, to
+    // (theta_p,phi_p), which is given with respect to the telescope
+    // pointing direction
+    double theta_p = 0.0; //TODO
+    double phi_p   = 0.0; //TODO
 
     // Evaluate IRF
-    double irf = m_rsp->aeff(0.0, 0.0, 0.0, 0.0, m_srcLogEng) *
+    double irf = m_rsp->aeff(theta_p, phi_p, 0.0, 0.0, m_srcLogEng) *
                  m_rsp->psf_dummy(delta, m_sigma);
 
     // Optionally take energy dispersion into account
     if (m_rsp->hasedisp())
-        irf *= m_rsp->edisp(m_obsLogEng, 0.0, 0.0, 0.0, 0.0, m_srcLogEng);
+        irf *= m_rsp->edisp(m_obsLogEng, m_theta, phi, 0.0, 0.0, m_srcLogEng);
 
 
     // Return

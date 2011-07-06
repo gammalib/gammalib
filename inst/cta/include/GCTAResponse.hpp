@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -196,12 +204,14 @@ private:
         irf_kern_phi(const GCTAResponse* rsp,
                      double              srcLogEng,
                      double              obsLogEng,
+                     double              theta,
                      double              sigma,
                      double              cos_term,
                      double              sin_term) :
                      m_rsp(rsp),
                      m_srcLogEng(srcLogEng),
                      m_obsLogEng(obsLogEng),
+                     m_theta(theta),
                      m_sigma(sigma),
                      m_cos_term(cos_term),
                      m_sin_term(sin_term) { return; }
@@ -210,6 +220,7 @@ private:
         const GCTAResponse* m_rsp;           //!< Pointer to CTA response
         double              m_srcLogEng;     //!< True photon energy
         double              m_obsLogEng;     //!< Measured photon energy
+        double              m_theta;         //!< Offset angle theta
         double              m_sigma;         //!< Width of PSF in radians
         double              m_cos_term;      //!< Cosine term for PSF offset angle computation
         double              m_sin_term;      //!< Sine term for PSF offset angle computation
@@ -236,14 +247,15 @@ private:
     };
 
     // Private data members
-    std::string         m_caldb;    //!< Name of or path to the calibration database
-    std::string         m_rspname;  //!< Name of the instrument response
-    GNodeArray          m_nodes;    //!< log(E) nodes for interpolation
-    std::vector<double> m_logE;     //!< log(E) = log10(E/TeV) - bin centre
-    std::vector<double> m_aeff;     //!< Effective area in square metres after all cuts
-    std::vector<double> m_r68;      //!< 68% containment radius of PSF post cuts in degrees
-    std::vector<double> m_r80;      //!< 80% containment radius of PSF post cuts in degrees
-    double              m_eps;      //!< Integration precision
+    std::string         m_caldb;        //!< Name of or path to the calibration database
+    std::string         m_rspname;      //!< Name of the instrument response
+    GNodeArray          m_nodes;        //!< log(E) nodes for interpolation
+    std::vector<double> m_logE;         //!< log(E) = log10(E/TeV) - bin centre
+    std::vector<double> m_aeff;         //!< Effective area in square metres after all cuts
+    std::vector<double> m_r68;          //!< 68% containment radius of PSF post cuts in degrees
+    std::vector<double> m_r80;          //!< 80% containment radius of PSF post cuts in degrees
+    double              m_eps;          //!< Integration precision
+    double              m_offset_sigma; //!< Sigma for offset angle computation (0=none)
 
 };
 
