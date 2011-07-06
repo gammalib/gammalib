@@ -297,7 +297,7 @@ void GWcsAZP::free_members(void)
 void GWcsAZP::prj_set(void) const
 {
     // Initialise projection parameters
-    m_w.assign(7,0.0);
+    m_w.assign(8,0.0);
     
     // Set undefined parameters
     if (undefined(m_pv[1])) m_pv[1] = 0.0;
