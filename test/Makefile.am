@@ -31,20 +31,16 @@ if WITH_INST_LAT
 endif
 
 # Optional python bindings
-if ENABLE_PYTHON_BINDING
-if HAVE_PYTHON
-if WITH_PYTHON_BINDING
+if WITH_PYTHON
   TEST_PYTHON_SCRIPT = test_python.py
   TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext/build:$(PYTHONPATH)
-endif
-endif
 endif
 
 # Include directories
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/src \
            -I$(top_srcdir)/src/support \
-	   $(INCL_MWL) \
+           $(INCL_MWL) \
            $(INCL_CTA) \
            $(INCL_LAT)
 
@@ -76,7 +72,7 @@ TESTS = test_GVector \
         test_GApplication \
         test_GModel \
         test_GSky \
-	$(INST_MWL) $(INST_CTA) $(INST_LAT) \
+        $(INST_MWL) $(INST_CTA) $(INST_LAT) \
         $(TEST_PYTHON_SCRIPT)
 
 # Standard test sources and links
