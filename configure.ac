@@ -287,35 +287,34 @@ if test "x$with_cfitsio" = "xyes"; then
     sparc*-sun-solaris*)  cfitsio_deps="-lm -lsocket" ;;
     *)                    cfitsio_deps="-lm" ;;
   esac
+  
+  # First search for cfitsio in the standard paths using the AC_CHECK_LIB
+  # macro. This allows also search in paths that are eventually specified by LDFAGS.
+  AC_CHECK_LIB([cfitsio], [ffpss],
+               [has_cfitsio="yes"
+                AC_MSG_NOTICE([cfitsio found])],
+               [], [${cfitsio_deps}])
 
-  # Search for cfitsio shared library in a some standard directories
-  for i in "$gammalib_prefix" /opt/local /usr/local /usr ; do
-    if test -f $i/lib/libcfitsio.so -o -f $i/lib/libcfitsio.dylib -a -f $i/include/fitsio.h; then
-      LIBDIR_CFITSIO=$i/lib
-      INCDIR_CFITSIO=$i/include
-      break
-    fi
-    if test -f $i/lib64/libcfitsio.so -o -f $i/lib64/libcfitsio.dylib -a -f $i/include/fitsio.h; then
-      LIBDIR_CFITSIO=$i/lib64
-      INCDIR_CFITSIO=$i/include
-      break
-    fi
-  done
-  if test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO"; then
-    has_cfitsio="yes"
-    LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
-    CPPFLAGS="$CPPFLAGS -I$INCDIR_CFITSIO"
-    AC_MSG_NOTICE([cfitsio found in ${LIBDIR_CFITSIO}])
-  else
-
-    # If cfitsio has not yet been found then search now using the AC_CHECK_LIB
-    # macro. This allows also search in paths that are eventually specified in
-    # LDFLAGS
-    if test "x$has_cfitsio" != "xyes"; then
-      AC_CHECK_LIB([cfitsio], [ffpss],
-                   [has_cfitsio="yes"
-                    AC_MSG_NOTICE([cfitsio found])],
-                   [], [${cfitsio_deps}])
+  # If cfitsio has not been found then search for cfitsio shared library in a some
+  # default directories
+  if test "x$has_cfitsio" = "xno"; then
+    for i in "$gammalib_prefix" /opt/local /usr/local /usr ; do
+      if test -f $i/lib64/libcfitsio.so -o -f $i/lib64/libcfitsio.dylib -a -f $i/include/fitsio.h; then
+        LIBDIR_CFITSIO=$i/lib64
+        INCDIR_CFITSIO=$i/include
+        break
+      fi
+      if test -f $i/lib/libcfitsio.so -o -f $i/lib/libcfitsio.dylib -a -f $i/include/fitsio.h; then
+        LIBDIR_CFITSIO=$i/lib
+        INCDIR_CFITSIO=$i/include
+        break
+      fi
+    done
+    if test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO"; then
+      has_cfitsio="yes"
+      LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
+      CPPFLAGS="$CPPFLAGS -I$INCDIR_CFITSIO"
+      AC_MSG_NOTICE([cfitsio found in ${LIBDIR_CFITSIO}])
     fi
   fi
 
@@ -339,6 +338,7 @@ AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
 dnl ===========================
 dnl Checks for readline library
 dnl ===========================
+
 # Initialise readline flag
 has_readline="no"
 
@@ -358,41 +358,41 @@ if test "x$with_readline" = "xyes"; then
     sparc*-sun-solaris*)  readline_deps="-lncurses" ;;
     *)                    readline_deps="-lncurses" ;;
   esac
+  
+  # First search for readline using the AC_CHECK_LIB macro. This performs search
+  # in all standard locations and the paths that are eventually specified by LDFLAGS
+  AC_CHECK_LIB([readline], [main],
+               [has_readline="yes"
+                AC_MSG_NOTICE([readline found])],
+               [], [${readline_deps}])
 
-  # Search for readline shared library
-  for i in "$gammalib_prefix" /opt/local /usr/local /usr ; do
-    if test -f $i/lib/libreadline.so -o -f $i/lib/libreadline.dylib -a -f $i/include/readline/readline.h; then
-      LIBDIR_READLINE=$i/lib
-      INCDIR_READLINE=$i/include
-      break
+  # If readline has not been found then search for readline shared library in a couple
+  # of predefined locations
+  if test "x$has_readline" = "xno"; then
+    for i in "$gammalib_prefix" /opt/local /usr/local /usr ; do
+      if test -f $i/lib64/libreadline.so -o -f $i/lib64/libreadline.dylib -a -f $i/include/readline/readline.h; then
+        LIBDIR_READLINE=$i/lib64
+        INCDIR_READLINE=$i/include
+        break
+      fi
+      if test -f $i/lib/libreadline.so -o -f $i/lib/libreadline.dylib -a -f $i/include/readline/readline.h; then
+        LIBDIR_READLINE=$i/lib
+        INCDIR_READLINE=$i/include
+        break
+      fi
+    done
+    if test -n "$LIBDIR_READLINE" -a -n "$INCDIR_READLINE"; then
+      has_readline="yes"
+      if test "$LIBDIR_READLINE" != "$LIBDIR_CFITSIO"; then
+        LDFLAGS="$LDFLAGS -L$LIBDIR_READLINE"
+      fi
+      if test "$INCDIR_READLINE" != "$INCDIR_CFITSIO"; then
+        CPPFLAGS="$CPPFLAGS -I$INCDIR_READLINE"
+      fi
+      AC_SUBST(LIBDIR_READLINE)
+      AC_SUBST(INCDIR_READLINE)
+      AC_MSG_NOTICE([readline found in ${LIBDIR_READLINE}])
     fi
-    if test -f $i/lib64/libreadline.so -o -f $i/lib64/libreadline.dylib -a -f $i/include/readline/readline.h; then
-      LIBDIR_READLINE=$i/lib64
-      INCDIR_READLINE=$i/include
-      break
-    fi
-  done
-  if test -n "$LIBDIR_READLINE" -a -n "$INCDIR_READLINE"; then
-    has_readline="yes"
-    if test "$LIBDIR_READLINE" != "$LIBDIR_CFITSIO"; then
-      LDFLAGS="$LDFLAGS -L$LIBDIR_READLINE"
-    fi
-    if test "$INCDIR_READLINE" != "$INCDIR_CFITSIO"; then
-      CPPFLAGS="$CPPFLAGS -I$INCDIR_READLINE"
-    fi
-    AC_SUBST(LIBDIR_READLINE)
-    AC_SUBST(INCDIR_READLINE)
-    AC_MSG_NOTICE([readline found in ${LIBDIR_READLINE}])
-  fi
-
-  # If readline has not yet been found then search now using the AC_CHECK_LIB
-  # macro. This allows also search in paths that are eventually specified in
-  # LDFLAGS
-  if test "x$has_readline" != "xyes"; then
-    AC_CHECK_LIB([readline], [main],
-                 [has_readline="yes"
-                  AC_MSG_NOTICE([readline found])],
-                 [], [${readline_deps}])
   fi
 
   # Set readline information
