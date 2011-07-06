@@ -178,6 +178,7 @@ dnl  HAVE_SWIG             - swig is available
 dnl  ENABLE_PYTHON_BINDING - Python binding is requested
 dnl  WITH_PYTHON_BINDING   - Either has swig or python wraper files
 dnl ========================================================================
+
 # Checks for Python (HAVE_PYTHON)
 has_python="no"
 AM_PATH_PYTHON([2.2],
@@ -230,7 +231,7 @@ AM_CONDITIONAL(WITH_PYTHON_BINDING, test "x$has_python_wrap" = "xyes" -o "$SWIG"
 
 # Inform about missing components and set host dependent variables
 if test "x$ac_enable_python_binding" = "xyes"; then
-  if test "$PYTHON"; then
+  if test "x$has_python" = "xyes"; then
     if test "x$has_python_wrap" != "xyes"; then
       if test ! "$SWIG"; then
         AC_MSG_WARN([Neither pyext/gammalib_wrap.cpp and pyext/gammalib.py nor swig has not been found])
