@@ -50,17 +50,10 @@ fi
 AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], "${gammalib_prefix}", [Location where library is installed])
 
 
-dnl ==============================================
-dnl Add pkgconfig information of install directory
-dnl ==============================================
-dnl PKG_CONFIG_PATH="${gammalib_prefix}/lib/pkgconfig:/opt/local/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib/pkgconfig:$PKG_CONFIG_PATH"
-dnl export PKG_CONFIG_PATH
-
-
 dnl ===========================
-dnl things required by automake
+dnl Things required by automake
 dnl ===========================
-dnl AC_ARG_PROGRAM
+# AC_ARG_PROGRAM
 AC_PROG_MAKE_SET
 
 
@@ -80,7 +73,7 @@ dnl =============================================================
 dnl Checks for typedefs, structures, and compiler characteristics
 dnl =============================================================
 AC_TYPE_SIZE_T
-dnl AC_TYPE_LONG_LONG_INT
+# AC_TYPE_LONG_LONG_INT
 AC_C_CONST
 AC_C_INLINE
 
@@ -168,19 +161,32 @@ else
 fi
 
 
-dnl ========================================================================
-dnl Checks for python binding. Python binding requires Python and either the
-dnl files gammalib_wrap.cpp and gammalib.py or SWIG to create these files.
-dnl The following conditionals are set:
-dnl  HAVE_PYTHON           - Python >= 2.2 and headers are available
-dnl  has_python            - Python >= 2.2 and headers are available
-dnl  HAVE_SWIG             - swig is available
-dnl  ENABLE_PYTHON_BINDING - Python binding is requested
-dnl  WITH_PYTHON_BINDING   - Either has swig or python wraper files
-dnl ========================================================================
+dnl =========================================================================
+dnl Checks if Python bindings are to be build. Python binding requires Python
+dnl and either the files gammalib_wrap.cpp and gammalib.py or swig to create
+dnl these files. The following conditionals are set:
+dnl  WITH_PYTHON - Python bindings will be built
+dnl  HAVE_SWIG    - swig is available
+dnl =========================================================================
 
-# Checks for Python (HAVE_PYTHON)
+# Initialise flags
+enable_python="no"
 has_python="no"
+has_swig="no"
+has_wrappers="no"
+
+# Python binding enabled?
+AC_ARG_ENABLE([python-binding],
+              AS_HELP_STRING([--enable-python-binding],
+                             [build python binding [default=yes]]),
+              [ac_enable_python_binding="$enableval"],
+              [ac_enable_python_binding="yes"])
+if test "x$ac_enable_python_binding" = "xno"; then
+  AC_MSG_NOTICE([Python binding for gammalib will not be built])
+  AC_MSG_NOTICE([Enable Python binding module building with --enable-python-binding])
+fi
+
+# Do we have Python and Python.h?
 AM_PATH_PYTHON([2.2],
                [has_python="yes"],
                [AC_MSG_WARN([Python >= 2.2 not found. Python >= 2.2 is required to build python binding. Python can be obtained from http://www.python.org])])
@@ -204,72 +210,64 @@ if test "x$has_python" = "xyes"; then
     AC_MSG_WARN([No Python header file "$PY_INCLUDE/Python.h" found. Please install appropriate Python development package.])
   fi
 fi
-AM_CONDITIONAL(HAVE_PYTHON, test "x$has_python" = "xyes")
 
-# Checks for SWIG (HAVE_SWIG)
+# Do we have swig?
 AC_PATH_PROG([SWIG], [swig])
-AM_CONDITIONAL(HAVE_SWIG, test "$SWIG")
-#echo $HAVE_SWIG
-
-# Python binding enabled?
-AC_ARG_ENABLE([python-binding],
-              AS_HELP_STRING([--enable-python-binding],
-                             [build python binding [default=yes]]),
-              [ac_enable_python_binding="$enableval"],
-              [ac_enable_python_binding="yes"])
-AM_CONDITIONAL(ENABLE_PYTHON_BINDING, test "x$ac_enable_python_binding" = "xyes")
-
-# Checks for gammalib_wrap.cpp and gammalib.py
+if test "$SWIG"; then
+  has_swig="yes"
+fi
+AM_CONDITIONAL(HAVE_SWIG, test "x$has_swig" = "xyes")
+ 
+# Do we have wrappers (gammalib_wrap.cpp and gammalib.py)?
 AC_CHECK_FILES([pyext/gammalib_wrap.cpp pyext/gammalib.py],,)
-has_python_wrap="no"
 if test "x$ac_cv_file_pyext_gammalib_wrap_cpp" = "xyes"; then
   if test "x$ac_cv_file_pyext_gammalib_py" = "xyes"; then
-    has_python_wrap="yes"
+    has_wrappers="yes"
   fi
 fi
-AM_CONDITIONAL(WITH_PYTHON_BINDING, test "x$has_python_wrap" = "xyes" -o "$SWIG")
 
-# Inform about missing components and set host dependent variables
-if test "x$ac_enable_python_binding" = "xyes"; then
-  if test "x$has_python" = "xyes"; then
-    if test "x$has_python_wrap" != "xyes"; then
-      if test ! "$SWIG"; then
-        AC_MSG_WARN([Neither pyext/gammalib_wrap.cpp and pyext/gammalib.py nor swig has not been found])
-        AC_MSG_WARN([Python binding for gammalib cannot be built])
-        AC_MSG_WARN([Either use a gammalib distribution with gammalib_wrap.cpp and gammalib.py shipped or install swig on your system])
-        AC_MSG_WARN([swig can be obtained from http://www.swig.org/])
-      fi
-    fi
-
-    # Set host specific build prefix (needed for Solaris pycc bug)
-    PYTHON_BUILD_PREFIX=
-    case $host in
-      sparc*-sun-solaris*)  PYTHON_BUILD_PREFIX="CC=CC" ;;
-      *)                    PYTHON_BUILD_PREFIX="" ;;
-    esac
-    AC_SUBST(PYTHON_BUILD_PREFIX)
-
-    # Set host specific extra libraries. Add all host specific libraries here that
-    # need to be linked in the python module
-    PYTHON_EXTRA_LIBS=
-    case $host in
-      sparc*-sun-solaris*)  PYTHON_EXTRA_LIBS="Cstd" ;;
-      *)                    PYTHON_EXTRA_LIBS="" ;;
-    esac
-    AC_SUBST(PYTHON_EXTRA_LIBS)
-
-  else
-    AC_MSG_WARN([Python binding for gammalib cannot be built as Python seems not to be installed on your system])
+# Signal if Python is enabled
+if test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes"; then
+  if test "x$has_swig" = "xyes" -o "x$has_wrappers" = "xyes"; then
+    enable_python="yes"
   fi
+fi
+AM_CONDITIONAL(WITH_PYTHON, test "x$enable_python" = "xyes")
+
+# Set Python environment
+if test "x$enable_python" = "xyes"; then
+
+  # Set host specific build prefix (needed for Solaris pycc bug)
+  PYTHON_BUILD_PREFIX=
+  case $host in
+    sparc*-sun-solaris*)  PYTHON_BUILD_PREFIX="CC=CC" ;;
+    *)                    PYTHON_BUILD_PREFIX="" ;;
+  esac
+  AC_SUBST(PYTHON_BUILD_PREFIX)
+
+  # Set host specific extra libraries. Add all host specific libraries here that
+  # need to be linked in the python module
+  PYTHON_EXTRA_LIBS=
+  case $host in
+    sparc*-sun-solaris*)  PYTHON_EXTRA_LIBS="Cstd" ;;
+    *)                    PYTHON_EXTRA_LIBS="" ;;
+  esac
+  AC_SUBST(PYTHON_EXTRA_LIBS)
+
 else
-  AC_MSG_NOTICE([Python binding for gammalib will not be built])
-  AC_MSG_NOTICE([Enable Python binding module building with --enable-python-binding])
+  if test "x$has_python_wrap" = "xno" -a "x$has_swig" = "xno"; then
+    AC_MSG_WARN([Neither pyext/gammalib_wrap.cpp and pyext/gammalib.py nor swig has not been found])
+    AC_MSG_WARN([Python binding for gammalib cannot be built])
+    AC_MSG_WARN([Either use a gammalib distribution with gammalib_wrap.cpp and gammalib.py shipped or install swig on your system])
+    AC_MSG_WARN([swig can be obtained from http://www.swig.org/])
+  fi
 fi
 
 
 dnl ==========================
 dnl Checks for cfitsio library
 dnl ==========================
+
 # Initialise cfitsio flag
 has_cfitsio="no"
 
@@ -282,17 +280,6 @@ AC_ARG_WITH([cfitsio],
 
 # If we want to use cfitsio, then search the library now
 if test "x$with_cfitsio" = "xyes"; then
-
-  # First try pkgconfig
-  #PKG_CHECK_MODULES([cfitsio], [cfitsio],
-  #                  [has_cfitsio="yes"],
-  #                  [AC_MSG_WARN([cfitsio pkgconfig information not found - try now locating library directly])])
-  #if test "x$has_cfitsio" = "xyes"; then
-  #  CFLAGS="$CFLAGS $cfitsio_CFLAGS"
-  #  CPPFLAGS="$CPPFLAGS $cfitsio_CFLAGS"
-  #  LDFLAGS="$LDFLAGS $cfitsio_LIBS"
-  #  CFITSIO="cfitsio"
-  #else
 
   # Set host specific cfitsio dependencies
   cfitsio_deps=
@@ -421,62 +408,6 @@ if test "x$has_readline" = "xyes"; then
 fi
 AM_CONDITIONAL(WITH_READLINE, test "x$has_readline" = "xyes")
 
-# Check if readline is available
-#AC_CHECK_LIB([readline], [main],
-#             [LIBS="${LIBS} -lreadline ${readline_deps}"
-#              AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])],
-#             [], [${readline_deps}])
-#AM_CONDITIONAL(WITH_READLINE, test "x$ac_cv_lib_readline_main" = "xyes")
-#
-# If readline is available then get library path for unit testing
-#if test "x$ac_cv_lib_readline_main" = "xyes"; then
-#  for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
-#    test -f $i/libreadline.a -o -f $i/libreadline.so -o -f $i/libreadline.dylib && LIBDIR_READLINE=$i
-#  done
-#  AC_SUBST(LIBDIR_READLINE)
-#fi
-#
-# Checks for readline
-#AC_ARG_WITH([readline],
-#            [AS_HELP_STRING([--with-readline],
-#            [support fancy command line editing @<:@default=check@:>@])],
-#            [],
-#            [with_readline=yes])
-#AC_ARG_WITH([readline-lib-dir],
-#            AC_HELP_STRING([--with-readline-lib-dir],
-#                           [readline library directory [[/usr/(local/)lib(64)]]]),
-#            [readline_lib_dir=$withval])
-#
-# If readline is requested then add readline library path to LDFLAGS
-#if test "x$with_readline" = "xyes"; then
-#  if test "x$readline_lib_dir" != "x"; then
-#    test -f $readline_lib_dir/libreadline.a -o -f $readline_lib_dir/libreadline.so -o -f $readline_lib_dir/libreadline.dylib && LIBDIR_READLINE=$readline_lib_dir
-#  else
-#    for i in /usr/local/lib /usr/local/lib64 /opt/local/lib /usr/lib /usr/lib64 ; do
-#      test -f $i/libreadline.a -o -f $i/libreadline.so -o -f $i/libreadline.dylib && LIBDIR_READLINE=$i
-#    done
-#  fi
-#  if test -z "$LIBDIR_READLINE"; then
-#    if test "x$readline_lib_dir" != "x";then
-#      AC_MSG_ERROR(Cannot find readline library under $readline_lib_dir)
-#    else
-#      AC_MSG_ERROR(Cannot find readline library. Use --with-readline-lib-dir= to specify non-default path or --without-readline to compile with readline library.)
-#    fi
-#  fi
-#  LDFLAGS="$LDFLAGS -L$LIBDIR_READLINE"
-#  AC_SUBST(LIBDIR_READLINE)
-#fi
-#
-# Check for readline library
-#if test "x$with_readline" = "xyes"; then
-#  AC_CHECK_LIB([readline], [main],
-#               [LIBS="${LIBS} -lreadline -lncurses"
-#                AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])],
-#               [AC_MSG_FAILURE([--with-readline was given, but test for readline failed])],
-#               [-lncurses])
-#fi
-#AM_CONDITIONAL(WITH_READLINE, test "x$with_readline" = "xyes")
-
 
 dnl =========================================
 dnl Checks for instrument specific interfaces
@@ -589,32 +520,46 @@ if test "x$has_readline" = "xyes"; then
 else
   echo "  - Readline support             (no)    no readline library found"
 fi
-if test ! "$SWIG"; then
-  echo "  - swig                         (no)"
+if test "x$has_python" = "xyes"; then
+  echo "  * Python / Python.h            (yes)"
 else
-  echo "  * swig                         (yes)"
+  echo "  - Python / Python.h            (no)"
 fi
+if test "x$has_swig" = "xyes"; then
+  echo "  * swig                         (yes)"
+else
+  echo "  - swig                         (no)"
+fi
+if test "x$has_wrappers" = "xyes"; then
+  echo "  * Python wrappers              (yes)"
+else
+  echo "  - Python wrappers              (no)"
+fi
+
+# Dump Python binding information
 if test "x$ac_enable_python_binding" = "xyes"; then
   if test "x$has_python" = "xyes"; then
-    if test "x$has_python_wrap" = "xyes"; then
-      if test ! "$SWIG"; then
-        echo "  * Python binding               (yes)"
-      else
+    if test "x$has_wrappers" = "xyes"; then
+      if test "x$has_swig" = "xyes"; then
         echo "  * Python binding               (yes)   use swig for updates"
+      else
+        echo "  * Python binding               (yes)   use wrappers"
       fi
     else
-      if test ! "$SWIG"; then
-        echo "  - Python binding               (no)    swig not installed"
-      else
+      if test "x$has_swig" = "xyes"; then
         echo "  * Python binding               (yes)   use swig for building"
+      else
+        echo "  - Python binding               (no)    swig required to build wrappers"
       fi
     fi
   else
-    echo "  - Python binding               (no)    Python >=2.2 not installed"
+    echo "  - Python binding               (no)    Python and/or Python.h not installed"
   fi
 else
   echo "  - Python binding               (no)"
 fi
+
+# Dump instrument interface information
 if test "x$with_mwl" = "xyes"; then
   echo "  * Multiwavelength interface    (yes)"
 else
@@ -630,11 +575,15 @@ if test "x$with_cta" = "xyes"; then
 else
   echo "  - CTA interface                (no)"
 fi
+
+# Dump Doxygen information
 if test "$DX_DOXYGEN" != ""; then
   echo "  * Doxygen                      (yes)   $DX_DOXYGEN"
 else
   echo "  - Doxygen                      (no)"
 fi
+
+# Dump next step information
 echo
 echo "Now type 'make'"
 echo
