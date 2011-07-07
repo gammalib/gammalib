@@ -228,6 +228,7 @@ private:
                        double              zeta,
                        double              lambda,
                        double              omega0,
+                       double              rho,
                        double              cos_psf,
                        double              sin_psf,
                        double              cos_ph,
@@ -241,6 +242,7 @@ private:
                        m_zeta(zeta),
                        m_lambda(lambda),
                        m_omega0(omega0),
+                       m_rho(rho),
                        m_cos_psf(cos_psf),
                        m_sin_psf(sin_psf),
                        m_cos_ph(cos_ph),
@@ -256,6 +258,7 @@ private:
         double              m_zeta;          //!< Distance model centre - measured photon
         double              m_lambda;        //!< Distance model centre - pointing
         double              m_omega0;        //!< Azimuth of pointing in model system
+        double              m_rho;           //!< ...
         double              m_cos_psf;       //!< Cosine term for PSF offset angle computation
         double              m_sin_psf;       //!< Sine term for PSF offset angle computation
         double              m_cos_ph;        //!< Cosine term for photon offset angle computation

@@ -225,11 +225,14 @@ GCTAResponse* GCTAResponse::clone(void) const
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
  *
+ * @exception GCTAException::bad_observation_type
+ *            Observation is not a CTA observations.
+ * @exception GCTAException::no_pointing
+ *            No valid CTA pointing found.
  * @exception GCTAException::bad_instdir_type
  *            Instrument direction is not a valid CTA instrument direction.
  *
- * @todo Set polar angle of photon in camera system
- * @todo Set telescope zenith and azimuth angles
+ * @todo Implement Phi dependence in CTA IRF
  ***************************************************************************/
 double GCTAResponse::irf(const GInstDir&     obsDir,
                          const GEnergy&      obsEng,
@@ -246,6 +249,8 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
 
     // Get pointer on CTA pointing
     const GCTAPointing *pnt = ctaobs->pointing(srcTime);
+    if (pnt == NULL)
+        throw GCTAException::no_pointing(G_IRF);
 
     // Get pointer on CTA instrument direction
     const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
@@ -253,12 +258,12 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
         throw GCTAException::bad_instdir_type(G_IRF);
 
     // Get pointing direction zenith angle and azimuth [radians]
-    double zenith  = 0.0; //TODO: not yet set
-    double azimuth = 0.0; //TODO: not yet set
+    double zenith  = pnt->zenith();
+    double azimuth = pnt->azimuth();
 
     // Get radial offset and polar angles of true photon in camera [radians]
     double theta = pnt->dir().dist(srcDir);
-    double phi   = 0.0; //TODO: not yet set
+    double phi   = 0.0; //TODO: Implement Phi dependence
 
     // Get log10(E/TeV) of true photon energy.
     double srcLogEng = srcEng.log10TeV();
@@ -307,12 +312,16 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
  * @param[in] obs Observation.
  *
  * @exception GCTAException::bad_observation_type
- *            Observation is not a CTA observation.
+ *            Observation is not a CTA observations.
+ * @exception GCTAException::no_pointing
+ *            No valid CTA pointing found.
  * @exception GException::no_list
  *            Observation does not contain a valid CTA event list.
  *
  * @todo Set polar angle of photon in camera system
  * @todo Set telescope zenith and azimuth angles
+ *
+ * @todo Implement Phi dependence in CTA IRF
  ***************************************************************************/
 double GCTAResponse::npred(const GSkyDir&      srcDir,
                            const GEnergy&      srcEng,
@@ -324,21 +333,23 @@ double GCTAResponse::npred(const GSkyDir&      srcDir,
     if (ctaobs == NULL)
         throw GCTAException::bad_observation_type(G_NPRED);
 
+    // Get pointer on CTA pointing
+    const GCTAPointing *pnt = ctaobs->pointing(srcTime);
+    if (pnt == NULL)
+        throw GCTAException::no_pointing(G_NPRED);
+
     // Get pointer on CTA events list
     const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
     if (events == NULL)
         throw GException::no_list(G_NPRED);
 
-    // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing(srcTime);
-
     // Get pointing direction zenith angle and azimuth [radians]
-    double zenith  = 0.0;  //TODO: not yet set
-    double azimuth = 0.0;  //TODO: not yet set
+    double zenith  = pnt->zenith();
+    double azimuth = pnt->azimuth();
 
     // Get radial offset and polar angles of true photon in camera [radians]
     double theta = pnt->dir().dist(srcDir);
-    double phi   = 0.0;    //TODO: not yet set
+    double phi   = 0.0; //TODO: Implement Phi dependence
 
     // Get log10(E/TeV) of true photon energy.
     double srcLogEng = srcEng.log10TeV();
@@ -374,8 +385,7 @@ double GCTAResponse::npred(const GSkyDir&      srcDir,
  * Simulates a CTA event using the response function from an incident photon.
  * If the event is not detected a NULL pointer is returned.
  *
- * @todo Set polar angle of photon in camera system
- * @todo Set telescope zenith and azimuth angles
+ * @todo Implement Phi dependence in CTA IRF
  * @todo Implement energy dispersion.
  ***************************************************************************/
 GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
@@ -390,12 +400,12 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
         throw GCTAException::bad_pointing_type(G_MC);
 
     // Get pointing direction zenith angle and azimuth [radians]
-    double zenith  = 0.0;  //TODO: not yet set
-    double azimuth = 0.0;  //TODO: not yet set
+    double zenith  = ctapnt->zenith();
+    double azimuth = ctapnt->azimuth();
 
     // Get radial offset and polar angles of true photon in camera [radians]
     double theta_p = ctapnt->dir().dist(photon.dir());
-    double phi_p   = 0.0;    //TODO: not yet set
+    double phi_p   = 0.0;  //TODO Implement Phi dependence
 
     // Compute effective area for photon
     double srcLogEng      = photon.energy().log10TeV();
@@ -548,8 +558,12 @@ std::string GCTAResponse::print(void) const
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
  *
+ * @exception GCTAException::bad_observation_type
+ *            Specified observation is not a CTA observations.
+ * @exception GCTAException::no_pointing
+ *            No valid CTA pointing found.
  * @exception GCTAException::bad_instdir_type
- *            Instrument direction is not a valid CTA instrument direction
+ *            Instrument direction is not a valid CTA instrument direction.
  *
  * Performs integration of the model times IRF over the true photon arrival
  * direction in the coordinate system of the source model for azimuthally
@@ -562,11 +576,8 @@ std::string GCTAResponse::print(void) const
  * is defined around this location with \f$(\omega,\rho)\f$ being the
  * azimuth and zenith angles, respectively. \f$\omega=0\f$ is defined
  * by the direction that connects the source centre \f$\vec{m}\f$ to the
- * measured photon direction \f$\vec{p}\f$, and \f$\omega\f$ increases
+ * measured photon direction \f$\vec{p'}\f$, and \f$\omega\f$ increases
  * counterclockwise.
- *
- * @todo Does not yet implement polar angle dependency of IRF.
- * @todo Does not yet make use of telescope zenith and azimuth
  ***************************************************************************/
 double GCTAResponse::irf_extended(const GInstDir&             obsDir,
                                   const GEnergy&              obsEng,
@@ -583,15 +594,13 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
 
     // Get pointer on CTA pointing
     const GCTAPointing *pnt = ctaobs->pointing(srcTime);
+    if (pnt == NULL)
+        throw GCTAException::no_pointing(G_IRF_EXTENDED);
 
     // Get pointer on CTA instrument direction
     const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
     if (dir == NULL)
         throw GCTAException::bad_instdir_type(G_IRF_EXTENDED);
-
-    //TODO: Get zenith and azimuth angles [radians]
-    double zenith  = 0.0;
-    double azimuth = 0.0;
 
     // Determine angular distance between measured photon direction and model
     // centre [radians]
@@ -640,8 +649,8 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
         // Setup integration kernel
         GCTAResponse::irf_kern_rho integrand(this,
                                              model.radial(),
-                                             zenith,
-                                             azimuth,
+                                             pnt->zenith(),
+                                             pnt->azimuth(),
                                              srcLogEng,
                                              obsLogEng,
                                              sigma,
@@ -1192,6 +1201,7 @@ double GCTAResponse::irf_kern_rho::eval(double rho)
                                                m_zeta,
                                                m_lambda,
                                                m_omega0,
+                                               rho,
                                                cos_psf,
                                                sin_psf,
                                                cos_ph,
@@ -1219,7 +1229,7 @@ double GCTAResponse::irf_kern_rho::eval(double rho)
  *
  * From the model coordinates \f$(\rho,\omega)\f$ it computes the PSF
  * offset angle \f$\delta\f$, defined as the angle between true 
- * (\f$\vec{p'}\f$) and observed (\f$\vec{p}\f$) photon arrival direction,
+ * (\f$\vec{p}\f$) and observed (\f$\vec{p'}\f$) photon arrival direction,
  * using
  * \f[\delta = \arccos(\cos \rho \cos \zeta + 
  *                     \sin \rho \sin \zeta \cos \omega)\f]
@@ -1227,8 +1237,8 @@ double GCTAResponse::irf_kern_rho::eval(double rho)
  * \f$\zeta\f$ is the angular distance between the observed photon direction
  * \f$\vec{p}\f$ and the model centre \f$\vec{m}\f$.
  *
- * Furthermore, it computes the true photon offset angle \f$\theta\f$,
- * defined as the angle between true photon direction and camera pointing,
+ * Furthermore, it computes the observed photon offset angle \f$\theta\f$,
+ * defined as the angle between observed photon direction and camera pointing,
  * using
  * \f[\theta = \arccos(\cos \rho \cos \lambda + 
  *                     \sin \rho \sin \lambda \cos \omega_0 - \omega)\f]
@@ -1241,17 +1251,8 @@ double GCTAResponse::irf_kern_omega::eval(double omega)
     // Compute PSF offset angle [radians]
     double delta = arccos(m_cos_psf + m_sin_psf * std::cos(omega));
     
-    // Compute true photon offset angle in camera system [radians]
-    double theta = 0.0;
-    if (m_lambda > 0) {
-        if (m_zeta > 0) {
-            double domega = m_omega0 - omega;
-            theta         = arccos(m_cos_ph + m_sin_ph * std::cos(domega));
-        }
-        else {
-            theta = m_lambda;
-        }
-    }
+    // Compute observed photon offset angle in camera system [radians]
+    double theta = arccos(m_cos_ph + m_sin_ph * std::cos(m_omega0 - omega));
     
     //TODO: Compute true photon offset angle in camera system [radians]
     double phi = 0.0;
