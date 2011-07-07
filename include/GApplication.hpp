@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -69,7 +77,7 @@ public:
     bool        logExplicit(void) const;
     bool        logVerbose(void) const;
     bool        logDebug(void) const;
-    bool        clobber(void) const { return m_clobber; }
+    bool        clobber(void) const;
     bool        haspar(const std::string& name) const;
     std::string print(void) const;
 
@@ -83,7 +91,6 @@ protected:
     void        free_members(void);
     std::string par_filename(void) const;
     std::string log_filename(void) const;
-    void        get_par_standard(void);
     void        log_header(void);
     void        log_trailer(void);
     void        log_parameters(void);
@@ -95,9 +102,6 @@ protected:
     std::time_t              m_tstart;     //!< Calendar start time of execution
     std::clock_t             m_cstart;     //!< Clock start time of execution
     GPars                    m_pars;       //!< Application parameters
-    int                      m_chatter;    //!< Chatter level
-    bool                     m_clobber;    //!< Clobber flag
-    bool                     m_debug;      //!< Debugging mode activated
 };
 
 #endif /* GAPPLICATION_HPP */

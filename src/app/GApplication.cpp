@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -75,9 +83,6 @@ GApplication::GApplication(const std::string& name, const std::string& version)
     // Initialise application parameters
     m_pars.load(par_filename());
 
-    // Get standard parameters from parameter file
-    get_par_standard();
-
     // Return
     return;
 }
@@ -110,9 +115,6 @@ GApplication::GApplication(const std::string& name, const std::string& version,
 
     // Initialise application parameters
     m_pars.load(par_filename(), m_args);
-
-    // Get standard parameters from parameter file
-    get_par_standard();
 
     // Return
     return;
@@ -287,8 +289,11 @@ void GApplication::logFileOpen(bool clobber)
  ***************************************************************************/
 bool GApplication::logTerse(void) const
 {
+    // Get chatter level (circumvent const correctness)
+    int chatter = ((GPar*)&m_pars["chatter"])->integer();
+
     // Return terse logging condition
-    return (m_chatter > 0);
+    return (chatter > 0);
 }
 
 
@@ -300,8 +305,11 @@ bool GApplication::logTerse(void) const
  ***************************************************************************/
 bool GApplication::logNormal(void) const
 {
+    // Get chatter level (circumvent const correctness)
+    int chatter = ((GPar*)&m_pars["chatter"])->integer();
+
     // Return normal logging condition
-    return (m_chatter > 1);
+    return (chatter > 1);
 }
 
 
@@ -313,8 +321,11 @@ bool GApplication::logNormal(void) const
  ***************************************************************************/
 bool GApplication::logExplicit(void) const
 {
+    // Get chatter level (circumvent const correctness)
+    int chatter = ((GPar*)&m_pars["chatter"])->integer();
+
     // Return explicit logging condition
-    return (m_chatter > 2);
+    return (chatter > 2);
 }
 
 
@@ -325,8 +336,11 @@ bool GApplication::logExplicit(void) const
  ***************************************************************************/
 bool GApplication::logVerbose(void) const
 {
+    // Get chatter level (circumvent const correctness)
+    int chatter = ((GPar*)&m_pars["chatter"])->integer();
+
     // Return verbose logging condition
-    return (m_chatter > 3);
+    return (chatter > 3);
 }
 
 
@@ -337,8 +351,26 @@ bool GApplication::logVerbose(void) const
  ***************************************************************************/
 bool GApplication::logDebug(void) const
 {
+    // Get debug condition (circumvent const correctness)
+    bool debug = ((GPar*)&m_pars["debug"])->boolean();
+
     // Return debug condition
-    return (m_debug);
+    return (debug);
+}
+
+
+/***********************************************************************//**
+ * @brief Return clobber
+ *
+ * The clobber indicates if existing files should be overwritten.
+ ***************************************************************************/
+bool GApplication::clobber(void) const
+{
+    // Get clobber condition (circumvent const correctness)
+    bool clobber = ((GPar*)&m_pars["clobber"])->boolean();
+
+    // Return clobber condition
+    return (clobber);
 }
 
 
@@ -407,9 +439,6 @@ void GApplication::init_members(void)
     m_version.clear();
     m_args.clear();
     m_pars.clear();
-    m_chatter = 1;
-    m_clobber = true;
-    m_debug   = false;
 
     // Save the execution calendar start time
     std::time(&m_tstart);
@@ -439,9 +468,6 @@ void GApplication::copy_members(const GApplication& app)
     m_tstart  = app.m_tstart;
     m_cstart  = app.m_cstart;
     m_pars    = app.m_pars;
-    m_chatter = app.m_chatter;
-    m_clobber = app.m_clobber;
-    m_debug   = app.m_debug;
 
     // Return
     return;
@@ -490,24 +516,6 @@ std::string GApplication::log_filename(void) const
 {
     // Return
     return (m_name+".log");
-}
-
-
-/***********************************************************************//**
- * @brief Get standard parameters from parameter file
- *
- * The standard parameters "chatter", "clobber" and "debug" are read from
- * the parameter file.
- ***************************************************************************/
-void GApplication::get_par_standard(void)
-{
-    // Extract parameters
-    m_chatter = (*this)["chatter"].integer();
-    m_clobber = (*this)["clobber"].boolean();
-    m_debug   = (*this)["debug"].boolean();
-
-    // Return
-    return;
 }
 
 
