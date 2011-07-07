@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{INST}}
 \newcommand{\doctype}{\mbox{Instrument specific interface}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{15 February 2011}}
+\newcommand{\calendar}{\mbox{7 July 2011}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 \newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
@@ -561,12 +561,10 @@ T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \section{CTA interface}
-
-\subsection{CTA response}
-
 \newcommand{\teldir}{\mbox{$\vec{d}$}}
 \newcommand{\srcdir}{\mbox{$\vec{p}$}}
 \newcommand{\phdir}{\mbox{$\vec{p'}$}}
+\newcommand{\mdir}{\mbox{$\vec{m}$}}
 \newcommand{\off}{\mbox{$\theta$}}
 \newcommand{\polar}{\mbox{$\phi$}}
 \newcommand{\zen}{\mbox{$\Theta$}}
@@ -574,6 +572,12 @@ T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t)
 \newcommand{\opt}{\mbox{$\epsilon_{\rm opt}$}}
 \newcommand{\conf}{\mbox{$C$}}
 \newcommand{\psfsep}{\mbox{$\delta$}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{CTA response}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Introduction}
 
 The CTA response function depends on the following parameters
 \begin{itemize}
@@ -584,25 +588,9 @@ The CTA response function depends on the following parameters
 \item the optical efficiency \opt, and
 \item the array configuration \conf.
 \end{itemize}
-Furthermore, the angular separation between true and measued photon direction is
+Furthermore, the angular separation between true and measured photon direction is
 denoted by \psfsep.
 The relation between the angular parameters is illustrated in Fig.~\ref{fig:ctapsf}.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[!b]
-\center
-\epsfig{figure=cta-psf.eps, height=8cm}
-\caption{Relation between the pointing direction \teldir, the source position \srcdir\,
-the observed photon arrival direction \phdir, the radial offset and polar angles \off\ and
-\polar, and the angular separation \psfsep\ between true and observed photon arrival 
-direction.
-The large circle indicates the field of view, while the dashed circle indicates
-the line of constant offset angle \off.
-The dashed line indicates the direction for which $\polar=0$.
-}
- \label{fig:ctapsf}
-\end{figure}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Using these parameters, the CTA response function can be factorised as follows:
 \begin{eqnarray}
@@ -642,18 +630,180 @@ E_{\rm disp}(E' | \off, \polar, \zen, \azm, \conf, \opt, E) \,
 \label{eq:ctapirf}
 \end{eqnarray}
 where the source intensity is for convenience given as function of offset angle
-\off\ and polar angle $\polar$ around the pointing direction \teldir\ (cf.~Fig.~\ref{fig:ctapsf}).
+\off\ and polar angle $\polar$ around the pointing direction \teldir.
+The relevant angles and relations are illustrated in Fig.~\ref{fig:ctapsf}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}
+\begin{figure}[!t]
 \center
-\epsfig{figure=cta-psf-region1.eps, height=7cm}
-\epsfig{figure=cta-psf-region1.eps, height=7cm}
-\caption{TBD.
+\epsfig{figure=cta-psf.eps, height=8cm}
+\caption{Relation between the pointing direction \teldir, the source position \srcdir,
+the observed photon arrival direction \phdir, the radial offset and polar angles \off\ and
+\polar, and the angular separation \psfsep\ between true and observed photon arrival 
+direction.
+The large circle indicates the field of view, the dotted line indicates the direction for 
+which $\polar=0$.
+All azimuth angles are counted counter clockwise.
 }
- \label{fig:ctapsfregion}
+ \label{fig:ctapsf}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Point source response function}
+
+To be written ... (this is straight forward).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Extended source response function}
+
+To compute Eq.~(\ref{eq:ctapirf}) for extended sources it is more convenient to switch to
+a coordinate system that is centred on the location \mdir\ of the model.
+We introduce thus the zenith and azimuth angles $\rho$ and $\omega$ that
+are defined by the vector from the model centre \mdir\ to the observed photon arrival direction 
+\phdir.
+Eq.~(\ref{eq:ctapirf}) writes then
+\begin{eqnarray}
+\lefteqn{P_{\vec{p}}(\vec{p'}, E', t' | \zen, \azm, \conf, \opt, E)} & & \nonumber \\
+& = & \int_0^{\pi} \int_0^{2 \pi} 
+S(\rho, \omega, E, t) \, A_{\rm eff}(\rho, \omega, \zen, \azm, \conf, \opt, E) \, \nonumber \\
+& \times &
+PSF(\psfsep | \rho, \omega, \zen, \azm, \conf, \opt, E) \,
+E_{\rm disp}(E' | \rho, \omega, \zen, \azm, \conf, \opt, E) \,
+\sin \rho \, {\rm d}\rho \, {\rm d}\omega
+\end{eqnarray}
+which for azimuthally symmetric models $S(\rho, E, t)$ simplifies to
+\begin{equation}
+P_{\vec{p}}(\vec{p'}, E', t' | \zen, \azm, \conf, \opt, E) =
+\int_0^{\pi} S(\rho, E, t) K(\rho, \omega) \sin \rho \, {\rm d}\rho
+\label{eq:ctaextirf}
+\end{equation}
+where
+\begin{equation}
+K(\rho, \omega) = \int_0^{2 \pi} 
+A_{\rm eff}(\rho, \omega, \zen, \azm, \conf, \opt, E) \,
+PSF(\psfsep | \rho, \omega, \zen, \azm, \conf, \opt, E) \,
+E_{\rm disp}(E' | \rho, \omega, \zen, \azm, \conf, \opt, E) \,
+{\rm d}\omega
+\label{eq:ctaextkernel}
+\end{equation}
+is the azimuthal integration of the instrument response function in the model coordinate
+system.
+Evaluation of Eq.~(\ref{eq:ctaextkernel}) for a given zenith angle $\rho$ is done by the method
+{\tt GCTAResponse::irf\_kern\_rho::eval}.
+
+As $PSF(\psfsep | \rho, \omega, \zen, \azm, \conf, \opt, E)$ falls strongly with increasing
+\psfsep, we can define a maximum angle $\psfsep_{\rm max}$ beyond
+which the $PSF$ drops to zero.
+For a given zenith angle $\rho$, evaluation of Eq.~(\ref{eq:ctaextkernel}) can thus be limited 
+to an arc of length
+$\Delta \omega$
+which is given by
+\begin{equation}
+\Delta \omega = \left \{
+\begin{array}{l l}
+\displaystyle
+0 & \mbox{if $\zeta = 0$ and $\rho > \psfsep_{\rm max}$ or $\rho = 0$ and $\zeta > \psfsep_{\rm max}$ or $\ \zeta \ge \rho + \psfsep_{\rm max}$} \\
+2 \pi & \mbox{if $\zeta = 0$ and $\rho \le \psfsep_{\rm max}$ or $\rho = 0$ and $\zeta \le \psfsep_{\rm max}$ or $\rho \le \psfsep_{\rm max}-\zeta $} \\
+\displaystyle
+2 \arccos \left ( 
+\frac{\cos \psfsep_{\rm max} - \cos \zeta \cos \rho}
+        {\sin \zeta \sin \rho} 
+\right) & \mbox{else}
+\end{array}
+\right.
+\label{eq:ctaextarc}
+\end{equation}
+where
+$\zeta$ is the angular distance between the model centre \mdir\ and the observed photon direction \phdir.
+The relation is illustrated in Fig.~\ref{fig:ctapsfarc}.
+In the actual implementation, $\psfsep_{\rm max}$ is computed by the method
+{\tt GCTAResponse::psf\_dummy\_max}
+which returns $\psfsep_{\rm max} = 5 \sigma$, where $\sigma$ is the (energy dependent)
+width of the Gaussian taken to model the PSF.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!t]
+\center
+\epsfig{figure=cta-psf-arc.eps, height=8cm}
+\caption{Illustration of the arc $\Delta \omega$ (thick blue) that is relevant for the computation
+of Eq.~(\ref{eq:ctaextkernel}).
+}
+ \label{fig:ctapsfarc}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Computation of Eq.~(\ref{eq:ctaextkernel}) requires some coordinate transformations.
+These are done in the method\break {\tt GCTAResponse::irf\_kern\_omega::eval} which computes
+the argument of Eq.~(\ref{eq:ctaextkernel}).
+
+The PSF offset angle \psfsep\ is computed using
+\begin{equation}
+\psfsep = \arccos(\cos \rho \cos \zeta + \sin \rho \sin \zeta \cos \omega)
+\end{equation}
+while the offset angle \off\ of the true photon direction \srcdir\ in the camera system is computed
+using
+\begin{equation}
+\theta = \arccos(\cos \rho \cos \lambda +  \sin \rho \sin \lambda \cos (\omega_0 - \omega))
+\end{equation}
+where
+$\lambda$ is the angular separation between the pointing direction \teldir\ and the
+model centre \mdir, and
+$\omega_0$ is the angle between the $\lambda$ and $\zeta$ sides, computed using
+\begin{equation}
+\omega_0 = \left \{
+\begin{array}{l l}
+\displaystyle
+0 & \mbox{if $\lambda = 0$ or $\zeta = 0$} \\
+\arccos \left( \frac{\cos \eta - \cos \lambda \cos \zeta}{\sin \lambda \sin \zeta} \right) & \mbox{else}
+\end{array}
+\right.
+\end{equation}
+and $\eta$ is the angular separation between the pointing direction \teldir\ and the 
+measured photon direction \phdir.
+$\lambda$, $\omega_0$, $\eta$ and $\zeta$ are computed by the method
+{\tt GCTAResponse::irf\_extended} which is the main driver routines for the
+extended response computation.
+
+Note that for $\lambda=0$ the model centre \mdir\ coincides with the pointing direction \teldir,
+and $\off=\rho$ irrespectively of $\omega$ and $\omega_0$.
+For $\zeta=0$ the model centre \mdir\ coincides with the measured photon direction \phdir,
+and the phase of $\omega$ is undefined.
+However, for $\zeta=0$ the azimuth integration arc length $\Delta \omega$ is either $0$ or
+$2\pi$ (see Eq.~\ref{eq:ctaextarc}) the phase is irrelevant, and we arbitrary set $\omega_0$.
+The various angles and relations that occur in the transformations are illustrated in
+Fig.~\ref{fig:ctapsfext}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!t]
+\center
+\epsfig{figure=cta-psf-extended.eps, height=8cm}
+\caption{Illustration of the angles that occur in the coordinate transformation from the model
+based system $(\rho,\omega)$ to the camera based system $(\off,\polar)$.
+}
+ \label{fig:ctapsfext}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Diffuse source response function}
+
+Not yet implemented.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{CTA specific models}
+
+To be written.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Junk
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Some junk I want to keep for reference}
 
 As $PSF(\psfsep | \off, \polar, \zen, \azm, \conf, \opt, E)$ falls strongly with increasing
 \psfsep, we may define a maximum angle $\psfsep_{\rm max}$ beyond
@@ -665,8 +815,8 @@ $[\phi_0 - \Delta \phi, \phi_0 + \Delta \phi]$ around the position angle
 \begin{equation}
 \phi_0 = \arctan \left( 
 \frac{\sin( \alpha_{\vec{p}'} - \alpha_{\vec{d}} )}
-        {\cos \delta_{\vec{d}} \times \tan \delta_{\vec{p}'} - 
-         \sin \delta_{\vec{d}} \times \cos( \alpha_{\vec{p}'} - \alpha_{\vec{d}} )}
+        {\cos \delta_{\vec{d}} \tan \delta_{\vec{p}'} - 
+         \sin \delta_{\vec{d}} \cos( \alpha_{\vec{p}'} - \alpha_{\vec{d}} )}
 \right)
 \label{eq:posang}
 \end{equation}
@@ -706,10 +856,6 @@ Furthemore, if the source model is only non-zero within a circular region around
 \srcdir, the integration can be further restricted to the overlapping region between
 the maximum $PSF$ extent and this circular region.
 
-
-
-
-
 Since only $S(\off, \phi, E, t)$ and $PSF(\theta | \opt, \zen, \azm, \off, \conf, E)$ depend on 
 $\phi$, we can separate the azimuthal integration from the offset angle integration.
 We thus integrate first the product of source model and PSF over all azimuth angles using
@@ -726,9 +872,6 @@ A_{\rm eff}(\opt, \zen, \azm, \off, \conf, E) \,
 E_{\rm disp}(E' | \opt, \zen, \azm, \off, \conf, E) \,
 \sin \off \, {\rm d}\off
 \end{eqnarray}
-
-
-
 
 Equation (\ref{eq:model}) can then be written as
 \begin{equation}
@@ -799,10 +942,5 @@ N_{\rm pred} = \int_{0}^{\infty} \int_{0}^{\infty} \int_{\Omega}
   N_{\rm R}(\vec{d}, \vec{p}, E, t)
 \, {\rm d}\vec{p} \, {\rm d}E \, \,{\rm d}t
 \end{equation}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Source Models
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \end{document}
