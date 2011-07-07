@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAPointing.hpp
- * @brief GCTAPointing class definition.
+ * @brief CTA pointing class interface definition
  * @author J. Knodlseder
  */
 
