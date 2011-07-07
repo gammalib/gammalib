@@ -1,9 +1,12 @@
-xxxx-xx-xx  Juergen Knoedlseder  <knodlseder@cesr.fr>
+2011-07-01  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
-        * Version 0.4.9 released
+        * Version 0.4.9
         ========================
 
         Implement wcslib adaption for GWcs classes
+        Added AZP, STG, and TAN WCS projections
+        Add simple offset angle dependence of CTA response
+        Does not require pkg-config anymore
 
 2011-02-24  Juergen Knoedlseder  <knodlseder@cesr.fr>
 

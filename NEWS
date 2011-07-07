@@ -2,18 +2,18 @@ New Features and Important Changes in GammaLib 00-04-09
 
 Author(s) : Juergen Knoedlseder
 
-February ??, 2011
+July 1st, 2011
 
 
 1. Introduction
 ---------------
-This document briefly summarizes module by module the most important changes
-made since the last release of GammaLib.
+This document briefly summarizes module by module the most important changes made since the last release of GammaLib.
 
 
 2. Configuration
 -----------------
-None
+Remove pkg-config usage from configure.ac as this introduced somas
+on Mac OS X systems (by default there is no pkg-config on Mac OS X).
 
 
 3. Application module
@@ -57,12 +57,16 @@ Replaced the IDL based World Coordinate System code by wcslib based code.
 This improves performance and accuracy of the coordinate transformation
 and corrects a bug in the LONPOLE/LATPOLE keywords that were written in
 the earlier version into the FITS file.
+
 Introduced GWcslib base class for projections that are wcslib based.
 All code adapted from wcslib goes into that class. Not all functionality
 has yet been ported from wcslib to GammaLib, but the essential things
 for creating, writing and reading WCS compliant FITS files is there.
+
 Introduced a World Coordinate System registry for easy extension of the
 set of projections.
+
+Added the following projection types: AZP, STG, TAN
 
 
 11. Support module
@@ -87,4 +91,8 @@ None
 
 15. CTA interface
 -----------------
-None
+Added a simple offset angle dependence to the CTA response. The effective
+area is assumed to vary following exp(-0.5*theta^4/sigma^2), where theta
+is the offset angle of the photon arrival direction in the camera system
+and sigma is a parameter that is set by default to 3.0 deg^2. No energy
+dependence has been assumed in the offset angle variation.
