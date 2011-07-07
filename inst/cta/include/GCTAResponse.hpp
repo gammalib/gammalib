@@ -117,6 +117,8 @@ public:
     void           load(const std::string& rspname);
     void           eps(const double& eps) { m_eps=eps; }
     const double&  eps(void) const { return m_eps; }
+    void           offset_sigma(const double& sigma) { m_offset_sigma=sigma; }
+    const double&  offset_sigma(void) const { return m_offset_sigma; }
 
     // Low-level response methods
     double aeff(const double& theta,
@@ -164,66 +166,100 @@ private:
     void free_members(void);
     void read_performance_table(const std::string& filename);
 
-    // IRF theta integration kernel
-    class irf_kern_theta : public GIntegrand {
+    // Model*IRF zenith angle integration kernel
+    class irf_kern_rho : public GIntegrand {
     public:
-        irf_kern_theta(const GCTAResponse* rsp,
-                       const GModelRadial* radial,
-                       double              srcLogEng,
-                       double              obsLogEng,
-                       double              sigma,
-                       double              dist,
-                       double              delta_max) :
-                       m_rsp(rsp),
-                       m_radial(radial),
-                       m_srcLogEng(srcLogEng),
-                       m_obsLogEng(obsLogEng),
-                       m_sigma(sigma),
-                       m_dist(dist),
-                       m_cos_dist(std::cos(dist)),
-                       m_sin_dist(std::sin(dist)),
-                       m_delta_max(delta_max),
-                       m_cos_delta_max(std::cos(delta_max)) { return; }
-        double eval(double theta);
+        irf_kern_rho(const GCTAResponse* rsp,
+                     const GModelRadial* radial,
+                     double              zenith,
+                     double              azimuth,
+                     double              srcLogEng,
+                     double              obsLogEng,
+                     double              sigma,
+                     double              zeta,
+                     double              lambda,
+                     double              omega0,
+                     double              delta_max) :
+                     m_rsp(rsp),
+                     m_radial(radial),
+                     m_zenith(zenith),
+                     m_azimuth(azimuth),
+                     m_srcLogEng(srcLogEng),
+                     m_obsLogEng(obsLogEng),
+                     m_sigma(sigma),
+                     m_zeta(zeta),
+                     m_cos_zeta(std::cos(zeta)),
+                     m_sin_zeta(std::sin(zeta)),
+                     m_lambda(lambda),
+                     m_cos_lambda(std::cos(lambda)),
+                     m_sin_lambda(std::sin(lambda)),
+                     m_omega0(omega0),
+                     m_delta_max(delta_max),
+                     m_cos_delta_max(std::cos(delta_max)) { return; }
+        double eval(double rho);
     protected:
         const GCTAResponse* m_rsp;           //!< Pointer to CTA response
         const GModelRadial* m_radial;        //!< Pointer to radial spatial model
+        double              m_zenith;        //!< Pointing zenith angle
+        double              m_azimuth;       //!< Pointing azimuth angle
         double              m_srcLogEng;     //!< True photon energy
         double              m_obsLogEng;     //!< Measured photon energy
         double              m_sigma;         //!< Width of PSF in radians
-        double              m_dist;          //!< Distance model centre - measured photon
-        double              m_cos_dist;      //!< Cosine of distance
-        double              m_sin_dist;      //!< Sine of distance
+        double              m_zeta;          //!< Distance model centre - measured photon
+        double              m_cos_zeta;      //!< Cosine of zeta
+        double              m_sin_zeta;      //!< Sine of zeta
+        double              m_lambda;        //!< Distance model centre - pointing
+        double              m_cos_lambda;    //!< Cosine of lambda
+        double              m_sin_lambda;    //!< Sine of lambda
+        double              m_omega0;        //!< Azimuth of pointing in model system
         double              m_delta_max;     //!< Maximum PSF radius
         double              m_cos_delta_max; //!< Cosine of maximum PSF radius
     };
 
-    // IRF phi integration kernel
-    class irf_kern_phi : public GIntegrand {
+    // IRF azimuth integration kernel
+    class irf_kern_omega : public GIntegrand {
     public:
-        irf_kern_phi(const GCTAResponse* rsp,
-                     double              srcLogEng,
-                     double              obsLogEng,
-                     double              theta,
-                     double              sigma,
-                     double              cos_term,
-                     double              sin_term) :
-                     m_rsp(rsp),
-                     m_srcLogEng(srcLogEng),
-                     m_obsLogEng(obsLogEng),
-                     m_theta(theta),
-                     m_sigma(sigma),
-                     m_cos_term(cos_term),
-                     m_sin_term(sin_term) { return; }
-        double eval(double phi);
+        irf_kern_omega(const GCTAResponse* rsp,
+                       double              zenith,
+                       double              azimuth,
+                       double              srcLogEng,
+                       double              obsLogEng,
+                       double              sigma,
+                       double              zeta,
+                       double              lambda,
+                       double              omega0,
+                       double              cos_psf,
+                       double              sin_psf,
+                       double              cos_ph,
+                       double              sin_ph) :
+                       m_rsp(rsp),
+                       m_zenith(zenith),
+                       m_azimuth(azimuth),
+                       m_srcLogEng(srcLogEng),
+                       m_obsLogEng(obsLogEng),
+                       m_sigma(sigma),
+                       m_zeta(zeta),
+                       m_lambda(lambda),
+                       m_omega0(omega0),
+                       m_cos_psf(cos_psf),
+                       m_sin_psf(sin_psf),
+                       m_cos_ph(cos_ph),
+                       m_sin_ph(sin_ph) { return; }
+        double eval(double omega);
     protected:
         const GCTAResponse* m_rsp;           //!< Pointer to CTA response
+        double              m_zenith;        //!< Pointing zenith angle
+        double              m_azimuth;       //!< Pointing azimuth angle
         double              m_srcLogEng;     //!< True photon energy
         double              m_obsLogEng;     //!< Measured photon energy
-        double              m_theta;         //!< Offset angle theta
         double              m_sigma;         //!< Width of PSF in radians
-        double              m_cos_term;      //!< Cosine term for PSF offset angle computation
-        double              m_sin_term;      //!< Sine term for PSF offset angle computation
+        double              m_zeta;          //!< Distance model centre - measured photon
+        double              m_lambda;        //!< Distance model centre - pointing
+        double              m_omega0;        //!< Azimuth of pointing in model system
+        double              m_cos_psf;       //!< Cosine term for PSF offset angle computation
+        double              m_sin_psf;       //!< Sine term for PSF offset angle computation
+        double              m_cos_ph;        //!< Cosine term for photon offset angle computation
+        double              m_sin_ph;        //!< Sine term for photon offset angle computation
     };
 
     // Integration

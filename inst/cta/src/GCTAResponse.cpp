@@ -551,7 +551,22 @@ std::string GCTAResponse::print(void) const
  * @exception GCTAException::bad_instdir_type
  *            Instrument direction is not a valid CTA instrument direction
  *
- * @todo Does not yet implement polar angle dependencies of IRF.
+ * Performs integration of the model times IRF over the true photon arrival
+ * direction in the coordinate system of the source model for azimuthally
+ * independent models \f$M(\rho)\f$:
+ * \f[\int_{\omega_{\rm min}}^{\omega_{\rm max}}
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}} M(\rho) IRF(\rho, \omega)
+ *    d\rho d\omega\f],
+ *
+ * The source centre is located at \f$\vec{m}\f$, and a spherical system
+ * is defined around this location with \f$(\omega,\rho)\f$ being the
+ * azimuth and zenith angles, respectively. \f$\omega=0\f$ is defined
+ * by the direction that connects the source centre \f$\vec{m}\f$ to the
+ * measured photon direction \f$\vec{p}\f$, and \f$\omega\f$ increases
+ * counterclockwise.
+ *
+ * @todo Does not yet implement polar angle dependency of IRF.
+ * @todo Does not yet make use of telescope zenith and azimuth
  ***************************************************************************/
 double GCTAResponse::irf_extended(const GInstDir&             obsDir,
                                   const GEnergy&              obsEng,
@@ -561,10 +576,43 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
                                   const GTime&                srcTime,
                                   const GObservation&         obs) const
 {
+    // Get pointer on CTA observation
+    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+    if (ctaobs == NULL)
+        throw GCTAException::bad_observation_type(G_IRF_EXTENDED);
+
+    // Get pointer on CTA pointing
+    const GCTAPointing *pnt = ctaobs->pointing(srcTime);
+
     // Get pointer on CTA instrument direction
     const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
     if (dir == NULL)
         throw GCTAException::bad_instdir_type(G_IRF_EXTENDED);
+
+    //TODO: Get zenith and azimuth angles [radians]
+    double zenith  = 0.0;
+    double azimuth = 0.0;
+
+    // Determine angular distance between measured photon direction and model
+    // centre [radians]
+    double zeta = model.dir().dist(dir->skydir());
+
+    // Determine angular distance between measured photon direction and
+    // pointing direction [radians]
+    double eta = pnt->dir().dist(dir->skydir());
+
+    // Determine angular distance between model centre and pointing direction
+    // [radians]
+    double lambda = model.dir().dist(pnt->dir());
+
+    // Compute azimuth angle of pointing in model system [radians]
+    // Will be comprised in interval [0,pi]
+    double omega0 = 0.0;
+    double denom  = std::sin(lambda) * std::sin(zeta);
+    if (denom != 0.0) {
+        double arg = (std::cos(eta) - std::cos(lambda) * std::cos(zeta))/denom;
+        omega0     = arccos(arg);
+    }
 
     // Get log10(E/TeV) of true and measured photon energies
     double srcLogEng = srcEng.log10TeV();
@@ -577,34 +625,35 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
     double delta_max = psf_delta_max(0.0, 0.0, 0.0, 0.0, srcLogEng);
     double src_max   = model.radial()->theta_max();
 
-    // Determine distance of measured photon direction from model centre
-    double dist = model.dir().dist(dir->skydir());
-
-    // Set radial model theta angle range
-    double theta_min = (dist > delta_max) ? dist - delta_max : 0.0;
-    double theta_max = dist + delta_max;
-    if (theta_max > src_max)
-        theta_max = src_max;
+    // Set radial model zenith angle range
+    double rho_min = (zeta > delta_max) ? zeta - delta_max : 0.0;
+    double rho_max = zeta + delta_max;
+    if (rho_max > src_max)
+        rho_max = src_max;
 
     // Initialise IRF value
     double irf = 0.0;
 
-    // Perform offset angle integration if interval is valid
-    if (theta_max > theta_min) {
+    // Perform zenith angle integration if interval is valid
+    if (rho_max > rho_min) {
 
         // Setup integration kernel
-        GCTAResponse::irf_kern_theta integrand(this,
-                                               model.radial(),
-                                               srcLogEng,
-                                               obsLogEng,
-                                               sigma,
-                                               dist,
-                                               delta_max);
+        GCTAResponse::irf_kern_rho integrand(this,
+                                             model.radial(),
+                                             zenith,
+                                             azimuth,
+                                             srcLogEng,
+                                             obsLogEng,
+                                             sigma,
+                                             zeta,
+                                             lambda,
+                                             omega0,
+                                             delta_max);
 
-        // Integrate over theta
+        // Integrate over zenith angle
         GIntegral integral(&integrand);
         integral.eps(m_eps);
-        irf = integral.romb(theta_min, theta_max);
+        irf = integral.romb(rho_min, rho_max);
 
     }
 
@@ -612,8 +661,8 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
     #if G_DEBUG_IRF_EXTENDED
     std::cout << "irf_extended";
     std::cout << " sigma=" << sigma;
-    std::cout << " theta_min=" << theta_min;
-    std::cout << " theta_max=" << theta_max;
+    std::cout << " rho_min=" << rho_min;
+    std::cout << " rho_max=" << rho_max;
     std::cout << " irf=" << irf << std::endl;
     #endif
 
@@ -1088,60 +1137,70 @@ void GCTAResponse::read_performance_table(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Kernel for offset angle IRF integration
+ * @brief Kernel for model zenith angle integration of IRF
  *
- * @param[in] theta Offset angle (radians).
+ * @param[in] rho Zenith angle with respect to model centre [radians].
  *
- * This method provides the kernel for the offset angle integration of the
- * IRF. The offset angle is given with respect to the centre of the radial
- * model.
- *
- * @todo Does not handle angular dependencies of Psf
- * @todo Does not handle zenith and azimuth angle dependences of Aeff and Edisp.
+ * This method evaluates the kernel \f$K(\rho)\f$ for the zenith angle
+ * integration
+ * \f[\int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho) d\rho\f]
+ * of the product between model and IRF, where
+ * \f[K(\rho) = \int_{\omega_{\rm min}}^{\omega_{\rm max}} M(\rho)
+ *              IRF(\rho, \omega) d\omega\f],
+ * \f$M(\rho)\f$ is azimuthally symmetric the source model, and
+ * \f$IRF(\rho, \omega)\f$ is the instrument response function.
  ***************************************************************************/
-double GCTAResponse::irf_kern_theta::eval(double theta)
+double GCTAResponse::irf_kern_rho::eval(double rho)
 {
     // Compute half length of arc that lies within PSF validity circle
     // (in radians)
-    double dphi = 0.5 * cta_roi_arclength(theta,
-                                          m_dist,
-                                          m_cos_dist,
-                                          m_sin_dist,
-                                          m_delta_max,
-                                          m_cos_delta_max);
+    double domega = 0.5 * cta_roi_arclength(rho,
+                                            m_zeta,
+                                            m_cos_zeta,
+                                            m_sin_zeta,
+                                            m_delta_max,
+                                            m_cos_delta_max);
 
     // Initialise result
     double irf = 0.0;
 
     // Continue only if arc length is positive
-    if (dphi > 0.0) {
+    if (domega > 0.0) {
 
-        // Compute phi integration range
-        double phi_min = -dphi;
-        double phi_max = +dphi;
+        // Compute omega integration range
+        double omega_min = -domega;
+        double omega_max = +domega;
 
-        // Evaluate sky model
-        double model = m_radial->eval(theta);
+        // Evaluate sky model M(rho)
+        double model = m_radial->eval(rho);
 
         // Precompute cosine and sine terms for azimuthal integration
-        double cos_theta = std::cos(theta);
-        double sin_theta = std::sin(theta);
-        double cos_term  = cos_theta*m_cos_dist;
-        double sin_term  = sin_theta*m_sin_dist;
+        double cos_rho = std::cos(rho);
+        double sin_rho = std::sin(rho);
+        double cos_psf = cos_rho*m_cos_zeta;
+        double sin_psf = sin_rho*m_sin_zeta;
+        double cos_ph  = cos_rho*m_cos_lambda;
+        double sin_ph  = sin_rho*m_sin_lambda;
 
         // Setup integration kernel
-        GCTAResponse::irf_kern_phi integrand(m_rsp,
-                                             m_srcLogEng,
-                                             m_obsLogEng,
-                                             theta,
-                                             m_sigma,
-                                             cos_term,
-                                             sin_term);
+        GCTAResponse::irf_kern_omega integrand(m_rsp,
+                                               m_zenith,
+                                               m_azimuth,
+                                               m_srcLogEng,
+                                               m_obsLogEng,
+                                               m_sigma,
+                                               m_zeta,
+                                               m_lambda,
+                                               m_omega0,
+                                               cos_psf,
+                                               sin_psf,
+                                               cos_ph,
+                                               sin_ph);
 
         // Integrate over phi
         GIntegral integral(&integrand);
         integral.eps(m_rsp->m_eps);
-        irf = integral.romb(phi_min, phi_max) * model * sin_theta;
+        irf = integral.romb(omega_min, omega_max) * model * sin_rho;
 
     } // endif: arc length was positive
 
@@ -1153,35 +1212,57 @@ double GCTAResponse::irf_kern_theta::eval(double theta)
 /***********************************************************************//**
  * @brief Kernel for azimuth angle IRF integration
  *
- * @param[in] phi Azimuth angle (radians).
+ * @param[in] omega Azimuth angle (radians).
  *
- * This method provides the kernel for the azimuth angle integration of the
- * IRF. The azimuth angle is given with respect to the centre of the radial
- * model, and is counted from the line that connects that centre to the
- * location of the observed photon.
+ * This method evaluates the instrument response function
+ * \f$IRF(\rho,\omega)\f$ for the azimuth angle integration of the IRF.
  *
- * @todo Implement offset angle computation !!!
- * @todo Does not handle angular dependencies of Psf
- * @todo Does not handle zenith and azimuth angle dependences of Aeff and Edisp.
+ * From the model coordinates \f$(\rho,\omega)\f$ it computes the PSF
+ * offset angle \f$\delta\f$, defined as the angle between true 
+ * (\f$\vec{p'}\f$) and observed (\f$\vec{p}\f$) photon arrival direction,
+ * using
+ * \f[\delta = \arccos(\cos \rho \cos \zeta + 
+ *                     \sin \rho \sin \zeta \cos \omega)\f]
+ * where
+ * \f$\zeta\f$ is the angular distance between the observed photon direction
+ * \f$\vec{p}\f$ and the model centre \f$\vec{m}\f$.
+ *
+ * Furthermore, it computes the true photon offset angle \f$\theta\f$,
+ * defined as the angle between true photon direction and camera pointing,
+ * using
+ * \f[\theta = \arccos(\cos \rho \cos \lambda + 
+ *                     \sin \rho \sin \lambda \cos \omega_0 - \omega)\f]
+ * where
+ * \f$\lambda\f$ is the angular distance between the model centre and the
+ * camera pointing direction.
  ***************************************************************************/
-double GCTAResponse::irf_kern_phi::eval(double phi)
+double GCTAResponse::irf_kern_omega::eval(double omega)
 {
-    // Compute PSF offset angle in radians
-    double delta = arccos(m_cos_term + m_sin_term * std::cos(phi));
+    // Compute PSF offset angle [radians]
+    double delta = arccos(m_cos_psf + m_sin_psf * std::cos(omega));
     
-    // Transform (theta,phi), which is given with respect to the model, to
-    // (theta_p,phi_p), which is given with respect to the telescope
-    // pointing direction
-    double theta_p = 0.0; //TODO
-    double phi_p   = 0.0; //TODO
+    // Compute true photon offset angle in camera system [radians]
+    double theta = 0.0;
+    if (m_lambda > 0) {
+        if (m_zeta > 0) {
+            double domega = m_omega0 - omega;
+            theta         = arccos(m_cos_ph + m_sin_ph * std::cos(domega));
+        }
+        else {
+            theta = m_lambda;
+        }
+    }
+    
+    //TODO: Compute true photon offset angle in camera system [radians]
+    double phi = 0.0;
 
     // Evaluate IRF
-    double irf = m_rsp->aeff(theta_p, phi_p, 0.0, 0.0, m_srcLogEng) *
+    double irf = m_rsp->aeff(theta, phi, m_zenith, m_azimuth, m_srcLogEng) *
                  m_rsp->psf_dummy(delta, m_sigma);
 
     // Optionally take energy dispersion into account
     if (m_rsp->hasedisp())
-        irf *= m_rsp->edisp(m_obsLogEng, m_theta, phi, 0.0, 0.0, m_srcLogEng);
+        irf *= m_rsp->edisp(m_obsLogEng, theta, phi, m_zenith, m_azimuth, m_srcLogEng);
 
 
     // Return
