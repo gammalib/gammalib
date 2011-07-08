@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -241,6 +249,24 @@ double GModelSpectralExpPlaw::eval(const GEnergy& srcEng) const
     double power  = std::pow(e_norm, index()) * std::exp(-e_cut);
     double value  = norm() * power;
 
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(value) || std::isinf(value)) {
+        std::cout << "*** ERROR: GModelSpectralExpPlaw::eval";
+        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", energy=" << energy;
+        std::cout << ", index=" << index();
+        std::cout << ", ecut=" << ecut();
+        std::cout << ", pivot=" << pivot();
+        std::cout << ", e_norm=" << e_norm;
+        std::cout << ", e_cut=" << e_cut;
+        std::cout << ", power=" << power;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
     // Return
     return value;
 }
@@ -293,6 +319,28 @@ double GModelSpectralExpPlaw::eval_gradients(const GEnergy& srcEng) const
     ((GModelSpectralExpPlaw*)this)->m_index.gradient(g_index);
     ((GModelSpectralExpPlaw*)this)->m_ecut.gradient(g_ecut);
     ((GModelSpectralExpPlaw*)this)->m_pivot.gradient(g_pivot);
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(value) || std::isinf(value)) {
+        std::cout << "*** ERROR: GModelSpectralExpPlaw::eval_gradients";
+        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", energy=" << energy;
+        std::cout << ", index=" << index();
+        std::cout << ", ecut=" << ecut();
+        std::cout << ", pivot=" << pivot();
+        std::cout << ", e_norm=" << e_norm;
+        std::cout << ", e_cut=" << e_cut;
+        std::cout << ", power=" << power;
+        std::cout << ", g_norm=" << g_norm;
+        std::cout << ", g_index=" << g_index;
+        std::cout << ", g_ecut=" << g_ecut;
+        std::cout << ", g_pivot=" << g_pivot;
+        std::cout << ")" << std::endl;
+    }
+    #endif
 
     // Return
     return value;
@@ -569,8 +617,9 @@ void GModelSpectralExpPlaw::init_members(void)
     m_norm.clear();
     m_norm.name("Prefactor");
     m_norm.unit("ph/cm2/s/MeV");
-    m_norm.value(1.0);
     m_norm.scale(1.0);
+    m_norm.value(1.0);          // default: 1.0
+    m_norm.min(0.0);            // min:     0.0
     m_norm.free();
     m_norm.gradient(0.0);
     m_norm.hasgrad(true);
@@ -578,8 +627,9 @@ void GModelSpectralExpPlaw::init_members(void)
     // Initialise powerlaw index
     m_index.clear();
     m_index.name("Index");
-    m_index.value(-2.0);
     m_index.scale(1.0);
+    m_index.value(-2.0);        // default: -2.0
+    m_index.range(-10.0,+10.0); // range:   [-10,+10]
     m_index.free();
     m_index.gradient(0.0);
     m_index.hasgrad(true);
@@ -588,8 +638,9 @@ void GModelSpectralExpPlaw::init_members(void)
     m_ecut.clear();
     m_ecut.name("Cutoff");
     m_ecut.unit("MeV");
-    m_ecut.value(1000.0);
     m_ecut.scale(1.0);
+    m_ecut.value(1000.0);       // default: 1000.0
+    m_norm.min(0.1);            // min:     0.1
     m_ecut.free();
     m_ecut.gradient(0.0);
     m_ecut.hasgrad(true);
@@ -598,8 +649,8 @@ void GModelSpectralExpPlaw::init_members(void)
     m_pivot.clear();
     m_pivot.name("PivotEnergy");
     m_pivot.unit("MeV");
-    m_pivot.value(100.0);
     m_pivot.scale(1.0);
+    m_pivot.value(100.0);
     m_pivot.fix();
     m_pivot.gradient(0.0);
     m_pivot.hasgrad(true);
