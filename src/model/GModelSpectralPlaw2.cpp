@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -233,6 +241,20 @@ double GModelSpectralPlaw2::eval(const GEnergy& srcEng) const
     // Compute function value
     double value = integral() * m_norm * m_power;
 
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(value) || std::isinf(value)) {
+        std::cout << "*** ERROR: GModelSpectralPlaw2::eval";
+        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", integral=" << integral();
+        std::cout << ", m_norm=" << m_norm;
+        std::cout << ", m_power=" << m_power;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
     // Return
     return value;
 }
@@ -293,6 +315,22 @@ double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng) const
     // Set gradients
     ((GModelSpectralPlaw2*)this)->m_integral.gradient(g_integral);
     ((GModelSpectralPlaw2*)this)->m_index.gradient(g_index);
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(value) || std::isinf(value)) {
+        std::cout << "*** ERROR: GModelSpectralPlaw2::eval_gradients";
+        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", integral=" << integral();
+        std::cout << ", m_norm=" << m_norm;
+        std::cout << ", m_power=" << m_power;
+        std::cout << ", g_integral=" << g_integral;
+        std::cout << ", g_index=" << g_index;
+        std::cout << ")" << std::endl;
+    }
+    #endif
 
     // Return
     return value;
@@ -548,9 +586,9 @@ void GModelSpectralPlaw2::init_members(void)
     m_integral.clear();
     m_integral.name("Integral");
     m_integral.unit("ph/cm2/s");
-    m_integral.value(1.0);
     m_integral.scale(1.0);
-    m_integral.range(0.0, 10.0);
+    m_integral.value(1.0);       // default: 1.0
+    m_integral.range(0.0, 10.0); // range:   [0,10]
     m_integral.free();
     m_integral.gradient(0.0);
     m_integral.hasgrad(true);
@@ -558,9 +596,9 @@ void GModelSpectralPlaw2::init_members(void)
     // Initialise powerlaw index
     m_index.clear();
     m_index.name("Index");
-    m_index.value(-2.0);
     m_index.scale(1.0);
-    m_index.range(-5.0, -0.1);
+    m_index.value(-2.0);        // default: -2.0
+    m_index.range(-10.0,+10.0); // range:   [-10,+10]
     m_index.free();
     m_index.gradient(0.0);
     m_index.hasgrad(true);
@@ -569,9 +607,9 @@ void GModelSpectralPlaw2::init_members(void)
     m_emin.clear();
     m_emin.name("LowerLimit");
     m_emin.unit("MeV");
-    m_emin.value(100.0);
     m_emin.scale(1.0);
-    m_emin.range(0.001, 1.0e15);
+    m_emin.value(100.0);         // default: 100
+    m_emin.range(0.001, 1.0e15); // range:   [0.001, 1e15]
     m_emin.fix();
     m_emin.gradient(0.0);
     m_emin.hasgrad(false);
@@ -580,9 +618,9 @@ void GModelSpectralPlaw2::init_members(void)
     m_emax.clear();
     m_emax.name("UpperLimit");
     m_emax.unit("MeV");
-    m_emax.value(500000.0);
     m_emax.scale(1.0);
-    m_emax.range(0.001, 1.0e15);
+    m_emax.value(500000.0);      // default: 500000
+    m_emin.range(0.001, 1.0e15); // range:   [0.001, 1e15]
     m_emax.fix();
     m_emax.gradient(0.0);
     m_emax.hasgrad(false);
