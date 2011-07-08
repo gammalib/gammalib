@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-04-09
 
 Author(s) : Juergen Knoedlseder
 
-July 1st, 2011
+July 8th, 2011
 
 
 1. Introduction
@@ -14,6 +14,13 @@ This document briefly summarizes module by module the most important changes mad
 -----------------
 Remove pkg-config usage from configure.ac as this introduced somas
 on Mac OS X systems (by default there is no pkg-config on Mac OS X).
+
+Add --enable-nan-check option and add option configuration information
+to configuration summary screen dump.
+
+Test for presence of Python.h and build Python binding only if the
+file exists. This should resolve installation issues on systems that
+do not have the Python development package installed.
 
 
 3. Application module
@@ -33,17 +40,17 @@ None
 
 6. Model module
 ---------------
-None
+Add NaN/Inf check to various spatial and spectral models.
 
 
 7. Numerics module
 ------------------
-None
+Add NaN/Inf check to GIntegral class.
 
 
 8. Observation module
 ---------------------
-None
+Add NaN/Inf check to GResponse and GObservation class.
 
 
 9. Optimization module
@@ -96,3 +103,5 @@ area is assumed to vary following exp(-0.5*theta^4/sigma^2), where theta
 is the offset angle of the photon arrival direction in the camera system
 and sigma is a parameter that is set by default to 3.0 deg^2. No energy
 dependence has been assumed in the offset angle variation.
+
+Add NaN/Inf check to various classes.

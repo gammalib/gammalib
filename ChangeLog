@@ -7,6 +7,8 @@
         Added AZP, STG, and TAN WCS projections
         Add simple offset angle dependence of CTA response
         Does not require pkg-config anymore
+        Add NaN/Inf check in various places (--enable-nan-check)
+        Test for presence of Python.h
 
 2011-02-24  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
