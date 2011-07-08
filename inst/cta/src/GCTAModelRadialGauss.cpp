@@ -4,10 +4,18 @@
  *  copyright (C) 2011 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -40,7 +48,8 @@ const GCTAModelRadialRegistry g_cta_radial_gauss_registry(&g_cta_radial_gauss_se
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_DEBUG_MC 0                                     //!< Debug MC method
+//#define G_DEBUG_MC                                     //!< Debug MC method
+//#define G_CHECK_NAN                                    //!< Check for NaN
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -207,7 +216,7 @@ GCTAModelRadialGauss* GCTAModelRadialGauss::clone(void) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] offset Offset angle (degrees).
+ * @param[in] offset Offset angle [degrees].
  *
  * Evaluates the Gaussian model for a given offset. The Gaussian model is
  * defined as
@@ -219,12 +228,30 @@ GCTAModelRadialGauss* GCTAModelRadialGauss::clone(void) const
  *
  * Note that this method implements a function which is unity for
  * \f$\theta=0\f$.
+ *
+ * Note that we add a small constant to sigma to assure that the Gaussian
+ * sigma is positive.
  ***************************************************************************/
 double GCTAModelRadialGauss::eval(const double& offset) const
 {
+    // Set constants
+    const double eps_sigma = 7.71728e-8; // Add (1 arcsec)^2 to sigma
+
     // Compute value
-    double arg   = offset * offset / sigma();
+    double sig   = sigma() + eps_sigma;
+    double arg   = offset * offset / sig;
     double value = exp(-0.5 * arg * arg);
+
+    // Debug: Check for NaN
+    #if defined(G_CHECK_NAN)
+    if (std::isnan(value) || std::isinf(value)) {
+        std::cout << "*** ERROR: GCTAModelRadialGauss::eval";
+        std::cout << "(offset=" << offset << "): NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", sig=" << sig;
+        std::cout << ")" << std::endl;
+    }
+    #endif
 
     // Return value
     return value;
@@ -234,7 +261,7 @@ double GCTAModelRadialGauss::eval(const double& offset) const
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] offset Offset angle (degrees).
+ * @param[in] offset Offset angle [degrees].
  *
  * Evaluates the Gaussian model for a given offset. The Gaussian model is
  * defined as
@@ -253,19 +280,37 @@ double GCTAModelRadialGauss::eval(const double& offset) const
  *
  * Note that this method implements a function which is unity for
  * \f$\theta=0\f$.
+ *
+ * Note that we add a small constant to sigma to assure that the Gaussian
+ * sigma is positive.
  ***************************************************************************/
 double GCTAModelRadialGauss::eval_gradients(const double& offset) const
 {
+    // Set constants
+    const double eps_sigma = 7.71728e-8; // Add (1 arcsec)^2 to sigma
+
     // Compute value
-    double arg   = offset * offset / sigma();
+    double sig   = sigma() + eps_sigma;
+    double arg   = offset * offset / sig;
     double arg2  = arg * arg;
     double value = exp(-0.5 * arg2);
 
     // Compute partial derivatives of the sigma parameter.
-    double g_sigma = value * arg2 / sigma() * m_sigma.scale();
+    double g_sigma = value * arg2 / sig * m_sigma.scale();
 
     // Set gradients (circumvent const correctness)
     ((GCTAModelRadialGauss*)this)->m_sigma.gradient(g_sigma);
+
+    // Debug: Check for NaN
+    #if defined(G_CHECK_NAN)
+    if (std::isnan(value) || std::isinf(value)) {
+        std::cout << "*** ERROR: GCTAModelRadialGauss::eval";
+        std::cout << "(offset=" << offset << "): NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", sig=" << sig;
+        std::cout << ")" << std::endl;
+    }
+    #endif
 
     // Return value
     return value;
@@ -293,7 +338,7 @@ double GCTAModelRadialGauss::eval_gradients(const double& offset) const
 GCTAInstDir GCTAModelRadialGauss::mc(const GCTAInstDir& dir, GRan& ran) const
 {
     // Simulate offset from photon arrival direction
-    #if G_DEBUG_MC
+    #if defined(G_DEBUG_MC)
     int    n_samples = 0;
     #endif
     double sigma_max = 4.0 * sqrt(sigma());
@@ -307,11 +352,11 @@ GCTAInstDir GCTAModelRadialGauss::mc(const GCTAInstDir& dir, GRan& ran) const
         double arg2 = arg * arg;
         value       = sin(offset * deg2rad) * exp(-0.5 * arg2);
         u           = ran.uniform() * u_max;
-        #if G_DEBUG_MC
+        #if defined(G_DEBUG_MC)
         n_samples++;
         #endif
     } while (u > value);
-    #if G_DEBUG_MC
+    #if defined(G_DEBUG_MC)
     std::cout << "#=" << n_samples << " ";
     #endif
 
@@ -508,6 +553,7 @@ void GCTAModelRadialGauss::init_members(void)
     m_sigma.scale(1.0);
     m_sigma.gradient(0.0);
     m_sigma.hasgrad(true);
+    m_sigma.min(0.0);
 
     // Set parameter pointer(s)
     m_pars.clear();
