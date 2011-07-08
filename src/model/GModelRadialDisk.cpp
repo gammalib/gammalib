@@ -4,10 +4,18 @@
  *  copyright (C) 2011 by Christoph Deil                                   *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -40,6 +48,7 @@ const GModelRadialRegistry g_radial_disk_registry(&g_radial_disk_seed);
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_CHECK_NAN                                      //!< Check for NaN
 
 
 /*==========================================================================
@@ -234,6 +243,18 @@ double GModelRadialDisk::eval(const double& theta) const
 
     // Set value
     double value = (theta <= m_radius_rad) ? m_norm : 0.0;
+
+    // Debug: Check for NaN
+    #if defined(G_CHECK_NAN)
+    if (std::isnan(value) || std::isinf(value)) {
+        std::cout << "*** ERROR: GModelRadialDisk::eval";
+        std::cout << "(theta=" << theta << "): NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", m_radius_rad=" << m_radius_rad;
+        std::cout << ", m_norm=" << m_norm;
+        std::cout << ")" << std::endl;
+    }
+    #endif
 
     // Return value
     return value;
@@ -438,6 +459,7 @@ void GModelRadialDisk::init_members(void)
     m_radius.scale(1.0);
     m_radius.gradient(0.0);
     m_radius.hasgrad(false);  // Radial components never have gradients
+    m_radius.min(0.0);
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_radius);
@@ -492,9 +514,15 @@ void GModelRadialDisk::free_members(void)
  *
  * Computes the normalization
  * \f[{\tt m\_norm} = \frac{1}{2 \pi (1 - \cos r)}\f]
+ *
+ * Note that we add a small constant to the radius to assure that the disk
+ * radius is positive.
  ***************************************************************************/
 void GModelRadialDisk::update() const
 {
+    // Set constants
+    const double eps_radius = 2.778e-4; // Add 1 arcsec to radius
+
     // Update if radius has changed
     if (m_last_radius != radius()) {
 
@@ -502,10 +530,11 @@ void GModelRadialDisk::update() const
         m_last_radius = radius();
 
         // Compute disk radius in radians
-        m_radius_rad = radius() * deg2rad;
+        m_radius_rad = (radius()+eps_radius) * deg2rad;
 
         // Perform precomputations
-        m_norm  = 1. / (twopi * (1 - std::cos(m_radius_rad)));
+        double denom = twopi * (1 - std::cos(m_radius_rad));
+        m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
 
     } // endif: update required
 
