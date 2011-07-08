@@ -4,10 +4,18 @@
  *  copyright (C) 2011 by Christoph Deil                                   *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -40,7 +48,8 @@ const GModelRadialRegistry g_radial_shell_registry(&g_radial_shell_seed);
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DEBUG_MC 0                                     //!< Debug MC method
+//#define G_DEBUG_MC                                     //!< Debug MC method
+//#define G_CHECK_NAN                                    //!< Check for NaN
 
 
 /*==========================================================================
@@ -283,15 +292,34 @@ double GModelRadialShell::eval(const double& theta) const
     }
 
     // Compute value
-    double value = 0;
+    double value = 0.0;
     if (x < m_x_out) {
         value = sqrt(m_x_out - x);
         if (x < m_x_in)
             value -= sqrt(m_x_in - x);
     }
+    
+    // Normalise value
+    double result = m_norm * value;
+
+    // Debug: Check for NaN
+    #if defined(G_CHECK_NAN)
+    if (std::isnan(result) || std::isinf(result)) {
+        std::cout << "*** ERROR: GModelRadialShell::eval";
+        std::cout << "(theta=" << theta << "): NaN/Inf encountered";
+        std::cout << " (result=" << result;
+        std::cout << ", m_norm=" << m_norm;
+        std::cout << ", value=" << value;
+        std::cout << ", x=" << x;
+        std::cout << ", m_x_out=" << m_x_out;
+        std::cout << ", m_x_in=" << m_x_in;
+        std::cout << ", m_small_angle=" << m_small_angle;
+        std::cout << ")" << std::endl;
+    }
+    #endif
 
     // Return normalised value
-    return (m_norm * value);
+    return result;
 }
 
 
@@ -324,7 +352,7 @@ GSkyDir GModelRadialShell::mc(GRan& ran) const
     update();
 
     // Simulate offset from photon arrival direction
-    #if G_DEBUG_MC
+    #if defined(G_DEBUG_MC)
     int    n_samples = 0;
     #endif
     double theta_max     = this->theta_max();
@@ -338,11 +366,11 @@ GSkyDir GModelRadialShell::mc(GRan& ran) const
         theta = ran.uniform() * theta_max;
         value = eval(theta) * std::sin(theta);
         u     = ran.uniform() * u_max;
-        #if G_DEBUG_MC
+        #if defined(G_DEBUG_MC)
         n_samples++;
         #endif
     } while (u > value);
-    #if G_DEBUG_MC
+    #if defined(G_DEBUG_MC)
     std::cout << "#=" << n_samples << " ";
     #endif
 
@@ -536,6 +564,7 @@ void GModelRadialShell::init_members(void)
     m_radius.scale(1.0);
     m_radius.gradient(0.0);
     m_radius.hasgrad(false);
+    m_radius.min(0.0);
 
     // Initialise Width
     m_width.clear();
@@ -546,6 +575,7 @@ void GModelRadialShell::init_members(void)
     m_width.scale(1.0);
     m_width.gradient(0.0);
     m_width.hasgrad(false);
+    m_width.min(0.0);
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_radius);
@@ -638,12 +668,16 @@ void GModelRadialShell::free_members(void)
  *    \frac{1+\cos 2 {\tt m\_theta\_in}}{4} \ln \left(
  *          \frac{\sqrt{2} \cos {\tt m\_theta\_in}}
  *               {\sqrt{2} + \sqrt{1 - \cos 2 {\tt m\_theta\_in}}} \right)\f]
+ *
+ * Note that we add a small constant to the width to assure that the shell
+ * width is positive.
  ***************************************************************************/
 void GModelRadialShell::update() const
 {
     // Set constants
-    const double c1 = twopi / 3.0;
-    const double c2 = 1.0 / (2.0 * sqrt_two);
+    const double c1        = twopi / 3.0;
+    const double c2        = 1.0 / (2.0 * sqrt_two);
+    const double eps_width = 2.778e-4; // Add 1 arcsec to width
 
     // Update if radius or width have changed
     if (m_last_radius != radius() || m_last_width != width()) {
@@ -651,26 +685,51 @@ void GModelRadialShell::update() const
         // Store last values
         m_last_radius = radius();
         m_last_width  = width();
-
+        
+        // Get width. Make sure that the width is >0
+        double w = width();
+        if (w < 0.0)
+            w = 0.0;
+        w += eps_width;
+        
         // Perform precomputations
-        m_theta_in   = radius()  * deg2rad;
-        m_theta_out  = (radius() + width()) * deg2rad;
+        m_theta_in   =  radius()          * deg2rad;
+        m_theta_out  = (radius() + w) * deg2rad;
         if (m_small_angle) {
-            m_x_in  = m_theta_in  * m_theta_in;
-            m_x_out = m_theta_out * m_theta_out;
-            m_norm  = 1.0 / (c1 * (m_x_out*m_theta_out - m_x_in*m_theta_in));
+            m_x_in       = m_theta_in  * m_theta_in;
+            m_x_out      = m_theta_out * m_theta_out;
+            double denom = c1 * (m_x_out*m_theta_out - m_x_in*m_theta_in);
+            m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
         } else {
             double sin_theta_in  = std::sin(m_theta_in);
             double sin_theta_out = std::sin(m_theta_out);
             double term1         = (f1(m_theta_out) - f1(m_theta_in)) * c2;
             double term2         = f2(m_theta_out);
             double term3         = f2(m_theta_in);
-            m_norm  = 1.0 / (twopi * (term1 + term2 - term3));
-            m_x_in  = sin_theta_in*sin_theta_in;
-            m_x_out = sin_theta_out * sin_theta_out;
+            double denom         = twopi * (term1 + term2 - term3);
+            m_norm               = (denom > 0.0) ? 1.0 / denom : 0.0;
+            m_x_in               = sin_theta_in*sin_theta_in;
+            m_x_out              = sin_theta_out * sin_theta_out;
         }
 
     } // endif: update required
+    
+    // Debug: Check for NaN
+    #if defined(G_CHECK_NAN)
+    if (std::isnan(m_norm) || std::isinf(m_norm)) {
+        std::cout << "*** ERROR: GModelRadialShell::update:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (m_norm=" << m_norm;
+        std::cout << ", radius=" << radius();
+        std::cout << ", width=" << width();
+        std::cout << ", m_theta_in=" << m_theta_in;
+        std::cout << ", m_theta_out=" << m_theta_out;
+        std::cout << ", term1=" << (f1(m_theta_out) - f1(m_theta_in)) * c2;
+        std::cout << ", term2=" << f2(m_theta_out);
+        std::cout << ", term3=" << f2(m_theta_in);
+        std::cout << ")" << std::endl;
+    }
+    #endif
 
     // Return
     return;
