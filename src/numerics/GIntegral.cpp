@@ -37,7 +37,6 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_CHECK_NAN                                     //!< Check for NaN
 
 
 /*==========================================================================
@@ -212,8 +211,8 @@ double GIntegral::romb(double a, double b, int k)
         // Integration using Trapezoid rule
         s[m_iter] = trapzd(a, b, m_iter, s[m_iter-1]);
 
-        // Debug: Check for NaN
-        #if defined(G_CHECK_NAN)
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
         if (std::isnan(s[m_iter]) || std::isinf(s[m_iter])) {
             std::cout << "*** ERROR: GIntegral::romb";
             std::cout << "(a=" << a << ", b=" << b << ", k=" << k << "):";

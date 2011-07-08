@@ -1,13 +1,21 @@
 /***************************************************************************
  *               GResponse.cpp  -  Response abstract base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 
@@ -40,7 +48,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DEBUG_NPRED_EXTENDED 0                    //!< Debug npred_extended
+//#define G_DEBUG_NPRED_EXTENDED                    //!< Debug npred_extended
 
 
 /*==========================================================================
@@ -367,7 +375,7 @@ double GResponse::npred_extended(const GModelExtendedSource& model,
         npred = integral.romb(theta_min, theta_max);
 
         // Compile option: Show integration results
-        #if G_DEBUG_NPRED_EXTENDED
+        #if defined(G_DEBUG_NPRED_EXTENDED)
         std::cout << "npred_extended:";
         std::cout << " theta_min=" << theta_min;
         std::cout << " theta_max=" << theta_max;
@@ -375,6 +383,18 @@ double GResponse::npred_extended(const GModelExtendedSource& model,
         #endif
 
     } // endif: offset angle range was valid
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(npred) || std::isinf(npred)) {
+        std::cout << "*** ERROR: GResponse::npred_extended:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (npred=" << npred;
+        std::cout << ", theta_min=" << theta_min;
+        std::cout << ", theta_max=" << theta_max;
+        std::cout << ")" << std::endl;
+    }
+    #endif
 
     // Return Npred
     return npred;
@@ -475,6 +495,19 @@ double GResponse::npred_kern_theta::eval(double theta)
     GIntegral integral(&integrand);
     npred = integral.romb(0.0, twopi) * sin_theta * model;
 
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(npred) || std::isinf(npred)) {
+        std::cout << "*** ERROR: GResponse::npred_kern_theta::eval";
+        std::cout << "(theta=" << theta << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (npred=" << npred;
+        std::cout << ", model=" << model;
+        std::cout << ", sin_theta=" << sin_theta;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
     // Return Npred
     return npred;
 }
@@ -501,6 +534,19 @@ double GResponse::npred_kern_phi::eval(double phi)
 
     // Compute Npred for this sky direction
     double npred = m_rsp->npred(srcDir, *m_srcEng, *m_srcTime, *m_obs);
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(npred) || std::isinf(npred)) {
+        std::cout << "*** ERROR: GResponse::npred_kern_phi::eval";
+        std::cout << "(phi=" << phi << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (npred=" << npred;
+        std::cout << ", cos_phi=" << cos_phi;
+        std::cout << ", sin_phi=" << sin_phi;
+        std::cout << ")" << std::endl;
+    }
+    #endif
 
     // Return Npred
     return npred;

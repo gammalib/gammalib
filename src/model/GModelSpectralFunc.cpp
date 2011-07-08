@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -232,6 +240,19 @@ double GModelSpectralFunc::eval(const GEnergy& srcEng) const
     // Compute function value
     double value  = norm() * func;
 
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(value) || std::isinf(value)) {
+        std::cout << "*** ERROR: GModelSpectralFunc::eval";
+        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", norm=" << norm();
+        std::cout << ", func=" << func;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
     // Return
     return value;
 }
@@ -266,6 +287,20 @@ double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng) const
 
     // Set gradients (circumvent const correctness)
     ((GModelSpectralFunc*)this)->m_norm.gradient(g_norm);
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(value) || std::isinf(value)) {
+        std::cout << "*** ERROR: GModelSpectralFunc::eval_gradients";
+        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", norm=" << norm();
+        std::cout << ", func=" << func;
+        std::cout << ", g_norm=" << g_norm;
+        std::cout << ")" << std::endl;
+    }
+    #endif
 
     // Return
     return value;
@@ -456,10 +491,9 @@ void GModelSpectralFunc::init_members(void)
     // Initialise powerlaw normalisation
     m_norm.clear();
     m_norm.name("Normalization");
-    m_norm.min(0.0);
-    m_norm.max(1000.0);
-    m_norm.value(1.0);
     m_norm.scale(1.0);
+    m_norm.value(1.0);
+    m_norm.range(0.0,1000.0);
     m_norm.free();
     m_norm.gradient(0.0);
     m_norm.hasgrad(true);

@@ -62,10 +62,9 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_IRF_EXTENDED_OLD    0              //!< Use old irf_extended method
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DEBUG_IRF_EXTENDED  0                //!< Debug irf_extended method
+//#define G_DEBUG_IRF_EXTENDED                 //!< Debug irf_extended method
 
 /* __ Constants __________________________________________________________ */
 
@@ -298,6 +297,18 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
 
     } // endif: we were sufficiently close to PSF
 
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(irf) || std::isinf(irf)) {
+        std::cout << "*** ERROR: GCTAResponse::irf:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (irf=" << irf;
+        std::cout << ", theta=" << theta;
+        std::cout << ", phi=" << phi << ")";
+        std::cout << std::endl;
+    }
+    #endif
+
     // Return IRF value
     return irf;
 }
@@ -365,6 +376,18 @@ double GCTAResponse::npred(const GSkyDir&      srcDir,
         npred *= nedisp(srcDir, srcEng, srcTime, *pnt, events->ebounds());
 
     } // endif: had energy dispersion
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(npred) || std::isinf(npred)) {
+        std::cout << "*** ERROR: GCTAResponse::npred:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (npred=" << npred;
+        std::cout << ", theta=" << theta;
+        std::cout << ", phi=" << phi << ")";
+        std::cout << std::endl;
+    }
+    #endif
 
     // Return Npred
     return npred;
@@ -664,10 +687,22 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
         integral.eps(m_eps);
         irf = integral.romb(rho_min, rho_max);
 
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (std::isnan(irf) || std::isinf(irf)) {
+            std::cout << "*** ERROR: GCTAResponse::irf_extended:";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (irf=" << irf;
+            std::cout << ", rho_min=" << rho_min;
+            std::cout << ", rho_max=" << rho_max;
+            std::cout << ", omega0=" << omega0 << ")";
+            std::cout << std::endl;
+        }
+        #endif
     }
 
     // Compile option: Show integration results
-    #if G_DEBUG_IRF_EXTENDED
+    #if defined(G_DEBUG_IRF_EXTENDED)
     std::cout << "irf_extended";
     std::cout << " sigma=" << sigma;
     std::cout << " rho_min=" << rho_min;
@@ -751,13 +786,6 @@ double GCTAResponse::aeff(const double& theta,
         double arg    = offset * offset / m_offset_sigma;
         double scale  = exp(-0.5 * arg * arg);
         aeff         *= scale;
-/*
-std::cout << "GCTAResponse::aeff:"
-          << " scale=" << scale
-          << " theta=" << theta
-          << " offset=" << offset
-          << " arg=" << arg << std::endl;
-*/
     }
 
     // Return effective area
@@ -907,6 +935,20 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
         value = integral.romb(0.0, rmax);
 
     } // endelse: numerical integration required
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(value) || std::isinf(value)) {
+        std::cout << "*** ERROR: GCTAResponse::npsf:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", radroi=" << radroi;
+        std::cout << ", psf=" << psf;
+        std::cout << ", sigma=" << sigma;
+        std::cout << ", rmax=" << rmax << ")";
+        std::cout << std::endl;
+    }
+    #endif
 
     // Return integrated PSF
     return value;
@@ -1212,6 +1254,20 @@ double GCTAResponse::irf_kern_rho::eval(double rho)
         integral.eps(m_rsp->m_eps);
         irf = integral.romb(omega_min, omega_max) * model * sin_rho;
 
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (std::isnan(irf) || std::isinf(irf)) {
+            std::cout << "*** ERROR: GCTAResponse::irf_kern_rho::eval";
+            std::cout << "(rho=" << rho << "):";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (irf=" << irf;
+            std::cout << ", domega=" << domega;
+            std::cout << ", model=" << model;
+            std::cout << ", sin_rho=" << sin_rho << ")";
+            std::cout << std::endl;
+        }
+        #endif
+
     } // endif: arc length was positive
 
     // Return result
@@ -1265,6 +1321,19 @@ double GCTAResponse::irf_kern_omega::eval(double omega)
     if (m_rsp->hasedisp())
         irf *= m_rsp->edisp(m_obsLogEng, theta, phi, m_zenith, m_azimuth, m_srcLogEng);
 
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(irf) || std::isinf(irf)) {
+        std::cout << "*** ERROR: GCTAResponse::irf_kern_omega::eval";
+        std::cout << "(omega=" << omega << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (irf=" << irf;
+        std::cout << ", delta=" << delta;
+        std::cout << ", theta=" << theta;
+        std::cout << ", phi=" << phi << ")";
+        std::cout << std::endl;
+    }
+    #endif
 
     // Return
     return irf;
@@ -1285,7 +1354,20 @@ double GCTAResponse::npsf_kern_rad_azsym::eval(double theta)
     double phi = cta_roi_arclength(theta, m_psf, m_cospsf, m_sinpsf, m_roi, m_cosroi);
 
     // Get PSF value
-    double value = m_parent->psf_dummy(theta, m_sigma) * phi * sin(theta);
+    double value = m_parent->psf_dummy(theta, m_sigma) * phi * std::sin(theta);
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(value) || std::isinf(value)) {
+        std::cout << "*** ERROR: GCTAResponse::npsf_kern_rad_azsym::eval";
+        std::cout << "(theta=" << theta << ").";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", theta=" << theta;
+        std::cout << ", phi=" << phi << ")";
+        std::cout << std::endl;
+    }
+    #endif
 
     // Return
     return value;

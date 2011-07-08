@@ -49,7 +49,6 @@ const GCTAModelRadialRegistry g_cta_radial_gauss_registry(&g_cta_radial_gauss_se
 
 /* __ Coding definitions _________________________________________________ */
 //#define G_DEBUG_MC                                     //!< Debug MC method
-//#define G_CHECK_NAN                                    //!< Check for NaN
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -228,27 +227,20 @@ GCTAModelRadialGauss* GCTAModelRadialGauss::clone(void) const
  *
  * Note that this method implements a function which is unity for
  * \f$\theta=0\f$.
- *
- * Note that we add a small constant to sigma to assure that the Gaussian
- * sigma is positive.
  ***************************************************************************/
 double GCTAModelRadialGauss::eval(const double& offset) const
 {
-    // Set constants
-    const double eps_sigma = 7.71728e-8; // Add (1 arcsec)^2 to sigma
-
     // Compute value
-    double sig   = sigma() + eps_sigma;
-    double arg   = offset * offset / sig;
+    double arg   = offset * offset / sigma();
     double value = exp(-0.5 * arg * arg);
 
-    // Debug: Check for NaN
-    #if defined(G_CHECK_NAN)
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
     if (std::isnan(value) || std::isinf(value)) {
         std::cout << "*** ERROR: GCTAModelRadialGauss::eval";
         std::cout << "(offset=" << offset << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
-        std::cout << ", sig=" << sig;
+        std::cout << ", sigma=" << sigma();
         std::cout << ")" << std::endl;
     }
     #endif
@@ -280,34 +272,27 @@ double GCTAModelRadialGauss::eval(const double& offset) const
  *
  * Note that this method implements a function which is unity for
  * \f$\theta=0\f$.
- *
- * Note that we add a small constant to sigma to assure that the Gaussian
- * sigma is positive.
  ***************************************************************************/
 double GCTAModelRadialGauss::eval_gradients(const double& offset) const
 {
-    // Set constants
-    const double eps_sigma = 7.71728e-8; // Add (1 arcsec)^2 to sigma
-
     // Compute value
-    double sig   = sigma() + eps_sigma;
-    double arg   = offset * offset / sig;
+    double arg   = offset * offset / sigma();
     double arg2  = arg * arg;
     double value = exp(-0.5 * arg2);
 
     // Compute partial derivatives of the sigma parameter.
-    double g_sigma = value * arg2 / sig * m_sigma.scale();
+    double g_sigma = value * arg2 / sigma() * m_sigma.scale();
 
     // Set gradients (circumvent const correctness)
     ((GCTAModelRadialGauss*)this)->m_sigma.gradient(g_sigma);
 
-    // Debug: Check for NaN
-    #if defined(G_CHECK_NAN)
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
     if (std::isnan(value) || std::isinf(value)) {
         std::cout << "*** ERROR: GCTAModelRadialGauss::eval";
         std::cout << "(offset=" << offset << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
-        std::cout << ", sig=" << sig;
+        std::cout << ", sigma=" << sigma();
         std::cout << ")" << std::endl;
     }
     #endif
@@ -421,6 +406,9 @@ double GCTAModelRadialGauss::omega(void) const
  *
  * Read the Gaussian radial model information from an XML element. The XML
  * element is required to have one parameter named "Sigma". 
+ *
+ * @todo Implement a test of the sigma and sigma boundary. The sigma
+ *       and sigma minimum should be >0.
  ***************************************************************************/
 void GCTAModelRadialGauss::read(const GXmlElement& xml)
 {
@@ -438,7 +426,13 @@ void GCTAModelRadialGauss::read(const GXmlElement& xml)
 
         // Handle Sigma
         if (par->attribute("name") == "Sigma") {
+            
+            // Read parameter
             m_sigma.read(*par);
+            
+            //TODO: Check parameter
+            
+            // Increment parameter counter
             npar[0]++;
         }
 
@@ -549,11 +543,12 @@ void GCTAModelRadialGauss::init_members(void)
     m_sigma.clear();
     m_sigma.name("Sigma");
     m_sigma.unit("deg2");
+    m_sigma.value(7.71728e-8); // (1 arcsec)^2
+    m_sigma.min(7.71728e-8);   // (1 arcsec)^2
     m_sigma.free();
     m_sigma.scale(1.0);
     m_sigma.gradient(0.0);
     m_sigma.hasgrad(true);
-    m_sigma.min(0.0);
 
     // Set parameter pointer(s)
     m_pars.clear();

@@ -4,10 +4,18 @@
  *  copyright (C) 2011 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -233,6 +241,19 @@ double GModelRadialGauss::eval(const double& theta) const
     double theta2    = theta   * theta;
     double value     = exp(-0.5 * theta2 / sigma2) / (twopi * sigma2);
 
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(value) || std::isinf(value)) {
+        std::cout << "*** ERROR: GModelRadialGauss::eval";
+        std::cout << "(theta=" << theta << "): NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", sigma_rad=" << sigma_rad;
+        std::cout << ", sigma2=" << sigma2;
+        std::cout << ", theta2=" << theta2;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
     // Return value
     return value;
 }
@@ -306,6 +327,9 @@ double GModelRadialGauss::theta_max(void) const
  * is required to have 3 parameters. 
  * The position is named either "RA" and "DEC" or "GLON" and "GLAT", the
  * Gaussian width is named "Sigma".
+ *
+ * @todo Implement a test of the sigma and sigma boundary. The sigma
+ *       and sigma minimum should be >0.
  ***************************************************************************/
 void GModelRadialGauss::read(const GXmlElement& xml)
 {
@@ -329,7 +353,13 @@ void GModelRadialGauss::read(const GXmlElement& xml)
 
         // Handle Gaussian width
         if (par->attribute("name") == "Sigma") {
+            
+            // Read parameter
             m_sigma.read(*par);
+            
+            //TODO: Check parameter
+            
+            // Increment parameter counter
             npar[0]++;
         }
 
@@ -434,7 +464,8 @@ std::string GModelRadialGauss::print(void) const
  * @brief Initialise class members
  *
  * Note that this model implements no gradients, as spatial models will
- * always require numerical gradient computations.
+ * always require numerical gradient computations. The minimum Gaussian
+ * width is set to 1 arcsec.
  ***************************************************************************/
 void GModelRadialGauss::init_members(void)
 {
@@ -443,10 +474,12 @@ void GModelRadialGauss::init_members(void)
     m_sigma.clear();
     m_sigma.name("Sigma");
     m_sigma.unit("deg");
+    m_sigma.value(2.778e-4); // 1 arcsec
+    m_sigma.min(2.778e-4);   // 1 arcsec
     m_sigma.free();
     m_sigma.scale(1.0);
     m_sigma.gradient(0.0);
-    m_sigma.hasgrad(false);
+    m_sigma.hasgrad(false);  // Radial components never have gradients
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_sigma);

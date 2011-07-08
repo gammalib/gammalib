@@ -4,10 +4,18 @@
  *  copyright (C) 2011 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -356,12 +364,28 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
         GEnergy srcEng  = obsEng;
         GTime   srcTime = obsTime;
 
-        // Compute spatially integrated IRF
-        npred = rsp->npred(*this, srcEng, srcTime, obs);
+        // Compute response components
+        double npred_spatial  = rsp->npred(*this, srcEng, srcTime, obs);
+        double npred_spectral = spectral()->eval(srcEng);
+        double npred_temporal = temporal()->eval(srcTime);
+                
+        // Compute response
+        npred = npred_spatial * npred_spectral * npred_temporal;
 
-        // Multiply by spectral and temporal components
-        npred *= spectral()->eval(srcEng);
-        npred *= temporal()->eval(srcTime);
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (std::isnan(npred) || std::isinf(npred)) {
+            std::cout << "*** ERROR: GModelSky::npred:";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (npred=" << npred;
+            std::cout << ", npred_spatial=" << npred_spatial;
+            std::cout << ", npred_spectral=" << npred_spectral;
+            std::cout << ", npred_temporal=" << npred_temporal;
+            std::cout << ", srcEng=" << srcEng;
+            std::cout << ", srcTime=" << srcTime;
+            std::cout << ")" << std::endl;
+        }
+        #endif
 
     } // endif: model was valid
 
@@ -807,6 +831,19 @@ double GModelSky::spatial(const GEvent& event,
             // Set value
             value = spec * temp * irf;
 
+            // Compile option: Check for NaN/Inf
+            #if defined(G_NAN_CHECK)
+            if (std::isnan(value) || std::isinf(value)) {
+                std::cout << "*** ERROR: GModelSky::spatial:";
+                std::cout << " NaN/Inf encountered";
+                std::cout << " (value=" << value;
+                std::cout << ", spec=" << spec;
+                std::cout << ", temp=" << temp;
+                std::cout << ", irf=" << irf;
+                std::cout << ")" << std::endl;
+            }
+            #endif
+
             // Multiply factors to spectral gradients
             if (spectral() != NULL) {
                 double fact = temp * irf;
@@ -831,12 +868,24 @@ double GModelSky::spatial(const GEvent& event,
         else {
 
             // Evaluate source model
-            double source = 1.0;
-            if (m_spectral != NULL) source *= m_spectral->eval(srcEng);
-            if (m_temporal != NULL) source *= m_temporal->eval(srcTime);
+            double spec = (m_spectral != NULL) ? m_spectral->eval(srcEng) : 1.0;
+            double temp = (m_temporal != NULL) ? m_temporal->eval(srcTime) : 1.0;
 
             // Set value
-            value = source * irf;
+            value = spec * temp * irf;
+
+            // Compile option: Check for NaN/Inf
+            #if defined(G_NAN_CHECK)
+            if (std::isnan(value) || std::isinf(value)) {
+                std::cout << "*** ERROR: GModelSky::spatial:";
+                std::cout << " NaN/Inf encountered";
+                std::cout << " (value=" << value;
+                std::cout << ", spec=" << spec;
+                std::cout << ", temp=" << temp;
+                std::cout << ", irf=" << irf;
+                std::cout << ")" << std::endl;
+            }
+            #endif
 
         }
 
@@ -891,6 +940,18 @@ double GModelSky::spectral(const GEvent& event, const GTime& srcTime,
     else
         value = spatial(event, event.energy(), srcTime, obs, grad);
 
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(value) || std::isinf(value)) {
+        std::cout << "*** ERROR: GModelSky::spectral:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", event=" << event;
+        std::cout << ", srcTime=" << srcTime;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
     // Return value
     return value;
 }
@@ -938,6 +999,17 @@ double GModelSky::temporal(const GEvent& event, const GObservation& obs,
     // Case B: No integration (assume no time dispersion)
     else
         value = spectral(event, event.time(), obs, grad);
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(value) || std::isinf(value)) {
+        std::cout << "*** ERROR: GModelSky::temporal:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", event=" << event;
+        std::cout << ")" << std::endl;
+    }
+    #endif
 
     // Return value
     return value;

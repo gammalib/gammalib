@@ -4,10 +4,18 @@
  *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -50,7 +58,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_LN_ENERGY_INT  1   //!< ln(E) variable substitution for integration
+#define G_LN_ENERGY_INT      //!< ln(E) variable substitution for integration
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -739,11 +747,23 @@ double GObservation::npred_spec(const GModel& model,
     GIntegral                     integral(&integrand);
 
     // Do Romberg integration
-    #if G_LN_ENERGY_INT
+    #if defined(G_LN_ENERGY_INT)
     emin = log(emin);
     emax = log(emax);
     #endif
     double result = integral.romb(emin, emax);
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(result) || std::isinf(result)) {
+        std::cout << "*** ERROR: GObservation::npred_spec:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (result=" << result;
+        std::cout << ", emin=" << emin;
+        std::cout << ", emax=" << emax;
+        std::cout << ")" << std::endl;
+    }
+    #endif
 
     // Return result
     return result;
@@ -756,13 +776,16 @@ double GObservation::npred_spec(const GModel& model,
  * @param[in] x Function value.
  *
  * This method implements the integration kernel needed for the npred_spec()
- * method. Upon the defintion of the G_LN_ENERGY_INT declaration the energy
- * integration is done logarithmically (G_LN_ENERGY_INT=1) or not.
+ * method. If G_LN_ENERGY_INT is defined the energy integration is done
+ * logarithmically.
  ***************************************************************************/
 double GObservation::npred_spec_kern::eval(double x)
 {
-    #if G_LN_ENERGY_INT
+    #if defined(G_LN_ENERGY_INT)
     // Variable substitution
+    #if defined(G_NAN_CHECK)
+    double x_in = x;
+    #endif
     x = exp(x);
     #endif
 
@@ -773,9 +796,25 @@ double GObservation::npred_spec_kern::eval(double x)
     // Get function value
     double value = m_model->npred(eng, *m_time, *m_parent);
 
-    #if G_LN_ENERGY_INT
+    #if defined(G_LN_ENERGY_INT)
     // Correct for variable substitution
+    #if defined(G_NAN_CHECK)
+    double value_out = value;
+    #endif
     value *= x;
+    #endif
+
+    // Compile option: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (std::isnan(value) || std::isinf(value)) {
+        std::cout << "*** ERROR: GObservation::npred_spec_kern::eval";
+        std::cout << "(x=" << x_in << "): ";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << " (value_out=" << value_out;
+        std::cout << " x=" << x;
+        std::cout << ")" << std::endl;
+    }
     #endif
 
     // Return value

@@ -49,7 +49,6 @@ const GModelRadialRegistry g_radial_shell_registry(&g_radial_shell_seed);
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_MC                                     //!< Debug MC method
-//#define G_CHECK_NAN                                    //!< Check for NaN
 
 
 /*==========================================================================
@@ -302,8 +301,8 @@ double GModelRadialShell::eval(const double& theta) const
     // Normalise value
     double result = m_norm * value;
 
-    // Debug: Check for NaN
-    #if defined(G_CHECK_NAN)
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
     if (std::isnan(result) || std::isinf(result)) {
         std::cout << "*** ERROR: GModelRadialShell::eval";
         std::cout << "(theta=" << theta << "): NaN/Inf encountered";
@@ -410,6 +409,10 @@ double GModelRadialShell::theta_max(void) const
  * is required to have 4 parameters.
  * The position is named either "RA" and "DEC" or "GLON" and "GLAT", the
  * shell inner and outer radius are named "Radius" and "Width".
+ *
+ * @todo Implement tests of the radius and radius boundary and the width and
+ *       width boundary. The radius and radius boundary should be >=0, the
+ *       width and width boundary should be >0.
  ***************************************************************************/
 void GModelRadialShell::read(const GXmlElement& xml)
 {
@@ -436,13 +439,25 @@ void GModelRadialShell::read(const GXmlElement& xml)
 
         // Handle Radius
         if (par->attribute("name") == "Radius") {
+            
+            // Read parameter
             m_radius.read(*par);
+            
+            //TODO: Check parameter
+            
+            // Increment parameter counter
             npar[0]++;
         }
 
         // Handle Width
         else if (par->attribute("name") == "Width") {
+            
+            // Read parameter
             m_width.read(*par);
+            
+            //TODO: Check parameter
+            
+            // Increment parameter counter
             npar[1]++;
         }
 
@@ -560,29 +575,29 @@ void GModelRadialShell::init_members(void)
     m_radius.name("Radius");
     m_radius.unit("deg");
     m_radius.value(0.0);
+    m_radius.min(0.0);
     m_radius.free();
     m_radius.scale(1.0);
     m_radius.gradient(0.0);
-    m_radius.hasgrad(false);
-    m_radius.min(0.0);
+    m_radius.hasgrad(false);  // Radial components never have gradients
 
     // Initialise Width
     m_width.clear();
     m_width.name("Width");
     m_width.unit("deg");
-    m_width.value(1.0);
+    m_width.value(2.778e-4);
+    m_width.min(2.778e-4);   // 1 arcsec
     m_width.free();
     m_width.scale(1.0);
     m_width.gradient(0.0);
-    m_width.hasgrad(false);
-    m_width.min(0.0);
+    m_width.hasgrad(false);  // Radial components never have gradients
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_radius);
     m_pars.push_back(&m_width);
 
     // Initialise other members
-    m_small_angle = true;
+    m_small_angle = false;
 
     // Initialise precomputation cache. Note that zero values flag
     // uninitialised as a zero radius and width shell is not meaningful
@@ -668,16 +683,12 @@ void GModelRadialShell::free_members(void)
  *    \frac{1+\cos 2 {\tt m\_theta\_in}}{4} \ln \left(
  *          \frac{\sqrt{2} \cos {\tt m\_theta\_in}}
  *               {\sqrt{2} + \sqrt{1 - \cos 2 {\tt m\_theta\_in}}} \right)\f]
- *
- * Note that we add a small constant to the width to assure that the shell
- * width is positive.
  ***************************************************************************/
 void GModelRadialShell::update() const
 {
     // Set constants
-    const double c1        = twopi / 3.0;
-    const double c2        = 1.0 / (2.0 * sqrt_two);
-    const double eps_width = 2.778e-4; // Add 1 arcsec to width
+    const double c1 = twopi / 3.0;
+    const double c2 = 1.0 / (2.0 * sqrt_two);
 
     // Update if radius or width have changed
     if (m_last_radius != radius() || m_last_width != width()) {
@@ -686,15 +697,9 @@ void GModelRadialShell::update() const
         m_last_radius = radius();
         m_last_width  = width();
         
-        // Get width. Make sure that the width is >0
-        double w = width();
-        if (w < 0.0)
-            w = 0.0;
-        w += eps_width;
-        
         // Perform precomputations
-        m_theta_in   =  radius()          * deg2rad;
-        m_theta_out  = (radius() + w) * deg2rad;
+        m_theta_in   = radius() * deg2rad;
+        m_theta_out  = (radius() + width()) * deg2rad;
         if (m_small_angle) {
             m_x_in       = m_theta_in  * m_theta_in;
             m_x_out      = m_theta_out * m_theta_out;
@@ -714,8 +719,8 @@ void GModelRadialShell::update() const
 
     } // endif: update required
     
-    // Debug: Check for NaN
-    #if defined(G_CHECK_NAN)
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
     if (std::isnan(m_norm) || std::isinf(m_norm)) {
         std::cout << "*** ERROR: GModelRadialShell::update:";
         std::cout << " NaN/Inf encountered";

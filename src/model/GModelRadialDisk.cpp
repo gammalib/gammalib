@@ -48,7 +48,6 @@ const GModelRadialRegistry g_radial_disk_registry(&g_radial_disk_seed);
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_CHECK_NAN                                      //!< Check for NaN
 
 
 /*==========================================================================
@@ -244,8 +243,8 @@ double GModelRadialDisk::eval(const double& theta) const
     // Set value
     double value = (theta <= m_radius_rad) ? m_norm : 0.0;
 
-    // Debug: Check for NaN
-    #if defined(G_CHECK_NAN)
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
     if (std::isnan(value) || std::isinf(value)) {
         std::cout << "*** ERROR: GModelRadialDisk::eval";
         std::cout << "(theta=" << theta << "): NaN/Inf encountered";
@@ -324,6 +323,9 @@ double GModelRadialDisk::theta_max(void) const
  * is required to have 3 parameters.
  * The position is named either "RA" and "DEC" or "GLON" and "GLAT", the
  * disk radius is named "Radius".
+ *
+ * @todo Implement a test of the radius and radius boundary. The radius
+ *       and radius minimum should be >0.
  ***************************************************************************/
 void GModelRadialDisk::read(const GXmlElement& xml)
 {
@@ -347,7 +349,13 @@ void GModelRadialDisk::read(const GXmlElement& xml)
 
         // Handle Radius
         if (par->attribute("name") == "Radius") {
+            
+            // Read parameter
             m_radius.read(*par);
+            
+            //TODO: Check parameter
+            
+            // Increment parameter counter
             npar[0]++;
         }
 
@@ -454,12 +462,12 @@ void GModelRadialDisk::init_members(void)
     m_radius.clear();
     m_radius.name("Radius");
     m_radius.unit("deg");
-    m_radius.value(0.0);
+    m_radius.value(2.778e-4); // 1 arcsec
+    m_radius.min(2.778e-4);   // 1 arcsec
     m_radius.free();
     m_radius.scale(1.0);
     m_radius.gradient(0.0);
     m_radius.hasgrad(false);  // Radial components never have gradients
-    m_radius.min(0.0);
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_radius);
@@ -514,15 +522,9 @@ void GModelRadialDisk::free_members(void)
  *
  * Computes the normalization
  * \f[{\tt m\_norm} = \frac{1}{2 \pi (1 - \cos r)}\f]
- *
- * Note that we add a small constant to the radius to assure that the disk
- * radius is positive.
  ***************************************************************************/
 void GModelRadialDisk::update() const
 {
-    // Set constants
-    const double eps_radius = 2.778e-4; // Add 1 arcsec to radius
-
     // Update if radius has changed
     if (m_last_radius != radius()) {
 
@@ -530,7 +532,7 @@ void GModelRadialDisk::update() const
         m_last_radius = radius();
 
         // Compute disk radius in radians
-        m_radius_rad = (radius()+eps_radius) * deg2rad;
+        m_radius_rad = radius() * deg2rad;
 
         // Perform precomputations
         double denom = twopi * (1 - std::cos(m_radius_rad));
