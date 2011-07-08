@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-Version: 00-04-09 (February 24, 2011)
+Version: 00-04-09 (July 8, 2011)
 Author:  Juergen Knodlseder (knodlseder@cesr.fr)
 
 
@@ -27,7 +27,7 @@ See the files "NEWS" and "ChangeLog".
 
 What is the GammaLib anyway?
 ============================
-The GammaLib is a vesatile toolbox for the high-level analysis of
+The GammaLib is a versatile toolbox for the high-level analysis of
 astronomical gamma-ray data. It is implemented as a C++ library
 that is fully scriptable in the Python scripting language. The library
 provides core functionalities such as data input and output, interfaces
