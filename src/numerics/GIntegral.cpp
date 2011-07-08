@@ -37,6 +37,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_CHECK_NAN                                     //!< Check for NaN
 
 
 /*==========================================================================
@@ -210,6 +211,17 @@ double GIntegral::romb(double a, double b, int k)
 
         // Integration using Trapezoid rule
         s[m_iter] = trapzd(a, b, m_iter, s[m_iter-1]);
+
+        // Debug: Check for NaN
+        #if defined(G_CHECK_NAN)
+        if (std::isnan(s[m_iter]) || std::isinf(s[m_iter])) {
+            std::cout << "*** ERROR: GIntegral::romb";
+            std::cout << "(a=" << a << ", b=" << b << ", k=" << k << "):";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (s[" << m_iter << "]=" << s[m_iter] << ")";
+            std::cout << std::endl;
+        }
+        #endif
 
         // Starting from iteration k on, use polynomial interpolation
         if (m_iter >= k) {
@@ -415,30 +427,73 @@ double GIntegral::polint(double* xa, double* ya, int n, double x, double *dy)
  ***************************************************************************/
 double GIntegral::trapzd(double a, double b, int n, double result)
 {
-    // Case A: Only a single step is requested
-    if (n == 1)
-        result = 0.5*(b-a)*(m_integrand->eval(a) + m_integrand->eval(b));
-
-    // Case B: More than a single step is requested
-    else {
-        //
-        int it = 1;
-        for (int j = 1; j < n-1; ++j)
-            it <<= 1;
-
-        // Set step size
-        double tnm = double(it);
-        double del = (b-a)/tnm;
-
-        // Sum up values
-        double x   = a + 0.5*del;
-        double sum = 0.0;
-        for (int j = 0; j < it; ++j, x+=del)
-            sum += m_integrand->eval(x);
-
-        // Set result
-        result = 0.5*(result + (b-a)*sum/tnm);
+    // Handle case of identical boundaries
+    if (a == b) {
+        result = 0.0;
     }
+    
+    // ... otherwise use trapeziodal rule
+    else {
+    
+        // Case A: Only a single step is requested
+        if (n == 1) {
+        
+            // Evaluate integrand at boundaries
+            double y_a = m_integrand->eval(a);
+            double y_b = m_integrand->eval(b);
+            
+            // Compute result
+            result = 0.5*(b-a)*(m_integrand->eval(a) + m_integrand->eval(b));
+            
+        } // endif: only a single step was requested
+
+        // Case B: More than a single step is requested
+        else {
+            // Compute step level 2^(n-1)
+            int it = 1;
+            for (int j = 1; j < n-1; ++j)
+                it <<= 1;
+
+            // Verify that step level is valid
+            if (it == 0) {
+                std::cout << "*** ERROR: GIntegral::trapzd(";
+                std::cout << "a=" << a << ", b=" << b << ", n=" << n;
+                std::cout << ", result=" << result << "): it=" << it << ". ";
+                std::cout << "Looks like an overflow?";
+                std::cout << std::endl;
+            }
+
+            // Set step size
+            double tnm = double(it);
+            double del = (b-a)/tnm;
+
+            // Verify that step is >0
+            if (it == 0) {
+                std::cout << "*** ERROR: GIntegral::trapzd(";
+                std::cout << "a=" << a << ", b=" << b << ", n=" << n;
+                std::cout << ", result=" << result << "): del=" << del << ". ";
+                std::cout << "Step is too small to make sense.";
+                std::cout << std::endl;
+            }
+
+            // Sum up values
+            double x   = a + 0.5*del;
+            double sum = 0.0;
+            for (int j = 0; j < it; ++j, x+=del) {
+                
+                // Evaluate integrand
+                double y = m_integrand->eval(x);
+
+                // Add integrand
+                sum += y;
+                
+            } // endfor: looped over steps
+
+            // Set result
+            result = 0.5*(result + (b-a)*sum/tnm);
+        }
+        
+    } // endelse: trapeziodal rule was applied
 
     // Return result
     return result;
