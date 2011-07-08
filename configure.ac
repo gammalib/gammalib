@@ -92,9 +92,11 @@ AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 
 
-dnl =================================
-dnl Checks for debugging or profiling
-dnl =================================
+dnl =========================================
+dnl Checks for debugging or profiling options
+dnl =========================================
+
+# Check for debugging option
 AC_MSG_CHECKING(whether to enable debugging)
 AC_ARG_ENABLE([debug],
               AS_HELP_STRING([--enable-debug],
@@ -110,6 +112,8 @@ if test "x$enable_debug" = "xyes"; then
 else
   AC_MSG_RESULT(no)
 fi
+
+# Check for profiling option
 AC_MSG_CHECKING(whether to enable profiling)
 AC_ARG_ENABLE([profiling],
               AS_HELP_STRING([--enable-profiling],
@@ -121,6 +125,23 @@ if test "x$enable_profiling" = "xyes"; then
   CXXFLAGS="$CXXFLAGS -pg"
   FFLAGS="$FFLAGS -pg"
   AC_DEFINE([G_PROFILE], [1], [Define if profiling is turned on])
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
+
+
+dnl =====================================
+dnl NaN/Inf checking option (G_NAN_CHECK)
+dnl =====================================
+AC_MSG_CHECKING(whether to enable NaN/Inf checking)
+AC_ARG_ENABLE([nan_check],
+              AS_HELP_STRING([--enable-nan-check],
+                             [performs NaN/Inf checking [default=yes]]),
+             [NAN_CHECK="$enableval"],
+             [NAN_CHECK="yes"])
+if test "x$NAN_CHECK" = "xyes"; then
+  AC_DEFINE([G_NAN_CHECK], [1], [Define if NaN/Inf checking should be performed])
   AC_MSG_RESULT(yes)
 else
   AC_MSG_RESULT(no)
@@ -172,6 +193,7 @@ dnl =========================================================================
 # Initialise flags
 enable_python="no"
 has_python="no"
+has_python_h="no"
 has_swig="no"
 has_wrappers="no"
 
@@ -198,15 +220,15 @@ if test "x$has_python" = "xyes"; then
   PY_INCLUDE="$PY_INCLUDE$PYTHON_VERSION"
   
   # Check if we have Python.h
-  AC_CHECK_HEADERS($PY_INCLUDE/Python.h, [has_python="yes"], [has_python="no"])
+  AC_CHECK_HEADERS($PY_INCLUDE/Python.h, [has_python_h="yes"], [has_python_h="no"])
   
   # Mac OS X kluge: if test before was unsuccessful then check for headers in /usr/include
-  if test "x$has_python" = "xno"; then
-    AC_CHECK_HEADERS("/usr/include/python$PYTHON_VERSION/Python.h", [has_python="yes"], [has_python="no"])
+  if test "x$has_python_h" = "xno"; then
+    AC_CHECK_HEADERS("/usr/include/python$PYTHON_VERSION/Python.h", [has_python_h="yes"], [has_python_h="no"])
   fi
 
   # Signal any problem
-  if test "x$has_python" = "xno"; then
+  if test "x$has_python_h" = "xno"; then
     AC_MSG_WARN([No Python header file "$PY_INCLUDE/Python.h" found. Please install appropriate Python development package.])
   fi
 fi
@@ -227,7 +249,7 @@ if test "x$ac_cv_file_pyext_gammalib_wrap_cpp" = "xyes"; then
 fi
 
 # Signal if Python is enabled
-if test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes"; then
+if test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes" -a "x$has_python_h" = "xyes"; then
   if test "x$has_swig" = "xyes" -o "x$has_wrappers" = "xyes"; then
     enable_python="yes"
   fi
@@ -521,9 +543,14 @@ else
   echo "  - Readline support             (no)    no readline library found"
 fi
 if test "x$has_python" = "xyes"; then
-  echo "  * Python / Python.h            (yes)"
+  echo "  * Python                       (yes)"
 else
-  echo "  - Python / Python.h            (no)"
+  echo "  - Python                       (no)"
+fi
+if test "x$has_python_h" = "xyes"; then
+  echo "  * Python.h                     (yes)"
+else
+  echo "  - Python.h                     (no)"
 fi
 if test "x$has_swig" = "xyes"; then
   echo "  * swig                         (yes)"
@@ -539,24 +566,28 @@ fi
 # Dump Python binding information
 if test "x$ac_enable_python_binding" = "xyes"; then
   if test "x$has_python" = "xyes"; then
-    if test "x$has_wrappers" = "xyes"; then
-      if test "x$has_swig" = "xyes"; then
-        echo "  * Python binding               (yes)   use swig for updates"
+    if test "x$has_python_h" = "xyes"; then
+      if test "x$has_wrappers" = "xyes"; then
+        if test "x$has_swig" = "xyes"; then
+          echo "  * Make Python binding          (yes)   use swig for updates"
+        else
+          echo "  * Make Python binding          (yes)   use wrappers"
+        fi
       else
-        echo "  * Python binding               (yes)   use wrappers"
+        if test "x$has_swig" = "xyes"; then
+          echo "  * Make Python binding          (yes)   use swig for building"
+        else
+          echo "  - Make Python binding          (no)    swig required to build wrappers"
+        fi
       fi
     else
-      if test "x$has_swig" = "xyes"; then
-        echo "  * Python binding               (yes)   use swig for building"
-      else
-        echo "  - Python binding               (no)    swig required to build wrappers"
-      fi
+      echo "  - Make Python binding          (no)    Python.h not installed"
     fi
   else
-    echo "  - Python binding               (no)    Python and/or Python.h not installed"
+    echo "  - Make Python binding          (no)    Python not installed"
   fi
 else
-  echo "  - Python binding               (no)"
+  echo "  - Make Python binding          (no)"
 fi
 
 # Dump instrument interface information
@@ -581,6 +612,33 @@ if test "$DX_DOXYGEN" != ""; then
   echo "  * Doxygen                      (yes)   $DX_DOXYGEN"
 else
   echo "  - Doxygen                      (no)"
+fi
+
+# Dump compile options
+if test "x$NAN_CHECK" = "xyes"; then
+  echo "  * Perform in NaN/Inf checks    (yes)   (default)"
+else
+  echo "  - Perform in NaN/Inf checks    (no)"
+fi
+if test "x$RANGE_CHECK" = "xyes"; then
+  echo "  * Perform range checking       (yes)   (default)"
+else
+  echo "  - Perform range checking       (no)"
+fi
+if test "x$SMALL_MEMORY" = "xyes"; then
+  echo "  * Optimize memory usage        (yes)   (default)"
+else
+  echo "  - Optimize memory usage        (no)"
+fi
+if test "x$enable_debug" = "xyes"; then
+  echo "  * Compile in debug code        (yes)"
+else
+  echo "  - Compile in debug code        (no)    (default)"
+fi
+if test "x$enable_profiling" = "xyes"; then
+  echo "  * Enable code for profiling    (yes)"
+else
+  echo "  - Enable code for profiling    (no)    (default)"
 fi
 
 # Dump next step information
