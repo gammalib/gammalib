@@ -1783,7 +1783,7 @@ void GWcslib::cel_s2x(int nlng, int nlat, int sll, int sxy,
  * @param[in] nphi Phi vector length.
  * @param[in] ntheta Theta vector length (0=no replication).
  * @param[in] spt Input vector step.
- * @param[in] sxy Output vector step.
+ * @param[in] sll Output vector step.
  * @param[in] phi Longitude in the native coordinate system of the
  *                projection [deg].
  * @param[in] theta Latitude in the native coordinate system of the
@@ -1990,7 +1990,7 @@ void GWcslib::sph_x2s(int nphi, int ntheta, int spt, int sll,
 /***********************************************************************//**
  * @brief Rotation in the pixel-to-world direction
  *
- * @param[in] nlat Longitude vector length.
+ * @param[in] nlng Longitude vector length.
  * @param[in] nlat Latitude vector length (0=no replication).
  * @param[in] sll Input vector step.
  * @param[in] spt Output vector step.
@@ -2868,7 +2868,9 @@ double GWcslib::atan2d(const double& y, const double& x) const
 /***********************************************************************//**
  * @brief Compute sine and cosine of angle in degrees
  *
- * @param[in] angle Angle in degrees
+ * @param[in] angle Angle [degrees].
+ * @param[out] s Sine of angle.
+ * @param[out] c Cosine of angle.
  *
  * Code adapted from wcstrig.c::sincosd().
  ***************************************************************************/
