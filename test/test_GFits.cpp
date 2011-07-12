@@ -61,10 +61,11 @@ void test_create(void)
     std::cout << "Test GFits: ";
 
     // Remove FITS file
-    system("rm -rf test_empty.fits");
-    system("rm -rf test_empty_image.fits");
-    system("rm -rf test.fits");
-    system("rm -rf test_create_bintable.fits");
+    int rc = 0;
+    rc = system("rm -rf test_empty.fits");
+    rc = system("rm -rf test_empty_image.fits");
+    rc = system("rm -rf test.fits");
+    rc = system("rm -rf test_create_bintable.fits");
 
     // Create empty FITS file
     try {
@@ -1851,7 +1852,7 @@ void test_bintable_double(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    system(cmd.c_str());
+    int rc = system(cmd.c_str());
 
     // Allocate reference sums
     double      sum_dbl       = 0.0;
@@ -2208,7 +2209,7 @@ void test_bintable_float(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    system(cmd.c_str());
+    int rc = system(cmd.c_str());
 
     // Allocate reference sums
     float       sum_flt       = 0.0;
@@ -2565,7 +2566,7 @@ void test_bintable_short(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    system(cmd.c_str());
+    int rc = system(cmd.c_str());
 
     // Allocate reference sums
     short       sum_sht       = 0;
@@ -2925,7 +2926,7 @@ void test_bintable_ushort(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    system(cmd.c_str());
+    int rc = system(cmd.c_str());
 
     // Allocate reference sums
     unsigned short sum_sht       = 0;
@@ -3285,7 +3286,7 @@ void test_bintable_long(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    system(cmd.c_str());
+    int rc = system(cmd.c_str());
 
     // Allocate reference sums
     long        sum_lng       = 0;
@@ -3644,7 +3645,7 @@ void test_bintable_longlong(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    system(cmd.c_str());
+    int rc = system(cmd.c_str());
 
     // Allocate reference sums
     long long   sum_lng       = 0;
@@ -4003,7 +4004,7 @@ void test_bintable_ulong(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    system(cmd.c_str());
+    int rc = system(cmd.c_str());
 
     // Allocate reference sums
     unsigned long sum_lng       = 0;
@@ -4362,7 +4363,7 @@ void test_bintable_string(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    system(cmd.c_str());
+    int rc = system(cmd.c_str());
 
     // Allocate reference sums
     std::string sum_str;
@@ -4720,7 +4721,7 @@ void test_bintable_logical(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    system(cmd.c_str());
+    int rc = system(cmd.c_str());
 
     // Allocate reference sums
     int         sum       = 0;
@@ -5084,7 +5085,7 @@ void test_bintable_bit(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    system(cmd.c_str());
+    int rc = system(cmd.c_str());
 
     // Allocate reference sums
     int         sum       = 0;
