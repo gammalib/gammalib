@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdlib>
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
@@ -2686,7 +2687,7 @@ double GWcslib::cosd(const double& angle) const
 {
     // Check for rounding errors
     if (fmod(angle, 90.0) == 0.0) {
-        int i = abs((int)floor(angle/90.0 + 0.5))%4;
+        int i = std::abs((int)std::floor(angle/90.0 + 0.5))%4;
         switch (i) {
         case 0:
             return 1.0;
@@ -2715,7 +2716,7 @@ double GWcslib::sind(const double& angle) const
 {
     // Check for rounding errors
     if (fmod(angle, 90.0) == 0.0) {
-        int i = abs((int)floor(angle/90.0 - 0.5))%4;
+        int i = std::abs((int)std::floor(angle/90.0 - 0.5))%4;
         switch (i) {
         case 0:
             return 1.0;
@@ -2744,7 +2745,7 @@ double GWcslib::tand(const double& angle) const
 {
     // Check for rounding errors
     double resid = fmod(angle, 360.0);
-    if (resid == 0.0 || fabs(resid) == 180.0)
+    if (resid == 0.0 || std::abs(resid) == 180.0)
         return 0.0;
     else if (resid == 45.0 || resid == 225.0)
         return 1.0;
@@ -2879,7 +2880,7 @@ void GWcslib::sincosd(const double& angle, double *s, double *c) const
 {
     // Check for rounding errors
     if (fmod(angle, 90.0) == 0.0) {
-        int i = abs((int)floor(angle/90.0 + 0.5))%4;
+        int i = std::abs((int)std::floor(angle/90.0 + 0.5))%4;
         switch (i) {
         case 0:
             *s = 0.0;
