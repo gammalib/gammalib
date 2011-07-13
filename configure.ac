@@ -312,26 +312,47 @@ if test "x$with_cfitsio" = "xyes"; then
     *)                    cfitsio_deps="-lm" ;;
   esac
   
-  # First search for cfitsio in the standard paths using the AC_CHECK_LIB
-  # macro. This allows also search in paths that are eventually specified by LDFAGS.
+  # First search for cfitsio in the standard paths using AC_CHECK_LIB
+  # and check for appropriate headers using AC_CHECK_HEADERS. This allows
+  # also to search in paths that are eventually specified by LDFAGS and
+  # CPPFLAGS.
   AC_CHECK_LIB([cfitsio], [ffpss],
                [has_cfitsio="yes"
                 AC_MSG_NOTICE([cfitsio found])],
                [], [${cfitsio_deps}])
+  AC_CHECK_HEADERS([fitsio.h cfitsio/fitsio.h], [break])
+  if test x"$ac_cv_header_fitsio_h" != "xyes" -a x"$ac_cv_header_cfitsio_fitsio_h" != "xyes"; then
+    has_cfitsio="no"
+    AC_MSG_NOTICE([cfitsio headers not found or not usable])
+  fi
 
   # If cfitsio has not been found then search for cfitsio shared library in a some
   # default directories
   if test "x$has_cfitsio" = "xno"; then
     for i in "$gammalib_prefix" /opt/local /usr/local /usr ; do
-      if test -f $i/lib64/libcfitsio.so -o -f $i/lib64/libcfitsio.dylib -a -f $i/include/fitsio.h; then
-        LIBDIR_CFITSIO=$i/lib64
-        INCDIR_CFITSIO=$i/include
-        break
+      if test -f $i/lib64/libcfitsio.so -o -f $i/lib64/libcfitsio.dylib; then
+        if test -f $i/include/fitsio.h; then
+          LIBDIR_CFITSIO=$i/lib64
+          INCDIR_CFITSIO=$i/include
+          break
+        fi
+        if test -f $i/include/cfitsio/fitsio.h; then
+          LIBDIR_CFITSIO=$i/lib64
+          INCDIR_CFITSIO=$i/include/cfitsio/
+          break
+        fi
       fi
-      if test -f $i/lib/libcfitsio.so -o -f $i/lib/libcfitsio.dylib -a -f $i/include/fitsio.h; then
-        LIBDIR_CFITSIO=$i/lib
-        INCDIR_CFITSIO=$i/include
-        break
+      if test -f $i/lib/libcfitsio.so -o -f $i/lib/libcfitsio.dylib; then
+        if test -f $i/include/fitsio.h; then
+          LIBDIR_CFITSIO=$i/lib
+          INCDIR_CFITSIO=$i/include
+          break
+        fi
+        if test -f $i/include/cfitsio/fitsio.h; then
+          LIBDIR_CFITSIO=$i/lib
+          INCDIR_CFITSIO=$i/include/cfitsio
+          break
+        fi
       fi
     done
     if test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO"; then
