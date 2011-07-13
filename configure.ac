@@ -18,7 +18,7 @@
 #
 # Process this file with autoconf to produce a configure script
 
-AC_INIT([GammaLib], [0.4.9], [knodlseder@cesr.fr], [gammalib])
+AC_INIT([GammaLib], [0.4.10], [knodlseder@cesr.fr], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies])
@@ -312,70 +312,13 @@ if test "x$with_cfitsio" = "xyes"; then
     *)                    cfitsio_deps="-lm" ;;
   esac
   
-  # First search for cfitsio in the standard paths using AC_CHECK_LIB
-  # and check for appropriate headers using AC_CHECK_HEADERS. This allows
-  # also to search in paths that are eventually specified by LDFAGS and
-  # CPPFLAGS.
-  AC_CHECK_LIB([cfitsio], [ffpss],
-               [has_cfitsio="yes"
-                AC_MSG_NOTICE([cfitsio found])],
-               [], [${cfitsio_deps}])
-  AC_CHECK_HEADERS([fitsio.h cfitsio/fitsio.h], [break])
-  if test x"$ac_cv_header_fitsio_h" != "xyes" -a x"$ac_cv_header_cfitsio_fitsio_h" != "xyes"; then
-    has_cfitsio="no"
-    AC_MSG_NOTICE([cfitsio headers not found or not usable])
-  fi
-
-  # If cfitsio has not been found then search for cfitsio shared library in a some
-  # default directories
-  if test "x$has_cfitsio" = "xno"; then
-    for i in "$gammalib_prefix" /opt/local /usr/local /usr ; do
-      if test -f $i/lib64/libcfitsio.so -o -f $i/lib64/libcfitsio.dylib; then
-        if test -f $i/include/fitsio.h; then
-          LIBDIR_CFITSIO=$i/lib64
-          INCDIR_CFITSIO=$i/include
-          break
-        fi
-        if test -f $i/include/cfitsio/fitsio.h; then
-          LIBDIR_CFITSIO=$i/lib64
-          INCDIR_CFITSIO=$i/include/cfitsio/
-          break
-        fi
-      fi
-      if test -f $i/lib/libcfitsio.so -o -f $i/lib/libcfitsio.dylib; then
-        if test -f $i/include/fitsio.h; then
-          LIBDIR_CFITSIO=$i/lib
-          INCDIR_CFITSIO=$i/include
-          break
-        fi
-        if test -f $i/include/cfitsio/fitsio.h; then
-          LIBDIR_CFITSIO=$i/lib
-          INCDIR_CFITSIO=$i/include/cfitsio
-          break
-        fi
-      fi
-    done
-    if test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO"; then
-      has_cfitsio="yes"
-      LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
-      CPPFLAGS="$CPPFLAGS -I$INCDIR_CFITSIO"
-      AC_MSG_NOTICE([cfitsio found in ${LIBDIR_CFITSIO}])
-    fi
-  fi
-
-  # Set cfitsio information
-  if test "x$has_cfitsio" = "xyes"; then
-    LIBS_CFITSIO="-lcfitsio ${cfitsio_deps}"
-    LIBS="${LIBS} ${LIBS_CFITSIO}"
-  fi
+  # Check for cfitsio library and headers
+  AC_FIND_LIB_HEADER([cfitsio], [ffpss], [fitsio.h cfitsio/fitsio.h],
+                     [has_cfitsio="yes"], [], [${cfitsio_deps}])
 
 fi
 if test "x$has_cfitsio" = "xyes"; then
   AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])
-  AC_SUBST(CFITSIO)
-  AC_SUBST(LIBS_CFITSIO)
-  AC_SUBST(LIBDIR_CFITSIO)
-  AC_SUBST(INCDIR_CFITSIO)
 fi
 AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
 
@@ -384,8 +327,9 @@ dnl ===========================
 dnl Checks for readline library
 dnl ===========================
 
-# Initialise readline flag
+# Initialise readline and ncurses flags
 has_readline="no"
+has_ncurses="no"
 
 # Check if we want to use readline
 AC_ARG_WITH([readline],
@@ -397,74 +341,9 @@ AC_ARG_WITH([readline],
 # If we want to use readline, then search now the library
 if test "x$with_readline" = "xyes"; then
 
-  #NCURSES_LIBS=
-  #AC_CHECK_LIB(ncurses, tgetstr, NCURSES_LIBS=-lncurses)
-  #if test "x$NCURSES_LIBS" = "x"; then
-  #  AC_MSG_ERROR([Unable to find ncurses library])
-  #fi
-  #AC_SUBST(NCURSES_LIBS)
-
-  #saved_LDFLAGS="$LDFLAGS"
-  #LDFLAGS="$LDFLAGS -lncurses"
-  #READLINE_LIBS=
-  #AC_CHECK_LIB(readline, readline, READLINE_LIBS=-lreadline)
-  #if test "x$READLINE_LIBS" = "x"; then
-  #  AC_MSG_ERROR([Unable to find readline library])
-  #fi
-  #AC_CHECK_HEADER(readline/readline.h, :,
-  #  AC_MSG_ERROR([Unable to find readline headers]))
-  #AC_SUBST(READLINE_LIBS)
-  #LDFLAGS="$saved_LDFLAGS"
-
-  # Set host specific readline dependencies
-  readline_deps=
-  case $host in
-    sparc*-sun-solaris*)  readline_deps="-lncurses" ;;
-    *)                    readline_deps="-lncurses" ;;
-  esac
-  
-  # First search for readline using the AC_CHECK_LIB macro. This performs search
-  # in all standard locations and the paths that are eventually specified by LDFLAGS
-  AC_CHECK_LIB([readline], [main],
-               [has_readline="yes"
-                AC_MSG_NOTICE([readline found])],
-               [], [${readline_deps}])
-
-  # If readline has not been found then search for readline shared library in a couple
-  # of predefined locations
-  if test "x$has_readline" = "xno"; then
-    for i in "$gammalib_prefix" /opt/local /usr/local /usr ; do
-      if test -f $i/lib64/libreadline.so -o -f $i/lib64/libreadline.dylib -a -f $i/include/readline/readline.h; then
-        LIBDIR_READLINE=$i/lib64
-        INCDIR_READLINE=$i/include
-        break
-      fi
-      if test -f $i/lib/libreadline.so -o -f $i/lib/libreadline.dylib -a -f $i/include/readline/readline.h; then
-        LIBDIR_READLINE=$i/lib
-        INCDIR_READLINE=$i/include
-        break
-      fi
-    done
-    if test -n "$LIBDIR_READLINE" -a -n "$INCDIR_READLINE"; then
-      has_readline="yes"
-      if test "$LIBDIR_READLINE" != "$LIBDIR_CFITSIO"; then
-        LDFLAGS="$LDFLAGS -L$LIBDIR_READLINE"
-      fi
-      if test "$INCDIR_READLINE" != "$INCDIR_CFITSIO"; then
-        CPPFLAGS="$CPPFLAGS -I$INCDIR_READLINE"
-      fi
-      AC_SUBST(LIBDIR_READLINE)
-      AC_SUBST(INCDIR_READLINE)
-      AC_MSG_NOTICE([readline found in ${LIBDIR_READLINE}])
-    fi
-  fi
-
-  # Set readline information
-  if test "x$has_readline" = "xyes"; then
-    LIBS_READLINE="-lreadline ${readline_deps}"
-    AC_SUBST(LIBS_READLINE)
-    LIBS="${LIBS} ${LIBS_READLINE}"
-  fi
+  # First check for the presence of the ncurses library
+  AC_FIND_LIB_HEADER([ncurses], [tgetstr], [], [has_ncurses="yes"])
+  AC_FIND_LIB_HEADER([readline], [readline], [readline/readline.h], [has_readline="yes"])
 
 fi
 if test "x$has_readline" = "xyes"; then
@@ -575,14 +454,18 @@ echo
 echo "  GammaLib configuration summary"
 echo "  =============================="
 if test "x$has_cfitsio" = "xyes"; then
-  echo "  * FITS I/O support             (yes)   $LIBDIR_CFITSIO $INCDIR_CFITSIO"
+  echo "  * FITS I/O support             (yes)"
 else
   echo "  - FITS I/O support             (no)    no cfitsio library found"
 fi
 if test "x$has_readline" = "xyes"; then
-  echo "  * Readline support             (yes)   $LIBDIR_READLINE $INCDIR_READLINE"
+  echo "  * Readline support             (yes)"
 else
-  echo "  - Readline support             (no)    no readline library found"
+  if test "x$has_readline" = "xyes"; then
+    echo "  - Readline support             (no)    no ncurses library found"
+  else
+    echo "  - Readline support             (no)    no readline library found"
+  fi
 fi
 if test "x$has_python" = "xyes"; then
   echo "  * Python                       (yes)"
