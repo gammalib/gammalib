@@ -28,7 +28,7 @@
 /* __ Method name definitions ____________________________________________ */
 
 /* __ Macros _____________________________________________________________ */
-#define G_BITPIX 10                 //!< Defines the number of bits per pixel
+#define G_BITPIX __TSBYTE                        //!< Must be equal to TSBYTE
 
 /* __ Coding definitions _________________________________________________ */
 
