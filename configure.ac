@@ -63,6 +63,16 @@ dnl =========================
 AC_CANONICAL_HOST
 
 
+dnl ==============================================================
+dnl Checks for programs
+dnl (this has to come before the check for header files, otherwise
+dnl  we won't detect if the C++ compiler is missing)
+dnl ==============================================================
+AC_PROG_CXX
+AC_PROG_INSTALL
+AC_PROG_LIBTOOL
+
+
 dnl =======================
 dnl Checks for header files
 dnl =======================
@@ -82,14 +92,6 @@ dnl ============================
 dnl Checks for library functions
 dnl ============================
 # AC_CHECK_LIB(m, sincos, [AC_DEFINE([HAVE_SINCOS],[1],[Define to 1 if your system has `sincos'.])])
-
-
-dnl ===================
-dnl Checks for programs
-dnl ===================
-AC_PROG_CXX
-AC_PROG_INSTALL
-AC_PROG_LIBTOOL
 
 
 dnl =========================================
@@ -373,6 +375,25 @@ AC_ARG_WITH([readline],
 
 # If we want to use readline, then search now the library
 if test "x$with_readline" = "xyes"; then
+
+  #NCURSES_LIBS=
+  #AC_CHECK_LIB(ncurses, tgetstr, NCURSES_LIBS=-lncurses)
+  #if test "x$NCURSES_LIBS" = "x"; then
+  #  AC_MSG_ERROR([Unable to find ncurses library])
+  #fi
+  #AC_SUBST(NCURSES_LIBS)
+
+  #saved_LDFLAGS="$LDFLAGS"
+  #LDFLAGS="$LDFLAGS -lncurses"
+  #READLINE_LIBS=
+  #AC_CHECK_LIB(readline, readline, READLINE_LIBS=-lreadline)
+  #if test "x$READLINE_LIBS" = "x"; then
+  #  AC_MSG_ERROR([Unable to find readline library])
+  #fi
+  #AC_CHECK_HEADER(readline/readline.h, :,
+  #  AC_MSG_ERROR([Unable to find readline headers]))
+  #AC_SUBST(READLINE_LIBS)
+  #LDFLAGS="$saved_LDFLAGS"
 
   # Set host specific readline dependencies
   readline_deps=
