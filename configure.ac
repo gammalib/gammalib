@@ -316,6 +316,11 @@ if test "x$with_cfitsio" = "xyes"; then
   AC_FIND_LIB_HEADER([cfitsio], [ffpss], [fitsio.h cfitsio/fitsio.h],
                      [has_cfitsio="yes"], [], [${cfitsio_deps}])
 
+  # Add cfitsio dependencies
+  if test "x$has_cfitsio" = "xyes"; then
+    LIBS="${LIBS} ${cfitsio_deps}"
+  fi
+
 fi
 if test "x$has_cfitsio" = "xyes"; then
   AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])
