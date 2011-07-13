@@ -70,7 +70,7 @@ def test_fits():
     fits.append(img3)
     fits.append(img4)
     fits.append(img5)
-    fits.append(img6)
+    #fits.append(img6) # Not supported in older cfitsio
     fits.append(img7)
     fits.append(img8)
     fits.append(img9)
