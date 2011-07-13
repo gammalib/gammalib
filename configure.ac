@@ -461,10 +461,10 @@ fi
 if test "x$has_readline" = "xyes"; then
   echo "  * Readline support             (yes)"
 else
-  if test "x$has_readline" = "xyes"; then
-    echo "  - Readline support             (no)    no ncurses library found"
-  else
+  if test "x$has_ncurses" = "xyes"; then
     echo "  - Readline support             (no)    no readline library found"
+  else
+    echo "  - Readline support             (no)    no ncurses library found"
   fi
 fi
 if test "x$has_python" = "xyes"; then
