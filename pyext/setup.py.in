@@ -87,7 +87,7 @@ for extra_lib_path in extra_lib_paths:
 	dir = extra_lib_path.lstrip('-L')
 	if len(dir) > 0:
 		library_dirs.append(extra_lib_path.lstrip('-L'))
-		runtime_library_dirs(extra_lib_path.lstrip('-L'))
+		runtime_library_dirs.append(extra_lib_path.lstrip('-L'))
 
 # Get extra include directories
 extra_inc_paths = ('@CPPFLAGS@').split(' ')
