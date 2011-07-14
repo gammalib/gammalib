@@ -308,8 +308,8 @@ if test "x$with_cfitsio" = "xyes"; then
   # Set host specific cfitsio dependencies
   cfitsio_deps=
   case $host in
-    sparc*-sun-solaris*)  cfitsio_deps="-lm -lsocket" ;;
-    *)                    cfitsio_deps="-lm" ;;
+    *-*-solaris*)  cfitsio_deps="-lm -lsocket" ;;
+    *)             cfitsio_deps="-lm" ;;
   esac
   
   # Check for cfitsio library and headers
