@@ -635,3 +635,16 @@ bool isinfinite(double x)
 {
   return (x < -DBL_MAX || x > DBL_MAX);
 }
+
+
+/***********************************************************************//**
+ * @brief Checks if argument is not a number
+ *
+ * @param[in] x Argument.
+ *
+ * This function is a very simple kluge. It may not work on all systems.
+ ***************************************************************************/
+bool isnotanumber(double x)
+{
+  return (x != x);
+}

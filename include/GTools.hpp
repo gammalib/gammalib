@@ -94,5 +94,6 @@ double                   modulo(double v1, double v2);
 double                   arccos(const double& arg);
 bool                     file_exists(const std::string& filename);
 bool                     isinfinite(double x);
+bool                     isnotanumber(double x);
 
 #endif /* GTOOLS_HPP */
