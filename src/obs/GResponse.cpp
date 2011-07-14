@@ -386,7 +386,7 @@ double GResponse::npred_extended(const GModelExtendedSource& model,
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (std::isnan(npred) || std::isinf(npred)) {
+    if (isnan(npred) || isinfinite(npred)) {
         std::cout << "*** ERROR: GResponse::npred_extended:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (npred=" << npred;
@@ -497,7 +497,7 @@ double GResponse::npred_kern_theta::eval(double theta)
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (std::isnan(npred) || std::isinf(npred)) {
+    if (isnan(npred) || isinfinite(npred)) {
         std::cout << "*** ERROR: GResponse::npred_kern_theta::eval";
         std::cout << "(theta=" << theta << "):";
         std::cout << " NaN/Inf encountered";
@@ -537,7 +537,7 @@ double GResponse::npred_kern_phi::eval(double phi)
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (std::isnan(npred) || std::isinf(npred)) {
+    if (isnan(npred) || isinfinite(npred)) {
         std::cout << "*** ERROR: GResponse::npred_kern_phi::eval";
         std::cout << "(phi=" << phi << "):";
         std::cout << " NaN/Inf encountered";

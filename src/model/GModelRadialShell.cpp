@@ -303,7 +303,7 @@ double GModelRadialShell::eval(const double& theta) const
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (std::isnan(result) || std::isinf(result)) {
+    if (isnan(result) || isinfinite(result)) {
         std::cout << "*** ERROR: GModelRadialShell::eval";
         std::cout << "(theta=" << theta << "): NaN/Inf encountered";
         std::cout << " (result=" << result;
@@ -721,7 +721,7 @@ void GModelRadialShell::update() const
     
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (std::isnan(m_norm) || std::isinf(m_norm)) {
+    if (isnan(m_norm) || isinfinite(m_norm)) {
         std::cout << "*** ERROR: GModelRadialShell::update:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (m_norm=" << m_norm;

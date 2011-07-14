@@ -245,7 +245,7 @@ double GModelRadialDisk::eval(const double& theta) const
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (std::isnan(value) || std::isinf(value)) {
+    if (isnan(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GModelRadialDisk::eval";
         std::cout << "(theta=" << theta << "): NaN/Inf encountered";
         std::cout << " (value=" << value;

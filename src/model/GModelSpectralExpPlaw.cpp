@@ -251,7 +251,7 @@ double GModelSpectralExpPlaw::eval(const GEnergy& srcEng) const
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (std::isnan(value) || std::isinf(value)) {
+    if (isnan(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralExpPlaw::eval";
         std::cout << "(srcEng=" << srcEng << "):";
         std::cout << " NaN/Inf encountered";
@@ -322,7 +322,7 @@ double GModelSpectralExpPlaw::eval_gradients(const GEnergy& srcEng) const
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (std::isnan(value) || std::isinf(value)) {
+    if (isnan(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralExpPlaw::eval_gradients";
         std::cout << "(srcEng=" << srcEng << "):";
         std::cout << " NaN/Inf encountered";

@@ -299,7 +299,7 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (std::isnan(irf) || std::isinf(irf)) {
+    if (isnan(irf) || isinfinite(irf)) {
         std::cout << "*** ERROR: GCTAResponse::irf:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (irf=" << irf;
@@ -379,7 +379,7 @@ double GCTAResponse::npred(const GSkyDir&      srcDir,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (std::isnan(npred) || std::isinf(npred)) {
+    if (isnan(npred) || isinfinite(npred)) {
         std::cout << "*** ERROR: GCTAResponse::npred:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (npred=" << npred;
@@ -689,7 +689,7 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (std::isnan(irf) || std::isinf(irf)) {
+        if (isnan(irf) || isinfinite(irf)) {
             std::cout << "*** ERROR: GCTAResponse::irf_extended:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (irf=" << irf;
@@ -938,7 +938,7 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (std::isnan(value) || std::isinf(value)) {
+    if (isnan(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GCTAResponse::npsf:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -1256,7 +1256,7 @@ double GCTAResponse::irf_kern_rho::eval(double rho)
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (std::isnan(irf) || std::isinf(irf)) {
+        if (isnan(irf) || isinfinite(irf)) {
             std::cout << "*** ERROR: GCTAResponse::irf_kern_rho::eval";
             std::cout << "(rho=" << rho << "):";
             std::cout << " NaN/Inf encountered";
@@ -1323,7 +1323,7 @@ double GCTAResponse::irf_kern_omega::eval(double omega)
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (std::isnan(irf) || std::isinf(irf)) {
+    if (isnan(irf) || isinfinite(irf)) {
         std::cout << "*** ERROR: GCTAResponse::irf_kern_omega::eval";
         std::cout << "(omega=" << omega << "):";
         std::cout << " NaN/Inf encountered";
@@ -1358,7 +1358,7 @@ double GCTAResponse::npsf_kern_rad_azsym::eval(double theta)
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (std::isnan(value) || std::isinf(value)) {
+    if (isnan(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GCTAResponse::npsf_kern_rad_azsym::eval";
         std::cout << "(theta=" << theta << ").";
         std::cout << " NaN/Inf encountered";

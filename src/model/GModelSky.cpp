@@ -374,7 +374,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (std::isnan(npred) || std::isinf(npred)) {
+        if (isnan(npred) || isinfinite(npred)) {
             std::cout << "*** ERROR: GModelSky::npred:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (npred=" << npred;
@@ -833,7 +833,7 @@ double GModelSky::spatial(const GEvent& event,
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
-            if (std::isnan(value) || std::isinf(value)) {
+            if (isnan(value) || isinfinite(value)) {
                 std::cout << "*** ERROR: GModelSky::spatial:";
                 std::cout << " NaN/Inf encountered";
                 std::cout << " (value=" << value;
@@ -876,7 +876,7 @@ double GModelSky::spatial(const GEvent& event,
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
-            if (std::isnan(value) || std::isinf(value)) {
+            if (isnan(value) || isinfinite(value)) {
                 std::cout << "*** ERROR: GModelSky::spatial:";
                 std::cout << " NaN/Inf encountered";
                 std::cout << " (value=" << value;
@@ -942,7 +942,7 @@ double GModelSky::spectral(const GEvent& event, const GTime& srcTime,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (std::isnan(value) || std::isinf(value)) {
+    if (isnan(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GModelSky::spectral:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -1002,7 +1002,7 @@ double GModelSky::temporal(const GEvent& event, const GObservation& obs,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (std::isnan(value) || std::isinf(value)) {
+    if (isnan(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GModelSky::temporal:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
