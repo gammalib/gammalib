@@ -61,8 +61,13 @@ if (len(sys.argv) > 3):
 include_dirs         = ['@top_srcdir@/include']
 data_files           = glob.glob('@top_srcdir@/pyext/*.i')
 library_dirs         = ['../src/.libs']
-runtime_library_dirs = ['@libdir@']
 libraries            = [libgamma]
+
+# Set default runtime library directories
+if os.path.exists('@prefix@/lib'):
+	runtime_library_dirs = ['@prefix@/lib']
+else:
+	runtime_library_dirs = []
 
 # Add cfitsio library only if available
 if '@WITH_CFITSIO_TRUE@' != '#':
