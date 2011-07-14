@@ -32,7 +32,7 @@
 #include "GTools.hpp"
 #include "GSkymap.hpp"
 #include "GWcsRegistry.hpp"
-#include "GWcsCAR.hpp"
+#include "GWcslib.hpp"
 #include "GWcsHPX.hpp"
 #include "GFits.hpp"
 #include "GFitsTableDoubleCol.hpp"
@@ -1292,14 +1292,18 @@ void GSkymap::alloc_wcs(const GFitsImage* hdu)
             throw GException::skymap_bad_ctype(G_ALLOC_WCS,
                                                ctype1, ctype2);
 
-        // Allocate WCS class
-        if (xproj == "CAR") {
-            m_wcs = new GWcsCAR;
+        // Allocate WCS registry
+        GWcsRegistry registry;
+        
+        // Allocate projection from registry
+        m_wcs = registry.alloc(xproj);
+        
+        // Signal if projection type is not known
+        if (m_wcs == NULL) {
+            std::string message = "Projection code not known. "
+                                  "Should be one of "+registry.list()+".";
+            throw GException::wcs_invalid(G_ALLOC_WCS, xproj, message);
         }
-        else
-            throw GException::wcs_invalid(G_ALLOC_WCS, xproj,
-                                          "WCS projection found in FITS file"
-                                          " is currently not supported.");
 
     } // endif: HDU was valid
 
