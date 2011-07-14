@@ -61,7 +61,7 @@ if (len(sys.argv) > 3):
 include_dirs         = ['@top_srcdir@/include']
 data_files           = glob.glob('@top_srcdir@/pyext/*.i')
 library_dirs         = ['../src/.libs']
-runtime_library_dirs = []
+runtime_library_dirs = ['@libdir@']
 libraries            = [libgamma]
 
 # Add cfitsio library only if available
@@ -87,6 +87,7 @@ for extra_lib_path in extra_lib_paths:
 	dir = extra_lib_path.lstrip('-L')
 	if len(dir) > 0:
 		library_dirs.append(extra_lib_path.lstrip('-L'))
+		runtime_library_dirs(extra_lib_path.lstrip('-L'))
 
 # Get extra include directories
 extra_inc_paths = ('@CPPFLAGS@').split(' ')
