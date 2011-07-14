@@ -83,9 +83,9 @@ public:
              const double& cdelt1, const double& cdelt2);
 
 private:
-    // Constants
-    static const int    PVN       = 32;
-    static const double UNDEFINED = 987654321.0e99;
+    // Static constants (set in GWcslib.cpp)
+    static const int    PVN = 32;
+    static const double UNDEFINED;
 
 protected:
     // Protected methods
