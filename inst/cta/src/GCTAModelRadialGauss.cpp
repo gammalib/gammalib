@@ -236,7 +236,7 @@ double GCTAModelRadialGauss::eval(const double& offset) const
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnan(value) || isinfinite(value)) {
+    if (isnotanumber(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GCTAModelRadialGauss::eval";
         std::cout << "(offset=" << offset << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -288,7 +288,7 @@ double GCTAModelRadialGauss::eval_gradients(const double& offset) const
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnan(value) || isinfinite(value)) {
+    if (isnotanumber(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GCTAModelRadialGauss::eval";
         std::cout << "(offset=" << offset << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
