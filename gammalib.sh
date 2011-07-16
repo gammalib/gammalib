@@ -1,45 +1,40 @@
 #! /bin/bash -f
 
-# Parameters
-sourcedir=gammalib
+# Set parameters
 installdir=$(pwd)/build
 makedoc="no"
 
-echo "Remove existing folder"
-rm -rf $sourcedir
-#rm -rf $installdir
-
 echo "Checkout latest GammaLib"
+rm -rf gammalib
 cvs -Q -d /home/cvs export -N -r HEAD "gammalib"
-rm -rf $sourcedir/inst/lat/test/data/ft2.fits.gz
 
+# Extract version number
+version=`cat gammalib/configure.ac | grep 'AC_INIT' | awk -F"[" '{print $3}' | sed 's/],//' | sed 's/\./ /g'`
+version=`printf "%2.2d-%2.2d-%2.2d" $version`
+echo "GammaLib version: "$version
+
+# Set source directory
+sourcedir=gammalib-$version
+rm -rf $sourcedir
+mv gammalib $sourcedir
+
+#
 echo "Create Makefile.in and configure scripts"
 cd $sourcedir
-#
 ./autogen.sh
-#aclocal -I m4
-#libtoolize --copy
-#autoconf
-#autoheader
-#automake --add-missing --copy
-#
-#rm -f autogen.sh      
-#rm -rf m4
-#rm -rf autom4te.cache
-#rm -f configure.ac
-#rm -f Makefile.am
 rm -f gammalib.sh
-#
 cd ..
 
+#
 echo "Create gammalib_wrap.cpp and gammalib.py files for python binding (making swig obsolete)"
 inc_inst="-I$sourcedir/inst/mwl/pyext -I$sourcedir/inst/lat/pyext -I$sourcedir/inst/cta/pyext"
 opt_inst="-DWITH_INST_MWL -DWITH_INST_LAT -DWITH_INST_CTA"
 swig -c++ -python -Wall -includeall -I$sourcedir/src $inc_inst $opt_inst -o $sourcedir/pyext/gammalib_wrap.cpp -outdir $sourcedir/pyext $sourcedir/pyext/gammalib.i
 
+#
 if [ "x$makedoc" == "xyes" ] ; then
   echo "Create doxygen documentation"
-  cd gammalib/doc
+  cd $sourcedir/doc
   doxygen Doxyfile
   cd latex
   make
@@ -49,8 +44,9 @@ if [ "x$makedoc" == "xyes" ] ; then
   cd ../..
 fi
 
+#
 echo "Create LaTeX documentation"
-cd gammalib/doc
+cd $sourcedir/doc
 #
 latex gammalib_um.tex
 dvips gammalib_um.dvi -o gammalib_um.ps
@@ -103,23 +99,19 @@ tar cvf - $sourcedir > $sourcedir.tar
 rm -f $sourcedir.tar.gz
 gzip $sourcedir.tar
 
+#
 echo "Configure GammaLib"
 cd $sourcedir
-#./autogen.sh
 ./configure --prefix=$installdir
 
+#
 echo "Compile GammaLib"
 make -j10
 
-#echo "Install GammaLib"
-#make install
-
+#
 echo "Check GammaLib"
-#export PATH=$installdir/bin:$PATH
-#export LD_LIBRARY_PATH=$installdir/lib:$LD_LIBRARY_PATH
-#export PYTHONPATH=$installdir/lib/python2.5/site-packages:$PYTHONPATH
 make check
 
+#
 echo "Install GammaLib"
 make install
-
