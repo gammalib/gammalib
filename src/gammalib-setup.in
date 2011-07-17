@@ -12,6 +12,7 @@
 # ====================
 this_script=`echo $0 | sed 's:.*/::'`
 gammalib_info="$this_script:"
+gammalib_error="$ctatools_info ERROR --"
 
 #
 # Extract argument
@@ -32,6 +33,49 @@ uname_system=`uname`
 python_dir="@pythondir@"
 pkgconfig_dir="@prefix@/lib/pkgconfig"
 man_dir="@prefix@/share/doc/gammalib/man"
+
+#
+# Make pfiles available
+# =====================
+if [ -d $prefix/syspfiles/. ]; then
+
+  # make sure local parameter file directory exists
+  if [ ! -w $HOME/pfiles/. ]; then
+    mkdir $HOME/pfiles
+    if [ $? -ne 0 ]; then
+      echo "$gammalib_error cannot create local pfiles directory $HOME/pfiles" >&2
+      exit 3
+    fi
+  fi
+
+  # use PFILES (if set) to set initial values for locpfiles and syspfiles
+  if [ "x$PFILES" != x ]; then
+    syspfiles=`echo $PFILES | sed "s%.*;%%"`
+    locpfiles=`echo $PFILES | sed "s%;*$syspfiles$%%"`
+  fi
+
+  # move $HOME/pfiles to front of locpfiles and weed out redundancies
+  if [ "x$locpfiles" = x ]; then
+    locpfiles="$HOME/pfiles"
+  else
+    locpfiles=`echo ":$locpfiles:" | \
+      sed "s%:$HOME/pfiles:%:%g" | sed "s%::*$%%"`
+    locpfiles="$HOME/pfiles$locpfiles"
+  fi
+
+  # move $prefix/syspfiles to front of syspfiles and weed out redundancies
+  if [ "x$syspfiles" = x ]; then
+    syspfiles="$prefix/syspfiles"
+  else
+    syspfiles=`echo ":$syspfiles:" | \
+      sed "s%:$prefix/syspfiles:%:%g" | sed "s%::*$%%"`
+    syspfiles="$prefix/syspfiles$syspfiles"
+  fi
+
+  # Set PFILES and PFCLOBBER environment variable
+  PFILES="$locpfiles;$syspfiles"
+  PFCLOBBER=1
+fi
 
 #
 # Set LD_LIBRARY_PATH
@@ -114,7 +158,7 @@ fi
 #
 # List of variables needed in initialization script
 # =================================================
-varlist="PATH PYTHONPATH PKG_CONFIG_PATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH MANPATH"
+varlist="PATH PYTHONPATH PKG_CONFIG_PATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH MANPATH PFILES PFCLOBBER"
 
 #
 # Save values in output initialization shell scripts
