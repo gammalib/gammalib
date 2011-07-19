@@ -313,7 +313,9 @@ if test "x$with_cfitsio" = "xyes"; then
   esac
   
   # Check for cfitsio library and headers
-  AC_FIND_LIB_HEADER([cfitsio], [ffpss], [fitsio.h cfitsio/fitsio.h],
+  # cfitsio/fitsio.h is for Scientific Linux
+  # libcfitsio0/fitsio.h is for OpenSuse
+  AC_FIND_LIB_HEADER([cfitsio], [ffpss], [fitsio.h cfitsio/fitsio.h libcfitsio0/fitsio.h],
                      [has_cfitsio="yes"], [], [${cfitsio_deps}])
 
   # Add cfitsio dependencies
