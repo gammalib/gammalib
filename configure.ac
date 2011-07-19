@@ -72,6 +72,9 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 
+# Is pkgconfig available? This sets PKG_CONFIG to the binary location
+PKG_PROG_PKG_CONFIG
+
 
 dnl =======================
 dnl Checks for header files
@@ -328,24 +331,43 @@ AC_ARG_WITH([cfitsio],
 # If we want to use cfitsio, then search the library now
 if test "x$with_cfitsio" = "xyes"; then
 
-  # Set host specific cfitsio dependencies
-  cfitsio_deps=
-  case $host in
-    *-*-solaris*)  cfitsio_deps="-lm -lsocket" ;;
-    *)             cfitsio_deps="-lm" ;;
-  esac
-  
-  # Check for cfitsio library and headers
-  # cfitsio/fitsio.h is for Scientific Linux
-  # libcfitsio0/fitsio.h is for OpenSuse
-  AC_FIND_LIB_HEADER([cfitsio], [ffpss], [fitsio.h cfitsio/fitsio.h libcfitsio0/fitsio.h],
-                     [has_cfitsio="yes"], [], [${cfitsio_deps}])
-
-  # Add cfitsio dependencies
-  if test "x$has_cfitsio" = "xyes"; then
-    LIBS="${LIBS} ${cfitsio_deps}"
+  # Use pkgconfig if available
+  if test "x$PKG_CONFIG" != "x"; then
+    PKG_CHECK_MODULES([cfitsio], [cfitsio],
+                      [has_cfitsio="yes"],
+                      [AC_MSG_WARN([cfitsio pkgconfig information not found])])
+    if test "x$has_cfitsio" = "xyes"; then
+      CFLAGS="$CFLAGS $cfitsio_CFLAGS"
+      CPPFLAGS="$CPPFLAGS $cfitsio_CFLAGS"
+      LDFLAGS="$LDFLAGS $cfitsio_LIBS"
+      CFITSIO="cfitsio"
+    fi
   fi
+    
+  # If we still don't have cfitsio, then search the library and headers in
+  # standard paths
+  if test "x$has_cfitsio" = "xno"; then
 
+    # Set host specific cfitsio dependencies
+    cfitsio_deps=
+    case $host in
+      *-*-solaris*)  cfitsio_deps="-lm -lsocket" ;;
+      *)             cfitsio_deps="-lm" ;;
+    esac
+  
+    # Check for cfitsio library and headers
+    AC_FIND_LIB_HEADER([cfitsio], [ffpss], [fitsio.h],
+                       [has_cfitsio="yes"], [], [${cfitsio_deps}])
+    #AC_FIND_LIB_HEADER([cfitsio], [ffpss], [fitsio.h cfitsio/fitsio.h libcfitsio0/fitsio.h],
+    #                   [has_cfitsio="yes"], [], [${cfitsio_deps}])
+
+    # Add cfitsio dependencies
+    if test "x$has_cfitsio" = "xyes"; then
+      LIBS="${LIBS} ${cfitsio_deps}"
+    fi
+    
+  fi
+  
 fi
 if test "x$has_cfitsio" = "xyes"; then
   AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])
