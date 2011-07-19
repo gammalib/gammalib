@@ -43,6 +43,8 @@
 
 #if defined(HAVE_CFITSIO_FITSIO_H)
 #include <cfitsio/fitsio.h>
+#elif defined(HAVE_LIBCFITSIO0_FITSIO_H)
+#include <libcfitsio0/fitsio.h>
 #else
 #include <fitsio.h>
 #endif
