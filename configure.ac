@@ -216,23 +216,46 @@ AM_PATH_PYTHON([2.2],
                [AC_MSG_WARN([Python >= 2.2 not found. Python >= 2.2 is required to build python binding. Python can be obtained from http://www.python.org])])
 if test "x$has_python" = "xyes"; then
 
-  # Determine include path for python
-  AC_PATH_PROG(PY_INCLUDE, python)  
-  PY_INCLUDE=`echo $PY_INCLUDE | sed -e "s/bin/include/"`
-  PY_INCLUDE="$PY_INCLUDE$PYTHON_VERSION"
-  
-  # Check if we have Python.h
-  AC_CHECK_HEADERS($PY_INCLUDE/Python.h, [has_python_h="yes"], [has_python_h="no"])
-  
-  # Mac OS X kluge: if test before was unsuccessful then check for headers in /usr/include
-  if test "x$has_python_h" = "xno"; then
-    AC_CHECK_HEADERS("/usr/include/python$PYTHON_VERSION/Python.h", [has_python_h="yes"], [has_python_h="no"])
+  # Do we have distutils?
+  AC_MSG_CHECKING([for the distutils Python package])
+  ac_distutils_result=`$PYTHON -c "import distutils" 2>&1`
+  if test -z "$ac_distutils_result"; then
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
   fi
 
-  # Signal any problem
-  if test "x$has_python_h" = "xno"; then
-    AC_MSG_WARN([No Python header file "$PY_INCLUDE/Python.h" found. Please install appropriate Python development package.])
+  # If we have distutils then get python path from distutils ...
+  if test -z "$ac_distutils_result"; then
+    AC_MSG_CHECKING([for Python include path])
+    python_path=`$PYTHON -c "import distutils.sysconfig; \
+           		             print distutils.sysconfig.get_python_inc();"`
+    if test -n "${python_path}"; then
+      python_path="-I$python_path"
+      has_python_h="yes"
+    fi
+    PYTHON_CPPFLAGS=$python_path
+    CPPFLAGS="${CPPFLAGS} ${python_path}"
+	AC_MSG_RESULT([$python_path])
+	AC_SUBST([PYTHON_CPPFLAGS])
+
+  # ... otherwise check for includes relative to exectuable (obsolete?)
+  else                             
+                             
+    # Determine include path for python
+    AC_PATH_PROG(PY_INCLUDE, python)  
+    PY_INCLUDE=`echo $PY_INCLUDE | sed -e "s/bin/include/"`
+    PY_INCLUDE="$PY_INCLUDE$PYTHON_VERSION"
+  
+    # Check if we have Python.h
+    AC_CHECK_HEADERS($PY_INCLUDE/Python.h, [has_python_h="yes"], [has_python_h="no"])
+  
+    # Signal any problem
+    if test "x$has_python_h" = "xno"; then
+      AC_MSG_WARN([No Python header file "$PY_INCLUDE/Python.h" found. Please install appropriate Python development package.])
+    fi
   fi
+  
 fi
 
 # Do we have swig?
