@@ -53,7 +53,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-m4_define(AC_DEFUN([AC_FIND_LIB_HEADER],[
+AC_DEFUN([AC_FIND_LIB_HEADER],[
   # Initialise status
   AS_VAR_SET([ac_find_lib_status], [no])
   AS_VAR_SET([ac_find_header_status], [no])
@@ -153,7 +153,7 @@ m4_define(AC_DEFUN([AC_FIND_LIB_HEADER],[
   
   # Set flags
   if test "x$3" != "x"; then
-    AS_IF([test "$ac_find_lib_status" == yes ],
+    AS_IF([test "$ac_find_lib_status" = yes ],
           [LIBS="-l$1 $LIBS"
            LDFLAGS="$LDFLAGS$ac_find_lib_add_LDFLAGS"
            CPPFLAGS="$CPPFLAGS$ac_find_lib_add_CPPFLAGS"
@@ -162,7 +162,7 @@ m4_define(AC_DEFUN([AC_FIND_LIB_HEADER],[
           [AC_MSG_RESULT([not found])
            $5])
   else
-    AS_IF([test "$ac_find_lib_status" == yes ],
+    AS_IF([test "$ac_find_lib_status" = yes ],
           [LIBS="-l$1 $LIBS"
            LDFLAGS="$LDFLAGS$ac_find_lib_add_LDFLAGS"
            AC_MSG_RESULT($ac_message)
@@ -170,5 +170,11 @@ m4_define(AC_DEFUN([AC_FIND_LIB_HEADER],[
           [AC_MSG_RESULT([not found])
            $5])
   fi
+
+  # Kluge to set include directives
+  if test "x$3" != "x" -a "$ac_find_lib_status" = yes; then
+    AC_CHECK_HEADERS([$header $3])
+  fi
+
   # echo "out: "$LIBS $LDFLAGS $CPPFLAGS
-]))
+])
