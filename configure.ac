@@ -72,9 +72,6 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 
-# Is pkgconfig available? This sets PKG_CONFIG to the binary location
-PKG_PROG_PKG_CONFIG
-
 
 dnl =======================
 dnl Checks for header files
@@ -360,12 +357,22 @@ AC_ARG_WITH([cfitsio],
 # If we want to use cfitsio, then search the library now
 if test "x$with_cfitsio" = "xyes"; then
 
+  # Is pkgconfig available? This sets PKG_CONFIG to the binary location
+  PKG_PROG_PKG_CONFIG
+
   # Use pkgconfig if available
   if test "x$PKG_CONFIG" != "x"; then
     PKG_CHECK_MODULES([cfitsio], [cfitsio],
                       [has_cfitsio="yes"],
                       [AC_MSG_WARN([cfitsio pkgconfig information not found])])
     if test "x$has_cfitsio" = "xyes"; then
+    
+      # OpenSUSE kluge: cfitsio pkgconfig not correct
+      if test -f "/usr/include/libcfitsio0"; then
+        cfitsio_CFLAGS="-I/usr/include/libcfitsio0/fitsio.h"
+      fi
+      
+      # Set environment variables
       CFLAGS="$CFLAGS $cfitsio_CFLAGS"
       CPPFLAGS="$CPPFLAGS $cfitsio_CFLAGS"
       LDFLAGS="$LDFLAGS $cfitsio_LIBS"
