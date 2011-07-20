@@ -1,54 +1,157 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1"><title>Getting Started</title>
 
-  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-  <title>Getting Started</title>
-
-
-  <link href="gammalib.css" media="screen,print" type="text/css" rel="stylesheet">
-
+<link href="gammalib.css" media="screen,print" type="text/css" rel="stylesheet">
 </head>
 
-
 <body>
-
 <p class="Header">Getting started</p>
-
 <p style="padding-top: 0pt; text-align: left;" class="Body"><a href="#First%20steps%20with%20GammaLib">
 First steps with GammaLib</a><br>
-
 <a href="#Getting_Help">
 Getting Help</a>
 </p>
-
 <br>
-
 <p class="Title"><a name="First steps with GammaLib"></a>First
 steps with GammaLib</p>
-
 <p style="padding-top: 0pt; text-align: left;" class="Body">GammaLib
-comes with a Python interface, and as first step you should verify that the
+comes with a Python interface, and as first step you should verify that
+the
 Python interfaces workes correctly. You do this by typing:
 </p>
-
 <p class="Code">&gt; python<br>
-
 &gt;&gt;&gt; from gammalib import *<br>
-
 &gt;&gt;&gt;
 </p>
-
-<p style="padding-top: 0pt; text-align: left;" class="Body">If everything works fine you should just get a new Python prompt after importing GammaLib.
+<p style="padding-top: 0pt; text-align: left;" class="Body">If
+everything works fine you should just get a new Python prompt after
+importing GammaLib. If you get an error message, make sure that you've
+setup correctly the GammaLib environment. You basically need the <span style="font-family: Courier New,Courier,monospace;">PYTHONPATH</span>
+variable set to GammaLib's Python site-package, and you also have to
+make sure that GammaLib and any dependent library (cfitsio, readline,
+ncurses) is in the library load path (eventually you may need to adjust
+<span style="font-family: Courier New,Courier,monospace;">LD_LIBRARY_PATH</span>).
+This is all done automatically if you set up the environment as
+described <a href="installation.html#Setting_up_your_environment">here</a>.</p>
+<br>
+<p style="padding-top: 0pt; text-align: left;" class="Body">Now
+try:
 </p>
-
+<p class="Code">&gt;&gt;&gt; models=GModels()<br>
+&gt;&gt;&gt; print models<br>
+=== GModels ===<br>
+Number of models ..........: 0<br>
+Number of parameters ......: 0<br>
+&gt;&gt;&gt;
+</p>
+<p style="padding-top: 0pt; text-align: left;" class="Body">You
+just alloacted
+your first GammaLib object, which is an empty model container.</p>
 <br>
-
+<p style="padding-top: 0pt; text-align: left;" class="Body">Now
+let's append a model to this container. For this, type:
+</p>
+<p class="Code">&gt;&gt;&gt; pos = GSkyDir()<br>
+&gt;&gt;&gt; pos.radec_deg(83.6331, 22.0145)<br>
+&gt;&gt;&gt; spatial = GModelSpatialPtsrc(pos)<br>
+&gt;&gt;&gt; spectral = GModelSpectralPlaw(1.0, -2.0)<br>
+&gt;&gt;&gt; model = GModelPointSource(spatial, spectral)<br>
+&gt;&gt;&gt; models.append(model)<br>
+&gt;&gt;&gt; print models<br>
+=== GModels ===<br>
+Number of models ..........: 1<br>
+Number of parameters ......: 6<br>
+=== GModelPointSource ===<br>
+Name ......................:<br>
+Instruments ...............: all<br>
+Model type ................: "SkyDirFunction" * "PowerLaw" * "Constant"<br>
+Number of parameters ......: 6<br>
+Number of spatial par's ...: 2<br>
+&nbsp;RA .......................: 83.6331 deg (fixed,scale=1)<br>
+&nbsp;DEC ......................: 22.0145 deg (fixed,scale=1)<br>
+Number of spectral par's ..: 3<br>
+&nbsp;Prefactor ................: 1 +/- 0 [0,infty[ ph/cm2/s/MeV
+(free,scale=1,gradient)<br>
+&nbsp;Index ....................: -2 +/- 0 [-10,10]
+(free,scale=1,gradient)<br>
+&nbsp;PivotEnergy ..............: 100 MeV (fixed,scale=1,gradient)<br>
+Number of temporal par's ..: 1<br>
+&nbsp;Constant .................: 1 (relative value)
+(fixed,scale=1,gradient)<br>
+&gt;&gt;&gt;
+</p>
+<p style="padding-top: 0pt; text-align: left;" class="Body">With
+this
+sequence of commands you first defined a sky direction in celestial
+coordinates using <span style="font-family: Courier New,Courier,monospace;">GSkyDir</span>.
+You may easily recognise that this is the position of the Crab. You
+then used this position to define the spatial component of a sky model
+using <span style="font-family: Courier New,Courier,monospace;">GModelSpatialPtsrc</span>.
+As the name suggests, the spatial component is a point source. Next,
+you defined the spectral component using <span style="font-family: Courier New,Courier,monospace;">GModelSpactralPlaw</span>:
+a power law with normalisation of 1 and index of -2. Then, you combined
+the spatial and spectral components in a point source model using <span style="font-family: Courier New,Courier,monospace;">GModelPointSource</span>.
+And finally you appended the point source to the model container
+allocated previously using the <span style="font-family: Courier New,Courier,monospace;">append</span>
+method. When you then print the model container you see that is
+contains now one model with 6 parameters. Among them, you find the
+specified source position (parameters <span style="font-family: Courier New,Courier,monospace;">RA</span>
+and <span style="font-family: Courier New,Courier,monospace;">DEC</span>),
+the power law normalisation (parameter <span style="font-family: Courier New,Courier,monospace;">Prefactor</span>)
+and the spectral index (parameter <span style="font-family: Courier New,Courier,monospace;">Index</span>).
+In addition, the reference energy for the normalisation has been set
+automatically to 100 MeV (parameter <span style="font-family: Courier New,Courier,monospace;">PivotEnergy</span>)
+and the temporal component has been set by default to a constant
+(parameter <span style="font-family: Courier New,Courier,monospace;">Constant</span>).</p>
 <br>
-
+<p style="padding-top: 0pt; text-align: left;" class="Body">Suppose
+you want
+to change one of these parameters, such as the <span style="font-family: Courier New,Courier,monospace;">PivotEnergy</span>
+that you want
+to set to 1 TeV. This can be done using:</p>
+<p class="Code">&gt;&gt;&gt;
+models[0]['PivotEnergy'].value(1.0e6)<br>
+&gt;&gt;&gt; print models<br>
+...<br>
+&nbsp;PivotEnergy ..............: 1e+06 MeV (fixed,scale=1,gradient)<br>
+...<br>
+</p>
+<p style="padding-top: 0pt; text-align: left;" class="Body">As
+the units are MeV, we had to specify a value of 1e6 to set the
+reference energy to 1 TeV. We did this by accessing the first model in
+the container using <span style="font-family: Courier New,Courier,monospace;">models[0]</span>
+(counting in GammaLib always starts from 0). Then we addressed the <span style="font-family: Courier New,Courier,monospace;">PivotEnergy</span>
+parameter by specifying <span style="font-family: Courier New,Courier,monospace;">['PivotEnergy']</span>.
+And finally we called the <span style="font-family: Courier New,Courier,monospace;">value</span>
+method that sets the value of a particular parameter.</p>
+<br>
+<p style="padding-top: 0pt; text-align: left;" class="Body">After
+all this
+hard work, you may save your model into a XML file by typing:</p>
+<p class="Code">&gt;&gt;&gt;
+models.save('test.xml')<br>
+&gt;&gt;&gt;<br>
+</p>
+<p style="padding-top: 0pt; text-align: left;" class="Body">and
+you
+can load it from an XML file in memory using</p>
+<p class="Code">&gt;&gt;&gt;
+newmodels=GModels('test.xml')<br>
+&gt;&gt;&gt; print newmodels<br>
+</p>
+<p style="padding-top: 0pt; text-align: left;" class="Body">The
+last
+print command is to convince yourself that the models have been
+loaded properly.</p>
+<br>
+<p style="padding-top: 0pt; text-align: left;" class="Body">Much
+more is still to come. Please be a little bit patient, I'm working on
+it. In the meantime you may check the <a href="doxygen.html">Doxygen
+documentation</a> to see what classes and methods are available.</p>
+<br>
 <p class="Title"><a name="Getting_Help"></a>Getting
 Help</p>
-
 <p style="padding-top: 0pt; text-align: left;" class="Body">
 Any questions, bug reports, or suggested enhancements related to
 GammaLib should be submitted
@@ -57,6 +160,10 @@ or the
 <a href="mailto:gammalib-users@lists.soureforge.net">gammalib-users@lists.sourceforge.net</a>
 mailing list.
 </p>
-
-</body>
-</html>
+<br>
+<hr size="1">
+<p class="Body">Last updated by: J&uuml;rgen
+Kn&ouml;dlseder 20 July
+2011
+</p>
+</body></html>

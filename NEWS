@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 00-04-09
+New Features and Important Changes in GammaLib 00-04-10
 
 Author(s) : Juergen Knoedlseder
 
-July 9th, 2011
+July 20, 2011
 
 
 1. Introduction
@@ -12,15 +12,22 @@ This document briefly summarizes module by module the most important changes mad
 
 2. Configuration
 -----------------
-Remove pkg-config usage from configure.ac as this introduced somas
-on Mac OS X systems (by default there is no pkg-config on Mac OS X).
+The configuration script aborts now if no C++ compiler is found.
 
-Add --enable-nan-check option and add option configuration information
-to configuration summary screen dump.
+pkg-config was reintroduced for finding the cfitsio library, but
+it's only used if pkg-config is available. This may help to
+increase the portability to various platforms, although problems
+with incorrect pkg-config files have been encountered on some
+distributions (OpenSUSE).
 
-Test for presence of Python.h and build Python binding only if the
-file exists. This should resolve installation issues on systems that
-do not have the Python development package installed.
+The configuration script now also handles fitsio.h headers found in
+specific subdirectory (which is needed to compile on OpenSUSE and
+Scientific Linux).
+
+Set the installation directory as the default runtime library
+directory for Python. This solves a `make check' problem that occurred
+on some distributions because it could not find the cfitsio
+library that was installed in that location.
 
 
 3. Application module
@@ -40,17 +47,17 @@ None
 
 6. Model module
 ---------------
-Add NaN/Inf check to various spatial and spectral models.
+None
 
 
 7. Numerics module
 ------------------
-Add NaN/Inf check to GIntegral class.
+None
 
 
 8. Observation module
 ---------------------
-Add NaN/Inf check to GResponse and GObservation class.
+None
 
 
 9. Optimization module
@@ -60,20 +67,7 @@ None
 
 10. Sky module
 --------------
-Replaced the IDL based World Coordinate System code by wcslib based code.
-This improves performance and accuracy of the coordinate transformation
-and corrects a bug in the LONPOLE/LATPOLE keywords that were written in
-the earlier version into the FITS file.
-
-Introduced GWcslib base class for projections that are wcslib based.
-All code adapted from wcslib goes into that class. Not all functionality
-has yet been ported from wcslib to GammaLib, but the essential things
-for creating, writing and reading WCS compliant FITS files is there.
-
-Introduced a World Coordinate System registry for easy extension of the
-set of projections.
-
-Added the following projection types: AZP, STG, TAN
+Use now GWcsRegistry for alloc_wcs().
 
 
 11. Support module
@@ -98,10 +92,4 @@ None
 
 15. CTA interface
 -----------------
-Added a simple offset angle dependence to the CTA response. The effective
-area is assumed to vary following exp(-0.5*theta^4/sigma^2), where theta
-is the offset angle of the photon arrival direction in the camera system
-and sigma is a parameter that is set by default to 3.0 deg^2. No energy
-dependence has been assumed in the offset angle variation.
-
-Add NaN/Inf check to various classes.
+None
