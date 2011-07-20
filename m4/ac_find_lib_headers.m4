@@ -74,7 +74,7 @@ m4_define(AC_DEFUN([AC_FIND_LIB_HEADER],[
 
   # Loop over all directories
   for i in '' "$gammalib_prefix" /opt/local /usr/local /usr; do
-    for lib in lib64 lib; do
+    for l in lib64 lib; do
 
       # Case A: headers are required
       if test "x$3" != "x"; then
@@ -86,7 +86,7 @@ m4_define(AC_DEFUN([AC_FIND_LIB_HEADER],[
             CPPFLAGS="$ac_find_lib_save_CPPFLAGS"
             ac_message="found"
           else
-            ac_find_lib_add_LDFLAGS=" -L$i/$lib"
+            ac_find_lib_add_LDFLAGS=" -L$i/$l"
             ac_find_lib_add_CPPFLAGS=" -I$i/include"
             LDFLAGS="$ac_find_lib_save_LDFLAGS$ac_find_lib_add_LDFLAGS"
             CPPFLAGS="$ac_find_lib_save_CPPFLAGS$ac_find_lib_add_CPPFLAGS"
@@ -129,8 +129,8 @@ m4_define(AC_DEFUN([AC_FIND_LIB_HEADER],[
           LDFLAGS="$ac_find_lib_save_LDFLAGS"
           ac_message="found"
         else
-          LDFLAGS="$ac_find_lib_save_LDFLAGS -L$i/$lib"
-          ac_find_lib_add_LDFLAGS="$i/$lib"
+          ac_find_lib_add_LDFLAGS=" -L$i/$l"
+            LDFLAGS="$ac_find_lib_save_LDFLAGS$ac_find_lib_add_LDFLAGS"
           ac_message="found in $ac_find_lib_add_LDFLAGS"
         fi
         AC_LINK_IFELSE([AC_LANG_CALL([], [$2])],
