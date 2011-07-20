@@ -98,7 +98,7 @@ for extra_lib_path in extra_lib_paths:
 # Get extra include directories
 extra_inc_paths = ('@CPPFLAGS@').split(' ')
 for extra_inc_path in extra_inc_paths:
-    if extra_inc_path().lstrip().find('-I') == 0:
+    if extra_inc_path.lstrip().find('-I') == 0:
 		dir = extra_inc_path.lstrip().lstrip('-I')
 		if len(dir) > 0:
 			include_dirs.append(dir)
