@@ -368,8 +368,8 @@ if test "x$with_cfitsio" = "xyes"; then
     if test "x$has_cfitsio" = "xyes"; then
     
       # OpenSUSE kluge: cfitsio pkgconfig not correct
-      if test -f "/usr/include/libcfitsio0"; then
-        cfitsio_CFLAGS="-I/usr/include/libcfitsio0/fitsio.h"
+      if test -f "/usr/include/libcfitsio0/fitsio.h"; then
+        cfitsio_CFLAGS="-I/usr/include/libcfitsio0"
       fi
       
       # Set environment variables
