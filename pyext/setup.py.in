@@ -58,10 +58,10 @@ if (len(sys.argv) > 3):
 			print 'WARNING: Failed to create symbolic link to static library. Link dynamically.'
 
 # Set default include directories and data files
-include_dirs         = ['@top_srcdir@/include']
-data_files           = glob.glob('@top_srcdir@/pyext/*.i')
-library_dirs         = ['../src/.libs']
-libraries            = [libgamma]
+include_dirs  = ['@top_srcdir@/include']
+data_files    = glob.glob('@top_srcdir@/pyext/*.i')
+library_dirs  = ['../src/.libs']
+libraries     = [libgamma]
 
 # Set default runtime library directories
 if os.path.exists('@prefix@/lib'):
@@ -89,8 +89,8 @@ for extra_lib in extra_libs:
 # Get extra library paths
 extra_lib_paths = ('@LDFLAGS@').split(' ')
 for extra_lib_path in extra_lib_paths:
-    if extra_lib_path.find('-L') != -1:
-		dir = extra_lib_path.lstrip('-L')
+    if extra_lib_path.lstrip().find('-L') == 0:
+		dir = extra_lib_path.lstrip().lstrip('-L')
 		if len(dir) > 0:
 			library_dirs.append(dir)
 			runtime_library_dirs.append(dir)
@@ -98,8 +98,8 @@ for extra_lib_path in extra_lib_paths:
 # Get extra include directories
 extra_inc_paths = ('@CPPFLAGS@').split(' ')
 for extra_inc_path in extra_inc_paths:
-    if extra_lib_path.find('-I') != -1:
-		dir = extra_inc_path.lstrip('-I')
+    if extra_inc_path().lstrip().find('-I') == 0:
+		dir = extra_inc_path.lstrip().lstrip('-I')
 		if len(dir) > 0:
 			include_dirs.append(dir)
 
