@@ -314,6 +314,35 @@ else
 fi
 
 
+dnl ===========================
+dnl Checks for readline library
+dnl ===========================
+
+# Initialise readline and ncurses flags
+has_readline="no"
+has_ncurses="no"
+
+# Check if we want to use readline
+AC_ARG_WITH([readline],
+            [AS_HELP_STRING([--with-readline],
+                            [Use readline library [default=yes]])],
+            [],
+            [with_readline=yes])
+
+# If we want to use readline, then search now the library
+if test "x$with_readline" = "xyes"; then
+
+  # First check for the presence of the ncurses library
+  AC_FIND_LIB_HEADER([ncurses], [tgetstr], [], [has_ncurses="yes"])
+  AC_FIND_LIB_HEADER([readline], [readline], [readline/readline.h], [has_readline="yes"])
+
+fi
+if test "x$has_readline" = "xyes"; then
+  AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
+fi
+AM_CONDITIONAL(WITH_READLINE, test "x$has_readline" = "xyes")
+
+
 dnl ==========================
 dnl Checks for cfitsio library
 dnl ==========================
@@ -373,35 +402,6 @@ if test "x$has_cfitsio" = "xyes"; then
   AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])
 fi
 AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
-
-
-dnl ===========================
-dnl Checks for readline library
-dnl ===========================
-
-# Initialise readline and ncurses flags
-has_readline="no"
-has_ncurses="no"
-
-# Check if we want to use readline
-AC_ARG_WITH([readline],
-            [AS_HELP_STRING([--with-readline],
-                            [Use readline library [default=yes]])],
-            [],
-            [with_readline=yes])
-
-# If we want to use readline, then search now the library
-if test "x$with_readline" = "xyes"; then
-
-  # First check for the presence of the ncurses library
-  AC_FIND_LIB_HEADER([ncurses], [tgetstr], [], [has_ncurses="yes"])
-  AC_FIND_LIB_HEADER([readline], [readline], [readline/readline.h], [has_readline="yes"])
-
-fi
-if test "x$has_readline" = "xyes"; then
-  AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
-fi
-AM_CONDITIONAL(WITH_READLINE, test "x$has_readline" = "xyes")
 
 
 dnl =========================================
