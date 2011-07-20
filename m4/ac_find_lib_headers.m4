@@ -173,7 +173,7 @@ AC_DEFUN([AC_FIND_LIB_HEADER],[
 
   # Kluge to set include directives
   if test "x$3" != "x" -a "$ac_find_lib_status" = yes; then
-    AC_CHECK_HEADERS([$header $3])
+    AC_CHECK_HEADERS([$header $3], [break])
   fi
 
   # echo "out: "$LIBS $LDFLAGS $CPPFLAGS
