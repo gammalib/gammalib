@@ -384,11 +384,10 @@ if test "x$with_cfitsio" = "xyes"; then
       *)             cfitsio_deps="-lm" ;;
     esac
   
-    # Check for cfitsio library and headers
-    AC_FIND_LIB_HEADER([cfitsio], [ffpss], [fitsio.h],
+    # Check for cfitsio library and headers. The cfitsio/fitsio.h is for
+    # Scientific Linux as no pkgconfig is installed for this distribution
+    AC_FIND_LIB_HEADER([cfitsio], [ffpss], [fitsio.h cfitsio/fitsio.h],
                        [has_cfitsio="yes"], [], [${cfitsio_deps}])
-    #AC_FIND_LIB_HEADER([cfitsio], [ffpss], [fitsio.h cfitsio/fitsio.h libcfitsio0/fitsio.h],
-    #                   [has_cfitsio="yes"], [], [${cfitsio_deps}])
 
     # Add cfitsio dependencies
     if test "x$has_cfitsio" = "xyes"; then
