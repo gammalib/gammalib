@@ -22,8 +22,6 @@
 #   /usr/local/lib
 #   /usr/lib64
 #   /usr/lib
-#   /lib64                 (for readline/ncurses is some distros)
-#   /lib                   (for readline/ncurses is some distros)
 #
 #   If the library is found, the function adds it's name to LIBS.
 #   Furthermore, if the library is found in a specific directory, the
@@ -55,127 +53,122 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_DEFUN([AC_FIND_LIB_HEADER],[
-  #
+m4_define(AC_DEFUN([AC_FIND_LIB_HEADER],[
   # Initialise status
-  #
   AS_VAR_SET([ac_find_lib_status], [no])
   AS_VAR_SET([ac_find_header_status], [no])
-  #
+
   # Signal checking
-  #
   AC_MSG_CHECKING([for $2 in -l$1])
-  #
+
   # Save original values
-  #
   # echo "in: "$LIBS $LDFLAGS $CPPFLAGS
   ac_find_lib_save_LIBS=$LIBS
   ac_find_lib_save_LDFLAGS=$LDFLAGS
+  ac_find_lib_save_CPPFLAGS=$CPPFLAGS
   ac_find_lib_add_LDFLAGS=
-  ac_find_lib_base=
-  #
+  ac_find_lib_add_CPPFLAGS=
+
   # Set link flags for testing
-  #
   LIBS="-l$1 $6 $LIBS"
-  #
+
   # Loop over all directories
-  #
-  for i in '' "$gammalib_prefix" /opt/local /usr/local /usr /; do
-    #
-    # Search library in lib64 first
-    #
-    if test -z "$i"; then
-      LDFLAGS="$ac_find_lib_save_LDFLAGS"
-      ac_message="found"
-    else
-      LDFLAGS="$ac_find_lib_save_LDFLAGS -L$i/lib64"
-      ac_message="found in $i/lib64"
-    fi
-    AC_LINK_IFELSE([AC_LANG_CALL([], [$2])],
-                 [AS_VAR_SET([ac_find_lib_status], [yes])],
-                 [AS_VAR_SET([ac_find_lib_status], [no])])
-    LDFLAGS=$ac_find_lib_save_LDFLAGS
-    if test "x$ac_find_lib_status" = "xyes"; then
-      if test -z "$i"; then
-        ac_find_lib_add_LDFLAGS=
+  for i in '' "$gammalib_prefix" /opt/local /usr/local /usr; do
+    for lib in lib64 lib; do
+
+      # Case A: headers are required
+      if test "x$3" != "x"; then
+        for header in $3; do
+          if test "x$i" == "x"; then
+            ac_find_lib_add_LDFLAGS=
+            ac_find_lib_add_CPPFLAGS=
+            LDFLAGS="$ac_find_lib_save_LDFLAGS"
+            CPPFLAGS="$ac_find_lib_save_CPPFLAGS"
+            ac_message="found"
+          else
+            ac_find_lib_add_LDFLAGS=" -L$i/$lib"
+            ac_find_lib_add_CPPFLAGS=" -I$i/include"
+            LDFLAGS="$ac_find_lib_save_LDFLAGS$ac_find_lib_add_LDFLAGS"
+            CPPFLAGS="$ac_find_lib_save_CPPFLAGS$ac_find_lib_add_CPPFLAGS"
+            ac_message="found in $i/$lib and $i/$include"
+          fi
+
+          # Test if we can link the library
+          AC_LINK_IFELSE([AC_LANG_CALL([], [$2])],
+                         [AS_VAR_SET([ac_find_lib_status], [yes])],
+                         [AS_VAR_SET([ac_find_lib_status], [no])])
+
+          # Test if the preprocessor can handle the header
+          AC_PREPROC_IFELSE([AC_LANG_SOURCE([@%:@include <$header>])],
+                            [AS_VAR_SET([ac_find_header_status], [yes])],
+                            [AS_VAR_SET([ac_find_header_status], [no])])
+
+          # Test if we can compile the header (not used as problems with
+          # readline
+          #AC_COMPILE_IFELSE([AC_LANG_SOURCE([@%:@include <$header>])],
+          #                  [AS_VAR_SET([ac_find_header_status], [yes])],
+          #                  [AS_VAR_SET([ac_find_header_status], [no])])
+
+          # Recover old flags
+          LDFLAGS=$ac_find_lib_save_LDFLAGS
+          CPPFLAGS=$ac_find_lib_save_CPPFLAGS
+          if test "x$ac_find_lib_status" = "xyes" -a "x$ac_find_header_status" = "xyes"; then
+            break
+          else
+            ac_find_lib_status="no"
+          fi
+        done
+        if test "x$ac_find_lib_status" = "xyes"; then
+          break
+        fi
+     
+      # Case B: no headers are required
       else
-        ac_find_lib_add_LDFLAGS=" -L$i/lib64"
-        ac_find_lib_base="$i"
+        if test -z "$i"; then
+          ac_find_lib_add_LDFLAGS=
+          LDFLAGS="$ac_find_lib_save_LDFLAGS"
+          ac_message="found"
+        else
+          LDFLAGS="$ac_find_lib_save_LDFLAGS -L$i/$lib"
+          ac_find_lib_add_LDFLAGS="$i/$lib"
+          ac_message="found in $ac_find_lib_add_LDFLAGS"
+        fi
+        AC_LINK_IFELSE([AC_LANG_CALL([], [$2])],
+                       [AS_VAR_SET([ac_find_lib_status], [yes])],
+                       [AS_VAR_SET([ac_find_lib_status], [no])])
+        LDFLAGS=$ac_find_lib_save_LDFLAGS
+        if test "x$ac_find_lib_status" = "xyes"; then
+          break
+        fi
       fi
-      break
-    fi
-    #
-    # If still alive, check library in lib next
-    #
-    if test -z "$i"; then
-      LDFLAGS="$ac_find_lib_save_LDFLAGS"
-      ac_message="found"
-    else
-      LDFLAGS="$ac_find_lib_save_LDFLAGS -L$i/lib"
-      ac_message="found in $i/lib"
-    fi
-    AC_LINK_IFELSE([AC_LANG_CALL([], [$2])],
-                   [AS_VAR_SET([ac_find_lib_status], [yes])],
-                   [AS_VAR_SET([ac_find_lib_status], [no])])
-    LDFLAGS=$ac_find_lib_save_LDFLAGS
+
+    done
     if test "x$ac_find_lib_status" = "xyes"; then
-      if test -z "$i"; then
-        ac_find_lib_add_LDFLAGS=
-      else
-        ac_find_lib_add_LDFLAGS=" -L$i/lib"
-        ac_find_lib_base="$i"
-      fi
       break
     fi
   done
-  #
-  # Recover original values
-  #
+
+  # Recover original LIBS value
   LIBS=$ac_find_lib_save_LIBS
-  LDFLAGS=$ac_find_lib_save_LDFLAGS
-  #
-  # Inform about test result
-  #
-  if test "x$ac_find_lib_status" = "xyes"; then
-    AC_MSG_RESULT($ac_message)
-  else
-    AC_MSG_RESULT([not found])
-  fi
-  #
-  # Optionally check for presence of headers (see AC_CHECK_HEADERS)
-  #
+  
+  # Set flags
   if test "x$3" != "x"; then
-    ac_find_lib_save_CPPFLAGS=$CPPFLAGS
-    ac_find_lib_add_CPPFLAGS=
-    if test -z "$ac_find_lib_base"; then
-      CPPFLAGS="$ac_find_lib_save_CPPFLAGS"
-    else
-      CPPFLAGS="$ac_find_lib_save_CPPFLAGS -I$ac_find_lib_base/include"
-    fi
-    AC_CHECK_HEADERS([$3],
-                     [AS_VAR_SET([ac_find_header_status], [yes])
-                      break])
-    CPPFLAGS=$ac_find_lib_save_CPPFLAGS
-    if test "x$ac_find_header_status" = "xyes"; then
-      if test -z "$ac_find_lib_base"; then
-        CPPFLAGS="$CPPFLAGS"
-        AC_MSG_NOTICE([$1 headers found])
-      else
-        CPPFLAGS="$CPPFLAGS -I$ac_find_lib_base/include"
-        AC_MSG_NOTICE([$1 headers found in $ac_find_lib_base/include])
-      fi
-    else
-      AC_MSG_WARN([No $1 headers found])
-    fi
-    AS_IF([test "$ac_find_lib_status" != no -a "ac_find_header_status" != no ],
+    AS_IF([test "$ac_find_lib_status" == yes ],
           [LIBS="-l$1 $LIBS"
-           LDFLAGS="$LDFLAGS $ac_find_lib_add_LDFLAGS"
-           $4], [$5])
+           LDFLAGS="$LDFLAGS$ac_find_lib_add_LDFLAGS"
+           CPPFLAGS="$CPPFLAGS$ac_find_lib_add_CPPFLAGS"
+           AC_MSG_RESULT($ac_message)
+           $4],
+          [AC_MSG_RESULT([not found])
+           $5])
   else
-    AS_IF([test "$ac_find_lib_status" != no],
+    AS_IF([test "$ac_find_lib_status" == yes ],
           [LIBS="-l$1 $LIBS"
-           LDFLAGS="$LDFLAGS $ac_find_lib_add_LDFLAGS"
-           $4], [$5])
+           LDFLAGS="$LDFLAGS$ac_find_lib_add_LDFLAGS"
+           AC_MSG_RESULT($ac_message)
+           $4],
+          [AC_MSG_RESULT([not found])
+           $5])
   fi
   # echo "out: "$LIBS $LDFLAGS $CPPFLAGS
-])
+]))
