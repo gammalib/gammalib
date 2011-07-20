@@ -130,7 +130,7 @@ m4_define(AC_DEFUN([AC_FIND_LIB_HEADER],[
           ac_message="found"
         else
           ac_find_lib_add_LDFLAGS=" -L$i/$l"
-            LDFLAGS="$ac_find_lib_save_LDFLAGS$ac_find_lib_add_LDFLAGS"
+          LDFLAGS="$ac_find_lib_save_LDFLAGS$ac_find_lib_add_LDFLAGS"
           ac_message="found in $ac_find_lib_add_LDFLAGS"
         fi
         AC_LINK_IFELSE([AC_LANG_CALL([], [$2])],
