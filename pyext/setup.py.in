@@ -89,17 +89,19 @@ for extra_lib in extra_libs:
 # Get extra library paths
 extra_lib_paths = ('@LDFLAGS@').split(' ')
 for extra_lib_path in extra_lib_paths:
-	dir = extra_lib_path.lstrip('-L')
-	if len(dir) > 0:
-		library_dirs.append(extra_lib_path.lstrip('-L'))
-		runtime_library_dirs.append(extra_lib_path.lstrip('-L'))
+    if extra_lib_path.find('-L') != -1:
+		dir = extra_lib_path.lstrip('-L')
+		if len(dir) > 0:
+			library_dirs.append(dir)
+			runtime_library_dirs.append(dir)
 
 # Get extra include directories
 extra_inc_paths = ('@CPPFLAGS@').split(' ')
 for extra_inc_path in extra_inc_paths:
-	dir = extra_inc_path.lstrip('-I')
-	if len(dir) > 0:
-		include_dirs.append(extra_inc_path.lstrip('-I'))
+    if extra_lib_path.find('-I') != -1:
+		dir = extra_inc_path.lstrip('-I')
+		if len(dir) > 0:
+			include_dirs.append(dir)
 
 # Add instrument specific include directories and data files
 if '@WITH_INST_MWL_TRUE@' != '#':
