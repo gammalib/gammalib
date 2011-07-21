@@ -22,6 +22,7 @@
  * swig -c++ -python -Wall gammalib.i                                      *
  ***************************************************************************/
 %module gammalib
+%feature("autodoc", "1");
 
 /* __ Support module _____________________________________________________ */
 %include "GException.i"
