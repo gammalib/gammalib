@@ -34,6 +34,7 @@
 #include "GLATEventList.hpp"
 #include "GLATEventCube.hpp"
 #include "GLATRoi.hpp"
+#include "GLATException.hpp"
 #include "GFits.hpp"
 #include "GTools.hpp"
 #include "GEnergy.hpp"
@@ -43,6 +44,7 @@ const GLATObservation      g_obs_lat_seed;
 const GObservationRegistry g_obs_lat_registry(&g_obs_lat_seed);
 
 /* __ Method name definitions ____________________________________________ */
+#define G_RESPONSE                    "GLATObservation::response(GResponse&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -170,12 +172,47 @@ GLATObservation* GLATObservation::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Load LAT response
+ * @brief Set response function
+ *
+ * @param[in] rsp Response function.
+ *
+ * @exception GLATException::bad_response_type
+ *            Specified response in not of type GLATResponse.
+ *
+ * Sets the response function for the observation. The argument has to be of
+ * type GLATResponse, otherwise an exception is thrown.
+ ***************************************************************************/
+void GLATObservation::response(const GResponse& rsp)
+{
+    // Get pointer on LAT response
+    const GLATResponse* latrsp = dynamic_cast<const GLATResponse*>(&rsp);
+    if (latrsp == NULL)
+        throw GLATException::bad_response_type(G_RESPONSE);
+
+    // Delete old response function
+    if (m_response != NULL) delete m_response;
+
+    // Clone response function
+    m_response = latrsp->clone();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set response function
  *
  * @param[in] irfname Name of instrument response function.
  * @param[in] caldb Optional path to calibration database.
  *
- * @todo Response not yet loaded.
+ * Set the LAT response function using the IRF name and the path to the
+ * calibration database. The IFR name has to be one of
+ * name
+ * name::front
+ * name::back
+ * where name is the response name (e.g. P6_v3). Note that the name is case
+ * sensitive for the moment.
  ***************************************************************************/
 void GLATObservation::response(const std::string& irfname, std::string caldb)
 {

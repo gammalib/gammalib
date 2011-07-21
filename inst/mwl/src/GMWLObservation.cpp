@@ -32,12 +32,14 @@
 #include "GTools.hpp"
 #include "GMWLObservation.hpp"
 #include "GMWLSpectrum.hpp"
+#include "GMWLException.hpp"
 
 /* __ Globals ____________________________________________________________ */
 const GMWLObservation      g_obs_mwl_seed;
 const GObservationRegistry g_obs_mwl_registry(&g_obs_mwl_seed);
 
 /* __ Method name definitions ____________________________________________ */
+#define G_RESPONSE                    "GMWLObservation::response(GResponse&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -217,7 +219,36 @@ GMWLObservation* GMWLObservation::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Returns pointer to response function (dummy)
+ * @brief Set response function
+ *
+ * @param[in] rsp Response function.
+ *
+ * @exception GMWLException::bad_response_type
+ *            Specified response in not of type GMWLResponse.
+ *
+ * Sets the response function for the observation. The argument has to be of
+ * type GMWLResponse, otherwise an exception is thrown.
+ ***************************************************************************/
+void GMWLObservation::response(const GResponse& rsp)
+{
+    // Get pointer on MWL response
+    const GMWLResponse* mwlrsp = dynamic_cast<const GMWLResponse*>(&rsp);
+    if (mwlrsp == NULL)
+        throw GMWLException::bad_response_type(G_RESPONSE);
+
+    // Delete old response function
+    if (m_response != NULL) delete m_response;
+
+    // Clone response function
+    m_response = mwlrsp->clone();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to response function
  ***************************************************************************/
 GMWLResponse* GMWLObservation::response(void) const
 {

@@ -57,6 +57,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void             clear(void);
     virtual GCTAObservation* clone(void) const;
+    virtual void             response(const GResponse& rsp);
     virtual GCTAResponse*    response(void) const;
     virtual GCTAPointing*    pointing(const GTime& time) const;
     virtual std::string      instrument(void) const;

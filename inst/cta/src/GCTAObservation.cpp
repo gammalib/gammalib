@@ -46,6 +46,7 @@ const GCTAObservation      g_obs_cta_seed;
 const GObservationRegistry g_obs_cta_registry(&g_obs_cta_seed);
 
 /* __ Method name definitions ____________________________________________ */
+#define G_RESPONSE                    "GCTAObservation::response(GResponse&)"
 #define G_READ_DS_EBOUNDS       "GCTAObservation::read_ds_ebounds(GFitsHDU*)"
 #define G_READ_DS_ROI               "GCTAObservation::read_ds_roi(GFitsHDU*)"
 
@@ -177,6 +178,35 @@ void GCTAObservation::clear(void)
 GCTAObservation* GCTAObservation::clone(void) const
 {
     return new GCTAObservation(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Set response function
+ *
+ * @param[in] rsp Response function.
+ *
+ * @exception GCTAException::bad_response_type
+ *            Specified response in not of type GCTAResponse.
+ *
+ * Sets the response function for the observation. The argument has to be of
+ * type GCTAResponse, otherwise an exception is thrown.
+ ***************************************************************************/
+void GCTAObservation::response(const GResponse& rsp)
+{
+    // Get pointer on CTA response
+    const GCTAResponse* ctarsp = dynamic_cast<const GCTAResponse*>(&rsp);
+    if (ctarsp == NULL)
+        throw GCTAException::bad_response_type(G_RESPONSE);
+
+    // Delete old response function
+    if (m_response != NULL) delete m_response;
+
+    // Clone response function
+    m_response = ctarsp->clone();
+
+    // Return
+    return;
 }
 
 
