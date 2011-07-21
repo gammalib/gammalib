@@ -4,15 +4,23 @@
  *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
  * @file GOptimizerLM.hpp
- * @brief GOptimizerLM base class interface definition.
+ * @brief Levenberg Marquardt optimizer class interface definition
  * @author J. Knodlseder
  */
 
@@ -33,10 +41,13 @@
 #define G_LM_NOT_POSTIVE_DEFINITE 3
 #define G_LM_BAD_ERRORS           4
 
+
 /***********************************************************************//**
  * @class GOptimizerLM
  *
- * @brief GOptimizerLM class interface defintion.
+ * @brief Levenberg Marquardt optimizer class interface defintion
+ *
+ * This method implements an Levenberg Marquardt optimizer.
  ***************************************************************************/
 class GOptimizerLM : public GOptimizer {
 
@@ -54,29 +65,29 @@ public:
     GModels&        operator() (GOptimizerFunction& fct, GModels& m);
 
     // Implemented pure virtual methods
-    void          clear(void);
-    GOptimizerLM* clone(void) const;
-    std::string   print(void) const;
+    virtual void          clear(void);
+    virtual GOptimizerLM* clone(void) const;
+    virtual std::string   print(void) const;
+    virtual double        value(void) const { return m_value; }
+    virtual int           status(void) const { return m_status; }
+    virtual int           iter(void) const { return m_iter; }
     
     // Methods
-    void        max_iter(const int& n) { m_max_iter=n; }
-    void        max_stalls(const int& n) { m_max_stall=n; }
-    void        max_boundary_hits(const int& n) { m_max_stall=n; }
-    void        lambda_start(const double& val) { m_lambda_start=val; }
-    void        lambda_inc(const double& val) { m_lambda_inc=val; }
-    void        lambda_dec(const double& val) { m_lambda_dec=val; }
-    void        eps(const double& eps) { m_eps=eps; }
-    int         max_iter(void) const { return m_max_iter; }
-    int         max_stalls(void) const { return m_max_stall; }
-    int         max_boundary_hits(void) const { return m_max_hit; }
-    int         status(void) const { return m_status; }
-    int         iter(void) const { return m_iter; }
-    double      lambda_start(void) const { return m_lambda_start; }
-    double      lambda_inc(void) const { return m_lambda_inc; }
-    double      lambda_dec(void) const { return m_lambda_dec; }
-    double      lambda(void) const { return m_lambda; }
-    double      eps(void) const { return m_eps; }
-    double      value(void) const { return m_value; }
+    void   max_iter(const int& n) { m_max_iter=n; }
+    void   max_stalls(const int& n) { m_max_stall=n; }
+    void   max_boundary_hits(const int& n) { m_max_stall=n; }
+    void   lambda_start(const double& val) { m_lambda_start=val; }
+    void   lambda_inc(const double& val) { m_lambda_inc=val; }
+    void   lambda_dec(const double& val) { m_lambda_dec=val; }
+    void   eps(const double& eps) { m_eps=eps; }
+    int    max_iter(void) const { return m_max_iter; }
+    int    max_stalls(void) const { return m_max_stall; }
+    int    max_boundary_hits(void) const { return m_max_hit; }
+    double lambda_start(void) const { return m_lambda_start; }
+    double lambda_inc(void) const { return m_lambda_inc; }
+    double lambda_dec(void) const { return m_lambda_dec; }
+    double lambda(void) const { return m_lambda; }
+    double eps(void) const { return m_eps; }
 
 protected:
     // Protected methods
