@@ -285,6 +285,28 @@ GCTAException::bad_pointing_type::bad_pointing_type(std::string origin,
 
 
 /***********************************************************************//**
+ * @brief Response is not a CTA response
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCTAException::bad_response_type::bad_response_type(std::string origin,
+                                                    std::string message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Response is not of type GCTAResponse.";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Invalid radial model type
  *
  * @param[in] origin Method that throws the error.

@@ -1,13 +1,21 @@
 /***************************************************************************
  *          GMWLException.cpp  - Multi-wavelength exception handler        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -77,5 +85,27 @@ GMWLException::invalid_unit::invalid_unit(std::string origin,
     m_origin  = origin;
     m_message = "Invalid or unsupported unit \""+unit+"\" encountered. " +
                 message;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Response is not a MWL response
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GMWLException::bad_response_type::bad_response_type(std::string origin,
+                                                    std::string message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Response is not of type GMWLResponse.";
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
     return;
 }

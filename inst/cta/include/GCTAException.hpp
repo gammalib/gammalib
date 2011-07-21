@@ -114,6 +114,10 @@ public:
     public:
         bad_pointing_type(std::string origin, std::string message = "");
     };
+    class bad_response_type : public GCTAExceptionHandler {
+    public:
+        bad_response_type(std::string origin, std::string message = "");
+    };
 
     // Model exceptions
     class model_invalid_radial : public GCTAExceptionHandler {
