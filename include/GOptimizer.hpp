@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GOptimizer.hpp
- * @brief GOptimizer abstract base class interface definition.
+ * @brief Optimizer abstract base class interface definition.
  * @author J. Knodlseder
  */
 
@@ -39,7 +39,9 @@
 /***********************************************************************//**
  * @class GOptimizer
  *
- * @brief GOptimizer abstract base class interface defintion.
+ * @brief Optimizer abstract base class interface defintion
+ *
+ * This class defines the abstract interface for the optimizer class.
  ***************************************************************************/
 class GOptimizer {
 
@@ -51,7 +53,7 @@ public:
     // Constructors and destructors
     GOptimizer(void);
     GOptimizer(const GOptimizer& opt);
-    virtual ~GOptimizer();
+    virtual ~GOptimizer(void);
 
     // Operators
     virtual GOptimizer&     operator= (const GOptimizer& opt);
@@ -61,6 +63,9 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GOptimizer* clone(void) const = 0;
+    virtual double      value(void) const = 0;
+    virtual int         status(void) const = 0;
+    virtual int         iter(void) const = 0;
     virtual std::string print(void) const = 0;
  
     // Implemented methods
