@@ -1,3 +1,11 @@
+2011-07-21  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+        * Version 0.4.11 released
+        =========================
+
+        Add set response() to observation classes
+        Expose GCTAResponse::offset_sigma() in python
+
 2011-07-20  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.4.10 released

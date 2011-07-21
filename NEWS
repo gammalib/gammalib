@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 00-04-10
+New Features and Important Changes in GammaLib 00-04-11
 
 Author(s) : Juergen Knoedlseder
 
-July 20, 2011
+July 21, 2011
 
 
 1. Introduction
@@ -12,23 +12,7 @@ This document briefly summarizes module by module the most important changes mad
 
 2. Configuration
 -----------------
-The configuration script aborts now if no C++ compiler is found.
-
-pkg-config was reintroduced for finding the cfitsio library, but
-it's only used if pkg-config is available. This may help to
-increase the portability to various platforms, although problems
-with incorrect pkg-config files have been encountered on some
-distributions (OpenSUSE).
-
-The configuration script now also handles fitsio.h headers found in
-specific subdirectory (which is needed to compile on OpenSUSE and
-Scientific Linux).
-
-Set the installation directory as the default runtime library
-directory for Python. This solves a `make check' problem that occurred
-on some distributions because it could not find the cfitsio
-library that was installed in that location.
-
+None
 
 3. Application module
 ---------------------
@@ -57,17 +41,24 @@ None
 
 8. Observation module
 ---------------------
-None
+Add set response() method to GObservation. This allows setting a
+response by cloning the response specified in the argument.
 
 
 9. Optimization module
 ----------------------
-None
+The following pure virtual methods have been added to GOptimizer:
+value() - returns the optimizer value
+status() - returns the optimizer status (integer code)
+iter() - returns the number of iterations done by the optimizer
+
+The function cast_GOptimizerLM has been added to the python interface
+so that casting from GOptimizer to GOptimizerLM is possible.
 
 
 10. Sky module
 --------------
-Use now GWcsRegistry for alloc_wcs().
+None
 
 
 11. Support module
@@ -82,14 +73,17 @@ None
 
 13. Multi-wavelength interface
 ------------------------------
-None
+Add set response() method to GMWLObservation. This allows setting a
+response by cloning the response specified in the argument.
 
 
 14. Fermi-LAT interface
 ----------------------
-None
+Add set response() method to GLATLObservation. This allows setting a
+response by cloning the response specified in the argument.
 
 
 15. CTA interface
 -----------------
-None
+Add set response() method to GCTAObservation. This allows setting a
+response by cloning the response specified in the argument.
