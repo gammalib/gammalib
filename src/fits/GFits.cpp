@@ -225,6 +225,7 @@ int GFits::size(void) const
  * For each HDU, a GFitsHDU object is associated to the GFits object.
  * The HDUs can then be accessed using the hdu(const std::string&) or
  * hdu(int extno) method.
+ * Any environment variable present in the filename will be expanded.
  ***************************************************************************/
 void GFits::open(const std::string& filename, bool create)
 {
@@ -235,18 +236,21 @@ void GFits::open(const std::string& filename, bool create)
     if (m_fitsfile != NULL)
         throw GException::fits_already_opened(G_OPEN, m_filename);
 
+    // Expand environment variables
+    std::string fname = expand_env(filename);
+
     // Initialise FITS file as readwrite and non created
     m_readwrite = true;
     m_created   = false;
 
     // Try opening FITS file with readwrite access
     int status = 0;
-    status     = __ffopen(FHANDLE(m_fitsfile), filename.c_str(), 1, &status);
+    status     = __ffopen(FHANDLE(m_fitsfile), fname.c_str(), 1, &status);
 
     // If failed then try opening as readonly
     if (status == 104 || status == 112) {
         status      = 0;
-        status      = __ffopen(FHANDLE(m_fitsfile), filename.c_str(), 0, &status);
+        status      = __ffopen(FHANDLE(m_fitsfile), fname.c_str(), 0, &status);
         m_readwrite = false;
     }
 
@@ -254,7 +258,7 @@ void GFits::open(const std::string& filename, bool create)
     // FITS file now
     if (create && status == 104) {
         status      = 0;
-        status      = __ffinit(FHANDLE(m_fitsfile), filename.c_str(), &status);
+        status      = __ffinit(FHANDLE(m_fitsfile), fname.c_str(), &status);
         m_readwrite = true;
         m_created   = true;
     }
@@ -262,15 +266,15 @@ void GFits::open(const std::string& filename, bool create)
 	// Throw special exception if status=202 (keyword not found). This error
 	// may occur if the file is opened with an expression
 	if (status == 202)
-        throw GException::fits_open_error(G_OPEN, filename, status,
+        throw GException::fits_open_error(G_OPEN, fname, status,
 		                  "Keyword not found when opening file.");
 
     // Throw any other error
     else if (status != 0)
-        throw GException::fits_open_error(G_OPEN, filename, status);
+        throw GException::fits_open_error(G_OPEN, fname, status);
 
     // Store FITS file attributes
-    m_filename = filename;
+    m_filename = fname;
 
     // Determine number of HDUs
     int num_hdu = 0;
@@ -386,26 +390,32 @@ void GFits::save(bool clobber)
  * @exception GException::fits_file_exist
  *            Specified file exists already. Overwriting requires
  *            clobber=true.
+ *
+ * Saves object into a specific FITS file.
+ * Any environment variable present in the filename will be expanded.
  ***************************************************************************/
 void GFits::saveto(const std::string& filename, bool clobber)
 {
+    // Expand environment variables
+    std::string fname = expand_env(filename);
+
     // Debug header
     #if DEBUG
-    std::cout << "GFits::saveto(\"" << filename << "\", " << clobber << ")"
+    std::cout << "GFits::saveto(\"" << fname << "\", " << clobber << ")"
               << " (size=" << size() << ") -->" << std::endl;
     #endif
 
     // If overwriting has been specified then remove any existing file ...
     if (clobber)
-        remove(filename.c_str());
+        remove(fname.c_str());
 
     // ... otherwise, if file exists then throw an exception
-    else if (file_exists(filename))
-        throw GException::fits_file_exist(G_SAVETO, filename);
+    else if (file_exists(fname))
+        throw GException::fits_file_exist(G_SAVETO, fname);
 
     // Create or open FITS file
     GFits new_fits;
-    new_fits.open(filename, true);
+    new_fits.open(fname, true);
 
     // Append all headers
     for (int i = 0; i < size(); ++i)

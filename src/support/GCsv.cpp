@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -269,6 +277,9 @@ int GCsv::integer(const int& row, const int& col) const
  *            CSV table file not found.
  * @exception GException::csv_bad_columns
  *            Inconsistent columns encountered in CSV table file.
+ *
+ * Load CSV table from ASCII file.
+ * Any environment variable present in the filename will be expanded.
  **************************************************************************/
 void GCsv::load(const std::string& filename, std::string sep)
 {
@@ -283,10 +294,13 @@ void GCsv::load(const std::string& filename, std::string sep)
     const int n = 10000; 
     char  line[n];
 
+    // Expand environment variables
+    std::string fname = expand_env(filename);
+
     // Open CSV table (read-only
-    FILE* fptr = std::fopen(filename.c_str(), "r");
+    FILE* fptr = std::fopen(fname.c_str(), "r");
     if (fptr == NULL)
-        throw GException::file_not_found(G_LOAD, filename);
+        throw GException::file_not_found(G_LOAD, fname);
 
     // Read lines
     int iline = 0;
@@ -317,7 +331,7 @@ void GCsv::load(const std::string& filename, std::string sep)
         else {
             // Check table consistency
             if (m_cols != elements.size())
-                throw GException::csv_bad_columns(G_LOAD, filename,
+                throw GException::csv_bad_columns(G_LOAD, fname,
                                   iline, m_cols, elements.size());
 
             // Append elements

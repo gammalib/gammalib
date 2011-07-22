@@ -200,20 +200,24 @@ void GXml::append(GXmlNode* node)
  *            Unable to open XML file (read access requested).
  *
  * Loads XML file by reading all lines from the XML file.
+ * Any environment variable present in the filename will be expanded.
  ***************************************************************************/
 void GXml::load(const std::string& filename)
 {
     // Clear object
     clear();
 
+    // Expand environment variables
+    std::string fname = expand_env(filename);
+
     // Check if file exists
-    if (!file_exists(filename))
-        throw GException::file_not_found(G_LOAD, filename);
+    if (!file_exists(fname))
+        throw GException::file_not_found(G_LOAD, fname);
 
     // Open parameter file
-    FILE* fptr = fopen(filename.c_str(), "r");
+    FILE* fptr = fopen(fname.c_str(), "r");
     if (fptr == NULL)
-        throw GException::file_open_error(G_LOAD, filename);
+        throw GException::file_open_error(G_LOAD, fname);
 
     // Parse file
     parse(fptr);
