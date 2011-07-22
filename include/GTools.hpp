@@ -61,6 +61,7 @@ const double pc2cm        =  3.08568025e18;
 std::string              strip_whitespace(const std::string& arg);
 std::string              strip_chars(const std::string& arg,
                                      const std::string& chars);
+std::string              expand_env(const std::string& arg);
 std::string              str(const unsigned short int& value);
 std::string              str(const unsigned int& value);
 std::string              str(const unsigned long int& value);

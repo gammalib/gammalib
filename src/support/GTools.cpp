@@ -33,6 +33,7 @@
 #include <cmath>
 #include <cfloat>
 #include <cctype>
+#include <cstdlib>         // std::getenv() function
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -83,6 +84,132 @@ std::string strip_chars(const std::string& arg, const std::string& chars)
 
     } // endif: argument was not empty
 
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Expand environment variables in string
+ *
+ * @param[in] arg String
+ *
+ * Expands any environment variable that is found in a string. Valid
+ * delimiters for environment variables are $ENV{<name>}, $ENV(<name>),
+ * ${<name>}, and $(<name>). Environment variable occuring within single
+ * quotes (') are ignored.
+ *
+ * This function has been inspired by the function ape_util_expand_env_var
+ * from ape_util.c in the ape software developed at HEASARC.
+ ***************************************************************************/
+std::string expand_env(const std::string& arg)
+{
+    // Set environment variable delimiters
+    static const char* begin_delim[] = { "$ENV{", "$ENV(", "${", "$(" };
+    static const char* end_delim[]   = { "}", ")", "}", ")" };
+    static const int   num_delim     = 4;
+
+    // Initialise result with argument
+    std::string result = arg;
+    
+    // Initialise parse parameters
+    size_t index    = 0;
+    bool   in_quote = false;
+    
+    // Loop over string
+    while (index < result.length()) {
+        
+        // If we have an escaped character then skip the current character
+        // and the next one
+        if (result[index] == '\\') {
+            index += 2;
+            continue;
+        }
+        
+        // If we have a single quote then toggle the quote state
+        if (result[index] == '\'') {
+            in_quote = !in_quote;
+            index++;
+            continue;
+        }
+        
+        // Don't expand environment variables inside single quotes. Note
+        // that double quotes are ok.
+        if (in_quote) {
+            index++;
+            continue;
+        }
+        
+        // Find delimiter which indicates beginning of an environment variable
+        size_t begin_length = 0;
+        int    delim_idx    = 0;
+        for (; delim_idx < num_delim; ++delim_idx) {
+            size_t len = std::strlen(begin_delim[delim_idx]);
+            if (result.compare(index, len, begin_delim[delim_idx]) == 0) {
+                begin_length = len;
+                break;
+            }
+        }
+        
+        // If we found a delimiter then process the environment variable
+        if (begin_length > 0) {
+            
+            // Search for the termination delimiter of the environment
+            // variable
+            size_t i_start    = index + begin_length;
+            size_t i_end      = i_start;
+            size_t end_length = std::strlen(end_delim[delim_idx]);
+            while (i_end < result.length() &&
+                   result.compare(i_end, end_length, end_delim[delim_idx]) != 0) {
+                i_end++;
+            }
+            
+            // If termination delimiter has been found then expand the
+            // environment variable
+            if (i_end < result.length()) {
+            
+                // Extract environment variable name
+                std::string name        = result.substr(i_start, i_end-i_start);
+                size_t      name_length = name.length();
+
+                // Erase delimiters and environment variable
+                result.erase(index, begin_length+name_length+end_length);
+                
+                // Get the environment variable from the operating system
+                const char* env = std::getenv(name.c_str());
+                
+                // If the environment variable has been found then replace
+                // it by its value
+                if (env != NULL) {
+                
+                    // Set replacement string and its length
+                    std::string replace(env);
+                    size_t      replace_length = replace.length();
+                    
+                    // Insert replacement string
+                    result.insert(index, replace);
+                    
+                    // Advance pointer
+                    index += replace_length;
+                    
+                } // endif: environment variable has been found
+            
+            } // endif: termination delimiter found
+            
+            // If no environment variable has been found then set index=i_end+1
+            else {
+                index = i_end + 1;
+            }
+            
+        } // endif: we found an environment variable delimiter
+        
+        // ... otherwise advance to next character
+        else {
+            index++;
+        }
+
+    } // endwhile: looped over string
+    
     // Return result
     return result;
 }
