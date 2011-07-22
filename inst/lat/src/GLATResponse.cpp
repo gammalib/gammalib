@@ -198,6 +198,8 @@ GLATResponse* GLATResponse::clone(void) const
  * This default method simply checks if the calibration database directory
  * exists. If the directory exists, the path will be stored. No checking is
  * implemented that checks for the consistency of the calibration database.
+ * Any environment variable present in the calibration database path will
+ * be expanded.
  *
  * @todo Implement a GCalDB class that handles any calibration database
  *       issues. GCalDB may be an abstract class for which instrument
@@ -206,12 +208,15 @@ GLATResponse* GLATResponse::clone(void) const
  ***************************************************************************/
 void GLATResponse::caldb(const std::string& caldb)
 {
+    // Expand environment variables
+    std::string caldb_expanded = expand_env(caldb);
+
     // Check if calibration database directory is accessible
-    if (access(caldb.c_str(), R_OK) != 0)
-        throw GException::caldb_not_found(G_CALDB, caldb);
+    if (access(caldb_expanded.c_str(), R_OK) != 0)
+        throw GException::caldb_not_found(G_CALDB, caldb_expanded);
 
     // Store the path to the calibration database
-    m_caldb = caldb;
+    m_caldb = caldb_expanded;
 
     // Return
     return;
