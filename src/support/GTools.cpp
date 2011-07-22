@@ -96,8 +96,9 @@ std::string strip_chars(const std::string& arg, const std::string& chars)
  *
  * Expands any environment variable that is found in a string. Valid
  * delimiters for environment variables are $ENV{<name>}, $ENV(<name>),
- * ${<name>}, and $(<name>). Environment variable occuring within single
- * quotes (') are ignored.
+ * ${<name>}, $(<name>) and $<name> (in the last case the terminating
+ * delimiter is either a / or a blank character or the end of the string).
+ * Environment variables occuring within single quotes (') are ignored.
  *
  * This function has been inspired by the function ape_util_expand_env_var
  * from ape_util.c in the ape software developed at HEASARC.
@@ -105,9 +106,9 @@ std::string strip_chars(const std::string& arg, const std::string& chars)
 std::string expand_env(const std::string& arg)
 {
     // Set environment variable delimiters
-    static const char* begin_delim[] = { "$ENV{", "$ENV(", "${", "$(" };
-    static const char* end_delim[]   = { "}", ")", "}", ")" };
-    static const int   num_delim     = 4;
+    static const char* begin_delim[] = { "$ENV{", "$ENV(", "${", "$(", "$" };
+    static const char* end_delim[]   = { "}", ")", "}", ")", "/" };
+    static const int   num_delim     = 5;
 
     // Initialise result with argument
     std::string result = arg;
@@ -155,18 +156,32 @@ std::string expand_env(const std::string& arg)
         if (begin_length > 0) {
             
             // Search for the termination delimiter of the environment
-            // variable
+            // variable. There is a special case for delimiter 4:
+            // It has always an end_length of zero as the / is not a real
+            // delimiter, but just an indicator that the environment variable
+            // ends. Another indicator is a blank. If the end of the
+            // string has been reached this is also acceptable.
             size_t i_start    = index + begin_length;
             size_t i_end      = i_start;
-            size_t end_length = std::strlen(end_delim[delim_idx]);
-            while (i_end < result.length() &&
-                   result.compare(i_end, end_length, end_delim[delim_idx]) != 0) {
-                i_end++;
+            size_t end_length = 0;
+            if (delim_idx == 4) {
+                while (i_end < result.length() &&
+                       result.compare(i_end, 1, "/") != 0 &&
+                       result.compare(i_end, 1, " ") != 0) {
+                    i_end++;
+                }
+            }
+            else {
+                end_length = std::strlen(end_delim[delim_idx]);
+                while (i_end < result.length() &&
+                       result.compare(i_end, end_length, end_delim[delim_idx]) != 0) {
+                    i_end++;
+                }
             }
             
             // If termination delimiter has been found then expand the
             // environment variable
-            if (i_end < result.length()) {
+            if (i_end < result.length() || delim_idx == 4) {
             
                 // Extract environment variable name
                 std::string name        = result.substr(i_start, i_end-i_start);
