@@ -479,7 +479,7 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
  * This default method simply checks if the calibration database directory
  * exists. If the directory exists, the path will be stored. No checking is
  * implemented that checks for the consistency of the calibration database.
- * Any environment variables present in the calibration database path will
+ * Any environment variable present in the calibration database path will
  * be expanded.
  *
  * @todo Implement a GCalDB class that handles any calibration database
