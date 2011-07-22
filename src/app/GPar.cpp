@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -428,7 +436,8 @@ std::string GPar::string(void)
  *
  * This method queries and returns a filename parameter. The method only
  * applies to filename parameters. Other parameter types will produce an
- * exception.
+ * exception. Any environment variables that are encountered within the
+ * filename are expanded automatically.
  ***************************************************************************/
 std::string GPar::filename(void)
 {
@@ -440,9 +449,9 @@ std::string GPar::filename(void)
 
     // Query parameter
     query();
-
+    
     // Return value
-    return m_value;
+    return (expand_env(m_value));
 }
 
 
