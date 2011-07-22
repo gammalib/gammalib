@@ -45,7 +45,8 @@ INCLUDES = -I$(top_srcdir)/include \
            $(INCL_LAT)
 
 # Test programs (those will be compiled)
-check_PROGRAMS = test_GVector \
+check_PROGRAMS = test_GSupport \
+                 test_GVector \
                  test_GMatrix \
                  test_GSymMatrix \
                  test_GSparseMatrix \
@@ -62,7 +63,8 @@ TESTS_ENVIRONMENT = LD_LIBRARY_PATH=$(top_builddir)/src/.libs:$(LIBDIR_CFITSIO):
                     $(TEST_PYTHON_ENV)
 
 # Tests (these are the tests to be executed)
-TESTS = test_GVector \
+TESTS = test_GSupport \
+        test_GVector \
         test_GMatrix \
         test_GSymMatrix \
         test_GSparseMatrix \
@@ -76,6 +78,11 @@ TESTS = test_GVector \
         $(TEST_PYTHON_SCRIPT)
 
 # Standard test sources and links
+test_GSupport_SOURCES = test_GSupport.cpp
+test_GSupport_LDFLAGS = @LDFLAGS@
+test_GSupport_CPPFLAGS = @CPPFLAGS@
+test_GSupport_LDADD = $(top_srcdir)/src/libgamma.la
+#
 test_GVector_SOURCES = test_GVector.cpp
 test_GVector_LDFLAGS = @LDFLAGS@
 test_GVector_CPPFLAGS = @CPPFLAGS@
