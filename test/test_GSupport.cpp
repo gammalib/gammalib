@@ -124,6 +124,45 @@ void test_expand_env(void)
         }
         std::cout << ".";
 
+        // $HOME environment variable within string
+        s_in  = "My $HOME is my castle.";
+        s_ref = "My "+home+" is my castle.";
+        s_out = expand_env(s_in);
+        if (s_out != s_ref) {
+            std::cout << std::endl 
+                      << "TEST ERROR: Unexpected string "
+                      << "'"+s_out+"' "
+                      << "(expected '"+s_ref+"')" << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // $HOME/path environment variable within string
+        s_in  = "My $HOME/path is my castle.";
+        s_ref = "My "+home+"/path is my castle.";
+        s_out = expand_env(s_in);
+        if (s_out != s_ref) {
+            std::cout << std::endl 
+                      << "TEST ERROR: Unexpected string "
+                      << "'"+s_out+"' "
+                      << "(expected '"+s_ref+"')" << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
+        // $HOME environment variable at end of string
+        s_in  = "My $HOME";
+        s_ref = "My "+home;
+        s_out = expand_env(s_in);
+        if (s_out != s_ref) {
+            std::cout << std::endl 
+                      << "TEST ERROR: Unexpected string "
+                      << "'"+s_out+"' "
+                      << "(expected '"+s_ref+"')" << std::endl;
+            throw;
+        }
+        std::cout << ".";
+
         // Environment variable within single quotes
         s_in  = "My '$(HOME)' is my castle.";
         s_ref = s_in;
