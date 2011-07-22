@@ -5,6 +5,7 @@
 
         Add set response() to observation classes
         Expose GCTAResponse::offset_sigma() in python
+        Implement environment variable expansion
 
 2011-07-20  Juergen Knoedlseder  <knodlseder@cesr.fr>
 

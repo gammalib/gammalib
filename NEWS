@@ -16,12 +16,14 @@ None
 
 3. Application module
 ---------------------
-None
+GPar::filename() expands any environment variables that are present in
+the filename.
 
 
 4. FITS I/O Interface
 ---------------------
-None
+Any environment variables in the filename in GFits::open and
+GFits::saveto are expanded.
 
 
 5. Linear algebra module
@@ -63,12 +65,15 @@ None
 
 11. Support module
 ------------------
-None
+Add expand_env() function to expand environment variables within
+a string.
+
+Any environment variables in the filename in GCsv::load are expanded.
 
 
 12. XML module
 --------------
-None
+Any environment variables in the filename in GXml::load are expanded.
 
 
 13. Multi-wavelength interface
@@ -82,8 +87,14 @@ response by cloning the response specified in the argument.
 Add set response() method to GLATLObservation. This allows setting a
 response by cloning the response specified in the argument.
 
+In setting the caldb directory path for GLATResponse, any environment
+variables in the path are expanded.
+
 
 15. CTA interface
 -----------------
 Add set response() method to GCTAObservation. This allows setting a
 response by cloning the response specified in the argument.
+
+In setting the caldb directory path for GCTAResponse, any environment
+variables in the path are expanded.
