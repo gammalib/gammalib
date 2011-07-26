@@ -387,7 +387,7 @@ void GPar::real(const double& value)
 
 
 /***********************************************************************//**
- * @brief Returns any parameter value as string
+ * @brief Returns parameter value as string
  *
  * This method queries any parameter and returns it as a string. No parameter
  * type checking is performed.
