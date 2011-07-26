@@ -4,10 +4,18 @@
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -31,7 +39,8 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DEBUG_OPT 0          //!< Perform optimizer debugging (0=no, 1=yes)
+//#define G_DEBUG_OPT            //!< Define to debug optimize() method
+//#define G_DEBUG_ITER           //!< Define to debug iteration() method
 
 
 /*==========================================================================
@@ -400,7 +409,7 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
             *m_logger << "func=" << m_value << ", ";
             *m_logger << "Lambda=" << m_lambda << std::endl;
         }
-        #if G_DEBUG_OPT
+        #if defined(G_DEBUG_OPT)
         std::cout << "Initial iteration: func=" << m_value << ", Lambda="
                   << m_lambda << std::endl;
         #endif
@@ -427,7 +436,7 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
                     *m_logger << " (stalled)";
                 *m_logger << std::endl;
             }
-            #if G_DEBUG_OPT
+            #if defined(G_DEBUG_OPT)
             std::cout << "Iteration " << m_iter << ": func=" 
                       << m_value << ", Lambda=" << m_lambda
                       << ", delta=" << delta << std::endl;
@@ -557,6 +566,22 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
             (*covar)(ipar,ipar) *= (1.0 + m_lambda);
             (*grad)[ipar]        = -(*grad)[ipar];
         }
+        
+        // Debug option: dump gradient and covariance matrix
+        #if defined(G_DEBUG_ITER)
+        std::cout << "Grad.: ";
+        for (int ipar = 0; ipar < m_npars; ++ipar) {
+            std::cout << (*grad)[ipar] << " ";
+        }
+        std::cout << std::endl;
+        std::cout << "Covar: ";
+        for (int ipar = 0; ipar < m_npars; ++ipar) {
+            for (int jpar = 0; jpar < m_npars; ++jpar) {
+                std::cout << (*covar)(ipar,jpar) << " ";
+            }
+        }
+        std::cout << std::endl;
+        #endif
 
         // Solve: covar * X = grad. Handle matrix problems
         try {
@@ -601,6 +626,13 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
 
                 // Compute new parameter value
                 p += (*grad)[ipar] * step;
+
+                // Debug option: dump new parameter value
+                #if defined(G_DEBUG_ITER)
+                std::cout << "Trial ";
+                std::cout << pars->par(ipar).name() << " = ";
+                std::cout << p << std::endl;
+                #endif
 
                 // Constrain parameter to within the valid range
                 if (pars->par(ipar).hasmin() && p < p_min) {
@@ -668,6 +700,12 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
 
         // Retrieve new function value
         m_value = *(fct->value());
+
+        // Debug option: dump new function value
+        #if defined(G_DEBUG_ITER)
+        std::cout << "Function value " << m_value;
+        std::cout << " (was " << save_value << ")" << std::endl;
+        #endif
 
         // Determine how many parameters have changed
         int par_change = 0;
