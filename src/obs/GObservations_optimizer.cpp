@@ -4,10 +4,18 @@
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -207,8 +215,11 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                 // Poisson statistics
                 if (toupper(statistics) == "POISSON") {
 
-                    // Update the Npred value
-                    m_npred     += m_this->m_obs[i]->npred((GModels&)pars, m_wrk_grad);
+                    // Determine Npred value and gradient for this observation
+                    double npred = m_this->m_obs[i]->npred((GModels&)pars, m_wrk_grad);
+
+                    // Update the Npred value and gradient
+                    m_npred     += npred;
                     *m_gradient += *m_wrk_grad;
                     #if G_EVAL_DEBUG
                     std::cout << "Unbinned Poisson";
@@ -220,7 +231,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                     poisson_unbinned(*(m_this->m_obs[i]), pars);
 
                     // Add the Npred value to the log-likelihood
-                    m_value += m_npred;
+                    m_value += npred;
 
                 } // endif: Poisson statistics
 
@@ -267,7 +278,12 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
     // Optionally dump gradient and covariance matrix
     #if G_EVAL_DEBUG
     std::cout << *m_gradient << std::endl;
-    std::cout << *m_covar << std::endl;
+    for (int i = 0; i < pars.npars(); ++i) {
+        for (int j = 0; j < pars.npars(); ++j) {
+            std::cout << (*m_covar)(i,j) << " ";
+        }
+        std::cout << std::endl;
+    }
     #endif
 
     // Timing measurement
@@ -325,8 +341,9 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
         double model = obs.model((GModels&)pars, *event, m_wrk_grad);
 
         // Skip bin if model is too small (avoids -Inf or NaN gradients)
-        if (model <= m_minmod)
+        if (model <= m_minmod) {
             continue;
+        }
 
         // Create index array of non-zero derivatives
         int ndev = 0;
