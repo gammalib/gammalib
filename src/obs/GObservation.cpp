@@ -58,7 +58,8 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_LN_ENERGY_INT      //!< ln(E) variable substitution for integration
+#define G_LN_ENERGY_INT   //!< ln(E) variable substitution for integration
+//#define G_GRAD_RIDDLER  //!< Use Riddler's method for computing derivatives
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -479,8 +480,12 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
             // checked on spatial parameters of models
             GDerivative derivative(&function);
             double x  = model[ipar].value();
+            #if defined(G_GRAD_RIDDLER)
+            grad = derivative.value(x);
+            #else
             double dx = 0.05;
             grad = derivative.difference(x, dx);
+            #endif
 
             // Restore current model parameter
             (*ptr)[ipar] = current;
@@ -583,9 +588,12 @@ double GObservation::npred_grad(const GModel& model, int ipar) const
         // checked on several models
         GDerivative derivative(&function);
         double x  = model[ipar].value();
+        #if defined(G_GRAD_RIDDLER)
+        grad = derivative.value(x);
+        #else
         double dx = 0.05;
         grad = derivative.difference(x, dx);
-        //grad = derivative.value(x);
+        #endif
 
         // Restore current model parameter
         (*ptr)[ipar] = current;
