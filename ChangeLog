@@ -1,4 +1,4 @@
-2011-07-21  Juergen Knoedlseder  <knodlseder@cesr.fr>
+2011-07-26  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.4.11 released
         =========================
@@ -6,6 +6,7 @@
         Add set response() to observation classes
         Expose GCTAResponse::offset_sigma() in python
         Implement environment variable expansion
+        Correctly fit unbinned for multiple observations
 
 2011-07-20  Juergen Knoedlseder  <knodlseder@cesr.fr>
 

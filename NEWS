@@ -2,12 +2,13 @@ New Features and Important Changes in GammaLib 00-04-11
 
 Author(s) : Juergen Knoedlseder
 
-July 21, 2011
+July 26, 2011
 
 
 1. Introduction
 ---------------
-This document briefly summarizes module by module the most important changes made since the last release of GammaLib.
+This document briefly summarizes module by module the most important
+changes made since the last release of GammaLib.
 
 
 2. Configuration
@@ -45,6 +46,10 @@ None
 ---------------------
 Add set response() method to GObservation. This allows setting a
 response by cloning the response specified in the argument.
+
+Correct a major bug in GObservation_optimizer::eval() where Npred
+was incorrectly added to the log-likelihood value for multiple
+observations.
 
 
 9. Optimization module
