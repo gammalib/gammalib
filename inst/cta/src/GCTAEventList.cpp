@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -374,16 +382,21 @@ std::string GCTAEventList::print(void) const
     // Append header
     result.append("=== GCTAEventList ===");
     result.append("\n"+parformat("Number of events")+str(size()));
+    
+    // Append GTI intervals
     result.append("\n"+parformat("Time interval"));
     if (gti().size() > 0)
         result.append(str(tstart().met())+" - "+str(tstop().met())+" sec");
     else
         result.append("not defined");
-    result.append("\n"+parformat("Energy range"));
+        
+    // Append energy intervals
     if (ebounds().size() > 0)
-        result.append(emin().print()+" - "+emax().print());
+        result.append("\n"+ebounds().print());
     else
-        result.append("not defined");
+        result.append("\n"+parformat("Energy intervals")+"not defined");
+    
+    // Append ROI
     if (roi().radius() > 0)
         result.append("\n"+roi().print());
     else
