@@ -79,6 +79,11 @@ public:
     bool        logDebug(void) const;
     bool        clobber(void) const;
     bool        haspar(const std::string& name) const;
+    std::string par_filename(void) const;
+    std::string log_filename(void) const;
+    void        log_header(void);
+    void        log_trailer(void);
+    void        log_parameters(void);
     std::string print(void) const;
 
     // Public members
@@ -89,11 +94,6 @@ protected:
     void        init_members(void);
     void        copy_members(const GApplication& app);
     void        free_members(void);
-    std::string par_filename(void) const;
-    std::string log_filename(void) const;
-    void        log_header(void);
-    void        log_trailer(void);
-    void        log_parameters(void);
 
     // Protected data members
     std::string              m_name;       //!< Application name
