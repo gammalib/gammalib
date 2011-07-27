@@ -568,10 +568,11 @@ std::string GEbounds::print(void) const
 
     // Append Header
     result.append("=== GEbounds ===\n");
-    result.append(parformat("Number of intervals")+str(size())+"\n");
+    result.append(parformat("Number of intervals")+str(size()));
     
     // Single energy bin
     if (size() == 1) {
+        result.append("\n");
         result.append(parformat("Energy range"));
         result.append(emin().print());
         result.append(" - ");

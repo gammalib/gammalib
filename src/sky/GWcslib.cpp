@@ -1354,7 +1354,7 @@ std::string GWcslib::wcs_print(void) const
     
     // Append spectral transformation parameters
     result.append(parformat("Rest frequency")+wcs_print_value(m_restfrq)+"\n");
-    result.append(parformat("Rest wavelength")+wcs_print_value(m_restwav)+"\n");
+    result.append(parformat("Rest wavelength")+wcs_print_value(m_restwav));
 
     // Return
     return result;
