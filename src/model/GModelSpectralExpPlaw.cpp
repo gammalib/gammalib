@@ -42,6 +42,7 @@ const GModelSpectralRegistry g_spectral_expplaw_registry(&g_spectral_expplaw_see
 
 /* __ Method name definitions ____________________________________________ */
 #define G_FLUX              "GModelSpectralExpPlaw::flux(GEnergy&, GEnergy&)"
+#define G_EFLUX            "GModelSpectralExpPlaw::eflux(GEnergy&, GEnergy&)"
 #define G_MC           "GModelSpectralExpPlaw::mc(GEnergy&, GEnergy&, GRan&)"
 #define G_READ                    "GModelSpectralExpPlaw::read(GXmlElement&)"
 #define G_WRITE                  "GModelSpectralExpPlaw::write(GXmlElement&)"
@@ -348,7 +349,7 @@ double GModelSpectralExpPlaw::eval_gradients(const GEnergy& srcEng) const
 
 
 /***********************************************************************//**
- * @brief Returns model flux between [emin, emax] (units: ph/cm2/s)
+ * @brief Returns model photon flux between [emin, emax] (units: ph/cm2/s)
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
@@ -369,6 +370,34 @@ double GModelSpectralExpPlaw::flux(const GEnergy& emin, const GEnergy& emax) con
 {
     // Dump warning that method is not yet implemented
     throw GException::feature_not_implemented(G_FLUX);
+
+    // Return
+    return 0.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns model energy flux between [emin, emax] (units: erg/cm2/s)
+ *
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method not yet implemented.
+ *
+ * Computes
+ * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
+ * where
+ * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
+ * energy, respectively, and
+ * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ *
+ * @todo Implement method.
+ ***************************************************************************/
+double GModelSpectralExpPlaw::eflux(const GEnergy& emin, const GEnergy& emax) const
+{
+    // Dump warning that method is not yet implemented
+    throw GException::feature_not_implemented(G_EFLUX);
 
     // Return
     return 0.0;
