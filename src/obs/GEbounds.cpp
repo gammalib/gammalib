@@ -4,10 +4,18 @@
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -23,6 +31,7 @@
 #include <cmath>
 #include <iostream>
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GEbounds.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
@@ -536,7 +545,7 @@ bool GEbounds::isin(const GEnergy& eng) const
     // Initialise test
     bool found = false;
 
-    // Test all GTIs
+    // Test all energy boundaries
     for (int i = 0; i < m_num; ++i) {
         if (eng >= m_min[i] && eng <= m_max[i]) {
             found = true;
@@ -546,6 +555,36 @@ bool GEbounds::isin(const GEnergy& eng) const
 
     // Return result
     return found;
+}
+
+
+/***********************************************************************//**
+ * @brief Print energy boundaries
+ ***************************************************************************/
+std::string GEbounds::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append Header
+    result.append("=== GEbounds ===\n");
+    result.append(parformat("Number of boundaries")+str(size())+"\n");
+    result.append(parformat("Energy range"));
+    result.append(emin().print());
+    result.append(" - ");
+    result.append(emax().print());
+    
+    // Append energy bins
+    for (int i = 0; i < size(); ++i) {
+        result.append("\n");
+        result.append(parformat("Energy bin "+str(i)));
+        result.append(emin(i).print());
+        result.append(" - ");
+        result.append(emax(i).print());
+    }
+
+    // Return
+    return result;
 }
 
 
@@ -763,21 +802,32 @@ void GEbounds::merge_engs(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Put energy boundaries in output stream
+ * @brief Output operator
  *
- * @param[in] os Output stream into which the GEbounds will be dumped
- * @param[in] ebds GEbounds to be dumped
+ * @param[in] os Output stream.
+ * @param[in] ebds Energy boundaries.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GEbounds& ebds)
 {
-    // Put GEbounds in stream
-    os.precision(3);
-    os << "=== GEbounds ===" << std::endl;
-    os << " Number of boundaries ......: " << ebds.m_num << std::endl;
-    os << " Energy range ..............: " << std::fixed
-       << ebds.emin().MeV() << " - "
-       << ebds.emax().MeV() << " MeV";
+     // Write energy boundaries in output stream
+    os << ebds.print();
 
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] ebds Energy boundaries.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GEbounds& ebds)
+{
+    // Write energy boundaries into logger
+    log << ebds.print();
+
+    // Return logger
+    return log;
 }
