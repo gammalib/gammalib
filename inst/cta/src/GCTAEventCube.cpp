@@ -462,6 +462,9 @@ std::string GCTAEventCube::print(void) const
     result.append("\n"+parformat("Number of pixels")+str(npix()));
     result.append("\n"+parformat("Number of energy bins")+str(ebins()));
 
+    // Append skymap definition
+    result.append("\n"+m_map.print());
+    
     // Append GTI intervals
     result.append("\n"+parformat("Time interval"));
     if (gti().size() > 0)
