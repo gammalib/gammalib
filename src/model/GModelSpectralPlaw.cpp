@@ -326,7 +326,7 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng) const
 
 
 /***********************************************************************//**
- * @brief Returns model flux between [emin, emax] (units: ph/cm2/s)
+ * @brief Returns model photon flux between [emin, emax] (units: ph/cm2/s)
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
@@ -337,6 +337,7 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng) const
  * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
  * energy, respectively, and
  * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ * The integration is done analytically.
  ***************************************************************************/
 double GModelSpectralPlaw::flux(const GEnergy& emin, const GEnergy& emax) const
 {
@@ -349,6 +350,40 @@ double GModelSpectralPlaw::flux(const GEnergy& emin, const GEnergy& emax) const
     }
     else
         flux *= (std::log(emax.MeV()) - std::log(emin.MeV()));
+
+    // Return flux
+    return flux;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns model energy flux between [emin, emax] (units: erg/cm2/s)
+ *
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ *
+ * Computes
+ * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
+ * where
+ * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
+ * energy, respectively, and
+ * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ * The integration is done analytically.
+ ***************************************************************************/
+double GModelSpectralPlaw::eflux(const GEnergy& emin, const GEnergy& emax) const
+{
+    // Compute flux
+    double flux = norm() * pow(pivot(), -index());
+    if (index() != -2.0) {
+        double exponent = index() + 2.0;
+        flux *= (std::pow(emax.MeV(), exponent)-std::pow(emin.MeV(), exponent)) /
+                exponent;
+    }
+    else
+        flux *= (std::log(emax.MeV()) - std::log(emin.MeV()));
+
+    // Convert from MeV/cm2/s to erg/cm2/s
+    flux *= MeV2erg;
 
     // Return flux
     return flux;

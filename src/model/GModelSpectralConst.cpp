@@ -246,7 +246,7 @@ double GModelSpectralConst::eval_gradients(const GEnergy& srcEng) const
 
 
 /***********************************************************************//**
- * @brief Returns model flux between [emin, emax] (units: ph/cm2/s)
+ * @brief Returns model photon flux between [emin, emax] (units: ph/cm2/s)
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
@@ -257,11 +257,39 @@ double GModelSpectralConst::eval_gradients(const GEnergy& srcEng) const
  * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
  * energy, respectively, and
  * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ * The integration is done analytically.
  ***************************************************************************/
 double GModelSpectralConst::flux(const GEnergy& emin, const GEnergy& emax) const
 {
     // Compute flux for a constant model
     double flux = norm() * (emax.MeV() - emin.MeV());
+
+    // Return
+    return flux;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns model energy flux between [emin, emax] (units: erg/cm2/s)
+ *
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ *
+ * Computes
+ * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
+ * where
+ * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
+ * energy, respectively, and
+ * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ * The integration is done analytically.
+ ***************************************************************************/
+double GModelSpectralConst::eflux(const GEnergy& emin, const GEnergy& emax) const
+{
+    // Compute flux for a constant model
+    double flux = norm() * 0.5 * (emax.MeV()*emax.MeV() - emin.MeV()*emin.MeV());
+
+    // Convert from MeV/cm2/s to erg/cm2/s
+    flux *= MeV2erg;
 
     // Return
     return flux;
