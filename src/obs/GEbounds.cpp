@@ -568,19 +568,25 @@ std::string GEbounds::print(void) const
 
     // Append Header
     result.append("=== GEbounds ===\n");
-    result.append(parformat("Number of boundaries")+str(size())+"\n");
-    result.append(parformat("Energy range"));
-    result.append(emin().print());
-    result.append(" - ");
-    result.append(emax().print());
+    result.append(parformat("Number of intervals")+str(size())+"\n");
     
-    // Append energy bins
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n");
-        result.append(parformat("Energy bin "+str(i)));
-        result.append(emin(i).print());
+    // Single energy bin
+    if (size() == 1) {
+        result.append(parformat("Energy range"));
+        result.append(emin().print());
         result.append(" - ");
-        result.append(emax(i).print());
+        result.append(emax().print());
+    }
+    
+    // Multiple energy bins
+    else if (size() > 1) {
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n");
+            result.append(parformat("Energy interval "+str(i)));
+            result.append(emin(i).print());
+            result.append(" - ");
+            result.append(emax(i).print());
+        }
     }
 
     // Return
