@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -31,6 +39,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS1                                   "GPars::operator[](int&)"
 #define G_ACCESS2                           "GPars::operator[](std::string&)"
+#define G_APPEND                                       "GPars::append(GPar&)"
 #define G_LOAD1                              "GPars::load(const std::string)"
 #define G_LOAD2    "GPars::load(const std::string, std::vector<std::string>)"
 #define G_SAVE                               "GPars::save(const std::string)"
@@ -276,6 +285,84 @@ void GPars::clear(void)
 
     // Init members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+ ***************************************************************************/
+GPars* GPars::clone(void) const
+{
+    return (new GPars(*this));
+}
+
+
+/***********************************************************************//**
+ * @brief Append parameter to container
+ *
+ * @param[in] par Parameter.
+ *
+ * @exception GException::par_error
+ *            Tried to append an already existing parameter.
+ *
+ * This method appends one parameter to the parameter container. The
+ * parameter provided to the method can be deleted after calling this method.
+ ***************************************************************************/
+void GPars::append(const GPar& par)
+{
+    // Check if parameter is already in container
+    if (haspar(par.name()))
+        throw GException::par_error(G_APPEND, par.name(), "exists already.");
+    
+    // Append parameter
+    m_pars.push_back(par);
+    
+    // Get pointer on appended parameter. We work later on the appended
+    // parameter as the argument is const (and the value() method eventually
+    // will alter the parameter)
+    GPar* ptr = &(m_pars[m_pars.size()-1]);
+    
+    // Build parameter file line
+    std::string line;
+    size_t      start = 0;
+    size_t      stop  = 0;
+    line.append(ptr->name()+", ");
+    line.append(ptr->type()+ ", ");
+    line.append(ptr->mode()+ ",");
+    start = line.length();
+    line.append(ptr->value()+ ",");
+    stop = line.length();
+    line.append(ptr->min()+ ",");
+    line.append(ptr->max()+ ",");
+    line.append("\""+ptr->prompt()+"\"\n");
+    
+    // Append parameter file line and attributes
+    m_line.push_back(m_parfile.size());
+    m_parfile.push_back(line);
+    m_vstart.push_back(start);
+    m_vstop.push_back(stop);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append standard parameters to container
+ *
+ * This method appends the standard parameters to the parameter container.
+ * Standard parameters are: "chatter", "clobber", "debug" and "mode".
+ ***************************************************************************/
+void GPars::append_standard(void)
+{
+    // Append standard parameters
+    append(GPar("chatter","i","h","2","0","4","Chattiness of output"));
+	append(GPar("clobber","b","h","yes","","","Overwrite existing output files with new output files?"));
+	append(GPar("debug","b","h","no","","","Debugging mode activated"));
+	append(GPar("mode","s","h","ql","","","Mode of automatic parameters"));
 
     // Return
     return;
