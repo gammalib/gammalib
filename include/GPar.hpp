@@ -62,6 +62,7 @@ public:
     GPar& operator= (const GPar& par);
 
     // Methods
+    GPar*       clone(void) const;
     void        type(const std::string& type);
     void        mode(const std::string& mode);
     void        value(const std::string& value);
