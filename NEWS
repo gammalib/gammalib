@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-04-11
 
 Author(s) : Juergen Knoedlseder
 
-July 26, 2011
+July 28, 2011
 
 
 1. Introduction
@@ -20,6 +20,14 @@ None
 GPar::filename() expands any environment variables that are present in
 the filename.
 
+Add GPars::append() and GPars::append_standard() to allow construction
+of parfiles from within the code. This is particularly useful for
+development cscripts that want to carry a default parfile on the fly.
+
+Add output methods to Python interface of GLog class. These wrap the
+operator<< methods existing in the C++ interface for the class and
+provide logging support within Python. 
+
 
 4. FITS I/O Interface
 ---------------------
@@ -34,7 +42,8 @@ None
 
 6. Model module
 ---------------
-None
+Add eflux() method for spectral models. This allows the computation
+of an energy flux (erg/cm2/s) for a given energy interval.
 
 
 7. Numerics module

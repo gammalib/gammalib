@@ -1,4 +1,4 @@
-2011-07-26  Juergen Knoedlseder  <knodlseder@cesr.fr>
+2011-07-28  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.4.11 released
         =========================
@@ -7,6 +7,9 @@
         Expose GCTAResponse::offset_sigma() in python
         Implement environment variable expansion
         Correctly fit unbinned for multiple observations
+        Add eflux() methods to spectral models
+        Add GLog output methods to Python interface
+        Add append() and append_standard() methods to GPars
 
 2011-07-20  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
