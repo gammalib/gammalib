@@ -1,13 +1,21 @@
 /***************************************************************************
  *                        GLog.i - Information logger                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -18,6 +26,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GLog.hpp"
+#include "GTools.hpp"
 %}
 
 
@@ -33,19 +42,6 @@ public:
     GLog(const std::string& filename, bool clobber = false);
     GLog(const GLog& log);
     ~GLog(void);
-
-    // Operators
-    void  operator()(const char *msgFormat, ...);
-    GLog& operator<<(const GLog& log);
-    GLog& operator<<(const std::string& str);
-    GLog& operator<<(const char* str);
-    GLog& operator<<(const char& value);
-    GLog& operator<<(const unsigned char& value);
-    GLog& operator<<(const bool& value);
-    GLog& operator<<(const int& value);
-    GLog& operator<<(const unsigned int& value);
-    GLog& operator<<(const double& value);
-    GLog& operator<<(std::ostream& (*fn)(std::ostream&));
 
     // Methods
     void        clear(void);
@@ -77,5 +73,41 @@ public:
 %extend GLog {
     GLog copy() {
         return (*self);
+    }
+    void __call__(const GLog& log) {
+        (*self) << log;
+    }
+    void __call__(const std::string& arg) {
+        (*self) << arg;
+    }
+    void __call__(const bool& value) {
+        (*self) << value;
+    }
+    void __call__(const int& value) {
+        (*self) << value;
+    }
+    void __call__(const double& value) {
+        (*self) << value;
+    }
+    void parformat(const std::string& arg) {
+        (*self) << parformat(arg);
+    }
+    void toupper(const std::string& arg) {
+        (*self) << toupper(arg);
+    }
+    void tolower(const std::string& arg) {
+        (*self) << tolower(arg);
+    }
+    void fill(const std::string& arg, int n) {
+        (*self) << fill(arg, n);
+    }
+    void left(const std::string& arg, int n) {
+        (*self) << left(arg, n);
+    }
+    void right(const std::string& arg, int n) {
+        (*self) << right(arg, n);
+    }
+    void center(const std::string& arg, int n) {
+        (*self) << center(arg, n);
     }
 }
