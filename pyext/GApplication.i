@@ -29,6 +29,10 @@
 #include "GTools.hpp"
 %}
 
+// Include (int ARGC, char **ARGV) typemap to allow passing command line
+// arguments to GApplication constructor
+%include "argcargv.i"
+
 
 /***********************************************************************//**
  * @class GApplication
@@ -41,7 +45,7 @@ public:
     GApplication(void);
     GApplication(const std::string& name, const std::string& version);
     GApplication(const std::string& name, const std::string& version,
-                 int argc, char* argv[]);
+                 int ARGC, char **ARGV);
     GApplication(const GApplication& app);
     ~GApplication(void);
 
