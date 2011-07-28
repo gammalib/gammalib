@@ -67,6 +67,9 @@ public:
     void        log_header(void);
     void        log_trailer(void);
     void        log_parameters(void);
+
+    // Public members
+    GLog        log;
 };
 
 
