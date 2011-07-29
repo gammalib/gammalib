@@ -83,12 +83,32 @@ protected:
     void copy_members(const GModelSpectralFunc& model);
     void free_members(void);
     void load_nodes(const std::string& filename);
+    void set_cache(void) const;
+    void mc_update(const GEnergy& emin, const GEnergy& emax) const;
 
     // Protected members
-    GModelPar           m_norm;      //!< Normalization factor
-    GNodeArray          m_nodes;     //!< Nodes of function
-    std::vector<double> m_values;    //!< Function values at nodes
-    std::string         m_filename;  //!< Name of file function
+    GModelPar           m_norm;       //!< Normalization factor
+    mutable GNodeArray  m_lin_nodes;  //!< Energy nodes of function
+    mutable GNodeArray  m_log_nodes;  //!< lof10(Energy) nodes of function
+    std::vector<double> m_lin_values; //!< Function values at nodes
+    std::vector<double> m_log_values; //!< log10(Function) values at nodes
+    std::string         m_filename;   //!< Name of file function
+
+    // Cached members used for pre-computations
+    mutable std::vector<double> m_prefactor; //!< Power-law normalisations
+    mutable std::vector<double> m_gamma;     //!< Power-law indices
+    mutable std::vector<double> m_epivot;    //!< Power-law pivot energies
+    mutable std::vector<double> m_flux;      //!< Photon fluxes
+    mutable std::vector<double> m_eflux;     //!< Energy fluxes
+    
+    // Cached members for MC
+    mutable GEnergy             m_mc_emin;   //!< Minimum energy
+    mutable GEnergy             m_mc_emax;   //!< Maximum energy
+    mutable std::vector<int>    m_mc_inx;    //!< Node indices
+    mutable std::vector<double> m_mc_cum;    //!< Cumulative distribution
+    mutable std::vector<double> m_mc_min;    //!< Lower boundary for MC
+    mutable std::vector<double> m_mc_max;    //!< Upper boundary for MC
+    mutable std::vector<double> m_mc_exp;    //!< Exponent for MC
 };
 
 #endif /* GMODELSPECTRALFUNC_HPP */
