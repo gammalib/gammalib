@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-04-11
 
 Author(s) : Juergen Knoedlseder
 
-July 28, 2011
+July 29, 2011
 
 
 1. Introduction
@@ -26,7 +26,11 @@ development cscripts that want to carry a default parfile on the fly.
 
 Add output methods to Python interface of GLog class. These wrap the
 operator<< methods existing in the C++ interface for the class and
-provide logging support within Python. 
+provide logging support within Python.
+
+Parameter file read and write operations are now protected by a file
+lock. This prevents file access conflicts for multiple processes
+trying to read and write simultaneously to the same file.
 
 
 4. FITS I/O Interface

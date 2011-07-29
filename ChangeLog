@@ -1,4 +1,4 @@
-2011-07-28  Juergen Knoedlseder  <knodlseder@cesr.fr>
+2011-07-29  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.4.11 released
         =========================
@@ -10,6 +10,7 @@
         Add eflux() methods to spectral models
         Add GLog output methods to Python interface
         Add append() and append_standard() methods to GPars
+        Protect parfile read/write by a file lock
 
 2011-07-20  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
