@@ -739,6 +739,78 @@ double arccos(const double& arg)
 
 
 /***********************************************************************//**
+ * @brief Compute photon flux between two energies for a power law
+ *
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
+ * @param[in] epivot Pivot energy.
+ * @param[in] gamma Spectral index.
+ *
+ * Analytically computes
+ * \f[\int_{E_{\rm min}}^{E_{\rm max}} 
+ *                             \left( E/E_{\rm pivot} \right)^{\gamma} dE\f]
+ * where
+ * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
+ * energy, respectively, and
+ * \f$E_{\rm pivot}\f$ is the pivot energy, and
+ * \f$\gamma\f$ is the spectral index.
+ ***************************************************************************/
+double plaw_photon_flux(const double& emin, const double& emax,
+                        const double& epivot, const double& gamma)
+{
+    // Compute photon flux
+    double flux = std::pow(epivot, -gamma);
+    if (gamma != -1.0) {
+        double exponent = gamma + 1.0;
+        flux *= (std::pow(emax, exponent) -
+                 std::pow(emin, exponent)) / exponent;
+    }
+    else {
+        flux *= (std::log(emax) - std::log(emin));
+    }
+
+    // Return result
+    return flux;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute energy flux between two energies for a power law
+ *
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
+ * @param[in] epivot Pivot energy.
+ * @param[in] gamma Spectral index.
+ *
+ * Analytically computes
+ * \f[\int_{E_{\rm min}}^{E_{\rm max}} 
+ *                           \left( E/E_{\rm pivot} \right)^{\gamma} E dE\f]
+ * where
+ * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
+ * energy, respectively, and
+ * \f$E_{\rm pivot}\f$ is the pivot energy, and
+ * \f$\gamma\f$ is the spectral index.
+ ***************************************************************************/
+double plaw_energy_flux(const double& emin, const double& emax,
+                        const double& epivot, const double& gamma)
+{
+    // Compute energy flux
+    double flux = std::pow(epivot, -gamma);
+    if (gamma != -2.0) {
+        double exponent = gamma + 2.0;
+        flux *= (std::pow(emax, exponent) -
+                 std::pow(emin, exponent)) / exponent;
+    }
+    else {
+        flux *= (std::log(emax) - std::log(emin));
+    }
+
+    // Return result
+    return flux;
+}
+
+
+/***********************************************************************//**
  * @brief Checks if a file exists.
  *
  * @param[in] filename File name.

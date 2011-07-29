@@ -93,6 +93,14 @@ std::string              center(const std::string& s, int n, char c = ' ');
 std::string              parformat(const std::string& s);
 double                   modulo(double v1, double v2);
 double                   arccos(const double& arg);
+double                   plaw_photon_flux(const double& emin,
+                                          const double& emax,
+                                          const double& epivot,
+                                          const double& gamma);
+double                   plaw_energy_flux(const double& emin,
+                                          const double& emax,
+                                          const double& epivot,
+                                          const double& gamma);
 bool                     file_exists(const std::string& filename);
 bool                     isinfinite(double x);
 bool                     isnotanumber(double x);
