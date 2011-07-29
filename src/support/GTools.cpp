@@ -758,16 +758,24 @@ double arccos(const double& arg)
 double plaw_photon_flux(const double& emin, const double& emax,
                         const double& epivot, const double& gamma)
 {
-    // Compute photon flux
-    double flux = std::pow(epivot, -gamma);
-    if (gamma != -1.0) {
-        double exponent = gamma + 1.0;
-        flux *= (std::pow(emax, exponent) -
-                 std::pow(emin, exponent)) / exponent;
-    }
-    else {
-        flux *= (std::log(emax) - std::log(emin));
-    }
+    // Initialise flux
+    double flux = 0.0;
+    
+    // Continue only if emax > emin
+    if (emax > emin) {
+
+        // Compute photon flux
+        flux = std::pow(epivot, -gamma);
+        if (gamma != -1.0) {
+            double exponent = gamma + 1.0;
+            flux *= (std::pow(emax, exponent) -
+                     std::pow(emin, exponent)) / exponent;
+        }
+        else {
+            flux *= (std::log(emax) - std::log(emin));
+        }
+
+    } // endif: emax > emin
 
     // Return result
     return flux;
@@ -794,16 +802,24 @@ double plaw_photon_flux(const double& emin, const double& emax,
 double plaw_energy_flux(const double& emin, const double& emax,
                         const double& epivot, const double& gamma)
 {
-    // Compute energy flux
-    double flux = std::pow(epivot, -gamma);
-    if (gamma != -2.0) {
-        double exponent = gamma + 2.0;
-        flux *= (std::pow(emax, exponent) -
-                 std::pow(emin, exponent)) / exponent;
-    }
-    else {
-        flux *= (std::log(emax) - std::log(emin));
-    }
+    // Initialise flux
+    double flux = 0.0;
+    
+    // Continue only if emax > emin
+    if (emax > emin) {
+
+        // Compute energy flux
+        flux = std::pow(epivot, -gamma);
+        if (gamma != -2.0) {
+            double exponent = gamma + 2.0;
+            flux *= (std::pow(emax, exponent) -
+                     std::pow(emin, exponent)) / exponent;
+        }
+        else {
+            flux *= (std::log(emax) - std::log(emin));
+        }
+
+    } // endif: emax > emin
 
     // Return result
     return flux;
