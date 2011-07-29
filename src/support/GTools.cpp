@@ -764,10 +764,11 @@ double plaw_photon_flux(const double& emin, const double& emax,
     // Continue only if emax > emin
     if (emax > emin) {
 
-        // Compute photon flux
+        // Compute photon flux. Computations dependend on the exponent. We
+        // add here a kluge to assure numerical accuracy.
         flux = std::pow(epivot, -gamma);
-        if (gamma != -1.0) {
-            double exponent = gamma + 1.0;
+        double exponent = gamma + 1.0;
+        if (std::abs(exponent) > 1.0e-11) {
             flux *= (std::pow(emax, exponent) -
                      std::pow(emin, exponent)) / exponent;
         }
@@ -808,10 +809,11 @@ double plaw_energy_flux(const double& emin, const double& emax,
     // Continue only if emax > emin
     if (emax > emin) {
 
-        // Compute energy flux
+        // Compute energy flux. Computations dependend on the exponent. We
+        // add here a kluge to assure numerical accuracy.
         flux = std::pow(epivot, -gamma);
-        if (gamma != -2.0) {
-            double exponent = gamma + 2.0;
+        double exponent = gamma + 2.0;
+        if (std::abs(exponent) > 1.0e-11) {
             flux *= (std::pow(emax, exponent) -
                      std::pow(emin, exponent)) / exponent;
         }
