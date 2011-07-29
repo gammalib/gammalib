@@ -341,16 +341,10 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng) const
  ***************************************************************************/
 double GModelSpectralPlaw::flux(const GEnergy& emin, const GEnergy& emax) const
 {
-    // Compute flux
-    double flux = norm() * pow(pivot(), -index());
-    if (index() != -1.0) {
-        double exponent = index() + 1.0;
-        flux *= (std::pow(emax.MeV(), exponent)-std::pow(emin.MeV(), exponent)) /
-                exponent;
-    }
-    else
-        flux *= (std::log(emax.MeV()) - std::log(emin.MeV()));
-
+    // Compute photon flux
+    double flux = norm() * plaw_photon_flux(emin.MeV(), emax.MeV(),
+                                            pivot(), index());
+    
     // Return flux
     return flux;
 }
@@ -372,15 +366,9 @@ double GModelSpectralPlaw::flux(const GEnergy& emin, const GEnergy& emax) const
  ***************************************************************************/
 double GModelSpectralPlaw::eflux(const GEnergy& emin, const GEnergy& emax) const
 {
-    // Compute flux
-    double flux = norm() * pow(pivot(), -index());
-    if (index() != -2.0) {
-        double exponent = index() + 2.0;
-        flux *= (std::pow(emax.MeV(), exponent)-std::pow(emin.MeV(), exponent)) /
-                exponent;
-    }
-    else
-        flux *= (std::log(emax.MeV()) - std::log(emin.MeV()));
+    // Compute energy flux
+    double flux = norm() * plaw_energy_flux(emin.MeV(), emax.MeV(),
+                                            pivot(), index());
 
     // Convert from MeV/cm2/s to erg/cm2/s
     flux *= MeV2erg;
