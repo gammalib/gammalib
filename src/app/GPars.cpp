@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include <pwd.h>           // user/passwd function
+#include <fcntl.h>         // for file locking
 #include <unistd.h>        // access() function
 #include <sys/stat.h>      // mkdir() function
 #include <cstdlib>         // std::getenv() function
@@ -51,6 +52,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_LOCK_PARFILE                           //!< Enables parfile locking
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -830,6 +832,24 @@ void GPars::read(const std::string& filename)
     const int n = 1000; 
     char  line[n];
 
+    // Trying to get file lock
+    #if defined(G_LOCK_PARFILE)
+    struct flock lock;
+    lock.l_type   = F_RDLCK;  // Want a read lock
+    lock.l_whence = SEEK_SET; // Want beginning of file
+    lock.l_start  = 0;        // No offset, lock entire file ...
+    lock.l_len    = 0;        // ... to the end
+    lock.l_pid    = getpid(); // Current process ID
+    int fd;
+    if ((fd = open(filename.c_str(), O_RDWR)) == -1) {
+        throw GException::par_file_open_error(G_READ, filename);
+    }
+    if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
+        throw GException::par_file_open_error(G_READ, filename,
+              "Could not get a lock on the file.");
+    }
+    #endif
+
     // Open parameter file
     FILE* fptr = fopen(filename.c_str(), "r");
     if (fptr == NULL)
@@ -841,6 +861,16 @@ void GPars::read(const std::string& filename)
 
     // Close file
     fclose(fptr);
+
+    // Unlock file
+    #if defined(G_LOCK_PARFILE)
+    lock.l_type = F_UNLCK;
+    if (fcntl(fd, F_SETLK, &lock) == -1) {
+        throw GException::par_file_open_error(G_READ, filename,
+              "Could not unlock the file.");
+    }
+    close(fd);
+    #endif
 
     // Return
     return;
@@ -859,6 +889,24 @@ void GPars::read(const std::string& filename)
  ***************************************************************************/
 void GPars::write(const std::string& filename) const
 {
+    // Trying to get file lock
+    #if defined(G_LOCK_PARFILE)
+    struct flock lock;
+    lock.l_type   = F_WRLCK;  // Want a write lock
+    lock.l_whence = SEEK_SET; // Want beginning of file
+    lock.l_start  = 0;        // No offset, lock entire file ...
+    lock.l_len    = 0;        // ... to the end
+    lock.l_pid    = getpid(); // Current process ID
+    int fd;
+    if ((fd = open(filename.c_str(), O_RDWR)) == -1) {
+        throw GException::par_file_open_error(G_WRITE, filename);
+    }
+    if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
+        throw GException::par_file_open_error(G_WRITE, filename,
+              "Could not get a lock on the file.");
+    }
+    #endif
+
     // Open parameter file
     FILE* fptr = fopen(filename.c_str(), "w");
     if (fptr == NULL)
@@ -870,6 +918,16 @@ void GPars::write(const std::string& filename) const
 
     // Close file
     fclose(fptr);
+
+    // Unlock file
+    #if defined(G_LOCK_PARFILE)
+    lock.l_type = F_UNLCK;
+    if (fcntl(fd, F_SETLK, &lock) == -1) {
+        throw GException::par_file_open_error(G_WRITE, filename,
+              "Could not unlock the file.");
+    }
+    close(fd);
+    #endif
 
     // Return
     return;
