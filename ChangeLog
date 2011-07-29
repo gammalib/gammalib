@@ -8,6 +8,7 @@
         Implement environment variable expansion
         Correctly fit unbinned for multiple observations
         Add eflux() methods to spectral models
+        Implement flux(), eflux() and mc() for GModelSpectralFunc
         Add GLog output methods to Python interface
         Add append() and append_standard() methods to GPars
         Protect parfile read/write by a file lock

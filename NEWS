@@ -49,6 +49,9 @@ None
 Add eflux() method for spectral models. This allows the computation
 of an energy flux (erg/cm2/s) for a given energy interval.
 
+Implement the flux(), eflux and mc() methods for the GModelSpectralFunc
+class.
+
 
 7. Numerics module
 ------------------
