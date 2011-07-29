@@ -87,6 +87,18 @@ public:
         (*self)[name] = val;
         return;
     }
+    void __setitem__(const std::string& name, const int& val) {
+        (*self)[name].integer(val);
+        return;
+    }
+    void __setitem__(const std::string& name, const double& val) {
+        (*self)[name].real(val);
+        return;
+    }
+    void __setitem__(const std::string& name, const std::string& val) {
+        (*self)[name].value(val);
+        return;
+    }
     GApplication copy() {
         return (*self);
     }
