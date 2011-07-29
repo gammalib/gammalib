@@ -535,15 +535,20 @@ public:
         model_invalid_parscale(std::string origin, GXmlElement xml,
                                std::string message = "");
     };
-    class not_enough_data : public GExceptionHandler {
+    class file_function_data : public GExceptionHandler {
     public:
-        not_enough_data(std::string origin, std::string filename,
-                        int num, std::string message = "");
-    };
-    class not_enough_columns : public GExceptionHandler {
-    public:
-        not_enough_columns(std::string origin, std::string filename,
+        file_function_data(std::string origin, std::string filename,
                            int num, std::string message = "");
+    };
+    class file_function_columns : public GExceptionHandler {
+    public:
+        file_function_columns(std::string origin, std::string filename,
+                              int num, std::string message = "");
+    };
+    class file_function_value : public GExceptionHandler {
+    public:
+        file_function_value(std::string origin, std::string filename,
+                            double value, std::string message = "");
     };
     class par_not_found : public GExceptionHandler {
     public:

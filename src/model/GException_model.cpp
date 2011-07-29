@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -259,16 +267,19 @@ GException::model_invalid_parscale::model_invalid_parscale(std::string origin,
  * @param[in] num Number of nodes.
  * @param[in] message Optional error message.
  ***************************************************************************/
-GException::not_enough_data::not_enough_data(std::string origin,
-                                             std::string filename,
-                                             int         num,
-                                             std::string message)
+GException::file_function_data::file_function_data(std::string origin,
+                                                   std::string filename,
+                                                   int         num,
+                                                   std::string message)
 {
     // Set origin and message
     m_origin  = origin;
     m_message = "File function \""+filename+"\" contains "+str(num)+
                 " energy nodes while at least 2 are required to describe a"
-                " spectral shape. "+message;
+                " spectral shape.";
+    if (message.length() > 0) {
+        m_message += " "+message;
+    }
 
     // Return
     return;
@@ -283,16 +294,45 @@ GException::not_enough_data::not_enough_data(std::string origin,
  * @param[in] num Number of columns.
  * @param[in] message Optional error message.
  ***************************************************************************/
-GException::not_enough_columns::not_enough_columns(std::string origin,
-                                                   std::string filename,
-                                                   int         num,
-                                                   std::string message)
+GException::file_function_columns::file_function_columns(std::string origin,
+                                                         std::string filename,
+                                                         int         num,
+                                                         std::string message)
 {
     // Set origin and message
     m_origin  = origin;
     m_message = "File function \""+filename+"\" contains "+str(num)+
                 " columns while at least 2 are required to define"
-                " energy and intensity. "+message;
+                " energy and intensity.";
+    if (message.length() > 0) {
+        m_message += " "+message;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Invalid value in file function
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] filename File function filename.
+ * @param[in] num Number of columns.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::file_function_value::file_function_value(std::string origin,
+                                                     std::string filename,
+                                                     double      value,
+                                                     std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Invalid value \""+str(value)+"\" encountered in"
+                " file function \""+filename+"\".";
+    if (message.length() > 0) {
+        m_message += " "+message;
+    }
 
     // Return
     return;
