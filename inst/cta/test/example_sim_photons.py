@@ -114,6 +114,9 @@ def show_photons(photons, xmlname, e_min, e_max, area, duration, ebins=30):
 		# Set axes
 		plt.xlabel("Energy (TeV)")
 		plt.ylabel("Number of incident photons")
+	
+		# Notify
+		print "PLEASE CLOSE WINDOW TO CONTINUE ..."
 
 		# Allocate histogram
 		# Show plot
@@ -131,23 +134,31 @@ def show_photons(photons, xmlname, e_min, e_max, area, duration, ebins=30):
 #==========================#
 if __name__ == '__main__':
 	"""
-	Simulate CTA observation.
+	Simulate photons.
 	"""
 	# Dump header
 	print
-	print "****************************"
-	print "* Simulate CTA observation *"
-	print "****************************"
+	print "********************"
+	print "* Simulate photons *"
+	print "********************"
 
-	# Set energy range in TeV
-	xmlname  = "data/crab.xml"    # Source model
+	# Set XML names
+	xmlnames = ["data/crab.xml", \
+	            "data/crab_file_function.xml", \
+	            "data/crab_file_function_mod.xml"]
+
+	# Set simulation parameters
 	e_min    = 0.1                # 0.1 TeV
 	e_max    = 100.0              # 100 TeV
 	area     = 3200000.0 * 1.0e4  # 3200000.0 m^2
 	duration = 3600 * 5           # 5 hours
-
-    # Perform simulation
-	photons = simulate(xmlname, e_min, e_max, area, duration)
-
-	# Show photons
-	show_photons(photons, xmlname, e_min, e_max, area, duration)
+    
+	# Loop over models
+	for xmlname in xmlnames:
+		
+		# Perform simulation
+		photons = simulate(xmlname, e_min, e_max, area, duration)
+		
+		# Show photons
+		show_photons(photons, xmlname, e_min, e_max, area, duration)
+		
