@@ -832,11 +832,6 @@ void GPars::read(const std::string& filename)
     const int n = 1000; 
     char  line[n];
 
-    // Open parameter file
-    FILE* fptr = fopen(filename.c_str(), "r");
-    if (fptr == NULL)
-        throw GException::par_file_open_error(G_READ, filename);
-
     // Trying to get file lock
     #if defined(G_LOCK_PARFILE)
     struct flock lock;
@@ -855,6 +850,11 @@ void GPars::read(const std::string& filename)
               "Could not get a lock on the file.");
     }
     #endif
+
+    // Open parameter file
+    FILE* fptr = fopen(filename.c_str(), "r");
+    if (fptr == NULL)
+        throw GException::par_file_open_error(G_READ, filename);
 
     // Read lines
     while (fgets(line, n, fptr) != NULL)
