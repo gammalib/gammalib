@@ -661,7 +661,7 @@ void GPars::free_members(void)
  * by ; in PFILES.
  * If the PFILES environment variable is not set or no parameter file was
  * found, the parameter file is searched (in the given order) in the users
- * pfiles directory, in ${GAMMAROOT}/syspfiles and in ${prefix}/syspfiles,
+ * pfiles directory, in ${GAMMALIB}/syspfiles and in ${prefix}/syspfiles,
  * where ${prefix} is the path to the GammaLib installation.
  ***************************************************************************/
 std::string GPars::inpath(const std::string& filename) const
@@ -705,10 +705,10 @@ std::string GPars::inpath(const std::string& filename) const
         }
     }
 
-    // If we have no valid path so far then search file within GAMMAROOT
-    // repository (${GAMMAROOT}/syspfiles)
+    // If we have no valid path so far then search file within GAMMALIB
+    // repository (${GAMMALIB}/syspfiles)
     if (path.size() == 0) {
-        ptr = std::getenv("GAMMAROOT");
+        ptr = std::getenv("GAMMALIB");
         if (ptr != NULL) {
             std::string fname = std::string(ptr) + "/syspfiles/" + filename;
             if (access(fname.c_str(), R_OK) == 0)
