@@ -893,11 +893,6 @@ void GPars::read(const std::string& filename)
  ***************************************************************************/
 void GPars::write(const std::string& filename) const
 {
-    // Open parameter file.
-    FILE* fptr = fopen(filename.c_str(), "w");
-    if (fptr == NULL)
-        throw GException::par_file_open_error(G_WRITE, filename);
-
     // Trying to get file lock. We have to do this after opening the file
     // using the fopen function, as the file may not exist, hence it needs
     // to be created first.
@@ -909,13 +904,28 @@ void GPars::write(const std::string& filename) const
     lock.l_len    = 0;        // ... to the end
     lock.l_pid    = getpid(); // Current process ID
     int  fd;
-    if ((fd = open(filename.c_str(), O_WRONLY)) == -1) {
-        throw GException::par_file_open_error(G_WRITE, filename,
-              "Could not open file for locking.");
+    if ((fd = open(filename.c_str(), O_WRONLY)) != -1) {
+        if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
+            throw GException::par_file_open_error(G_WRITE, filename,
+                  "Could not get a lock on the file.");
+        }
     }
-    if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
-        throw GException::par_file_open_error(G_WRITE, filename,
-              "Could not get a lock on the file.");
+    #endif
+
+    // Open parameter file.
+    FILE* fptr = fopen(filename.c_str(), "w");
+    if (fptr == NULL)
+        throw GException::par_file_open_error(G_WRITE, filename);
+
+    // If file is not locked then lock it now.
+    #if defined(G_LOCK_PARFILE)
+    if (fd == -1) {
+        if ((fd = open(filename.c_str(), O_WRONLY)) != -1) {
+            if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
+                throw GException::par_file_open_error(G_WRITE, filename,
+                      "Could not get a lock on the file.");
+            }
+        }
     }
     #endif
 
