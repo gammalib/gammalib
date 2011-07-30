@@ -8,6 +8,9 @@ test_XXX.cpp
 test_python.py
   Unit test for GammaLib Python interface.
 
+test_file_function.py
+  Test the GModelSpectralFunc file function class.
+
 example_model_xml_io.py
   Illustrates how gamma-ray source models are built and saved
   on disk into an XML file.
