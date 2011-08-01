@@ -785,6 +785,8 @@ double GCTAResponse::aeff(const double& theta,
 {
     // Interpolate effective area using node array
     double aeff = m_nodes.interpolate(srcLogEng, m_aeff);
+    if (aeff < 0)
+        aeff = 0.0;
     
     // Optionally add in offset angle dependence
     if (m_offset_sigma != 0.0) {
