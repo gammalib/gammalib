@@ -286,9 +286,10 @@ void GOptimizerLM::init_members(void)
     m_lambda_dec   = 0.1;
     m_eps          = 1.0e-6;
     m_max_iter     = 1000;
-    m_max_stall    = 5;
+    m_max_stall    = 10;
     m_max_hit      = 3; //!< Maximum successive boundary hits before freeze
     m_step_adjust  = true;
+    m_diag_load    = 1.0e-100;
 
     // Initialise bookkeeping arrays
     m_hit_boundary.clear();
@@ -325,6 +326,7 @@ void GOptimizerLM::copy_members(const GOptimizerLM& opt)
     m_max_iter     = opt.m_max_iter;
     m_max_stall    = opt.m_max_stall;
     m_step_adjust  = opt.m_step_adjust;
+    m_diag_load    = opt.m_diag_load;
     m_hit_boundary = opt.m_hit_boundary;
     m_hit_minimum  = opt.m_hit_minimum;
     m_hit_maximum  = opt.m_hit_maximum;
@@ -395,6 +397,22 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
         // Initial evaluation
         fct->eval(*pars);
 
+        // If a free parameter has a zero diagonal element in the curvature
+        // matrix then load it with a small value so that it will be fitted.
+        // This is needed in the LM algorithm as we don't use the full Hessian
+        // matrix but only the curvature. The problem appears in the unbinned
+        // fitting where parameter gradients may be zero (due to the truncation
+        // of the PSF), but the Npred gradient is not zero. As the Npred
+        // curvature is by definition zero, we would never move the
+        // corresponding fit parameter, and thus block the fit. This is
+        // prevented by this kluge.
+        for (int ipar = 0; ipar < m_npars; ++ipar) {
+            if (pars->par(ipar).isfree()) {
+                if ((*fct->covar())(ipar,ipar) == 0.0)
+                    (*fct->covar())(ipar,ipar) = m_diag_load;
+            }
+        }
+
         // Save parameters
         m_value = *(fct->value());
 
@@ -426,12 +444,32 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
             // Compute function improvement (>0 means decrease)
             double delta = value_old - m_value;
 
+            // Determine maximum (scaled) gradient
+            double grad_max  = 0.0;
+            int    grad_imax = -1;
+            for (int ipar = 0; ipar < m_npars; ++ipar) {
+                if (pars->par(ipar).isfree()) {
+                    double grad = pars->par(ipar).gradient();
+                    if (grad > grad_max) {
+                        grad_max  = grad;
+                        grad_imax = ipar;
+                    }
+                    if (grad == 0.0) {
+                        *m_logger << "Parameter " << ipar;
+                        *m_logger << " (" << pars->par(ipar).name() << ")";
+                        *m_logger << " has a zero gradient." << std::endl;
+                    }
+                }
+            }
+
             // Optionally write iteration results into logger
             if (m_logger != NULL) {
                 *m_logger << "Iteration " << m_iter << ": ";
                 *m_logger << "func=" << m_value << ", ";
                 *m_logger << "Lambda=" << m_lambda << ", ";
                 *m_logger << "delta=" << delta;
+                //*m_logger << ", " << "max(grad)=" << grad_max;
+                //*m_logger << " [" << grad_imax << "]";
                 if (m_lambda > lambda_old)
                     *m_logger << " (stalled)";
                 *m_logger << std::endl;
@@ -708,6 +746,22 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
 
         // Evaluate function at new parameters
         fct->eval(*pars);
+
+        // If a free parameter has a zero diagonal element in the curvature
+        // matrix then load it with a small value so that it will be fitted.
+        // This is needed in the LM algorithm as we don't use the full Hessian
+        // matrix but only the curvature. The problem appears in the unbinned
+        // fitting where parameter gradients may be zero (due to the truncation
+        // of the PSF), but the Npred gradient is not zero. As the Npred
+        // curvature is by definition zero, we would never move the
+        // corresponding fit parameter, and thus block the fit. This is
+        // prevented by this kluge.
+        for (int ipar = 0; ipar < m_npars; ++ipar) {
+            if (pars->par(ipar).isfree()) {
+                if ((*fct->covar())(ipar,ipar) == 0.0)
+                    (*fct->covar())(ipar,ipar) = m_diag_load;
+            }
+        }
 
         // Fetch new pointers since eval will allocate new memory
         grad  = fct->gradient();
