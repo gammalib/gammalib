@@ -218,7 +218,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                     // Determine Npred value and gradient for this observation
                     double npred = m_this->m_obs[i]->npred((GModels&)pars, m_wrk_grad);
 
-                    // Update the Npred value and gradient
+                    // Update the Npred value, gradient.
                     m_npred     += npred;
                     *m_gradient += *m_wrk_grad;
                     #if G_EVAL_DEBUG
@@ -274,6 +274,15 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         m_covar->stack_destroy();
 
     } while(0); // endwhile: main loop
+    
+    // Copy over the parameter gradients for all parameters that are
+    // free (so that we can access the gradients from outside)
+    for (int ipar = 0; ipar < pars.npars(); ++ipar) {
+        if (pars.par(ipar).isfree()) {
+            GModelPar* par = (GModelPar*)&pars.par(ipar);
+            par->gradient((*m_gradient)[ipar]);
+        }
+    }
 
     // Optionally dump gradient and covariance matrix
     #if G_EVAL_DEBUG
