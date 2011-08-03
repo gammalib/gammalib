@@ -116,6 +116,7 @@ protected:
     std::vector<bool> m_par_freeze;      //!< Bookkeeping of parameter freeze
     double            m_lambda;          //!< Actual lambda
     double            m_value;           //!< Actual function value
+    double            m_diag_load;       //!< Value for diagonal loading
     int               m_status;          //!< Fit status
     int               m_iter;            //!< Iteration
     GLog*             m_logger;          //!< Pointer to optional logger
