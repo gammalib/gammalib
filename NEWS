@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-04-11
 
 Author(s) : Juergen Knoedlseder
 
-July 29, 2011
+August 2, 2011
 
 
 1. Introduction
@@ -119,3 +119,6 @@ response by cloning the response specified in the argument.
 
 In setting the caldb directory path for GCTAResponse, any environment
 variables in the path are expanded.
+
+GCTAResponse::aeff() does no longer return negative effective area
+that occurred when extrapolating below the low-energy threshold.

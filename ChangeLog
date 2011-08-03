@@ -5,6 +5,7 @@
 
         Add set response() to observation classes
         Expose GCTAResponse::offset_sigma() in python
+        GCTAResponse::aeff() no longer returns negative areas.
         Implement environment variable expansion
         Correctly fit unbinned for multiple observations
         Add eflux() methods to spectral models
