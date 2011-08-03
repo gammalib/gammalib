@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-04-11
 
 Author(s) : Juergen Knoedlseder
 
-August 2, 2011
+August 3, 2011
 
 
 1. Introduction
@@ -77,6 +77,12 @@ iter() - returns the number of iterations done by the optimizer
 
 The function cast_GOptimizerLM has been added to the python interface
 so that casting from GOptimizer to GOptimizerLM is possible.
+
+The LM optimizer now frees any internally fixed parameter on exit,
+so the the free/fix status for all parameter on exit is the same as
+on entry. This prevents changing the model definition in an observation
+without a user alert. Parameters which were internally fixed will have
+zero errors, as before, so they can be easily recognized.
 
 
 10. Sky module

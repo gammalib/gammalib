@@ -1,4 +1,4 @@
-2011-07-29  Juergen Knoedlseder  <knodlseder@cesr.fr>
+2011-08-03  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.4.11 released
         =========================
@@ -13,6 +13,7 @@
         Add GLog output methods to Python interface
         Add append() and append_standard() methods to GPars
         Protect parfile read/write by a file lock
+        LM optimizer frees any internally fixed parameter at exit
 
 2011-07-20  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
