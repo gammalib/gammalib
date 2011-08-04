@@ -1,18 +1,26 @@
 /***************************************************************************
  *    GFitsTableBitCol.i  - FITS table bit column class SWIG definition    *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
  * @file GFitsTableBitCol.i
- * @brief GFitsTableBitCol class SWIG file.
+ * @brief FITS table bit column class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -24,7 +32,7 @@
 /***********************************************************************//**
  * @class GFitsTableBitCol
  *
- * @brief SWIG interface for FITS table logical column
+ * @brief FITS table bit column Python interface definition
  ***************************************************************************/
 class GFitsTableBitCol : public GFitsTableCol {
 public:
@@ -35,18 +43,27 @@ public:
     GFitsTableBitCol(const GFitsTableBitCol& column);
     virtual ~GFitsTableBitCol(void);
 
-    // Methods
-    std::string    string(const int& row, const int& col = 0);
-    double         real(const int& row, const int& col = 0);
-    int            integer(const int& row, const int& col = 0);
-    unsigned char* data(void) { return m_data; }
+    // Implement virtual methods
+    virtual std::string string(const int& row, const int& col = 0);
+    virtual double      real(const int& row, const int& col = 0);
+    virtual int         integer(const int& row, const int& col = 0);
+    virtual void        insert(const int& rownum, const int& nrows);
+    virtual void        remove(const int& rownum, const int& nrows);
+    
+    // Other methods
+    unsigned char* data(void);
     void           nulval(const unsigned char* value);
-    unsigned char* nulval(void) { return m_nulval; }
+    unsigned char* nulval(void);
 };
 
 
 /***********************************************************************//**
  * @brief GFitsTableBitCol class extension
+ *
+ * @todo We would like to return a reference in __getitem__ so that we can
+ *       set the elements in an iterator. Declaring simply a reference
+ *       shows an object pointer instead of the content. I still have to
+ *       find out how to implement this (e.g. via typemaps).
  ***************************************************************************/
 %extend GFitsTableBitCol {
     bool __getitem__(int GFitsTableColInx[]) {

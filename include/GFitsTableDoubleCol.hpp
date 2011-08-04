@@ -1,18 +1,26 @@
 /***************************************************************************
  *        GFitsTableDoubleCol.hpp  - FITS table double column class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
  * @file GFitsTableDoubleCol.hpp
- * @brief GFitsTableDoubleCol class definition.
+ * @brief FITS table double column class interface definition
  * @author J. Knodlseder
  */
 
@@ -27,7 +35,7 @@
 /***********************************************************************//**
  * @class GFitsTableDoubleCol
  *
- * @brief Interface for FITS table double column
+ * @brief FITS table double column
  *
  * This class implements a FITS table double column.
  ***************************************************************************/
@@ -46,13 +54,17 @@ public:
     double&              operator() (const int& row, const int& inx = 0);
     const double&        operator() (const int& row, const int& inx = 0) const;
 
-    // Methods
-    std::string string(const int& row, const int& col = 0);
-    double      real(const int& row, const int& col = 0);
-    int         integer(const int& row, const int& col = 0);
-    double*     data(void) { return m_data; }
-    void        nulval(const double* value);
-    double*     nulval(void) { return m_nulval; }
+    // Implement virtual methods
+    virtual std::string string(const int& row, const int& col = 0);
+    virtual double      real(const int& row, const int& col = 0);
+    virtual int         integer(const int& row, const int& col = 0);
+    virtual void        insert(const int& rownum, const int& nrows);
+    virtual void        remove(const int& rownum, const int& nrows);
+    
+    // Other methods
+    double* data(void) { return m_data; }
+    void    nulval(const double* value);
+    double* nulval(void) { return m_nulval; }
 
 private:
     // Private methods

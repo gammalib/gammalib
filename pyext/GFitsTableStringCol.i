@@ -1,18 +1,26 @@
 /***************************************************************************
  * GFitsTableStringCol.i  - FITS table string column class SWIG definition *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
  * @file GFitsTableStringCol.i
- * @brief GFitsTableStringCol class SWIG file.
+ * @brief FITS table string column class Python interface definition
  * @author J. Knodlseder
  */
 %{
@@ -24,7 +32,7 @@
 /***********************************************************************//**
  * @class GFitsTableStringCol
  *
- * @brief SWIG interface for FITS table string column
+ * @brief FITS table string column Python interface definition
  ***************************************************************************/
 class GFitsTableStringCol : public GFitsTableCol {
 public:
@@ -35,18 +43,27 @@ public:
     GFitsTableStringCol(const GFitsTableStringCol& column);
     virtual ~GFitsTableStringCol(void);
 
-    // Methods
-    std::string  string(const int& row, const int& col = 0);
-    double       real(const int& row, const int& col = 0);
-    int          integer(const int& row, const int& col = 0);
-    std::string* data(void) { return m_data; }
-    void         nulval(const std::string value);
-    char*        nulval(void) { return m_nulval; }
+    // Implement virtual methods
+    virtual std::string string(const int& row, const int& col = 0);
+    virtual double      real(const int& row, const int& col = 0);
+    virtual int         integer(const int& row, const int& col = 0);
+    virtual void        insert(const int& rownum, const int& nrows);
+    virtual void        remove(const int& rownum, const int& nrows);
+    
+    // Other methods
+    std::string* data(void);
+    void         nulval(const std::string& value);
+    char*        nulval(void);
 };
 
 
 /***********************************************************************//**
  * @brief GFitsTableStringCol class extension
+ *
+ * @todo We would like to return a reference in __getitem__ so that we can
+ *       set the elements in an iterator. Declaring simply a reference
+ *       shows an object pointer instead of the content. I still have to
+ *       find out how to implement this (e.g. via typemaps).
  ***************************************************************************/
 %extend GFitsTableStringCol {
     std::string __getitem__(int GFitsTableColInx[]) {

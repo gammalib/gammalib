@@ -4,10 +4,18 @@
  *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -27,6 +35,8 @@
 #include "GFitsTableBitCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_INSERT                       "GFitsTableBitCol::insert(int&, int&)"
+#define G_REMOVE                       "GFitsTableBitCol::remove(int&, int&)"
 #define G_LOAD_COLUMN                       "GFitsTableBitCol::load_column()"
 #define G_SAVE_COLUMN                       "GFitsTableBitCol::save_column()"
 #define G_GET_BIT                      "GFitsTableBitCol::get_bit(int&,int&)"
@@ -265,6 +275,188 @@ int GFitsTableBitCol::integer(const int& row, const int& inx)
 
     // Return result
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert rows in column
+ *
+ * @param[in] rownum Row after which rows should be inserted (0=first row).
+ * @param[in] nrows Number of rows to be inserted.
+ *
+ * @exception GException::fits_invalid_row
+ *            Specified rownum is invalid.
+ *
+ * This method inserts rows into a FITS table. This implies that the column
+ * will be loaded into memory.
+ ***************************************************************************/
+void GFitsTableBitCol::insert(const int& rownum, const int& nrows)
+{
+    // Make sure that rownum is valid
+    if (rownum < 0 || rownum > m_length)
+        throw GException::fits_invalid_row(G_INSERT, rownum, m_length);
+    
+    // Continue only if there are rows to be inserted
+    if (nrows > 0) {
+    
+        // If we have no rows yet then simply set the length to the
+        // number of rows to be inserted
+        if (m_length == 0) {
+            m_length = nrows;
+        }
+        
+        // ... otherwise fetch data, allocate new data and copy over
+        // the existing items
+        else {
+
+            // If data are not available then load them now
+            if (m_data == NULL) fetch_data();
+
+            // Set any pending Bit
+            set_pending();
+
+            // Compute new column length
+            int length = m_length + nrows;
+
+            // Compute total number of Bits in column
+            m_bits = m_number * length;
+
+            // Compute number of Bytes and Bits per row
+            m_bytes_per_row = (m_number > 0) ? ((m_number-1) / 8) + 1 : 0;
+            m_bits_per_row  = m_bytes_per_row * 8;
+
+            // Compute length of memory array
+            m_size = m_bytes_per_row * length;
+        
+            // Allocate new data to hold the column
+            unsigned char* new_data = new unsigned char[m_size];
+
+            // Compute the number of elements before the insertion point,
+            // the number of elements that get inserted, and the total
+            // number of elements after the insertion point
+            int n_before = m_bytes_per_row * rownum;
+            int n_insert = m_bytes_per_row * nrows;
+            int n_after  = m_bytes_per_row * (m_length - rownum);
+
+            // Copy and initialise data
+            unsigned char* src = m_data;
+            unsigned char* dst = new_data;
+            for (int i = 0; i < n_before; ++i)
+                *dst++ = *src++;
+            for (int i = 0; i < n_insert; ++i)
+                *dst++ = 0;
+            for (int i = 0; i < n_after; ++i)
+                *dst++ = *src++;
+        
+            // Free old data
+            if (m_data != NULL) delete [] m_data;
+            
+            // Set pointer to new data and store length
+            m_data   = new_data;
+            m_length = length;
+        
+        } // endelse: there were already data
+    
+    } // endfor: there were rows to be inserted
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove rows from column
+ *
+ * @param[in] rownum Row after which rows should be removed (0=first row).
+ * @param[in] nrows Number of rows to be removed.
+ *
+ * @exception GException::fits_invalid_row
+ *            Specified rownum is invalid.
+ * @exception GException::fits_invalid_nrows
+ *            Invalid number of rows specified.
+ *
+ * This method removes rows from a FITS table. This implies that the column
+ * will be loaded into memory.
+ ***************************************************************************/
+void GFitsTableBitCol::remove(const int& rownum, const int& nrows)
+{
+    // Make sure that rownum is valid
+    if (rownum < 0 || rownum >= m_length)
+        throw GException::fits_invalid_row(G_REMOVE, rownum, m_length-1);
+    
+    // Make sure that we don't remove beyond the limit
+    if (nrows < 0 || nrows > m_length-rownum)
+        throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-rownum);
+    
+    // Continue only if there are rows to be removed
+    if (nrows > 0) {
+    
+        // If data are not available then load them now
+        if (m_data == NULL) fetch_data();
+
+        // Set any pending Bit
+        set_pending();
+
+        // Compute new column length
+        int length = m_length - nrows;
+        
+        // Compute total number of Bits in column
+        m_bits = m_number * length;
+
+        // Compute number of Bytes and Bits per row
+        m_bytes_per_row = (m_number > 0) ? ((m_number-1) / 8) + 1 : 0;
+        m_bits_per_row  = m_bytes_per_row * 8;
+
+        // Compute length of memory array
+        m_size = m_bytes_per_row * length;
+        
+        // If we have rows remaining then allocate new data to hold
+        // the column
+        if (m_size > 0) {
+        
+            // Allocate new data to hold the column
+            unsigned char* new_data = new unsigned char[m_size];
+
+            // Compute the number of elements before the removal point,
+            // the number of elements that get removed, and the total
+            // number of elements after the removal point
+            int n_before = m_bytes_per_row * rownum;
+            int n_remove = m_bytes_per_row * nrows;
+            int n_after  = m_bytes_per_row * (length - rownum);
+
+            // Copy data
+            unsigned char* src = m_data;
+            unsigned char* dst = new_data;
+            for (int i = 0; i < n_before; ++i)
+                *dst++ = *src++;
+            src += n_remove;
+            for (int i = 0; i < n_after; ++i)
+                *dst++ = *src++;
+        
+            // Free old data
+            if (m_data != NULL) delete [] m_data;
+            
+            // Set pointer to new data and store length
+            m_data   = new_data;
+            m_length = length;
+        
+        } // endif: there are still elements after removal
+        
+        // ... otherwise just remove all data
+        else {
+
+            // Free old data
+            if (m_data != NULL) delete [] m_data;
+
+            // Set pointer to new data and store length
+            m_data   = NULL;
+            m_length = length;
+        }
+    
+    } // endfor: there were rows to be removed
+
+    // Return
+    return;
 }
 
 
@@ -614,8 +806,10 @@ void GFitsTableBitCol::save_column(void)
  * @param[in] row Row of column.
  * @param[in] inx Vector index in column row.
  *
+ * @exception GException::fits_invalid_row
+ *            Table row out of valid range.
  * @exception GException::out_of_range
- *            Table row or vector index are out of valid range.
+ *            Table vector index out of valid range.
  *
  * Set the Bit for boolean data access. Note that this method assumes that
  * the data have already been loaded.
@@ -625,7 +819,7 @@ void GFitsTableBitCol::get_bit(const int& row, const int& inx)
     // Check row value
     #if defined(G_RANGE_CHECK)
     if (row < 0 || row >= m_length)
-        throw GException::out_of_range(G_GET_BIT, row, 0, m_length-1);
+        throw GException::fits_invalid_row(G_GET_BIT, row, m_length-1);
     #endif
 
     // Check inx value
