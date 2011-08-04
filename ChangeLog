@@ -1,4 +1,4 @@
-2011-08-03  Juergen Knoedlseder  <knodlseder@cesr.fr>
+2011-08-04  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.4.11 released
         =========================
@@ -14,6 +14,7 @@
         Add append() and append_standard() methods to GPars
         Protect parfile read/write by a file lock
         LM optimizer frees any internally fixed parameter at exit
+        Add row and column manipulation methods for FITS tables
 
 2011-07-20  Juergen Knoedlseder  <knodlseder@cesr.fr>
 

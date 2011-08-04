@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-04-11
 
 Author(s) : Juergen Knoedlseder
 
-August 3, 2011
+August 4, 2011
 
 
 1. Introduction
@@ -37,6 +37,10 @@ trying to read and write simultaneously to the same file.
 ---------------------
 Any environment variables in the filename in GFits::open and
 GFits::saveto are expanded.
+
+Add row appending, insertion and removal capabilities to FITS
+tables. Implement also proper removing of obsolete columns from
+a FITS file.
 
 
 5. Linear algebra module
