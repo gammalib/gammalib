@@ -52,9 +52,9 @@ public:
     void        clear(void);
     int         size(void) const;
     void        open(const std::string& filename, bool create = false);
-    void        close(void);
-    void        save(void);
+    void        save(bool clobber = false);
     void        saveto(const std::string& filename, bool clobber = false);
+    void        close(void);
     void        append(const GFitsHDU& hdu);
     GFitsHDU*   hdu(const std::string& extname) const;
     GFitsHDU*   hdu(int extno) const;
@@ -62,6 +62,7 @@ public:
     GFitsImage* image(int extno) const;
     GFitsTable* table(const std::string& extname) const;
     GFitsTable* table(int extno) const;
+    std::string name(void) const;
 };
 
 
