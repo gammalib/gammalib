@@ -4,15 +4,23 @@
  *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
  * @file GFitsTable.cpp
- * @brief FITS table base class implementation
+ * @brief FITS table abstract base class implementation
  * @author J. Knodlseder
  */
 
@@ -44,6 +52,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_APPEND_COLUMN           "GFitsTable::append_column(GFitsTableCol*)"
 #define G_INSERT_COLUMN      "GFitsTable::insert_column(int, GFitsTableCol*)"
+#define G_INSERT_ROWS                   "GFitsTable::insert_rows(int&, int&)"
+#define G_REMOVE_ROWS                   "GFitsTable::remove_rows(int&, int&)"
 #define G_COLUMN1                          "GFitsTable::column(std::string&)"
 #define G_COLUMN2                                  "GFitsTable::column(int&)"
 #define G_OPEN_DATA                            "GFitsTable::open_data(void*)"
@@ -55,6 +65,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+#define G_DEBUG_SAVE
 
 
 /*==========================================================================
@@ -283,10 +294,16 @@ void GFitsTable::insert_column(int colnum, GFitsTableCol& column)
  *
  * @param[in] nrows Number of rows to be appended.
  *
- * @todo Method needs to be implemented.
+ * This method appends rows to a FITS table. This implies that all columns
+ * will be loaded into memory.
  ***************************************************************************/
 void GFitsTable::append_rows(const int& nrows)
 {
+    // Set row number for insertion to end of the file
+    int rownum = this->nrows();
+    
+    // Insert rows
+    insert_rows(rownum, nrows);
 
     // Return
     return;
@@ -296,13 +313,75 @@ void GFitsTable::append_rows(const int& nrows)
 /***********************************************************************//**
  * @brief Insert rows into the table
  *
- * @param[in] rownum Row number after which rows should be inserted.
+ * @param[in] rownum Row after which rows should be inserted (0=first row).
  * @param[in] nrows Number of rows to be inserted.
  *
- * @todo Method needs to be implemented.
+ * @exception GException::fits_invalid_row
+ *            Specified rownum is invalid.
+ *
+ * This method inserts rows into a FITS table. This implies that all columns
+ * will be loaded into memory.
  ***************************************************************************/
 void GFitsTable::insert_rows(const int& rownum, const int& nrows)
 {
+    // Make sure that rownum is valid
+    if (rownum < 0 || rownum > m_rows)
+        throw GException::fits_invalid_row(G_INSERT_ROWS, rownum, m_rows);
+
+    // Continue only if there are rows to be inserted
+    if (nrows > 0) {
+
+        // Insert rows for all columns
+        for (int icol = 0; icol < m_cols; ++icol) {
+            m_columns[icol]->insert(rownum, nrows);
+        }
+        
+        // Increment number of rows in table
+        m_rows += nrows;
+
+    } // endfor: there were rows to be inserted
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove rows from the table
+ *
+ * @param[in] rownum Row after which rows should be removed (0=first row).
+ * @param[in] nrows Number of rows to be removed.
+ *
+ * @exception GException::fits_invalid_row
+ *            Specified rownum is invalid.
+ * @exception GException::fits_invalid_nrows
+ *            Invalid number of rows specified.
+ *
+ * This method inserts rows into a FITS table. This implies that all columns
+ * will be loaded into memory.
+ ***************************************************************************/
+void GFitsTable::remove_rows(const int& rownum, const int& nrows)
+{
+    // Make sure that rownum is valid
+    if (rownum < 0 || rownum >= m_rows)
+        throw GException::fits_invalid_row(G_REMOVE_ROWS, rownum, m_rows-1);
+    
+    // Make sure that we don't remove beyond the limit
+    if (nrows < 0 || nrows > m_rows-rownum)
+        throw GException::fits_invalid_nrows(G_REMOVE_ROWS, nrows, m_rows-rownum);
+
+    // Continue only if there are rows to be removed
+    if (nrows > 0) {
+
+        // Insert rows for all columns
+        for (int icol = 0; icol < m_cols; ++icol) {
+            m_columns[icol]->remove(rownum, nrows);
+        }
+        
+        // Decrement number of rows in table
+        m_rows -= nrows;
+
+    } // endfor: there were rows to be removed
 
     // Return
     return;
@@ -620,25 +699,37 @@ void GFitsTable::data_open(void* vptr)
  * All columns with a length of zero will be excluded from saving, and if
  * they exist in the FITS file, they will be removed from the file.
  *
- * @todo Implementation not yet completed. Row adding and deletion is still
- * missing.
- *
  * @todo This method should also update the header. Even easier, this method
- * should save the header into the file using the m_header.save() method.
- * Only this assures coherence between the files !!!! If this has been
- * implemented (also in the GFitsImage method) we should delete the
- * m_header.save() call in GFitsHDU::save.
+ *       should save the header into the file using the m_header.save()
+ *       method.
+ *       Only this assures coherence between the files !!!! Once this has
+ *       been implemented (also in the GFitsImage method) we should delete
+ *       the m_header.save() call in GFitsHDU::save.
  ***************************************************************************/
 void GFitsTable::data_save(void)
 {
-//cout << "GFitsTable::save entry" << endl;
+    // Debug definition: Dump method entry
+    #if defined(G_DEBUG_SAVE)
+    std::cout << "GFitsTable::save: entry" << std::endl;
+    #endif
+
+    // Make sure that column lengths are consistent with table length.
+    // Columns with zero length will not be considered (why?)
+    for (int i = 0; i < m_cols; ++i) {
+        if (m_columns[i] != NULL && m_columns[i]->length() > 0) {
+            if (m_columns[i]->length() != m_rows) {
+                throw GException::fits_bad_col_length(G_SAVE_DATA,
+                                                      m_columns[i]->length(),
+                                                      m_rows);
+            }
+        }
+    }
+
     // Move to HDU
     int status = 0;
-//    status     = __ffmahd(FPTR(m_fitsfile), (FPTR(m_fitsfile)->HDUposition)+1,
-//                          NULL, &status);
-    status     = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, NULL, &status);
+    status = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, NULL, &status);
 
-    // If HDU does not yet exist in file then create it now
+    // If HDU does not exist in file then create it now
     if (status == 107) {
 
         // Reset status
@@ -698,44 +789,97 @@ void GFitsTable::data_save(void)
             }
         }
 
+        // Debug option: Signal table creation
+        #if defined(G_DEBUG_SAVE)
+        std::cout << "GFitsTable::save: created new table" << std::endl;
+        #endif
+
     }
-    else if (status != 0)
+    
+    // ... otherwise we signal a FITS error
+    else if (status != 0) {
         throw GException::fits_error(G_SAVE_DATA, status);
+    }
 
     // Determine number of columns in table
     int num_cols = 0;
     status = __ffgncl(FPTR(m_fitsfile), &num_cols, &status);
-    if (status != 0)
+    if (status != 0) {
         throw GException::fits_error(G_SAVE_DATA, status);
+    }
+    
+    // Debug option: Log number of columns in FITS table
+    #if defined(G_DEBUG_SAVE)
+    std::cout << "GFitsTable::save: FITS table contains ";
+    std::cout << num_cols << " columns." << std::endl;
+    #endif
 
     // If we have no columns in the table then delete all columns from
     // FITS table
-    if (m_columns == NULL) {
-        // TBD: Delete all columns from FITS table
+    if (m_columns == NULL && num_cols > 0) {
+        for (int i = 0; i < num_cols; ++i) {
+            status = __ffdcol(FPTR(m_fitsfile), i, &status);
+            if (status != 0) {
+                throw GException::fits_error(G_SAVE_DATA, status);
+            }
+        }
     }
 
     // ... otherwise update the FITS table
     else {
 
-        // Make sure that all columns have the same length. Columns with zero
-        // length will not be considered
-        int length = 0;
-        for (int i = 0; i < m_cols; ++i) {
-            if (m_columns[i] != NULL && m_columns[i]->length() > 0) {
-                if (length == 0)
-                    length = m_columns[i]->length();
-                else if (m_columns[i]->length() != length) {
-                    throw GException::fits_bad_col_length(G_SAVE_DATA,
-                                                          m_columns[i]->length(),
-                                                          length);
-                }
-            }
+        // Determine number of rows in table
+        long num_rows = 0;
+        status        = __ffgnrw(FPTR(m_fitsfile), &num_rows, &status);
+        if (status != 0) {
+            throw GException::fits_error(G_SAVE_DATA, status);
         }
 
-        // If the table length differs from number of rows in the FITS file
-        // then re-adjust FITS table length
-        // TBD
+        // Debug option: Log number of rows in FITS table
+        #if defined(G_DEBUG_SAVE)
+        std::cout << "GFitsTable::save: FITS table contains ";
+        std::cout << num_rows << " rows." << std::endl;
+        #endif
 
+        // If the table length differs from number of rows in the FITS file
+        // then readjust FITS table length. We do this by adding or
+        // deleting rows at the end of the table as we anyways rewrite the
+        // entire table later
+        if (m_rows > num_rows) {
+        
+            // Insert rows at the end of the table
+            long long firstrow = num_rows;
+            long long nrows    = m_rows - num_rows;
+            status = __ffirow(FPTR(m_fitsfile), firstrow, nrows, &status);
+            if (status != 0) {
+                throw GException::fits_error(G_SAVE_DATA, status);
+            }
+            
+            // Debug option: Log row adding
+            #if defined(G_DEBUG_SAVE)
+            std::cout << "GFitsTable::save: Added " << nrows;
+            std::cout << " rows to FITS table." << std::endl;
+            #endif
+            
+        }
+        else if (m_rows < num_rows) {
+
+            // Delete rows at the end of the table
+            long long firstrow = num_rows;
+            long long nrows    = num_rows - m_rows;
+            status = __ffdrow(FPTR(m_fitsfile), firstrow, nrows, &status);
+            if (status != 0) {
+                throw GException::fits_error(G_SAVE_DATA, status);
+            }
+            
+            // Debug option: Log row adding
+            #if defined(G_DEBUG_SAVE)
+            std::cout << "GFitsTable::save: Deleted " << nrows;
+            std::cout << " rows from FITS table." << std::endl;
+            #endif
+            
+        }
+        
         // Update all columns. The 'm_colnum' field specifies where in the
         // FITS file the column resides. If 'm_colnum=0' then we have a new
         // column that does not yet exist. In this case we append a new column
@@ -755,8 +899,9 @@ void GFitsTable::data_save(void)
                     // Append column to FITS file
                     status = __fficol(FPTR(m_fitsfile), num_cols, get_ttype(i),
                                       get_tform(i), &status);
-                    if (status != 0)
+                    if (status != 0) {
                         throw GException::fits_error(G_SAVE_DATA, status);
+                    }
 
                     // Connect all column to FITS table by copying over the
                     // FITS file pointer.
@@ -766,32 +911,56 @@ void GFitsTable::data_save(void)
                 } // endif: column appended to FITS file
 
                 // Now write column into FITS file (only if length is positive)
-                if (m_columns[i]->length() > 0)
+                if (m_columns[i]->length() > 0) {
                     m_columns[i]->save();
+                }
 
             } // endif: column was valid
         } // endfor: looped over all table columns
 
-        // Delete all unused columns of FITS file (from last to first!!!)
+        // Delete all unused columns from FITS file. We do this from last to
+        // first so that the column numbers remain valid. Also note that
+        // FITS column counting starts from 1.
         for (int colnum = num_cols; colnum > 0; --colnum) {
 
-            // Initialise column usage flag
-            int used = 0;
-
-            // Set column usage flag by searching column number in table
+            // Get column name from FITS file
+            char keyname[10];
+            char value[80];
+            sprintf(keyname, "TTYPE%d", colnum);
+            status = __ffgkey(FPTR(m_fitsfile), keyname, value, NULL, &status);
+            if (status != 0) {
+                throw GException::fits_error(G_SAVE_DATA, status);
+            }
+            value[strlen(value)-1] = '\0';
+            std::string colname = strip_whitespace(&(value[1]));
+            
+            // Check if this column is actually in our list of columns
+            bool used = false;
             for (int i = 0; i < m_cols; ++i) {
                 if (m_columns[i]           != NULL &&
-                    m_columns[i]->m_colnum == colnum &&
-                    m_columns[i]->length() > 0) {
-                    used = 1;
+                    m_columns[i]->length() > 0 &&
+                    m_columns[i]->name()   == colname) {
+                    used = true;
                     break;
                 }
             }
 
             // If column is not used then delete it now from FITS table
             if (!used) {
-                // delete FITS column 'colnum'
-            }
+
+                // Delete column
+                status = __ffdcol(FPTR(m_fitsfile), colnum, &status);
+                if (status != 0) {
+                    throw GException::fits_error(G_SAVE_DATA, status);
+                }
+
+                // Debug option: Log column deletion
+                #if defined(G_DEBUG_SAVE)
+                std::cout << "GFitsTable::save: Deleted obsolete column ";
+                std::cout << value << " from FITS table." << std::endl;
+                #endif
+                
+            } // endif: deleted column
 
         } // endfor: Looped over all FITS columns
 
@@ -799,7 +968,11 @@ void GFitsTable::data_save(void)
 
     // Now update the header
 
-//cout << "GFitsTable::save exit" << endl;
+    // Debug definition: Dump method exit
+    #if defined(G_DEBUG_SAVE)
+    std::cout << "GFitsTable::save: exit" << std::endl;
+    #endif
+
     // Return
     return;
 }
