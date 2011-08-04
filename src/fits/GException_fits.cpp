@@ -505,3 +505,63 @@ GException::fits_wrong_image_operator::fits_wrong_image_operator(std::string ori
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief FITS error: Invalid row number
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] row Row number.
+ * @param[in] nrows Number of rows in table.
+ * @param[in] message Error message.
+ ***************************************************************************/
+GException::fits_invalid_row::fits_invalid_row(std::string origin,
+                                               int         row,
+                                               int         nrows,
+                                               std::string message)
+{
+    // Set origin
+    m_origin  = origin;
+
+    // Set message
+    m_message  = "Invalid row number "+str(row)+" specified";
+    m_message += " (must be within [0,"+str(nrows)+"]).";
+
+    // Set optional message
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief FITS error: Invalid number of rows
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] nrows Number of rows.
+ * @param[in] max_rows Maximum number of rows allowed.
+ * @param[in] message Error message.
+ ***************************************************************************/
+GException::fits_invalid_nrows::fits_invalid_nrows(std::string origin,
+                                                   int         nrows,
+                                                   int         max_rows,
+                                                   std::string message)
+{
+    // Set origin
+    m_origin  = origin;
+
+    // Set message
+    m_message  = "Invalid number of rows ("+str(nrows)+") specified";
+    m_message += " (must be within [0,"+str(max_rows)+"]).";
+
+    // Set optional message
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
+

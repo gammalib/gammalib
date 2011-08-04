@@ -296,6 +296,20 @@ public:
 		                          int         naxis,
 								  int         nargs);
     };
+    class fits_invalid_row : public GExceptionHandler {
+    public:
+        fits_invalid_row(std::string origin,
+                         int         row,
+                         int         nrows,
+                         std::string message = "");
+    };
+    class fits_invalid_nrows : public GExceptionHandler {
+    public:
+        fits_invalid_nrows(std::string origin,
+                           int         nrows,
+                           int         max_rows,
+                           std::string message = "");
+    };
 
 
     // GSkymap exceptions
