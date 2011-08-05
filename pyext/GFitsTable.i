@@ -69,11 +69,34 @@ static int table_column_tuple(PyObject *input, int *ptr) {
     }
 }
 %}
+
+// This is the typemap that makes use of the function defined above
 %typemap(in) int GFitsTableColInx[ANY](int temp[3]) {
-   if (!table_column_tuple($input,temp)) {
-      return NULL;
-   }
-   $1 = &temp[0];
+    if (!table_column_tuple($input,temp)) {
+        return NULL;
+    }
+    $1 = &temp[0];
+}
+
+// This typecheck verifies that all arguments are integers. The typecheck
+// is needed for using "int GFitsTableColInx" in overloaded methods.
+%typemap(typecheck) int GFitsTableColInx[ANY] {
+    $1 = 1;
+    if (PySequence_Check($input)) {
+        int size = PyObject_Length($input);
+        for (int i = 0; i < size; i++) {
+            PyObject *o = PySequence_GetItem($input,i);
+            if (!PyInt_Check(o)) {
+                $1 = 0;
+                break;
+            }
+        }
+    }
+    else {
+        if (!PyInt_Check($input)) {
+            $1 = 0;
+        }
+    }
 }
 
 
@@ -94,15 +117,13 @@ public:
     virtual GFitsTable* clone(void) const = 0;
 
     // Implemented Methods
-    void           append_column(GFitsTableCol& column);
-    void           insert_column(int colnum, GFitsTableCol& column);
-    void           append_rows(const int& nrows);
-    void           insert_rows(const int& rownum, const int& nrows);
-    void           remove_rows(const int& rownum, const int& nrows);
-    GFitsTableCol* column(const std::string& colname);
-    GFitsTableCol* column(const int& colnum);
-    int            nrows(void) const;
-    int            ncols(void) const;
+    void append_column(GFitsTableCol& column);
+    void insert_column(int colnum, GFitsTableCol& column);
+    void append_rows(const int& nrows);
+    void insert_rows(const int& rownum, const int& nrows);
+    void remove_rows(const int& rownum, const int& nrows);
+    int  nrows(void) const;
+    int  ncols(void) const;
 };
 
 
@@ -112,5 +133,19 @@ public:
 %extend GFitsTable {
     char *__str__() {
         return tochar(self->print());
+    }
+    GFitsTableCol& __getitem__(const int& colnum) {
+        return (*self)[colnum];
+    }
+    GFitsTableCol& __getitem__(const std::string& colname) {
+        return (*self)[colname];
+    }
+    void __setitem__(const int& colnum, const GFitsTableCol& col) {
+        (*self)[colnum] = col;
+        return;
+    }
+    void __setitem__(const std::string& colname, const GFitsTableCol& col) {
+        (*self)[colname] = col;
+        return;
     }
 };
