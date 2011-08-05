@@ -690,26 +690,26 @@ void GFitsTableBoolCol::init_data(void)
  *
  * Refer to GFitsTableCol::load_column for more information.
  ***************************************************************************/
-void GFitsTableBoolCol::fetch_data(void)
+void GFitsTableBoolCol::fetch_data(void) const
 {
     // Calculate size of memory
     m_size = m_number * m_length;
 
     // Free old buffer memory
-    free_buffer();
+    const_cast<GFitsTableBoolCol*>(this)->free_buffer();
 
     // Allocate buffer memory
-    alloc_buffer();
+    const_cast<GFitsTableBoolCol*>(this)->alloc_buffer();
 
     // Save column
-    load_column();
+    const_cast<GFitsTableBoolCol*>(this)->load_column();
 
     // Extract values from buffer
     for (int i = 0; i < m_size; ++i)
         m_data[i] = (bool)m_buffer[i];
 
     // Free buffer memory
-    free_buffer();
+    const_cast<GFitsTableBoolCol*>(this)->free_buffer();
 
     // Return
     return;

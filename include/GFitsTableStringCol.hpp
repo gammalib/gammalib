@@ -79,7 +79,7 @@ private:
     void                 release_data(void);
     void                 alloc_nulval(const std::string& value);
     void                 init_data(void);
-    void                 fetch_data(void);
+    void                 fetch_data(void) const;
     void                 alloc_buffer(void);
     void                 free_buffer(void);
     void*                ptr_data(void) { return m_buffer; }
