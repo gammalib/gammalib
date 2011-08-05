@@ -342,8 +342,6 @@ void GLATEdisp::free_members(void)
  *
  * @param[in] hdu FITS table pointer.
  *
- * @exception GException::fits_column_not_found
- *            Effective area column not found
  * @exception GLATException::inconsistent_response
  *            Inconsistent response table encountered
  ***************************************************************************/
@@ -365,12 +363,8 @@ void GLATEdisp::read_edisp(const GFitsTable* hdu)
         m_ls1.reserve(size);
 
         // Get pointer to columns
-        GFitsTableCol* norm = ((GFitsTable*)hdu)->column("NORM");
-        GFitsTableCol* ls1  = ((GFitsTable*)hdu)->column("LS1");
-        if (norm == NULL)
-            throw GException::fits_column_not_found(G_READ_EDISP, "NORM");
-        if (ls1 == NULL)
-            throw GException::fits_column_not_found(G_READ_EDISP, "LS1");
+        const GFitsTableCol* norm = &(*hdu)["NORM"];
+        const GFitsTableCol* ls1  = &(*hdu)["LS1"];
 
         // Check consistency of columns
         if (norm->number() != size)

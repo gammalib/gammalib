@@ -4,10 +4,18 @@
  *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -271,11 +279,16 @@ void GLATEventList::read(const GFits& file)
     // Get HDU
     GFitsTable* hdu = file.table("EVENTS");
 
-    // Read event data
-    read_events(hdu);
+    // Continue only if valid
+    if (hdu != NULL) {
 
-    // Read data selection keywords
-    read_ds_keys(hdu);
+        // Read event data
+        read_events(*hdu);
+
+        // Read data selection keywords
+        read_ds_keys(*hdu);
+    
+    } // endif: HDU was valid
 
     // Return
     return;
@@ -417,9 +430,11 @@ void GLATEventList::free_members(void)
 /***********************************************************************//**
  * @brief Read LAT events from FITS table.
  *
- * @param[in] table FITS table pointer.
+ * @param[in] table Event table.
+ *
+ * Read the LAT events from the event table.
  ***************************************************************************/
-void GLATEventList::read_events(const GFitsTable* table)
+void GLATEventList::read_events(const GFitsTable& table)
 {
     // Clear existing events
     m_events.clear();
@@ -427,102 +442,96 @@ void GLATEventList::read_events(const GFitsTable* table)
     // Allocate space for keyword name
     char keyword[10];
 
-    // Continue only if HDU is valid
-    if (table != NULL) {
+    // Extract number of events in FT1 file
+    int num = table.integer("NAXIS2");
 
-        // Circumvent const correctness. We need this because the column()
-        // method is not declared const. This should be corrected.
-        GFitsTable* hdu = (GFitsTable*)table;
+    // If there are events then load them
+    if (num > 0) {
 
-        // Extract number of events in FT1 file
-        int num = hdu->integer("NAXIS2");
+        // Reserve data
+        m_events.reserve(num);
 
-        // If there are events then load them
-        if (num > 0) {
+        // Get column pointers
+        GFitsTableDoubleCol* ptr_time    = (GFitsTableDoubleCol*)&table["TIME"];
+        GFitsTableFloatCol*  ptr_energy  = (GFitsTableFloatCol*)&table["ENERGY"];
+        GFitsTableFloatCol*  ptr_ra      = (GFitsTableFloatCol*)&table["RA"];
+        GFitsTableFloatCol*  ptr_dec     = (GFitsTableFloatCol*)&table["DEC"];
+        GFitsTableFloatCol*  ptr_theta   = (GFitsTableFloatCol*)&table["THETA"];
+        GFitsTableFloatCol*  ptr_phi     = (GFitsTableFloatCol*)&table["PHI"];
+        GFitsTableFloatCol*  ptr_zenith  = (GFitsTableFloatCol*)&table["ZENITH_ANGLE"];
+        GFitsTableFloatCol*  ptr_azimuth = (GFitsTableFloatCol*)&table["EARTH_AZIMUTH_ANGLE"];
+        GFitsTableLongCol*   ptr_eid     = (GFitsTableLongCol*)&table["EVENT_ID"];
+        GFitsTableLongCol*   ptr_rid     = (GFitsTableLongCol*)&table["RUN_ID"];
+        GFitsTableShortCol*  ptr_recon   = (GFitsTableShortCol*)&table["RECON_VERSION"];
+        GFitsTableShortCol*  ptr_calib   = (GFitsTableShortCol*)&table["CALIB_VERSION"];
+        GFitsTableShortCol*  ptr_class   = (GFitsTableShortCol*)&table["EVENT_CLASS"];
+        GFitsTableShortCol*  ptr_conv    = (GFitsTableShortCol*)&table["CONVERSION_TYPE"];
+        GFitsTableDoubleCol* ptr_ltime   = (GFitsTableDoubleCol*)&table["LIVETIME"];
 
-            // Reserve data
-            m_events.reserve(num);
+        // Copy data from columns into GLATEventAtom objects
+        GLATEventAtom event;
+        for (int i = 0; i < num; ++i) {
+            event.m_time.met((*ptr_time)(i));
+            event.m_energy.MeV((*ptr_energy)(i));
+            event.m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
+            event.m_theta               = (*ptr_theta)(i);
+            event.m_phi                 = (*ptr_phi)(i);
+            event.m_zenith_angle        = (*ptr_zenith)(i);
+            event.m_earth_azimuth_angle = (*ptr_azimuth)(i);
+            event.m_event_id            = (*ptr_eid)(i);
+            event.m_run_id              = (*ptr_rid)(i);
+            event.m_recon_version       = (*ptr_recon)(i);
+            event.m_calib_version[0]    = (*ptr_calib)(i,0);
+            event.m_calib_version[1]    = (*ptr_calib)(i,1);
+            event.m_calib_version[2]    = (*ptr_calib)(i,2);
+            event.m_event_class         = (*ptr_class)(i);
+            event.m_conversion_type     = (*ptr_conv)(i);
+            event.m_livetime            = (*ptr_ltime)(i);
+            m_events.push_back(event);
+        }
 
-            // Get column pointers
-            GFitsTableDoubleCol* ptr_time    = (GFitsTableDoubleCol*)hdu->column("TIME");
-            GFitsTableFloatCol*  ptr_energy  = (GFitsTableFloatCol*)hdu->column("ENERGY");
-            GFitsTableFloatCol*  ptr_ra      = (GFitsTableFloatCol*)hdu->column("RA");
-            GFitsTableFloatCol*  ptr_dec     = (GFitsTableFloatCol*)hdu->column("DEC");
-            GFitsTableFloatCol*  ptr_theta   = (GFitsTableFloatCol*)hdu->column("THETA");
-            GFitsTableFloatCol*  ptr_phi     = (GFitsTableFloatCol*)hdu->column("PHI");
-            GFitsTableFloatCol*  ptr_zenith  = (GFitsTableFloatCol*)hdu->column("ZENITH_ANGLE");
-            GFitsTableFloatCol*  ptr_azimuth = (GFitsTableFloatCol*)hdu->column("EARTH_AZIMUTH_ANGLE");
-            GFitsTableLongCol*   ptr_eid     = (GFitsTableLongCol*)hdu->column("EVENT_ID");
-            GFitsTableLongCol*   ptr_rid     = (GFitsTableLongCol*)hdu->column("RUN_ID");
-            GFitsTableShortCol*  ptr_recon   = (GFitsTableShortCol*)hdu->column("RECON_VERSION");
-            GFitsTableShortCol*  ptr_calib   = (GFitsTableShortCol*)hdu->column("CALIB_VERSION");
-            GFitsTableShortCol*  ptr_class   = (GFitsTableShortCol*)hdu->column("EVENT_CLASS");
-            GFitsTableShortCol*  ptr_conv    = (GFitsTableShortCol*)hdu->column("CONVERSION_TYPE");
-            GFitsTableDoubleCol* ptr_ltime   = (GFitsTableDoubleCol*)hdu->column("LIVETIME");
+        // Extract number of diffuse response labels
+        int num_difrsp = table.integer("NDIFRSP");
 
-            // Copy data from columns into GLATEventAtom objects
-            GLATEventAtom event;
+        // Allocate diffuse response components
+        if (num_difrsp > 0) {
+
+            // Reserve space
+            m_difrsp_label.reserve(num_difrsp);
+
+            // Allocate components
             for (int i = 0; i < num; ++i) {
-                event.m_time.met((*ptr_time)(i));
-                event.m_energy.MeV((*ptr_energy)(i));
-                event.m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
-                event.m_theta               = (*ptr_theta)(i);
-                event.m_phi                 = (*ptr_phi)(i);
-                event.m_zenith_angle        = (*ptr_zenith)(i);
-                event.m_earth_azimuth_angle = (*ptr_azimuth)(i);
-                event.m_event_id            = (*ptr_eid)(i);
-                event.m_run_id              = (*ptr_rid)(i);
-                event.m_recon_version       = (*ptr_recon)(i);
-                event.m_calib_version[0]    = (*ptr_calib)(i,0);
-                event.m_calib_version[1]    = (*ptr_calib)(i,1);
-                event.m_calib_version[2]    = (*ptr_calib)(i,2);
-                event.m_event_class         = (*ptr_class)(i);
-                event.m_conversion_type     = (*ptr_conv)(i);
-                event.m_livetime            = (*ptr_ltime)(i);
-                m_events.push_back(event);
+                m_events[i].m_difrsp = new double[num_difrsp];
             }
 
-            // Extract number of diffuse response labels
-            int num_difrsp = hdu->integer("NDIFRSP");
+            // Load diffuse columns
+            for (int k = 0; k < num_difrsp; ++k) {
 
-            // Allocate diffuse response components
-            if (num_difrsp > 0) {
+                // Set keyword name
+                std::sprintf(keyword, "DIFRSP%d", k);
 
-                // Reserve space
-                m_difrsp_label.reserve(num_difrsp);
+                // Get DIFRSP label
+                try {
+                    GFitsTable* ptr = (GFitsTable*)&table; // Kluge to const
+                    m_difrsp_label.push_back(ptr->card(std::string(keyword))->string());
+                }
+                catch (GException::fits_key_not_found &e) {
+                    m_difrsp_label.push_back("NONE");
+                }
 
-                // Allocate components
-                for (int i = 0; i < num; ++i)
-                    m_events[i].m_difrsp = new double[num_difrsp];
+                // Get column pointer
+                GFitsTableFloatCol* ptr_dif = (GFitsTableFloatCol*)&table[std::string(keyword)];
 
-                // Load diffuse columns
-                for (int k = 0; k < num_difrsp; ++k) {
+                // Copy data from columns into GLATEventAtom objects
+                for (int i = 0; i < num; ++i) {
+                    m_events[i].m_difrsp[k] = (*ptr_dif)(i);
+                }
 
-                    // Set keyword name
-                    std::sprintf(keyword, "DIFRSP%d", k);
+            } // endfor: looped over diffuse columns
 
-                    // Get DIFRSP label
-                    try {
-                        m_difrsp_label.push_back(hdu->card(std::string(keyword))->string());
-                    }
-                    catch (GException::fits_key_not_found &e) {
-                        m_difrsp_label.push_back("NONE");
-                    }
+        } // endif: diffuse components found
 
-                    // Get column pointer
-                    GFitsTableFloatCol* ptr_dif = (GFitsTableFloatCol*)hdu->column(std::string(keyword));
-
-                    // Copy data from columns into GLATEventAtom objects
-                    for (int i = 0; i < num; ++i)
-                        m_events[i].m_difrsp[k] = (*ptr_dif)(i);
-
-                } // endfor: looped over diffuse columns
-
-            } // endif: diffuse components found
-
-        } // endif: events found
-
-    } // endif: HDU was valid
+    } // endif: events found
 
     // Return
     return;
@@ -533,75 +542,74 @@ void GLATEventList::read_events(const GFitsTable* table)
  * @brief Read data selection keywords from FITS HDU.
  *
  * @param[in] hdu FITS HDU pointer.
+ *
+ * @todo Declared header card const in to GFitsHDU.
+ * @todo Add check key method to GFitsHDU to avoid unneccesary try/catch
+ *       blocks.
  ***************************************************************************/
-void GLATEventList::read_ds_keys(const GFitsHDU* hdu)
+void GLATEventList::read_ds_keys(const GFitsHDU& hdu)
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Get number of data selection keys
+    int ds_num = hdu.integer("NDSKEYS");
 
-        // Get number of data selection keys
-        int ds_num = hdu->integer("NDSKEYS");
+    // Get data selection keys
+    if (ds_num > 0) {
 
-        // Get data selection keys
-        if (ds_num > 0) {
+        // Circumvent const correctness. We need this because the header()
+        // card method is not declared const. This should be corrected.
+        GFitsHDU* ptr = (GFitsHDU*)&hdu;
 
-            // Circumvent const correctness. We need this because the column()
-            // method is not declared const. This should be corrected.
-            GFitsHDU* ptr = (GFitsHDU*)hdu;
+        // Reserve space
+        m_ds_type.reserve(ds_num);
+        m_ds_unit.reserve(ds_num);
+        m_ds_value.reserve(ds_num);
+        m_ds_reference.reserve(ds_num);
 
-            // Reserve space
-            m_ds_type.reserve(ds_num);
-            m_ds_unit.reserve(ds_num);
-            m_ds_value.reserve(ds_num);
-            m_ds_reference.reserve(ds_num);
+        // Allocate space for the keyword
+        char keyword[10];
 
-            // Allocate space for the keyword
-            char keyword[10];
+        // Get columns
+        for (int i = 0; i < ds_num; ++i) {
 
-            // Get columns
-            for (int i = 0; i < ds_num; ++i) {
+            // Get DSTYPnn
+            try {
+                std::sprintf(keyword, "DSTYP%d", i+1);
+                m_ds_type.push_back(ptr->card(std::string(keyword))->string());
+            }
+            catch (GException::fits_key_not_found &e) {
+                m_ds_type.push_back("");
+            }
 
-                // Get DSTYPnn
-                try {
-                    std::sprintf(keyword, "DSTYP%d", i+1);
-                    m_ds_type.push_back(ptr->card(std::string(keyword))->string());
-                }
-                catch (GException::fits_key_not_found &e) {
-                    m_ds_type.push_back("");
-                }
+            // Get DSUNInn
+            try {
+                std::sprintf(keyword, "DSUNI%d", i+1);
+                m_ds_unit.push_back(ptr->card(std::string(keyword))->string());
+            }
+            catch (GException::fits_key_not_found &e) {
+                m_ds_unit.push_back("");
+            }
 
-                // Get DSUNInn
-                try {
-                    std::sprintf(keyword, "DSUNI%d", i+1);
-                    m_ds_unit.push_back(ptr->card(std::string(keyword))->string());
-                }
-                catch (GException::fits_key_not_found &e) {
-                    m_ds_unit.push_back("");
-                }
+            // Get DSVALnn
+            try {
+                std::sprintf(keyword, "DSVAL%d", i+1);
+                m_ds_value.push_back(ptr->card(std::string(keyword))->string());
+            }
+            catch (GException::fits_key_not_found &e) {
+                m_ds_value.push_back("");
+            }
 
-                // Get DSVALnn
-                try {
-                    std::sprintf(keyword, "DSVAL%d", i+1);
-                    m_ds_value.push_back(ptr->card(std::string(keyword))->string());
-                }
-                catch (GException::fits_key_not_found &e) {
-                    m_ds_value.push_back("");
-                }
+            // Get DSREFnn
+            try {
+                std::sprintf(keyword, "DSREF%d", i+1);
+                m_ds_reference.push_back(ptr->card(std::string(keyword))->string());
+            }
+            catch (GException::fits_key_not_found &e) {
+                m_ds_reference.push_back("");
+            }
 
-                // Get DSREFnn
-                try {
-                    std::sprintf(keyword, "DSREF%d", i+1);
-                    m_ds_reference.push_back(ptr->card(std::string(keyword))->string());
-                }
-                catch (GException::fits_key_not_found &e) {
-                    m_ds_reference.push_back("");
-                }
+        } // endfor: looped over data selection keys
 
-            } // endfor: looped over data selection keys
-
-        } // endif: there were data selection keys
-
-    } // endif: HDU was valid
+    } // endif: there were data selection keys
 
     // Return
     return;

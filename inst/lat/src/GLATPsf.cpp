@@ -495,16 +495,11 @@ void GLATPsf::free_members(void)
  * @brief Read PSF scale factors from FITS table
  *
  * @param[in] hdu FITS table pointer.
- *
- * @exception GException::fits_column_not_found
- *            Table column not found
  ***************************************************************************/
 void GLATPsf::read_scale(const GFitsTable* hdu)
 {
     // Get pointer to column
-    GFitsTableCol* scale = ((GFitsTable*)hdu)->column("PSFSCALE");
-    if (scale == NULL)
-        throw GException::fits_column_not_found(G_READ_SCALE, "PSFSCALE");
+    const GFitsTableCol* scale = &(*hdu)["PSFSCALE"];
 
     // Get scaling factors
     if (isfront()) {
@@ -594,8 +589,6 @@ double GLATPsf::scale_factor(const double& energy) const
  *
  * @param[in] hdu FITS table pointer.
  *
- * @exception GException::fits_column_not_found
- *            Table column not found
  * @exception GLATException::inconsistent_response
  *            Inconsistent response table encountered
  ***************************************************************************/
@@ -624,18 +617,10 @@ void GLATPsf::read_psf_v1(const GFitsTable* hdu)
         m_gtail.reserve(size);
 
         // Get pointer to columns
-        GFitsTableCol* ncore = ((GFitsTable*)hdu)->column("NCORE");
-        GFitsTableCol* sigma = ((GFitsTable*)hdu)->column("SIGMA");
-        GFitsTableCol* gcore = ((GFitsTable*)hdu)->column("GCORE");
-        GFitsTableCol* gtail = ((GFitsTable*)hdu)->column("GTAIL");
-        if (ncore == NULL)
-            throw GException::fits_column_not_found(G_READ_PSF, "NCORE");
-        if (sigma == NULL)
-            throw GException::fits_column_not_found(G_READ_PSF, "SIGMA");
-        if (gcore == NULL)
-            throw GException::fits_column_not_found(G_READ_PSF, "GCORE");
-        if (gtail == NULL)
-            throw GException::fits_column_not_found(G_READ_PSF, "GTAIL");
+        const GFitsTableCol* ncore = &(*hdu)["NCORE"];
+        const GFitsTableCol* sigma = &(*hdu)["SIGMA"];
+        const GFitsTableCol* gcore = &(*hdu)["GCORE"];
+        const GFitsTableCol* gtail = &(*hdu)["GTAIL"];
 
         // Check consistency of columns
         if (ncore->number() != size)

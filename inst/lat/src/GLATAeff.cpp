@@ -410,8 +410,6 @@ void GLATAeff::free_members(void)
  *
  * @param[in] hdu FITS table pointer.
  *
- * @exception GException::fits_column_not_found
- *            Effective area column not found
  * @exception GLATException::inconsistent_response
  *            Inconsistent response table encountered
  *
@@ -436,18 +434,18 @@ void GLATAeff::read_aeff(const GFitsTable* hdu)
         m_aeff.reserve(size);
 
         // Get pointer to effective area column
-        GFitsTableCol* ptr = ((GFitsTable*)hdu)->column("EFFAREA");
-        if (ptr == NULL)
-            throw GException::fits_column_not_found(G_READ_AEFF, "EFFAREA");
+        const GFitsTableCol* ptr = &(*hdu)["EFFAREA"];
 
         // Check consistency of effective area table
         int num = ptr->number();
-        if (num != size)
+        if (num != size) {
             throw GLATException::inconsistent_response(G_READ_AEFF, num, size);
+        }
 
         // Copy data and convert from m2 into cm2
-        for (int i = 0; i < size; ++i)
+        for (int i = 0; i < size; ++i) {
             m_aeff.push_back(ptr->real(0,i) * 1.0e4);
+        }
 
     } // endif: there were effective area bins
 

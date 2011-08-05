@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -599,26 +607,26 @@ void GMWLSpectrum::read_fits(const GFitsTable* table)
     m_data.clear();
 
     // Initialise column pointers columns
-    GFitsTableCol* c_energy     = NULL;
-    GFitsTableCol* c_energy_err = NULL;
-    GFitsTableCol* c_flux       = NULL;
-    GFitsTableCol* c_flux_err   = NULL;
+    const GFitsTableCol* c_energy     = NULL;
+    const GFitsTableCol* c_energy_err = NULL;
+    const GFitsTableCol* c_flux       = NULL;
+    const GFitsTableCol* c_flux_err   = NULL;
 
     // Extract column pointers
     if (table->ncols() == 2) {
-        c_energy = ((GFitsTable*)table)->column(0);
-        c_flux   = ((GFitsTable*)table)->column(1);
+        c_energy = &(*table)[0];
+        c_flux   = &(*table)[1];
     }
     else if (table->ncols() == 3) {
-        c_energy   = ((GFitsTable*)table)->column(0);
-        c_flux     = ((GFitsTable*)table)->column(1);
-        c_flux_err = ((GFitsTable*)table)->column(2);
+        c_energy   = &(*table)[0];
+        c_flux     = &(*table)[1];
+        c_flux_err = &(*table)[2];
     }
     else if (table->ncols() > 3) {
-        c_energy     = ((GFitsTable*)table)->column(0);
-        c_energy_err = ((GFitsTable*)table)->column(1);
-        c_flux       = ((GFitsTable*)table)->column(2);
-        c_flux_err   = ((GFitsTable*)table)->column(3);
+        c_energy     = &(*table)[0];
+        c_energy_err = &(*table)[1];
+        c_flux       = &(*table)[2];
+        c_flux_err   = &(*table)[3];
     }
     else {
         throw GMWLException::bad_file_format(G_READ_FITS,

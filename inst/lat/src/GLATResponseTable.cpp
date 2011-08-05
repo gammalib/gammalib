@@ -4,10 +4,18 @@
  *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -163,9 +171,6 @@ GLATResponseTable* GLATResponseTable::clone(void) const
  *
  * @param[in] hdu Response table HDU.
  *
- * @exception GException::fits_column_not_found
- *            Response table column not found.
- *
  * The response table definition is assumed to be stored in 4 vector columns
  * with names
  * ENERG_LO (energy bins lower boundary)
@@ -179,20 +184,10 @@ void GLATResponseTable::read(const GFitsTable* hdu)
     clear();
 
     // Get pointers to table columns
-    GFitsTableCol* energy_lo = ((GFitsTable*)hdu)->column("ENERG_LO");
-    GFitsTableCol* energy_hi = ((GFitsTable*)hdu)->column("ENERG_HI");
-    GFitsTableCol* ctheta_lo = ((GFitsTable*)hdu)->column("CTHETA_LO");
-    GFitsTableCol* ctheta_hi = ((GFitsTable*)hdu)->column("CTHETA_HI");
-
-    // Check on existence of columns
-    if (energy_lo == NULL)
-        throw GException::fits_column_not_found(G_READ, "ENERG_LO");
-    if (energy_hi == NULL)
-        throw GException::fits_column_not_found(G_READ, "ENERG_HI");
-    if (ctheta_lo == NULL)
-        throw GException::fits_column_not_found(G_READ, "CTHETA_LO");
-    if (ctheta_hi == NULL)
-        throw GException::fits_column_not_found(G_READ, "CTHETA_HI");
+    const GFitsTableCol* energy_lo = &(*hdu)["ENERG_LO"];
+    const GFitsTableCol* energy_hi = &(*hdu)["ENERG_HI"];
+    const GFitsTableCol* ctheta_lo = &(*hdu)["CTHETA_LO"];
+    const GFitsTableCol* ctheta_hi = &(*hdu)["CTHETA_HI"];
 
     // Extract number of bins
     m_energy_num = energy_lo->number();
