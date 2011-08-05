@@ -44,9 +44,9 @@ public:
     virtual ~GFitsTableFloatCol(void);
 
     // Implement virtual methods
-    virtual std::string string(const int& row, const int& col = 0);
-    virtual double      real(const int& row, const int& col = 0);
-    virtual int         integer(const int& row, const int& col = 0);
+    virtual std::string string(const int& row, const int& col = 0) const;
+    virtual double      real(const int& row, const int& col = 0) const;
+    virtual int         integer(const int& row, const int& col = 0) const;
     virtual void        insert(const int& rownum, const int& nrows);
     virtual void        remove(const int& rownum, const int& nrows);
     
