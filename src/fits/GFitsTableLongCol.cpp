@@ -201,7 +201,7 @@ const long& GFitsTableLongCol::operator() (const int& row, const int& inx) const
  *
  * Returns value of specified row and vector index as string.
  ***************************************************************************/
-std::string GFitsTableLongCol::string(const int& row, const int& inx)
+std::string GFitsTableLongCol::string(const int& row, const int& inx) const
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
@@ -223,7 +223,7 @@ std::string GFitsTableLongCol::string(const int& row, const int& inx)
  *
  * Returns value of specified row and vector index as double precision.
  ***************************************************************************/
-double GFitsTableLongCol::real(const int& row, const int& inx)
+double GFitsTableLongCol::real(const int& row, const int& inx) const
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
@@ -244,7 +244,7 @@ double GFitsTableLongCol::real(const int& row, const int& inx)
  *
  * Returns value of specified row and vector index as integer.
  ***************************************************************************/
-int GFitsTableLongCol::integer(const int& row, const int& inx)
+int GFitsTableLongCol::integer(const int& row, const int& inx) const
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();

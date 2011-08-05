@@ -57,9 +57,9 @@ public:
     const bool&       operator() (const int& row, const int& inx = 0) const;
 
     // Implement virtual methods
-    virtual std::string string(const int& row, const int& col = 0);
-    virtual double      real(const int& row, const int& col = 0);
-    virtual int         integer(const int& row, const int& col = 0);
+    virtual std::string string(const int& row, const int& col = 0) const;
+    virtual double      real(const int& row, const int& col = 0) const;
+    virtual int         integer(const int& row, const int& col = 0) const;
     virtual void        insert(const int& rownum, const int& nrows);
     virtual void        remove(const int& rownum, const int& nrows);
     
@@ -70,22 +70,28 @@ public:
 
 private:
     // Private methods
-    void              init_members(void);
-    void              copy_members(const GFitsTableBitCol& column);
-    void              free_members(void);
-    GFitsTableBitCol* clone(void) const;
-    std::string       ascii_format(void) const;
-    std::string       binary_format(void) const;
-    void              alloc_data(void);
-    void              release_data(void);
-    void              alloc_nulval(const unsigned char* value);
-    void              init_data(void);
-    void*             ptr_data(void) { return m_data; }
-    void*             ptr_nulval(void) { return m_nulval; }
-    void              load_column(void);
-    void              save_column(void);
-    void              get_bit(const int& row, const int& inx);
-    void              set_pending(void);
+    void init_members(void);
+    void copy_members(const GFitsTableBitCol& column);
+    void free_members(void);
+
+    // Implemented pure virtual methods
+    virtual GFitsTableBitCol* clone(void) const;
+    virtual std::string       ascii_format(void) const;
+    virtual std::string       binary_format(void) const;
+    virtual void              alloc_data(void);
+    virtual void              init_data(void);
+    virtual void*             ptr_data(void) { return m_data; }
+    virtual void*             ptr_nulval(void) { return m_nulval; }
+
+    // Overloaded virtual methods
+    virtual void load_column(void);
+    virtual void save_column(void);
+
+    // Other private methods
+    void release_data(void);
+    void alloc_nulval(const unsigned char* value);
+    void get_bit(const int& row, const int& inx);
+    void set_pending(void);
 
     // Private data area
     int            m_bits;           //!< Total number of Bits in column

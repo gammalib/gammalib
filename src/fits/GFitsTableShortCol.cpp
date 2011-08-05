@@ -201,7 +201,7 @@ const short& GFitsTableShortCol::operator() (const int& row, const int& inx) con
  *
  * Returns value of specified row and vector index as string.
  ***************************************************************************/
-std::string GFitsTableShortCol::string(const int& row, const int& inx)
+std::string GFitsTableShortCol::string(const int& row, const int& inx) const
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
@@ -223,7 +223,7 @@ std::string GFitsTableShortCol::string(const int& row, const int& inx)
  *
  * Returns value of specified row and vector index as double precision.
  ***************************************************************************/
-double GFitsTableShortCol::real(const int& row, const int& inx)
+double GFitsTableShortCol::real(const int& row, const int& inx) const
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
@@ -244,7 +244,7 @@ double GFitsTableShortCol::real(const int& row, const int& inx)
  *
  * Returns value of specified row and vector index as integer.
  ***************************************************************************/
-int GFitsTableShortCol::integer(const int& row, const int& inx)
+int GFitsTableShortCol::integer(const int& row, const int& inx) const
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();

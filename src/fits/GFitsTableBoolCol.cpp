@@ -201,7 +201,7 @@ const bool& GFitsTableBoolCol::operator() (const int& row, const int& inx) const
  *
  * Returns value of specified row and vector index as string.
  ***************************************************************************/
-std::string GFitsTableBoolCol::string(const int& row, const int& inx)
+std::string GFitsTableBoolCol::string(const int& row, const int& inx) const
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
@@ -222,7 +222,7 @@ std::string GFitsTableBoolCol::string(const int& row, const int& inx)
  *
  * Returns value of specified row and vector index as double precision.
  ***************************************************************************/
-double GFitsTableBoolCol::real(const int& row, const int& inx)
+double GFitsTableBoolCol::real(const int& row, const int& inx) const
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
@@ -243,7 +243,7 @@ double GFitsTableBoolCol::real(const int& row, const int& inx)
  *
  * Returns value of specified row and vector index as integer.
  ***************************************************************************/
-int GFitsTableBoolCol::integer(const int& row, const int& inx)
+int GFitsTableBoolCol::integer(const int& row, const int& inx) const
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();

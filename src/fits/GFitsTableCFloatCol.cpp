@@ -201,7 +201,7 @@ const GFits::cfloat& GFitsTableCFloatCol::operator() (const int& row,
  *
  * Returns value of specified row and vector index as string.
  ***************************************************************************/
-std::string GFitsTableCFloatCol::string(const int& row, const int& inx)
+std::string GFitsTableCFloatCol::string(const int& row, const int& inx) const
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
@@ -223,7 +223,7 @@ std::string GFitsTableCFloatCol::string(const int& row, const int& inx)
  *
  * Returns value of specified row and vector index as double precision.
  ***************************************************************************/
-double GFitsTableCFloatCol::real(const int& row, const int& inx)
+double GFitsTableCFloatCol::real(const int& row, const int& inx) const
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
@@ -244,7 +244,7 @@ double GFitsTableCFloatCol::real(const int& row, const int& inx)
  *
  * Returns value of specified row and vector index as integer.
  ***************************************************************************/
-int GFitsTableCFloatCol::integer(const int& row, const int& inx)
+int GFitsTableCFloatCol::integer(const int& row, const int& inx) const
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();

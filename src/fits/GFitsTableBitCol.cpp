@@ -223,7 +223,7 @@ const bool& GFitsTableBitCol::operator() (const int& row, const int& inx) const
  *
  * Returns value of specified row and vector index as string.
  ***************************************************************************/
-std::string GFitsTableBitCol::string(const int& row, const int& inx)
+std::string GFitsTableBitCol::string(const int& row, const int& inx) const
 {
     // Get Bit value
     bool bit = (*this)(row, inx);
@@ -244,7 +244,7 @@ std::string GFitsTableBitCol::string(const int& row, const int& inx)
  *
  * Returns value of specified row and vector index as double precision.
  ***************************************************************************/
-double GFitsTableBitCol::real(const int& row, const int& inx)
+double GFitsTableBitCol::real(const int& row, const int& inx) const
 {
     // Get Bit value
     bool bit = (*this)(row, inx);
@@ -265,7 +265,7 @@ double GFitsTableBitCol::real(const int& row, const int& inx)
  *
  * Returns value of specified row and vector index as integer.
  ***************************************************************************/
-int GFitsTableBitCol::integer(const int& row, const int& inx)
+int GFitsTableBitCol::integer(const int& row, const int& inx) const
 {
     // Get Bit value
     bool bit = (*this)(row, inx);
