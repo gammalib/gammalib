@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>                             // string
+#include <vector>                             // string
 #include <sstream>                            // ostringstream
 #include <stdexcept>                          // exception
 #include "GTime.hpp"
@@ -309,6 +310,13 @@ public:
                            int         nrows,
                            int         max_rows,
                            std::string message = "");
+    };
+    class fits_inconsistent_tdim : public GExceptionHandler {
+    public:
+        fits_inconsistent_tdim(std::string      origin,
+                               std::vector<int> tdim,
+                               int              number,
+                               std::string      message = "");
     };
 
 

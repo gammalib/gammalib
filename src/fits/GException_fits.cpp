@@ -565,3 +565,48 @@ GException::fits_invalid_nrows::fits_invalid_nrows(std::string origin,
 }
 
 
+/***********************************************************************//**
+ * @brief FITS error: Inconsistent TDIM information
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] tdim Number of rows.
+ * @param[in] number Expected total number of elements.
+ * @param[in] message Error message.
+ ***************************************************************************/
+GException::fits_inconsistent_tdim::fits_inconsistent_tdim(std::string      origin,
+                                                           std::vector<int> tdim,
+                                                           int              number,
+                                                           std::string      message)
+{
+    // Set origin
+    m_origin  = origin;
+
+    // Set message
+    if (tdim.size() < 1) {
+        m_message  = "Empty TDIM keyword encountered.";
+    }
+    else {
+        // Compute expectation
+        std::string sdim = "("+str(tdim[0]);
+        int         num  = tdim[0];
+        for (int k = 1; k < tdim.size(); ++k) {
+            sdim += ","+str(tdim[k]);
+            num  *= tdim[k];
+        }
+        sdim += ")";
+        
+        // Set message
+        m_message  = "TDIM keyword "+sdim+" predicts "+str(num)+" column"
+                     " elements, while there are "+str(number)+" elements"
+                     " in the column.";
+    }
+
+    // Set optional message
+    if (message.length() > 0)
+        m_message += " "+message;
+
+    // Return
+    return;
+}
+
+
