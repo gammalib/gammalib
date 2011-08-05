@@ -59,22 +59,24 @@ public:
     virtual ~GFitsTable(void);
 
     // Operators
-    GFitsTable& operator= (const GFitsTable& table);
+    GFitsTable&          operator=(const GFitsTable& table);
+    GFitsTableCol&       operator[](const int& colnum);
+    const GFitsTableCol& operator[](const int& colnum) const;
+    GFitsTableCol&       operator[](const std::string& colname);
+    const GFitsTableCol& operator[](const std::string& colname) const;
 
     // Pure virtual methods
     virtual GFitsTable* clone(void) const = 0;
 
     // Implemented Methods
-    void           append_column(GFitsTableCol& column);
-    void           insert_column(int colnum, GFitsTableCol& column);
-    void           append_rows(const int& nrows);
-    void           insert_rows(const int& rownum, const int& nrows);
-    void           remove_rows(const int& rownum, const int& nrows);
-    GFitsTableCol* column(const std::string& colname);
-    GFitsTableCol* column(const int& colnum);
-    int            nrows(void) const;
-    int            ncols(void) const;
-    std::string    print(void) const;
+    void        append_column(GFitsTableCol& column);
+    void        insert_column(int colnum, GFitsTableCol& column);
+    void        append_rows(const int& nrows);
+    void        insert_rows(const int& rownum, const int& nrows);
+    void        remove_rows(const int& rownum, const int& nrows);
+    int         nrows(void) const;
+    int         ncols(void) const;
+    std::string print(void) const;
 
 protected:
     // Protected methods

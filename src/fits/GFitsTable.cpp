@@ -50,12 +50,14 @@
 #include "GFitsTableCDoubleCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ACCESS1                              "GFitsTable::operator[](int&)"
+#define G_ACCESS2                      "GFitsTable::operator[](std::string&)"
 #define G_APPEND_COLUMN           "GFitsTable::append_column(GFitsTableCol*)"
 #define G_INSERT_COLUMN      "GFitsTable::insert_column(int, GFitsTableCol*)"
 #define G_INSERT_ROWS                   "GFitsTable::insert_rows(int&, int&)"
 #define G_REMOVE_ROWS                   "GFitsTable::remove_rows(int&, int&)"
-#define G_COLUMN1                          "GFitsTable::column(std::string&)"
-#define G_COLUMN2                                  "GFitsTable::column(int&)"
+//#define G_COLUMN1                          "GFitsTable::column(std::string&)"
+//#define G_COLUMN2                                  "GFitsTable::column(int&)"
 #define G_OPEN_DATA                            "GFitsTable::open_data(void*)"
 #define G_SAVE_DATA                                 "GFitsTable::save_data()"
 #define G_GET_TFORM                             "GFitsTable::get_tform(int&)"
@@ -149,9 +151,9 @@ GFitsTable::~GFitsTable(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] table Table which will be assigned
+ * @param[in] table Table.
  ***************************************************************************/
-GFitsTable& GFitsTable::operator= (const GFitsTable& table)
+GFitsTable& GFitsTable::operator=(const GFitsTable& table)
 {
     // Execute only if object is not identical
     if (this != &table) {
@@ -172,6 +174,162 @@ GFitsTable& GFitsTable::operator= (const GFitsTable& table)
 
     // Return this object
     return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to table column
+ *
+ * @param[in] colnum Column number [0,...,ncols()-1].
+ *
+ * @exception GException::fits_no_data
+ *            No data found in table.
+ * @exception GException::out_of_range
+ *            Column number is out of range.
+ ***************************************************************************/
+GFitsTableCol& GFitsTable::operator[](const int& colnum)
+{
+    // If there is no data then throw an exception
+    if (m_columns == NULL) {
+        throw GException::fits_no_data(G_ACCESS1, "No columns in table.");
+    }
+
+    // Compile option: raise exception if column number is out of range
+    #if defined(G_RANGE_CHECK)
+    if (colnum < 0 || colnum >= m_cols)
+        throw GException::out_of_range(G_ACCESS1, colnum, 0, m_cols-1);
+    #endif
+
+    // Get column pointer
+    GFitsTableCol* ptr = m_columns[colnum];
+    if (ptr == NULL) {
+        throw GException::fits_no_data(G_ACCESS1, "No data for this column.");
+    }
+
+    // Return reference
+    return *ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to table column (const version)
+ *
+ * @param[in] colnum Column number [0,...,ncols()-1].
+ *
+ * @exception GException::fits_no_data
+ *            No data found in table.
+ * @exception GException::out_of_range
+ *            Column number is out of range.
+ ***************************************************************************/
+const GFitsTableCol& GFitsTable::operator[](const int& colnum) const
+{
+    // If there is no data then throw an exception
+    if (m_columns == NULL) {
+        throw GException::fits_no_data(G_ACCESS1, "No columns in table.");
+    }
+
+    // Compile option: raise exception if column number is out of range
+    #if defined(G_RANGE_CHECK)
+    if (colnum < 0 || colnum >= m_cols)
+        throw GException::out_of_range(G_ACCESS1, colnum, 0, m_cols-1);
+    #endif
+
+    // Get column pointer
+    const GFitsTableCol* ptr = m_columns[colnum];
+    if (ptr == NULL) {
+        throw GException::fits_no_data(G_ACCESS1, "No data for this column.");
+    }
+
+    // Return reference
+    return *ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to table column
+ *
+ * @param[in] colname Column name.
+ *
+ * @exception GException::fits_no_data
+ *            No data found in table.
+ * @exception GException::fits_column_not_found
+ *            Column name not found.
+ ***************************************************************************/
+GFitsTableCol& GFitsTable::operator[](const std::string& colname)
+{
+    // If there is no data then throw an exception
+    if (m_columns == NULL) {
+        throw GException::fits_no_data(G_ACCESS2, "No columns in table.");
+    }
+
+    // Initialise pointer
+    GFitsTableCol* ptr = NULL;
+
+    // If there are columns then search for the specified name
+    if (m_columns != NULL) {
+        for (int i = 0; i < m_cols; ++i) {
+            if (m_columns[i]->name() == colname) {
+                ptr = m_columns[i];
+                if (ptr == NULL) {
+                    throw GException::fits_no_data(G_ACCESS2, 
+                                                   "No data for this column");
+                }
+                break;
+            }
+        }
+    }
+
+    // If column has not been found throw an exception
+    if (ptr == NULL) {
+        throw GException::fits_column_not_found(G_ACCESS2, colname);
+    }
+
+    // Return reference
+    return *ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to table column (const version)
+ *
+ * @param[in] colname Column name.
+ *
+ * @exception GException::fits_no_data
+ *            No data found in table.
+ * @exception GException::fits_column_not_found
+ *            Column name not found.
+ ***************************************************************************/
+const GFitsTableCol& GFitsTable::operator[](const std::string& colname) const
+{
+    // If there is no data then throw an exception
+    if (m_columns == NULL) {
+        throw GException::fits_no_data(G_ACCESS2, "No columns in table.");
+    }
+
+    // Initialise pointer
+    const GFitsTableCol* ptr = NULL;
+
+    // If there are columns then search for the specified name
+    if (m_columns != NULL) {
+        for (int i = 0; i < m_cols; ++i) {
+            if (m_columns[i]->name() == colname) {
+                ptr = m_columns[i];
+                if (ptr == NULL) {
+                    throw GException::fits_no_data(G_ACCESS2, 
+                                                   "No data for this column");
+                }
+                break;
+            }
+        }
+    }
+
+    // If column has not been found throw an exception
+    if (ptr == NULL) {
+        throw GException::fits_column_not_found(G_ACCESS2, colname);
+    }
+
+    // Return reference
+    return *ptr;
 }
 
 
@@ -399,6 +557,7 @@ void GFitsTable::remove_rows(const int& rownum, const int& nrows)
  * @exception GException::fits_column_not_found
  *            Requested column has not been found in table.
  ***************************************************************************/
+/*
 GFitsTableCol* GFitsTable::column(const std::string& colname)
 {
     // If there is no data then throw an exception
@@ -428,7 +587,7 @@ GFitsTableCol* GFitsTable::column(const std::string& colname)
     // Return column pointer
     return ptr;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Return pointer to column with number
@@ -441,6 +600,7 @@ GFitsTableCol* GFitsTable::column(const std::string& colname)
  * @exception GException::out_of_range
  *            Requested column has not been found in table.
  ***************************************************************************/
+/*
 GFitsTableCol* GFitsTable::column(const int& colnum)
 {
     // If there is no data then throw an exception
@@ -459,7 +619,7 @@ GFitsTableCol* GFitsTable::column(const int& colnum)
     // Return column pointer
     return ptr;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Return number of rows in table
