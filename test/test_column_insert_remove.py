@@ -29,6 +29,13 @@ def test_three(a):
 	print a
 	return a
 
+def set(a):
+	#a[0] = 1.0
+	a[1] = 65536
+	a[2] = True
+	#a[3] = "Hallo"
+	print a[1]
+
 
 #==========================#
 # Main routine entry point #
@@ -38,17 +45,19 @@ if __name__ == '__main__':
 	Perform testing.
 	"""
 	# Perform tests
-	#a = GFitsTableBitCol("Test",3)
-	#a = GFitsTableBoolCol("Test",3)
-	#a = GFitsTableByteCol("Test",3)
-	#a = GFitsTableDoubleCol("Test",3)
-	#a = GFitsTableFloatCol("Test",3)
-	#a = GFitsTableLongCol("Test",3)
-	#a = GFitsTableLongLongCol("Test",3)
-	#a = GFitsTableShortCol("Test",3)
-	#a = GFitsTableStringCol("Test",3,10)
-	#a = GFitsTableULongCol("Test",3)
-	a = GFitsTableUShortCol("Test",3)
+	#a = GFitsTableBitCol("Test",4)
+	#a = GFitsTableBoolCol("Test",4)
+	#a = GFitsTableByteCol("Test",4)
+	#a = GFitsTableDoubleCol("Test",4)
+	#a = GFitsTableFloatCol("Test",4)
+	#a = GFitsTableLongCol("Test",4)
+	#a = GFitsTableLongLongCol("Test",4)
+	#a = GFitsTableShortCol("Test",4)
+	#a = GFitsTableStringCol("Test",4,10)
+	#a = GFitsTableULongCol("Test",4)
+	a = GFitsTableUShortCol("Test",4)
 	a = test_one(a)
 	a = test_two(a)
 	a = test_three(a)
+	#set(a)
+	
