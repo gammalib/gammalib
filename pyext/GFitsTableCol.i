@@ -64,7 +64,9 @@ public:
 
     // Base class Methods
     void        name(const std::string& name);
+    void        unit(const std::string& unit);
     std::string name(void) const;
+    std::string unit(void) const;
     int         colnum(void) const;
     int         type(void) const;
     int         repeat(void) const;
