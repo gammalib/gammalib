@@ -43,7 +43,10 @@
  * @brief Abstract interface for FITS table
  *
  * This class defines the abstract interface for a FITS table. A FITS table
- * is a collection of columns with an identical number of rows.
+ * is a collection of columns with an identical number of rows. This class
+ * provides high level access to table columns.
+ *
+ * @todo Implement remove_column method
  ***************************************************************************/
 class GFitsTable : public GFitsHDU {
 
@@ -76,6 +79,7 @@ public:
     void        remove_rows(const int& rownum, const int& nrows);
     int         nrows(void) const;
     int         ncols(void) const;
+    bool        has(const std::string& colname) const;
     std::string print(void) const;
 
 protected:
@@ -100,6 +104,7 @@ private:
     void            copy_members(const GFitsTable& table);
     void            free_members(void);
     GFitsTableCol*  alloc_column(int typecode) const;
+    GFitsTableCol*  ptr_column(const std::string& colname) const;
 };
 
 #endif /* GFITSTABLE_HPP */
