@@ -122,6 +122,7 @@ public:
     void append_rows(const int& nrows);
     void insert_rows(const int& rownum, const int& nrows);
     void remove_rows(const int& rownum, const int& nrows);
+    bool has(const std::string& colname) const;
     int  nrows(void) const;
     int  ncols(void) const;
 };
