@@ -422,8 +422,10 @@ void GFitsTableCol::load_column(void)
         alloc_data();
         init_data();
 
-        // If a FITS file is attached then load column data from the FITS
-        // file
+        // If a FITS file is attached then try loading column data from the
+        // FITS file. This may fail in case that no data has yet been written
+        // to the FITS file. In that case we just skip loading and return
+        // the initalised column ... 
         if (FPTR(m_fitsfile)->Fptr != NULL) {
 
             // Move to the HDU
@@ -431,18 +433,32 @@ void GFitsTableCol::load_column(void)
             status     = __ffmahd(FPTR(m_fitsfile),
                                   (FPTR(m_fitsfile)->HDUposition)+1,
                                   NULL, &status);
-            if (status != 0)
-                throw GException::fits_hdu_not_found(G_LOAD_COLUMN,
+            
+            // If this failed because:
+            // - the primary HDU was not found (status 252)
+            // - we moved past the file (status 107)
+            // we assume that no data have yet been written to the file and
+            // we skip the loading.
+            if (status != 252 && status != 107) {
+            
+                // Break on any other cfitsio error
+                if (status != 0) {
+                    throw GException::fits_hdu_not_found(G_LOAD_COLUMN,
                                   (FPTR(m_fitsfile)->HDUposition)+1,
                                   status);
+                }
 
-            // Load data
-            status = __ffgcv(FPTR(m_fitsfile), m_type, m_colnum, 1, 1, m_size,
-                             ptr_nulval(), ptr_data(), &m_anynul, &status);
-            if (status != 0)
-                throw GException::fits_error(G_LOAD_COLUMN, status,
-                                  "for column \""+m_name+"\".");
-        }
+                // Load data
+                status = __ffgcv(FPTR(m_fitsfile), m_type, m_colnum, 1, 1, m_size,
+                                 ptr_nulval(), ptr_data(), &m_anynul, &status);
+                if (status != 0) {
+                    throw GException::fits_error(G_LOAD_COLUMN, status,
+                                      "for column \""+m_name+"\".");
+                }
+        
+            } // endif: no primary HDU found
+
+        } // endif: there was a FITS file attached
 
     } // endif: column has a positive size
 
