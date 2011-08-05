@@ -80,15 +80,15 @@ private:
     void                 alloc_nulval(const std::string& value);
     void                 init_data(void);
     void                 fetch_data(void) const;
-    void                 alloc_buffer(void);
-    void                 free_buffer(void);
+    void                 alloc_buffer(void) const;
+    void                 free_buffer(void) const;
     void*                ptr_data(void) { return m_buffer; }
     void*                ptr_nulval(void) { return m_nulval; }
 
     // Private data area
-    std::string* m_data;    //!< Data area
-    char**       m_buffer;  //!< Data area for CFITSIO transfer
-    char*        m_nulval;  //!< NULL string
+    std::string*    m_data;    //!< Data area
+    mutable char**  m_buffer;  //!< Data area for CFITSIO transfer
+    char*           m_nulval;  //!< NULL string
 };
 
 #endif /* GFITSTABLESTRINGCOL_HPP */
