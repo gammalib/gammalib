@@ -15,6 +15,7 @@
         Protect parfile read/write by a file lock
         LM optimizer frees any internally fixed parameter at exit
         Add row and column manipulation methods for FITS tables
+        Replace FITS table column methods by access operators
 
 2011-07-20  Juergen Knoedlseder  <knodlseder@cesr.fr>
 

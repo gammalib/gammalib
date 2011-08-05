@@ -42,6 +42,9 @@ Add row appending, insertion and removal capabilities to FITS
 tables. Implement also proper removing of obsolete columns from
 a FITS file.
 
+Replace the GFitsTable::column() methods by [] access operators.
+This allows for more compact and intuitive coding.
+
 
 5. Linear algebra module
 ------------------------

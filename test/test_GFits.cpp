@@ -2069,8 +2069,8 @@ void test_bintable_double(void)
         //
 
         // Get column
-        GFitsTableDoubleCol* col_dbl =
-            (GFitsTableDoubleCol*)((GFitsTable*)fits.hdu(1))->column("DOUBLE");
+        GFitsTableDoubleCol* col_dbl = 
+             (GFitsTableDoubleCol*)&(*fits.table(1))["DOUBLE"];
 
         // Check double precision table (operator access)
         tot_dbl = 0.0;
@@ -2125,8 +2125,8 @@ void test_bintable_double(void)
         //
 
         // Get column
-        GFitsTableDoubleCol* col_dbl10 =
-            (GFitsTableDoubleCol*)((GFitsTable*)fits.hdu(1))->column("DOUBLE10");
+        GFitsTableDoubleCol* col_dbl10 = 
+             (GFitsTableDoubleCol*)&(*fits.table(1))["DOUBLE10"];
 
         // Check double precision table (operator access)
         tot_dbl = 0.0;
@@ -2426,7 +2426,7 @@ void test_bintable_float(void)
 
         // Get column
         GFitsTableFloatCol* col_flt =
-            (GFitsTableFloatCol*)((GFitsTable*)fits.hdu(1))->column("FLOAT");
+            (GFitsTableFloatCol*)&(*fits.table(1))["FLOAT"];
 
         // Check single precision table (operator access)
         tot_flt = 0.0;
@@ -2482,7 +2482,7 @@ void test_bintable_float(void)
 
         // Get column
         GFitsTableFloatCol* col_flt10 =
-            (GFitsTableFloatCol*)((GFitsTable*)fits.hdu(1))->column("FLOAT10");
+            (GFitsTableFloatCol*)&(*fits.table(1))["FLOAT10"];
 
         // Check single precision table (operator access)
         tot_flt = 0.0;
@@ -2787,7 +2787,7 @@ void test_bintable_short(void)
 
         // Get column
         GFitsTableShortCol* col_sht =
-            (GFitsTableShortCol*)((GFitsTable*)fits.hdu(1))->column("SHORT");
+            (GFitsTableShortCol*)&(*fits.table(1))["SHORT"];
 
         // Check short table (operator access)
         tot_sht = 0;
@@ -2843,7 +2843,7 @@ void test_bintable_short(void)
 
         // Get column
         GFitsTableShortCol* col_sht10 =
-            (GFitsTableShortCol*)((GFitsTable*)fits.hdu(1))->column("SHORT10");
+            (GFitsTableShortCol*)&(*fits.table(1))["SHORT10"];
 
         // Check short table (operator access)
         tot_sht = 0;
@@ -3147,7 +3147,7 @@ void test_bintable_ushort(void)
 
         // Get column
         GFitsTableUShortCol* col_sht =
-            (GFitsTableUShortCol*)((GFitsTable*)fits.hdu(1))->column("USHORT");
+            (GFitsTableUShortCol*)&(*fits.table(1))["USHORT"];
 
         // Check table (operator access)
         tot_sht = 0;
@@ -3203,7 +3203,7 @@ void test_bintable_ushort(void)
 
         // Get column
         GFitsTableUShortCol* col_sht10 =
-            (GFitsTableUShortCol*)((GFitsTable*)fits.hdu(1))->column("USHORT10");
+            (GFitsTableUShortCol*)&(*fits.table(1))["USHORT10"];
 
         // Check table (operator access)
         tot_sht = 0;
@@ -3506,7 +3506,7 @@ void test_bintable_long(void)
 
         // Get column
         GFitsTableLongCol* col_lng =
-            (GFitsTableLongCol*)((GFitsTable*)fits.hdu(1))->column("LONG");
+            (GFitsTableLongCol*)&(*fits.table(1))["LONG"];
 
         // Check long table (operator access)
         tot_lng = 0;
@@ -3562,7 +3562,7 @@ void test_bintable_long(void)
 
         // Get column
         GFitsTableLongCol* col_lng10 =
-            (GFitsTableLongCol*)((GFitsTable*)fits.hdu(1))->column("LONG10");
+            (GFitsTableLongCol*)&(*fits.table(1))["LONG10"];
 
         // Check long table (operator access)
         tot_lng = 0;
@@ -3865,7 +3865,7 @@ void test_bintable_longlong(void)
 
         // Get column
         GFitsTableLongLongCol* col_lng =
-            (GFitsTableLongLongCol*)((GFitsTable*)fits.hdu(1))->column("LONGLONG");
+            (GFitsTableLongLongCol*)&(*fits.table(1))["LONGLONG"];
 
         // Check table (operator access)
         tot_lng = 0;
@@ -3921,7 +3921,7 @@ void test_bintable_longlong(void)
 
         // Get column
         GFitsTableLongLongCol* col_lng10 =
-            (GFitsTableLongLongCol*)((GFitsTable*)fits.hdu(1))->column("LONGLONG10");
+            (GFitsTableLongLongCol*)&(*fits.table(1))["LONGLONG10"];
 
         // Check table (operator access)
         tot_lng = 0;
@@ -4224,7 +4224,7 @@ void test_bintable_ulong(void)
 
         // Get column
         GFitsTableULongCol* col_lng =
-            (GFitsTableULongCol*)((GFitsTable*)fits.hdu(1))->column("ULONG");
+            (GFitsTableULongCol*)&(*fits.table(1))["ULONG"];
 
         // Check table (operator access)
         tot_lng = 0;
@@ -4280,7 +4280,7 @@ void test_bintable_ulong(void)
 
         // Get column
         GFitsTableULongCol* col_lng10 =
-            (GFitsTableULongCol*)((GFitsTable*)fits.hdu(1))->column("ULONG10");
+            (GFitsTableULongCol*)&(*fits.table(1))["ULONG10"];
 
         // Check table (operator access)
         tot_lng = 0;
@@ -4581,7 +4581,7 @@ void test_bintable_string(void)
 
         // Get column
         GFitsTableStringCol* col_str =
-            (GFitsTableStringCol*)((GFitsTable*)fits.hdu(1))->column("STRING");
+            (GFitsTableStringCol*)&(*fits.table(1))["STRING"];
 
         // Check string table (operator access)
         tot_str.clear();
@@ -4637,7 +4637,7 @@ void test_bintable_string(void)
 
         // Get column
         GFitsTableStringCol* col_str10 =
-            (GFitsTableStringCol*)((GFitsTable*)fits.hdu(1))->column("STRING10");
+            (GFitsTableStringCol*)&(*fits.table(1))["STRING10"];
 
         // Check table (operator access)
         tot_str.clear();
@@ -4946,7 +4946,7 @@ void test_bintable_logical(void)
 
         // Get column
         GFitsTableBoolCol* col =
-            (GFitsTableBoolCol*)((GFitsTable*)fits.hdu(1))->column("LOGICAL");
+            (GFitsTableBoolCol*)&(*fits.table(1))["LOGICAL"];
 
         // Check table (operator access)
         tot_int = 0;
@@ -5002,7 +5002,7 @@ void test_bintable_logical(void)
 
         // Get column
         GFitsTableBoolCol* col10 =
-            (GFitsTableBoolCol*)((GFitsTable*)fits.hdu(1))->column("LOGICAL10");
+            (GFitsTableBoolCol*)&(*fits.table(1))["LOGICAL10"];
 
         // Check table (operator access)
         tot_int = 0;
@@ -5310,7 +5310,7 @@ void test_bintable_bit(void)
 
         // Get column
         GFitsTableBitCol* col =
-            (GFitsTableBitCol*)((GFitsTable*)fits.hdu(1))->column("BIT");
+            (GFitsTableBitCol*)&(*fits.table(1))["BIT"];
 
         // Check table (operator access)
         tot_int = 0;
@@ -5366,7 +5366,7 @@ void test_bintable_bit(void)
 
         // Get column
         GFitsTableBitCol* col10 =
-            (GFitsTableBitCol*)((GFitsTable*)fits.hdu(1))->column("BIT10");
+            (GFitsTableBitCol*)&(*fits.table(1))["BIT10"];
 
         // Check table (operator access)
         tot_int = 0;
