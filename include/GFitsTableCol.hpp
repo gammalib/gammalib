@@ -61,9 +61,9 @@ public:
     GFitsTableCol& operator= (const GFitsTableCol& column);
 
     // Virtual Methods
-    virtual std::string string(const int& row, const int& inx = 0) = 0;
-    virtual double      real(const int& row, const int& inx = 0) = 0;
-    virtual int         integer(const int& row, const int& inx = 0) = 0;
+    virtual std::string string(const int& row, const int& inx = 0) const = 0;
+    virtual double      real(const int& row, const int& inx = 0) const = 0;
+    virtual int         integer(const int& row, const int& inx = 0) const = 0;
     virtual void        insert(const int& rownum, const int& nrows) = 0;
     virtual void        remove(const int& rownum, const int& nrows) = 0;
 
@@ -96,11 +96,11 @@ protected:
     int         m_number;    //!< @brief Number of elements in column.
                              //!< m_number = m_repeat / m_width
     int         m_length;    //!< Length of column
-    int         m_size;      //!< Size of allocated data area (0 if not loaded)
+    mutable int m_size;      //!< Size of allocated data area (0 if not loaded)
     int         m_anynul;    //!< Number of NULLs encountered
     void*       m_fitsfile;  //!< FITS file pointer associated with column
 
-    // Protected virtual methods
+    // Protected pure virtual methods
     virtual GFitsTableCol* clone(void) const = 0;
     virtual std::string    ascii_format(void) const = 0;
     virtual std::string    binary_format(void) const = 0;
@@ -109,9 +109,9 @@ protected:
     virtual void*          ptr_data(void) = 0;
     virtual void*          ptr_nulval(void) = 0;
 
-    // Protected methods
+    // Protected virtual methods
     virtual void           save(void);
-    virtual void           fetch_data(void);
+    virtual void           fetch_data(void) const;
     virtual void           load_column(void);
     virtual void           save_column(void);
     virtual std::ostream&  dump_column(std::ostream& os) const;

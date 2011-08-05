@@ -371,16 +371,19 @@ void GFitsTableCol::save(void)
 /***********************************************************************//**
  * @brief Fetch column data
  *
+ * This method fetches column data when needed. It is declared const, so
+ * that const data access methods can be implemented.
+ *
  * If a FITS file is attached to the column the data are loaded into memory
  * from the FITS file. If no FITS file is attached, memory is allocated
- * to hold the column data and all cells are set to 0.
+ * to hold the column data and all cells are initialised.
  *
- * Refer to GFitsTableCol::load_column for more information.
+ * This method calls GFitsTableCol::load_column to do the job.
  ***************************************************************************/
-void GFitsTableCol::fetch_data(void)
+void GFitsTableCol::fetch_data(void) const
 {
-    // Save column
-    load_column();
+    // Save column (circumvent const correctness)
+    const_cast<GFitsTableCol*>(this)->load_column();
 
     // Return
     return;
