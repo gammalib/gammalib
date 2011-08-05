@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include <string>
+#include <vector>
 #include "GLog.hpp"
 
 
@@ -68,37 +69,40 @@ public:
     virtual void        remove(const int& rownum, const int& nrows) = 0;
 
     // Base class Methods
-    void        name(const std::string& name);
-    void        unit(const std::string& unit);
-    std::string name(void) const;
-    std::string unit(void) const;
-    int         colnum(void) const;
-    int         type(void) const;
-    int         repeat(void) const;
-    int         width(void) const;
-    int         number(void) const;
-    int         length(void) const;
-    int         anynul(void) const;
-    std::string print(void) const;
+    void             name(const std::string& name);
+    void             unit(const std::string& unit);
+    void             dim(const std::vector<int>& dim);
+    std::string      name(void) const;
+    std::string      unit(void) const;
+    std::vector<int> dim(void) const;
+    int              colnum(void) const;
+    int              type(void) const;
+    int              repeat(void) const;
+    int              width(void) const;
+    int              number(void) const;
+    int              length(void) const;
+    int              anynul(void) const;
+    std::string      print(void) const;
 
 protected:
     // Protected data area
-    std::string m_name;      //!< Column name
-    std::string m_unit;      //!< Column unit
-    int         m_colnum;    //!< @brief Column number (starting from 1).
-                             //!< This parameter is used to signal if a
-                             //!< table column corresponds to a FITS file
-                             //!< column. If it is set to 0 there is no
-                             //!< correspondance.
-    int         m_type;      //!< Column type
-    int         m_repeat;    //!< Repeat value of column
-    int         m_width;     //!< Width of single column element
-    int         m_number;    //!< @brief Number of elements in column.
-                             //!< m_number = m_repeat / m_width
-    int         m_length;    //!< Length of column
-    mutable int m_size;      //!< Size of allocated data area (0 if not loaded)
-    int         m_anynul;    //!< Number of NULLs encountered
-    void*       m_fitsfile;  //!< FITS file pointer associated with column
+    std::string      m_name;     //!< Column name
+    std::string      m_unit;     //!< Column unit
+    std::vector<int> m_dim;      //!< Column dimension
+    int              m_colnum;   //!< @brief Column number (starting from 1).
+                                 //!< This parameter is used to signal if a
+                                 //!< table column corresponds to a FITS file
+                                 //!< column. If it is set to 0 there is no
+                                 //!< correspondance.
+    int              m_type;     //!< Column type
+    int              m_repeat;   //!< Repeat value of column
+    int              m_width;    //!< Width of single column element
+    int              m_number;   //!< @brief Number of elements in column.
+                                 //!< m_number = m_repeat / m_width
+    int              m_length;   //!< Length of column
+    mutable int      m_size;     //!< Size of allocated data area (0 if not loaded)
+    int              m_anynul;   //!< Number of NULLs encountered
+    void*            m_fitsfile; //!< FITS file pointer associated with column
 
     // Protected pure virtual methods
     virtual GFitsTableCol* clone(void) const = 0;
