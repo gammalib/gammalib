@@ -30,6 +30,7 @@
 #endif
 #include <cstring>
 #include <iostream>
+#include <vector>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
@@ -56,8 +57,6 @@
 #define G_INSERT_COLUMN      "GFitsTable::insert_column(int, GFitsTableCol*)"
 #define G_INSERT_ROWS                   "GFitsTable::insert_rows(int&, int&)"
 #define G_REMOVE_ROWS                   "GFitsTable::remove_rows(int&, int&)"
-//#define G_COLUMN1                          "GFitsTable::column(std::string&)"
-//#define G_COLUMN2                                  "GFitsTable::column(int&)"
 #define G_OPEN_DATA                            "GFitsTable::open_data(void*)"
 #define G_SAVE_DATA                                 "GFitsTable::save_data()"
 #define G_GET_TFORM                             "GFitsTable::get_tform(int&)"
@@ -262,20 +261,8 @@ GFitsTableCol& GFitsTable::operator[](const std::string& colname)
         throw GException::fits_no_data(G_ACCESS2, "No columns in table.");
     }
 
-    // Initialise pointer
-    GFitsTableCol* ptr = NULL;
-
-    // Search for the specified name
-    for (int i = 0; i < m_cols; ++i) {
-        if (m_columns[i]->name() == colname) {
-            ptr = m_columns[i];
-            if (ptr == NULL) {
-                throw GException::fits_no_data(G_ACCESS2, 
-                                               "No data for this column");
-            }
-            break;
-        }
-    }
+    // Get column pointer
+    GFitsTableCol* ptr = ptr_column(colname);
 
     // If column has not been found throw an exception
     if (ptr == NULL) {
@@ -304,20 +291,8 @@ const GFitsTableCol& GFitsTable::operator[](const std::string& colname) const
         throw GException::fits_no_data(G_ACCESS2, "No columns in table.");
     }
 
-    // Initialise pointer
-    const GFitsTableCol* ptr = NULL;
-
-    // If there are columns then search for the specified name
-    for (int i = 0; i < m_cols; ++i) {
-        if (m_columns[i]->name() == colname) {
-            ptr = m_columns[i];
-            if (ptr == NULL) {
-                throw GException::fits_no_data(G_ACCESS2, 
-                                               "No data for this column");
-            }
-            break;
-        }
-    }
+    // Get column pointer
+    GFitsTableCol* ptr = ptr_column(colname);
 
     // If column has not been found throw an exception
     if (ptr == NULL) {
@@ -585,37 +560,6 @@ GFitsTableCol* GFitsTable::column(const std::string& colname)
 }
 */
 
-/***********************************************************************//**
- * @brief Return pointer to column with number
- *
- * @param[in] colnum Number of requested column (starting from 0)
- *
- * @exception GException::fits_no_data
- *            There are no column data in the table or there is not data
- *            for this column
- * @exception GException::out_of_range
- *            Requested column has not been found in table.
- ***************************************************************************/
-/*
-GFitsTableCol* GFitsTable::column(const int& colnum)
-{
-    // If there is no data then throw an exception
-    if (m_columns == NULL)
-        throw GException::fits_no_data(G_COLUMN2, "No column data in table");
-
-    // If column number is out of range then throw an exception
-    if (colnum < 0 || colnum >= m_cols)
-        throw GException::out_of_range(G_COLUMN2, colnum, 0, m_cols-1);
-
-    // Get column pointer
-    GFitsTableCol* ptr = ptr = m_columns[colnum];
-    if (ptr == NULL)
-        throw GException::fits_no_data(G_COLUMN2, "No data for this column");
-
-    // Return column pointer
-    return ptr;
-}
-*/
 
 /***********************************************************************//**
  * @brief Return number of rows in table
@@ -634,6 +578,19 @@ int GFitsTable::ncols(void) const
 {
     // Return number of columns
     return m_cols;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks the presence of a column in table
+ ***************************************************************************/
+bool GFitsTable::has(const std::string& colname) const
+{
+    // Get pointer in column
+    GFitsTableCol* ptr = ptr_column(colname);
+    
+    // Return state
+    return (ptr != NULL);
 }
 
 
@@ -707,10 +664,13 @@ std::string GFitsTable::print(void) const
  *            A CFITSIO error occured during loading the table.
  * @exception GException::fits_unknown_coltype
  *            FITS column of unsupported type has been found in the FITS file.
+ * @exception GException::fits_inconsistent_tdim
+ *            The TDIM information provided in the header is inconsistent
+ *            with the size of the column.
  *
- * Builds a description of the table in memory.
- * Columns are not loaded but column descriptors are allocated.
- * The column data will only be loaded once it needs to be accessed.
+ * This method loads a description of the table into memory. Column data are
+ * not loaded at this point to save memory. They will be loaded on request
+ * later. 
  ***************************************************************************/
 void GFitsTable::data_open(void* vptr)
 {
@@ -799,6 +759,29 @@ void GFitsTable::data_open(void* vptr)
         else
             unit[strlen(unit)-1] = '\0';
 
+        // Get column dimension (optional, leave blank if not found)
+        char dim[80];
+        sprintf(keyname, "TDIM%d", i+1);
+        status = __ffgkey(FPTR(m_fitsfile), keyname, dim, NULL, &status);
+        if (status != 0) {
+            status = 0;
+            dim[0] = '\0';
+            dim[1] = '\0';
+        }
+        else {
+            dim[strlen(dim)-1] = '\0';
+        }
+        
+        // If found, extract column dimension into vector array of integers
+        std::vector<int> vdim;
+        std::string      sdim = strip_chars(strip_whitespace(&(dim[1])),"()");
+        if (sdim.length() > 0) {
+            std::vector<std::string> elements = split(sdim, ",");
+            for (int k = 0; k < elements.size(); ++k) {
+                vdim.push_back(toint(elements[k]));
+            }
+        }
+
         // Allocate column
         m_columns[i] = alloc_column(typecode);
         if (m_columns[i] == NULL) {
@@ -811,6 +794,7 @@ void GFitsTable::data_open(void* vptr)
         // Store column definition
         m_columns[i]->name(strip_whitespace(&(value[1])));
         m_columns[i]->unit(strip_whitespace(&(unit[1])));
+        m_columns[i]->dim(vdim);
         m_columns[i]->m_colnum = i+1;
         m_columns[i]->m_type   = typecode;
         m_columns[i]->m_repeat = repeat;
@@ -819,15 +803,36 @@ void GFitsTable::data_open(void* vptr)
         m_columns[i]->connect(FPTR(m_fitsfile));
 
         // Extract column vector size
-        if (m_columns[i]->m_repeat == 1)   // ASCII tables
+        if (m_columns[i]->m_repeat == 1) { // ASCII tables
             m_columns[i]->m_number = 1;
+        }
         else {                             // Binary tables
-            if (typecode == __TSTRING)
+            if (typecode == __TSTRING) {
                 m_columns[i]->m_number = m_columns[i]->m_repeat /
                                          m_columns[i]->m_width;
-            else
+            }
+            else {
                 m_columns[i]->m_number = m_columns[i]->m_repeat;
+            }
         }
+        
+        // If TDIM information was set then check its consistency
+        if (vdim.size() > 0) {
+            
+            // Compute expectation
+            int num = vdim[0];
+            for (int k = 1; k < vdim.size(); ++k) {
+                num *= vdim[k];
+            }
+                
+            // Compare with real size
+            if (num != m_columns[i]->m_number) {
+                throw GException::fits_inconsistent_tdim(G_OPEN_DATA,
+                                                         vdim,
+                                                         m_columns[i]->m_number);
+            }
+                
+        } // endif: Valid TDIM information was found
 
     } // endfor: looped over all columns
 
@@ -1122,7 +1127,46 @@ void GFitsTable::data_save(void)
 
     } // endelse: FITS table has been updated
 
-    // Now update the header
+    // Now update the header for all columns (unit and TDIM information)
+    for (int i = 0; i < m_cols; ++i) {
+
+        // Only consider valid columns
+        if (m_columns[i] != NULL) {
+
+            // Get column number
+            int colnum = m_columns[i]->m_colnum;
+
+            // Update column units if available
+            if (m_columns[i]->unit().length() > 0) {
+
+                // Build keyname
+                std::string keyname = "TUNIT"+str(colnum);
+
+                // Update header card
+                card(keyname, m_columns[i]->unit(), "physical unit of field");
+            }
+
+            // Write TDIM keyword if available
+            if (m_columns[i]->dim().size() > 0) {
+        
+                // Build keyname
+                std::string keyname = "TDIM"+str(colnum);
+            
+                // Build value string
+                std::string value = "("+str(m_columns[i]->dim()[0]);
+                for (int k = 1; k < m_columns[i]->dim().size(); ++k) {
+                    value += ","+str(m_columns[i]->dim()[k]);
+                }
+                value += ")";
+                
+                // Update header card
+                card(keyname, value, "dimensions of field");
+            
+            } // endif: wrote TDIM keyword
+
+        } // endif: column was valid
+
+    } // endfor: looped over all columns
 
     // Debug definition: Dump method exit
     #if defined(G_DEBUG_SAVE)
@@ -1411,6 +1455,35 @@ GFitsTableCol* GFitsTable::alloc_column(int typecode) const
     }
 
     // Return
+    return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer of column with given name
+ *
+ * @param[in] colname Name of column.
+ *
+ * This method returns a pointer on the column with the specified name. It
+ * returns NULL if no column with the given name was found, or if the
+ * column is not allocated.
+ ***************************************************************************/
+GFitsTableCol* GFitsTable::ptr_column(const std::string& colname) const
+{
+    // Initialise pointer
+    GFitsTableCol* ptr = NULL;
+
+    // If there are columns then search for the specified name
+    if (m_columns != NULL) {
+        for (int i = 0; i < m_cols; ++i) {
+            if (m_columns[i]->name() == colname) {
+                ptr = m_columns[i];
+                break;
+            }
+        }
+    }
+    
+    // Return pointer
     return ptr;
 }
 
