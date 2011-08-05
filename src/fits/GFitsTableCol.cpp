@@ -28,7 +28,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFitsTableCol.hpp"
@@ -170,7 +169,7 @@ GFitsTableCol& GFitsTableCol::operator= (const GFitsTableCol& column)
 /***********************************************************************//**
  * @brief Set column name
  *
- * @param[in] name Name of the column.
+ * @param[in] name Column name.
  ***************************************************************************/
 void GFitsTableCol::name(const std::string& name)
 {
@@ -185,12 +184,31 @@ void GFitsTableCol::name(const std::string& name)
 /***********************************************************************//**
  * @brief Set column unit
  *
- * @param[in] unit Unit of the column.
+ * @param[in] unit Column unit.
  ***************************************************************************/
 void GFitsTableCol::unit(const std::string& unit)
 {
-    // Set name
+    // Set unit
     m_unit = unit;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set column dimension
+ *
+ * @param[in] dim Column dimension.
+ *
+ * The column dimension is a integer vector.
+ *
+ * @todo Implement dimension check.
+ ***************************************************************************/
+void GFitsTableCol::dim(const std::vector<int>& dim)
+{
+    // Set dimension
+    m_dim = dim;
 
     // Return
     return;
@@ -202,7 +220,7 @@ void GFitsTableCol::unit(const std::string& unit)
  ***************************************************************************/
 std::string GFitsTableCol::name(void) const
 {
-    // Return Name
+    // Return name
     return m_name;
 }
 
@@ -212,8 +230,18 @@ std::string GFitsTableCol::name(void) const
  ***************************************************************************/
 std::string GFitsTableCol::unit(void) const
 {
-    // Return column length
+    // Return column unit
     return m_unit;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns column dimension
+ ***************************************************************************/
+std::vector<int> GFitsTableCol::dim(void) const
+{
+    // Return column dimension
+    return m_dim;
 }
 
 
@@ -317,10 +345,16 @@ std::string GFitsTableCol::print(void) const
     // Initialise result string
     std::string result;
 
-    // Append formatted column name
-    result.append(parformat(m_name));
+    // Append formatted column name. Optionally add units
+    if (m_unit.length() > 0) {
+        result.append(parformat(m_name+" ("+m_unit+")"));
+    }
+    else {
+        result.append(parformat(m_name));
+    }
 
-    // Append column number
+    // Append column number. This will be "-" if the column does not exist
+    // in the FITS file.
     if (m_colnum > 0)
         result.append(right(str(m_colnum),4)+" ");
     else
@@ -334,6 +368,20 @@ std::string GFitsTableCol::print(void) const
 
     // Append format information
     result.append("["+binary_format()+","+ascii_format()+"]");
+
+    // Append dimensions (if available)
+    if (m_dim.size() > 0) {
+    
+        // Build TDIM string
+        std::string value = "("+str(m_dim[0]);
+        for (int k = 1; k < m_dim.size(); ++k) {
+            value += ","+str(m_dim[k]);
+        }
+        value += ")";
+        
+        // Append
+        result.append(" "+value);
+    }
 
     // Append cfitsio information
     result.append(" repeat="+str(m_repeat));
@@ -495,16 +543,18 @@ void GFitsTableCol::save_column(void)
         status     = __ffmahd(FPTR(m_fitsfile),
                               (FPTR(m_fitsfile)->HDUposition)+1, NULL,
                               &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_hdu_not_found(G_SAVE_COLUMN,
                               (FPTR(m_fitsfile)->HDUposition)+1,
                               status);
+        }
 
         // Save the column data
         status = __ffpcn(FPTR(m_fitsfile), m_type, m_colnum, 1, 1,
                          m_size, ptr_data(), ptr_nulval(), &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_error(G_SAVE_COLUMN, status);
+        }
 
     } // endif: FITS file was connected
 
@@ -596,6 +646,7 @@ void GFitsTableCol::init_members(void)
     // Initialise members
     m_name.clear();
     m_unit.clear();
+    m_dim.clear();
     m_colnum = 0;
     m_type   = 0;
     m_repeat = 0;
@@ -620,6 +671,7 @@ void GFitsTableCol::copy_members(const GFitsTableCol& column)
     // Copy attributes
     m_name     = column.m_name;
     m_unit     = column.m_unit;
+    m_dim      = column.m_dim;
     m_colnum   = column.m_colnum;
     m_type     = column.m_type;
     m_repeat   = column.m_repeat;
