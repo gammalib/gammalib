@@ -1121,7 +1121,7 @@ void GSkymap::read_healpix(const GFitsTable* hdu)
         // all columns. Only count columns that can fully hold the map.
         m_num_maps = 0;
         for (int icol = 0; icol < ncols; ++icol) {
-            GFitsTableCol* col = ((GFitsTable*)hdu)->column(icol);
+            const GFitsTableCol* col = &(*hdu)[icol];
             if (col->number() % nentry == 0)
                 m_num_maps += col->number() / nentry;
         }
@@ -1139,7 +1139,7 @@ void GSkymap::read_healpix(const GFitsTable* hdu)
         for (int icol = 0; icol < ncols; ++icol) {
 
             // Get next column
-            GFitsTableCol* col = ((GFitsTable*)hdu)->column(icol);
+            const GFitsTableCol* col = &(*hdu)[icol];
 
             // Only consider columns that can fully hold maps
             if (col->number() % nentry == 0) {

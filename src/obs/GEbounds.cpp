@@ -361,8 +361,8 @@ void GEbounds::read(GFitsTable* hdu)
 
             // Copy information
             for (int i = 0; i < m_num; ++i) {
-                m_min[i].keV(hdu->column("E_MIN")->real(i));
-                m_max[i].keV(hdu->column("E_MAX")->real(i));
+                m_min[i].keV((*hdu)["E_MIN"].real(i));
+                m_max[i].keV((*hdu)["E_MAX"].real(i));
             }
 
         } // endif: there were channels to read
