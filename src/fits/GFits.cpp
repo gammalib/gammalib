@@ -738,9 +738,9 @@ std::string GFits::print(void) const
     result.append(parformat("Filename")+m_filename+"\n");
     result.append(parformat("History"));
     if (m_created)
-        result.append(" new file\n");
+        result.append("new file\n");
     else
-        result.append(" existing file\n");
+        result.append("existing file\n");
     result.append(parformat("Mode"));
     if (m_readwrite)
         result.append("read/write\n");
