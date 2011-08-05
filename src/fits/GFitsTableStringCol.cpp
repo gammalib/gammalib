@@ -183,7 +183,7 @@ std::string& GFitsTableStringCol::operator() (const int& row, const int& inx)
 const std::string& GFitsTableStringCol::operator() (const int& row, const int& inx) const
 {
     // If data are not available then load them now
-    if (m_data == NULL) ((GFitsTableStringCol*)this)->fetch_data();
+    if (m_data == NULL) fetch_data();
 
     // Return data bin
     return m_data[offset(row, inx)];
@@ -725,12 +725,12 @@ void GFitsTableStringCol::fetch_data(void) const
     m_size = m_number * m_length;
 
     // Free old buffer memory
-    const_cast<GFitsTableStringCol*>(this)->free_buffer();
+    free_buffer();
 
     // Allocate buffer memory
-    const_cast<GFitsTableStringCol*>(this)->alloc_buffer();
+    alloc_buffer();
 
-    // Save column
+    // Load column
     const_cast<GFitsTableStringCol*>(this)->load_column();
 
     // Extract string from buffer
@@ -740,7 +740,7 @@ void GFitsTableStringCol::fetch_data(void) const
     }
 
     // Free buffer memory
-    const_cast<GFitsTableStringCol*>(this)->free_buffer();
+    free_buffer();
 
     // Return
     return;
@@ -753,7 +753,7 @@ void GFitsTableStringCol::fetch_data(void) const
  * The CFITSIO transfer buffer allows transparent conversion from the CFITSIO
  * storage format to a vector of strings.
  ***************************************************************************/
-void GFitsTableStringCol::alloc_buffer(void)
+void GFitsTableStringCol::alloc_buffer(void) const
 {
     // Allocate buffer memory
     if (m_size > 0) {
@@ -780,7 +780,7 @@ void GFitsTableStringCol::alloc_buffer(void)
  *
  * Release memory that has been allocated for the CFITSIO transfer buffer.
  ***************************************************************************/
-void GFitsTableStringCol::free_buffer(void)
+void GFitsTableStringCol::free_buffer(void) const
 {
     // If there was a buffer allocated then free it
     if (m_buffer != NULL) {

@@ -265,17 +265,15 @@ GFitsTableCol& GFitsTable::operator[](const std::string& colname)
     // Initialise pointer
     GFitsTableCol* ptr = NULL;
 
-    // If there are columns then search for the specified name
-    if (m_columns != NULL) {
-        for (int i = 0; i < m_cols; ++i) {
-            if (m_columns[i]->name() == colname) {
-                ptr = m_columns[i];
-                if (ptr == NULL) {
-                    throw GException::fits_no_data(G_ACCESS2, 
-                                                   "No data for this column");
-                }
-                break;
+    // Search for the specified name
+    for (int i = 0; i < m_cols; ++i) {
+        if (m_columns[i]->name() == colname) {
+            ptr = m_columns[i];
+            if (ptr == NULL) {
+                throw GException::fits_no_data(G_ACCESS2, 
+                                               "No data for this column");
             }
+            break;
         }
     }
 
@@ -310,16 +308,14 @@ const GFitsTableCol& GFitsTable::operator[](const std::string& colname) const
     const GFitsTableCol* ptr = NULL;
 
     // If there are columns then search for the specified name
-    if (m_columns != NULL) {
-        for (int i = 0; i < m_cols; ++i) {
-            if (m_columns[i]->name() == colname) {
-                ptr = m_columns[i];
-                if (ptr == NULL) {
-                    throw GException::fits_no_data(G_ACCESS2, 
-                                                   "No data for this column");
-                }
-                break;
+    for (int i = 0; i < m_cols; ++i) {
+        if (m_columns[i]->name() == colname) {
+            ptr = m_columns[i];
+            if (ptr == NULL) {
+                throw GException::fits_no_data(G_ACCESS2, 
+                                               "No data for this column");
             }
+            break;
         }
     }
 
