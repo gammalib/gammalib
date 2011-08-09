@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-04-11
 
 Author(s) : Juergen Knoedlseder
 
-August 4, 2011
+August 9, 2011
 
 
 1. Introduction
@@ -135,3 +135,13 @@ variables in the path are expanded.
 
 GCTAResponse::aeff() does no longer return negative effective area
 that occurred when extrapolating below the low-energy threshold.
+
+The Npred computation has been improved in GCTAResponse for extended
+sources so that Romberg integration convergence problems should no
+longer occur. Integration will now be skipped for models that are too
+far away from the ROI so that they can give any possible contribution.
+Also, azimuthal model integration will be done over only the sector that
+overlaps with the ROI+PSF radius. And finally, a simple Trapezoid rule
+is used for small radial integration intervals in the PSF integration
+(GCTAResponse::npsf).
+

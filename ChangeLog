@@ -1,11 +1,12 @@
-2011-08-04  Juergen Knoedlseder  <knodlseder@cesr.fr>
+2011-08-09  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.4.11 released
         =========================
 
         Add set response() to observation classes
         Expose GCTAResponse::offset_sigma() in python
-        GCTAResponse::aeff() no longer returns negative areas.
+        GCTAResponse::aeff() no longer returns negative areas
+        Improve Npred integration for extended sources in GCTAResponse
         Implement environment variable expansion
         Correctly fit unbinned for multiple observations
         Add eflux() methods to spectral models
