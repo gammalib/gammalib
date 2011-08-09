@@ -196,63 +196,157 @@ double GIntegral::romb(double a, double b, int k)
     double result    = 0.0;
     double ss        = 0.0;
     double dss       = 0.0;
+    
+    // Continue only if integration range is valid
+    if (b > a) {
 
-    // Allocate temporal storage
-    double* s = new double[m_max_iter+2];
-    double* h = new double[m_max_iter+2];
+        // Allocate temporal storage
+        double* s = new double[m_max_iter+2];
+        double* h = new double[m_max_iter+2];
 
-    // Initialise step size
-    h[1] = 1.0;
-    s[0] = 0.0;
+        // Initialise step size
+        h[1] = 1.0;
+        s[0] = 0.0;
 
-    // Loop
-    for (m_iter = 1; m_iter <= m_max_iter; ++m_iter) {
+        // Iterative loop
+        for (m_iter = 1; m_iter <= m_max_iter; ++m_iter) {
 
-        // Integration using Trapezoid rule
-        s[m_iter] = trapzd(a, b, m_iter, s[m_iter-1]);
+            // Integration using Trapezoid rule
+            s[m_iter] = trapzd(a, b, m_iter, s[m_iter-1]);
 
-        // Compile option: Check for NaN/Inf
-        #if defined(G_NAN_CHECK)
-        if (std::isnan(s[m_iter]) || std::isinf(s[m_iter])) {
-            std::cout << "*** ERROR: GIntegral::romb";
-            std::cout << "(a=" << a << ", b=" << b << ", k=" << k << "):";
-            std::cout << " NaN/Inf encountered";
-            std::cout << " (s[" << m_iter << "]=" << s[m_iter] << ")";
-            std::cout << std::endl;
-        }
-        #endif
+            // Compile option: Check for NaN/Inf
+            #if defined(G_NAN_CHECK)
+            if (isnotanumber(s[m_iter]) || isinfinite(s[m_iter])) {
+                std::cout << "*** ERROR: GIntegral::romb";
+                std::cout << "(a=" << a << ", b=" << b << ", k=" << k << "):";
+                std::cout << " NaN/Inf encountered";
+                std::cout << " (s[" << m_iter << "]=" << s[m_iter] << ")";
+                std::cout << std::endl;
+            }
+            #endif
 
-        // Starting from iteration k on, use polynomial interpolation
-        if (m_iter >= k) {
-            ss = polint(&h[m_iter-k], &s[m_iter-k], k, 0.0, &dss);
-            if (std::abs(dss) <= m_eps * std::abs(ss)) {
-                converged = true;
-                result    = ss;
-                break;
+            // Starting from iteration k on, use polynomial interpolation
+            if (m_iter >= k) {
+                ss = polint(&h[m_iter-k], &s[m_iter-k], k, 0.0, &dss);
+                if (std::abs(dss) <= m_eps * std::abs(ss)) {
+                    converged = true;
+                    result    = ss;
+                    break;
+                }
+            }
+
+            // Reduce step size
+            h[m_iter+1]= 0.25 * h[m_iter];
+
+        } // endfor: iterative loop
+
+        // Free temporal storage
+        delete [] s;
+        delete [] h;
+
+        // Dump warning
+        if (!m_silent) {
+            if (!converged) {
+                std::cout << "*** WARNING: GIntegral::romb: ";
+                std::cout << "Integration did not converge ";
+                std::cout << "(iter=" << m_iter;
+                std::cout << ", result=" << ss;
+                std::cout << ", d=" << std::abs(dss);
+                std::cout << " > " << m_eps * std::abs(ss) << ")";
+                std::cout << std::endl;
+                throw;
             }
         }
+    
+    } // endif: integration range was valid
 
-        // Reduce step size
-        h[m_iter+1]= 0.25 * h[m_iter];
+    // Return result
+    return result;
+}
 
+
+/***********************************************************************//**
+ * @brief Perform Trapezoidal integration
+ *
+ * @param[in] a Left integration boundary.
+ * @param[in] b Right integration boundary.
+ * @param[in] n Number of steps.
+ * @param[in] result Result from a previous trapezoidal integration step.
+ *
+ * The original Numerical Recipes function had result declared as a static
+ * variable, yet this led to some untrackable integration problems. For this
+ * reason, previous results are now passed using an argument.
+ * Result initialisation is done if n=1.
+ ***************************************************************************/
+double GIntegral::trapzd(double a, double b, int n, double result)
+{
+    // Handle case of identical boundaries
+    if (a == b) {
+        result = 0.0;
     }
+    
+    // ... otherwise use trapeziodal rule
+    else {
+    
+        // Case A: Only a single step is requested
+        if (n == 1) {
+        
+            // Evaluate integrand at boundaries
+            double y_a = m_integrand->eval(a);
+            double y_b = m_integrand->eval(b);
+            
+            // Compute result
+            result = 0.5*(b-a)*(m_integrand->eval(a) + m_integrand->eval(b));
+            
+        } // endif: only a single step was requested
 
-    // Free temporal storage
-    delete [] s;
-    delete [] h;
+        // Case B: More than a single step is requested
+        else {
+            // Compute step level 2^(n-1)
+            int it = 1;
+            for (int j = 1; j < n-1; ++j)
+                it <<= 1;
 
-    // Dump warning
-    if (!m_silent) {
-        if (!converged) {
-            std::cout << "*** WARNING: GIntegral::romb: ";
-            std::cout << "Integration did not converge ";
-            std::cout << "(iter=" << m_iter;
-            std::cout << ", result=" << ss;
-            std::cout << ", d=" << std::abs(dss);
-            std::cout << " > " << m_eps * std::abs(ss) << ")";
-            std::cout << std::endl;
+            // Verify that step level is valid
+            if (it == 0) {
+                std::cout << "*** ERROR: GIntegral::trapzd(";
+                std::cout << "a=" << a << ", b=" << b << ", n=" << n;
+                std::cout << ", result=" << result << "): it=" << it << ". ";
+                std::cout << "Looks like an overflow?";
+                std::cout << std::endl;
+            }
+
+            // Set step size
+            double tnm = double(it);
+            double del = (b-a)/tnm;
+
+            // Verify that step is >0
+            if (del == 0) {
+                std::cout << "*** ERROR: GIntegral::trapzd(";
+                std::cout << "a=" << a << ", b=" << b << ", n=" << n;
+                std::cout << ", result=" << result << "): del=" << del << ". ";
+                std::cout << "Step is too small to make sense.";
+                std::cout << std::endl;
+            }
+
+            // Sum up values
+            double x   = a + 0.5*del;
+            double sum = 0.0;
+            for (int j = 0; j < it; ++j, x+=del) {
+                
+                // Evaluate integrand
+                double y = m_integrand->eval(x);
+
+                // Add integrand
+                sum += y;
+                
+            } // endfor: looped over steps
+
+            // Set result
+            result = 0.5*(result + (b-a)*sum/tnm);
         }
-    }
+        
+    } // endelse: trapeziodal rule was applied
 
     // Return result
     return result;
@@ -408,94 +502,6 @@ double GIntegral::polint(double* xa, double* ya, int n, double x, double *dy)
 
     // Return
     return y;
-}
-
-
-/***********************************************************************//**
- * @brief Perform Trapezoidal integration
- *
- * @param[in] a Left integration boundary.
- * @param[in] b Right integration boundary.
- * @param[in] n Number of steps.
- * @param[in] result Result from a previous trapezoidal integration step.
- *
- * The original Numerical Recipes function had result declared as a static
- * variable, yet this led to some untrackable integration problems. For this
- * reason, previous results are now passed using an argument.
- * Result initialisation is done if n=1.
- ***************************************************************************/
-double GIntegral::trapzd(double a, double b, int n, double result)
-{
-    // Handle case of identical boundaries
-    if (a == b) {
-        result = 0.0;
-    }
-    
-    // ... otherwise use trapeziodal rule
-    else {
-    
-        // Case A: Only a single step is requested
-        if (n == 1) {
-        
-            // Evaluate integrand at boundaries
-            double y_a = m_integrand->eval(a);
-            double y_b = m_integrand->eval(b);
-            
-            // Compute result
-            result = 0.5*(b-a)*(m_integrand->eval(a) + m_integrand->eval(b));
-            
-        } // endif: only a single step was requested
-
-        // Case B: More than a single step is requested
-        else {
-            // Compute step level 2^(n-1)
-            int it = 1;
-            for (int j = 1; j < n-1; ++j)
-                it <<= 1;
-
-            // Verify that step level is valid
-            if (it == 0) {
-                std::cout << "*** ERROR: GIntegral::trapzd(";
-                std::cout << "a=" << a << ", b=" << b << ", n=" << n;
-                std::cout << ", result=" << result << "): it=" << it << ". ";
-                std::cout << "Looks like an overflow?";
-                std::cout << std::endl;
-            }
-
-            // Set step size
-            double tnm = double(it);
-            double del = (b-a)/tnm;
-
-            // Verify that step is >0
-            if (it == 0) {
-                std::cout << "*** ERROR: GIntegral::trapzd(";
-                std::cout << "a=" << a << ", b=" << b << ", n=" << n;
-                std::cout << ", result=" << result << "): del=" << del << ". ";
-                std::cout << "Step is too small to make sense.";
-                std::cout << std::endl;
-            }
-
-            // Sum up values
-            double x   = a + 0.5*del;
-            double sum = 0.0;
-            for (int j = 0; j < it; ++j, x+=del) {
-                
-                // Evaluate integrand
-                double y = m_integrand->eval(x);
-
-                // Add integrand
-                sum += y;
-                
-            } // endfor: looped over steps
-
-            // Set result
-            result = 0.5*(result + (b-a)*sum/tnm);
-        }
-        
-    } // endelse: trapeziodal rule was applied
-
-    // Return result
-    return result;
 }
 
 
