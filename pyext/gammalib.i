@@ -37,8 +37,8 @@
 %include "GMatrix.i"
 %include "GSymMatrix.i"
 %include "GSparseMatrix.i"
-//%include "GIntegral.i"
-//%include "GIntegrand.i"
+%include "GIntegral.i"
+%include "GIntegrand.i"
 
 /* __ FITS module ________________________________________________________ */
 %include "GFits.i"
