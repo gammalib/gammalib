@@ -271,6 +271,24 @@ double GResponse::irf_diffuse(const GInstDir&            obsDir,
 
 
 /***********************************************************************//**
+ * @brief Return maximum IRF radius (in radians)
+ *
+ * @param[in] srcEng True energy of photon.
+ *
+ * This method returns the radius beyond which the IRF can be assumed to be
+ * zero. By default this method returns pi (hence no limiting IRF radius).
+ * Implementing a maximum IRF radius helps the convergence of the Npred
+ * integration routine, and brings down computation time to an affordable
+ * amount.
+ ***************************************************************************/
+double GResponse::irf_max_radius(const GEnergy& srcEng) const
+{
+    // Return pi
+    return pi;
+}
+
+
+/***********************************************************************//**
  * @brief Return data space integral of instrument response function
  *
  * @param[in] model Source model.
@@ -345,7 +363,7 @@ double GResponse::npred_extended(const GModelExtendedSource& model,
 {
     // Initialise Npred value
     double npred = 0.0;
-
+    
     // Compute rotation matrix to convert from native coordinates given by
     // (theta,phi) into celestial coordinates.
     GMatrix ry;
