@@ -114,9 +114,10 @@ protected:
     std::vector<int>  m_hit_minimum;     //!< Bookkeeping of successive minimum hits
     std::vector<int>  m_hit_maximum;     //!< Bookkeeping of successive maximum hits
     std::vector<bool> m_par_freeze;      //!< Bookkeeping of parameter freeze
+    std::vector<bool> m_par_remove;      //!< Bookkeeping of parameter removal
     double            m_lambda;          //!< Actual lambda
     double            m_value;           //!< Actual function value
-    double            m_diag_load;       //!< Value for diagonal loading
+    //double            m_diag_load;       //!< Value for diagonal loading
     int               m_status;          //!< Fit status
     int               m_iter;            //!< Iteration
     GLog*             m_logger;          //!< Pointer to optional logger

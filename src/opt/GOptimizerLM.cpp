@@ -289,13 +289,14 @@ void GOptimizerLM::init_members(void)
     m_max_stall    = 10;
     m_max_hit      = 3; //!< Maximum successive boundary hits before freeze
     m_step_adjust  = true;
-    m_diag_load    = 1.0e-100;
+    //m_diag_load    = 1.0e-100;
 
     // Initialise bookkeeping arrays
     m_hit_boundary.clear();
     m_hit_minimum.clear();
     m_hit_maximum.clear();
     m_par_freeze.clear();
+    m_par_remove.clear();
 
     // Initialise optimizer values
     m_lambda = m_lambda_start;
@@ -326,11 +327,12 @@ void GOptimizerLM::copy_members(const GOptimizerLM& opt)
     m_max_iter     = opt.m_max_iter;
     m_max_stall    = opt.m_max_stall;
     m_step_adjust  = opt.m_step_adjust;
-    m_diag_load    = opt.m_diag_load;
+    //m_diag_load    = opt.m_diag_load;
     m_hit_boundary = opt.m_hit_boundary;
     m_hit_minimum  = opt.m_hit_minimum;
     m_hit_maximum  = opt.m_hit_maximum;
     m_par_freeze   = opt.m_par_freeze;
+    m_par_remove   = opt.m_par_remove;
     m_lambda       = opt.m_lambda;
     m_value        = opt.m_value;
     m_status       = opt.m_status;
@@ -383,33 +385,43 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
         m_hit_minimum.clear();
         m_hit_maximum.clear();
         m_par_freeze.clear();
+        m_par_remove.clear();
         m_hit_boundary.reserve(m_npars);
         m_hit_minimum.reserve(m_npars);
         m_hit_maximum.reserve(m_npars);
         m_par_freeze.reserve(m_npars);
+        m_par_remove.reserve(m_npars);
         for (int i = 0; i < m_npars; ++i) {
             m_hit_boundary.push_back(false);
             m_hit_minimum.push_back(0);
             m_hit_maximum.push_back(0);
             m_par_freeze.push_back(false);
+            m_par_remove.push_back(false);
         }
 
         // Initial evaluation
         fct->eval(*pars);
 
         // If a free parameter has a zero diagonal element in the curvature
-        // matrix then load it with a small value so that it will be fitted.
-        // This is needed in the LM algorithm as we don't use the full Hessian
-        // matrix but only the curvature. The problem appears in the unbinned
+        // matrix then remove this parameter definitely from the fit as it
+        // otherwise will block the fit. The problem appears in the unbinned
         // fitting where parameter gradients may be zero (due to the truncation
-        // of the PSF), but the Npred gradient is not zero. As the Npred
-        // curvature is by definition zero, we would never move the
-        // corresponding fit parameter, and thus block the fit. This is
-        // prevented by this kluge.
+        // of the PSF), but the Npred gradient is not zero. In principle we
+        // could use the Npred gradient for fitting (I guess), but I still
+        // have to figure out how ... (the diagonal loading was not so
+        // successful as it faked early convergence)
         for (int ipar = 0; ipar < m_npars; ++ipar) {
             if (pars->par(ipar).isfree()) {
-                if ((*fct->covar())(ipar,ipar) == 0.0)
-                    (*fct->covar())(ipar,ipar) = m_diag_load;
+                if ((*fct->covar())(ipar,ipar) == 0.0) {
+                    //(*fct->covar())(ipar,ipar) = m_diag_load;
+                    if (m_logger != NULL) {
+                        *m_logger << "  Parameter \"" << pars->par(ipar).name();
+                        *m_logger << "\" has zero covariance.";
+                        *m_logger << " Fix parameter." << std::endl;
+                    }
+                    m_par_remove[ipar] = true;
+                    pars->par(ipar).fix();
+                }
             }
         }
 
@@ -560,7 +572,7 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
         // Free now all temporarily frozen parameters so that the resulting
         // model has the same attributes as the initial model
         for (int ipar = 0; ipar < m_npars; ++ipar) {
-            if (m_par_freeze[ipar]) {
+            if (m_par_freeze[ipar] || m_par_remove[ipar]) {
                 pars->par(ipar).free();
                 if (m_logger != NULL) {
                     *m_logger << "  Free parameter \""
@@ -748,18 +760,25 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
         fct->eval(*pars);
 
         // If a free parameter has a zero diagonal element in the curvature
-        // matrix then load it with a small value so that it will be fitted.
-        // This is needed in the LM algorithm as we don't use the full Hessian
-        // matrix but only the curvature. The problem appears in the unbinned
+        // matrix then remove this parameter definitely from the fit as it
+        // otherwise will block the fit. The problem appears in the unbinned
         // fitting where parameter gradients may be zero (due to the truncation
-        // of the PSF), but the Npred gradient is not zero. As the Npred
-        // curvature is by definition zero, we would never move the
-        // corresponding fit parameter, and thus block the fit. This is
-        // prevented by this kluge.
+        // of the PSF), but the Npred gradient is not zero. In principle we
+        // could use the Npred gradient for fitting (I guess), but I still
+        // have to figure out how ... (the diagonal loading was not so
+        // successful as it faked early convergence)
         for (int ipar = 0; ipar < m_npars; ++ipar) {
             if (pars->par(ipar).isfree()) {
-                if ((*fct->covar())(ipar,ipar) == 0.0)
-                    (*fct->covar())(ipar,ipar) = m_diag_load;
+                if ((*fct->covar())(ipar,ipar) == 0.0) {
+                    //(*fct->covar())(ipar,ipar) = m_diag_load;
+                    if (m_logger != NULL) {
+                        *m_logger << "  Parameter \"" << pars->par(ipar).name();
+                        *m_logger << "\" has zero covariance.";
+                        *m_logger << " Fix parameter." << std::endl;
+                    }
+                    m_par_remove[ipar] = true;
+                    pars->par(ipar).fix();
+                }
             }
         }
 
