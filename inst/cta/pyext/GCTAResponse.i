@@ -75,6 +75,10 @@ public:
                                const GEnergy&             srcEng,
                                const GTime&               srcTime,
                                const GObservation&        obs) const;
+    virtual double npred_extended(const GModelExtendedSource& model,
+                                  const GEnergy&              srcEng,
+                                  const GTime&                srcTime,
+                                  const GObservation&         obs) const;
 
     // Other Methods
     GCTAEventAtom* mc(const double& area, const GPhoton& photon,

@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <cmath>
 #include <vector>
+#include "GMatrix.hpp"
 #include "GEvent.hpp"
 #include "GModelSky.hpp"
 #include "GModelPointSource.hpp"
@@ -56,6 +57,7 @@
 #include "GCTADir.hpp"
 
 /* __ Forward declaration ________________________________________________ */
+class GCTAObservation;
 
 
 /***********************************************************************//**
@@ -108,6 +110,10 @@ public:
                                const GEnergy&             srcEng,
                                const GTime&               srcTime,
                                const GObservation&        obs) const;
+    virtual double npred_extended(const GModelExtendedSource& model,
+                                  const GEnergy&              srcEng,
+                                  const GTime&                srcTime,
+                                  const GObservation&         obs) const;
 
     // Other Methods
     GCTAEventAtom* mc(const double& area, const GPhoton& photon,
@@ -263,6 +269,77 @@ private:
         double              m_sin_psf;       //!< Sine term for PSF offset angle computation
         double              m_cos_ph;        //!< Cosine term for photon offset angle computation
         double              m_sin_ph;        //!< Sine term for photon offset angle computation
+    };
+
+    // Npred theta integration kernel
+    class npred_kern_theta : public GIntegrand {
+    public:
+        npred_kern_theta(const GCTAResponse*    rsp,
+                         const GModelRadial*    radial,
+                         const GEnergy*         srcEng,
+                         const GTime*           srcTime,
+                         const GCTAObservation* obs,
+                         const GMatrix*         rot,
+                         double                 dist,
+                         double                 radius,
+                         double                 phi) :
+                         m_rsp(rsp),
+                         m_radial(radial),
+                         m_srcEng(srcEng),
+                         m_srcTime(srcTime),
+                         m_obs(obs),
+                         m_rot(rot),
+                         m_dist(dist),
+                         m_cos_dist(std::cos(dist)),
+                         m_sin_dist(std::sin(dist)),
+                         m_radius(radius),
+                         m_cos_radius(std::cos(radius)),
+                         m_phi(phi) { return; }
+        double eval(double theta);
+    protected:
+        const GCTAResponse*    m_rsp;        //!< Pointer to response
+        const GModelRadial*    m_radial;     //!< Pointer to radial spatial model
+        const GEnergy*         m_srcEng;     //!< Pointer to true photon energy
+        const GTime*           m_srcTime;    //!< Pointer to true photon arrival time
+        const GCTAObservation* m_obs;        //!< Pointer to observation
+        const GMatrix*         m_rot;        //!< Rotation matrix
+        double                 m_dist;       //!< Distance model-ROI centre
+        double                 m_cos_dist;   //!< Cosine of distance model-ROI centre
+        double                 m_sin_dist;   //!< Sine of distance model-ROI centre
+        double                 m_radius;     //!< ROI+PSF radius
+        double                 m_cos_radius; //!< Cosine of ROI+PSF radius
+        double                 m_phi;        //!< Position angle of ROI
+    };
+
+    // Npred phi integration kernel
+    class npred_kern_phi : public GIntegrand {
+    public:
+        npred_kern_phi(const GCTAResponse*    rsp,
+                       const GEnergy*         srcEng,
+                       const GTime*           srcTime,
+                       const GCTAObservation* obs,
+                       const GMatrix*         rot,
+                       double                 theta,
+                       double                 sin_theta) :
+                       m_rsp(rsp),
+                       m_srcEng(srcEng),
+                       m_srcTime(srcTime),
+                       m_obs(obs),
+                       m_rot(rot),
+                       m_theta(theta),
+                       m_cos_theta(std::cos(theta)),
+                       m_sin_theta(sin_theta) { return; }
+        double eval(double phi);
+    protected:
+        const GCTAResponse*    m_rsp;        //!< Pointer to response
+        const GModelRadial*    m_radial;     //!< Pointer to radial spatial model
+        const GEnergy*         m_srcEng;     //!< Pointer to true photon energy
+        const GTime*           m_srcTime;    //!< Pointer to true photon arrival time
+        const GCTAObservation* m_obs;        //!< Pointer to observation
+        const GMatrix*         m_rot;        //!< Rotation matrix
+        double                 m_theta;      //!< Offset angle (radians)
+        double                 m_cos_theta;  //!< cosine of offset angle
+        double                 m_sin_theta;  //!< Sine of offset angle
     };
 
     // Integration

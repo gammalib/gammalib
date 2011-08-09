@@ -58,6 +58,8 @@
            " GTime&, GModelExtendedSource&, GEnergy&, GTime&, GObservation&)"
 #define G_IRF_DIFFUSE     "GCTAResponse::irf_diffuse(GCTAInstDir&, GEnergy&,"\
          " GTime&, GModelDiffuseSource&, GEnergy&, GTime&, GCTAObservation&)"
+#define G_NPRED_EXTENDED                      "GCTAResponse::npred_extended(" \
+                       "GModelExtendedSource&,GEnergy&,GTime&,GObservation&)"
 #define G_READ           "GCTAResponse::read_performance_table(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -66,6 +68,7 @@
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_IRF_EXTENDED                 //!< Debug irf_extended method
+//#define G_DEBUG_NPRED_EXTENDED                    //!< Debug npred_extended
 
 /* __ Constants __________________________________________________________ */
 
@@ -754,6 +757,115 @@ double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
 }
 
 
+/***********************************************************************//**
+ * @brief Return spatial integral of extended source model
+ *
+ * @param[in] model Extended source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] obs Observation.
+ ***************************************************************************/
+double GCTAResponse::npred_extended(const GModelExtendedSource& model,
+                                    const GEnergy&              srcEng,
+                                    const GTime&                srcTime,
+                                    const GObservation&         obs) const
+{
+    // Initialise Npred value
+    double npred = 0.0;
+
+    // Get pointer on CTA observation
+    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+    if (ctaobs == NULL)
+        throw GCTAException::bad_observation_type(G_NPRED_EXTENDED);
+
+    // Get pointer on CTA events list
+    const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
+    if (events == NULL)
+        throw GException::no_list(G_NPRED_EXTENDED);
+
+    // Get log10(E/TeV) of true photon energy
+    double srcLogEng = srcEng.log10TeV();
+
+    // Get maximum PSF radius (radians)
+    double sigma          = psf_dummy_sigma(srcLogEng);
+    double psf_max_radius = psf_dummy_max(sigma);
+
+    // Extract ROI radius (radians)
+    double roi_radius = events->roi().radius() * deg2rad;
+
+    // Compute distance between ROI and model centre (radians)
+    double roi_model_distance = events->roi().centre().dist(model.radial()->dir());
+
+    // Compute the ROI radius plus maximum PSF radius (radians). Any photon
+    // coming from beyond this radius will not make it in the dataspace and
+    // thus can be neglected.
+    double roi_psf_radius = roi_radius + psf_max_radius;
+
+    // Set offset angle integration range. We take here the ROI+PSF into
+    // account to make no integrations beyond the point where the
+    // contribution drops to zero.
+    double theta_min = (roi_model_distance > roi_psf_radius)
+                       ? roi_model_distance - roi_psf_radius: 0.0;
+    double theta_max = model.radial()->theta_max();
+
+    // Perform offset angle integration only if interval is valid
+    if (theta_max > theta_min) {
+
+        // Compute rotation matrix to convert from native model coordinates,
+        // given by (theta,phi), into celestial coordinates.
+        GMatrix ry;
+        GMatrix rz;
+        GMatrix rot;
+        ry.eulery(model.radial()->dec() - 90.0);
+        rz.eulerz(-model.radial()->ra());
+        rot = transpose(ry * rz);
+        
+        // Compute position angle of ROI centre with respect to model
+        // centre (radians)
+        double phi = model.radial()->dir().posang(events->roi().centre().skydir());
+
+        // Setup integration kernel
+        GCTAResponse::npred_kern_theta integrand(this,
+                                                 model.radial(),
+                                                 &srcEng,
+                                                 &srcTime,
+                                                 ctaobs,
+                                                 &rot,
+                                                 roi_model_distance,
+                                                 roi_radius,
+                                                 phi);
+
+        // Integrate over theta
+        GIntegral integral(&integrand);
+        npred = integral.romb(theta_min, theta_max);
+
+        // Compile option: Show integration results
+        #if defined(G_DEBUG_NPRED_EXTENDED)
+        std::cout << "npred_extended:";
+        std::cout << " theta_min=" << theta_min;
+        std::cout << " theta_max=" << theta_max;
+        std::cout << " npred=" << npred << std::endl;
+        #endif
+
+    } // endif: offset angle range was valid
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (isnotanumber(npred) || isinfinite(npred)) {
+        std::cout << "*** ERROR: GCTAResponse::npred_extended:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (npred=" << npred;
+        std::cout << ", theta_min=" << theta_min;
+        std::cout << ", theta_max=" << theta_max;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+    
+    // Return Npred
+    return npred;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                    Low-level CTA response methods                       =
@@ -928,8 +1040,9 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
 
     // If PSF is sufficiently enclosed by ROI, skip the numerical integration
     // and assume that the integral is 1.0
-    if (psf+rmax < radroi)
+    if (psf+rmax < radroi) {
         value = 1.0;
+    }
 
     // ... otherwise perform numerical integration
     else {
@@ -1345,6 +1458,123 @@ double GCTAResponse::irf_kern_omega::eval(double omega)
 
     // Return
     return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for zenith angle Npred integration or radial model
+ *
+ * @param[in] theta Radial model zenith angle (radians).
+ *
+ * This method integrates a radial model for a given zenith angle theta over
+ * all azimuth angles that fall within the ROI+PSF radius. The limitation to
+ * an arc assures that the integration converges properly.
+ *
+ * @todo Rename method to npred_radial_kern_theta.
+ ***************************************************************************/
+double GCTAResponse::npred_kern_theta::eval(double theta)
+{
+    // Initialise Npred value
+    double npred = 0.0;
+
+    // Compute half length of arc that lies within ROI+PSF radius (radians)
+    double dphi = 0.5 * cta_roi_arclength(theta,
+                                          m_dist,
+                                          m_cos_dist,
+                                          m_sin_dist,
+                                          m_radius,
+                                          m_cos_radius);
+
+
+    // Continue only if arc length is positive
+    if (dphi > 0.0) {
+
+        // Compute phi integration range
+        double phi_min = m_phi - dphi;
+        double phi_max = m_phi + dphi;
+
+        // Get radial model value
+        double model = m_radial->eval(theta);
+
+        // Compute sine of offset angle
+        double sin_theta = std::sin(theta);
+
+        // Setup phi integration kernel
+        GCTAResponse::npred_kern_phi integrand(m_rsp,
+                                               m_srcEng,
+                                               m_srcTime,
+                                               m_obs,
+                                               m_rot,
+                                               theta,
+                                               sin_theta);
+
+        // Integrate over phi
+        GIntegral integral(&integrand);
+        npred = integral.romb(phi_min, phi_max) * sin_theta * model;
+
+        // Debug: Check for NaN
+        #if defined(G_NAN_CHECK)
+        if (isnotanumber(npred) || isinfinite(npred)) {
+            std::cout << "*** ERROR: GCTAResponse::npred_kern_theta::eval";
+            std::cout << "(theta=" << theta << "):";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (npred=" << npred;
+            std::cout << ", model=" << model;
+            std::cout << ", phi=[" << phi_min << "," << phi_max << "]";
+            std::cout << ", sin_theta=" << sin_theta;
+            std::cout << ")" << std::endl;
+        }
+        #endif
+
+    } // endif: arc length was positive
+
+    // Return Npred
+    return npred;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for azimuth angle Npred integration of radial model
+ *
+ * @param[in] phi Azimuth angle (radians).
+ *
+ * @todo Rename method to npred_radial_kern_phi.
+ * @todo Re-consider formula for possible simplification (dumb matrix
+ *       multiplication is definitely not the fastest way to do that
+ *       computation).
+ ***************************************************************************/
+double GCTAResponse::npred_kern_phi::eval(double phi)
+{
+    // Compute sky direction vector in native coordinates
+    double  cos_phi = std::cos(phi);
+    double  sin_phi = std::sin(phi);
+    GVector native(-cos_phi*m_sin_theta, sin_phi*m_sin_theta, m_cos_theta);
+
+    // Rotate from native into celestial system
+    GVector cel = *m_rot * native;
+
+    // Set sky direction
+    GSkyDir srcDir;
+    srcDir.celvector(cel);
+
+    // Compute Npred for this sky direction
+    double npred = m_rsp->npred(srcDir, *m_srcEng, *m_srcTime, *m_obs);
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (isnotanumber(npred) || isinfinite(npred)) {
+        std::cout << "*** ERROR: GCTAResponse::npred_kern_phi::eval";
+        std::cout << "(phi=" << phi << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (npred=" << npred;
+        std::cout << ", cos_phi=" << cos_phi;
+        std::cout << ", sin_phi=" << sin_phi;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return Npred
+    return npred;
 }
 
 
