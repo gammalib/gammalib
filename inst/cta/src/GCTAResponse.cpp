@@ -284,20 +284,27 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
     // Compute only if we're sufficiently close to PSF
     if (delta <= delta_max) {
 
-        // Get point source IRF
-        irf  = aeff(theta, phi, zenith, azimuth, srcLogEng);
-        irf *= psf(delta, theta, phi, zenith, azimuth, srcLogEng);
-
-        // Multiply-in energy dispersion
-        if (hasedisp()) {
-
-            // Get log10(E/TeV) of measured photon energy.
-            double obsLogEng = obsEng.log10TeV();
-
+        // Get effective area component
+        irf = aeff(theta, phi, zenith, azimuth, srcLogEng);
+        
+        // Multiply-in PSF
+        if (irf > 0) {
+        
+            // Get PSF component
+            irf *= psf(delta, theta, phi, zenith, azimuth, srcLogEng);
+            
             // Multiply-in energy dispersion
-            irf *= edisp(obsLogEng, theta, phi, zenith, azimuth, srcLogEng);
+            if (hasedisp() && irf > 0) {
 
-        } // endif: energy dispersion was available
+                // Get log10(E/TeV) of measured photon energy.
+                double obsLogEng = obsEng.log10TeV();
+
+                // Multiply-in energy dispersion
+                irf *= edisp(obsLogEng, theta, phi, zenith, azimuth, srcLogEng);
+
+            } // endif: energy dispersion was available and PSF was non-zero
+            
+        } // endif: Aeff was non-zero
 
     } // endif: we were sufficiently close to PSF
 
@@ -369,17 +376,24 @@ double GCTAResponse::npred(const GSkyDir&      srcDir,
     // Get log10(E/TeV) of true photon energy.
     double srcLogEng = srcEng.log10TeV();
 
-    // Get IRF components
+    // Get effectve area components
     double npred = aeff(theta, phi, zenith, azimuth, srcLogEng);
-    npred       *= npsf(srcDir, srcLogEng, srcTime, *pnt, events->roi());
-
-    // Multiply-in energy dispersion
-    if (hasedisp()) {
+    
+    // Multiply-in PSF
+    if (npred > 0.0) {
+    
+        // Get PSF
+        npred *= npsf(srcDir, srcLogEng, srcTime, *pnt, events->roi());
 
         // Multiply-in energy dispersion
-        npred *= nedisp(srcDir, srcEng, srcTime, *pnt, events->ebounds());
+        if (hasedisp() && npred > 0.0) {
 
-    } // endif: had energy dispersion
+            // Get energy dispersion
+            npred *= nedisp(srcDir, srcEng, srcTime, *pnt, events->ebounds());
+
+        } // endif: had energy dispersion
+    
+    } // endif: had non-zero effective area
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -496,8 +510,9 @@ void GCTAResponse::caldb(const std::string& caldb)
     std::string caldb_expanded = expand_env(caldb);
     
     // Check if calibration database directory is accessible
-    if (access(caldb_expanded.c_str(), R_OK) != 0)
+    if (access(caldb_expanded.c_str(), R_OK) != 0) {
         throw GException::caldb_not_found(G_CALDB, caldb_expanded);
+    }
 
     // Store the path to the calibration database
     m_caldb = caldb_expanded;
@@ -552,8 +567,9 @@ std::string GCTAResponse::print(void) const
     result.append("=== GCTAResponse ===");
     result.append("\n"+parformat("Calibration database")+m_caldb);
     result.append("\n"+parformat("Response name")+m_rspname);
-    if (m_offset_sigma == 0)
+    if (m_offset_sigma == 0) {
         result.append("\n"+parformat("Offset angle dependence")+"none");
+    }
     else {
         std::string txt = "Fixed sigma="+str(m_offset_sigma);
         result.append("\n"+parformat("Offset angle dependence")+txt);
@@ -832,7 +848,7 @@ double GCTAResponse::npred_extended(const GModelExtendedSource& model,
                                                  ctaobs,
                                                  &rot,
                                                  roi_model_distance,
-                                                 roi_radius,
+                                                 roi_psf_radius,
                                                  phi);
 
         // Integrate over theta
@@ -1013,15 +1029,20 @@ double GCTAResponse::edisp(const double& obsLogEng,
  * @param[in] pnt CTA pointing.
  * @param[in] roi CTA region of interest.
  *
- * This method integrates the PSF over the circular region of interest.
+ * This method integrates the PSF over the circular region of interest (ROI).
  * Integration is done in a polar coordinate system centred on the PSF since
  * the PSF is assumed to be azimuthally symmetric. The polar integration is
  * done using the method npsf_kern_rad_azsym() that computes analytically
- * the arclength that is comprised within the ROI. The radial integration
- * is done using a standard Romberg integration. Note that the integration
- * is only performed when the PSF is sufficiently close to the ROI border so
- * that part of the PSF may be outside the ROI. For all other cases, the
- * integral is simply 1.
+ * the arclength that is comprised within the ROI.
+ * 
+ * Note that the integration is only performed when the PSF is spilling out
+ * of the ROI border, otherwise the integral is simply 1. Numerical
+ * integration is done using the standard Romberg method. The integration
+ * boundaries are computed so that only the PSF section that falls in the ROI
+ * is considered.
+ *
+ * @todo Enhance romb() integration method for small integration regions
+ *       (see comment abobr kluge below)
  ***************************************************************************/
 double GCTAResponse::npsf(const GSkyDir&      srcDir,
                           const double&       srcLogEng,
@@ -1033,43 +1054,67 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
     double value = 0.0;
 
     // Extract relevant parameters from arguments
-    double radroi = roi.radius() * deg2rad;
-    double psf    = roi.centre().dist(srcDir);
-    double sigma  = psf_dummy_sigma(srcLogEng);
-    double rmax   = psf_dummy_max(sigma);
+    double roi_radius       = roi.radius() * deg2rad;
+    double roi_psf_distance = roi.centre().dist(srcDir);
+    double sigma            = psf_dummy_sigma(srcLogEng);
+    double rmax             = psf_dummy_max(sigma);
 
-    // If PSF is sufficiently enclosed by ROI, skip the numerical integration
-    // and assume that the integral is 1.0
-    if (psf+rmax < radroi) {
+    // If PSF is fully enclosed by the ROI then skip the numerical
+    // integration and assume that the integral is 1.0
+    if (roi_psf_distance + rmax <= roi_radius) {
         value = 1.0;
     }
 
     // ... otherwise perform numerical integration
     else {
 
-        // Setup integration kernel
-        GCTAResponse::npsf_kern_rad_azsym integrand(this, radroi, psf, sigma);
+        // Compute minimum PSF integration radius
+        double rmin = (roi_psf_distance > roi_radius) 
+                      ? roi_psf_distance - roi_radius : 0.0;
+        
+        // Continue only if integration range is valid
+        if (rmax > rmin) {
 
-        // Integrate PSF
-        GIntegral integral(&integrand);
-        integral.eps(m_eps);
-        value = integral.romb(0.0, rmax);
+            // Setup integration kernel
+            GCTAResponse::npsf_kern_rad_azsym integrand(this,
+                                                        roi_radius,
+                                                        roi_psf_distance,
+                                                        sigma);
+
+            // Setup integration
+            GIntegral integral(&integrand);
+            integral.eps(m_eps);
+
+            // Radially integrate PSF. In case that the radial integration
+            // region is small, we do the integration using a simple
+            // trapezoidal rule. This is a kluge to prevent convergence
+            // problems in the romb() method for small integration intervals.
+            // Ideally, the romb() method should be enhanced to handle this
+            // case automatically. The kluge threshold was fixed manually!
+            if (rmax-rmin < 1.0e-12) {
+                value = integral.trapzd(rmin, rmax);
+            }
+            else {
+                value = integral.romb(rmin, rmax);
+            }
+
+            // Compile option: Check for NaN/Inf
+            #if defined(G_NAN_CHECK)
+            if (isnotanumber(value) || isinfinite(value)) {
+                std::cout << "*** ERROR: GCTAResponse::npsf:";
+                std::cout << " NaN/Inf encountered";
+                std::cout << " (value=" << value;
+                std::cout << ", roi_radius=" << roi_radius;
+                std::cout << ", roi_psf_distance=" << roi_psf_distance;
+                std::cout << ", sigma=" << sigma;
+                std::cout << ", r=[" << rmin << "," << rmax << "])";
+                std::cout << std::endl;
+            }
+            #endif
+        
+        } // endif: integration range was valid
 
     } // endelse: numerical integration required
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
-        std::cout << "*** ERROR: GCTAResponse::npsf:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", radroi=" << radroi;
-        std::cout << ", psf=" << psf;
-        std::cout << ", sigma=" << sigma;
-        std::cout << ", rmax=" << rmax << ")";
-        std::cout << std::endl;
-    }
-    #endif
 
     // Return integrated PSF
     return value;
@@ -1202,8 +1247,8 @@ void GCTAResponse::init_members(void)
     m_aeff.clear();
     m_r68.clear();
     m_r80.clear();
-    m_eps          = 1.0e-5;
-    m_offset_sigma = 3.0;    // default value for now ...
+    m_eps          = 1.0e-5; // Precision for Romberg integration
+    m_offset_sigma = 3.0;    // Default value for now ...
 
     // Return
     return;
@@ -1439,9 +1484,10 @@ double GCTAResponse::irf_kern_omega::eval(double omega)
                  m_rsp->psf_dummy(delta, m_sigma);
 
     // Optionally take energy dispersion into account
-    if (m_rsp->hasedisp())
+    if (m_rsp->hasedisp() && irf > 0.0) {
         irf *= m_rsp->edisp(m_obsLogEng, theta, phi, m_zenith, m_azimuth, m_srcLogEng);
-
+    }
+    
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(irf) || isinfinite(irf)) {
@@ -1588,24 +1634,37 @@ double GCTAResponse::npred_kern_phi::eval(double phi)
  ***************************************************************************/
 double GCTAResponse::npsf_kern_rad_azsym::eval(double theta)
 {
+    // Initialise PSF value
+    double value = 0.0;
+    
     // Get arclength for given radius in radians
-    double phi = cta_roi_arclength(theta, m_psf, m_cospsf, m_sinpsf, m_roi, m_cosroi);
+    double phi = cta_roi_arclength(theta,
+                                   m_psf,
+                                   m_cospsf,
+                                   m_sinpsf,
+                                   m_roi,
+                                   m_cosroi);
 
-    // Get PSF value
-    double value = m_parent->psf_dummy(theta, m_sigma) * phi * std::sin(theta);
+    // If arclength is positive then compute the PSF value
+    if (phi > 0) {
+    
+        // Compute PSF value
+        value = m_parent->psf_dummy(theta, m_sigma) * phi * std::sin(theta);
 
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
-        std::cout << "*** ERROR: GCTAResponse::npsf_kern_rad_azsym::eval";
-        std::cout << "(theta=" << theta << ").";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", theta=" << theta;
-        std::cout << ", phi=" << phi << ")";
-        std::cout << std::endl;
-    }
-    #endif
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (isnotanumber(value) || isinfinite(value)) {
+            std::cout << "*** ERROR: GCTAResponse::npsf_kern_rad_azsym::eval";
+            std::cout << "(theta=" << theta << ").";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (value=" << value;
+            std::cout << ", theta=" << theta;
+            std::cout << ", phi=" << phi << ")";
+            std::cout << std::endl;
+        }
+        #endif
+        
+    } // endif: arclength was positive
 
     // Return
     return value;
