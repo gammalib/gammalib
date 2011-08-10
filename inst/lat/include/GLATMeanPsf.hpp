@@ -1,13 +1,21 @@
 /***************************************************************************
  *                  GLATMeanPsf.hpp  -  Fermi LAT mean PSF                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -65,6 +73,8 @@ public:
     void         set(const GSkyDir& dir, const GLATObservation& obs);
     int          noffsets(void) const { return m_offset.size(); }
     int          nenergies(void) const { return m_energy.size(); }
+    double       offset(const int& inx) { return m_offset[inx]; }
+    double       energy(const int& inx) { return m_energy[inx]; }
     GSkyDir      dir(void) const { return m_dir; }
     std::string  name(void) const { return m_name; }
     void         name(const std::string& name) { m_name=name; }
