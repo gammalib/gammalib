@@ -40,8 +40,8 @@
 #define G_STRING_SET                             "GPar::string(std::string&)"
 #define G_FILENAME_SET                         "GPar::filename(std::string&)"
 #define G_BOOLEAN_SET                                  "GPar::boolean(bool&)"
-#define G_INTEGER_SET                                  "GPar::integer(bool&)"
-#define G_REAL_SET                                        "GPar::real(bool&)"
+#define G_INTEGER_SET                                   "GPar::integer(int&)"
+#define G_REAL_SET                                      "GPar::real(double&)"
 #define G_STRING_GET                                         "GPar::string()"
 #define G_FILENAME_GET                                     "GPar::filename()"
 #define G_BOOLEAN_GET                                       "GPar::boolean()"
@@ -348,7 +348,7 @@ void GPar::boolean(const bool& value)
  ***************************************************************************/
 void GPar::integer(const int& value)
 {
-    // Check if parameter is boolean
+    // Check if parameter is integer
     if (m_type != "i")
         throw GException::par_error(G_INTEGER_SET, name(),
               "attempted to set "+gpar_type_string(m_type)+
