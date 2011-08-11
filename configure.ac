@@ -410,9 +410,9 @@ fi
 AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
 
 
-dnl =========================================
-dnl Checks for instrument specific interfaces
-dnl =========================================
+dnl ==================================================
+dnl Checks for optional instrument specific interfaces
+dnl ==================================================
 # Checks for the existence of instrument specific interfaces
 AC_CHECK_FILE([inst/Makefile.am],
               [with_inst=yes],
