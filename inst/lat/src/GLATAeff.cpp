@@ -164,6 +164,11 @@ double GLATAeff::operator() (const double& logE, const double& ctheta)
     double aeff = (ctheta >= m_min_ctheta) 
                   ? m_aeff_bins.interpolate(logE, ctheta, m_aeff) : 0.0;
 
+    // Make sure that effective area is not negative
+    if (aeff < 0.0) {
+        aeff = 0.0;
+    }
+    
     // Return effective area value
     return aeff;
 }
@@ -184,6 +189,11 @@ double GLATAeff::operator() (const double& logE, const double& ctheta,
     // Get effective area value
     double aeff = (ctheta >= m_min_ctheta) 
                   ? m_aeff_bins.interpolate(logE, ctheta, m_aeff) : 0.0;
+
+    // Make sure that effective area is not negative
+    if (aeff < 0.0) {
+        aeff = 0.0;
+    }
 
     // Return effective area value
     return aeff;
