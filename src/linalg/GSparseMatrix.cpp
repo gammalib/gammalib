@@ -4,19 +4,32 @@
  *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  * ----------------------------------------------------------------------- *
  * This class implements the compressed sparse column format. The          *
  * following arrays are allocated:                                         *
- * m_data     : holds all 'elements' non-zero values, in column order (Ax) *
- * m_colstart : holds the index of the first element of each column   (Ap) *
- * m_rowinx   : holds the row indices for all elements                (Ai) *
+ *                                                                         *
+ * m_rows     (n)  Number of rows                                          *
+ * m_cols     (m)  Number of columns                                       *
+ * m_data     (Ax) Holds all 'elements' non-zero values, in column order   *
+ * m_colstart (Ap) Holds the index of the first element of each column     *
+ * m_rowinx   (Ai) Holds the row indices for all elements                  *
+ *                                                                         *
  * Column 'col' covers therefore [m_colstart[j], ..., m_colstart[j+1]-1]   *
  * Note that 'm_colstart' has m_cols+1 elements.                           *
+ *                                                                         *
  ***************************************************************************/
 /**
  * @file GSparseMatrix.cpp
@@ -2829,17 +2842,17 @@ GSparseMatrix abs(const GSparseMatrix& m)
  ***************************************************************************/
 GSparseMatrix cs_symperm(const GSparseMatrix& m, const int* pinv)
 {
-  // Declare loop variables
-  int i, j, p, q, i2, j2;
+    // Declare loop variables
+    int i, j, p, q, i2, j2;
 
-  // Assign matrix attributes
-  int     n  = m.m_cols;
-  int*    Ap = m.m_colstart;
-  int*    Ai = m.m_rowinx; 
-  double* Ax = m.m_data;
+    // Assign matrix attributes
+    int     n  = m.m_cols;
+    int*    Ap = m.m_colstart;
+    int*    Ai = m.m_rowinx; 
+    double* Ax = m.m_data;
 
-  // Allocate result matrix
-  GSparseMatrix C(n, n, Ap[n]);
+    // Allocate result matrix
+    GSparseMatrix C(n, n, Ap[n]);
 
     // Allocate and initialise workspace
     int  wrk_size = n;
@@ -2847,66 +2860,69 @@ GSparseMatrix cs_symperm(const GSparseMatrix& m, const int* pinv)
     for (i = 0; i < wrk_size; ++i)
         wrk_int[i] = 0;
 
-  // Assign result matrix attributes
-  int*    Cp = C.m_colstart;
-  int*    Ci = C.m_rowinx; 
-  double* Cx = C.m_data;
+    // Assign result matrix attributes
+    int*    Cp = C.m_colstart;
+    int*    Ci = C.m_rowinx; 
+    double* Cx = C.m_data;
 
-  // Count entries in each column of C
-  for (j = 0; j < n; j++) {
+    // Count entries in each column of C
+    for (j = 0; j < n; j++) {
 
-    // Column j of A is column j2 of C
-    j2 = pinv ? pinv[j] : j;
+        // Column j of A is column j2 of C
+        j2 = pinv ? pinv[j] : j;
 
-    // Loop over entries in column j
-    for (p = Ap[j]; p < Ap[j+1]; p++) {
-      i = Ai [p];
-      if (i > j) continue;              // skip lower triangular part of A
-      i2 = pinv ? pinv[i] : i;          // row i of A is row i2 of C
-      wrk_int[G_MAX(i2, j2)]++;         // column count of C
+        // Loop over entries in column j
+        for (p = Ap[j]; p < Ap[j+1]; p++) {
+            i = Ai [p];
+            if (i > j) continue;              // skip lower triangular part of A
+            i2 = pinv ? pinv[i] : i;          // row i of A is row i2 of C
+            wrk_int[G_MAX(i2, j2)]++;         // column count of C
+        }
     }
-  }
 
-  // Compute column pointers of C
-  cs_cumsum(Cp, wrk_int, n);
+    // Compute column pointers of C
+    cs_cumsum(Cp, wrk_int, n);
 
-  // Loop over all columns of A
-  for (j = 0 ; j < n ; j++) {
+    // Loop over all columns of A
+    for (j = 0 ; j < n ; j++) {
 
-    // Column j of A is column j2 of C
-    j2 = pinv ? pinv[j] : j;
+        // Column j of A is column j2 of C
+        j2 = pinv ? pinv[j] : j;
 
-    // Loop over entries in column j
-    for (p = Ap[j]; p < Ap[j+1]; p++) {
-      i = Ai [p] ;
-      if (i > j) continue;              // skip lower triangular part of A
-      i2    = pinv ? pinv[i] : i;       // row i of A is row i2 of C
-      Ci[q  = wrk_int[G_MAX(i2,j2)]++] = G_MIN(i2,j2);
-      if (Cx) Cx[q] = Ax[p];
+        // Loop over entries in column j
+        for (p = Ap[j]; p < Ap[j+1]; p++) {
+            i = Ai [p] ;
+            if (i > j) continue;              // skip lower triangular part of A
+            i2    = pinv ? pinv[i] : i;       // row i of A is row i2 of C
+            Ci[q  = wrk_int[G_MAX(i2,j2)]++] = G_MIN(i2,j2);
+            if (Cx) Cx[q] = Ax[p];
+        }
     }
-  }
 
-  // Free workspace
-  delete [] wrk_int;
+    // Free workspace
+    delete [] wrk_int;
   
-  // Rectify the number of elements in matrix C
-  C.free_elements(Cp[n], (C.m_elements-Cp[n]));
+    // Rectify the number of elements in matrix C
+    C.free_elements(Cp[n], (C.m_elements-Cp[n]));
 
-  // Return result
-  return C;
+    // Return result
+    return C;
 
 }
 
 
 /***************************************************************************
- *                              cs_transpose                               *
- * ----------------------------------------------------------------------- *
- * Transpose matrix. The flag 'values' allows to avoid copying the actual  *
- * data values. This allows to perform a logical matrix transposition, as  *
- * needed by the symbolic matrix analysis class.                           *
- * ----------------------------------------------------------------------- *
- * NOTE: This routine DOES NOT support pending elements (they have to be   *
- * filled before.                                                          *
+ * @brief Compute transpose matrix
+ *
+ * @param[in] m     Matrix.
+ * @param[in] value Flag that signals if values should be copied.
+ *
+ * The flag 'values' allows to avoid copying the actual data values. This
+ * allows to perform a logical matrix transposition, as needed by the
+ * symbolic matrix analysis class.
+ *
+ * Note that this method does not support pending elements (they have to be
+ * filled before).
  ***************************************************************************/
 GSparseMatrix cs_transpose(const GSparseMatrix& m, int values)
 {
@@ -2916,45 +2932,55 @@ GSparseMatrix cs_transpose(const GSparseMatrix& m, int values)
     // Allocate and initialise workspace
     int  wrk_size = m.m_rows;
     int* wrk_int  = new int[wrk_size];
-    for (int i = 0; i < wrk_size; i++) 
+    for (int i = 0; i < wrk_size; ++i) {
         wrk_int[i] = 0;
-
-  // Setup the number of non-zero elements in each row
-  for (int p = 0; p < m.m_elements; p++) 
-    wrk_int[m.m_rowinx[p]]++;
-
-  // Set row pointers. To use a GSparseSymbolic function we have to
-  // allocate and object (but this does not take memory)
-  cs_cumsum(result.m_colstart, wrk_int, m.m_rows);
-
-  // Case A: Normal transponse, including assignment of values
-  if (values) {
-    for (int col = 0; col < m.m_cols; col++) {
-      for (int p = m.m_colstart[col] ; p < m.m_colstart[col+1] ; p++) {
-        int i         = wrk_int[m.m_rowinx[p]]++;
-        result.m_rowinx[i] = col;
-        result.m_data[i]   = m.m_data[p] ;
-      }
     }
-  }
 
-  // Case B: Logical transponse, no assignment of values is performed
-  else {
-    for (int col = 0; col < m.m_cols; col++) {
-      for (int p = m.m_colstart[col] ; p < m.m_colstart[col+1] ; p++)
-        result.m_rowinx[wrk_int[m.m_rowinx[p]]++] = col;
+    // Setup the number of non-zero elements in each row
+    // for (p = 0 ; p < Ap [n] ; p++) w [Ai [p]]++ ;
+    // Ap[n] = m.m_colstart[col]
+    //     n = m.m_cols
+    // Ai[p] = m.m_rowinx[p]
+    for (int p = 0; p < m.m_colstart[m.m_cols]; ++p) {
+        wrk_int[m.m_rowinx[p]]++;
     }
-  }
 
-  // Return transponse matrix
-  return result;
+    // Set row pointers. To use a GSparseSymbolic function we have to
+    // allocate and object (but this does not take memory)
+    cs_cumsum(result.m_colstart, wrk_int, m.m_rows);
+
+    // Case A: Normal transponse, including assignment of values
+    if (values) {
+        for (int col = 0; col < m.m_cols; ++col) {
+            for (int p = m.m_colstart[col]; p < m.m_colstart[col+1] ; ++p) {
+                int i              = wrk_int[m.m_rowinx[p]]++;
+                result.m_rowinx[i] = col;
+                result.m_data[i]   = m.m_data[p] ;
+            }
+        }
+    }
+
+    // Case B: Logical transponse, no assignment of values is performed
+    else {
+        for (int col = 0; col < m.m_cols; ++col) {
+            for (int p = m.m_colstart[col]; p < m.m_colstart[col+1] ; ++p) {
+                result.m_rowinx[wrk_int[m.m_rowinx[p]]++] = col;
+            }
+        }
+    }
+    
+    // Free workspace
+    delete [] wrk_int;
+
+    // Return transponse matrix
+    return result;
 
 }
 
 
 /*==========================================================================
  =                                                                         =
- =                   Other functions used by GSparseMatrix                 =
+ =                            Other functions                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -2970,22 +2996,22 @@ GSparseMatrix cs_transpose(const GSparseMatrix& m, int values)
  ***************************************************************************/
 double cs_cumsum(int* p, int* c, int n)
 {
-  // Signal error if one of the input pointers is NULL
-  if (!p || !c) return (-1);
+    // Signal error if one of the input pointers is NULL
+    if (!p || !c) return (-1);
 
-  // Initialise sums (integer and double)
-  int    nz  = 0;
-  double nz2 = 0.0;
+    // Initialise sums (integer and double)
+    int    nz  = 0;
+    double nz2 = 0.0;
 
-  // Evaluate p[0..n] = cumulative sum of c[0..n-1]
-  for (int i = 0; i < n; ++i) {
-    p[i]  = nz ;
-    nz   += c[i];
-    nz2  += c[i];    // also in double to avoid int overflow
-    c[i]  = p[i];    // also copy p[0..n-1] back into c[0..n-1]
-  }
-  p[n] = nz ;
+    // Evaluate p[0..n] = cumulative sum of c[0..n-1]
+    for (int i = 0; i < n; ++i) {
+        p[i]  = nz ;
+        nz   += c[i];
+        nz2  += c[i];    // also in double to avoid int overflow
+        c[i]  = p[i];    // also copy p[0..n-1] back into c[0..n-1]
+    }
+    p[n] = nz ;
 
-  // Return cumulative sum of c[0..n-1]
-  return nz2;
+    // Return cumulative sum of c[0..n-1]
+    return nz2;
 }
