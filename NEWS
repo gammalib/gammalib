@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-04-11
 
 Author(s) : Juergen Knoedlseder
 
-August 9, 2011
+September 9, 2011
 
 
 1. Introduction
@@ -48,7 +48,8 @@ This allows for more compact and intuitive coding.
 
 5. Linear algebra module
 ------------------------
-None
+Correct a bug in GSparseMatrix::cs_transpose that randomly led to
+segmentation faults and de-allocate correctly the working array.
 
 
 6. Model module
