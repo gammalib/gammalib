@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-Version: 00-04-10 (July 20, 2011)
+Version: 00-04-11 (September 9, 2011)
 Author:  Juergen Knodlseder (knodlseder@cesr.fr)
 
 
@@ -99,6 +99,17 @@ Macintosh OS X Installation
 GammaLib is known to work on various flavors of OS X.  Follow the 
 Linux installation instructions above.
 
+In some cases, install problems have been reported with mixed
+architectures (i386, ppc, x86_64), so you may configure and build
+as follows to enable building a bundle for various architectures:
+
+     % export CXXFLAGS="-arch ppc -arch i386 -arch x86_64"
+     % export LDFLAGS="-arch ppc -arch i386 -arch x86_64"
+     % ./configure
+     % make
+     % make check
+     % make install
+
 
 BSD Installation
 ================
@@ -132,7 +143,7 @@ extensive unit test by typing:
 If everything works successfully you should see
 
     ===================
-    All 14 tests passed
+    All 15 tests passed
     ===================
 
 at the end of the test. If no Python support was compiled in, the
