@@ -43,7 +43,7 @@ def extract_data(filename):
 				dy.append(yerr*conv)
 			plt.loglog(x, y, styles[k])
 			plt.errorbar(x, y, dy, fmt=None, ecolor=ecolor[k])
-			
+
 			# Increment style counter
 			k = k + 1
 	
