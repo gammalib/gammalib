@@ -318,7 +318,7 @@ GException::file_function_columns::file_function_columns(std::string origin,
  *
  * @param[in] origin Method that throws the error.
  * @param[in] filename File function filename.
- * @param[in] num Number of columns.
+ * @param[in] value Number of columns.
  * @param[in] message Optional error message.
  ***************************************************************************/
 GException::file_function_value::file_function_value(std::string origin,
