@@ -518,50 +518,6 @@ void GFitsTable::remove_rows(const int& rownum, const int& nrows)
 
 
 /***********************************************************************//**
- * @brief Return pointer to column with specified name
- *
- * @param[in] colname Name of column which should be accessed
- *
- * @exception GException::fits_no_data
- *            There are no column data in the table or there is not data
- *            for this column
- * @exception GException::fits_column_not_found
- *            Requested column has not been found in table.
- ***************************************************************************/
-/*
-GFitsTableCol* GFitsTable::column(const std::string& colname)
-{
-    // If there is no data then throw an exception
-    if (m_columns == NULL)
-        throw GException::fits_no_data(G_COLUMN1, "No column data in table");
-
-    // Initialise pointer
-    GFitsTableCol* ptr = NULL;
-
-    // If there are columns then search for the specified name
-    if (m_columns != NULL) {
-        for (int i = 0; i < m_cols; ++i) {
-            if (m_columns[i]->name() == colname) {
-                ptr = m_columns[i];
-                if (ptr == NULL)
-                    throw GException::fits_no_data(G_COLUMN1, 
-                                                   "No data for this column");
-                break;
-            }
-        }
-    }
-
-    // If column has not been found throw an exception
-    if (ptr == NULL)
-        throw GException::fits_column_not_found(G_COLUMN1, colname);
-
-    // Return column pointer
-    return ptr;
-}
-*/
-
-
-/***********************************************************************//**
  * @brief Return number of rows in table
  ***************************************************************************/
 int GFitsTable::nrows(void) const
@@ -583,6 +539,8 @@ int GFitsTable::ncols(void) const
 
 /***********************************************************************//**
  * @brief Checks the presence of a column in table
+ *
+ * @param[in] colname Column name.
  ***************************************************************************/
 bool GFitsTable::has(const std::string& colname) const
 {
