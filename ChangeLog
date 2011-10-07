@@ -1,3 +1,11 @@
+2011-10-07  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+        * Version 0.5.0 released
+        ========================
+
+        Add support for CTA 1DC response format.
+        Comply to v1.0.0 event list format.
+
 2011-10-03  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.4.11 released

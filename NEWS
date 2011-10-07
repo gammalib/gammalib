@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 00-04-11
+New Features and Important Changes in GammaLib 00-05-00
 
 Author(s) : Juergen Knoedlseder
 
-October 3, 2011
+October 7, 2011
 
 
 1. Introduction
@@ -10,139 +10,60 @@ October 3, 2011
 This document briefly summarizes module by module the most important
 changes made since the last release of GammaLib.
 
-
 2. Configuration
 -----------------
 None
 
 3. Application module
 ---------------------
-GPar::filename() expands any environment variables that are present in
-the filename.
-
-Add GPars::append() and GPars::append_standard() to allow construction
-of parfiles from within the code. This is particularly useful for
-development cscripts that want to carry a default parfile on the fly.
-
-Add output methods to Python interface of GLog class. These wrap the
-operator<< methods existing in the C++ interface for the class and
-provide logging support within Python.
-
-Parameter file read and write operations are now protected by a file
-lock. This prevents file access conflicts for multiple processes
-trying to read and write simultaneously to the same file.
-
+None
 
 4. FITS I/O Interface
 ---------------------
-Any environment variables in the filename in GFits::open and
-GFits::saveto are expanded.
-
-Add row appending, insertion and removal capabilities to FITS
-tables. Implement also proper removing of obsolete columns from
-a FITS file.
-
-Replace the GFitsTable::column() methods by [] access operators.
-This allows for more compact and intuitive coding.
-
+None
 
 5. Linear algebra module
 ------------------------
-Correct a bug in GSparseMatrix::cs_transpose that randomly led to
-segmentation faults and de-allocate correctly the working array.
-
+None
 
 6. Model module
 ---------------
-Add eflux() method for spectral models. This allows the computation
-of an energy flux (erg/cm2/s) for a given energy interval.
-
-Implement the flux(), eflux and mc() methods for the GModelSpectralFunc
-class.
-
+None
 
 7. Numerics module
 ------------------
 None
 
-
 8. Observation module
 ---------------------
-Add set response() method to GObservation. This allows setting a
-response by cloning the response specified in the argument.
-
-Correct a major bug in GObservation_optimizer::eval() where Npred
-was incorrectly added to the log-likelihood value for multiple
-observations.
-
+None
 
 9. Optimization module
 ----------------------
-The following pure virtual methods have been added to GOptimizer:
-value() - returns the optimizer value
-status() - returns the optimizer status (integer code)
-iter() - returns the number of iterations done by the optimizer
-
-The function cast_GOptimizerLM has been added to the python interface
-so that casting from GOptimizer to GOptimizerLM is possible.
-
-The LM optimizer now frees any internally fixed parameter on exit,
-so the the free/fix status for all parameter on exit is the same as
-on entry. This prevents changing the model definition in an observation
-without a user alert. Parameters which were internally fixed will have
-zero errors, as before, so they can be easily recognized.
-
+None
 
 10. Sky module
 --------------
 None
 
-
 11. Support module
 ------------------
-Add expand_env() function to expand environment variables within
-a string.
-
-Any environment variables in the filename in GCsv::load are expanded.
-
+None
 
 12. XML module
 --------------
-Any environment variables in the filename in GXml::load are expanded.
-
+None
 
 13. Multi-wavelength interface
 ------------------------------
-Add set response() method to GMWLObservation. This allows setting a
-response by cloning the response specified in the argument.
-
+None
 
 14. Fermi-LAT interface
 ----------------------
-Add set response() method to GLATLObservation. This allows setting a
-response by cloning the response specified in the argument.
-
-In setting the caldb directory path for GLATResponse, any environment
-variables in the path are expanded.
-
+None
 
 15. CTA interface
 -----------------
-Add set response() method to GCTAObservation. This allows setting a
-response by cloning the response specified in the argument.
+Add support for 1DC response files.
 
-In setting the caldb directory path for GCTAResponse, any environment
-variables in the path are expanded.
-
-GCTAResponse::aeff() does no longer return negative effective area
-that occurred when extrapolating below the low-energy threshold.
-
-The Npred computation has been improved in GCTAResponse for extended
-sources so that Romberg integration convergence problems should no
-longer occur. Integration will now be skipped for models that are too
-far away from the ROI so that they can give any possible contribution.
-Also, azimuthal model integration will be done over only the sector that
-overlaps with the ROI+PSF radius. And finally, a simple Trapezoid rule
-is used for small radial integration intervals in the PSF integration
-(GCTAResponse::npsf).
-
+Implement v1.0.0 event list format.
