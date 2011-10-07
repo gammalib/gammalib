@@ -318,10 +318,10 @@ void test_unbinned_obs(void)
             //std::cout << event->test() << std::endl;
             num++;
         }
-        if (num != 8096) {
+        if (num != 8794) {
             std::cout << std::endl
                       << "TEST ERROR: Wrong number of iterations in GObservations::iterator."
-                      << " (excepted 8096, found " << num << ")" << std::endl;
+                      << " (excepted 8794, found " << num << ")" << std::endl;
             throw;
         }
     }
@@ -341,10 +341,10 @@ void test_unbinned_obs(void)
             //std::cout << *event->energy() << std::endl;
             num++;
         }
-        if (num != 4048) {
+        if (num != 4397) {
             std::cout << std::endl
                       << "TEST ERROR: Wrong number of iterations in GCTAEventList::iterator."
-                      << " (excepted 4048, found " << num << ")" << std::endl;
+                      << " (excepted 4397, found " << num << ")" << std::endl;
             throw;
         }
     }
