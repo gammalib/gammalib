@@ -912,7 +912,7 @@ double GCTAResponse::aeff(const double& theta,
                           const double& srcLogEng) const
 {
     // Interpolate effective area using node array
-    double aeff = m_nodes.interpolate(srcLogEng, m_aeff);
+    double aeff = m_aeff_logE.interpolate(srcLogEng, m_aeff);
     if (aeff < 0)
         aeff = 0.0;
     
@@ -1198,7 +1198,7 @@ double GCTAResponse::psf_dummy_sigma(const double& srcLogEng) const
     const double conv = 0.6624 * deg2rad;
 
     // Determine Gaussian sigma in radians
-    double sigma = m_nodes.interpolate(srcLogEng, m_r68) * conv;
+    double sigma = m_psf_logE.interpolate(srcLogEng, m_r68) * conv;
 
     // Return result
     return sigma;
@@ -1243,6 +1243,8 @@ void GCTAResponse::init_members(void)
     // Initialise members
     m_caldb.clear();
     m_rspname.clear();
+    m_psf_logE.clear();
+    m_aeff_logE.clear();
     m_logE.clear();
     m_aeff.clear();
     m_r68.clear();
@@ -1265,7 +1267,8 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
     // Copy attributes
     m_caldb        = rsp.m_caldb;
     m_rspname      = rsp.m_rspname;
-    m_nodes        = rsp.m_nodes;
+    m_psf_logE     = rsp.m_psf_logE;
+    m_aeff_logE    = rsp.m_aeff_logE;
     m_logE         = rsp.m_logE;
     m_aeff         = rsp.m_aeff;
     m_r68          = rsp.m_r68;
@@ -1302,6 +1305,14 @@ void GCTAResponse::free_members(void)
  ***************************************************************************/
 void GCTAResponse::read_performance_table(const std::string& filename)
 {
+    // Clear arrays
+    m_psf_logE.clear();
+    m_aeff_logE.clear();
+    m_logE.clear();
+    m_aeff.clear();
+    m_r68.clear();
+    m_r80.clear();
+
     // Allocate line buffer
     const int n = 1000;
     char  line[n];
@@ -1341,12 +1352,64 @@ void GCTAResponse::read_performance_table(const std::string& filename)
     // If we have nodes then setup node array
     int num = m_logE.size();
     if (num > 0) {
-        for (int i = 0; i < num; ++i)
-            m_nodes.append(m_logE.at(i));
+        for (int i = 0; i < num; ++i) {
+            m_psf_logE.append(m_logE.at(i));
+            m_aeff_logE.append(m_logE.at(i));
+        }
     }
 
     // Close file
     std::fclose(fptr);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read CTA ARF matrix
+ *
+ * @param[in] hdu FITS table pointer.
+ *
+ * This method reads a CTA 1DC ARF matrix from the FITS HDU. Note that the
+ * effective area is converted from m2 to cm2 and stored in units of cm2.
+ *
+ * @todo So far we expect energies in units of TeV
+ * @todo So far we expect the effective area in units of m2
+ ***************************************************************************/
+void GCTAResponse::read_arf(const GFitsTable* hdu)
+{
+    // Clear arrays
+    m_aeff_logE.clear();
+    m_aeff.clear();
+
+    // Get pointers to table columns
+    const GFitsTableCol* energy_lo = &(*hdu)["ENERG_LO"];
+    const GFitsTableCol* energy_hi = &(*hdu)["ENERG_HI"];
+    const GFitsTableCol* specresp  = &(*hdu)["SPECRESP"];
+
+    // Extract number of energy bins
+    int num = energy_lo->number();
+
+    // Set nodes
+    for (int i = 0; i < num; ++i) {
+    
+        // Compute log10 mean energy
+        double e_min = energy_lo->real(i);
+        double e_max = energy_hi->real(i);
+        double logE  = 0.5 * (log10(e_min) + log10(e_max));
+        
+        // Compute effective area in cm2
+        double aeff = specresp->real(i) * 10000.0;
+        
+        // Store log10 mean energy and effective area value
+        m_aeff_logE.append(logE);
+        m_aeff.push_back(aeff);
+
+    } // endfor: looped over nodes
+    
+    // Disable offset angle dependence
+    m_offset_sigma = 0.0;
 
     // Return
     return;

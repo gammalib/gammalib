@@ -171,6 +171,7 @@ private:
     void copy_members(const GCTAResponse& rsp);
     void free_members(void);
     void read_performance_table(const std::string& filename);
+    void read_arf(const GFitsTable* hdu);
 
     // Model*IRF zenith angle integration kernel
     class irf_kern_rho : public GIntegrand {
@@ -365,9 +366,10 @@ private:
     // Private data members
     std::string         m_caldb;        //!< Name of or path to the calibration database
     std::string         m_rspname;      //!< Name of the instrument response
-    GNodeArray          m_nodes;        //!< log(E) nodes for interpolation
+    GNodeArray          m_psf_logE;     //!< log(E) nodes for PSF interpolation
+    GNodeArray          m_aeff_logE;    //!< log(E) nodes for Aeff interpolation
     std::vector<double> m_logE;         //!< log(E) = log10(E/TeV) - bin centre
-    std::vector<double> m_aeff;         //!< Effective area in square metres after all cuts
+    std::vector<double> m_aeff;         //!< Effective area in cm2 after all cuts
     std::vector<double> m_r68;          //!< 68% containment radius of PSF post cuts in degrees
     std::vector<double> m_r80;          //!< 80% containment radius of PSF post cuts in degrees
     double              m_eps;          //!< Integration precision
