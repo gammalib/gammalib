@@ -4,10 +4,18 @@
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
 /**
@@ -67,30 +75,26 @@ protected:
     void free_members(void);
 
     // Protected members
-    GCTAInstDir m_dir;            //!< Event direction
-    GEnergy     m_energy;         //!< Event energy
-    GTime       m_time;           //!< Event time
-    long        m_event_id;       //!< Event identifier
-    char        m_flags;          //!< Flags
-    int         m_multip;         //!< Multiplicity
-    char        m_telmask;        //!< Telescope mask
-    float       m_dir_err;        //!< Error on event direction
-    float       m_detx;           //!<
-    float       m_dety;           //!<
-    float       m_alt_pnt;        //!< Pointing altitude
-    float       m_az_pnt;         //!< Pointing azimuth
-    float       m_alt;            //!< Event altitude
-    float       m_az;             //!< Event azimuth
-    float       m_corex;          //!<
-    float       m_corey;          //!<
-    float       m_core_err;       //!<
-    float       m_xmax;           //!<
-    float       m_xmax_err;       //!<
-    float       m_energy_err;     //!< Error on event energy (MeV)
-    float       m_hil_msw;        //!< Hillas width
-    float       m_hil_msw_err;    //!< Error on Hillas width
-    float       m_hil_msl;        //!< Hillas length
-    float       m_hil_msl_err;    //!< Error on Hillas length
+    GCTAInstDir   m_dir;            //!< Event direction
+    GEnergy       m_energy;         //!< Event energy
+    GTime         m_time;           //!< Event time
+    unsigned long m_event_id;       //!< Event identifier
+    unsigned long m_obs_id;         //!< Observation identifier
+    int           m_multip;         //!< Multiplicity
+    char          m_telmask;        //!< Telescope mask
+    float         m_dir_err;        //!< Error on event direction
+    float         m_detx;           //!< Tangential coordinate in nominal sys
+    float         m_dety;           //!< Tangential coordinate in nominal sys
+    float         m_alt;            //!< Event altitude
+    float         m_az;             //!< Event azimuth
+    float         m_corex;          //!< Position on ground (m)
+    float         m_corey;          //!< Position on ground (m)
+    float         m_core_err;       //!< Error on core reconstruction
+    float         m_xmax;           //!< Position of shower max (g/cm2)
+    float         m_xmax_err;       //!< Error on shower max (g/cm2)
+    float         m_shwidth;        //!< Shower width (m)
+    float         m_shlength;       //!< Shower length (m)
+    float         m_energy_err;     //!< Error on event energy (MeV)
 };
 
 #endif /* GCTAEVENTATOM_HPP */
