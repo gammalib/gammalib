@@ -1,10 +1,17 @@
-2011-10-07  Juergen Knoedlseder  <knodlseder@cesr.fr>
+2011-10-12  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.5.0 released
         ========================
 
         Add support for CTA 1DC response format.
         Comply to v1.0.0 event list format.
+
+2011-10-12  Juergen Knoedlseder  <knodlseder@cesr.fr>
+
+        * Version 0.4.12 released
+        =========================
+        Add missing #include <cstring> to GTools.cpp
+        Correct but in python interface for GSymMatrix and GSparseMatrix
 
 2011-10-03  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
