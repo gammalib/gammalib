@@ -87,14 +87,14 @@ public:
         return tochar(str);
     }
     double __getslice__(int row, int col) {
-        if (row >=0 && row < (int)self->rows() && col >= 0 || col < (int)self->cols())
+        if (row >=0 && row < (int)self->rows() && col >= 0 && col < (int)self->cols())
             return (*self)(row,col);
         else
             throw GException::out_of_range("__getitem__(int,int)", row, col,
                                            (int)self->rows(), (int)self->cols());
     }
     void __setslice__(int row, int col, const double val) {
-        if (row >=0 && row < (int)self->rows() && col >= 0 || col < (int)self->cols())
+        if (row >=0 && row < (int)self->rows() && col >= 0 && col < (int)self->cols())
             (*self)(row,col) = val;
         else
             throw GException::out_of_range("__setitem__(int,int)", row, col,
