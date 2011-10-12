@@ -64,3 +64,18 @@ public:
  ***************************************************************************/
 %extend GCTAModelRadial {
 };
+
+
+/***********************************************************************//**
+ * @brief GCTAModelRadialAcceptance type casts
+ ***************************************************************************/
+%inline %{
+    GCTAModelRadialAcceptance* cast_GCTAModelRadialAcceptance(GModel* model) {
+        GCTAModelRadialAcceptance* cast = dynamic_cast<GCTAModelRadialAcceptance*>(model);
+        if (cast == NULL) {
+            throw GException::bad_type("cast_GCTAModelRadialAcceptance(GModel* model)",
+                                       "GModel not of type GCTAModelRadialAcceptance");
+        }
+        return cast;
+    }
+%}
