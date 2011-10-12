@@ -34,6 +34,7 @@
 #include <cfloat>
 #include <cctype>
 #include <cstdlib>         // std::getenv() function
+#include <cstring>         // std::strlen() function
 #include <iostream>
 #include <sstream>
 #include <algorithm>
