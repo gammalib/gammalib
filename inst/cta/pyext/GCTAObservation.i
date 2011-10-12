@@ -75,17 +75,16 @@ public:
 };
 
 
-
-
 /***********************************************************************//**
  * @brief GCTAObservation type casts
  ***************************************************************************/
 %inline %{
     GCTAObservation* cast_GCTAObservation(GObservation* obs) {
         GCTAObservation* cta = dynamic_cast<GCTAObservation*>(obs);
-        if (cta == NULL)
-            throw GException::bad_type("cast_GMWLObservation(GObservation* obs)",
-                                       "GObservation not of type GCTAObservation");            
+        if (cta == NULL) {
+            throw GException::bad_type("cast_GCTAObservation(GObservation* obs)",
+                                       "GObservation not of type GCTAObservation");
+        }
         return cta;
     }
 %}
