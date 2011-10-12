@@ -22,6 +22,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAModelRadialRegistry.cpp \
           src/GCTAModelRadial.cpp \
           src/GCTAModelRadialGauss.cpp \
+          src/GCTAModelRadialPolynom.cpp \
           src/GCTAModelRadialAcceptance.cpp \
           src/GCTADir.cpp
 
@@ -39,6 +40,7 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAModelRadialRegistry.hpp \
                      include/GCTAModelRadial.hpp \
                      include/GCTAModelRadialGauss.hpp \
+                     include/GCTAModelRadialPolynom.hpp \
                      include/GCTAModelRadialAcceptance.hpp \
                      include/GCTADir.hpp \
                      include/GCTALib.hpp

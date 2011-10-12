@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-05-00
 
 Author(s) : Juergen Knoedlseder
 
-October 7, 2011
+October 12, 2011
 
 
 1. Introduction
@@ -64,6 +64,9 @@ None
 
 15. CTA interface
 -----------------
-Add support for 1DC response files.
+Comply to v1.0.0 event list format
 
-Implement v1.0.0 event list format.
+Add support for 1DC response files
+
+Add GCTAModelRadialPolynom class to model the radial acceptance using a polynomial.
+ 
