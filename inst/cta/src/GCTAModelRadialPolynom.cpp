@@ -36,6 +36,7 @@
 #include "GCTAModelRadialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
+const double g_cta_radial_polynom_offset_max = 4.0;
 
 /* __ Globals ____________________________________________________________ */
 const GCTAModelRadialPolynom  g_cta_radial_polynom_seed;
@@ -377,7 +378,10 @@ double GCTAModelRadialPolynom::eval_gradients(const double& offset) const
  * \f$c_i\f$ are the polynomial coefficients,
  * using the rejection method.
  *
- * Note that the maximum offset angle has been fixed to 10 deg (hardwired).
+ * Note that the maximum offset angle is fixed by the constant
+ * g_cta_radial_polynom_offset_max.
+ * This needs eventually adjusting on real data. The main reason for the
+ * tight limit is to avoid divergence at large offset angles.
  *
  * @todo This method actually assumes that the polynom is always < 1, which
  *       may not be necessarily the case. Ideally, the method should
@@ -387,8 +391,7 @@ double GCTAModelRadialPolynom::eval_gradients(const double& offset) const
 GCTAInstDir GCTAModelRadialPolynom::mc(const GCTAInstDir& dir, GRan& ran) const
 {
     // Set constants
-    const double offset_max = 10.0;
-    const double u_max      = sin(offset_max * deg2rad);
+    const double u_max = sin(g_cta_radial_polynom_offset_max * deg2rad);
 
     // Debug option: initialise number if samples thrown for one value
     #if defined(G_DEBUG_MC)
@@ -402,7 +405,7 @@ GCTAInstDir GCTAModelRadialPolynom::mc(const GCTAInstDir& dir, GRan& ran) const
     double offset = 0.0;
     do {
         // Throw offset angle
-        offset = ran.uniform() * offset_max;
+        offset = ran.uniform() * g_cta_radial_polynom_offset_max;
         
         // Compute function value at this offset angle
         value  = sin(offset * deg2rad) * eval(offset);
@@ -446,12 +449,14 @@ GCTAInstDir GCTAModelRadialPolynom::mc(const GCTAInstDir& dir, GRan& ran) const
  *
  * The integration is performed numerically, and the upper integration bound
  * \f$\pi\f$
- * is fixed to 10 degrees.
+ * is fixed to < g_cta_radial_polynom_offset_max.
+ * This needs eventually adjusting on real data. The main reason for the
+ * tight limit is to avoid divergence at large offset angles.
  ***************************************************************************/
 double GCTAModelRadialPolynom::omega(void) const
 {
     // Set constants
-    const double offset_max_rad = 10.0 * deg2rad;
+    const double offset_max_rad = g_cta_radial_polynom_offset_max * deg2rad;
 
     // Allocate integrand
     GCTAModelRadialPolynom::integrand integrand(this);
