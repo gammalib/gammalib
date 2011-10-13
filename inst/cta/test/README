@@ -11,6 +11,9 @@ test_model.py
 test_gauss.py
   Test Gaussian.
 
+test_radial_acceptance.
+  Displays the various radial acceptance models.
+
 example_binned_ml_fit.py
   Illustrates a binned maximum likelihood fit of CTA data.
   This script implements a full analysis chain, and computes
