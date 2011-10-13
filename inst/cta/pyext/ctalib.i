@@ -37,6 +37,7 @@
 %include "GCTAModelRadialRegistry.i"
 %include "GCTAModelRadialGauss.i"
 %include "GCTAModelRadialPolynom.i"
+%include "GCTAModelRadialProfile.i"
 %include "GCTAModelRadialAcceptance.i"
 %include "GCTADir.i"
 
