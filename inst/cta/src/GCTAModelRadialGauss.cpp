@@ -401,14 +401,15 @@ double GCTAModelRadialGauss::omega(void) const
  *
  * @exception GException::model_invalid_parnum
  *            Invalid number of model parameters found in XML element.
+ * @exception GException::model_invalid_parvalue
+ *            Non-positive parameter value found.
+ * @exception GException::model_invalid_parlimit
+ *            Missing or non-positive minimum parameter boundary.
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
  * Read the Gaussian radial model information from an XML element. The XML
  * element is required to have one parameter named "Sigma". 
- *
- * @todo Implement a test of the sigma and sigma boundary. The sigma
- *       and sigma minimum should be >0.
  ***************************************************************************/
 void GCTAModelRadialGauss::read(const GXmlElement& xml)
 {
@@ -430,7 +431,15 @@ void GCTAModelRadialGauss::read(const GXmlElement& xml)
             // Read parameter
             m_sigma.read(*par);
             
-            //TODO: Check parameter
+            // Check parameter
+            if (m_sigma.real_value() <= 0.0) {
+                throw GException::model_invalid_parvalue(G_READ, xml,
+                      "\"Sigma\" parameter is required to be positive.");
+            }
+            if (!m_sigma.hasmin() || m_sigma.real_min() <= 0.0) {
+                throw GException::model_invalid_parlimit(G_READ, xml,
+                      "\"Sigma\" parameter requires positive minimum boundary.");
+            }
             
             // Increment parameter counter
             npar[0]++;
