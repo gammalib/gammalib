@@ -69,4 +69,6 @@ Comply to v1.0.0 event list format
 Add support for 1DC response files
 
 Add GCTAModelRadialPolynom class to model the radial acceptance using a polynomial.
- 
+
+Add GCTAModelRadialProfile class to model the radial acceptance using a 3 parameter profile (width, core, tail).
+

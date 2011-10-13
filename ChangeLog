@@ -6,6 +6,7 @@
         Comply to v1.0.0 event list format
         Add support for CTA 1DC response format
         Add GCTAModelRadialPolynom model
+        Add GCTAModelRadialProfile model
 
 2011-10-12  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
