@@ -70,14 +70,15 @@ def show_model(xmlfile):
 #==========================#
 if __name__ == '__main__':
 	"""
-	Show radial acceptance model.
+	Show radial acceptance models.
 	"""
 	# Dump header
 	print
-	print "********************************"
-	print "* Show radial acceptance model *"
-	print "********************************"
+	print "*********************************"
+	print "* Show radial acceptance models *"
+	print "*********************************"
 
     # Display various models
 	show_model("data/crab.xml")
 	show_model("data/crab_poly.xml")
+	show_model("data/crab_profile.xml")
