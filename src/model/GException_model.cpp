@@ -218,6 +218,48 @@ GException::model_invalid_parnames::model_invalid_parnames(std::string origin,
 
 
 /***********************************************************************//**
+ * @brief Invalid model parameter value in XML element
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] xml XML element.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::model_invalid_parvalue::model_invalid_parvalue(std::string origin,
+                                                           GXmlElement xml,
+                                                           std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Invalid model parameter value found in XML element. " +
+                message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Invalid model parameter limit in XML element
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] xml XML element.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::model_invalid_parlimit::model_invalid_parlimit(std::string origin,
+                                                           GXmlElement xml,
+                                                           std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Invalid model parameter limit found in XML element. " +
+                message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Model parameter has invalid scale
  *
  * @param[in] origin Method that throws the error.

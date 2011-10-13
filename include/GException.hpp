@@ -550,6 +550,16 @@ public:
         model_invalid_parnames(std::string origin, GXmlElement xml,
                                std::string message = "");
     };
+    class model_invalid_parvalue : public GExceptionHandler {
+    public:
+        model_invalid_parvalue(std::string origin, GXmlElement xml,
+                               std::string message = "");
+    };
+    class model_invalid_parlimit : public GExceptionHandler {
+    public:
+        model_invalid_parlimit(std::string origin, GXmlElement xml,
+                               std::string message = "");
+    };
     class model_invalid_parscale : public GExceptionHandler {
     public:
         model_invalid_parscale(std::string origin, double scale,
