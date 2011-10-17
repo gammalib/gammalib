@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-05-00
 
 Author(s) : Juergen Knoedlseder
 
-October 12, 2011
+October 16, 2011
 
 
 1. Introduction
@@ -12,7 +12,7 @@ changes made since the last release of GammaLib.
 
 2. Configuration
 -----------------
-None
+License text has been updated throughout the code to GNU GPL v3.
 
 3. Application module
 ---------------------
