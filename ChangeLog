@@ -1,9 +1,10 @@
-2011-10-16  Juergen Knoedlseder  <knodlseder@cesr.fr>
+2011-10-19  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.5.0 released
         ========================
 
         Update license text
+        Add configure options for Mac OSX universal builds
         Comply to v1.0.0 event list format
         Add support for CTA 1DC response format
         Add GCTAModelRadialPolynom model

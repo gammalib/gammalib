@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-05-00
 
 Author(s) : Juergen Knoedlseder
 
-October 16, 2011
+October 19, 2011
 
 
 1. Introduction
@@ -13,6 +13,11 @@ changes made since the last release of GammaLib.
 2. Configuration
 -----------------
 License text has been updated throughout the code to GNU GPL v3.
+
+The configure options --enable-universalsdk and --with-universal-archs
+have been added to control building of universal libraries.  This is
+particularily required if the installed Python architecture differs from
+the default architecture created by the compiler.
 
 3. Application module
 ---------------------
