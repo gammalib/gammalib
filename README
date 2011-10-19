@@ -1,7 +1,7 @@
 GammaLib information
 ====================
-Version: 00-05-00 (October 12, 2011)
-Author:  Juergen Knodlseder (knodlseder@cesr.fr)
+Version: 00-05-00 (October 19, 2011)
+Author:  Juergen Knoedlseder (knodlseder@cesr.fr)
 
 
 License information
@@ -28,14 +28,14 @@ See the files "NEWS" and "ChangeLog".
 What is the GammaLib anyway?
 ============================
 The GammaLib is a versatile toolbox for the high-level analysis of
-astronomical gamma-ray data. It is implemented as a C++ library
-that is fully scriptable in the Python scripting language. The library
+astronomical gamma-ray data.  It is implemented as a C++ library
+that is fully scriptable in the Python scripting language.  The library
 provides core functionalities such as data input and output, interfaces
 for parameter specifications, and a reporting and logging interface.
 It implements instruments specific functionalities such as instrument
-response functions and data formats. Instrument specific functionalities
+response functions and data formats.  Instrument specific functionalities
 share a common interface to allow for extension of the GammaLib to
-include new gamma-ray instruments. The GammaLib provides an abstract
+include new gamma-ray instruments.  The GammaLib provides an abstract
 data analysis framework that enables simultaneous multi-mission analysis.
 
 
@@ -51,9 +51,9 @@ GammaLib should compile on every modern Unix system without any need
 to install other libraries. 
 
 To enable support for FITS file handling, however, the cfitsio library
-from HEASARC needs to be installed. cfitsio can be downloaded from 
+from HEASARC needs to be installed.  cfitsio can be downloaded from 
 http://heasarc.gsfc.nasa.gov/fitsio and detailed installation instructions
-can be found there. If cfitsio does not already exist on your system,
+can be found there.  If cfitsio does not already exist on your system,
 we recommend installation of cfitsio in the default GammaLib install
 directory as a shared library by typing:
 
@@ -64,7 +64,7 @@ directory as a shared library by typing:
 GammaLib can also benefit from the presence of the readline library
 that provides line-editing and history capabilities for text input
 (GammaLib offers however also full functionality without having 
-readline installed). readline requires the ncurses library. Both
+readline installed).  readline requires the ncurses library.  Both
 libraries can be downloaded from http://ftp.gnu.org/gnu/.
 
 
@@ -96,19 +96,50 @@ GammaLib was correctly built. Make sure that all tests were successful.
 
 Macintosh OS X Installation
 ============================
-GammaLib is known to work on various flavors of OS X.  Follow the 
-Linux installation instructions above.
+GammaLib is known to work on various flavors of OS X.  To cope with
+different system versions and architectures, there are two Mac
+specific configure options:
 
-In some cases, install problems have been reported with mixed
-architectures (i386, ppc, x86_64), so you may configure and build
-as follows to enable building a bundle for various architectures:
+     % ./configure --enable-universalsdk[=PATH]
 
-     % export CXXFLAGS="-arch ppc -arch i386 -arch x86_64"
-     % export LDFLAGS="-arch ppc -arch i386 -arch x86_64"
-     % ./configure
-     % make
-     % make check
-     % make install
+creates a universal build of GammaLib.  The optional argument specifies
+which OSX SDK should be used to perform the build.  This defaults to
+"/Developer/SDKs/MacOSX.10.4u.sdk".  Specify "/" when building on a 10.5
+system or higher, especially when building 64-bit code.
+
+     % ./configure --with-univeral-archs=VALUE
+
+specifies the kind of universal build that should be created.  Possible
+values are: "32-bit", "3-way", "intel" or "all".  By default, a "32-bit" 
+build will be made.  This option is only valid when
+"--enable-universalsdk" is specified.
+
+These options are in particular needed if your Python architecture differs
+from the default architecture of your system.  To examine the Python
+architecture you may type:
+
+     % file `which python`
+
+which will return the architectures that are compiled in the Mach-0
+executable:
+
+     i386    32-bit intel
+     ppc     32-bit powerpc
+     ppc64   64-bit powerpc
+     x86_64  64-bit intel
+
+If Python is 32-bit (ppc, i386) but the compiler produces by default
+64-bit code (ppc64, x86_64), the Python module will not work.  Using
+
+     % ./configure --enable-universalsdk=/
+
+will force a universal 32-bit build which creates code for ppc and 
+i386.  If on the other hand Python is 64-bit (ppc64, x86_64) but the
+compiler produces by default 32-bit code (ppc, i386), the option
+
+     % ./configure --enable-universalsdk=/ --with-univeral-archs=3-way
+
+will generate a universal build which contains 32-bit and 64-bit code.
 
 
 BSD Installation
