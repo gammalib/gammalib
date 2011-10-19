@@ -18,7 +18,12 @@
 #  You should have received a copy of the GNU General Public License        #
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.    #
 #                                                                           #
-#  Process this file with autoconf to produce a configure script.           #
+# ------------------------------------------------------------------------- #
+# Process this file with autoconf to produce a configure script.            #
+# ------------------------------------------------------------------------- #
+# ToDo:                                                                     #
+# - add possibility to build as Framework on Darwin                         #
+# - strip "-Wstrict-prototypes" for C++ compiling                           #
 #############################################################################
 
 #############################################################################
@@ -261,6 +266,11 @@ yes)
 				    cur_target='10.5'
 			    elif test "${UNIVERSAL_ARCHS}" = "64-bit"; then
 				    cur_target='10.5'
+			    elif test `/usr/bin/arch` = "i386"; then
+				    # On Intel macs default to a deployment
+				    # target of 10.4, that's the first OSX
+				    # release with Intel support.
+				    cur_target="10.4"
 			    fi
 		    else
 			    if test `/usr/bin/arch` = "i386"; then
