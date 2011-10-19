@@ -12,7 +12,7 @@
 # ====================
 this_script=`echo $0 | sed 's:.*/::'`
 gammalib_info="$this_script:"
-gammalib_error="$ctatools_info ERROR --"
+gammalib_error="$gammalib_info ERROR --"
 
 #
 # Extract argument
