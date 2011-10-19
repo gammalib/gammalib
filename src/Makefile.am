@@ -23,6 +23,10 @@ SUBDIRS = support \
 # Define sources for this directory
 sources =
 
+# Darwin support
+MACOSX_DEPLOYMENT_TARGET=@CONFIGURE_MACOSX_DEPLOYMENT_TARGET@
+export MACOSX_DEPLOYMENT_TARGET
+
 # Optional instrument specific libraries
 if WITH_INST_MWL
   INST_MWL = ../inst/mwl/libmwl.la
@@ -37,7 +41,7 @@ endif
 # Scripts to be distributed
 scripts = gammalib-setup \
           gammalib-init.sh \
-	  gammalib-init.csh
+          gammalib-init.csh
 
 # Build libtool library
 lib_LTLIBRARIES = libgamma.la
