@@ -8,7 +8,7 @@ if WITH_INST
 INST_DIR = inst
 endif
 
-# Darwin support
+# Darwin universal SDK support
 MACOSX_DEPLOYMENT_TARGET=@CONFIGURE_MACOSX_DEPLOYMENT_TARGET@
 export MACOSX_DEPLOYMENT_TARGET
 
