@@ -36,6 +36,10 @@ if WITH_PYTHON
   TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext/build:$(PYTHONPATH)
 endif
 
+# Darwin support
+MACOSX_DEPLOYMENT_TARGET=@CONFIGURE_MACOSX_DEPLOYMENT_TARGET@
+export MACOSX_DEPLOYMENT_TARGET
+
 # Include directories
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/src \
