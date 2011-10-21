@@ -38,6 +38,7 @@
 #include "GFitsTableULongCol.hpp"
 #include "GFitsTableUShortCol.hpp"
 #include "GTools.hpp"
+#include "GException.hpp"
 %}
 %include "std_vector.i"
 %template(vectori) std::vector<int>;

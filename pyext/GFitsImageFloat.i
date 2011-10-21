@@ -26,6 +26,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFitsImageFloat.hpp"
+#include "GException.hpp"
 %}
 
 
