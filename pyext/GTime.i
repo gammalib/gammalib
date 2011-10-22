@@ -28,6 +28,8 @@
 #include "GTime.hpp"
 #include "GTools.hpp"
 %}
+// Required for template vector
+%include stl.i
 
 
 /***********************************************************************//**
