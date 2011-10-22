@@ -27,6 +27,7 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GXmlElement.hpp"
 #include "GTools.hpp"
+#include "GException.hpp"
 %}
 
 
