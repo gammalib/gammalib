@@ -457,6 +457,10 @@ void GNodeArray::init_members(void)
     m_is_linear     = 0;
     m_linear_slope  = 0.0;
     m_linear_offset = 0.0;
+    m_inx_left      = 0;
+    m_inx_right     = 0;
+    m_wgt_left      = 0.0;
+    m_wgt_right     = 0.0;
 
     // Return
     return;
@@ -476,6 +480,10 @@ void GNodeArray::copy_members(const GNodeArray& array)
     m_is_linear     = array.m_is_linear;
     m_linear_slope  = array.m_linear_slope;
     m_linear_offset = array.m_linear_offset;
+    m_inx_left      = array.m_inx_left;
+    m_inx_right     = array.m_inx_right;
+    m_wgt_left      = array.m_wgt_left;
+    m_wgt_right     = array.m_wgt_right;
 
     // Return
     return;
