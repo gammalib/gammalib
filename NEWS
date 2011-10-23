@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-05-00
 
 Author(s) : Juergen Knoedlseder
 
-October 19, 2011
+October 23, 2011
 
 
 1. Introduction
@@ -18,6 +18,10 @@ The configure options --enable-universalsdk and --with-universal-archs
 have been added to control building of universal libraries.  This is
 particularily required if the installed Python architecture differs from
 the default architecture created by the compiler.
+
+The gammalib Python extension has been split into modules to reduce the
+memory requirements during compilation and to increase compilation
+speed. 
 
 3. Application module
 ---------------------
@@ -69,9 +73,9 @@ None
 
 15. CTA interface
 -----------------
-Comply to v1.0.0 event list format
+Comply to CTA event list format v1.0.0.
 
-Add support for 1DC response files
+Add support for 1DC response files.
 
 Add GCTAModelRadialPolynom class to model the radial acceptance using a polynomial.
 
