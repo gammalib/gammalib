@@ -28,6 +28,8 @@
 #include "GSkymap.hpp"
 #include "GTools.hpp"
 %}
+
+
 /***********************************************************************//**
  * @brief Tuple to index conversion to provide pixel access.
  *
@@ -67,11 +69,34 @@ static int skymap_tuple(PyObject *input, int *ptr) {
     }
 }
 %}
+
+// This is the typemap that makes use of the function defined above
 %typemap(in) int GSkymapInx[ANY](int temp[3]) {
    if (!skymap_tuple($input,temp)) {
       return NULL;
    }
    $1 = &temp[0];
+}
+
+// This typecheck verifies that all arguments are integers. The typecheck
+// is needed for using "int GSkymapInx" in overloaded methods.
+%typemap(typecheck) int GSkymapInx[ANY] {
+    $1 = 1;
+    if (PySequence_Check($input)) {
+        int size = PyObject_Length($input);
+        for (int i = 0; i < size; i++) {
+            PyObject *o = PySequence_GetItem($input,i);
+            if (!PyInt_Check(o)) {
+                $1 = 0;
+                break;
+            }
+        }
+    }
+    else {
+        if (!PyInt_Check($input)) {
+            $1 = 0;
+        }
+    }
 }
 
 
@@ -122,10 +147,12 @@ public:
         return tochar(self->print());
     }
     double __getitem__(int GSkymapInx[]) {
-        if (GSkymapInx[0] == 1)
+        if (GSkymapInx[0] == 1) {
             return (*self)(GSkymapInx[1]);
-        else
+        }
+        else {
             return (*self)(GSkymapInx[1], GSkymapInx[2]);
+        }
     }
     /*
     double __getitem__(const GSkyPixel& pixel) {
@@ -133,10 +160,12 @@ public:
     }
     */
     void __setitem__(int GSkymapInx[], double value) {
-        if (GSkymapInx[0] == 1)
+        if (GSkymapInx[0] == 1) {
             (*self)(GSkymapInx[1]) = value;
-        else
+        }
+        else {
             (*self)(GSkymapInx[1], GSkymapInx[2]) = value;
+        }
     }
     /*
     void __setitem__(const GSkyPixel& pixel, double value) {
