@@ -212,7 +212,7 @@ def test_skymap():
 
     # Create HEALPix skymap
     pixels = GSkymap("HPX", "GAL", 4, "RING", 2)
-    for i, pixel in enumerate(pixels):
+    for i in range(pixels.npix()):
         pixels[i]   = i+1.0
         pixels[i,1] = i+1.0 + 1000.0
     pixels.save(file1)
