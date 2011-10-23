@@ -1,3 +1,24 @@
+#############################################################################
+# Disutils setup file for gammalib Python extension module                  #
+# ------------------------------------------------------------------------- #
+# Copyright (C) 2011 Jurgen Knodlseder                                      #
+# ------------------------------------------------------------------------- #
+#                                                                           #
+#  This program is free software: you can redistribute it and/or modify     #
+#  it under the terms of the GNU General Public License as published by     #
+#  the Free Software Foundation, either version 3 of the License, or        #
+#  (at your option) any later version.                                      #
+#                                                                           #
+#  This program is distributed in the hope that it will be useful,          #
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of           #
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
+#  GNU General Public License for more details.                             #
+#                                                                           #
+#  You should have received a copy of the GNU General Public License        #
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.    #
+#                                                                           #
+#############################################################################
+
 from distutils.core import setup, Extension
 from distutils import sysconfig
 import glob
@@ -11,19 +32,22 @@ pkg_name = 'gammalib'
 core_modules = ['app', 'fits', 'linalg', 'model', 'numerics', \
                 'obs', 'opt', 'sky', 'support', 'xml']
 
-# Check on test install
-if (len(sys.argv) == 3):
+# Detect execution mode
+is_unit_test = False
+if (len(sys.argv) >= 3):
 	if (sys.argv[2] == '--home=install'):
 		print "This install is for unit testing."
-
+		is_unit_test = True
+	elif (sys.argv[2] == '--inplace'):
+		print "This build is for unit testing."
+		is_unit_test = True
 
 # Set GammaLib library name. If we're about to make the test build then
 # create a symbolic link to the static library to enforce static linking.
 # This is required on some system (such as Mac OS X) to avoid problems
 # with finding the shared library during unit testing.
 libgamma='gamma'
-if (len(sys.argv) > 1):
-	if (1 == 1):
+if is_unit_test:
 	
 		# Remove any existing symbolic link to libgamma.a. This will
 		# prevent any exception in creating the symbolic link due to
@@ -43,18 +67,14 @@ if (len(sys.argv) > 1):
 		except:
 			print 'WARNING: Failed to create symbolic link to static library. Link dynamically.'
 
-# Set default include directories and data files
-include_dirs = ['@top_srcdir@/include']
-data_files   = glob.glob('@top_srcdir@/pyext/*.i')
-library_dirs = ['../src/.libs']
-libraries    = [libgamma]
+# Set default include directories, install files, library paths and libraries
+include_dirs  = ['@top_srcdir@/include']
+install_files = glob.glob('@top_srcdir@/pyext/*.i')
+library_dirs  = ['../src/.libs']
+libraries     = [libgamma]
 
 # Set default runtime library directories
-if os.path.exists('@prefix@/lib'):
-	runtime_library_dirs = ['@prefix@/lib']
-else:
-	runtime_library_dirs = []
-runtime_library_dirs = []
+runtime_library_dirs = ['@prefix@/lib']
 
 # Add cfitsio library only if available
 if '@WITH_CFITSIO_TRUE@' != '#':
@@ -127,11 +147,11 @@ for module in inst_modules:
 	include_inst_dirs = include_dirs
 	include_inst_dirs.append(include_path)
 	
-	# Add SWIG files to data_files
-	data_files.extend(glob.glob(pyext_path+'/*.i'))
+	# Add SWIG files to install_files
+	install_files.extend(glob.glob(pyext_path+'/*.i'))
 	
 	# Define module
-	ext_module = Extension('_'+module, [pyext_path+'/'+module+'_wrap.cpp'], \
+	ext_module = Extension('_'+module, [pkg_name+'/'+module+'_wrap.cpp'], \
 	                       include_dirs=include_dirs, \
 						   libraries=libraries,
 						   library_dirs=library_dirs,
@@ -147,6 +167,11 @@ for module in inst_modules:
 	file.write('from '+module+' import *\n')
 file.close()
 
+# Set data files to install. Do not install data files in unit testing mode.
+if is_unit_test:
+	data_files=[]
+else:
+	data_files=[('@prefix@/share/gammalib/swig', install_files)]
 
 # Setup
 setup(name='@PACKAGE_NAME@',
@@ -154,10 +179,17 @@ setup(name='@PACKAGE_NAME@',
       description='gammalib Python bindings',
       author='Juergen Knoedlseder',
       author_email='@PACKAGE_BUGREPORT@',
+      maintainer='Juergen Knoedlseder',
+      maintainer_email='@PACKAGE_BUGREPORT@',
       url='http://gammalib.sourceforge.net/',
       packages=[pkg_name],
       ext_package=pkg_name,
       ext_modules=ext_modules,
       py_modules=py_modules,
+	  data_files=data_files,
+	  license="GNU GPL v3",
+	  long_description="Versatile toolbox for the analysis of astronomical gamma-ray data",
+	  platforms=["Linux", "Solaris", "Mac OS-X", "Unix", "BSD"],
 	  )
-#data_files=[('@prefix@/share/gammalib/swig', data_files)],
+
+# Post-processing
