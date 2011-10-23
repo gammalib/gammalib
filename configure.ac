@@ -29,7 +29,7 @@
 #############################################################################
 # Initialisation                                                            #
 #############################################################################
-AC_INIT([GammaLib], [0.5.0], [knodlseder@cesr.fr], [gammalib])
+AC_INIT([gammalib], [0.5.0], [knodlseder@cesr.fr], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies])
