@@ -33,7 +33,7 @@ endif
 # Optional python bindings
 if WITH_PYTHON
   TEST_PYTHON_SCRIPT = test_python.py
-  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext/build:$(PYTHONPATH)
+  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext/install/lib/python:$(PYTHONPATH)
 endif
 
 # Darwin support
