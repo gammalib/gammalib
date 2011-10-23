@@ -29,6 +29,9 @@
 #include "GTools.hpp"
 %}
 
+/* __ Inform about base classes ___________________________________________*/
+%import(module="opt") "GOptimizerPars.i";
+
 
 /***********************************************************************//**
  * @class GModels
