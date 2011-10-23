@@ -4,41 +4,27 @@ import glob
 import os
 import sys
 
-# Removes list of bad prefixes from list
-def remove_prefixes(optlist, bad_prefixes):
-	for bad_prefix in bad_prefixes:
-		for i, flag in enumerate(optlist):
-			if flag.startswith(bad_prefix):
-				optlist.pop(i)
-				break
-	return optlist
+# Define package name
+pkg_name = 'gammalib'
 
-# Adjust compile options for darwin
-#if sys.platform.lower().startswith("darwin"):
-#
-#	# Remove some time consuming options
-#	cvars = sysconfig.get_config_vars()
-#	cflags = cvars.get('OPT')
-#	if cflags:
-#		cflags = remove_prefixes(cflags.split(), 
-#		         ['-g', '-O', '-Wstrict-prototypes', '-DNDEBUG'])
-#	cvars['OPT'] = str.join(' ', cflags)
-#	cvars['CFLAGS'] = cvars['BASECFLAGS'] + ' ' + cvars['OPT']
-#	
-#	# Remove -arch flags. This prevents building a fat library
-#	cvars['ARCHFLAGS'] = ''
-#	
-#	# Signal darwin compiler adjustments
-#	print 'Adjust default distutils compiler options for darwin.'
+# Define core modules
+core_modules = ['app', 'fits', 'linalg', 'model', 'numerics', \
+                'obs', 'opt', 'sky', 'support', 'xml']
+
+# Check on test install
+if (len(sys.argv) == 3):
+	if (sys.argv[2] == '--home=install'):
+		print "This install is for unit testing."
+
 
 # Set GammaLib library name. If we're about to make the test build then
 # create a symbolic link to the static library to enforce static linking.
 # This is required on some system (such as Mac OS X) to avoid problems
 # with finding the shared library during unit testing.
 libgamma='gamma'
-if (len(sys.argv) > 3):
-	if (sys.argv[3] == 'build'):
-		
+if (len(sys.argv) > 1):
+	if (1 == 1):
+	
 		# Remove any existing symbolic link to libgamma.a. This will
 		# prevent any exception in creating the symbolic link due to
 		# an already existing link.
@@ -58,16 +44,17 @@ if (len(sys.argv) > 3):
 			print 'WARNING: Failed to create symbolic link to static library. Link dynamically.'
 
 # Set default include directories and data files
-include_dirs  = ['@top_srcdir@/include']
-data_files    = glob.glob('@top_srcdir@/pyext/*.i')
-library_dirs  = ['../src/.libs']
-libraries     = [libgamma]
+include_dirs = ['@top_srcdir@/include']
+data_files   = glob.glob('@top_srcdir@/pyext/*.i')
+library_dirs = ['../src/.libs']
+libraries    = [libgamma]
 
 # Set default runtime library directories
 if os.path.exists('@prefix@/lib'):
 	runtime_library_dirs = ['@prefix@/lib']
 else:
 	runtime_library_dirs = []
+runtime_library_dirs = []
 
 # Add cfitsio library only if available
 if '@WITH_CFITSIO_TRUE@' != '#':
@@ -89,7 +76,7 @@ for extra_lib in extra_libs:
 # Get extra library paths
 extra_lib_paths = ('@LDFLAGS@').split(' ')
 for extra_lib_path in extra_lib_paths:
-    if extra_lib_path.lstrip().find('-L') == 0:
+	if extra_lib_path.lstrip().find('-L') == 0:
 		dir = extra_lib_path.lstrip().lstrip('-L')
 		if len(dir) > 0:
 			library_dirs.append(dir)
@@ -98,37 +85,79 @@ for extra_lib_path in extra_lib_paths:
 # Get extra include directories
 extra_inc_paths = ('@CPPFLAGS@').split(' ')
 for extra_inc_path in extra_inc_paths:
-    if extra_inc_path.lstrip().find('-I') == 0:
+	if extra_inc_path.lstrip().find('-I') == 0:
 		dir = extra_inc_path.lstrip().lstrip('-I')
 		if len(dir) > 0:
 			include_dirs.append(dir)
 
-# Add instrument specific include directories and data files
+# Add definitions for instrument specific modules
+inst_modules = []
 if '@WITH_INST_MWL_TRUE@' != '#':
 	print "Include multi-wavelength interface in gammalib Python bindings."
-	include_dirs.append('@top_srcdir@/inst/mwl/include')
-	data_files.extend(glob.glob('@top_srcdir@/inst/mwl/pyext/*.i'))
+	inst_modules.append('mwl')
 if '@WITH_INST_CTA_TRUE@' != '#':
 	print "Include CTA instrument interface in gammalib Python bindings."
-	include_dirs.append('@top_srcdir@/inst/cta/include')
-	data_files.extend(glob.glob('@top_srcdir@/inst/cta/pyext/*.i'))
+	inst_modules.append('cta')
 if '@WITH_INST_LAT_TRUE@' != '#':
 	print "Include Fermi/LAT instrument interface in gammalib Python bindings."
-	include_dirs.append('@top_srcdir@/inst/lat/include')
-	data_files.extend(glob.glob('@top_srcdir@/inst/lat/pyext/*.i'))
+	inst_modules.append('lat')
+
+# Set extension definition for core modules
+ext_modules = []
+py_modules  = []
+for module in core_modules:
+	
+	# Define module
+	ext_module = Extension('_'+module, [pkg_name+'/'+module+'_wrap.cpp'], \
+	                       include_dirs=include_dirs, \
+						   libraries=libraries,
+						   library_dirs=library_dirs,
+						   runtime_library_dirs=runtime_library_dirs)
+	ext_modules.append(ext_module)
+	py_modules.append(pkg_name+'.'+module)
+
+# Set extension definition for instrument dependent modules
+for module in inst_modules:
+
+	# Define paths
+	pyext_path   = '@top_srcdir@/inst/'+module+'/pyext'
+	include_path = '@top_srcdir@/inst/'+module+'/include'
+	
+	# Set include directories for module
+	include_inst_dirs = include_dirs
+	include_inst_dirs.append(include_path)
+	
+	# Add SWIG files to data_files
+	data_files.extend(glob.glob(pyext_path+'/*.i'))
+	
+	# Define module
+	ext_module = Extension('_'+module, [pyext_path+'/'+module+'_wrap.cpp'], \
+	                       include_dirs=include_dirs, \
+						   libraries=libraries,
+						   library_dirs=library_dirs,
+						   runtime_library_dirs=runtime_library_dirs)
+	ext_modules.append(ext_module)
+	py_modules.append(pkg_name+'.'+module)
+
+# Create gammalib/__init__.py file
+file = open(pkg_name+'/__init__.py', 'w')
+for module in core_modules:
+	file.write('from '+module+' import *\n')
+for module in inst_modules:
+	file.write('from '+module+' import *\n')
+file.close()
+
 
 # Setup
 setup(name='@PACKAGE_NAME@',
       version='@PACKAGE_VERSION@',
       description='gammalib Python bindings',
-      author='Jurgen Knodlseder',
+      author='Juergen Knoedlseder',
       author_email='@PACKAGE_BUGREPORT@',
       url='http://gammalib.sourceforge.net/',
-      py_modules=['gammalib'],
-      ext_modules=[Extension('_gammalib', ['gammalib_wrap.cpp'],
-                             include_dirs=include_dirs,
-                             library_dirs=library_dirs,
-                             libraries=libraries,
-                             runtime_library_dirs=runtime_library_dirs)],
-      data_files=[('@prefix@/share/gammalib/swig', data_files)],
-      )
+      packages=[pkg_name],
+      ext_package=pkg_name,
+      ext_modules=ext_modules,
+      py_modules=py_modules,
+	  )
+#data_files=[('@prefix@/share/gammalib/swig', data_files)],

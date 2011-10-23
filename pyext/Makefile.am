@@ -5,38 +5,43 @@
 
 if WITH_PYTHON
 
-# Set SWIG interface filename
-SWIG_INTERFACE = gammalib.i
-
-# Define the targets that should be built before anything else.
-# These are honored by 'make all', 'make check' and 'make install'.
-if HAVE_SWIG
-  BUILT_SOURCES = gammalib_wrap.cpp gammalib.py
-endif
-
-# Set files to be removed in clean
-if HAVE_SWIG
-  CLEANFILES = gammalib_wrap.cpp gammalib.py
-endif
-
-# Set extra files to distribute
-#EXTRA_DIST = runme.py
-
-# Set instrument specific SWIG options (those will be catched in gammalib.i)
+# Set instrument specific SWIG targets
 if WITH_INST_MWL
-  OPT_MWL = -DWITH_INST_MWL
-  INC_MWL = -I$(top_srcdir)/inst/mwl/pyext
+  MWL_SWIG_TARGETS = $(top_srcdir)/inst/mwl/pyext/mwl_wrap.cpp \
+					 $(top_srcdir)/inst/mwl/pyext/mwl.py
 endif
 if WITH_INST_CTA
-  OPT_CTA = -DWITH_INST_CTA
-  INC_CTA = -I$(top_srcdir)/inst/cta/pyext
+  CTA_SWIG_TARGETS = $(top_srcdir)/inst/cta/pyext/cta_wrap.cpp \
+					 $(top_srcdir)/inst/cta/pyext/cta.py
 endif
 if WITH_INST_LAT
-  OPT_LAT = -DWITH_INST_LAT
-  INC_LAT = -I$(top_srcdir)/inst/lat/pyext
+  LAT_SWIG_TARGETS = $(top_srcdir)/inst/lat/pyext/lat_wrap.cpp \
+					 $(top_srcdir)/inst/lat/pyext/lat.py
 endif
-INC_INST = $(INC_MWL) $(INC_CTA) $(INC_LAT)
-OPT_INST = $(OPT_MWL) $(OPT_CTA) $(OPT_LAT)
+INST_SWIG_TARGETS = $(MWL_SWIG_TARGETS) $(CTA_SWIG_TARGETS) $(LAT_SWIG_TARGETS)
+
+# Sources that are required for the build. All targets in the list will be built
+# before anything. These are honored by 'make all', 'make check' and 'make install'.
+# We use this here to make sure that all these targets are build by swig before we
+# start compiling the Python modules.
+BUILT_SOURCES = gammalib/app_wrap.cpp  gammalib/app.py \
+                gammalib/fits_wrap.cpp gammalib/fits.py \
+                gammalib/linalg_wrap.cpp gammalib/linalg.py \
+                gammalib/model_wrap.cpp gammalib/model.py \
+                gammalib/numerics_wrap.cpp gammalib/numerics.py \
+                gammalib/obs_wrap.cpp gammalib/obs.py \
+                gammalib/opt_wrap.cpp gammalib/opt.py \
+                gammalib/sky_wrap.cpp gammalib/sky.py \
+                gammalib/support_wrap.cpp gammalib/support.py \
+                gammalib/xml_wrap.cpp gammalib/xml.py \
+                $(INST_SWIG_TARGETS)
+
+# Set files to be removed in clean. We remove only the SWIG interface files if swig
+# is available to rebuild them. 
+if HAVE_SWIG
+  CLEAN_FILES = $(BUILT_SOURCES)
+endif
+CLEANFILES = $(CLEAN_FILES)
 
 all-local: build
 
@@ -45,19 +50,23 @@ all-local: build
 # of this specific directory. So we build one instance for checking, the other
 # for installation. If we could get the name built by distutils we could avoid
 # this.
-build: gammalib_wrap.cpp gammalib.py
-	$(PYTHON_BUILD_PREFIX) $(PYTHON) setup.py build --build-platlib build
-	$(PYTHON_BUILD_PREFIX) $(PYTHON) setup.py build
+#$(PYTHON_BUILD_PREFIX) $(PYTHON) setup.py build_ext --build-platlib build
+build: $(BUILT_SOURCES)
+	$(PYTHON_BUILD_PREFIX) $(PYTHON) setup.py build_ext
+
+# make check installs the gammalib extension for checking in the install directory
+check-local:
+	$(PYTHON) setup.py install --home=install
 
 install-exec-local:
 	$(PYTHON) setup.py install --prefix=$(prefix)
 
 clean-local:
-	rm -rf build
+	rm -rf build install
 	
 if HAVE_SWIG
-gammalib_wrap.cpp gammalib.py: $(SWIG_INTERFACE)
-	$(SWIG) -c++ -python -Wall -I$(top_srcdir)/src $(INC_INST) $(OPT_INST) -o gammalib_wrap.cpp -outdir . $(srcdir)/$(SWIG_INTERFACE)
+%_wrap.cpp %.py: %.i
+	$(SWIG) -c++ -python -Wall -o $@ -outdir gammalib $<
 endif # HAVE_SWIG
 
 endif # WITH_PYTHON
