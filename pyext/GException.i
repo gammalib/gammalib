@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GException.i  -  exception handler                  *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2008-2010 by Jurgen Knodlseder                         *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -16,9 +16,8 @@
  *                                                                         *
  *  You should have received a copy of the GNU General Public License      *
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
+ *                                                                         *
  ***************************************************************************/
-%module GException
-
 %{
 /* Put headers and other declarations here */
 #include "GException.hpp"
