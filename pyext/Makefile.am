@@ -93,6 +93,9 @@ clean-local:
 # for each instrument module.
 if HAVE_SWIG
 
+# Rule to build SWIG wrappers
+swig: $(BUILT_SOURCES)
+
 # General rule for core modules
 %_wrap.cpp %.py: %.i
 	$(SWIG) -c++ -python -Wall -o $@ -outdir gammalib $<
