@@ -841,7 +841,7 @@ void GPars::read(const std::string& filename)
     lock.l_len    = 0;        // ... to the end
     lock.l_pid    = getpid(); // Current process ID
     int fd;
-    if ((fd = open(filename.c_str(), O_RDWR)) == -1) {
+    if ((fd = open(filename.c_str(), O_RDONLY)) == -1) {
         throw GException::par_file_open_error(G_READ, filename,
               "Could not open file for locking.");
     }
