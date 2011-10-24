@@ -83,55 +83,7 @@ AC_PROG_CXX
 
 
 #############################################################################
-# Darwin option: Determine if a universal library should be built           #
-# ------------------------------------------------------------------------- #
-# --enable-universalsdk=PATH takes an optional argument that specifies      #
-# which OSX SDK should be used to perform the build.  This defaults to      #
-# "/Developer/SDKs/MacOSX.10.4u.sdk".  Specify "/" when building on a 10.5  #
-# system or larger, especially when building 64-bit code.                   #
-#############################################################################
-AC_MSG_CHECKING([for --enable-universalsdk])
-AC_ARG_ENABLE(universalsdk,
-	AS_HELP_STRING([--enable-universalsdk@<:@=SDKDIR@:>@], [Build against Mac OS X 10.4u SDK (ppc/i386)]),
-[
-	case $enableval in
-	yes)
-		enableval=/Developer/SDKs/MacOSX10.4u.sdk
-		if test ! -d "${enableval}"
-		then
-			enableval=/
-		fi
-		;;
-	esac
-	case $enableval in
-	no)
-		UNIVERSALSDK=
-		enable_universalsdk=
-		;;
-	*)
-		UNIVERSALSDK=$enableval
-		if test ! -d "${UNIVERSALSDK}"
-		then
-			AC_MSG_ERROR([--enable-universalsdk specifies non-existing SDK: ${UNIVERSALSDK}])
-		fi
-		;;
-	esac
-	
-],[
-   	UNIVERSALSDK=
-	enable_universalsdk=
-])
-if test -n "${UNIVERSALSDK}"
-then
-	AC_MSG_RESULT(${UNIVERSALSDK})
-else
-	AC_MSG_RESULT(no)
-fi
-AC_SUBST(UNIVERSALSDK)
-
-
-#############################################################################
-# Darwin option: Determine archirecture of universal library to be built    #
+# Darwin option: Determine architecture of universal library to be built    #
 # ------------------------------------------------------------------------- #
 # --with-univeral-archs=VALUE, where VALUE is one of "32-bit", "64-bit",    #
 # "3-way", "intel" or "all".  Defaults to "32-bit".                         #
@@ -144,15 +96,73 @@ AC_ARG_WITH(universal-archs,
 [
 	AC_MSG_RESULT($withval)
 	UNIVERSAL_ARCHS="$withval"
-    if test "${enable_universalsdk}" ; then
-		:
-	else
-		AC_MSG_ERROR([--with-universal-archs without --enable-universalsdk.])
-	fi
 ],
 [
  	AC_MSG_RESULT(32-bit)
 ])
+
+
+#############################################################################
+# Darwin option: Determine if a universal library should be built           #
+# ------------------------------------------------------------------------- #
+# --enable-universalsdk=PATH takes an optional argument that specifies      #
+# which OSX SDK should be used to perform the build.                        #
+# This defaults to:                                                         #
+# "/Developer/SDKs/MacOSX.10.4u.sdk" for a 32-bit build (default)           #
+# "/Developer/SDKs/MacOSX.10.5.sdk"  for any other build                    #
+#############################################################################
+AC_MSG_CHECKING([for --enable-universalsdk])
+AC_ARG_ENABLE(universalsdk,
+	AS_HELP_STRING([--enable-universalsdk@<:@=SDKDIR@:>@], [Build against Mac OS X 10.4u SDK (ppc/i386)]),
+[
+	case $enableval in
+	yes)
+        if [test "${UNIVERSAL_ARCHS}" = "32-bit";] then
+            enableval=/Developer/SDKs/MacOSX10.4u.sdk
+        else
+            enableval=/Developer/SDKs/MacOSX10.5.sdk
+        fi
+		if [test ! -d "${enableval}";] then
+			enableval=/
+        fi
+		;;
+	esac
+	case $enableval in
+	no)
+		UNIVERSALSDK=
+		enable_universalsdk=
+		;;
+	*)
+		UNIVERSALSDK=$enableval
+		if [test ! -d "${UNIVERSALSDK}"]; then
+			AC_MSG_ERROR([--enable-universalsdk specifies non-existing SDK: ${UNIVERSALSDK}])
+		fi
+		;;
+	esac
+	
+],[
+   	UNIVERSALSDK=
+	enable_universalsdk=
+])
+if [test -n "${UNIVERSALSDK}"]; then
+	AC_MSG_RESULT(${UNIVERSALSDK})
+else
+	AC_MSG_RESULT(no)
+fi
+AC_SUBST(UNIVERSALSDK)
+
+
+#############################################################################
+# Darwin option: Check whether --with-universal-archs was specified without #
+#                --enable-universalsdk                                      #
+#############################################################################
+if [test "${withval}"]; then
+    if [test "${enable_universalsdk}"]; then
+		:
+	else
+		AC_MSG_ERROR([--with-universal-archs without --enable-universalsdk.])
+	fi
+fi
 
 
 #############################################################################
@@ -249,7 +259,6 @@ yes)
         fi
 
 	    # Calculate the right deployment target for this build.
-	    #
 	    cur_target=`sw_vers -productVersion | sed 's/\(10\.[[0-9]]*\).*/\1/'`
 	    if test ${cur_target} '>' 10.2; then
 		    cur_target=10.3
@@ -282,6 +291,25 @@ yes)
 		    fi
 	    fi
 	    CONFIGURE_MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET-${cur_target}}
+        
+        # Make sure that deployment target is >= SDK
+        case "${UNIVERSALSDK}" in
+        */MacOSX10.4u.sdk)
+            if [test ${cur_target} '>' 10.4;] then
+	            AC_MSG_ERROR([Invalid MACOSX_DEPLOYMENT_TARGET=$CONFIGURE_MACOSX_DEPLOYMENT_TARGET for SDK 10.4. Specify --enable-universalsdk=/Developer/SDKs/MacOSX${cur_target}.sdk])
+            fi
+            ;;
+        */MacOSX10.5.sdk)
+            if [test ${cur_target} '>' 10.5;] then
+	            AC_MSG_ERROR([Invalid MACOSX_DEPLOYMENT_TARGET=$CONFIGURE_MACOSX_DEPLOYMENT_TARGET for SDK 10.5. Specify --enable-universalsdk=/Developer/SDKs/MacOSX${cur_target}.sdk])
+            fi
+            ;;
+        */MacOSX10.6.sdk)
+            if [test ${cur_target} '>' 10.6;] then
+	            AC_MSG_ERROR([Invalid MACOSX_DEPLOYMENT_TARGET=$CONFIGURE_MACOSX_DEPLOYMENT_TARGET for SDK 10.6. Specify --enable-universalsdk=/Developer/SDKs/MacOSX${cur_target}.sdk])
+            fi
+            ;;
+        esac
 	    
 	    # Make sure that MACOSX_DEPLOYMENT_TARGET is set in the 
 	    # environment with a value that is the same as what we'll use
