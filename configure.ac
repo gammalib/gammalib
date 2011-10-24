@@ -499,7 +499,6 @@ enable_python="no"
 has_python="no"
 has_python_h="no"
 has_swig="no"
-has_wrappers="no"
 
 # Python binding enabled?
 AC_ARG_ENABLE([python-binding],
@@ -566,18 +565,10 @@ if test "$SWIG"; then
   has_swig="yes"
 fi
 AM_CONDITIONAL(HAVE_SWIG, test "x$has_swig" = "xyes")
- 
-# Do we have wrappers (gammalib_wrap.cpp and gammalib.py)?
-AC_CHECK_FILES([pyext/gammalib_wrap.cpp pyext/gammalib.py],,)
-if test "x$ac_cv_file_pyext_gammalib_wrap_cpp" = "xyes"; then
-  if test "x$ac_cv_file_pyext_gammalib_py" = "xyes"; then
-    has_wrappers="yes"
-  fi
-fi
 
 # Signal if Python is enabled
-if test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes" -a "x$has_python_h" = "xyes"; then
-  if test "x$has_swig" = "xyes" -o "x$has_wrappers" = "xyes"; then
+if [test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes" -a "x$has_python_h" = "xyes"]; then
+  if [test "x$has_swig" = "xyes"]; then
     enable_python="yes"
   fi
 fi
@@ -840,37 +831,20 @@ if test "x$has_swig" = "xyes"; then
 else
   echo "  - swig                         (no)"
 fi
-if test "x$has_wrappers" = "xyes"; then
-  echo "  * Python wrappers              (yes)"
-else
-  echo "  - Python wrappers              (no)"
-fi
 
-# Dump Python binding information
+# Dump Python bindings information
 if test "x$ac_enable_python_binding" = "xyes"; then
   if test "x$has_python" = "xyes"; then
     if test "x$has_python_h" = "xyes"; then
-      if test "x$has_wrappers" = "xyes"; then
-        if test "x$has_swig" = "xyes"; then
-          echo "  * Make Python binding          (yes)   use swig for updates"
-        else
-          echo "  * Make Python binding          (yes)   use wrappers"
-        fi
-      else
-        if test "x$has_swig" = "xyes"; then
-          echo "  * Make Python binding          (yes)   use swig for building"
-        else
-          echo "  - Make Python binding          (no)    swig required to build wrappers"
-        fi
-      fi
+      echo "  * Make Python bindings         (yes)"
     else
-      echo "  - Make Python binding          (no)    Python.h not installed"
+      echo "  - Make Python bindings         (no)    Python.h not installed"
     fi
   else
-    echo "  - Make Python binding          (no)    Python not installed"
+    echo "  - Make Python bindings         (no)    Python not installed"
   fi
 else
-  echo "  - Make Python binding          (no)"
+  echo "  - Make Python bindings         (no)"
 fi
 
 # Dump instrument interface information
