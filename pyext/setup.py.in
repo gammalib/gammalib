@@ -35,10 +35,7 @@ core_modules = ['app', 'fits', 'linalg', 'model', 'numerics', \
 # Detect execution mode
 is_unit_test = False
 if (len(sys.argv) >= 3):
-	if (sys.argv[2] == '--home=install'):
-		print "This install is for unit testing."
-		is_unit_test = True
-	elif (sys.argv[2] == '--inplace'):
+	if (sys.argv[2] == '--inplace'):
 		print "This build is for unit testing."
 		is_unit_test = True
 
@@ -49,23 +46,23 @@ if (len(sys.argv) >= 3):
 libgamma='gamma'
 if is_unit_test:
 	
-		# Remove any existing symbolic link to libgamma.a. This will
-		# prevent any exception in creating the symbolic link due to
-		# an already existing link.
-		try:
-			os.remove('../src/.libs/libgamma_python.a')
-			print 'Removed ../src/.libs/libgamma_python.a'
-		except:
-			pass
-		
-		# Now create a symbolic link and set the library name to this
-		# symbolic link
-		try:
-			os.symlink('libgamma.a', '../src/.libs/libgamma_python.a')
-			print 'Created ../src/.libs/libgamma_python.a'
-			libgamma='gamma_python'
-		except:
-			print 'WARNING: Failed to create symbolic link to static library. Link dynamically.'
+	# Remove any existing symbolic link to libgamma.a. This will
+	# prevent any exception in creating the symbolic link due to
+	# an already existing link.
+	try:
+		os.remove('../src/.libs/libgamma_python.a')
+		print 'Removed ../src/.libs/libgamma_python.a'
+	except:
+		pass
+	
+	# Now create a symbolic link and set the library name to this
+	# symbolic link
+	try:
+		os.symlink('libgamma.a', '../src/.libs/libgamma_python.a')
+		print 'Created ../src/.libs/libgamma_python.a'
+		libgamma='gamma_python'
+	except:
+		print 'WARNING: Failed to create symbolic link to static library. Link dynamically.'
 
 # Set default include directories, install files, library paths and libraries
 include_dirs  = ['@top_srcdir@/include']
@@ -74,7 +71,10 @@ library_dirs  = ['../src/.libs']
 libraries     = [libgamma]
 
 # Set default runtime library directories
-runtime_library_dirs = ['@prefix@/lib']
+if os.path.exists('@prefix@/lib'):
+	runtime_library_dirs = ['@prefix@/lib']
+else:
+	runtime_library_dirs = []
 
 # Add cfitsio library only if available
 if '@WITH_CFITSIO_TRUE@' != '#':
