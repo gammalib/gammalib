@@ -1,6 +1,7 @@
 #! /bin/bash -f
 
 # Set parameters
+basedir=$(pwd)
 installdir=$(pwd)/build
 makedoc="no"
 
@@ -18,21 +19,32 @@ sourcedir=gammalib-$version
 rm -rf $sourcedir
 mv gammalib $sourcedir
 
-#
+# Create Python wrappers using SWIG. We need here a quite complicated kluge to get this done
+# as the Makefile in pyext does not exist (and we don't want that it exists in the distro).
+# We thus make a copy of gammalib, create the Makefile there, call 'make swig' in pyext,
+# and copy over the wrappers into the gammalib distro
+echo "Create Python wrappers using SWIG (making SWIG obsolete for installation)"
+swig -version
+tmpdir=$basedir/tmp_for_swig
+rm -rf $tmpdir
+cp -r $sourcedir $tmpdir
+cd $tmpdir
+./autogen.sh
+./configure
+cd pyext
+make swig
+cd $basedir
+cp -r $tmpdir/pyext/gammalib $sourcedir/pyext
+rm -rf $tmpdir
+
 echo "Create Makefile.in and configure scripts"
 cd $sourcedir
 ./autogen.sh
 rm -f gammalib.sh
 rm -rf dev
-cd ..
+cd $basedir
 
-#
-echo "Create gammalib_wrap.cpp and gammalib.py files for python binding (making swig obsolete)"
-inc_inst="-I$sourcedir/inst/mwl/pyext -I$sourcedir/inst/lat/pyext -I$sourcedir/inst/cta/pyext"
-opt_inst="-DWITH_INST_MWL -DWITH_INST_LAT -DWITH_INST_CTA"
-swig -c++ -python -Wall -includeall -I$sourcedir/src $inc_inst $opt_inst -o $sourcedir/pyext/gammalib_wrap.cpp -outdir $sourcedir/pyext $sourcedir/pyext/gammalib.i
-
-#
+# Create Doxygen documentation
 if [ "x$makedoc" == "xyes" ] ; then
   echo "Create doxygen documentation"
   cd $sourcedir/doc
@@ -42,10 +54,10 @@ if [ "x$makedoc" == "xyes" ] ; then
   make
   dvips -o refman.ps refman
   ps2pdf refman.ps 
-  cd ../..
+  cd $basedir
 fi
 
-#
+# Create LaTeX documentation
 echo "Create LaTeX documentation"
 cd $sourcedir/doc
 #
@@ -90,29 +102,32 @@ cd ../..
 mv dev/srs/gammalib_srs.pdf .
 #
 rm -rf dev
-cd ../..
+cd $basedir
 
+# Set permissions
 echo "Make files read/write"
 chmod -R u+rw $sourcedir
 
+# Create tarball
 echo "Create tarball"
 tar cvf - $sourcedir > $sourcedir.tar
 rm -f $sourcedir.tar.gz
 gzip $sourcedir.tar
+#exit 0
 
-#
+# Configure GammaLib
 echo "Configure GammaLib"
 cd $sourcedir
 ./configure --prefix=$installdir
 
-#
-echo "Compile GammaLib"
+# Build GammaLib
+echo "Build GammaLib"
 make -j10
 
-#
+# Check GammaLib
 echo "Check GammaLib"
 make check
 
-#
+# Install GammaLib
 echo "Install GammaLib"
 make install
