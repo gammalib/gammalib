@@ -1045,9 +1045,9 @@ fi
 
 # Dump compile options
 if test "x$NAN_CHECK" = "xyes"; then
-  echo "  * Perform in NaN/Inf checks    (yes)   (default)"
+  echo "  * Perform NaN/Inf checks       (yes)   (default)"
 else
-  echo "  - Perform in NaN/Inf checks    (no)"
+  echo "  - Perform NaN/Inf checks       (no)"
 fi
 if test "x$RANGE_CHECK" = "xyes"; then
   echo "  * Perform range checking       (yes)   (default)"
