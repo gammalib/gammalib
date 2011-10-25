@@ -216,6 +216,58 @@ AC_MSG_RESULT($ac_sys_machine)
 
 
 #############################################################################
+# Set system-dependent library definitions                                  #
+#############################################################################
+AC_MSG_CHECKING([for the shared library paths environment variable])
+case $ac_sys_system in
+    BeOS*)
+        SHAREDSUFFIX='.so'
+        ;;
+    CYGWIN*)
+        SHAREDSUFFIX='.dll.a'
+        ;;
+    SunOS*)
+        SHAREDSUFFIX='.so'
+        RUNSHARED='LD_LIBRARY_PATH'
+        ;;
+    Linux*|GNU*|NetBSD*|FreeBSD*|DragonFly*)
+        SHAREDSUFFIX='.so'
+        RUNSHARED='LD_LIBRARY_PATH'
+        ;;
+    hp*|HP*)
+        case `uname -m` in
+            ia64)
+                SHAREDSUFFIX='.so'
+                ;;
+            *)
+                SHAREDSUFFIX='.sl'
+                ;;
+        esac
+        RUNSHARED='SHLIB_PATH'
+        ;;
+    OSF*)
+        SHAREDSUFFIX='.so'
+        RUNSHARED='LD_LIBRARY_PATH'
+        ;;
+    atheos*)
+        SHAREDSUFFIX='.so'
+        RUNSHARED='DLL_PATH'
+	    ;;
+    Darwin*)
+        SHAREDSUFFIX='.dylib'
+        RUNSHARED='DYLD_LIBRARY_PATH'
+        ;;
+    AIX*)
+        SHAREDSUFFIX='.so'
+        RUNSHARED='LIBPATH'
+        ;;
+esac
+AC_MSG_RESULT($RUNSHARED)
+AC_SUBST(SHAREDSUFFIX)
+AC_SUBST(RUNSHARED)
+
+
+#############################################################################
 # Set -arch flags for universal builds on OSX and tweak BASECFLAGS based on #
 # compiler and platform (note that BASECFLAGS are not yet used).            #
 #############################################################################
