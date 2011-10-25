@@ -16,12 +16,12 @@
 #   The directories that are searched are (in the given order):
 #   $gammalib_prefix/lib64
 #   $gammalib_prefix/lib
-#   /opt/local/lib64       (for Mac OS X)
-#   /opt/local/lib         (for Mac OS X)
 #   /usr/local/lib64
 #   /usr/local/lib
 #   /usr/lib64
 #   /usr/lib
+#   /opt/local/lib64       (for Mac OS X)
+#   /opt/local/lib         (for Mac OS X)
 #
 #   If the library is found, the function adds it's name to LIBS.
 #   Furthermore, if the library is found in a specific directory, the
@@ -73,7 +73,7 @@ AC_DEFUN([AC_FIND_LIB_HEADER],[
   LIBS="-l$1 $6 $LIBS"
 
   # Loop over all directories
-  for i in '' "$gammalib_prefix" /opt/local /usr/local /usr; do
+  for i in '' "$gammalib_prefix" /usr/local /usr /opt/local; do
     for l in lib64 lib; do
 
       # Case A: headers are required
