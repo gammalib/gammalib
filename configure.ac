@@ -85,14 +85,19 @@ AC_PROG_CXX
 #############################################################################
 # Darwin option: Determine architecture of universal library to be built    #
 # ------------------------------------------------------------------------- #
-# --with-univeral-archs=VALUE, where VALUE is one of "32-bit", "64-bit",    #
-# "3-way", "intel" or "all".  Defaults to "32-bit".                         #
+# --with-univeral-archs=VALUE, where VALUE is one of:                       #
+# 32-bit - ppc, i386 (default)                                              #
+# 64-bit - ppc64, x86_64                                                    #
+# 3-way  - ppc, i386, x86_64                                                #
+# intel  - i386, x86_64                                                     #
+# all    - ppc, ppc64, i386, x86_64                                         #
 #############################################################################
 UNIVERSAL_ARCHS="32-bit"
 AC_SUBST(LIPO_32BIT_FLAGS)
 AC_MSG_CHECKING(for --with-universal-archs)
 AC_ARG_WITH(universal-archs,
-    AS_HELP_STRING([--with-universal-archs=ARCH], [select architectures for universal build ("32-bit", "64-bit", "3-way", "intel" or "all")]),
+    AS_HELP_STRING([--with-universal-archs=ARCH],
+                   [select architectures for universal build ("32-bit", "64-bit", "3-way", "intel", or "all")]),
 [
 	AC_MSG_RESULT($withval)
 	UNIVERSAL_ARCHS="$withval"
@@ -108,12 +113,12 @@ AC_ARG_WITH(universal-archs,
 # --enable-universalsdk=PATH takes an optional argument that specifies      #
 # which OSX SDK should be used to perform the build.                        #
 # This defaults to:                                                         #
-# "/Developer/SDKs/MacOSX.10.4u.sdk" for a 32-bit build (default)           #
+# "/Developer/SDKs/MacOSX.10.4u.sdk" for a '32-bit' build                   #
 # "/Developer/SDKs/MacOSX.10.5.sdk"  for any other build                    #
 #############################################################################
 AC_MSG_CHECKING([for --enable-universalsdk])
 AC_ARG_ENABLE(universalsdk,
-	AS_HELP_STRING([--enable-universalsdk@<:@=SDKDIR@:>@], [Build against Mac OS X 10.4u SDK (ppc/i386)]),
+	AS_HELP_STRING([--enable-universalsdk@<:@=SDKDIR@:>@], [Build against Mac OS X 10.4 SDK (ppc/i386)]),
 [
 	case $enableval in
 	yes)
@@ -258,7 +263,10 @@ yes)
 		    AC_MSG_RESULT($CXX)
         fi
 
-	    # Calculate the right deployment target for this build.
+	    # Calculate the right deployment target for this build. x86_64
+        # support is only available in SDK 10.5, hence any build including
+        # a x86_64 target needs 10.5. i386 came in in SDK 10.4, hence we
+        # need 10.4 for a 32-bit build.
 	    cur_target=`sw_vers -productVersion | sed 's/\(10\.[[0-9]]*\).*/\1/'`
 	    if test ${cur_target} '>' 10.2; then
 		    cur_target=10.3
@@ -275,11 +283,8 @@ yes)
 				    cur_target='10.5'
 			    elif test "${UNIVERSAL_ARCHS}" = "64-bit"; then
 				    cur_target='10.5'
-			    elif test `/usr/bin/arch` = "i386"; then
-				    # On Intel macs default to a deployment
-				    # target of 10.4, that's the first OSX
-				    # release with Intel support.
-				    cur_target="10.4"
+			    elif test "${UNIVERSAL_ARCHS}" = "32-bit"; then
+				    cur_target='10.4'
 			    fi
 		    else
 			    if test `/usr/bin/arch` = "i386"; then
@@ -343,7 +348,7 @@ yes)
 		        LIPO_32BIT_FLAGS="-extract ppc7400 -extract i386"
 		        ARCH_RUN_32BIT="/usr/bin/arch -i386 -ppc"
 		    else
-	            AC_MSG_ERROR([proper usage is --with-universal-arch=32-bit|64-bit|all|intel|3-way])
+	            AC_MSG_ERROR([proper usage is --with-universal-arch=ppc|i386|ppc64|x86_64|32-bit|64-bit|all|intel|3-way])
 		    fi
 		    CXXFLAGS="${UNIVERSAL_ARCH_FLAGS} ${CXXFLAGS}"
 		    if test "${UNIVERSALSDK}" != "/"; then
@@ -633,11 +638,21 @@ fi
 
 
 #############################################################################
-# Checks for readline and ncurses libraries                                 #
+# Search for readline and ncurses libraries                                 #
+# ------------------------------------------------------------------------- #
+# Searchs the following paths for the readline and ncurses libraries:       #
+# $gammalib_prefix/lib[64]                                                  #
+# /usr/lib[64]                                                              #
+# /usr/local/lib[64]                                                        #
+# /opt/local/lib[64]                                                        #
 #############################################################################
 # Initialise readline and ncurses flags
 has_readline="no"
 has_ncurses="no"
+use_readline="no"
+LIBDIR_READLINE=
+INCDIR_READLINE=
+LIBDIR_NCURSES=
 
 # Check if we want to use readline
 AC_ARG_WITH([readline],
@@ -649,22 +664,96 @@ AC_ARG_WITH([readline],
 # If we want to use readline, then search now the library
 if test "x$with_readline" = "xyes"; then
 
-  # First check for the presence of the ncurses library
-  AC_FIND_LIB_HEADER([ncurses], [tgetstr], [], [has_ncurses="yes"])
-  AC_FIND_LIB_HEADER([readline], [readline], [readline/readline.h], [has_readline="yes"])
+    # Set library names
+    case $ac_sys_system in
+	    Darwin*) 
+            libreadline="libreadline.dylib" 
+            libncurses="libncurses.dylib" 
+            ;;
+        *)
+            libreadline="libreadline.so" 
+            libncurses="libncurses.so" 
+            ;;
+    esac
 
+    # Search for readline library
+    for i in "$gammalib_prefix" /usr /usr/local /opt/local ; do
+        for k in lib lib64 ; do  
+            if [test -f $i/$k/$libreadline]; then
+                
+                # We found the library, now search for the header
+                if [test -f $i/include/readline.h]; then
+                    LIBDIR_READLINE=$i/$k
+                    INCDIR_READLINE=$i/include
+                    break
+                elif [test -f $i/include/readline/readline.h]; then
+                    LIBDIR_READLINE=$i/$k
+                    INCDIR_READLINE=$i/include/readline
+                    break
+                fi
+            
+            fi
+        done
+        if [test -n "$LIBDIR_READLINE" -a -n "$INCDIR_READLINE"]; then
+            break
+        fi
+    done
+
+    # Search for ncurses library
+    for i in "$gammalib_prefix" /usr /usr/local /opt/local ; do
+        for k in lib lib64 ; do  
+            if [test -f $i/$k/$libncurses]; then
+                LIBDIR_NCURSES=$i/$k
+                break
+            fi
+        done
+        if [test -n "$LIBDIR_NCURSES"]; then
+            break
+        fi
+    done
+
+    # Signal if we found readline library
+    if [test -n "$LIBDIR_READLINE" -a -n "$INCDIR_READLINE"]; then
+        has_readline="yes"
+    fi
+    
+    # Signal if we found ncurses library
+    if [test -n "$LIBDIR_NCURSES"]; then
+        has_ncurses="yes"
+    fi
+    
+    # If we have both we add readline support to GammaLib
+    if [test "x$has_readline" = "xyes" -a "x$has_ncurses" = "xyes"]; then
+        use_readline="yes"
+    fi
+    
+    # Set some variables for readline support
+    if test "x$use_readline" = "xyes"; then
+        AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
+        LDFLAGS="$LDFLAGS -L$LIBDIR_READLINE -L$LIBDIR_NCURSES"
+        CPPFLAGS="$CPPFLAGS -I$INCDIR_READLINE"
+        LIBS="${LIBS} -lreadline -lncurses"
+        AC_SUBST(LIBDIR_READLINE)
+        AC_SUBST(INCDIR_READLINE)
+        AC_SUBST(LIBDIR_NCURSES)
+    fi
 fi
-if test "x$has_readline" = "xyes"; then
-  AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
-fi
-AM_CONDITIONAL(WITH_READLINE, test "x$has_readline" = "xyes")
+AM_CONDITIONAL(WITH_READLINE, test "x$use_readline" = "xyes")
 
 
 #############################################################################
-# Checks for cfitsio library                                                #
+# Search for cfitsio library                                                #
+# ------------------------------------------------------------------------- #
+# Searchs the following paths for the cfitsio library:                      #
+# $gammalib_prefix/lib[64]                                                  #
+# /usr/lib[64]                                                              #
+# /usr/local/lib[64]                                                        #
+# /opt/local/lib[64]                                                        #
 #############################################################################
 # Initialise cfitsio flag
 has_cfitsio="no"
+LIBDIR_CFITSIO=
+INCDIR_CFITSIO=
 
 # Check if we want to use cfitsio
 AC_ARG_WITH([cfitsio],
@@ -676,55 +765,57 @@ AC_ARG_WITH([cfitsio],
 # If we want to use cfitsio, then search the library now
 if test "x$with_cfitsio" = "xyes"; then
 
-  # Is pkgconfig available? This sets PKG_CONFIG to the binary location
-  PKG_PROG_PKG_CONFIG
-
-  # Use pkgconfig if available
-  if test "x$PKG_CONFIG" != "x"; then
-    PKG_CHECK_MODULES([cfitsio], [cfitsio],
-                      [has_cfitsio="yes"],
-                      [AC_MSG_WARN([cfitsio pkgconfig information not found])])
-    if test "x$has_cfitsio" = "xyes"; then
-    
-      # OpenSUSE kluge: cfitsio pkgconfig not correct
-      if test -f "/usr/include/libcfitsio0/fitsio.h"; then
-        cfitsio_CFLAGS="-I/usr/include/libcfitsio0"
-      fi
-      
-      # Set environment variables
-      CFLAGS="$CFLAGS $cfitsio_CFLAGS"
-      CPPFLAGS="$CPPFLAGS $cfitsio_CFLAGS"
-      LDFLAGS="$LDFLAGS $cfitsio_LIBS"
-      CFITSIO="cfitsio"
-    fi
-  fi
-    
-  # If we still don't have cfitsio, then search the library and headers in
-  # standard paths
-  if test "x$has_cfitsio" = "xno"; then
-
     # Set host specific cfitsio dependencies
     cfitsio_deps=
     case $host in
-      *-*-solaris*)  cfitsio_deps="-lm -lsocket" ;;
-      *)             cfitsio_deps="-lm" ;;
+        *-*-solaris*) cfitsio_deps="-lm -lsocket" ;;
+        *)            cfitsio_deps="-lm" ;;
     esac
-  
-    # Check for cfitsio library and headers. The cfitsio/fitsio.h is for
-    # Scientific Linux as no pkgconfig is installed for this distribution
-    AC_FIND_LIB_HEADER([cfitsio], [ffpss], [fitsio.h cfitsio/fitsio.h],
-                       [has_cfitsio="yes"], [], [${cfitsio_deps}])
 
-    # Add cfitsio dependencies
-    if test "x$has_cfitsio" = "xyes"; then
-      LIBS="${LIBS} ${cfitsio_deps}"
+    # Set library name
+    case $ac_sys_system in
+	    Darwin*) libcfitsio="libcfitsio.dylib" ;;
+        *)       libcfitsio="libcfitsio.so" ;;
+    esac
+
+    # Search for cfitsio library
+    for i in "$gammalib_prefix" /usr /usr/local /opt/local ; do
+        for k in lib lib64 ; do  
+            if [test -f $i/$k/$libcfitsio]; then
+                
+                # We found the library, now search for the header
+                if [test -f $i/include/fitsio.h]; then
+                    LIBDIR_CFITSIO=$i/$k
+                    INCDIR_CFITSIO=$i/include
+                    break
+                elif [test -f $i/include/libcfitsio0/fitsio.h]; then
+                    # OpenSUSE kluge
+                    LIBDIR_CFITSIO=$i/$k
+                    INCDIR_CFITSIO=$i/include/libcfitsio0
+                    break
+                elif [test -f $i/include/cfitsio/fitsio.h]; then
+                    LIBDIR_CFITSIO=$i/$k
+                    INCDIR_CFITSIO=$i/include/cfitsio
+                    break
+                fi
+            
+            fi
+        done
+        if [test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO"]; then
+            break
+        fi
+    done
+              
+    # If we found library then set some variables
+    if [test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO";] then
+        has_cfitsio="yes"
+        AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])
+        LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
+        CPPFLAGS="$CPPFLAGS -I$INCDIR_CFITSIO"
+        LIBS="${LIBS} -lcfitsio ${cfitsio_deps}"
+        AC_SUBST(LIBDIR_CFITSIO)
+        AC_SUBST(INCDIR_CFITSIO)
     fi
-    
-  fi
-  
-fi
-if test "x$has_cfitsio" = "xyes"; then
-  AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])
 fi
 AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
 
@@ -831,12 +922,13 @@ echo
 echo "  GammaLib configuration summary"
 echo "  =============================="
 if test "x$has_cfitsio" = "xyes"; then
-  echo "  * FITS I/O support             (yes)"
+  echo "  * FITS I/O support             (yes)   $LIBDIR_CFITSIO $INCDIR_CFITSIO"
 else
   echo "  - FITS I/O support             (no)    no cfitsio library found"
 fi
-if test "x$has_readline" = "xyes"; then
-  echo "  * Readline support             (yes)"
+if test "x$use_readline" = "xyes"; then
+  echo "  * Readline support             (yes)   $LIBDIR_READLINE $INCDIR_READLINE"
+  echo "  * Ncurses support              (yes)   $LIBDIR_NCURSES"
 else
   if test "x$has_ncurses" = "xyes"; then
     echo "  - Readline support             (no)    no readline library found"
