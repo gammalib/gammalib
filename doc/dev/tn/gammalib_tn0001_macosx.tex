@@ -1,0 +1,977 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Mac OS X deployment
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definitions for manual package
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\task}{\mbox{GammaLib}}
+\newcommand{\this}{\mbox{\tt \task}}
+\newcommand{\shorttype}{\mbox{}}
+\newcommand{\doctype}{\mbox{Mac OS X deployment}}
+\newcommand{\reference}{\mbox{GammaLib-TN0001}}
+\newcommand{\version}{\mbox{1.0}}
+\newcommand{\calendar}{\mbox{24 October 2011}}
+\newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
+\newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document definition
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}[12pt,a4]
+\usepackage{epsfig}
+\usepackage{technote}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Begin of document body
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\frontpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Scope
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Scope}
+
+This technical note collects information about deployment of \this\ on Mac OS X, with
+special emphasis on compatibility issues between different Mac OS X versions and 
+CPU architectures.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+The Mac OS X operating systems comes in a number of versions and architectures which are
+summarized in Tables \ref{table:versions} and \ref{table:arch}.
+In particular, changes from Mac OS X 10.3 to 10.7 reflect the evolution from a pure PowerPC
+system (10.3) to a pure Intel system (10.7).
+To assure portability, \task\ should build and work properly on all these variants.
+
+%%% Mac OS X versions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!h]
+  \center
+  \begin{tabular}{lll}
+  \hline
+  Version & Name & New features \\
+  \hline
+  10.0 & Cheetah & \\
+  10.1 & Puma & \\
+  10.2 & Jaguar & \\
+  10.3 & Panther & last PowerPC only system \\
+  10.4 & Tiger & first Intel processor support, supports universal binaries (only 32-bit) \\
+  10.5 & Leopard & first Intel 64-bit universal binary support \\
+  10.6 & Snow Leopard & includes 32-bit and 64-bit kernels \\
+  10.7 & Lion & PowerPC support dropped \\
+  \hline
+  \end{tabular}
+  \caption{Mac OS X versions}
+  \label{table:versions}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Mac OS X architectures %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!h]
+  \center
+  \begin{tabular}{lll}
+  \hline
+  Architecture & Bit & Processor \\
+  \hline
+  {\tt ppc} & 32 & PowerPC \\
+  {\tt i386} & 32 & Intel \\
+  {\tt ppc64} & 64 & PowerPC \\
+  {\tt x86\_64} & 64 & Intel \\
+  \hline
+  \end{tabular}
+  \caption{Mac OS X architectures}
+  \label{table:arch}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Multi-architecture support is implemented in Mac OS X in form of universal binaires (or libraries).
+Here, code compiled for different architectures is packed into a single binary of library.
+Using the {\tt gcc} compiler suite, this feature is automatically enabled when different
+architectures are specified using the {\tt -arch} option to the compiler.
+For example, {\tt -arch i386 -arch ppc} will built 32-bit code for both PowerPC and Intel
+architectures.
+
+To see which architectures exist in a binary or library, one can use the {\tt file} command.
+For example
+{\scriptsize
+\begin{verbatim} 
+$ file /usr/lib/libreadline.dylib 
+/usr/lib/libreadline.dylib: Mach-O universal binary with 3 architectures
+/usr/lib/libreadline.dylib (for architecture x86_64):	Mach-O 64-bit dynamically linked shared library x86_64
+/usr/lib/libreadline.dylib (for architecture i386):	Mach-O dynamically linked shared library i386
+/usr/lib/libreadline.dylib (for architecture ppc7400):	Mach-O dynamically linked shared library ppc
+\end{verbatim}}
+shows that the shared {\tt readline} library on the Mac OS 10.6 system is a 3-way library that
+was compiled for {\tt x86\_64}, {\tt i386}, and {\tt ppc} architectures.
+
+As the Mac OS X system evolves, new system features become available.
+In order to compile code for older systems on a new Mac OS X version, Apple's Xcode comes
+with a number of Software Development Kits (SDKs).
+They are available in the {\tt /Developer/SDKs} folder.
+Using these SDKs allows for building against the headers and libraries of an operating
+system version other than the development platform.
+This is achieved by adding the {\tt -isysroot} to the {\tt gcc} call.
+For example, {\tt -isysroot /Developer/SDKs/MacOSX10.4u.sdk} builds and links against
+headers and libraries that were available in Mac OS 10.4.
+By selecting a given SDK, the build can use features available in OS versions up to and including 
+the one corresponding to the base SDK.
+
+To illustrate this, we can again use the {\tt file} command to see for what architectures the {\tt readline}
+library was built in different Mac OS X versions:
+{\scriptsize
+\begin{verbatim} 
+$ file /Developer/SDKs/MacOSX10.4u.sdk/usr/lib/libreadline.dylib
+/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/libreadline.dylib: Mach-O universal binary with 2 architectures
+/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/libreadline.dylib (for architecture i386):	Mach-O dynamically linked shared library stub i386
+/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/libreadline.dylib (for architecture ppc):	Mach-O dynamically linked shared library stub ppc
+$ file /Developer/SDKs/MacOSX10.5.sdk/usr/lib/libreadline.dylib
+/Developer/SDKs/MacOSX10.5.sdk/usr/lib/libreadline.dylib: Mach-O universal binary with 4 architectures
+/Developer/SDKs/MacOSX10.5.sdk/usr/lib/libreadline.dylib (for architecture ppc7400):	Mach-O dynamically linked shared library stub ppc
+/Developer/SDKs/MacOSX10.5.sdk/usr/lib/libreadline.dylib (for architecture ppc64):	Mach-O 64-bit dynamically linked shared library stub ppc64
+/Developer/SDKs/MacOSX10.5.sdk/usr/lib/libreadline.dylib (for architecture i386):	Mach-O dynamically linked shared library stub i386
+/Developer/SDKs/MacOSX10.5.sdk/usr/lib/libreadline.dylib (for architecture x86_64):	Mach-O 64-bit dynamically linked shared library stub x86_64
+$ file /Developer/SDKs/MacOSX10.6.sdk/usr/lib/libreadline.dylib
+/Developer/SDKs/MacOSX10.6.sdk/usr/lib/libreadline.dylib: Mach-O universal binary with 3 architectures
+/Developer/SDKs/MacOSX10.6.sdk/usr/lib/libreadline.dylib (for architecture x86_64):	Mach-O 64-bit dynamically linked shared library stub x86_64
+/Developer/SDKs/MacOSX10.6.sdk/usr/lib/libreadline.dylib (for architecture i386):	Mach-O dynamically linked shared library stub i386
+/Developer/SDKs/MacOSX10.6.sdk/usr/lib/libreadline.dylib (for architecture ppc7400):	Mach-O dynamically linked shared library stub ppc
+\end{verbatim}}
+We note that on Mac OS X 10.4, {\tt readline} was compiled for {\tt i386} and {\tt ppc} only, while on
+10.5 it was a 4-way library supporting PowerPC and Intel 32-and 64-bit architectures.
+In Mac OS X 10.6, {\tt ppc64} support was dropped.
+Note also that the libraries included in the SDK are stubs for linking only.
+Stubs means that they do not contain executable code but just the exported symbols. 
+
+Another important feature in compiling and running universal binaries (or libraries) is the 
+Deployment Target (DT).
+The Deployment Target specifies the earliest OS version on which the software can run.
+It is important to recognize that the Deployment Target can be smaller than the SDK version used
+for the build.
+For example, one may specify a Deployment Target of 10.3 while using a SDK of 10.6.
+This means that the code can exploit a feature that is only available in SDK 10.6, but it has 
+to make sure itself that this feature is indeed available on the system it is running on.
+Otherwise the program will crash.
+This building technique is known as {\em weak linking} and allows great flexibility in code
+development for various Mac OS X versions.
+
+On the other hand, specifying a Deployment Target that is larger than the current SDK used 
+is not allowed, as this would mean that the code could not run on the system which it was 
+built for.
+
+The deployment target is set using the {\tt MACOSX\_DEPLOYMENT\_TARGET}
+environment variable.
+This environment variable also related to the {\tt gcc} option {\tt -mmacosx-version-min}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% GammaLib configuration
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{\this\ configuration}
+
+\this\ supports building of universal libraries in order to cope with the various Mac OS X versions
+that actually do exist.
+The {\tt configure} script will examine that actual system and will optionally define the
+SDK version, the build architectures and the Deployment Target version.
+For this purpose, the {\tt configure} options {\tt --enable-universalsdk} and {\tt --with-universal-archs}
+have been added that allow tuning the actual settings.
+The respective code in {\tt configure.ac} has been largely inspired from the Python {\tt ./configure} 
+script, although it has been adjusted to fit the needs of \this.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Native build}
+
+First we consider the case of a native build, which means that code is only generated for a single
+architecture, i.e. no universal library is created.
+A native build is invoked when the configure option {\tt --enable-universalsdk} is {\bf not} given.
+
+In this case, no SDK will be used, and the code will be built and linked against the libraries that
+are available on the actual system.
+In particular, no {\tt -isysroot} option will be given to {\tt gcc}.
+
+If the library is built on Mac OS X $\le10.2$, the
+{\tt MACOSX\_DEPLOYMENT\_TARGET}
+environment variable for building and linking the \this\ shared library will be set to the actual 
+Mac OS X version.
+For Mac OS X $>10.2$, {\tt MACOSX\_DEPLOYMENT\_TARGET} will depend on the actual
+architecture of the development platform.
+For a PowerPC processor, {\tt MACOSX\_DEPLOYMENT\_TARGET=10.3}, while for an Intel
+processor, {\tt MACOSX\_DEPLOYMENT\_TARGET=10.4} (Mac OS X is the first system that
+supports Intel processors).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Universal build}
+
+Second, we consider the case of a universal build.
+A universal build is invoked using
+\begin{verbatim}
+./configure --enable-universalsdk
+\end{verbatim}
+
+Universal builds were introduced with Mac OS X 10.4, yet it is not clear to me whether they also
+would work on earlier systems, provided that PowerPC support has been added.
+I have found universal binaries (built for {\tt i386} and {\tt ppc}) that were claimed
+to work at least for Mac OS X 10.3, hence it is well possible that they work even for earlier versions.
+Also Xcode 3 (the version on Mac OS X 10.6) seems to allow building universal binaries for 
+Deployment Targets as low as 10.1.
+
+Intel {\tt i386} has been introduced in Mac OS X 10.4, hence any Intel only library implies a
+Deployment Target of at least 10.4.
+
+Intel {\tt x86\_64} has been officially added in Mac OS X 10.5, but Xcode 3 allows
+also the generation of {\tt x86\_64} code using the 10.4 SDK.
+I have encountered problems, however, when compiling {\tt x86\_64} code against the 
+10.4 SDK, such as a missing {\tt x86\_64} architecture in the system's {\tt readline}
+library.
+Thus, building for the {\tt x86\_64} architecture seems to require at least a Deployment Target 
+of 10.5.
+
+The \this\ {\tt configure} script follows here the approach taken in the Python {\tt configure} script,
+although the detailed parametrisation is different.
+For 32-bit builds, Mac OS X 10.4 is the default SDK, while 64-bit builds require Mac OS X 10.5.
+These defaults are taken if {\tt --enable-universalsdk} is supplied without any argument.
+A specific SDK directory may be specified using
+\begin{verbatim}
+./configure --enable-universalsdk=/Developer/SDKs/MacOSX10.6.sdk
+\end{verbatim}
+Furthermore,
+\begin{verbatim}
+./configure --enable-universalsdk=/
+\end{verbatim}
+will take the native systems headers and libraries as SDK.
+
+{\tt configure} will use this information to append {\tt -isysroot \$\{UNIVERSALSDK\}}
+options to {\tt CPPFLAGS}, {\tt LDFLAGS} and {\tt CXXFLAGS},
+where {\tt \$\{UNIVERSALSDK\}} is the path to the specified SDK.
+In addition, if the Mac OS X 10.4 SDK has been selected, {\tt gcc} version 4.0 will be used 
+for compilation.
+This is accomplished by setting
+{\tt CC=gcc-4.0},
+{\tt CXX=g++-4.0}, and
+{\tt CPP=cpp-4.0}.
+
+The target architectures that will be compiled in the universal libraries can be specified using\break
+{\tt --with-universal-archs=VALUE}.
+Table \ref{table:options} lists the {\tt VALUE}s that are available.
+If  the\break {\tt --with-universal-archs} option is not given, {\tt 3-way} ({\tt ppc}, {\tt i386}, {\tt x86\_64})
+will be assumed as default option.
+The {\tt configure} script makes use of this information to add {\tt -arch} compile flags
+to {\tt CXXFLAGS} and {\tt LDFLAGS} to define the architectures for which the code will be 
+compiled.
+
+%%% architecture options %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!h]
+  \center
+  \begin{tabular}{llc}
+  \hline
+  VALUE & Architectures & {\tt MACOSX\_DEPLOYMENT\_TARGET} \\
+  \hline
+  {\tt 32-bit} & {\tt ppc}, {\tt i386} & 10.4 \\
+  {\tt 64-bit} & {\tt ppc64}, {\tt x86\_64} & 10.5 \\
+  {\tt 3-way} (default) & {\tt ppc}, {\tt i386}, {\tt x86\_64} & 10.5 \\
+  {\tt intel} & {\tt i386} and {\tt x86\_64} & 10.5 \\
+  {\tt all} & {\tt ppc}, {\tt ppc64}, {\tt i386}, {\tt x86\_64} & 10.5 \\
+  \hline
+  \end{tabular}
+  \caption{Possible values for the {\tt --with-universal-archs=VALUE} option.}
+  \label{table:options}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The Deployment Target also depends on the specific combination of architectures.
+{\tt i386} became only available in Mac OS X 10.4, hence {\tt 32-bit} builds require
+a Deployment Target of 10.4.
+{\tt x86\_64} became available in Mac OS X 10.5, hence all combinations containing
+the {\tt x86\_64} architecture need a Deployment Target of 10.5.
+The values taken for {\tt MACOSX\_DEPLOYMENT\_TARGET} are summarized in the 
+last column of Table \ref{table:options}.
+Note that the {\tt 32-bit} setting differs from what is found in Python's {\tt configure} script
+(which assumes a Deployment Target of 10.3 for this build).
+
+Note further that these values only apply if the build system is Mac OS X $\ge10.3$.
+For earlier versions, the {\tt configure} script will set the Deployment Target to the Mac OS X
+version.
+I'm not sure that this is correct, but that's how the Python {\tt configure} script deals with earlier
+Mac OS X versions, hence I just copied this part.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Dependency libraries}
+\label{sec:dependencies}
+
+Although \this\ is designed to have as few dependencies as possible, it requires at least the {\tt cfitsio}
+library to be installed to allow for FITS file access.
+Furthermore, \this\ can make use of the {\tt readline} library (and the related and required {\tt ncurses}
+library), but not having those will not restrict the functionalities of \this.
+
+Unless we make an install from source of these dependency libraries, we have little control over the
+actual architectures that they support.
+In the best case, the libraries are provided as universal builds, and \this\ can link with the relevant
+architectures.
+{\tt readline} and {\tt ncurses} are in fact shipped with Mac OS X, and as we have shown by using the
+{\tt file} command above, various architectures are supported (cf.~Table \ref{table:readline}).
+
+%%% readline architectures %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!h]
+  \center
+  \begin{tabular}{ll}
+  \hline
+  SDK & Architectures \\
+  \hline
+  10.4 & {\tt ppc}, {\tt i386} \\
+  10.5 & {\tt ppc}, {\tt i386}, {\tt ppc64}, {\tt x86\_64} \\
+  10.6 & {\tt ppc}, {\tt i386}, {\tt x86\_64} \\
+  \hline
+  \end{tabular}
+  \caption{Available architectures for {\tt readline} and {\tt ncurses} in different SDKs.}
+  \label{table:readline}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The  bigger problem is {\tt cfitsio}, which is not shipped with Mac OS X, and which therefore can
+exist in various architectures on a given system.
+If the library is installed via MacPorts, it will only exist in the native architecture.
+If it is installed from source, it is built by default as a universal library for {\tt i386} and {\tt x86\_64}.
+{\bf The fact that there is no a priori control over the architectures that are available in {\tt cfitsio} is
+a major flaw of the \this\ installation on Mac OS X.}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Python module}
+\label{sec:python}
+
+A even worse flaw exists for building the \this\ Python module, because a common architecture
+match has to be found between the Python executable, the \this\ library, and the dependence
+libraries ({\tt cfitsio}, {\tt readline}, and {\tt ncurses}).
+
+Python modules need in principle to be built for all architectures that are present in the Python
+executable.
+This is automatically guaranteed by using the {\tt distutils} Python module for compilation,
+linking and installation, which will extract the relevant information from the actual Python
+build.
+\this\ makes use of this module, which means that the SDK and the Deployment Target 
+environment variable
+{\tt MACOSX\_DEPLOYMENT\_TARGET}
+that were used for compiling the \this\ library will {\bf not} be used for the compilation of the \this\ 
+Python module.
+The configuration of the \this\ Python module will be fully determined by the configuration
+of the Python executable.
+
+The \this\ Python module, however, relies on the {\tt libgamma.dylib} library, which in turn depends
+on the {\tt libcfitsio.dylib} (and eventually also the {\tt libreadline.dylib} and {\tt libncurses.dylib})
+libraries.
+The \this\ Python module will thus only work if the relevant architecture is indeed found in all
+these libraries.
+This does not mean that all possible architectures need to be present, but if Python is for
+example launched as an Intel 64-bit application it needs to find {\tt x86\_64} code in
+{\tt libgamma.dylib}, {\tt libcfitsio.dylib}, {\tt libreadline.dylib} and {\tt libncurses.dylib}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Other issues}
+
+Another important issue arose related to dependencies that are automatically created by the
+{\tt automake} system.
+These dependencies get created by default when
+{\tt AM\_INIT\_AUTOMAKE}
+is specified in {\tt configure.ac}.
+Dependency creation adds a number of compile flags {\tt -M} that are incompatible with building
+universal libraries.
+To avoid this problem,
+{\tt AM\_INIT\_AUTOMAKE([no-dependencies])}
+has been specified in {\tt configure.ac}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Case studies
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Case studies}
+
+In order to test the \this\ package on Mac OS X and to explore possible limitations of the build
+system, a number of case studies have been done.
+All tests have been performed using a development version of {\tt GammaLib-00-05-00}.
+The test platform was a Intel Core i7 MacBook Pro, running Mac OS X 10.6.8
+which by default compiles code for the {\tt x86\_64} architecture. 
+Apple's SDKs 10.4, 10.5 and 10.6 have been installed.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Case A: Installing \this\ on vanilla Mac OS X}
+
+With vanilla Mac OS X, I mean an operating system that comes out of the box, without any
+3rd party adds, such as different Python versions or specific {\tt cfitsio}, {\tt readline}, or
+{\tt ncurses} libraries.
+
+The Mac OS X 10.6 used for testing came with Python 2.5 and Python 2.6, and tests have been executed
+for both versions.
+The major difference between both versions is that Python 2.5 is a {\tt 32-bit} build while
+Python 2.6 is a {\tt 3-way} build (cf.~Table \ref{table:macpython}).
+
+%%% Python architectures %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!h]
+  \center
+  \begin{tabular}{ll}
+  \hline
+  Python & Architectures \\
+  \hline
+  2.5 & {\tt ppc}, {\tt i386} \\
+  2.6 & {\tt ppc}, {\tt i386}, {\tt x86\_64} \\
+  \hline
+  \end{tabular}
+  \caption{Architectures supported by Mac OS X provided Python (for Mac OS X 10.6).}
+  \label{table:macpython}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Prior to installing \this, {\tt cfitsio} needed to be installed from source.
+{\tt cfitsio} version 3.280 was installed in {\tt /usr/local/gamma} using 
+{\small\begin{verbatim}
+$ ./configure --prefix=/usr/local/gamma
+$ make shared
+$ make install
+\end{verbatim}}
+This installed {\tt cfitsio} as universal library built for the {\tt i386} and {\tt x86\_64} architectures,
+which is the default configuration.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Building against Python 2.5}
+
+Python 2.5 was first tested using the following command sequence:
+{\small\begin{verbatim}
+$ export PATH=/System/Library/Frameworks/Python.framework/Versions/2.5/bin:/usr/bin:/bin:/usr/sbin:/sbin
+$ ./configure
+$ make
+$ make check
+\end{verbatim}}
+
+During the build step (i.e. after typing {\tt make}), the following warnings appeared at the stage
+where the shared libraries of the Python modules were linked against {\tt libgamma.dylib}:
+{\small\begin{verbatim}
+ld: warning: in ../src/.libs/libgamma.dylib, file is not of required architecture
+ld: warning: in ../src/.libs/libgamma.dylib, file is not of required architecture
+ld: warning: in /usr/local/gamma/lib/libcfitsio.dylib, missing required architecture ppc in file
+\end{verbatim}}
+The reason for these warnings is obvious.
+{\tt x86\_64} is the native architecture of the test platform, and the \this\ shared library
+{\tt libgamma.dylib} has been compiled for this architecture.
+Python 2.5, however, has been compiled for {\tt ppc} and {\tt i386}, and consequently,
+the \this\ Python modules will be built for the same architectures.
+Linking the Python modules against {\tt libgamma.dylib} then fails, as the library neither
+contains the {\tt ppc} nor the {\tt i386} architecture.
+Furthermore, linking against {\tt libcfitsio.dylib} for the {\tt ppc} architecture also fails,
+as {\tt cfitsio} has been compiled for Intel architectures only, and thus does not provide
+code for {\tt ppc}.
+
+{\tt make check} works then fine for the tests that verify the {\tt libgamma.dylib} itself (which
+are the first 14 tests), but fails on the final verification of the Python module.
+The following Python run-time error occurs:
+{\small\begin{verbatim}
+Traceback (most recent call last):
+  File "./test_python.py", line 3, in <module>
+    from gammalib import *
+  File "/Users/jurgen/dev/gammalib/pyext/gammalib/__init__.py", line 1, in <module>
+    from app import *
+  File "/Users/jurgen/dev/gammalib/pyext/gammalib/app.py", line 7, in <module>
+    import _app
+ImportError: dlopen(/Users/jurgen/dev/gammalib/pyext/gammalib/_app.so, 2): 
+Symbol not found: __ZNK17GExceptionHandler4whatEv
+  Referenced from: /Users/jurgen/dev/gammalib/pyext/gammalib/_app.so
+  Expected in: flat namespace
+ in /Users/jurgen/dev/gammalib/pyext/gammalib/_app.so
+FAIL: test_python.py
+===================================
+1 of 15 tests failed
+Please report to knodlseder@cesr.fr
+===================================
+\end{verbatim}}
+This error is related to the attempt of the Python module {\tt \_app.so} to load
+a symbol from {\tt libgamma.dylib}, which obviously fails because the symbol is
+not found for the requested architecture.
+
+The problem can be solved by building \this\ as universal library.
+The following sequence
+{\small\begin{verbatim}
+$ ./configure --enable-universalsdk
+$ make
+$ make check
+\end{verbatim}}
+builds \this\ as {\tt 32-bit} universal binary, compiling for the {\tt ppc} and {\tt i386}
+architectures.
+These are the same architectures that are also present in the Python executable.
+
+Building leaves
+{\small\begin{verbatim}
+ld: warning: in /usr/local/gamma/lib/libcfitsio.dylib, missing required architecture ppc in file
+\end{verbatim}}
+as the only warning during compile time, because there is still no {\tt ppc} architecture in
+{\tt cfitsio}.
+{\tt make check} was now successful for all 15 unit tests, including the Python test.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Building against Python 2.6}
+
+Python 2.6 was tested using the following command sequence:
+{\small\begin{verbatim}
+$ export PATH=/System/Library/Frameworks/Python.framework/Versions/2.6/bin:/usr/bin:/bin:/usr/sbin:/sbin
+$ ./configure
+$ make
+$ make check
+\end{verbatim}}
+which compiled \this\ for the native {\tt x86\_64} architecture.
+During the build of the Python modules the following warnings occurred
+{\small\begin{verbatim}
+ld: warning: in ../src/.libs/libgamma.dylib, file is not of required architecture
+ld: warning: in ../src/.libs/libgamma.dylib, file is not of required architecture
+ld: warning: in /usr/local/gamma/lib/libcfitsio.dylib, missing required architecture ppc in file
+\end{verbatim}}
+which are related to the fact that {\tt libgamma.dylib} does not contain the
+{\tt i386} and {\tt ppc} architectures, and {\tt libcfitsio.dylib} does not contain the
+{\tt ppc} architecture.
+Despite these warnings, all 15 unit tests were executed successfully.
+
+I also tested Python 2.6 using
+{\small\begin{verbatim}
+$ ./configure --enable-universalsdk
+$ make
+$ make check
+\end{verbatim}}
+The only warning occurring now is
+{\small\begin{verbatim}
+ld: warning: in /usr/local/gamma/lib/libcfitsio.dylib, missing required architecture ppc in file
+\end{verbatim}}
+and all 15 unit tests were executed successfully.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Summary}
+
+The test results for the vanilla Mac OS X are summarised in Table \ref{table:vanilla}.
+The column {\tt libgamma} specifies the architectures that are compiled into the \this\
+library, while the column {\tt gammalib} gives the architectures available in the
+Python module.
+The columns ``use as API'' and ``use from Python'' specify the architectures that are effectively
+used when \this\ is used as a C++ API and when it is used from Pyhton as a module, respectively.
+For both Python version, the {\tt configure} option {\tt --enable-universalsdk} allows a successful
+build of \this.
+
+%%% Python architectures %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!h]
+  \small
+  \center
+  \begin{tabular}{cc|cccc}
+  \hline
+   & & \multicolumn{4}{c}{Architectures} \\
+  Python & {\tt configure} flags & {\tt libgamma} & {\tt gammalib} & use as API & use from Python \\
+  \hline
+  2.5 & - & {\tt x86\_64} & {\tt ppc}, {\tt i386} & {\tt x86\_64} & {\bf failed} \\
+  2.5 & --enable-universalsdk & {\tt ppc}, {\tt i386}, {\tt x86\_64} & {\tt ppc}, {\tt i386} & {\tt x86\_64} & {\tt i386} \\
+  2.6 & - & {\tt x86\_64} & {\tt ppc}, {\tt i386}, {\tt x86\_64} & {\tt x86\_64} & {\tt x86\_64} \\
+  2.6 & --enable-universalsdk & {\tt ppc}, {\tt i386}, {\tt x86\_64} & {\tt ppc}, {\tt i386}, {\tt x86\_64} & {\tt x86\_64} & {\tt x86\_64} \\
+  \hline
+  \end{tabular}
+  \caption{Summary of vanilla Mac OS X tests.}
+  \label{table:vanilla}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Case B: Pure MacPorts system}
+
+A popular source for software on Mac OS X is MacPorts ({\tt http://www.macports.org/}).
+Software from MacPorts is compiled upon installation from source, and by default this is only
+done for the architecture the system is actually running on ({\tt x86\_64} is our case).\footnote{
+There exists the possibility of installing universal builds via MacPorts, but I assume here that 
+most people will not use this option.}
+
+The software installed from MacPorts was Python (versions 2.5, 2.6 and 2.7), {\tt cfitsio},
+{\tt readline} and {\tt ncurses}.
+I tested MacPorts using
+{\small\begin{verbatim}
+$ export PATH=/opt/local/Library/Frameworks/Python.framework/Versions/2.X/bin:/usr/bin:/bin:/usr/sbin:/sbin
+$ ./configure
+$ make
+$ make check
+\end{verbatim}}
+(where {\tt X} stands for the minor Python version number).
+No warning has been issued during the build, and all 15 tests passed successfully.
+
+It should be noted that the \this\ library was actually linked against the {\tt readline} and {\tt ncurses}
+libraries provided by Mac OS X, as those are found earlier in the list of searched paths (MacPorts
+{\tt /opt/local/lib} directory is only searched last).
+The Python module linker, however, had {\tt -L/opt/local/lib} as first search path in the list of
+options (probably because the Python library is installed under this directory), and consequently
+the \this\ Python modules were linked against MacPorts {\tt readline} and {\tt ncurses} libraries.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Case C: MacPorts {\tt cfitsio} and Mac OS X Python}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Case D: MacPorts {\tt cfitsio} and Python from {\tt http://www.python.org/}}
+
+{\tt http://www.python.org/} provides Python binary installers for Mac OS X that come generally
+in two versions:
+\begin{itemize}
+\item 64-bit/32-bit {\tt x86\_64}/{\tt i386} installer (corresponding to our option {\tt intel})
+\item 32-bit {\tt ppc}/{\tt i386} installer (corresponding to our option {\tt 32-bit})
+\end{itemize}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Software}
+
+The test matrix has been applied to a development version of {\tt GammaLib-00-05-00}.
+
+\this\ depends primarily on cfitsio, and at least one of the architectures that is compiled into \this\
+has to match the one cfitsio was built for.
+If cfitsio is installed via MacPorts, cfitsio is built for the native architecture.
+On the computer on which the tests were performed, this was {\tt x86\_64}.
+
+\this\ provides bindings to Python, but they will only work if at least one of the architectures that 
+are compiled into \this\ matches one of the architectures in Python, and if this match is also found
+in cfitsio (and eventually readline and ncurses).
+{\bf There is an obvious example for which Python support will never fully work, which is if none 
+of the architectures in Python matches the one in cfitsio} (in this case any FITS related function
+will result in a runtime error).
+There is nothing that can be done about this at the level of \this.
+The only solution is the installation of cfitsio as a universal library, comprising the required
+architectures.
+
+In this series of tests we explored the worst case scenario, making use of the cfitsio MacPorts
+install which is only compiled for {\tt x86\_64}.
+The cfitsio version was 3.26.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Procedure}
+
+Tests consisted of building and checking \this\ using different Python versions and \this\
+configuration options.
+Typically, the test sequence was comprised by the following commands:
+\begin{verbatim}
+$ export PATH=/Users/jurgen/Software/python/python27/<SDK>/<arch>/bin:/usr/bin:/bin:
+/usr/sbin:/sbin:/opt/local/bin
+$ make distclean
+$ ./configure <optionn>
+$ make
+$ make check
+\end{verbatim}
+
+The {\tt make distclean} step guarantees that results from previous tests will be erased before
+starting a new test.
+
+For the purpose of these tests, a number of different versions of Python 2.7.2 have been compiled,
+using different SDKs, DTs and architectures.
+They were installed in different directories, so that specifying a specific directory before the
+{\tt ./configure} step will force \this\ to use this specific Python version.
+Note that an Intel build requires a Mac OS X Deployment Target of $\ge10.4$, which obviously
+is not satisfied for a number of Python configurations (they are marked by $\dag$ in 
+Table \ref{table:tests}).
+This is an obvious bug in the Python 2.7.2 {\tt ./configure} script, leading to numerous
+warnings
+\begin{verbatim}
+#warning Building for Intel with Mac OS X Deployment Target < 10.4 is invalid.
+\end{verbatim}
+during compilation.
+These versions have been included in the test matrix as they may exist on some systems.
+
+Furthemore, not all configuration options worked.
+Several options led to
+\begin{verbatim}
+checking size of size_t... configure: error: in `/Users/jurgen/Software/python/src/Python-2.7.2':
+configure: error: cannot compute sizeof (size_t)
+\end{verbatim}
+during the {\tt ./configure} step of Python.
+In particular, the {\tt ppc64} target did only configure for SDK 10.5 with success.
+Furthemore, SDK 10.4 also could not be configured to include the {\tt x86\_64} target.
+
+In addition to Python 2.7.2 a number of other Python versions were also tested.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Case B: MacPorts {\tt cfitsio} and Mac OS X Python}
+
+I have no clue what in general is shipped, and how things evolve from one Mac OS X version to another.
+
+%%% Python architectures %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!h]
+  \center
+  \begin{tabular}{ll}
+  \hline
+  Python & Architectures \\
+  \hline
+  2.5 & {\tt ppc}, {\tt i386} \\
+  2.6 & {\tt ppc}, {\tt i386}, {\tt x86\_64} \\
+  \hline
+  \end{tabular}
+  \caption{Architectures supported by Mac OS X provided Python (for Mac OS X 10.6).}
+  \label{table:macpython}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Results}
+
+The test results are summarized in Table \ref{table:tests}.
+
+%%% Test matrix %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!t]
+  \center
+  \begin{tabular}{cccc|cc|ccc|c}
+  \hline
+  \multicolumn{4}{c|}{Python} & \multicolumn{6}{c}{\this} \\
+  Version & SDK & DT & Architecture(s) & sdk$^\ast$ & archs$^{\ast\ast}$ & SDK & DT & Architecture(s) & result \\
+  \hline
+  2.7 & 10.4 & 10.3$^\dag$ & {\tt ppc}, {\tt i386} & - & - & / & 10.4 & {\tt x86\_64} & Failure 1 \\
+  2.7 & 10.4 & 10.3$^\dag$ & {\tt ppc}, {\tt i386} & yes & - & 10.4 & 10.4 & {\tt ppc}, {\tt i386} & Failure 2 \\
+  \hline
+  \hline
+  \hline
+  2.5 & / & 10.6 & {\tt ppc}, {\tt i386} & - & - & / & 10.4 & {\tt x86\_64} & fails$^{(1)}$ \\
+  2.5 & / & 10.6 & {\tt ppc}, {\tt i386} & yes & - & 10.4 & 10.4 & {\tt ppc}, {\tt i386} & ok \\
+  \hline
+  2.6 & / & 10.6 & {\tt x86\_64} & - & - & / & 10.4 & {\tt x86\_64} & ok \\
+  2.6 & / & 10.6 & {\tt x86\_64} & / & {\tt 3-way} & / & 10.5 & {\tt ppc}, {\tt i386}, {\tt x86\_64} & ok$^{(3)}$ \\
+  2.6 & / & 10.6 & {\tt ppc}, {\tt i386}, {\tt x86\_64} & / & - & / & 10.4 & {\tt x86\_64} & ok \\
+  \hline
+  2.7 & / & 10.4 & {\tt x86\_64} & - & - & / & 10.4 & {\tt x86\_64} & ok?  \\
+  \hline
+  2.7 & 10.4 & 10.3$^\dag$ & {\tt ppc}, {\tt i386} & - & - & / & 10.4 & {\tt x86\_64} & fails$^{(1)}$  \\
+  2.7 & 10.4 & 10.3$^\dag$ & {\tt ppc}, {\tt i386} & yes & - & 10.4 & 10.4 & {\tt ppc}, {\tt i386} & ok? \\
+  2.7 & 10.4 & 10.3$^\dag$ & {\tt ppc}, {\tt i386} & / & - & / & 10.4 & {\tt ppc}, {\tt i386} &  ok \\
+  2.7 & 10.4 & 10.3$^\dag$ & {\tt ppc}, {\tt i386} & 10.5 & - & 10.5 & 10.4 & {\tt ppc}, {\tt i386} & ok \\
+  2.7 & 10.4 & 10.3$^\dag$ & {\tt ppc}, {\tt i386} & 10.6 & - & 10.6 & 10.4 & {\tt ppc}, {\tt i386} & ok \\
+  \hline
+  2.7 & 10.5 & 10.3$^\dag$ & {\tt ppc}, {\tt i386} & - & - & / & 10.4 & {\tt x86\_64} & fails$^{(1)}$ \\
+  2.7 & 10.5 & 10.3$^\dag$ & {\tt ppc}, {\tt i386} & yes & - & 10.4 & 10.4 & {\tt ppc}, {\tt i386} & ok \\
+  2.7 & 10.5 & 10.5 & {\tt ppc64}, {\tt x86\_64} & - & - & / & 10.4 & {\tt x86\_64} & ok \\
+  \hline
+  2.7 & 10.6 & 10.3$^\dag$ & {\tt ppc}, {\tt i386} & - & - & / & 10.4 & {\tt x86\_64} & fails$^{(1)}$? \\
+  2.7 & 10.6 & 10.3$^\dag$ & {\tt ppc}, {\tt i386} & yes & - & 10.4 & 10.4 & {\tt ppc}, {\tt i386} & ok$^{(2)}$ \\
+  2.7 & 10.6 & 10.3$^\dag$ & {\tt ppc}, {\tt i386} & / & - & / & 10.4 & {\tt ppc}, {\tt i386} & ok$^{(2)}$ \\
+  2.7 & 10.6 & 10.3$^\dag$ & {\tt ppc}, {\tt i386} & 10.5 & - & 10.5 & 10.4 & {\tt ppc}, {\tt i386} & ok$^{(2)}$ \\
+  2.7 & 10.6 & 10.3$^\dag$ & {\tt ppc}, {\tt i386} & 10.6 & - & 10.6 & 10.4 & {\tt ppc}, {\tt i386} & ok$^{(2)}$ \\
+  \hline
+  2.7 & 10.6 & 10.5 & {\tt ppc}, {\tt i386}, {\tt x86\_64} & - & - & / & 10.4 & {\tt x86\_64} & ok \\
+  \hline
+  \end{tabular}
+  \begin{flushleft}
+  $^\ast${\tt --enable-universalsdk} option: not given (``-"), given (``yes"), use root directory as SDK 
+  (``/"), use specific SDK (``10.X"). \\
+  $^{\ast\ast}${\tt --with-universal-archs} option: not given (``-"), otherwise gives the specified value. \\
+  $^{(1)}$Failure of python test in {\tt make check} due to different architectures for 
+  Python and {\tt libgamma.dylib}.\\
+  $^{(2)}$Warning about building for Intel with Mac OS X Deployment Target $<10.4$. \\
+  $^{(3)}$Python interface was only built for the architecture(s) that are also present in the
+  Python build.
+  \end{flushleft}
+  \caption{\task\ test matrix. 
+  The first 4 columns given the Python configuration 
+  (version, SDK, {\tt MACOSX\_DEPLOYMENT\_TARGET} and architecture).
+  The next 2 columns give the values of the {\tt --enable-universalsdk} and 
+  {\tt --with-universal-archs} options given to {\tt configure} of \this.
+  The following 3 columns give the \this\ configuration (as derived from the configuration
+  options), and the final column indicates the test results.}
+  \label{table:tests}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Most tests were successful.
+The few failures that occured were all related to differences in architecture between Python and
+the \this\ shared library {\tt libgamma.dylib}.
+These failures are marked by "fail$^{(1)}$" in the results column.
+Typical error messages that occured in the {\tt make check} step when running the Python
+test were
+\begin{verbatim}
+ImportError: dlopen(/Users/jurgen/dev/gammalib/pyext/build/_gammalib.so, 2): 
+  Symbol not found: __ZNK17GExceptionHandler4whatEv
+  Referenced from: /Users/jurgen/dev/gammalib/pyext/build/_gammalib.so
+  Expected in: dynamic lookup
+\end{verbatim}
+or
+\begin{verbatim}
+ImportError: dlopen(/Users/jurgen/dev/gammalib/pyext/build/_gammalib.so, 2): 
+no suitable image found.  
+Did find: /Users/jurgen/dev/gammalib/pyext/build/_gammalib.so: 
+no matching architecture in universal wrapper
+\end{verbatim}
+These errors indicate that the required achitecture was not found in the shared library
+{\tt \_gammalib.so} which is loaded when {\tt import gammalib} is executed in Python.
+The error occured for cases where Python was only compiled for {\tt ppc} and {\tt i386}, while
+\this\ was compiled for {\tt x86\_64} (note that the Python bindings were however compiled
+correctly for the {\tt ppc} and {\tt i386} archirectures).
+Adding the \this\ configuration option {\tt --enable-universalsdk} always solved the problem
+({\bf to be confirmed}).
+
+Warnings: uniquement sur SDK 10.6
+
+Note also that the Python interface is only built for the architectures that are also present in
+Python (distuils).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Failure 1}
+
+While the library build was running without any problem, the following warnings appeared
+during the build of the Python bindings:
+\begin{verbatim}
+ld: warning: in ../src/.libs/libgamma.dylib, file is not of required architecture
+ld: warning: in /opt/local/lib/libcfitsio.dylib, file is not of required architecture
+ld: warning: in /opt/local/lib/libreadline.dylib, file is not of required architecture
+ld: warning: in /opt/local/lib/libncurses.dylib, file is not of required architecture
+\end{verbatim}
+All libraries that are listed here were compiled for {\tt x86\_64}, while the Python bindings
+were compiled for {\tt i386} and {\tt ppc}.
+The linker warning informs about that mismatch, the Python bindings were however built
+nevertheless.
+
+{\tt make check} terminates with
+\begin{verbatim}
+Traceback (most recent call last):
+  File "./test_python.py", line 3, in <module>
+    from gammalib import *
+  File "/Users/jurgen/dev/gammalib/pyext/gammalib/__init__.py", line 1, in <module>
+    from app import *
+  File "/Users/jurgen/dev/gammalib/pyext/gammalib/app.py", line 7, in <module>
+    import _app
+ImportError: dlopen(/Users/jurgen/dev/gammalib/pyext/gammalib/_app.so, 2): Symbol not found:
+ __ZNK17GExceptionHandler4whatEv
+  Referenced from: /Users/jurgen/dev/gammalib/pyext/gammalib/_app.so
+  Expected in: dynamic lookup
+
+FAIL: test_python.py
+===================================
+1 of 15 tests failed
+Please report to knodlseder@cesr.fr
+===================================
+\end{verbatim}
+The reason for this error is that the shared library {\tt \_app.so} -- which is the Python extension
+module -- has been built for {\tt i386} and {\tt ppc}, while the shared \this\ library {\tt libgamma.dylib}
+has been built for {\tt x86\_64}. 
+{\tt \_app.so} therefore is not able to find the symbol in the required architecture, and the
+{\tt dlopen} function (which loads dynamic library modules) fails.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Failure 2}
+
+In this test, \this\ was compiled for {\tt i386} and {\tt ppc}, and the same architectures are
+available in Python.
+
+During {\tt make} the following warnings occur when creating the {\tt libgamma.dylib}
+library and when building the Python bindings.
+\begin{verbatim}
+ld: warning: in /opt/local/lib/libcfitsio.dylib, file is not of required architecture
+ld: warning: in /opt/local/lib/libreadline.dylib, file is not of required architecture
+ld: warning: in /opt/local/lib/libncurses.dylib, file is not of required architecture
+\end{verbatim}
+As \this\ is now compiled for {\tt i386} and {\tt ppc}, there is no mismatch between
+{\tt libgamma.dylib} and Python.
+However, none of the 3rd party libraries contains the required architectures, hence using
+3rd party services fails.
+
+This can be seen during {\tt make check}, which gives the following errors:
+\begin{verbatim}
+***********************
+* GFits class testing *
+***********************
+dyld: lazy symbol binding failed: Symbol not found: _ffopen
+  Referenced from: /Users/jurgen/dev/gammalib/src/.libs/libgamma.0.dylib
+  Expected in: dynamic lookup
+
+dyld: Symbol not found: _ffopen
+  Referenced from: /Users/jurgen/dev/gammalib/src/.libs/libgamma.0.dylib
+  Expected in: dynamic lookup
+\end{verbatim}
+and
+\begin{verbatim}
+Traceback (most recent call last):
+  File "./test_python.py", line 3, in <module>
+    from gammalib import *
+  File "/Users/jurgen/dev/gammalib/pyext/gammalib/__init__.py", line 1, in <module>
+    from app import *
+  File "/Users/jurgen/dev/gammalib/pyext/gammalib/app.py", line 7, in <module>
+    import _app
+ImportError: dlopen(/Users/jurgen/dev/gammalib/pyext/gammalib/_app.so, 2): Symbol not found: _readline
+  Referenced from: /Users/jurgen/dev/gammalib/pyext/gammalib/_app.so
+  Expected in: dynamic lookup
+
+FAIL: test_python.py
+===================================
+6 of 15 tests failed
+Please report to knodlseder@cesr.fr
+===================================
+\end{verbatim}
+The first test that failed was the {\tt GFits} test, as no FITS support was available.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Conclusions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}
+
+Deploying \this\ on Mac OS X can become a major challenge, as result of the various systems
+and CPU architectures that may be involved.
+
+If the user has full control over the components in the system, he can tweak the \this\ {\tt configure}
+flags to setup the system so that it matches the Python and {\tt cfitsio} architectures.
+In the worst case, the user may have to compile {\tt cfitsio} from source, using the same architectures
+that are also present in Python, so that \this, Python and {\tt cfitsio} work seamlessly together.
+In this case, the user should first determine the architectures present in Python using
+\begin{verbatim}
+$ file `which python`
+\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Appendix
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Appendix}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Building a universal {\tt cfitsio} library}
+
+A universal {\tt cfitsio} library is built on Mac OS X by using the following sequence of commands
+{\small
+\begin{verbatim}
+$ ./configure CFLAGS="-arch i386 -arch ppc -arch x86_64" LDFLAGS="-arch i386 -arch ppc -arch x86_64"
+$ make shared
+\end{verbatim}}
+Note that by default {\tt cfitsio} adds {\tt -arch i386 -arch x86\_64} to the compile flags, hence the shorter
+{\small
+\begin{verbatim}
+$ ./configure CFLAGS="-arch ppc" LDFLAGS="-arch ppc"
+$ make shared
+\end{verbatim}}
+leads to the same result.
+The resulting shared library will then have the following architectures:
+{\small
+\begin{verbatim}
+$ file libcfitsio.dylib
+libcfitsio.dylib: Mach-O universal binary with 3 architectures
+libcfitsio.dylib (for architecture i386):	Mach-O dynamically linked shared library i386
+libcfitsio.dylib (for architecture x86_64):	Mach-O 64-bit dynamically linked shared library x86_64
+libcfitsio.dylib (for architecture ppc7400):	Mach-O dynamically linked shared library ppc
+\end{verbatim}}
+
+
+\end{document}
+
