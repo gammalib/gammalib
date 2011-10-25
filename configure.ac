@@ -92,7 +92,7 @@ AC_PROG_CXX
 # intel  - i386, x86_64                                                     #
 # all    - ppc, ppc64, i386, x86_64                                         #
 #############################################################################
-UNIVERSAL_ARCHS="32-bit"
+UNIVERSAL_ARCHS="3-way"
 AC_SUBST(LIPO_32BIT_FLAGS)
 AC_MSG_CHECKING(for --with-universal-archs)
 AC_ARG_WITH(universal-archs,
@@ -103,7 +103,7 @@ AC_ARG_WITH(universal-archs,
 	UNIVERSAL_ARCHS="$withval"
 ],
 [
- 	AC_MSG_RESULT(32-bit)
+ 	AC_MSG_RESULT(3-way)
 ])
 
 
