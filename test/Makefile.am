@@ -63,7 +63,7 @@ check_PROGRAMS = test_GSupport \
                  $(INST_MWL) $(INST_CTA) $(INST_LAT)
 
 # Set test environment (needed for linking with cfitsio and readline)
-TESTS_ENVIRONMENT = LD_LIBRARY_PATH=$(top_builddir)/src/.libs:$(LIBDIR_CFITSIO):$(LIBDIR_READLINE):$(LIBDIR_NCURSES):$(LD_LIBRARY_PATH) \
+TESTS_ENVIRONMENT = @RUNSHARED@=$(top_builddir)/src/.libs:$(LIBDIR_CFITSIO):$(LIBDIR_READLINE):$(LIBDIR_NCURSES):$(@RUNSHARED@) \
                     $(TEST_PYTHON_ENV)
 
 # Tests (these are the tests to be executed)
