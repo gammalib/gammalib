@@ -50,11 +50,14 @@ if sys.platform.lower().startswith("darwin"):
 	# Extract LDSHARED
 	ldshared_old = cvars.get('LDSHARED')
 	ldshared_new = ''
+	ldshared_rm  = ''
 	for option in ldshared_old.split(' '):
 		if option.lstrip().find('-L/opt/local/lib') != 0:
 			ldshared_new += option + ' '
-	print ldshared_old
-	print ldshared_new
+		else:
+			ldshared_rm += option + ' '
+	if (len(ldshared_rm) > 0):
+		print 'Removed following option(s) from LDSHARED: '+ldshared_rm
 	
 	# Set LDSHARED
 	cvars['LDSHARED'] = ldshared_new
