@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
+#include <string>
 #include "GLog.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
@@ -52,6 +53,7 @@ public:
     // Constructors and destructors
     GEbounds(void);
     GEbounds(const GEbounds& ebds);
+    explicit GEbounds(const std::string& filename);
     virtual ~GEbounds(void);
 
     // Operators

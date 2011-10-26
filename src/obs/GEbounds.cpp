@@ -90,6 +90,25 @@ GEbounds::GEbounds(const GEbounds& ebds)
 
 
 /***********************************************************************//**
+ * @brief Load constructor
+ *
+ * @param[in] filename FITS filename.
+ ***************************************************************************/
+GEbounds::GEbounds(const std::string& filename)
+{
+    // Initialise members
+    init_members();
+
+    // Load XML file
+    load(filename);
+
+    // Return
+    return;
+}
+
+
+
+/***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
 GEbounds::~GEbounds(void)
