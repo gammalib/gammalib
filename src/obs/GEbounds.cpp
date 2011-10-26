@@ -54,7 +54,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                          Constructors/destructors                       =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -74,7 +74,7 @@ GEbounds::GEbounds(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] ebds Energy boundaries from which the instance should be built.
+ * @param[in] ebds Energy boundaries.
  ***************************************************************************/
 GEbounds::GEbounds(const GEbounds& ebds)
 {
@@ -93,7 +93,7 @@ GEbounds::GEbounds(const GEbounds& ebds)
  * @brief Load constructor
  *
  * @param[in] filename FITS filename.
- * @param[in] extname FITS extension name (defaults to EBOUNDS).
+ * @param[in] extname FITS extension name (defaults to "EBOUNDS").
  ***************************************************************************/
 GEbounds::GEbounds(const std::string& filename, const std::string& extname)
 {
@@ -124,7 +124,7 @@ GEbounds::~GEbounds(void)
 
 /*==========================================================================
  =                                                                         =
- =                                Operators                                =
+ =                              Operators                                  =
  =                                                                         =
  ==========================================================================*/
 
@@ -297,8 +297,8 @@ void GEbounds::setlog(const GEnergy& emin, const GEnergy& emax, const int& num)
 /***********************************************************************//**
  * @brief Load energy boundaries from file.
  *
- * @param[in] filename FITS filename from which GEbounds is to be loaded.
- * @param[in] extname FITS extension name of the energy boundaries.
+ * @param[in] filename FITS filename.
+ * @param[in] extname FITS extension name (defaults to "EBOUNDS").
  *
  * This method loads the energy boundary definitions from a FITS file.
  ***************************************************************************/
@@ -327,9 +327,9 @@ void GEbounds::load(const std::string& filename, const std::string& extname)
 /***********************************************************************//**
  * @brief Save energy boundaries to FITS file.
  *
- * @param[in] filename Name of file into which energy boundaries are to be saved.
+ * @param[in] filename FITS filename.
  * @param[in] clobber Overwrite any existing file.
- * @param[in] extname Energy boundary extension name (default is "EBOUNDS")
+ * @param[in] extname Energy boundary extension name (defaults to "EBOUNDS").
  ***************************************************************************/
 void GEbounds::save(const std::string& filename, bool clobber,
                     const std::string& extname) const
@@ -337,7 +337,7 @@ void GEbounds::save(const std::string& filename, bool clobber,
     // Allocate FITS file
     GFits file;
 
-    // Write GTI to FITS file
+    // Write energy boundaries to FITS file
     write(&file, extname);
 
     // Save to file
@@ -403,9 +403,10 @@ void GEbounds::read(GFitsTable* hdu)
  * @param[in] file Pointer to FITS file.
  * @param[in] extname Energy boundary extension name (default is "EBOUNDS")
  *
- * This methods write energy boundaries in units of keV.
+ * This method writes energy boundaries in units of keV.
  *
  * @todo Write header keywords.
+ * @todo Should we allow for the possibility to specify the energy units?
  ***************************************************************************/
 void GEbounds::write(GFits* file, const std::string& extname) const
 {
@@ -418,6 +419,10 @@ void GEbounds::write(GFits* file, const std::string& extname) const
         cemin(i) = m_min[i].keV();
         cemax(i) = m_max[i].keV();
     }
+
+    // Set energy units to keV
+    cemin.unit("keV");
+    cemax.unit("keV");
 
     // Create binary table
     GFitsBinTable* table = new GFitsBinTable(m_num);
@@ -439,7 +444,7 @@ void GEbounds::write(GFits* file, const std::string& extname) const
 /***********************************************************************//**
  * @brief Returns energy bin index for a given energy
  *
- * @param[in] eng Energy for which index is to be returned.
+ * @param[in] eng Energy.
  *
  * Returns the energy boundary bin index for a given energy. If the energy
  * falls outside any of the boundaries, -1 is returned.
@@ -719,8 +724,8 @@ GEbounds* GEbounds::clone(void) const
  * @brief Insert energy interval
  *
  * @param[in] inx Index at which energy interval is to be inserted.
- * @param[in] emin Minimum energy of interval to be inserted.
- * @param[in] emax Maximum energy of interval to be inserted.
+ * @param[in] emin Minimum energy of interval.
+ * @param[in] emax Maximum energy of interval.
  *
  * Inserts an energy interval at a given position in the GEbounds array. This
  * method does not assure the energy ordering of the intervals, this has to
