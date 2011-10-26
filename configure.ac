@@ -86,9 +86,9 @@ AC_PROG_CXX
 # Darwin option: Determine architecture of universal library to be built    #
 # ------------------------------------------------------------------------- #
 # --with-univeral-archs=VALUE, where VALUE is one of:                       #
-# 32-bit - ppc, i386 (default)                                              #
+# 32-bit - ppc, i386                                                        #
 # 64-bit - ppc64, x86_64                                                    #
-# 3-way  - ppc, i386, x86_64                                                #
+# 3-way  - ppc, i386, x86_64 (default)                                      #
 # intel  - i386, x86_64                                                     #
 # all    - ppc, ppc64, i386, x86_64                                         #
 #############################################################################
