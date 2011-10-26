@@ -42,7 +42,7 @@ public:
     // Constructors and destructors
     GEbounds(void);
     GEbounds(const GEbounds& ebds);
-    explicit GEbounds(const std::string& filename);
+    explicit GEbounds(const std::string& filename, const std::string& extname);
     virtual ~GEbounds(void);
 
     // Methods
@@ -52,11 +52,11 @@ public:
     void    setlin(const GEnergy& emin, const GEnergy& emax, const int& num);
     void    setlog(const GEnergy& emin, const GEnergy& emax, const int& num);
 	void    load(const std::string& filename,
-                 const std::string& extname = "EBOUNDS");
+                 const std::string& extname);
 	void    save(const std::string& filename, bool clobber,
-                 const std::string& extname = "EBOUNDS") const;
+                 const std::string& extname) const;
     void    read(GFitsTable* hdu);
-    void    write(GFits* file, const std::string& extname = "EBOUNDS") const;
+    void    write(GFits* file, const std::string& extname) const;
     int     index(const GEnergy& eng) const;
     int     size(void) const { return m_num; }
     GEnergy emin(void) const { return m_emin; }

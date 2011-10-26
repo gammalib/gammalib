@@ -93,14 +93,15 @@ GEbounds::GEbounds(const GEbounds& ebds)
  * @brief Load constructor
  *
  * @param[in] filename FITS filename.
+ * @param[in] extname FITS extension name (defaults to EBOUNDS).
  ***************************************************************************/
-GEbounds::GEbounds(const std::string& filename)
+GEbounds::GEbounds(const std::string& filename, const std::string& extname)
 {
     // Initialise members
     init_members();
 
-    // Load XML file
-    load(filename);
+    // Load FITS file
+    load(filename, extname);
 
     // Return
     return;

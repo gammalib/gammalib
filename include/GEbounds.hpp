@@ -53,7 +53,7 @@ public:
     // Constructors and destructors
     GEbounds(void);
     GEbounds(const GEbounds& ebds);
-    explicit GEbounds(const std::string& filename);
+    explicit GEbounds(const std::string& filename, const std::string& extname = "EBOUNDS");
     virtual ~GEbounds(void);
 
     // Operators
