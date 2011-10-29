@@ -5,7 +5,7 @@
 #              software installation. Note that this script is
 #              designed to be invoked by gammalib-init.csh/gammalib-init.sh,
 #              and should not normally be invoked directly by user.
-# Author/Date: Juergen Knoedlseder, IRAP, February 10, 2011
+# Author/Date: Juergen Knoedlseder, IRAP, October 29, 2011
 #-------------------------------------------------------------------------------
 #
 # Set fixed parameters
@@ -33,6 +33,7 @@ uname_system=`uname`
 python_dir="@pythondir@"
 pkgconfig_dir="@prefix@/lib/pkgconfig"
 man_dir="@prefix@/share/doc/gammalib/man"
+caldb_dir="@prefix@/share/caldb"
 
 #
 # Make pfiles available
@@ -146,7 +147,7 @@ fi
 
 #
 # Set MANPATH
-# ==============
+# ===========
 if [ "x$MANPATH" = x ]; then
   MANPATH="$man_dir:$(manpath)"
 else
@@ -156,9 +157,18 @@ else
 fi
 
 #
+# Set CALDB (if not yet set)
+# ==========================
+if [ "x$CALDB" = x ]; then
+  CALDB="$caldb_dir"
+fi
+
+#
 # List of variables needed in initialization script
 # =================================================
-varlist="PATH PYTHONPATH PKG_CONFIG_PATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH MANPATH PFILES PFCLOBBER"
+varlist="LD_LIBRARY_PATH DYLD_LIBRARY_PATH PATH"
+varlist="$varlist PYTHONPATH PKG_CONFIG_PATH MANPATH"
+varlist="$varlist PFILES PFCLOBBER CALDB"
 
 #
 # Save values in output initialization shell scripts
