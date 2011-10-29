@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCTAResponse.i  -  CTA instrument response function class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAResponse.i
  * @brief CTA instrument response function Python interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -39,8 +39,8 @@ class GCTAResponse : public GResponse {
 public:
     // Constructors and destructors
     GCTAResponse(void);
-    explicit GCTAResponse(const std::string& rspname, const std::string& caldb);
     GCTAResponse(const GCTAResponse& rsp);
+    explicit GCTAResponse(const std::string& rspname, const std::string& caldb = "");
     virtual ~GCTAResponse(void);
 
     // Implement pure virtual base class methods
