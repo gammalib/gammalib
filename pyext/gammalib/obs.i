@@ -31,6 +31,11 @@
 %import(module="support") "GException.i";
 
 /* __ Observation handling _______________________________________________ */
+%include "GEnergy.i"
+%include "GTime.i"
+%include "GEbounds.i"
+%include "GGti.i"
+%include "GCaldb.i"
 %include "GObservations.i"
 %include "GObservation.i"
 %include "GObservationRegistry.i"
@@ -41,11 +46,7 @@
 %include "GEventAtom.i"
 %include "GEventBin.i"
 %include "GInstDir.i"
-%include "GEnergy.i"
-%include "GTime.i"
 %include "GRoi.i"
-%include "GEbounds.i"
-%include "GGti.i"
 %include "GPointing.i"
 %include "GResponse.i"
 %include "GPhoton.i"
