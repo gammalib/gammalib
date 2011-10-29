@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GException.cpp  -  exception handlers                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GException.cpp
- * @brief Exception handler interface implementation.
- * @author J. Knodlseder
+ * @brief Exception handler interface implementation
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -38,7 +38,7 @@ const char* GExceptionHandler::what() const throw()
     std::string message = "*** ERROR in " + m_origin + ": " + m_message;
 
     // Return message as C character array
-    return tochar(message);
+    return (tochar(message));
 }
 
 
@@ -47,20 +47,30 @@ const char* GExceptionHandler::what() const throw()
  *
  * @param[in] origin Name of method that has thrown the exception.
  * @param[in] message Optional message.
+ *
+ * This exception signals features that are not yet implemented. It may be
+ * thrown by modules that are still under development.
  ***************************************************************************/
 GException::feature_not_implemented::feature_not_implemented(std::string origin,
                                                              std::string message)
 {
-    m_origin   = origin;
-    if (message.length() > 0)
+    // Set origin
+    m_origin = origin;
+
+    // Set message string
+    if (message.length() > 0) {
         m_message = message;
-    else
+    }
+    else {
         m_message = "Feature not implemented.";
+    }
     m_message += " In case that you need this feature for your application"
                  " please submit a feature request on"
                  " https://sourceforge.net/projects/gammalib/,"
                  " join this error message and provide a detailed"
                  " description of your needs.";
+
+    // Return
     return;
 }
 
@@ -70,17 +80,20 @@ GException::feature_not_implemented::feature_not_implemented(std::string origin,
  *
  * @param[in] origin Name of method that has thrown the exception.
  * @param[in] message Optional message.
+ *
+ * This exception signals that a specified argument was not valid.
  ***************************************************************************/
 GException::invalid_argument::invalid_argument(std::string origin,
                                                std::string message)
 {
     // Set origin
-    m_origin   = origin;
+    m_origin = origin;
 
     // Set message string
     m_message = "Invalid argument encountered.";
-    if (message.length() > 0)
+    if (message.length() > 0) {
         m_message += " " + message;
+    }
 
     // Return
     return;
@@ -88,15 +101,51 @@ GException::invalid_argument::invalid_argument(std::string origin,
 
 
 /***********************************************************************//**
- * @brief Bad type
+ * @brief Invalid type conversion
  *
  * @param[in] origin Name of method that has thrown the exception.
  * @param[in] message Optional message.
  ***************************************************************************/
 GException::bad_type::bad_type(std::string origin, std::string message)
 {
-    m_origin   = origin;
-    m_message = "Invalid type conversion. " + message;
+    // Set origin
+    m_origin = origin;
+
+    // Set message string
+    m_message = "Invalid type conversion.";
+    if (message.length() > 0) {
+        m_message += " " + message;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Environment variable not found
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] envname Name of environment variable.
+ * @param[in] message Optional message.
+ *
+ * This exception signals that are required environment variable was not
+ * found.
+ ***************************************************************************/
+GException::env_not_found::env_not_found(std::string origin,
+                                         std::string envname,
+                                         std::string message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message string
+    m_message = "Environment variable \""+envname+"\" not found.";
+    if (message.length() > 0) {
+        m_message += " " + message;
+    }
+
+    // Return
     return;
 }
 
@@ -109,8 +158,13 @@ GException::bad_type::bad_type(std::string origin, std::string message)
  ***************************************************************************/
 GException::mem_alloc::mem_alloc(std::string origin, unsigned num)
 {
-    m_origin  = origin;
+    // Set origin
+    m_origin = origin;
+
+    // Set message string
     m_message = "Memory allocation error (" + str((int)num) + " elements)";
+
+    // Return
     return;
 }
 
@@ -123,8 +177,13 @@ GException::mem_alloc::mem_alloc(std::string origin, unsigned num)
  ***************************************************************************/
 GException::not_enough_nodes::not_enough_nodes(std::string origin, int num)
 {
-    m_origin  = origin;
+    // Set origin
+    m_origin = origin;
+
+    // Set message string
     m_message = "Not enough nodes in node array (" + str(num) + " nodes).";
+
+    // Return
     return;
 }
 
@@ -134,11 +193,22 @@ GException::not_enough_nodes::not_enough_nodes(std::string origin, int num)
  *
  * @param[in] origin Name of method that has thrown the exception.
  * @param[in] filename Filename.
+ * @param[in] message Optional message.
  ***************************************************************************/
-GException::file_not_found::file_not_found(std::string origin, std::string filename)
+GException::file_not_found::file_not_found(std::string origin,
+                                           std::string filename,
+                                           std::string message)
 {
-    m_origin  = origin;
+    // Set origin
+    m_origin = origin;
+
+    // Set message string
     m_message = "File \"" + filename +"\" not found.";
+    if (message.length() > 0) {
+        m_message += " " + message;
+    }
+
+    // Return
     return;
 }
 
@@ -148,11 +218,72 @@ GException::file_not_found::file_not_found(std::string origin, std::string filen
  *
  * @param[in] origin Name of method that has thrown the exception.
  * @param[in] filename Filename.
+ * @param[in] message Optional message.
  ***************************************************************************/
-GException::file_open_error::file_open_error(std::string origin, std::string filename)
+GException::file_open_error::file_open_error(std::string origin,
+                                             std::string filename,
+                                             std::string message)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message string
     m_message = "Unable to open file \"" + filename +"\"";
+    if (message.length() > 0) {
+        m_message += " " + message;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Directory not found
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] dirname Directory name.
+ * @param[in] message Optional message.
+ ***************************************************************************/
+GException::directory_not_found::directory_not_found(std::string origin,
+                                                     std::string dirname,
+                                                     std::string message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message string
+    m_message = "Directory \"" + dirname +"\" not found.";
+    if (message.length() > 0) {
+        m_message += " " + message;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Directory not accessible
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] dirname Directory name.
+ * @param[in] message Optional message.
+ ***************************************************************************/
+GException::directory_not_accessible::directory_not_accessible(std::string origin,
+                                                               std::string dirname,
+                                                               std::string message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message string
+    m_message = "Directory \"" + dirname +"\" not accessible.";
+    if (message.length() > 0) {
+        m_message += " " + message;
+    }
+
+    // Return
     return;
 }
 

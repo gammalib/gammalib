@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GException.hpp  -  exception handler                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GException.hpp
  * @brief Exception handler interface definiton.
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GEXCEPTION_HPP
@@ -76,10 +76,19 @@ public:
                          std::string message = "");
     };
 
-    // Bad type
+    // Invalid type conversion
     class bad_type : public GExceptionHandler {
     public:
-        bad_type(std::string origin, std::string message = "");
+        bad_type(std::string origin,
+                 std::string message = "");
+    };
+
+    // Environment variable not found
+    class env_not_found : public GExceptionHandler {
+    public:
+        env_not_found(std::string origin,
+                      std::string envname,
+                      std::string message = "");
     };
 
     // Memory allocation exception class
@@ -97,13 +106,33 @@ public:
     // File not found
     class file_not_found : public GExceptionHandler {
     public:
-        file_not_found(std::string origin, std::string filename);
+        file_not_found(std::string origin,
+                       std::string filename,
+                       std::string message = "");
     };
 
     // File open error
     class file_open_error : public GExceptionHandler {
     public:
-        file_open_error(std::string origin, std::string filename);
+        file_open_error(std::string origin,
+                        std::string filename,
+                        std::string message = "");
+    };
+
+    // Directory not found
+    class directory_not_found : public GExceptionHandler {
+    public:
+        directory_not_found(std::string origin,
+                            std::string dirname,
+                            std::string message = "");
+    };
+
+    // Directory not accessible
+    class directory_not_accessible : public GExceptionHandler {
+    public:
+        directory_not_accessible(std::string origin,
+                                 std::string dirname,
+                                 std::string message = "");
     };
 
     // Empty object exception class
