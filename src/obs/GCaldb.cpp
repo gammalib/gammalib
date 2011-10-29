@@ -35,7 +35,8 @@
 #include "GCaldb.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CALDB                                                    "GCaldb()"
+#define G_CALDB1                                                   "GCaldb()"
+#define G_CALDB2                                        "GCaldb(std::string)"
 #define G_SET_DATABASE                    "GCaldb::set_database(std::string)"
 #define G_PATH                       "GCaldb::path(std::string, std::string)"
 #define G_CIF                         "GCaldb::cif(std::string, std::string)"
@@ -74,7 +75,7 @@ GCaldb::GCaldb(void)
     
     // Throw an exception if the environment variable is not found
     if (ptr == NULL) {
-        throw GException::env_not_found(G_CALDB, "CALDB",
+        throw GException::env_not_found(G_CALDB1, "CALDB",
               "Please set the CALDB environment variable to a valid"
               " calibration database root directory.");
     }
@@ -110,21 +111,49 @@ GCaldb::GCaldb(const GCaldb& caldb)
  *
  * @param[in] pathname Calibration database root directory.
  *
+ * @exception GException::env_not_found
+ *            CALDB environment variable not found
+ *
  * This constructor sets the calibration database using the specified root
- * directory. Any existing CALDB environment variable will be ignored.
+ * directory. Unless the specified pathname is not empty, any existing CALDB
+ * environment variable will be ignored. If the pathname is empty, however,
+ * the constructor attempts to detemine the CALDB root directory from the
+ * CALDB environment variable. If this fails, the constructor will throw an
+ * exception.
+ * Any environment variable contained in the pathname will be expected.
  ***************************************************************************/
 GCaldb::GCaldb(const std::string& pathname)
 {
     // Initialise members
     init_members();
 
-    // Set the root directory
-    set_database(pathname);
+    // If pathname is not empty then use it as root pathname
+    if (pathname.length() > 0) {
+        set_database(expand_env(pathname));
+    }
+
+    // ... otherwise try to determine root pathname from CALDB environment
+    // variable.
+    else {
+
+        // Get root directory from CALDB environment variable
+        char* ptr = std::getenv("CALDB");
+    
+        // Throw an exception if the environment variable is not found
+        if (ptr == NULL) {
+            throw GException::env_not_found(G_CALDB2, "CALDB",
+                  "Please set the CALDB environment variable to a valid"
+                  " calibration database root directory.");
+        }
+
+        // ... otherwise set calibration database
+        set_database(std::string(ptr));
+
+    }
 
     // Return
     return;
 }
-
 
 
 /***********************************************************************//**
@@ -201,15 +230,18 @@ void GCaldb::clear(void)
  ***************************************************************************/
 GCaldb* GCaldb::clone(void) const
 {
-    // Clone this image
-    return new GCaldb(*this);
+    // Clone this object
+    return (new GCaldb(*this));
 }
 
 
 /***********************************************************************//**
  * @brief Returns number of entries in calibration database
  *
- * Cloning provides a copy of the calibration database.
+ * This method returns the number of entries that were found in an opened
+ * calibration database. An entry corresponds to one line in the Calibration
+ * Index File (CIF). If the index file is empty, or if no calibration
+ * database has been opened, the method returns 0.
  ***************************************************************************/
 int GCaldb::size(void) const
 {
@@ -231,7 +263,9 @@ int GCaldb::size(void) const
  *
  * @param[in] pathname Calibration database root directory.
  *
- * Set a new root directory for the calibration database.
+ * Set a new root directory for the calibration database. Any previously
+ * opened database will be closed.
+ * Any environment variable present in the pathname will be expanded.
  ***************************************************************************/
 void GCaldb::dir(const std::string& pathname)
 {
@@ -239,7 +273,7 @@ void GCaldb::dir(const std::string& pathname)
     clear();
 
     // Set calibration database
-    set_database(pathname);
+    set_database(expand_env(pathname));
 
     // Return
     return;
@@ -252,7 +286,9 @@ void GCaldb::dir(const std::string& pathname)
  * @param[in] mission Mission name (case insensitive).
  * @param[in] instrument Instrument name (case insensitive; optional).
  *
- * Opens the calibration database for a given mission and instrument.
+ * Opens the calibration database for a given mission and instrument. Opening
+ * consists of loading the Calibration Index File (CIF) in memory. Once
+ * opened, calibration information can be accessed.
  ***************************************************************************/
 void GCaldb::open(const std::string& mission, const std::string& instrument)
 {
@@ -281,7 +317,7 @@ void GCaldb::open(const std::string& mission, const std::string& instrument)
 /***********************************************************************//**
  * @brief Close calibration database
  *
- * Close a specific calibration database.
+ * Close any previously opened calibration database.
  ***************************************************************************/
 void GCaldb::close(void)
 {
