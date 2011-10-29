@@ -122,6 +122,7 @@
 /* __ Observation handling _______________________________________________ */
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GCaldb.hpp"
 #include "GObservations.hpp"
 #include "GObservation.hpp"
 #include "GObservationRegistry.hpp"

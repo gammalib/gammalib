@@ -18,6 +18,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GWcsHPX.hpp \
                      GEnergy.hpp \
                      GTime.hpp \
+                     GCaldb.hpp \
                      GObservations.hpp \
                      GObservation.hpp \
                      GObservationRegistry.hpp \
