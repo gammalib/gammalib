@@ -8,6 +8,7 @@ INCLUDES = -I$(top_srcdir)/include \
 # Define sources for this directory
 sources = GEnergy.cpp \
           GTime.cpp \
+          GCaldb.cpp \
           GObservations.cpp \
           GObservations_iterator.cpp \
           GObservations_optimizer.cpp \
