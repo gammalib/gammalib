@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAResponse.cpp  -  CTA Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAResponse.cpp
  * @brief CTA response class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -38,6 +38,7 @@
 #include "GIntegral.hpp"
 #include "GIntegrand.hpp"
 #include "GVector.hpp"
+#include "GCaldb.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTAPointing.hpp"
@@ -93,13 +94,33 @@ GCTAResponse::GCTAResponse(void) : GResponse()
 
 
 /***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] rsp CTA response.
+ **************************************************************************/
+GCTAResponse::GCTAResponse(const GCTAResponse& rsp) : GResponse(rsp)
+{
+    // Initialise members
+    init_members();
+
+    // Copy members
+    copy_members(rsp);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Response constructor
  *
  * @param[in] rspname Response file name.
- * @param[in] caldb Calibration database.
+ * @param[in] caldb Calibration database path (defaults to "").
  *
  * Create instance by specifying the response file name and the calibration
- * database path.
+ * database path. If an empty string is passed as calibration database path
+ * the method will use the CALDB environment variable to determine
+ * calibration database path.
  ***************************************************************************/
 GCTAResponse::GCTAResponse(const std::string& rspname,
                            const std::string& caldb) : GResponse()
@@ -112,24 +133,6 @@ GCTAResponse::GCTAResponse(const std::string& rspname,
 
     // Load IRF
     this->load(rspname);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Copy constructor
- *
- * @param[in] rsp CTA response.
- **************************************************************************/
-GCTAResponse::GCTAResponse(const GCTAResponse& rsp) : GResponse(rsp)
-{
-    // Initialise members
-    init_members();
-
-    // Copy members
-    copy_members(rsp);
 
     // Return
     return;
@@ -490,32 +493,17 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
  *
  * @param[in] caldb Path to calibration database
  *
- * @exception GException::caldb_not_found
- *            Calibration database repository not found.
- *
- * This default method simply checks if the calibration database directory
- * exists. If the directory exists, the path will be stored. No checking is
- * implemented that checks for the consistency of the calibration database.
- * Any environment variable present in the calibration database path will
- * be expanded.
- *
- * @todo Implement a GCalDB class that handles any calibration database
- *       issues. GCalDB may be an abstract class for which instrument
- *       specific methods are implement to handle any instrument specific
- *       IRF database issues. 
+ * This method stores the CALDB root directory as the path to the CTA
+ * calibration database. Once the final calibration format has been decided
+ * on, this method should be adjusted.
  ***************************************************************************/
 void GCTAResponse::caldb(const std::string& caldb)
 {
-    // Expand environment variables
-    std::string caldb_expanded = expand_env(caldb);
-    
-    // Check if calibration database directory is accessible
-    if (access(caldb_expanded.c_str(), R_OK) != 0) {
-        throw GException::caldb_not_found(G_CALDB, caldb_expanded);
-    }
+    // Allocate calibration database
+    GCaldb db(caldb);
 
     // Store the path to the calibration database
-    m_caldb = caldb_expanded;
+    m_caldb = db.dir();
 
     // Return
     return;
