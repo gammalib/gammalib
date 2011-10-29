@@ -46,8 +46,11 @@ public:
     // Methods
     void        clear(void);
     GCaldb*     clone(void) const;
+    int         size(void) const;
     std::string dir(void) const;
     void        dir(const std::string& pathname);
+    void        open(const std::string& mission, const std::string& instrument = "");
+    void        close(void);
 };
 
 

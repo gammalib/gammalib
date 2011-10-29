@@ -37,6 +37,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                                                    "GCaldb()"
 #define G_SET_DATABASE                    "GCaldb::set_database(std::string)"
+#define G_PATH                       "GCaldb::path(std::string, std::string)"
+#define G_CIF                         "GCaldb::cif(std::string, std::string)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -205,6 +207,26 @@ GCaldb* GCaldb::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Returns number of entries in calibration database
+ *
+ * Cloning provides a copy of the calibration database.
+ ***************************************************************************/
+int GCaldb::size(void) const
+{
+    // Initialise size
+    int size = 0;
+
+    // If CIF is open then determine number of entries
+    if (m_cif != NULL) {
+        size = m_cif->nrows();
+    }
+
+    // Return size
+    return size;
+}
+
+
+/***********************************************************************//**
  * @brief Set calibration database root directory
  *
  * @param[in] pathname Calibration database root directory.
@@ -225,6 +247,61 @@ void GCaldb::dir(const std::string& pathname)
 
 
 /***********************************************************************//**
+ * @brief Open calibration database
+ *
+ * @param[in] mission Mission name (case insensitive).
+ * @param[in] instrument Instrument name (case insensitive; optional).
+ *
+ * Opens the calibration database for a given mission and instrument.
+ ***************************************************************************/
+void GCaldb::open(const std::string& mission, const std::string& instrument)
+{
+    // Close any open database
+    close();
+
+    // Set full CIF filename (this also validates the mission and
+    // instrument names)
+    m_cifname = cifname(mission, instrument);
+
+    // Store mission and instrument
+    m_mission    = mission;
+    m_instrument = instrument;
+
+    // Open CIF FITS file
+    m_fits.open(m_cifname);
+
+    // Store pointer to first extension which holds the CIF table
+    m_cif = m_fits.table(1);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Close calibration database
+ *
+ * Close a specific calibration database.
+ ***************************************************************************/
+void GCaldb::close(void)
+{
+    // Reset database parameters
+    m_mission.clear();
+    m_instrument.clear();
+    m_cifname.clear();
+    
+    // Close CIF FITS file
+    m_fits.close();
+
+    // Reset CIF table pointer
+    m_cif = NULL;
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print calibration database
  ***************************************************************************/
 std::string GCaldb::print(void) const
@@ -233,8 +310,16 @@ std::string GCaldb::print(void) const
     std::string result;
 
     // Append Header
-    result.append("=== GCaldb ===\n");
-    result.append(parformat("Database root")+m_caldb);
+    result.append("=== GCaldb ===");
+    result.append("\n"+parformat("Database root")+m_caldb);
+
+    // Append information about opened database
+    if (m_cif != NULL) {
+        result.append("\n"+parformat("Selected Mission")+toupper(m_mission));
+        result.append("\n"+parformat("Selected Instrument")+toupper(m_instrument));
+        result.append("\n"+parformat("Calibration Index File")+m_cifname);
+        result.append("\n"+parformat("Number of entries")+str(size()));
+    }
     
     // Return
     return result;
@@ -254,6 +339,11 @@ void GCaldb::init_members(void)
 {
     // Initialise members
     m_caldb.clear();
+    m_mission.clear();
+    m_instrument.clear();
+    m_cifname.clear();
+    m_fits.clear();
+    m_cif = NULL;
 
     // Return
     return;
@@ -268,7 +358,20 @@ void GCaldb::init_members(void)
 void GCaldb::copy_members(const GCaldb& caldb)
 {
     // Copy attributes
-    m_caldb = caldb.m_caldb;
+    m_caldb      = caldb.m_caldb;
+    m_mission    = caldb.m_mission;
+    m_instrument = caldb.m_instrument;
+    m_cifname    = caldb.m_cifname;
+    m_fits       = caldb.m_fits;
+
+    // Set CIF table pointer. We do not copy over the pointer as the FITS
+    // file has been copied here.
+    if (caldb.m_cif != NULL) {
+        m_cif = m_fits.table(1);
+    }
+    else {
+        m_cif = NULL;
+    }
 
     // Return
     return;
@@ -280,6 +383,9 @@ void GCaldb::copy_members(const GCaldb& caldb)
  ***************************************************************************/
 void GCaldb::free_members(void)
 {
+    // Close any open database
+    close();
+
     // Return
     return;
 }
@@ -317,6 +423,104 @@ void GCaldb::set_database(const std::string& pathname)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return path to calibration directory
+ *
+ * @param[in] mission Mission name (case insensitive).
+ * @param[in] instrument Instrument name (case insensitive; optional).
+ *
+ * @exception GException::directory_not_found
+ *            Calibration directory not found.
+ * @exception GException::directory_not_accessible
+ *            No read permission granted to calibration directory.
+ *
+ * The calibration directory path is given by
+ * $CALDB/data/<mission>
+ * or
+ * $CALDB/data/<mission>/<instrument>
+ * where <mission> is the name of the mission and <instrument> is the
+ * optional instrument name (all lower case). The arguments provided to the
+ * method are transformed to lower case.
+ ***************************************************************************/
+std::string GCaldb::path(const std::string& mission, const std::string& instrument)
+{
+    // Verify that mission name is valid and directory is accessible
+    std::string path = m_caldb + "/data/" + tolower(mission);
+    if (access(path.c_str(), F_OK) != 0) {
+        throw GException::directory_not_found(G_PATH, path,
+              "Requested mission \""+toupper(mission)+"\" not found in"
+              " calibration database.");
+    }
+    if (access(path.c_str(), R_OK) != 0) {
+        throw GException::directory_not_accessible(G_PATH, path,
+              "Requested read permission not granted for mission \""+
+              toupper(mission)+"\".");
+    }
+
+    // If an instrument has been specified, verify that instrument name is
+    // valid and directory is accessible
+    if (instrument.length() > 0) {
+
+        // Add instrument to path
+        path += "/" + tolower(instrument);
+
+        // Verify path
+        if (access(path.c_str(), F_OK) != 0) {
+            throw GException::directory_not_found(G_PATH, path,
+                  "Requested instrument \""+toupper(instrument)+"\" on"
+                  " mission \""+toupper(mission)+"\" not found in"
+                  " calibration database.");
+        }
+        if (access(path.c_str(), R_OK) != 0) {
+            throw GException::directory_not_accessible(G_PATH, path,
+                "Requested read permission not granted for instrument \""+
+                toupper(instrument)+"\" on mission \""+toupper(mission)+
+                "\".");
+        }
+        
+    } // endif: instrument has been specified
+    
+    // Return path
+    return path;
+}
+
+
+/***********************************************************************//**
+ * @brief Return absolute CIF filename
+ *
+ * @param[in] mission Mission name (case insensitive).
+ * @param[in] instrument Instrument name (case insensitive; optional).
+ *
+ * @exception GException::file_not_found
+ *            CIF not found.
+ *
+ * The calibration directory path is given by
+ * $CALDB/data/<mission>/caldb.indx
+ * or
+ * $CALDB/data/<mission>/<instrument>/caldb.indx
+ * where <mission> is the name of the mission and <instrument> is the
+ * optional instrument name (all lower case). The arguments provided to the
+ * method are transformed to lower case.
+ ***************************************************************************/
+std::string GCaldb::cifname(const std::string& mission, const std::string& instrument)
+{
+    // Get path to calibration directory
+    std::string cif = path(mission, instrument);
+
+    // Add calibration index filename
+    cif += "/caldb.indx";
+
+    // Verify that CIF exists
+    if (access(cif.c_str(), F_OK) != 0) {
+        throw GException::file_not_found(G_CIF, cif,
+              "Calibration Index File (CIF) not found.");
+    }
+
+    // Return cif
+    return cif;
 }
 
 

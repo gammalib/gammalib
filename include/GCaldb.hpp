@@ -31,6 +31,8 @@
 #include <iostream>
 #include <string>
 #include "GLog.hpp"
+#include "GFits.hpp"
+#include "GFitsBinTable.hpp"
 
 
 /***********************************************************************//**
@@ -42,7 +44,18 @@
  * constructor is invoked it tries setting the calibration database access
  * path using the CALDB environment variable. Alternatively, the calibration
  * database path can be passed to the constructor to override the environment
- * variable.
+ * variable, or set using the dir() method.
+ *
+ * It is assumed that the calibration data are found under
+ *   $CALDB/data/<mission>[/<instrument>]
+ * and that the Calibration Index File (CIF) is located at
+ *   $CALDB/data/<mission>[/<instrument>]/caldb.indx
+ * where <mission> is the name of the mission and <instrument> is the
+ * optional instrument name (all lower case).
+ *
+ * The calibration database for a given mission and instrument is opened
+ * using the open() method. Once opened, database information can be
+ * accessed. After usage, the database is closed using the close() method.
  ***************************************************************************/
 class GCaldb {
 
@@ -63,19 +76,29 @@ public:
     // Methods
     void        clear(void);
     GCaldb*     clone(void) const;
+    int         size(void) const;
     std::string dir(void) const { return m_caldb; }
     void        dir(const std::string& pathname);
+    void        open(const std::string& mission, const std::string& instrument = "");
+    void        close(void);
     std::string print(void) const;
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GCaldb& caldb);
-    void free_members(void);
-    void set_database(const std::string& pathname);
+    void        init_members(void);
+    void        copy_members(const GCaldb& caldb);
+    void        free_members(void);
+    void        set_database(const std::string& pathname);
+    std::string path(const std::string& mission, const std::string& instrument = "");
+    std::string cifname(const std::string& mission, const std::string& instrument = "");
 
     // Protected data area
-    std::string m_caldb;    //!< CALDB root directory
+    std::string m_caldb;        //!< CALDB root directory
+    std::string m_mission;      //!< Mission of opened database
+    std::string m_instrument;   //!< Instrument of opened database
+    std::string m_cifname;      //!< CIF filename of opened database
+    GFits       m_fits;         //!< CIF FITS file
+    GFitsTable* m_cif;          //!< Pointer to CIF table
 };
 
 #endif /* GCALDB_HPP */
