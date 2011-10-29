@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GEbounds.hpp  -  Energy boundary class                   *
+ *               GEbounds.hpp  -  Energy boundaries class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,12 +20,12 @@
  ***************************************************************************/
 /**
  * @file GEbounds.hpp
- * @brief Energy boundary class interface definition.
- * @author J. Knodlseder
+ * @brief Energy boundaries class interface definition
+ * @author J. Knoedlseder
  */
 
-#ifndef GBOUNDS_HPP
-#define GBOUNDS_HPP
+#ifndef GEBOUNDS_HPP
+#define GEBOUNDS_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
@@ -39,7 +39,7 @@
 /***********************************************************************//**
  * @class GEbounds
  *
- * @brief Interface for the GEbounds class.
+ * @brief Interface for the energy boundaries class
  *
  * This class holds a list of energy intervals.
  ***************************************************************************/
@@ -53,7 +53,8 @@ public:
     // Constructors and destructors
     GEbounds(void);
     GEbounds(const GEbounds& ebds);
-    explicit GEbounds(const std::string& filename, const std::string& extname = "EBOUNDS");
+    explicit GEbounds(const std::string& filename,
+                      const std::string& extname = "EBOUNDS");
     virtual ~GEbounds(void);
 
     // Operators
@@ -61,6 +62,7 @@ public:
 
     // Methods
     void        clear(void);
+    GEbounds*   clone(void) const;
     void        append(const GEnergy& emin, const GEnergy& emax);
     void        insert(const GEnergy& emin, const GEnergy& emax);
     void        setlin(const GEnergy& emin, const GEnergy& emax, const int& num);
@@ -85,13 +87,12 @@ public:
 
 protected:
     // Protected methods
-    void      init_members(void);
-    void      copy_members(const GEbounds& ebds);
-    void      free_members(void);
-    void      set_attributes(void);
-    GEbounds* clone(void) const;
-    void      insert_eng(int inx, const GEnergy& emin, const GEnergy& emax);
-    void      merge_engs(void);
+    void init_members(void);
+    void copy_members(const GEbounds& ebds);
+    void free_members(void);
+    void set_attributes(void);
+    void insert_eng(int inx, const GEnergy& emin, const GEnergy& emax);
+    void merge_engs(void);
 
     // Protected data area
     int      m_num;         //!< Number of energy boundaries
@@ -101,4 +102,4 @@ protected:
     GEnergy* m_max;         //!< Energy bin maxima
 };
 
-#endif /* GBOUNDS_HPP */
+#endif /* GEBOUNDS_HPP */
