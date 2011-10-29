@@ -690,6 +690,13 @@ fi
 
 
 #############################################################################
+# Initialise directory path for test environment                            #
+#############################################################################
+TEST_ENV_DIR=
+AC_SUBST(TEST_ENV_DIR)
+
+
+#############################################################################
 # Search for readline and ncurses libraries                                 #
 # ------------------------------------------------------------------------- #
 # Searchs the following paths for the readline and ncurses libraries:       #
@@ -697,6 +704,8 @@ fi
 # /usr/lib[64]                                                              #
 # /usr/local/lib[64]                                                        #
 # /opt/local/lib[64]                                                        #
+# Note that we don't want to link here against the libraries as this leads  #
+# to problems on Mac OS X universal libraries with missing architectures.   #
 #############################################################################
 # Initialise readline and ncurses flags
 has_readline="no"
@@ -737,10 +746,16 @@ if test "x$with_readline" = "xyes"; then
                 if [test -f $i/include/readline.h]; then
                     LIBDIR_READLINE=$i/$k
                     INCDIR_READLINE=$i/include
+                    if [ test "$i" != "/usr" -a "$i" != "/usr/local" ]; then
+                        TEST_ENV_DIR="$TEST_ENV_DIR:$LIBDIR_READLINE"
+                    fi
                     break
                 elif [test -f $i/include/readline/readline.h]; then
                     LIBDIR_READLINE=$i/$k
                     INCDIR_READLINE=$i/include/readline
+                    if [ test "$i" != "/usr" -a "$i" != "/usr/local" ]; then
+                        TEST_ENV_DIR="$TEST_ENV_DIR:$LIBDIR_READLINE"
+                    fi
                     break
                 fi
             
@@ -756,6 +771,9 @@ if test "x$with_readline" = "xyes"; then
         for k in lib lib64 ; do  
             if [test -f $i/$k/$libncurses]; then
                 LIBDIR_NCURSES=$i/$k
+                if [ test "$i" != "/usr" -a "$i" != "/usr/local" ]; then
+                    TEST_ENV_DIR="$TEST_ENV_DIR:$LIBDIR_NCURSES"
+                fi
                 break
             fi
         done
@@ -801,6 +819,8 @@ AM_CONDITIONAL(WITH_READLINE, test "x$use_readline" = "xyes")
 # /usr/lib[64]                                                              #
 # /usr/local/lib[64]                                                        #
 # /opt/local/lib[64]                                                        #
+# Note that we don't want to link here against the libraries as this leads  #
+# to problems on Mac OS X universal libraries with missing architectures.   #
 #############################################################################
 # Initialise cfitsio flag
 has_cfitsio="no"
@@ -839,15 +859,24 @@ if test "x$with_cfitsio" = "xyes"; then
                 if [test -f $i/include/fitsio.h]; then
                     LIBDIR_CFITSIO=$i/$k
                     INCDIR_CFITSIO=$i/include
+                    if [ test "$i" != "/usr" -a "$i" != "/usr/local" ]; then
+                        TEST_ENV_DIR="$TEST_ENV_DIR:$LIBDIR_CFITSIO"
+                    fi
                     break
                 elif [test -f $i/include/libcfitsio0/fitsio.h]; then
                     # OpenSUSE kluge
                     LIBDIR_CFITSIO=$i/$k
                     INCDIR_CFITSIO=$i/include/libcfitsio0
+                    if [ test "$i" != "/usr" -a "$i" != "/usr/local" ]; then
+                        TEST_ENV_DIR="$TEST_ENV_DIR:$LIBDIR_CFITSIO"
+                    fi
                     break
                 elif [test -f $i/include/cfitsio/fitsio.h]; then
                     LIBDIR_CFITSIO=$i/$k
                     INCDIR_CFITSIO=$i/include/cfitsio
+                    if [ test "$i" != "/usr" -a "$i" != "/usr/local" ]; then
+                        TEST_ENV_DIR="$TEST_ENV_DIR:$LIBDIR_CFITSIO"
+                    fi
                     break
                 fi
             
