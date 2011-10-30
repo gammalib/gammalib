@@ -696,6 +696,7 @@ TEST_ENV_DIR=
 AC_SUBST(TEST_ENV_DIR)
 add_gammalib_prefix="no"
 add_opt_local="no"
+add_usr_local="no"
 
 
 #############################################################################
@@ -898,6 +899,7 @@ if [test "x$with_cfitsio" = "xyes"]; then
                     if [test -f /usr/local/lib/libcfitsio$SHAREDSUFFIX -a \
                              -f /usr/local/include/fitsio.h]; then
                         has_cfitsio="yes"
+                        add_usr_local="yes"
                         LIBDIR_CFITSIO="/usr/local/lib"
                         INCDIR_CFITSIO="/usr/local/include"
                     fi
@@ -933,6 +935,10 @@ fi
 if [test "x$add_opt_local" = "xyes"]; then
     LDFLAGS="$LDFLAGS -L/opt/local/lib"
     TEST_ENV_DIR="$TEST_ENV_DIR:/opt/local/lib"
+fi
+if [test "x$add_usr_local" = "xyes"]; then
+    LDFLAGS="$LDFLAGS -L/usr/local/lib"
+    TEST_ENV_DIR="$TEST_ENV_DIR:/usr/local/lib"
 fi
 
 
