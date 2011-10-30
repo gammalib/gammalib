@@ -42,6 +42,7 @@ cd $sourcedir
 ./autogen.sh
 rm -f gammalib.sh
 rm -rf dev
+rm -rf autom4te.cache    
 cd $basedir
 
 # Create Doxygen documentation
