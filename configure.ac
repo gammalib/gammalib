@@ -831,6 +831,7 @@ AM_CONDITIONAL(WITH_READLINE, test "x$use_readline" = "xyes")
 # finally we perform system dependent checks. These are:                    #
 # - Darwin: /opt/local (MacPorts)                                           #
 # - Linux:  headers in /usr/include/libcfitsio0 (OpenSUSE)                  #
+#           /usr/local (FreeBSD)                                            #
 #############################################################################
 has_cfitsio="no"
 LIBDIR_CFITSIO=
@@ -855,8 +856,6 @@ if [test "x$with_cfitsio" = "xyes"]; then
         *)            cfitsio_deps="-lm" ;;
     esac
 
-    echo $gammalib_prefix/lib/libcfitsio$SHAREDSUFFIX
-    
     # First check if cfitsio exists in $gammalib_prefix
     if [test -f $gammalib_prefix/lib/libcfitsio$SHAREDSUFFIX -a \
              -f $gammalib_prefix/include/fitsio.h]; then
@@ -894,6 +893,13 @@ if [test "x$with_cfitsio" = "xyes"]; then
                         has_cfitsio="yes"
                         LIBDIR_CFITSIO="/usr/lib"
                         INCDIR_CFITSIO="/usr/include/libcfitsio0"
+                    fi
+                    # FreeBSD kluge
+                    if [test -f /usr/local/lib/libcfitsio$SHAREDSUFFIX -a \
+                             -f /usr/local/include/fitsio.h]; then
+                        has_cfitsio="yes"
+                        LIBDIR_CFITSIO="/usr/local/lib"
+                        INCDIR_CFITSIO="/usr/local/include"
                     fi
                     ;;
             esac
