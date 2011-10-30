@@ -694,26 +694,20 @@ fi
 #############################################################################
 TEST_ENV_DIR=
 AC_SUBST(TEST_ENV_DIR)
+add_gammalib_prefix="no"
+add_opt_local="no"
 
 
 #############################################################################
-# Search for readline and ncurses libraries                                 #
+# Search for ncurses library (needed for readline)                          #
 # ------------------------------------------------------------------------- #
-# Searchs the following paths for the readline and ncurses libraries:       #
-# $gammalib_prefix/lib[64]                                                  #
-# /usr/lib[64]                                                              #
-# /usr/local/lib[64]                                                        #
-# /opt/local/lib[64]                                                        #
-# Note that we don't want to link here against the libraries as this leads  #
-# to problems on Mac OS X universal libraries with missing architectures.   #
+# We check first in the gammalib directory, then in the standard paths and  #
+# finally we perform system dependent checks. These are:                    #
+# - Darwin: check in /opt/local/lib                                         #
 #############################################################################
-# Initialise readline and ncurses flags
-has_readline="no"
 has_ncurses="no"
-use_readline="no"
-LIBDIR_READLINE=
-INCDIR_READLINE=
 LIBDIR_NCURSES=
+AC_SUBST(LIBDIR_NCURSES)
 
 # Check if we want to use readline
 AC_ARG_WITH([readline],
@@ -722,110 +716,127 @@ AC_ARG_WITH([readline],
             [],
             [with_readline=yes])
 
-# If we want to use readline, then search now the library
-if test "x$with_readline" = "xyes"; then
+# If we want to use readline, then search now the ncurses library
+if [test "x$with_readline" = "xyes";] then
 
-    # Set library names
-    case $ac_sys_system in
-	    Darwin*) 
-            libreadline="libreadline.dylib" 
-            libncurses="libncurses.dylib" 
-            ;;
-        *)
-            libreadline="libreadline.so" 
-            libncurses="libncurses.so" 
-            ;;
-    esac
-
-    # Search for readline library
-    for i in "$gammalib_prefix" /usr /usr/local /opt/local ; do
-        for k in lib lib64 ; do  
-            if [test -f $i/$k/$libreadline]; then
-                
-                # We found the library, now search for the header
-                if [test -f $i/include/readline.h]; then
-                    LIBDIR_READLINE=$i/$k
-                    INCDIR_READLINE=$i/include
-                    if [ test "$i" != "/usr" -a "$i" != "/usr/local" ]; then
-                        TEST_ENV_DIR="$TEST_ENV_DIR:$LIBDIR_READLINE"
-                    fi
-                    break
-                elif [test -f $i/include/readline/readline.h]; then
-                    LIBDIR_READLINE=$i/$k
-                    INCDIR_READLINE=$i/include/readline
-                    if [ test "$i" != "/usr" -a "$i" != "/usr/local" ]; then
-                        TEST_ENV_DIR="$TEST_ENV_DIR:$LIBDIR_READLINE"
-                    fi
-                    break
-                fi
-            
-            fi
-        done
-        if [test -n "$LIBDIR_READLINE" -a -n "$INCDIR_READLINE"]; then
-            break
-        fi
-    done
-
-    # Search for ncurses library
-    for i in "$gammalib_prefix" /usr /usr/local /opt/local ; do
-        for k in lib lib64 ; do  
-            if [test -f $i/$k/$libncurses]; then
-                LIBDIR_NCURSES=$i/$k
-                if [ test "$i" != "/usr" -a "$i" != "/usr/local" ]; then
-                    TEST_ENV_DIR="$TEST_ENV_DIR:$LIBDIR_NCURSES"
-                fi
-                break
-            fi
-        done
-        if [test -n "$LIBDIR_NCURSES"]; then
-            break
-        fi
-    done
-
-    # Signal if we found readline library
-    if [test -n "$LIBDIR_READLINE" -a -n "$INCDIR_READLINE"]; then
-        has_readline="yes"
-    fi
-    
-    # Signal if we found ncurses library
-    if [test -n "$LIBDIR_NCURSES"]; then
+    # First check if ncurses exists in $gammalib_prefix
+    if [test -f $gammalib_prefix/lib/libncurses.$SHAREDSUFFIX]; then
+        add_gammalib_prefix="yes"
         has_ncurses="yes"
-    fi
+        LIBDIR_NCURSES="$gammalib_prefix/lib"
+    else
+
+        # Next search for ncurses in standard path
+        AC_CHECK_LIB([ncurses], [initscr],
+                     [has_ncurses="yes"
+                      AC_MSG_NOTICE([ncurses found])],
+                     [], [])
+
+        # If not found then make additional checks
+        if [test "x$has_ncurses" != "xyes";] then
+            case $ac_sys_system in
+	            Darwin*) 
+                    if [test -f /opt/local/lib/libncurses.$SHAREDSUFFIX]; then
+                        add_opt_local="yes"
+                        has_ncurses="yes"
+                        LIBDIR_NCURSES="/opt/local/lib"
+                    fi
+                    ;;
+                *)
+                    ;;
+            esac
+        fi
     
-    # If we have both we add readline support to GammaLib
-    if [test "x$has_readline" = "xyes" -a "x$has_ncurses" = "xyes"]; then
-        use_readline="yes"
     fi
+
+fi
+
+
+#############################################################################
+# Check for readline library                                                #
+# ------------------------------------------------------------------------- #
+# We check first in the gammalib directory, then in the standard paths and  #
+# finally we perform system dependent checks. These are:                    #
+# - Darwin: check in /opt/local/lib                                         #
+#############################################################################
+has_readline="no"
+use_readline="no"
+LIBDIR_READLINE=
+INCDIR_READLINE=
+AC_SUBST(LIBDIR_READLINE)
+AC_SUBST(INCDIR_READLINE)
+
+# Check if we want to use readline
+AC_ARG_WITH([readline],
+            [AS_HELP_STRING([--with-readline],
+                            [Use readline library [default=yes]])],
+            [],
+            [with_readline=yes])
+
+# If we want to use readline, then search now the ncurses library
+if [test "x$with_readline" = "xyes";] then
+
+    # First check if readline exists in $gammalib_prefix
+    if [test -f $gammalib_prefix/lib/libreadline$SHAREDSUFFIX -a \
+             -f $gammalib_prefix/include/readline/readline.h]; then
+        add_gammalib_prefix="yes"
+        has_readline="yes"
+        LIBDIR_READLINE="$gammalib_prefix/lib"
+        INCDIR_READLINE="$gammalib_prefix/include/readline"
+    else
+
+        # Next search for readline in standard path
+        AC_CHECK_LIB([readline], [main],
+                     [AC_MSG_NOTICE([readline found])
+                      AC_CHECK_HEADER([readline/readline.h],
+                                      [has_readline="yes"
+                                       AC_MSG_NOTICE([readline headers found])],
+                                      [], [])],
+                     [], [-lncurses])
+
+        # If not found then make additional checks
+        if [test "x$has_readline" != "xyes";] then
+            case $ac_sys_system in
+	            Darwin*) 
+                    if [test -f /opt/local/lib/libreadline$SHAREDSUFFIX -a \
+                             -f /opt/local/include/readline/readline.h]; then
+                        add_opt_local="yes"
+                        has_readline="yes"
+                        LIBDIR_READLINE="/opt/local/lib"
+                        INCDIR_READLINE="/opt/local/include/readline"
+                    fi
+                    ;;
+                *)
+                    ;;
+            esac
+        fi
     
-    # Set some variables for readline support
-    if test "x$use_readline" = "xyes"; then
-        AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
-        LDFLAGS="$LDFLAGS -L$LIBDIR_READLINE -L$LIBDIR_NCURSES"
-        CPPFLAGS="$CPPFLAGS -I$INCDIR_READLINE"
-        LIBS="${LIBS} -lreadline -lncurses"
-        AC_SUBST(LIBDIR_READLINE)
-        AC_SUBST(INCDIR_READLINE)
-        AC_SUBST(LIBDIR_NCURSES)
     fi
+
+fi
+
+# If we have ncurses and readline then add readline support to GammaLib
+if [test "x$has_readline" = "xyes" -a "x$has_ncurses" = "xyes"]; then
+    use_readline="yes"
+    AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
+    LIBS="${LIBS} -lreadline -lncurses"
 fi
 AM_CONDITIONAL(WITH_READLINE, test "x$use_readline" = "xyes")
 
 
 #############################################################################
-# Search for cfitsio library                                                #
+# Check for cfitsio library                                                 #
 # ------------------------------------------------------------------------- #
-# Searchs the following paths for the cfitsio library:                      #
-# $gammalib_prefix/lib[64]                                                  #
-# /usr/lib[64]                                                              #
-# /usr/local/lib[64]                                                        #
-# /opt/local/lib[64]                                                        #
-# Note that we don't want to link here against the libraries as this leads  #
-# to problems on Mac OS X universal libraries with missing architectures.   #
+# We check first in the gammalib directory, then in the standard paths and  #
+# finally we perform system dependent checks. These are:                    #
+# - Darwin: /opt/local (MacPorts)                                           #
+# - Linux:  headers in /usr/include/libcfitsio0 (OpenSUSE)                  #
 #############################################################################
-# Initialise cfitsio flag
 has_cfitsio="no"
 LIBDIR_CFITSIO=
 INCDIR_CFITSIO=
+AC_SUBST(LIBDIR_CFITSIO)
+AC_SUBST(INCDIR_CFITSIO)
 
 # Check if we want to use cfitsio
 AC_ARG_WITH([cfitsio],
@@ -835,7 +846,7 @@ AC_ARG_WITH([cfitsio],
             [with_cfitsio=yes])
 
 # If we want to use cfitsio, then search the library now
-if test "x$with_cfitsio" = "xyes"; then
+if [test "x$with_cfitsio" = "xyes"]; then
 
     # Set host specific cfitsio dependencies
     cfitsio_deps=
@@ -844,61 +855,79 @@ if test "x$with_cfitsio" = "xyes"; then
         *)            cfitsio_deps="-lm" ;;
     esac
 
-    # Set library name
-    case $ac_sys_system in
-	    Darwin*) libcfitsio="libcfitsio.dylib" ;;
-        *)       libcfitsio="libcfitsio.so" ;;
-    esac
-
-    # Search for cfitsio library
-    for i in "$gammalib_prefix" /usr /usr/local /opt/local ; do
-        for k in lib lib64 ; do  
-            if [test -f $i/$k/$libcfitsio]; then
-                
-                # We found the library, now search for the header
-                if [test -f $i/include/fitsio.h]; then
-                    LIBDIR_CFITSIO=$i/$k
-                    INCDIR_CFITSIO=$i/include
-                    if [ test "$i" != "/usr" -a "$i" != "/usr/local" ]; then
-                        TEST_ENV_DIR="$TEST_ENV_DIR:$LIBDIR_CFITSIO"
-                    fi
-                    break
-                elif [test -f $i/include/libcfitsio0/fitsio.h]; then
-                    # OpenSUSE kluge
-                    LIBDIR_CFITSIO=$i/$k
-                    INCDIR_CFITSIO=$i/include/libcfitsio0
-                    if [ test "$i" != "/usr" -a "$i" != "/usr/local" ]; then
-                        TEST_ENV_DIR="$TEST_ENV_DIR:$LIBDIR_CFITSIO"
-                    fi
-                    break
-                elif [test -f $i/include/cfitsio/fitsio.h]; then
-                    LIBDIR_CFITSIO=$i/$k
-                    INCDIR_CFITSIO=$i/include/cfitsio
-                    if [ test "$i" != "/usr" -a "$i" != "/usr/local" ]; then
-                        TEST_ENV_DIR="$TEST_ENV_DIR:$LIBDIR_CFITSIO"
-                    fi
-                    break
-                fi
-            
-            fi
-        done
-        if [test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO"]; then
-            break
-        fi
-    done
-              
-    # If we found library then set some variables
-    if [test -n "$LIBDIR_CFITSIO" -a -n "$INCDIR_CFITSIO";] then
+    echo $gammalib_prefix/lib/libcfitsio$SHAREDSUFFIX
+    
+    # First check if cfitsio exists in $gammalib_prefix
+    if [test -f $gammalib_prefix/lib/libcfitsio$SHAREDSUFFIX -a \
+             -f $gammalib_prefix/include/fitsio.h]; then
+        add_gammalib_prefix="yes"
         has_cfitsio="yes"
-        AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])
-        LDFLAGS="$LDFLAGS -L$LIBDIR_CFITSIO"
-        CPPFLAGS="$CPPFLAGS -I$INCDIR_CFITSIO"
-        LIBS="${LIBS} -lcfitsio ${cfitsio_deps}"
-        AC_SUBST(LIBDIR_CFITSIO)
-        AC_SUBST(INCDIR_CFITSIO)
+        LIBDIR_CFITSIO="$gammalib_prefix/lib"
+        INCDIR_CFITSIO="$gammalib_prefix/include"
+    else
+
+        # Next search for cfitsio in standard path
+        AC_CHECK_LIB([cfitsio], [ffpss],
+                     [AC_MSG_NOTICE([cfitsio found])
+                      AC_CHECK_HEADER([fitsio.h],
+                                      [has_cfitsio="yes"
+                                       AC_MSG_NOTICE([cfitsio headers found])],
+                                      [], [])],
+                     [], [${cfitsio_deps}])
+
+        # If not found then make additional checks
+        if [test "x$has_cfitsio" != "xyes";] then
+            case $ac_sys_system in
+	            Darwin*) 
+                    if [test -f /opt/local/lib/libcfitsio$SHAREDSUFFIX -a \
+                             -f /opt/local/include/fitsio.h]; then
+                        add_opt_local="yes"
+                        has_cfitsio="yes"
+                        LIBDIR_CFITSIO="/opt/local/lib"
+                        INCDIR_CFITSIO="/opt/local/include"
+                    fi
+                    ;;
+                *)
+                    # OpenSUSE kluge
+                    if [test -f /usr/lib/libcfitsio$SHAREDSUFFIX -a \
+                             -f /usr/include/libcfitsio0/fitsio.h]; then
+                        has_cfitsio="yes"
+                        LIBDIR_CFITSIO="/usr/lib"
+                        INCDIR_CFITSIO="/usr/include/libcfitsio0"
+                    fi
+                    ;;
+            esac
+        fi
+    
     fi
+
+fi
+
+# If we have ncurses and readline then add readline support to GammaLib
+if [test "x$has_cfitsio" = "xyes"]; then
+    AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])
+    LIBS="${LIBS} -lcfitsio ${cfitsio_deps}"
 fi
 AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
+
+
+#############################################################################
+# Add compiler flags                                                        #
+#############################################################################
+if [test "x$INCDIR_READLINE" != x]; then
+    CPPFLAGS="$CPPFLAGS -I$INCDIR_READLINE"
+fi
+if [test "x$INCDIR_CFITSIO" != x]; then
+    CPPFLAGS="$CPPFLAGS -I$INCDIR_CFITSIO"
+fi
+if [test "x$add_gammalib_prefix" = "xyes"]; then
+    LDFLAGS="$LDFLAGS -L$gammalib_prefix/lib"
+    TEST_ENV_DIR="$TEST_ENV_DIR:$gammalib_prefix/lib"
+fi
+if [test "x$add_opt_local" = "xyes"]; then
+    LDFLAGS="$LDFLAGS -L/opt/local/lib"
+    TEST_ENV_DIR="$TEST_ENV_DIR:/opt/local/lib"
+fi
 
 
 #############################################################################
