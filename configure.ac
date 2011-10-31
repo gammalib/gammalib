@@ -895,6 +895,13 @@ if [test "x$with_cfitsio" = "xyes"]; then
                         LIBDIR_CFITSIO="/usr/lib"
                         INCDIR_CFITSIO="/usr/include/libcfitsio0"
                     fi
+                    # Scientific Linux kluge
+                    if [test -f /usr/lib/libcfitsio$SHAREDSUFFIX -a \
+                             -f /usr/include/cfitsio/fitsio.h]; then
+                        has_cfitsio="yes"
+                        LIBDIR_CFITSIO="/usr/lib"
+                        INCDIR_CFITSIO="/usr/include/cfitsio"
+                    fi
                     # FreeBSD kluge
                     if [test -f /usr/local/lib/libcfitsio$SHAREDSUFFIX -a \
                              -f /usr/local/include/fitsio.h]; then
