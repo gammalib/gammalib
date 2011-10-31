@@ -653,9 +653,7 @@ AM_CONDITIONAL(HAVE_SWIG, test "x$has_swig" = "xyes")
 
 # Signal if Python is enabled
 if [test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes" -a "x$has_python_h" = "xyes"]; then
-  if [test "x$has_swig" = "xyes"]; then
-    enable_python="yes"
-  fi
+  enable_python="yes"
 fi
 AM_CONDITIONAL(WITH_PYTHON, test "x$enable_python" = "xyes")
 
@@ -679,13 +677,6 @@ if test "x$enable_python" = "xyes"; then
   esac
   AC_SUBST(PYTHON_EXTRA_LIBS)
 
-else
-  if test "x$has_python_wrap" = "xno" -a "x$has_swig" = "xno"; then
-    AC_MSG_WARN([Neither pyext/gammalib_wrap.cpp and pyext/gammalib.py nor swig has not been found])
-    AC_MSG_WARN([Python binding for gammalib cannot be built])
-    AC_MSG_WARN([Either use a gammalib distribution with gammalib_wrap.cpp and gammalib.py shipped or install swig on your system])
-    AC_MSG_WARN([swig can be obtained from http://www.swig.org/])
-  fi
 fi
 
 
