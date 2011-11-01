@@ -913,6 +913,13 @@ if [test "x$with_cfitsio" = "xyes"]; then
                         LIBDIR_CFITSIO="/usr/local/lib"
                         INCDIR_CFITSIO="/usr/local/include"
                     fi
+                    if [test -f /usr/local/lib64/libcfitsio$SHAREDSUFFIX -a \
+                             -f /usr/local/include/fitsio.h]; then
+                        has_cfitsio="yes"
+                        add_usr_local="yes"
+                        LIBDIR_CFITSIO="/usr/local/lib64"
+                        INCDIR_CFITSIO="/usr/local/include"
+                    fi
                     ;;
             esac
         fi
