@@ -67,7 +67,8 @@ if sys.platform.lower().startswith("darwin"):
 # This is required on some system (such as Mac OS X) to avoid problems
 # with finding the shared library during unit testing.
 libgamma='gamma'
-if is_unit_test:
+#if is_unit_test:
+if sys.platform.lower().startswith("darwin") and is_unit_test:
 	
 	# Remove any existing symbolic link to libgamma.a. This will
 	# prevent any exception in creating the symbolic link due to
