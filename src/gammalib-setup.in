@@ -129,7 +129,7 @@ if [ "x$PYTHONPATH" = x ]; then
 else
   PYTHONPATH=`echo ":$PYTHONPATH:" | \
     sed "s%:$python_exec_dir:%:%g" | sed "s%::*$%%"`
-  PYTHONPATH="$python_dir$PYTHONPATH"
+  PYTHONPATH="$python_exec_dir$PYTHONPATH"
 fi
 
 #
