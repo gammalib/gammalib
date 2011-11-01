@@ -68,7 +68,7 @@ if sys.platform.lower().startswith("darwin"):
 # with finding the shared library during unit testing.
 libgamma='gamma'
 #if is_unit_test:
-if sys.platform.lower().startswith("darwin") and is_unit_test:
+if is_unit_test and sys.platform.lower().startswith("darwin"):
 	
 	# Remove any existing symbolic link to libgamma.a. This will
 	# prevent any exception in creating the symbolic link due to
@@ -89,16 +89,15 @@ if sys.platform.lower().startswith("darwin") and is_unit_test:
 		print 'WARNING: Failed to create symbolic link to static library. Link dynamically.'
 
 # Set default include directories, install files, library paths and libraries
-include_dirs  = ['@top_srcdir@/include']
-install_files = glob.glob('@top_srcdir@/pyext/*.i')
-library_dirs  = ['../src/.libs']
-libraries     = [libgamma]
+include_dirs         = ['@top_srcdir@/include']
+install_files        = glob.glob('@top_srcdir@/pyext/*.i')
+library_dirs         = ['../src/.libs']
+runtime_library_dirs = ['../src/.libs']
+libraries            = [libgamma]
 
-# Set default runtime library directories
+# Add install directory to runtime library path
 if os.path.exists('@prefix@/lib'):
-	runtime_library_dirs = ['@prefix@/lib']
-else:
-	runtime_library_dirs = []
+	runtime_library_dirs.append('@prefix@/lib')
 
 # Add cfitsio library only if available
 if '@WITH_CFITSIO_TRUE@' != '#':
@@ -117,7 +116,7 @@ for extra_lib in extra_libs:
 	if len(extra_lib) > 0:
 		libraries.append(extra_lib)
 
-# Get extra library paths
+# Get extra library paths (for cfitsio, readline, ncurses)
 extra_lib_paths = ('@LDFLAGS@').split(' ')
 for extra_lib_path in extra_lib_paths:
 	if extra_lib_path.lstrip().find('-L') == 0:
