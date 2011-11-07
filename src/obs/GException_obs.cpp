@@ -30,6 +30,7 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GObservationRegistry.hpp"
 
 
 /***********************************************************************//**
@@ -46,8 +47,9 @@ GException::no_response::no_response(std::string origin, std::string message)
     // Set error message
     m_message = "No valid instrument response found in observation." \
                 " Set instrument response before using this method.";
-    if (message.length() > 0)
+    if (message.length() > 0) {
         m_message += " " + message;
+    }
 
     // Return
     return;
@@ -68,8 +70,9 @@ GException::no_events::no_events(std::string origin, std::string message)
     // Set error message
     m_message = "No valid event container found in observation." \
                 " Set event container before using this method.";
-    if (message.length() > 0)
+    if (message.length() > 0) {
         m_message += " " + message;
+    }
 
     // Return
     return;
@@ -90,8 +93,9 @@ GException::no_list::no_list(std::string origin, std::string message)
     // Set error message
     m_message = "No valid event list found in observation." \
                 " Set event list before using this method.";
-    if (message.length() > 0)
+    if (message.length() > 0) {
         m_message += " " + message;
+    }
 
     // Return
     return;
@@ -112,8 +116,9 @@ GException::no_cube::no_cube(std::string origin, std::string message)
     // Set error message
     m_message = "No valid event cube found in observation." \
                 " Set event cube before using this method.";
-    if (message.length() > 0)
+    if (message.length() > 0) {
         m_message += " " + message;
+    }
 
     // Return
     return;
@@ -134,8 +139,9 @@ GException::no_roi::no_roi(std::string origin, std::string message)
     // Set error message
     m_message = "No valid region of interest (ROI) found in observation." \
                 " Set region of interest before using this method.";
-    if (message.length() > 0)
+    if (message.length() > 0) {
         m_message += " " + message;
+    }
 
     // Return
     return;
@@ -181,8 +187,9 @@ GException::caldb_not_found::caldb_not_found(std::string origin,
 
     // Set error message
     m_message = "Calibration database \""+caldb+"\" not found.";
-    if (message.length() > 0)
+    if (message.length() > 0) {
         m_message += " " + message;
+    }
 
     // Return
     return;
@@ -226,8 +233,9 @@ GException::gti_invalid::gti_invalid(std::string origin, GTime tstart,
     // Set error message
     m_message = "Invalid Good Time Interval (" + tstart.print() + "-" +
                 tstop.print() + ") specified.";
-    if (message.length() > 0)
+    if (message.length() > 0) {
         m_message += " " + message;
+    }
 
     // Return
     return;
@@ -251,8 +259,9 @@ GException::erange_invalid::erange_invalid(std::string origin, double emin,
     // Set error message
     m_message = "Invalid energy range (Emin="+str(emin)+" MeV, Emax="+
                 str(emax)+" MeV specified.";
-    if (message.length() > 0)
+    if (message.length() > 0) {
         m_message += " " + message;
+    }
 
     // Return
     return;
@@ -311,7 +320,7 @@ GException::invalid_instrument::invalid_instrument(std::string origin,
             if (i > 0) {
                 m_message += ", ";
             }
-            m_message += "\"" + registry.name(i) + "\"";
+            m_message += "\"" + registry.instrument(i) + "\"";
         }
         m_message += ".";
     }
