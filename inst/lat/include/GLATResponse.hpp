@@ -84,6 +84,7 @@ public:
     // Other Methods
     void        caldb(const std::string& caldb);
     std::string caldb(void) const { return m_caldb; }
+    std::string rspname(void) const { return m_rspname; }
     void        load(const std::string& rspname);
     int         size(void) const { return m_aeff.size(); }
     GLATAeff*   aeff(const int& index) const;
