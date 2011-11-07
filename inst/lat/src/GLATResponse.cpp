@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATResponse.cpp  -  Fermi-LAT response class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATResponse.cpp
  * @brief Fermi-LAT response class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -31,6 +31,11 @@
 #include <unistd.h>           // access() function
 #include <cstdlib>            // std::getenv() function
 #include <string>
+#include "GException.hpp"
+#include "GFits.hpp"
+#include "GTools.hpp"
+#include "GCaldb.hpp"
+#include "GModelSpatialPtsrc.hpp"
 #include "GLATInstDir.hpp"
 #include "GLATResponse.hpp"
 #include "GLATObservation.hpp"
@@ -38,10 +43,6 @@
 #include "GLATEventBin.hpp"
 #include "GLATEventCube.hpp"
 #include "GLATException.hpp"
-#include "GException.hpp"
-#include "GModelSpatialPtsrc.hpp"
-#include "GFits.hpp"
-#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                           "GLATResponse::caldb(std::string&)"
@@ -63,7 +64,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DUMP_MEAN_PSF  1                    //!< Dump mean PSF allocation
+#define G_DUMP_MEAN_PSF  0                    //!< Dump mean PSF allocation
 #define G_DEBUG_MEAN_PSF 0                    //!< Debug mean PSF computation
 
 /* __ Constants __________________________________________________________ */
@@ -195,28 +196,18 @@ GLATResponse* GLATResponse::clone(void) const
  * @exception GException::caldb_not_found
  *            Calibration database repository not found.
  *
- * This default method simply checks if the calibration database directory
- * exists. If the directory exists, the path will be stored. No checking is
- * implemented that checks for the consistency of the calibration database.
- * Any environment variable present in the calibration database path will
- * be expanded.
+ * This method stores the CALDB root directory as the path to the LAT
+ * calibration database.
  *
- * @todo Implement a GCalDB class that handles any calibration database
- *       issues. GCalDB may be an abstract class for which instrument
- *       specific methods are implement to handle any instrument specific
- *       IRF database issues. 
+ * @todo Make use of the LAT CALDB to translate IRF names into filenames.
  ***************************************************************************/
 void GLATResponse::caldb(const std::string& caldb)
 {
-    // Expand environment variables
-    std::string caldb_expanded = expand_env(caldb);
-
-    // Check if calibration database directory is accessible
-    if (access(caldb_expanded.c_str(), R_OK) != 0)
-        throw GException::caldb_not_found(G_CALDB, caldb_expanded);
+    // Allocate calibration database
+    GCaldb db(caldb);
 
     // Store the path to the calibration database
-    m_caldb = caldb_expanded;
+    m_caldb = db.dir();
 
     // Return
     return;
