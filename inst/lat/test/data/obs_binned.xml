@@ -1,0 +1,8 @@
+<observation_list title="observation library">
+  <observation name="Crab" id="00001" instrument="LAT">
+    <parameter name="CountsMap" file="../inst/lat/test/data/srcmap.fits"/>
+    <parameter name="ExposureMap" file="../inst/lat/test/data/binned_expmap.fits"/>
+    <parameter name="LifeTimeCube" file="../inst/lat/test/data/ltcube.fits"/>
+    <parameter name="IRF" value="P6_v3_diff"/>
+  </observation>
+</observation_list>
