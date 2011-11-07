@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATObservation.cpp  -  LAT Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATObservation.cpp
  * @brief LAT Observation class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -45,6 +45,8 @@ const GObservationRegistry g_obs_lat_registry(&g_obs_lat_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_RESPONSE                    "GLATObservation::response(GResponse&)"
+#define G_READ                          "GLATObservation::read(GXmlElement&)"
+#define G_WRITE                        "GLATObservation::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -280,6 +282,260 @@ std::string GLATObservation::instrument(void) const
 
 
 /***********************************************************************//**
+ * @brief Read observation from XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * @exception GException::xml_invalid_parnum
+ *            Invalid number of parameters found in XML element.
+ * @exception GException::xml_invalid_parnames
+ *            Invalid parameter names found in XML element.
+ *
+ * Reads information for a LAT observation from an XML element. The expected
+ * format of the XML element is
+ *
+ *  <observation name="..." id="..." instrument="LAT">
+ *    <parameter name="FT1" file="..."/>
+ *    <parameter name="FT2" file="..."/>
+ *    <parameter name="LifeTimeCube" file="..."/>
+ *    <parameter name="IRF" file="..."/>
+ *  </observation>
+ *
+ * for an unbinned observation and
+ *
+ *  <observation name="..." id="..." instrument="LAT">
+ *    <parameter name="CountsMap" file="..."/>
+ *    <parameter name="ExposureMap" file="..."/>
+ *    <parameter name="LifeTimeCube" file="..."/>
+ *    <parameter name="IRF" value="..."/>
+ *  </observation>
+ *
+ * for a binned observation.
+ ***************************************************************************/
+void GLATObservation::read(const GXmlElement& xml)
+{
+    // Clear observation
+    clear();
+
+    // Initialise attributes
+    std::string ft1file = "";
+    std::string ft2file = "";
+    std::string ltfile  = "";
+    std::string cntfile = "";
+    std::string expfile = "";
+    std::string irfname = "";
+
+    // Determine number of parameter nodes in XML element
+    int npars = xml.elements("parameter");
+
+    // Verify that XML element has exactly 4 parameters
+    if (xml.elements() != 4 || npars != 4) {
+        throw GException::xml_invalid_parnum(G_READ, xml,
+              "LAT observation requires exactly 4 parameters.");
+    }
+
+    // Extract parameters
+    int npar1[] = {0, 0, 0, 0};
+    int npar2[] = {0, 0, 0, 0};
+    for (int i = 0; i < npars; ++i) {
+
+        // Get parameter element
+        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+
+        // Handle Unbinned format
+        if (par->attribute("name") == "FT1") {
+            ft1file = par->attribute("file");
+            npar1[0]++;
+        }
+        else if (par->attribute("name") == "FT2") {
+            ft2file = par->attribute("file");
+            npar1[1]++;
+        }
+
+        // Handle Binned format
+        else if (par->attribute("name") == "CountsMap") {
+            cntfile = par->attribute("file");
+            npar2[0]++;
+        }
+        else if (par->attribute("name") == "ExposureMap") {
+            expfile = par->attribute("file");
+            npar2[1]++;
+        }
+
+        // Handle common parameters
+        else if (par->attribute("name") == "LifeTimeCube") {
+            ltfile = par->attribute("file");
+            npar1[2]++;
+            npar2[2]++;
+        }
+        else if (par->attribute("name") == "IRF") {
+            irfname = par->attribute("value");
+            npar1[3]++;
+            npar2[3]++;
+        }
+
+    } // endfor: looped over all parameters
+
+    // Verify that all parameters were found
+    bool unbin_ok = (npar1[0] == 1 && npar1[1] == 1 && npar1[2] == 1 && npar1[3] == 1);
+    bool bin_ok   = (npar2[0] == 1 && npar2[1] == 1 && npar2[2] == 1 && npar2[3] == 1);
+    if (!bin_ok && !unbin_ok) {
+        throw GException::xml_invalid_parnames(G_READ, xml,
+              "Require either \"FT1\", \"FT2\", \"LifeTimeCube\", and \"IRF\""
+              " or \"CountsMap\", \"ExposureMap\", \"LifeTimeCube\", and"
+              " \"IRF\" parameters.");
+    }
+
+    // Load data
+    if (unbin_ok) {
+        load_unbinned(ft1file, ft2file, ltfile);
+    }
+    else {
+        load_binned(cntfile, expfile, ltfile);
+    }
+    
+    // Set response function
+    response(irfname);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write observation into XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * @exception GException::no_list
+ *            No valid CTA event list or event cube found.
+ * @exception GException::xml_invalid_parnum
+ *            Invalid number of parameters found in XML element.
+ * @exception GException::xml_invalid_parnames
+ *            Invalid parameter names found in XML element.
+ *
+ * Writes information for a LAT observation into an XML element. The expected
+ * format of the XML element is
+ *
+ *  <observation name="..." id="..." instrument="LAT">
+ *    <parameter name="FT1" file="..."/>
+ *    <parameter name="FT2" file="..."/>
+ *    <parameter name="LifeTimeCube" file="..."/>
+ *    <parameter name="IRF" file="..."/>
+ *  </observation>
+ *
+ * for an unbinned observation and
+ *
+ *  <observation name="..." id="..." instrument="LAT">
+ *    <parameter name="CountsMap" file="..."/>
+ *    <parameter name="ExposureMap" file="..."/>
+ *    <parameter name="LifeTimeCube" file="..."/>
+ *    <parameter name="IRF" value="..."/>
+ *  </observation>
+ *
+ * for a binned observation.
+ *
+ * @todo We should create a special exception that informs that there is
+ *       neither a valid LAT event list nor a valid LAT counts map in this
+ *       observations.
+ ***************************************************************************/
+void GLATObservation::write(GXmlElement& xml) const
+{
+    // Determine if we deal with a binned or unbinned observation
+    const GLATEventList* list = dynamic_cast<const GLATEventList*>(m_events);
+    const GLATEventCube* cube = dynamic_cast<const GLATEventCube*>(m_events);
+    if (list == NULL && cube == NULL) {
+        throw GException::no_list(G_WRITE);
+    }
+
+    // Set event list flag
+    bool is_list = (list != NULL);
+
+    // If XML element has 0 nodes then append 4 parameter nodes
+    if (xml.elements() == 0) {
+        if (is_list) {
+            xml.append(new GXmlElement("parameter name=\"FT1\""));
+            xml.append(new GXmlElement("parameter name=\"FT2\""));
+            xml.append(new GXmlElement("parameter name=\"LifeTimeCube\""));
+            xml.append(new GXmlElement("parameter name=\"IRF\""));
+        }
+        else {
+            xml.append(new GXmlElement("parameter name=\"CountsMap\""));
+            xml.append(new GXmlElement("parameter name=\"ExposureMap\""));
+            xml.append(new GXmlElement("parameter name=\"LifeTimeCube\""));
+            xml.append(new GXmlElement("parameter name=\"IRF\""));
+        }
+    }
+
+    // Verify that XML element has exactly 4 parameters
+    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
+        throw GException::xml_invalid_parnum(G_WRITE, xml,
+              "LAT observation requires exactly 4 parameters.");
+    }
+
+    // Set or update parameter attributes
+    int npar[] = {0, 0, 0, 0};
+    for (int i = 0; i < 4; ++i) {
+
+        // Get parameter element
+        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+
+        // Handle FT1
+        if (par->attribute("name") == "FT1") {
+            par->attribute("file", m_ft1file);
+            npar[0]++;
+        }
+
+        // Handle CountsMap
+        else if (par->attribute("name") == "CountsMap") {
+            par->attribute("file", m_cntfile);
+            npar[0]++;
+        }
+
+        // Handle FT2
+        else if (par->attribute("name") == "FT2") {
+            par->attribute("file", m_ft2file);
+            npar[1]++;
+        }
+
+        // Handle ExposureMap
+        else if (par->attribute("name") == "ExposureMap") {
+            par->attribute("file", m_expfile);
+            npar[1]++;
+        }
+
+        // Handle LifeTimeCube
+        else if (par->attribute("name") == "LifeTimeCube") {
+            par->attribute("file", m_ltfile);
+            npar[2]++;
+        }
+
+        // Handle IRF
+        else if (par->attribute("name") == "IRF") {
+            std::string irfname = "";
+            if (m_response != NULL) {
+                irfname = m_response->rspname();
+            }
+            par->attribute("value", irfname);
+            npar[3]++;
+        }
+
+    } // endfor: looped over all parameters
+
+    // Verify that all required parameters are present
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
+        throw GException::xml_invalid_parnames(G_READ, xml,
+              "Require either \"FT1\", \"FT2\", \"LifeTimeCube\", and \"IRF\""
+              " or \"CountsMap\", \"ExposureMap\", \"LifeTimeCube\", and"
+              " \"IRF\" parameters.");
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print LAT observation information
  ***************************************************************************/
 std::string GLATObservation::print(void) const
@@ -358,6 +614,11 @@ void GLATObservation::load_unbinned(const std::string& ft1name,
         m_ltcube->load(ltcube_name);
     }
 
+    // Store filenames
+    m_ft1file = ft1name;
+    m_ft2file = ft2name;
+    m_ltfile  = ltcube_name;
+
     // Return
     return;
 }
@@ -399,6 +660,11 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
         m_ltcube->load(ltcube_name);
     }
 
+    // Store filenames
+    m_cntfile = cntmap_name;
+    m_expfile = expmap_name;
+    m_ltfile  = ltcube_name;
+
     // Return
     return;
 }
@@ -416,6 +682,11 @@ void GLATObservation::load_binned(const std::string& cntmap_name,
 void GLATObservation::init_members(void)
 {
     // Initialise members
+    m_ft1file.clear();
+    m_ft2file.clear();
+    m_ltfile.clear();
+    m_cntfile.clear();
+    m_expfile.clear();
     m_response = NULL;
     m_pointing = NULL;
     m_ltcube   = NULL;
@@ -433,6 +704,13 @@ void GLATObservation::init_members(void)
 void GLATObservation::copy_members(const GLATObservation& obs)
 {
     // Copy members
+    m_ft1file = obs.m_ft1file;
+    m_ft2file = obs.m_ft2file;
+    m_ltfile  = obs.m_ltfile;
+    m_cntfile = obs.m_cntfile;
+    m_expfile = obs.m_expfile;
+    
+    // Clone members
     if (obs.m_response != NULL) m_response = obs.m_response->clone();
     if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
     if (obs.m_ltcube   != NULL) m_ltcube   = obs.m_ltcube->clone();

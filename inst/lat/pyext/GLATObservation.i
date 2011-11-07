@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATObservation.i  -  LAT Observation class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,6 +48,8 @@ public:
     virtual GLATResponse*    response(void) const;
     virtual GLATPointing*    pointing(const GTime& time) const;
     virtual std::string      instrument(void) const;
+    virtual void             read(const GXmlElement& xml);
+    virtual void             write(GXmlElement& xml) const;
 
     // Other methods
     void                     load_unbinned(const std::string& ft1name,

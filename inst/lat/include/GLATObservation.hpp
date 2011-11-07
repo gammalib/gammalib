@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATObservation.hpp  -  LAT Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATObservation.hpp
  * @brief LAT Observation class interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GLATOBSERVATION_HPP
@@ -63,6 +63,8 @@ public:
     virtual GLATResponse*    response(void) const;
     virtual GLATPointing*    pointing(const GTime& time) const;
     virtual std::string      instrument(void) const;
+    virtual void             read(const GXmlElement& xml);
+    virtual void             write(GXmlElement& xml) const;
     virtual std::string      print(void) const;
 
     // Other methods
@@ -83,6 +85,11 @@ protected:
     void free_members(void);
 
     // Protected members
+    std::string   m_ft1file;      //!< FT1 filename
+    std::string   m_ft2file;      //!< FT2 filename
+    std::string   m_ltfile;       //!< Lifetime cube filename
+    std::string   m_cntfile;      //!< Counts map filename
+    std::string   m_expfile;      //!< Exposure map filename
     GLATResponse* m_response;     //!< Pointer to instrument response functions
     GLATPointing* m_pointing;     //!< Pointer to pointing direction
     GLATLtCube*   m_ltcube;       //!< Pointer to lifetime cube
