@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GException_obs.cpp  -  observations exception handlers         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GException_obs.cpp
  * @brief Observation exception handler interface implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -276,8 +276,48 @@ GException::invalid_statistics::invalid_statistics(std::string origin,
     // Set error message
     m_message = "Invalid optimization statistics \""+statistics+
                 "\" specified.";
-    if (message.length() > 0)
+    if (message.length() > 0) {
         m_message += " " + message;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Invalid instrument encountered
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] instrument Encountered instrument.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::invalid_instrument::invalid_instrument(std::string origin,
+                                                   std::string instrument,
+                                                   std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Invalid instrument \""+instrument+"\" encountered.";
+    if (message.length() > 0) {
+        m_message += " " + message;
+    }
+
+    // Add list of valid instruments
+    GObservationRegistry registry;
+    if (registry.size() > 0) {
+        m_message += "The following instruments are registered: ";
+        for (int i = 0; i < registry.size(); ++i) {
+            if (i > 0) {
+                m_message += ", ";
+            }
+            m_message += "\"" + registry.name(i) + "\"";
+        }
+        m_message += ".";
+    }
+    else {
+        m_message += "No instruments are registered.";
+    }
 
     // Return
     return;

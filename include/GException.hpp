@@ -524,6 +524,11 @@ public:
         invalid_statistics(std::string origin, std::string statistics,
                            std::string message = "");
     };
+    class invalid_instrument : public GExceptionHandler {
+    public:
+        invalid_instrument(std::string origin, std::string instrument,
+                           std::string message = "");
+    };
 
 
     // XML exceptions
