@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      test_LAT.cpp  -  test LAT classes                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file test_LAT.cpp
  * @brief Testing of LAT classes.
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -39,16 +39,18 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir    = "../inst/lat/test/data";
-const std::string lat_caldb  = "../inst/lat/caldb";
-const std::string lat_irf    = "P6_v3_diff";
-const std::string lat_ft1    = datadir+"/ft1.fits";
-const std::string lat_ft2    = datadir+"/ft2.fits";
-const std::string lat_cntmap = datadir+"/cntmap.fits";
-const std::string lat_srcmap = datadir+"/srcmap.fits";
-const std::string lat_expmap = datadir+"/binned_expmap.fits";
-const std::string lat_ltcube = datadir+"/ltcube.fits";
-const std::string lat_xml    = datadir+"/source_model1.xml";
+const std::string datadir       = "../inst/lat/test/data";
+const std::string lat_caldb     = "../inst/lat/caldb";
+const std::string lat_irf       = "P6_v3_diff";
+const std::string lat_ft1       = datadir+"/ft1.fits";
+const std::string lat_ft2       = datadir+"/ft2.fits";
+const std::string lat_cntmap    = datadir+"/cntmap.fits";
+const std::string lat_srcmap    = datadir+"/srcmap.fits";
+const std::string lat_expmap    = datadir+"/binned_expmap.fits";
+const std::string lat_ltcube    = datadir+"/ltcube.fits";
+const std::string lat_bin_xml   = datadir+"/obs_binned.xml";
+const std::string lat_unbin_xml = datadir+"/obs_unbinned.xml";
+const std::string lat_model_xml = datadir+"/source_model1.xml";
 
 
 /***********************************************************************//**
@@ -276,6 +278,9 @@ void test_ltcube(void)
  ***************************************************************************/
 void test_unbinned_obs(void)
 {
+    // Set filenames
+    const std::string file1 = "test_obs_unbinned.xml";
+
     // Write header
     std::cout << "Test unbinned observation handling: ";
 
@@ -355,6 +360,23 @@ void test_unbinned_obs(void)
     }
     std::cout << ".";
 
+    // Test XML loading
+    try {
+        // Load observations
+        obs = GObservations(lat_unbin_xml);
+        
+        // Save observations
+        obs.save(file1);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to load unbinned observation from XML file."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
     // Plot final test success
     std::cout << " ok." << std::endl;
 
@@ -369,6 +391,9 @@ void test_unbinned_obs(void)
  ***************************************************************************/
 void test_binned_obs(void)
 {
+    // Set filenames
+    const std::string file1 = "test_obs_binned.xml";
+
     // Write header
     std::cout << "Test binned observation handling: ";
 
@@ -488,11 +513,27 @@ void test_binned_obs(void)
 
         // Set mean PSF
         GLATMeanPsf psf(dir, run);
-//std::cout << std::endl << psf << std::endl;
     }
     catch (std::exception &e) {
         std::cout << std::endl
                   << "TEST ERROR: Unable to setup mean LAT PSF."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test XML loading
+    try {
+        // Load observations
+        obs = GObservations(lat_bin_xml);
+        
+        // Save observations
+        obs.save(file1);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to load binned observation from XML file."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -534,7 +575,7 @@ void test_binned_optimizer(void)
     std::cout << ".";
 
     // Load models from XML file
-    obs.models(lat_xml);
+    obs.models(lat_model_xml);
 
     // Setup LM optimizer
     GOptimizerLM opt;
@@ -581,6 +622,12 @@ int main(void)
 
     // Execute tests requiring data
     if (has_data) {
+
+        // Set CALDB environment variable
+        std::string caldb = "CALDB="+lat_caldb;
+        putenv((char*)caldb.c_str());
+
+        // Execute tests
         test_ltcube();
         test_unbinned_obs();
         test_binned_obs();
