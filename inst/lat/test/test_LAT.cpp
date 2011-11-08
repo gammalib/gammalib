@@ -279,7 +279,7 @@ void test_ltcube(void)
 void test_unbinned_obs(void)
 {
     // Set filenames
-    const std::string file1 = "test_obs_unbinned.xml";
+    const std::string file1 = "test_lat_obs_unbinned.xml";
 
     // Write header
     std::cout << "Test unbinned observation handling: ";
@@ -392,7 +392,7 @@ void test_unbinned_obs(void)
 void test_binned_obs(void)
 {
     // Set filenames
-    const std::string file1 = "test_obs_binned.xml";
+    const std::string file1 = "test_lat_obs_binned.xml";
 
     // Write header
     std::cout << "Test binned observation handling: ";
