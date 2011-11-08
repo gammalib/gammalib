@@ -1231,6 +1231,9 @@ void GCTAResponse::init_members(void)
     // Initialise members
     m_caldb.clear();
     m_rspname.clear();
+    m_arffile.clear();
+    m_rmffile.clear();
+    m_psffile.clear();
     m_psf_logE.clear();
     m_aeff_logE.clear();
     m_logE.clear();
@@ -1255,6 +1258,9 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
     // Copy attributes
     m_caldb        = rsp.m_caldb;
     m_rspname      = rsp.m_rspname;
+    m_arffile      = rsp.m_arffile;
+    m_rmffile      = rsp.m_rmffile;
+    m_psffile      = rsp.m_psffile;
     m_psf_logE     = rsp.m_psf_logE;
     m_aeff_logE    = rsp.m_aeff_logE;
     m_logE         = rsp.m_logE;
