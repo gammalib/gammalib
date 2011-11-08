@@ -315,7 +315,7 @@ GException::invalid_instrument::invalid_instrument(std::string origin,
     // Add list of valid instruments
     GObservationRegistry registry;
     if (registry.size() > 0) {
-        m_message += "The following instruments are registered: ";
+        m_message += " The following instruments are registered: ";
         for (int i = 0; i < registry.size(); ++i) {
             if (i > 0) {
                 m_message += ", ";
