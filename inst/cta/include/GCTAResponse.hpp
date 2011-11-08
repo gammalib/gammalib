@@ -125,6 +125,9 @@ public:
     const double&  eps(void) const { return m_eps; }
     void           offset_sigma(const double& sigma) { m_offset_sigma=sigma; }
     const double&  offset_sigma(void) const { return m_offset_sigma; }
+    std::string    arffile(void) const { return m_arffile; }
+    std::string    rmffile(void) const { return m_rmffile; }
+    std::string    psffile(void) const { return m_psffile; }
 
     // Low-level response methods
     double aeff(const double& theta,
@@ -366,6 +369,9 @@ private:
     // Private data members
     std::string         m_caldb;        //!< Name of or path to the calibration database
     std::string         m_rspname;      //!< Name of the instrument response
+    std::string         m_arffile;      //!< Name of ARF file
+    std::string         m_rmffile;      //!< Name of RMF file
+    std::string         m_psffile;      //!< Name of PSF file
     GNodeArray          m_psf_logE;     //!< log(E) nodes for PSF interpolation
     GNodeArray          m_aeff_logE;    //!< log(E) nodes for Aeff interpolation
     std::vector<double> m_logE;         //!< log(E) = log10(E/TeV) - bin centre

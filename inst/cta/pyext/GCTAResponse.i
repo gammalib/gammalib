@@ -90,6 +90,9 @@ public:
     const double&  eps(void) const;
     void           offset_sigma(const double& sigma);
     const double&  offset_sigma(void) const;
+    std::string    arffile(void) const;
+    std::string    rmffile(void) const;
+    std::string    psffile(void) const;
 
     // Low-level response methods
     double aeff(const double& theta,
