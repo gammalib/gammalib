@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GFitsTable.i  - FITS table abstract base class SWIG interface       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTable.i
  * @brief FITS table abstract base class Python interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -122,7 +122,7 @@ public:
     void append_rows(const int& nrows);
     void insert_rows(const int& rownum, const int& nrows);
     void remove_rows(const int& rownum, const int& nrows);
-    bool has(const std::string& colname) const;
+    bool hascolumn(const std::string& colname) const;
     int  nrows(void) const;
     int  ncols(void) const;
 };

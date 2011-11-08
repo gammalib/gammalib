@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GFitsTable.cpp  - FITS table base class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTable.cpp
  * @brief FITS table abstract base class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -542,7 +542,7 @@ int GFitsTable::ncols(void) const
  *
  * @param[in] colname Column name.
  ***************************************************************************/
-bool GFitsTable::has(const std::string& colname) const
+bool GFitsTable::hascolumn(const std::string& colname) const
 {
     // Get pointer in column
     GFitsTableCol* ptr = ptr_column(colname);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GFitsTable.hpp  - FITS table abstract base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTable.hpp
  * @brief FITS table abstract base class interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GFITSTABLE_HPP
@@ -79,7 +79,7 @@ public:
     void        remove_rows(const int& rownum, const int& nrows);
     int         nrows(void) const;
     int         ncols(void) const;
-    bool        has(const std::string& colname) const;
+    bool        hascolumn(const std::string& colname) const;
     std::string print(void) const;
 
 protected:
