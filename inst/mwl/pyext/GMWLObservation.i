@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GMWLObservation.i  -  Multi-wavelength observation class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GMWLObservation.i
  * @brief Multi-wavelength observation class Python interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -43,6 +43,7 @@ public:
     // Constructors and destructors
     GMWLObservation(void);
     explicit GMWLObservation(const std::string& filename);
+    explicit GMWLObservation(const std::string& filename, const int& extno);
     explicit GMWLObservation(const std::string& filename, const std::string& extname);
     GMWLObservation(const GMWLObservation& obs);
     virtual ~GMWLObservation(void);
@@ -54,11 +55,19 @@ public:
     virtual GMWLResponse*    response(void) const;
     virtual GMWLPointing*    pointing(const GTime& time) const;
     virtual std::string      instrument(void) const;
+    virtual void             read(const GXmlElement& xml);
+    virtual void             write(GXmlElement& xml) const;
 
     // Other methods
-    void load(const std::string& filename);
-    void load(const std::string& filename, const std::string& extname);
-    void instrument(const std::string& instrument);
+    void        load(const std::string& filename);
+    void        load(const std::string& filename, const int& extno);
+    void        load(const std::string& filename, const std::string& extname);
+    std::string filename(void) const;
+    std::string extno(void) const;
+    std::string extname(void) const;
+    void        filename(const std::string& filename);
+    void        extno(const std::string& extno);
+    void        extname(const std::string& extname);
 };
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GMWLObservation.cpp  -  Multi-wavelength observation class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GMWLObservation.cpp
  * @brief Multi-wavelength observation class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -30,6 +30,7 @@
 #endif
 #include "GObservationRegistry.hpp"
 #include "GTools.hpp"
+#include "GException.hpp"
 #include "GMWLObservation.hpp"
 #include "GMWLSpectrum.hpp"
 #include "GMWLException.hpp"
@@ -40,6 +41,8 @@ const GObservationRegistry g_obs_mwl_registry(&g_obs_mwl_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_RESPONSE                    "GMWLObservation::response(GResponse&)"
+#define G_READ                          "GMWLObservation::read(GXmlElement&)"
+#define G_WRITE                        "GMWLObservation::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -83,6 +86,28 @@ GMWLObservation::GMWLObservation(const std::string& filename) : GObservation()
 
     // Load observation
     load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief File constructor
+ *
+ * @param[in] filename File name.
+ * @param[in] extno FITS file extension number.
+ *
+ * Creates instance from file.
+ ***************************************************************************/
+GMWLObservation::GMWLObservation(const std::string& filename,
+                                 const int& extno) : GObservation()
+{
+    // Initialise members
+    init_members();
+
+    // Load observation
+    load(filename, extno);
 
     // Return
     return;
@@ -233,8 +258,9 @@ void GMWLObservation::response(const GResponse& rsp)
 {
     // Get pointer on MWL response
     const GMWLResponse* mwlrsp = dynamic_cast<const GMWLResponse*>(&rsp);
-    if (mwlrsp == NULL)
+    if (mwlrsp == NULL) {
         throw GMWLException::bad_response_type(G_RESPONSE);
+    }
 
     // Delete old response function
     if (m_response != NULL) delete m_response;
@@ -270,6 +296,168 @@ GMWLPointing* GMWLObservation::pointing(const GTime& time) const
 
 
 /***********************************************************************//**
+ * @brief Read observation from XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * @exception GException::xml_invalid_parnum
+ *            Invalid number of parameters found in XML element.
+ * @exception GException::xml_invalid_parnames
+ *            Invalid parameter names found in XML element.
+ *
+ * Reads information for a multi-wavelength observation from an XML element.
+ * The expected format of the XML element is
+ *
+ *  <observation name="..." id="..." instrument="MWL">
+ *    <parameter name="Instrument" value="..."/>
+ *    <parameter name="Data" file="..." [extno="..."] [extname="..."]/>
+ *  </observation>
+ *
+ * The extno and extname attributes of the data parameter are optional, and
+ * can be used to indicate the extension number or name from which the
+ * multi-wavelength data should be loaded. If both are given, the extension
+ * number will take precedence and the extension name is ignored.
+ ***************************************************************************/
+void GMWLObservation::read(const GXmlElement& xml)
+{
+    // Clear observation
+    clear();
+
+    // Determine number of parameter nodes in XML element
+    int npars = xml.elements("parameter");
+
+    // Verify that XML element has exactly 2 parameters
+    if (xml.elements() != 2 || npars != 2) {
+        throw GException::xml_invalid_parnum(G_READ, xml,
+              "MWL observation requires exactly 2 parameters.");
+    }
+
+    // Extract parameters
+    int npar[2] = {0, 0};
+    for (int i = 0; i < npars; ++i) {
+
+        // Get parameter element
+        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+
+        // Handle Instrument name
+        if (par->attribute("name") == "Instrument") {
+
+            // Read instrument name
+            m_instrument = par->attribute("value");
+            
+            // Increment parameter counter
+            npar[0]++;
+        }
+
+        // Handle data filename
+        else if (par->attribute("name") == "Data") {
+
+            // Read filename
+            std::string filename = par->attribute("file");
+            
+            // Read (optional) extension number and name
+            std::string extno   = par->attribute("extno");
+            std::string extname = par->attribute("extname");
+            
+            // Load file (this also stores the filename, extno and
+            // extname)
+            if (strip_whitespace(extno).length() > 0) {
+                load(filename, toint(extno));
+            }
+            else if (strip_whitespace(extname).length() > 0) {
+                load(filename, extname);
+            }
+            else {
+                load(filename);
+            }
+            
+            // Increment parameter counter
+            npar[1]++;
+        }
+
+    } // endfor: looped over all parameters
+
+    // Verify that all parameters were found
+    if (npar[0] != 1 || npar[1] != 1) {
+        throw GException::xml_invalid_parnames(G_READ, xml,
+              "Require \"Instrument\" and \"Data\" parameters.");
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write observation into XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * @exception GException::xml_invalid_parnum
+ *            Invalid number of parameters found in XML element.
+ * @exception GException::xml_invalid_parnames
+ *            Invalid parameter names found in XML element.
+ *
+ * Writes information for a multi-wavelength observation into an XML element.
+ * The format of the XML element is
+ *
+ *  <observation name="..." id="..." instrument="MWL">
+ *    <parameter name="Instrument" value="..."/>
+ *    <parameter name="Data" file="..." [extno="..."] [extname="..."]/>
+ *  </observation>
+ ***************************************************************************/
+void GMWLObservation::write(GXmlElement& xml) const
+{
+    // If XML element has 0 nodes then append 2 parameter nodes
+    if (xml.elements() == 0) {
+        xml.append(new GXmlElement("parameter name=\"Instrument\""));
+        xml.append(new GXmlElement("parameter name=\"Data\""));
+    }
+
+    // Verify that XML element has exactly 2 parameters
+    if (xml.elements() != 2 || xml.elements("parameter") != 2) {
+        throw GException::xml_invalid_parnum(G_WRITE, xml,
+              "MWL observation requires exactly 2 parameters.");
+    }
+
+    // Set or update parameter attributes
+    int npar[] = {0, 0};
+    for (int i = 0; i < 2; ++i) {
+
+        // Get parameter element
+        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+
+        // Handle Instrument
+        if (par->attribute("name") == "Instrument") {
+            npar[0]++;
+            par->attribute("value", m_instrument);
+        }
+
+        // Handle Data
+        else if (par->attribute("name") == "Data") {
+            npar[1]++;
+            par->attribute("file", m_filename);
+            if (strip_whitespace(m_extno).length() > 0) {
+                par->attribute("extno", m_extno);
+            }
+            if (strip_whitespace(m_extname).length() > 0) {
+                par->attribute("extname", m_extname);
+            }
+        }
+
+    } // endfor: looped over all parameters
+
+    // Check of all required parameters are present
+    if (npar[0] != 1 || npar[1] != 1)
+        throw GException::xml_invalid_parnames(G_WRITE, xml,
+              "Require \"Instrument\" and \"Data\" parameters.");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load observation
  *
  * @param[in] filename File name.
@@ -288,7 +476,38 @@ void GMWLObservation::load(const std::string& filename)
 
     // Set attributes
     name("Multi-wavelength observation");
-    instrument(spec->instrument());
+    m_filename   = filename;
+    m_instrument = spec->instrument();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load observation
+ *
+ * @param[in] filename File name.
+ * @param[in] extno FITS extension number.
+ ***************************************************************************/
+void GMWLObservation::load(const std::string& filename,
+                           const int& extno)
+{
+    // Clear observation
+    clear();
+
+    // Allocate spectrum
+    GMWLSpectrum* spec = new GMWLSpectrum;
+    m_events = spec;
+
+    // Load spectrum
+    spec->load(filename, extno);
+
+    // Set attributes
+    name("Multi-wavelength observation");
+    m_filename   = filename;
+    m_extno      = str(extno);
+    m_instrument = spec->instrument();
 
     // Return
     return;
@@ -316,7 +535,9 @@ void GMWLObservation::load(const std::string& filename,
 
     // Set attributes
     name("Multi-wavelength observation");
-    instrument(spec->instrument());
+    m_filename   = filename;
+    m_extname    = extname;
+    m_instrument = spec->instrument();
 
     // Return
     return;
@@ -334,10 +555,14 @@ std::string GMWLObservation::print(void) const
     // Append header
     result.append("=== GMWLObservation ===");
     result.append("\n"+parformat("Name")+name());
+    result.append("\n"+parformat("Identifier")+id());
+    result.append("\n"+parformat("Instrument")+instrument());
+    result.append("\n"+parformat("Statistics")+statistics());
 
     // Append events
-    if (m_events != NULL)
+    if (m_events != NULL) {
         result.append("\n"+((GMWLSpectrum*)m_events)->print());
+    }
 
     // Return result
     return result;
@@ -361,6 +586,9 @@ void GMWLObservation::init_members(void)
 {
     // Initialise members
     m_instrument = "MWL";
+    m_filename.clear();
+    m_extno.clear();
+    m_extname.clear();
     m_response   = new GMWLResponse;
     m_pointing   = new GMWLPointing;
 
@@ -381,6 +609,9 @@ void GMWLObservation::copy_members(const GMWLObservation& obs)
 {
     // Copy members
     m_instrument = obs.m_instrument;
+    m_filename   = obs.m_filename;
+    m_extno      = obs.m_extno;
+    m_extname    = obs.m_extname;
     if (obs.m_response != NULL) m_response = obs.m_response->clone();
     if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
 
