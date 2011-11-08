@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAEventList.hpp  -  CTA event atom container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAEventList.hpp
  * @brief CTA event atom container class interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GCTAEVENTLIST_HPP
@@ -83,6 +83,9 @@ protected:
     virtual void set_energies(void) { return; }
     virtual void set_times(void) { return; }
     void         read_events(const GFitsTable* hdu);
+    void         read_events_v0(const GFitsTable* hdu);
+    void         read_events_v1(const GFitsTable* hdu);
+    void         read_events_hillas(const GFitsTable* hdu);
     void         read_ds_ebounds(const GFitsHDU* hdu);
     void         read_ds_roi(const GFitsHDU* hdu);
     void         write_events(GFitsBinTable* hdu) const;

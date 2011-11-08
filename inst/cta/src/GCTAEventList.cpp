@@ -280,19 +280,32 @@ void GCTAEventList::save(const std::string& filename, bool clobber) const
  *
  * @param[in] file FITS file.
  *
- * This method read the CTA event list from a FITS file.
+ * This method reads the CTA event list from a FITS file. The extension name
+ * for the events is expected to be "EVENTS". The header of the HDU is
+ * scanned for data selection keywords that define the energy boundaries and
+ * the region of interest. So far, no scan is performed for time intervals.
  *
- * The method clears the object before loading, thus any events residing in
- * the object before loading will be lost.
+ * If present, Good Time Intervals will be read from an extension names 
+ * "GTI". If no "GTI" extension is present, a single Good Time Interval will
+ * be assumed based on the TSTART and TSTOP keywords.
+ *
+ * The method clears the object before reading, thus any information residing
+ * in the event list prior to reading will be lost.
+ *
+ * @todo Ultimately, any events file should have a GTI extension, hence the
+ *       extraction of GTIs from TSTART and TSTOP should not be necessary.
+ *
+ * @todo For the moment we simply use the MJD unit from the GTime class, but
+ *       we should add the information from MJDREFI and MJDREFF to allow
+ *       setting of arbitrary time units.
  ***************************************************************************/
 void GCTAEventList::read(const GFits& file)
 {
     // Clear object
     clear();
 
-    // Get HDUs
+    // Get event list HDU
     GFitsTable* events = file.table("EVENTS");
-    GFitsTable* gti    = file.table("GTI");
 
     // Load event data
     read_events(events);
@@ -303,8 +316,27 @@ void GCTAEventList::read(const GFits& file)
     // Read energy boundaries from data selection keyword
     read_ds_ebounds(events);
 
-    // Read Good Time Intervals
-    m_gti.read(gti);
+    // If we have a GTI extension, then read Good Time Intervals from that
+    // extension
+    if (file.hashdu("GTI")) {
+        GFitsTable* gti = file.table("GTI");
+        m_gti.read(gti);
+    }
+
+    // ... otherwise build GTI from TSTART and TSTOP
+    else {
+        double tstart  = events->real("TSTART");
+        double tstop   = events->real("TSTOP");
+        int    mjdrefi = events->integer("MJDREFI");
+        double mjdreff = events->real("MJDREFF");
+        GTime  start;
+        GTime  stop;
+        //GTime  start(tstart, mjdrefi, mjdreff);
+        //GTime  stop(tstart, mjdrefi, mjdreff);
+        start.mjd(tstart);
+        stop.mjd(tstop);
+        m_gti.append(start, stop);
+    }
 
     // Return
     return;
@@ -385,22 +417,28 @@ std::string GCTAEventList::print(void) const
     
     // Append GTI intervals
     result.append("\n"+parformat("Time interval"));
-    if (gti().size() > 0)
-        result.append(str(tstart().met())+" - "+str(tstop().met())+" sec");
-    else
+    if (gti().size() > 0) {
+        result.append(str(tstart().mjd())+" - "+str(tstop().mjd())+" days");
+    }
+    else {
         result.append("not defined");
+    }
         
     // Append energy intervals
-    if (ebounds().size() > 0)
+    if (ebounds().size() > 0) {
         result.append("\n"+ebounds().print());
-    else
+    }
+    else {
         result.append("\n"+parformat("Energy intervals")+"not defined");
+    }
     
     // Append ROI
-    if (roi().radius() > 0)
+    if (roi().radius() > 0) {
         result.append("\n"+roi().print());
-    else
+    }
+    else {
         result.append("\n"+parformat("Region of interest")+"not defined");
+    }
 
     // Return result
     return result;
@@ -493,14 +531,53 @@ void GCTAEventList::free_members(void)
  * @param[in] table FITS table pointer.
  *
  * This method reads the CTA event list from a FITS table HDU into memory.
- *
- * @todo Implement agreed column format
- * @todo Declare GFitsTable::column() as const, or at least, add a const
- *       version. Even better, add column access operators instead of the
- *       column() method as GFitsTable is a container for columns, and
- *       each container should have an access operator.
+ * Depending on the columns existing in the file, it either selects v0 or
+ * v1 of the event list reader.
  ***************************************************************************/
 void GCTAEventList::read_events(const GFitsTable* table)
+{
+    // Clear existing events
+    m_events.clear();
+
+    // Continue only if HDU is valid
+    if (table != NULL) {
+
+        // Extract number of events in FITS file
+        int num = table->integer("NAXIS2");
+
+        // Continue only if there are events
+        if (num > 0) {
+        
+            // Read events for v1
+            if (table->hascolumn("SHWIDTH") && table->hascolumn("SHLENGTH")) {
+                read_events_v1(table);
+            }
+
+            // ... otherwise read events for v0
+            else {
+                read_events_v0(table);
+            }
+
+        } // endif: there were events
+
+    } // endif: HDU was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read CTA events from FITS table (version 0)
+ *
+ * @param[in] table FITS table pointer.
+ *
+ * This method reads the CTA event list from a FITS table HDU into memory.
+ * It is a minimal event reader that is compliant with the initial data
+ * format distributed by Karl Kosack. Information that is not present in
+ * that format is set to 0.
+ ***************************************************************************/
+void GCTAEventList::read_events_v0(const GFitsTable* table)
 {
     // Clear existing events
     m_events.clear();
@@ -511,9 +588,88 @@ void GCTAEventList::read_events(const GFitsTable* table)
     // Continue only if HDU is valid
     if (table != NULL) {
 
-        // Circumvent const correctness. We need this because the column()
-        // method is not declared const. This should be corrected.
-        //GFitsTable* hdu = (GFitsTable*)table;
+        // Extract number of events in FITS file
+        int num = table->integer("NAXIS2");
+
+        // If there are events then load them
+        if (num > 0) {
+
+            // Reserve data
+            m_events.reserve(num);
+
+            // Get column pointers
+            GFitsTableULongCol*  ptr_eid        = (GFitsTableULongCol*)&(*table)["EVENT_ID"];
+            GFitsTableDoubleCol* ptr_time       = (GFitsTableDoubleCol*)&(*table)["TIME"];
+            GFitsTableShortCol*  ptr_multip     = (GFitsTableShortCol*)&(*table)["MULTIP"];
+            GFitsTableFloatCol*  ptr_ra         = (GFitsTableFloatCol*)&(*table)["RA"];
+            GFitsTableFloatCol*  ptr_dec        = (GFitsTableFloatCol*)&(*table)["DEC"];
+            GFitsTableFloatCol*  ptr_dir_err    = (GFitsTableFloatCol*)&(*table)["DIR_ERR"];
+            GFitsTableFloatCol*  ptr_detx       = (GFitsTableFloatCol*)&(*table)["DETX"];
+            GFitsTableFloatCol*  ptr_dety       = (GFitsTableFloatCol*)&(*table)["DETY"];
+            GFitsTableFloatCol*  ptr_alt        = (GFitsTableFloatCol*)&(*table)["ALT"];
+            GFitsTableFloatCol*  ptr_az         = (GFitsTableFloatCol*)&(*table)["AZ"];
+            GFitsTableFloatCol*  ptr_corex      = (GFitsTableFloatCol*)&(*table)["COREX"];
+            GFitsTableFloatCol*  ptr_corey      = (GFitsTableFloatCol*)&(*table)["COREY"];
+            GFitsTableFloatCol*  ptr_core_err   = (GFitsTableFloatCol*)&(*table)["CORE_ERR"];
+            GFitsTableFloatCol*  ptr_xmax       = (GFitsTableFloatCol*)&(*table)["XMAX"];
+            GFitsTableFloatCol*  ptr_xmax_err   = (GFitsTableFloatCol*)&(*table)["XMAX_ERR"];
+            GFitsTableFloatCol*  ptr_energy     = (GFitsTableFloatCol*)&(*table)["ENERGY"];
+            GFitsTableFloatCol*  ptr_energy_err = (GFitsTableFloatCol*)&(*table)["ENERGY_ERR"];
+
+            // Copy data from columns into GCTAEventAtom objects
+            GCTAEventAtom event;
+            for (int i = 0; i < num; ++i) {
+                event.m_time.met((*ptr_time)(i));
+                event.m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
+                event.m_energy.TeV((*ptr_energy)(i));
+                event.m_event_id    = (*ptr_eid)(i);
+                event.m_obs_id      = 0;
+                event.m_multip      = (*ptr_multip)(i);
+                event.m_telmask     = 0;
+                event.m_dir_err     = (*ptr_dir_err)(i);
+                event.m_detx        = (*ptr_detx)(i);
+                event.m_dety        = (*ptr_dety)(i);
+                event.m_alt         = (*ptr_alt)(i);
+                event.m_az          = (*ptr_az)(i);
+                event.m_corex       = (*ptr_corex)(i);
+                event.m_corey       = (*ptr_corey)(i);
+                event.m_core_err    = (*ptr_core_err)(i);
+                event.m_xmax        = (*ptr_xmax)(i);
+                event.m_xmax_err    = (*ptr_xmax_err)(i);
+                event.m_shwidth     = 0.0;
+                event.m_shlength    = 0.0;
+                event.m_energy_err  = (*ptr_energy_err)(i);
+                m_events.push_back(event);
+            }
+
+        } // endif: there were events
+
+    } // endif: HDU was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read CTA events from FITS table (version 1)
+ *
+ * @param[in] table FITS table pointer.
+ *
+ * This method reads the CTA event list from a FITS table HDU into memory.
+ *
+ * @todo Implement agreed column format
+ ***************************************************************************/
+void GCTAEventList::read_events_v1(const GFitsTable* table)
+{
+    // Clear existing events
+    m_events.clear();
+
+    // Allocate space for keyword name
+    char keyword[10];
+
+    // Continue only if HDU is valid
+    if (table != NULL) {
 
         // Extract number of events in FITS file
         int num = table->integer("NAXIS2");
@@ -571,6 +727,52 @@ void GCTAEventList::read_events(const GFitsTable* table)
                 event.m_energy_err  = (*ptr_energy_err)(i);
                 m_events.push_back(event);
             }
+
+        } // endif: there were events
+
+    } // endif: HDU was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read Hillas information for CTA events from FITS table
+ *
+ * @param[in] table FITS table pointer.
+ *
+ * This method reads the Hillas reconstruction information for CTA events
+ * from an EVENTS file.
+ *
+ * @todo Implement method after restructuration of event list.
+ ***************************************************************************/
+void GCTAEventList::read_events_hillas(const GFitsTable* table)
+{
+    // Allocate space for keyword name
+    char keyword[10];
+
+    // Continue only if HDU is valid
+    if (table != NULL) {
+
+        // Extract number of events in FITS file
+        int num = table->integer("NAXIS2");
+
+        //TODO: Make sure that dimension is consistent with existing event list
+
+        // Continue only if there are events
+        if (num > 0) {
+
+            // Get column pointers
+            GFitsTableFloatCol* ptr_hil_msw     = (GFitsTableFloatCol*)&(*table)["HIL_MSW"];
+            GFitsTableFloatCol* ptr_hil_msw_err = (GFitsTableFloatCol*)&(*table)["HIL_MSW_ERR"];
+            GFitsTableFloatCol* ptr_hil_msl     = (GFitsTableFloatCol*)&(*table)["HIL_MSL"];
+            GFitsTableFloatCol* ptr_hil_msl_err = (GFitsTableFloatCol*)&(*table)["HIL_MSL_ERR"];
+
+            //TODO: Add information to event
+            for (int i = 0; i < num; ++i) {
+
+            } // endfor: looped over all events
 
         } // endif: there were events
 

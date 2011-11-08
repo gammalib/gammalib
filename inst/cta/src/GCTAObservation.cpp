@@ -726,6 +726,7 @@ void GCTAObservation::init_members(void)
     m_pointing = NULL;
     m_obs_id   = 0;
     m_livetime = 0.0;
+    m_deadc    = 0.0;
     m_ra_obj   = 0.0;
     m_dec_obj  = 0.0;
 
@@ -749,6 +750,7 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     m_eventfile = obs.m_eventfile;
     m_obs_id    = obs.m_obs_id;
     m_livetime  = obs.m_livetime;
+    m_deadc     = obs.m_deadc;
     m_ra_obj    = obs.m_ra_obj;
     m_dec_obj   = obs.m_dec_obj;
 
@@ -780,30 +782,51 @@ void GCTAObservation::free_members(void)
  *
  * @param[in] hdu FITS HDU pointer
  *
- * Reads the observation attributes from HDU. Nothing is done if the HDU
- * pointer is NULL.
+ * Reads CTA observation attributes from HDU. Mandatory attributes are
+ *
+ * RA_PNT  - Right Ascension of pointing
+ * DEC_PNT - Declination of pointing
+ *
+ * and optional attributes are
+ *
+ * OBJECT   - Name of observed object
+ * RA_OBJ   - Right Ascension of observed object,
+ * DEC_OBJ  - Declination of observed object,
+ * OBS_ID   - Observation identifier
+ * LIVETIME - Livetime
+ * DEADC    - Deadtime correction
+ * ALT_PNT  - Altitude of pointing above horizon
+ * AZ_PNT   - Azimuth of pointing
+ *
+ * Based on RA_PNT and DEC_PNT, the CTA pointing direction is set. Nothing
+ * is done if the HDU pointer is NULL.
+ *
+ * @todo The actual reader is a minimal reader to accomodate as many
+ *       different datasets as possible. Once the CTA data format is fixed
+ *       the reader should have more mandatory attributes.
  ***************************************************************************/
 void GCTAObservation::read_attributes(const GFitsHDU* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
 
-        // Read attributes
-        m_obs_id   = hdu->integer("OBS_ID");
-        m_livetime = hdu->real("LIVETIME");
-        m_name     = hdu->string("OBJECT");
-        m_ra_obj   = hdu->real("RA_OBJ");
-        m_dec_obj  = hdu->real("DEC_OBJ");
+        // Read mandatory attributes
+        double ra_pnt  = hdu->real("RA_PNT");
+        double dec_pnt = hdu->real("DEC_PNT");
 
-        // Read pointing information
-        double  ra_pnt  = hdu->real("RA_PNT");
-        double  dec_pnt = hdu->real("DEC_PNT");
-        double  alt_pnt = hdu->real("ALT_PNT");
-        double  az_pnt  = hdu->real("AZ_PNT");
+        // Read optional attributes
+        m_name     = (hdu->hascard("OBJECT"))   ? hdu->string("OBJECT") : "unknown";
+        m_ra_obj   = (hdu->hascard("RA_OBJ"))   ? hdu->real("RA_OBJ") : 0.0;
+        m_dec_obj  = (hdu->hascard("DEC_OBJ"))  ? hdu->real("DEC_OBJ") : 0.0;
+        m_obs_id   = (hdu->hascard("OBS_ID"))   ? hdu->integer("OBS_ID") : 0;
+        m_livetime = (hdu->hascard("LIVETIME")) ? hdu->real("LIVETIME") : 0.0;
+        m_deadc    = (hdu->hascard("DEADC"))    ? hdu->real("DEADC") : 0.0;
+        double alt = (hdu->hascard("ALT_PNT"))  ? hdu->real("ALT_PNT") : 0.0;
+        double az  = (hdu->hascard("AZ_PNT"))   ? hdu->real("AZ_PNT") : 0.0;
+
+        // Set pointing information
         GSkyDir pnt;
         pnt.radec_deg(ra_pnt, dec_pnt);
-
-        // Set pointing
         if (m_pointing != NULL) delete m_pointing;
         m_pointing = new GCTAPointing;
         m_pointing->dir(pnt);
