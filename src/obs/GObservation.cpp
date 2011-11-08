@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GObservation.cpp  -  Abstract observation base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -302,6 +302,23 @@ void GObservation::name(const std::string& name)
 
 
 /***********************************************************************//**
+ * @brief Set observation identifier
+ *
+ * @param[in] id Observation identifier.
+ *
+ * Set identifier of the observation.
+ ***************************************************************************/
+void GObservation::id(const std::string& id)
+{
+    // Set identifier
+    m_id = id;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set event container
  *
  * @param[in] events Event container pointer.
@@ -376,6 +393,7 @@ void GObservation::init_members(void)
 {
     // Initialise members
     m_name.clear();
+    m_id.clear();
     m_statistics = "Poisson";
     m_events     = NULL;
 
@@ -395,6 +413,7 @@ void GObservation::copy_members(const GObservation& obs)
 {
     // Copy members
     m_name       = obs.m_name;
+    m_id         = obs.m_id;
     m_statistics = obs.m_statistics;
 
     // Clone members

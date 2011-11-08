@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GObservation.hpp  -  Abstract observation base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GObservation.hpp
  * @brief Abstract observation base class interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GOBSERVATION_HPP
@@ -84,6 +84,8 @@ public:
     virtual GResponse*    response(void) const = 0;
     virtual GPointing*    pointing(const GTime& time) const = 0;
     virtual std::string   instrument(void) const = 0;
+    virtual void          read(const GXmlElement& xml) = 0;
+    virtual void          write(GXmlElement& xml) const = 0;
     virtual std::string   print(void) const = 0;
 
     // Virtual methods
@@ -93,9 +95,11 @@ public:
 
     // Implemented methods
     void                  name(const std::string& name);
+    void                  id(const std::string& id);
     void                  events(const GEvents* events);
     void                  statistics(const std::string& statistics);
     const std::string&    name(void) const { return m_name; }
+    const std::string&    id(void) const { return m_id; }
     const GEvents*        events(void) const;
     const std::string&    statistics(void) const { return m_statistics; }
 
@@ -179,6 +183,7 @@ protected:
 
     // Protected data area
     std::string m_name;         //!< Name of observation
+    std::string m_id;           //!< Observation identifier
     std::string m_statistics;   //!< Optimizer statistics (default=poisson)
     GEvents*    m_events;       //!< Pointer to event container
 };

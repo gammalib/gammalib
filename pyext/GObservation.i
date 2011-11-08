@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GObservation.i  -  Abstract observation abstract base class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GObservation.i
  * @brief Abstract observation base class Python interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -49,6 +49,8 @@ public:
     virtual GResponse*    response(void) const = 0;
     virtual GPointing*    pointing(const GTime& time) const = 0;
     virtual std::string   instrument(void) const = 0;
+    virtual void          read(const GXmlElement& xml) = 0;
+    virtual void          write(GXmlElement& xml) const = 0;
 
     // Virtual methods
     virtual double        model(const GModels& models, const GEvent& event,
@@ -57,9 +59,11 @@ public:
 
     // Implemented methods
     void                  name(const std::string& name);
+    void                  id(const std::string& id);
     void                  events(const GEvents* events);
     void                  statistics(const std::string& statistics);
     const std::string&    name(void) const;
+    const std::string&    id(void) const;
     const GEvents*        events(void) const;
     const std::string&    statistics(void) const;
 
