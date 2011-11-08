@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      test_CTA.cpp  -  test CTA classes                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file test_CTA.cpp
  * @brief Testing of CTA classes.
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -39,12 +39,14 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir    = "../inst/cta/test/data";
-const std::string cta_caldb  = "../inst/cta/caldb";
-const std::string cta_irf    = "kb_E_50h_v3";
-const std::string cta_events = datadir+"/crab_events.fits.gz";
-const std::string cta_cntmap = datadir+"/crab_cntmap.fits.gz";
-const std::string cta_xml    = datadir+"/crab.xml";
+const std::string datadir       = "../inst/cta/test/data";
+const std::string cta_caldb     = "../inst/cta/caldb";
+const std::string cta_irf       = "kb_E_50h_v3";
+const std::string cta_events    = datadir+"/crab_events.fits.gz";
+const std::string cta_cntmap    = datadir+"/crab_cntmap.fits.gz";
+const std::string cta_bin_xml   = datadir+"/obs_binned.xml";
+const std::string cta_unbin_xml = datadir+"/obs_unbinned.xml";
+const std::string cta_model_xml = datadir+"/crab.xml";
 
 
 /***********************************************************************//**
@@ -276,6 +278,9 @@ void test_response(void)
  ***************************************************************************/
 void test_unbinned_obs(void)
 {
+    // Set filenames
+    const std::string file1 = "test_cta_obs_unbinned.xml";
+
     // Write header
     std::cout << "Test CTA unbinned observation handling: ";
 
@@ -356,6 +361,23 @@ void test_unbinned_obs(void)
     }
     std::cout << ".";
 
+    // Test XML loading
+    try {
+        // Load observations
+        obs = GObservations(cta_unbin_xml);
+        
+        // Save observations
+        obs.save(file1);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to load unbinned observation from XML file."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
     // Plot final test success
     std::cout << " ok." << std::endl;
 
@@ -397,7 +419,7 @@ void test_unbinned_optimizer(void)
     std::cout << ".";
 
     // Load models from XML file
-    obs.models(cta_xml);
+    obs.models(cta_model_xml);
 
     // Perform LM optimization
     GOptimizerLM opt;
@@ -430,6 +452,9 @@ void test_unbinned_optimizer(void)
  ***************************************************************************/
 void test_binned_obs(void)
 {
+    // Set filenames
+    const std::string file1 = "test_cta_obs_binned.xml";
+
     // Write header
     std::cout << "Test CTA binned observation handling: ";
 
@@ -445,6 +470,23 @@ void test_binned_obs(void)
     }
     catch (std::exception &e) {
         std::cout << std::endl << "TEST ERROR: Unable to load CTA run."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test XML loading
+    try {
+        // Load observations
+        obs = GObservations(cta_bin_xml);
+        
+        // Save observations
+        obs.save(file1);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to load binned observation from XML file."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -490,7 +532,7 @@ void test_binned_optimizer(void)
     std::cout << ".";
 
     // Load models from XML file
-    obs.models(cta_xml);
+    obs.models(cta_model_xml);
 
     // Perform LM optimization
     GOptimizerLM opt;
@@ -537,6 +579,12 @@ int main(void)
 
     // Execute tests requiring data
     if (has_data) {
+
+        // Set CALDB environment variable
+        std::string caldb = "CALDB="+cta_caldb;
+        putenv((char*)caldb.c_str());
+
+        // Execute tests
         test_unbinned_obs();
         test_binned_obs();
         test_unbinned_optimizer();
