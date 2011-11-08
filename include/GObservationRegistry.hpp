@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GObservationRegistry.hpp  -  Observation registry class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GObservationRegistry.hpp
  * @brief GObservationRegistry class interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GOBSERVATIONREGISTRY_HPP
@@ -54,7 +54,7 @@ class GObservationRegistry {
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GObservationRegistry& registry);
-    friend GLog&         operator<<(GLog& log, const GObservationRegistry& registry);
+    friend GLog&         operator<<(GLog& log,        const GObservationRegistry& registry);
 
 public:
     // Constructors and destructors
@@ -68,8 +68,8 @@ public:
 
     // Methods
     int           size(void) const { return m_number; }
-    GObservation* alloc(const std::string& type) const;
-    std::string   type(const int& index) const;
+    GObservation* alloc(const std::string& instrument) const;
+    std::string   instrument(const int& index) const;
     std::string   print(void) const;
 
 protected:

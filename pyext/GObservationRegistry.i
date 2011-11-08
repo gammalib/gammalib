@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GObservationRegistry.i  -  Observation registry class python I/F     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GObservationRegistry.i
  * @brief GObservationRegistry class python interface.
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -45,8 +45,8 @@ public:
 
     // Methods
     int           size(void) const { return m_number; }
-    GObservation* alloc(const std::string& type) const;
-    std::string   type(const int& index) const;
+    GObservation* alloc(const std::string& instrument) const;
+    std::string   instrument(const int& index) const;
 };
 
 

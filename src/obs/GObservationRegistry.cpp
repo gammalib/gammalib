@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GObservationRegistry.cpp  -  Observation registry class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GObservationRegistry.cpp
  * @brief GObservationRegistry class interface implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -37,7 +37,7 @@ std::string*         GObservationRegistry::m_names(0);
 const GObservation** GObservationRegistry::m_obs(0);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_NAME                             "GObservationRegistry::name(int&)"
+#define G_INSTRUMENT                 "GObservationRegistry::instrument(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -64,8 +64,9 @@ GObservationRegistry::GObservationRegistry(void)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GObservationRegistry(void): ";
-    for (int i = 0; i < m_number; ++i)
+    for (int i = 0; i < m_number; ++i) {
         std::cout << "\"" << m_names[i] << "\" ";
+    }
     std::cout << std::endl;
     #endif
 
@@ -116,8 +117,9 @@ GObservationRegistry::GObservationRegistry(const GObservation* obs)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GObservationRegistry(const GObservation*): ";
-    for (int i = 0; i < m_number; ++i)
+    for (int i = 0; i < m_number; ++i) {
         std::cout << "\"" << m_names[i] << "\" ";
+    }
     std::cout << std::endl;
     #endif
 
@@ -198,19 +200,20 @@ GObservationRegistry& GObservationRegistry::operator= (const GObservationRegistr
 /***********************************************************************//**
  * @brief Allocate observation of given type
  *
- * @param[in] type Observation type.
+ * @param[in] instrument Instrument name.
  *
- * Returns a pointer to a void observation instance of the specified type. If
- * the type has not been found in the registry, a NULL pointer is returned.
+ * Returns a pointer to a void observation instance for a specific
+ * instrument. If the instrument has not been found in the registry, a NULL
+ * pointer is returned.
  ***************************************************************************/
-GObservation* GObservationRegistry::alloc(const std::string& type) const
+GObservation* GObservationRegistry::alloc(const std::string& instrument) const
 {
     // Initialise observation
     GObservation* obs = NULL;
 
     // Search for observation in registry
     for (int i = 0; i < m_number; ++i) {
-        if (m_names[i] == type) {
+        if (m_names[i] == instrument) {
             obs = m_obs[i]->clone();
             break;
         }
@@ -222,19 +225,20 @@ GObservation* GObservationRegistry::alloc(const std::string& type) const
 
 
 /***********************************************************************//**
- * @brief Returns observation types
+ * @brief Returns instrument name for a specific registered observation
  *
  * @param[in] index Observation index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Observation index is out of range.
  ***************************************************************************/
-std::string GObservationRegistry::type(const int& index) const
+std::string GObservationRegistry::instrument(const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_NAME, index, 0, size()-1);
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_INSTRUMENT, index, 0, size()-1);
+    }
     #endif
 
     // Return name
