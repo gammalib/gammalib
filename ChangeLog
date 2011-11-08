@@ -1,4 +1,4 @@
-2011-10-23  Juergen Knoedlseder  <knodlseder@cesr.fr>
+2011-11-08  Juergen Knoedlseder  <knodlseder@cesr.fr>
 
         * Version 0.5.0 released
         ========================
@@ -6,7 +6,8 @@
         Update license text
         Add configure options for Mac OSX universal builds
         Break gammalib Python extension into modules
-        Comply to CTA event list format v1.0.0 
+        Comply to CTA event list format v1.0.0
+        Implement XML protocol for observation loading
         Add support for CTA 1DC response format
         Add GCTAModelRadialPolynom model
         Add GCTAModelRadialProfile model

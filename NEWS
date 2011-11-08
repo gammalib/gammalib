@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-05-00
 
 Author(s) : Juergen Knoedlseder
 
-October 23, 2011
+November, 8th, 2011
 
 
 1. Introduction
@@ -45,7 +45,9 @@ None
 
 8. Observation module
 ---------------------
-None
+Implemented an XML protocol that describes observations. This allows
+for complex combinations of observations in multi-mission analyses
+or for collecting sets of observations, such as runs or exposures.
 
 9. Optimization module
 ----------------------
