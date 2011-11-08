@@ -75,9 +75,10 @@ public:
     void   ra_obj(const double& ra) { m_ra_obj=ra; }
     void   dec_obj(const double& dec) { m_dec_obj=dec; }
     int    obs_id(void) const { return m_obs_id; }
-    double livetime(void) const { return m_livetime; }
     double ra_obj(void) const { return m_ra_obj; }
     double dec_obj(void) const { return m_dec_obj; }
+    double livetime(void) const { return m_livetime; }
+    double deadc(void) const { return m_deadc; }
 
 protected:
     // Protected methods
@@ -96,6 +97,7 @@ protected:
     GCTAPointing* m_pointing;     //!< Pointer to pointing direction
     int           m_obs_id;       //!< Observation ID
     double        m_livetime;     //!< Livetime
+    double        m_deadc;        //!< Deadtime correction
     double        m_ra_obj;       //!< Right Ascension of object
     double        m_dec_obj;      //!< Declination of object
 };

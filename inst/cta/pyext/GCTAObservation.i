@@ -61,9 +61,10 @@ public:
     void   ra_obj(const double& ra);
     void   dec_obj(const double& dec);
     int    obs_id(void) const;
-    double livetime(void) const;
     double ra_obj(void) const;
     double dec_obj(void) const;
+    double livetime(void) const;
+    double deadc(void) const;
 };
 
 
