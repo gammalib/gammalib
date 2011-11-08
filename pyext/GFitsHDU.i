@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GFitsHDU.i  - FITS HDU handling class                 *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2008-2011 by Jurgen Knodlseder                         *
+ *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,30 +56,29 @@ public:
     };
 
     // Pure virtual methods
-    virtual HDUType     exttype(void) const = 0;
-    virtual GFitsHDU*   clone(void) const = 0;
+    virtual HDUType   exttype(void) const = 0;
+    virtual GFitsHDU* clone(void) const = 0;
 
     // Implemented methods
-    virtual std::string      extname(void) const;
-    virtual void             extname(const std::string& extname);
-    virtual int              extno(void) const;
-    virtual void             extno(int num);
-    virtual GFitsHeader*     header(void);
-    virtual GFitsHeaderCard* card(const std::string& keyname);
-    virtual GFitsHeaderCard* card(const int& cardno);
-    virtual int              cards(void) const;
-    virtual std::string      string(const std::string& keyname) const;
-    virtual double           real(const std::string& keyname) const;
-    virtual int              integer(const std::string& keyname) const;
-    virtual void             card(const std::string& keyname,
-                                  const std::string& value,
-                                  const std::string& comment);
-    virtual void             card(const std::string& keyname,
-                                  const double&      value,
-                                  const std::string& comment);
-    virtual void             card(const std::string& keyname,
-                                  const int&         value,
-                                  const std::string& comment);
+    int              size(void) const;
+    std::string      extname(void) const;
+    void             extname(const std::string& extname);
+    int              extno(void) const;
+    void             extno(int num);
+    GFitsHeader*     header(void);
+    bool             hascard(const std::string& keyname) const;
+    bool             hascard(const int& cardno) const;
+    GFitsHeaderCard* card(const std::string& keyname);
+    GFitsHeaderCard* card(const int& cardno);
+    std::string      string(const std::string& keyname) const;
+    double           real(const std::string& keyname) const;
+    int              integer(const std::string& keyname) const;
+    void             card(const std::string& keyname, const std::string& value,
+                          const std::string& comment);
+    void             card(const std::string& keyname, const double& value,
+                          const std::string& comment);
+    void             card(const std::string& keyname, const int& value,
+                          const std::string& comment);
 };
 
 

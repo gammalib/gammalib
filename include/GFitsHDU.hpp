@@ -70,18 +70,20 @@ public:
 
     // Pure virtual methods
     virtual HDUType     exttype(void) const = 0;
-    virtual std::string print(void) const = 0;
     virtual GFitsHDU*   clone(void) const = 0;
+    virtual std::string print(void) const = 0;
 
     // Implemented methods
+    int              size(void) const { return m_header.size(); }
     std::string      extname(void) const { return m_name; }
     void             extname(const std::string& extname);
     int              extno(void) const { return m_hdunum; }
     void             extno(int num) { m_hdunum=num; }
     GFitsHeader*     header(void) { return &m_header; }
+    bool             hascard(const std::string& keyname) const;
+    bool             hascard(const int& cardno) const;
     GFitsHeaderCard* card(const std::string& keyname);
     GFitsHeaderCard* card(const int& cardno);
-    int              cards(void) const { return m_header.size(); }
     std::string      string(const std::string& keyname) const;
     double           real(const std::string& keyname) const;
     int              integer(const std::string& keyname) const;

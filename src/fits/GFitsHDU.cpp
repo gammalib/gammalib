@@ -295,6 +295,30 @@ void GFitsHDU::card(const std::string& keyname, const int& value,
 }
 
 
+/***********************************************************************//**
+ * @brief Checks for presence of header card
+ *
+ * @param[in] keyname Name of header card.
+ ***************************************************************************/
+bool GFitsHDU::hascard(const std::string& keyname) const
+{
+    // Return presence
+    return (m_header.hascard(keyname));
+}
+
+
+/***********************************************************************//**
+ * @brief Checks for presence of header card
+ *
+ * @param[in] cardno Number of card in header.
+ ***************************************************************************/
+bool GFitsHDU::hascard(const int& cardno) const
+{
+    // Return presence
+    return m_header.hascard(cardno);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Protected methods                            =
