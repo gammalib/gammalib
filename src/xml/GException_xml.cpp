@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GException_xml.cpp  -  XML exception handlers             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,6 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GException_xml.cpp
+ * @brief Implement exceptions for the XML module
+ * @author J. Knoedlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
@@ -45,8 +50,9 @@ GException::xml_syntax_error::xml_syntax_error(std::string origin,
     m_message = "XML syntax error ("+message+")";
 
     // Set segment
-    if (segment.length() > 0)
-        m_message += " occured in "+segment;
+    if (segment.length() > 0) {
+        m_message += " occured in " + segment;
+    }
 
     // Return
     return;
@@ -84,7 +90,10 @@ GException::xml_bad_node_type::xml_bad_node_type(std::string origin,
 {
     // Set origin and message
     m_origin  = origin;
-    m_message = "Invalid XML node type ("+type+"). "+message;
+    m_message = "Invalid XML node type ("+type+").";
+    if (message.length() > 0) {
+        m_message += " " + message;
+    }
 
     // Return
     return;
@@ -104,8 +113,59 @@ GException::xml_name_not_found::xml_name_not_found(std::string origin,
 {
     // Set origin and message
     m_origin  = origin;
-    m_message = "XML element name \""+name+"\" not found. "+message;
+    m_message = "XML element name \""+name+"\" not found.";
+    if (message.length() > 0) {
+        m_message += " " + message;
+    }
 
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Invalid number of parameters in XML element
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] xml XML element.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::xml_invalid_parnum::xml_invalid_parnum(std::string origin,
+                                                   GXmlElement xml,
+                                                   std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Invalid number of parameters found in XML element.";
+    if (message.length() > 0) {
+        m_message += " " + message;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Invalid parameter names in XML element
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] xml XML element.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::xml_invalid_parnames::xml_invalid_parnames(std::string origin,
+                                                       GXmlElement xml,
+                                                       std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Invalid parameter names found in XML element." ;
+    if (message.length() > 0) {
+        m_message += " " + message;
+    }
+
+    // Return
+    return;
+}
+
+

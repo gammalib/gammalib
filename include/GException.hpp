@@ -551,6 +551,16 @@ public:
         xml_name_not_found(std::string origin, std::string type,
                            std::string message = "");
     };
+    class xml_invalid_parnum : public GExceptionHandler {
+    public:
+        xml_invalid_parnum(std::string origin, GXmlElement xml,
+                           std::string message = "");
+    };
+    class xml_invalid_parnames : public GExceptionHandler {
+    public:
+        xml_invalid_parnames(std::string origin, GXmlElement xml,
+                             std::string message = "");
+    };
 
 
     // Model exceptions
