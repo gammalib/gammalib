@@ -297,7 +297,7 @@ std::string GLATObservation::instrument(void) const
  *  <observation name="..." id="..." instrument="LAT">
  *    <parameter name="FT1" file="..."/>
  *    <parameter name="FT2" file="..."/>
- *    <parameter name="LifeTimeCube" file="..."/>
+ *    <parameter name="LiveTimeCube" file="..."/>
  *    <parameter name="IRF" file="..."/>
  *  </observation>
  *
@@ -306,7 +306,7 @@ std::string GLATObservation::instrument(void) const
  *  <observation name="..." id="..." instrument="LAT">
  *    <parameter name="CountsMap" file="..."/>
  *    <parameter name="ExposureMap" file="..."/>
- *    <parameter name="LifeTimeCube" file="..."/>
+ *    <parameter name="LiveTimeCube" file="..."/>
  *    <parameter name="IRF" value="..."/>
  *  </observation>
  *
@@ -363,7 +363,7 @@ void GLATObservation::read(const GXmlElement& xml)
         }
 
         // Handle common parameters
-        else if (par->attribute("name") == "LifeTimeCube") {
+        else if (par->attribute("name") == "LiveTimeCube") {
             ltfile = par->attribute("file");
             npar1[2]++;
             npar2[2]++;
@@ -381,8 +381,8 @@ void GLATObservation::read(const GXmlElement& xml)
     bool bin_ok   = (npar2[0] == 1 && npar2[1] == 1 && npar2[2] == 1 && npar2[3] == 1);
     if (!bin_ok && !unbin_ok) {
         throw GException::xml_invalid_parnames(G_READ, xml,
-              "Require either \"FT1\", \"FT2\", \"LifeTimeCube\", and \"IRF\""
-              " or \"CountsMap\", \"ExposureMap\", \"LifeTimeCube\", and"
+              "Require either \"FT1\", \"FT2\", \"LiveTimeCube\", and \"IRF\""
+              " or \"CountsMap\", \"ExposureMap\", \"LiveTimeCube\", and"
               " \"IRF\" parameters.");
     }
 
@@ -420,7 +420,7 @@ void GLATObservation::read(const GXmlElement& xml)
  *  <observation name="..." id="..." instrument="LAT">
  *    <parameter name="FT1" file="..."/>
  *    <parameter name="FT2" file="..."/>
- *    <parameter name="LifeTimeCube" file="..."/>
+ *    <parameter name="LiveTimeCube" file="..."/>
  *    <parameter name="IRF" file="..."/>
  *  </observation>
  *
@@ -429,7 +429,7 @@ void GLATObservation::read(const GXmlElement& xml)
  *  <observation name="..." id="..." instrument="LAT">
  *    <parameter name="CountsMap" file="..."/>
  *    <parameter name="ExposureMap" file="..."/>
- *    <parameter name="LifeTimeCube" file="..."/>
+ *    <parameter name="LiveTimeCube" file="..."/>
  *    <parameter name="IRF" value="..."/>
  *  </observation>
  *
@@ -456,13 +456,13 @@ void GLATObservation::write(GXmlElement& xml) const
         if (is_list) {
             xml.append(new GXmlElement("parameter name=\"FT1\""));
             xml.append(new GXmlElement("parameter name=\"FT2\""));
-            xml.append(new GXmlElement("parameter name=\"LifeTimeCube\""));
+            xml.append(new GXmlElement("parameter name=\"LiveTimeCube\""));
             xml.append(new GXmlElement("parameter name=\"IRF\""));
         }
         else {
             xml.append(new GXmlElement("parameter name=\"CountsMap\""));
             xml.append(new GXmlElement("parameter name=\"ExposureMap\""));
-            xml.append(new GXmlElement("parameter name=\"LifeTimeCube\""));
+            xml.append(new GXmlElement("parameter name=\"LiveTimeCube\""));
             xml.append(new GXmlElement("parameter name=\"IRF\""));
         }
     }
@@ -504,8 +504,8 @@ void GLATObservation::write(GXmlElement& xml) const
             npar[1]++;
         }
 
-        // Handle LifeTimeCube
-        else if (par->attribute("name") == "LifeTimeCube") {
+        // Handle LiveTimeCube
+        else if (par->attribute("name") == "LiveTimeCube") {
             par->attribute("file", m_ltfile);
             npar[2]++;
         }
@@ -525,8 +525,8 @@ void GLATObservation::write(GXmlElement& xml) const
     // Verify that all required parameters are present
     if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
         throw GException::xml_invalid_parnames(G_READ, xml,
-              "Require either \"FT1\", \"FT2\", \"LifeTimeCube\", and \"IRF\""
-              " or \"CountsMap\", \"ExposureMap\", \"LifeTimeCube\", and"
+              "Require either \"FT1\", \"FT2\", \"LiveTimeCube\", and \"IRF\""
+              " or \"CountsMap\", \"ExposureMap\", \"LiveTimeCube\", and"
               " \"IRF\" parameters.");
     }
 
@@ -575,7 +575,7 @@ std::string GLATObservation::print(void) const
  *
  * @param[in] ft1name FT1 FITS filename.
  * @param[in] ft2name FT2 FITS filename.
- * @param[in] ltcube_name Lifetime cube FITS filename
+ * @param[in] ltcube_name Livetime cube FITS filename
  *
  * @todo So far nothing is done with the ft2 file and the ltcube file.
  *       Loading of the relevant information needs to be implemented.
