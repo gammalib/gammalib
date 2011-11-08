@@ -1,0 +1,8 @@
+<observation_list title="observation library">
+  <observation name="Crab" id="00001" instrument="CTA">
+    <parameter name="CountsMap" file="../inst/cta/test/data/crab_cntmap.fits"/>
+    <parameter name="ARF" file=""/>
+    <parameter name="RMF" file=""/>
+    <parameter name="PSF" value=""/>
+  </observation>
+</observation_list>
