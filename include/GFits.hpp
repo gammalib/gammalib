@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GFits.hpp  - FITS file access class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFits.hpp
  * @brief FITS file access class interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GFITS_HPP
@@ -71,6 +71,8 @@ public:
     void        saveto(const std::string& filename, bool clobber = false);
     void        close(void);
     void        append(const GFitsHDU& hdu);
+    bool        hashdu(const std::string& extname) const;
+    bool        hashdu(int extno) const;
     GFitsHDU*   hdu(const std::string& extname) const;
     GFitsHDU*   hdu(int extno) const;
     GFitsImage* image(const std::string& extname) const;

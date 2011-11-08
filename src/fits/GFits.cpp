@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GFits.cpp  - FITS file access class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFits.cpp
  * @brief FITS file access class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -547,6 +547,59 @@ void GFits::append(const GFitsHDU& hdu)
 
 
 /***********************************************************************//**
+ * @brief Verify if HDU exists
+ *
+ * @param[in] extname Name of HDU extension.
+ *
+ * Returns true if a HDU with the specified extension name is present,
+ * otherwise false.
+ ***************************************************************************/
+bool GFits::hashdu(const std::string& extname) const
+{
+    // Initialise result
+    bool present = false;
+
+    // Check primary HDU if requested ...
+    if (toupper(extname) == "PRIMARY") {
+        if (size() > 0) {
+            present = true;
+        }
+    }
+
+    // ... otherwise search for specified extension
+    else {
+        for (int i = 0; i < size(); ++i) {
+            if (m_hdu[i]->extname() == extname) {
+                present = true;
+                break;
+            }
+        }
+    }
+
+    // Return presence flag
+    return present;
+}
+
+
+/***********************************************************************//**
+ * @brief Verify if HDU exists
+ *
+ * @param[in] extno Extension number (starting from 0).
+ *
+ * Returns true if a HDU with the specified extension number is present,
+ * otherwise false.
+ ***************************************************************************/
+bool GFits::hashdu(int extno) const
+{
+    // Set result
+    bool present = (extno >= 0 && extno < size());
+
+    // Return presence flag
+    return present;
+}
+
+
+/***********************************************************************//**
  * @brief Get pointer to HDU
  *
  * @param[in] extname Name of HDU extension.
@@ -578,8 +631,9 @@ GFitsHDU* GFits::hdu(const std::string& extname) const
     }
 
     // Throw an error if HDU has not been found
-    if (ptr == NULL)
+    if (ptr == NULL) {
         throw GException::fits_hdu_not_found(G_HDU1, extname);
+    }
 
     // Return pointer
     return ptr;
@@ -637,8 +691,9 @@ GFitsImage* GFits::image(const std::string& extname) const
     GFitsHDU* ptr = hdu(extname);
 
     // Throw an error if HDU is not an image
-    if (ptr->exttype() != GFitsHDU::HT_IMAGE)
+    if (ptr->exttype() != GFitsHDU::HT_IMAGE) {
         throw GException::fits_hdu_not_image(G_IMAGE1, extname, ptr->exttype());
+    }
 
     // Return pointer
     return ((GFitsImage*)ptr);
@@ -661,10 +716,11 @@ GFitsImage* GFits::image(int extno) const
     GFitsHDU* ptr = hdu(extno);
 
     // Throw an error if HDU is not an image
-    if (ptr->exttype() != GFitsHDU::HT_IMAGE)
+    if (ptr->exttype() != GFitsHDU::HT_IMAGE) {
         throw GException::fits_hdu_not_image(G_IMAGE2,
                                              "(extno="+str(extno)+")",
                                              ptr->exttype());
+    }
 
     // Return pointer
     return ((GFitsImage*)ptr);
@@ -688,8 +744,9 @@ GFitsTable* GFits::table(const std::string& extname) const
 
     // Throw an error if HDU is not a table
     if (ptr->exttype() != GFitsHDU::HT_ASCII_TABLE &&
-        ptr->exttype() != GFitsHDU::HT_BIN_TABLE)
+        ptr->exttype() != GFitsHDU::HT_BIN_TABLE) {
         throw GException::fits_hdu_not_table(G_TABLE1, extname, ptr->exttype());
+    }
 
     // Return pointer
     return ((GFitsTable*)ptr);
@@ -713,10 +770,11 @@ GFitsTable* GFits::table(int extno) const
 
     // Throw an error if HDU is not a table
     if (ptr->exttype() != GFitsHDU::HT_ASCII_TABLE &&
-        ptr->exttype() != GFitsHDU::HT_BIN_TABLE)
+        ptr->exttype() != GFitsHDU::HT_BIN_TABLE) {
         throw GException::fits_hdu_not_table(G_TABLE2,
                                              "(extno="+str(extno)+")",
                                              ptr->exttype());
+    }
 
     // Return pointer
     return ((GFitsTable*)ptr);
