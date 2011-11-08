@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsHeader.cpp  - FITS header handling class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsHeader.cpp
  * @brief FITS header class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -35,8 +35,8 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CARD                                      "GFitsHeader::card(int&)"
-#define G_CARD_PTR                      "GFitsHeader::card_ptr(std::string&)"
+#define G_CARD1                             "GFitsHeader::card(std::string&)"
+#define G_CARD2                                     "GFitsHeader::card(int&)"
 #define G_OPEN                                     "GFitsHeader::open(void*)"
 #define G_SAVE                                     "GFitsHeader::save(void*)"
 
@@ -155,6 +155,15 @@ void GFitsHeader::clear(void)
 
 
 /***********************************************************************//**
+ * @brief Clone header object
+ ***************************************************************************/
+GFitsHeader* GFitsHeader::clone(void) const
+{
+    return new GFitsHeader(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Returns number of header cards
  ***************************************************************************/
 int GFitsHeader::size(void) const
@@ -268,6 +277,40 @@ void GFitsHeader::close(void)
 
 
 /***********************************************************************//**
+ * @brief Check if card is present in header
+ *
+ * @param[in] keyname Name of header card.
+ *
+ * Returns true if header card is present, false otherwise.
+ ***************************************************************************/
+bool GFitsHeader::hascard(const std::string& keyname) const
+{
+    // Check for presence
+    bool present = (card_ptr(keyname) != NULL);
+
+    // Return presence
+    return present;
+}
+
+
+/***********************************************************************//**
+ * @brief Check if card is present in header
+ *
+ * @param[in] cardno Number of card in header
+ *
+ * Returns true if header card is present, false otherwise.
+ ***************************************************************************/
+bool GFitsHeader::hascard(const int& cardno) const
+{
+    // Check for presence
+    bool present = (cardno >= 0 && cardno < m_num_cards);
+
+    // Return presence
+    return present;
+}
+
+
+/***********************************************************************//**
  * @brief Update card in header or append card to header
  *
  * @param card FITS header card that should be updated
@@ -323,12 +366,23 @@ void GFitsHeader::update(const GFitsHeaderCard& card)
  *
  * @param[in] keyname Name of header card
  *
+ * @exception GException::fits_key_not_found
+ *            Requested card was not found in header.
+ *
  * Returns a pointer on the header card.
- * If card was not found a 'fits_key_not_found' error will be thrown.
  ***************************************************************************/
 GFitsHeaderCard* GFitsHeader::card(const std::string& keyname)
 {
-    return GFitsHeader::card_ptr(keyname);
+    // Get header card pointer
+    GFitsHeaderCard* ptr = card_ptr(keyname);
+
+    // If no card was found then throw an error
+    if (ptr == NULL) {
+        throw GException::fits_key_not_found(G_CARD1, keyname);
+    }
+    
+    // Return card pointer
+    return ptr;
 }
 
 
@@ -337,14 +391,17 @@ GFitsHeaderCard* GFitsHeader::card(const std::string& keyname)
  *
  * @param[in] cardno Number of card in header
  *
+ * @exception GException::out_of_range
+ *            Requested card was not found in header.
+ *
  * Returns a pointer on the header card.
- * If card was not found a 'out_of_range' error will be thrown.
  ***************************************************************************/
 GFitsHeaderCard* GFitsHeader::card(const int& cardno)
 {
     // If card number is out of range then throw an exception
-    if (cardno < 0 || cardno >= m_num_cards)
-        throw GException::out_of_range(G_CARD, cardno, 0, m_num_cards-1);
+    if (cardno < 0 || cardno >= m_num_cards) {
+        throw GException::out_of_range(G_CARD2, cardno, 0, m_num_cards-1);
+    }
 
     // Get card pointer
     GFitsHeaderCard* ptr = &(m_card[cardno]);
@@ -475,27 +532,6 @@ int GFitsHeader::integer(const int& cardno)
 
 
 /***********************************************************************//**
- * @brief Clone header object
- ***************************************************************************/
-GFitsHeader* GFitsHeader::clone(void) const
-{
-    return new GFitsHeader(*this);
-}
-
-
-/***********************************************************************//**
- * @brief Returns number of header cards
- *
- * @todo Depreceated method. Use size() instead.
- ***************************************************************************/
-int GFitsHeader::num_cards(void) const
-{
-    // Return number of header cards
-    return m_num_cards;
-}
-
-
-/***********************************************************************//**
  * @brief Print FITS file information
  ***************************************************************************/
 std::string GFitsHeader::print(void) const
@@ -580,13 +616,10 @@ void GFitsHeader::free_members(void)
  *
  * @param[in] keyname Name of the header card
  *
- * @exception GException::fits_key_not_found
- *            Requested header card was not found in header.
- *
- * Returns a pointer on the header card.
- * If card was not found a 'fits_key_not_found' error will be thrown.
+ * Returns pointer on header card. If the header card was not found then
+ * return a NULL pointer.
  ***************************************************************************/
-GFitsHeaderCard* GFitsHeader::card_ptr(const std::string& keyname)
+GFitsHeaderCard* GFitsHeader::card_ptr(const std::string& keyname) const
 {
 
     // Set card pointer to NULL (default)
@@ -599,10 +632,6 @@ GFitsHeaderCard* GFitsHeader::card_ptr(const std::string& keyname)
             break;
         }
     }
-
-    // If no card was found then throw an error
-    if (ptr == NULL)
-        throw GException::fits_key_not_found(G_CARD_PTR, keyname);
 
     // Return pointer
     return ptr;

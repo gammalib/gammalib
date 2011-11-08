@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GFitsHeader.i  - FITS header handling class SWIG file         *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2008-2011 by Jurgen Knodlseder                         *
+ *  copyright : (C) 2008-2011 by Juergen Knoedlseder                       *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GFitsHeader.i
- * @brief GFitsHeader class SWIG file.
- * @author J. Knodlseder
+ * @brief FITS header class Python interface definition
+ * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -52,11 +52,14 @@ public:
 
     // Methods
     void             clear(void);
+    GFitsHeader*     clone(void) const;
     int              size(void) const;
-    void             update(const GFitsHeaderCard& card);
     void             open(void* vptr);
     void             save(void* vptr);
     void             close(void);
+    bool             hascard(const std::string& keyname) const;
+    bool             hascard(const int& cardno) const;
+    void             update(const GFitsHeaderCard& card);
     GFitsHeaderCard* card(const std::string& keyname);
     GFitsHeaderCard* card(const int& cardno);
     std::string      string(const std::string& keyname);
@@ -65,8 +68,6 @@ public:
     double           real(const int& cardno);
     int              integer(const std::string& keyname);
     int              integer(const int& cardno);
-    GFitsHeader*     clone(void) const;
-    int              num_cards(void) const;
 };
 
 

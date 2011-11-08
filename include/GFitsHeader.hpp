@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsHeader.hpp  - FITS header handling class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GFitsHeader.hpp
- * @brief GFitsHeader class definition.
- * @author J. Knodlseder
+ * @brief FITS header class definition
+ * @author J. Knoedlseder
  */
 
 #ifndef GFITSHEADER_HPP
@@ -61,10 +61,13 @@ public:
 
     // Methods
     void             clear(void);
+    GFitsHeader*     clone(void) const;
     int              size(void) const;
     void             open(void* vptr);
     void             save(void* vptr);
     void             close(void);
+    bool             hascard(const std::string& keyname) const;
+    bool             hascard(const int& cardno) const;
     void             update(const GFitsHeaderCard& card);
     GFitsHeaderCard* card(const std::string& keyname);
     GFitsHeaderCard* card(const int& cardno);
@@ -74,8 +77,6 @@ public:
     double           real(const int& cardno);
     int              integer(const std::string& keyname);
     int              integer(const int& cardno);
-    GFitsHeader*     clone(void) const;
-    int              num_cards(void) const;
     std::string      print(void) const;
 
 private:
@@ -83,7 +84,7 @@ private:
     void             init_members(void);
     void             copy_members(const GFitsHeader& header);
     void             free_members(void);
-    GFitsHeaderCard* card_ptr(const std::string& keyname);
+    GFitsHeaderCard* card_ptr(const std::string& keyname) const;
 
     // Private data area
     int              m_num_cards;
