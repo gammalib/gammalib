@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GObservations.i  -  Observations container class SWIG interface     *
+ *             GObservations.i  -  Observations container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GObservations.i
  * @brief Observation container class Python interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -40,12 +40,17 @@ public:
     // Constructors and destructors
     GObservations(void);
     GObservations(const GObservations& obs);
+    explicit GObservations(const std::string& filename);
     virtual ~GObservations(void);
 
     // Methods
     void     clear(void);
     int      size(void) const;
     void     append(GObservation &obs);
+    void     load(const std::string& filename);
+    void     save(const std::string& filename) const;
+    void     read(const GXml& xml);
+    void     write(GXml& xml) const;
     void     models(const GModels& models);
     void     models(const std::string& filename);
     GModels& models(void);
@@ -62,18 +67,21 @@ public:
         return tochar(self->print());
     }
     GObservation& __getitem__(const int& index) {
-        if (index >= 0 && index < self->size())
+        if (index >= 0 && index < self->size()) {
             return (*self)[index];
-        else
+        }
+        else {
             throw GException::out_of_range("__getitem__(int)", index, self->size());
+        }
     }
     void __setitem__(const int& index, const GObservation& val) {
         if (index>=0 && index < self->size()) {
             (*self)[index] = val;
             return;
         }
-        else
+        else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());
+        }
     }
     GObservations copy() {
         return (*self);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GObservations.cpp  -  Observation container class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GObservations.cpp
  * @brief Observations container class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -31,10 +31,11 @@
 #include "GTools.hpp"
 #include "GException.hpp"
 #include "GObservations.hpp"
+#include "GObservationRegistry.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OP_ACCESS                         "GObservations::operator[](int&)"
-#define G_OBSERVATION                 "GObservations::observation(int) const"
+#define G_READ                                   "GObservations::read(GXml&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -74,6 +75,27 @@ GObservations::GObservations(const GObservations& obs)
 
     // Copy members
     copy_members(obs);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load constructor
+ *
+ * @param[in] filename XML filename.
+ *
+ * Creates instance of observation container by extracting all relevant
+ * information from an XML file.
+ ***************************************************************************/
+GObservations::GObservations(const std::string& filename)
+{
+    // Initialise members
+    init_members();
+
+    // Load XML file
+    load(filename);
 
     // Return
     return;
@@ -136,8 +158,9 @@ GObservations& GObservations::operator=(const GObservations& obs)
 GObservation& GObservations::operator[](const int& index)
 {
     // If index is outside boundary then throw an error
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
+    }
 
     // Return reference
     return *(m_obs[index]);
@@ -155,8 +178,9 @@ GObservation& GObservations::operator[](const int& index)
 const GObservation& GObservations::operator[](const int& index) const
 {
     // If index is outside boundary then throw an error
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
+    }
 
     // Return reference
     return *(m_obs[index]);
@@ -203,6 +227,172 @@ void GObservations::append(GObservation& obs)
 
 
 /***********************************************************************//**
+ * @brief Load observations from XML file.
+ *
+ * @param[in] filename Name of XML file.
+ ***************************************************************************/
+void GObservations::load(const std::string& filename)
+{
+    // Clear any existing observations
+    clear();
+
+    // Load XML document
+    GXml xml(filename);
+
+    // Read observations from XML document
+    read(xml);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save observations into XML file.
+ *
+ * @param[in] filename Name of XML file.
+ ***************************************************************************/
+void GObservations::save(const std::string& filename) const
+{
+    // Declare empty XML document
+    GXml xml;
+
+    // Write observations into XML file
+    write(xml);
+
+    // Save XML document
+    xml.save(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read observations from XML document
+ *
+ * @param[in] xml XML document.
+ *
+ * @exception GException::invalid_instrument
+ *            Invalid instrument encountered.
+ *
+ * Reads observations from the first observation list that is found in the
+ * XML document. The decoding of the instrument specific observation
+ * definition is done within the observation's read() method.
+ *
+ * @todo Observation names and IDs are not verified so far for uniqueness.
+ *       This would be required to achieve an unambiguous update of parameters
+ *       in an already existing XML file when using the write method.
+ ***************************************************************************/
+void GObservations::read(const GXml& xml)
+{
+    // Get pointer on observation library
+    GXmlElement* lib = xml.element("observation_list", 0);
+
+    // Loop over all observations
+    int n = lib->elements("observation");
+    for (int i = 0; i < n; ++i) {
+
+        // Get pointer on observation
+        GXmlElement* obs = (GXmlElement*)lib->element("observation", i);
+
+        // Get attributes
+        std::string name       = obs->attribute("name");
+        std::string id         = obs->attribute("id");
+        std::string instrument = obs->attribute("instrument");
+
+        // Get model
+        GObservationRegistry registry;
+        GObservation*        ptr = registry.alloc(instrument);
+
+        // If observation is valid then read its definition from XML file
+        if (ptr != NULL) {
+
+            // Read definition
+            ptr->read(*obs);
+
+            // Set attributes
+            ptr->name(name);
+            ptr->id(id);
+
+        } // endif: observation was valid
+
+        // ... otherwise throw an exception
+        else {
+            throw GException::invalid_instrument(G_READ, instrument);
+        }
+
+        // Append observation to container
+        append(*ptr);
+
+        // Free model (appending clones the observation)
+        delete ptr;
+
+    } // endfor: looped over all observations
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write observations into XML document
+ *
+ * @param[in] xml XML document.
+ *
+ * Write observations into the first observation library that is found in the
+ * XML document. In case that no observation library exists, one is added to
+ * the document.
+ ***************************************************************************/
+void GObservations::write(GXml& xml) const
+{
+    // If there is no observation library then append one
+    if (xml.elements("observation_list") == 0) {
+        xml.append(new GXmlElement("observation_list title=\"observation list\""));
+    }
+
+    // Get pointer on observation library
+    GXmlElement* lib = xml.element("observation_list", 0);
+
+    // Write all observations into library
+    for (int i = 0; i < size(); ++i) {
+    
+        // Initialise pointer on observation
+        GXmlElement* obs = NULL;
+
+        // Search corresponding observation
+        int n = xml.elements("observation");
+        for (int k = 0; k < n; ++k) {
+            GXmlElement* element = (GXmlElement*)xml.element("observation", k);
+            if (element->attribute("name")       == m_obs[i]->name() &&
+                element->attribute("id")         == m_obs[i]->id()   &&
+                element->attribute("instrument") == m_obs[i]->instrument()) {
+                obs = element;
+                break;
+            }
+        }
+
+        // If no observation with corresponding name, ID and instrument was found
+        // then append one now
+        if (obs == NULL) {
+            obs = new GXmlElement("observation");
+            obs->attribute("name", m_obs[i]->name());
+            obs->attribute("id", m_obs[i]->id());
+            obs->attribute("instrument", m_obs[i]->instrument());
+            lib->append(obs);
+        }
+    
+        // Write now observation
+        m_obs[i]->write(*obs);
+
+    } // endfor: looped over all observaitons
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load models from XML file
  *
  * @param[in] filename XML filename. 
@@ -218,9 +408,9 @@ void GObservations::models(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Optimize model parameters using optimizer
+ * @brief Optimise model parameters using optimiser
  *
- * @param[in] opt Optimiser to be used for 
+ * @param[in] opt Optimiser.
  ***************************************************************************/
 void GObservations::optimize(GOptimizer& opt)
 {
@@ -352,8 +542,9 @@ void GObservations::copy_members(const GObservations& obs)
 
     // Copy observations
     m_obs.clear();
-    for (int i = 0; i < obs.m_obs.size(); ++i)
+    for (int i = 0; i < obs.m_obs.size(); ++i) {
         m_obs.push_back((obs.m_obs[i]->clone()));
+    }
 
     // Return
     return;

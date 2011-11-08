@@ -71,6 +71,7 @@ public:
     // Constructors and destructors
     GObservations(void);
     GObservations(const GObservations& obs);
+    explicit GObservations(const std::string& filename);
     virtual ~GObservations(void);
 
     // Operators
@@ -82,6 +83,10 @@ public:
     void        clear(void);
     int         size(void) const { return m_obs.size(); }
     void        append(GObservation& obs);
+    void        load(const std::string& filename);
+    void        save(const std::string& filename) const;
+    void        read(const GXml& xml);
+    void        write(GXml& xml) const;
     void        models(const GModels& models) { m_models=models;}
     void        models(const std::string& filename);
     GModels&    models(void) { return m_models; }
