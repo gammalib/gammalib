@@ -1,7 +1,7 @@
 /***************************************************************************
  * GFitsTableULongCol.cpp  - FITS table unsigned long integer column class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableULongCol.cpp
  * @brief FITS table unsigned long integer column class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -313,7 +313,7 @@ void GFitsTableULongCol::insert(const int& rownum, const int& nrows)
             for (int i = 0; i < n_before; ++i)
                 *dst++ = *src++;
             for (int i = 0; i < n_insert; ++i)
-                *dst++ = 0.0;
+                *dst++ = 0;
             for (int i = 0; i < n_after; ++i)
                 *dst++ = *src++;
         
