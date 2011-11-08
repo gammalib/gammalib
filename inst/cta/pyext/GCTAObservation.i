@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAObservation.i  -  CTA Observation class interface           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAObservation.i
  * @brief CTA observation class Python interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -48,6 +48,8 @@ public:
     virtual GCTAResponse*    response(void) const;
     virtual GCTAPointing*    pointing(const GTime& time) const;
     virtual std::string      instrument(void) const;
+    virtual void             read(const GXmlElement& xml);
+    virtual void             write(GXmlElement& xml) const;
 
     // Other methods
     void   load_unbinned(const std::string& filename);

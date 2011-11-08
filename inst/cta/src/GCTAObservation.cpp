@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCTAObservation.cpp  -  CTA Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAObservation.cpp
  * @brief CTA observation class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -47,6 +47,8 @@ const GObservationRegistry g_obs_cta_registry(&g_obs_cta_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_RESPONSE                    "GCTAObservation::response(GResponse&)"
+#define G_READ                          "GCTAObservation::read(GXmlElement&)"
+#define G_WRITE                        "GCTAObservation::write(GXmlElement&)"
 #define G_READ_DS_EBOUNDS       "GCTAObservation::read_ds_ebounds(GFitsHDU*)"
 #define G_READ_DS_ROI               "GCTAObservation::read_ds_roi(GFitsHDU*)"
 
@@ -291,6 +293,254 @@ std::string GCTAObservation::instrument(void) const
 
 
 /***********************************************************************//**
+ * @brief Read observation from XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * @exception GException::xml_invalid_parnum
+ *            Invalid number of parameters found in XML element.
+ * @exception GException::xml_invalid_parnames
+ *            Invalid parameter names found in XML element.
+ *
+ * Reads information for a CTA observation from an XML element.
+ * The expected format of the XML element is
+ *
+ *  <observation name="..." id="..." instrument="CTA">
+ *    <parameter name="EventList" file="..."/>
+ *    <parameter name="ARF" file="..."/>
+ *    <parameter name="RMF" file="..."/>
+ *    <parameter name="PSF" file="..."/>
+ *  </observation>
+ *
+ * for an unbinned observation and
+ *
+ *  <observation name="..." id="..." instrument="CTA">
+ *    <parameter name="CountsMap" file="..."/>
+ *    <parameter name="ARF" file="..."/>
+ *    <parameter name="RMF" file="..."/>
+ *    <parameter name="PSF" file="..."/>
+ *  </observation>
+ *
+ * for a binned observation.
+ ***************************************************************************/
+void GCTAObservation::read(const GXmlElement& xml)
+{
+    // Clear observation
+    clear();
+
+    // Initialise response file names
+    std::string arf = "";
+    std::string rmf = "";
+    std::string psf = "";
+
+    // Determine number of parameter nodes in XML element
+    int npars = xml.elements("parameter");
+
+    // Verify that XML element has exactly 4 parameters
+    if (xml.elements() != 4 || npars != 4) {
+        throw GException::xml_invalid_parnum(G_READ, xml,
+              "CTA observation requires exactly 4 parameters.");
+    }
+
+    // Extract parameters
+    int npar[] = {0, 0, 0, 0};
+    for (int i = 0; i < npars; ++i) {
+
+        // Get parameter element
+        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+
+        // Handle EventList
+        if (par->attribute("name") == "EventList") {
+
+            // Read eventlist file name
+            std::string filename = par->attribute("file");
+            
+            // Load unbinned observation (sets also m_evenfile member)
+            load_unbinned(filename);
+            
+            // Increment parameter counter
+            npar[0]++;
+        }
+
+        // Handle CountsMap
+        else if (par->attribute("name") == "CountsMap") {
+
+            // Read countsmap file name
+            std::string filename = par->attribute("file");
+            
+            // Load binned observation (sets also m_evenfile member)
+            load_binned(filename);
+            
+            // Increment parameter counter
+            npar[0]++;
+        }
+
+        // Handle ARF
+        else if (par->attribute("name") == "ARF") {
+            arf = par->attribute("file");
+            npar[1]++;
+        }
+
+        // Handle RMF
+        else if (par->attribute("name") == "RMF") {
+            rmf = par->attribute("file");
+            npar[2]++;
+        }
+
+        // Handle PSF
+        else if (par->attribute("name") == "PSF") {
+            psf = par->attribute("file");
+            npar[3]++;
+        }
+
+    } // endfor: looped over all parameters
+
+    // Verify that all parameters were found
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
+        throw GException::xml_invalid_parnames(G_READ, xml,
+              "Require \"EventList\" or \"CountsMap\" and \"ARF\", \"RMF\""
+              " \"PSF\" parameters.");
+    }
+
+    //TODO: Set response function
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write observation into XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * @exception GException::no_list
+ *            No valid CTA event list or event cube found.
+ * @exception GException::xml_invalid_parnum
+ *            Invalid number of parameters found in XML element.
+ * @exception GException::xml_invalid_parnames
+ *            Invalid parameter names found in XML element.
+ *
+ * Writes information for a CTA observation into an XML element. The expected
+ * format of the XML element is
+ *
+ *  <observation name="..." id="..." instrument="CTA">
+ *    <parameter name="EventList" file="..."/>
+ *    <parameter name="ARF" file="..."/>
+ *    <parameter name="RMF" file="..."/>
+ *    <parameter name="PSF" file="..."/>
+ *  </observation>
+ *
+ * for an unbinned observation and
+ *
+ *  <observation name="..." id="..." instrument="CTA">
+ *    <parameter name="CountsMap" file="..."/>
+ *    <parameter name="ARF" file="..."/>
+ *    <parameter name="RMF" file="..."/>
+ *    <parameter name="PSF" file="..."/>
+ *  </observation>
+ *
+ * for a binned observation.
+ *
+ * @todo We should create a special exception that informs that there is
+ *       neither a valid CTA event list nor a valid CTA counts map in this
+ *       observations.
+ ***************************************************************************/
+void GCTAObservation::write(GXmlElement& xml) const
+{
+    // Determine if we deal with a binned or unbinned observation
+    const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(m_events);
+    const GCTAEventCube* cube = dynamic_cast<const GCTAEventCube*>(m_events);
+    if (list == NULL && cube == NULL) {
+        throw GException::no_list(G_WRITE);
+    }
+
+    // Set event list flag
+    bool is_list = (list != NULL);
+
+    // If XML element has 0 nodes then append 4 parameter nodes
+    if (xml.elements() == 0) {
+        if (is_list) {
+            xml.append(new GXmlElement("parameter name=\"EventList\""));
+        }
+        else {
+            xml.append(new GXmlElement("parameter name=\"CountsMap\""));
+        }
+        xml.append(new GXmlElement("parameter name=\"ARF\""));
+        xml.append(new GXmlElement("parameter name=\"RMF\""));
+        xml.append(new GXmlElement("parameter name=\"PSF\""));
+    }
+
+    // Verify that XML element has exactly 4 parameters
+    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
+        throw GException::xml_invalid_parnum(G_WRITE, xml,
+              "CTA observation requires exactly 4 parameters.");
+    }
+
+    // Set or update parameter attributes
+    int npar[] = {0, 0, 0, 0};
+    for (int i = 0; i < 4; ++i) {
+
+        // Get parameter element
+        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+
+        // Handle Eventlist
+        if (par->attribute("name") == "EventList") {
+            par->attribute("file", m_eventfile);
+            npar[0]++;
+        }
+
+        // Handle Countsmap
+        else if (par->attribute("name") == "CountsMap") {
+            par->attribute("file", m_eventfile);
+            npar[0]++;
+        }
+
+        // Handle ARF
+        else if (par->attribute("name") == "ARF") {
+            std::string arf = "";
+            if (m_response != NULL) {
+                arf = m_response->arffile();
+            }
+            par->attribute("file", arf);
+            npar[1]++;
+        }
+
+        // Handle RMF
+        else if (par->attribute("name") == "RMF") {
+            std::string rmf = "";
+            if (m_response != NULL) {
+                rmf = m_response->rmffile();
+            }
+            par->attribute("file", rmf);
+            npar[2]++;
+        }
+
+        // Handle PSF
+        else if (par->attribute("name") == "PSF") {
+            std::string psf = "";
+            if (m_response != NULL) {
+                psf = m_response->psffile();
+            }
+            par->attribute("file", psf);
+            npar[3]++;
+        }
+
+    } // endfor: looped over all parameters
+
+    // Verify that all required parameters are present
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
+        throw GException::xml_invalid_parnames(G_WRITE, xml,
+              "Require \"EventList\" or \"CountsMap\" and \"ARF\", \"RMF\""
+              " \"PSF\" parameters.");
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print CTA observation information
  ***************************************************************************/
 std::string GCTAObservation::print(void) const
@@ -301,24 +551,30 @@ std::string GCTAObservation::print(void) const
     // Append header
     result.append("=== GCTAObservation ===");
     result.append("\n"+parformat("Name")+name());
+    result.append("\n"+parformat("Identifier")+id());
     result.append("\n"+parformat("Instrument")+instrument());
     result.append("\n"+parformat("Statistics")+statistics());
 
     // Append pointing
-    if (m_pointing != NULL)
+    if (m_pointing != NULL) {
         result.append("\n"+m_pointing->print());
-    else
+    }
+    else {
         result.append("\n"+parformat("CTA pointing")+"undefined");
+    }
 
     // Append response
-    if (m_response != NULL)
+    if (m_response != NULL) {
         result.append("\n"+response()->print());
-    else
+    }
+    else {
         result.append("\n"+parformat("CTA response")+"undefined");
+    }
 
     // Append events
-    if (m_events != NULL)
+    if (m_events != NULL) {
         result.append("\n"+m_events->print());
+    }
 
     // Return result
     return result;
@@ -356,6 +612,9 @@ void GCTAObservation::load_unbinned(const std::string& filename)
     // Close FITS file
     file.close();
 
+    // Store event filename
+    m_eventfile = filename;
+
     // Return
     return;
 }
@@ -391,6 +650,9 @@ void GCTAObservation::load_binned(const std::string& filename)
 
     // Close FITS file
     file.close();
+
+    // Store event filename
+    m_eventfile = filename;
 
     // Return
     return;
@@ -459,6 +721,7 @@ void GCTAObservation::save(const std::string& filename, bool clobber) const
 void GCTAObservation::init_members(void)
 {
     // Initialise members
+    m_eventfile.clear();
     m_response = NULL;
     m_pointing = NULL;
     m_obs_id   = 0;
@@ -483,10 +746,11 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
 
     // Copy members
-    m_obs_id   = obs.m_obs_id;
-    m_livetime = obs.m_livetime;
-    m_ra_obj   = obs.m_ra_obj;
-    m_dec_obj  = obs.m_dec_obj;
+    m_eventfile = obs.m_eventfile;
+    m_obs_id    = obs.m_obs_id;
+    m_livetime  = obs.m_livetime;
+    m_ra_obj    = obs.m_ra_obj;
+    m_dec_obj   = obs.m_dec_obj;
 
     // Return
     return;

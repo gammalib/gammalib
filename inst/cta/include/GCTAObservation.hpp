@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCTAObservation.hpp  -  CTA Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAObservation.hpp
  * @brief CTA observation class interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GCTAOBSERVATION_HPP
@@ -61,6 +61,8 @@ public:
     virtual GCTAResponse*    response(void) const;
     virtual GCTAPointing*    pointing(const GTime& time) const;
     virtual std::string      instrument(void) const;
+    virtual void             read(const GXmlElement& xml);
+    virtual void             write(GXmlElement& xml) const;
     virtual std::string      print(void) const;
 
     // Other methods
@@ -89,12 +91,13 @@ protected:
     double npred_temp(const GModel& model) const;
 
     // Protected members
-    GCTAResponse* m_response;   //!< Pointer to instrument response functions
-    GCTAPointing* m_pointing;   //!< Pointer to pointing direction
-    int           m_obs_id;     //!< Observation ID
-    double        m_livetime;   //!< Livetime
-    double        m_ra_obj;     //!< Right Ascension of object
-    double        m_dec_obj;    //!< Declination of object
+    std::string   m_eventfile;    //!< Event filename
+    GCTAResponse* m_response;     //!< Pointer to instrument response functions
+    GCTAPointing* m_pointing;     //!< Pointer to pointing direction
+    int           m_obs_id;       //!< Observation ID
+    double        m_livetime;     //!< Livetime
+    double        m_ra_obj;       //!< Right Ascension of object
+    double        m_dec_obj;      //!< Declination of object
 };
 
 #endif /* GCTAOBSERVATION_HPP */
