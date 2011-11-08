@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_MWL.cpp  -  test multi-wavelength classes             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file test_MWL.cpp
  * @brief Testing of MWL classes.
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -37,10 +37,12 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string lat_crab_model = "../inst/mwl/test/data/crab.xml";
-const std::string lat_crab_fits  = "../inst/mwl/test/data/crab.fits";
-const std::string crab_model = "../inst/mwl/test/data/crab_mwl.xml";
-const std::string crab_fits      = "../inst/mwl/test/data/crab_mwl.fits";
+const std::string datadir        = "../inst/mwl/test/data";
+const std::string lat_crab_model = datadir+"/crab.xml";
+const std::string lat_crab_fits  = datadir+"/crab.fits";
+const std::string crab_model     = datadir+"/crab_mwl.xml";
+const std::string crab_fits      = datadir+"/crab_mwl.fits";
+const std::string mwl_xml        = datadir+"/obs_mwl.xml";
 
 
 /***********************************************************************//**
@@ -48,6 +50,9 @@ const std::string crab_fits      = "../inst/mwl/test/data/crab_mwl.fits";
  ***************************************************************************/
 void test_obs(void)
 {
+    // Set filenames
+    const std::string file1 = "test_mwl_obs.xml";
+
     // Write header
     std::cout << "Test observation handling: ";
 
@@ -93,6 +98,23 @@ void test_obs(void)
     catch (std::exception &e) {
         std::cout << std::endl
                   << "TEST ERROR: Unable to append GMWLObservation to GObservations."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test XML loading
+    try {
+        // Load observations
+        GObservations obs = GObservations(mwl_xml);
+        
+        // Save observations
+        obs.save(file1);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to load MWL observation from XML file."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
