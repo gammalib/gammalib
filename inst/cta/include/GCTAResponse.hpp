@@ -128,6 +128,8 @@ public:
     std::string    arffile(void) const { return m_arffile; }
     std::string    rmffile(void) const { return m_rmffile; }
     std::string    psffile(void) const { return m_psffile; }
+    void           read_arf(const GFitsTable* hdu);
+    void           read_psf(const GFitsTable* hdu);
 
     // Low-level response methods
     double aeff(const double& theta,
@@ -174,7 +176,6 @@ private:
     void copy_members(const GCTAResponse& rsp);
     void free_members(void);
     void read_performance_table(const std::string& filename);
-    void read_arf(const GFitsTable* hdu);
 
     // Model*IRF zenith angle integration kernel
     class irf_kern_rho : public GIntegrand {
