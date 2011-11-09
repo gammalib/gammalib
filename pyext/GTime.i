@@ -77,7 +77,10 @@ public:
                    const std::string& timeunit,
                    const std::string& timesys = "TT",
                    const std::string& timeref = "local");
-    double getTime(void) const { return m_time; }
+    double getTime(void) const;
+    double getTime(const double& mrdref) const;
+    double getTime(const int& mjdrefi, const double& mrdreff) const;
+    double getMjdRef(void) const;
 };
 
 
