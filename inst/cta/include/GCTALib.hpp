@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTALib.hpp  -  CTA Support Header files                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,6 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GCTALib.hpp
+ * @brief Collection of CTA support header files
+ * @author J. Knoedlseder
+ */
 
 #ifndef GCTALIB_HPP
 #define GCTALIB_HPP
@@ -39,7 +44,12 @@
 #include "GCTAModelRadial.hpp"
 #include "GCTAModelRadialRegistry.hpp"
 #include "GCTAModelRadialGauss.hpp"
+#include "GCTAModelRadialPolynom.hpp"
+#include "GCTAModelRadialProfile.hpp"
 #include "GCTAModelRadialAcceptance.hpp"
 #include "GCTADir.hpp"
+
+/* __ CTA specific definitions ___________________________________________ */
+#define G_CTA_MJDREF 51544.5                 //!< Reference of CTA time frame
 
 #endif /* GCTALIB_HPP */
