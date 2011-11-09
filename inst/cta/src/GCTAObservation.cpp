@@ -402,7 +402,45 @@ void GCTAObservation::read(const GXmlElement& xml)
               " \"PSF\" parameters.");
     }
 
-    //TODO: Set response function
+    // Delete old response function
+    if (m_response != NULL) delete m_response;
+
+    // Allocate new CTA response function
+    m_response = new GCTAResponse;
+
+    // Set ARF
+    if (strip_whitespace(arf).length() > 0) {
+
+        // Open ARF FITS file
+        GFits file(arf);
+
+        // Get ARF table
+        GFitsTable* table = file.table("SPECRESP");
+
+        // Read ARF
+        m_response->read_arf(table);
+
+        // Close ARF FITS file
+        file.close();
+
+    } // endif: there was an ARF to load
+    
+    // Set PSF
+    if (strip_whitespace(psf).length() > 0) {
+
+        // Open PSF FITS file
+        GFits file(psf);
+
+        // Get PSF table
+        GFitsTable* table = file.table("PSF");
+
+        // Read PSF
+        m_response->read_psf(table);
+
+        // Close PSF FITS file
+        file.close();
+
+    } // endif: there was a PSF to load
 
     // Return
     return;
