@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GMWLSpectrum.cpp  -  Multi-wavelength spectrum class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GMWLSpectrum.cpp
  * @brief Multi-wavelength spectrum class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -470,15 +470,19 @@ std::string GMWLSpectrum::print(void) const
     result.append("\n"+parformat("Instrument")+m_instrument);
     result.append("\n"+parformat("Number of points")+str(size()));
     result.append("\n"+parformat("Time interval"));
-    if (gti().size() > 0)
+    if (m_gti.size() > 0) {
         result.append(str(tstart().met())+" - "+str(tstop().met()));
-    else
+    }
+    else {
         result.append("not defined");
+    }
     result.append("\n"+parformat("Energy range"));
-    if (ebounds().size() > 0)
+    if (m_ebounds.size() > 0) {
         result.append(emin().print()+" - "+emax().print());
-    else
+    }
+    else {
         result.append("not defined");
+    }
 
     // Append spectral points
     for (int i = 0; i < size(); ++i) {

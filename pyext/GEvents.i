@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GEvents.i  -  Abstract event container class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEvents.i
  * @brief Abstract event container class Python interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -55,12 +55,12 @@ public:
     // Implemented methods
     void                ebounds(const GEbounds& ebounds);
     void                gti(const GGti& gti);
+    const GEbounds&     ebounds(void) const;
+    const GGti&         gti(void) const;
     GTime               tstart(void) const;
     GTime               tstop(void) const;
     GEnergy             emin(void) const;
     GEnergy             emax(void) const;
-    const GEbounds&     ebounds(void) const;
-    const GGti&         gti(void) const;
 };
 
 

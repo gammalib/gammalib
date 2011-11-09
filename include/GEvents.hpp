@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GEvents.hpp  -  Abstract event container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEvents.hpp
  * @brief Abstract event container class interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GEVENTS_HPP
@@ -94,10 +94,10 @@ public:
     void                gti(const GGti& gti);
     const GEbounds&     ebounds(void) const { return m_ebounds; }
     const GGti&         gti(void) const { return m_gti; }
-    GTime               tstart(void) const { return gti().tstart(); }
-    GTime               tstop(void) const { return  gti().tstop(); }
-    GEnergy             emin(void) const { return ebounds().emin(); }
-    GEnergy             emax(void) const { return ebounds().emax(); }
+    GTime               tstart(void) const { return m_gti.tstart(); }
+    GTime               tstop(void) const { return  m_gti.tstop(); }
+    GEnergy             emin(void) const { return m_ebounds.emin(); }
+    GEnergy             emax(void) const { return m_ebounds.emax(); }
 
     // Event iterator
     class iterator {
