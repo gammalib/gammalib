@@ -1,7 +1,7 @@
 /***************************************************************************
- *                     GTime.i  -  Time class python I/F                   *
+ *                          GTime.i  -  Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GTime.i
- * @brief GTime class python interface
- * @author J. Knodlseder
+ * @brief Time class python interface definition
+ * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,28 +35,49 @@
 /***********************************************************************//**
  * @class GTime
  *
- * @brief Class that handles times in a system independent way.
+ * @brief Class that handles times in a system independent way
  *
- * The GTime class stores a time value in MJD and implements methods that
- * provide automatic conversion of the time values in other systems. This
- * makes instrument specific implementations more robust and reduces the
- * risk of unit errors.
+ * The GTime class stores a time value in seconds and its MJD reference in
+ * days. The time can be retrieved in any MJD reference.
  ***************************************************************************/
 class GTime {
 public:
     // Constructors and destructors
     GTime(void);
     GTime(const GTime& time);
-    ~GTime(void);
+    explicit GTime(const double&      time,
+                   const double&      mrdref,
+                   const std::string& timeunit,
+                   const std::string& timesys = "TT",
+                   const std::string& timeref = "local");
+    explicit GTime(const double&      time,
+                   const int&         mjdrefi,
+                   const double&      mrdreff,
+                   const std::string& timeunit,
+                   const std::string& timesys = "TT",
+                   const std::string& timeref = "local");
+    virtual ~GTime(void);
  
     // Methods
-    void   clear(void) { m_time = 0.0; }
+    void   clear(void);
     double jd(void) const;
     double mjd(void) const;
     double met(void) const;
     void   jd(const double& time);
     void   mjd(const double& time);
     void   met(const double& time);
+    void   setTime(const double&      time,
+                   const double&      mrdref,
+                   const std::string& timeunit,
+                   const std::string& timesys = "TT",
+                   const std::string& timeref = "local");
+    void   setTime(const double&      time,
+                   const int&         mjdrefi,
+                   const double&      mrdreff,
+                   const std::string& timeunit,
+                   const std::string& timesys = "TT",
+                   const std::string& timeref = "local");
+    double getTime(void) const { return m_time; }
 };
 
 

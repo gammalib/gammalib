@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.hpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GTime.hpp
- * @brief Time value class definition.
- * @author J. Knodlseder
+ * @brief Time class interface definition
+ * @author J. Knoedlseder
  */
 
 #ifndef GTIME_HPP
@@ -37,24 +37,17 @@
 /***********************************************************************//**
  * @class GTime
  *
- * @brief Class that handles times in a system independent way.
+ * @brief Class that handles times in a system independent way
  *
- * The GTime class stores a time value in MET which are defined as the
- * number of seconds since 2001-01-01 00:00:00.000 UTC in TT (Terrestrial
- * Time). This is the Fermi/LAT reference time. See
- * http://fermi.gsfc.nasa.gov/ssc/data/analysis/documentation/Cicerone/Cicerone_Data/Time_in_ScienceTools.html
- * GTime implements methods that provide automatic conversion of the
- * time values in other systems. This makes instrument specific
- * implementations more robust and reduces the risk of unit errors.
+ * The GTime class stores a time value in seconds and its MJD reference in
+ * days. The time can be retrieved in any MJD reference.
  *
- * @todo Add general conversion routine that makes use of standard
- *       HEASARC keyword values, such as TIMESYS, MJDREF (or MJDREFI/MJDREFF),
- *       TIMEUNIT, TIMEZERO, TIMEREF.
+ * @todo Make use of MJD reference in operators.
  ***************************************************************************/
 class GTime {
 
     // I/O friends
-    friend GLog&         operator<< (GLog& log, const GTime& time);
+    friend GLog&         operator<< (GLog& log,        const GTime& time);
     friend std::ostream& operator<< (std::ostream& os, const GTime& time);
 
     // Operator friends
@@ -74,19 +67,45 @@ public:
     // Constructors and destructors
     GTime(void);
     GTime(const GTime& time);
-    ~GTime(void);
+    explicit GTime(const double&      time,
+                   const double&      mrdref,
+                   const std::string& timeunit,
+                   const std::string& timesys = "TT",
+                   const std::string& timeref = "local");
+    explicit GTime(const double&      time,
+                   const int&         mjdrefi,
+                   const double&      mrdreff,
+                   const std::string& timeunit,
+                   const std::string& timesys = "TT",
+                   const std::string& timeref = "local");
+    virtual ~GTime(void);
  
     // Operators
     GTime& operator= (const GTime& time);
 
     // Methods
-    void        clear(void) { m_time = 0.0; }
+    void        clear(void);
     double      jd(void) const;
     double      mjd(void) const;
     double      met(void) const;
     void        jd(const double& time);
     void        mjd(const double& time);
     void        met(const double& time);
+    void        setTime(const double&      time,
+                        const double&      mrdref,
+                        const std::string& timeunit,
+                        const std::string& timesys = "TT",
+                        const std::string& timeref = "local");
+    void        setTime(const double&      time,
+                        const int&         mjdrefi,
+                        const double&      mrdreff,
+                        const std::string& timeunit,
+                        const std::string& timesys = "TT",
+                        const std::string& timeref = "local");
+    double      getTime(void) const;
+    double      getTime(const double& mrdref) const;
+    double      getTime(const int& mjdrefi, const double& mrdreff) const;
+    double      getMjdRef(void) const;
     std::string print(void) const;
   
 protected:
@@ -96,7 +115,8 @@ protected:
     void free_members(void);
 
     // Protected data members
-    double m_time;          //!< Time in MET
+    double m_time;          //!< Time in seconds
+    double m_mjdref;        //!< Time reference
 };
 
 
