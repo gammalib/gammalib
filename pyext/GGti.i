@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GGti.i  -  Good time interval class python I/F             *
+ *                   GGti.i  -  Good time interval class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GGti.i
- * @brief GGti class python interface
- * @author J. Knodlseder
+ * @brief Good time interval class Python interface definition
+ * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -47,23 +47,25 @@ public:
 
     // Methods
     void   clear(void);
+    int    size(void) const;
     void   add(const GTime& tstart, const GTime& tstop);
     void   append(const GTime& tstart, const GTime& tstop);
     void   insert(const GTime& tstart, const GTime& tstop);
+    void   reduce(const GTime& tstart, const GTime& tstop);
 	void   load(const std::string& filename,
                 const std::string& extname = "GTI");
 	void   save(const std::string& filename, bool clobber,
                 const std::string& extname = "GTI") const;
     void   read(GFitsTable* hdu);
     void   write(GFits* file, const std::string& extname = "GTI") const;
-    int    size(void) const { return m_num; }
-	GTime  tstart(void) const { return m_tstart; }
-	GTime  tstop(void) const { return m_tstop; }
+	GTime  tstart(void) const;
+	GTime  tstop(void) const;
 	GTime  tstart(int inx) const;
 	GTime  tstop(int inx) const;
-	double telapse(void) const { return m_telapse; }
-	double ontime(void) const { return m_ontime; }
-    bool   isin(const GTime& t) const;
+	double telapse(void) const;
+	double ontime(void) const;
+    double getMjdRef(void) const { return m_mjdref; }
+    bool   isin(const GTime& time) const;
 };
 
 
@@ -71,11 +73,9 @@ public:
  * @brief GGti class extension
  ***************************************************************************/
 %extend GGti {
-    /*
     char *__str__() {
         return tochar(self->print());
     }
-    */
     GGti copy() {
         return (*self);
     }
