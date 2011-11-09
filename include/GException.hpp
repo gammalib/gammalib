@@ -529,6 +529,11 @@ public:
         invalid_instrument(std::string origin, std::string instrument,
                            std::string message = "");
     };
+    class time_invalid_unit : public GExceptionHandler {
+    public:
+        time_invalid_unit(std::string origin, std::string unit,
+                          std::string message = "");
+    };
 
 
     // XML exceptions

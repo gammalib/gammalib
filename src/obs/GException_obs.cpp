@@ -331,3 +331,26 @@ GException::invalid_instrument::invalid_instrument(std::string origin,
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Invalid time unit encountered
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] unit Time unit.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::time_invalid_unit::time_invalid_unit(std::string origin,
+                                                 std::string unit,
+                                                 std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Invalid time unit \""+unit+"\" encountered.";
+    if (message.length() > 0) {
+        m_message += " " + message;
+    }
+
+    // Return
+    return;
+}
