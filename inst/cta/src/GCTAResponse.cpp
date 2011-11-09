@@ -70,6 +70,8 @@
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_IRF_EXTENDED                 //!< Debug irf_extended method
 //#define G_DEBUG_NPRED_EXTENDED                    //!< Debug npred_extended
+//#define G_DEBUG_PRINT_AEFF                          //!< Debug print() Aeff
+//#define G_DEBUG_PRINT_PSF                            //!< Debug print() Psf
 
 /* __ Constants __________________________________________________________ */
 
@@ -555,6 +557,9 @@ std::string GCTAResponse::print(void) const
     result.append("=== GCTAResponse ===");
     result.append("\n"+parformat("Calibration database")+m_caldb);
     result.append("\n"+parformat("Response name")+m_rspname);
+    result.append("\n"+parformat("ARF file name")+m_arffile);
+    result.append("\n"+parformat("RMF file name")+m_rmffile);
+    result.append("\n"+parformat("PSF file name")+m_psffile);
     if (m_offset_sigma == 0) {
         result.append("\n"+parformat("Offset angle dependence")+"none");
     }
@@ -562,15 +567,26 @@ std::string GCTAResponse::print(void) const
         std::string txt = "Fixed sigma="+str(m_offset_sigma);
         result.append("\n"+parformat("Offset angle dependence")+txt);
     }
-    /*
-    result.append("\n"+parformat("Response definiton"));
-    for (int i = 0; i < m_logE.size(); ++i) {
-        result.append("\n"+parformat("logE="+str(m_logE.at(i))));
+    result.append("\n"+parformat("Effective area nodes")+str(m_aeff_logE.size()));
+    result.append("\n"+parformat("PSF nodes")+str(m_psf_logE.size()));
+
+    // Debug option: Plot Aeff
+    #if defined(G_DEBUG_PRINT_AEFF)
+    result.append("\n"+parformat("Effective area"));
+    for (int i = 0; i < m_aeff_logE.size(); ++i) {
+        result.append("\n"+parformat("logE="+str(m_aeff_logE[i])));
         result.append("Aeff="+str(m_aeff.at(i))+" m2");
-        result.append(", r68="+str(m_r68.at(i))+" deg");
-        result.append(", r80="+str(m_r68.at(i))+" deg");
     }
-    */
+    #endif
+
+    // Debug option: Plot Aeff
+    #if defined(G_DEBUG_PRINT_AEFF)
+    result.append("\n"+parformat("Point spread function"));
+    for (int i = 0; i < m_psf_logE.size(); ++i) {
+        result.append("\n"+parformat("logE="+str(m_psf_logE[i])));
+        result.append("r68="+str(m_r68.at(i))+" deg");
+    }
+    #endif
 
     // Return result
     return result;
@@ -1361,15 +1377,15 @@ void GCTAResponse::read_performance_table(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Read CTA ARF matrix
+ * @brief Read CTA ARF vector
  *
  * @param[in] hdu FITS table pointer.
  *
- * This method reads a CTA 1DC ARF matrix from the FITS HDU. Note that the
- * effective area is converted from m2 to cm2 and stored in units of cm2.
- *
- * @todo So far we expect energies in units of TeV
- * @todo So far we expect the effective area in units of m2
+ * This method reads a CTA ARF vector from the FITS HDU. Note that the
+ * energies are converted to TeV and the effective area is converted to cm2.
+ * Conversion is done based on the units provided for the energy and
+ * effective area columns. Units that are recognized are 'keV', 'MeV', 'GeV',
+ * 'TeV', 'm^2', 'm2', 'cm^2' and 'cm^2' (case independent).
  ***************************************************************************/
 void GCTAResponse::read_arf(const GFitsTable* hdu)
 {
@@ -1382,19 +1398,48 @@ void GCTAResponse::read_arf(const GFitsTable* hdu)
     const GFitsTableCol* energy_hi = &(*hdu)["ENERG_HI"];
     const GFitsTableCol* specresp  = &(*hdu)["SPECRESP"];
 
+    // Determine unit conversion factors (default: TeV and cm^2)
+    std::string u_energy_lo = tolower(strip_whitespace(energy_lo->unit()));
+    std::string u_energy_hi = tolower(strip_whitespace(energy_hi->unit()));
+    std::string u_specresp  = tolower(strip_whitespace(specresp->unit()));
+    double c_energy_lo = 1.0;
+    double c_energy_hi = 1.0;
+    double c_specresp  = 1.0;
+    if (u_energy_lo == "kev") {
+        c_energy_lo = 1.0e-9;
+    }
+    else if (u_energy_lo == "mev") {
+        c_energy_lo = 1.0e-6;
+    }
+    else if (u_energy_lo == "gev") {
+        c_energy_lo = 1.0e-3;
+    }
+    if (u_energy_hi == "kev") {
+        c_energy_hi = 1.0e-9;
+    }
+    else if (u_energy_hi == "mev") {
+        c_energy_hi = 1.0e-6;
+    }
+    else if (u_energy_hi == "gev") {
+        c_energy_hi = 1.0e-3;
+    }
+    if (u_specresp == "m^2" || u_specresp == "m2") {
+        c_specresp = 10000.0;
+    }
+
     // Extract number of energy bins
-    int num = energy_lo->number();
+    int num = energy_lo->length();
 
     // Set nodes
     for (int i = 0; i < num; ++i) {
     
-        // Compute log10 mean energy
-        double e_min = energy_lo->real(i);
-        double e_max = energy_hi->real(i);
+        // Compute log10 mean energy in TeV
+        double e_min = energy_lo->real(i) * c_energy_lo;
+        double e_max = energy_hi->real(i) * c_energy_hi;
         double logE  = 0.5 * (log10(e_min) + log10(e_max));
         
         // Compute effective area in cm2
-        double aeff = specresp->real(i) * 10000.0;
+        double aeff = specresp->real(i) * c_specresp;
         
         // Store log10 mean energy and effective area value
         m_aeff_logE.append(logE);
@@ -1405,6 +1450,76 @@ void GCTAResponse::read_arf(const GFitsTable* hdu)
     // Disable offset angle dependence
     m_offset_sigma = 0.0;
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read CTA PSF vector
+ *
+ * @param[in] hdu FITS table pointer.
+ *
+ * This method reads a CTA PSF vector from the FITS HDU. Note that the
+ * energies are converted to TeV. Conversion is done based on the units
+ * provided for the energy columns. Units that are recognized are 'keV',
+ * 'MeV', 'GeV', and 'TeV' (case independent).
+ ***************************************************************************/
+void GCTAResponse::read_psf(const GFitsTable* hdu)
+{
+    // Clear arrays
+    m_psf_logE.clear();
+    m_r68.clear();
+
+    // Get pointers to table columns
+    const GFitsTableCol* energy_lo = &(*hdu)["ENERG_LO"];
+    const GFitsTableCol* energy_hi = &(*hdu)["ENERG_HI"];
+    const GFitsTableCol* r68       = &(*hdu)["R68"];
+
+    // Determine unit conversion factors (default: TeV)
+    std::string u_energy_lo = tolower(strip_whitespace(energy_lo->unit()));
+    std::string u_energy_hi = tolower(strip_whitespace(energy_hi->unit()));
+    double c_energy_lo = 1.0;
+    double c_energy_hi = 1.0;
+    if (u_energy_lo == "kev") {
+        c_energy_lo = 1.0e-9;
+    }
+    else if (u_energy_lo == "mev") {
+        c_energy_lo = 1.0e-6;
+    }
+    else if (u_energy_lo == "gev") {
+        c_energy_lo = 1.0e-3;
+    }
+    if (u_energy_hi == "kev") {
+        c_energy_hi = 1.0e-9;
+    }
+    else if (u_energy_hi == "mev") {
+        c_energy_hi = 1.0e-6;
+    }
+    else if (u_energy_hi == "gev") {
+        c_energy_hi = 1.0e-3;
+    }
+
+    // Extract number of energy bins
+    int num = energy_lo->length();
+
+    // Set nodes
+    for (int i = 0; i < num; ++i) {
+    
+        // Compute log10 mean energy in TeV
+        double e_min = energy_lo->real(i) * c_energy_lo;
+        double e_max = energy_hi->real(i) * c_energy_hi;
+        double logE  = 0.5 * (log10(e_min) + log10(e_max));
+        
+        // Extract r68 value
+        double r68_value = r68->real(i);
+        
+        // Store log10 mean energy and r68 value
+        m_psf_logE.append(logE);
+        m_r68.push_back(r68_value);
+
+    } // endfor: looped over nodes
+    
     // Return
     return;
 }
