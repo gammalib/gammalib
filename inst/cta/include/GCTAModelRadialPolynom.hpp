@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialPolynom.hpp  -  Radial Polynom CTA model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAModelRadialPolynom.hpp
  * @brief Radial Polynom model class interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GCTAMODELRADIALPOLYNOM_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
+#include "GTools.hpp"
 #include "GModelPar.hpp"
 #include "GXmlElement.hpp"
 #include "GCTAModelRadial.hpp"
