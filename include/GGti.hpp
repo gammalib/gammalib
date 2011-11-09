@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GGti.hpp  -  Good time interval class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,15 +20,17 @@
  ***************************************************************************/
 /**
  * @file GGti.hpp
- * @brief Good time interval class interface definition.
- * @author J. Knodlseder
+ * @brief Good time interval class interface definition
+ * @author J. Knoedlseder
  */
 
 #ifndef GGTI_HPP
 #define GGTI_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include <iostream>
+#include "GLog.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GTime.hpp"
@@ -44,11 +46,9 @@
  ***************************************************************************/
 class GGti {
 
-    // Friend classes
-    friend class GObservation;
-
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GGti& gti);
+    friend GLog&         operator<< (GLog& log,        const GGti& gti);
 
 public:
     // Constructors and destructors
@@ -60,24 +60,27 @@ public:
     GGti& operator= (const GGti& gti);
 
     // Methods
-    void   clear(void);
-    void   add(const GTime& tstart, const GTime& tstop);
-    void   append(const GTime& tstart, const GTime& tstop);
-    void   insert(const GTime& tstart, const GTime& tstop);
-    void   load(const std::string& filename,
-                const std::string& extname = "GTI");
-    void   save(const std::string& filename, bool clobber,
-                const std::string& extname = "GTI") const;
-    void   read(GFitsTable* hdu);
-    void   write(GFits* file, const std::string& extname = "GTI") const;
-    int    size(void) const { return m_num; }
-    GTime  tstart(void) const { return m_tstart; }
-    GTime  tstop(void) const { return m_tstop; }
-    GTime  tstart(int inx) const;
-    GTime  tstop(int inx) const;
-    double telapse(void) const { return m_telapse; }
-    double ontime(void) const { return m_ontime; }
-    bool   isin(const GTime& t) const;
+    void        clear(void);
+    int         size(void) const { return m_num; }
+    void        add(const GTime& tstart, const GTime& tstop);
+    void        append(const GTime& tstart, const GTime& tstop);
+    void        insert(const GTime& tstart, const GTime& tstop);
+    void        reduce(const GTime& tstart, const GTime& tstop);
+    void        load(const std::string& filename,
+                     const std::string& extname = "GTI");
+    void        save(const std::string& filename, bool clobber,
+                     const std::string& extname = "GTI") const;
+    void        read(GFitsTable* hdu);
+    void        write(GFits* file, const std::string& extname = "GTI") const;
+    GTime       tstart(void) const { return m_tstart; }
+    GTime       tstop(void) const { return m_tstop; }
+    GTime       tstart(int inx) const;
+    GTime       tstop(int inx) const;
+    double      telapse(void) const { return m_telapse; }
+    double      ontime(void) const { return m_ontime; }
+    double      getMjdRef(void) const { return m_mjdref; }
+    bool        isin(const GTime& time) const;
+    std::string print(void) const;
 
 protected:
     // Protected methods
@@ -95,6 +98,7 @@ protected:
     GTime   m_tstop;    //!< Stop of observation
     double  m_ontime;   //!< Sum of GTI durations (in seconds)
     double  m_telapse;  //!< Time between start of first GTI and stop of last GTI (in seconds)
+    double  m_mjdref;   //!< MJD reference
     GTime  *m_start;    //!< Array of start times
     GTime  *m_stop;     //!< Array of stop times
 
