@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAEventList.cpp  -  CTA event atom container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAEventList.cpp
  * @brief CTA event atom container class implementation.
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -325,18 +325,25 @@ void GCTAEventList::read(const GFits& file)
 
     // ... otherwise build GTI from TSTART and TSTOP
     else {
-        double tstart  = events->real("TSTART");
-        double tstop   = events->real("TSTOP");
-        int    mjdrefi = events->integer("MJDREFI");
-        double mjdreff = events->real("MJDREFF");
-        GTime  start;
-        GTime  stop;
-        //GTime  start(tstart, mjdrefi, mjdreff);
-        //GTime  stop(tstart, mjdrefi, mjdreff);
-        start.mjd(tstart);
-        stop.mjd(tstop);
+
+        // Read start and stop time, MJD reference and time unit, system,
+        // and reference
+        double tstart        = events->real("TSTART");
+        double tstop         = events->real("TSTOP");
+        int    mjdrefi       = events->integer("MJDREFI");
+        double mjdreff       = events->real("MJDREFF");
+        std::string timeunit = events->string("TIMEUNIT");
+        std::string timesys  = events->string("TIMESYS");
+        std::string timeref  = events->string("TIMEREF");
+        
+        // Set start and stop time
+        GTime start(tstart, mjdrefi, mjdreff, timeunit, timesys, timeref);
+        GTime stop(tstop, mjdrefi, mjdreff, timeunit, timesys, timeref);
+
+        // Append start and stop time as single time interval to GTI
         m_gti.append(start, stop);
-    }
+
+    } // endelse: GTI built from TSTART and TSTOP
 
     // Return
     return;
