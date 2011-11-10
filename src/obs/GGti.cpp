@@ -556,7 +556,7 @@ std::string GGti::print(void) const
     result.append("\n"+parformat("Number of intervals")+str(size()));
     result.append("\n"+parformat("Ontime")+str(ontime())+" sec");
     result.append("\n"+parformat("Elapsed time")+str(telapse())+" sec");
-    result.append("\n"+parformat("MJD reference date")+str(getMjdRef())+" days");
+    result.append("\n"+parformat("MJD reference date")+str(mjdref())+" days");
     result.append("\n"+parformat("Time range"));
     result.append(tstart().print()+" - "+tstop().print());
 

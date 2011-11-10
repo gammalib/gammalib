@@ -40,7 +40,7 @@ const double mjd_ref    = 51910.0007428703703703703;   // MJD of Fermi MET=0
 const double jd_ref     = 2451910.5007428703703703703; // JD seconds of Fermi MET=0
 
 /* __ Method name definitions ____________________________________________ */
-#define G_SETTIME           "GTime::setTime(double&, double&, std::string&, " \
+#define G_TIME                 "GTime::time(double&, double&, std::string&, " \
                                                  "std::string&, std::string&"
 
 /* __ Macros _____________________________________________________________ */
@@ -109,7 +109,7 @@ GTime::GTime(const double&      time,
     init_members();
 
     // Set time
-    setTime(time, mrdref, timeunit, timesys, timeref);
+    this->time(time, mrdref, timeunit, timesys, timeref);
 
     // Return
     return;
@@ -140,7 +140,7 @@ GTime::GTime(const double&      time,
     init_members();
 
     // Set time
-    setTime(time, mjdrefi, mrdreff, timeunit, timesys, timeref);
+    this->time(time, mjdrefi, mrdreff, timeunit, timesys, timeref);
 
     // Return
     return;
@@ -327,7 +327,7 @@ void GTime::time(const double&      time,
         time_in_seconds = time;
     }
     else {
-        throw GException::time_invalid_unit(G_SETTIME, timeunit,
+        throw GException::time_invalid_unit(G_TIME, timeunit,
               "Valid units are \"day(s)\" and \"sec(s)\"");
     }
 
@@ -364,7 +364,7 @@ void GTime::time(const double&      time,
     double mjdref = double(mjdrefi) + mrdreff;
     
     // Set time
-    time(time, mjdref, timeunit, timesys, timeref);
+    this->time(time, mjdref, timeunit, timesys, timeref);
 
     // Return
     return;
@@ -452,7 +452,7 @@ std::string GTime::print(void) const
     std::string result;
 
     // Append time
-    result.append(str(getTime())+" s");
+    result.append(str(time())+" s");
 
     // Return
     return result;
