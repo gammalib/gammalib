@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{CCD}}
 \newcommand{\doctype}{\mbox{Coding Conventions Document}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{5 February 2011}}
+\newcommand{\calendar}{\mbox{10 November 2011}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 \newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
@@ -346,17 +346,18 @@ Numeric argument types should be typically {\tt int} and {\tt double}.
 Unless absolutely required, {\tt short int}, {\tt long}, and {\tt float} should be avoided.
 True/false checks should always be done using {\tt bool}.
 
-Methods should be declated as {\tt const} if they do not alter class members.
+Methods should be declared as {\tt const} if they do not alter class members.
 In some classes, pre-computations are done to speed up calculations, and these
 pre-computations will alter class members.
 If these pre-computation are not supposed to alter the content of a class,
-methods that perfom pre-computations should also be declared as {\tt const}.
+methods that perform pre-computations should also be declared as {\tt const}.
 Internally, they have to circumvent const correctness by casting the pointer to
-non {\tt const}.
+non {\tt const} or by using the {\tt mutable} attribute in the declaration of the members
+that hold the pre-computed values (the latter option is preferred).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Arguments and return values}
+\subsubsection{Method arguments and return values}
 
 Arguments to methods should in general be passed by reference to reduce function
 overhead.
@@ -402,12 +403,6 @@ class member.
     const GEvents*     events(void) const;
     const std::string& statistics(void) const;
 \end{verbatim}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{More about const correctness}
-
-Use mutable keyword for cached variables, when object will not logially change.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
