@@ -66,21 +66,21 @@ public:
     void   jd(const double& time);
     void   mjd(const double& time);
     void   met(const double& time);
-    void   setTime(const double&      time,
-                   const double&      mrdref,
-                   const std::string& timeunit,
-                   const std::string& timesys = "TT",
-                   const std::string& timeref = "local");
-    void   setTime(const double&      time,
-                   const int&         mjdrefi,
-                   const double&      mrdreff,
-                   const std::string& timeunit,
-                   const std::string& timesys = "TT",
-                   const std::string& timeref = "local");
-    double getTime(void) const;
-    double getTime(const double& mrdref) const;
-    double getTime(const int& mjdrefi, const double& mrdreff) const;
-    double getMjdRef(void) const;
+    void   time(const double&      time,
+                const double&      mrdref,
+                const std::string& timeunit,
+                const std::string& timesys = "TT",
+                const std::string& timeref = "local");
+    void   time(const double&      time,
+                const int&         mjdrefi,
+                const double&      mrdreff,
+                const std::string& timeunit,
+                const std::string& timesys = "TT",
+                const std::string& timeref = "local");
+    double time(void) const;
+    double time(const double& mrdref) const;
+    double time(const int& mjdrefi, const double& mrdreff) const;
+    double mjdref(void) const;
 };
 
 

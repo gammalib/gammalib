@@ -78,7 +78,7 @@ public:
     GTime       tstop(int inx) const;
     double      telapse(void) const { return m_telapse; }
     double      ontime(void) const { return m_ontime; }
-    double      getMjdRef(void) const { return m_mjdref; }
+    double      mjdref(void) const { return m_mjdref; }
     bool        isin(const GTime& time) const;
     std::string print(void) const;
 

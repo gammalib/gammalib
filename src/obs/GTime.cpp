@@ -311,11 +311,11 @@ void GTime::met(const double& time)
  *
  * @todo Implement interpretation of "timesys" and "timeref" parameters.
  ***************************************************************************/
-void GTime::setTime(const double&      time,
-                    const double&      mrdref,
-                    const std::string& timeunit,
-                    const std::string& timesys,
-                    const std::string& timeref)
+void GTime::time(const double&      time,
+                 const double&      mrdref,
+                 const std::string& timeunit,
+                 const std::string& timesys,
+                 const std::string& timeref)
 {
     // Convert time to seconds
     double time_in_seconds;
@@ -353,18 +353,18 @@ void GTime::setTime(const double&      time,
  * Sets the time for arbitrary units and MJD reference date. The MJD
  * reference day is specified as integer part and floating point fraction.
  ***************************************************************************/
-void GTime::setTime(const double&      time,
-                    const int&         mjdrefi,
-                    const double&      mrdreff,
-                    const std::string& timeunit,
-                    const std::string& timesys,
-                    const std::string& timeref)
+void GTime::time(const double&      time,
+                 const int&         mjdrefi,
+                 const double&      mrdreff,
+                 const std::string& timeunit,
+                 const std::string& timesys,
+                 const std::string& timeref)
 {
     // Compute reference MJD
     double mjdref = double(mjdrefi) + mrdreff;
     
     // Set time
-    setTime(time, mjdref, timeunit, timesys, timeref);
+    time(time, mjdref, timeunit, timesys, timeref);
 
     // Return
     return;
@@ -376,7 +376,7 @@ void GTime::setTime(const double&      time,
  *
  * Returns time in seconds in the native MJD reference.
  ***************************************************************************/
-double GTime::getTime(void) const
+double GTime::time(void) const
 {
     // Return time
     return m_time;
@@ -390,7 +390,7 @@ double GTime::getTime(void) const
  *
  * Returns time in seconds in the specified MJD reference.
  ***************************************************************************/
-double GTime::getTime(const double& mrdref) const
+double GTime::time(const double& mrdref) const
 {
     // Retrieve time in seconds
     double time = m_time;
@@ -419,13 +419,13 @@ double GTime::getTime(const double& mrdref) const
  *
  * Returns time in seconds in the specified MJD reference.
  ***************************************************************************/
-double GTime::getTime(const int& mjdrefi, const double& mrdreff) const
+double GTime::time(const int& mjdrefi, const double& mrdreff) const
 {
     // Compute reference MJD
     double mjdref = double(mjdrefi) + mrdreff;
     
     // Return time
-    return (getTime(mjdref));
+    return (time(mjdref));
 }
 
 
@@ -434,7 +434,7 @@ double GTime::getTime(const int& mjdrefi, const double& mrdreff) const
  *
  * Returns MJD reference in days.
  ***************************************************************************/
-double GTime::getMjdRef(void) const
+double GTime::mjdref(void) const
 {
     // Return MJD reference
     return m_mjdref;
