@@ -933,12 +933,22 @@ double GCTAModelRadialAcceptance::roi_kern::eval(double offset)
     // Circumvent const correctness
     GCTAModelRadial* radial = (GCTAModelRadial*)m_parent;
 
-    // Get arclength for given radius in radians.
-    double phi = cta_roi_arclength(offset, m_dist, m_cosdist, m_sindist,
-                                   m_roi, m_cosroi);
+    // Initialise Npred value
+    double value = 0.0;
+    
+    // Continue only if offset > 0
+    if (offset > 0.0) {
 
-    // Get PSF value
-    double value = radial->eval(offset*rad2deg) * phi * sin(offset);
+        // Get arclength for given radius in radians.
+        double phi = cta_roi_arclength(offset, m_dist, m_cosdist, m_sindist,
+                                       m_roi, m_cosroi);
+
+        // Get PSF value if phi > 0
+        if (phi > 0.0) {
+            value = radial->eval(offset*rad2deg) * phi * sin(offset);
+        }
+
+    } // endif: offset was positive
 
     // Return
     return value;
