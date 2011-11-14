@@ -95,6 +95,10 @@ protected:
     float         m_shwidth;        //!< Shower width (m)
     float         m_shlength;       //!< Shower length (m)
     float         m_energy_err;     //!< Error on event energy (MeV)
+    float         m_hil_msw;        //!< Hillas MSW
+    float         m_hil_msw_err;    //!< Hillas MSW error
+    float         m_hil_msl;        //!< Hillas MSL
+    float         m_hil_msl_err;    //!< Hillas MSL error
 };
 
 #endif /* GCTAEVENTATOM_HPP */

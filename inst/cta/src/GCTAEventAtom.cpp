@@ -217,6 +217,10 @@ void GCTAEventAtom::init_members(void)
     m_shwidth     = 0.0;
     m_shlength    = 0.0;
     m_energy_err  = 0.0;
+    m_hil_msw     = 0.0;
+    m_hil_msw_err = 0.0;
+    m_hil_msl     = 0.0;
+    m_hil_msl_err = 0.0;
 
     // Return
     return;
@@ -251,6 +255,10 @@ void GCTAEventAtom::copy_members(const GCTAEventAtom& atom)
     m_shwidth     = atom.m_shwidth;
     m_shlength    = atom.m_shlength;
     m_energy_err  = atom.m_energy_err;
+    m_hil_msw     = atom.m_hil_msw;
+    m_hil_msw_err = atom.m_hil_msw_err;
+    m_hil_msl     = atom.m_hil_msl;
+    m_hil_msl_err = atom.m_hil_msl_err;
 
     // Return
     return;
