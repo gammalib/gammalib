@@ -46,8 +46,10 @@ public:
     virtual GLATObservation* clone(void) const;
     virtual void             response(const GResponse& rsp);
     virtual GLATResponse*    response(void) const;
-    virtual GLATPointing*    pointing(const GTime& time) const;
+    virtual GLATPointing*    pointing(void) const;
     virtual std::string      instrument(void) const;
+    virtual double           ontime(void) const;
+    virtual double           livetime(void) const;
     virtual void             read(const GXmlElement& xml);
     virtual void             write(GXmlElement& xml) const;
 

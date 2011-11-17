@@ -250,13 +250,9 @@ GCTAResponse* GCTAObservation::response(void) const
 /***********************************************************************//**
  * @brief Returns pointer to CTA pointing direction
  *
- * @param[in] time Time.
- *
- * Returns pointer to pointing direction for a given time.
- *
- * @todo Update pointing information as function of time.
+ * Returns pointer to pointing direction.
  ***************************************************************************/
-GCTAPointing* GCTAObservation::pointing(const GTime& time) const
+GCTAPointing* GCTAObservation::pointing(void) const
 {
     // Return pointing pointer
     return m_pointing;
@@ -592,6 +588,8 @@ std::string GCTAObservation::print(void) const
     result.append("\n"+parformat("Identifier")+id());
     result.append("\n"+parformat("Instrument")+instrument());
     result.append("\n"+parformat("Statistics")+statistics());
+    result.append("\n"+parformat("Ontime")+str(ontime()));
+    result.append("\n"+parformat("Livetime")+str(livetime()));
 
     // Append pointing
     if (m_pointing != NULL) {
@@ -763,6 +761,7 @@ void GCTAObservation::init_members(void)
     m_response = NULL;
     m_pointing = NULL;
     m_obs_id   = 0;
+    m_ontime   = 0.0;
     m_livetime = 0.0;
     m_deadc    = 0.0;
     m_ra_obj   = 0.0;
@@ -787,6 +786,7 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     // Copy members
     m_eventfile = obs.m_eventfile;
     m_obs_id    = obs.m_obs_id;
+    m_ontime    = obs.m_ontime;
     m_livetime  = obs.m_livetime;
     m_deadc     = obs.m_deadc;
     m_ra_obj    = obs.m_ra_obj;
@@ -854,11 +854,12 @@ void GCTAObservation::read_attributes(const GFitsHDU* hdu)
 
         // Read optional attributes
         m_name     = (hdu->hascard("OBJECT"))   ? hdu->string("OBJECT") : "unknown";
+        m_ontime   = (hdu->hascard("ONTIME"))   ? hdu->real("ONTIME") : 0.0;
+        m_livetime = (hdu->hascard("LIVETIME")) ? hdu->real("LIVETIME") : 0.0;
+        m_deadc    = (hdu->hascard("DEADC"))    ? hdu->real("DEADC") : 0.0;
         m_ra_obj   = (hdu->hascard("RA_OBJ"))   ? hdu->real("RA_OBJ") : 0.0;
         m_dec_obj  = (hdu->hascard("DEC_OBJ"))  ? hdu->real("DEC_OBJ") : 0.0;
         m_obs_id   = (hdu->hascard("OBS_ID"))   ? hdu->integer("OBS_ID") : 0;
-        m_livetime = (hdu->hascard("LIVETIME")) ? hdu->real("LIVETIME") : 0.0;
-        m_deadc    = (hdu->hascard("DEADC"))    ? hdu->real("DEADC") : 0.0;
         double alt = (hdu->hascard("ALT_PNT"))  ? hdu->real("ALT_PNT") : 0.0;
         double az  = (hdu->hascard("AZ_PNT"))   ? hdu->real("AZ_PNT") : 0.0;
 

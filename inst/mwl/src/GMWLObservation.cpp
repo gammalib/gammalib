@@ -284,11 +284,9 @@ GMWLResponse* GMWLObservation::response(void) const
 
 
 /***********************************************************************//**
- * @brief Returns pointer to pointing (dummy)
- *
- * @param[in] time Time.
+ * @brief Returns pointer to pointing
  ***************************************************************************/
-GMWLPointing* GMWLObservation::pointing(const GTime& time) const
+GMWLPointing* GMWLObservation::pointing(void) const
 {
     // Return pointing pointer
     return m_pointing;

@@ -247,14 +247,8 @@ GLATResponse* GLATObservation::response(void) const
 
 /***********************************************************************//**
  * @brief Returns pointer to LAT pointing direction
- *
- * @param[in] time Time.
- *
- * Returns pointer to pointing direction for a given time. As the pointing
- * direction is supposed not to vary during an observation, the time argument
- * needs not to be considered.
  ***************************************************************************/
-GLATPointing* GLATObservation::pointing(const GTime& time) const
+GLATPointing* GLATObservation::pointing(void) const
 {
     // Return response pointer
     return m_pointing;

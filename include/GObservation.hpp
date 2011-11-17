@@ -62,7 +62,7 @@
 class GObservation {
 
     // Friend classes
-    friend class GObservations;
+    //friend class GObservations;
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GObservation& obs);
@@ -82,8 +82,10 @@ public:
     virtual GObservation* clone(void) const = 0;
     virtual void          response(const GResponse& rsp) = 0;
     virtual GResponse*    response(void) const = 0;
-    virtual GPointing*    pointing(const GTime& time) const = 0;
+    virtual GPointing*    pointing(void) const = 0;
     virtual std::string   instrument(void) const = 0;
+    virtual double        ontime(void) const = 0;
+    virtual double        livetime(void) const = 0;
     virtual void          read(const GXmlElement& xml) = 0;
     virtual void          write(GXmlElement& xml) const = 0;
     virtual std::string   print(void) const = 0;

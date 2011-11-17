@@ -53,8 +53,10 @@ public:
     virtual GMWLObservation* clone(void) const;
     virtual void             response(const GResponse& rsp);
     virtual GMWLResponse*    response(void) const;
-    virtual GMWLPointing*    pointing(const GTime& time) const;
+    virtual GMWLPointing*    pointing(void) const;
     virtual std::string      instrument(void) const;
+    virtual double           ontime(void) const;
+    virtual double           livetime(void) const;
     virtual void             read(const GXmlElement& xml);
     virtual void             write(GXmlElement& xml) const;
 

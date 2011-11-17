@@ -46,8 +46,10 @@ public:
     virtual GCTAObservation* clone(void) const;
     virtual void             response(const GResponse& rsp);
     virtual GCTAResponse*    response(void) const;
-    virtual GCTAPointing*    pointing(const GTime& time) const;
+    virtual GCTAPointing*    pointing(void) const;
     virtual std::string      instrument(void) const;
+    virtual double           ontime(void) const;
+    virtual double           livetime(void) const;
     virtual void             read(const GXmlElement& xml);
     virtual void             write(GXmlElement& xml) const;
 
@@ -63,7 +65,6 @@ public:
     int    obs_id(void) const;
     double ra_obj(void) const;
     double dec_obj(void) const;
-    double livetime(void) const;
     double deadc(void) const;
 };
 

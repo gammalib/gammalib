@@ -59,8 +59,10 @@ public:
     virtual GCTAObservation* clone(void) const;
     virtual void             response(const GResponse& rsp);
     virtual GCTAResponse*    response(void) const;
-    virtual GCTAPointing*    pointing(const GTime& time) const;
+    virtual GCTAPointing*    pointing(void) const;
     virtual std::string      instrument(void) const;
+    virtual double           ontime(void) const { return m_ontime; }
+    virtual double           livetime(void) const { return m_livetime; }
     virtual void             read(const GXmlElement& xml);
     virtual void             write(GXmlElement& xml) const;
     virtual std::string      print(void) const;
@@ -77,7 +79,6 @@ public:
     int         obs_id(void) const { return m_obs_id; }
     double      ra_obj(void) const { return m_ra_obj; }
     double      dec_obj(void) const { return m_dec_obj; }
-    double      livetime(void) const { return m_livetime; }
     double      deadc(void) const { return m_deadc; }
     std::string eventfile(void) const { return m_eventfile; }
 
@@ -97,6 +98,7 @@ protected:
     GCTAResponse* m_response;     //!< Pointer to instrument response functions
     GCTAPointing* m_pointing;     //!< Pointer to pointing direction
     int           m_obs_id;       //!< Observation ID
+    double        m_ontime;       //!< Ontime
     double        m_livetime;     //!< Livetime
     double        m_deadc;        //!< Deadtime correction
     double        m_ra_obj;       //!< Right Ascension of object
