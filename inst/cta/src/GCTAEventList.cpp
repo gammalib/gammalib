@@ -565,6 +565,9 @@ void GCTAEventList::read_events(const GFitsTable* table)
                 read_events_v0(table);
             }
 
+            // Read (optional) Hillas parameters
+            read_events_hillas(table);
+
         } // endif: there were events
 
     } // endif: HDU was valid
@@ -650,10 +653,6 @@ void GCTAEventList::read_events_v0(const GFitsTable* table)
                 event.m_shwidth     = 0.0;
                 event.m_shlength    = 0.0;
                 event.m_energy_err  = (*ptr_energy_err)(i);
-                event.m_hil_msw     = (*ptr_hil_msw)(i);
-                event.m_hil_msw_err = (*ptr_hil_msw_err)(i);
-                event.m_hil_msl     = (*ptr_hil_msl)(i);
-                event.m_hil_msl_err = (*ptr_hil_msl_err)(i);
                 m_events.push_back(event);
             }
 
@@ -716,10 +715,6 @@ void GCTAEventList::read_events_v1(const GFitsTable* table)
             GFitsTableFloatCol*  ptr_shl         = (GFitsTableFloatCol*)&(*table)["SHLENGTH"];
             GFitsTableFloatCol*  ptr_energy      = (GFitsTableFloatCol*)&(*table)["ENERGY"];
             GFitsTableFloatCol*  ptr_energy_err  = (GFitsTableFloatCol*)&(*table)["ENERGY_ERR"];
-            GFitsTableFloatCol*  ptr_hil_msw     = (GFitsTableFloatCol*)&(*table)["HIL_MSW"];
-            GFitsTableFloatCol*  ptr_hil_msw_err = (GFitsTableFloatCol*)&(*table)["HIL_MSW_ERR"];
-            GFitsTableFloatCol*  ptr_hil_msl     = (GFitsTableFloatCol*)&(*table)["HIL_MSL"];
-            GFitsTableFloatCol*  ptr_hil_msl_err = (GFitsTableFloatCol*)&(*table)["HIL_MSL_ERR"];
 
             // Copy data from columns into GCTAEventAtom objects
             GCTAEventAtom event;
@@ -744,10 +739,6 @@ void GCTAEventList::read_events_v1(const GFitsTable* table)
                 event.m_shwidth     = (*ptr_shw)(i);
                 event.m_shlength    = (*ptr_shl)(i);
                 event.m_energy_err  = (*ptr_energy_err)(i);
-                event.m_hil_msw     = (*ptr_hil_msw)(i);
-                event.m_hil_msw_err = (*ptr_hil_msw_err)(i);
-                event.m_hil_msl     = (*ptr_hil_msl)(i);
-                event.m_hil_msl_err = (*ptr_hil_msl_err)(i);
                 m_events.push_back(event);
             }
 
@@ -766,9 +757,12 @@ void GCTAEventList::read_events_v1(const GFitsTable* table)
  * @param[in] table FITS table pointer.
  *
  * This method reads the Hillas reconstruction information for CTA events
- * from an EVENTS file.
+ * from an EVENTS file. It searches for the columns HIL_MSW, HIL_MSW_ERR,
+ * HIL_MSL, and HIL_MSL_ERR in the FITS table and extracts the relevant
+ * columns from the FITS file. If a column is not found, no action is
+ * performed.
  *
- * @todo Implement method after restructuration of event list.
+ * @todo Verify consistency of event list size
  ***************************************************************************/
 void GCTAEventList::read_events_hillas(const GFitsTable* table)
 {
@@ -781,21 +775,47 @@ void GCTAEventList::read_events_hillas(const GFitsTable* table)
         // Extract number of events in FITS file
         int num = table->integer("NAXIS2");
 
-        //TODO: Make sure that dimension is consistent with existing event list
+        //TODO: Make sure that dimension is consistent with existing event
+        //      list
 
         // Continue only if there are events
         if (num > 0) {
 
-            // Get column pointers
-            GFitsTableFloatCol* ptr_hil_msw     = (GFitsTableFloatCol*)&(*table)["HIL_MSW"];
-            GFitsTableFloatCol* ptr_hil_msw_err = (GFitsTableFloatCol*)&(*table)["HIL_MSW_ERR"];
-            GFitsTableFloatCol* ptr_hil_msl     = (GFitsTableFloatCol*)&(*table)["HIL_MSL"];
-            GFitsTableFloatCol* ptr_hil_msl_err = (GFitsTableFloatCol*)&(*table)["HIL_MSL_ERR"];
+            // HIL_MSW
+            if (table->hascolumn("HIL_MSW")) {
+                GFitsTableFloatCol* ptr =
+                     (GFitsTableFloatCol*)&(*table)["HIL_MSW"];
+                for (int i = 0; i < num; ++i) {
+                    m_events[i].m_hil_msw = (*ptr)(i);
+                }
+            }
 
-            //TODO: Add information to event
-            for (int i = 0; i < num; ++i) {
+            // HIL_MSW_ERR
+            if (table->hascolumn("HIL_MSW_ERR")) {
+                GFitsTableFloatCol* ptr =
+                     (GFitsTableFloatCol*)&(*table)["HIL_MSW_ERR"];
+                for (int i = 0; i < num; ++i) {
+                    m_events[i].m_hil_msw_err = (*ptr)(i);
+                }
+            }
 
-            } // endfor: looped over all events
+            // HIL_MSL
+            if (table->hascolumn("HIL_MSL")) {
+                GFitsTableFloatCol* ptr =
+                     (GFitsTableFloatCol*)&(*table)["HIL_MSL"];
+                for (int i = 0; i < num; ++i) {
+                    m_events[i].m_hil_msl = (*ptr)(i);
+                }
+            }
+
+            // HIL_MSL_ERR
+            if (table->hascolumn("HIL_MSL_ERR")) {
+                GFitsTableFloatCol* ptr =
+                     (GFitsTableFloatCol*)&(*table)["HIL_MSL_ERR"];
+                for (int i = 0; i < num; ++i) {
+                    m_events[i].m_hil_msl_err = (*ptr)(i);
+                }
+            }
 
         } // endif: there were events
 

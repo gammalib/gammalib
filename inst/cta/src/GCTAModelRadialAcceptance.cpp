@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAModelRadialAcceptance.cpp  -  Radial acceptance model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAModelRadialAcceptance.cpp
  * @brief Radial acceptance model class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -265,10 +265,10 @@ double GCTAModelRadialAcceptance::eval(const GEvent& event,
                                        const GObservation& obs) const
 {
     // Extract CTA pointing direction
-    GTime time; // not used
-    GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing(time));
-    if (pnt == NULL)
+    GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
+    if (pnt == NULL) {
         throw GCTAException::no_pointing(G_EVAL);
+    }
 
     // Get instrument direction
     const GInstDir*    inst_dir = &(event.dir());
@@ -312,10 +312,10 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
                                                  const GObservation& obs) const
 {
     // Extract CTA pointing direction
-    GTime time; // not used
-    GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing(time));
-    if (pnt == NULL)
+    GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
+    if (pnt == NULL) {
         throw GCTAException::no_pointing(G_EVAL);
+    }
 
     // Get instrument direction
     const GInstDir*    inst_dir = &(event.dir());
@@ -391,13 +391,15 @@ double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
 
         // Get pointer on CTA events list
         const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
-        if (events == NULL)
+        if (events == NULL) {
             throw GException::no_list(G_NPRED);
+        }
 
         // Get CTA pointing direction
-        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing(obsTime));
-        if (pnt == NULL)
+        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
+        if (pnt == NULL) {
             throw GCTAException::no_pointing(G_NPRED);
+        }
 
         // Get ROI radius in radians
         double roi_radius = events->roi().radius() * deg2rad;
@@ -450,9 +452,10 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
     if (valid_model()) {
 
         // Extract CTA pointing direction at beginning of observation
-        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing(obs.events()->tstart()));
-        if (pnt == NULL)
+        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
+        if (pnt == NULL) {
             throw GCTAException::no_pointing(G_MC);
+        }
 
         // Convert CTA pointing direction in instrument system
         GCTAInstDir pnt_dir(pnt->dir());

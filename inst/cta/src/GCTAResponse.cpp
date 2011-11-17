@@ -256,14 +256,16 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
         throw GCTAException::bad_observation_type(G_IRF);
 
     // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing(srcTime);
-    if (pnt == NULL)
+    const GCTAPointing *pnt = ctaobs->pointing();
+    if (pnt == NULL) {
         throw GCTAException::no_pointing(G_IRF);
+    }
 
     // Get pointer on CTA instrument direction
     const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
-    if (dir == NULL)
+    if (dir == NULL) {
         throw GCTAException::bad_instdir_type(G_IRF);
+    }
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -357,18 +359,21 @@ double GCTAResponse::npred(const GSkyDir&      srcDir,
 {
     // Get pointer on CTA observation
     const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL)
+    if (ctaobs == NULL) {
         throw GCTAException::bad_observation_type(G_NPRED);
+    }
 
     // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing(srcTime);
-    if (pnt == NULL)
+    const GCTAPointing *pnt = ctaobs->pointing();
+    if (pnt == NULL) {
         throw GCTAException::no_pointing(G_NPRED);
+    }
 
     // Get pointer on CTA events list
     const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
-    if (events == NULL)
+    if (events == NULL) {
         throw GException::no_list(G_NPRED);
+    }
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -641,18 +646,21 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
 {
     // Get pointer on CTA observation
     const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL)
+    if (ctaobs == NULL) {
         throw GCTAException::bad_observation_type(G_IRF_EXTENDED);
+    }
 
     // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing(srcTime);
-    if (pnt == NULL)
+    const GCTAPointing *pnt = ctaobs->pointing();
+    if (pnt == NULL) {
         throw GCTAException::no_pointing(G_IRF_EXTENDED);
+    }
 
     // Get pointer on CTA instrument direction
     const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
-    if (dir == NULL)
+    if (dir == NULL) {
         throw GCTAException::bad_instdir_type(G_IRF_EXTENDED);
+    }
 
     // Determine angular distance between measured photon direction and model
     // centre [radians]
