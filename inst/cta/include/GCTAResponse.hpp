@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAResponse.hpp  -  CTA Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -128,6 +128,12 @@ public:
     std::string    arffile(void) const { return m_arffile; }
     std::string    rmffile(void) const { return m_rmffile; }
     std::string    psffile(void) const { return m_psffile; }
+    double         arf_thetacut(void) const { return m_arf_thetacut; }
+    double         arf_scale(void) const { return m_arf_scale; }
+    void           arf_thetacut(const double& value) { m_arf_thetacut=value; }
+    void           arf_scale(const double& value) { m_arf_scale=value; }
+    void           load_arf(const std::string& filename);
+    void           load_psf(const std::string& filename);
     void           read_arf(const GFitsTable* hdu);
     void           read_psf(const GFitsTable* hdu);
 
@@ -373,6 +379,8 @@ private:
     std::string         m_arffile;      //!< Name of ARF file
     std::string         m_rmffile;      //!< Name of RMF file
     std::string         m_psffile;      //!< Name of PSF file
+    double              m_arf_thetacut; //!< Theta cut for ARF
+    double              m_arf_scale;    //!< Scale for ARF
     GNodeArray          m_psf_logE;     //!< log(E) nodes for PSF interpolation
     GNodeArray          m_aeff_logE;    //!< log(E) nodes for Aeff interpolation
     std::vector<double> m_logE;         //!< log(E) = log10(E/TeV) - bin centre
