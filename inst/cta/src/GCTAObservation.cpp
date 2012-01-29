@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCTAObservation.cpp  -  CTA Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -324,10 +324,12 @@ void GCTAObservation::read(const GXmlElement& xml)
     // Clear observation
     clear();
 
-    // Initialise response file names
-    std::string arf = "";
-    std::string rmf = "";
-    std::string psf = "";
+    // Initialise response parameters
+    std::string arf      = "";
+    std::string rmf      = "";
+    std::string psf      = "";
+    double      thetacut = 0.0;
+    double      scale    = 1.0;
 
     // Determine number of parameter nodes in XML element
     int npars = xml.elements("parameter");
@@ -373,7 +375,23 @@ void GCTAObservation::read(const GXmlElement& xml)
 
         // Handle ARF
         else if (par->attribute("name") == "ARF") {
+
+            // Store filename
             arf = par->attribute("file");
+
+            // Optionally extract thetacut (0.0 if no thetacut)
+            std::string s_thetacut = par->attribute("thetacut");
+            if (s_thetacut.length() > 0) {
+                thetacut = todouble(s_thetacut);
+            }
+
+            // Optionally extract scale factor (1.0 if no scale)
+            std::string s_scale = par->attribute("scale");
+            if (s_scale.length() > 0) {
+                scale = todouble(s_scale);
+            }
+
+            // Increase number of parameters
             npar[1]++;
         }
 
@@ -404,40 +422,18 @@ void GCTAObservation::read(const GXmlElement& xml)
     // Allocate new CTA response function
     m_response = new GCTAResponse;
 
-    // Set ARF
-    if (strip_whitespace(arf).length() > 0) {
-
-        // Open ARF FITS file
-        GFits file(arf);
-
-        // Get ARF table
-        GFitsTable* table = file.table("SPECRESP");
-
-        // Read ARF
-        m_response->read_arf(table);
-
-        // Close ARF FITS file
-        file.close();
-
-    } // endif: there was an ARF to load
-    
-    // Set PSF
+    // Load PSF (need this before ARF to handle thetacut)
     if (strip_whitespace(psf).length() > 0) {
+        m_response->load_psf(psf);
+    }
 
-        // Open PSF FITS file
-        GFits file(psf);
-
-        // Get PSF table
-        GFitsTable* table = file.table("PSF");
-
-        // Read PSF
-        m_response->read_psf(table);
-
-        // Close PSF FITS file
-        file.close();
-
-    } // endif: there was a PSF to load
-
+    // Load ARF
+    if (strip_whitespace(arf).length() > 0) {
+        m_response->arf_thetacut(thetacut);
+        m_response->arf_scale(scale);
+        m_response->load_arf(arf);
+    }
+    
     // Return
     return;
 }
@@ -532,11 +528,21 @@ void GCTAObservation::write(GXmlElement& xml) const
 
         // Handle ARF
         else if (par->attribute("name") == "ARF") {
-            std::string arf = "";
+            std::string arf      = "";
+            double      thetacut = 0.0;
+            double      scale    = 1.0;
             if (m_response != NULL) {
-                arf = m_response->arffile();
+                arf      = m_response->arffile();
+                thetacut = m_response->arf_thetacut();
+                scale    = m_response->arf_scale();
             }
             par->attribute("file", arf);
+            if (thetacut > 0.0) {
+                par->attribute("thetacut", str(thetacut));
+            }
+            if (scale != 1.0) {
+                par->attribute("scale", str(scale));
+            }
             npar[1]++;
         }
 
