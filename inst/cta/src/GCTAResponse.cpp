@@ -673,15 +673,47 @@ void GCTAResponse::read_arf(const GFitsTable* hdu)
         double e_max = energy_hi->real(i) * c_energy_hi;
         double logE  = 0.5 * (log10(e_min) + log10(e_max));
 
+        // Initialise scale factor
+        double scale = m_arf_scale;
+
         // Optionally compute scaling factor from thetacut. This is done
         // by computing the containment fraction for the specified thetacut.
         if (m_arf_thetacut > 0.0) {
-            //TODO: Determine sigma for logE; integrate Gaussian up to
-            //thetacut; scale = 1/integral
+
+            // Get PSF sigma at node energy
+            double sigma = psf_dummy_sigma(logE);
+
+            // Get maximum integration radius
+            double rmax = m_arf_thetacut * deg2rad;
+
+            // Setup integration kernel
+            GCTAResponse::npsf_kern_rad_azsym integrand(this,
+                                                        rmax,
+                                                        0.0,
+                                                        sigma);
+
+            // Setup integration
+            GIntegral integral(&integrand);
+            integral.eps(m_eps);
+
+            // Perform integration
+            double value = integral.romb(0.0, rmax);
+
+            // Update scale factor
+            if (value > 0.0) {
+                scale /= value;
+            }
+            else {
+                std::cout << "WARNING: Non-positive integral occured in";
+                std::cout << " PSF integration in GCTAResponse::read_arf.";
+            }
+
+//std::cout << logE << " sigma=" << sigma;
+//std::cout << " rmax=" << rmax << " => " << value << " " << scale << std::endl;
         }
 
         // Compute effective area in cm2
-        double aeff = specresp->real(i) * c_specresp * m_arf_scale;
+        double aeff = specresp->real(i) * c_specresp * scale;
         
         // Store log10 mean energy and effective area value
         m_aeff_logE.append(logE);
