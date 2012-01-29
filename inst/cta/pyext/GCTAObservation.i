@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAObservation.i  -  CTA Observation class interface           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,18 +54,20 @@ public:
     virtual void             write(GXmlElement& xml) const;
 
     // Other methods
-    void   load_unbinned(const std::string& filename);
-    void   load_binned(const std::string& filename);
-    void   save(const std::string& filename, bool clobber) const;
-    void   response(const std::string& irfname, std::string caldb = "");
-    void   pointing(const GCTAPointing& pointing);
-    void   obs_id(const int& id);
-    void   ra_obj(const double& ra);
-    void   dec_obj(const double& dec);
-    int    obs_id(void) const;
-    double ra_obj(void) const;
-    double dec_obj(void) const;
-    double deadc(void) const;
+    void        load_unbinned(const std::string& filename);
+    void        load_binned(const std::string& filename);
+    void        save(const std::string& filename, bool clobber) const;
+    void        response(const std::string& irfname, std::string caldb = "");
+    void        pointing(const GCTAPointing& pointing);
+    void        obs_id(const int& id);
+    void        ra_obj(const double& ra);
+    void        dec_obj(const double& dec);
+    int         obs_id(void) const;
+    double      ra_obj(void) const;
+    double      dec_obj(void) const;
+    double      deadc(void) const;
+    std::string eventfile(void) const;
+    void        eventfile(const std::string& filename);
 };
 
 

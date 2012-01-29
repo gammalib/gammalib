@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCTAObservation.hpp  -  CTA Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -81,6 +81,7 @@ public:
     double      dec_obj(void) const { return m_dec_obj; }
     double      deadc(void) const { return m_deadc; }
     std::string eventfile(void) const { return m_eventfile; }
+    void        eventfile(const std::string& filename) { m_eventfile = filename; }
 
 protected:
     // Protected methods
