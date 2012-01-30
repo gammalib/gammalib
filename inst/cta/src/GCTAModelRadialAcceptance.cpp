@@ -277,13 +277,13 @@ double GCTAModelRadialAcceptance::eval(const GEvent& event,
     // Compute offset angle (in degrees)
     double offset = cta_dir->dist_deg(pnt->dir());
 
-    // Initialise value
-    double value = 1.0;
+    // Evaluate function and gradients
+    double rad  = (radial()   != NULL) ? radial()->eval(offset) : 1.0;
+    double spec = (spectral() != NULL) ? spectral()->eval(event.energy()) : 1.0;
+    double temp = (temporal() != NULL) ? temporal()->eval(event.time()) : 1.0;
 
-    // Evaluate function
-    if (radial()   != NULL) value *= radial()->eval(offset);
-    if (spectral() != NULL) value *= spectral()->eval(event.energy());
-    if (temporal() != NULL) value *= temporal()->eval(event.time());
+    // Compute value
+    double value = rad * spec * temp;
 
     // Return
     return value;
