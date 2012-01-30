@@ -413,8 +413,12 @@ double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
         // Setup integrator
         GIntegral integral(&integrand);
 
+        // Setup integration boundaries
+        double rmin = (roi_distance > roi_radius) ? roi_distance-roi_radius : 0.0;
+        double rmax = roi_radius + roi_distance;
+
         // Spatially integrate radial component
-        npred = integral.romb(0.0, roi_radius);
+        npred = integral.romb(rmin, rmax);
 
         // Multiply in spectral and temporal components
         npred *= spectral()->eval(obsEng);
@@ -946,7 +950,7 @@ double GCTAModelRadialAcceptance::roi_kern::eval(double offset)
         double phi = cta_roi_arclength(offset, m_dist, m_cosdist, m_sindist,
                                        m_roi, m_cosroi);
 
-        // Get PSF value if phi > 0
+        // Get kernel value if phi > 0
         if (phi > 0.0) {
             value = radial->eval(offset*rad2deg) * phi * sin(offset);
         }
