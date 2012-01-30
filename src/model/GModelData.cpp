@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GModelData.hpp  -  Abstract virtual data model class          *
+ *           GModelData.cpp  -  Abstract virtual data model class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011 by Jurgen Knodlseder                                *
  * ----------------------------------------------------------------------- *
