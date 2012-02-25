@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectralFunc.cpp  -  Spectral function model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralFunc.cpp
  * @brief Spectral function model class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -720,12 +720,14 @@ void GModelSpectralFunc::copy_members(const GModelSpectralFunc& model)
     m_log_values = model.m_log_values;
     m_filename   = model.m_filename;
     
-    // Copy cache
+    // Copy pre-computation cache
     m_prefactor  = model.m_prefactor;
     m_gamma      = model.m_gamma;
     m_epivot     = model.m_epivot;
     m_flux       = model.m_flux;
     m_eflux      = model.m_eflux;
+
+    // Copy MC cache
     m_mc_emin    = model.m_mc_emin;
     m_mc_emax    = model.m_mc_emax;
     m_mc_cum     = model.m_mc_cum;

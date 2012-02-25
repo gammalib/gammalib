@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectralFunc.hpp  -  Spectral function model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralFunc.hpp
  * @brief Spectral function model class definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GMODELSPECTRALFUNC_HPP
@@ -104,7 +104,6 @@ protected:
     // Cached members for MC
     mutable GEnergy             m_mc_emin;   //!< Minimum energy
     mutable GEnergy             m_mc_emax;   //!< Maximum energy
-    mutable std::vector<int>    m_mc_inx;    //!< Node indices
     mutable std::vector<double> m_mc_cum;    //!< Cumulative distribution
     mutable std::vector<double> m_mc_min;    //!< Lower boundary for MC
     mutable std::vector<double> m_mc_max;    //!< Upper boundary for MC
