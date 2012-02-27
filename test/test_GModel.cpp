@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GModel.cpp  -  test GModel class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,6 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GModel.cpp
+ * @brief Test model classes
+ * @author J. Knoedlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
@@ -30,7 +35,8 @@
 #include "GammaLib.hpp"
 
 /* __ Globals ____________________________________________________________ */
-const std::string xml_file = "data/crab.xml";
+const std::string xml_file              = "data/crab.xml";
+const std::string xml_model_point_nodes = "data/model_point_nodes.xml";
 
 
 /***********************************************************************//**
@@ -188,6 +194,53 @@ void test_model(void)
 
 
 /***********************************************************************//**
+ * @brief Test XML model.
+ ***************************************************************************/
+void test_xml_model(const std::string &name, const std::string &filename)
+{
+    // Write header
+    std::cout << "Test " << name << ": ";
+
+    // Test load constructor
+    try {
+        GModels models(filename);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to load model from XML document."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Test save constructor
+    try {
+        GModels models(filename);
+        models.save("test.xml");
+        models.load("test.xml");
+        models.save("test.xml");
+        models.load("test.xml");
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to save and load model from XML document."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Plot final test success
+    std::cout << " ok." << std::endl;
+
+    // Exit test
+    return;
+
+}
+
+
+/***********************************************************************//**
  * @brief Test models.
  ***************************************************************************/
 void test_models(void)
@@ -262,6 +315,9 @@ int main(void)
     test_model_par();
     test_model();
     test_models();
+
+    // Test spectral models
+    test_xml_model("GModelSpectralNodes", xml_model_point_nodes);
 
     // Return
     return 0;
