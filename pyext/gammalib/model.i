@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     model module  -  Python bindings                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,6 +55,7 @@
 %include "GModelSpectralConst.i"
 %include "GModelSpectralExpPlaw.i"
 %include "GModelSpectralFunc.i"
+%include "GModelSpectralNodes.i"
 %include "GModelSpectralPlaw.i"
 %include "GModelSpectralPlaw2.i"
 %include "GModelTemporal.i"
