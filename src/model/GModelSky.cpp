@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GModelSky.hpp  -  Abstract virtual sky model class           *
+ *             GModelSky.cpp  -  Abstract sky model base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GModelSky.cpp
- * @brief Abstract sky model class implementation
- * @author J. Knodlseder
+ * @brief Abstract sky model base class implementation
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -258,8 +258,9 @@ GVector GModelSky::gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
     GVector gradients;
     if (size() > 0) {
         gradients = GVector(size());
-        for (int i = 0; i < size(); ++i)
+        for (int i = 0; i < size(); ++i) {
             gradients[i] = m_pars[i]->gradient();
+        }
     }
 
     // Return gradients
@@ -354,8 +355,9 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
 
         // Get response function
         GResponse* rsp = obs.response();
-        if (rsp == NULL)
+        if (rsp == NULL) {
             throw GException::no_response(G_NPRED);
+        }
 
         // Here we make the simplifying approximations
         // srcEng=obsEng and srcTime=obsTime. To be fully correct we should
@@ -461,17 +463,11 @@ void GModelSky::write(GXmlElement& xml) const
 
     // Set model attributes
     src->attribute("name", name());
-    if (spatial() != NULL) {
-        if (spatial()->type() == "PointSource")
-            src->attribute("type", "PointSource");
-        else
-            src->attribute("type", "DiffuseSource");
-    }
-    else
-        src->attribute("type", "unknown");
+    src->attribute("type", type());
     std::string instruments = this->instruments();
-    if (instruments.length() > 0)
+    if (instruments.length() > 0) {
         src->attribute("instrument", instruments);
+    }
 
     // Write spectral model
     if (spectral() != NULL) {
@@ -567,8 +563,9 @@ GPhotons GModelSky::mc(const double& area,
             GTimes times = m_temporal->mc(rate, tmin, tmax, ran);
 
             // Reserve space for photons
-            if (times.size() > 0)
+            if (times.size() > 0) {
                 photons.reserve(times.size());
+            }
 
             // Loop over photons
             for (int i = 0; i < times.size(); ++i) {
@@ -679,16 +676,19 @@ void GModelSky::set_pointers(void)
     if (n_pars > 0) {
 
         // Gather spatial parameter pointers
-        for (int i = 0; i < n_spatial; ++i)
+        for (int i = 0; i < n_spatial; ++i) {
             m_pars.push_back(&((*spatial())[i]));
+        }
 
         // Gather spectral parameters
-        for (int i = 0; i < n_spectral; ++i)
+        for (int i = 0; i < n_spectral; ++i) {
             m_pars.push_back(&((*spectral())[i]));
+        }
 
         // Gather temporal parameters
-        for (int i = 0; i < n_temporal; ++i)
+        for (int i = 0; i < n_temporal; ++i) {
             m_pars.push_back(&((*temporal())[i]));
+        }
 
     }
 
@@ -715,12 +715,14 @@ GModelSpatial* GModelSky::xml_spatial(const GXmlElement& spatial) const
     GModelSpatial*        ptr = registry.alloc(type);
 
     // If model if valid then read model from XML file
-    if (ptr != NULL)
+    if (ptr != NULL) {
         ptr->read(spatial);
+    }
 
     // ... otherwise throw an exception
-    else
+    else {
         throw GException::model_invalid_spatial(G_XML_SPATIAL, type);
+    }
 
     // Return pointer
     return ptr;
@@ -745,12 +747,14 @@ GModelSpectral* GModelSky::xml_spectral(const GXmlElement& spectral) const
     GModelSpectral*        ptr = registry.alloc(type);
 
     // If model if valid then read model from XML file
-    if (ptr != NULL)
+    if (ptr != NULL) {
         ptr->read(spectral);
+    }
 
     // ... otherwise throw an exception
-    else
+    else {
         throw GException::model_invalid_spectral(G_XML_SPECTRAL, type);
+    }
 
     // Return pointer
     return ptr;
@@ -775,12 +779,14 @@ GModelTemporal* GModelSky::xml_temporal(const GXmlElement& temporal) const
     GModelTemporal*        ptr = registry.alloc(type);
 
     // If model if valid then read model from XML file
-    if (ptr != NULL)
+    if (ptr != NULL) {
         ptr->read(temporal);
+    }
 
     // ... otherwise throw an exception
-    else
+    else {
         throw GException::model_invalid_temporal(G_XML_TEMPORAL, type);
+    }
 
     // Return pointer
     return ptr;
@@ -814,8 +820,9 @@ double GModelSky::spatial(const GEvent& event,
 
         // Get response function
         GResponse* rsp = obs.response();
-        if (rsp == NULL)
+        if (rsp == NULL) {
             throw GException::no_response(G_SPATIAL);
+        }
 
         // Get IRF value. This method returns the spatial component of the
         // source model.
@@ -848,8 +855,9 @@ double GModelSky::spatial(const GEvent& event,
             if (spectral() != NULL) {
                 double fact = temp * irf;
                 if (fact != 1.0) {
-                    for (int i = 0; i < spectral()->size(); ++i)
+                    for (int i = 0; i < spectral()->size(); ++i) {
                         (*spectral())[i].gradient((*spectral())[i].gradient() * fact);
+                    }
                 }
             }
 
@@ -857,8 +865,9 @@ double GModelSky::spatial(const GEvent& event,
             if (temporal() != NULL) {
                 double fact = spec * irf;
                 if (fact != 1.0) {
-                    for (int i = 0; i < temporal()->size(); ++i)
+                    for (int i = 0; i < temporal()->size(); ++i) {
                         (*temporal())[i].gradient((*temporal())[i].gradient() * fact);
+                    }
                 }
             }
 
@@ -925,8 +934,9 @@ double GModelSky::spectral(const GEvent& event, const GTime& srcTime,
 
     // Get response function
     GResponse* rsp = obs.response();
-    if (rsp == NULL)
+    if (rsp == NULL) {
         throw GException::no_response(G_SPECTRAL);
+    }
 
     // Determine if energy integration is needed
     bool integrate = rsp->hasedisp();
@@ -937,8 +947,9 @@ double GModelSky::spectral(const GEvent& event, const GTime& srcTime,
     }
 
     // Case B: No integration (assume no energy dispersion)
-    else
+    else {
         value = spatial(event, event.energy(), srcTime, obs, grad);
+    }
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -985,8 +996,9 @@ double GModelSky::temporal(const GEvent& event, const GObservation& obs,
 
     // Get response function
     GResponse* rsp = obs.response();
-    if (rsp == NULL)
+    if (rsp == NULL) {
         throw GException::no_response(G_TEMPORAL);
+    }
 
     // Determine if time integration is needed
     bool integrate = rsp->hastdisp();
@@ -997,8 +1009,9 @@ double GModelSky::temporal(const GEvent& event, const GObservation& obs,
     }
 
     // Case B: No integration (assume no time dispersion)
-    else
+    else {
         value = spectral(event, event.time(), obs, grad);
+    }
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -1049,8 +1062,9 @@ std::string GModelSky::print_model(void) const
     result.append("\n"+parformat("Instruments"));
     if (m_instruments.size() > 0) {
         for (int i = 0; i < m_instruments.size(); ++i) {
-            if (i > 0)
+            if (i > 0) {
                 result.append(", ");
+            }
             result.append(m_instruments[i]);
         }
     }
@@ -1061,28 +1075,34 @@ std::string GModelSky::print_model(void) const
     result.append("\n"+parformat("Model type"));
     if (n_spatial > 0) {
         result.append("\""+spatial()->type()+"\"");
-        if (n_spectral > 0 || n_temporal > 0)
+        if (n_spectral > 0 || n_temporal > 0) {
             result.append(" * ");
+        }
     }
     if (n_spectral > 0) {
         result.append("\""+spectral()->type()+"\"");
-        if (n_temporal > 0)
+        if (n_temporal > 0) {
             result.append(" * ");
+        }
     }
-    if (n_temporal > 0)
+    if (n_temporal > 0) {
         result.append("\""+temporal()->type()+"\"");
+    }
 
     // Append parameters
     result.append("\n"+parformat("Number of parameters")+str(size()));
     result.append("\n"+parformat("Number of spatial par's")+str(n_spatial));
-    for (int i = 0; i < n_spatial; ++i)
+    for (int i = 0; i < n_spatial; ++i) {
         result.append("\n"+(*spatial())[i].print());
+    }
     result.append("\n"+parformat("Number of spectral par's")+str(n_spectral));
-    for (int i = 0; i < n_spectral; ++i)
+    for (int i = 0; i < n_spectral; ++i) {
         result.append("\n"+(*spectral())[i].print());
+    }
     result.append("\n"+parformat("Number of temporal par's")+str(n_temporal));
-    for (int i = 0; i < n_temporal; ++i)
+    for (int i = 0; i < n_temporal; ++i) {
         result.append("\n"+(*temporal())[i].print());
+    }
 
     // Return result
     return result;
