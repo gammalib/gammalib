@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GObservation.cpp  -  Abstract observation base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GObservation.cpp
  * @brief Abstract observation base class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -459,10 +459,11 @@ void GObservation::free_members(void)
  * the spatial model may eventually be noisy due to numerical integration
  * limits.
  *
- * @todo We simply remove any parameter boundaries here for the computation
- *       to avoid any out of boundary errors. We may have models, however,
- *       for which out of bound parameters lead to illegal computations, such
- *       as division by zero or taking the square root of negative values.
+ * @todo For the Riddler method, we simply remove any parameter boundaries
+ *       here for the computation to avoid any out of boundary errors.
+ *       We may have models, however, for which out of bound parameters lead
+ *       to illegal computations, such as division by zero or taking the
+ *       square root of negative values.
  *       I cannot see any elegant method to catch this at this level.
  *       Eventually, the higher level method should avoid going in a
  *       parameter domain that is not defined. 
@@ -489,6 +490,44 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
             // Save current model parameter
             GModelPar current = (*ptr)[ipar];
 
+            // Get actual parameter value
+            double x = model[ipar].value();
+
+            // Determine fixed step size for computation of derivative.
+            // By default, the step size is fixed to 0.05, but if this would
+            // violate a boundary, dx is reduced accordingly. In case that x
+            // is right on the boundary, x is displaced slightly from the
+            // boundary to allow evaluation of the derivative.
+            #if !defined(G_GRAD_RIDDLER)
+            double dx = 0.05;
+            if (model[ipar].hasmin()) {
+                double dx_min = x - model[ipar].min();
+                if (dx_min == 0.0) {
+                    dx = 0.05 * x;
+                    if (dx == 0.0) {
+                        dx = 0.05;
+                    }
+                    x += dx; 
+                }
+                else if (dx_min < dx) {
+                    dx = dx_min;
+                }
+            }
+            if (model[ipar].hasmax()) {
+                double dx_max = model[ipar].max() - x;
+                if (dx_max == 0.0) {
+                    dx = 0.05 * x;
+                    if (dx == 0.0) {
+                        dx = 0.05;
+                    }
+                    x -= dx; 
+                }
+                else if (dx_max < dx) {
+                    dx = dx_max;
+                }
+            }
+            #endif
+
             // Remove any boundaries to avoid limitations
             (*ptr)[ipar].remove_range();
 
@@ -498,11 +537,9 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
             // Get derivative. We use a fixed step size here that has been
             // checked on spatial parameters of models
             GDerivative derivative(&function);
-            double x  = model[ipar].value();
             #if defined(G_GRAD_RIDDLER)
             grad = derivative.value(x);
             #else
-            double dx = 0.05;
             grad = derivative.difference(x, dx);
             #endif
 
@@ -575,10 +612,11 @@ double GObservation::model_func::eval(double x)
  * method has turned out more robust then the Riddler's method implement
  * by the GDerivative::value() method.
  *
- * @todo We simply remove any parameter boundaries here for the computation
- *       to avoid any out of boundary errors. We may have models, however,
- *       for which out of bound parameters lead to illegal computations, such
- *       as division by zero or taking the square root of negative values.
+ * @todo For Riddler's method we simply remove any parameter boundaries here
+ *       for the computation to avoid any out of boundary errors. We may have
+ *       models, however, for which out of bound parameters lead to illegal
+ *       computations, such as division by zero or taking the square root of
+ *       negative values.
  *       I cannot see any elegant method to catch this at this level.
  *       Eventually, the higher level method should avoid going in a
  *       parameter domain that is not defined. 
@@ -597,20 +635,55 @@ double GObservation::npred_grad(const GModel& model, int ipar) const
         // Save current model parameter
         GModelPar current = (*ptr)[ipar];
 
+        // Get actual parameter value
+        double x = model[ipar].value();
+
+        // Determine fixed step size for computation of derivative.
+        // By default, the step size is fixed to 0.05, but if this would
+        // violate a boundary, dx is reduced accordingly. In case that x
+        // is right on the boundary, x is displaced slightly from the
+        // boundary to allow evaluation of the derivative.
+        #if !defined(G_GRAD_RIDDLER)
+        double dx = 0.05;
+        if (model[ipar].hasmin()) {
+            double dx_min = x - model[ipar].min();
+            if (dx_min == 0.0) {
+                dx = 0.05 * x;
+                if (dx == 0.0) {
+                    dx = 0.05;
+                }
+                x += dx; 
+            }
+            else if (dx_min < dx) {
+                dx = dx_min;
+            }
+        }
+        if (model[ipar].hasmax()) {
+            double dx_max = model[ipar].max() - x;
+            if (dx_max == 0.0) {
+                dx = 0.05 * x;
+                if (dx == 0.0) {
+                    dx = 0.05;
+                }
+                x -= dx; 
+            }
+            else if (dx_max < dx) {
+                dx = dx_max;
+            }
+        }
+        #endif
+        
         // Remove any boundaries to avoid limitations
         (*ptr)[ipar].remove_range();
 
         // Setup derivative function
         GObservation::npred_func function(this, model, ipar);
 
-        // Get derivative. We use a fixed step size here that has been
-        // checked on several models
+        // Get derivative.
         GDerivative derivative(&function);
-        double x  = model[ipar].value();
         #if defined(G_GRAD_RIDDLER)
         grad = derivative.value(x);
         #else
-        double dx = 0.05;
         grad = derivative.difference(x, dx);
         #endif
 
