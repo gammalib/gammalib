@@ -60,6 +60,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpectralPlaw2.hpp \
                      GModelSpectralExpPlaw.hpp \
                      GModelSpectralFunc.hpp \
+                     GModelSpectralNodes.hpp \
                      GModelSpectralConst.hpp \
                      GModelTemporal.hpp \
                      GModelTemporalRegistry.hpp \
