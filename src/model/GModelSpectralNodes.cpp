@@ -1,0 +1,1280 @@
+/***************************************************************************
+ *         GModelSpectralNodes.cpp  -  Spectral nodes model class          *
+ * ----------------------------------------------------------------------- *
+ *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ * ----------------------------------------------------------------------- *
+ *                                                                         *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
+ *                                                                         *
+ ***************************************************************************/
+/**
+ * @file GModelSpectralNodes.cpp
+ * @brief Spectral nodes model class implementation
+ * @author J. Knoedlseder
+ */
+
+/* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include <cmath>
+#include "GException.hpp"
+#include "GTools.hpp"
+//#include "GCsv.hpp"
+#include "GModelSpectralNodes.hpp"
+#include "GModelSpectralRegistry.hpp"
+
+/* __ Constants __________________________________________________________ */
+
+/* __ Globals ____________________________________________________________ */
+const GModelSpectralNodes    g_spectral_func_seed;
+const GModelSpectralRegistry g_spectral_func_registry(&g_spectral_func_seed);
+
+/* __ Method name definitions ____________________________________________ */
+#define G_FLUX                "GModelSpectralNodes::flux(GEnergy&, GEnergy&)"
+#define G_EFLUX              "GModelSpectralNodes::eflux(GEnergy&, GEnergy&)"
+#define G_MC             "GModelSpectralNodes::mc(GEnergy&, GEnergy&, GRan&)"
+#define G_READ                      "GModelSpectralNodes::read(GXmlElement&)"
+#define G_WRITE                    "GModelSpectralNodes::write(GXmlElement&)"
+//#define G_LOAD_NODES          "GModelSpectralNodes::load_nodes(std::string&)"
+
+/* __ Macros _____________________________________________________________ */
+
+/* __ Coding definitions _________________________________________________ */
+
+/* __ Debug definitions __________________________________________________ */
+
+
+/*==========================================================================
+ =                                                                         =
+ =                        Constructors/destructors                         =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Void constructor
+ ***************************************************************************/
+GModelSpectralNodes::GModelSpectralNodes(void) : GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief XML constructor
+ *
+ * @param[in] xml XML element.
+ *
+ * Creates instance of a spectral nodes model by extracting information from
+ * an XML element. See GModelSpectralNodes::read() for more information about
+ * the expected structure of the XML element.
+ ***************************************************************************/
+GModelSpectralNodes::GModelSpectralNodes(const GXmlElement& xml) :
+                     GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Read information from XML element
+    read(xml);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] model Spectral nodes model.
+ ***************************************************************************/
+GModelSpectralNodes::GModelSpectralNodes(const GModelSpectralNodes& model) :
+                     GModelSpectral(model)
+{
+    // Initialise members
+    init_members();
+
+    // Copy members
+    copy_members(model);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Destructor
+ ***************************************************************************/
+GModelSpectralNodes::~GModelSpectralNodes(void)
+{
+    // Free members
+    free_members();
+
+    // Return
+    return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                                Operators                                =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Assignment operator
+ *
+ * @param[in] model Spectral nodes model.
+ ***************************************************************************/
+GModelSpectralNodes& GModelSpectralNodes::operator= (const GModelSpectralNodes& model)
+{
+    // Execute only if object is not identical
+    if (this != &model) {
+
+        // Copy base class members
+        this->GModelSpectral::operator=(model);
+
+        // Free members
+        free_members();
+
+        // Initialise members
+        init_members();
+
+        // Copy members
+        copy_members(model);
+
+    } // endif: object was not identical
+
+    // Return
+    return *this;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                              Public methods                             =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear instance
+***************************************************************************/
+void GModelSpectralNodes::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GModelSpectral::free_members();
+
+    // Initialise members
+    this->GModelSpectral::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+***************************************************************************/
+GModelSpectralNodes* GModelSpectralNodes::clone(void) const
+{
+    return new GModelSpectralNodes(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Evaluate function
+ *
+ * @param[in] srcEng True energy of photon.
+ *
+ * The spectral model is defined as a piecewise power law between spectral
+ * nodes \f$(E_i, I_i)\f$,
+ * where 
+ * \f$E_i\f$ is the energy and \f$I_i\f$ is the intensity of node \f$i\f$.
+ * For a given energy \f$E\f$, the piecewise powerlaw is computing by
+ * finding the bracketing energies \f$E_1 <= E <= E_2\f$ and computing
+ * \f[I(E)=10^{(\log v_1 + \log s_1) w_1 + (\log v_2 + \log s_2) w_2}\f]
+ * where
+ * \f$I_1 = v_1 s_1\f$ is the intensity of node 1 (\f$E_1\f$),
+ * \f$I_2 = v_2 s_2\f$ is the intensity of node 2 (\f$E_2\f$),
+ * \f$w_1\f$ is the weighting of node 1, and
+ * \f$w_2\f$ is the weighting of node 2.
+ * The weightings \f$w_1\f$ and \f$w_2\f$ are computed by linear
+ * interpolation (in the log-log plane) between the nodes
+ * \f$(\log E_1, \log I_1)\f$
+ * and
+ * \f$(\log E_2, \log I_2)\f$
+ * to the requested energy \f$\log E\f$.
+ ***************************************************************************/
+double GModelSpectralNodes::eval(const GEnergy& srcEng) const
+{
+    // Update evaluation cache
+    update_eval_cache();
+
+    // Interpolate function. This is done in log10-log10 space, but the
+    // linear value is returned.
+    double exponent = m_log_energies.interpolate(srcEng.log10MeV(), m_log_values);
+    double value    = std::pow(10.0, exponent);
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (isnotanumber(value) || isinfinite(value)) {
+        std::cout << "*** ERROR: GModelSpectralNodes::eval";
+        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", exponent=" << exponent;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Evaluate function and gradients
+ *
+ * @param[in] srcEng True energy of photon.
+ *
+ * The spectral model is defined as a piecewise power law between spectral
+ * nodes \f$(E_i, I_i)\f$,
+ * where 
+ * \f$E_i\f$ is the energy and \f$I_i\f$ is the intensity of node \f$i\f$.
+ * For a given energy \f$E\f$, the piecewise powerlaw is computing by
+ * finding the bracketing energies \f$E_1 <= E <= E_2\f$ and computing
+ * \f[I(E)=10^{(\log v_1 + \log s_1) w_1 + (\log v_2 + \log s_2) w_2}\f]
+ * where
+ * \f$I_1 = v_1 s_1\f$ is the intensity of node 1 (\f$E_1\f$),
+ * \f$I_2 = v_2 s_2\f$ is the intensity of node 2 (\f$E_2\f$),
+ * \f$w_1\f$ is the weighting of node 1, and
+ * \f$w_2\f$ is the weighting of node 2.
+ * The weightings \f$w_1\f$ and \f$w_2\f$ are computed by linear
+ * interpolation (in the log-log plane) between the nodes
+ * \f$(\log E_1, \log I_1)\f$
+ * and
+ * \f$(\log E_2, \log I_2)\f$
+ * to the requested energy \f$\log E\f$.
+ *
+ * The partial derivatives are given by
+ * \f[dI/dv_i=I(E) w_i / v_i\f]
+ * for \f$i=1,2\f$ and \f$0\f$ for all other nodes.
+ ***************************************************************************/
+double GModelSpectralNodes::eval_gradients(const GEnergy& srcEng) const
+{
+    // Update evaluation cache
+    update_eval_cache();
+
+    // Set interpolation value
+    m_log_energies.set_value(srcEng.log10MeV());
+
+    // Get indices and weights for interpolation
+    int    inx_left  = m_log_energies.inx_left();
+    int    inx_right = m_log_energies.inx_right();
+    double wgt_left  = m_log_energies.wgt_left();
+    double wgt_right = m_log_energies.wgt_right();
+
+    // Interpolate function
+    double exponent = m_log_values[inx_left]  * wgt_left +
+                      m_log_values[inx_right] * wgt_right;
+
+    // Compute linear value
+    double value = std::pow(10.0, exponent);
+
+    // Initialise gradients
+    for (int i = 0; i < m_values.size(); ++i) {
+        ((GModelSpectralNodes*)this)->m_values[i].gradient(0.0);
+    }
+
+    // Gradient for left node
+    if (m_values[inx_left].isfree()) {
+        double grad = value * wgt_left / m_values[inx_left].value();
+        ((GModelSpectralNodes*)this)->m_values[inx_left].gradient(grad);
+    }
+
+    // Gradient for right node
+    if (m_values[inx_right].isfree()) {
+        double grad = value * wgt_right / m_values[inx_right].value();
+        ((GModelSpectralNodes*)this)->m_values[inx_right].gradient(grad);
+    }
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (isnotanumber(value) || isinfinite(value)) {
+        std::cout << "*** ERROR: GModelSpectralNodes::eval_gradients";
+        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", exponent=" << exponent;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns model photon flux between [emin, emax] (units: ph/cm2/s)
+ *
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ *
+ * Computes
+ * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
+ * where
+ * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
+ * energy, respectively, and
+ * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ ***************************************************************************/
+double GModelSpectralNodes::flux(const GEnergy& emin, const GEnergy& emax) const
+{
+    // Update flux cache
+    update_flux_cache();
+
+    // Initialise flux
+    double flux = 0.0;
+    
+    // Get energy range in MeV
+    double e_min = emin.MeV();
+    double e_max = emax.MeV();
+    
+    // Continue only if e_max > e_min
+    if (e_max > e_min) {
+    
+        // Determine left node index for minimum energy
+        m_lin_energies.set_value(e_min);
+        int inx_emin = m_lin_energies.inx_left();
+
+        // Determine left node index for maximum energy
+        m_lin_energies.set_value(e_max);
+        int inx_emax = m_lin_energies.inx_left();
+    
+        // If both energies are within the same nodes then simply
+        // integrate over the energy interval using the appropriate power
+        // law parameters
+        if (inx_emin == inx_emax) {
+            flux = m_prefactor[inx_emin] * 
+                   plaw_photon_flux(e_min,
+                                    e_max, 
+                                    m_epivot[inx_emin],
+                                    m_gamma[inx_emin]);
+        }
+    
+        // ... otherwise integrate over the nodes where emin and emax
+        // resides and all the remaining nodes
+        else {
+
+            // If we are requested to extrapolate beyond first node,
+            // the use the first nodes lower energy and upper energy
+            // boundary for the initial integration.
+            int i_start = (e_min < m_lin_energies[0]) ? inx_emin : inx_emin+1;
+
+            // Integrate from emin to the node boundary
+            flux = m_prefactor[inx_emin] *
+                   plaw_photon_flux(e_min,
+                                    m_lin_energies[i_start],
+                                    m_epivot[inx_emin],
+                                    m_gamma[inx_emin]);
+
+            // Integrate over all nodes between
+            for (int i = i_start; i < inx_emax; ++i) {
+                flux += m_flux[i];
+            }
+
+            // Integrate from node boundary to emax
+            flux += m_prefactor[inx_emax] *
+                    plaw_photon_flux(m_lin_energies[inx_emax],
+                                     e_max,
+                                     m_epivot[inx_emax],
+                                     m_gamma[inx_emax]);
+        
+        } // endelse: emin and emax not between same nodes
+    
+    } // endif: e_max > e_min
+
+    // Return
+    return flux;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns model energy flux between [emin, emax] (units: erg/cm2/s)
+ *
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ *
+ * Computes
+ * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
+ * where
+ * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
+ * energy, respectively, and
+ * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ ***************************************************************************/
+double GModelSpectralNodes::eflux(const GEnergy& emin, const GEnergy& emax) const
+{
+    // Update flux cache
+    update_flux_cache();
+
+    // Initialise flux
+    double flux = 0.0;
+    
+    // Get energy range in MeV
+    double e_min = emin.MeV();
+    double e_max = emax.MeV();
+    
+    // Continue only if e_max > e_min
+    if (e_max > e_min) {
+    
+        // Determine left node index for minimum energy
+        m_lin_energies.set_value(e_min);
+        int inx_emin = m_lin_energies.inx_left();
+
+        // Determine left node index for maximum energy
+        m_lin_energies.set_value(e_max);
+        int inx_emax = m_lin_energies.inx_left();
+    
+        // If both energies are within the same nodes then simply
+        // integrate over the energy interval using the appropriate power
+        // law parameters
+        if (inx_emin == inx_emax) {
+            flux = m_prefactor[inx_emin] * 
+                   plaw_energy_flux(e_min,
+                                    e_max, 
+                                    m_epivot[inx_emin],
+                                    m_gamma[inx_emin]) * MeV2erg;
+        }
+
+        // ... otherwise integrate over the nodes where emin and emax
+        // resides and all the remaining nodes
+        else {
+
+            // If we are requested to extrapolate beyond first node,
+            // the use the first nodes lower energy and upper energy
+            // boundary for the initial integration.
+            int i_start = (e_min < m_lin_energies[0]) ? inx_emin : inx_emin+1;
+
+            // Integrate from emin to the node boundary
+            flux = m_prefactor[inx_emin] *
+                   plaw_energy_flux(e_min,
+                                    m_lin_energies[i_start],
+                                    m_epivot[inx_emin],
+                                    m_gamma[inx_emin]) * MeV2erg;
+
+            // Integrate over all nodes between
+            for (int i = i_start; i < inx_emax; ++i) {
+                flux += m_eflux[i];
+            }
+
+            // Integrate from node boundary to emax
+            flux += m_prefactor[inx_emax] *
+                    plaw_energy_flux(m_lin_energies[inx_emax],
+                                     e_max,
+                                     m_epivot[inx_emax],
+                                     m_gamma[inx_emax]) * MeV2erg;
+        
+        } // endelse: emin and emax not between same nodes
+    
+    } // endif: e_max > e_min
+
+    // Return
+    return flux;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns MC energy between [emin, emax]
+ *
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ * @param[in] ran Random number generator.
+ ***************************************************************************/
+GEnergy GModelSpectralNodes::mc(const GEnergy& emin, const GEnergy& emax,
+                               GRan& ran) const
+{
+    // Allocate energy
+    GEnergy energy;
+    
+    // Continue only if emax > emin
+    if (emax > emin) {
+    
+        // Update cache
+        mc_update(emin, emax);
+
+        // Determine in which bin we reside
+        int inx = 0;
+        if (m_mc_cum.size() > 1) {
+            double u = ran.uniform();
+            for (inx = m_mc_cum.size()-1; inx > 0; --inx) {
+                if (m_mc_cum[inx-1] <= u)
+                    break;
+            }
+        }
+
+        // Get random energy for specific bin
+        if (m_mc_exp[inx] != 0.0) {
+            double e_min = m_mc_min[inx];
+            double e_max = m_mc_max[inx];
+            double u     = ran.uniform();
+            double eng   = (u > 0.0) 
+                            ? std::exp(std::log(u * (e_max - e_min) + e_min) / m_mc_exp[inx])
+                            : 0.0;
+            energy.MeV(eng);
+        }
+        else {
+            double e_min = m_mc_min[inx];
+            double e_max = m_mc_max[inx];
+            double u     = ran.uniform();
+            double eng   = std::exp(u * (e_max - e_min) + e_min);
+            energy.MeV(eng);
+        }
+
+    } // endif: emax > emin
+    
+    // Return energy
+    return energy;
+}
+
+
+/***********************************************************************//**
+ * @brief Read model from XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * @exception GException::model_invalid_parnum
+ *            Invalid number of model parameters found in XML element.
+ * @exception GException::model_invalid_parnames
+ *            Invalid model parameter name found in XML element.
+ *
+ * Read the node function information from an XML element. The XML
+ * element is required to have at least two nodes. Each node has two
+ * parameters named "Energy" and "Intensity".
+ *
+ * @todo Check that all energies and intensities are positive
+ * @todo Check that nodes are ordered
+ * @todo Check that energy boundaries are not overlapping
+ ***************************************************************************/
+void GModelSpectralNodes::read(const GXmlElement& xml)
+{
+    // Free space for nodes
+    m_energies.clear();
+    m_values.clear();
+
+    // Get number of nodes from XML file
+    int nodes = xml.elements("node");
+
+    // Throw an error if there not at least two nodes
+    if (nodes < 1) {
+        std::string message = "Node function model requires at least two"
+                              " nodes.";
+        throw GException::model_invalid_parnum(G_READ, xml, message);
+    }
+
+    // Loop over all nodes
+    for (int i = 0; i < nodes; ++i) {
+
+        // Allocate node parameters
+        GModelPar energy;
+        GModelPar intensity;
+            
+        // Get node
+        GXmlElement* node = (GXmlElement*)xml.element("node", i);
+
+        // Verify that node XML element has exactly 2 parameters
+        if (node->elements() != 2 || node->elements("parameter") != 2) {
+            throw GException::model_invalid_parnum(G_READ, xml,
+                  "Node requires exactly 2 parameters.");
+        }
+
+        // Extract node parameters
+        int npar[] = {0, 0};
+        for (int k = 0; k < 2; ++k) {
+
+            // Get parameter element
+            GXmlElement* par = (GXmlElement*)node->element("parameter", k);
+
+            // Handle energy
+            if (par->attribute("name") == "Energy") {
+                energy.read(*par);
+                npar[0]++;
+            }
+
+            // Handle intensity
+            else if (par->attribute("name") == "Intensity") {
+                intensity.read(*par);
+                npar[1]++;
+            }
+
+        } // endfor: looped over parameters
+
+        // Verify that all parameters were found
+        if (npar[0] != 1 || npar[1] != 1) {
+            throw GException::model_invalid_parnames(G_READ, xml,
+                  "Require \"Energy\" and \"Intensity\" parameters.");
+        }
+
+        // Set parameter names
+        std::string energy_name    = "Energy"+str(i);
+        std::string intensity_name = "Intensity"+str(i);
+
+        // Set energy attributes
+        energy.name(energy_name);
+        energy.unit("MeV");
+        energy.hasgrad(false);
+
+        // Set intensity attributes
+        intensity.name(intensity_name);
+        intensity.unit("ph/cm2/s/MeV");
+        intensity.hasgrad(true);
+
+        // Push node parameters on list
+        m_energies.push_back(energy);
+        m_values.push_back(intensity);
+
+    } // endfor: looped over nodes
+
+    // Update parameter mapping
+    update_pars();
+
+    // Set pre-computation cache
+    set_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write model into XML element
+ *
+ * @param[in] xml XML element into which model information is written.
+ *
+ * @exception GException::model_invalid_spectral
+ *            Existing XML element is not of required type
+ * @exception GException::model_invalid_parnum
+ *            Invalid number of model parameters or nodes found in XML element.
+ * @exception GException::model_invalid_parnames
+ *            Invalid model parameter names found in XML element.
+ *
+ * Write the node function information into an XML element. The XML element
+ * will have node leaves, where each node leave has two parameters named
+ * "Energy" and "Intensity".
+ ***************************************************************************/
+void GModelSpectralNodes::write(GXmlElement& xml) const
+{
+    // Determine number of nodes
+    int nodes = m_energies.size();
+
+    // Set model type
+    if (xml.attribute("type") == "") {
+        xml.attribute("type", type());
+    }
+
+    // Verify model type
+    if (xml.attribute("type") != type()) {
+        throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
+              "Spectral model is not of type \""+type()+"\".");
+    }
+
+    // If XML element has 0 nodes then append nodes
+    if (xml.elements() == 0) {
+        for (int i = 0; i < nodes; ++i) {
+            xml.append(new GXmlElement("node"));
+        }
+    }
+
+    // Verify that XML element has the required number of nodes
+    if (xml.elements() != nodes || xml.elements("node") != nodes) {
+        std::string message = "Spectral model requires exactly " +
+                              str(nodes) + " nodes.";
+        throw GException::model_invalid_parnum(G_WRITE, xml, message);
+    }
+
+    // Loop over all nodes
+    for (int i = 0; i < nodes; ++i) {
+
+        // Get node
+        GXmlElement* node = (GXmlElement*)xml.element("node", i);
+
+        // If XML element has 0 leafes then append energy and intensity
+        // element
+        if (node->elements() == 0) {
+            node->append(new GXmlElement("parameter name=\"Energy\""));
+            node->append(new GXmlElement("parameter name=\"Intensity\""));
+        }
+
+        // Verify that node XML element has exactly 2 parameters
+        if (node->elements() != 2 || node->elements("parameter") != 2) {
+            throw GException::model_invalid_parnum(G_WRITE, xml,
+                  "Node requires exactly 2 parameters.");
+        }
+
+        // Set or update model parameter attributes
+        int npar[] = {0, 0};
+        for (int k = 0; k < 2; ++k) {
+
+            // Get parameter element
+            GXmlElement* par = (GXmlElement*)node->element("parameter", k);
+
+            // Handle prefactor
+            if (par->attribute("name") == "Energy") {
+                npar[0]++;
+                m_energies[i].write(*par);
+            }
+
+            // Handle index
+            else if (par->attribute("name") == "Intensity") {
+                npar[1]++;
+                m_values[i].write(*par);
+            }
+
+        } // endfor: looped over parameters
+
+        // Check of all required parameters are present
+        if (npar[0] != 1 || npar[1] != 1) {
+            throw GException::model_invalid_parnames(G_WRITE, xml,
+                  "Require \"Energy\" and \"Intensity\" parameters.");
+        }
+
+    } // endfor: looped over nodes
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Print powerlaw information
+ ***************************************************************************/
+std::string GModelSpectralNodes::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GModelSpectralNodes ===");
+    result.append("\n"+parformat("Number of nodes")+str(m_energies.size()));
+    result.append("\n"+parformat("Number of parameters")+str(size()));
+    for (int i = 0; i < size(); ++i) {
+        result.append("\n"+m_pars[i]->print());
+    }
+
+    // Append node information
+    for (int i = 0; i < m_prefactor.size(); ++i) {
+        result.append("\n"+parformat("Node "+str(i+1)));
+        result.append("Epivot="+str(m_epivot[i]));
+        result.append(" Prefactor="+str(m_prefactor[i]));
+        result.append(" Gamma="+str(m_gamma[i]));
+        result.append(" Flux="+str(m_flux[i]));
+        result.append(" EFlux="+str(m_eflux[i]));
+    }
+
+    // Return result
+    return result;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                             Private methods                             =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ ***************************************************************************/
+void GModelSpectralNodes::init_members(void)
+{
+    // Initialise node energies and values
+    m_energies.clear();
+    m_values.clear();
+
+    // Initialise evaluation cache
+    m_old_energies.clear();
+    m_old_values.clear();
+    m_log_energies.clear();
+    m_log_values.clear();
+
+    // Initialise flux computation cache
+    m_lin_energies.clear();
+    m_lin_values.clear();
+    m_prefactor.clear();
+    m_gamma.clear();
+    m_epivot.clear();
+    m_flux.clear();
+    m_eflux.clear();
+    
+    // Initialise MC cache
+    m_mc_emin.clear();
+    m_mc_emax.clear();
+    m_mc_cum.clear();
+    m_mc_min.clear();
+    m_mc_max.clear();
+    m_mc_exp.clear();
+
+    // Update parameter mapping
+    update_pars();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] model Spectral function model.
+ ***************************************************************************/
+void GModelSpectralNodes::copy_members(const GModelSpectralNodes& model)
+{
+    // Copy node energies and values
+    m_energies     = model.m_energies;
+    m_values       = model.m_values;
+    
+    // Copy evaluation cache
+    m_old_energies = model.m_old_energies;
+    m_old_values   = model.m_old_values;
+    m_log_energies = model.m_log_energies;
+    m_log_values   = model.m_log_values;
+
+    // Copy flux computation cache
+    m_lin_energies = model.m_lin_energies;
+    m_lin_values   = model.m_lin_values;
+    m_prefactor    = model.m_prefactor;
+    m_gamma        = model.m_gamma;
+    m_epivot       = model.m_epivot;
+    m_flux         = model.m_flux;
+    m_eflux        = model.m_eflux;
+
+    // Copy MC cache
+    m_mc_emin      = model.m_mc_emin;
+    m_mc_emax      = model.m_mc_emax;
+    m_mc_cum       = model.m_mc_cum;
+    m_mc_min       = model.m_mc_min;
+    m_mc_max       = model.m_mc_max;
+    m_mc_exp       = model.m_mc_exp;
+
+    // Update parameter mapping
+    update_pars();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ ***************************************************************************/
+void GModelSpectralNodes::free_members(void)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update parameter mapping
+ *
+ * Sets the parameter pointers in the m_pars array, enabling iterating over
+ * all model parameters. This method needs to be called after changing the
+ * number of nodes in the spectral model. The method needs not to be called
+ * after value update.
+ ***************************************************************************/
+void GModelSpectralNodes::update_pars(void)
+{
+    // Clear parameter pointer(s)
+    m_pars.clear();
+
+    // Get number of nodes
+    int nodes = m_energies.size();
+
+    // Set parameter pointers for all nodes
+    for (int i = 0; i < nodes; ++i) {
+
+        // Signal that energies have no gradients
+        m_energies[i].hasgrad(false);
+
+        // Signal that values have gradients
+        m_values[i].hasgrad(true);
+
+        // Set pointer
+        m_pars.push_back(&(m_energies[i]));
+        m_pars.push_back(&(m_values[i]));
+
+    } // endfor: looped over nodes
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set pre-computation cache
+ ***************************************************************************/
+void GModelSpectralNodes::set_cache(void) const
+{
+    // Set evaluation cache
+    set_eval_cache();
+
+    // Set flux computation cache
+    set_flux_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set evaluation cache
+ *
+ * The evaluation cache contains pre-computed results that are needed for
+ * fast function evaluation.
+ *
+ * @todo Check that all energies and intensities are > 0
+ ***************************************************************************/
+void GModelSpectralNodes::set_eval_cache(void) const
+{
+    // Clear any existing values
+    m_old_energies.clear();
+    m_old_values.clear();
+    m_log_energies.clear();
+    m_log_values.clear();
+
+    // Compute log10 of energies and intensities
+    for (int i = 0; i < m_energies.size(); ++i) {
+    
+        // Set log10(energy)
+        double log10energy = std::log10(m_energies[i].real_value());
+        m_old_energies.push_back(log10energy);
+        m_log_energies.append(log10energy);
+
+        // Set log10(intensity)
+        double log10value = std::log10(m_values[i].real_value());
+        m_old_values.push_back(log10value);
+        m_log_values.push_back(log10value);
+
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set flux computation cache
+ *
+ * Pre-computes some values that are needed for flux computation.
+ *
+ * @todo Handle special case emin=emax and fmin=fmax
+ ***************************************************************************/
+void GModelSpectralNodes::set_flux_cache(void) const
+{
+    // Clear any existing values
+    m_lin_energies.clear();
+    m_lin_values.clear();
+    m_prefactor.clear();
+    m_gamma.clear();
+    m_epivot.clear();
+    m_flux.clear();
+    m_eflux.clear();
+
+    // Store linear energies and values
+    for (int i = 0; i < m_energies.size(); ++i) {
+        m_lin_energies.append(m_energies[i].real_value());
+        m_lin_values.push_back(m_values[i].real_value());
+    }
+
+    // Loop over all nodes-1
+    for (int i = 0; i < m_energies.size()-1; ++i) {
+    
+        // Get energies and function values
+        double emin = m_lin_energies[i];
+        double emax = m_lin_energies[i+1];
+        double fmin = m_values[i].real_value();
+        double fmax = m_values[i+1].real_value();
+    
+        // Compute pivot energy (MeV). We use here the geometric mean of
+        // the node boundaries.
+        double epivot = std::sqrt(emin*emax);
+        
+        // Compute spectral index
+        double gamma = std::log(fmin/fmax) / std::log(emin/emax);
+        
+        // Compute power law normalisation
+        double prefactor = fmin / std::pow(emin/epivot, gamma);
+        
+        // Compute photon flux between nodes
+        double flux = prefactor*plaw_photon_flux(emin, emax, epivot, gamma);
+
+        // Compute energy flux between nodes
+        double eflux = prefactor*plaw_energy_flux(emin, emax, epivot, gamma);
+
+        // Convert energy flux from MeV/cm2/s to erg/cm2/s
+        eflux *= MeV2erg;
+        
+        // Push back values on pre-computation cache
+        m_prefactor.push_back(prefactor);
+        m_gamma.push_back(gamma);
+        m_epivot.push_back(epivot);
+        m_flux.push_back(flux);
+        m_eflux.push_back(eflux);
+    
+    } // endfor: looped over all nodes
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update evaluation cache
+ *
+ * Updates the evaluation cache by computing only results for values that
+ * changed.
+ *
+ * @todo Check that all energies and intensities are > 0
+ ***************************************************************************/
+void GModelSpectralNodes::update_eval_cache(void) const
+{
+    // Update energies
+    for (int i = 0; i < m_energies.size(); ++i) {
+        double energy = m_energies[i].real_value();
+        if (energy != m_old_energies[i]) {
+            m_log_energies[i] = std::log10(energy);
+            m_old_energies[i] = energy;
+        }
+    }
+
+    // Update intensities
+    for (int i = 0; i < m_values.size(); ++i) {
+        double value = m_values[i].real_value();
+        if (value != m_old_values[i]) {
+            m_log_values[i] = std::log10(value);
+            m_old_values[i] = value;
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update flux computation cache
+ *
+ * Updates the flux computation cache if either the energy boundaries or the
+ * intensity values have changed.
+ *
+ * @todo Handle special case emin=emax and fmin=fmax
+ ***************************************************************************/
+void GModelSpectralNodes::update_flux_cache(void) const
+{
+    // Loop over all nodes-1
+    for (int i = 0; i < m_energies.size()-1; ++i) {
+    
+        // Get energies and function values
+        double emin = m_lin_energies[i];
+        double emax = m_lin_energies[i+1];
+        double fmin = m_values[i].real_value();
+        double fmax = m_values[i+1].real_value();
+
+        // Update values only if energies or function values have changed
+        if (emin != m_energies[i].real_value() ||
+            emax != m_energies[i+1].real_value() ||
+            fmin != m_values[i].real_value() ||
+            fmax != m_values[i+1].real_value()) {
+    
+            // Compute pivot energy (MeV). We use here the geometric mean
+            // of the node boundaries.
+            double epivot = std::sqrt(emin*emax);
+        
+            // Compute spectral index
+            double gamma = std::log(fmin/fmax) / std::log(emin/emax);
+        
+            // Compute power law normalisation
+            double prefactor = fmin / std::pow(emin/epivot, gamma);
+        
+            // Compute photon flux between nodes
+            double flux = prefactor*plaw_photon_flux(emin, emax, epivot, gamma);
+
+            // Compute energy flux between nodes
+            double eflux = prefactor*plaw_energy_flux(emin, emax, epivot, gamma);
+
+            // Convert energy flux from MeV/cm2/s to erg/cm2/s
+            eflux *= MeV2erg;
+        
+            // Store values on pre-computation cache
+            m_prefactor[i] = prefactor;
+            m_gamma[i]     = gamma;
+            m_epivot[i]    = epivot;
+            m_flux[i]      = flux;
+            m_eflux[i]     = eflux;
+
+        } // endif: update was required
+    
+    } // endfor: looped over all nodes
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set MC pre-computation cache
+ *
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
+ *
+ * This method sets up an array of indices and the cumulative distribution
+ * function needed for MC simulations.
+ ***************************************************************************/
+void GModelSpectralNodes::mc_update(const GEnergy& emin, const GEnergy& emax) const
+{
+    // Check if we need to update the cache
+    if (emin != m_mc_emin || emax != m_mc_emax) {
+    
+        // Store new energy interval
+        m_mc_emin = emin;
+        m_mc_emax = emax;
+        
+        // Initialise cache
+        m_mc_cum.clear();
+        m_mc_min.clear();
+        m_mc_max.clear();
+        m_mc_exp.clear();
+
+        // Get energy range in MeV
+        double e_min = emin.MeV();
+        double e_max = emax.MeV();
+    
+        // Continue only if e_max > e_min
+        if (e_max > e_min) {
+        
+            // Allocate flux
+            double flux;
+    
+            // Determine left node index for minimum energy
+            m_lin_energies.set_value(e_min);
+            int inx_emin = m_lin_energies.inx_left();
+
+            // Determine left node index for maximum energy
+            m_lin_energies.set_value(e_max);
+            int inx_emax = m_lin_energies.inx_left();
+    
+            // If both energies are within the same node then just
+            // add this one node on the stack
+            if (inx_emin == inx_emax) {
+                flux = m_prefactor[inx_emin] * 
+                       plaw_photon_flux(e_min,
+                                        e_max, 
+                                        m_epivot[inx_emin],
+                                        m_gamma[inx_emin]);
+                m_mc_cum.push_back(flux);
+                m_mc_min.push_back(e_min);
+                m_mc_max.push_back(e_max);
+                m_mc_exp.push_back(m_gamma[inx_emin]);
+            }
+    
+            // ... otherwise integrate over the nodes where emin and emax
+            // resides and all the remaining nodes
+            else {
+
+                // If we are requested to extrapolate beyond first node,
+                // the use the first nodes lower energy and upper energy
+                // boundary for the initial integration.
+                int i_start = (e_min < m_lin_energies[0]) ? inx_emin : inx_emin+1;
+
+                // Add emin to the node boundary
+                flux = m_prefactor[inx_emin] *
+                       plaw_photon_flux(e_min,
+                                        m_lin_energies[i_start],
+                                        m_epivot[inx_emin],
+                                        m_gamma[inx_emin]);
+                m_mc_cum.push_back(flux);
+                m_mc_min.push_back(e_min);
+                m_mc_max.push_back(m_lin_energies[i_start]);
+                m_mc_exp.push_back(m_gamma[inx_emin]);
+
+                // Add all nodes between
+                for (int i = i_start; i < inx_emax; ++i) {
+                    flux = m_flux[i];
+                    m_mc_cum.push_back(flux);
+                    m_mc_min.push_back(m_lin_energies[i]);
+                    m_mc_max.push_back(m_lin_energies[i+1]);
+                    m_mc_exp.push_back(m_gamma[i]);
+                }
+
+                // Add node boundary to emax
+                flux = m_prefactor[inx_emax] *
+                       plaw_photon_flux(m_lin_energies[inx_emax],
+                                        e_max,
+                                        m_epivot[inx_emax],
+                                        m_gamma[inx_emax]);
+                m_mc_cum.push_back(flux);
+                m_mc_min.push_back(m_lin_energies[inx_emax]);
+                m_mc_max.push_back(e_max);
+                m_mc_exp.push_back(m_gamma[inx_emax]);
+        
+            } // endelse: emin and emax not between same nodes
+
+            // Build cumulative distribution
+            for (int i = 1; i < m_mc_cum.size(); ++i) {
+                m_mc_cum[i] += m_mc_cum[i-1];
+            }
+            double norm = m_mc_cum[m_mc_cum.size()-1];
+            for (int i = 0; i < m_mc_cum.size(); ++i) {
+                m_mc_cum[i] /= norm;
+            }
+
+            // Set MC values
+            for (int i = 0; i < m_mc_cum.size(); ++i) {
+
+                // Compute exponent
+                double exponent = m_mc_exp[i] + 1.0;
+                
+                // Exponent dependend computation
+                if (std::abs(exponent) > 1.0e-11) {
+                    m_mc_exp[i] = exponent;
+                    m_mc_min[i] = std::pow(m_mc_min[i], exponent);
+                    m_mc_max[i] = std::pow(m_mc_max[i], exponent);
+                }
+                else {
+                    m_mc_exp[i] = 0.0;
+                    m_mc_min[i] = std::log(m_mc_min[i]);
+                    m_mc_max[i] = std::log(m_mc_max[i]);
+                }
+            
+            } // endfor: set MC values
+            
+        } // endif: e_max > e_min
+        
+    } // endif: Update was required
+
+    // Return
+    return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                                 Friends                                 =
+ =                                                                         =
+ ==========================================================================*/
