@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTALib.hpp  -  CTA Support Header files                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,6 +41,7 @@
 #include "GCTARoi.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAResponse.hpp"
+#include "GCTAResponseTable.hpp"
 #include "GCTAModelRadial.hpp"
 #include "GCTAModelRadialRegistry.hpp"
 #include "GCTAModelRadialGauss.hpp"
