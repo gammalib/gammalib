@@ -1,7 +1,7 @@
 /***************************************************************************
  *        cta - Cherenkov Telescope Array support python bindings          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -53,6 +53,7 @@
 %include "GCTAEventAtom.i"
 %include "GCTAPointing.i"
 %include "GCTAResponse.i"
+%include "GCTAResponseTable.i"
 %include "GCTAInstDir.i"
 %include "GCTARoi.i"
 %include "GCTAModelRadial.i"
