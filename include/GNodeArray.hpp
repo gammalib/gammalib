@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GNodeArray.hpp  -  Array of nodes class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GNodeArray.hpp
  * @brief Node array class interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GNODEARRAY_HPP
@@ -63,6 +63,9 @@ public:
     // Constructors and destructors
     GNodeArray(void);
     GNodeArray(const GNodeArray& array);
+    GNodeArray(const int& num, const double* array);
+    GNodeArray(const GVector& vector);
+    GNodeArray(const std::vector<double>& vector);
     virtual ~GNodeArray(void);
 
     // Operators

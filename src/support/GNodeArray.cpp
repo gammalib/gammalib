@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GNodeArray.cpp  -  Array of nodes class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GNodeArray.cpp
  * @brief Node array class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -68,7 +68,7 @@ GNodeArray::GNodeArray(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] array Instance from which object should be constructed.
+ * @param[in] array Node array.
  ***************************************************************************/
 GNodeArray::GNodeArray(const GNodeArray& array)
 {
@@ -77,6 +77,67 @@ GNodeArray::GNodeArray(const GNodeArray& array)
 
     // Copy members
     copy_members(array);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Element constructor
+ *
+ * @param[in] num Number of elements.
+ * @param[in] array Array of elements.
+ *
+ * Constructs node array from a number of elements in an array.
+ ***************************************************************************/
+GNodeArray::GNodeArray(const int& num, const double* array)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Use elements to initialise nodes
+    nodes(num, array);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief GVector constructor
+ *
+ * @param[in] vector Vector.
+ *
+ * Constructs node array from the elements in a GVector object.
+ ***************************************************************************/
+GNodeArray::GNodeArray(const GVector& vector)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Use vector to initialise nodes
+    nodes(vector);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Vector constructor
+ *
+ * @param[in] vector Vector.
+ *
+ * Constructs node array from the elements in a double precision vector.
+ ***************************************************************************/
+GNodeArray::GNodeArray(const std::vector<double>& vector)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Use vector to initialise nodes
+    nodes(vector);
 
     // Return
     return;

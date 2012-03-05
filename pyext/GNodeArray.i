@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GNodeArray.i  -  Array of nodes class SWIG definition          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GNodeArray.i
  * @brief Node array class Python interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -40,6 +40,9 @@ public:
     // Constructors and destructors
     GNodeArray(void);
     GNodeArray(const GNodeArray& array);
+    GNodeArray(const int& num, const double* array);
+    GNodeArray(const GVector& vector);
+    GNodeArray(const std::vector<double>& vector);
     virtual ~GNodeArray(void);
 
     // Methods
