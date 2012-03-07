@@ -71,6 +71,7 @@ public:
     double             axis_hi(const int& index, const int& bin) const;
     void               axis_linear(const int& index);
     void               axis_log10(const int& index);
+    void               axis_radians(const int& index);
     void               read(const GFitsTable* hdu);
     void               write(GFitsTable* hdu) const;
     std::string        print(void) const;
