@@ -475,23 +475,24 @@ def test_optimise():
 # Main routine entry point #
 #==========================#
 if __name__ == '__main__':
-    """
-    Perform testing.
-    """
-    # Dump result
-    print
-    print "****************************"
-    print "* Python interface testing *"
-    print "****************************"
-
-    # Initialise success counter
-    tests   = 0
-    success = 0
-
-    # Perform tests
-    test_fits()
-    test_skymap()
-#    test_node_array()
-#    test_lat_response()
-#    test_lat_observation()
-#    test_optimise()
+	"""
+	Perform testing.
+	"""
+	# Dump result
+	print
+	print "****************************"
+	print "* Python interface testing *"
+	print "****************************"
+	
+	# Initialise success counter
+	tests   = 0
+	success = 0
+	
+	# Perform tests
+	test_fits()
+	test_skymap()
+#	test_node_array()
+#	test_lat_response()
+#	test_lat_observation()
+#	test_optimise()
+	
