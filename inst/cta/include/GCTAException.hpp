@@ -125,6 +125,20 @@ public:
         model_invalid_radial(std::string origin, std::string type,
                              std::string message = "");
     };
+
+    // Response table exceptions
+    class bad_rsp_table_dim : public GCTAExceptionHandler {
+    public:
+        bad_rsp_table_dim(std::string origin,
+                          int         table_dim,
+                          int         expected_dim,
+                          std::string message = "");
+    };
+    class bad_rsp_table_format : public GCTAExceptionHandler {
+    public:
+        bad_rsp_table_format(std::string origin,
+                             std::string message = "");
+    };
 };
 
 #endif /* GCTAEXCEPTION_HPP */

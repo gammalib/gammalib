@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAException.cpp  - CTA exception handler              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAException.cpp
  * @brief CTA exception handler interface implementation.
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -327,17 +327,69 @@ GCTAException::model_invalid_radial::model_invalid_radial(std::string origin,
     if (registry.size() > 0) {
         m_message += "The following models are registered: ";
         for (int i = 0; i < registry.size(); ++i) {
-            if (i > 0)
+            if (i > 0) {
                 m_message += ", ";
+            }
             m_message += "\"" + registry.name(i) + "\"";
         }
         m_message += ".";
     }
-    else
+    else {
         m_message += "No models are registered.";
+    }
 
     // Return
     return;
 }
 
 
+/***********************************************************************//**
+ * @brief Bad response table dimension
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] found Found table dimension.
+ * @param[in] expected Expected table dimension.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCTAException::bad_rsp_table_dim::bad_rsp_table_dim(std::string origin,
+                                                    int         found,
+                                                    int         expected,
+                                                    std::string message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Response table dimension "+str(found)+
+                " is smaller than the expected dimension "+str(expected)+
+                ".";
+    if (message.length() > 0) {
+        m_message += " "+message;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Bad response table format
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCTAException::bad_rsp_table_format::bad_rsp_table_format(std::string origin,
+                                                          std::string message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Response table has invalid format.";
+    if (message.length() > 0) {
+        m_message += " "+message;
+    }
+
+    // Return
+    return;
+}
