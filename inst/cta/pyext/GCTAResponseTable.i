@@ -29,9 +29,14 @@
 #include "GCTAResponseTable.hpp"
 %}
 
+/* Define std::vector<double> as valid return type (otherwise a memory leak
+   occurs. */
+%include "std_vector.i"
+%template(VecDouble) std::vector<double>;
+
 
 /***********************************************************************//**
- * @class GCTAResponse
+ * @class GCTAResponseTable
  *
  * @brief Interface for the CTA response table class
  ***************************************************************************/
@@ -44,6 +49,10 @@ public:
     GCTAResponseTable(const GFitsTable* hdu);
     virtual ~GCTAResponseTable(void);
 
+    // Interpolation operators
+    std::vector<double> operator()(const double& arg) const;
+    std::vector<double> operator()(const double& arg1, const double& arg2) const;
+
     // Methods
     void               clear(void);
     GCTAResponseTable* clone(void) const;
@@ -53,6 +62,7 @@ public:
     double             axis_hi(const int& index, const int& bin) const;
     void               axis_linear(const int& index);
     void               axis_log10(const int& index);
+    void               axis_radians(const int& index);
     void               read(const GFitsTable* hdu);
     void               write(GFitsTable* hdu) const;
 };
