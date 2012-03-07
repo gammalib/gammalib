@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCTAResponse.i  -  CTA instrument response function class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -129,9 +129,11 @@ public:
                   const GEbounds&     ebds) const;
 
     // Analytical PSF implementation
-    double psf_dummy(const double& delta, const double& sigma) const;
-    double psf_dummy_sigma(const double& srcLogEng) const;
-    double psf_dummy_max(const double& sigma) const;
+    double      psf_dummy(const double& delta,
+                          const GCTAPsfPars& pars) const;
+    GCTAPsfPars psf_dummy_sigma(const double& srcLogEng,
+                                const double& theta) const;
+    double      psf_dummy_max(const GCTAPsfPars& pars) const;
 };
 
 
@@ -168,9 +170,10 @@ public:
 %inline %{
     GCTAResponse* cast_GCTAResponse(GResponse* arg) {
         GCTAResponse* rsp = dynamic_cast<GCTAResponse*>(arg);
-        if (rsp == NULL)
+        if (rsp == NULL) {
             throw GException::bad_type("cast_GCTAResponse(GResponse*)",
                                        "GResponse not of type GCTAResponse");
+        }
         return rsp;
     }
 %}

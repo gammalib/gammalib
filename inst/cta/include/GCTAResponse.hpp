@@ -55,6 +55,10 @@
 #include "GCTARoi.hpp"
 #include "GCTAEventAtom.hpp"
 #include "GCTADir.hpp"
+#include "GCTAResponseTable.hpp"
+
+/* __ Type definitions ___________________________________________________ */
+typedef std::vector<double> GCTAPsfPars;
 
 /* __ Forward declaration ________________________________________________ */
 class GCTAObservation;
@@ -63,7 +67,20 @@ class GCTAObservation;
 /***********************************************************************//**
  * @class GCTAResponse
  *
- * @brief Interface for the CTA instrument response function.
+ * @brief Interface for the CTA instrument response function
+ *
+ * The CTA response is still in the prototyping stage. To for allow
+ * evolutions in the response formats, versions numbers have been defined.
+ *
+ * For the PSF, versions are stored in the m_psf_version member. The
+ * following versions numbers are actually defined:
+ * -99 : Unknown PSF version
+ * -10 : PSF is given by ASCII file
+ * -9  : PSF is given by vector
+ * -8  : PSF is given by response table
+ * Note that negative values are used so far as we're still in the
+ * prototyping stage for the IRF definition. Once the IRFs are defined we'll
+ * start with positive version numbers.
  ***************************************************************************/
 class GCTAResponse : public GResponse {
 
@@ -172,9 +189,11 @@ public:
                   const GEbounds&     ebds) const;
 
     // Analytical PSF implementation
-    double psf_dummy(const double& delta, const double& sigma) const;
-    double psf_dummy_sigma(const double& srcLogEng) const;
-    double psf_dummy_max(const double& sigma) const;
+    double      psf_dummy(const double& delta,
+                          const GCTAPsfPars& pars) const;
+    GCTAPsfPars psf_dummy_sigma(const double& srcLogEng,
+                                const double& theta) const;
+    double      psf_dummy_max(const GCTAPsfPars& pars) const;
 
 private:
     // Private methods
@@ -192,7 +211,7 @@ private:
                      double              azimuth,
                      double              srcLogEng,
                      double              obsLogEng,
-                     double              sigma,
+                     GCTAPsfPars         sigma,
                      double              zeta,
                      double              lambda,
                      double              omega0,
@@ -221,7 +240,7 @@ private:
         double              m_azimuth;       //!< Pointing azimuth angle
         double              m_srcLogEng;     //!< True photon energy
         double              m_obsLogEng;     //!< Measured photon energy
-        double              m_sigma;         //!< Width of PSF in radians
+        GCTAPsfPars         m_sigma;         //!< Width of PSF in radians
         double              m_zeta;          //!< Distance model centre - measured photon
         double              m_cos_zeta;      //!< Cosine of zeta
         double              m_sin_zeta;      //!< Sine of zeta
@@ -241,7 +260,7 @@ private:
                        double              azimuth,
                        double              srcLogEng,
                        double              obsLogEng,
-                       double              sigma,
+                       GCTAPsfPars         sigma,
                        double              zeta,
                        double              lambda,
                        double              omega0,
@@ -271,7 +290,7 @@ private:
         double              m_azimuth;       //!< Pointing azimuth angle
         double              m_srcLogEng;     //!< True photon energy
         double              m_obsLogEng;     //!< Measured photon energy
-        double              m_sigma;         //!< Width of PSF in radians
+        GCTAPsfPars         m_sigma;         //!< Width of PSF in radians
         double              m_zeta;          //!< Distance model centre - measured photon
         double              m_lambda;        //!< Distance model centre - pointing
         double              m_omega0;        //!< Azimuth of pointing in model system
@@ -282,30 +301,30 @@ private:
         double              m_sin_ph;        //!< Sine term for photon offset angle computation
     };
 
-    // Npred theta integration kernel
-    class npred_kern_theta : public GIntegrand {
+    // Radial model Npred theta integration kernel
+    class npred_radial_kern_theta : public GIntegrand {
     public:
-        npred_kern_theta(const GCTAResponse*    rsp,
-                         const GModelRadial*    radial,
-                         const GEnergy*         srcEng,
-                         const GTime*           srcTime,
-                         const GCTAObservation* obs,
-                         const GMatrix*         rot,
-                         double                 dist,
-                         double                 radius,
-                         double                 phi) :
-                         m_rsp(rsp),
-                         m_radial(radial),
-                         m_srcEng(srcEng),
-                         m_srcTime(srcTime),
-                         m_obs(obs),
-                         m_rot(rot),
-                         m_dist(dist),
-                         m_cos_dist(std::cos(dist)),
-                         m_sin_dist(std::sin(dist)),
-                         m_radius(radius),
-                         m_cos_radius(std::cos(radius)),
-                         m_phi(phi) { return; }
+        npred_radial_kern_theta(const GCTAResponse*    rsp,
+                                const GModelRadial*    radial,
+                                const GEnergy*         srcEng,
+                                const GTime*           srcTime,
+                                const GCTAObservation* obs,
+                                const GMatrix*         rot,
+                                double                 dist,
+                                double                 radius,
+                                double                 phi) :
+                                m_rsp(rsp),
+                                m_radial(radial),
+                                m_srcEng(srcEng),
+                                m_srcTime(srcTime),
+                                m_obs(obs),
+                                m_rot(rot),
+                                m_dist(dist),
+                                m_cos_dist(std::cos(dist)),
+                                m_sin_dist(std::sin(dist)),
+                                m_radius(radius),
+                                m_cos_radius(std::cos(radius)),
+                                m_phi(phi) { return; }
         double eval(double theta);
     protected:
         const GCTAResponse*    m_rsp;        //!< Pointer to response
@@ -322,24 +341,24 @@ private:
         double                 m_phi;        //!< Position angle of ROI
     };
 
-    // Npred phi integration kernel
-    class npred_kern_phi : public GIntegrand {
+    // Radial model Npred phi integration kernel
+    class npred_radial_kern_phi : public GIntegrand {
     public:
-        npred_kern_phi(const GCTAResponse*    rsp,
-                       const GEnergy*         srcEng,
-                       const GTime*           srcTime,
-                       const GCTAObservation* obs,
-                       const GMatrix*         rot,
-                       double                 theta,
-                       double                 sin_theta) :
-                       m_rsp(rsp),
-                       m_srcEng(srcEng),
-                       m_srcTime(srcTime),
-                       m_obs(obs),
-                       m_rot(rot),
-                       m_theta(theta),
-                       m_cos_theta(std::cos(theta)),
-                       m_sin_theta(sin_theta) { return; }
+        npred_radial_kern_phi(const GCTAResponse*    rsp,
+                              const GEnergy*         srcEng,
+                              const GTime*           srcTime,
+                              const GCTAObservation* obs,
+                              const GMatrix*         rot,
+                              double                 theta,
+                              double                 sin_theta) :
+                              m_rsp(rsp),
+                              m_srcEng(srcEng),
+                              m_srcTime(srcTime),
+                              m_obs(obs),
+                              m_rot(rot),
+                              m_theta(theta),
+                              m_cos_theta(std::cos(theta)),
+                              m_sin_theta(sin_theta) { return; }
         double eval(double phi);
     protected:
         const GCTAResponse*    m_rsp;        //!< Pointer to response
@@ -353,13 +372,19 @@ private:
         double                 m_sin_theta;  //!< Sine of offset angle
     };
 
-    // Integration
+    // PSF integration kernel
     class npsf_kern_rad_azsym : public GIntegrand {
     public:
-        npsf_kern_rad_azsym(const GCTAResponse* parent, double roi,
-                            double psf, double sigma) :
-                            m_parent(parent), m_roi(roi), m_cosroi(cos(roi)),
-                            m_psf(psf), m_cospsf(cos(psf)), m_sinpsf(sin(psf)),
+        npsf_kern_rad_azsym(const       GCTAResponse* parent,
+                            double      roi,
+                            double      psf,
+                            GCTAPsfPars sigma) :
+                            m_parent(parent),
+                            m_roi(roi),
+                            m_cosroi(cos(roi)),
+                            m_psf(psf),
+                            m_cospsf(cos(psf)),
+                            m_sinpsf(sin(psf)),
                             m_sigma(sigma) { return; }
         double eval(double r);
     protected:
@@ -370,7 +395,7 @@ private:
         double              m_psf;     //!< PSF-ROI centre distance in radians
         double              m_cospsf;  //!< Cosine of PSF-ROI centre distance
         double              m_sinpsf;  //!< Sine of PSF-ROI centre distance
-        double              m_sigma;   //!< Width of PSF in radians
+        GCTAPsfPars         m_sigma;   //!< Width of PSF in radians
     };
 
     // Private data members
@@ -390,6 +415,9 @@ private:
     double              m_eps;          //!< Integration precision
     double              m_offset_sigma; //!< Sigma for offset angle computation (0=none)
 
+    // New PSF handling
+    int                 m_psf_version;  //!< PSF version
+    GCTAResponseTable   m_psf_table;    //!< PSF response table
 };
 
 #endif /* GCTARESPONSE_HPP */
