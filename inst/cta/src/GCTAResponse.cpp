@@ -780,6 +780,7 @@ void GCTAResponse::read_arf(const GFitsTable* hdu)
                 std::cout << "WARNING: GCTAResponse::read_arf:";
                 std::cout << " Non-positive integral occured in";
                 std::cout << " PSF integration in GCTAResponse::read_arf.";
+                std::cout << std::endl;
             }
         }
 
