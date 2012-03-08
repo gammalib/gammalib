@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GResponse.cpp  -  Response abstract base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,6 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GResponse.hpp
+ * @brief Abstract response base class interface definition
+ * @author J. Knoedlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
@@ -148,6 +153,14 @@ GResponse& GResponse::operator= (const GResponse& rsp)
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
  *
+ * Returns the instrument response function for a given event, given a sky
+ * model, the incident photon energy, the photon arrival time, and an
+ * observation.
+ *
+ * Note that this method applies the deadtime correction, so that the
+ * response function can be directly multiplied by the exposure time (also
+ * known as ontime).
+ *
  * @todo Throw exception if model pointer is invalid.
  ***************************************************************************/
 double GResponse::irf(const GEvent&       event,
@@ -165,15 +178,21 @@ double GResponse::irf(const GEvent&       event,
     const GModelDiffuseSource*  difsrc = dynamic_cast<const GModelDiffuseSource*>(&model);
 
     // Call model dependent method
-    if (ptsrc != NULL)
+    if (ptsrc != NULL) {
         irf = irf_ptsrc(event.dir(), event.energy(), event.time(),
                         *ptsrc, srcEng, srcTime, obs);
-    else if (extsrc != NULL)
+    }
+    else if (extsrc != NULL) {
         irf = irf_extended(event.dir(), event.energy(), event.time(),
                            *extsrc, srcEng, srcTime, obs);
-    else if (difsrc != NULL)
+    }
+    else if (difsrc != NULL) {
         irf = irf_diffuse(event.dir(), event.energy(), event.time(),
                           *difsrc, srcEng, srcTime, obs);
+    }
+
+    // Apply deadtime correction
+    irf *= obs.deadc(srcTime);
 
     // Return IRF value
     return irf;
@@ -278,6 +297,14 @@ double GResponse::irf_diffuse(const GInstDir&            obsDir,
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
  *
+ * Returns the data space integral of the instrument response function for
+ * a given sky model, given the incident photon energy, the photon arrival
+ * time, and an observations.
+ *
+ * Note that this method applies the deadtime correction, so that the
+ * result can be directly multiplied by the exposure time (also known as
+ * ontime).
+ *
  * @todo Throw exception if model pointer is invalid.
  ***************************************************************************/
 double GResponse::npred(const GModelSky&    model,
@@ -294,12 +321,18 @@ double GResponse::npred(const GModelSky&    model,
     const GModelDiffuseSource*  difsrc = dynamic_cast<const GModelDiffuseSource*>(&model);
 
     // Call model dependent method
-    if (ptsrc != NULL)
+    if (ptsrc != NULL) {
         npred = npred_ptsrc(*ptsrc, srcEng, srcTime, obs);
-    else if (extsrc != NULL)
+    }
+    else if (extsrc != NULL) {
         npred = npred_extended(*extsrc, srcEng, srcTime, obs);
-    else if (difsrc != NULL)
+    }
+    else if (difsrc != NULL) {
         npred = npred_diffuse(*difsrc, srcEng, srcTime, obs);
+    }
+
+    // Apply deadtime correction
+    npred *= obs.deadc(srcTime);
 
     // Return response value
     return npred;
@@ -376,7 +409,7 @@ double GResponse::npred_extended(const GModelExtendedSource& model,
 
         // Compile option: Show integration results
         #if defined(G_DEBUG_NPRED_EXTENDED)
-        std::cout << "npred_extended:";
+        std::cout << "GResponse::npred_extended:";
         std::cout << " theta_min=" << theta_min;
         std::cout << " theta_max=" << theta_max;
         std::cout << " npred=" << npred << std::endl;
