@@ -997,11 +997,14 @@ double GCTAObservation::npred_temp(const GModel& model) const
     // Initialise result
     double result = 0.0;
 
-    // Integrate only if ontime is positive
-    if (ontime() > 0.0) {
+    // Determine ontime
+    double ontime = events()->gti().ontime();
 
-        // Integration is a simple multiplication by the ontime
-        result = npred_spec(model, events()->gti().tstart()) * ontime();
+    // Integrate only if ontime is positive
+    if (ontime > 0.0) {
+
+        // Integration is a simple multiplication by the time
+        result = npred_spec(model, events()->gti().tstart()) * ontime;
 
     }
 
