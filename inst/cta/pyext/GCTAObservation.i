@@ -63,10 +63,12 @@ public:
     void        obs_id(const int& id);
     void        ra_obj(const double& ra);
     void        dec_obj(const double& dec);
+    void        ontime(const double& ontime);
+    void        livetime(const double& livetime);
+    void        deadc(const double& deadc);
     int         obs_id(void) const;
     double      ra_obj(void) const;
     double      dec_obj(void) const;
-    double      deadc(void) const;
     std::string eventfile(void) const;
     void        eventfile(const std::string& filename);
 };

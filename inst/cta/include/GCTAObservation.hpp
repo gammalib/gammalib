@@ -77,10 +77,12 @@ public:
     void        obs_id(const int& id) { m_obs_id=id; }
     void        ra_obj(const double& ra) { m_ra_obj=ra; }
     void        dec_obj(const double& dec) { m_dec_obj=dec; }
+    void        ontime(const double& ontime) { m_ontime=ontime; }
+    void        livetime(const double& livetime) { m_livetime=livetime; }
+    void        deadc(const double& deadc) { m_deadc=deadc; }
     int         obs_id(void) const { return m_obs_id; }
     double      ra_obj(void) const { return m_ra_obj; }
     double      dec_obj(void) const { return m_dec_obj; }
-    double      deadc(void) const { return m_deadc; }
     std::string eventfile(void) const { return m_eventfile; }
     void        eventfile(const std::string& filename) { m_eventfile = filename; }
 
