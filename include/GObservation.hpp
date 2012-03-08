@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GObservation.hpp  -  Abstract observation base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -86,6 +86,7 @@ public:
     virtual std::string   instrument(void) const = 0;
     virtual double        ontime(void) const = 0;
     virtual double        livetime(void) const = 0;
+    virtual double        deadc(const GTime& time) const = 0;
     virtual void          read(const GXmlElement& xml) = 0;
     virtual void          write(GXmlElement& xml) const = 0;
     virtual std::string   print(void) const = 0;
