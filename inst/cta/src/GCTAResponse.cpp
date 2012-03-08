@@ -580,6 +580,9 @@ void GCTAResponse::load(const std::string& irfname)
     // Store response name
     m_rspname = irfname;
 
+    // Set PSF version
+    m_psf_version = -10;
+
     // Return
     return;
 }
