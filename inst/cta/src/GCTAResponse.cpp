@@ -69,6 +69,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DEBUG_READ_ARF                         //!< Debug read_arf method
 //#define G_DEBUG_IRF_EXTENDED                 //!< Debug irf_extended method
 //#define G_DEBUG_NPRED_EXTENDED                    //!< Debug npred_extended
 //#define G_DEBUG_PRINT_AEFF                          //!< Debug print() Aeff
@@ -777,11 +778,20 @@ void GCTAResponse::read_arf(const GFitsTable* hdu)
             integral.eps(m_eps);
 
             // Perform integration
-            double value = integral.romb(0.0, rmax);
+            double fraction = integral.romb(0.0, rmax);
 
             // Update scale factor
-            if (value > 0.0) {
-                scale /= value;
+            if (fraction > 0.0) {
+                scale /= fraction;
+                #if defined(G_DEBUG_READ_ARF)
+                std::cout << "GCTAResponse::read_arf:";
+                std::cout << " e_min=" << e_min;
+                std::cout << " e_max=" << e_max;
+                std::cout << " logE=" << logE;
+                std::cout << " scale=" << scale;
+                std::cout << " fraction=" << fraction;
+                std::cout << std::endl;
+                #endif
             }
             else {
                 std::cout << "WARNING: GCTAResponse::read_arf:";
