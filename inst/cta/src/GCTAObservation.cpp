@@ -596,7 +596,7 @@ std::string GCTAObservation::print(void) const
     result.append("\n"+parformat("Statistics")+statistics());
     result.append("\n"+parformat("Ontime")+str(ontime()));
     result.append("\n"+parformat("Livetime")+str(livetime()));
-    result.append("\n"+parformat("Deadtime correction")+str(deadc()));
+    result.append("\n"+parformat("Deadtime correction")+str(m_deadc));
 
     // Append pointing
     if (m_pointing != NULL) {
