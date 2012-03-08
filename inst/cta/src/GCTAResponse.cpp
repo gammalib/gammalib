@@ -460,6 +460,10 @@ double GCTAResponse::npred(const GSkyDir&      srcDir,
  * Simulates a CTA event using the response function from an incident photon.
  * If the event is not detected a NULL pointer is returned.
  *
+ * Note that this method does not take into account any deadtime correction.
+ * This has to be applied externally (hence by adjusting the number of
+ * photons to the livetime instead of the ontime).
+ *
  * @todo Implement Phi dependence in CTA IRF
  * @todo Implement energy dispersion
  * @todo Implement the method for a 3 Gaussian PSF
