@@ -50,6 +50,7 @@ public:
     virtual std::string      instrument(void) const;
     virtual double           ontime(void) const;
     virtual double           livetime(void) const;
+    virtual double           deadc(const GTime& time) const;
     virtual void             read(const GXmlElement& xml);
     virtual void             write(GXmlElement& xml) const;
 

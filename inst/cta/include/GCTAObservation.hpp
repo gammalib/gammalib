@@ -63,6 +63,7 @@ public:
     virtual std::string      instrument(void) const;
     virtual double           ontime(void) const { return m_ontime; }
     virtual double           livetime(void) const { return m_livetime; }
+    virtual double           deadc(const GTime& time) const { return m_deadc; }
     virtual void             read(const GXmlElement& xml);
     virtual void             write(GXmlElement& xml) const;
     virtual std::string      print(void) const;
