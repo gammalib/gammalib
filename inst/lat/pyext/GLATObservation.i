@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATObservation.i  -  LAT Observation class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,6 +50,7 @@ public:
     virtual std::string      instrument(void) const;
     virtual double           ontime(void) const;
     virtual double           livetime(void) const;
+    virtual double           deadc(const GTime& time) const;
     virtual void             read(const GXmlElement& xml);
     virtual void             write(GXmlElement& xml) const;
 
