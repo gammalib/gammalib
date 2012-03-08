@@ -938,7 +938,7 @@ void GCTAObservation::write_attributes(GFitsHDU* hdu) const
         hdu->card("TELAPSE",  telapse, "[s] Mission elapsed time");
         hdu->card("ONTIME",   ontime, "[s] Total good time including deadtime");
         hdu->card("LIVETIME", livetime(), "[s] Total livetime");
-        hdu->card("DEADC",    deadc, "Deadtime fraction");
+        hdu->card("DEADC",    deadc, "Deadtime correction factor");
         hdu->card("TIMEDEL",  1.0, "Time resolution");
 
         // Set pointing information
