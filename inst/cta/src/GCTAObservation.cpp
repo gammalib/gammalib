@@ -596,6 +596,7 @@ std::string GCTAObservation::print(void) const
     result.append("\n"+parformat("Statistics")+statistics());
     result.append("\n"+parformat("Ontime")+str(ontime()));
     result.append("\n"+parformat("Livetime")+str(livetime()));
+    result.append("\n"+parformat("Deadtime correction")+str(deadc()));
 
     // Append pointing
     if (m_pointing != NULL) {
@@ -828,22 +829,25 @@ void GCTAObservation::free_members(void)
  *
  * Reads CTA observation attributes from HDU. Mandatory attributes are
  *
- * RA_PNT  - Right Ascension of pointing
- * DEC_PNT - Declination of pointing
+ * RA_PNT   - Right Ascension of pointing
+ * DEC_PNT  - Declination of pointing
+ * ONTIME   - Exposure time
+ * LIVETIME - Livetime
  *
  * and optional attributes are
  *
  * OBJECT   - Name of observed object
+ * DEADC    - Deadtime correction
  * RA_OBJ   - Right Ascension of observed object,
  * DEC_OBJ  - Declination of observed object,
  * OBS_ID   - Observation identifier
- * LIVETIME - Livetime
- * DEADC    - Deadtime correction
  * ALT_PNT  - Altitude of pointing above horizon
  * AZ_PNT   - Azimuth of pointing
  *
- * Based on RA_PNT and DEC_PNT, the CTA pointing direction is set. Nothing
- * is done if the HDU pointer is NULL.
+ * Based on RA_PNT and DEC_PNT, the CTA pointing direction is set. Note that
+ * DEADC is computed using DEADC=LIVETIME/ONTIME
+ *
+ * Nothing is done if the HDU pointer is NULL.
  *
  * @todo The actual reader is a minimal reader to accomodate as many
  *       different datasets as possible. Once the CTA data format is fixed
@@ -857,17 +861,27 @@ void GCTAObservation::read_attributes(const GFitsHDU* hdu)
         // Read mandatory attributes
         double ra_pnt  = hdu->real("RA_PNT");
         double dec_pnt = hdu->real("DEC_PNT");
+        m_ontime   = (hdu->hascard("ONTIME"))   ? hdu->real("ONTIME") : 0.0;
+        m_livetime = (hdu->hascard("LIVETIME")) ? hdu->real("LIVETIME") : 0.0;
 
         // Read optional attributes
         m_name     = (hdu->hascard("OBJECT"))   ? hdu->string("OBJECT") : "unknown";
-        m_ontime   = (hdu->hascard("ONTIME"))   ? hdu->real("ONTIME") : 0.0;
-        m_livetime = (hdu->hascard("LIVETIME")) ? hdu->real("LIVETIME") : 0.0;
         m_deadc    = (hdu->hascard("DEADC"))    ? hdu->real("DEADC") : 0.0;
         m_ra_obj   = (hdu->hascard("RA_OBJ"))   ? hdu->real("RA_OBJ") : 0.0;
         m_dec_obj  = (hdu->hascard("DEC_OBJ"))  ? hdu->real("DEC_OBJ") : 0.0;
         m_obs_id   = (hdu->hascard("OBS_ID"))   ? hdu->integer("OBS_ID") : 0;
         double alt = (hdu->hascard("ALT_PNT"))  ? hdu->real("ALT_PNT") : 0.0;
         double az  = (hdu->hascard("AZ_PNT"))   ? hdu->real("AZ_PNT") : 0.0;
+
+        // Kluge: compute DEADC from livetime and ontime instead of using the
+        // keyword value as the original event lists had this values badly
+        // assigned
+        if (m_ontime > 0) {
+            m_deadc = m_livetime / m_ontime;
+        }
+        else {
+            m_deadc = 0.0;
+        }
 
         // Set pointing information
         GSkyDir pnt;
@@ -972,22 +986,22 @@ void GCTAObservation::write_attributes(GFitsHDU* hdu) const
  * @param[in] model Gamma-ray source model.
  *
  * Implement the temporal integration as a simple multiplication by the
- * elapsed time. This assumes that the source is non-variable during the
+ * ontime. This assumes that the source is non-variable during the
  * observation and that the CTA pointing is stable.
+ *
+ * Note that we use here the ontime as the GResponse::irf method returns
+ * already deadtime corrected response values.
  ***************************************************************************/
 double GCTAObservation::npred_temp(const GModel& model) const
 {
     // Initialise result
     double result = 0.0;
 
-    // Determine ontime
-    double ontime = events()->gti().ontime();
-
     // Integrate only if ontime is positive
-    if (ontime > 0.0) {
+    if (ontime() > 0.0) {
 
-        // Integration is a simple multiplication by the time
-        result = npred_spec(model, events()->gti().tstart()) * ontime;
+        // Integration is a simple multiplication by the ontime
+        result = npred_spec(model, events()->gti().tstart()) * ontime();
 
     }
 
