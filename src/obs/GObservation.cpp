@@ -459,6 +459,15 @@ void GObservation::free_members(void)
  * the spatial model may eventually be noisy due to numerical integration
  * limits.
  *
+ * The step size for the dumb method has been fixed to 0.0002, which
+ * corresponds to abound 1 arcsec for parameters that are given in degrees.
+ * The reasoning behind this value is that parameters that use numerical
+ * gradients are typically angles, such as for example the position, and
+ * we want to achieve arcsec precision with this method.
+ *
+ * @todo Implement a more precise numerical derivation scheme. This needs
+ *       a deep investigation as the scheme needs to be precise but also
+ *       robust (not sensitive to noise in the function).
  * @todo For the Riddler method, we simply remove any parameter boundaries
  *       here for the computation to avoid any out of boundary errors.
  *       We may have models, however, for which out of bound parameters lead
@@ -493,19 +502,20 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
             // Get actual parameter value
             double x = model[ipar].value();
 
-            // Determine fixed step size for computation of derivative.
-            // By default, the step size is fixed to 0.05, but if this would
+            // Set fixed step size for computation of derivative.
+            // By default, the step size is fixed to 0.0002, but if this would
             // violate a boundary, dx is reduced accordingly. In case that x
             // is right on the boundary, x is displaced slightly from the
             // boundary to allow evaluation of the derivative.
             #if !defined(G_GRAD_RIDDLER)
-            double dx = 0.05;
+            const double step_size = 0.0002;
+            double       dx        = step_size;
             if (model[ipar].hasmin()) {
                 double dx_min = x - model[ipar].min();
                 if (dx_min == 0.0) {
-                    dx = 0.05 * x;
+                    dx = step_size * x;
                     if (dx == 0.0) {
-                        dx = 0.05;
+                        dx = step_size;
                     }
                     x += dx; 
                 }
@@ -516,9 +526,9 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
             if (model[ipar].hasmax()) {
                 double dx_max = model[ipar].max() - x;
                 if (dx_max == 0.0) {
-                    dx = 0.05 * x;
+                    dx = step_size * x;
                     if (dx == 0.0) {
-                        dx = 0.05;
+                        dx = step_size;
                     }
                     x -= dx; 
                 }
@@ -612,6 +622,15 @@ double GObservation::model_func::eval(double x)
  * method has turned out more robust then the Riddler's method implement
  * by the GDerivative::value() method.
  *
+ * The step size for the dumb method has been fixed to 0.0002, which
+ * corresponds to abound 1 arcsec for parameters that are given in degrees.
+ * The reasoning behind this value is that parameters that use numerical
+ * gradients are typically angles, such as for example the position, and
+ * we want to achieve arcsec precision with this method.
+ *
+ * @todo Implement a more precise numerical derivation scheme. This needs
+ *       a deep investigation as the scheme needs to be precise but also
+ *       robust (not sensitive to noise in the function).
  * @todo For Riddler's method we simply remove any parameter boundaries here
  *       for the computation to avoid any out of boundary errors. We may have
  *       models, however, for which out of bound parameters lead to illegal
@@ -639,18 +658,19 @@ double GObservation::npred_grad(const GModel& model, int ipar) const
         double x = model[ipar].value();
 
         // Determine fixed step size for computation of derivative.
-        // By default, the step size is fixed to 0.05, but if this would
+        // By default, the step size is fixed to 0.0002, but if this would
         // violate a boundary, dx is reduced accordingly. In case that x
         // is right on the boundary, x is displaced slightly from the
         // boundary to allow evaluation of the derivative.
         #if !defined(G_GRAD_RIDDLER)
-        double dx = 0.05;
+        const double step_size = 0.0002;
+        double       dx        = step_size;
         if (model[ipar].hasmin()) {
             double dx_min = x - model[ipar].min();
             if (dx_min == 0.0) {
-                dx = 0.05 * x;
+                dx = step_size * x;
                 if (dx == 0.0) {
-                    dx = 0.05;
+                    dx = step_size;
                 }
                 x += dx; 
             }
@@ -661,9 +681,9 @@ double GObservation::npred_grad(const GModel& model, int ipar) const
         if (model[ipar].hasmax()) {
             double dx_max = model[ipar].max() - x;
             if (dx_max == 0.0) {
-                dx = 0.05 * x;
+                dx = step_size * x;
                 if (dx == 0.0) {
-                    dx = 0.05;
+                    dx = step_size;
                 }
                 x -= dx; 
             }
