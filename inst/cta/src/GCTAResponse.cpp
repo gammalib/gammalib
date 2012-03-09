@@ -475,34 +475,33 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
     // Initialise event
     GCTAEventAtom* event = NULL;
 
-    // Continue only if the photon arrives at the moment when the detector
-    // is not dead. This implements the deadtime correction.
-    double deadc = obs.deadc(photon.time());
-    if (deadc >= 1.0 || ran.uniform() <= deadc) {
+    // Get pointer on CTA pointing
+    GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
+    if (pnt == NULL) {
+        throw GCTAException::no_pointing(G_MC);
+    }
 
-        // Get pointer on CTA pointing
-        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
-        if (pnt == NULL) {
-            throw GCTAException::no_pointing(G_MC);
-        }
+    // Get pointing direction zenith angle and azimuth [radians]
+    double zenith  = pnt->zenith();
+    double azimuth = pnt->azimuth();
 
-        // Get pointing direction zenith angle and azimuth [radians]
-        double zenith  = pnt->zenith();
-        double azimuth = pnt->azimuth();
+    // Get radial offset and polar angles of true photon in camera [radians]
+    double theta_p = pnt->dir().dist(photon.dir());
+    double phi_p   = 0.0;  //TODO Implement Phi dependence
 
-        // Get radial offset and polar angles of true photon in camera [radians]
-        double theta_p = pnt->dir().dist(photon.dir());
-        double phi_p   = 0.0;  //TODO Implement Phi dependence
+    // Compute effective area for photon
+    double srcLogEng      = photon.energy().log10TeV();
+    double effective_area = aeff(theta_p, phi_p, zenith, azimuth, srcLogEng);
 
-        // Compute effective area for photon
-        double srcLogEng      = photon.energy().log10TeV();
-        double effective_area = aeff(theta_p, phi_p, zenith, azimuth, srcLogEng);
+    // Compute limiting value
+    double ulimite = effective_area / area;
 
-        // Compute limiting value
-        double ulimite = effective_area / area;
-
-        // Continue only if event is detected
-        if (ran.uniform() <= ulimite) {
+    // Continue only if event is detected
+    if (ran.uniform() <= ulimite) {
+        
+        // Apply deadtime correction
+        double deadc = obs.deadc(photon.time());
+        if (deadc >= 1.0 || ran.uniform() <= deadc) {
 
             // Simulate offset from photon arrival direction
             //TODO: Make a proper implementation depending on the response
@@ -527,9 +526,9 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
             event->energy(photon.energy());
             event->time(photon.time());
 
-        } // endif: event was detected
+        } // endif: detector was alive
 
-    } // endif: detector was alive
+    } // endif: event was detected
 
     // Return event
     return event;
