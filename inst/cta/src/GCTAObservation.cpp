@@ -433,7 +433,7 @@ void GCTAObservation::read(const GXmlElement& xml)
         m_response->arf_scale(scale);
         m_response->load_arf(arf);
     }
-    
+
     // Return
     return;
 }
