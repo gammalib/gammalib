@@ -82,7 +82,7 @@ public:
 
     // Other Methods
     GCTAEventAtom* mc(const double& area, const GPhoton& photon,
-                      const GPointing& pnt, GRan& ran) const;
+                      const GObservation& obs, GRan& ran) const;
     void           caldb(const std::string& caldb);
     std::string    caldb(void) const;
     void           load(const std::string& rspname);

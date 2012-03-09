@@ -452,77 +452,84 @@ double GCTAResponse::npred(const GSkyDir&      srcDir,
  *
  * @param[in] area Simulation surface area.
  * @param[in] photon Photon.
- * @param[in] pnt Pointing.
+ * @param[in] obs Observation.
  * @param[in] ran Random number generator.
  *
- * @exception GCTAException::bad_pointing_type
- *            Specified pointing is not a CTA pointing.
+ * @exception GCTAException::no_pointing
+ *            No CTA pointing found in observation.
  *
  * Simulates a CTA event using the response function from an incident photon.
  * If the event is not detected a NULL pointer is returned.
  *
- * Note that this method does not take into account any deadtime correction.
- * This has to be applied externally (hence by adjusting the number of
- * photons to the livetime instead of the ontime).
+ * The method also applies a deadtime correction using a Monte Carlo process,
+ * taking into account temporal deadtime variations. For this purpose, the
+ * method makes use of the time dependent GObservation::deadc method.
  *
  * @todo Implement Phi dependence in CTA IRF
  * @todo Implement energy dispersion
  * @todo Implement the method for a 3 Gaussian PSF
  ***************************************************************************/
 GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
-                                const GPointing& pnt, GRan& ran) const
+                                const GObservation& obs, GRan& ran) const
 {
     // Initialise event
     GCTAEventAtom* event = NULL;
 
-    // Get pointer on CTA pointing
-    const GCTAPointing *ctapnt = dynamic_cast<const GCTAPointing*>(&pnt);
-    if (ctapnt == NULL) {
-        throw GCTAException::bad_pointing_type(G_MC);
-    }
+    // Continue only if the photon arrives at the moment when the detector
+    // is not dead. This implements the deadtime correction.
+    double deadc = obs.deadc(photon.time());
+    if (deadc >= 1.0 || ran.uniform() <= deadc) {
 
-    // Get pointing direction zenith angle and azimuth [radians]
-    double zenith  = ctapnt->zenith();
-    double azimuth = ctapnt->azimuth();
+        // Get pointer on CTA pointing
+        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
+        if (pnt == NULL) {
+            throw GCTAException::no_pointing(G_MC);
+        }
 
-    // Get radial offset and polar angles of true photon in camera [radians]
-    double theta_p = ctapnt->dir().dist(photon.dir());
-    double phi_p   = 0.0;  //TODO Implement Phi dependence
+        // Get pointing direction zenith angle and azimuth [radians]
+        double zenith  = pnt->zenith();
+        double azimuth = pnt->azimuth();
 
-    // Compute effective area for photon
-    double srcLogEng      = photon.energy().log10TeV();
-    double effective_area = aeff(theta_p, phi_p, zenith, azimuth, srcLogEng);
+        // Get radial offset and polar angles of true photon in camera [radians]
+        double theta_p = pnt->dir().dist(photon.dir());
+        double phi_p   = 0.0;  //TODO Implement Phi dependence
 
-    // Compute limiting value
-    double ulimite = effective_area / area;
+        // Compute effective area for photon
+        double srcLogEng      = photon.energy().log10TeV();
+        double effective_area = aeff(theta_p, phi_p, zenith, azimuth, srcLogEng);
 
-    // Continue only if event is detected
-    if (ran.uniform() <= ulimite) {
+        // Compute limiting value
+        double ulimite = effective_area / area;
 
-        // Simulate offset from photon arrival direction
-        //TODO: Make a proper implementation depending on the response
-        // version. For now, the first Gaussian is used.
-        GCTAPsfPars pars  = psf_dummy_sigma(srcLogEng, theta_p);
-        double      theta = pars[1] * ran.chisq2() * rad2deg;
-        double      phi   = 360.0 * ran.uniform();
+        // Continue only if event is detected
+        if (ran.uniform() <= ulimite) {
 
-        // Rotate sky direction by offset
-        GSkyDir sky_dir = photon.dir();
-        sky_dir.rotate_deg(phi, theta);
+            // Simulate offset from photon arrival direction
+            //TODO: Make a proper implementation depending on the response
+            // version. For now, the first Gaussian is used.
+            GCTAPsfPars pars  = psf_dummy_sigma(srcLogEng, theta_p);
+            double      theta = pars[1] * ran.chisq2() * rad2deg;
+            double      phi   = 360.0 * ran.uniform();
 
-        // Set measured photon arrival direction
-        GCTAInstDir inst_dir;
-        inst_dir.skydir(sky_dir);
+            // Rotate sky direction by offset
+            GSkyDir sky_dir = photon.dir();
+            sky_dir.rotate_deg(phi, theta);
 
-        // Allocate event
-        event = new GCTAEventAtom;
+            // Set measured photon arrival direction
+            GCTAInstDir inst_dir;
+            inst_dir.skydir(sky_dir);
 
-        // Set event attributes
-        event->dir(inst_dir);
-        event->energy(photon.energy());
-        event->time(photon.time());
+            // Allocate event
+            event = new GCTAEventAtom;
 
-    } // endif: event was detected
+            // Set event attributes
+            event->dir(inst_dir);
+            event->energy(photon.energy());
+            event->time(photon.time());
+
+        } // endif: event was detected
+
+    } // endif: detector was alive
 
     // Return event
     return event;
