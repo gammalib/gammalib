@@ -2,7 +2,7 @@
 # Configuration for GammaLib - a versatile toolbox for high-level analysis  #
 #                              of astronomical gamma-ray data               #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2006-2011 Jurgen Knodlseder                                 #
+# Copyright (C) 2006-2012 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -29,7 +29,7 @@
 #############################################################################
 # Initialisation                                                            #
 #############################################################################
-AC_INIT([gammalib], [0.5.0], [knodlseder@cesr.fr], [gammalib])
+AC_INIT([gammalib], [0.5.0], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies])
