@@ -377,11 +377,12 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
     double value = rad * spec * temp;
 
     // Apply deadtime correction
-    value *= obs.deadc(event.time());
+    double deadc = obs.deadc(event.time());
+    value       *= deadc;
 
     // Multiply factors to radial gradients
     if (radial() != NULL) {
-        double fact = spec * temp;
+        double fact = spec * temp * deadc;
         if (fact != 1.0) {
             for (int i = 0; i < radial()->size(); ++i)
                 (*radial())[i].gradient( (*radial())[i].gradient() * fact );
@@ -390,7 +391,7 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
 
     // Multiply factors to spectral gradients
     if (spectral() != NULL) {
-        double fact = rad * temp;
+        double fact = rad * temp * deadc;
         if (fact != 1.0) {
             for (int i = 0; i < spectral()->size(); ++i)
                 (*spectral())[i].gradient( (*spectral())[i].gradient() * fact );
@@ -399,7 +400,7 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
 
     // Multiply factors to temporal gradients
     if (temporal() != NULL) {
-        double fact = rad * spec;
+        double fact = rad * spec * deadc;
         if (fact != 1.0) {
             for (int i = 0; i < temporal()->size(); ++i)
                 (*temporal())[i].gradient( (*temporal())[i].gradient() * fact );
