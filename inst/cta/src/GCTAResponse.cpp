@@ -833,6 +833,12 @@ void GCTAResponse::read_arf(const GFitsTable* hdu)
  * energies are converted to TeV. Conversion is done based on the units
  * provided for the energy columns. Units that are recognized are 'keV',
  * 'MeV', 'GeV', and 'TeV' (case independent).
+ *
+ * The Gaussian width parameter may be either given in 68% containment radius
+ * (R68) or in sigma (ANGRES40; corresponding to a 38% containment radius).
+ * The former format is used for CTA and H.E.S.S. data, the latter for
+ * MAGIC data. All these things should be more uniform once we have a well
+ * defined format.
  ***************************************************************************/
 void GCTAResponse::read_psf(const GFitsTable* hdu)
 {
@@ -843,7 +849,17 @@ void GCTAResponse::read_psf(const GFitsTable* hdu)
     // Get pointers to table columns
     const GFitsTableCol* energy_lo = &(*hdu)["ENERG_LO"];
     const GFitsTableCol* energy_hi = &(*hdu)["ENERG_HI"];
-    const GFitsTableCol* r68       = &(*hdu)["R68"];
+
+    // Handle various data formats (H.E.S.S. and MAGIC)
+    const GFitsTableCol* r68;
+    double               r68_scale = 1.0;
+    if (hdu->hascolumn("R68")) {
+        r68 = &(*hdu)["R68"];
+    }
+    else {
+        r68 = &(*hdu)["ANGRES40"];
+        r68_scale = 1.0 / 0.6624305; // MAGIC PSF is already 1 sigma
+    }
 
     // Determine unit conversion factors (default: TeV)
     std::string u_energy_lo = tolower(strip_whitespace(energy_lo->unit()));
@@ -880,8 +896,8 @@ void GCTAResponse::read_psf(const GFitsTable* hdu)
         double e_max = energy_hi->real(i) * c_energy_hi;
         double logE  = 0.5 * (log10(e_min) + log10(e_max));
         
-        // Extract r68 value
-        double r68_value = r68->real(i);
+        // Extract r68 value and scale as required
+        double r68_value = r68->real(i) * r68_scale;
         
         // Store log10 mean energy and r68 value
         m_psf_logE.append(logE);
