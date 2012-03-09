@@ -42,8 +42,14 @@
 #include "GIntegrand.hpp"
 
 /* __ Globals ____________________________________________________________ */
-const GCTAObservation      g_obs_cta_seed;
+const GCTAObservation      g_obs_cta_seed("CTA");
+const GCTAObservation      g_obs_hess_seed("HESS");
+const GCTAObservation      g_obs_magic_seed("MAGIC");
+const GCTAObservation      g_obs_veritas_seed("VERITAS");
 const GObservationRegistry g_obs_cta_registry(&g_obs_cta_seed);
+const GObservationRegistry g_obs_hess_registry(&g_obs_hess_seed);
+const GObservationRegistry g_obs_magic_registry(&g_obs_magic_seed);
+const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_RESPONSE                    "GCTAObservation::response(GResponse&)"
@@ -74,6 +80,29 @@ GCTAObservation::GCTAObservation(void) : GObservation()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Instrument constructor
+ *
+ * @param[in] instrument Instrument name.
+ *
+ * Creates empty CTA observation class for a given instrument. This enables
+ * using the CTA specific interface for any other THE instrument. Note that
+ * each other THE instruments needs a specific registry at the beginning
+ * of the GCTAObservation.cpp file.
+ ***************************************************************************/
+GCTAObservation::GCTAObservation(const std::string& instrument) : GObservation()
+{
+    // Initialise members
+    init_members();
+
+    // Set instrument
+    m_instrument = instrument;
 
     // Return
     return;
@@ -279,16 +308,6 @@ void GCTAObservation::pointing(const GCTAPointing& pointing)
 
 
 /***********************************************************************//**
- * @brief Returns instrument name
- ***************************************************************************/
-std::string GCTAObservation::instrument(void) const
-{
-    // Return instument name
-    return ("CTA");
-}
-
-
-/***********************************************************************//**
  * @brief Read observation from XML element
  *
  * @param[in] xml XML element.
@@ -301,7 +320,7 @@ std::string GCTAObservation::instrument(void) const
  * Reads information for a CTA observation from an XML element.
  * The expected format of the XML element is
  *
- *  <observation name="..." id="..." instrument="CTA">
+ *  <observation name="..." id="..." instrument="...">
  *    <parameter name="EventList" file="..."/>
  *    <parameter name="ARF" file="..."/>
  *    <parameter name="RMF" file="..."/>
@@ -310,7 +329,7 @@ std::string GCTAObservation::instrument(void) const
  *
  * for an unbinned observation and
  *
- *  <observation name="..." id="..." instrument="CTA">
+ *  <observation name="..." id="..." instrument="...">
  *    <parameter name="CountsMap" file="..."/>
  *    <parameter name="ARF" file="..."/>
  *    <parameter name="RMF" file="..."/>
@@ -330,6 +349,9 @@ void GCTAObservation::read(const GXmlElement& xml)
     std::string psf      = "";
     double      thetacut = 0.0;
     double      scale    = 1.0;
+
+    // Extract instrument name
+    m_instrument = xml.attribute("instrument");
 
     // Determine number of parameter nodes in XML element
     int npars = xml.elements("parameter");
@@ -454,7 +476,7 @@ void GCTAObservation::read(const GXmlElement& xml)
  * Writes information for a CTA observation into an XML element. The expected
  * format of the XML element is
  *
- *  <observation name="..." id="..." instrument="CTA">
+ *  <observation name="..." id="..." instrument="...">
  *    <parameter name="EventList" file="..."/>
  *    <parameter name="ARF" file="..."/>
  *    <parameter name="RMF" file="..."/>
@@ -463,7 +485,7 @@ void GCTAObservation::read(const GXmlElement& xml)
  *
  * for an unbinned observation and
  *
- *  <observation name="..." id="..." instrument="CTA">
+ *  <observation name="..." id="..." instrument="...">
  *    <parameter name="CountsMap" file="..."/>
  *    <parameter name="ARF" file="..."/>
  *    <parameter name="RMF" file="..."/>
@@ -764,15 +786,16 @@ void GCTAObservation::save(const std::string& filename, bool clobber) const
 void GCTAObservation::init_members(void)
 {
     // Initialise members
+    m_instrument = "CTA";
     m_eventfile.clear();
-    m_response = NULL;
-    m_pointing = NULL;
-    m_obs_id   = 0;
-    m_ontime   = 0.0;
-    m_livetime = 0.0;
-    m_deadc    = 0.0;
-    m_ra_obj   = 0.0;
-    m_dec_obj  = 0.0;
+    m_response   = NULL;
+    m_pointing   = NULL;
+    m_obs_id     = 0;
+    m_ontime     = 0.0;
+    m_livetime   = 0.0;
+    m_deadc      = 0.0;
+    m_ra_obj     = 0.0;
+    m_dec_obj    = 0.0;
 
     // Return
     return;
@@ -791,13 +814,14 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
 
     // Copy members
-    m_eventfile = obs.m_eventfile;
-    m_obs_id    = obs.m_obs_id;
-    m_ontime    = obs.m_ontime;
-    m_livetime  = obs.m_livetime;
-    m_deadc     = obs.m_deadc;
-    m_ra_obj    = obs.m_ra_obj;
-    m_dec_obj   = obs.m_dec_obj;
+    m_instrument = obs.m_instrument;
+    m_eventfile  = obs.m_eventfile;
+    m_obs_id     = obs.m_obs_id;
+    m_ontime     = obs.m_ontime;
+    m_livetime   = obs.m_livetime;
+    m_deadc      = obs.m_deadc;
+    m_ra_obj     = obs.m_ra_obj;
+    m_dec_obj    = obs.m_dec_obj;
 
     // Return
     return;
@@ -919,13 +943,13 @@ void GCTAObservation::write_attributes(GFitsHDU* hdu) const
         double deadc   = (ontime > 0.0) ? livetime() / ontime : 0.0;
 
         // Set observation information
-        hdu->card("CREATOR",  "GammaLib", "Program which created the file");
-        hdu->card("TELESCOP", "CTA",      "Telescope");
-        hdu->card("OBS_ID",   obs_id(),   "Observation identifier");
-        hdu->card("DATE_OBS", "string",   "Observation start date");
-        hdu->card("TIME_OBS", "string",   "Observation start time");
-        hdu->card("DATE_END", "string",   "Observation end date");
-        hdu->card("TIME_END", "string",   "Observation end time");
+        hdu->card("CREATOR",  "GammaLib",   "Program which created the file");
+        hdu->card("TELESCOP", instrument(), "Telescope");
+        hdu->card("OBS_ID",   obs_id(),     "Observation identifier");
+        hdu->card("DATE_OBS", "string",     "Observation start date");
+        hdu->card("TIME_OBS", "string",     "Observation start time");
+        hdu->card("DATE_END", "string",     "Observation end date");
+        hdu->card("TIME_END", "string",     "Observation end time");
 
         // Set observation time information
         hdu->card("TSTART",   tstart, "[s] Mission time of start of observation");
