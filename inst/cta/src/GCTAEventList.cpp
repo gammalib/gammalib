@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAEventList.cpp  -  CTA event atom container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -625,10 +625,6 @@ void GCTAEventList::read_events_v0(const GFitsTable* table)
             GFitsTableFloatCol*  ptr_xmax_err    = (GFitsTableFloatCol*)&(*table)["XMAX_ERR"];
             GFitsTableFloatCol*  ptr_energy      = (GFitsTableFloatCol*)&(*table)["ENERGY"];
             GFitsTableFloatCol*  ptr_energy_err  = (GFitsTableFloatCol*)&(*table)["ENERGY_ERR"];
-            GFitsTableFloatCol*  ptr_hil_msw     = (GFitsTableFloatCol*)&(*table)["HIL_MSW"];
-            GFitsTableFloatCol*  ptr_hil_msw_err = (GFitsTableFloatCol*)&(*table)["HIL_MSW_ERR"];
-            GFitsTableFloatCol*  ptr_hil_msl     = (GFitsTableFloatCol*)&(*table)["HIL_MSL"];
-            GFitsTableFloatCol*  ptr_hil_msl_err = (GFitsTableFloatCol*)&(*table)["HIL_MSL_ERR"];
 
             // Copy data from columns into GCTAEventAtom objects
             GCTAEventAtom event;
