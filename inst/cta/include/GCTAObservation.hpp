@@ -48,6 +48,7 @@ class GCTAObservation : public GObservation {
 public:
     // Constructors and destructors
     GCTAObservation(void);
+    GCTAObservation(const std::string& instrument);
     GCTAObservation(const GCTAObservation& obs);
     virtual ~GCTAObservation(void);
 
@@ -60,7 +61,7 @@ public:
     virtual void             response(const GResponse& rsp);
     virtual GCTAResponse*    response(void) const;
     virtual GCTAPointing*    pointing(void) const;
-    virtual std::string      instrument(void) const;
+    virtual std::string      instrument(void) const { return m_instrument; }
     virtual double           ontime(void) const { return m_ontime; }
     virtual double           livetime(void) const { return m_livetime; }
     virtual double           deadc(const GTime& time) const { return m_deadc; }
@@ -98,6 +99,7 @@ protected:
     double npred_temp(const GModel& model) const;
 
     // Protected members
+    std::string   m_instrument;   //!< Instrument name
     std::string   m_eventfile;    //!< Event filename
     GCTAResponse* m_response;     //!< Pointer to instrument response functions
     GCTAPointing* m_pointing;     //!< Pointer to pointing direction
