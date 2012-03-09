@@ -299,7 +299,7 @@ void GTime::met(const double& time)
  *
  * @param[in] time Time value.
  * @param[in] mjdref Reference MJD (days).
- * @param[in] timeunit Time unit ("sec(s)", "day(s)").
+ * @param[in] timeunit Time unit ("s", "d", "sec(s)", "day(s)").
  * @param[in] timesys Time system (ignored so far).
  * @param[in] timeref Time reference (ignored so far).
  *
@@ -320,15 +320,15 @@ void GTime::time(const double&      time,
     // Convert time to seconds
     double time_in_seconds;
     std::string u_timeunit = toupper(timeunit);
-    if (u_timeunit == "DAY" || u_timeunit == "DAYS") {
+    if (u_timeunit == "D" || u_timeunit == "DAY" || u_timeunit == "DAYS") {
         time_in_seconds = time * sec_in_day;
     }
-    else if (u_timeunit == "SEC" || u_timeunit == "SECS") {
+    else if (u_timeunit == "S" || u_timeunit == "SEC" || u_timeunit == "SECS") {
         time_in_seconds = time;
     }
     else {
         throw GException::time_invalid_unit(G_TIME, timeunit,
-              "Valid units are \"day(s)\" and \"sec(s)\"");
+              "Valid units are \"d(ay(s))\" and \"s(ec(s))\"");
     }
 
     // Store time and reference
