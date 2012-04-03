@@ -1,4 +1,4 @@
-2011-11-08  Juergen Knoedlseder  <knodlseder@cesr.fr>
+2012-04-03  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.5.0 released
         ========================
@@ -9,8 +9,11 @@
         Comply to CTA event list format v1.0.0
         Implement XML protocol for observation loading
         Add support for CTA 1DC response format
+        Add GCTAResponseTable class for response file handling
         Add GCTAModelRadialPolynom model
         Add GCTAModelRadialProfile model
+        Add GModelSpectralNodes model
+        Correct Npred integration in GCTAModelRadialAcceptance
 
 2011-10-12  Juergen Knoedlseder  <knodlseder@cesr.fr>
 

@@ -2,13 +2,14 @@ New Features and Important Changes in GammaLib 00-05-00
 
 Author(s) : Juergen Knoedlseder
 
-November, 8th, 2011
+April, 3rd, 2012
 
 
 1. Introduction
 ---------------
 This document briefly summarizes module by module the most important
 changes made since the last release of GammaLib.
+
 
 2. Configuration
 -----------------
@@ -23,25 +24,35 @@ The gammalib Python extension has been split into modules to reduce the
 memory requirements during compilation and to increase compilation
 speed. 
 
+
 3. Application module
 ---------------------
 None
+
 
 4. FITS I/O Interface
 ---------------------
 None
 
+
 5. Linear algebra module
 ------------------------
 None
 
+
 6. Model module
 ---------------
-None
+Added GModelSpectralNodes model which allows fitting a piecewise power
+law model to the data. The piecewise power law is defined by a number
+of nodes (at least 2), and the intensity of each node can be adjusted
+by the fit (the energy can also be fitted, yet no analytical gradient
+is implemented for this).
+
 
 7. Numerics module
 ------------------
 None
+
 
 8. Observation module
 ---------------------
@@ -49,37 +60,59 @@ Implemented an XML protocol that describes observations. This allows
 for complex combinations of observations in multi-mission analyses
 or for collecting sets of observations, such as runs or exposures.
 
+
 9. Optimization module
 ----------------------
 None
+
 
 10. Sky module
 --------------
 None
 
+
 11. Support module
 ------------------
 None
+
 
 12. XML module
 --------------
 None
 
+
 13. Multi-wavelength interface
 ------------------------------
 None
+
 
 14. Fermi-LAT interface
 ----------------------
 None
 
+
 15. CTA interface
 -----------------
 Comply to CTA event list format v1.0.0.
 
-Add support for 1DC response files.
+Add support for 1DC response files. For this purpose, the class
+GCTAResponseTable was implemented to read arbitrary response tables
+in single-row vector column format. GCTAResponse was modified to read
+PSF response tables implementing the energy and offset angle dependencies
+and using a 3-component Gaussian.
 
-Add GCTAModelRadialPolynom class to model the radial acceptance using a polynomial.
+Add GCTAModelRadialPolynom class to model the radial acceptance using
+a polynomial.
 
-Add GCTAModelRadialProfile class to model the radial acceptance using a 3 parameter profile (width, core, tail).
+Add GCTAModelRadialProfile class to model the radial acceptance using
+a 3 parameter profile (width, core, tail).
+
+Correct bug in Npred computation in GCTAModelRadialAcceptance that
+underestimated Npred for pointings that were offset from ROI centre.
+
+Implement observation reading and writing from and to XML files.
+This allows specifying the event list or counts map together with the
+relevant response information in a XML file. This is a placeholder for
+the implementation of the calibration database, and is mainly designed
+for 1DC.
 
