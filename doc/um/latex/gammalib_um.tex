@@ -2,7 +2,7 @@
 %                             GammaLib User Manual
 %
 % Version: 0.5
-% Last modification: 10 February 2012
+% Last modification: 9 March 2012
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -11,7 +11,7 @@
 \newcommand{\task}{\mbox{GammaLib}}
 \newcommand{\this}{\mbox{\tt \task}}
 \newcommand{\version}{\mbox{0.5.0}}
-\newcommand{\calendar}{\mbox{10 February 2012}}
+\newcommand{\calendar}{\mbox{9 March 2012}}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -708,9 +708,6 @@ This seems to be a bug (or a feature) of the clang compiler.
 
 
 
-
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % GammaLib modules (for experienced users)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -718,76 +715,249 @@ This seems to be a bug (or a feature) of the clang compiler.
 \section{\this\ modules}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{High-level analysis support}
+\subsection{What is in this section?}
+
+This section provides an overview over all \this\ modules and their C++ classes, with particular
+emphasis on the relation between the classes and their basic functionalities.
+It describes the purpose of all C++ classes and their primary usage, as well as their underlying
+arithmetics.
+However, we do not provide a detailed description of the interface and the inner workings of 
+each C++ class.
+This information is provided in the reference documentation, which can be found online
+at \url{http://gammalib.sourceforge.net/doxygen/}, or which can be installed locally on your
+machine (see section \ref{sec:doxygen}).
+
+Each \this\ module is presented in a dedicated section, following the overview shown in 
+Fig.~\ref{fig:structure} from the top-left to the bottom right.
+Instrument specific modules are described in a dedicated chapter (see chapter \ref{sec:inst}).
+All C++ classes of a module and their relations are illustrated using a UML diagram.
+
+To explain how to read such a diagram, we show an example for five fictive classes in
+Fig.~\ref{fig:umltemplate}.
+Our example shows a container class that contains an arbitrary number of elements which
+are realized by an abstract base class.
+Names of abstract base classes are indicated in {\it italic} to highlight the fact that such classes
+can not be instantiated.
+The possible number of elements that may be held by the container (in this case any number)
+is indicated by the cardinality {\tt 0..*} situated next to the abstract base class.
+Our example shows also two derived classes that inherit from the abstract base class.
+The second derived class is associated with a single element of some other class, indicated by 
+the cardinality {\tt 1} next to the class.
+This other class is not part of the actual module, and is thus shown in grey with a dotted boundary.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt app} - Creation of ftools applications}
-\label{sec:app}
+\begin{figure*}[!h]
+ \center
+ \epsfig{figure=uml-template.eps}
+ \caption{UML diagram illustrating the relation between five classes.}
+ \label{fig:umltemplate}
+\end{figure*}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt obs} - Observation handling}
+\subsection{Observation handling ({\tt obs})}
 \label{sec:obs}
 
-The primary user interface for the analysis of gamma-ray data is implemented by
-the container class {\tt GObservations}.
-{\tt GObservations} collects a list of gamma-ray observations which are the basic
-entity used
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Overview}
 
-The basic entity used for analysis of gamma-ray data is an observation.
-{\bf TBW: Define what an observation is: single instrument, specific response function}.
+Figure \ref{fig:umlobs} present an overview over the C++ classes of the {\tt obs} module and their
+relations.
 
-An observation is implemented by the abstract {\tt GObservation} class that provides
-the instrument independent interface to the data.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure*}[!h]
+ \center
+ \epsfig{figure=uml-obs.eps, width=16cm}
+ \caption{Relation of C++ classes in the {\tt obs} module.}
+ \label{fig:umlobs}
+\end{figure*}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-To combine several observation for an analysis, a list of {\tt GObservation} objects is
-gather by the container class {\tt GObservations}
+The central C++ class of the {\tt obs} module is the abstract base class {\tt GObservation} which
+defines the instrument-independent interface for a gamma-ray observation.
+A gamma-ray observation is defined for a single specific instrument, and describes a time period
+during which the instrument is in a given stable configuration that can be characterized by a 
+single specific response function.
+Each gamma-ray observation is composed of events, a response function and a pointing.
+
+Observations are collected in the C++ container class {\tt GObservations} which is composed
+of a list of {\tt GObservation} elements (the list is of arbitrary length; an empty list is a valid state 
+of the {\tt GObservations} class).
+The observation container is furthermore composed of a {\tt GModels} model container class
+that holds a list of models used to describe the event distributions of the observations 
+(see section \ref{sec:model}).
+The {\tt GObservations} class presents the central element of all scientific data analyses,
+as it combines all data and all models in a single entity.
+
+Instrument specific implementations of {\tt GObservation} objects are registered in the 
+C++ registry class {\tt GObservationRegistry} which statically collects one instance of each 
+instrument-specific observation class that is available in \this\ (see section \ref{sec:registry}
+for a general description of registry classes).
+
+The instrument response for a given observation is defined by the abstract base class 
+{\tt GResponse}.
+This class is composed of the C++ class {\tt GCaldb} which implements the calibration data
+base that is required to compute the response function for a given instrument and observation.
+{\tt GCaldb} supports the HEASARC CALDB format 
+(\url{http://heasarc.nasa.gov/docs/heasarc/caldb/}), but is sufficiently general to support also
+other formats (see section \ref{sec:caldb} to learn how to setup and to use a calibration database).
+
+The pointing for a given observation is defined by the abstract base class {\tt GPointing}.
+This class is composed of the C++ class {\tt GSkyDir} which implements a sky direction,
+which is a position on the celestial sphere ({\tt GSkyDir} returns the position in equatorial
+and galactic coordinates).
+Note that the pointing needs not to be fixed during the observation but may evolve with time.
+In this case, the sky direction returned by  {\tt GPointing} will explicitly depend on time.
+
+The events for a given observation are defined by the abstract base class {\tt GEvents}.
+This class is composed of the C++ classes {\tt GGti} and {\tt GEbounds}.
+{\tt GGti} implements so called {\em Good Time Intervals}, which defines the time period(s)
+during which the data were taken (see section \ref{sec:time}).
+{\tt GEbounds} implements so called {\em Energy Boundaries}, which define the energy
+intervals that are covered by the data (see section \ref{sec:energy}).
+
+{\tt GEvents} is also a container for the individual events, implemented by the abstract 
+{\tt GEvent} base class.
+\this\ distinguishes two types of events:
+event atoms, which are individual events, and
+event bins, which are collections of events with similar properties.
+Event atoms are implemented by the abstract base class {\tt GEventAtom}, while event bins
+are implemented by the abstract base class {\tt GEventBin}.
+Both classes derive from the abstract {\tt GEvent} base class.
+
+Each event type has it's own container class, which derives from the abstract {\tt GEvents}
+base class.
+Event atoms are collected by the abstract {\tt GEventList} base class, while event bins are
+collected by the abstract {\tt GEventCube} base class.
+The {\tt GEventList} class contains an instance of the abstract {\tt GRoi} base class
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Describing observations using XML}
+\label{sec:obsxml}
+
+TBW: Describe the observation XML format, and show how to handle observations using this
+format.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt model} - Model handling}
+\subsubsection{Handling the instrument response}
+\label{sec:response}
+
+TBW: Describe how the instrument response is handled and what the general interfaces are.
+Note that the deadtime correction is taken into account in the
+{\tt GResponse::irf}, 
+{\tt GResponse::npred}, and
+{\tt GResponse::mc} methods.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Setting up and using a calibration database}
+\label{sec:caldb}
+
+TBW: Describe how to setup and how to use a calibration database.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Times in \this}
+\label{sec:time}
+
+TBW: Describe how times are implemented in \this. This section should also handle GTIs.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Energies in \this}
+\label{sec:energy}
+
+TBW: Describe how energies are implemented in \this. Mention that the internal energy is MeV.
+This section should also handle EBOUNDS.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Regions of Interest}
+\label{sec:roi}
+
+TBW: Describe what a ROI is and why this is needed (unbinned analysis).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Model handling ({\tt model})}
 \label{sec:model}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt sky} - Sky maps and sky coordinates}
+\subsection{Sky maps and sky coordinates ({\tt sky})}
 \label{sec:sky}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Core services}
+\subsection{Creation of ftools applications ({\tt app})}
+\label{sec:app}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt numerics} - Numerical methods}
+\subsection{Numerical methods ({\tt numerics})}
 \label{sec:numerics}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt linalg} - Linear algebra}
+\subsection{Linear algebra ({\tt linalg})}
 \label{sec:linalg}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt opt} - Optimizers}
+\subsection{Optimizers ({\tt opt})}
 \label{sec:opt}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt support} - Support functions and classes}
+\subsection{Support functions and classes ({\tt support})}
 \label{sec:support}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Interfaces}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt fits} - FITS file interface}
+\subsection{FITS file interface ({\tt fits})}
 \label{sec:fits}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt xml} - XML file interface}
+\subsection{XML file interface ({\tt xml})}
 \label{sec:xml}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Instrument-specific interfaces (for experienced users)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\section{Instrument-specific interfaces}
+\label{sec:inst}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{CTA interface ({\tt cta})}
+\label{sec:cta}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{{\em Fermi}-LAT interface ({\tt cta})}
+\label{sec:lat}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Multi-wavelength interface ({\tt mwl})}
+\label{sec:mwl}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Under the hood (for experienced users)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\section{Under the hood}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Registry classes}
+\label{sec:registry}
+
+TBW: Describe what a registry class is.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
