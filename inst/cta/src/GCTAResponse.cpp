@@ -1651,7 +1651,7 @@ double GCTAResponse::psf_dummy(const double& delta, const GCTAPsfPars& pars) con
  * vector is composed of 3 parameters:
  * \f[{\tt SCALE} = \frac{1}{2 \pi \sigma^2}\f]
  * \f[{\tt SIGMA} = \sigma\f]
- * \f[{\tt WIDTH} = -\frac{1}{2 \sigma^2\f]
+ * \f[{\tt WIDTH} = -\frac{1}{2 \sigma^2}\f]
  * where
  * \f$\sigma\f$ is the Gaussian sigma in radians.
  *
@@ -1663,13 +1663,13 @@ double GCTAResponse::psf_dummy(const double& delta, const GCTAPsfPars& pars) con
  * \f[{\tt SIGMA\_2} = \sigma_2\f]
  * \f[{\tt AMPL\_3} = a_3\f]
  * \f[{\tt SIGMA\_3} = \sigma_3\f]
- * \f[{\tt WIDTH\_1} = -\frac{1}{2 \sigma_1^2\f]
- * \f[{\tt WIDTH\_2} = -\frac{1}{2 \sigma_2^2\f]
- * \f[{\tt WIDTH\_3} = -\frac{1}{2 \sigma_3^2\f]
+ * \f[{\tt WIDTH\_1} = -\frac{1}{2 \sigma_1^2}\f]
+ * \f[{\tt WIDTH\_2} = -\frac{1}{2 \sigma_2^2}\f]
+ * \f[{\tt WIDTH\_3} = -\frac{1}{2 \sigma_3^2}\f]
  * where
  * \f$\sigma_i\f$ are the Gaussian sigma values of the three components
  * in radians and
- * \f$\a_i\f$ are the relative amplitudes of the 2nd and 3rd Gaussians (the
+ * \f$a_i\f$ are the relative amplitudes of the 2nd and 3rd Gaussians (the
  * relative amplitude of the first Gaussian is by definition 1).
  *
  * @todo Convert sigma parameter to radians upon loading of the response
