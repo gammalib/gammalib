@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.cpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -100,7 +100,7 @@ GTime::GTime(const GTime& time)
  * reference day is specified as floating point value.
  ***************************************************************************/
 GTime::GTime(const double&      time,
-             const double&      mrdref,
+             const double&      mjdref,
              const std::string& timeunit,
              const std::string& timesys,
              const std::string& timeref)
@@ -109,7 +109,7 @@ GTime::GTime(const double&      time,
     init_members();
 
     // Set time
-    this->time(time, mrdref, timeunit, timesys, timeref);
+    this->time(time, mjdref, timeunit, timesys, timeref);
 
     // Return
     return;
@@ -131,7 +131,7 @@ GTime::GTime(const double&      time,
  ***************************************************************************/
 GTime::GTime(const double&      time,
              const int&         mjdrefi,
-             const double&      mrdreff,
+             const double&      mjdreff,
              const std::string& timeunit,
              const std::string& timesys,
              const std::string& timeref)
@@ -140,7 +140,7 @@ GTime::GTime(const double&      time,
     init_members();
 
     // Set time
-    this->time(time, mjdrefi, mrdreff, timeunit, timesys, timeref);
+    this->time(time, mjdrefi, mjdreff, timeunit, timesys, timeref);
 
     // Return
     return;
@@ -312,7 +312,7 @@ void GTime::met(const double& time)
  * @todo Implement interpretation of "timesys" and "timeref" parameters.
  ***************************************************************************/
 void GTime::time(const double&      time,
-                 const double&      mrdref,
+                 const double&      mjdref,
                  const std::string& timeunit,
                  const std::string& timesys,
                  const std::string& timeref)
@@ -333,7 +333,7 @@ void GTime::time(const double&      time,
 
     // Store time and reference
     m_time   = time_in_seconds;
-    m_mjdref = mrdref;
+    m_mjdref = mjdref;
 
     // Return
     return;
@@ -355,13 +355,13 @@ void GTime::time(const double&      time,
  ***************************************************************************/
 void GTime::time(const double&      time,
                  const int&         mjdrefi,
-                 const double&      mrdreff,
+                 const double&      mjdreff,
                  const std::string& timeunit,
                  const std::string& timesys,
                  const std::string& timeref)
 {
     // Compute reference MJD
-    double mjdref = double(mjdrefi) + mrdreff;
+    double mjdref = double(mjdrefi) + mjdreff;
     
     // Set time
     this->time(time, mjdref, timeunit, timesys, timeref);
@@ -390,16 +390,16 @@ double GTime::time(void) const
  *
  * Returns time in seconds in the specified MJD reference.
  ***************************************************************************/
-double GTime::time(const double& mrdref) const
+double GTime::time(const double& mjdref) const
 {
     // Retrieve time in seconds
     double time = m_time;
     
     // Add offset due to MJD differences
-    if (m_mjdref != mrdref) {
+    if (m_mjdref != mjdref) {
 
         // Compute time offset
-        double offset = (m_mjdref - mrdref) * sec_in_day;
+        double offset = (m_mjdref - mjdref) * sec_in_day;
         
         // Add offset
         time += offset;
@@ -419,10 +419,10 @@ double GTime::time(const double& mrdref) const
  *
  * Returns time in seconds in the specified MJD reference.
  ***************************************************************************/
-double GTime::time(const int& mjdrefi, const double& mrdreff) const
+double GTime::time(const int& mjdrefi, const double& mjdreff) const
 {
     // Compute reference MJD
-    double mjdref = double(mjdrefi) + mrdreff;
+    double mjdref = double(mjdrefi) + mjdreff;
     
     // Return time
     return (time(mjdref));
