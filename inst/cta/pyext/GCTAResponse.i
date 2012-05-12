@@ -93,6 +93,14 @@ public:
     std::string    arffile(void) const;
     std::string    rmffile(void) const;
     std::string    psffile(void) const;
+    double         arf_thetacut(void) const;
+    double         arf_scale(void) const;
+    void           arf_thetacut(const double& value);
+    void           arf_scale(const double& value);
+    void           load_arf(const std::string& filename);
+    void           load_psf(const std::string& filename);
+    void           read_arf(const GFitsTable* hdu);
+    void           read_psf(const GFitsTable* hdu);
 
     // Low-level response methods
     double aeff(const double& theta,
