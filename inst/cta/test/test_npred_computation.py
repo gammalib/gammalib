@@ -2,7 +2,7 @@
 # ==========================================================================
 # This script tests the Npred computation of the CTA response.
 #
-# Copyright (C) 2011 Jurgen Knodlseder
+# Copyright (C) 2011-2012 Jurgen Knodlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,14 +33,20 @@ except ImportError:
 	has_matplotlib = False
 
 
-# ======================================= #
+# ======================================== #
 # Compute NPsf as function of PSF position #
-# ======================================= #
-def npsf(caldb, irf, radius):
+# ======================================== #
+def npsf(caldb, irf, radius=1.0, energy=0.5):
 	"""
+	Compute NPsf as function of PSF position.
 	"""
-	# Setup CTA response
-	rsp = GCTAResponse(irf, caldb)
+	# Setup CTA response. If no calibration database is given we directly
+	# load the PSF from the file specified using the irf parameter.
+	if caldb == "":
+		rsp = GCTAResponse()
+		rsp.load_psf(irf)
+	else:
+		rsp = GCTAResponse(irf, caldb)
 	
 	# Setup ROI
 	instDir = GCTAInstDir()
@@ -51,16 +57,17 @@ def npsf(caldb, irf, radius):
 	
 	# Setup source energy
 	srcEng = GEnergy()
-	srcEng.TeV(0.1)
+	srcEng.TeV(energy)
 
 	# Setup dummy time and pointing
 	srcTime = GTime()
 	pnt     = GCTAPointing()
 	
 	# Compute PSF as function of offset
-	x = []
-	y = []
-	for i in range(150):
+	x    = []
+	y    = []
+	rmax = int(radius*150.0)
+	for i in range(rmax):
 		
 		# Compute offset angle
 		offset = i*radius/100.0
@@ -95,7 +102,8 @@ def npsf(caldb, irf, radius):
 		# Show plot
 		plt.show()
 
-		
+	# Return
+	return
 	
 
 #==========================#
@@ -103,10 +111,16 @@ def npsf(caldb, irf, radius):
 #==========================#
 if __name__ == '__main__':
 	"""
+	Test NPsf computation 
 	"""
 	# Set response information
 	caldb = "$GAMMALIB/share/caldb/cta"
 	irf   = "kb_E_50h_v3"
+	#file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023523_std_psf.fits"
+	#file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023526_std_psf.fits"
+	#file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023559_std_psf.fits"
+	#file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023592_std_psf.fits"
 	
 	# Compute NPsf
-	npsf(caldb, irf, 1.0)
+	npsf(caldb, irf, radius=1.0)
+	#npsf("", file, radius=1.0, energy=1.0)
