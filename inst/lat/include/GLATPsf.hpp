@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATPsf.hpp  -  Fermi LAT point spread function             *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATPsf.hpp
  * @brief Fermi LAT point spread function class definition.
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GLATPSF_HPP
@@ -122,6 +122,11 @@ private:
         double m_gcore;
         double m_gtail;
     };
+
+
+    // PSF version 3 methods and classes
+    void          read_psf_v3(const GFitsTable* hdu);
+    void          write_psf_v3(GFits& file) const;
     
     // Protected members
     int                 m_version;      //!< PSF version (starting from 1)
@@ -137,6 +142,14 @@ private:
     std::vector<double> m_sigma;        //!< PSF sigma parameter
     std::vector<double> m_gcore;        //!< PSF gcore parameter
     std::vector<double> m_gtail;        //!< PSF gtail parameter
+
+    // Additional PSF version 3 protected members
+    //std::vector<double> m_ncore;        //!< PSF ncore parameter
+    std::vector<double> m_ntail;        //!< PSF ntail parameter
+    std::vector<double> m_score;        //!< PSF score parameter
+    std::vector<double> m_stail;        //!< PSF stail parameter
+    //std::vector<double> m_gcore;        //!< PSF gcore parameter
+    //std::vector<double> m_gtail;        //!< PSF gtail parameter
 };
 
 #endif /* GLATPSF_HPP */

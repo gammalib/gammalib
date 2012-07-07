@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATPsf.cpp  -  Fermi LAT point spread function             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATPsf.cpp
  * @brief Fermi LAT point spread function class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -39,8 +39,10 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OP_PSF1           "GLATPsf::operator() (double&, double&, double&)"
-#define G_READ                             "GLATPsf::read(const GFits* file)"
-#define G_READ_PSF                           "GLATPsf::read_psf(GFitsTable*)"
+#define G_READ                                        "GLATPsf::read(GFits*)"
+#define G_WRITE                                      "GLATPsf::write(GFits&)"
+#define G_READ_PSF_V1                     "GLATPsf::read_psf_v1(GFitsTable*)"
+#define G_READ_PSF_V3                     "GLATPsf::read_psf_v3(GFitsTable*)"
 #define G_READ_SCALE                       "GLATPsf::read_scale(GFitsTable*)"
 
 /* __ Macros _____________________________________________________________ */
@@ -300,7 +302,7 @@ void GLATPsf::save(const std::string filename, bool clobber)
  *
  * Reads the version dependent point spread function from the FITS file.
  *
- * @todo Implement also PSF versions 2 and 3
+ * @todo Implement also PSF version 2.
  ***************************************************************************/
 void GLATPsf::read(const GFits& fits)
 {
@@ -309,13 +311,15 @@ void GLATPsf::read(const GFits& fits)
 
     // Get pointer to PSF parameters table
     GFitsTable* hdu_rpsf  = fits.table("RPSF");
-    if (hdu_rpsf == NULL)
+    if (hdu_rpsf == NULL) {
         throw GException::fits_hdu_not_found(G_READ, "RPSF");
+    }
 
     // Get pointer to PSF scaling parameters table
     GFitsTable* hdu_scale = fits.table("PSF_SCALING_PARAMS");
-    if (hdu_scale == NULL)
+    if (hdu_scale == NULL) {
         throw GException::fits_hdu_not_found(G_READ, "PSF_SCALING_PARAMS");
+    }
 
     // Determine PSF version
     try {
@@ -327,18 +331,24 @@ void GLATPsf::read(const GFits& fits)
 
     // Determine PSF type
     std::string detnam = strip_whitespace(toupper(hdu_rpsf->string("DETNAM")));
-    if (detnam == "FRONT")
+    if (detnam == "FRONT") {
         m_front = true;
-    else if (detnam == "BACK")
+    }
+    else if (detnam == "BACK") {
         m_front = false;
-    else
+    }
+    else {
         throw GLATException::invalid_response(G_READ, 
               "Unknown response type "+detnam+".");
+    }
 
     // Read point spread function
     switch (m_version) {
     case 1:
         read_psf_v1(hdu_rpsf);
+        break;
+    case 3:
+        read_psf_v3(hdu_rpsf);
         break;
     default:
         throw GLATException::invalid_response(G_READ, 
@@ -359,7 +369,7 @@ void GLATPsf::read(const GFits& fits)
  *
  * @param[in] fits FITS file.
  *
- * @todo Implement also PSF versions 2 and 3
+ * @todo Implement also PSF version 2.
  ***************************************************************************/
 void GLATPsf::write(GFits& fits) const
 {
@@ -368,8 +378,11 @@ void GLATPsf::write(GFits& fits) const
     case 1:
         write_psf_v1(fits);
         break;
+    case 3:
+        write_psf_v3(fits);
+        break;
     default:
-        throw GLATException::invalid_response(G_READ, 
+        throw GLATException::invalid_response(G_WRITE, 
               "Unsupported response function version "+str(m_version)+".");
         break;
     }
@@ -409,10 +422,12 @@ std::string GLATPsf::print(void) const
     result.append("=== GLATPsf ===");
     result.append("\n"+parformat("Version")+str(version()));
     result.append("\n"+parformat("Detector section"));
-    if (isfront())
+    if (isfront()) {
         result.append("front");
-    else
+    }
+    else {
         result.append("back");
+    }
     result.append("\n"+parformat("Energy scaling"));
     result.append("sqrt(");
     result.append("("+str(m_scale_par1)+"*(E/100)^"+str(m_scale_index)+")^2");
@@ -449,6 +464,11 @@ void GLATPsf::init_members(void)
     m_gcore.clear();
     m_gtail.clear();
 
+    // Initialise additional PSF version 3 members
+    m_ntail.clear();
+    m_score.clear();
+    m_stail.clear();
+    
     // Return
     return;
 }
@@ -475,6 +495,11 @@ void GLATPsf::copy_members(const GLATPsf& psf)
     m_sigma       = psf.m_sigma;
     m_gcore       = psf.m_gcore;
     m_gtail       = psf.m_gtail;
+
+    // Copy additional PSF version 3 members
+    m_ntail       = psf.m_ntail;
+    m_score       = psf.m_score;
+    m_stail       = psf.m_stail;
 
     // Return
     return;
@@ -570,8 +595,8 @@ void GLATPsf::write_scale(GFits& file) const
 double GLATPsf::scale_factor(const double& energy) const
 {
     // Compute scale factor
-    double f1       = m_scale_par1 * pow(0.01*energy, m_scale_index);
-    double scale    = sqrt(f1*f1 + m_scale_par2*m_scale_par2);
+    double f1    = m_scale_par1 * pow(0.01*energy, m_scale_index);
+    double scale = sqrt(f1*f1 + m_scale_par2*m_scale_par2);
 
     // Return scale factor
     return scale;
@@ -591,6 +616,10 @@ double GLATPsf::scale_factor(const double& energy) const
  *
  * @exception GLATException::inconsistent_response
  *            Inconsistent response table encountered
+ *
+ * Reads point spread function information from FITS HDU. In addition to the
+ * energy and costheta binning information, 4 columns are expected:
+ * NCORE, SIGMA, GCORE, and GTAIL.
  ***************************************************************************/
 void GLATPsf::read_psf_v1(const GFitsTable* hdu)
 {
@@ -623,18 +652,22 @@ void GLATPsf::read_psf_v1(const GFitsTable* hdu)
         const GFitsTableCol* gtail = &(*hdu)["GTAIL"];
 
         // Check consistency of columns
-        if (ncore->number() != size)
-            throw GLATException::inconsistent_response(G_READ_PSF,
+        if (ncore->number() != size) {
+            throw GLATException::inconsistent_response(G_READ_PSF_V1,
                                                        ncore->number(), size);
-        if (sigma->number() != size)
-            throw GLATException::inconsistent_response(G_READ_PSF,
+        }
+        if (sigma->number() != size) {
+            throw GLATException::inconsistent_response(G_READ_PSF_V1,
                                                        sigma->number(), size);
-        if (gcore->number() != size)
-            throw GLATException::inconsistent_response(G_READ_PSF,
+        }
+        if (gcore->number() != size) {
+            throw GLATException::inconsistent_response(G_READ_PSF_V1,
                                                        gcore->number(), size);
-        if (gtail->number() != size)
-            throw GLATException::inconsistent_response(G_READ_PSF,
+        }
+        if (gtail->number() != size) {
+            throw GLATException::inconsistent_response(G_READ_PSF_V1,
                                                        gtail->number(), size);
+        }
 
         // Copy data
         for (int i = 0; i < size; ++i) {
@@ -829,6 +862,164 @@ double GLATPsf::base_int_v1(const double& u, const double& gamma)
 
     // Return integral
     return integral;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                             PSF Version 3                               =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Read point spread function from FITS table (version 3)
+ *
+ * @param[in] hdu FITS table pointer.
+ *
+ * @exception GLATException::inconsistent_response
+ *            Inconsistent response table encountered
+ *
+ * Reads point spread function information from FITS HDU. In addition to the
+ * energy and costheta binning information, 6 columns are expected:
+ * NCORE, NTAIL, SCORE, STAIL, GCORE, and GTAIL.
+ ***************************************************************************/
+void GLATPsf::read_psf_v3(const GFitsTable* hdu)
+{
+    // Clear arrays
+    m_ncore.clear();
+    m_ntail.clear();
+    m_score.clear();
+    m_stail.clear();
+    m_gcore.clear();
+    m_gtail.clear();
+
+    // Get energy and cos theta binning
+    m_rpsf_bins.read(hdu);
+
+    // Set minimum cos(theta)
+    m_min_ctheta = m_rpsf_bins.costheta_lo(0);
+
+    // Continue only if there are bins
+    int size = m_rpsf_bins.size();
+    if (size > 0) {
+
+        // Allocate arrays
+        m_ncore.reserve(size);
+        m_ntail.reserve(size);
+        m_score.reserve(size);
+        m_stail.reserve(size);
+        m_gcore.reserve(size);
+        m_gtail.reserve(size);
+
+        // Get pointer to columns
+        const GFitsTableCol* ncore = &(*hdu)["NCORE"];
+        const GFitsTableCol* ntail = &(*hdu)["NTAIL"];
+        const GFitsTableCol* score = &(*hdu)["SCORE"];
+        const GFitsTableCol* stail = &(*hdu)["STAIL"];
+        const GFitsTableCol* gcore = &(*hdu)["GCORE"];
+        const GFitsTableCol* gtail = &(*hdu)["GTAIL"];
+
+        // Check consistency of columns
+        if (ncore->number() != size) {
+            throw GLATException::inconsistent_response(G_READ_PSF_V3,
+                                                       ncore->number(), size);
+        }
+        if (ntail->number() != size) {
+            throw GLATException::inconsistent_response(G_READ_PSF_V3,
+                                                       ntail->number(), size);
+        }
+        if (score->number() != size) {
+            throw GLATException::inconsistent_response(G_READ_PSF_V3,
+                                                       score->number(), size);
+        }
+        if (stail->number() != size) {
+            throw GLATException::inconsistent_response(G_READ_PSF_V3,
+                                                       stail->number(), size);
+        }
+        if (gcore->number() != size) {
+            throw GLATException::inconsistent_response(G_READ_PSF_V3,
+                                                       gcore->number(), size);
+        }
+        if (gtail->number() != size) {
+            throw GLATException::inconsistent_response(G_READ_PSF_V3,
+                                                       gtail->number(), size);
+        }
+
+        // Copy data
+        for (int i = 0; i < size; ++i) {
+            m_ncore.push_back(ncore->real(0,i));
+            m_ntail.push_back(ntail->real(0,i));
+            m_score.push_back(score->real(0,i));
+            m_stail.push_back(stail->real(0,i));
+            m_gcore.push_back(gcore->real(0,i));
+            m_gtail.push_back(gtail->real(0,i));
+        }
+
+    } // endif: there were bins
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write point spread function into FITS file (version 3)
+ *
+ * @param[in] file FITS file.
+ *
+ * This method does not write anything if the instance is empty.
+ ***************************************************************************/
+void GLATPsf::write_psf_v3(GFits& file) const
+{
+    // Continue only if there are bins
+    int size = m_rpsf_bins.size();
+    if (size > 0) {
+
+        // Create new binary table
+        GFitsBinTable* hdu_rpsf = new GFitsBinTable;
+
+        // Set table attributes
+        hdu_rpsf->extname("RPSF");
+
+        // Write boundaries into table
+        m_rpsf_bins.write(hdu_rpsf);
+
+        // Allocate floating point vector columns
+        GFitsTableFloatCol col_ncore = GFitsTableFloatCol("NCORE",  1, size);
+        GFitsTableFloatCol col_ntail = GFitsTableFloatCol("NTAIL",  1, size);
+        GFitsTableFloatCol col_score = GFitsTableFloatCol("SCORE",  1, size);
+        GFitsTableFloatCol col_stail = GFitsTableFloatCol("STAIL",  1, size);
+        GFitsTableFloatCol col_gcore = GFitsTableFloatCol("GCORE",  1, size);
+        GFitsTableFloatCol col_gtail = GFitsTableFloatCol("GTAIL",  1, size);
+
+        // Fill columns
+        for (int i = 0; i < size; ++i) {
+            col_ncore(0,i) = m_ncore[i];
+            col_ntail(0,i) = m_ntail[i];
+            col_score(0,i) = m_score[i];
+            col_stail(0,i) = m_stail[i];
+            col_gcore(0,i) = m_gcore[i];
+            col_gtail(0,i) = m_gtail[i];
+        }
+
+        // Append columns to table
+        hdu_rpsf->append_column(col_ncore);
+        hdu_rpsf->append_column(col_ntail);
+        hdu_rpsf->append_column(col_score);
+        hdu_rpsf->append_column(col_stail);
+        hdu_rpsf->append_column(col_gcore);
+        hdu_rpsf->append_column(col_gtail);
+
+        // Append HDU to FITS file
+        file.append(*hdu_rpsf);
+
+        // Free binary table
+        delete hdu_rpsf;
+
+    } // endif: there were data to write
+
+    // Return
+    return;
 }
 
 
