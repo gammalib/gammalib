@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GLATPsf.hpp  -  Fermi LAT point spread function             *
+ *              GLATPsf.i  -  Fermi/LAT point spread function              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,48 +19,23 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GLATPsf.hpp
- * @brief Fermi LAT point spread function class definition
+ * @file GLATPsf.i
+ * @brief Fermi/LAT point spread function class definition
  * @author J. Knoedlseder
  */
-
-#ifndef GLATPSF_HPP
-#define GLATPSF_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include <string>
-#include <iostream>
-#include "GLog.hpp"
-#include "GLATPsfBase.hpp"
-#include "GLATInstDir.hpp"
-#include "GLATPointing.hpp"
-#include "GFits.hpp"
-#include "GFitsTable.hpp"
-#include "GSkyDir.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GLATPsf.hpp"
+#include "GTools.hpp"
+%}
 
 
 /***********************************************************************//**
  * @class GLATPsf
  *
- * @brief Interface for the Fermi LAT point spread function
- *
- * This class provides the interface to the Fermi LAT point spread function
- * (PSF). An instance of the class holds the PSF for a specific detector
- * section (front or back). The class handles different PSF versions by
- * holding a pointer to the versioned PSF, which is defined by the abstract
- * base class GLATPsfBase. On loading (or reading) of the PSF information
- * from the FITS file, the appropriate versioned PSF will be allocated.
- *
- * @todo Implement Phi dependence
+ * @brief Interface for the Fermi/LAT point spread function
  ***************************************************************************/
 class GLATPsf {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATPsf& psf);
-    friend GLog&         operator<< (GLog& log, const GLATPsf& psf);
-
 public:
     // Constructors and destructors
     GLATPsf(void);
@@ -69,12 +44,11 @@ public:
     virtual ~GLATPsf(void);
 
     // Operators
-    GLATPsf& operator= (const GLATPsf& psf);
-    double   operator() (const double& offset, const double& logE,
-                         const double& ctheta);
-    double   operator() (const GLATInstDir& obsDir, const GSkyDir& srcDir,
-                         const GEnergy& srcEng, const GTime& srcTime,
-                         const GLATPointing& pnt);
+    double operator() (const double& offset, const double& logE,
+                       const double& ctheta);
+    double operator() (const GLATInstDir& obsDir, const GSkyDir& srcDir,
+                       const GEnergy& srcEng, const GTime& srcTime,
+                       const GLATPointing& pnt);
 
     // Methods
     void         clear(void);
@@ -92,16 +66,17 @@ public:
     bool         isfront(void) const;
     bool         isback(void) const;
     int          version(void) const;
-    std::string  print(void) const;
-
-private:
-    // Methods
-    void         init_members(void);
-    void         copy_members(const GLATPsf& psf);
-    void         free_members(void);
-    
-    // Members
-    GLATPsfBase* m_psf;   //!< Pointer to versioned point spread function
 };
 
-#endif /* GLATPSF_HPP */
+
+/***********************************************************************//**
+ * @brief GLATPsf class extension
+ ***************************************************************************/
+%extend GLATPsf {
+    char *__str__() {
+        return tochar(self->print());
+    }
+    GLATPsf copy() {
+        return (*self);
+    }
+};

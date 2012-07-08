@@ -16,6 +16,9 @@ sources = src/GLATObservation.cpp \
           src/GLATResponseTable.cpp \
           src/GLATAeff.cpp \
           src/GLATPsf.cpp \
+          src/GLATPsfBase.cpp \
+          src/GLATPsfV1.cpp \
+          src/GLATPsfV3.cpp \
           src/GLATEdisp.cpp \
           src/GLATMeanPsf.cpp \
           src/GLATInstDir.cpp \
@@ -36,6 +39,9 @@ pkginclude_HEADERS = include/GLATLib.hpp \
                      include/GLATResponseTable.hpp \
                      include/GLATAeff.hpp \
                      include/GLATPsf.hpp \
+                     include/GLATPsfBase.hpp \
+                     include/GLATPsfV1.hpp \
+                     include/GLATPsfV3.hpp \
                      include/GLATEdisp.hpp \
                      include/GLATMeanPsf.hpp \
                      include/GLATInstDir.hpp \

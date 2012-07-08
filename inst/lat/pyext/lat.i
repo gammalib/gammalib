@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  lat - Fermi/LAT support python bindings                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,7 @@
 %include "GLATEventCube.i"
 %include "GLATEventBin.i"
 %include "GLATResponse.i"
+%include "GLATPsf.i"
 %include "GLATInstDir.i"
 %include "GLATRoi.i"
 %include "GLATLtCube.i"
