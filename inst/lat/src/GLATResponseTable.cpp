@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GLATResponseTable.cpp  -  Fermi LAT Response table class        *
+ *         GLATResponseTable.cpp  -  Fermi/LAT Response table class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATResponseTable.cpp
- * @brief Fermi LAT response table class implementation
- * @author J. Knodlseder
+ * @brief Fermi/LAT response table class implementation
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -216,18 +216,21 @@ void GLATResponseTable::read(const GFitsTable* hdu)
     // Set energy nodes (log10 of energy)
     if (m_energy_num > 0) {
         double *logE = new double[m_energy_num];
-        for (int i = 0; i < m_energy_num; ++i)
+        for (int i = 0; i < m_energy_num; ++i) {
             logE[i] = 0.5 * (log10(m_energy_lo[i]) + log10(m_energy_hi[i]));
 //ST method logE[i] = log10(sqrt(m_energy_lo[i]*m_energy_hi[i]));
-        m_energy.nodes(m_energy_num, logE);
+            m_energy.push_back(std::pow(10.0, logE[i]));
+        }
+        m_logE.nodes(m_energy_num, logE);
         delete [] logE;
     }
 
     // Set cos theta nodes
     if (m_ctheta_num > 0) {
         double *ctheta = new double[m_ctheta_num];
-        for (int i = 0; i < m_ctheta_num; ++i)
+        for (int i = 0; i < m_ctheta_num; ++i) {
             ctheta[i] = 0.5 * (m_ctheta_lo[i] + m_ctheta_hi[i]);
+        }
         m_ctheta.nodes(m_ctheta_num, ctheta);
         delete [] ctheta;
     }
@@ -311,6 +314,10 @@ int GLATResponseTable::index(const int& ie, const int& ic) const
  * The mean energy is actually computed from the logarithmic average of 
  * lower and upper boundaries:
  * \f$E=10^{0.5 \times (\log{E_{\rm min}} + \log{E_{\rm max}})}\f$
+ * Note that this energy is stored in the m_energy array, hence to convert
+ * to MeV we simply have to the it to the power of 10.
+ *
+ * @todo Store also linear energies to avoid conversion.
  ***************************************************************************/
 double GLATResponseTable::energy(const int& ie) const
 {
@@ -321,35 +328,31 @@ double GLATResponseTable::energy(const int& ie) const
     #endif
 
     // Determine mean energy of bin
-    double mean   = 0.5 * (log10(m_energy_lo[ie]) + log10(m_energy_hi[ie]));
-    double energy = pow(10.0, mean);
+    //double mean   = 0.5 * (log10(m_energy_lo[ie]) + log10(m_energy_hi[ie]));
+    //double mean   = m_logE[ie];
+    //double energy = pow(10.0, mean);
 
     // Return mean energy
-    return energy;
+    return (m_energy[ie]);
 }
 
 
 /***********************************************************************//**
- * @brief Perform bi-linear interpolation of 2D array
+ * @brief Set indices and weighting for bi-linear interpolation of 2D array
  *
  * @param[in] logE Base 10 logarithm of the energy (MeV).
  * @param[in] ctheta Cosine of zenith angle.
- * @param[in] array Array to be interpolated.
  *
  * Bi-linear interpolation is performed in log10 of energy and in cos theta.
- * The array is stored in a std::vector object with the logE axis varying
- * more rapidely.
  ***************************************************************************/
-double GLATResponseTable::interpolate(const double&              logE,
-                                      const double&              ctheta,
-                                      const std::vector<double>& array)
+void GLATResponseTable::set(const double& logE, const double& ctheta)
 {
     // Flag no change of values
     bool change = false;
 
     // Set energy interpolation
     if (logE != m_last_energy) {
-        m_energy.set_value(logE);
+        m_logE.set_value(logE);
         m_last_energy = logE;
         change        = true;
     }
@@ -368,18 +371,41 @@ double GLATResponseTable::interpolate(const double&              logE,
         // Set array indices for bi-linear interpolation
         int inx_ctheta_left  = m_ctheta.inx_left()  * m_energy_num;
         int inx_ctheta_right = m_ctheta.inx_right() * m_energy_num;
-        m_inx1 = m_energy.inx_left()  + inx_ctheta_left;
-        m_inx2 = m_energy.inx_left()  + inx_ctheta_right;
-        m_inx3 = m_energy.inx_right() + inx_ctheta_left;
-        m_inx4 = m_energy.inx_right() + inx_ctheta_right;
+        m_inx1 = m_logE.inx_left()  + inx_ctheta_left;
+        m_inx2 = m_logE.inx_left()  + inx_ctheta_right;
+        m_inx3 = m_logE.inx_right() + inx_ctheta_left;
+        m_inx4 = m_logE.inx_right() + inx_ctheta_right;
 
         // Set weighting factors for bi-linear interpolation
-        m_wgt1 = m_energy.wgt_left()  * m_ctheta.wgt_left();
-        m_wgt2 = m_energy.wgt_left()  * m_ctheta.wgt_right();
-        m_wgt3 = m_energy.wgt_right() * m_ctheta.wgt_left();
-        m_wgt4 = m_energy.wgt_right() * m_ctheta.wgt_right();
+        m_wgt1 = m_logE.wgt_left()  * m_ctheta.wgt_left();
+        m_wgt2 = m_logE.wgt_left()  * m_ctheta.wgt_right();
+        m_wgt3 = m_logE.wgt_right() * m_ctheta.wgt_left();
+        m_wgt4 = m_logE.wgt_right() * m_ctheta.wgt_right();
 
     } // endif: logE or ctheta changed
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Perform bi-linear interpolation of 2D array
+ *
+ * @param[in] logE Base 10 logarithm of the energy (MeV).
+ * @param[in] ctheta Cosine of zenith angle.
+ * @param[in] array Array to be interpolated.
+ *
+ * Bi-linear interpolation is performed in log10 of energy and in cos theta.
+ * The array is stored in a std::vector object with the logE axis varying
+ * more rapidely.
+ ***************************************************************************/
+double GLATResponseTable::interpolate(const double&              logE,
+                                      const double&              ctheta,
+                                      const std::vector<double>& array)
+{
+    // Set interpolation indices and weights
+    set(logE, ctheta);
 
     // Perform bi-linear interpolation
     double value = m_wgt1 * array[m_inx1] +
@@ -410,42 +436,8 @@ double GLATResponseTable::interpolate(const double&              logE,
                                       const int&                 offset,
                                       const int&                 size)
 {
-    // Flag no change of values
-    bool change = false;
-
-    // Set energy interpolation
-    if (logE != m_last_energy) {
-        m_energy.set_value(logE);
-        m_last_energy = logE;
-        change        = true;
-    }
-
-    // Set cos(theta) interpolation
-    if (ctheta != m_last_ctheta) {
-        m_ctheta.set_value(ctheta);
-        m_last_ctheta = ctheta;
-        change        = true;
-    }
-
-    // If change occured then update interpolation indices and weighting
-    // factors
-    if (change) {
-
-        // Set array indices for bi-linear interpolation
-        int inx_ctheta_left  = m_ctheta.inx_left()  * m_energy_num;
-        int inx_ctheta_right = m_ctheta.inx_right() * m_energy_num;
-        m_inx1 = m_energy.inx_left()  + inx_ctheta_left;
-        m_inx2 = m_energy.inx_left()  + inx_ctheta_right;
-        m_inx3 = m_energy.inx_right() + inx_ctheta_left;
-        m_inx4 = m_energy.inx_right() + inx_ctheta_right;
-
-        // Set weighting factors for bi-linear interpolation
-        m_wgt1 = m_energy.wgt_left()  * m_ctheta.wgt_left();
-        m_wgt2 = m_energy.wgt_left()  * m_ctheta.wgt_right();
-        m_wgt3 = m_energy.wgt_right() * m_ctheta.wgt_left();
-        m_wgt4 = m_energy.wgt_right() * m_ctheta.wgt_right();
-
-    } // endif: logE or ctheta changed
+    // Set interpolation indices and weights
+    set(logE, ctheta);
 
     // Perform bi-linear interpolation
     double value = m_wgt1 * array[m_inx1*size+offset] +
@@ -543,6 +535,63 @@ double GLATResponseTable::costheta_hi(const int& inx) const
 
 
 /***********************************************************************//**
+ * @brief Return indices of 4 corners used for interpolation
+ ***************************************************************************/
+std::vector<int> GLATResponseTable::indices(void) const
+{
+    // Define vector
+    std::vector<int> incides;
+
+    // Push indices on vector
+    incides.push_back(m_inx1);
+    incides.push_back(m_inx2);
+    incides.push_back(m_inx3);
+    incides.push_back(m_inx4);
+
+    // Return vector
+    return incides;
+}
+
+
+/***********************************************************************//**
+ * @brief Return energies of 4 corners used for interpolation
+ ***************************************************************************/
+std::vector<double> GLATResponseTable::energies(void) const
+{
+    // Define vector
+    std::vector<double> energies;
+
+    // Push energies on vector
+    energies.push_back(m_energy[m_logE.inx_left()]);
+    energies.push_back(m_energy[m_logE.inx_left()]);
+    energies.push_back(m_energy[m_logE.inx_right()]);
+    energies.push_back(m_energy[m_logE.inx_right()]);
+
+    // Return vector
+    return energies;
+}
+
+
+/***********************************************************************//**
+ * @brief Return weights of 4 corners used for interpolation
+ ***************************************************************************/
+std::vector<double> GLATResponseTable::weights(void) const
+{
+    // Define vector
+    std::vector<double> weights;
+
+    // Push indices on vector
+    weights.push_back(m_wgt1);
+    weights.push_back(m_wgt2);
+    weights.push_back(m_wgt3);
+    weights.push_back(m_wgt4);
+
+    // Return vector
+    return weights;
+}
+
+
+/***********************************************************************//**
  * @brief Print response table information
  ***************************************************************************/
 std::string GLATResponseTable::print(void) const
@@ -574,6 +623,9 @@ void GLATResponseTable::init_members(void)
     // Initialise members
     m_energy_num  = 0;
     m_ctheta_num  = 0;
+    m_energy.clear();
+    m_logE.clear();
+    m_ctheta.clear();
     m_energy_lo   = NULL;
     m_energy_hi   = NULL;
     m_ctheta_lo   = NULL;
@@ -605,6 +657,7 @@ void GLATResponseTable::copy_members(const GLATResponseTable& table)
     m_energy_num  = table.m_energy_num;
     m_ctheta_num  = table.m_ctheta_num;
     m_energy      = table.m_energy;
+    m_logE        = table.m_logE;
     m_ctheta      = table.m_ctheta;
     m_last_energy = table.m_last_energy;
     m_last_ctheta = table.m_last_ctheta;

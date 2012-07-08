@@ -316,7 +316,7 @@ void GLATPsfV1::write(GFits& file) const
  *       simpler.
  ***************************************************************************/
 double GLATPsfV1::psf(const double& offset, const double& logE,
-                            const double& ctheta)
+                      const double& ctheta)
 {
     // Set constants
     const double ub = 10.0;
@@ -450,8 +450,8 @@ double GLATPsfV1::base_fct(const double& u, const double& gamma)
     // kluge because of sloppy programming in handoff response when
     // setting boundaries of fit parameters for the PSF.
     double base = (gamma == 1)
-                  ? (1.0 - 1.0/1.001) * pow(1.0 + u/1.001, -1.001)
-                  : (1.0 - 1.0/gamma) * pow(1.0 + u/gamma, -gamma);
+                  ? (1.0 - 1.0/1.001) * std::pow(1.0 + u/1.001, -1.001)
+                  : (1.0 - 1.0/gamma) * std::pow(1.0 + u/gamma, -gamma);
 
     // Return base function
     return base;
@@ -468,11 +468,13 @@ double GLATPsfV1::base_fct(const double& u, const double& gamma)
  * \f[1 - \left(1 + \frac{u}{\Gamma} \right)^{1-\Gamma}\f]
  * which is valid for small angles \f$u\f$. For larger angles a numerical
  * integration of the base function has to be performed.
+ *
+ * @todo Verify that 1+u/gamma is not negative
  ***************************************************************************/
 double GLATPsfV1::base_int(const double& u, const double& gamma)
 {
     // Compute integral of base function
-    double integral = 1.0 - pow(1.0 + u/gamma, 1.0 - gamma);
+    double integral = 1.0 - std::pow(1.0 + u/gamma, 1.0 - gamma);
 
     // Return integral
     return integral;

@@ -69,9 +69,13 @@ public:
 
 private:
     // Methods
-    void       init_members(void);
-    void       copy_members(const GLATPsfV3& psf);
-    void       free_members(void);
+    void          init_members(void);
+    void          copy_members(const GLATPsfV3& psf);
+    void          free_members(void);
+    static double base_fct(const double& u, const double& gamma);
+    static double base_int(const double& u, const double& gamma);
+    double        eval_psf(const double& offset, const double& energy,
+                           const int& index);
 
     // Protected members
     std::vector<double> m_ncore;        //!< PSF ncore parameter

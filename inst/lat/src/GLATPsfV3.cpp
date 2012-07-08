@@ -332,13 +332,41 @@ void GLATPsfV3::write(GFits& file) const
  * @param[in] logE Log10 of the true photon energy (MeV).
  * @param[in] ctheta Cosine of zenith angle.
  *
- * @todo Implement method.
+ * Evaluates point spread function by doing a bi-linear interpolation of
+ * PSF values obtained at the 4 corners that bound the specified energy and
+ * cos(theta) value.
  ***************************************************************************/
 double GLATPsfV3::psf(const double& offset, const double& logE,
-                            const double& ctheta)
+                      const double& ctheta)
 {
     // Initialise response
     double psf = 0.0;
+
+    // Compute point spread function
+    if (ctheta >= m_min_ctheta) {
+
+        // Set interpolation indices and weights
+        m_rpsf_bins.set(logE, ctheta);
+
+        // Recover information for interpolation
+        std::vector<int>    index  = m_rpsf_bins.indices();
+        std::vector<double> energy = m_rpsf_bins.energies();
+        std::vector<double> weight = m_rpsf_bins.weights();
+
+        // Compute offset angle in radians
+        double offset_rad = offset * deg2rad;
+        
+        // Compute PSF values for the four corners
+        double psf0 = eval_psf(offset_rad, energy[0], index[0]);
+        double psf1 = eval_psf(offset_rad, energy[1], index[1]);
+        double psf2 = eval_psf(offset_rad, energy[2], index[2]);
+        double psf3 = eval_psf(offset_rad, energy[3], index[3]);
+
+        // Perform bi-linear interpolation
+        psf = weight[0] * psf0 + weight[1] * psf1 +
+              weight[2] * psf2 + weight[3] * psf3;
+
+    } // endif: cos(theta) was in valid range
 
     // Return point spread function
     return psf;
@@ -396,6 +424,91 @@ void GLATPsfV3::free_members(void)
 {
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return point spread base function value
+ *
+ * @param[in] u Function argument.
+ * @param[in] gamma Index.
+ *
+ * The version 3 PSF base function is given by
+ * \f[\left(1 - \frac{1}{\Gamma} \right)
+ *    \left(1 + \frac{u}{\Gamma} \right)^{-\Gamma}\f]
+ ***************************************************************************/
+double GLATPsfV3::base_fct(const double& u, const double& gamma)
+{
+    // Get base function value. The special case of gamma==1 is a ugly
+    // kluge because of sloppy programming in handoff response when
+    // setting boundaries of fit parameters for the PSF.
+    double base = (gamma == 1)
+                  ? (1.0 - 1.0/1.001) * std::pow(1.0 + u/1.001, -1.001)
+                  : (1.0 - 1.0/gamma) * std::pow(1.0 + u/gamma, -gamma);
+
+    // Return base function
+    return base;
+}
+
+
+/***********************************************************************//**
+ * @brief Return approximation of point spread base function integral
+ *
+ * @param[in] u Function argument.
+ * @param[in] gamma Index.
+ *
+ * The version 3 PSF base function integral is approximated by
+ * \f[1 - \left(1 + \frac{u}{\Gamma} \right)^{1-\Gamma}\f]
+ * which is valid for small angles \f$u\f$. For larger angles a numerical
+ * integration of the base function has to be performed.
+ *
+ * @todo Verify that 1+u/gamma is not negative
+ ***************************************************************************/
+double GLATPsfV3::base_int(const double& u, const double& gamma)
+{
+    // Compute integral of base function
+    double integral = 1.0 - std::pow(1.0 + u/gamma, 1.0 - gamma);
+
+    // Return integral
+    return integral;
+}
+
+
+/***********************************************************************//**
+ * @brief Evaluate PSF for a specific set of parameters
+ *
+ * @param[in] offset Offset angle (radians).
+ * @param[in] energy Energy (MeV).
+ * @param[in] index Parameter array index.
+ *
+ * Evaluates PSF for a specific set of parameters. The parameter set is
+ * identified by the index.
+ ***************************************************************************/
+double GLATPsfV3::eval_psf(const double& offset, const double& energy,
+                           const int& index)
+{
+    // Get energy scaling
+    double scale = scale_factor(energy);
+
+    // Get parameters
+    double ncore(m_ncore[index]);
+    double ntail(m_ntail[index]);
+    double score(m_score[index] * scale);
+    double stail(m_stail[index] * scale);
+    double gcore(m_gcore[index]);
+    double gtail(m_gtail[index]);
+
+    // Compute argument
+    double rc = offset/score;
+    double uc = rc*rc/2.0;
+    double rt = offset/stail;
+    double ut = rt*rt/2.0;
+
+    // Evaluate PSF
+    double psf = ncore * (base_fct(uc, gcore) + ntail * base_fct(ut, gtail));
+    
+    // Return PSF
+    return psf;
 }
 
 
