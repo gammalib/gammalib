@@ -41,8 +41,10 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+//#define G_APPROXIMATE_PSF_INTEGRAL        //!< Use approximate PSF integral
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_CHECK_PSF_NORM                       //!< Check PSF normalization
 
 /* __ Constants __________________________________________________________ */
 
@@ -178,6 +180,10 @@ GLATPsfV3* GLATPsfV3::clone(void) const
  * Reads point spread function information from FITS HDU. In addition to the
  * energy and costheta binning information, 6 columns are expected:
  * NCORE, NTAIL, SCORE, STAIL, GCORE, and GTAIL.
+ *
+ * The method assures that NCORE is set properly for each energy and
+ * cos(theta) bin so that the integral over the PSF amount to unity. This
+ * normalization is done by the method normalize_psf.
  ***************************************************************************/
 void GLATPsfV3::read(const GFitsTable* hdu)
 {
@@ -250,6 +256,9 @@ void GLATPsfV3::read(const GFitsTable* hdu)
             m_gcore.push_back(gcore->real(0,i));
             m_gtail.push_back(gtail->real(0,i));
         }
+
+        // Normalize PSF for all parameters
+        normalize_psf();
 
     } // endif: there were bins
 
@@ -481,8 +490,10 @@ double GLATPsfV3::base_int(const double& u, const double& gamma)
  * @param[in] energy Energy (MeV).
  * @param[in] index Parameter array index.
  *
- * Evaluates PSF for a specific set of parameters. The parameter set is
- * identified by the index.
+ * Evaluates PSF as function of offset angle and energy for a specific set
+ * of PSF parameters. The parameter set that is used is specified by the
+ * index parameter. The energy parameter only serves to scale the score and
+ * stail parameters of the PSF.
  ***************************************************************************/
 double GLATPsfV3::eval_psf(const double& offset, const double& energy,
                            const int& index)
@@ -499,16 +510,154 @@ double GLATPsfV3::eval_psf(const double& offset, const double& energy,
     double gtail(m_gtail[index]);
 
     // Compute argument
-    double rc = offset/score;
-    double uc = rc*rc/2.0;
-    double rt = offset/stail;
-    double ut = rt*rt/2.0;
+    double rc = offset / score;
+    double uc = 0.5 * rc * rc;
+    double rt = offset / stail;
+    double ut = 0.5 * rt * rt;
 
     // Evaluate PSF
     double psf = ncore * (base_fct(uc, gcore) + ntail * base_fct(ut, gtail));
     
     // Return PSF
     return psf;
+}
+
+
+/***********************************************************************//**
+ * @brief Integrates PSF for a specific set of parameters
+ *
+ * @param[in] energy Energy (MeV).
+ * @param[in] index Parameter array index.
+ *
+ * Integrates PSF for a specific set of parameters.
+ *
+ * Compile option G_APPROXIMATE_PSF_INTEGRAL:
+ * If defined, a numerical PSF integral is only performed for energies
+ * < 120 MeV, while for larger energies the small angle approximation is
+ * used. In not defined, a numerical PSF integral is performed for all
+ * energies.
+ * This option is kept for comparison with the Fermi/LAT ScienceTools who
+ * select the integration method based on the true photon energy. As the
+ * normalization is only performed once upon loading of the PSF, CPU time
+ * is not really an issue here, and we can afford the more precise numerical
+ * integration. Note that the uncertainties of the approximation at energies
+ * near to 120 MeV reaches 0.1%.
+ *
+ * @todo Implement gcore and gtail checking
+ ***************************************************************************/
+double GLATPsfV3::integrate_psf(const double& energy, const int& index)
+{
+    // Initialise integral
+    double psf = 0.0;
+
+    // Get energy scaling
+    double scale = scale_factor(energy);
+
+    // Get parameters
+    double ncore(m_ncore[index]);
+    double ntail(m_ntail[index]);
+    double score(m_score[index] * scale);
+    double stail(m_stail[index] * scale);
+    double gcore(m_gcore[index]);
+    double gtail(m_gtail[index]);
+
+    // Make sure that gcore and gtail are not negative
+    //if (gcore < 0 || gtail < 0) {
+    //}
+
+    // Do we need an exact integral?
+    #if defined(G_APPROXIMATE_PSF_INTEGRAL)
+    if (energy < 120) {
+    #endif
+
+        // Allocate integrand
+        GLATPsfV3::base_integrand integrand(ncore, ntail, score, stail, gcore, gtail);
+
+        // Allocate integral
+        GIntegral integral(&integrand);
+
+        // Integrate radially from 0 to 90 degrees
+        psf = integral.romb(0.0, pihalf) * twopi;
+    
+    #if defined(G_APPROXIMATE_PSF_INTEGRAL)
+    } // endif: exact integral was performed
+
+    // No, so we use the small angle approximation
+    else {
+
+        // Compute arguments
+        double rc = pihalf / score;
+        double uc = 0.5 * rc * rc;
+        double sc = twopi * score * score;
+        double rt = pihalf / stail;
+        double ut = 0.5 * rt * rt;
+        double st = twopi * stail * stail;
+
+        // Evaluate PSF integral (from 0 to 90 degrees)
+        psf = ncore * (base_int(uc, gcore) * sc +
+                       base_int(ut, gtail) * st * ntail);
+    
+    }
+    #endif
+
+    // Return PSF integral
+    return psf;
+}
+
+
+/***********************************************************************//**
+ * @brief Normalize PSF for all parameters
+ *
+ * Makes sure that PSF is normalized for all parameters. We assure this by
+ * looping over all parameter nodes, integrating the PSF for each set of
+ * parameters, and dividing the NCORE parameter by the integral.
+ *
+ * Compile option G_CHECK_PSF_NORM:
+ * If defined, checks that the PSF is normalized correctly.
+ ***************************************************************************/
+void GLATPsfV3::normalize_psf(void)
+{
+    // Loop over all energy bins
+    for (int ie = 0; ie < m_rpsf_bins.nenergies(); ++ie) {
+
+        // Extract energy value (in MeV)
+        double energy = m_rpsf_bins.energy(ie);
+
+        // Loop over all cos(theta) bins
+        for (int ic = 0; ic < m_rpsf_bins.ncostheta(); ++ic) {
+
+            // Get parameter index
+            int index = m_rpsf_bins.index(ie, ic);
+
+            // Integrate PSF
+            double norm = integrate_psf(energy, index);
+
+            // Normalize PSF
+            m_ncore[index] /= norm;
+
+            // Compile option: check PSF normalization
+            #if defined(G_CHECK_PSF_NORM)
+            double scale = scale_factor(energy);
+            double ncore(m_ncore[index]);
+            double ntail(m_ntail[index]);
+            double score(m_score[index] * scale);
+            double stail(m_stail[index] * scale);
+            double gcore(m_gcore[index]);
+            double gtail(m_gtail[index]);
+            GLATPsfV3::base_integrand integrand(ncore, ntail, score, stail, gcore, gtail);
+            GIntegral integral(&integrand);
+            double sum = integral.romb(0.0, pihalf) * twopi;
+            std::cout << "Energy=" << energy;
+            std::cout << " cos(theta)=" << m_rpsf_bins.costheta_lo(ic);
+            std::cout << " error=" << sum-1.0 << std::endl;
+            #endif
+
+        } // endfor: looped over cos(theta)
+
+    } // endfor: looped over energies
+    
+    // Return
+    return;
 }
 
 

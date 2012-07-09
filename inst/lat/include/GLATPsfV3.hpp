@@ -76,7 +76,38 @@ private:
     static double base_int(const double& u, const double& gamma);
     double        eval_psf(const double& offset, const double& energy,
                            const int& index);
+    double        integrate_psf(const double& energy, const int& index);
+    void          normalize_psf(void);
 
+    // Integrand class. This class is used to perform the radial
+    // integration of the PSF to assure the proper normalization.
+    // Note that score and stail need to be scaled by energy.
+    class base_integrand : public GIntegrand {
+    public:
+        base_integrand(double ncore, double ntail,
+                       double score, double stail,
+                       double gcore, double gtail) :
+                       m_ncore(ncore), m_ntail(ntail),
+                       m_score(score), m_stail(stail),
+                       m_gcore(gcore), m_gtail(gtail) { }
+        double eval(double x) {
+            double rc = x / m_score;
+            double uc = 0.5 * rc * rc;
+            double rt = x / m_stail;
+            double ut = 0.5 * rt * rt;
+            double f = m_ncore * (base_fct(uc, m_gcore) + 
+                                  m_ntail * base_fct(ut, m_gtail));
+            return (f*sin(x));
+        }
+    private:
+        double m_ncore;
+        double m_ntail;
+        double m_score;
+        double m_stail;
+        double m_gcore;
+        double m_gtail;
+    };
+    
     // Protected members
     std::vector<double> m_ncore;        //!< PSF ncore parameter
     std::vector<double> m_ntail;        //!< PSF ntail parameter
