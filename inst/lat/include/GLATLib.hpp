@@ -47,7 +47,7 @@
 #include "GLATPsf.hpp"
 #include "GLATPsfBase.hpp"
 #include "GLATPsfV1.hpp"
-#include "GLATPsfV2.hpp"
+#include "GLATPsfV3.hpp"
 #include "GLATResponse.hpp"
 #include "GLATResponseTable.hpp"
 #include "GLATRoi.hpp"
