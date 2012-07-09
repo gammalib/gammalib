@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      test_LAT.cpp  -  test LAT classes                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,51 +54,75 @@ const std::string lat_model_xml = datadir+"/source_model1.xml";
 
 
 /***********************************************************************//**
- * @brief Test response handling.
+ * @brief Test one specific response
+ *
+ * Verifies the ability to load and to save Fermi/LAT response functions.
  ***************************************************************************/
-void test_response(void)
+void test_one_response(const std::string& irf)
 {
+    // Set FITS filename
+    std::string fitsfile = "test_rsp_" + irf + ".fits";
+    
     // Remove FITS file
-    system("rm -rf test_rsp.fits");
+    std::string cmd = "rm -rf " + fitsfile;
+    system(cmd.c_str());
 
-    // Write header
-    std::cout << "Test response: ";
-
-    // Try loading
+    // Try loading the response
     try {
         GLATResponse rsp;
         rsp.caldb(lat_caldb);
         std::cout << ".";
-        rsp.load(lat_irf+"::front");
+        rsp.load(irf+"::front");
         std::cout << ".";
-        rsp.load(lat_irf+"::back");
+        rsp.load(irf+"::back");
         std::cout << ".";
-        rsp.load(lat_irf);
+        rsp.load(irf);
 //std::cout << std::endl << rsp << std::endl;
         std::cout << ".";
     }
     catch (std::exception &e) {
         std::cout << std::endl
-                  << "TEST ERROR: Unable to load LAT response." << std::endl;
+                  << "TEST ERROR: Unable to load LAT response "
+                  << irf << "." << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
     std::cout << ".";
 
-    // Try saving
+    // Try saving the response
     try {
         GLATResponse rsp;
         rsp.caldb(lat_caldb);
-        rsp.load(lat_irf);
-        rsp.save("test_rsp.fits");
+        rsp.load(irf);
+        rsp.save(fitsfile);
     }
     catch (std::exception &e) {
         std::cout << std::endl
-                  << "TEST ERROR: Unable to save LAT response." << std::endl;
+                  << "TEST ERROR: Unable to save LAT response "
+                  << irf << "." << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
     std::cout << ".";
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test Fermi/LAT response handling
+ *
+ * Verifies all Fermi/LAT responses.
+ ***************************************************************************/
+void test_response(void)
+{
+    // Write header
+    std::cout << "Test response: ";
+
+    // Test various IRFs
+    test_one_response("P6_v3_diff");
+    test_one_response("P7SOURCE_V6");
 
     // Plot final test success
     std::cout << " ok." << std::endl;
