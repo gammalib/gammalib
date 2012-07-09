@@ -541,21 +541,28 @@ void GLATResponse::load(const std::string& rspname)
     }
     else if (array.size() == 2) {
         m_rspname = array[0];
-        if (strip_whitespace(tolower(array[1])) == "front")
+        if (strip_whitespace(tolower(array[1])) == "front") {
             m_hasfront = true;
-        else if (strip_whitespace(tolower(array[1])) == "back")
+        }
+        else if (strip_whitespace(tolower(array[1])) == "back") {
             m_hasback  = true;
-        else
+        }
+        else {
             throw GException::rsp_invalid_type(G_LOAD, array[1]);
+        }
     }
-    else
+    else {
         throw GException::rsp_invalid_type(G_LOAD, m_rspname);
+    }
+
+    // Set caldb access path
+    caldb += "/data/glast/lat/bcf/";
 
     // Load front IRF if requested
     if (m_hasfront) {
-        std::string aeffname  = m_caldb + "/aeff_"  + m_rspname + "_front.fits";
-        std::string psfname   = m_caldb + "/psf_"   + m_rspname + "_front.fits";
-        std::string edispname = m_caldb + "/edisp_" + m_rspname + "_front.fits";
+        std::string aeffname  = caldb + "ea/aeff_"  + m_rspname + "_front.fits";
+        std::string psfname   = caldb + "psf/psf_"   + m_rspname + "_front.fits";
+        std::string edispname = caldb + "edisp/edisp_" + m_rspname + "_front.fits";
         GLATAeff*  aeff  = new GLATAeff(aeffname);
         GLATPsf*   psf   = new GLATPsf(psfname);
         GLATEdisp* edisp = new GLATEdisp(edispname);
@@ -566,9 +573,9 @@ void GLATResponse::load(const std::string& rspname)
 
     // Load back IRF if requested
     if (m_hasback) {
-        std::string aeffname  = m_caldb + "/aeff_"  + m_rspname + "_back.fits";
-        std::string psfname   = m_caldb + "/psf_"   + m_rspname + "_back.fits";
-        std::string edispname = m_caldb + "/edisp_" + m_rspname + "_back.fits";
+        std::string aeffname  = caldb + "ea/aeff_"  + m_rspname + "_back.fits";
+        std::string psfname   = caldb + "psf/psf_"   + m_rspname + "_back.fits";
+        std::string edispname = caldb + "edisp/edisp_" + m_rspname + "_back.fits";
         GLATAeff*  aeff  = new GLATAeff(aeffname);
         GLATPsf*   psf   = new GLATPsf(psfname);
         GLATEdisp* edisp = new GLATEdisp(edispname);
