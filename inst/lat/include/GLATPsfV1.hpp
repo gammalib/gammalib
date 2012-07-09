@@ -72,7 +72,8 @@ private:
     static double base_int(const double& u, const double& gamma);
 
     // Integrand class. This class is used to perform the radial
-    // integration of the PSF to assure the proper normalization.
+    // integration of the PSF that assures the proper normalization
+    // of the PSF at low energies.
     class base_integrand : public GIntegrand {
     public:
         base_integrand(double ncore, double ntail, double sigma,
@@ -93,7 +94,7 @@ private:
         double m_gcore;
         double m_gtail;
     };
-    
+
     // Protected members
     std::vector<double> m_ncore;        //!< PSF ncore parameter
     std::vector<double> m_sigma;        //!< PSF sigma parameter
