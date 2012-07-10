@@ -12,32 +12,30 @@ Time range: 239557446.6 - 240162199.6
 Ontime: 479181.287 sec
 
 
-ScienceTools Results:
-<===> Crab:
-<===> Integral: 24.2366 +/- 1.49592
-<===> Index: -2.12469 +/- 0.047645
-<===> LowerLimit: 100
-<===> UpperLimit: 500000
-<===> TS value: 1288.84
-<===> Flux: 2.41072e-06 +/- 1.50572e-07 photons/cm^2/s
-<===> 
-<===> Extragal_diffuse:
-<===> Normalization: 2.28608 +/- 0.462238
-<===> Flux: 0.000472782 +/- 9.55616e-05 photons/cm^2/s
-<===> 
-<===> Galactic_diffuse:
-<===> Value: 0.861482 +/- 0.0652221
-<===> MapBase::readFitsFile: creating WcsMap2 object
-<===> Flux: 0.000415039 +/- 3.14203e-05 photons/cm^2/s
-<===> WARNING: Fit may be bad in range [100, 1258.93] (MeV)
-<===> WARNING: Fit may be bad in range [2511.89, 5011.87] (MeV)
-<===> 
-<===> 
-<===> Total number of observed counts: 2211
-<===> Total number of model events: 2211.03
-<===> 120  -10794.50987  2211.030385
-<===> 
-<===> -log(Likelihood): 10794.50987
+gtlike results:
+Crab:
+Integral: 24.2369 +/- 1.49572
+Index: -2.12467 +/- 0.0476363
+LowerLimit: 100
+UpperLimit: 500000
+TS value: 1300.37
+Flux: 2.41076e-06 +/- 1.50551e-07 photons/cm^2/s
+
+Extragal_diffuse:
+Normalization: 2.28565 +/- 0.462091
+Flux: 0.000472695 +/- 9.55313e-05 photons/cm^2/s
+
+Galactic_diffuse:
+Value: 0.861504 +/- 0.0652024
+Flux: 0.00041505 +/- 3.14108e-05 photons/cm^2/s
+
+WARNING: Fit may be bad in range [100, 1258.93] (MeV)
+WARNING: Fit may be bad in range [1995.26, 5011.87] (MeV)
+
+Total number of observed counts: 2211
+Total number of model events: 2211
+
+-log(Likelihood): 10794.50987
 
 
 GammaLib Results:
