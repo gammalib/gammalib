@@ -39,22 +39,30 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir       = "../inst/lat/test/data";
-const std::string lat_caldb     = "../inst/lat/caldb";
-const std::string lat_irf       = "P6_v3_diff";
-const std::string lat_ft1       = datadir+"/ft1.fits";
-const std::string lat_ft2       = datadir+"/ft2.fits";
-const std::string lat_cntmap    = datadir+"/cntmap.fits";
-const std::string lat_srcmap    = datadir+"/srcmap.fits";
-const std::string lat_expmap    = datadir+"/binned_expmap.fits";
-const std::string lat_ltcube    = datadir+"/ltcube.fits";
-const std::string lat_bin_xml   = datadir+"/obs_binned.xml";
-const std::string lat_unbin_xml = datadir+"/obs_unbinned.xml";
-const std::string lat_model_xml = datadir+"/source_model1.xml";
+const std::string lat_caldb = "../inst/lat/caldb";
+const std::string dirPass6  = "../inst/lat/test/data/p6v3";
+const std::string dirPass7  = "../inst/lat/test/data/p7v6";
+
+
+/***********************************************************************//**
+ * @brief Livetime cube functions
+ ***************************************************************************/
+double test_fct1(const double& ctheta)
+{
+    //std::cout << ctheta << " ";
+    return 1.0;
+}
+double test_fct2(const double& ctheta, const double& phi)
+{
+    //std::cout << "(" << ctheta << "," << phi << ")" << " ";
+    return 1.0;
+}
 
 
 /***********************************************************************//**
  * @brief Test one specific response
+ *
+ * @param[in] irf Instrument response function.
  *
  * Verifies the ability to load and to save Fermi/LAT response functions.
  ***************************************************************************/
@@ -77,7 +85,7 @@ void test_one_response(const std::string& irf)
         rsp.load(irf+"::back");
         std::cout << ".";
         rsp.load(irf);
-//std::cout << std::endl << rsp << std::endl;
+        //std::cout << std::endl << rsp << std::endl;
         std::cout << ".";
     }
     catch (std::exception &e) {
@@ -111,53 +119,18 @@ void test_one_response(const std::string& irf)
 
 
 /***********************************************************************//**
- * @brief Test Fermi/LAT response handling
+ * @brief Test livetime cube handling for a specific dataset
  *
- * Verifies all Fermi/LAT responses.
+ * @param[in] datadir Directory of test data.
+ *
+ * Verifies the ability to handle Fermi/LAT livetime cubes.
  ***************************************************************************/
-void test_response(void)
-{
-    // Write header
-    std::cout << "Test response: ";
-
-    // Test various IRFs
-    test_one_response("P6_v3_diff");
-    test_one_response("P7SOURCE_V6");
-
-    // Plot final test success
-    std::cout << " ok." << std::endl;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Livetime cube functions.
- ***************************************************************************/
-double test_fct1(const double& ctheta)
-{
-    //std::cout << ctheta << " ";
-    return 1.0;
-}
-double test_fct2(const double& ctheta, const double& phi)
-{
-    //std::cout << "(" << ctheta << "," << phi << ")" << " ";
-    return 1.0;
-}
-
-
-/***********************************************************************//**
- * @brief Test livetime cube handling.
- ***************************************************************************/
-void test_ltcube(void)
+void test_one_ltcube(const std::string& datadir, const double& reference)
 {
     // Set filenames
-    const std::string file1 = "test_lat_ltcube.fits";
-    const std::string file2 = "test_lat_ltcube_phi.fits";
-
-    // Write header
-    std::cout << "Test livetime cube: ";
+    std::string lat_ltcube = datadir+"/ltcube.fits";
+    std::string file1      = "test_lat_ltcube.fits";
+    std::string file2      = "test_lat_ltcube_phi.fits";
 
     // Load livetime cube
     try {
@@ -182,14 +155,13 @@ void test_ltcube(void)
         GSkyDir dir;
         GEnergy energy;
 
-        // Test cos theta integration operator. The total ontime of the dataset is
-        // 811432.0 sec, hence the efficiency is 42%. This seems reasonable as the
-        // test function returns 1 for half of the sky.
+        // Test cos theta integration operator.
         double sum = ltcube(dir, energy, test_fct1);
-        if (fabs(sum-339733.528629) > 0.001) {
+        if (fabs(sum-reference) > 0.001) {
             std::cout << std::endl
-                      << "TEST ERROR: Invalid livetime cube sum (expected 339733.5286,"
-                      << " encountered value " << sum
+                      << "TEST ERROR: Livetime cube sum "
+                      << sum << " is invalid, "
+                      << reference << " expected."
                       << std::endl;
             throw;
         }
@@ -212,14 +184,15 @@ void test_ltcube(void)
         GSkyDir dir;
         GEnergy energy;
 
-        // Test cos theta and phi integration operator. The sum differs from above
-        // since the actual test dataset does not cover the same time interval
+        // Test cos theta and phi integration operator. The sum differs from
+        // above since the actual test dataset does not cover the same time
+        // interval
         double sum = ltcube(dir, energy, test_fct2);
-//        if (fabs(sum-339334.6641) > 0.001) {
         if (fabs(sum-0.0) > 0.001) {
             std::cout << std::endl
-                      << "TEST ERROR: Invalid livetime cube sum (expected 339334.6641,"
-                      << " encountered value " << sum
+                      << "TEST ERROR: Livetime cube sum "
+                      << sum << " is invalid, "
+                      << 0.0 << " expected."
                       << std::endl;
             throw;
         }
@@ -289,35 +262,43 @@ void test_ltcube(void)
     }
     std::cout << ".";
 
-    // Plot final test success
-    std::cout << " ok." << std::endl;
-
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Test unbinned observation handling.
+ * @brief Test unbinned observation handling for a specific dataset
+ *
+ * @param[in] datadir Directory of test data.
+ *
+ * Verifies the ability to handle unbinned Fermi/LAT data.
  ***************************************************************************/
-void test_unbinned_obs(void)
+void test_one_unbinned_obs(const std::string& datadir)
 {
     // Set filenames
-    const std::string file1 = "test_lat_obs_unbinned.xml";
-
-    // Write header
-    std::cout << "Test unbinned observation handling: ";
+    std::string lat_ft1       = datadir+"/ft1.fits";
+    std::string lat_ft2       = datadir+"/ft2.fits";
+    std::string lat_unbin_xml = datadir+"/obs_unbinned.xml";
+    std::string file1         = "test_lat_obs_unbinned.xml";
 
     // Declare observations
     GObservations   obs;
     GLATObservation run;
+
+    // Determine number of events in FT1 file
+    GFits ft1(lat_ft1);
+    int nevents = ft1.table("EVENTS")->nrows();
+    ft1.close();
 
     // Load unbinned LAT observation
     try {
         run.load_unbinned(lat_ft1, lat_ft2, "");
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to load unbinned LAT run."
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to load unbinned LAT data"
+                  << " (" << datadir << ")."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -330,7 +311,9 @@ void test_unbinned_obs(void)
         obs.append(run);
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to add LAT run to observations." 
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to add LAT data to observations"
+                  << " (" << datadir << ")." 
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -345,10 +328,11 @@ void test_unbinned_obs(void)
             //std::cout << num << std::endl;
             num++;
         }
-        if (num != 5680) {
+        if (num != nevents*2) {
             std::cout << std::endl
                       << "TEST ERROR: " << num
-                      << " iterations in GObservations::iterator instead of 5680."
+                      << " iterations in GObservations::iterator instead of"
+                      << " expected " << nevents*2 << " iterations."
                       << std::endl;
             throw;
         }
@@ -369,10 +353,12 @@ void test_unbinned_obs(void)
             //std::cout << *event->energy() << std::endl;
             num++;
         }
-        if (num != 2840) {
-            std::cout << std::endl <<
-                      "TEST ERROR: Wrong number of iterations in GLATEventList::iterator."
-                      << " (excepted 2840, found " << num << ")" << std::endl;
+        if (num != nevents) {
+            std::cout << std::endl
+                      << "TEST ERROR: " << num
+                      << " iterations in GLATEventList::iterator instead of "
+                      << " expected " << nevents << " iterations."
+                      << std::endl;
             throw;
         }
     }
@@ -401,9 +387,6 @@ void test_unbinned_obs(void)
     }
     std::cout << ".";
 
-    // Plot final test success
-    std::cout << " ok." << std::endl;
-
     // Exit test
     return;
 
@@ -411,38 +394,58 @@ void test_unbinned_obs(void)
 
 
 /***********************************************************************//**
- * @brief Test binned observation handling.
+ * @brief Test binned observation handling for a specific dataset
+ *
+ * @param[in] datadir Directory of test data.
+ *
+ * Verifies the ability to handle binned Fermi/LAT data.
  ***************************************************************************/
-void test_binned_obs(void)
+void test_one_binned_obs(const std::string& datadir, const std::string& irf)
 {
     // Set filenames
-    const std::string file1 = "test_lat_obs_binned.xml";
-
-    // Write header
-    std::cout << "Test binned observation handling: ";
+    std::string lat_cntmap  = datadir+"/cntmap.fits";
+    std::string lat_srcmap  = datadir+"/srcmap.fits";
+    std::string lat_expmap  = datadir+"/binned_expmap.fits";
+    std::string lat_ltcube  = datadir+"/ltcube.fits";
+    std::string lat_bin_xml = datadir+"/obs_binned.xml";
+    std::string file1       = "test_lat_obs_binned.xml";
 
     // Declare observations
     GObservations   obs;
     GLATObservation run;
 
-    // Load LAT binned observation
+    // Determine number of bins and events in counts map
+    GFits       cntmap(lat_cntmap);
+    GFitsImage* image   = cntmap.image(0);
+    double      nevents = 0.0;
+    int         nsize   = image->size();
+    for (int i = 0; i < nsize; ++i) {
+        nevents += image->pixel(i);
+    }
+    cntmap.close();
+
+    // Load LAT binned observation from counts map
     try {
         run.load_binned(lat_cntmap, "", "");
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to load binned LAT run."
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to load binned LAT data from cntmap"
+                  << " (" << datadir << ")."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
     }
     std::cout << ".";
 
-    // Reload LAT binned observation from srcmap
+    // Reload LAT binned observation from source map
     try {
         run.load_binned(lat_srcmap, "", "");
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to reload binned LAT run."
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to load binned LAT data from srcmap"
+                  << " (" << datadir << ")."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -455,7 +458,9 @@ void test_binned_obs(void)
         obs.append(run);
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to add LAT run to observation."
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to add LAT data to observations"
+                  << " (" << datadir << ")." 
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -470,17 +475,19 @@ void test_binned_obs(void)
             num++;
             sum += (int)event->counts();
         }
-        if (sum != 3904) {
+        if (sum != 2*nevents) {
             std::cout << std::endl
                       << "TEST ERROR: " << sum
-                      << " iterations in GObservations::iterator instead of 3904."
+                      << " events in GObservations instead of"
+                      << " expected " << 2*nevents << " events."
                       << std::endl;
             throw;
         }
-        if (num != 200000) {
+        if (num != 2*nsize) {
             std::cout << std::endl
                       << "TEST ERROR: " << num
-                      << " event bins in GObservations::iterator instead of 200000."
+                      << " iterations in GObservations::iterator instead of "
+                      << " expected " << 2*nsize << " iterations."
                       << std::endl;
             throw;
         }
@@ -499,21 +506,22 @@ void test_binned_obs(void)
         int sum = 0;
         GLATEventCube *ptr = (GLATEventCube*)run.events();
         for (GLATEventCube::iterator event = ptr->begin(); event != ptr->end(); ++event) {
-//            std::cout << *((GLATEventBin*)&(*event));
             num++;
             sum += (int)event->counts();
         }
-        if (sum != 1952) {
+        if (sum != nevents) {
             std::cout << std::endl
                       << "TEST ERROR: " << sum
-                      << " iterations in GObservations::iterator instead of 1952."
+                      << " events in GLATEventCube instead of"
+                      << " expected " << 2*nevents << " events."
                       << std::endl;
             throw;
         }
-        if (num != 100000) {
+        if (num != nsize) {
             std::cout << std::endl
                       << "TEST ERROR: " << num
-                      << " event bins in GObservations::iterator instead of 100000."
+                      << " iterations in GLATEventCube::iterator instead of "
+                      << " expected " << 2*nsize << " iterations."
                       << std::endl;
             throw;
         }
@@ -530,7 +538,7 @@ void test_binned_obs(void)
     try {
         // Load obervation
         run.load_binned(lat_srcmap, lat_expmap, lat_ltcube);
-        run.response(lat_irf,lat_caldb);
+        run.response(irf, lat_caldb);
 
         // Initialise sky direction
         GSkyDir dir;
@@ -564,9 +572,6 @@ void test_binned_obs(void)
     }
     std::cout << ".";
 
-    // Plot final test success
-    std::cout << " ok." << std::endl;
-
     // Exit test
     return;
 
@@ -574,19 +579,26 @@ void test_binned_obs(void)
 
 
 /***********************************************************************//**
- * @brief Test binned optimizer.
+ * @brief Test binned optimizer
+ *
+ * @param[in] datadir Directory of test data.
+ *
+ * Verifies the ability optimize binned Fermi/LAT data.
  ***************************************************************************/
-void test_binned_optimizer(void)
+void test_one_binned_optimizer(const std::string& datadir, const std::string& irf)
 {
-    // Write header
-    std::cout << "Test binned optimizer: ";
+    // Set filenames
+    std::string lat_srcmap    = datadir+"/srcmap.fits";
+    std::string lat_expmap    = datadir+"/binned_expmap.fits";
+    std::string lat_ltcube    = datadir+"/ltcube.fits";
+    std::string lat_model_xml = datadir+"/source_model.xml";
 
     // Setup GObservations for optimizing
     GObservations   obs;
     GLATObservation run;
     try {
         run.load_binned(lat_srcmap, lat_expmap, lat_ltcube);
-        run.response(lat_irf, lat_caldb);
+        run.response(irf, lat_caldb);
         obs.append(run);
     }
     catch (std::exception &e) {
@@ -618,6 +630,115 @@ void test_binned_optimizer(void)
     std::cout << std::endl << opt << std::endl;
     std::cout << obs.models() << std::endl;
 
+    // Exit test
+    return;
+
+}
+
+
+/***********************************************************************//**
+ * @brief Test Fermi/LAT response handling
+ *
+ * Verifies all Fermi/LAT responses.
+ ***************************************************************************/
+void test_response(void)
+{
+    // Write header
+    std::cout << "Test response: ";
+
+    // Test various IRFs
+    test_one_response("P6_v3_diff");
+    test_one_response("P7SOURCE_V6");
+
+    // Plot final test success
+    std::cout << " ok." << std::endl;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test livetime cube handling
+ *
+ * Verifies handling of Fermi/LAT livetime cubes.
+ ***************************************************************************/
+void test_ltcube(void)
+{
+    // Write header
+    std::cout << "Test livetime cube: ";
+
+    // Test various datasets
+    test_one_ltcube(dirPass6, 339733.528629);
+    test_one_ltcube(dirPass7, 248009.734604);
+
+    // Plot final test success
+    std::cout << " ok." << std::endl;
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test unbinned observation handling
+ *
+ * Verifies handling of unbinned data. 
+ ***************************************************************************/
+void test_unbinned_obs(void)
+{
+    // Write header
+    std::cout << "Test unbinned observation handling: ";
+
+    // Test various datasets
+    test_one_unbinned_obs(dirPass6);
+    test_one_unbinned_obs(dirPass7);
+
+    // Plot final test success
+    std::cout << " ok." << std::endl;
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test binned observation handling
+ *
+ * Verifies the ability to handle binned Fermi/LAT data.
+ ***************************************************************************/
+void test_binned_obs(void)
+{
+    // Write header
+    std::cout << "Test binned observation handling: ";
+
+    // Test various datasets
+    test_one_binned_obs(dirPass6, "P6_v3_diff");
+    test_one_binned_obs(dirPass7, "P7SOURCE_V6");
+
+    // Plot final test success
+    std::cout << " ok." << std::endl;
+
+    // Exit test
+    return;
+
+}
+
+
+/***********************************************************************//**
+ * @brief Test binned optimizer handling
+ *
+ * Verifies the ability to handle binned Fermi/LAT optimization.
+ ***************************************************************************/
+void test_binned_optimizer(void)
+{
+    // Write header
+    std::cout << "Test binned optimizer: ";
+
+    // Test various datasets
+    test_one_binned_optimizer(dirPass6, "P6_v3_diff");
+    test_one_binned_optimizer(dirPass7, "P7SOURCE_V6");
+
     // Plot final test success
     std::cout << " ok." << std::endl;
 
@@ -639,9 +760,9 @@ int main(void)
     std::cout << "*****************************************" << std::endl;
 
     // Check if data directory exists
-    bool has_data = (access(datadir.c_str(), R_OK) == 0);
+    bool has_data = (access("../inst/lat/test/data", R_OK) == 0);
 
-    // Execute the tests
+    // Execute tests that are not requiring data
     test_response();
 
     // Execute tests requiring data
