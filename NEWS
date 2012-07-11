@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 00-05-00
+New Features and Important Changes in GammaLib 00-06-00
 
 Author(s) : Juergen Knoedlseder
 
-April, 3rd, 2012
+July, 11th, 2012
 
 
 1. Introduction
@@ -42,11 +42,7 @@ None
 
 6. Model module
 ---------------
-Added GModelSpectralNodes model which allows fitting a piecewise power
-law model to the data. The piecewise power law is defined by a number
-of nodes (at least 2), and the intensity of each node can be adjusted
-by the fit (the energy can also be fitted, yet no analytical gradient
-is implemented for this).
+None
 
 
 7. Numerics module
@@ -56,9 +52,7 @@ None
 
 8. Observation module
 ---------------------
-Implemented an XML protocol that describes observations. This allows
-for complex combinations of observations in multi-mission analyses
-or for collecting sets of observations, such as runs or exposures.
+None
 
 
 9. Optimization module
@@ -88,31 +82,15 @@ None
 
 14. Fermi-LAT interface
 ----------------------
-None
+Added support for Pass 7 data. In particular, P7SOURCE_V6 response
+functions are now included in the GammaLib distribution, together
+with some test data for the Crab. The LAT response code has also
+been refactored to support more cleanly various PSF versions.
+Efficiency factors, needed by Pass 7, are now also supported. Note
+that we still lack support for the Phi dependence of the IRF, and
+also energy dispersion has not yet been implemented.
 
 
 15. CTA interface
 -----------------
-Comply to CTA event list format v1.0.0.
-
-Add support for 1DC response files. For this purpose, the class
-GCTAResponseTable was implemented to read arbitrary response tables
-in single-row vector column format. GCTAResponse was modified to read
-PSF response tables implementing the energy and offset angle dependencies
-and using a 3-component Gaussian.
-
-Add GCTAModelRadialPolynom class to model the radial acceptance using
-a polynomial.
-
-Add GCTAModelRadialProfile class to model the radial acceptance using
-a 3 parameter profile (width, core, tail).
-
-Correct bug in Npred computation in GCTAModelRadialAcceptance that
-underestimated Npred for pointings that were offset from ROI centre.
-
-Implement observation reading and writing from and to XML files.
-This allows specifying the event list or counts map together with the
-relevant response information in a XML file. This is a placeholder for
-the implementation of the calibration database, and is mainly designed
-for 1DC.
-
+None

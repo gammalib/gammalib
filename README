@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-Version: 00-05-00 (April 3, 2012)
+Version: 00-06-00 (July, 11, 2012)
 Author:  Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu)
 
 
@@ -41,9 +41,9 @@ data analysis framework that enables simultaneous multi-mission analysis.
 
 Web sites
 =========
-http://gammalib.sourceforge.net            - for documentation
-https://sourceforge.net/projects/gammalib/ - for downloads
-
+http://gammalib.sourceforge.net                   - for documentation
+https://sourceforge.net/projects/gammalib/        - for downloads
+https://cta-redmine.irap.omp.eu/projects/gammalib - for developers
 
 Prerequisites
 =============
@@ -314,4 +314,4 @@ OpenSolaris
 Contact
 =======
 To get in touch with the GammaLib developers and to contribute to the
-project please contact Juergen Knoedlseder <knodlseder@cesr.fr>.
+project please contact Juergen Knoedlseder <jurgen.knodlseder@irap.omp.eu>.
