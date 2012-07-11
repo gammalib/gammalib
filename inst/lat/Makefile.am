@@ -20,6 +20,7 @@ sources = src/GLATObservation.cpp \
           src/GLATPsfV1.cpp \
           src/GLATPsfV3.cpp \
           src/GLATEdisp.cpp \
+          src/GLATEfficiency.cpp \
           src/GLATMeanPsf.cpp \
           src/GLATInstDir.cpp \
           src/GLATRoi.cpp \
@@ -43,6 +44,7 @@ pkginclude_HEADERS = include/GLATLib.hpp \
                      include/GLATPsfV1.hpp \
                      include/GLATPsfV3.hpp \
                      include/GLATEdisp.hpp \
+                     include/GLATEfficiency.hpp \
                      include/GLATMeanPsf.hpp \
                      include/GLATInstDir.hpp \
                      include/GLATRoi.hpp \

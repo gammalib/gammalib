@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GLATResponse.cpp  -  Fermi-LAT response class             *
+ *               GLATResponse.cpp  -  Fermi/LAT response class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.cpp
- * @brief Fermi-LAT response class implementation
+ * @brief Fermi/LAT response class implementation
  * @author J. Knoedlseder
  */
 
@@ -241,8 +241,9 @@ double GLATResponse::irf(const GInstDir&     obsDir,
 {
     // Get LAT instrument direction
     const GLATInstDir* dir = dynamic_cast<const GLATInstDir*>(&obsDir);
-    if (dir == NULL)
+    if (dir == NULL) {
         throw GLATException::bad_instdir_type(G_IRF);
+    }
 
     // Search for mean PSF
     int ipsf = -1;
@@ -304,12 +305,14 @@ double GLATResponse::irf(const GEvent& event, const GModelSky& model,
 {
     // Get IRF value
     double rsp;
-    if (event.isatom())
+    if (event.isatom()) {
         rsp = irf(static_cast<const GLATEventAtom&>(event), model,
                   srcEng, srcTime, obs);
-    else
+    }
+    else {
         rsp = irf(static_cast<const GLATEventBin&>(event), model,
                   srcEng, srcTime, obs);
+    }
 
     // Return IRF value
     return rsp;
@@ -459,10 +462,12 @@ double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
         std::cout << " MeanPsf=" << mean_psf;
         std::cout << " DiffusePsf=" << rsp;
         std::cout << " ratio(Mean/Diffuse)=" << mean_psf/rsp;
-        if (mean_psf/rsp < 0.99)
+        if (mean_psf/rsp < 0.99) {
             std::cout << " <<< (1%)";
-        else if (mean_psf/rsp > 1.01)
+        }
+        else if (mean_psf/rsp > 1.01) {
             std::cout << " >>> (1%)";
+        }
         std::cout << std::endl;
         #endif
 
@@ -472,8 +477,9 @@ double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
     } // endif: model was point source
 
     // ... otherwise throw an exception
-    if ((idiff == -1) && ptsrc == NULL)
+    if ((idiff == -1) && ptsrc == NULL) {
         throw GLATException::diffuse_not_found(G_IRF_BIN, model.name());
+    }
 
     // Return IRF value
     return rsp;
@@ -618,6 +624,9 @@ void GLATResponse::save(const std::string& rspname) const
     // Save energy dispersions
     //edisp_append(file);
 
+    // Save efficiency factors
+    //eff_append(file);
+
     // Save FITS file
     file.save();
 
@@ -635,8 +644,9 @@ GLATAeff* GLATResponse::aeff(const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= m_aeff.size())
+    if (index < 0 || index >= m_aeff.size()) {
         throw GException::out_of_range(G_AEFF, index, 0, m_aeff.size()-1);
+    }
     #endif
 
     // Return pointer on effective area
@@ -653,8 +663,9 @@ GLATPsf* GLATResponse::psf(const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= m_psf.size())
+    if (index < 0 || index >= m_psf.size()) {
         throw GException::out_of_range(G_PSF, index, 0, m_psf.size()-1);
+    }
     #endif
 
     // Return pointer on point spread function
@@ -671,8 +682,9 @@ GLATEdisp* GLATResponse::edisp(const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= m_edisp.size())
+    if (index < 0 || index >= m_edisp.size()) {
         throw GException::out_of_range(G_EDISP, index, 0, m_edisp.size()-1);
+    }
     #endif
 
     // Return pointer on energy dispersion
@@ -693,21 +705,26 @@ std::string GLATResponse::print(void) const
     result.append("\n"+parformat("Calibration database")+m_caldb);
     result.append("\n"+parformat("Response name")+m_rspname);
     result.append("\n"+parformat("Section(s)"));
-    if (m_hasfront && m_hasback)
+    if (m_hasfront && m_hasback) {
         result.append("front & back");
-    else if (m_hasfront)
+    }
+    else if (m_hasfront) {
         result.append("front");
-    else if (m_hasback)
+    }
+    else if (m_hasback) {
         result.append("back");
-    else
+    }
+    else {
         result.append("unknown");
+    }
     for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_aeff[i]->print());
         result.append("\n"+m_psf[i]->print());
         result.append("\n"+m_edisp[i]->print());
     }
-    for (int i = 0; i < m_ptsrc.size(); ++i)
+    for (int i = 0; i < m_ptsrc.size(); ++i) {
         result.append("\n"+m_ptsrc[i]->print());
+    }
 
     // Return result
     return result;
@@ -740,8 +757,9 @@ void GLATResponse::init_members(void)
     
     // By default use HANDOFF response database.
     char* handoff = std::getenv("HANDOFF_IRF_DIR");
-    if (handoff != NULL)
+    if (handoff != NULL) {
         m_caldb.assign(handoff);
+    }
 
     // Return
     return;
