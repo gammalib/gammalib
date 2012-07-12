@@ -68,15 +68,15 @@ public:
     }
     GLATEventAtom* __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
-            return &((*self)[index]);
+            return ((*self)[index]);
         }
         else {
             throw GException::out_of_range("__getitem__(int)", index, self->size());
         }
     }
-    void __setitem__(const int& index, const double& value) {
+    void __setitem__(const int& index, const GLATEventAtom& value) {
         if (index>=0 && index < self->size()) {
-            (*self)[index] = value;
+            *((*self)[index]) = value;
         }
         else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());
