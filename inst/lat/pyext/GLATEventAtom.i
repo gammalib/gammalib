@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GLATLtCube.i  -  Fermi/LAT lifetime cube                *
+ *              GLATEventAtom.i  -  Fermi/LAT event atom class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,56 +19,61 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GLATLtCube.i
- * @brief Fermi/LAT lifetime cube Python interface definition
+ * @file GLATEventAtom.i
+ * @brief Fermi/LAT event atom class interface definition
  * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GLATLtCube.hpp"
+#include "GLATEventAtom.hpp"
 #include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GLATLtCube
+ * @class GLATEventAtom
  *
- * @brief Interface for the Fermi LAT lifetime cube.
+ * @brief Fermi/LAT event atom class
  ***************************************************************************/
-class GLATLtCube {
-
+class GLATEventAtom : public GEventAtom {
 public:
     // Constructors and destructors
-    GLATLtCube(void);
-    GLATLtCube(const std::string& filename);
-    GLATLtCube(const GLATLtCube& cube);
-    virtual ~GLATLtCube(void);
+    GLATEventAtom(void);
+    GLATEventAtom(const GLATEventAtom& atom);
+    virtual ~GLATEventAtom(void);
 
-    // Operators
-    double operator() (const GSkyDir& dir, const GEnergy& energy, _ltcube_ctheta fct);
-    double operator() (const GSkyDir& dir, const GEnergy& energy, _ltcube_ctheta_phi fct);
-    double operator() (const GSkyDir& dir, const GEnergy& energy,
-                       const GLATAeff& aeff);
-    double operator() (const GSkyDir& dir, const GEnergy& energy,
-                       const double& offset, const GLATPsf& psf,
-                       const GLATAeff& aeff);
-
-    // Methods
-    void        clear(void);
-    GLATLtCube* clone(void) const;
-    void        load(const std::string& filename);
-    void        save(const std::string& filename, bool clobber=false) const;
+    // Implemented pure virtual base class methods
+    void               clear(void);
+    GLATEventAtom*     clone(void) const;
+    const GLATInstDir& dir(void) const;
+    const GEnergy&     energy(void) const;
+    const GTime&       time(void) const;
 };
 
 
 /***********************************************************************//**
- * @brief GLATLtCube class extension
+ * @brief GLATEventAtom class extension
  ***************************************************************************/
-%extend GLATLtCube {
+%extend GLATEventAtom {
     char *__str__() {
         return tochar(self->print());
     }
-    GLATLtCube copy() {
+    GLATEventAtom copy() {
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GLATEventAtom type casts
+ ***************************************************************************/
+%inline %{
+    GLATEventAtom* cast_GLATEventAtom(GEvent* event) {
+        GLATEventAtom* atom = dynamic_cast<GLATEventAtom*>(event);
+        if (atom == NULL) {
+            throw GException::bad_type("cast_GLATEventAtom(GEvent*)",
+                                       "GEvent not of type GLATEventAtom");
+        }
+        return atom;
+    }
+%}

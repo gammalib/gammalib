@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GLATLtCube.i  -  Fermi/LAT lifetime cube                *
+ *               GLATPointing.i  -  Fermi/LAT pointing class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,56 +19,60 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GLATLtCube.i
- * @brief Fermi/LAT lifetime cube Python interface definition
+ * @file GLATPointing.i
+ * @brief Fermi/LAT pointing class interface definition
  * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GLATLtCube.hpp"
+#include "GLATPointing.hpp"
 #include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GLATLtCube
+ * @class GLATPointing
  *
- * @brief Interface for the Fermi LAT lifetime cube.
+ * @brief Interface for the Fermi/LAT pointing
  ***************************************************************************/
-class GLATLtCube {
-
+class GLATPointing : public GPointing {
 public:
     // Constructors and destructors
-    GLATLtCube(void);
-    GLATLtCube(const std::string& filename);
-    GLATLtCube(const GLATLtCube& cube);
-    virtual ~GLATLtCube(void);
-
-    // Operators
-    double operator() (const GSkyDir& dir, const GEnergy& energy, _ltcube_ctheta fct);
-    double operator() (const GSkyDir& dir, const GEnergy& energy, _ltcube_ctheta_phi fct);
-    double operator() (const GSkyDir& dir, const GEnergy& energy,
-                       const GLATAeff& aeff);
-    double operator() (const GSkyDir& dir, const GEnergy& energy,
-                       const double& offset, const GLATPsf& psf,
-                       const GLATAeff& aeff);
+    GLATPointing(void);
+    GLATPointing(const GLATPointing& pnt);
+    virtual ~GLATPointing(void);
 
     // Methods
-    void        clear(void);
-    GLATLtCube* clone(void) const;
-    void        load(const std::string& filename);
-    void        save(const std::string& filename, bool clobber=false) const;
+    void           clear(void);
+    GLATPointing*  clone(void) const;
+    const GSkyDir& dir(void) const;
+    void           dir(const GSkyDir& dir);
 };
 
 
 /***********************************************************************//**
- * @brief GLATLtCube class extension
+ * @brief GLATPointing class extension
  ***************************************************************************/
-%extend GLATLtCube {
+%extend GLATPointing {
     char *__str__() {
         return tochar(self->print());
     }
-    GLATLtCube copy() {
+    GLATPointing copy() {
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GLATPointing type casts
+ ***************************************************************************/
+%inline %{
+    GLATPointing* cast_GLATPointing(GPointing* pnt) {
+        GLATPointing* lat = dynamic_cast<GLATPointing*>(pnt);
+        if (lat == NULL) {
+            throw GException::bad_type("cast_GLATPointing(GPointing*)",
+                                       "GPointing not of type GLATPointing");
+        }
+        return lat;
+    }
+%}

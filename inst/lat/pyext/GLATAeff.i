@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GLATLtCube.i  -  Fermi/LAT lifetime cube                *
+ *                 GLATAeff.i  -  Fermi/LAT effective area                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,56 +19,64 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GLATLtCube.i
- * @brief Fermi/LAT lifetime cube Python interface definition
+ * @file GLATAeff.i
+ * @brief Fermi/LAT effective area class definition
  * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GLATLtCube.hpp"
+#include "GLATAeff.hpp"
 #include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GLATLtCube
+ * @class GLATAeff
  *
- * @brief Interface for the Fermi LAT lifetime cube.
+ * @brief Interface for the Fermi/LAT effective area
  ***************************************************************************/
-class GLATLtCube {
-
+class GLATAeff {
 public:
     // Constructors and destructors
-    GLATLtCube(void);
-    GLATLtCube(const std::string& filename);
-    GLATLtCube(const GLATLtCube& cube);
-    virtual ~GLATLtCube(void);
+    GLATAeff(void);
+    GLATAeff(const std::string filename);
+    GLATAeff(const GLATAeff& aeff);
+    virtual ~GLATAeff(void);
 
     // Operators
-    double operator() (const GSkyDir& dir, const GEnergy& energy, _ltcube_ctheta fct);
-    double operator() (const GSkyDir& dir, const GEnergy& energy, _ltcube_ctheta_phi fct);
-    double operator() (const GSkyDir& dir, const GEnergy& energy,
-                       const GLATAeff& aeff);
-    double operator() (const GSkyDir& dir, const GEnergy& energy,
-                       const double& offset, const GLATPsf& psf,
-                       const GLATAeff& aeff);
+    double operator() (const double& logE, const double& ctheta);
+    double operator() (const double& logE, const double& ctheta,
+                       const double& phi);
+    double operator() (const GSkyDir& srcDir, const GEnergy& srcEng,
+                       const GTime& srcTime,  const GLATPointing& pnt);
 
     // Methods
-    void        clear(void);
-    GLATLtCube* clone(void) const;
-    void        load(const std::string& filename);
-    void        save(const std::string& filename, bool clobber=false) const;
+    void         clear(void);
+    GLATAeff*    clone(void) const;
+    void         load(const std::string filename);
+    void         save(const std::string filename, bool clobber = false);
+    void         read(const GFits* file);
+    void         write(GFits& file) const;
+    int          size(void) const;
+    int          nenergies(void) const;
+    int          ncostheta(void) const;
+    double       costhetamin(void) const;
+    void         costhetamin(const double& ctheta);
+    bool         hasphi(void) const;
+    bool         hasefficiency(void) const;
+    double       efficiency_factor1(const GEnergy& srcEng) const;
+    double       efficiency_factor2(const GEnergy& srcEng) const;
 };
 
 
 /***********************************************************************//**
- * @brief GLATLtCube class extension
+ * @brief GLATAeff class extension
  ***************************************************************************/
-%extend GLATLtCube {
+%extend GLATAeff {
     char *__str__() {
         return tochar(self->print());
     }
-    GLATLtCube copy() {
+    GLATAeff copy() {
         return (*self);
     }
 };
