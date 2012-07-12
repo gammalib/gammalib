@@ -414,15 +414,20 @@ bool GLATAeff::hasefficiency(void) const
  * Returns the efficiency factor 1 as function of the true photon energy.
  *
  * If no efficiency factors are present returns 1.
+ *
+ * @todo Implement cache to save computation time if called with same energy
+ *       value (happens for binned analysis for example)
  ***************************************************************************/
 double GLATAeff::efficiency_factor1(const GEnergy& srcEng) const
 {
     // Initialise factor
     double factor = 1.0;
 
-    // Compute efficiency factor
-    if (m_eff_func1 != NULL) {
-        factor = (*m_eff_func1)(srcEng.log10MeV());
+    // Compute efficiency factor. Note that the factor 1 uses the functor 2,
+    // following the philosophie implemented in the ScienceTools method
+    // EfficiencyFactor::getLivetimeFactors
+    if (m_eff_func2 != NULL) {
+        factor = (*m_eff_func2)(srcEng.log10MeV());
     }
 
     // Return factor
@@ -438,15 +443,20 @@ double GLATAeff::efficiency_factor1(const GEnergy& srcEng) const
  * Returns the efficiency factor 2 as function of the true photon energy.
  *
  * If no efficiency factors are present returns 2.
+ *
+ * @todo Implement cache to save computation time if called with same energy
+ *       value (happens for binned analysis for example)
  ***************************************************************************/
 double GLATAeff::efficiency_factor2(const GEnergy& srcEng) const
 {
     // Initialise factor
     double factor = 0.0;
 
-    // Compute efficiency factor
-    if (m_eff_func2 != NULL) {
-        factor = (*m_eff_func2)(srcEng.log10MeV());
+    // Compute efficiency factor. Note that the factor 2 uses the functor 1,
+    // following the philosophie implemented in the ScienceTools method
+    // EfficiencyFactor::getLivetimeFactors
+    if (m_eff_func1 != NULL) {
+        factor = (*m_eff_func1)(srcEng.log10MeV());
     }
 
     // Return factor
