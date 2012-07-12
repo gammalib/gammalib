@@ -98,6 +98,16 @@ GammaLib Results with efficiency correction:
  Number of free parameters .: 4
  Number of iterations ......: 8
  Lambda ....................: 1e-11
+=== GObservations ===
+ Number of observations ....: 1
+ Number of predicted events : 2211
+=== GLATEventCube ===
+ Number of elements ........: 200000
+ Number of pixels ..........: 100 x 100
+ Number of energy bins .....: 20
+ Number of events ..........: 2211
+ Time interval .............: 2.39557e+08 - 2.40162e+08
+ Energy range ..............: 100 MeV - 10 GeV
 === GModels ===
  Number of models ..........: 3
  Number of parameters ......: 13
