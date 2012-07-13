@@ -148,6 +148,17 @@ if '@WITH_INST_LAT_TRUE@' != '#':
 # Set extension definition for core modules
 ext_modules = []
 py_modules  = []
+
+# extra args
+extra_compile_args = []
+extra_link_args = []
+
+# enable OPENMP
+if '@OPENMP_TRUE@' != '#':
+		extra_compile_args=['-fopenmp']
+		extra_link_args=['-fopenmp']
+	
+
 for module in core_modules:
 	
 	# Define module
@@ -155,7 +166,9 @@ for module in core_modules:
 	                       include_dirs=include_dirs, \
 						   libraries=libraries,
 						   library_dirs=library_dirs,
-						   runtime_library_dirs=runtime_library_dirs)
+						   runtime_library_dirs=runtime_library_dirs,
+						   extra_compile_args=extra_compile_args,
+						   extra_link_args=extra_link_args)
 	ext_modules.append(ext_module)
 	py_modules.append(pkg_name+'.'+module)
 
@@ -178,7 +191,9 @@ for module in inst_modules:
 	                       include_dirs=include_dirs, \
 						   libraries=libraries,
 						   library_dirs=library_dirs,
-						   runtime_library_dirs=runtime_library_dirs)
+						   runtime_library_dirs=runtime_library_dirs,
+						   extra_compile_args=extra_compile_args,
+                                                   extra_link_args=extra_link_args)
 	ext_modules.append(ext_module)
 	py_modules.append(pkg_name+'.'+module)
 
