@@ -37,6 +37,7 @@
 /* __ Globals ____________________________________________________________ */
 const std::string xml_file              = "data/crab.xml";
 const std::string xml_model_point_nodes = "data/model_point_nodes.xml";
+const std::string xml_model_spatial_map = "data/model_spatial_map.xml";
 
 
 /***********************************************************************//**
@@ -318,6 +319,7 @@ int main(void)
 
     // Test spectral models
     test_xml_model("GModelSpectralNodes", xml_model_point_nodes);
+    test_xml_model("GModelSpatialMap", xml_model_spatial_map);
 
     // Return
     return 0;
