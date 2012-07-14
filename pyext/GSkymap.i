@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GSkymap.i  -  Sky map class SWIG definition              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GSkymap.i
- * @brief GSkymap class SWIG file.
- * @author J. Knodlseder
+ * @brief Sky map class SWIG file.
+ * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -134,8 +134,10 @@ public:
     int       nx(void) const;
     int       ny(void) const;
     int       nmaps(void) const;
-    GWcs*     wcs(void) const { return m_wcs; }
-    double*   pixels(void) const { return m_pixels; }
+    int       xy2pix(const GSkyPixel& pix) const;
+    GSkyPixel pix2xy(const int& pix) const;
+    GWcs*     wcs(void) const;
+    double*   pixels(void) const;
 };
 
 
