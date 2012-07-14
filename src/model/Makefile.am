@@ -19,6 +19,7 @@ sources = GModelPar.cpp \
           GModelSpatialRegistry.cpp \
           GModelSpatialConst.cpp \
           GModelSpatialCube.cpp \
+          GModelSpatialMap.cpp \
           GModelSpatialPtsrc.cpp \
           GModelRadial.cpp \
           GModelRadialRegistry.cpp \
