@@ -44,6 +44,7 @@
 %include "GModelSpatialRegistry.i"
 %include "GModelSpatialConst.i"
 %include "GModelSpatialCube.i"
+%include "GModelSpatialMap.i"
 %include "GModelSpatialPtsrc.i"
 %include "GModelRadial.i"
 %include "GModelRadialRegistry.i"
