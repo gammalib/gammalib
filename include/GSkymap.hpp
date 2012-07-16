@@ -85,35 +85,40 @@ public:
     GSkymap& operator= (const GSkymap& map);
 
     // 1D pixel methods
-    double&       operator() (const int& pixel, const int map = 0);
-    const double& operator() (const int& pixel, const int map = 0) const;
+    double&       operator() (const int& pixel, const int& map = 0);
+    const double& operator() (const int& pixel, const int& map = 0) const;
     GSkyDir       pix2dir(const int& pix) const;
-    int           dir2pix(GSkyDir dir) const;
+    int           dir2pix(const GSkyDir& dir) const;
     double        omega(const int& pix) const;
 
     // 2D pixel methods
-    double&       operator() (const GSkyPixel& pixel, const int map = 0);
-    const double& operator() (const GSkyPixel& pixel, const int map = 0) const;
+    double&       operator() (const GSkyPixel& pixel, const int& map = 0);
+    const double& operator() (const GSkyPixel& pixel, const int& map = 0) const;
     GSkyDir       xy2dir(const GSkyPixel& pix) const;
-    GSkyPixel     dir2xy(GSkyDir dir) const;
+    GSkyPixel     dir2xy(const GSkyDir& dir) const;
     double        omega(const GSkyPixel& pix) const;
 
+    // Sky direction methods
+    double        operator() (const GSkyDir& dir, const int& map = 0) const;
+
     // Methods
-    void        clear(void);
-    GSkymap*    clone(void) const;
-    void        load(const std::string& filename);
-    void        save(const std::string& filename, bool clobber = false) const;
-    void        read(const GFitsHDU* hdu);
-    void        write(GFits* file) const;
-    int         npix(void) const;
-    int         nx(void) const;
-    int         ny(void) const;
-    int         nmaps(void) const;
-    int         xy2pix(const GSkyPixel& pix) const;
-    GSkyPixel   pix2xy(const int& pix) const;
-    GWcs*       wcs(void) const { return m_wcs; }
-    double*     pixels(void) const { return m_pixels; }
-    std::string print(void) const;
+    void          clear(void);
+    GSkymap*      clone(void) const;
+    void          load(const std::string& filename);
+    void          save(const std::string& filename, bool clobber = false) const;
+    void          read(const GFitsHDU* hdu);
+    void          write(GFits* file) const;
+    int           npix(void) const;
+    int           nx(void) const;
+    int           ny(void) const;
+    int           nmaps(void) const;
+    int           xy2pix(const GSkyPixel& pix) const;
+    GSkyPixel     pix2xy(const int& pix) const;
+    GWcs*         wcs(void) const { return m_wcs; }
+    double*       pixels(void) const { return m_pixels; }
+    bool          isinmap(const GSkyDir& dir) const;
+    bool          isinmap(const GSkyPixel& pixel) const;
+    std::string   print(void) const;
 
 private:
     // Private methods

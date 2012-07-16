@@ -122,10 +122,11 @@ public:
 
     // Methods
     GSkyDir   pix2dir(const int& pix);
-    int       dir2pix(GSkyDir dir) const;
+    int       dir2pix(const GSkyDir& dir) const;
     double    omega(const int& pix) const;
     GSkyDir   xy2dir(const GSkyPixel& pix);
-    GSkyPixel dir2xy(GSkyDir dir) const;
+    GSkyPixel dir2xy(const GSkyDir& dir) const;
+    void      clear(void);
     void      load(const std::string& filename);
     void      save(const std::string& filename, bool clobber = false) const;
     void      read(const GFitsHDU* hdu);
@@ -138,11 +139,16 @@ public:
     GSkyPixel pix2xy(const int& pix) const;
     GWcs*     wcs(void) const;
     double*   pixels(void) const;
+    bool      isinmap(const GSkyDir& dir) const;
+    bool      isinmap(const GSkyPixel& pixel) const;
 };
 
 
 /***********************************************************************//**
  * @brief GSkymap class extension
+ *
+ * @todo Implement __getitem__ and __setitem__ methods for GSkyPixel and
+ * GSkyDir
  ***************************************************************************/
 %extend GSkymap {
     char *__str__() {
