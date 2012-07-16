@@ -93,6 +93,27 @@ GModelSpatialMap::GModelSpatialMap(const GXmlElement& xml) : GModelSpatial()
 
 
 /***********************************************************************//**
+ * @brief Filename constructor
+ *
+ * @param[in] filename Name of FITS file.
+ *
+ * Creates instance of spatial map model by loading a skymap from a FITS
+ * file.
+ ***************************************************************************/
+GModelSpatialMap::GModelSpatialMap(const std::string& filename) : GModelSpatial()
+{
+    // Initialise members
+    init_members();
+
+    // Load skymap
+    load_map(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] model Spatial map model.
@@ -197,25 +218,17 @@ GModelSpatialMap* GModelSpatialMap::clone(void) const
  *
  * @param[in] srcDir True photon arrival direction.
  *
- * Returns the intensity of the skymap at the specified sky direction. If the
- * sky direction falls outside the skymap, an intensity of 0 is returned.
+ * Returns the intensity of the skymap at the specified sky direction
+ * multiplied by the normalization factor. If the sky direction falls outside
+ * the skymap, an intensity of 0 is returned.
  ***************************************************************************/
 double GModelSpatialMap::eval(const GSkyDir& srcDir) const
 {
-    // Initialise intensity with 0
-    double intensity = 0.0;
+    // Get skymap intensity
+    double intensity = m_map(srcDir);
 
-    // Convert sky direction into sky pixel
-    GSkyPixel pixel = m_map.dir2xy(srcDir);
-    
-    // If pixel is in range then determine skymap intensity
-    if ((pixel.x()+0.5 >= 0.0 && pixel.x()-0.5 < m_map.nx()) &&
-        (pixel.y()+0.5 >= 0.0 && pixel.y()-0.5 < m_map.ny())) {
-        intensity = m_map(pixel);
-    }
-
-    // Return intensity
-    return intensity;
+    // Return intensity times normalization factor
+    return (intensity * m_value.real_value());
 }
 
 
@@ -224,21 +237,24 @@ double GModelSpatialMap::eval(const GSkyDir& srcDir) const
  *
  * @param[in] srcDir True photon arrival direction.
  *
- * Returns the intensity of the skymap at the specified sky direction. If the
- * sky direction falls outside the skymap, an intensity of 0 is returned.
- *
- * The gradient is set to 0.
+ * Returns the intensity of the skymap at the specified sky direction
+ * multiplied by the normalization factor. The method also sets the gradient
+ * with respect to the normalization factor. If the sky direction falls
+ * outside the skymap, an intensity of 0 is returned.
  ***************************************************************************/
 double GModelSpatialMap::eval_gradients(const GSkyDir& srcDir) const
 {
-    // Get intensity
-    double intensity = eval(srcDir);
+    // Get skymap intensity
+    double intensity = m_map(srcDir);
+
+    // Compute partial derivatives of the parameter values
+    double g_value = (m_value.isfree()) ? intensity * m_value.scale() : 0.0;
 
     // Set gradient to 0 (circumvent const correctness)
-    ((GModelSpatialMap*)this)->m_value.gradient(0.0);
+    ((GModelSpatialMap*)this)->m_value.gradient(g_value);
 
-    // Return intensity
-    return intensity;
+    // Return intensity times normalization factor
+    return (intensity * m_value.real_value());
 }
 
 
@@ -340,17 +356,8 @@ void GModelSpatialMap::read(const GXmlElement& xml)
               " \"Normalization\" parameter.");
     }
 
-    // Store filename of skymap (for XML writing). Note that we do not
-    // expand any environment variable at this level, so that if we write
-    // back the XML element we write the filepath with the environment
-    // variable
-    m_filename = xml.attribute("file");
-
     // Load skymap
-    m_map.load(expand_env(m_filename));
-
-    // Update MC cache
-    update_mc_cache();
+    load_map(xml.attribute("file"));
 
     // Return
     return;
@@ -431,9 +438,9 @@ std::string GModelSpatialMap::print(void) const
     std::string result;
 
     // Append header
-    result.append("=== GModelSpatialMap ===\n");
-    result.append(parformat("Sky map file")+m_filename);
-    result.append(parformat("Number of parameters")+str(size()));
+    result.append("=== GModelSpatialMap ===");
+    result.append("\n"+parformat("Sky map file")+m_filename);
+    result.append("\n"+parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
     }
@@ -511,15 +518,30 @@ void GModelSpatialMap::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Update Monte Carlo cache
+ * @brief Load skymap into the model class
  *
- * The Monte Carlo cache consists of a linear array that maps a value between
- * 0 and 1 into the skymap pixel
+ * Loads skymap into the model class. After loading, the map is normalized
+ * so that the total flux in the map amounts to 1 ph/cm2/s. Negative skymap
+ * pixels are set to zero intensity.
+ *
+ * The method also initialises a cache for Monte Carlo sampling of the
+ * skymap. This Monte Carlo cache consists of a linear array that maps a
+ * value between 0 and 1 into the skymap pixel.
  ***************************************************************************/
-void GModelSpatialMap::update_mc_cache(void)
+void GModelSpatialMap::load_map(const std::string& filename)
 {
-    // Initialise cache
+    // Initialise skymap and cache
+    m_map.clear();
     m_mc_cache.clear();
+
+    // Store filename of skymap (for XML writing). Note that we do not
+    // expand any environment variable at this level, so that if we write
+    // back the XML element we write the filepath with the environment
+    // variable
+    m_filename = filename;
+
+    // Load skymap
+    m_map.load(expand_env(m_filename));
 
     // Determine number of skymap pixels
     int npix = m_map.npix();
@@ -534,23 +556,29 @@ void GModelSpatialMap::update_mc_cache(void)
         m_mc_cache.push_back(0.0);
 
         // Initialise cache with cumulative pixel fluxes and compute total
-        // flux in skymap for normalization. Negative pixels are ignored.
+        // flux in skymap for normalization. Negative pixels are set to
+        // zero intensity in the skymap.
         double sum = 0.0;
         for (int i = 0; i < npix; ++i) {
             double flux = m_map(i) * m_map.omega(i);
-            if (flux < 0.0) flux = 0.0;
+            if (flux < 0.0) {
+                m_map(i) = 0.0;
+                flux     = 0.0;
+            }
             sum += flux;
             m_mc_cache.push_back(sum);
         }
 
-        // Normalize pixel fluxes so that the cache runs from 0 to 1
+        // Normalize skymap and pixel fluxes in the cache so that the values
+        // in the cache run from 0 to 1
         if (sum > 0.0) {
-            for (int i = 0; i < npix+1; ++i) {
+            for (int i = 0; i < npix; ++i) {
+                m_map(i)      /= sum;
                 m_mc_cache[i] /= sum;
             }
         }
         
-        // Make sure that last pixel is >1
+        // Make sure that last pixel in the cache is >1
         m_mc_cache[npix] = 1.0001;
 
         // Dump cache values for debugging

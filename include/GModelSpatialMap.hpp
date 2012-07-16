@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include "GModelSpatial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
@@ -50,6 +51,7 @@ public:
     // Constructors and destructors
     GModelSpatialMap(void);
     explicit GModelSpatialMap(const GXmlElement& xml);
+    explicit GModelSpatialMap(const std::string& filename);
     GModelSpatialMap(const GModelSpatialMap& model);
     virtual ~GModelSpatialMap(void);
 
@@ -72,7 +74,7 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpatialMap& model);
     void free_members(void);
-    void update_mc_cache(void);
+    void load_map(const std::string& filename);
 
     // Protected members
     GModelPar           m_value;        //!< Value

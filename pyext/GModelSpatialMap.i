@@ -40,6 +40,7 @@ public:
     // Constructors and destructors
     GModelSpatialMap(void);
     explicit GModelSpatialMap(const GXmlElement& xml);
+    explicit GModelSpatialMap(const std::string& filename);
     GModelSpatialMap(const GModelSpatialMap& model);
     virtual ~GModelSpatialMap(void);
 
