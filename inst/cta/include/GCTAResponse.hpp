@@ -49,7 +49,6 @@
 #include "GTime.hpp"
 #include "GPhoton.hpp"
 #include "GNodeArray.hpp"
-#include "GIntegrand.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTARoi.hpp"
@@ -131,6 +130,10 @@ public:
                                   const GEnergy&              srcEng,
                                   const GTime&                srcTime,
                                   const GObservation&         obs) const;
+    virtual double npred_diffuse(const GModelDiffuseSource& model,
+                                 const GEnergy&             srcEng,
+                                 const GTime&               srcTime,
+                                 const GObservation&        obs) const;
 
     // Other Methods
     GCTAEventAtom* mc(const double& area, const GPhoton& photon,
@@ -201,202 +204,6 @@ private:
     void copy_members(const GCTAResponse& rsp);
     void free_members(void);
     void read_performance_table(const std::string& filename);
-
-    // Model*IRF zenith angle integration kernel
-    class irf_kern_rho : public GIntegrand {
-    public:
-        irf_kern_rho(const GCTAResponse* rsp,
-                     const GModelRadial* radial,
-                     double              zenith,
-                     double              azimuth,
-                     double              srcLogEng,
-                     double              obsLogEng,
-                     GCTAPsfPars         sigma,
-                     double              zeta,
-                     double              lambda,
-                     double              omega0,
-                     double              delta_max) :
-                     m_rsp(rsp),
-                     m_radial(radial),
-                     m_zenith(zenith),
-                     m_azimuth(azimuth),
-                     m_srcLogEng(srcLogEng),
-                     m_obsLogEng(obsLogEng),
-                     m_sigma(sigma),
-                     m_zeta(zeta),
-                     m_cos_zeta(std::cos(zeta)),
-                     m_sin_zeta(std::sin(zeta)),
-                     m_lambda(lambda),
-                     m_cos_lambda(std::cos(lambda)),
-                     m_sin_lambda(std::sin(lambda)),
-                     m_omega0(omega0),
-                     m_delta_max(delta_max),
-                     m_cos_delta_max(std::cos(delta_max)) { return; }
-        double eval(double rho);
-    protected:
-        const GCTAResponse* m_rsp;           //!< Pointer to CTA response
-        const GModelRadial* m_radial;        //!< Pointer to radial spatial model
-        double              m_zenith;        //!< Pointing zenith angle
-        double              m_azimuth;       //!< Pointing azimuth angle
-        double              m_srcLogEng;     //!< True photon energy
-        double              m_obsLogEng;     //!< Measured photon energy
-        GCTAPsfPars         m_sigma;         //!< Width of PSF in radians
-        double              m_zeta;          //!< Distance model centre - measured photon
-        double              m_cos_zeta;      //!< Cosine of zeta
-        double              m_sin_zeta;      //!< Sine of zeta
-        double              m_lambda;        //!< Distance model centre - pointing
-        double              m_cos_lambda;    //!< Cosine of lambda
-        double              m_sin_lambda;    //!< Sine of lambda
-        double              m_omega0;        //!< Azimuth of pointing in model system
-        double              m_delta_max;     //!< Maximum PSF radius
-        double              m_cos_delta_max; //!< Cosine of maximum PSF radius
-    };
-
-    // IRF azimuth integration kernel
-    class irf_kern_omega : public GIntegrand {
-    public:
-        irf_kern_omega(const GCTAResponse* rsp,
-                       double              zenith,
-                       double              azimuth,
-                       double              srcLogEng,
-                       double              obsLogEng,
-                       GCTAPsfPars         sigma,
-                       double              zeta,
-                       double              lambda,
-                       double              omega0,
-                       double              rho,
-                       double              cos_psf,
-                       double              sin_psf,
-                       double              cos_ph,
-                       double              sin_ph) :
-                       m_rsp(rsp),
-                       m_zenith(zenith),
-                       m_azimuth(azimuth),
-                       m_srcLogEng(srcLogEng),
-                       m_obsLogEng(obsLogEng),
-                       m_sigma(sigma),
-                       m_zeta(zeta),
-                       m_lambda(lambda),
-                       m_omega0(omega0),
-                       m_rho(rho),
-                       m_cos_psf(cos_psf),
-                       m_sin_psf(sin_psf),
-                       m_cos_ph(cos_ph),
-                       m_sin_ph(sin_ph) { return; }
-        double eval(double omega);
-    protected:
-        const GCTAResponse* m_rsp;           //!< Pointer to CTA response
-        double              m_zenith;        //!< Pointing zenith angle
-        double              m_azimuth;       //!< Pointing azimuth angle
-        double              m_srcLogEng;     //!< True photon energy
-        double              m_obsLogEng;     //!< Measured photon energy
-        GCTAPsfPars         m_sigma;         //!< Width of PSF in radians
-        double              m_zeta;          //!< Distance model centre - measured photon
-        double              m_lambda;        //!< Distance model centre - pointing
-        double              m_omega0;        //!< Azimuth of pointing in model system
-        double              m_rho;           //!< ...
-        double              m_cos_psf;       //!< Cosine term for PSF offset angle computation
-        double              m_sin_psf;       //!< Sine term for PSF offset angle computation
-        double              m_cos_ph;        //!< Cosine term for photon offset angle computation
-        double              m_sin_ph;        //!< Sine term for photon offset angle computation
-    };
-
-    // Radial model Npred theta integration kernel
-    class npred_radial_kern_theta : public GIntegrand {
-    public:
-        npred_radial_kern_theta(const GCTAResponse*    rsp,
-                                const GModelRadial*    radial,
-                                const GEnergy*         srcEng,
-                                const GTime*           srcTime,
-                                const GCTAObservation* obs,
-                                const GMatrix*         rot,
-                                double                 dist,
-                                double                 radius,
-                                double                 phi) :
-                                m_rsp(rsp),
-                                m_radial(radial),
-                                m_srcEng(srcEng),
-                                m_srcTime(srcTime),
-                                m_obs(obs),
-                                m_rot(rot),
-                                m_dist(dist),
-                                m_cos_dist(std::cos(dist)),
-                                m_sin_dist(std::sin(dist)),
-                                m_radius(radius),
-                                m_cos_radius(std::cos(radius)),
-                                m_phi(phi) { return; }
-        double eval(double theta);
-    protected:
-        const GCTAResponse*    m_rsp;        //!< Pointer to response
-        const GModelRadial*    m_radial;     //!< Pointer to radial spatial model
-        const GEnergy*         m_srcEng;     //!< Pointer to true photon energy
-        const GTime*           m_srcTime;    //!< Pointer to true photon arrival time
-        const GCTAObservation* m_obs;        //!< Pointer to observation
-        const GMatrix*         m_rot;        //!< Rotation matrix
-        double                 m_dist;       //!< Distance model-ROI centre
-        double                 m_cos_dist;   //!< Cosine of distance model-ROI centre
-        double                 m_sin_dist;   //!< Sine of distance model-ROI centre
-        double                 m_radius;     //!< ROI+PSF radius
-        double                 m_cos_radius; //!< Cosine of ROI+PSF radius
-        double                 m_phi;        //!< Position angle of ROI
-    };
-
-    // Radial model Npred phi integration kernel
-    class npred_radial_kern_phi : public GIntegrand {
-    public:
-        npred_radial_kern_phi(const GCTAResponse*    rsp,
-                              const GEnergy*         srcEng,
-                              const GTime*           srcTime,
-                              const GCTAObservation* obs,
-                              const GMatrix*         rot,
-                              double                 theta,
-                              double                 sin_theta) :
-                              m_rsp(rsp),
-                              m_srcEng(srcEng),
-                              m_srcTime(srcTime),
-                              m_obs(obs),
-                              m_rot(rot),
-                              m_theta(theta),
-                              m_cos_theta(std::cos(theta)),
-                              m_sin_theta(sin_theta) { return; }
-        double eval(double phi);
-    protected:
-        const GCTAResponse*    m_rsp;        //!< Pointer to response
-        const GModelRadial*    m_radial;     //!< Pointer to radial spatial model
-        const GEnergy*         m_srcEng;     //!< Pointer to true photon energy
-        const GTime*           m_srcTime;    //!< Pointer to true photon arrival time
-        const GCTAObservation* m_obs;        //!< Pointer to observation
-        const GMatrix*         m_rot;        //!< Rotation matrix
-        double                 m_theta;      //!< Offset angle (radians)
-        double                 m_cos_theta;  //!< cosine of offset angle
-        double                 m_sin_theta;  //!< Sine of offset angle
-    };
-
-    // PSF integration kernel
-    class npsf_kern_rad_azsym : public GIntegrand {
-    public:
-        npsf_kern_rad_azsym(const       GCTAResponse* parent,
-                            double      roi,
-                            double      psf,
-                            GCTAPsfPars sigma) :
-                            m_parent(parent),
-                            m_roi(roi),
-                            m_cosroi(cos(roi)),
-                            m_psf(psf),
-                            m_cospsf(cos(psf)),
-                            m_sinpsf(sin(psf)),
-                            m_sigma(sigma) { return; }
-        double eval(double r);
-    protected:
-        const GCTAResponse* m_parent;  //!< Pointer to parent
-        GEnergy             m_srcEng;  //!< Source energy
-        double              m_roi;     //!< ROI radius in radians
-        double              m_cosroi;  //!< Cosine of ROI radius
-        double              m_psf;     //!< PSF-ROI centre distance in radians
-        double              m_cospsf;  //!< Cosine of PSF-ROI centre distance
-        double              m_sinpsf;  //!< Sine of PSF-ROI centre distance
-        GCTAPsfPars         m_sigma;   //!< Width of PSF in radians
-    };
 
     // Private data members
     std::string         m_caldb;        //!< Name of or path to the calibration database
