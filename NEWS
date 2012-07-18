@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-06-00
 
 Author(s) : Juergen Knoedlseder
 
-July, 15th, 2012
+July, 18th, 2012
 
 
 1. Introduction
@@ -98,4 +98,11 @@ also energy dispersion has not yet been implemented.
 
 15. CTA interface
 -----------------
-None
+Added support for diffuse sources to CTA response. FITS sky maps can
+now be used to simulated and to fit CTA event data, both in binned and
+unbinned mode. Specifically, the GCTAResponse::irf_diffuse and
+GCTAResponse::npred_diffuse methods have been implemented to do the
+job. Some optimization has been performed to adjust the precision
+of the integrations that need to be performed for the diffuse response
+computation.
+

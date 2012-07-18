@@ -1,4 +1,4 @@
-2012-07-15  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2012-07-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.6.0 released
         ========================
@@ -6,6 +6,7 @@
         Add support for Fermi/LAT Pass 7 data
         Add GModelSpatialMap model
         Add sky direction access operator to GSkymap class
+        Add support for diffuse source models to CTA response
 
 2012-04-03  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
