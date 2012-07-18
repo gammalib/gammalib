@@ -1507,7 +1507,7 @@ double GCTAResponse::npred_diffuse(const GModelDiffuseSource& model,
         npred = integral.romb(0.0, roi_psf_radius);
 
         // Compile option: Show integration results
-        #if defined(G_NPRED_DIFFUSE)
+        #if defined(G_DEBUG_NPRED_DIFFUSE)
         std::cout << "GCTAResponse::npred_diffuse:";
         std::cout << " srcEng=" << srcEng;
         std::cout << " srcTime=" << srcTime;
