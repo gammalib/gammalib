@@ -2137,27 +2137,30 @@ void GCTAResponse::read_performance_table(const std::string& filename)
 
     // Open performance table readonly
     FILE* fptr = std::fopen(filename.c_str(), "r");
-    if (fptr == NULL)
+    if (fptr == NULL) {
         throw GCTAException::file_open_error(G_READ, filename);
+    }
 
     // Read lines
     while (std::fgets(line, n, fptr) != NULL) {
 
-        // Split line in elements
+        // Split line in elements. Strip empty elements from vector.
         std::vector<std::string> elements = split(line, " ");
-        for (std::vector<std::string>::iterator it = elements.begin();
-             it != elements.end(); ++it) {
-            if (strip_whitespace(*it).length() == 0)
-                elements.erase(it);
+        for (int i = elements.size()-1; i >= 0; i--) {
+            if (strip_whitespace(elements[i]).length() == 0) {
+                elements.erase(elements.begin()+i);
+            }
         }
 
         // Skip header
-        if (elements[0].find("log(E)") != std::string::npos)
+        if (elements[0].find("log(E)") != std::string::npos) {
             continue;
+        }
 
         // Break loop if end of data table has been reached
-        if (elements[0].find("----------") != std::string::npos)
+        if (elements[0].find("----------") != std::string::npos) {
             break;
+        }
 
         // Push elements in vectors
         m_logE.push_back(todouble(elements[0]));
