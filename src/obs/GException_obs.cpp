@@ -46,7 +46,7 @@ GException::no_response::no_response(std::string origin, std::string message)
 
     // Set error message
     m_message = "No valid instrument response found in observation." \
-                " Set instrument response before using this method.";
+                " Set event container before using this method.";
     if (message.length() > 0) {
         m_message += " " + message;
     }
