@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GFitsHDU.cpp  - FITS HDU handling class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsHDU.cpp
  * @brief GFitsHDU class implementation.
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -369,9 +369,10 @@ void GFitsHDU::move_to_hdu(void)
     // Move to HDU
     int status = 0;
     status     = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, NULL, &status);
-    if (status != 0)
+    if (status != 0) {
         throw GException::fits_hdu_not_found(G_MOVE_TO_HDU, m_hdunum,
                                              status);
+    }
 
     // Return
     return;
@@ -387,11 +388,12 @@ void GFitsHDU::move_to_hdu(void)
 GFitsHDU::HDUType GFitsHDU::get_hdu_type(void) const
 {
     // Get HDU type
-    int type;
+    int type   = 0;
     int status = 0;
     status     = __ffghdt(FPTR(m_fitsfile), &type, &status);
-    if (status != 0)
+    if (status != 0) {
         throw GException::fits_error(G_GET_HDU_TYPE, status);
+    }
 
     // Return HDU type
     return (HDUType)type;
