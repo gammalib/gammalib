@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GPars.cpp - Application parameters                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GPars.cpp
  * @brief Application parameter container class implementation
- * @author Jurgen Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -187,8 +187,9 @@ GPar& GPars::operator[](const int& index)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    }
     #endif
 
     // Return reference
@@ -208,8 +209,9 @@ const GPar& GPars::operator[](const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    }
     #endif
 
     // Return reference
@@ -230,14 +232,16 @@ GPar& GPars::operator[](const std::string& name)
     // Get parameter index
     int index = 0;
     for (; index < size(); ++index) {
-        if (m_pars[index].name() == name)
+        if (m_pars[index].name() == name) {
             break;
+        }
     }
 
     // Throw exception if parameter name has not been found
-    if (index >= size())
+    if (index >= size()) {
         throw GException::par_error(G_ACCESS2, name,
                           "has not been found in parameter file.");
+    }
 
     // Return reference
     return (m_pars[index]);
@@ -257,14 +261,16 @@ const GPar& GPars::operator[](const std::string& name) const
     // Get parameter index
     int index = 0;
     for (; index < size(); ++index) {
-        if (m_pars[index].name() == name)
+        if (m_pars[index].name() == name) {
             break;
+        }
     }
 
     // Throw exception if parameter name has not been found
-    if (index >= size())
+    if (index >= size()) {
         throw GException::par_error(G_ACCESS2, name,
                           "has not been found in parameter file.");
+    }
 
     // Return reference
     return (m_pars[index]);
@@ -316,8 +322,9 @@ GPars* GPars::clone(void) const
 void GPars::append(const GPar& par)
 {
     // Check if parameter is already in container
-    if (haspar(par.name()))
+    if (haspar(par.name())) {
         throw GException::par_error(G_APPEND, par.name(), "exists already.");
+    }
     
     // Append parameter
     m_pars.push_back(par);
@@ -388,8 +395,9 @@ void GPars::load(const std::string& filename)
 
     // Get path to parameter file for input
     std::string path = inpath(filename);
-    if (path.length() == 0)
+    if (path.length() == 0) {
         throw GException::par_file_not_found(G_LOAD1, filename);
+    }
 
     // Read parfile
     read(path);
@@ -424,8 +432,9 @@ void GPars::load(const std::string& filename,
 
     // Get path to parameter file for input
     std::string path = inpath(filename);
-    if (path.length() == 0)
+    if (path.length() == 0) {
         throw GException::par_file_not_found(G_LOAD2, filename);
+    }
 
     // Read parfile
     read(path);
@@ -438,22 +447,26 @@ void GPars::load(const std::string& filename,
 
         // Extract parameter name and value
         size_t pos = args[i].find("=");
-        if (pos == std::string::npos)
+        if (pos == std::string::npos) {
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],
                                                    "no \"=\" specified");
+        }
         std::string name  = args[i].substr(0, pos);
         std::string value = args[i].substr(pos+1);
-        if (name.length() < 1)
+        if (name.length() < 1) {
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],
                                        "no parameter name before \"=\"");
-        if (value.length() < 1)
+        }
+        if (value.length() < 1) {
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],
                                        "no parameter value after \"=\"");
+        }
 
         // Check if parameter exists
-        if (!haspar(name))
+        if (!haspar(name)) {
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],
                                   "invalid parameter name \""+name+"\"");
+        }
 
         // Assign value
         try {
@@ -464,12 +477,15 @@ void GPars::load(const std::string& filename,
         }
 
         // Set mode to hidden to prevent querying the parameter
-        if ((*this)[name].mode() == "q")
+        if ((*this)[name].mode() == "q") {
             (*this)[name].mode("h");
-        else if ((*this)[name].mode() == "ql")
+        }
+        else if ((*this)[name].mode() == "ql") {
             (*this)[name].mode("hl");
-        else if ((*this)[name].mode() == "lq")
+        }
+        else if ((*this)[name].mode() == "lq") {
             (*this)[name].mode("lh");
+        }
 
     } // endfor: looped over all parameters
 
@@ -490,8 +506,9 @@ void GPars::save(const std::string& filename)
 {
     // Get path to parameter file for output
     std::string path = outpath(filename);
-    if (path.size() == 0)
+    if (path.size() == 0) {
         throw GException::par_file_not_found(G_SAVE, filename);
+    }
 
     // Update parameter file
     update();
@@ -567,8 +584,9 @@ bool GPars::haspar(const std::string& name) const
     // Get parameter index
     int index = 0;
     for (; index < size(); ++index) {
-        if (m_pars[index].name() == name)
+        if (m_pars[index].name() == name) {
             break;
+        }
     }
 
     // Return test result
@@ -588,8 +606,9 @@ std::string GPars::print(void) const
     result.append("=== GPars ===");
 
     // Append parameters
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i].print());
+    }
 
     // Return result
     return result;
@@ -700,8 +719,9 @@ std::string GPars::inpath(const std::string& filename) const
         struct passwd* pw = getpwuid(uid);
         if (pw != NULL) {
             std::string fname = std::string(pw->pw_dir) + "/pfiles/" + filename;
-            if (access(fname.c_str(), R_OK) == 0)
+            if (access(fname.c_str(), R_OK) == 0) {
                 path = fname;
+            }
         }
     }
 
@@ -711,8 +731,9 @@ std::string GPars::inpath(const std::string& filename) const
         ptr = std::getenv("GAMMALIB");
         if (ptr != NULL) {
             std::string fname = std::string(ptr) + "/syspfiles/" + filename;
-            if (access(fname.c_str(), R_OK) == 0)
+            if (access(fname.c_str(), R_OK) == 0) {
                 path = fname;
+            }
         }
     }
 
@@ -722,8 +743,9 @@ std::string GPars::inpath(const std::string& filename) const
     if (path.size() == 0) {
         std::string fname = std::string(PACKAGE_PREFIX) + "/syspfiles/" +
                             filename;
-        if (access(fname.c_str(), R_OK) == 0)
+        if (access(fname.c_str(), R_OK) == 0) {
             path = fname;
+        }
     }
     #endif
 
@@ -784,8 +806,9 @@ std::string GPars::outpath(const std::string& filename) const
         uid_t uid         = geteuid();
         gid_t gid         = getegid();
         struct passwd* pw = getpwuid(uid);
-        if (pw == NULL)
+        if (pw == NULL) {
             throw GException::home_not_found(G_OUTPATH);
+        }
 
         // Set path
         path = std::string(pw->pw_dir) + "/pfiles";
@@ -793,16 +816,18 @@ std::string GPars::outpath(const std::string& filename) const
         // If directory does not exist then create it
         if (access(path.c_str(), F_OK) != 0) {
             if (mkdir(path.c_str(), 
-                S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0)
+                S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
                 throw GException::could_not_create_pfiles(G_OUTPATH, path);
+            }
         }
 
         // If directory exists but is not writable then make it writable
         else if (access(path.c_str(), W_OK) != 0) {
             if (chown(path.c_str(), uid, gid) != 0 ||
                 chmod(path.c_str(), 
-                      S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0)
+                      S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
                 throw GException::pfiles_not_accessible(G_OUTPATH, path);
+            }
         }
 
         // Append filename
@@ -853,12 +878,14 @@ void GPars::read(const std::string& filename)
 
     // Open parameter file
     FILE* fptr = fopen(filename.c_str(), "r");
-    if (fptr == NULL)
+    if (fptr == NULL) {
         throw GException::par_file_open_error(G_READ, filename);
+    }
 
     // Read lines
-    while (fgets(line, n, fptr) != NULL)
+    while (fgets(line, n, fptr) != NULL) {
         m_parfile.push_back(std::string(line));
+    }
 
     // Close file
     fclose(fptr);
@@ -914,14 +941,16 @@ void GPars::write(const std::string& filename) const
 
     // Open parameter file.
     FILE* fptr = fopen(filename.c_str(), "w");
-    if (fptr == NULL)
+    if (fptr == NULL) {
         throw GException::par_file_open_error(G_WRITE, filename);
+    }
 
     // If file is not locked then lock it now.
     #if defined(G_LOCK_PARFILE)
     if (fd == -1) {
         if ((fd = open(filename.c_str(), O_WRONLY)) != -1) {
             if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
+                fclose(fptr);
                 throw GException::par_file_open_error(G_WRITE, filename,
                       "Could not get a lock on the file.");
             }
@@ -930,8 +959,9 @@ void GPars::write(const std::string& filename) const
     #endif
 
     // Write lines
-    for (int i = 0; i < m_parfile.size(); ++i)
+    for (int i = 0; i < m_parfile.size(); ++i) {
         fprintf(fptr, "%s", m_parfile[i].c_str());
+    }
 
     // Close file
     fclose(fptr);
@@ -983,8 +1013,9 @@ void GPars::parse(void)
             continue;
 
         // If line is empty or if line starts with # then skip the line
-        if (line.length() == 0 || line[0] == '#')
+        if (line.length() == 0 || line[0] == '#') {
             continue;
+        }
 
         // Get the 7 text fields of valid a parameter line
         std::string fields[7];
@@ -997,8 +1028,9 @@ void GPars::parse(void)
         for (size_t pos = 0; pos < line.length(); ++pos) {
 
             // Toggle quotes
-            if (line[pos] == '"')
+            if (line[pos] == '"') {
                 quotes = 1-quotes;
+            }
 
             // Search for comma only if we are outside quotes. If comma is
             // found or end of line is reached then extract a field and start
@@ -1023,22 +1055,25 @@ void GPars::parse(void)
         } // endfor: looped over line
 
         // Throw an error if quotes are not balanced
-        if (quotes != 0)
+        if (quotes != 0) {
             throw GException::par_file_syntax_error(G_PARSE, 
                                                     strip_chars(line,"\n"),
                                                 "quotes are not balanced");
+        }
 
         // Throw an error if line has not 7 fields
-        if (index != 7)
+        if (index != 7) {
             throw GException::par_file_syntax_error(G_PARSE, 
                                                     strip_chars(line,"\n"),
                                  "found "+str(index)+" fields, require 7");
+        }
 
         // Verify if parameter name does not yet exist
-        if (haspar(fields[0]))
+        if (haspar(fields[0])) {
             throw GException::par_file_syntax_error(G_PARSE, 
                                                     strip_chars(line,"\n"),
                           "redefiniton of parameter name \""+fields[0]+"\"");
+        }
 
         // Add parameter
         try {
@@ -1059,10 +1094,11 @@ void GPars::parse(void)
         if (fields[0] == "mode") {
             if (fields[3] != "h"  && fields[3] != "q" &&
                 fields[3] != "hl" && fields[3] != "ql" &&
-                fields[3] != "lh" && fields[3] != "lq")
+                fields[3] != "lh" && fields[3] != "lq") {
                 throw GException::par_file_syntax_error(G_PARSE, 
                                                     strip_chars(line,"\n"),
                        "mode parameter has invalid value \""+fields[3]+"\"");
+            }
             m_mode = fields[3];
         }
 
@@ -1070,8 +1106,9 @@ void GPars::parse(void)
 
     // Set effective mode for all parameters that have mode 'auto'
     for (int i = 0; i < m_pars.size(); ++i) {
-        if (m_pars[i].mode() == "a")
+        if (m_pars[i].mode() == "a") {
             m_pars[i].mode(m_mode);
+        }
     }
 
     // Return
