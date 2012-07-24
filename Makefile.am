@@ -50,7 +50,7 @@ uninstall-local: $(HTML_UNINSTALL_DATA_TARGETS)
 static-analysis: cppcheck sloccount cppncss
 
 # Add dynamic-analysis rule:
-dynamic-analysis: coverage
+dynamic-analysis: coverage valgrind
 
 # Add cppcheck rule
 cppcheck:
@@ -86,6 +86,14 @@ coverage:
 		gcovr -r . -x -o gcovr-reports-data.xml; \
 	else \
 		echo "gcovr script not found in PATH."; \
+	fi
+
+# Add Valgrind rule
+valgrind:
+	@if type valgrind >/dev/null 2>&1; then \
+		$(MAKE) -C test valgrind; \
+	else \
+		echo "valgrind not found in PATH."; \
 	fi
 
 # Add Doxygen rules

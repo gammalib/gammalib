@@ -136,3 +136,13 @@ test_GSky_SOURCES = test_GSky.cpp
 test_GSky_LDFLAGS = @LDFLAGS@
 test_GSky_CPPFLAGS = @CPPFLAGS@
 test_GSky_LDADD = $(top_srcdir)/src/libgamma.la
+
+# Add Valgrind rule
+valgrind:
+	@if type valgrind >/dev/null 2>&1; then \
+		for prog in $(check_PROGRAMS) ; do \
+			valgrind --xml=yes --xml-file=valgrind_$$prog.xml ./$$prog; \
+		done ; \
+	else \
+		echo "valgrind  not found in PATH."; \
+	fi
