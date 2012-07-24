@@ -141,7 +141,9 @@ test_GSky_LDADD = $(top_srcdir)/src/libgamma.la
 valgrind:
 	@if type valgrind >/dev/null 2>&1; then \
 		for prog in $(check_PROGRAMS) ; do \
-			valgrind --xml=yes --xml-file=valgrind_$$prog.xml ./$$prog; \
+			valgrind --xml=yes --xml-file=tmp.xml ./$$prog; \
+			sed '/<\/valgrindoutput>/d' tmp.xml > valgrind_$$prog.xml; \
+			echo '</valgrindoutput>' >> valgrind_$$prog.xml; \
 		done ; \
 	else \
 		echo "valgrind  not found in PATH."; \
