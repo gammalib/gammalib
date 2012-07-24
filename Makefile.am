@@ -44,16 +44,28 @@ uninstall-local: $(HTML_UNINSTALL_DATA_TARGETS)
 #
 
 # Rules
-.PHONY: cppcheck doxygen-run doxygen-doc $(DX_PS_GOAL) $(DX_PDF_GOAL)
+.PHONY: doxygen-run doxygen-doc $(DX_PS_GOAL) $(DX_PDF_GOAL)
 
-# Add cppcheck rule (is declared PHONY later)
+# Add static-analysis rule:
+static-analysis: cppcheck sloccount
+
+# Add cppcheck rule
 cppcheck:
 	@if type cppcheck >/dev/null 2>&1; then \
 		cppcheck -v --enable=all --xml \
 		-Iinclude -Iinst/lat/include -Iinst/cta/include -Iinst/mwl/include \
 		inst/*/src inst/*/test src test 2> cppcheck-result.xml; \
 	else \
-		echo "cppcheck no installed."; \
+		echo "cppcheck not installed."; \
+	fi
+
+# Add sloccount rule
+sloccount:
+	@if type sloccount >/dev/null 2>&1; then \
+		sloccount --duplicates --wide --details \
+		include src inst test > sloccount.sc; \
+	else \
+		echo "sloccount not installed."; \
 	fi
 
 # Add Doxygen rules
