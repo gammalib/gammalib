@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLException.cpp  - Multi-wavelength exception handler        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GMWLException.cpp
  * @brief MWL exception handler interface implementation.
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -34,8 +34,11 @@
  ***************************************************************************/
 const char* GMWLExceptionHandler::what() const throw()
 {
+    // Set error message
     std::string message = "*** ERROR in " + m_origin + ": " + m_message;
-    return message.c_str();
+
+    // Return message as C character array
+    return tochar(message);
 }
 
 
@@ -50,8 +53,18 @@ GMWLException::file_open_error::file_open_error(std::string origin,
                                                 std::string filename,
                                                 std::string message)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "Unable to open file \""+filename+"\". "+message;
+
+    // Set message
+    m_message = "Unable to open file \""+filename+"\".";
+
+    // Append optional message
+    if (message.length() > 0) {
+        m_message += " "+message;
+    }
+
+    // Return
     return;
 }
 
@@ -65,8 +78,18 @@ GMWLException::file_open_error::file_open_error(std::string origin,
 GMWLException::bad_file_format::bad_file_format(std::string origin,
                                                 std::string message)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "File has invalid format. "+message;
+
+    // Set message
+    m_message = "File has invalid format.";
+
+    // Append optional message
+    if (message.length() > 0) {
+        m_message += " "+message;
+    }
+
+    // Return
     return;
 }
 
@@ -82,9 +105,18 @@ GMWLException::invalid_unit::invalid_unit(std::string origin,
                                           std::string unit,
                                           std::string message)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "Invalid or unsupported unit \""+unit+"\" encountered. " +
-                message;
+
+    // Set message
+    m_message = "Invalid or unsupported unit \""+unit+"\" encountered.";
+
+    // Append optional message
+    if (message.length() > 0) {
+        m_message += " "+message;
+    }
+
+    // Return
     return;
 }
 
@@ -103,8 +135,11 @@ GMWLException::bad_response_type::bad_response_type(std::string origin,
 
     // Set message
     m_message = "Response is not of type GMWLResponse.";
-    if (message.length() > 0)
+
+    // Append optional message
+    if (message.length() > 0) {
         m_message += " "+message;
+    }
 
     // Return
     return;
