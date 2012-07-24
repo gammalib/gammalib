@@ -40,8 +40,21 @@ uninstall-local: $(HTML_UNINSTALL_DATA_TARGETS)
 
 
 #
-# Additional install rules
+# Additional rules
 #
+
+# Rules
+.PHONY: cppcheck doxygen-run doxygen-doc $(DX_PS_GOAL) $(DX_PDF_GOAL)
+
+# Add cppcheck rule (is declared PHONY later)
+cppcheck:
+	@if type cppcheck >/dev/null 2>&1; then \
+		cppcheck -v --enable=all --xml \
+		-Iinclude -Iinst/lat/include -Iinst/cta/include -Iinst/mwl/include \
+		inst/*/src inst/*/test src test 2> cppcheck-result.xml; \
+	else \
+		echo "cppcheck no installed."; \
+	fi
 
 # Add Doxygen rules
 if DX_COND_doc
@@ -122,7 +135,7 @@ DX_CLEAN_LATEX = @DX_DOCDIR@/latex
 endif #DX_COND_latex
 
 # Rules
-.PHONY: doxygen-run doxygen-doc $(DX_PS_GOAL) $(DX_PDF_GOAL)
+#.PHONY: doxygen-run doxygen-doc $(DX_PS_GOAL) $(DX_PDF_GOAL)
 
 .INTERMEDIATE: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
 
