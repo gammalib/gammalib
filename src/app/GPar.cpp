@@ -1014,8 +1014,8 @@ GLog& operator<<(GLog& log, const GPar& par)
  ***************************************************************************/
 std::string gpar_type_string(const std::string& type)
 {
-    // Allocate type string
-    std::string type_string;
+    // Initialize empty type string
+    std::string type_string = "";
 
     // Set type dependent string
     if (type == "b") {
