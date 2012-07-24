@@ -47,7 +47,10 @@ uninstall-local: $(HTML_UNINSTALL_DATA_TARGETS)
 .PHONY: doxygen-run doxygen-doc $(DX_PS_GOAL) $(DX_PDF_GOAL)
 
 # Add static-analysis rule:
-static-analysis: cppcheck sloccount
+static-analysis: cppcheck sloccount cppncss
+
+# Add dynamic-analysis rule:
+dynamic-analysis: coverage
 
 # Add cppcheck rule
 cppcheck:
@@ -56,7 +59,7 @@ cppcheck:
 		-Iinclude -Iinst/lat/include -Iinst/cta/include -Iinst/mwl/include \
 		inst/*/src inst/*/test src test 2> cppcheck-result.xml; \
 	else \
-		echo "cppcheck not installed."; \
+		echo "cppcheck not found in PATH."; \
 	fi
 
 # Add sloccount rule
@@ -65,7 +68,24 @@ sloccount:
 		sloccount --duplicates --wide --details \
 		include src inst test > sloccount.sc; \
 	else \
-		echo "sloccount not installed."; \
+		echo "sloccount not found in PATH."; \
+	fi
+
+# Add cppncss rule
+cppncss:
+	@if type cppncss >/dev/null 2>&1; then \
+		cppncss -r -v -x -k -f=cppncss-raw-report.xml \
+		src inst/*/src; \
+	else \
+		echo "cppncss not found in PATH."; \
+	fi
+
+# Add coverage rule
+coverage:
+	@if type gcovr >/dev/null 2>&1; then \
+		gcovr -r . -x -o gcovr-reports-data.xml; \
+	else \
+		echo "gcovr script not found in PATH."; \
 	fi
 
 # Add Doxygen rules
